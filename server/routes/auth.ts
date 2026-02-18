@@ -15,8 +15,11 @@ authRouter.post('/register', async (req, res, next) => {
   try {
     const { email, password, displayName } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Valid email is required' });
+    }
+    if (!password || password.length < 4) {
+      return res.status(400).json({ error: 'Password must be at least 4 characters' });
     }
 
     // Check if email already taken

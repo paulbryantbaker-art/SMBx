@@ -63,7 +63,7 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
 
           <label style={styles.label}>Email</label>
           <input
-            type="email"
+            type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
@@ -78,7 +78,7 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Create a password"
             required
-            minLength={8}
+            minLength={4}
             style={styles.input}
           />
 
