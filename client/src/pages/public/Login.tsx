@@ -47,28 +47,14 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup }: Logi
           <div style={styles.dividerLine} />
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           {error && <div style={styles.error}>{error}</div>}
 
           <label style={styles.label}>Email</label>
-          <input
-            type="text"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-
-            style={styles.input}
-          />
+          <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" style={styles.input} />
 
           <label style={styles.label}>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-
-            style={styles.input}
-          />
+          <input type="text" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" style={styles.input} />
 
           <button type="submit" disabled={submitting} style={styles.submitBtn}>
             {submitting ? 'Signing in...' : 'Sign in'}

@@ -48,37 +48,17 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
           <div style={styles.dividerLine} />
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           {error && <div style={styles.error}>{error}</div>}
 
           <label style={styles.label}>Display Name</label>
-          <input
-            type="text"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Your name"
-
-            style={styles.input}
-          />
+          <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" style={styles.input} />
 
           <label style={styles.label}>Email</label>
-          <input
-            type="text"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-
-            style={styles.input}
-          />
+          <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" style={styles.input} />
 
           <label style={styles.label}>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Create a password"
-            style={styles.input}
-          />
+          <input type="text" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create a password" style={styles.input} />
 
           <button type="submit" disabled={submitting} style={styles.submitBtn}>
             {submitting ? 'Creating account...' : 'Create account'}
