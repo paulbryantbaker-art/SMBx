@@ -11,29 +11,32 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ─── 1. Body parsing ───────────────────────────────────────
 app.use(express.json());
+
+// ─── 2. Session + Passport ─────────────────────────────────
 app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ─── Public routes ──────────────────────────────────────────
+// ─── 3. API routes (public) ────────────────────────────────
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
 app.use('/api/auth', authRouter);
 
-// ─── Protected routes (everything below requires auth) ─────
+// ─── 3b. API routes (protected — everything else under /api)
 app.use('/api', requireAuth);
 
-// ─── Static files (production) ──────────────────────────────
-if (process.env.NODE_ENV === 'production') {
-  const clientPath = path.resolve(__dirname, '../client');
-  app.use(express.static(clientPath));
-  app.get('*', (_req, res) => {
-    res.sendFile(path.join(clientPath, 'index.html'));
-  });
-}
+// ─── 4. Static file serving ────────────────────────────────
+const clientPath = path.resolve(__dirname, '../client');
+app.use(express.static(clientPath));
+
+// ─── 5. SPA catch-all (must be LAST) ──────────────────────
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(clientPath, 'index.html'));
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
