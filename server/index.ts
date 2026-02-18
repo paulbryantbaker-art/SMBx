@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { sessionMiddleware, passport, requireAuth } from './middleware/auth.js';
 import { authRouter } from './routes/auth.js';
+import type { Request, Response, NextFunction } from 'express';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,11 +30,17 @@ app.use('/api/auth', authRouter);
 // ─── 3b. API routes (protected — everything else under /api)
 app.use('/api', requireAuth);
 
-// ─── 4. Static file serving ────────────────────────────────
+// ─── 4. JSON error handler for API routes ──────────────────
+app.use('/api', (err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('API error:', err);
+  res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
+});
+
+// ─── 5. Static file serving ────────────────────────────────
 const clientPath = path.resolve(__dirname, '../client');
 app.use(express.static(clientPath));
 
-// ─── 5. SPA catch-all (must be LAST) ──────────────────────
+// ─── 6. SPA catch-all (must be LAST) ──────────────────────
 app.get('*', (_req, res) => {
   res.sendFile(path.join(clientPath, 'index.html'));
 });
