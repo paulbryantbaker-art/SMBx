@@ -56,7 +56,7 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup }: Logi
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            required
+
             style={styles.input}
           />
 
@@ -66,7 +66,7 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup }: Logi
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
-            required
+
             style={styles.input}
           />
 

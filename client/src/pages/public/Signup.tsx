@@ -57,7 +57,7 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Your name"
-            required
+
             style={styles.input}
           />
 
@@ -67,7 +67,7 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            required
+
             style={styles.input}
           />
 
@@ -77,8 +77,6 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Create a password"
-            required
-            minLength={4}
             style={styles.input}
           />
 
