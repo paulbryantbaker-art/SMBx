@@ -5,19 +5,23 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import bcrypt from 'bcrypt';
 import pg from 'pg';
-import { eq } from 'drizzle-orm';
-import { db } from '../db.js';
-import { users, wallets } from '../../shared/schema.js';
+import postgres from 'postgres';
 import type { Request, Response, NextFunction } from 'express';
 
 const PgStore = connectPgSimple(session);
 
+// ─── Raw SQL connection for auth queries ────────────────────
+
+const sql = postgres(process.env.DATABASE_URL!, {
+  ssl: 'require',
+  prepare: false,
+});
+
 // ─── Session store pool (uses pg, not postgres-js) ──────────
 
-const isInternal = process.env.DATABASE_URL?.includes('railway.internal');
 const sessionPool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: isInternal ? false : { rejectUnauthorized: false },
+  ssl: { rejectUnauthorized: false },
 });
 
 sessionPool.on('error', (err) => {
@@ -50,9 +54,10 @@ passport.serializeUser((user: any, done) => {
 
 passport.deserializeUser(async (id: number, done) => {
   try {
-    const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    const [user] = await sql`SELECT * FROM users WHERE id = ${id} LIMIT 1`;
     done(null, user || null);
-  } catch (err) {
+  } catch (err: any) {
+    console.error('Deserialize error:', err.message);
     done(err, null);
   }
 });
@@ -65,11 +70,7 @@ passport.use(
     async (email, password, done) => {
       try {
         console.log('Login attempt:', email.toLowerCase());
-        const [user] = await db
-          .select()
-          .from(users)
-          .where(eq(users.email, email.toLowerCase()))
-          .limit(1);
+        const [user] = await sql`SELECT * FROM users WHERE email = ${email.toLowerCase()} LIMIT 1`;
 
         console.log('User found:', user ? `id=${user.id}` : 'not found');
 
@@ -110,40 +111,20 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             return done(new Error('No email from Google profile'));
           }
 
-          // Check for existing user by googleId
-          let [user] = await db
-            .select()
-            .from(users)
-            .where(eq(users.googleId, profile.id))
-            .limit(1);
+          let [user] = await sql`SELECT * FROM users WHERE google_id = ${profile.id} LIMIT 1`;
 
           if (!user) {
-            // Check if email already exists (link accounts)
-            [user] = await db
-              .select()
-              .from(users)
-              .where(eq(users.email, email.toLowerCase()))
-              .limit(1);
+            [user] = await sql`SELECT * FROM users WHERE email = ${email.toLowerCase()} LIMIT 1`;
 
             if (user) {
-              // Link Google ID to existing account
-              [user] = await db
-                .update(users)
-                .set({ googleId: profile.id })
-                .where(eq(users.id, user.id))
-                .returning();
+              [user] = await sql`UPDATE users SET google_id = ${profile.id} WHERE id = ${user.id} RETURNING *`;
             } else {
-              // Create new user + wallet
-              [user] = await db
-                .insert(users)
-                .values({
-                  email: email.toLowerCase(),
-                  displayName: profile.displayName || email,
-                  googleId: profile.id,
-                })
-                .returning();
-
-              await db.insert(wallets).values({ userId: user.id });
+              [user] = await sql`
+                INSERT INTO users (email, display_name, google_id)
+                VALUES (${email.toLowerCase()}, ${profile.displayName || email}, ${profile.id})
+                RETURNING *
+              `;
+              await sql`INSERT INTO wallets (user_id, balance_cents) VALUES (${user.id}, 0)`;
             }
           }
 

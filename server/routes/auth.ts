@@ -1,11 +1,14 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
-import { eq } from 'drizzle-orm';
-import { db } from '../db.js';
-import { users, wallets } from '../../shared/schema.js';
+import postgres from 'postgres';
 import { passport, requireAuth } from '../middleware/auth.js';
 
 const BCRYPT_ROUNDS = 12;
+
+const sql = postgres(process.env.DATABASE_URL!, {
+  ssl: 'require',
+  prepare: false,
+});
 
 export const authRouter = Router();
 
@@ -22,38 +25,29 @@ authRouter.post('/register', async (req, res, next) => {
       return res.status(400).json({ error: 'Password must be at least 4 characters' });
     }
 
-    // Check if email already taken
-    const [existing] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email.toLowerCase()))
-      .limit(1);
+    const emailLower = email.toLowerCase();
 
-    if (existing) {
+    const existing = await sql`SELECT id FROM users WHERE email = ${emailLower} LIMIT 1`;
+    if (existing.length > 0) {
       return res.status(409).json({ error: 'Email already in use' });
     }
 
     const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
-    const [user] = await db
-      .insert(users)
-      .values({
-        email: email.toLowerCase(),
-        password: hashedPassword,
-        displayName: displayName || email,
-      })
-      .returning();
+    const [user] = await sql`
+      INSERT INTO users (email, password, display_name)
+      VALUES (${emailLower}, ${hashedPassword}, ${displayName || emailLower})
+      RETURNING id, email, display_name, google_id, league, role, created_at, updated_at
+    `;
 
-    // Create wallet with 0 balance
-    await db.insert(wallets).values({ userId: user.id });
+    await sql`INSERT INTO wallets (user_id, balance_cents) VALUES (${user.id}, 0)`;
 
-    // Log in immediately
     req.login(user, (err) => {
       if (err) return next(err);
-      const { password: _, ...safeUser } = user;
-      return res.status(201).json(safeUser);
+      return res.status(201).json(user);
     });
-  } catch (err) {
+  } catch (err: any) {
+    console.error('Register error:', err.message);
     next(err);
   }
 });
@@ -64,7 +58,7 @@ authRouter.post('/login', (req, res, next) => {
   console.log('POST /api/auth/login body:', { email: req.body?.email });
   passport.authenticate('local', (err: any, user: any, info: any) => {
     if (err) {
-      console.error('Login passport error:', err.message, err.stack);
+      console.error('Login passport error:', err.message);
       return next(err);
     }
     if (!user) {
@@ -73,7 +67,7 @@ authRouter.post('/login', (req, res, next) => {
     }
     req.login(user, (loginErr) => {
       if (loginErr) {
-        console.error('Login session error:', loginErr.message, loginErr.stack);
+        console.error('Login session error:', loginErr.message);
         return next(loginErr);
       }
       console.log('Login success:', user.id, user.email);
