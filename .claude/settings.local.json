@@ -15,7 +15,12 @@
       "Bash(npx tsx:*)",
       "Bash(npm ls:*)",
       "Bash(npm uninstall:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git -C /Users/paul/Desktop/SMBx status)",
+      "Bash(git -C /Users/paul/Desktop/SMBx diff)",
+      "Bash(git -C /Users/paul/Desktop/SMBx log --oneline -5)",
+      "Bash(git -C /Users/paul/Desktop/SMBx add package.json)",
+      "Bash(git -C:*)"
     ]
   }
 }
