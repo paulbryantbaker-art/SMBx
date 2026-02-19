@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import path from 'path';
+import postgres from 'postgres';
 import { fileURLToPath } from 'url';
-import { testConnection } from './db.js';
 import { sessionMiddleware, passport, requireAuth } from './middleware/auth.js';
 import { authRouter } from './routes/auth.js';
 import type { Request, Response, NextFunction } from 'express';
@@ -16,7 +16,6 @@ const PORT = process.env.PORT || 3000;
 // ─── Raw DB test (no Drizzle, no passport, no sessions) ────
 app.get('/api/test-db', async (_req, res) => {
   try {
-    const postgres = (await import('postgres')).default;
     const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
     const users = await sql`SELECT id, email, display_name FROM users`;
     await sql.end();
@@ -26,8 +25,17 @@ app.get('/api/test-db', async (_req, res) => {
   }
 });
 
-// ─── Test DB on startup ────────────────────────────────────
-testConnection();
+// ─── Startup DB test (raw, no Drizzle) ─────────────────────
+(async () => {
+  try {
+    const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
+    const result = await sql`SELECT 1 as ok`;
+    console.log('DB connected:', result[0]?.ok === 1 ? 'OK' : 'unexpected');
+    await sql.end();
+  } catch (err: any) {
+    console.error('DB connection failed:', err.message);
+  }
+})();
 
 // ─── 0. Trust proxy (Railway) ───────────────────────────────
 app.set('trust proxy', 1);
