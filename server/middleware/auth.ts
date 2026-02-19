@@ -1,13 +1,10 @@
 import session from 'express-session';
-import pgSession from 'connect-pg-simple';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import bcrypt from 'bcrypt';
 import postgres from 'postgres';
 import type { Request, Response, NextFunction } from 'express';
-
-const PgStore = pgSession(session);
 
 // ─── Raw SQL connection for auth queries ────────────────────
 
@@ -16,16 +13,10 @@ const sql = postgres(process.env.DATABASE_URL!, {
   prepare: false,
 });
 
-// ─── Session ────────────────────────────────────────────────
-
-console.log('Session store conString:', process.env.DATABASE_URL ? `set (${process.env.DATABASE_URL.split('@')[1]?.split('/')[0] || '?'})` : 'MISSING!');
+// ─── Session (MemoryStore — will add DB sessions later) ─────
 
 export const sessionMiddleware = session({
-  store: new PgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: true,
-  }),
-  secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
+  secret: process.env.SESSION_SECRET || 'dev-secret',
   resave: false,
   saveUninitialized: false,
   proxy: true,
@@ -33,7 +24,7 @@ export const sessionMiddleware = session({
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     sameSite: 'lax',
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    maxAge: 30 * 24 * 60 * 60 * 1000,
   },
 });
 
