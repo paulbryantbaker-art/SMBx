@@ -3,7 +3,7 @@ import express from 'express';
 import path from 'path';
 import postgres from 'postgres';
 import { fileURLToPath } from 'url';
-import { sessionMiddleware, passport, requireAuth } from './middleware/auth.js';
+import { requireAuth } from './middleware/auth.js';
 import { authRouter } from './routes/auth.js';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -13,19 +13,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ─── Raw DB test (no Drizzle, no passport, no sessions) ────
-app.get('/api/test-db', async (_req, res) => {
-  try {
-    const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
-    const users = await sql`SELECT id, email, display_name FROM users`;
-    await sql.end();
-    res.json({ success: true, users });
-  } catch (error: any) {
-    res.json({ success: false, error: error.message, stack: error.stack });
-  }
-});
-
-// ─── Startup DB test (raw, no Drizzle) ─────────────────────
+// ─── Startup DB test ────────────────────────────────────────
 (async () => {
   try {
     const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
@@ -43,19 +31,25 @@ app.set('trust proxy', 1);
 // ─── 1. Body parsing ───────────────────────────────────────
 app.use(express.json());
 
-// ─── 2. Session + Passport ─────────────────────────────────
-app.use(sessionMiddleware);
-app.use(passport.initialize());
-app.use(passport.session());
-
-// ─── 3. API routes (public) ────────────────────────────────
+// ─── 2. API routes (public) ────────────────────────────────
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.get('/api/test-db', async (_req, res) => {
+  try {
+    const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
+    const users = await sql`SELECT id, email, display_name FROM users`;
+    await sql.end();
+    res.json({ success: true, users });
+  } catch (error: any) {
+    res.json({ success: false, error: error.message, stack: error.stack });
+  }
+});
+
 app.use('/api/auth', authRouter);
 
-// ─── 3b. API routes (protected — everything else under /api)
+// ─── 3. API routes (protected — everything else under /api) ─
 app.use('/api', requireAuth);
 
 // ─── 4. JSON error handler for API routes ──────────────────

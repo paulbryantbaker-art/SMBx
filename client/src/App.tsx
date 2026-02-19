@@ -6,7 +6,7 @@ import Signup from './pages/public/Signup';
 type Page = 'login' | 'signup';
 
 export default function App() {
-  const { user, loading, login, register, logout, loginWithGoogle } = useAuth();
+  const { user, loading, login, register, logout } = useAuth();
   const [page, setPage] = useState<Page>('login');
 
   if (loading) {
@@ -48,7 +48,7 @@ export default function App() {
     return (
       <Signup
         onRegister={async (name, email, password) => { await register(name, email, password); }}
-        onGoogleLogin={loginWithGoogle}
+        onGoogleLogin={() => {}}
         onNavigateLogin={() => setPage('login')}
       />
     );
@@ -57,7 +57,7 @@ export default function App() {
   return (
     <Login
       onLogin={async (email, password) => { await login(email, password); }}
-      onGoogleLogin={loginWithGoogle}
+      onGoogleLogin={() => {}}
       onNavigateSignup={() => setPage('signup')}
     />
   );
