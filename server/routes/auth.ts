@@ -61,13 +61,22 @@ authRouter.post('/register', async (req, res, next) => {
 // ─── Login ─────────────────────────────────────────────────
 
 authRouter.post('/login', (req, res, next) => {
+  console.log('POST /api/auth/login body:', { email: req.body?.email });
   passport.authenticate('local', (err: any, user: any, info: any) => {
-    if (err) return next(err);
+    if (err) {
+      console.error('Login passport error:', err.message, err.stack);
+      return next(err);
+    }
     if (!user) {
+      console.log('Login failed:', info?.message);
       return res.status(401).json({ error: info?.message || 'Invalid credentials' });
     }
     req.login(user, (loginErr) => {
-      if (loginErr) return next(loginErr);
+      if (loginErr) {
+        console.error('Login session error:', loginErr.message, loginErr.stack);
+        return next(loginErr);
+      }
+      console.log('Login success:', user.id, user.email);
       const { password: _, ...safeUser } = user;
       return res.json(safeUser);
     });

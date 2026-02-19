@@ -4,6 +4,7 @@ import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import bcrypt from 'bcrypt';
+import pg from 'pg';
 import { eq } from 'drizzle-orm';
 import { db } from '../db.js';
 import { users, wallets } from '../../shared/schema.js';
@@ -11,15 +12,24 @@ import type { Request, Response, NextFunction } from 'express';
 
 const PgStore = connectPgSimple(session);
 
+// ─── Session store pool (uses pg, not postgres-js) ──────────
+
+const isInternal = process.env.DATABASE_URL?.includes('railway.internal');
+const sessionPool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: isInternal ? false : { rejectUnauthorized: false },
+});
+
+sessionPool.on('error', (err) => {
+  console.error('Session pool error:', err.message);
+});
+
 // ─── Session ────────────────────────────────────────────────
 
 export const sessionMiddleware = session({
   store: new PgStore({
-    conString: process.env.DATABASE_URL,
+    pool: sessionPool,
     createTableIfMissing: true,
-    ...(process.env.DATABASE_URL?.includes('railway.internal')
-      ? {}
-      : { conObject: { ssl: { rejectUnauthorized: false } } }),
   }),
   secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
   resave: false,
@@ -54,11 +64,14 @@ passport.use(
     { usernameField: 'email' },
     async (email, password, done) => {
       try {
+        console.log('Login attempt:', email.toLowerCase());
         const [user] = await db
           .select()
           .from(users)
           .where(eq(users.email, email.toLowerCase()))
           .limit(1);
+
+        console.log('User found:', user ? `id=${user.id}` : 'not found');
 
         if (!user || !user.password) {
           return done(null, false, { message: 'Invalid email or password' });
@@ -70,7 +83,8 @@ passport.use(
         }
 
         return done(null, user);
-      } catch (err) {
+      } catch (err: any) {
+        console.error('Local strategy error:', err.message, err.stack);
         return done(err);
       }
     },
