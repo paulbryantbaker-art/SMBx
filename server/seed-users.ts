@@ -1,11 +1,8 @@
 import 'dotenv/config';
 import postgres from 'postgres';
-import { drizzle } from 'drizzle-orm/postgres-js';
 import bcrypt from 'bcrypt';
-import { users, wallets } from '../shared/schema.js';
 
-const client = postgres(process.env.DATABASE_URL!, { ssl: 'require' });
-const db = drizzle(client);
+const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
 const TEST_PASSWORD = 'test123';
 const BCRYPT_ROUNDS = 12;
@@ -18,28 +15,33 @@ const testUsers = [
 
 async function seed() {
   const hashedPassword = await bcrypt.hash(TEST_PASSWORD, BCRYPT_ROUNDS);
-  console.log('Password hashed.');
+  console.log('Hashed password:', hashedPassword);
 
   for (const u of testUsers) {
-    const [user] = await db
-      .insert(users)
-      .values({
-        email: u.email,
-        password: hashedPassword,
-        displayName: u.displayName,
-      })
-      .returning();
+    // Delete existing user + wallet if present
+    const existing = await sql`SELECT id FROM users WHERE email = ${u.email} LIMIT 1`;
+    if (existing.length > 0) {
+      await sql`DELETE FROM wallets WHERE user_id = ${existing[0].id}`;
+      await sql`DELETE FROM users WHERE id = ${existing[0].id}`;
+      console.log(`Deleted existing ${u.email}`);
+    }
 
-    await db.insert(wallets).values({
-      userId: user.id,
-      balanceCents: 50000,
-    });
+    const [user] = await sql`
+      INSERT INTO users (email, password, display_name)
+      VALUES (${u.email}, ${hashedPassword}, ${u.displayName})
+      RETURNING id, email
+    `;
 
-    console.log(`Created ${u.email} (id: ${user.id}) with $500 wallet`);
+    await sql`INSERT INTO wallets (user_id, balance_cents) VALUES (${user.id}, 50000)`;
+    console.log(`Created ${user.email} (id: ${user.id}) with $500 wallet`);
   }
 
+  // Verify a hash round-trip
+  const verify = await bcrypt.compare(TEST_PASSWORD, hashedPassword);
+  console.log('Hash verify round-trip:', verify);
+
   console.log('Done.');
-  await client.end();
+  await sql.end();
 }
 
 seed().catch((err) => {
