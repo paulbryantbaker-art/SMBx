@@ -1,14 +1,13 @@
 import session from 'express-session';
-import connectPgSimple from 'connect-pg-simple';
+import pgSession from 'connect-pg-simple';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import bcrypt from 'bcrypt';
-import pg from 'pg';
 import postgres from 'postgres';
 import type { Request, Response, NextFunction } from 'express';
 
-const PgStore = connectPgSimple(session);
+const PgStore = pgSession(session);
 
 // ─── Raw SQL connection for auth queries ────────────────────
 
@@ -17,38 +16,13 @@ const sql = postgres(process.env.DATABASE_URL!, {
   prepare: false,
 });
 
-// ─── Session store pool (uses pg, not postgres-js) ──────────
-
-const dbUrl = process.env.DATABASE_URL!;
-console.log('Session pool DATABASE_URL:', dbUrl ? `set (${dbUrl.split('@')[1]?.split('/')[0] || '?'})` : 'MISSING!');
-
-// Parse URL into individual params (most robust for pg.Pool)
-const dbParsed = new URL(dbUrl);
-const sessionPool = new pg.Pool({
-  host: dbParsed.hostname,
-  port: parseInt(dbParsed.port, 10) || 5432,
-  database: dbParsed.pathname.slice(1),
-  user: decodeURIComponent(dbParsed.username),
-  password: decodeURIComponent(dbParsed.password),
-  ssl: { rejectUnauthorized: false },
-});
-
-sessionPool.on('error', (err) => {
-  console.error('Session pool error:', err.message);
-});
-
-// Verify pool can connect
-sessionPool.query('SELECT 1 as ok').then(r => {
-  console.log('Session pool connected:', r.rows[0]?.ok === 1 ? 'OK' : 'unexpected');
-}).catch(err => {
-  console.error('Session pool connect FAILED:', err.message);
-});
-
 // ─── Session ────────────────────────────────────────────────
+
+console.log('Session store conString:', process.env.DATABASE_URL ? `set (${process.env.DATABASE_URL.split('@')[1]?.split('/')[0] || '?'})` : 'MISSING!');
 
 export const sessionMiddleware = session({
   store: new PgStore({
-    pool: sessionPool,
+    conString: process.env.DATABASE_URL,
     createTableIfMissing: true,
   }),
   secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
@@ -56,8 +30,8 @@ export const sessionMiddleware = session({
   saveUninitialized: false,
   proxy: true,
   cookie: {
-    httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
     sameSite: 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   },
