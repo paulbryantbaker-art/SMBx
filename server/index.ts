@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { testConnection } from './db.js';
 import { sessionMiddleware, passport, requireAuth } from './middleware/auth.js';
 import { authRouter } from './routes/auth.js';
 import type { Request, Response, NextFunction } from 'express';
@@ -11,6 +12,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ─── Test DB on startup ────────────────────────────────────
+testConnection();
 
 // ─── 1. Body parsing ───────────────────────────────────────
 app.use(express.json());
