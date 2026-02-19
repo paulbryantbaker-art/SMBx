@@ -17,9 +17,9 @@ export const sessionMiddleware = session({
   store: new PgStore({
     conString: process.env.DATABASE_URL,
     createTableIfMissing: true,
-    conObject: {
-      ssl: { rejectUnauthorized: false },
-    },
+    ...(process.env.DATABASE_URL?.includes('railway.internal')
+      ? {}
+      : { conObject: { ssl: { rejectUnauthorized: false } } }),
   }),
   secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
   resave: false,
