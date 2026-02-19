@@ -16,6 +16,9 @@ const PORT = process.env.PORT || 3000;
 // ─── Test DB on startup ────────────────────────────────────
 testConnection();
 
+// ─── 0. Trust proxy (Railway) ───────────────────────────────
+app.set('trust proxy', 1);
+
 // ─── 1. Body parsing ───────────────────────────────────────
 app.use(express.json());
 
