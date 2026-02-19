@@ -19,13 +19,29 @@ const sql = postgres(process.env.DATABASE_URL!, {
 
 // ─── Session store pool (uses pg, not postgres-js) ──────────
 
+const dbUrl = process.env.DATABASE_URL!;
+console.log('Session pool DATABASE_URL:', dbUrl ? `set (${dbUrl.split('@')[1]?.split('/')[0] || '?'})` : 'MISSING!');
+
+// Parse URL into individual params (most robust for pg.Pool)
+const dbParsed = new URL(dbUrl);
 const sessionPool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
+  host: dbParsed.hostname,
+  port: parseInt(dbParsed.port, 10) || 5432,
+  database: dbParsed.pathname.slice(1),
+  user: decodeURIComponent(dbParsed.username),
+  password: decodeURIComponent(dbParsed.password),
   ssl: { rejectUnauthorized: false },
 });
 
 sessionPool.on('error', (err) => {
   console.error('Session pool error:', err.message);
+});
+
+// Verify pool can connect
+sessionPool.query('SELECT 1 as ok').then(r => {
+  console.log('Session pool connected:', r.rows[0]?.ok === 1 ? 'OK' : 'unexpected');
+}).catch(err => {
+  console.error('Session pool connect FAILED:', err.message);
 });
 
 // ─── Session ────────────────────────────────────────────────
