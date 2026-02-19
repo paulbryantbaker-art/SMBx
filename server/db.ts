@@ -9,12 +9,13 @@ if (!connectionString) {
   process.exit(1);
 }
 
-const isInternal = connectionString.includes('railway.internal');
+const isRailway = connectionString.includes('rlwy.net') || connectionString.includes('railway');
 
-console.log(`Database: ${isInternal ? 'internal' : 'external'} → ${connectionString.split('@')[1]?.split('/')[0] || 'unknown host'}`);
+console.log(`Database: ${isRailway ? 'railway' : 'local'} → ${connectionString.split('@')[1]?.split('/')[0] || 'unknown host'}`);
 
 export const sql = postgres(connectionString, {
-  ssl: isInternal ? false : 'require',
+  ssl: isRailway ? 'require' : false,
+  prepare: false,
   connect_timeout: 10,
 });
 
@@ -24,7 +25,7 @@ export async function testConnection() {
   try {
     const result = await sql`SELECT 1 as ok`;
     console.log('DB connected:', result[0]?.ok === 1 ? 'OK' : 'unexpected result');
-  } catch (err) {
-    console.error('DB connection failed:', err);
+  } catch (err: any) {
+    console.error('DB connection failed:', err.message);
   }
 }
