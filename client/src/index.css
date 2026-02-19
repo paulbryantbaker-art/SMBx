@@ -1,19 +1,7 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-  --color-cream: #F5F5F0;
-  --color-cream-dark: #F0EDE6;
-  --color-cream-hover: #E8E4DC;
-  --color-sidebar: #F0EDE6;
-  --color-terra: #DA7756;
-  --color-terra-hover: #C4684A;
-  --color-text-primary: #1A1A18;
-  --color-text-secondary: #6B6963;
-  --color-text-tertiary: #9B9891;
-  --color-border: #E8E4DC;
-}
-
-/* Base resets */
 body {
   margin: 0;
   background-color: #F5F5F0;
@@ -21,7 +9,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Typing indicator animation */
 @keyframes dotPulse {
   0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
   40% { opacity: 1; transform: scale(1); }
