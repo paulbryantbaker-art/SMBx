@@ -28,7 +28,7 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup }: Logi
   return (
     <div style={styles.wrapper}>
       <div style={styles.card}>
-        <h1 style={styles.brand}>smbx.ai</h1>
+        <h1 style={styles.brand}>smbx.ai v2 test</h1>
         <p style={styles.subtitle}>Your AI M&A advisor</p>
 
         <button type="button" onClick={onGoogleLogin} style={styles.googleBtn}>
