@@ -14,7 +14,8 @@
       "Bash(npx drizzle-kit push:*)",
       "Bash(npx tsx:*)",
       "Bash(npm ls:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(ls:*)"
     ]
   }
 }
