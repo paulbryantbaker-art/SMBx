@@ -13,6 +13,19 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ─── Raw DB test (no Drizzle, no passport, no sessions) ────
+app.get('/api/test-db', async (_req, res) => {
+  try {
+    const postgres = (await import('postgres')).default;
+    const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
+    const users = await sql`SELECT id, email, display_name FROM users`;
+    await sql.end();
+    res.json({ success: true, users });
+  } catch (error: any) {
+    res.json({ success: false, error: error.message, stack: error.stack });
+  }
+});
+
 // ─── Test DB on startup ────────────────────────────────────
 testConnection();
 
