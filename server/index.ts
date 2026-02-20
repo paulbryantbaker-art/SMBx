@@ -14,7 +14,11 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ─── Startup DB test ────────────────────────────────────────
+// ─── Startup checks ─────────────────────────────────────────
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.warn('WARNING: ANTHROPIC_API_KEY not set — AI chat will fail');
+}
+
 (async () => {
   try {
     const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });

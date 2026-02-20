@@ -14,7 +14,6 @@ export default function InputBar({ onSend, disabled }: InputBarProps) {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = 'auto';
-    // Max ~6 lines: 6 * 24px line-height = 144px
     el.style.height = Math.min(el.scrollHeight, 144) + 'px';
   }, []);
 
