@@ -3,7 +3,7 @@ import type { MessageParam, ContentBlockParam } from '@anthropic-ai/sdk/resource
 import { TOOL_DEFINITIONS, executeTool } from './tools.js';
 import type { Response } from 'express';
 
-const MODEL = 'claude-sonnet-4-5-20250514';
+const MODEL = 'claude-sonnet-4-5-20250929';
 const MAX_TOOL_ROUNDS = 10; // safety limit on agentic loops
 
 let client: Anthropic | null = null;

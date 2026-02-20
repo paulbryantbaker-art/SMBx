@@ -22,7 +22,14 @@
       "Bash(git -C /Users/paul/Desktop/SMBx add package.json)",
       "Bash(git -C:*)",
       "Bash(echo:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npx vite:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm i:*)",
+      "Bash(sudo npm i:*)",
+      "Bash(npm run start:*)",
+      "Bash(curl:*)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQsImlhdCI6MTc3MTU2MDYwNCwiZXhwIjoxNzc0MTUyNjA0fQ.DklZ0GqI4mYmVjuvJK53Gdp9_QGLTfZ07tX3EY82Nf0\")"
     ]
   }
 }
