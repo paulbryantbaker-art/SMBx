@@ -178,35 +178,41 @@ async function classifyLeague(input: Record<string, any>, userId: number): Promi
   const isRollUp = rollUpIndustries.some(ri => industry.includes(ri)) && revenue && revenue > 1500000;
 
   let league: string;
+  let reason: string;
   let explanation: string;
 
   if (isRollUp) {
     // Roll-up override: L3 floor for roll-up industries with revenue >$1.5M
-    // PE platforms actively acquire in these verticals — L3 reflects the real buyer pool
     const baseLeague = ebitda ? classifyByEbitda(ebitda) : (sde ? classifyBySde(sde) : 'L3');
     const leagueRank = { L1: 1, L2: 2, L3: 3, L4: 4, L5: 5, L6: 6 };
     league = (leagueRank[baseLeague as keyof typeof leagueRank] || 0) >= 3 ? baseLeague : 'L3';
-    explanation = `Roll-up override: ${deal.industry} with revenue >$1.5M → L3 minimum. ${ebitda ? `EBITDA $${ebitda.toLocaleString()}` : sde ? `SDE $${sde.toLocaleString()}` : 'No earnings data'} → ${league}`;
+    reason = 'roll_up_override';
+    explanation = `Classified as ${league} via roll-up override: ${deal.industry} is an active consolidation sector, and your $${revenue!.toLocaleString()} revenue qualifies you for institutional-level buyer interest despite EBITDA below the standard L3 threshold. PE roll-ups evaluate businesses like yours as platform or bolt-on acquisitions, which means you'll be valued on institutional metrics.`;
   } else if (ebitda && ebitda >= 2000000) {
     league = classifyByEbitda(ebitda);
-    explanation = `EBITDA of $${ebitda.toLocaleString()} → ${league}`;
+    reason = 'standard';
+    explanation = `Classified as ${league} via standard EBITDA classification: EBITDA of $${ebitda.toLocaleString()}.`;
   } else if (sde) {
     league = classifyBySde(sde);
-    explanation = `SDE of $${sde.toLocaleString()} → ${league}`;
+    reason = 'standard';
+    explanation = `Classified as ${league} via standard SDE classification: SDE of $${sde.toLocaleString()}.`;
   } else if (financials.owner_compensation && revenue) {
-    // Estimate SDE from revenue and owner compensation
     const estSde = parseFloat(financials.owner_compensation) || 0;
     league = classifyBySde(estSde);
-    explanation = `Estimated from owner compensation of $${estSde.toLocaleString()} → ${league}`;
+    reason = 'standard';
+    explanation = `Classified as ${league} via estimated SDE from owner compensation of $${estSde.toLocaleString()}.`;
   } else {
     return JSON.stringify({ error: 'Not enough financial data. Need SDE or EBITDA to classify.' });
   }
 
-  // Update deal and user
-  await sql`UPDATE deals SET league = ${league}, updated_at = NOW() WHERE id = ${dealId}`;
+  // Save league + classification reason to deal
+  const classificationMeta = { reason, explanation, classified_at: new Date().toISOString() };
+  const existingFinancials = typeof deal.financials === 'string' ? JSON.parse(deal.financials) : (deal.financials || {});
+  const updatedFinancials = { ...existingFinancials, league_classification: classificationMeta };
+  await sql`UPDATE deals SET league = ${league}, financials = ${JSON.stringify(updatedFinancials)}::jsonb, updated_at = NOW() WHERE id = ${dealId}`;
   await sql`UPDATE users SET league = ${league}, updated_at = NOW() WHERE id = ${userId}`;
 
-  return JSON.stringify({ success: true, league, explanation });
+  return JSON.stringify({ success: true, league, reason, explanation });
 }
 
 function classifyBySde(sde: number): string {
