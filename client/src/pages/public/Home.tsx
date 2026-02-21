@@ -5,15 +5,15 @@ const SERIF = { fontFamily: 'ui-serif, Georgia, Cambria, serif' } as const;
 
 const PILLARS = [
   {
-    title: 'It knows your industry.',
+    title: 'She knows your industry.',
     body: "Not just \u2018business services\u2019 \u2014 your specific vertical. Veterinary clinics trade differently than HVAC companies. SaaS multiples move differently than dental practices. Yulia pulls from 80+ industry verticals with real market data, current multiples, and sector-specific intelligence. When PE firms are consolidating your industry, she knows \u2014 and she adjusts your strategy accordingly.",
   },
   {
-    title: 'It understands your deal.',
+    title: 'She understands your deal.',
     body: "Your financials, your add-backs, your growth trajectory, your local market conditions. Yulia doesn\u2019t apply a generic formula. She classifies your deal by size and complexity, selects the right valuation methodology, and builds a defensible thesis specific to your situation. Every number is extracted, verified, and shown with its source. Nothing is invented.",
   },
   {
-    title: 'It guides you through the process.',
+    title: 'She guides you through the process.',
     body: "This isn\u2019t \u2018here\u2019s a report, good luck.\u2019 Yulia walks you through every stage \u2014 intake, financials, valuation, packaging, matching, closing. She asks the next right question. She flags risks before they become problems. She generates the deliverables you need at each stage: CIMs, buyer lists, financial models, pitch decks, LOIs. The same deliverables a $50K advisor would produce.",
   },
 ];
@@ -96,7 +96,7 @@ export default function Home() {
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center mt-10 px-8 py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
+            className="inline-flex items-center mt-10 px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
           >
             Get started free &rarr;
           </Link>
@@ -136,8 +136,8 @@ export default function Home() {
             This is something different.
           </h2>
           <p className="text-lg md:text-xl text-text-secondary text-center leading-relaxed max-w-2xl mx-auto mb-16">
-            smbx.ai isn&apos;t a calculator. It isn&apos;t a listing site.
-            It&apos;s an advisor that thinks.
+            smbx.ai isn&apos;t a calculator. She isn&apos;t a listing site.
+            She&apos;s an advisor that thinks.
           </p>
           <div className="space-y-12">
             {PILLARS.map(p => (
@@ -270,7 +270,7 @@ export default function Home() {
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center px-8 py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
+            className="inline-flex items-center px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
           >
             Get started free &rarr;
           </Link>

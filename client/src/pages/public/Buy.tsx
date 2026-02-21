@@ -35,6 +35,12 @@ const STAGES = [
       'SBA modeling, seller financing scenarios, earnout structures. Yulia builds the sources and uses that make the deal work for both sides.',
   },
   {
+    title: 'Post-Acquisition Integration',
+    badge: null,
+    description:
+      "The deal doesn't end at closing. Yulia builds your first 100-day integration plan — Day 0 checklist, employee communication, customer retention, operational quick wins. Nothing falls through the cracks.",
+  },
+  {
     title: 'Closing',
     badge: null,
     description:
@@ -79,7 +85,7 @@ export default function Buy() {
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center px-8 py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
+            className="inline-flex items-center px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
           >
             Start your search free &rarr;
           </Link>
@@ -190,7 +196,7 @@ export default function Buy() {
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center px-8 py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
+            className="inline-flex items-center px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
           >
             Start your search &rarr;
           </Link>
