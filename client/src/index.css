@@ -18,3 +18,28 @@ body {
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
 }
+
+@keyframes heroChevron {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(4px); }
+}
+
+@keyframes audienceSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes audienceSlideOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-8px); }
+}
+
+.audienceIn {
+  display: inline-block;
+  animation: audienceSlideIn 200ms ease-out forwards;
+}
+
+.audienceOut {
+  display: inline-block;
+  animation: audienceSlideOut 150ms ease-in forwards;
+}

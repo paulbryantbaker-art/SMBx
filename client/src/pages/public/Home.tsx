@@ -91,20 +91,17 @@ const AUDIENCE_WORDS = [
 
 export default function Home() {
   const [audienceIndex, setAudienceIndex] = useState(0);
-  const [audienceVisible, setAudienceVisible] = useState(true);
+  const [animClass, setAnimClass] = useState('audienceIn');
 
   useEffect(() => {
-    const delay = setTimeout(() => {
-      const interval = setInterval(() => {
-        setAudienceVisible(false);
-        setTimeout(() => {
-          setAudienceIndex(i => (i + 1) % AUDIENCE_WORDS.length);
-          setAudienceVisible(true);
-        }, 300);
-      }, 3000);
-      return () => clearInterval(interval);
-    }, 1500);
-    return () => clearTimeout(delay);
+    const interval = setInterval(() => {
+      setAnimClass('audienceOut');
+      setTimeout(() => {
+        setAudienceIndex(i => (i + 1) % AUDIENCE_WORDS.length);
+        setAnimClass('audienceIn');
+      }, 200);
+    }, 2700);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -124,10 +121,15 @@ export default function Home() {
           <p className="text-xl md:text-2xl text-text-secondary mt-6">
             Built for{' '}
             <span
-              className="text-terra italic transition-opacity duration-300"
-              style={{ ...SERIF, opacity: audienceVisible ? 1 : 0 }}
+              className="inline-block text-terra italic"
+              style={{ ...SERIF, minWidth: '14ch', textAlign: 'left' }}
             >
-              {AUDIENCE_WORDS[audienceIndex]}
+              <span
+                key={audienceIndex}
+                className={animClass}
+              >
+                {AUDIENCE_WORDS[audienceIndex]}
+              </span>
             </span>
             .
           </p>
@@ -141,15 +143,24 @@ export default function Home() {
             Meet Yulia &rarr;
           </Link>
         </div>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <span className="text-text-tertiary text-sm tracking-wide">Scroll</span>
-        </div>
+        <svg
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 w-5 h-5 text-text-secondary opacity-40"
+          style={{ animation: 'heroChevron 2s ease-in-out infinite' }}
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M4 7l6 6 6-6" />
+        </svg>
       </section>
 
       {/* Spacer to push content below the fold */}
       <div className="min-h-screen" />
 
-      {/* CONTENT — scrolls over the hero */}
+      {/* CURTAIN 1 CONTENT — slides over hero */}
       <div className="relative z-10">
         {/* THE PROBLEM */}
         <section
@@ -176,40 +187,46 @@ export default function Home() {
             </p>
           </div>
         </section>
+      </div>
 
-        {/* THE INTELLIGENCE */}
-        <section className="px-6 py-20 bg-cream">
-          <div className="max-w-3xl mx-auto">
-            <h2
-              className="text-3xl md:text-4xl text-text-primary text-center mb-4 font-medium"
-              style={SERIF}
-            >
-              This is something different.
-            </h2>
-            <p className="text-lg md:text-xl text-text-secondary text-center leading-relaxed max-w-2xl mx-auto mb-16">
-              smbx.ai isn&apos;t a calculator. She isn&apos;t a listing site.
-              She&apos;s an advisor that thinks.
-            </p>
-            <div className="space-y-12">
-              {PILLARS.map(p => (
-                <div key={p.title}>
-                  <h3
-                    className="text-xl md:text-2xl text-text-primary mb-3 font-medium"
-                    style={SERIF}
-                  >
-                    {p.title}
-                  </h3>
-                  <p className="text-lg md:text-xl text-text-secondary leading-relaxed m-0">
-                    {p.body}
-                  </p>
-                </div>
-              ))}
-            </div>
+      {/* CURTAIN 2 — Intelligence section (sticky) */}
+      <section className="sticky top-0 z-0 min-h-screen flex flex-col items-center justify-center px-6 bg-cream">
+        <div className="max-w-3xl mx-auto">
+          <h2
+            className="text-3xl md:text-4xl text-text-primary text-center mb-4 font-medium"
+            style={SERIF}
+          >
+            This is something different.
+          </h2>
+          <p className="text-lg md:text-xl text-text-secondary text-center leading-relaxed max-w-2xl mx-auto mb-16">
+            smbx.ai isn&apos;t a calculator. She isn&apos;t a listing site.
+            She&apos;s an advisor that thinks.
+          </p>
+          <div className="space-y-12">
+            {PILLARS.map(p => (
+              <div key={p.title}>
+                <h3
+                  className="text-xl md:text-2xl text-text-primary mb-3 font-medium"
+                  style={SERIF}
+                >
+                  {p.title}
+                </h3>
+                <p className="text-lg md:text-xl text-text-secondary leading-relaxed m-0">
+                  {p.body}
+                </p>
+              </div>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
+      {/* CURTAIN 2 CONTENT — slides over intelligence */}
+      <div className="relative z-10">
         {/* HOW IT WORKS */}
-        <section className="px-6 py-20 bg-white">
+        <section
+          className="px-6 py-20 bg-white rounded-t-3xl"
+          style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.08)' }}
+        >
           <div className="max-w-2xl mx-auto">
             <h2
               className="text-3xl md:text-4xl text-text-primary text-center mb-2 font-medium"
