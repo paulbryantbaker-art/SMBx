@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
+import Logo from './Logo';
 
 const NAV_LINKS = [
   { href: '/sell', label: 'Sell' },
@@ -16,12 +17,8 @@ export default function PublicNav() {
     <nav className="sticky top-0 z-50 bg-white border-b border-border">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-14">
         {/* Logo */}
-        <Link
-          href="/"
-          className="text-xl font-semibold text-terra no-underline"
-          style={{ fontFamily: 'ui-serif, Georgia, serif' }}
-        >
-          smbx.ai
+        <Link href="/" className="no-underline">
+          <Logo className="text-xl" />
         </Link>
 
         {/* Desktop links */}

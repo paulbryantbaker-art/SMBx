@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import Logo from '../../components/public/Logo';
 
 interface SignupProps {
   onRegister: (displayName: string, email: string, password: string) => Promise<void>;
@@ -29,7 +30,7 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
   return (
     <div style={styles.wrapper}>
       <div style={styles.card}>
-        <h1 style={styles.brand}>smbx.ai</h1>
+        <h1 style={styles.brand}><Logo className="text-3xl" /></h1>
         <p style={styles.subtitle}>Create your account</p>
 
         <button type="button" onClick={onGoogleLogin} style={styles.googleBtn}>

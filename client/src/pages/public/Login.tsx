@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import Logo from '../../components/public/Logo';
 
 interface LoginProps {
   onLogin: (email: string, password: string) => Promise<void>;
@@ -28,7 +29,7 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup }: Logi
   return (
     <div style={styles.wrapper}>
       <div style={styles.card}>
-        <h1 style={styles.brand}>smbx.ai v2 test</h1>
+        <h1 style={styles.brand}><Logo className="text-3xl" /></h1>
         <p style={styles.subtitle}>Your AI M&A advisor</p>
 
         <button type="button" onClick={onGoogleLogin} style={styles.googleBtn}>

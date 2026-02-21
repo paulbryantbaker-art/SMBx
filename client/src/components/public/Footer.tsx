@@ -1,4 +1,5 @@
 import { Link } from 'wouter';
+import Logo from './Logo';
 
 const COLUMNS = [
   {
@@ -31,12 +32,8 @@ export default function Footer() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
           {/* Brand */}
           <div>
-            <Link
-              href="/"
-              className="text-lg font-semibold text-white no-underline"
-              style={{ fontFamily: 'ui-serif, Georgia, serif' }}
-            >
-              smbx.ai
+            <Link href="/" className="no-underline">
+              <Logo className="text-lg" light />
             </Link>
             <p className="text-base mt-2 leading-relaxed m-0">
               Your M&A advisor, on demand.
