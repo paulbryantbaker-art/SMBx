@@ -1,10 +1,10 @@
 # SMBX.AI — COMPLETE BUILD SPECIFICATION FOR CLAUDE CODE
-## Fresh Build from Scratch | February 18, 2026
+## Fresh Build from Scratch | February 2026
 
-**Repository:** github.com/[owner]/SMBx (private)
+**Repository:** github.com/paulbryantbaker-art/SMBx (private)
 **Domain:** smbx.ai
-**Document Version:** 1.0
-**Source Documents:** BUILD_PLAN_v4.pdf + Methodology_V17_Combined.md
+**Document Version:** 2.0 (Updated February 21, 2026)
+**Source Documents:** BUILD_PLAN_v5 + Methodology_V17_Combined.md
 **Design Reference:** claude.ai / anthropic.com (mirror exactly)
 
 ---
@@ -30,7 +30,6 @@
 17. [Deployment — Railway](#17-deployment)
 18. [Build Phases & Task Order](#18-build-phases)
 19. [Environment Variables](#19-env-vars)
-20. [CLAUDE.md for Repo](#20-claude-md)
 
 ---
 
@@ -47,6 +46,8 @@
 **Brand:** smbx.ai (formerly sbsmb / sellbuysmb)
 
 **Messaging Rule:** Never say "AI-powered." Say "instant," "smart," or just describe the outcome. Yulia is presented as an expert advisor, never as "an AI chatbot."
+
+**Homepage Hero:** "Sell a business. Buy a business. Raise capital." — Visitors know what the platform does in 2 seconds (Beer/Wine/Cigarettes principle).
 
 ---
 
@@ -242,8 +243,7 @@ const breakpoints = {
 
 ### 2.9 Glassmorphism (Selective Use)
 
-Per BUILD_PLAN_v4, the design language includes glassmorphism — frosted glass panels, subtle gradients. Apply this sparingly:
-
+Apply sparingly:
 - Modal/dialog backdrops: `backdrop-blur-sm bg-black/20`
 - Dropdown menus: `backdrop-blur-md bg-white/90`
 - Wallet card: `backdrop-blur-lg bg-white/80 border border-white/20`
@@ -256,15 +256,15 @@ Per BUILD_PLAN_v4, the design language includes glassmorphism — frosted glass 
 | Layer | Technology | Notes |
 |-------|-----------|-------|
 | Runtime | Node.js 20+ + Express (ESM) | ES modules throughout |
-| Frontend | React 19 + Vite 7 + Tailwind CSS 4 | SPA, mobile-first |
+| Frontend | React 19 + Vite 7 + **Tailwind CSS v3** | SPA, mobile-first. **v4 breaks on Railway.** |
 | UI Primitives | Radix UI | Unstyled, accessible |
 | Routing (client) | wouter | Lightweight, ~1.5kb |
-| Database | PostgreSQL via Drizzle ORM | Type-safe schema |
+| Database | **PostgreSQL via raw postgres-js** | **No ORM. Drizzle broke on Railway, bypassed entirely.** |
 | AI (primary) | Anthropic Claude API | Claude Sonnet 4.5 for chat |
 | AI (secondary) | Google Gemini 2.5 | Flash for extraction, Pro for reasoning |
 | AI (tertiary) | OpenAI | Fallback only |
 | Payments | Stripe | Wallet top-ups, webhooks |
-| Auth | Google OAuth + local (bcrypt) + sessions | express-session |
+| Auth | **JWT (jsonwebtoken)** | **No sessions, no passport. Sessions broke on Railway.** |
 | Deployment | Railway | PostgreSQL + Node.js service |
 | Repo | GitHub (private) | SMBx |
 
@@ -274,15 +274,12 @@ Per BUILD_PLAN_v4, the design language includes glassmorphism — frosted glass 
 {
   "dependencies": {
     "express": "^4.21",
-    "drizzle-orm": "^0.35",
+    "postgres": "^3.4",
     "@anthropic-ai/sdk": "^0.39",
     "@google/generative-ai": "^0.21",
     "stripe": "^17",
+    "jsonwebtoken": "^9",
     "bcrypt": "^5",
-    "express-session": "^1.18",
-    "connect-pg-simple": "^9",
-    "passport": "^0.7",
-    "passport-google-oauth20": "^2",
     "zod": "^3.23",
     "cors": "^2.8",
     "helmet": "^8",
@@ -290,7 +287,9 @@ Per BUILD_PLAN_v4, the design language includes glassmorphism — frosted glass 
   },
   "devDependencies": {
     "vite": "^7",
-    "tailwindcss": "^4",
+    "tailwindcss": "^3",
+    "postcss": "^8",
+    "autoprefixer": "^10",
     "@radix-ui/react-dialog": "^1",
     "@radix-ui/react-dropdown-menu": "^2",
     "@radix-ui/react-tooltip": "^1",
@@ -302,11 +301,28 @@ Per BUILD_PLAN_v4, the design language includes glassmorphism — frosted glass 
     "react-dom": "^19",
     "react-markdown": "^9",
     "typescript": "^5.7",
-    "esbuild": "^0.24",
-    "drizzle-kit": "^0.30"
+    "esbuild": "^0.24"
   }
 }
 ```
+
+### Database Query Pattern
+
+All database access uses raw postgres-js — no ORM:
+
+```typescript
+// server/db.ts
+import postgres from 'postgres';
+const sql = postgres(process.env.DATABASE_URL);
+export default sql;
+
+// Usage in any service:
+import sql from '../db.ts';
+const users = await sql`SELECT * FROM users WHERE id = ${userId}`;
+const result = await sql`INSERT INTO deals ${sql(dealData)} RETURNING *`;
+```
+
+Schema changes: write raw SQL migrations in `server/migrations/` and run them on deploy or manually.
 
 ---
 
@@ -316,12 +332,14 @@ Per BUILD_PLAN_v4, the design language includes glassmorphism — frosted glass 
 SMBx/
 ├── CLAUDE.md                          # Claude Code reads this first
 ├── METHODOLOGY_V17.md                 # Full methodology (in repo)
+├── SMBX_COMPLETE_SPEC.md             # This file
+├── YULIA_PROMPTS_V2.md               # Agentic runtime prompts
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
-├── tailwind.config.ts
+├── tailwind.config.js                 # Tailwind v3 config
+├── postcss.config.js                  # PostCSS for Tailwind v3
 ├── railway.json
-├── drizzle.config.ts
 ├── .env.example
 ├── .gitignore
 │
@@ -329,7 +347,6 @@ SMBx/
 │   └── build.ts                       # esbuild config for server
 │
 ├── shared/                            # Shared between client & server
-│   ├── schema.ts                      # Drizzle ORM schema (all tables)
 │   ├── types.ts                       # Shared TypeScript types
 │   ├── gateRegistry.ts                # 22 gates: S0-S5, B0-B5, R0-R5, PMI0-PMI3
 │   ├── sidebarRules.ts                # Progressive disclosure by gate
@@ -338,10 +355,17 @@ SMBx/
 │
 ├── server/
 │   ├── index.ts                       # Express server entry point
+│   ├── db.ts                          # postgres-js connection
 │   ├── routes.ts                      # All API routes
 │   ├── ai.ts                          # AI orchestration layer
+│   ├── migrations/                    # Raw SQL migration files
+│   │   ├── 001_initial_schema.sql
+│   │   └── ...
+│   ├── routes/
+│   │   ├── auth.ts                    # JWT auth routes
+│   │   └── chat.ts                    # Chat CRUD + messages
 │   ├── middleware/
-│   │   ├── auth.ts                    # Session + passport middleware
+│   │   ├── auth.ts                    # JWT verification middleware
 │   │   ├── walletGuard.ts             # Check wallet balance before generation
 │   │   └── rateLimiter.ts             # API rate limiting
 │   │
@@ -356,27 +380,21 @@ SMBx/
 │       ├── chatService.ts             # Chat history, conversations
 │       ├── dealService.ts             # Deal lifecycle management
 │       ├── documentService.ts         # File upload/storage
-│       ├── stripeService.ts           # Stripe integration
-│       ├── livingCimService.ts        # Dynamic CIM builder
-│       ├── ghostNotificationService.ts # Ghost profile alerts
-│       ├── dayPassService.ts          # Temporary advisor access
-│       ├── transactionTokenService.ts # Success fee tracking
-│       ├── dealVelocityService.ts     # Pipeline analytics
-│       ├── escrowService.ts           # Escrow/earnout management
-│       ├── groundTruthService.ts      # Verified financials feedback
-│       └── networkDensityService.ts   # Deal room participants
+│       └── stripeService.ts           # Stripe integration
 │
 ├── client/
 │   ├── index.html
 │   └── src/
 │       ├── App.tsx                    # Route definitions (wouter)
 │       ├── main.tsx                   # React entry
-│       ├── index.css                  # Tailwind imports + CSS vars
+│       ├── index.css                  # Tailwind v3 imports + CSS vars
+│       ├── styles/
+│       │   └── DESIGN_SYSTEM.md       # Design system reference
 │       │
 │       ├── hooks/
 │       │   ├── useWallet.ts           # Wallet state + actions
 │       │   ├── useChat.ts             # Chat messages + streaming
-│       │   ├── useAuth.ts             # Auth state
+│       │   ├── useAuth.ts             # Auth state (JWT)
 │       │   ├── useDeal.ts             # Current deal context
 │       │   └── useGate.ts             # Current gate + progression
 │       │
@@ -447,294 +465,294 @@ SMBx/
 
 ## 5. DATABASE SCHEMA (Core Tables)
 
-The full schema has 214 tables from the v3 codebase. Below are the critical tables for the fresh build, organized by domain.
+All tables defined as raw SQL. Run migrations via `server/migrations/` files.
 
 ### 5.1 Users & Auth
 
-```typescript
-// shared/schema.ts (Drizzle ORM)
-
-export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  email: varchar('email', { length: 255 }).notNull().unique(),
-  passwordHash: varchar('password_hash', { length: 255 }),
-  name: varchar('name', { length: 255 }),
-  avatarUrl: text('avatar_url'),
-  googleId: varchar('google_id', { length: 255 }).unique(),
-  role: varchar('role', { length: 50 }).default('user'), // user, admin, broker
-  league: varchar('league', { length: 10 }), // L1-L6, set after onboarding
-  journeyType: varchar('journey_type', { length: 20 }), // sell, buy, raise, pmi
-  onboardingComplete: boolean('onboarding_complete').default(false),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+```sql
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password_hash VARCHAR(255),
+  name VARCHAR(255),
+  avatar_url TEXT,
+  google_id VARCHAR(255) UNIQUE,
+  role VARCHAR(50) DEFAULT 'user',          -- user, admin, broker
+  league VARCHAR(10),                        -- L1-L6, set after onboarding
+  journey_type VARCHAR(20),                  -- sell, buy, raise, pmi
+  onboarding_complete BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
 ```
 
 ### 5.2 Wallet & Payments
 
-```typescript
-export const wallets = pgTable('wallets', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull().unique(),
-  balanceCents: integer('balance_cents').default(0).notNull(), // Store in cents
-  autoRefillEnabled: boolean('auto_refill_enabled').default(false),
-  autoRefillThresholdCents: integer('auto_refill_threshold_cents').default(5000), // $50
-  autoRefillAmountCents: integer('auto_refill_amount_cents').default(25000), // $250
-  createdAt: timestamp('created_at').defaultNow(),
-});
+```sql
+CREATE TABLE wallets (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) NOT NULL UNIQUE,
+  balance_cents INTEGER DEFAULT 0 NOT NULL,   -- $1 = 100 cents. $1 in wallet = $1 purchasing power.
+  auto_refill_enabled BOOLEAN DEFAULT false,
+  auto_refill_threshold_cents INTEGER DEFAULT 5000,   -- $50
+  auto_refill_amount_cents INTEGER DEFAULT 25000,     -- $250
+  created_at TIMESTAMP DEFAULT NOW()
+);
 
-export const walletTransactions = pgTable('wallet_transactions', {
-  id: serial('id').primaryKey(),
-  walletId: integer('wallet_id').references(() => wallets.id).notNull(),
-  type: varchar('type', { length: 20 }).notNull(), // topup, purchase, refund, bonus
-  amountCents: integer('amount_cents').notNull(), // positive = credit, negative = debit
-  balanceAfterCents: integer('balance_after_cents').notNull(),
-  description: text('description'),
-  menuItemId: varchar('menu_item_id', { length: 100 }), // if purchase
-  stripePaymentIntentId: varchar('stripe_payment_intent_id', { length: 255 }),
-  createdAt: timestamp('created_at').defaultNow(),
-});
+CREATE TABLE wallet_transactions (
+  id SERIAL PRIMARY KEY,
+  wallet_id INTEGER REFERENCES wallets(id) NOT NULL,
+  type VARCHAR(20) NOT NULL,                  -- topup, purchase, refund, bonus
+  amount_cents INTEGER NOT NULL,              -- positive = credit, negative = debit
+  balance_after_cents INTEGER NOT NULL,
+  description TEXT,
+  menu_item_id VARCHAR(100),
+  stripe_payment_intent_id VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW()
+);
 
-export const walletBlocks = pgTable('wallet_blocks', {
-  id: varchar('id', { length: 50 }).primaryKey(), // 'starter', 'builder', etc.
-  name: varchar('name', { length: 100 }).notNull(),
-  priceCents: integer('price_cents').notNull(),
-  bonusCents: integer('bonus_cents').default(0),
-  totalCreditsCents: integer('total_credits_cents').notNull(),
-  discountPercent: integer('discount_percent').default(0),
-  sortOrder: integer('sort_order').default(0),
-});
+CREATE TABLE wallet_blocks (
+  id VARCHAR(50) PRIMARY KEY,                 -- 'starter', 'builder', etc.
+  name VARCHAR(100) NOT NULL,
+  price_cents INTEGER NOT NULL,
+  bonus_cents INTEGER DEFAULT 0,
+  total_cents INTEGER NOT NULL,               -- price_cents + bonus_cents
+  discount_percent INTEGER DEFAULT 0,
+  sort_order INTEGER DEFAULT 0
+);
 ```
 
 ### 5.3 Conversations & Messages
 
-```typescript
-export const conversations = pgTable('conversations', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull(),
-  dealId: integer('deal_id').references(() => deals.id),
-  title: varchar('title', { length: 255 }).default('New conversation'),
-  journeyType: varchar('journey_type', { length: 20 }),
-  currentGate: varchar('current_gate', { length: 20 }),
-  isArchived: boolean('is_archived').default(false),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+```sql
+CREATE TABLE conversations (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) NOT NULL,
+  deal_id INTEGER REFERENCES deals(id),
+  title VARCHAR(255) DEFAULT 'New conversation',
+  journey_type VARCHAR(20),
+  current_gate VARCHAR(20),
+  is_archived BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
 
-export const messages = pgTable('messages', {
-  id: serial('id').primaryKey(),
-  conversationId: integer('conversation_id').references(() => conversations.id).notNull(),
-  role: varchar('role', { length: 20 }).notNull(), // 'user', 'assistant', 'system'
-  content: text('content').notNull(),
-  metadata: jsonb('metadata'), // gate transitions, deliverables generated, etc.
-  createdAt: timestamp('created_at').defaultNow(),
-});
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  conversation_id INTEGER REFERENCES conversations(id) NOT NULL,
+  role VARCHAR(20) NOT NULL,                  -- 'user', 'assistant', 'system'
+  content TEXT NOT NULL,
+  metadata JSONB,                             -- gate transitions, deliverables, etc.
+  created_at TIMESTAMP DEFAULT NOW()
+);
 ```
 
 ### 5.4 Deals
 
-```typescript
-export const deals = pgTable('deals', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull(),
-  journeyType: varchar('journey_type', { length: 20 }).notNull(), // sell, buy, raise, pmi
-  league: varchar('league', { length: 10 }),
-  currentGate: varchar('current_gate', { length: 20 }).default('S0'),
+```sql
+CREATE TABLE deals (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) NOT NULL,
+  journey_type VARCHAR(20) NOT NULL,          -- sell, buy, raise, pmi
+  league VARCHAR(10),
+  current_gate VARCHAR(20) DEFAULT 'S0',
   
-  // Business basics
-  businessName: varchar('business_name', { length: 255 }),
-  industry: varchar('industry', { length: 100 }),
-  location: varchar('location', { length: 255 }),
-  yearsInOperation: integer('years_in_operation'),
+  -- Business basics
+  business_name VARCHAR(255),
+  industry VARCHAR(100),
+  location VARCHAR(255),
+  years_in_operation INTEGER,
   
-  // Financials
-  annualRevenue: integer('annual_revenue'), // cents
-  sde: integer('sde'), // cents
-  ebitda: integer('ebitda'), // cents
-  adjustedEbitda: integer('adjusted_ebitda'), // cents
+  -- Financials (all in cents)
+  annual_revenue INTEGER,
+  sde INTEGER,
+  ebitda INTEGER,
+  adjusted_ebitda INTEGER,
   
-  // Valuation
-  valuationLow: integer('valuation_low'), // cents
-  valuationMid: integer('valuation_mid'),
-  valuationHigh: integer('valuation_high'),
-  multipleUsed: decimal('multiple_used'),
-  metricUsed: varchar('metric_used', { length: 20 }), // SDE or EBITDA
+  -- Valuation (all in cents)
+  valuation_low INTEGER,
+  valuation_mid INTEGER,
+  valuation_high INTEGER,
+  multiple_used DECIMAL,
+  metric_used VARCHAR(20),                    -- SDE or EBITDA
   
-  // Status
-  status: varchar('status', { length: 20 }).default('active'), // active, closed, paused
-  complexityFlags: jsonb('complexity_flags'), // Wagyu Rule triggers
+  -- Status
+  status VARCHAR(20) DEFAULT 'active',        -- active, closed, paused
+  complexity_flags JSONB,                     -- Wagyu Rule triggers
   
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
 ```
 
 ### 5.5 Menu Catalog
 
-```typescript
-export const menuItems = pgTable('menu_items', {
-  id: varchar('id', { length: 100 }).primaryKey(), // 'quick-valuation', 'full-cim', etc.
-  name: varchar('name', { length: 255 }).notNull(),
-  description: text('description'),
-  tier: varchar('tier', { length: 20 }).notNull(), // 'analyst', 'associate', 'vp'
-  basePriceCents: integer('base_price_cents').notNull(),
-  category: varchar('category', { length: 50 }), // financial, packaging, sourcing, etc.
-  journeyTypes: jsonb('journey_types'), // ['sell', 'buy', 'raise']
-  gateRequirement: varchar('gate_requirement', { length: 20 }), // minimum gate to access
-  isFree: boolean('is_free').default(false),
-  sortOrder: integer('sort_order').default(0),
-});
+```sql
+CREATE TABLE menu_items (
+  id VARCHAR(100) PRIMARY KEY,                -- 'quick-valuation', 'full-cim', etc.
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  tier VARCHAR(20) NOT NULL,                  -- 'analyst', 'associate', 'vp'
+  base_price_cents INTEGER NOT NULL,
+  category VARCHAR(50),                       -- financial, packaging, sourcing
+  journey_types JSONB,                        -- ['sell', 'buy', 'raise']
+  gate_requirement VARCHAR(20),               -- minimum gate to access
+  is_free BOOLEAN DEFAULT false,
+  sort_order INTEGER DEFAULT 0
+);
 
-export const dealPackages = pgTable('deal_packages', {
-  id: varchar('id', { length: 100 }).primaryKey(),
-  name: varchar('name', { length: 255 }).notNull(),
-  description: text('description'),
-  basePriceCents: integer('base_price_cents').notNull(),
-  includedItemIds: jsonb('included_item_ids'), // array of menu item IDs
-  discountPercent: integer('discount_percent').default(0),
-  journeyType: varchar('journey_type', { length: 20 }),
-  sortOrder: integer('sort_order').default(0),
-});
+CREATE TABLE deal_packages (
+  id VARCHAR(100) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  base_price_cents INTEGER NOT NULL,
+  included_item_ids JSONB,                    -- array of menu item IDs
+  discount_percent INTEGER DEFAULT 0,
+  journey_type VARCHAR(20),
+  sort_order INTEGER DEFAULT 0
+);
 ```
 
 ### 5.6 Deliverables
 
-```typescript
-export const deliverables = pgTable('deliverables', {
-  id: serial('id').primaryKey(),
-  dealId: integer('deal_id').references(() => deals.id).notNull(),
-  userId: integer('user_id').references(() => users.id).notNull(),
-  menuItemId: varchar('menu_item_id', { length: 100 }).references(() => menuItems.id),
-  conversationId: integer('conversation_id').references(() => conversations.id),
+```sql
+CREATE TABLE deliverables (
+  id SERIAL PRIMARY KEY,
+  deal_id INTEGER REFERENCES deals(id) NOT NULL,
+  user_id INTEGER REFERENCES users(id) NOT NULL,
+  menu_item_id VARCHAR(100) REFERENCES menu_items(id),
+  conversation_id INTEGER REFERENCES conversations(id),
   
-  type: varchar('type', { length: 50 }).notNull(), // valuation, cim, buyer-list, etc.
-  title: varchar('title', { length: 255 }).notNull(),
-  content: jsonb('content'), // structured output
-  markdownContent: text('markdown_content'), // rendered content
-  status: varchar('status', { length: 20 }).default('generating'), // generating, complete, error
+  type VARCHAR(50) NOT NULL,                  -- valuation, cim, buyer-list, etc.
+  title VARCHAR(255) NOT NULL,
+  content JSONB,                              -- structured output
+  markdown_content TEXT,                      -- rendered content
+  status VARCHAR(20) DEFAULT 'generating',    -- generating, complete, error
   
-  pricePaidCents: integer('price_paid_cents'),
-  leagueMultiplier: decimal('league_multiplier'),
+  price_paid_cents INTEGER,
+  league_multiplier DECIMAL,
   
-  createdAt: timestamp('created_at').defaultNow(),
-});
+  created_at TIMESTAMP DEFAULT NOW()
+);
 ```
 
-### 5.7 GTM Feature Tables
+### 5.7 GTM Feature Tables (Build Later)
 
-```typescript
-// Living CIMs
-export const livingCims = pgTable('living_cims', {
-  id: serial('id').primaryKey(),
-  dealId: integer('deal_id').references(() => deals.id).notNull(),
-  userId: integer('user_id').references(() => users.id).notNull(),
-  content: jsonb('content').notNull(),
-  publishState: varchar('publish_state', { length: 20 }).default('draft'),
-  version: integer('version').default(1),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+These tables support future GTM features. Build when needed, not upfront:
 
-export const cimShareLinks = pgTable('cim_share_links', {
-  id: serial('id').primaryKey(),
-  cimId: integer('cim_id').references(() => livingCims.id).notNull(),
-  token: varchar('token', { length: 255 }).notNull().unique(),
-  accessLevel: varchar('access_level', { length: 20 }).notNull(), // blind, teaser, full
-  revealStrategy: varchar('reveal_strategy', { length: 20 }), // signup, nda, both
-  viewCount: integer('view_count').default(0),
-  maxViews: integer('max_views'),
-  expiresAt: timestamp('expires_at'),
-  createdAt: timestamp('created_at').defaultNow(),
-});
+```sql
+-- Living CIMs
+CREATE TABLE living_cims (
+  id SERIAL PRIMARY KEY,
+  deal_id INTEGER REFERENCES deals(id) NOT NULL,
+  user_id INTEGER REFERENCES users(id) NOT NULL,
+  content JSONB NOT NULL,
+  publish_state VARCHAR(20) DEFAULT 'draft',
+  version INTEGER DEFAULT 1,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
 
-// Ghost Notifications
-export const ghostNotifications = pgTable('ghost_notifications', {
-  id: serial('id').primaryKey(),
-  businessIdentifier: varchar('business_identifier', { length: 255 }).notNull(),
-  source: varchar('source', { length: 100 }), // bizbuysell, loopnet, etc.
-  trackerCount: integer('tracker_count').default(0),
-  notificationSent: boolean('notification_sent').default(false),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+-- CIM Share Links
+CREATE TABLE cim_share_links (
+  id SERIAL PRIMARY KEY,
+  cim_id INTEGER REFERENCES living_cims(id) NOT NULL,
+  token VARCHAR(255) NOT NULL UNIQUE,
+  access_level VARCHAR(20) NOT NULL,          -- blind, teaser, full
+  view_count INTEGER DEFAULT 0,
+  max_views INTEGER,
+  expires_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW()
+);
 
-// Day Passes
-export const dayPasses = pgTable('day_passes', {
-  id: serial('id').primaryKey(),
-  dealId: integer('deal_id').references(() => deals.id).notNull(),
-  createdBy: integer('created_by').references(() => users.id).notNull(),
-  email: varchar('email', { length: 255 }).notNull(),
-  token: varchar('token', { length: 255 }).notNull().unique(),
-  accessLevel: varchar('access_level', { length: 20 }).default('read'), // read, comment, full
-  durationHours: integer('duration_hours').default(48),
-  startsAt: timestamp('starts_at'),
-  expiresAt: timestamp('expires_at'),
-  createdAt: timestamp('created_at').defaultNow(),
-});
+-- Day Passes
+CREATE TABLE day_passes (
+  id SERIAL PRIMARY KEY,
+  deal_id INTEGER REFERENCES deals(id) NOT NULL,
+  created_by INTEGER REFERENCES users(id) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  token VARCHAR(255) NOT NULL UNIQUE,
+  access_level VARCHAR(20) DEFAULT 'read',
+  duration_hours INTEGER DEFAULT 48,
+  expires_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW()
+);
 
-// Transaction Tokens
-export const transactionTokens = pgTable('transaction_tokens', {
-  id: serial('id').primaryKey(),
-  dealId: integer('deal_id').references(() => deals.id).notNull(),
-  dealValueCents: bigint('deal_value_cents', { mode: 'number' }),
-  feeCents: integer('fee_cents'),
-  status: varchar('status', { length: 20 }).default('pending'), // pending, paid, waived
-  stripePaymentIntentId: varchar('stripe_payment_intent_id', { length: 255 }),
-  createdAt: timestamp('created_at').defaultNow(),
-});
+-- Deal Velocity Events
+CREATE TABLE deal_velocity_events (
+  id SERIAL PRIMARY KEY,
+  deal_id INTEGER REFERENCES deals(id) NOT NULL,
+  event_type VARCHAR(50) NOT NULL,
+  metadata JSONB,
+  occurred_at TIMESTAMP DEFAULT NOW()
+);
 
-// Deal Velocity Events
-export const dealVelocityEvents = pgTable('deal_velocity_events', {
-  id: serial('id').primaryKey(),
-  dealId: integer('deal_id').references(() => deals.id).notNull(),
-  eventType: varchar('event_type', { length: 50 }).notNull(), // discovery, first_view, saved, nda_signed, etc.
-  metadata: jsonb('metadata'),
-  occurredAt: timestamp('occurred_at').defaultNow(),
-});
-
-// Escrow Transactions
-export const escrowTransactions = pgTable('escrow_transactions', {
-  id: serial('id').primaryKey(),
-  dealId: integer('deal_id').references(() => deals.id).notNull(),
-  type: varchar('type', { length: 20 }).notNull(), // deposit, earnout, holdback, release
-  amountCents: bigint('amount_cents', { mode: 'number' }).notNull(),
-  status: varchar('status', { length: 20 }).default('pending'),
-  stripePaymentIntentId: varchar('stripe_payment_intent_id', { length: 255 }),
-  createdAt: timestamp('created_at').defaultNow(),
-});
-
-// Ground Truth (Magma Feedback)
-export const groundTruthData = pgTable('ground_truth_data', {
-  id: serial('id').primaryKey(),
-  dealId: integer('deal_id').references(() => deals.id).notNull(),
-  estimatedRevenue: integer('estimated_revenue'),
-  actualRevenue: integer('actual_revenue'),
-  revenueDeltaPercent: decimal('revenue_delta_percent'),
-  estimatedEbitda: integer('estimated_ebitda'),
-  actualEbitda: integer('actual_ebitda'),
-  ebitdaDeltaPercent: decimal('ebitda_delta_percent'),
-  verificationSource: varchar('verification_source', { length: 50 }),
-  industry: varchar('industry', { length: 100 }),
-  createdAt: timestamp('created_at').defaultNow(),
-});
-
-// Deal Network Participants
-export const dealNetworkParticipants = pgTable('deal_network_participants', {
-  id: serial('id').primaryKey(),
-  dealId: integer('deal_id').references(() => deals.id).notNull(),
-  userId: integer('user_id').references(() => users.id),
-  email: varchar('email', { length: 255 }),
-  role: varchar('role', { length: 20 }).notNull(), // buyer, seller, attorney, cpa, lender, broker, consultant
-  invitedBy: integer('invited_by').references(() => users.id),
-  joinedAt: timestamp('joined_at').defaultNow(),
-});
+-- Deal Network Participants
+CREATE TABLE deal_network_participants (
+  id SERIAL PRIMARY KEY,
+  deal_id INTEGER REFERENCES deals(id) NOT NULL,
+  user_id INTEGER REFERENCES users(id),
+  email VARCHAR(255),
+  role VARCHAR(20) NOT NULL,                  -- buyer, seller, attorney, cpa, lender, broker
+  joined_at TIMESTAMP DEFAULT NOW()
+);
 ```
 
 ---
 
 ## 6. AUTHENTICATION
 
-### 6.1 Google OAuth (Primary)
+### 6.1 JWT-Based Auth (Primary)
+
+```
+User submits email + password (or Google OAuth)
+→ Validate credentials
+→ Generate JWT token (jsonwebtoken)
+→ Return token to client
+→ Client stores in memory (not localStorage for security)
+→ Client sends token in Authorization header on every request
+```
+
+### 6.2 JWT Configuration
+
+```typescript
+// server/routes/auth.ts
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const TOKEN_EXPIRY = '30d';
+
+function generateToken(user) {
+  return jwt.sign(
+    { userId: user.id, email: user.email, league: user.league },
+    JWT_SECRET,
+    { expiresIn: TOKEN_EXPIRY }
+  );
+}
+```
+
+### 6.3 Auth Middleware
+
+```typescript
+// server/middleware/auth.ts
+export function requireAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  
+  try {
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+}
+```
+
+### 6.4 Google OAuth Flow
 
 ```
 User clicks "Continue with Google"
@@ -742,39 +760,13 @@ User clicks "Continue with Google"
 → Google callback with code
 → Exchange for tokens, get profile
 → Find or create user in DB
-→ Create express-session
-→ Redirect to /app/chat
+→ Generate JWT
+→ Redirect to /app/chat with token
 ```
 
-### 6.2 Local Auth (Secondary)
+### 6.5 Password Hashing
 
-```
-User enters email + password
-→ Validate with Zod
-→ Hash password with bcrypt (12 rounds)
-→ Store in users table
-→ Create express-session
-→ Redirect to /app/chat
-```
-
-### 6.3 Session Management
-
-- `express-session` with `connect-pg-simple` (PostgreSQL store)
-- Cookie: `httpOnly: true, secure: true, sameSite: 'lax'`
-- Max age: 30 days
-- Session contains: `userId`, `email`, `league`, `journeyType`
-
-### 6.4 Middleware
-
-```typescript
-// server/middleware/auth.ts
-export function requireAuth(req, res, next) {
-  if (!req.session?.userId) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
-  next();
-}
-```
+For local auth: bcrypt with 12 rounds. Password validation not yet enforced (placeholder — implement before launch).
 
 ---
 
@@ -782,16 +774,19 @@ export function requireAuth(req, res, next) {
 
 **This is critical. There are NO subscription tiers, NO monthly plans, NO feature gates based on plan level.** The entire pricing model is:
 
-1. User signs up free → gets intro credits (welcome bonus)
-2. Free deliverables hook them in (intake, financial spread, add-backs)
-3. First paywall hits at valuation stage (Gate S2/B2/R2)
-4. User tops up wallet via Stripe → spends credits on deliverables from the menu
-5. League multiplier adjusts pricing based on deal complexity
+1. User signs up free → free gates hook them in (S0-S1, B0-B1, R0-R1, PMI0)
+2. Free deliverables build trust (intake, financial spread, add-backs)
+3. First paywall hits at gate 2 (valuation / investor materials)
+4. User tops up wallet with real dollars via Stripe
+5. **Gate-by-gate pricing:** Users pay small, manageable amounts as they advance through gates — NOT one big lump sum per journey. Each gate unlock is a clear price point that keeps users moving forward.
+6. $1 in wallet = $1 purchasing power. No separate "credit" unit. No conversion math.
+7. League multiplier adjusts pricing based on deal complexity
+8. Yulia contextually proposes value-added services (business optimization, transaction readiness) as natural upsells during the journey
 
-### 7.1 Wallet Blocks (Top-Up Options)
+### 7.1 Wallet Top-Up Blocks
 
-| Block ID | Name | Price | Bonus | Total Credits | Discount |
-|----------|------|-------|-------|---------------|----------|
+| Block ID | Name | Price | Bonus $ | Total $ | Discount |
+|----------|------|-------|---------|---------|----------|
 | `starter` | Starter | $50 | $0 | $50 | 0% |
 | `builder` | Builder | $100 | $5 | $105 | 5% |
 | `momentum` | Momentum | $250 | $25 | $275 | 10% |
@@ -803,7 +798,7 @@ export function requireAuth(req, res, next) {
 | `enterprise-plus` | Enterprise Plus | $25,000 | $7,500 | $32,500 | 30% |
 | `institutional` | Institutional | $50,000 | $15,000 | $65,000 | 30% |
 
-### 7.2 Menu Item Tiers
+### 7.2 Menu Item Tiers (Base Prices — before league multiplier)
 
 | Tier | Base Price Range | Examples |
 |------|-----------------|----------|
@@ -891,7 +886,7 @@ export const GATE_REGISTRY = {
   // SELL Journey
   S0: { name: 'Intake', journey: 'sell', free: true },
   S1: { name: 'Financials', journey: 'sell', free: true },
-  S2: { name: 'Valuation', journey: 'sell', free: false },  // FIRST PAYWALL
+  S2: { name: 'Valuation', journey: 'sell', free: false },
   S3: { name: 'Packaging', journey: 'sell', free: false },
   S4: { name: 'Market Matching', journey: 'sell', free: false },
   S5: { name: 'Closing', journey: 'sell', free: false },
@@ -899,7 +894,7 @@ export const GATE_REGISTRY = {
   // BUY Journey
   B0: { name: 'Thesis', journey: 'buy', free: true },
   B1: { name: 'Sourcing', journey: 'buy', free: true },
-  B2: { name: 'Valuation', journey: 'buy', free: false },  // FIRST PAYWALL
+  B2: { name: 'Valuation', journey: 'buy', free: false },
   B3: { name: 'Due Diligence', journey: 'buy', free: false },
   B4: { name: 'Structuring', journey: 'buy', free: false },
   B5: { name: 'Closing', journey: 'buy', free: false },
@@ -907,7 +902,7 @@ export const GATE_REGISTRY = {
   // RAISE Journey
   R0: { name: 'Intake', journey: 'raise', free: true },
   R1: { name: 'Financial Package', journey: 'raise', free: true },
-  R2: { name: 'Investor Materials', journey: 'raise', free: false },  // FIRST PAYWALL
+  R2: { name: 'Investor Materials', journey: 'raise', free: false },
   R3: { name: 'Outreach', journey: 'raise', free: false },
   R4: { name: 'Terms', journey: 'raise', free: false },
   R5: { name: 'Closing', journey: 'raise', free: false },
@@ -924,25 +919,11 @@ export const GATE_REGISTRY = {
 
 Gates advance when required deliverables for that gate are complete. Yulia drives the conversation forward and tells the user when they're ready to advance.
 
-```typescript
-// server/services/gateReadinessService.ts
-export function checkGateReadiness(dealId: number, targetGate: string): {
-  ready: boolean;
-  missingRequirements: string[];
-  blockers: string[];
-}
-```
-
 ### 8.3 Sidebar Progressive Disclosure
 
 The sidebar only shows navigation items relevant to the user's current gate and journey. As gates advance, new sections unlock.
 
-```typescript
-// shared/sidebarRules.ts
-export function getVisibleSections(journey: string, currentGate: string): SidebarSection[]
-```
-
-### 8.4 SELL Journey Detail (from Methodology v17, Part 2)
+### 8.4 SELL Journey Detail
 
 | Gate | Name | Key Deliverables | Free? |
 |------|------|-----------------|-------|
@@ -961,7 +942,7 @@ export function getVisibleSections(journey: string, currentGate: string): Sideba
 - **S4:** Matchmaker mode. Generates buyer profiles. Tracks outreach pipeline. Manages NDAs. Compares IOIs/LOIs.
 - **S5:** Closer mode. Generates funds flow statement. Tracks closing checklist. Manages working capital adjustments.
 
-### 8.5 BUY Journey Detail (from Methodology v17, Part 4)
+### 8.5 BUY Journey Detail
 
 | Gate | Name | Key Deliverables | Free? |
 |------|------|-----------------|-------|
@@ -972,7 +953,7 @@ export function getVisibleSections(journey: string, currentGate: string): Sideba
 | B4 | Structuring | Deal structure, financing, sources & uses, earnout modeling | No |
 | B5 | Closing | APA review, closing checklist, funds flow, Day 1 integration plan | No |
 
-### 8.6 RAISE Journey Detail (from Methodology v17, Part 3)
+### 8.6 RAISE Journey Detail
 
 | Gate | Name | Key Deliverables | Free? |
 |------|------|-----------------|-------|
@@ -983,7 +964,7 @@ export function getVisibleSections(journey: string, currentGate: string): Sideba
 | R4 | Terms | Term sheet analysis, comparison matrix, negotiation prep | No |
 | R5 | Closing | Transaction documents, closing mechanics, Form D filing | No |
 
-### 8.7 PMI Journey Detail (from Methodology v17, Part 6)
+### 8.7 PMI Journey Detail
 
 | Gate | Name | Key Deliverables | Free? |
 |------|------|-----------------|-------|
@@ -998,44 +979,18 @@ export function getVisibleSections(journey: string, currentGate: string): Sideba
 
 ### 9.1 The "Right Tool" Protocol
 
-Every task routes to a specialized AI engine. The system never calls a generic model.
+Every task routes to a specialized AI engine:
 
-| Task Category | Engine | Configuration | Behavior |
-|---------------|--------|---------------|----------|
-| Chat / Conversation | Claude Sonnet 4.5 | Streaming, system prompt with methodology context | Natural conversation with Yulia persona |
-| Financial Extraction | Gemini 2.5 Flash | JSON output only, temp 0.0 | Zero hallucination, pure OCR/data entry |
-| Market Intelligence | Gemini 2.5 Pro + Search | Search grounding enabled | Live market data, sector multiples |
-| Document Forensics | Claude with RAG context | Grounded only, temp 0.1 | Answer strictly from provided documents |
-| Deal Modeling | Gemini for calculations | Formula injection | Mathematical rigor, dynamic modeling |
-| Cap Table Logic | Claude Sonnet 4.5 | Reasoning mode | Waterfall distribution, complex equity |
-| Drafting (LOI/CIM) | Claude Sonnet 4.5 | Template injection | Standardized legal output |
-| Quick Valuation | Claude Haiku 4.5 | Structured output | Fast, cheap, accurate for L1/L2 |
+| Task Category | Engine | Configuration |
+|---------------|--------|---------------|
+| Chat / Conversation | Claude Sonnet 4.5 | Streaming, system prompt with methodology context |
+| Financial Extraction | Gemini 2.5 Flash | JSON output only, temp 0.0 |
+| Market Intelligence | Gemini 2.5 Pro + Search | Search grounding enabled |
+| Document Forensics | Claude with RAG context | Grounded only, temp 0.1 |
+| Drafting (LOI/CIM) | Claude Sonnet 4.5 | Template injection |
+| Quick Valuation | Claude Haiku 4.5 | Structured output |
 
-### 9.2 Author vs Auditor Protocol
-
-```typescript
-// server/ai.ts
-function routeTask(task: AITask): AIEngine {
-  // AUDITOR tasks — grounded, citation-required
-  const auditorTasks = [
-    'legal_diligence', 'financial_verification', 'add_back_analysis',
-    'document_forensics', 'contract_review', 'tax_return_analysis'
-  ];
-  
-  // AUTHOR tasks — creative, generative
-  const authorTasks = [
-    'chat', 'market_intelligence', 'valuation', 'cap_table_logic',
-    'drafting_loi', 'generate_cim', 'calculation'
-  ];
-  
-  if (auditorTasks.includes(task.type)) {
-    return { engine: 'claude_rag', temp: 0.1, citationsRequired: true };
-  }
-  return { engine: 'claude_sonnet', temp: 0.7, citationsRequired: false };
-}
-```
-
-### 9.3 Context Injection Protocol
+### 9.2 Context Injection Protocol
 
 Every AI prompt receives layered context:
 
@@ -1046,18 +1001,16 @@ Layer 3: DEAL CONTEXT — Current gate, financials ingested, documents uploaded
 Layer 4: MARKET CONTEXT — Industry heat index, regional data, macro overlays
 ```
 
-### 9.4 Streaming
+### 9.3 Streaming
 
 All chat responses stream via Server-Sent Events (SSE):
 
 ```typescript
-// Server
 app.get('/api/chat/stream/:conversationId', requireAuth, (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   
-  // Stream Claude response chunks
   for await (const chunk of claudeStream) {
     res.write(`data: ${JSON.stringify({ text: chunk })}\n\n`);
   }
@@ -1074,66 +1027,24 @@ app.get('/api/chat/stream/:conversationId', requireAuth, (req, res) => {
 
 Yulia is NOT a chatbot. She is an expert M&A advisor who adapts her persona based on the user's league:
 
-| League | Persona | Tone | Example |
-|--------|---------|------|---------|
-| L1 | Coach | Directive, reassuring | "Let me walk you through this step by step..." |
-| L2 | Guide | Process-oriented | "Here's what we need to do next..." |
-| L3 | Analyst | Cynical, data-driven | "Your margins are below industry median. Let's fix that before going to market." |
-| L4 | Associate | GAAP-focused | "We need to normalize for those related-party transactions." |
-| L5 | Partner | Strategic | "The arbitrage spread here is attractive. Let's model the 5-year exit." |
-| L6 | Macro | Institutional | "Given the current rate environment and sector consolidation..." |
+| League | Persona | Tone |
+|--------|---------|------|
+| L1 | Coach | Directive, reassuring |
+| L2 | Guide | Process-oriented |
+| L3 | Analyst | Cynical, data-driven |
+| L4 | Associate | GAAP-focused |
+| L5 | Partner | Strategic |
+| L6 | Macro | Institutional |
 
 ### 10.2 Hard Rails
 
-Yulia NEVER:
-- Says "As an AI..." or "I'm just a language model..."
-- Hallucinates financial data
-- Confirms add-backs without user verification
-- Provides legal advice (directs to attorney)
-- Shares data between deals (Chinese wall)
+Yulia NEVER: says "As an AI", hallucinates financial data, confirms add-backs without verification, provides legal advice, shares data between deals.
 
-Yulia ALWAYS:
-- Uses confident, direct language
-- Provides specific, actionable recommendations
-- Shows her work (citations, calculations)
-- Asks for verification on financial inputs
-- Alerts users to risks and red flags
+Yulia ALWAYS: uses confident direct language, provides specific actionable recommendations, shows her work, asks for verification on financial inputs, alerts to risks and red flags.
 
-### 10.3 System Prompt Structure
+### 10.3 Welcome Screen
 
-```
-You are Yulia, the AI M&A advisor for smbx.ai. You guide business owners through 
-buying, selling, and raising capital for businesses.
-
-CURRENT USER CONTEXT:
-- League: {league}
-- Journey: {journeyType}
-- Current Gate: {currentGate}
-- Deal: {dealSummary}
-
-YOUR PERSONA FOR THIS USER: {leaguePersona}
-
-METHODOLOGY RULES:
-{relevantMethodologySection}
-
-AVAILABLE DELIVERABLES AT THIS GATE:
-{gateDeliverables}
-
-CONVERSATION HISTORY:
-{recentMessages}
-
-INSTRUCTIONS:
-1. Stay in character as Yulia — expert, confident, never say "as an AI"
-2. Guide the user through their current gate
-3. When they need a paid deliverable, explain the value and offer to generate it
-4. Flag risks and red flags proactively
-5. Use the correct financial metrics for their league (SDE for L1/L2, EBITDA for L3+)
-6. Never invent financial data — extract from uploaded documents only
-```
-
-### 10.4 Welcome Screen
-
-When a user starts a new conversation (no active deal), Yulia presents journey options:
+When a user starts a new conversation (no active deal), Yulia presents journey options as interactive cards:
 
 ```
 Welcome to smbx.ai! I'm Yulia, your M&A advisor.
@@ -1143,62 +1054,21 @@ What brings you here today?
 [🏷️ Sell my business]  [🛒 Buy a business]  [💰 Raise capital]  [🔄 Post-acquisition]
 ```
 
-These are interactive cards (like Claude's suggested prompts) that start the appropriate journey.
-
 ---
 
 ## 11. THE MATH ENGINE
 
 The AI is forbidden from inventing formulas. It must apply these exact standards.
 
-### 11.1 SDE (L1/L2)
-
 ```
-SDE = Net_Income + Owner_Salary + Depreciation + Amortization + Interest + One_Time_Expenses + Verified_Addbacks
-```
-
-### 11.2 Adjusted EBITDA (L3-L6)
-
-```
-Adjusted_EBITDA = Net_Income + Depreciation + Amortization + Interest + Taxes + Verified_Addbacks - Non_Recurring_Income
-```
-
-### 11.3 DSCR
-
-```
-DSCR = EBITDA / Annual_Debt_Service
-```
-- SBA Threshold: ≥ 1.25
-- Conventional Threshold: ≥ 1.50
-
-### 11.4 Valuation
-
-```
-Strata_Valuation = (Verified SDE/EBITDA) × (Base_Multiple + Growth_Premium + Margin_Premium)
-```
-
-### 11.5 Arbitrage Spread (L5)
-
-```
-Arbitrage_Spread = (Exit_Multiple - Entry_Multiple) × EBITDA
-Target: Minimum 2.0x MOIC over 5-year hold
-```
-
-### 11.6 Transaction Token Fee
-
-```
+SDE = Net_Income + Owner_Salary + D&A + Interest + One_Time + Verified_Addbacks
+EBITDA = Net_Income + D&A + Interest + Taxes + Verified_Addbacks - Non_Recurring
+DSCR = EBITDA / Annual_Debt_Service (SBA ≥ 1.25, Conventional ≥ 1.50)
+Valuation = (SDE or EBITDA) × (Base_Multiple + Growth_Premium + Margin_Premium)
 Transaction_Fee = MAX(deal_value × 0.5%, $2,000)
 ```
 
-### 11.7 DSCR for Lender Dashboard
-
-```
-Monthly_Payment = P × [r(1+r)^n] / [(1+r)^n - 1]
-Annual_Debt_Service = Monthly_Payment × 12
-DSCR = EBITDA / Annual_Debt_Service
-```
-
-### 11.8 League Multiple Ranges (Constants)
+### League Multiple Ranges
 
 ```typescript
 export const LEAGUE_MULTIPLE_RANGES = {
@@ -1207,19 +1077,13 @@ export const LEAGUE_MULTIPLE_RANGES = {
   L3: { metric: 'EBITDA', min: 4.0, max: 6.0 },
   L4: { metric: 'EBITDA', min: 6.0, max: 8.0 },
   L5: { metric: 'EBITDA', min: 8.0, max: 12.0 },
-  L6: { metric: 'EBITDA', min: 10.0, max: null }, // DCF-based
+  L6: { metric: 'EBITDA', min: 10.0, max: null },
 };
 ```
 
-### 11.9 Roll-Up Override Rule
+### Roll-Up Override
 
-```typescript
-export const ROLLUP_INDUSTRIES = ['veterinary', 'dental', 'hvac', 'msp', 'pest_control'];
-export const ROLLUP_REVENUE_THRESHOLD = 1_500_000; // $1.5M
-
-// IF industry in ROLLUP_INDUSTRIES AND revenue > threshold
-// → Force EBITDA metric regardless of league
-```
+Industries: veterinary, dental, HVAC, MSP, pest control. If revenue > $1.5M → force EBITDA metric regardless of league.
 
 ---
 
@@ -1227,12 +1091,9 @@ export const ROLLUP_REVENUE_THRESHOLD = 1_500_000; // $1.5M
 
 The AI is forbidden from guessing the user's league. It classifies based on financial inputs.
 
-### 12.1 Classification Logic
-
 ```typescript
-export function classifyLeague(financials: { sde?: number; ebitda?: number; revenue?: number }): League {
+export function classifyLeague(financials: { sde?: number; ebitda?: number }): League {
   const { sde, ebitda } = financials;
-  
   if (ebitda && ebitda >= 50_000_000) return 'L6';
   if (ebitda && ebitda >= 10_000_000) return 'L5';
   if (ebitda && ebitda >= 5_000_000) return 'L4';
@@ -1242,70 +1103,24 @@ export function classifyLeague(financials: { sde?: number; ebitda?: number; reve
 }
 ```
 
-### 12.2 League Determines Everything
-
-- Which financial metric to use (SDE vs EBITDA)
-- Multiple ranges for valuation
-- Price multiplier for deliverables
-- Yulia's persona and tone
-- Complexity of generated documents
-- Which templates to use (L1 simple, L5 complex)
+League determines: financial metric, multiple ranges, deliverable pricing, Yulia's persona, document complexity, template selection.
 
 ---
 
 ## 13. GTM FEATURE SUITE
 
-### 13.1 Living CIM Builder (`/app/living-cim`)
-- Real-time binding to accounting data
-- Sensitivity toggles for valuation scenarios
-- Share links with access levels: blind, teaser, full
-- NDA acceptance workflow
-- Atomic view counter
+Build these AFTER core functionality (Phases 0-6) works. They are future roadmap items:
 
-### 13.2 Ghost Profile Notifications
-- Track when buyers watch unclaimed businesses
-- Alert threshold: 3 trackers triggers outreach
-- Converts scraped listings into active sellers
-
-### 13.3 Broker Listing Generator (`/app/broker-listing`)
-- AI-powered 22x-compliant CIM from raw financials
-- Structured JSON output via AI
-- Professional formatting
-
-### 13.4 Lender Risk Dashboard (`/app/lender-dashboard`)
-- DSCR calculation with amortization formula
-- Risk scoring matrix (LOW/MEDIUM/HIGH/CRITICAL)
-- SBA eligibility check
-- Covenant analysis
-
-### 13.5 Day Pass / Fractional Seats
-- 48-hour deal-specific access for external advisors
-- Access levels: read, comment, full
-- Token-based, no account required
-
-### 13.6 Transaction Token Pricing
-- Success fee: MAX(deal_value × 0.5%, $2,000)
-- Payment via Stripe at closing stage
-
-### 13.7 Deal Velocity Tracking
-- 10-stage event pipeline
-- Metrics: daysToNda, daysToLoi, daysToClose
-- Platform-wide analytics
-
-### 13.8 SBSMB Pay / Escrow Integration
-- Transaction types: deposit, earnout, holdback, release
-- Earnout milestone management
-- Stripe webhook integration
-
-### 13.9 Magma Feedback Loop
-- Capture verified financials post-close
-- Calculate estimation deltas
-- Feed corrections back into valuation models
-
-### 13.10 Network Density Metrics
-- Track 7 participant roles per deal
-- Engagement scoring
-- Correlation analysis: density → success rate
+- **Living CIM Builder** — Real-time binding to accounting data, sensitivity toggles, share links
+- **Ghost Profile Notifications** — Track when buyers watch unclaimed businesses
+- **Broker Listing Generator** — AI-powered CIM from raw financials
+- **Lender Risk Dashboard** — DSCR calculation, risk scoring, SBA eligibility
+- **Day Pass / Fractional Seats** — 48-hour deal-specific access for external advisors
+- **Transaction Token Pricing** — Success fee at closing
+- **Deal Velocity Tracking** — Pipeline analytics
+- **Escrow Integration** — Deposit, earnout, holdback management
+- **Magma Feedback Loop** — Verified financials post-close to improve models
+- **Network Density Metrics** — Deal room participant tracking
 
 ---
 
@@ -1313,23 +1128,21 @@ export function classifyLeague(financials: { sde?: number; ebitda?: number; reve
 
 ### 14.1 Auth
 ```
-POST   /api/auth/register          # Local signup
-POST   /api/auth/login             # Local login
+POST   /api/auth/register          # Local signup → returns JWT
+POST   /api/auth/login             # Local login → returns JWT
 GET    /api/auth/google             # Google OAuth initiate
-GET    /api/auth/google/callback    # Google OAuth callback
-POST   /api/auth/logout             # Logout
-GET    /api/auth/me                 # Current user
+GET    /api/auth/google/callback    # Google OAuth callback → returns JWT
+GET    /api/auth/me                 # Current user (from JWT)
 ```
 
 ### 14.2 Chat
 ```
-GET    /api/conversations                    # List user conversations
-POST   /api/conversations                    # Create conversation
-GET    /api/conversations/:id                # Get conversation with messages
-PATCH  /api/conversations/:id                # Rename/archive
-DELETE /api/conversations/:id                # Delete
-POST   /api/conversations/:id/messages       # Send message
-GET    /api/conversations/:id/stream         # SSE stream response
+GET    /api/chat/conversations                    # List user conversations
+POST   /api/chat/conversations                    # Create conversation
+GET    /api/chat/conversations/:id                # Get conversation with messages
+GET    /api/chat/conversations/:id/messages       # Get messages
+POST   /api/chat/conversations/:id/messages       # Send message + get AI response
+GET    /api/chat/conversations/:id/stream         # SSE stream response
 ```
 
 ### 14.3 Wallet
@@ -1348,7 +1161,6 @@ GET    /api/menu/packages                    # List deal packages
 GET    /api/menu/blocks                      # List wallet blocks
 POST   /api/deliverables/generate            # Purchase + generate deliverable
 GET    /api/deliverables/:dealId             # List deliverables for deal
-GET    /api/deliverables/:id/content         # Get deliverable content
 ```
 
 ### 14.5 Deals
@@ -1361,34 +1173,6 @@ GET    /api/deals/:id/gate-status            # Check gate readiness
 POST   /api/deals/:id/advance-gate           # Advance to next gate
 ```
 
-### 14.6 GTM Features
-```
-# Living CIM
-GET    /api/cim/:dealId                      # Get living CIM
-POST   /api/cim/:dealId                      # Create/update CIM
-POST   /api/cim/:dealId/share-link           # Create share link
-GET    /api/cim/share/:token                 # Public access via token
-
-# Day Pass
-POST   /api/deals/:dealId/day-pass           # Create day pass
-GET    /api/day-pass/:token                  # Access via day pass
-
-# Transaction Tokens
-POST   /api/deals/:dealId/transaction-token  # Create token at closing
-POST   /api/transaction-token/:id/pay        # Process payment
-
-# Deal Velocity
-POST   /api/deals/:dealId/velocity-event     # Record event
-GET    /api/deals/:dealId/velocity           # Get velocity metrics
-
-# Escrow
-POST   /api/deals/:dealId/escrow             # Create escrow transaction
-GET    /api/deals/:dealId/escrow             # List escrow transactions
-
-# Ground Truth
-POST   /api/deals/:dealId/ground-truth       # Submit verified financials
-```
-
 ---
 
 ## 15. FRONTEND PAGES & COMPONENTS
@@ -1397,12 +1181,13 @@ POST   /api/deals/:dealId/ground-truth       # Submit verified financials
 
 | Path | Page | Purpose |
 |------|------|---------|
-| `/` | Home | smbx.ai landing, hero, wallet pricing |
+| `/` | Home | "Sell a business. Buy a business. Raise capital." |
 | `/sell` | Sell | Seller journey value prop |
 | `/buy` | Buy | Buyer journey value prop |
 | `/raise` | Raise | Capital raise value prop |
-| `/how-it-works` | How It Works | Wallet + menu explanation |
-| `/enterprise` | Enterprise | Volume pricing |
+| `/pricing` | Pricing | Wallet model explanation |
+| `/how-it-works` | How It Works | Product walkthrough |
+| `/enterprise` | Enterprise | Broker/advisor use cases |
 | `/login` | Login | Auth page |
 | `/signup` | Signup | Registration page |
 
@@ -1410,88 +1195,34 @@ POST   /api/deals/:dealId/ground-truth       # Submit verified financials
 
 | Path | Page | Purpose |
 |------|------|---------|
-| `/app/chat` | Chat | **THE primary page.** Yulia conversation. |
-| `/app/chat/:conversationId` | Chat | Specific conversation |
-| `/app/wallet` | Wallet | Balance, top-up, history |
-| `/app/menu` | Menu | Browse deliverables catalog |
-| `/app/deal/:dealId` | Deal Room | Deal documents, participants |
-| `/app/settings` | Settings | User preferences |
-| `/app/profile` | Profile | Account management |
-
-### 15.3 Key Components
-
-**AppLayout.tsx** — The main layout that mirrors Claude.ai:
-- Left sidebar (collapsible on mobile)
-- Main content area (chat or other pages)
-- Responsive: sidebar hidden on mobile, slides in via hamburger
-
-**Sidebar.tsx** — Mirrors Claude.ai sidebar exactly:
-- Brand logo + collapse toggle at top
-- "New Chat" button
-- Conversation list grouped by date
-- Wallet balance badge at bottom
-- Settings & account links at bottom
-
-**ChatArea.tsx** — The main chat interface:
-- Message list (scrollable, auto-scroll on new messages)
-- Welcome screen when no messages
-- Composer at bottom
-
-**Composer.tsx** — Message input:
-- Auto-growing textarea
-- Attach files button
-- Journey/gate selector
-- Send button (terra cotta when active)
-- Keyboard: Enter to send, Shift+Enter for newline
-
-**Message.tsx** — Individual message:
-- Yulia messages: no bg, serif font, markdown rendered
-- User messages: slight bg tint, right-aligned
-- Deliverable cards inline
-- Code blocks with syntax highlighting
-- Tables rendered properly
-
-**DeliverableCard.tsx** — Inline in chat:
-- Card showing deliverable type, status
-- Preview of content
-- Download/export options
-- If locked: price + "Purchase" button
-
-**WalletBadge.tsx** — In sidebar footer:
-- Shows current balance
-- Green when healthy, yellow when low, red when empty
-- Click opens top-up modal
+| `/chat` | Chat | **THE primary page.** Yulia conversation. |
+| `/chat/:conversationId` | Chat | Specific conversation |
+| `/wallet` | Wallet | Balance, top-up, history |
+| `/menu` | Menu | Browse deliverables catalog |
+| `/settings` | Settings | User preferences |
 
 ---
 
 ## 16. SECURITY & DATA SOVEREIGNTY
 
-### 16.1 The "Vault" Architecture
-- **Type A: EVIDENCE (Immutable)** — Tax returns, bank statements, leases. Read-only, watermarked, encrypted.
-- **Type B: AGREEMENTS (Collaborative)** — LOI, APA, CIM, models. Version-controlled, editable.
-
-### 16.2 Chinese Wall
+### 16.1 Chinese Wall
 - Buyer data and seller data strictly isolated
 - AI context window flushed after every user session
 - No data from Deal A can inform Deal B
 
-### 16.3 Safe Harbor Geofence
+### 16.2 Safe Harbor Geofence
 ```typescript
 export const SAFE_HARBOR_COUNTRIES = ['US', 'UK', 'CA', 'AU', 'NZ', 'IE'];
 ```
-If asset location or IP is outside this zone, workflow terminates.
 
-### 16.4 Security Headers (Helmet.js)
-- Content-Security-Policy
-- X-Frame-Options: DENY
-- X-Content-Type-Options: nosniff
-- Strict-Transport-Security
+### 16.3 Security Headers (Helmet.js)
+- Content-Security-Policy, X-Frame-Options: DENY, Strict-Transport-Security
 
-### 16.5 Data Handling
+### 16.4 Data Handling
 - All financial values stored in cents (integers, no floating point)
 - Password hashing: bcrypt 12 rounds
-- Session cookies: httpOnly, secure, sameSite
-- File uploads: virus scan, type validation, size limits
+- JWT tokens: httpOnly not applicable (stored in memory), short-lived with refresh
+- File uploads: type validation, size limits
 - API rate limiting: 100 req/min per user
 
 ---
@@ -1520,10 +1251,8 @@ If asset location or IP is outside this zone, workflow terminates.
 ```bash
 # 1. Build client (Vite)
 npx vite build
-
 # 2. Build server (esbuild)
 node scripts/build.ts
-
 # 3. Start
 node dist/server/index.js
 ```
@@ -1538,25 +1267,24 @@ node dist/server/index.js
 ## 18. BUILD PHASES & TASK ORDER
 
 ### Phase 0: Get It Running (Day 1, ~4 hours)
-- [ ] Initialize fresh repo from scratch (npm init, tsconfig, vite config)
+- [ ] Initialize fresh repo (npm init, tsconfig, vite config)
 - [ ] Set up project structure (directories per Section 4)
-- [ ] Install all dependencies
-- [ ] Create shared/schema.ts with core tables
+- [ ] Install all dependencies (Tailwind v3, postgres-js, JWT)
+- [ ] Create server/db.ts (postgres-js connection)
 - [ ] Create server/index.ts (Express + static serving)
 - [ ] Create client scaffold (App.tsx, routes, layouts)
-- [ ] Create railway.json
-- [ ] Create esbuild config (scripts/build.ts)
+- [ ] Create railway.json + tailwind.config.js + postcss.config.js
 - [ ] Verify: `npm run dev` works, app loads in browser
 - [ ] Deploy to Railway, verify it loads
 
 ### Phase 1: Auth + Database (Days 2-3, ~12 hours)
-- [ ] Run Drizzle migrations (create all tables)
-- [ ] Implement Google OAuth flow
-- [ ] Implement local auth (register/login)
-- [ ] Session management with connect-pg-simple
-- [ ] Auth middleware
+- [ ] Run initial SQL migration (create core tables)
+- [ ] Implement JWT auth (register, login, verify)
+- [ ] Implement Google OAuth flow (optional — JWT return)
+- [ ] Auth middleware (JWT verification)
 - [ ] Login/Signup pages
 - [ ] Protected route wrapper
+- [ ] Seed wallet blocks + menu items + test users
 
 ### Phase 2: Chat Core — Mirror Claude UI (Days 3-5, ~16 hours)
 - [ ] AppLayout with sidebar + main area
@@ -1580,21 +1308,17 @@ node dist/server/index.js
 ### Phase 4: Wallet + Pricing Engine (Days 7-9, ~16 hours)
 - [ ] Wallet service (create, balance, add, deduct)
 - [ ] Stripe integration (checkout sessions, webhooks)
-- [ ] Wallet blocks seeded in DB
-- [ ] Menu catalog seeded in DB
 - [ ] Top-up flow (modal → Stripe → credit wallet)
 - [ ] Purchase flow (check balance → deduct → generate)
 - [ ] Auto-refill settings
 - [ ] League multiplier calculation
 - [ ] Wagyu Rule surcharge notification
 - [ ] Insufficient funds interstitial
-- [ ] Wallet dashboard page
-- [ ] Transaction history
+- [ ] Wallet dashboard page + transaction history
 
 ### Phase 5: Journey & Gate System (Days 9-11, ~12 hours)
 - [ ] Gate registry implementation
-- [ ] Gate readiness checks
-- [ ] Gate advancement logic
+- [ ] Gate readiness checks + advancement logic
 - [ ] Progressive sidebar disclosure
 - [ ] Deal CRUD
 - [ ] Journey onboarding flow (Yulia asks, classifies, starts)
@@ -1612,12 +1336,9 @@ node dist/server/index.js
 - [ ] Download/export deliverables
 
 ### Phase 7: Landing Pages + Branding (Days 13-14, ~8 hours)
-- [ ] Home page (smbx.ai hero, wallet pricing)
-- [ ] Sell page
-- [ ] Buy page
-- [ ] Raise page
-- [ ] How It Works page
-- [ ] Enterprise page
+- [ ] Home page ("Sell a business. Buy a business. Raise capital.")
+- [ ] Sell, Buy, Raise, Pricing pages
+- [ ] How It Works + Enterprise pages
 - [ ] Meta tags, OG tags, favicon
 - [ ] Remove all sbsmb/sellbuysmb references
 
@@ -1627,7 +1348,6 @@ node dist/server/index.js
 - [ ] Test on iOS Safari (primary mobile target)
 - [ ] Test on desktop Chrome/Safari
 - [ ] Custom domain setup (smbx.ai → Railway)
-- [ ] SSL (Railway handles automatically)
 - [ ] Stripe live mode keys
 - [ ] Database backup strategy
 - [ ] Error monitoring (Sentry)
@@ -1654,8 +1374,8 @@ STRIPE_SECRET_KEY=sk_live_...
 STRIPE_PUBLISHABLE_KEY=pk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 
-# Session
-SESSION_SECRET=<random-64-char-string>
+# Auth
+JWT_SECRET=<random-64-char-string>
 
 # App
 NODE_ENV=production
@@ -1665,135 +1385,35 @@ APP_URL=https://smbx.ai
 
 ---
 
-## 20. CLAUDE.md FOR REPO
-
-The following should be placed at the repo root as `CLAUDE.md` so Claude Code reads it automatically:
-
-```markdown
-# CLAUDE.md — smbx.ai
-
-## What This Is
-AI-powered M&A platform. Users talk to Yulia (AI advisor) who guides them through 
-buying, selling, or raising capital for businesses.
-
-## Core Architecture
-- Chat-first UX that mirrors claude.ai exactly
-- Node.js + Express (ESM) backend
-- React 19 + Vite 7 + Tailwind CSS 4 + Radix UI frontend
-- PostgreSQL via Drizzle ORM
-- Claude API (primary), Gemini (secondary), OpenAI (tertiary)
-- Stripe wallet payments (NO subscriptions)
-- Railway deployment
-
-## Critical Rules
-1. **NO SUBSCRIPTIONS.** Pure wallet + menu. Users buy credits, spend on deliverables.
-2. **Mirror claude.ai UI.** Same layout, fonts, colors, sidebar, chat experience.
-3. **Mobile-first.** Design for mobile browser, then adapt to desktop.
-4. **Yulia never says "As an AI."** She is an expert advisor.
-5. **Financial data: zero hallucination.** Extract exactly, never invent.
-6. **League determines everything.** L1-L6 controls metrics, multiples, pricing, persona.
-7. **All money in cents.** Never use floating point for financial values.
-
-## Key Files
-- `METHODOLOGY_V17.md` — Full M&A methodology (6 parts, ~80 pages)
-- `shared/schema.ts` — All database tables
-- `shared/gateRegistry.ts` — 22 gates across 4 journeys
-- `shared/constants.ts` — League ranges, multiples, safe harbor countries
-- `server/ai.ts` — AI orchestration layer
-- `server/services/walletService.ts` — Wallet CRUD
-- `server/services/menuCatalogService.ts` — Menu items + blocks + packages
-- `server/services/leagueRouter.ts` — League detection + multipliers
-
-## Design Tokens
-- Background: #F5F5F0 (light), #2B2A27 (dark)
-- Accent: #DA7756 (terra cotta)
-- Font: font-serif (ui-serif, Georgia stack)
-- Shadows: subtle, 0.035 opacity
-- Rounded: rounded-2xl for composer/cards
-- Max chat width: max-w-3xl
-
-## Pricing
-- 10 wallet blocks ($50 to $50,000)
-- 3 menu tiers: Analyst ($5-25), Associate ($25-100), VP ($100-500+)
-- 6 league multipliers (1.0x to 10.0x)
-- Wagyu Rule: complexity surcharge for flagged deals
-- Free gates: S0-S1, B0-B1, R0-R1, PMI0
-- First paywall: S2, B2, R2
-
-## Commands
-- `npm run dev` — Start dev server
-- `npm run build` — Build for production
-- `npx drizzle-kit push` — Push schema to DB
-- `npx drizzle-kit generate` — Generate migrations
-```
-
----
-
-## UNIT ECONOMICS RECAP
-
-| Metric | Value |
-|--------|-------|
-| Gross margin | 95%+ (AI API costs ~5%) |
-| Average wallet top-up | $250–$500 estimated |
-| LTV per deal journey | $500–$5,000+ depending on league |
-| CAC target | < $50 (organic/LinkedIn) |
-| TAM | $4.7B (US M&A advisory tech) |
-| SAM | $890M (SMB segment) |
-| SOM Year 1 | $2M ARR target |
-| Projection | $45M ARR by 2030 |
-
----
-
 ## IMPLEMENTATION CONSTANTS
 
 ```typescript
 // shared/constants.ts
 
-// Transaction Token Pricing
-export const TRANSACTION_TOKEN_FEE_PERCENT = 0.005; // 0.5%
+export const TRANSACTION_TOKEN_FEE_PERCENT = 0.005;
 export const TRANSACTION_TOKEN_FEE_MINIMUM = 200000; // $2,000 in cents
 
-// Day Pass Configuration
 export const DAY_PASS_DEFAULT_HOURS = 48;
 export const DAY_PASS_ACCESS_LEVELS = ['read', 'comment', 'full'] as const;
 
-// Deal Velocity Event Types
 export const DEAL_VELOCITY_EVENTS = [
   'discovery', 'first_view', 'saved', 'nda_signed', 'cim_requested',
   'meeting_scheduled', 'loi_submitted', 'loi_accepted',
   'due_diligence_started', 'closing'
 ] as const;
 
-// Network Participant Roles
 export const NETWORK_ROLES = [
   'buyer', 'seller', 'attorney', 'cpa', 'lender', 'broker', 'consultant', 'other'
 ] as const;
 
-// CIM Share Link Access Levels
 export const CIM_ACCESS_LEVELS = ['blind', 'teaser', 'full'] as const;
 
-// Blind Profile Reveal Strategies
-export const REVEAL_STRATEGIES = ['signup', 'nda', 'both'] as const;
-
-// Lender Risk Score Thresholds
-export const RISK_SCORE_THRESHOLDS = {
-  LOW: { minDscr: 1.50, maxLtv: 70 },
-  MEDIUM: { minDscr: 1.25, maxLtv: 80 },
-  HIGH: { minDscr: 1.15, maxLtv: 90 },
-  CRITICAL: { minDscr: 0, maxLtv: 100 },
-};
-
-// Ghost Notification Thresholds
-export const GHOST_NOTIFICATION_TRACKER_THRESHOLD = 3;
-
-// Safe Harbor
 export const SAFE_HARBOR_COUNTRIES = ['US', 'UK', 'CA', 'AU', 'NZ', 'IE'];
 
-// Roll-Up Industries
 export const ROLLUP_INDUSTRIES = ['veterinary', 'dental', 'hvac', 'msp', 'pest_control'];
 export const ROLLUP_REVENUE_THRESHOLD = 1_500_000;
 ```
 
 ---
 
-*End of specification. This document, combined with METHODOLOGY_V17.md (already in repo), gives Claude Code everything it needs to build smbx.ai from scratch.*
+*End of specification. This document, combined with CLAUDE.md, METHODOLOGY_V17.md, and YULIA_PROMPTS_V2.md gives Claude Code everything it needs to build smbx.ai.*
