@@ -121,17 +121,13 @@ export default function Home() {
           <p className="text-xl md:text-2xl text-text-secondary mt-6">
             Built for{' '}
             <span
-              className="inline-block text-terra italic"
-              style={{ ...SERIF, minWidth: '14ch', textAlign: 'left' }}
+              key={audienceIndex}
+              className={`text-terra italic ${animClass}`}
+              style={SERIF}
             >
-              <span
-                key={audienceIndex}
-                className={animClass}
-              >
-                {AUDIENCE_WORDS[audienceIndex]}
-              </span>
+              {AUDIENCE_WORDS[audienceIndex]}
+              <span className="text-text-secondary not-italic" style={{ fontFamily: 'inherit' }}>.</span>
             </span>
-            .
           </p>
           <p className="text-base md:text-lg text-text-secondary mt-3">
             Sell. Buy. Raise capital. From first conversation to closing.

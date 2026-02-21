@@ -1,5 +1,14 @@
+import { useEffect } from 'react';
 import { Route, Switch, Redirect, useLocation } from 'wouter';
 import { useAuth } from './hooks/useAuth';
+
+function ScrollToTop() {
+  const [location] = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+  return null;
+}
 import Home from './pages/public/Home';
 import Sell from './pages/public/Sell';
 import Buy from './pages/public/Buy';
@@ -22,6 +31,8 @@ export default function App() {
   }
 
   return (
+    <>
+    <ScrollToTop />
     <Switch>
       <Route path="/">
         <Home />
@@ -84,5 +95,6 @@ export default function App() {
         <Redirect to="/" />
       </Route>
     </Switch>
+    </>
   );
 }
