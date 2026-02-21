@@ -85,7 +85,7 @@ export default function Buy() {
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
+            className="inline-flex items-center px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-base md:text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
           >
             Start your search free &rarr;
           </Link>
@@ -196,7 +196,7 @@ export default function Buy() {
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
+            className="inline-flex items-center px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-base md:text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
           >
             Start your search &rarr;
           </Link>

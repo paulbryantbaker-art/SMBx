@@ -82,7 +82,7 @@ export default function Home() {
   return (
     <PublicLayout>
       {/* HERO */}
-      <section className="px-6 py-24">
+      <section className="px-6 py-16 md:py-24">
         <div className="max-w-2xl mx-auto text-center">
           <h1
             className="text-4xl md:text-6xl text-text-primary mb-6 font-medium leading-tight"
@@ -96,7 +96,7 @@ export default function Home() {
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center mt-10 px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
+            className="inline-flex items-center mt-10 px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-base md:text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
           >
             Get started free &rarr;
           </Link>
@@ -104,7 +104,7 @@ export default function Home() {
       </section>
 
       {/* THE PROBLEM */}
-      <section className="px-6 py-20 bg-white">
+      <section className="px-6 py-12 md:py-20 bg-white">
         <div className="max-w-2xl mx-auto text-center">
           <h2
             className="text-3xl md:text-4xl text-text-primary mb-8 font-medium"
@@ -270,7 +270,7 @@ export default function Home() {
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
+            className="inline-flex items-center px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-base md:text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
           >
             Get started free &rarr;
           </Link>
