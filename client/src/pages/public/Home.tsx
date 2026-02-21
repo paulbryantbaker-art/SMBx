@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 
@@ -78,28 +79,52 @@ const JOURNEYS = [
   },
 ];
 
+const EYEBROW_PHRASES = ['Selling a business', 'Buying a business', 'Raising capital'];
+
 export default function Home() {
+  const [eyebrowIndex, setEyebrowIndex] = useState(0);
+  const [eyebrowVisible, setEyebrowVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setEyebrowVisible(false);
+      setTimeout(() => {
+        setEyebrowIndex(i => (i + 1) % EYEBROW_PHRASES.length);
+        setEyebrowVisible(true);
+      }, 300);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <PublicLayout>
       {/* HERO */}
-      <section className="px-6 py-16 md:py-24">
-        <div className="max-w-2xl mx-auto text-center">
+      <section className="min-h-screen flex flex-col items-center justify-center px-6 relative">
+        <div className="text-center">
+          <span
+            className="inline-block bg-[#F0EDE6] text-text-secondary text-sm px-4 py-1.5 rounded-full mb-8 transition-opacity duration-300"
+            style={{ opacity: eyebrowVisible ? 1 : 0 }}
+          >
+            {EYEBROW_PHRASES[eyebrowIndex]}
+          </span>
           <h1
-            className="text-4xl md:text-6xl text-text-primary mb-6 font-medium leading-tight"
+            className="text-6xl md:text-8xl text-[#1A1A18] font-medium leading-tight tracking-tight"
             style={SERIF}
           >
-            Sell a business. Buy a business. Raise capital.
+            Agentic Deal Advisory.
           </h1>
-          <p className="text-lg md:text-xl text-text-secondary leading-relaxed max-w-2xl mx-auto">
-            An AI advisor that knows your industry, understands your deal, and
-            guides you from first conversation to closing.
+          <p className="text-xl md:text-2xl text-text-secondary mt-6">
+            Built for business buyers and sellers.
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center mt-10 px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-base md:text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
+            className="inline-flex items-center mt-10 px-10 py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
           >
-            Get started free &rarr;
+            Meet Yulia &rarr;
           </Link>
+        </div>
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <span className="text-text-tertiary text-sm tracking-wide">Scroll</span>
         </div>
       </section>
 
