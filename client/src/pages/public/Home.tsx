@@ -79,7 +79,6 @@ const JOURNEYS = [
   },
 ];
 
-const EYEBROW_PHRASES = ['Selling a business', 'Buying a business', 'Raising capital'];
 const AUDIENCE_WORDS = [
   'business owners',
   'first-time buyers',
@@ -91,21 +90,8 @@ const AUDIENCE_WORDS = [
 ];
 
 export default function Home() {
-  const [eyebrowIndex, setEyebrowIndex] = useState(0);
-  const [eyebrowVisible, setEyebrowVisible] = useState(true);
   const [audienceIndex, setAudienceIndex] = useState(0);
   const [audienceVisible, setAudienceVisible] = useState(true);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setEyebrowVisible(false);
-      setTimeout(() => {
-        setEyebrowIndex(i => (i + 1) % EYEBROW_PHRASES.length);
-        setEyebrowVisible(true);
-      }, 300);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -126,11 +112,8 @@ export default function Home() {
       {/* HERO — fixed behind content */}
       <section className="fixed inset-0 z-0 flex flex-col items-center justify-center px-6">
         <div className="text-center flex flex-col items-center">
-          <span
-            className="inline-block bg-[#F0EDE6] text-text-secondary text-sm px-4 py-1.5 rounded-full mb-8 transition-opacity duration-300"
-            style={{ opacity: eyebrowVisible ? 1 : 0 }}
-          >
-            {EYEBROW_PHRASES[eyebrowIndex]}
+          <span className="inline-block bg-[#F0EDE6] text-text-secondary text-sm px-4 py-1.5 rounded-full mb-8">
+            AI-Powered M&amp;A Advisory
           </span>
           <h1
             className="text-5xl md:text-8xl text-[#1A1A18] font-medium leading-tight tracking-tight"
