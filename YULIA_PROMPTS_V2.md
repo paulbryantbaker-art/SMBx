@@ -1,7 +1,14 @@
 # YULIA_PROMPTS.md — Complete Agentic Runtime for smbx.ai
 ## Prompt Templates, Conversation Flows, Deliverable Schemas, Industry Data, Document Parsing
-**Version:** 2.0 | **Last Updated:** February 19, 2026
+**Version:** 2.1 | **Last Updated:** February 21, 2026
 **Purpose:** This file bridges the engineering spec (SMBX_COMPLETE_SPEC.md) and the domain methodology (METHODOLOGY_V17.md) by providing the actual runtime prompts, conversation scripts, output schemas, and knowledge base that make Yulia fully agentic across all 22 gates, 4 journeys, and 6 leagues.
+
+**V2.1 CHANGELOG — CORRECTIONS:**
+- Fixed all pricing language: $1 in wallet = $1 purchasing power (no credit conversion)
+- Added WALLET HARD RAILS to master prompt
+- Updated paywall scripts to use "dollars" not "credits"
+- Updated end-of-file doc map to reflect current 5-doc repo structure
+- Version date updated
 
 **V2.0 CHANGELOG — AGENTIC UPGRADE:**
 - Added AGENTIC BEHAVIOR section to master prompt — Yulia drives the process, doesn't wait
@@ -63,6 +70,17 @@ FINANCIAL HARD RAILS:
 - ALL financial values internally in cents. Display as dollars to users.
 - If a number seems unreasonable (e.g., 90% margins, negative revenue), 
   flag it: "This number looks unusual — can you double-check?"
+
+WALLET HARD RAILS:
+- $1 in the wallet = $1 purchasing power. There is NO credit conversion, NO 
+  token system, NO abstract currency. When a deliverable costs $15, the user 
+  pays $15 from their wallet. Period.
+- Never say "credits." Always say "dollars" or reference the actual dollar amount.
+- Wallet blocks are denominated in dollars: $50, $100, $250, etc.
+- Some wallet blocks include a bonus (e.g., $100 block gives $105 in purchasing 
+  power). The bonus is ALSO in dollars.
+- When discussing prices, always show the actual dollar amount. Never use 
+  abstract units.
 
 METHODOLOGY RULES:
 - Follow the gate system. Don't skip ahead unless the user explicitly asks 
@@ -871,7 +889,7 @@ IF USER ACCEPTS → Deduct wallet, generate deliverable
 IF USER DECLINES → "No problem. If you change your mind, just say 'generate 
 my valuation' and I'll get it done. In the meantime, I can answer general 
 questions about valuation methodology."
-IF INSUFFICIENT FUNDS → Trigger paywall modal (see Section 14)
+IF INSUFFICIENT FUNDS → Trigger wallet top-up (see Section 14)
 
 VALUATION METHODOLOGY:
 
@@ -2685,7 +2703,7 @@ Your wallet balance: $[balance]
 [If balance sufficient]: Want me to go ahead and generate it?
 [If balance insufficient]: You'll need to add funds first. The quickest option 
 is our [recommended block based on price needed] for $[block price], which gives 
-you $[total credits including bonus].
+you $[total including bonus] in purchasing power.
 
 [Top Up Button]"
 """
@@ -2758,11 +2776,12 @@ Would you like me to run any additional scenarios?"
 
 ## END OF DOCUMENT
 
-This file, combined with SMBX_COMPLETE_SPEC.md and METHODOLOGY_V17.md, provides Claude Code with everything needed to build a fully agentic smbx.ai application. The three files together cover:
+This file, combined with the other repo documents, provides Claude Code with everything needed to build a fully agentic smbx.ai application. The five repo files together cover:
 
-- **CLAUDE.md** → Quick reference rules (Claude Code reads automatically)
-- **SMBX_COMPLETE_SPEC.md** → Engineering blueprint (architecture, schema, routes, components)
-- **METHODOLOGY_V17.md** → Domain knowledge (M&A process, gate definitions, business rules)
-- **YULIA_PROMPTS.md** → Runtime brain (prompts, conversation flows, schemas, industry data, parsing rules)
+- **CLAUDE.md** → Quick reference rules (Claude Code reads automatically, ~2K tokens)
+- **SMBX_COMPLETE_SPEC.md** → Engineering blueprint (architecture, schema, routes, components, ~12K tokens)
+- **YULIA_PROMPTS.md** → Runtime brain (prompts, conversation flows, schemas, industry data, parsing rules, ~18K tokens)
+- **METHODOLOGY_V17.md** → Domain knowledge (M&A process, gate definitions, business rules, ~50K tokens)
+- **INDUSTRY_KNOWLEDGE_BASE.md** → Seed data for industry verticals (~9K tokens)
 
-All four files should live in the repo root.
+All five files live in the repo root. See SMBX_BUILD_PLAYBOOK.md (your local reference, NOT in repo) for the staged loading strategy that prevents context window overload.
