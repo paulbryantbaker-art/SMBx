@@ -80,10 +80,21 @@ const JOURNEYS = [
 ];
 
 const EYEBROW_PHRASES = ['Selling a business', 'Buying a business', 'Raising capital'];
+const AUDIENCE_WORDS = [
+  'business owners',
+  'first-time buyers',
+  'search fund operators',
+  'brokers',
+  'PE firms',
+  'solo founders',
+  'family offices',
+];
 
 export default function Home() {
   const [eyebrowIndex, setEyebrowIndex] = useState(0);
   const [eyebrowVisible, setEyebrowVisible] = useState(true);
+  const [audienceIndex, setAudienceIndex] = useState(0);
+  const [audienceVisible, setAudienceVisible] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -94,6 +105,20 @@ export default function Home() {
       }, 300);
     }, 3000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      const interval = setInterval(() => {
+        setAudienceVisible(false);
+        setTimeout(() => {
+          setAudienceIndex(i => (i + 1) % AUDIENCE_WORDS.length);
+          setAudienceVisible(true);
+        }, 300);
+      }, 3000);
+      return () => clearInterval(interval);
+    }, 1500);
+    return () => clearTimeout(delay);
   }, []);
 
   return (
@@ -114,7 +139,14 @@ export default function Home() {
             Agentic Deal Advisory.
           </h1>
           <p className="text-xl md:text-2xl text-text-secondary mt-6">
-            Built for business buyers and sellers.
+            Built for{' '}
+            <span
+              className="text-terra italic transition-opacity duration-300"
+              style={{ ...SERIF, opacity: audienceVisible ? 1 : 0 }}
+            >
+              {AUDIENCE_WORDS[audienceIndex]}
+            </span>
+            .
           </p>
           <Link
             href="/signup"
