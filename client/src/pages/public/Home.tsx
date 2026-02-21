@@ -98,9 +98,9 @@ export default function Home() {
 
   return (
     <PublicLayout>
-      {/* HERO */}
-      <section className="min-h-screen flex flex-col items-center justify-center px-6 relative">
-        <div className="text-center">
+      {/* HERO — fixed behind content */}
+      <section className="fixed inset-0 z-0 flex flex-col items-center justify-center px-6">
+        <div className="text-center flex flex-col items-center">
           <span
             className="inline-block bg-[#F0EDE6] text-text-secondary text-sm px-4 py-1.5 rounded-full mb-8 transition-opacity duration-300"
             style={{ opacity: eyebrowVisible ? 1 : 0 }}
@@ -108,7 +108,7 @@ export default function Home() {
             {EYEBROW_PHRASES[eyebrowIndex]}
           </span>
           <h1
-            className="text-6xl md:text-8xl text-[#1A1A18] font-medium leading-tight tracking-tight"
+            className="text-5xl md:text-8xl text-[#1A1A18] font-medium leading-tight tracking-tight"
             style={SERIF}
           >
             Agentic Deal Advisory.
@@ -128,179 +128,188 @@ export default function Home() {
         </div>
       </section>
 
-      {/* THE PROBLEM */}
-      <section className="px-6 py-12 md:py-20 bg-white">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2
-            className="text-3xl md:text-4xl text-text-primary mb-8 font-medium"
-            style={SERIF}
-          >
-            M&amp;A advice has always been expensive &mdash; or terrible.
-          </h2>
-          <p className="text-lg md:text-xl text-text-secondary leading-relaxed mb-6">
-            Hire an advisor and you&apos;re looking at a $50,000 retainer before
-            anyone picks up the phone. And if your deal is under $2M? Most firms
-            won&apos;t take your call.
-          </p>
-          <p className="text-lg md:text-xl text-text-secondary leading-relaxed m-0">
-            Go the DIY route and you get generic calculators that don&apos;t know
-            the difference between a veterinary practice and a SaaS company. Plug
-            in revenue, get a number. No context. No strategy. No one watching
-            your back.
-          </p>
-        </div>
-      </section>
+      {/* Spacer to push content below the fold */}
+      <div className="min-h-screen" />
 
-      {/* THE INTELLIGENCE */}
-      <section className="px-6 py-20">
-        <div className="max-w-3xl mx-auto">
-          <h2
-            className="text-3xl md:text-4xl text-text-primary text-center mb-4 font-medium"
-            style={SERIF}
-          >
-            This is something different.
-          </h2>
-          <p className="text-lg md:text-xl text-text-secondary text-center leading-relaxed max-w-2xl mx-auto mb-16">
-            smbx.ai isn&apos;t a calculator. She isn&apos;t a listing site.
-            She&apos;s an advisor that thinks.
-          </p>
-          <div className="space-y-12">
-            {PILLARS.map(p => (
-              <div key={p.title}>
-                <h3
-                  className="text-xl md:text-2xl text-text-primary mb-3 font-medium"
-                  style={SERIF}
-                >
-                  {p.title}
-                </h3>
-                <p className="text-lg md:text-xl text-text-secondary leading-relaxed m-0">
-                  {p.body}
-                </p>
-              </div>
-            ))}
+      {/* CONTENT — scrolls over the hero */}
+      <div className="relative z-10">
+        {/* THE PROBLEM */}
+        <section
+          className="px-6 py-12 md:py-20 bg-white rounded-t-3xl"
+          style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.08)' }}
+        >
+          <div className="max-w-2xl mx-auto text-center">
+            <h2
+              className="text-3xl md:text-4xl text-text-primary mb-8 font-medium"
+              style={SERIF}
+            >
+              M&amp;A advice has always been expensive &mdash; or terrible.
+            </h2>
+            <p className="text-lg md:text-xl text-text-secondary leading-relaxed mb-6">
+              Hire an advisor and you&apos;re looking at a $50,000 retainer before
+              anyone picks up the phone. And if your deal is under $2M? Most firms
+              won&apos;t take your call.
+            </p>
+            <p className="text-lg md:text-xl text-text-secondary leading-relaxed m-0">
+              Go the DIY route and you get generic calculators that don&apos;t know
+              the difference between a veterinary practice and a SaaS company. Plug
+              in revenue, get a number. No context. No strategy. No one watching
+              your back.
+            </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* HOW IT WORKS */}
-      <section className="px-6 py-20 bg-white">
-        <div className="max-w-2xl mx-auto">
-          <h2
-            className="text-3xl md:text-4xl text-text-primary text-center mb-2 font-medium"
-            style={SERIF}
-          >
-            How it works
-          </h2>
-          <p className="text-lg md:text-xl text-text-secondary text-center mb-16">
-            A conversation, not a dashboard.
-          </p>
-          <div className="space-y-12">
-            {STEPS.map(step => (
-              <div key={step.title}>
-                <div className="flex items-center gap-3 mb-3">
+        {/* THE INTELLIGENCE */}
+        <section className="px-6 py-20 bg-cream">
+          <div className="max-w-3xl mx-auto">
+            <h2
+              className="text-3xl md:text-4xl text-text-primary text-center mb-4 font-medium"
+              style={SERIF}
+            >
+              This is something different.
+            </h2>
+            <p className="text-lg md:text-xl text-text-secondary text-center leading-relaxed max-w-2xl mx-auto mb-16">
+              smbx.ai isn&apos;t a calculator. She isn&apos;t a listing site.
+              She&apos;s an advisor that thinks.
+            </p>
+            <div className="space-y-12">
+              {PILLARS.map(p => (
+                <div key={p.title}>
                   <h3
-                    className="text-xl md:text-2xl text-text-primary font-medium m-0"
+                    className="text-xl md:text-2xl text-text-primary mb-3 font-medium"
                     style={SERIF}
                   >
-                    {step.title}
+                    {p.title}
                   </h3>
-                  {step.badge && (
-                    <span className="text-sm text-text-secondary bg-[#F0EDE6] px-2.5 py-0.5 rounded-full whitespace-nowrap">
-                      {step.badge}
-                    </span>
-                  )}
+                  <p className="text-lg md:text-xl text-text-secondary leading-relaxed m-0">
+                    {p.body}
+                  </p>
                 </div>
-                <p className="text-lg md:text-xl text-text-secondary leading-relaxed m-0">
-                  {step.body}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CREDIBILITY */}
-      <section className="px-6 py-20">
-        <div className="max-w-4xl mx-auto">
-          <h2
-            className="text-3xl md:text-4xl text-text-primary text-center mb-12 font-medium"
-            style={SERIF}
-          >
-            Built on real data. Not guesswork.
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-            {CREDIBILITY.map(item => (
-              <div key={item.title}>
-                <h3
-                  className="text-xl md:text-2xl text-text-primary mb-2 font-medium"
-                  style={SERIF}
+        {/* HOW IT WORKS */}
+        <section className="px-6 py-20 bg-white">
+          <div className="max-w-2xl mx-auto">
+            <h2
+              className="text-3xl md:text-4xl text-text-primary text-center mb-2 font-medium"
+              style={SERIF}
+            >
+              How it works
+            </h2>
+            <p className="text-lg md:text-xl text-text-secondary text-center mb-16">
+              A conversation, not a dashboard.
+            </p>
+            <div className="space-y-12">
+              {STEPS.map(step => (
+                <div key={step.title}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3
+                      className="text-xl md:text-2xl text-text-primary font-medium m-0"
+                      style={SERIF}
+                    >
+                      {step.title}
+                    </h3>
+                    {step.badge && (
+                      <span className="text-sm text-text-secondary bg-[#F0EDE6] px-2.5 py-0.5 rounded-full whitespace-nowrap">
+                        {step.badge}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-lg md:text-xl text-text-secondary leading-relaxed m-0">
+                    {step.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CREDIBILITY */}
+        <section className="px-6 py-20 bg-cream">
+          <div className="max-w-4xl mx-auto">
+            <h2
+              className="text-3xl md:text-4xl text-text-primary text-center mb-12 font-medium"
+              style={SERIF}
+            >
+              Built on real data. Not guesswork.
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              {CREDIBILITY.map(item => (
+                <div key={item.title}>
+                  <h3
+                    className="text-xl md:text-2xl text-text-primary mb-2 font-medium"
+                    style={SERIF}
+                  >
+                    {item.title}
+                  </h3>
+                  <p className="text-base md:text-lg text-text-secondary leading-relaxed m-0">
+                    {item.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* JOURNEY CARDS */}
+        <section className="px-6 py-20 bg-white">
+          <div className="max-w-4xl mx-auto">
+            <h2
+              className="text-3xl md:text-4xl text-text-primary text-center mb-12 font-medium"
+              style={SERIF}
+            >
+              What brings you here?
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {JOURNEYS.map(j => (
+                <Link
+                  key={j.href}
+                  href={j.href}
+                  className="bg-white rounded-2xl border border-border p-6 no-underline transition-shadow hover:shadow-md group"
+                  style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06)' }}
                 >
-                  {item.title}
-                </h3>
-                <p className="text-base md:text-lg text-text-secondary leading-relaxed m-0">
-                  {item.body}
-                </p>
-              </div>
-            ))}
+                  <h3
+                    className="text-xl md:text-2xl text-text-primary mb-2 font-medium group-hover:text-terra transition-colors"
+                    style={SERIF}
+                  >
+                    {j.title}
+                  </h3>
+                  <p className="text-base md:text-lg text-text-secondary leading-relaxed mb-4">
+                    {j.description}
+                  </p>
+                  <span className="text-base text-terra font-medium">
+                    Start free &rarr;
+                  </span>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* JOURNEY CARDS */}
-      <section className="px-6 py-20 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <h2
-            className="text-3xl md:text-4xl text-text-primary text-center mb-12 font-medium"
-            style={SERIF}
-          >
-            What brings you here?
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {JOURNEYS.map(j => (
-              <Link
-                key={j.href}
-                href={j.href}
-                className="bg-white rounded-2xl border border-border p-6 no-underline transition-shadow hover:shadow-md group"
-                style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06)' }}
-              >
-                <h3
-                  className="text-xl md:text-2xl text-text-primary mb-2 font-medium group-hover:text-terra transition-colors"
-                  style={SERIF}
-                >
-                  {j.title}
-                </h3>
-                <p className="text-base md:text-lg text-text-secondary leading-relaxed mb-4">
-                  {j.description}
-                </p>
-                <span className="text-base text-terra font-medium">
-                  Start free &rarr;
-                </span>
-              </Link>
-            ))}
+        {/* FINAL CTA */}
+        <section className="px-6 py-20 bg-[#F0EDE6]">
+          <div className="max-w-xl mx-auto text-center">
+            <h2
+              className="text-3xl md:text-4xl text-text-primary mb-4 font-medium"
+              style={SERIF}
+            >
+              Start free. Pay when you see value.
+            </h2>
+            <p className="text-lg md:text-xl text-text-secondary mb-10">
+              No credit card required. No commitment. Just a conversation.
+            </p>
+            <Link
+              href="/signup"
+              className="inline-flex items-center px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-base md:text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
+            >
+              Get started free &rarr;
+            </Link>
           </div>
-        </div>
-      </section>
-
-      {/* FINAL CTA */}
-      <section className="px-6 py-20 bg-[#F0EDE6]">
-        <div className="max-w-xl mx-auto text-center">
-          <h2
-            className="text-3xl md:text-4xl text-text-primary mb-4 font-medium"
-            style={SERIF}
-          >
-            Start free. Pay when you see value.
-          </h2>
-          <p className="text-lg md:text-xl text-text-secondary mb-10">
-            No credit card required. No commitment. Just a conversation.
-          </p>
-          <Link
-            href="/signup"
-            className="inline-flex items-center px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-base md:text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
-          >
-            Get started free &rarr;
-          </Link>
-        </div>
-      </section>
+        </section>
+      </div>
     </PublicLayout>
   );
 }
