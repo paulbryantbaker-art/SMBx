@@ -1,6 +1,8 @@
 import { Link } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 
+const SERIF = { fontFamily: 'ui-serif, Georgia, Cambria, serif' } as const;
+
 const HOW_STEPS = [
   {
     num: '01',
@@ -59,12 +61,12 @@ export default function Pricing() {
       <section className="px-6 pt-20 pb-16 md:pt-28 md:pb-24">
         <div className="max-w-2xl mx-auto text-center">
           <h1
-            className="text-4xl md:text-5xl text-text-primary mb-4 font-medium leading-tight"
-            style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+            className="text-4xl md:text-6xl text-text-primary mb-4 font-medium leading-tight"
+            style={SERIF}
           >
             Pay as you go. No subscriptions.
           </h1>
-          <p className="text-base md:text-lg text-text-secondary leading-relaxed max-w-xl mx-auto">
+          <p className="text-lg md:text-xl text-text-secondary leading-relaxed max-w-xl mx-auto">
             Top up your wallet, spend on what you need. $1 in = $1 of purchasing power.
           </p>
         </div>
@@ -74,22 +76,22 @@ export default function Pricing() {
       <section className="px-6 pb-16 md:pb-24">
         <div className="max-w-4xl mx-auto">
           <h2
-            className="text-2xl md:text-3xl text-text-primary text-center mb-10 font-medium"
-            style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+            className="text-3xl md:text-4xl text-text-primary text-center mb-10 font-medium"
+            style={SERIF}
           >
             How it works
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {HOW_STEPS.map(step => (
               <div key={step.num} className="text-center md:text-left">
-                <span className="text-sm font-semibold text-terra">{step.num}</span>
+                <span className="text-base font-semibold text-terra">{step.num}</span>
                 <h3
-                  className="text-lg text-text-primary mt-2 mb-2 font-medium"
-                  style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+                  className="text-xl md:text-2xl text-text-primary mt-2 mb-2 font-medium"
+                  style={SERIF}
                 >
                   {step.title}
                 </h3>
-                <p className="text-sm text-text-secondary leading-relaxed m-0">
+                <p className="text-base md:text-lg text-text-secondary leading-relaxed m-0">
                   {step.description}
                 </p>
               </div>
@@ -102,12 +104,12 @@ export default function Pricing() {
       <section className="px-6 py-16 md:py-24 bg-white">
         <div className="max-w-5xl mx-auto">
           <h2
-            className="text-2xl md:text-3xl text-text-primary text-center mb-4 font-medium"
-            style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+            className="text-3xl md:text-4xl text-text-primary text-center mb-4 font-medium"
+            style={SERIF}
           >
             Wallet top-ups
           </h2>
-          <p className="text-base text-text-secondary text-center mb-10 max-w-xl mx-auto">
+          <p className="text-lg md:text-xl text-text-secondary text-center mb-10 max-w-xl mx-auto">
             Buy once, use anytime. Larger blocks include bonus credits. Your credits never expire.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -121,30 +123,30 @@ export default function Pricing() {
                 }`}
               >
                 {block.popular && (
-                  <span className="text-xs font-semibold text-terra uppercase tracking-wide mb-1">
+                  <span className="text-sm font-semibold text-terra uppercase tracking-wide mb-1">
                     Most Popular
                   </span>
                 )}
-                <p className="text-sm text-text-secondary m-0 mb-1">{block.name}</p>
+                <p className="text-base text-text-secondary m-0 mb-1">{block.name}</p>
                 <p
                   className="text-2xl text-text-primary m-0 font-medium"
-                  style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+                  style={SERIF}
                 >
                   ${fmt(block.price)}
                 </p>
                 {block.bonus > 0 ? (
-                  <p className="text-sm text-terra m-0 mt-1">
+                  <p className="text-base text-terra m-0 mt-1">
                     +${fmt(block.bonus)} bonus ({block.discount})
                   </p>
                 ) : (
-                  <p className="text-sm text-text-secondary m-0 mt-1">No minimum</p>
+                  <p className="text-base text-text-secondary m-0 mt-1">No minimum</p>
                 )}
-                <p className="text-xs text-text-secondary m-0 mt-2">
+                <p className="text-sm text-text-secondary m-0 mt-2">
                   ${fmt(block.total)} purchasing power
                 </p>
                 <Link
                   href="/signup"
-                  className="mt-auto pt-4 text-sm text-terra font-medium no-underline hover:text-terra-hover transition-colors"
+                  className="mt-auto pt-4 text-base text-terra font-medium no-underline hover:text-terra-hover transition-colors"
                 >
                   Top up &rarr;
                 </Link>
@@ -158,8 +160,8 @@ export default function Pricing() {
       <section className="px-6 py-16 md:py-24">
         <div className="max-w-3xl mx-auto">
           <h2
-            className="text-2xl md:text-3xl text-text-primary text-center mb-10 font-medium"
-            style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+            className="text-3xl md:text-4xl text-text-primary text-center mb-10 font-medium"
+            style={SERIF}
           >
             What your credits buy
           </h2>
@@ -170,14 +172,14 @@ export default function Pricing() {
                 className="flex items-start gap-4 bg-white rounded-2xl border border-border p-5"
               >
                 <span
-                  className="text-lg text-terra font-medium whitespace-nowrap min-w-[90px]"
-                  style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+                  className="text-xl text-terra font-medium whitespace-nowrap min-w-[90px]"
+                  style={SERIF}
                 >
                   {tier.range}
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-text-primary m-0">{tier.label}</p>
-                  <p className="text-sm text-text-secondary m-0 mt-1">{tier.items}</p>
+                  <p className="text-base font-semibold text-text-primary m-0">{tier.label}</p>
+                  <p className="text-base md:text-lg text-text-secondary m-0 mt-1">{tier.items}</p>
                 </div>
               </div>
             ))}
@@ -189,16 +191,16 @@ export default function Pricing() {
       <section className="px-6 py-16 md:py-24 bg-white">
         <div className="max-w-3xl mx-auto">
           <h2
-            className="text-2xl md:text-3xl text-text-primary text-center mb-4 font-medium"
-            style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+            className="text-3xl md:text-4xl text-text-primary text-center mb-4 font-medium"
+            style={SERIF}
           >
             Pricing scales with deal size
           </h2>
-          <p className="text-base text-text-secondary text-center mb-10 max-w-xl mx-auto">
+          <p className="text-lg md:text-xl text-text-secondary text-center mb-10 max-w-xl mx-auto">
             Your deal size determines your league. Larger deals require deeper analysis, so prices scale proportionally.
           </p>
           <div className="bg-cream rounded-2xl border border-border overflow-hidden">
-            <div className="grid grid-cols-3 text-sm font-semibold text-text-primary border-b border-border px-6 py-3">
+            <div className="grid grid-cols-3 text-base font-semibold text-text-primary border-b border-border px-6 py-3">
               <span>League</span>
               <span>Deal Size</span>
               <span className="text-right">Multiplier</span>
@@ -206,7 +208,7 @@ export default function Pricing() {
             {LEAGUES.map(l => (
               <div
                 key={l.league}
-                className="grid grid-cols-3 text-sm text-text-secondary border-b border-border last:border-0 px-6 py-3"
+                className="grid grid-cols-3 text-base text-text-secondary border-b border-border last:border-0 px-6 py-3"
               >
                 <span className="font-medium text-text-primary">{l.league}</span>
                 <span>{l.size}</span>
@@ -214,7 +216,7 @@ export default function Pricing() {
               </div>
             ))}
           </div>
-          <p className="text-sm text-text-secondary text-center mt-6">
+          <p className="text-base text-text-secondary text-center mt-6">
             A $25 deliverable at L1 costs $25. At L3 it costs $50.
           </p>
         </div>
@@ -224,17 +226,17 @@ export default function Pricing() {
       <section className="px-6 py-16 md:py-24">
         <div className="max-w-2xl mx-auto text-center">
           <h2
-            className="text-2xl md:text-3xl text-text-primary mb-4 font-medium"
-            style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+            className="text-3xl md:text-4xl text-text-primary mb-4 font-medium"
+            style={SERIF}
           >
             Ready to start?
           </h2>
-          <p className="text-base text-text-secondary mb-8">
+          <p className="text-lg md:text-xl text-text-secondary mb-8">
             Your first conversation is free. No credit card required.
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center px-6 py-3 bg-terra text-white text-base font-medium rounded-lg hover:bg-terra-hover no-underline transition-colors"
+            className="inline-flex items-center px-8 py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
           >
             Get started free &rarr;
           </Link>

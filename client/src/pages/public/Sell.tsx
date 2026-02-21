@@ -1,6 +1,8 @@
 import { Link } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 
+const SERIF = { fontFamily: 'ui-serif, Georgia, Cambria, serif' } as const;
+
 const STEPS = [
   { num: 'S0', title: 'Intake', description: 'Tell Yulia about your business — industry, revenue, team size, and why you are considering a sale.', free: true },
   { num: 'S1', title: 'Financials', description: 'Upload your financials. Yulia organizes them, identifies add-backs, and flags anything a buyer will question.', free: true },
@@ -17,17 +19,17 @@ export default function Sell() {
       <section className="px-6 pt-20 pb-16 md:pt-28 md:pb-24">
         <div className="max-w-2xl mx-auto text-center">
           <h1
-            className="text-4xl md:text-5xl text-text-primary mb-4 font-medium leading-tight"
-            style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+            className="text-4xl md:text-6xl text-text-primary mb-4 font-medium leading-tight"
+            style={SERIF}
           >
             Sell your business with confidence
           </h1>
-          <p className="text-base md:text-lg text-text-secondary leading-relaxed mb-8 max-w-xl mx-auto">
+          <p className="text-lg md:text-xl text-text-secondary leading-relaxed mb-8 max-w-xl mx-auto">
             From valuation to closing, guided every step.
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center px-6 py-3 bg-terra text-white text-base font-medium rounded-lg hover:bg-terra-hover no-underline transition-colors"
+            className="inline-flex items-center px-8 py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
           >
             Start your exit &rarr;
           </Link>
@@ -43,20 +45,20 @@ export default function Sell() {
               className="bg-white rounded-2xl border border-border p-6"
             >
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-sm font-semibold text-terra">{step.num}</span>
+                <span className="text-base font-semibold text-terra">{step.num}</span>
                 {step.free && (
-                  <span className="text-xs font-medium text-terra bg-terra/10 px-2 py-0.5 rounded">
+                  <span className="text-sm font-medium text-terra bg-terra/10 px-2 py-0.5 rounded">
                     Free
                   </span>
                 )}
               </div>
               <h3
-                className="text-lg text-text-primary mb-2 font-medium"
-                style={{ fontFamily: 'ui-serif, Georgia, serif' }}
+                className="text-xl md:text-2xl text-text-primary mb-2 font-medium"
+                style={SERIF}
               >
                 {step.title}
               </h3>
-              <p className="text-sm text-text-secondary leading-relaxed m-0">
+              <p className="text-base md:text-lg text-text-secondary leading-relaxed m-0">
                 {step.description}
               </p>
             </div>

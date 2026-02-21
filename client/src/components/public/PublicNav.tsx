@@ -30,7 +30,7 @@ export default function PublicNav() {
             <Link
               key={l.href}
               href={l.href}
-              className={`text-sm no-underline transition-colors ${
+              className={`text-base no-underline transition-colors ${
                 location === l.href
                   ? 'text-terra font-medium'
                   : 'text-text-secondary hover:text-text-primary'
@@ -41,13 +41,13 @@ export default function PublicNav() {
           ))}
           <Link
             href="/login"
-            className="text-sm text-text-secondary hover:text-text-primary no-underline transition-colors"
+            className="text-base text-text-secondary hover:text-text-primary no-underline transition-colors"
           >
             Log in
           </Link>
           <Link
             href="/signup"
-            className="text-sm bg-terra text-white px-4 py-1.5 rounded-lg hover:bg-terra-hover no-underline transition-colors"
+            className="text-base bg-terra text-white px-4 py-1.5 rounded-lg hover:bg-terra-hover no-underline transition-colors"
           >
             Get started
           </Link>
@@ -77,7 +77,7 @@ export default function PublicNav() {
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="block text-sm text-text-secondary hover:text-text-primary no-underline"
+              className="block text-base text-text-secondary hover:text-text-primary no-underline"
             >
               {l.label}
             </Link>
@@ -85,14 +85,14 @@ export default function PublicNav() {
           <Link
             href="/login"
             onClick={() => setOpen(false)}
-            className="block text-sm text-text-secondary hover:text-text-primary no-underline"
+            className="block text-base text-text-secondary hover:text-text-primary no-underline"
           >
             Log in
           </Link>
           <Link
             href="/signup"
             onClick={() => setOpen(false)}
-            className="block text-sm bg-terra text-white px-4 py-2 rounded-lg text-center no-underline"
+            className="block text-base bg-terra text-white px-4 py-2 rounded-lg text-center no-underline"
           >
             Get started
           </Link>
