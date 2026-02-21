@@ -38,7 +38,7 @@ export default function Footer() {
             >
               smbx.ai
             </Link>
-            <p className="text-sm mt-2 leading-relaxed m-0">
+            <p className="text-base mt-2 leading-relaxed m-0">
               Your M&A advisor, on demand.
             </p>
           </div>
@@ -46,7 +46,7 @@ export default function Footer() {
           {/* Link columns */}
           {COLUMNS.map(col => (
             <div key={col.title}>
-              <p className="text-xs uppercase tracking-wider text-[#6B6B65] mb-3 m-0">
+              <p className="text-sm uppercase tracking-wider text-[#6B6B65] mb-3 m-0">
                 {col.title}
               </p>
               <ul className="list-none p-0 m-0 space-y-2">
@@ -54,7 +54,7 @@ export default function Footer() {
                   <li key={l.label}>
                     <Link
                       href={l.href}
-                      className="text-sm text-[#A3A3A3] hover:text-white no-underline transition-colors"
+                      className="text-base text-[#A3A3A3] hover:text-white no-underline transition-colors"
                     >
                       {l.label}
                     </Link>
@@ -66,7 +66,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-[#333] pt-6">
-          <p className="text-xs text-[#6B6B65] m-0">
+          <p className="text-sm text-[#6B6B65] m-0">
             &copy; {new Date().getFullYear()} smbx.ai. All rights reserved.
           </p>
         </div>
