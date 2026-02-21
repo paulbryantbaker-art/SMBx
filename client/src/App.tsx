@@ -1,6 +1,9 @@
 import { Route, Switch, Redirect, useLocation } from 'wouter';
 import { useAuth } from './hooks/useAuth';
 import Home from './pages/public/Home';
+import Sell from './pages/public/Sell';
+import Buy from './pages/public/Buy';
+import Raise from './pages/public/Raise';
 import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
 import Chat from './pages/Chat';
@@ -23,13 +26,13 @@ export default function App() {
         <Home />
       </Route>
       <Route path="/sell">
-        <Home />
+        <Sell />
       </Route>
       <Route path="/buy">
-        <Home />
+        <Buy />
       </Route>
       <Route path="/raise">
-        <Home />
+        <Raise />
       </Route>
       <Route path="/integrate">
         <Home />
