@@ -148,6 +148,9 @@ export default function Home() {
             </span>
             .
           </p>
+          <p className="text-base md:text-lg text-text-secondary mt-3">
+            Sell. Buy. Raise capital. From first conversation to closing.
+          </p>
           <Link
             href="/signup"
             className="inline-flex items-center mt-10 px-10 py-4 bg-terra text-white text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
