@@ -52,45 +52,29 @@ const HOW_IT_WORKS = [
 export default function Home() {
   return (
     <PublicLayout>
-      {/* 1. HERO */}
-      <section className="px-6 py-24 md:py-32">
+      {/* HERO */}
+      <section className="px-6 py-24">
         <div className="max-w-2xl mx-auto text-center">
           <h1
-            className="text-4xl md:text-5xl text-text-primary mb-6 font-medium leading-tight"
+            className="text-3xl md:text-5xl text-text-primary mb-4 font-medium leading-tight"
             style={{ fontFamily: 'ui-serif, Georgia, serif' }}
           >
-            Sell a business.{'\n'}Buy a business.{'\n'}Raise capital.
+            Sell a business. Buy a business. Raise capital.
           </h1>
-          <p className="text-xl text-text-secondary leading-relaxed mb-10">
-            Your M&amp;A advisor, on demand.
+          <p className="text-lg text-text-secondary leading-relaxed max-w-lg mx-auto">
+            Professional M&amp;A advisory that used to cost $50K. Start free.
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center px-8 py-4 bg-terra text-white text-base font-medium rounded-xl hover:bg-terra-hover no-underline transition-colors"
+            className="inline-flex items-center mt-8 px-8 py-4 bg-terra text-white text-base font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
           >
             Get started free &rarr;
           </Link>
         </div>
       </section>
 
-      {/* 2. THE PROBLEM */}
-      <section className="px-6 py-20">
-        <div className="max-w-xl mx-auto text-center">
-          <p className="text-base md:text-lg text-text-secondary leading-relaxed mb-6">
-            Most business owners can&apos;t afford an M&amp;A advisor. Traditional
-            firms charge $50K+ retainers and 5&ndash;12% success fees &mdash; and
-            they won&apos;t touch deals under $2M.
-          </p>
-          <p className="text-base md:text-lg text-text-secondary leading-relaxed m-0">
-            Yulia gives you the same deliverables &mdash; valuations, CIMs, buyer
-            lists, financial models &mdash; at a fraction of the cost. Start free.
-            Pay as you go. No minimums.
-          </p>
-        </div>
-      </section>
-
-      {/* 3. JOURNEY CARDS */}
-      <section className="px-6 py-20 bg-white">
+      {/* JOURNEY CARDS */}
+      <section className="px-6 py-16 bg-white">
         <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6">
           {JOURNEYS.map(j => (
             <Link
@@ -116,7 +100,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 4. HOW IT WORKS */}
+      {/* HOW IT WORKS */}
       <section className="px-6 py-20">
         <div className="max-w-2xl mx-auto">
           <h2
@@ -150,7 +134,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 5. CREDIBILITY */}
+      {/* CREDIBILITY */}
       <section className="px-6 py-20">
         <div className="max-w-lg mx-auto text-center">
           <h2
@@ -171,7 +155,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. FINAL CTA */}
+      {/* FINAL CTA */}
       <section className="px-6 py-20 bg-sidebar">
         <div className="max-w-xl mx-auto text-center">
           <h2
