@@ -1,14 +1,13 @@
-import { useState } from 'react';
+import { Route, Switch, Redirect, useLocation } from 'wouter';
 import { useAuth } from './hooks/useAuth';
+import Home from './pages/public/Home';
 import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
 import Chat from './pages/Chat';
 
-type Page = 'login' | 'signup';
-
 export default function App() {
   const { user, loading, login, register, logout } = useAuth();
-  const [page, setPage] = useState<Page>('login');
+  const [, navigate] = useLocation();
 
   if (loading) {
     return (
@@ -18,25 +17,68 @@ export default function App() {
     );
   }
 
-  if (user) {
-    return <Chat user={user} onLogout={logout} />;
-  }
-
-  if (page === 'signup') {
-    return (
-      <Signup
-        onRegister={async (name, email, password) => { await register(name, email, password); }}
-        onGoogleLogin={() => {}}
-        onNavigateLogin={() => setPage('login')}
-      />
-    );
-  }
-
   return (
-    <Login
-      onLogin={async (email, password) => { await login(email, password); }}
-      onGoogleLogin={() => {}}
-      onNavigateSignup={() => setPage('signup')}
-    />
+    <Switch>
+      <Route path="/">
+        <Home />
+      </Route>
+      <Route path="/sell">
+        <Home />
+      </Route>
+      <Route path="/buy">
+        <Home />
+      </Route>
+      <Route path="/raise">
+        <Home />
+      </Route>
+      <Route path="/integrate">
+        <Home />
+      </Route>
+      <Route path="/pricing">
+        <Home />
+      </Route>
+
+      <Route path="/login">
+        {user ? (
+          <Redirect to="/chat" />
+        ) : (
+          <Login
+            onLogin={async (email, password) => {
+              await login(email, password);
+              navigate('/chat');
+            }}
+            onGoogleLogin={() => {}}
+            onNavigateSignup={() => navigate('/signup')}
+          />
+        )}
+      </Route>
+
+      <Route path="/signup">
+        {user ? (
+          <Redirect to="/chat" />
+        ) : (
+          <Signup
+            onRegister={async (name, email, password) => {
+              await register(name, email, password);
+              navigate('/chat');
+            }}
+            onGoogleLogin={() => {}}
+            onNavigateLogin={() => navigate('/login')}
+          />
+        )}
+      </Route>
+
+      <Route path="/chat/:id?">
+        {user ? (
+          <Chat user={user} onLogout={() => { logout(); navigate('/'); }} />
+        ) : (
+          <Redirect to="/login" />
+        )}
+      </Route>
+
+      <Route>
+        <Redirect to="/" />
+      </Route>
+    </Switch>
   );
 }
