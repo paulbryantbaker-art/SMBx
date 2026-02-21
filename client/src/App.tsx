@@ -4,6 +4,7 @@ import Home from './pages/public/Home';
 import Sell from './pages/public/Sell';
 import Buy from './pages/public/Buy';
 import Raise from './pages/public/Raise';
+import Pricing from './pages/public/Pricing';
 import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
 import Chat from './pages/Chat';
@@ -38,7 +39,7 @@ export default function App() {
         <Home />
       </Route>
       <Route path="/pricing">
-        <Home />
+        <Pricing />
       </Route>
 
       <Route path="/login">
