@@ -158,7 +158,7 @@ export default function Home() {
     /* toggle mini bar when card scrolls out of view */
     const miniObs = new IntersectionObserver(
       ([e]) => setYuliaMinimized(!e.isIntersecting),
-      { threshold: 0.3 },
+      { threshold: 0.1 },
     );
     miniObs.observe(el);
     return () => { enterObs.disconnect(); miniObs.disconnect(); };
@@ -330,7 +330,7 @@ export default function Home() {
       {/* ── Yulia mini bar (appears when card scrolls away) ── */}
       <div
         className="fixed top-14 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm transition-transform duration-300 ease-out"
-        style={{ transform: yuliaMinimized && yuliaDone ? 'translateY(0)' : 'translateY(-100%)' }}
+        style={{ transform: yuliaMinimized ? 'translateY(0)' : 'translateY(-100%)' }}
       >
         <div className="max-w-7xl mx-auto h-14 flex items-center justify-between px-6">
           <div className="flex items-center">
