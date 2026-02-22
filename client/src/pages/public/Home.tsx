@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
+import YuliaSection from '../../components/public/YuliaSection';
 
 const SERIF = { fontFamily: 'ui-serif, Georgia, Cambria, serif' } as const;
 
@@ -135,85 +136,8 @@ function Ticker() {
    ───────────────────────────────────────── */
 
 export default function Home() {
-  /* ── Yulia typing state ── */
-  const yuliaRef = useRef<HTMLElement>(null);
-  const [yuliaEntered, setYuliaEntered] = useState(false);
-  const [yuliaText, setYuliaText] = useState('');
-  const [showPeriod, setShowPeriod] = useState(false);
-  const [showCursor, setShowCursor] = useState(false);
-  const [cursorOn, setCursorOn] = useState(true);
-  const [yuliaDone, setYuliaDone] = useState(false);
-  const [yuliaMinimized, setYuliaMinimized] = useState(false);
-  const yuliaStarted = useRef(false);
-
-  useEffect(() => {
-    const el = yuliaRef.current;
-    if (!el) return;
-    const enterObs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setYuliaEntered(true); enterObs.unobserve(el); } },
-      { threshold: 0.2 },
-    );
-    enterObs.observe(el);
-    const miniObs = new IntersectionObserver(
-      ([e]) => setYuliaMinimized(!e.isIntersecting),
-      { threshold: 0.1 },
-    );
-    miniObs.observe(el);
-    return () => { enterObs.disconnect(); miniObs.disconnect(); };
-  }, []);
-
-  useEffect(() => {
-    if (!yuliaEntered || yuliaStarted.current) return;
-    yuliaStarted.current = true;
-    setShowCursor(true);
-    const name = 'Yulia';
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    for (let i = 0; i < name.length; i++) {
-      timers.push(setTimeout(() => setYuliaText(name.slice(0, i + 1)), i * 120));
-    }
-    timers.push(setTimeout(() => setShowPeriod(true), name.length * 120 + 200));
-    timers.push(setTimeout(() => setYuliaDone(true), name.length * 120 + 500));
-    timers.push(setTimeout(() => setShowCursor(false), name.length * 120 + 800));
-    return () => timers.forEach(clearTimeout);
-  }, [yuliaEntered]);
-
-  useEffect(() => {
-    if (!showCursor) return;
-    const id = setInterval(() => setCursorOn(v => !v), 500);
-    return () => clearInterval(id);
-  }, [showCursor]);
-
   return (
     <PublicLayout>
-      {/* ── Yulia mini bar (fixed, slides in when card leaves) ── */}
-      <div
-        className="fixed left-0 right-0 z-50 transition-all duration-500 ease-out"
-        style={{
-          top: '56px',
-          transform: yuliaMinimized ? 'translateY(0)' : 'translateY(-100%)',
-          opacity: yuliaMinimized ? 1 : 0,
-        }}
-      >
-        <div className="bg-[#DA7756] shadow-lg">
-          <div className="max-w-7xl mx-auto h-16 flex items-center justify-between px-6">
-            <div className="flex items-center gap-4">
-              <span className="text-2xl font-medium text-white tracking-tight" style={SERIF}>
-                Yulia.
-              </span>
-              <span className="text-sm text-white/70 hidden md:inline">
-                Your AI deal advisor.
-              </span>
-            </div>
-            <Link
-              href="/signup"
-              className="bg-white text-[#DA7756] px-6 py-2.5 rounded-full text-sm font-semibold no-underline hover:bg-gray-50 transition-colors shadow-sm"
-            >
-              Get started &rarr;
-            </Link>
-          </div>
-        </div>
-      </div>
-
       {/* ═══════════════════════════════════════
           SECTION 1 · HERO — centered, massive type
           ═══════════════════════════════════════ */}
@@ -355,90 +279,9 @@ export default function Home() {
       </section>
 
       {/* ═══════════════════════════════════════
-          SECTION 4 · MEET YULIA — beautiful card
+          SECTION 4 · MEET YULIA — cinematic scroll
           ═══════════════════════════════════════ */}
-      <section
-        ref={yuliaRef}
-        className="py-16 md:py-32 flex items-center justify-center px-6 bg-[#FAF9F5]"
-      >
-        <div className="bg-white rounded-3xl shadow-lg p-6 md:p-16 max-w-3xl w-full mx-4 md:mx-auto text-center">
-          {/* Eyebrow */}
-          <p
-            className="text-sm uppercase tracking-widest text-[#DA7756] mb-3 md:mb-6"
-            style={{ opacity: yuliaEntered ? 1 : 0, transition: 'opacity 500ms ease-out' }}
-          >
-            Introducing
-          </p>
-
-          {/* Typed name */}
-          <h2
-            className="text-6xl md:text-8xl font-medium text-[#1A1A18] leading-none"
-            style={SERIF}
-          >
-            {yuliaText}
-            <span style={{ opacity: showPeriod ? 1 : 0, transition: 'opacity 300ms ease-out' }}>.</span>
-            {showCursor && (
-              <span
-                className="text-[#DA7756] ml-1 md:ml-2 inline-block"
-                style={{ opacity: cursorOn ? 1 : 0, transition: 'opacity 100ms' }}
-              >
-                |
-              </span>
-            )}
-          </h2>
-
-          {/* Subtitle */}
-          <p
-            className="text-xl md:text-2xl text-[#6B6963] mt-2 md:mt-4"
-            style={{
-              opacity: yuliaDone ? 1 : 0,
-              transform: yuliaDone ? 'translateY(0)' : 'translateY(8px)',
-              transition: 'opacity 700ms ease-out, transform 700ms ease-out',
-            }}
-          >
-            Your AI deal advisor.
-          </p>
-
-          {/* Stats */}
-          <div
-            className="grid grid-cols-3 gap-4 md:gap-8 mt-6 md:mt-12"
-            style={{
-              opacity: yuliaDone ? 1 : 0,
-              transform: yuliaDone ? 'translateY(0)' : 'translateY(16px)',
-              transition: 'opacity 700ms ease-out 300ms, transform 700ms ease-out 300ms',
-            }}
-          >
-            <div className="text-center">
-              <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
-                <CountUp target={80} suffix="+" active={yuliaDone} />
-              </p>
-              <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Industries</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>24/7</p>
-              <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Always On</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
-                <CountUp target={90} suffix="%" active={yuliaDone} />
-              </p>
-              <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Cost Savings</p>
-            </div>
-          </div>
-
-          {/* Tagline */}
-          <p
-            className="text-lg text-[#6B6963] italic mt-6 md:mt-10 leading-relaxed"
-            style={{
-              ...SERIF,
-              opacity: yuliaDone ? 1 : 0,
-              transition: 'opacity 700ms ease-out 600ms',
-            }}
-          >
-            Now you&apos;ll never wonder if you left money on the table.
-          </p>
-        </div>
-      </section>
+      <YuliaSection />
 
       {/* ─── SECTION 5 · DELIVERABLES — 2-col card grid ─── */}
       <section className="bg-white px-6 py-20 md:py-32">
