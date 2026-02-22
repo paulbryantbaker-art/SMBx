@@ -244,31 +244,32 @@ export default function Sell() {
       </section>
 
       {/* ═══════════════════════════════════════
-          SECTION 5 · BROKER CALLOUT
+          SECTION 5 · BROKER CALLOUT — full-width terra cotta
           ═══════════════════════════════════════ */}
-      <section className="bg-[#FAF9F5] px-6 py-16 md:py-24">
-        <FadeIn className="max-w-3xl mx-auto">
-          <div className="bg-white rounded-2xl p-8 md:p-12 shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8 items-center">
-              <div>
-                <p className="text-sm uppercase tracking-widest text-[#DA7756] mb-3">
-                  For brokers &amp; advisors
-                </p>
-                <h3 className="text-xl md:text-2xl font-medium text-[#1A1A18] leading-tight" style={SERIF}>
-                  Managing a seller engagement? Yulia does the heavy lifting so you can focus on closing.
-                </h3>
-                <p className="text-base md:text-lg text-[#6B6963] mt-4 leading-relaxed">
-                  Prep books, build CIMs, source buyers, and manage pipeline — in a fraction of the time. Your commission. Her workflow.
-                </p>
-              </div>
-              <div className="text-center md:text-right">
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center px-6 py-3 bg-[#DA7756] text-white text-base font-medium rounded-full hover:bg-[#C4684A] no-underline transition-colors"
-                >
-                  Start free &rarr;
-                </Link>
-              </div>
+      <section className="bg-[#DA7756] px-6 py-16 md:py-24">
+        <FadeIn className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8 md:gap-12 items-center">
+            <div>
+              <p className="text-sm uppercase tracking-widest text-white/60 mb-4">
+                For brokers &amp; advisors
+              </p>
+              <h3 className="text-2xl md:text-4xl font-medium text-white leading-tight" style={SERIF}>
+                You close deals. Let Yulia do the rest.
+              </h3>
+              <p className="text-base md:text-lg text-white/80 mt-6 leading-relaxed">
+                Prep books, build CIMs, source buyers, manage pipeline — in a fraction of the time. Whether you&apos;re representing a seller or collaborating with other brokers on a deal, Yulia handles the heavy lifting. Your clients. Your commission. Her workflow.
+              </p>
+            </div>
+            <div className="text-center md:text-right">
+              <Link
+                href="/signup"
+                className="inline-flex items-center px-8 py-4 bg-white text-[#DA7756] text-lg font-medium rounded-full hover:bg-gray-100 no-underline transition-colors"
+              >
+                Start free &rarr;
+              </Link>
+              <p className="text-sm text-white/50 mt-4">
+                No commitment. Works alongside your existing process.
+              </p>
             </div>
           </div>
         </FadeIn>
