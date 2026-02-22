@@ -353,166 +353,205 @@ export default function Home() {
         </section>
 
       {/* ═══════════════════════════════════════
-          SECTION 4 · MEET YULIA — morphing card
-          ═══════════════════════════════════════ */}
-      {/* ═══════════════════════════════════════
-          SECTION 4+ · YULIA MORPH + ALL REMAINING SECTIONS
+          SECTION 4+ · YULIA EXPLODING CARD + ALL REMAINING
           (single parent so sticky persists through all content)
+          Three phases: EXPLODE → HOLD+FADE → MINIMIZE
           ═══════════════════════════════════════ */}
-      <div className="relative">
-        <section
-          ref={yuliaRef}
-          className="sticky flex items-start justify-center px-6 bg-[#FAF9F5] will-change-transform"
-          style={{
-            top: '64px',
-            paddingTop: `${lerp(80, 0, scrollProgress)}px`,
-            paddingBottom: `${lerp(80, 0, scrollProgress)}px`,
-            zIndex: 30,
-          }}
-        >
-          <div
-            className="w-full text-center"
-            style={{
-              maxWidth: `${lerp(768, 1280, scrollProgress)}px`,
-              borderRadius: `${lerp(24, 0, scrollProgress)}px`,
-              padding: `${lerp(48, 16, scrollProgress)}px ${lerp(64, 24, scrollProgress)}px`,
-              backgroundColor: scrollProgress > 0.8 ? '#DA7756' : '#FFFFFF',
-              transition: 'background-color 0.2s',
-              boxShadow: scrollProgress > 0.8
-                ? '0 4px 12px rgba(218,119,86,0.3)'
-                : scrollProgress < 0.8
-                  ? '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -4px rgba(0,0,0,0.07)'
-                  : '0 1px 3px rgba(0,0,0,0.05)',
-              borderBottom: scrollProgress > 0.8 ? 'none' : '1px solid transparent',
-            }}
-          >
-            {/* Mini layout: row with name left, button right */}
-            <div style={{
-              display: 'flex',
-              flexDirection: scrollProgress > 0.7 ? 'row' : 'column',
-              alignItems: 'center',
-              justifyContent: scrollProgress > 0.7 ? 'space-between' : 'center',
-              gap: scrollProgress > 0.7 ? '16px' : '0px',
-            }}>
-              <div style={{
-                display: 'flex',
-                flexDirection: scrollProgress > 0.7 ? 'row' : 'column',
-                alignItems: 'center',
-                gap: scrollProgress > 0.7 ? '12px' : '0px',
-              }}>
-                {/* Eyebrow */}
-                <p
-                  className="text-sm uppercase tracking-widest"
-                  style={{
-                    color: scrollProgress > 0.8 ? 'rgba(255,255,255,0.7)' : '#DA7756',
-                    opacity: lerp(1, 0, Math.min(scrollProgress * 2, 1)),
-                    maxHeight: scrollProgress > 0.4 ? '0px' : '40px',
-                    overflow: 'hidden',
-                    marginBottom: scrollProgress > 0.4 ? '0px' : '12px',
-                    transition: 'max-height 0.15s, color 0.2s',
-                  }}
-                >
-                  Introducing
-                </p>
+      {(() => {
+        const p1 = Math.min(scrollProgress / 0.3, 1);
+        const p2 = Math.max(0, Math.min((scrollProgress - 0.3) / 0.4, 1));
+        const p3 = Math.max(0, Math.min((scrollProgress - 0.7) / 0.3, 1));
 
-                {/* Name */}
-                <h2
-                  className="font-medium leading-none"
-                  style={{
-                    ...SERIF,
-                    fontSize: `${lerp(72, 24, scrollProgress)}px`,
-                    color: scrollProgress > 0.8 ? '#FFFFFF' : '#1A1A18',
-                    transition: 'color 0.2s',
-                  }}
-                >
-                  {yuliaText || 'Yulia'}
-                  <span style={{ opacity: showPeriod || scrollProgress > 0 ? 1 : 0 }}>.</span>
-                  {showCursor && (
-                    <span style={{ color: scrollProgress > 0.8 ? 'rgba(255,255,255,0.7)' : '#DA7756', marginLeft: 4, opacity: cursorOn ? 1 : 0 }}>|</span>
-                  )}
-                </h2>
+        const bgR = Math.round(lerp(255, 218, p2));
+        const bgG = Math.round(lerp(255, 119, p2));
+        const bgB = Math.round(lerp(255, 86, p2));
 
-                {/* Subtitle */}
-                <p
-                  style={{
-                    fontSize: `${lerp(20, 16, scrollProgress)}px`,
-                    color: scrollProgress > 0.8 ? 'rgba(255,255,255,0.7)' : '#6B6963',
-                    opacity: scrollProgress > 0.8 ? (scrollProgress > 0.9 ? 1 : 0.5) : (yuliaDone ? 1 : 0),
-                    marginTop: scrollProgress > 0.7 ? '0px' : '8px',
-                    transition: 'color 0.2s',
-                  }}
-                >
-                  Your AI deal advisor.
-                </p>
-              </div>
+        const textR = Math.round(lerp(26, 255, p2));
+        const textG = Math.round(lerp(26, 255, p2));
+        const textB = Math.round(lerp(24, 255, p2));
 
-              {/* CTA button - visible in mini mode */}
-              <Link
-                href="/signup"
-                className="rounded-full font-medium no-underline transition-all whitespace-nowrap"
+        const subtitleR = Math.round(lerp(107, 255, p2));
+        const subtitleG = Math.round(lerp(105, 255, p2));
+        const subtitleB = Math.round(lerp(99, 255, p2));
+
+        const yuliaFontSize = scrollProgress < 0.3
+          ? lerp(72, 96, p1)
+          : lerp(96, 24, Math.min((scrollProgress - 0.3) / 0.7, 1));
+
+        const cardMaxWidth = scrollProgress < 0.3
+          ? lerp(768, 1600, p1)
+          : scrollProgress < 0.7
+            ? 1600
+            : lerp(1600, 1280, p3);
+
+        const cardPadV = scrollProgress < 0.3
+          ? lerp(48, 64, p1)
+          : lerp(64, 14, Math.min((scrollProgress - 0.3) / 0.7, 1));
+
+        const cardPadH = scrollProgress < 0.3
+          ? lerp(64, 72, p1)
+          : lerp(72, 24, Math.min((scrollProgress - 0.3) / 0.7, 1));
+
+        const cardRadius = scrollProgress < 0.3
+          ? lerp(24, 0, p1)
+          : 0;
+
+        const cardShadow = scrollProgress < 0.3
+          ? `0 ${lerp(10, 25, p1)}px ${lerp(15, 50, p1)}px -3px rgba(0,0,0,${lerp(0.07, 0.12, p1)})`
+          : p2 < 0.5
+            ? '0 25px 50px -3px rgba(0,0,0,0.12)'
+            : `0 4px 12px rgba(218,119,86,${lerp(0, 0.3, p2)})`;
+
+        const isRow = scrollProgress > 0.7;
+
+        return (
+          <div className="relative">
+            <section
+              ref={yuliaRef}
+              className="sticky flex items-start justify-center bg-[#FAF9F5] will-change-transform"
+              style={{
+                top: '64px',
+                paddingTop: `${lerp(80, 0, scrollProgress)}px`,
+                paddingBottom: `${lerp(80, 0, scrollProgress)}px`,
+                paddingLeft: `${lerp(24, 0, p1)}px`,
+                paddingRight: `${lerp(24, 0, p1)}px`,
+                zIndex: 30,
+              }}
+            >
+              <div
+                className="w-full text-center"
                 style={{
-                  backgroundColor: scrollProgress > 0.8 ? '#FFFFFF' : '#DA7756',
-                  color: scrollProgress > 0.8 ? '#DA7756' : '#FFFFFF',
-                  opacity: lerp(0, 1, Math.max((scrollProgress - 0.5) * 2, 0)),
-                  pointerEvents: scrollProgress > 0.6 ? 'auto' as const : 'none' as const,
-                  padding: `${lerp(16, 10, scrollProgress)}px ${lerp(40, 24, scrollProgress)}px`,
-                  fontSize: `${lerp(18, 16, scrollProgress)}px`,
-                  position: scrollProgress > 0.7 ? 'static' as const : 'absolute' as const,
-                  boxShadow: scrollProgress > 0.9 ? '0 0 0 3px rgba(255,255,255,0.3)' : 'none',
-                  transition: 'background-color 0.2s, color 0.2s, box-shadow 0.3s',
-                  ...(scrollProgress <= 0.7 ? { bottom: '-50px', left: '50%', transform: 'translateX(-50%)' } : {}),
+                  maxWidth: `${cardMaxWidth}px`,
+                  borderRadius: `${cardRadius}px`,
+                  padding: `${cardPadV}px ${cardPadH}px`,
+                  backgroundColor: `rgb(${bgR},${bgG},${bgB})`,
+                  boxShadow: cardShadow,
+                  borderBottom: scrollProgress > 0.7 ? '1px solid rgba(0,0,0,0.05)' : '1px solid transparent',
                 }}
               >
-                Meet Yulia &rarr;
-              </Link>
-            </div>
+                {/* Layout container */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: isRow ? 'row' : 'column',
+                  alignItems: 'center',
+                  justifyContent: isRow ? 'space-between' : 'center',
+                  gap: isRow ? '16px' : '0px',
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: isRow ? 'row' : 'column',
+                    alignItems: 'center',
+                    gap: isRow ? '12px' : '0px',
+                  }}>
+                    {/* Eyebrow */}
+                    <p
+                      className="text-sm uppercase tracking-widest"
+                      style={{
+                        color: `rgba(${textR},${textG},${textB},0.6)`,
+                        opacity: lerp(1, 0, p2),
+                        maxHeight: p2 > 0.3 ? '0px' : '40px',
+                        overflow: 'hidden',
+                        marginBottom: p2 > 0.3 ? '0px' : '12px',
+                        transition: 'max-height 0.15s',
+                      }}
+                    >
+                      Introducing
+                    </p>
 
-            {/* Stats - fade out as we scroll */}
-            <div
-              className="grid grid-cols-3 gap-4 md:gap-8"
-              style={{
-                opacity: lerp(1, 0, Math.min(scrollProgress * 2.5, 1)),
-                maxHeight: scrollProgress > 0.3 ? '0px' : '200px',
-                overflow: 'hidden',
-                marginTop: scrollProgress > 0.3 ? '0px' : '24px',
-                transition: 'max-height 0.15s',
-              }}
-            >
-              <div className="text-center">
-                <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
-                  <CountUp target={80} suffix="+" active={yuliaDone} />
-                </p>
-                <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Industries</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>24/7</p>
-                <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Always On</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
-                  <CountUp target={90} suffix="%" active={yuliaDone} />
-                </p>
-                <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Cost Savings</p>
-              </div>
-            </div>
+                    {/* Name */}
+                    <h2
+                      className="font-medium leading-none"
+                      style={{
+                        ...SERIF,
+                        fontSize: `${yuliaFontSize}px`,
+                        color: `rgb(${textR},${textG},${textB})`,
+                      }}
+                    >
+                      {yuliaText || 'Yulia'}
+                      <span style={{ opacity: showPeriod || scrollProgress > 0 ? 1 : 0 }}>.</span>
+                      {showCursor && (
+                        <span style={{ color: p2 > 0.5 ? 'rgba(255,255,255,0.7)' : '#DA7756', marginLeft: 4, opacity: cursorOn ? 1 : 0 }}>|</span>
+                      )}
+                    </h2>
 
-            {/* Tagline - fade out */}
-            <p
-              className="text-lg italic leading-relaxed"
-              style={{
-                ...SERIF,
-                color: '#6B6963',
-                opacity: lerp(yuliaDone ? 1 : 0, 0, Math.min(scrollProgress * 2, 1)),
-                maxHeight: scrollProgress > 0.3 ? '0px' : '80px',
-                overflow: 'hidden',
-                marginTop: scrollProgress > 0.3 ? '0px' : '24px',
-                transition: 'max-height 0.15s',
-              }}
-            >
-              Now you&apos;ll never wonder if you left money on the table.
-            </p>
-          </div>
-        </section>
+                    {/* Subtitle */}
+                    <p
+                      style={{
+                        fontSize: `${lerp(20, 16, Math.min((scrollProgress - 0.3) / 0.7, 1))}px`,
+                        color: `rgba(${subtitleR},${subtitleG},${subtitleB},${isRow ? 0.7 : (yuliaDone ? 1 : 0)})`,
+                        marginTop: isRow ? '0px' : '8px',
+                      }}
+                    >
+                      Your AI deal advisor.
+                    </p>
+                  </div>
+
+                  {/* CTA button */}
+                  <Link
+                    href="/signup"
+                    className="rounded-full font-medium no-underline whitespace-nowrap"
+                    style={{
+                      backgroundColor: p2 > 0.7 ? '#FFFFFF' : '#DA7756',
+                      color: p2 > 0.7 ? '#DA7756' : '#FFFFFF',
+                      opacity: lerp(0, 1, Math.max((scrollProgress - 0.5) * 2, 0)),
+                      pointerEvents: scrollProgress > 0.6 ? 'auto' as const : 'none' as const,
+                      padding: `${lerp(16, 10, Math.max(p2, p3))}px ${lerp(40, 24, Math.max(p2, p3))}px`,
+                      fontSize: `${lerp(18, 16, Math.max(p2, p3))}px`,
+                      position: isRow ? 'static' as const : 'absolute' as const,
+                      boxShadow: p3 > 0.5 ? '0 0 0 3px rgba(255,255,255,0.3)' : 'none',
+                      transition: 'background-color 0.2s, color 0.2s, box-shadow 0.3s',
+                      ...(isRow ? {} : { bottom: '-50px', left: '50%', transform: 'translateX(-50%)' }),
+                    }}
+                  >
+                    Meet Yulia &rarr;
+                  </Link>
+                </div>
+
+                {/* Stats - fade out in phase 2 */}
+                <div
+                  className="grid grid-cols-3 gap-4 md:gap-8"
+                  style={{
+                    opacity: lerp(1, 0, Math.min(p2 * 2, 1)),
+                    maxHeight: p2 > 0.3 ? '0px' : '200px',
+                    overflow: 'hidden',
+                    marginTop: p2 > 0.3 ? '0px' : '24px',
+                    transition: 'max-height 0.15s',
+                  }}
+                >
+                  <div className="text-center">
+                    <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
+                      <CountUp target={80} suffix="+" active={yuliaDone} />
+                    </p>
+                    <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Industries</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>24/7</p>
+                    <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Always On</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
+                      <CountUp target={90} suffix="%" active={yuliaDone} />
+                    </p>
+                    <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Cost Savings</p>
+                  </div>
+                </div>
+
+                {/* Tagline - fade out in phase 2 */}
+                <p
+                  className="text-lg italic leading-relaxed"
+                  style={{
+                    ...SERIF,
+                    color: `rgba(${subtitleR},${subtitleG},${subtitleB},${lerp(yuliaDone ? 1 : 0, 0, Math.min(p2 * 2, 1))})`,
+                    maxHeight: p2 > 0.3 ? '0px' : '80px',
+                    overflow: 'hidden',
+                    marginTop: p2 > 0.3 ? '0px' : '24px',
+                    transition: 'max-height 0.15s',
+                  }}
+                >
+                  Now you&apos;ll never wonder if you left money on the table.
+                </p>
+              </div>
+            </section>
 
       {/* ─── SECTION 5 · DELIVERABLES — 2-col card grid ─── */}
       <section className="bg-white px-6 py-20 md:py-32">
@@ -669,7 +708,9 @@ export default function Home() {
             </div>
           </FadeIn>
         </section>
-      </div>
+          </div>
+        );
+      })()}
     </PublicLayout>
   );
 }
