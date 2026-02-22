@@ -182,7 +182,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════
           SECTION 1 · HERO — centered, massive type
           ═══════════════════════════════════════ */}
-      <section className="fixed inset-0 z-0 flex flex-col items-center justify-center px-6 bg-[#FAF9F5]">
+      <section className="flex flex-col items-center justify-center px-6 py-20 md:py-32 bg-[#FAF9F5] min-h-[80vh] md:min-h-screen">
         <div className="text-center flex flex-col items-center max-w-5xl w-full">
           <span className="inline-block bg-[#F0EDE6] text-[#6B6963] text-sm px-4 py-1.5 rounded-full mb-8">
             AI-Powered M&amp;A Advisory
@@ -219,18 +219,10 @@ export default function Home() {
         </svg>
       </section>
 
-      <div className="min-h-screen pointer-events-none" />
-
       {/* ═══════════════════════════════════════
-          SECTIONS 2–3 · slide over hero
+          SECTION 2 · WAKE-UP — asymmetric split
           ═══════════════════════════════════════ */}
-      <div className="relative z-10">
-
-        {/* ─── SECTION 2 · WAKE-UP — asymmetric split ─── */}
-        <section
-          className="bg-white rounded-t-3xl px-6 py-20 md:py-32"
-          style={{ boxShadow: '0 -4px 30px rgba(0,0,0,0.05)' }}
-        >
+      <section className="bg-white px-6 py-20 md:py-32">
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
             {/* LEFT — the punch */}
             <FadeIn>
@@ -326,14 +318,13 @@ export default function Home() {
             </FadeIn>
           </div>
         </section>
-      </div>
 
       {/* ═══════════════════════════════════════
-          SECTION 4 · MEET YULIA — single card, sticky
+          SECTION 4 · MEET YULIA — single card
           ═══════════════════════════════════════ */}
       <section
         ref={yuliaRef}
-        className="relative z-20 py-8 md:py-0 md:sticky md:top-0 min-h-0 md:min-h-screen flex items-center justify-center px-6 bg-[#FAF9F5]"
+        className="py-16 md:py-32 flex items-center justify-center px-6 bg-[#FAF9F5]"
       >
         <div
           className="bg-white rounded-3xl shadow-lg p-6 md:p-16 max-w-3xl w-full mx-4 md:mx-auto text-center"
@@ -416,16 +407,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════
-          SECTIONS 5–8 · slide over Yulia
-          ═══════════════════════════════════════ */}
-      <div className="relative z-30">
-
-        {/* ─── SECTION 5 · DELIVERABLES — 2-col card grid ─── */}
-        <section
-          className="bg-white rounded-t-3xl px-6 py-20 md:py-32"
-          style={{ boxShadow: '0 -4px 30px rgba(0,0,0,0.1)' }}
-        >
+      {/* ─── SECTION 5 · DELIVERABLES — 2-col card grid ─── */}
+      <section className="bg-white px-6 py-20 md:py-32">
           <div className="max-w-5xl mx-auto">
             <FadeIn>
               <p className="text-sm uppercase tracking-widest text-[#6B6963] mb-6 text-center">
@@ -579,7 +562,6 @@ export default function Home() {
             </div>
           </FadeIn>
         </section>
-      </div>
     </PublicLayout>
   );
 }
