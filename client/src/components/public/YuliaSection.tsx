@@ -7,10 +7,14 @@ function lerp(a: number, b: number, t: number) {
   return a + (b - a) * Math.max(0, Math.min(1, t));
 }
 
-function phase(progress: number, start: number, end: number) {
+function band(progress: number, start: number, end: number) {
   if (progress <= start) return 0;
   if (progress >= end) return 1;
   return (progress - start) / (end - start);
+}
+
+function ease(t: number) {
+  return t * t * (3 - 2 * t);
 }
 
 export default function YuliaSection() {
@@ -51,31 +55,31 @@ export default function YuliaSection() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const pIntro = phase(progress, 0, 0.2);
-  const pName = phase(progress, 0.12, 0.4);
-  const pSubtitle = phase(progress, 0.35, 0.5);
-  const pStats = phase(progress, 0.45, 0.6);
-  const pTagline = phase(progress, 0.55, 0.68);
-  const pGather = phase(progress, 0.65, 0.85);
-  const pMini = phase(progress, 0.85, 1.0);
+  const pIntro    = ease(band(progress, 0.02, 0.12));
+  const pName     = ease(band(progress, 0.08, 0.28));
+  const pSub      = ease(band(progress, 0.25, 0.35));
+  const pStats    = ease(band(progress, 0.32, 0.45));
+  const pTagline  = ease(band(progress, 0.42, 0.55));
+  const pFadeOut  = ease(band(progress, 0.65, 0.85));
+  const pColor    = ease(band(progress, 0.68, 0.88));
 
-  const bgR = Math.round(lerp(250, 218, pMini));
-  const bgG = Math.round(lerp(249, 119, pMini));
-  const bgB = Math.round(lerp(245, 86, pMini));
+  const bgR = Math.round(lerp(250, 218, pColor));
+  const bgG = Math.round(lerp(249, 119, pColor));
+  const bgB = Math.round(lerp(245, 86, pColor));
 
-  const nameFontSize = pGather > 0
-    ? lerp(96, pMini > 0 ? 28 : 72, pGather)
+  const nameFontSize = pFadeOut > 0
+    ? lerp(96, pColor > 0 ? 28 : 72, pFadeOut)
     : lerp(20, 96, pName);
 
-  const cardMaxW = pMini > 0 ? lerp(768, 1280, pMini) : lerp(600, 768, pGather);
-  const cardPadding = pMini > 0 ? lerp(48, 14, pMini) : 48;
-  const cardRadius = pMini > 0 ? lerp(24, 0, pMini) : 24;
-  const contentOpacity = 1 - phase(progress, 0.75, 0.9);
-  const miniLayout = phase(progress, 0.88, 1.0);
+  const cardMaxW = pColor > 0 ? lerp(768, 1280, pColor) : lerp(600, 768, pFadeOut);
+  const cardPadding = pColor > 0 ? lerp(48, 14, pColor) : 48;
+  const cardRadius = pColor > 0 ? lerp(24, 0, pColor) : 24;
+  const contentOpacity = 1 - ease(band(progress, 0.75, 0.9));
+  const miniLayout = ease(band(progress, 0.88, 1.0));
 
   return (
     <>
-      <div ref={runwayRef} className="relative" style={{ height: '400vh' }}>
+      <div ref={runwayRef} className="relative" style={{ height: '500vh' }}>
         <div
           className="sticky top-[64px] overflow-hidden flex items-center justify-center"
           style={{
@@ -91,13 +95,13 @@ export default function YuliaSection() {
             <div
               className="w-full"
               style={{
-                backgroundColor: pGather > 0.2 && pMini < 0.5
-                  ? `rgba(255,255,255,${lerp(0, 1, phase(pGather, 0.2, 0.6))})`
+                backgroundColor: pFadeOut > 0.2 && pColor < 0.5
+                  ? `rgba(255,255,255,${lerp(0, 1, band(pFadeOut, 0.2, 0.6))})`
                   : 'transparent',
                 borderRadius: `${cardRadius}px`,
                 padding: `${cardPadding}px`,
-                boxShadow: pGather > 0.3 && pMini < 0.5
-                  ? `0 20px 60px rgba(0,0,0,${lerp(0, 0.08, phase(pGather, 0.3, 0.7))})`
+                boxShadow: pFadeOut > 0.3 && pColor < 0.5
+                  ? `0 20px 60px rgba(0,0,0,${lerp(0, 0.08, band(pFadeOut, 0.3, 0.7))})`
                   : 'none',
                 display: 'flex',
                 flexDirection: miniLayout > 0.5 ? 'row' as const : 'column' as const,
@@ -116,10 +120,10 @@ export default function YuliaSection() {
                   className="text-sm uppercase tracking-[0.25em]"
                   style={{
                     color: '#DA7756',
-                    opacity: pIntro * (1 - phase(progress, 0.7, 0.85)),
+                    opacity: pIntro * (1 - ease(band(progress, 0.7, 0.85))),
                     transform: `translateY(${lerp(20, 0, pIntro)}px)`,
-                    marginBottom: pGather > 0.5 ? '0' : '16px',
-                    maxHeight: pGather > 0.8 ? '0' : '40px',
+                    marginBottom: pFadeOut > 0.5 ? '0' : '16px',
+                    maxHeight: pFadeOut > 0.8 ? '0' : '40px',
                     overflow: 'hidden',
                   }}
                 >
@@ -131,8 +135,8 @@ export default function YuliaSection() {
                   style={{
                     ...SERIF,
                     fontSize: `${Math.max(nameFontSize, 24)}px`,
-                    color: pMini > 0.3
-                      ? `rgb(${Math.round(lerp(26, 255, phase(pMini, 0.3, 0.8)))},${Math.round(lerp(26, 255, phase(pMini, 0.3, 0.8)))},${Math.round(lerp(24, 255, phase(pMini, 0.3, 0.8)))})`
+                    color: pColor > 0.3
+                      ? `rgb(${Math.round(lerp(26, 255, band(pColor, 0.3, 0.8)))},${Math.round(lerp(26, 255, band(pColor, 0.3, 0.8)))},${Math.round(lerp(24, 255, band(pColor, 0.3, 0.8)))})`
                       : '#1A1A18',
                     opacity: pName > 0 ? 1 : 0,
                     transform: `scale(${lerp(0.8, 1, Math.min(pName * 2, 1))})`,
@@ -143,10 +147,10 @@ export default function YuliaSection() {
                 </h2>
 
                 <p style={{
-                  fontSize: `${lerp(22, 14, pMini)}px`,
-                  color: pMini > 0.5 ? 'rgba(255,255,255,0.7)' : '#6B6963',
-                  opacity: pSubtitle * (miniLayout > 0.5 ? 1 : (1 - phase(progress, 0.8, 0.92))),
-                  transform: `translateY(${lerp(16, 0, pSubtitle)}px)`,
+                  fontSize: `${lerp(22, 14, pColor)}px`,
+                  color: pColor > 0.5 ? 'rgba(255,255,255,0.7)' : '#6B6963',
+                  opacity: pSub * (miniLayout > 0.5 ? 1 : (1 - ease(band(progress, 0.8, 0.92)))),
+                  transform: `translateY(${lerp(16, 0, pSub)}px)`,
                   marginTop: miniLayout > 0.5 ? '0' : '12px',
                 }}>
                   Your AI deal advisor.
@@ -157,11 +161,11 @@ export default function YuliaSection() {
                 href="/signup"
                 className="rounded-full font-semibold no-underline transition-colors whitespace-nowrap"
                 style={{
-                  backgroundColor: pMini > 0.5 ? '#FFFFFF' : '#DA7756',
-                  color: pMini > 0.5 ? '#DA7756' : '#FFFFFF',
+                  backgroundColor: pColor > 0.5 ? '#FFFFFF' : '#DA7756',
+                  color: pColor > 0.5 ? '#DA7756' : '#FFFFFF',
                   padding: miniLayout > 0.5 ? '10px 24px' : '16px 40px',
                   fontSize: miniLayout > 0.5 ? '14px' : '18px',
-                  opacity: phase(progress, 0.88, 1),
+                  opacity: ease(band(progress, 0.88, 1)),
                   pointerEvents: progress > 0.9 ? 'auto' as const : 'none' as const,
                 }}
               >
@@ -175,7 +179,7 @@ export default function YuliaSection() {
                 maxWidth: '600px',
                 opacity: pStats * contentOpacity,
                 transform: `translateY(${lerp(30, 0, pStats)}px)`,
-                maxHeight: pGather > 0.7 ? '0' : '200px',
+                maxHeight: pFadeOut > 0.7 ? '0' : '200px',
                 overflow: 'hidden',
               }}
             >
@@ -198,7 +202,7 @@ export default function YuliaSection() {
                 color: '#6B6963',
                 opacity: pTagline * contentOpacity,
                 transform: `translateY(${lerp(20, 0, pTagline)}px)`,
-                maxHeight: pGather > 0.6 ? '0' : '100px',
+                maxHeight: pFadeOut > 0.6 ? '0' : '100px',
                 overflow: 'hidden',
               }}
             >
