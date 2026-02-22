@@ -192,7 +192,7 @@ export default function Home() {
           if (!el) { ticking = false; return; }
           const rect = el.getBoundingClientRect();
           const navH = 64;
-          const startY = window.innerHeight * 0.25;
+          const startY = window.innerHeight * 0.5;
           const endY = navH;
           if (rect.top >= startY) {
             setScrollProgress(0);
@@ -379,10 +379,10 @@ export default function Home() {
           : lerp(96, 24, Math.min((scrollProgress - 0.3) / 0.7, 1));
 
         const cardMaxWidth = scrollProgress < 0.3
-          ? lerp(768, 1600, p1)
+          ? lerp(768, 9999, p1)
           : scrollProgress < 0.7
-            ? 1600
-            : lerp(1600, 1280, p3);
+            ? 9999
+            : lerp(9999, 1152, p3);
 
         const cardPadV = scrollProgress < 0.3
           ? lerp(48, 64, p1)
@@ -552,6 +552,9 @@ export default function Home() {
                 </p>
               </div>
             </section>
+
+      {/* Spacer: scroll runway for the sticky animation */}
+      <div className="h-[150vh]" />
 
       {/* ─── SECTION 5 · DELIVERABLES — 2-col card grid ─── */}
       <section className="bg-white px-6 py-20 md:py-32">
