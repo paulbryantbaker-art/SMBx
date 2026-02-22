@@ -328,23 +328,25 @@ export default function Home() {
         </section>
 
       {/* ── Yulia mini bar (appears when card scrolls away) ── */}
-      <div
-        className="fixed top-14 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm transition-transform duration-300 ease-out"
-        style={{ transform: yuliaMinimized ? 'translateY(0)' : 'translateY(-100%)' }}
-      >
-        <div className="max-w-7xl mx-auto h-14 flex items-center justify-between px-6">
-          <div className="flex items-center">
-            <span className="text-xl font-medium text-[#1A1A18]" style={SERIF}>Yulia.</span>
-            <span className="hidden md:inline text-sm text-[#6B6963] ml-3">Your AI deal advisor.</span>
+      {yuliaMinimized && (
+        <div
+          className="fixed left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm transition-all duration-300"
+          style={{ top: '56px' }}
+        >
+          <div className="max-w-7xl mx-auto h-14 flex items-center justify-between px-6">
+            <div className="flex items-center gap-3">
+              <span className="text-xl font-medium text-[#1A1A18]" style={SERIF}>Yulia.</span>
+              <span className="text-sm text-[#6B6963] hidden md:inline">Your AI deal advisor.</span>
+            </div>
+            <Link
+              href="/signup"
+              className="bg-[#DA7756] text-white px-4 py-2 rounded-full text-sm font-medium no-underline hover:bg-[#C4684A] transition-colors"
+            >
+              Meet Yulia &rarr;
+            </Link>
           </div>
-          <Link
-            href="/signup"
-            className="bg-[#DA7756] text-white px-4 py-2 rounded-full text-sm font-medium no-underline hover:bg-[#C4684A] transition-colors"
-          >
-            Meet Yulia &rarr;
-          </Link>
         </div>
-      </div>
+      )}
 
       {/* ═══════════════════════════════════════
           SECTION 4 · MEET YULIA — single card
