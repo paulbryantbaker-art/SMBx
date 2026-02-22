@@ -112,6 +112,10 @@ function CountUp({ target, suffix = '', active, delay = 0, className, style }: {
   return <span ref={ref} className={className} style={style}>{value}{suffix}</span>;
 }
 
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
+
 function Ticker() {
   const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
   return (
@@ -143,7 +147,7 @@ export default function Home() {
   const [showCursor, setShowCursor] = useState(false);
   const [cursorOn, setCursorOn] = useState(true);
   const [yuliaDone, setYuliaDone] = useState(false);
-  const [yuliaMinimized, setYuliaMinimized] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const yuliaStarted = useRef(false);
 
   useEffect(() => {
@@ -155,13 +159,7 @@ export default function Home() {
       { threshold: 0.2 },
     );
     enterObs.observe(el);
-    /* toggle mini bar when card scrolls out of view */
-    const miniObs = new IntersectionObserver(
-      ([e]) => setYuliaMinimized(!e.isIntersecting),
-      { threshold: 0.1 },
-    );
-    miniObs.observe(el);
-    return () => { enterObs.disconnect(); miniObs.disconnect(); };
+    return () => enterObs.disconnect();
   }, []);
 
   useEffect(() => {
@@ -184,6 +182,33 @@ export default function Home() {
     const id = setInterval(() => setCursorOn(v => !v), 500);
     return () => clearInterval(id);
   }, [showCursor]);
+
+  useEffect(() => {
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const el = yuliaRef.current;
+          if (!el) { ticking = false; return; }
+          const rect = el.getBoundingClientRect();
+          const navH = 64;
+          const startY = window.innerHeight * 0.25;
+          const endY = navH;
+          if (rect.top >= startY) {
+            setScrollProgress(0);
+          } else if (rect.top <= endY) {
+            setScrollProgress(1);
+          } else {
+            setScrollProgress(1 - (rect.top - endY) / (startY - endY));
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
     <PublicLayout>
@@ -327,114 +352,151 @@ export default function Home() {
           </div>
         </section>
 
-      {/* ── Yulia mini bar (appears when card scrolls away) ── */}
-      {yuliaMinimized && (
-        <div
-          className="fixed left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm transition-all duration-300"
-          style={{ top: '64px' }}
-        >
-          <div className="max-w-7xl mx-auto h-14 flex items-center justify-between px-6">
-            <div className="flex items-center gap-3">
-              <span className="text-xl font-medium text-[#1A1A18]" style={SERIF}>Yulia.</span>
-              <span className="text-sm text-[#6B6963] hidden md:inline">Your AI deal advisor.</span>
-            </div>
-            <Link
-              href="/signup"
-              className="bg-[#DA7756] text-white px-4 py-2 rounded-full text-sm font-medium no-underline hover:bg-[#C4684A] transition-colors"
-            >
-              Meet Yulia &rarr;
-            </Link>
-          </div>
-        </div>
-      )}
-
       {/* ═══════════════════════════════════════
-          SECTION 4 · MEET YULIA — single card
+          SECTION 4 · MEET YULIA — morphing card
           ═══════════════════════════════════════ */}
-      <section
-        ref={yuliaRef}
-        className="py-16 md:py-32 flex items-center justify-center px-6 bg-[#FAF9F5]"
-      >
-        <div
-          className="bg-white rounded-3xl shadow-lg p-6 md:p-16 max-w-3xl w-full mx-4 md:mx-auto text-center"
+      <div className="relative bg-[#FAF9F5]" style={{ minHeight: '80vh' }}>
+        <section
+          ref={yuliaRef}
+          className="sticky flex items-start justify-center px-6 bg-[#FAF9F5] will-change-transform"
+          style={{
+            top: '64px',
+            paddingTop: `${lerp(80, 0, scrollProgress)}px`,
+            paddingBottom: `${lerp(80, 0, scrollProgress)}px`,
+            zIndex: 30,
+          }}
         >
-          {/* Eyebrow */}
-          <p
-            className="text-sm uppercase tracking-widest text-[#DA7756] mb-3 md:mb-6"
-            style={{ opacity: yuliaEntered ? 1 : 0, transition: 'opacity 500ms ease-out' }}
-          >
-            Introducing
-          </p>
-
-          {/* Typed name */}
-          <h2
-            className="text-6xl md:text-8xl font-medium text-[#1A1A18] leading-none"
-            style={SERIF}
-          >
-            {yuliaText}
-            <span style={{ opacity: showPeriod ? 1 : 0, transition: 'opacity 300ms ease-out' }}>.</span>
-            {showCursor && (
-              <span
-                className="text-[#DA7756] ml-1 md:ml-2 inline-block"
-                style={{ opacity: cursorOn ? 1 : 0, transition: 'opacity 100ms' }}
-              >
-                |
-              </span>
-            )}
-          </h2>
-
-          {/* Subtitle */}
-          <p
-            className="text-xl md:text-2xl text-[#6B6963] mt-2 md:mt-4"
-            style={{
-              opacity: yuliaDone ? 1 : 0,
-              transform: yuliaDone ? 'translateY(0)' : 'translateY(8px)',
-              transition: 'opacity 700ms ease-out, transform 700ms ease-out',
-            }}
-          >
-            Your AI deal advisor.
-          </p>
-
-          {/* Stats */}
           <div
-            className="grid grid-cols-3 gap-4 md:gap-8 mt-6 md:mt-12"
+            className="bg-white w-full text-center transition-shadow duration-150"
             style={{
-              opacity: yuliaDone ? 1 : 0,
-              transform: yuliaDone ? 'translateY(0)' : 'translateY(16px)',
-              transition: 'opacity 700ms ease-out 300ms, transform 700ms ease-out 300ms',
+              maxWidth: `${lerp(768, 1280, scrollProgress)}px`,
+              borderRadius: `${lerp(24, 0, scrollProgress)}px`,
+              padding: `${lerp(48, 12, scrollProgress)}px ${lerp(64, 24, scrollProgress)}px`,
+              boxShadow: scrollProgress < 0.8
+                ? '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -4px rgba(0,0,0,0.07)'
+                : '0 1px 3px rgba(0,0,0,0.05)',
+              borderBottom: scrollProgress > 0.8 ? '1px solid #E8E5DF' : '1px solid transparent',
             }}
           >
-            <div className="text-center">
-              <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
-                <CountUp target={80} suffix="+" active={yuliaDone} />
-              </p>
-              <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Industries</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>24/7</p>
-              <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Always On</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
-                <CountUp target={90} suffix="%" active={yuliaDone} />
-              </p>
-              <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Cost Savings</p>
-            </div>
-          </div>
+            {/* Mini layout: row with name left, button right */}
+            <div style={{
+              display: 'flex',
+              flexDirection: scrollProgress > 0.7 ? 'row' : 'column',
+              alignItems: 'center',
+              justifyContent: scrollProgress > 0.7 ? 'space-between' : 'center',
+              gap: scrollProgress > 0.7 ? '16px' : '0px',
+            }}>
+              <div style={{
+                display: 'flex',
+                flexDirection: scrollProgress > 0.7 ? 'row' : 'column',
+                alignItems: 'center',
+                gap: scrollProgress > 0.7 ? '12px' : '0px',
+              }}>
+                {/* Eyebrow */}
+                <p
+                  className="text-sm uppercase tracking-widest text-[#DA7756]"
+                  style={{
+                    opacity: lerp(1, 0, Math.min(scrollProgress * 2, 1)),
+                    maxHeight: scrollProgress > 0.4 ? '0px' : '40px',
+                    overflow: 'hidden',
+                    marginBottom: scrollProgress > 0.4 ? '0px' : '12px',
+                    transition: 'max-height 0.15s',
+                  }}
+                >
+                  Introducing
+                </p>
 
-          {/* Tagline */}
-          <p
-            className="text-lg text-[#6B6963] italic mt-6 md:mt-10 leading-relaxed"
-            style={{
-              ...SERIF,
-              opacity: yuliaDone ? 1 : 0,
-              transition: 'opacity 700ms ease-out 600ms',
-            }}
-          >
-            Now you&apos;ll never wonder if you left money on the table.
-          </p>
-        </div>
-      </section>
+                {/* Name */}
+                <h2
+                  className="font-medium text-[#1A1A18] leading-none"
+                  style={{
+                    ...SERIF,
+                    fontSize: `${lerp(72, 20, scrollProgress)}px`,
+                  }}
+                >
+                  {yuliaText || 'Yulia'}
+                  <span style={{ opacity: showPeriod || scrollProgress > 0 ? 1 : 0 }}>.</span>
+                  {showCursor && (
+                    <span className="text-[#DA7756] ml-1" style={{ opacity: cursorOn ? 1 : 0 }}>|</span>
+                  )}
+                </h2>
+
+                {/* Subtitle */}
+                <p
+                  className="text-[#6B6963]"
+                  style={{
+                    fontSize: `${lerp(20, 14, scrollProgress)}px`,
+                    opacity: scrollProgress > 0.8 ? (scrollProgress > 0.9 ? 1 : 0.5) : (yuliaDone ? 1 : 0),
+                    marginTop: scrollProgress > 0.7 ? '0px' : '8px',
+                  }}
+                >
+                  Your AI deal advisor.
+                </p>
+              </div>
+
+              {/* CTA button - visible in mini mode */}
+              <Link
+                href="/signup"
+                className="bg-[#DA7756] text-white rounded-full font-medium no-underline hover:bg-[#C4684A] transition-colors whitespace-nowrap"
+                style={{
+                  opacity: lerp(0, 1, Math.max((scrollProgress - 0.5) * 2, 0)),
+                  pointerEvents: scrollProgress > 0.6 ? 'auto' as const : 'none' as const,
+                  padding: `${lerp(16, 8, scrollProgress)}px ${lerp(40, 16, scrollProgress)}px`,
+                  fontSize: `${lerp(18, 14, scrollProgress)}px`,
+                  position: scrollProgress > 0.7 ? 'static' as const : 'absolute' as const,
+                  ...(scrollProgress <= 0.7 ? { bottom: '-50px', left: '50%', transform: 'translateX(-50%)' } : {}),
+                }}
+              >
+                Meet Yulia &rarr;
+              </Link>
+            </div>
+
+            {/* Stats - fade out as we scroll */}
+            <div
+              className="grid grid-cols-3 gap-4 md:gap-8"
+              style={{
+                opacity: lerp(1, 0, Math.min(scrollProgress * 2.5, 1)),
+                maxHeight: scrollProgress > 0.3 ? '0px' : '200px',
+                overflow: 'hidden',
+                marginTop: scrollProgress > 0.3 ? '0px' : '24px',
+                transition: 'max-height 0.15s',
+              }}
+            >
+              <div className="text-center">
+                <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
+                  <CountUp target={80} suffix="+" active={yuliaDone} />
+                </p>
+                <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Industries</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>24/7</p>
+                <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Always On</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
+                  <CountUp target={90} suffix="%" active={yuliaDone} />
+                </p>
+                <p className="text-[10px] md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Cost Savings</p>
+              </div>
+            </div>
+
+            {/* Tagline - fade out */}
+            <p
+              className="text-lg text-[#6B6963] italic leading-relaxed"
+              style={{
+                ...SERIF,
+                opacity: lerp(yuliaDone ? 1 : 0, 0, Math.min(scrollProgress * 2, 1)),
+                maxHeight: scrollProgress > 0.3 ? '0px' : '80px',
+                overflow: 'hidden',
+                marginTop: scrollProgress > 0.3 ? '0px' : '24px',
+                transition: 'max-height 0.15s',
+              }}
+            >
+              Now you&apos;ll never wonder if you left money on the table.
+            </p>
+          </div>
+        </section>
+      </div>
 
       {/* ─── SECTION 5 · DELIVERABLES — 2-col card grid ─── */}
       <section className="bg-white px-6 py-20 md:py-32">
