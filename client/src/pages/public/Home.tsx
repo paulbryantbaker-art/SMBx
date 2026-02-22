@@ -333,7 +333,7 @@ export default function Home() {
           ═══════════════════════════════════════ */}
       <section
         ref={yuliaRef}
-        className="sticky top-0 z-20 min-h-screen flex items-center justify-center px-6 bg-[#FAF9F5]"
+        className="relative z-20 py-8 md:py-0 md:sticky md:top-0 min-h-0 md:min-h-screen flex items-center justify-center px-6 bg-[#FAF9F5]"
       >
         <div
           className="bg-white rounded-3xl shadow-lg p-6 md:p-16 max-w-3xl w-full mx-4 md:mx-auto text-center"
