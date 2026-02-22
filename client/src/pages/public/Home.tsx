@@ -219,7 +219,7 @@ export default function Home() {
         </svg>
       </section>
 
-      <div className="min-h-screen" />
+      <div className="min-h-screen pointer-events-none" style={{ background: 'transparent' }} />
 
       {/* ═══════════════════════════════════════
           SECTIONS 2–3 · slide over hero
@@ -336,11 +336,11 @@ export default function Home() {
         className="sticky top-0 z-20 min-h-screen flex items-center justify-center px-6 bg-[#FAF9F5]"
       >
         <div
-          className="bg-white rounded-3xl shadow-lg p-10 md:p-16 lg:p-20 max-w-3xl w-full mx-auto text-center"
+          className="bg-white rounded-3xl shadow-lg p-8 md:p-16 lg:p-20 max-w-3xl w-full mx-4 md:mx-auto text-center"
         >
           {/* Eyebrow */}
           <p
-            className="text-sm uppercase tracking-widest text-[#DA7756] mb-6"
+            className="text-sm uppercase tracking-widest text-[#DA7756] mb-4 md:mb-6"
             style={{ opacity: yuliaEntered ? 1 : 0, transition: 'opacity 500ms ease-out' }}
           >
             Introducing
@@ -365,7 +365,7 @@ export default function Home() {
 
           {/* Subtitle */}
           <p
-            className="text-xl md:text-2xl text-[#6B6963] mt-4"
+            className="text-xl md:text-2xl text-[#6B6963] mt-3 md:mt-4"
             style={{
               opacity: yuliaDone ? 1 : 0,
               transform: yuliaDone ? 'translateY(0)' : 'translateY(8px)',
@@ -377,7 +377,7 @@ export default function Home() {
 
           {/* Stats */}
           <div
-            className="grid grid-cols-3 gap-8 mt-12"
+            className="grid grid-cols-3 gap-4 md:gap-8 mt-8 md:mt-12"
             style={{
               opacity: yuliaDone ? 1 : 0,
               transform: yuliaDone ? 'translateY(0)' : 'translateY(16px)',
@@ -385,17 +385,17 @@ export default function Home() {
             }}
           >
             <div className="text-center">
-              <p className="text-3xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
+              <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
                 <CountUp target={80} suffix="+" active={yuliaDone} />
               </p>
               <p className="text-xs md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Industries</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>24/7</p>
+              <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>24/7</p>
               <p className="text-xs md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Always On</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
+              <p className="text-2xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
                 <CountUp target={90} suffix="%" active={yuliaDone} />
               </p>
               <p className="text-xs md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Cost Savings</p>
@@ -404,7 +404,7 @@ export default function Home() {
 
           {/* Tagline */}
           <p
-            className="text-lg text-[#6B6963] italic mt-10 leading-relaxed"
+            className="text-lg text-[#6B6963] italic mt-8 md:mt-10 leading-relaxed"
             style={{
               ...SERIF,
               opacity: yuliaDone ? 1 : 0,
