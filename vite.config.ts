@@ -6,6 +6,7 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   root: 'client',
+  cacheDir: '/tmp/.vite',
   resolve: {
     alias: {
       '@shared': path.resolve(__dirname, 'shared'),
