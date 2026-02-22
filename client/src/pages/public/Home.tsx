@@ -143,17 +143,25 @@ export default function Home() {
   const [showCursor, setShowCursor] = useState(false);
   const [cursorOn, setCursorOn] = useState(true);
   const [yuliaDone, setYuliaDone] = useState(false);
+  const [yuliaMinimized, setYuliaMinimized] = useState(false);
   const yuliaStarted = useRef(false);
 
   useEffect(() => {
     const el = yuliaRef.current;
     if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setYuliaEntered(true); obs.unobserve(el); } },
+    /* trigger typing animation on first appearance */
+    const enterObs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setYuliaEntered(true); enterObs.unobserve(el); } },
       { threshold: 0.2 },
     );
-    obs.observe(el);
-    return () => obs.disconnect();
+    enterObs.observe(el);
+    /* toggle mini bar when card scrolls out of view */
+    const miniObs = new IntersectionObserver(
+      ([e]) => setYuliaMinimized(!e.isIntersecting),
+      { threshold: 0.3 },
+    );
+    miniObs.observe(el);
+    return () => { enterObs.disconnect(); miniObs.disconnect(); };
   }, []);
 
   useEffect(() => {
@@ -318,6 +326,25 @@ export default function Home() {
             </FadeIn>
           </div>
         </section>
+
+      {/* ── Yulia mini bar (appears when card scrolls away) ── */}
+      <div
+        className="fixed top-14 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm transition-transform duration-300 ease-out"
+        style={{ transform: yuliaMinimized && yuliaDone ? 'translateY(0)' : 'translateY(-100%)' }}
+      >
+        <div className="max-w-7xl mx-auto h-14 flex items-center justify-between px-6">
+          <div className="flex items-center">
+            <span className="text-xl font-medium text-[#1A1A18]" style={SERIF}>Yulia.</span>
+            <span className="hidden md:inline text-sm text-[#6B6963] ml-3">Your AI deal advisor.</span>
+          </div>
+          <Link
+            href="/signup"
+            className="bg-[#DA7756] text-white px-4 py-2 rounded-full text-sm font-medium no-underline hover:bg-[#C4684A] transition-colors"
+          >
+            Meet Yulia &rarr;
+          </Link>
+        </div>
+      </div>
 
       {/* ═══════════════════════════════════════
           SECTION 4 · MEET YULIA — single card
