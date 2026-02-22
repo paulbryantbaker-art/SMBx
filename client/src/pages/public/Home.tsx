@@ -355,7 +355,11 @@ export default function Home() {
       {/* ═══════════════════════════════════════
           SECTION 4 · MEET YULIA — morphing card
           ═══════════════════════════════════════ */}
-      <div className="relative bg-[#FAF9F5]" style={{ minHeight: '80vh' }}>
+      {/* ═══════════════════════════════════════
+          SECTION 4+ · YULIA MORPH + ALL REMAINING SECTIONS
+          (single parent so sticky persists through all content)
+          ═══════════════════════════════════════ */}
+      <div className="relative">
         <section
           ref={yuliaRef}
           className="sticky flex items-start justify-center px-6 bg-[#FAF9F5] will-change-transform"
@@ -367,15 +371,19 @@ export default function Home() {
           }}
         >
           <div
-            className="bg-white w-full text-center transition-shadow duration-150"
+            className="w-full text-center"
             style={{
               maxWidth: `${lerp(768, 1280, scrollProgress)}px`,
               borderRadius: `${lerp(24, 0, scrollProgress)}px`,
-              padding: `${lerp(48, 12, scrollProgress)}px ${lerp(64, 24, scrollProgress)}px`,
-              boxShadow: scrollProgress < 0.8
-                ? '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -4px rgba(0,0,0,0.07)'
-                : '0 1px 3px rgba(0,0,0,0.05)',
-              borderBottom: scrollProgress > 0.8 ? '1px solid #E8E5DF' : '1px solid transparent',
+              padding: `${lerp(48, 16, scrollProgress)}px ${lerp(64, 24, scrollProgress)}px`,
+              backgroundColor: scrollProgress > 0.8 ? '#DA7756' : '#FFFFFF',
+              transition: 'background-color 0.2s',
+              boxShadow: scrollProgress > 0.8
+                ? '0 4px 12px rgba(218,119,86,0.3)'
+                : scrollProgress < 0.8
+                  ? '0 10px 15px -3px rgba(0,0,0,0.07), 0 4px 6px -4px rgba(0,0,0,0.07)'
+                  : '0 1px 3px rgba(0,0,0,0.05)',
+              borderBottom: scrollProgress > 0.8 ? 'none' : '1px solid transparent',
             }}
           >
             {/* Mini layout: row with name left, button right */}
@@ -394,13 +402,14 @@ export default function Home() {
               }}>
                 {/* Eyebrow */}
                 <p
-                  className="text-sm uppercase tracking-widest text-[#DA7756]"
+                  className="text-sm uppercase tracking-widest"
                   style={{
+                    color: scrollProgress > 0.8 ? 'rgba(255,255,255,0.7)' : '#DA7756',
                     opacity: lerp(1, 0, Math.min(scrollProgress * 2, 1)),
                     maxHeight: scrollProgress > 0.4 ? '0px' : '40px',
                     overflow: 'hidden',
                     marginBottom: scrollProgress > 0.4 ? '0px' : '12px',
-                    transition: 'max-height 0.15s',
+                    transition: 'max-height 0.15s, color 0.2s',
                   }}
                 >
                   Introducing
@@ -408,26 +417,29 @@ export default function Home() {
 
                 {/* Name */}
                 <h2
-                  className="font-medium text-[#1A1A18] leading-none"
+                  className="font-medium leading-none"
                   style={{
                     ...SERIF,
-                    fontSize: `${lerp(72, 20, scrollProgress)}px`,
+                    fontSize: `${lerp(72, 24, scrollProgress)}px`,
+                    color: scrollProgress > 0.8 ? '#FFFFFF' : '#1A1A18',
+                    transition: 'color 0.2s',
                   }}
                 >
                   {yuliaText || 'Yulia'}
                   <span style={{ opacity: showPeriod || scrollProgress > 0 ? 1 : 0 }}>.</span>
                   {showCursor && (
-                    <span className="text-[#DA7756] ml-1" style={{ opacity: cursorOn ? 1 : 0 }}>|</span>
+                    <span style={{ color: scrollProgress > 0.8 ? 'rgba(255,255,255,0.7)' : '#DA7756', marginLeft: 4, opacity: cursorOn ? 1 : 0 }}>|</span>
                   )}
                 </h2>
 
                 {/* Subtitle */}
                 <p
-                  className="text-[#6B6963]"
                   style={{
-                    fontSize: `${lerp(20, 14, scrollProgress)}px`,
+                    fontSize: `${lerp(20, 16, scrollProgress)}px`,
+                    color: scrollProgress > 0.8 ? 'rgba(255,255,255,0.7)' : '#6B6963',
                     opacity: scrollProgress > 0.8 ? (scrollProgress > 0.9 ? 1 : 0.5) : (yuliaDone ? 1 : 0),
                     marginTop: scrollProgress > 0.7 ? '0px' : '8px',
+                    transition: 'color 0.2s',
                   }}
                 >
                   Your AI deal advisor.
@@ -437,13 +449,17 @@ export default function Home() {
               {/* CTA button - visible in mini mode */}
               <Link
                 href="/signup"
-                className="bg-[#DA7756] text-white rounded-full font-medium no-underline hover:bg-[#C4684A] transition-colors whitespace-nowrap"
+                className="rounded-full font-medium no-underline transition-all whitespace-nowrap"
                 style={{
+                  backgroundColor: scrollProgress > 0.8 ? '#FFFFFF' : '#DA7756',
+                  color: scrollProgress > 0.8 ? '#DA7756' : '#FFFFFF',
                   opacity: lerp(0, 1, Math.max((scrollProgress - 0.5) * 2, 0)),
                   pointerEvents: scrollProgress > 0.6 ? 'auto' as const : 'none' as const,
-                  padding: `${lerp(16, 8, scrollProgress)}px ${lerp(40, 16, scrollProgress)}px`,
-                  fontSize: `${lerp(18, 14, scrollProgress)}px`,
+                  padding: `${lerp(16, 10, scrollProgress)}px ${lerp(40, 24, scrollProgress)}px`,
+                  fontSize: `${lerp(18, 16, scrollProgress)}px`,
                   position: scrollProgress > 0.7 ? 'static' as const : 'absolute' as const,
+                  boxShadow: scrollProgress > 0.9 ? '0 0 0 3px rgba(255,255,255,0.3)' : 'none',
+                  transition: 'background-color 0.2s, color 0.2s, box-shadow 0.3s',
                   ...(scrollProgress <= 0.7 ? { bottom: '-50px', left: '50%', transform: 'translateX(-50%)' } : {}),
                 }}
               >
@@ -482,9 +498,10 @@ export default function Home() {
 
             {/* Tagline - fade out */}
             <p
-              className="text-lg text-[#6B6963] italic leading-relaxed"
+              className="text-lg italic leading-relaxed"
               style={{
                 ...SERIF,
+                color: '#6B6963',
                 opacity: lerp(yuliaDone ? 1 : 0, 0, Math.min(scrollProgress * 2, 1)),
                 maxHeight: scrollProgress > 0.3 ? '0px' : '80px',
                 overflow: 'hidden',
@@ -496,7 +513,6 @@ export default function Home() {
             </p>
           </div>
         </section>
-      </div>
 
       {/* ─── SECTION 5 · DELIVERABLES — 2-col card grid ─── */}
       <section className="bg-white px-6 py-20 md:py-32">
@@ -653,6 +669,7 @@ export default function Home() {
             </div>
           </FadeIn>
         </section>
+      </div>
     </PublicLayout>
   );
 }
