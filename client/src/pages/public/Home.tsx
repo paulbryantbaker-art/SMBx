@@ -4,27 +4,31 @@ import PublicLayout from '../../components/public/PublicLayout';
 
 const SERIF = { fontFamily: 'ui-serif, Georgia, Cambria, serif' } as const;
 
-const AUDIENCE_WORDS = [
-  'business owners',
-  'first-time buyers',
-  'search fund operators',
-  'brokers',
-  'PE firms',
-  'family offices',
+const TICKER_ITEMS = [
+  'Business Owners',
+  'First-Time Buyers',
+  'Search Funds',
+  'Brokers',
+  'PE Firms',
+  'Family Offices',
+  'Solo Founders',
+  'Investors',
+  'Serial Acquirers',
+  'Holding Companies',
 ];
 
 const PILLARS = [
   {
     title: 'She knows your industry.',
-    body: "Yulia has analyzed deal patterns across 80+ verticals — from dental practices to SaaS companies to manufacturing firms. She knows the typical multiples, the common pitfalls, and what buyers in your space actually care about.",
+    body: "Yulia has analyzed deal patterns across 80+ verticals \u2014 from dental practices to SaaS companies to manufacturing firms. She knows the typical multiples, the common pitfalls, and what buyers in your space actually care about.",
   },
   {
     title: 'She understands your deal.',
-    body: "Every transaction is different. Yulia doesn\u2019t give you generic advice — she builds a strategy around your specific financials, your timeline, your goals, and your market conditions. Right now.",
+    body: "Every transaction is different. Yulia doesn\u2019t give you generic advice \u2014 she builds a strategy around your specific financials, your timeline, your goals, and your market conditions. Right now.",
   },
   {
     title: 'She guides you through the process.',
-    body: "From intake to closing, Yulia produces real deliverables — financial analysis, valuation reports, offering memorandums, buyer lists, and negotiation frameworks. Not suggestions. Documents.",
+    body: "From intake to closing, Yulia produces real deliverables \u2014 financial analysis, valuation reports, offering memorandums, buyer lists, and negotiation frameworks. Not suggestions. Documents.",
   },
 ];
 
@@ -32,7 +36,7 @@ const STEPS = [
   {
     num: '01',
     title: 'Tell her about your deal.',
-    body: "Sign up free and start a conversation. Yulia will ask the right questions to understand your situation — whether you\u2019re selling, buying, or raising capital.",
+    body: "Sign up free and start a conversation. Yulia will ask the right questions to understand your situation \u2014 whether you\u2019re selling, buying, or raising capital.",
   },
   {
     num: '02',
@@ -54,7 +58,7 @@ const WITHOUT = [
 ];
 
 const WITH_YULIA = [
-  'You know exactly what your business is worth — and why.',
+  'You know exactly what your business is worth \u2014 and why.',
   'You get matched with qualified, serious buyers.',
   'Every document is ready before anyone asks for it.',
   "You pay a fraction of traditional fees and keep more of what you\u2019ve built.",
@@ -120,49 +124,48 @@ function FadeIn({ children, className = '', delay = 0 }: { children: ReactNode; 
   );
 }
 
+/* ── Ticker ── */
+function Ticker() {
+  const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
+  return (
+    <div className="overflow-hidden w-full max-w-2xl mx-auto mt-4 group">
+      <div
+        className="flex whitespace-nowrap group-hover:[animation-play-state:paused]"
+        style={{ animation: 'tickerScroll 30s linear infinite' }}
+      >
+        {items.map((item, i) => (
+          <span key={i} className="text-base md:text-lg text-[#6B6963] shrink-0">
+            {item}
+            <span className="text-[#DA7756] mx-3">&middot;</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── Component ── */
 export default function Home() {
-  const [audienceIndex, setAudienceIndex] = useState(0);
-  const [animClass, setAnimClass] = useState('audienceIn');
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAnimClass('audienceOut');
-      setTimeout(() => {
-        setAudienceIndex(i => (i + 1) % AUDIENCE_WORDS.length);
-        setAnimClass('audienceIn');
-      }, 200);
-    }, 2700);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <PublicLayout>
       {/* ═══ SECTION 1: HERO (fixed) ═══ */}
       <section className="fixed inset-0 z-0 flex flex-col items-center justify-center px-6 bg-[#FAF9F5]">
-        <div className="text-center flex flex-col items-center max-w-4xl">
+        <div className="text-center flex flex-col items-center max-w-4xl w-full">
           <span className="inline-block bg-[#F0EDE6] text-[#6B6963] text-sm px-4 py-1.5 rounded-full mb-8">
             AI-Powered M&amp;A Advisory
           </span>
           <h1
-            className="text-4xl md:text-7xl text-[#1A1A18] font-medium leading-tight tracking-tight"
+            className="text-4xl md:text-7xl text-[#1A1A18] font-medium leading-relaxed md:leading-tight tracking-tight mb-8 md:mb-10"
             style={SERIF}
           >
-            Sell your business. Buy a business. Raise capital.
+            Sell or buy any business, anywhere.
           </h1>
-          <p className="text-xl md:text-2xl text-[#6B6963] mt-6">
-            Built for{' '}
-            <span
-              key={audienceIndex}
-              className={`text-[#DA7756] italic ${animClass}`}
-              style={SERIF}
-            >
-              {AUDIENCE_WORDS[audienceIndex]}
-              <span className="text-[#6B6963] not-italic">.</span>
-            </span>
+          <p className="text-xl md:text-2xl text-[#6B6963] mb-4">
+            Built for everyone.
           </p>
-          <p className="text-base md:text-lg text-[#6B6963] mt-3">
-            From first conversation to closing.
+          <Ticker />
+          <p className="text-base md:text-lg text-[#6B6963] mt-6 max-w-lg mx-auto">
+            Harness deep intelligence and automation to close deals faster, easier, and smarter.
           </p>
           <Link
             href="/signup"
@@ -170,6 +173,9 @@ export default function Home() {
           >
             Meet Yulia &rarr;
           </Link>
+          <p className="text-sm text-[#6B6963] opacity-60 mt-8">
+            Available in &#127482;&#127480; &#127468;&#127463; &#127464;&#127462; &#127462;&#127482; and 20+ countries
+          </p>
         </div>
         <svg
           className="absolute bottom-8 left-1/2 -translate-x-1/2 w-5 h-5 text-[#6B6963] opacity-30"
@@ -232,46 +238,9 @@ export default function Home() {
             </div>
           </div>
         </section>
-      </div>
 
-      {/* ═══ SECTION 3: MEET YULIA (sticky curtain #2) ═══ */}
-      <section className="sticky top-0 z-0 min-h-screen flex items-center justify-center px-6 md:px-8 bg-[#FAF9F5]">
-        <div className="text-center max-w-4xl mx-auto">
-          <p className="text-sm uppercase tracking-widest text-[#6B6963] mb-6">
-            The solution
-          </p>
-          <h2
-            className="text-4xl md:text-7xl font-medium text-[#1A1A18]"
-            style={SERIF}
-          >
-            Meet Yulia.
-          </h2>
-          <p className="text-xl md:text-2xl text-[#6B6963] max-w-2xl mx-auto mt-6 leading-relaxed">
-            Your AI deal advisor. She doesn&apos;t sleep, doesn&apos;t charge by the
-            hour, and doesn&apos;t care how big your deal is.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mt-16 max-w-4xl mx-auto">
-            {STATS.map(s => (
-              <div key={s.label} className="text-center">
-                <p
-                  className="text-3xl md:text-4xl font-medium text-[#DA7756] m-0"
-                  style={SERIF}
-                >
-                  {s.value}
-                </p>
-                <p className="text-base text-[#6B6963] mt-2 m-0">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ SECTION 4: THE INTELLIGENCE (slides over Yulia) ═══ */}
-      <div className="relative z-10">
-        <section
-          className="px-6 md:px-8 py-24 md:py-32 bg-white rounded-t-3xl"
-          style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.05)' }}
-        >
+        {/* ═══ SECTION 3: THE INTELLIGENCE (scrolls normally) ═══ */}
+        <section className="px-6 md:px-8 py-24 md:py-32 bg-[#FAF9F5]">
           <div className="max-w-3xl mx-auto">
             <FadeIn>
               <p className="text-sm uppercase tracking-widest text-[#6B6963] mb-6 text-center">
@@ -303,9 +272,46 @@ export default function Home() {
             </div>
           </div>
         </section>
+      </div>
 
-        {/* ═══ SECTION 5: HOW IT WORKS ═══ */}
-        <section className="px-6 md:px-8 py-24 md:py-32 bg-[#FAF9F5]">
+      {/* ═══ SECTION 4: MEET YULIA (sticky curtain #2) ═══ */}
+      <section className="sticky top-0 z-0 min-h-screen flex items-center justify-center px-6 md:px-8 bg-white">
+        <div className="text-center max-w-4xl mx-auto">
+          <p className="text-sm uppercase tracking-widest text-[#6B6963] mb-6">
+            The solution
+          </p>
+          <h2
+            className="text-4xl md:text-7xl font-medium text-[#1A1A18]"
+            style={SERIF}
+          >
+            Meet Yulia.
+          </h2>
+          <p className="text-xl md:text-2xl text-[#6B6963] max-w-2xl mx-auto mt-6 leading-relaxed">
+            Your AI deal advisor. She doesn&apos;t sleep, doesn&apos;t charge by the
+            hour, and doesn&apos;t care how big your deal is.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mt-16 max-w-4xl mx-auto">
+            {STATS.map(s => (
+              <div key={s.label} className="text-center">
+                <p
+                  className="text-3xl md:text-4xl font-medium text-[#DA7756] m-0"
+                  style={SERIF}
+                >
+                  {s.value}
+                </p>
+                <p className="text-base text-[#6B6963] mt-2 m-0">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ SECTION 5: HOW IT WORKS (slides over Yulia) ═══ */}
+      <div className="relative z-10">
+        <section
+          className="px-6 md:px-8 py-24 md:py-32 bg-[#FAF9F5] rounded-t-3xl"
+          style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.05)' }}
+        >
           <div className="max-w-3xl mx-auto">
             <FadeIn>
               <p className="text-sm uppercase tracking-widest text-[#6B6963] mb-6 text-center">
