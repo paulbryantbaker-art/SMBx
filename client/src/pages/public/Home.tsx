@@ -331,7 +331,7 @@ export default function Home() {
       {yuliaMinimized && (
         <div
           className="fixed left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm transition-all duration-300"
-          style={{ top: '56px' }}
+          style={{ top: '64px' }}
         >
           <div className="max-w-7xl mx-auto h-14 flex items-center justify-between px-6">
             <div className="flex items-center gap-3">
