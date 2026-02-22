@@ -16,19 +16,19 @@ const TICKER_ITEMS = [
   'Holding Companies',
 ];
 
-const DELIVERABLES = [
-  'Financial analysis and normalization of your books — so buyers see the real story, not the tax story.',
-  'A defensible valuation backed by market data, comparable transactions, and industry-specific multiples.',
-  'A complete offering memorandum that makes buyers compete to talk to you.',
-  'A buyer list ranked by acquisition history, strategic fit, and likelihood to close.',
-  'Due diligence preparation that answers every question before it gets asked.',
-  'Negotiation frameworks built around your leverage points and walk-away number.',
-];
-
 const WHAT_IFS = [
   'What if you knew exactly what your business was worth — not a range, not a guess — before you talked to a single buyer?',
   'What if someone had already identified the 50 most likely acquirers in your industry and ranked them by fit?',
   'What if every document — valuation, memorandum, financial analysis — was ready before anyone asked?',
+];
+
+const DELIVERABLES = [
+  'A clear picture of what your business is actually worth — backed by real market data, not guesswork.',
+  'Financial analysis that shows buyers the real story, not the tax story.',
+  'An offering memorandum so compelling that buyers compete to talk to you.',
+  'A ranked list of the buyers most likely to close — based on acquisition history and strategic fit.',
+  'Due diligence preparation that answers every question before it gets asked.',
+  'Negotiation strategy built around your specific leverage points and walk-away number.',
 ];
 
 const JOURNEYS = [
@@ -58,7 +58,6 @@ function useOnScreen(threshold = 0.15) {
   return { ref, visible };
 }
 
-/* Fade up from below */
 function FadeIn({ children, className = '', delay = 0, duration = 700 }: {
   children: ReactNode; className?: string; delay?: number; duration?: number;
 }) {
@@ -72,21 +71,6 @@ function FadeIn({ children, className = '', delay = 0, duration = 700 }: {
   );
 }
 
-/* Slide in from left */
-function SlideIn({ children, className = '', delay = 0 }: {
-  children: ReactNode; className?: string; delay?: number;
-}) {
-  const { ref, visible } = useOnScreen(0.1);
-  return (
-    <div ref={ref} className={className} style={{
-      opacity: visible ? 1 : 0,
-      transform: visible ? 'translateX(0)' : 'translateX(-20px)',
-      transition: `opacity 500ms ease-out ${delay}ms, transform 500ms ease-out ${delay}ms`,
-    }}>{children}</div>
-  );
-}
-
-/* Animated counter — self-triggering (IntersectionObserver) or externally controlled */
 function CountUp({ target, suffix = '', active, delay = 0, className, style }: {
   target: number; suffix?: string; active?: boolean; delay?: number;
   className?: string; style?: React.CSSProperties;
@@ -128,11 +112,10 @@ function CountUp({ target, suffix = '', active, delay = 0, className, style }: {
   return <span ref={ref} className={className} style={style}>{value}{suffix}</span>;
 }
 
-/* Horizontal ticker */
 function Ticker() {
   const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
   return (
-    <div className="overflow-hidden w-full mt-4 group">
+    <div className="overflow-hidden w-full mt-3 group">
       <div
         className="flex whitespace-nowrap group-hover:[animation-play-state:paused]"
         style={{ animation: 'tickerScroll 30s linear infinite' }}
@@ -197,20 +180,23 @@ export default function Home() {
   return (
     <PublicLayout>
       {/* ═══════════════════════════════════════
-          SECTION 1 · HERO (fixed, z-0)
+          SECTION 1 · HERO — centered, massive type
           ═══════════════════════════════════════ */}
       <section className="fixed inset-0 z-0 flex flex-col items-center justify-center px-6 bg-[#FAF9F5]">
-        <div className="text-center flex flex-col items-center max-w-4xl w-full">
+        <div className="text-center flex flex-col items-center max-w-5xl w-full">
           <span className="inline-block bg-[#F0EDE6] text-[#6B6963] text-sm px-4 py-1.5 rounded-full mb-8">
             AI-Powered M&amp;A Advisory
           </span>
-          <h1 className="text-4xl md:text-7xl text-[#1A1A18] font-medium leading-tight tracking-tight mb-8" style={SERIF}>
+          <h1
+            className="text-5xl md:text-8xl lg:text-9xl text-[#1A1A18] font-medium leading-tight tracking-tight mb-8"
+            style={SERIF}
+          >
             Sell or buy<br />
             any business, <span className="text-[#DA7756]">anywhere</span>.
           </h1>
-          <p className="text-lg md:text-xl text-[#6B6963] mb-3">Built for everyone.</p>
+          <p className="text-lg md:text-xl text-[#6B6963] mt-8">Built for everyone.</p>
           <Ticker />
-          <p className="text-base md:text-lg text-[#6B6963] mt-6 max-w-lg mx-auto">
+          <p className="text-base md:text-lg text-[#6B6963] mt-6 max-w-md mx-auto">
             Harness deep intelligence and automation to close deals faster, easier, and smarter.
           </p>
           <Link
@@ -233,7 +219,6 @@ export default function Home() {
         </svg>
       </section>
 
-      {/* Spacer */}
       <div className="min-h-screen" />
 
       {/* ═══════════════════════════════════════
@@ -241,90 +226,87 @@ export default function Home() {
           ═══════════════════════════════════════ */}
       <div className="relative z-10">
 
-        {/* ─── SECTION 2 · THE WAKE-UP CALL ─── */}
+        {/* ─── SECTION 2 · WAKE-UP — asymmetric split ─── */}
         <section
-          className="bg-white rounded-t-3xl"
-          style={{ boxShadow: '0 -4px 30px rgba(0,0,0,0.06)' }}
+          className="bg-white rounded-t-3xl px-6 py-20 md:py-32"
+          style={{ boxShadow: '0 -4px 30px rgba(0,0,0,0.05)' }}
         >
-          {/* Part A — The punch */}
-          <div className="px-6 py-24 md:py-36 text-center">
-            <div className="max-w-3xl mx-auto">
-              <FadeIn>
-                <p className="text-sm uppercase tracking-widest text-[#DA7756] mb-8">The reality</p>
-              </FadeIn>
-              <FadeIn delay={100}>
-                <p className="text-2xl md:text-4xl text-[#6B6963]" style={SERIF}>
+          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
+            {/* LEFT — the punch */}
+            <FadeIn>
+              <div>
+                <p className="text-sm uppercase tracking-widest text-[#DA7756] mb-4">The reality</p>
+                <p className="text-xl md:text-2xl text-[#6B6963]" style={SERIF}>
                   Right now, someone is selling a business just like yours for
                 </p>
-              </FadeIn>
-              <div className="my-4 md:my-6">
-                <CountUp
-                  target={30} suffix="%" delay={200}
-                  className="block text-7xl md:text-[10rem] font-bold text-[#DA7756] leading-none"
-                  style={SERIF}
-                />
-                <span className="block text-3xl md:text-5xl font-bold text-[#DA7756] mt-1" style={SERIF}>
-                  less
-                </span>
-              </div>
-              <FadeIn delay={300}>
-                <p className="text-2xl md:text-4xl text-[#6B6963]" style={SERIF}>
+                <div className="my-2">
+                  <CountUp
+                    target={30} suffix="%" delay={200}
+                    className="block text-6xl md:text-8xl font-bold text-[#DA7756] leading-none"
+                    style={SERIF}
+                  />
+                  <span className="block text-2xl md:text-3xl font-bold text-[#DA7756] mt-1" style={SERIF}>
+                    less
+                  </span>
+                </div>
+                <p className="text-xl md:text-2xl text-[#6B6963]" style={SERIF}>
                   than it&apos;s worth.
                 </p>
-              </FadeIn>
-            </div>
+              </div>
+            </FadeIn>
 
-            {/* Part B — The agitation */}
-            <div className="max-w-2xl mx-auto mt-16 md:mt-24 space-y-8 text-left">
-              <FadeIn delay={400}>
-                <p className="text-lg md:text-xl text-[#6B6963] leading-relaxed">
-                  Last year, over 10,000 small businesses sold below market value. Not because the businesses were bad — because the owners didn&apos;t have the right intelligence at the right time.
-                </p>
-              </FadeIn>
-              <FadeIn delay={550}>
-                <p className="text-lg md:text-xl text-[#6B6963] leading-relaxed">
-                  They priced too low. Found the wrong buyer. Lost leverage in negotiation. And most of them will never know how much they left on the table.
-                </p>
-              </FadeIn>
-              <FadeIn delay={700}>
-                <p className="text-lg md:text-xl text-[#6B6963] leading-relaxed">
-                  This is the <span className="text-[#1A1A18] font-semibold">most important financial decision</span> you will ever make.
-                </p>
-              </FadeIn>
-            </div>
+            {/* RIGHT — context card */}
+            <FadeIn delay={150}>
+              <div className="bg-[#FAF9F5] rounded-2xl p-8 md:p-10">
+                <div className="space-y-6 text-base md:text-lg text-[#6B6963] leading-relaxed">
+                  <p>
+                    Last year, over 10,000 small businesses sold below market value. Not because the businesses were bad — because the owners didn&apos;t have the right intelligence at the right time.
+                  </p>
+                  <p>
+                    They priced too low. Found the wrong buyer. Lost leverage in negotiation.
+                  </p>
+                  <p>
+                    This is the <span className="text-[#1A1A18] font-semibold">most important financial decision</span> you will ever make.
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
           </div>
 
-          {/* Part C — The breather */}
-          <div className="px-6 py-16 md:py-24 text-center">
+          {/* The breather */}
+          <div className="py-16 text-center">
             <FadeIn duration={1000}>
-              <p className="text-4xl md:text-7xl text-[#1A1A18] font-medium italic leading-tight max-w-4xl mx-auto" style={SERIF}>
+              <p
+                className="text-3xl md:text-6xl text-[#1A1A18] font-medium italic leading-tight max-w-4xl mx-auto"
+                style={SERIF}
+              >
                 You don&apos;t have to do this alone.
               </p>
             </FadeIn>
           </div>
         </section>
 
-        {/* ─── SECTION 3 · THE SHIFT ─── */}
-        <section className="px-6 py-24 md:py-36 bg-[#FAF9F5] text-center">
-          <div className="max-w-3xl mx-auto">
+        {/* ─── SECTION 3 · THE SHIFT — 3-column card grid ─── */}
+        <section className="bg-[#FAF9F5] px-6 py-20 md:py-32">
+          <div className="max-w-6xl mx-auto">
             <FadeIn>
-              <h2 className="text-3xl md:text-5xl leading-tight" style={SERIF}>
+              <h2 className="text-3xl md:text-5xl leading-tight text-center md:text-left" style={SERIF}>
                 <span className="text-[#6B6963]">What if you had an </span>
                 <span className="text-[#1A1A18] font-semibold">unfair advantage?</span>
               </h2>
             </FadeIn>
 
-            <div className="max-w-2xl mx-auto mt-16 space-y-16">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
               {WHAT_IFS.map((text, i) => (
                 <FadeIn key={i} delay={100 + i * 150}>
-                  <div>
+                  <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
                     <span
-                      className="block text-[#DA7756] text-8xl md:text-9xl opacity-15 leading-none -mb-8 select-none"
+                      className="block text-[#DA7756] text-6xl opacity-20 leading-none -mb-4 select-none"
                       style={SERIF}
                     >
                       &ldquo;
                     </span>
-                    <p className="text-xl md:text-2xl text-[#6B6963] leading-relaxed italic" style={SERIF}>
+                    <p className="text-lg md:text-xl text-[#6B6963] leading-relaxed italic" style={SERIF}>
                       {text}
                     </p>
                   </div>
@@ -333,7 +315,7 @@ export default function Home() {
             </div>
 
             <FadeIn delay={600}>
-              <div className="mt-16" style={SERIF}>
+              <div className="mt-16 text-center" style={SERIF}>
                 <p className="text-2xl md:text-4xl font-medium text-[#1A1A18]">
                   This isn&apos;t hypothetical.
                 </p>
@@ -347,23 +329,28 @@ export default function Home() {
       </div>
 
       {/* ═══════════════════════════════════════
-          SECTION 4 · MEET YULIA (sticky curtain)
+          SECTION 4 · MEET YULIA — single card, sticky
           ═══════════════════════════════════════ */}
       <section
         ref={yuliaRef}
-        className="sticky top-0 z-20 min-h-screen flex items-center justify-center px-6 bg-[#1A1A18]"
+        className="sticky top-0 z-20 min-h-screen flex items-center justify-center px-6 bg-[#FAF9F5]"
       >
-        <div className="text-center max-w-4xl mx-auto">
+        <div
+          className="bg-white rounded-3xl shadow-lg p-10 md:p-16 lg:p-20 max-w-3xl w-full mx-auto text-center"
+        >
           {/* Eyebrow */}
           <p
-            className="text-sm uppercase tracking-widest text-[#DA7756] mb-8"
+            className="text-sm uppercase tracking-widest text-[#DA7756] mb-6"
             style={{ opacity: yuliaEntered ? 1 : 0, transition: 'opacity 500ms ease-out' }}
           >
             Introducing
           </p>
 
           {/* Typed name */}
-          <h2 className="text-7xl md:text-[12rem] font-medium text-white leading-none" style={SERIF}>
+          <h2
+            className="text-6xl md:text-8xl font-medium text-[#1A1A18] leading-none"
+            style={SERIF}
+          >
             {yuliaText}
             <span style={{ opacity: showPeriod ? 1 : 0, transition: 'opacity 300ms ease-out' }}>.</span>
             {showCursor && (
@@ -378,7 +365,7 @@ export default function Home() {
 
           {/* Subtitle */}
           <p
-            className="text-xl md:text-2xl text-gray-400 mt-4"
+            className="text-xl md:text-2xl text-[#6B6963] mt-4"
             style={{
               opacity: yuliaDone ? 1 : 0,
               transform: yuliaDone ? 'translateY(0)' : 'translateY(8px)',
@@ -390,7 +377,7 @@ export default function Home() {
 
           {/* Stats */}
           <div
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16"
+            className="grid grid-cols-3 gap-8 mt-12"
             style={{
               opacity: yuliaDone ? 1 : 0,
               transform: yuliaDone ? 'translateY(0)' : 'translateY(16px)',
@@ -398,34 +385,33 @@ export default function Home() {
             }}
           >
             <div className="text-center">
-              <p className="text-4xl md:text-6xl font-medium text-[#DA7756] m-0" style={SERIF}>
+              <p className="text-3xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
                 <CountUp target={80} suffix="+" active={yuliaDone} />
               </p>
-              <p className="text-sm md:text-base text-gray-500 mt-2 m-0 uppercase tracking-wider">Industries Analyzed</p>
+              <p className="text-xs md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Industries</p>
             </div>
             <div className="text-center">
-              <p className="text-4xl md:text-6xl font-medium text-[#DA7756] m-0" style={SERIF}>24/7</p>
-              <p className="text-sm md:text-base text-gray-500 mt-2 m-0 uppercase tracking-wider">Always On</p>
+              <p className="text-3xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>24/7</p>
+              <p className="text-xs md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Always On</p>
             </div>
             <div className="text-center">
-              <p className="text-4xl md:text-6xl font-medium text-[#DA7756] m-0" style={SERIF}>
+              <p className="text-3xl md:text-5xl font-medium text-[#DA7756] m-0" style={SERIF}>
                 <CountUp target={90} suffix="%" active={yuliaDone} />
               </p>
-              <p className="text-sm md:text-base text-gray-500 mt-2 m-0 uppercase tracking-wider">Less Than Traditional Fees</p>
+              <p className="text-xs md:text-sm text-[#6B6963] mt-1 m-0 uppercase tracking-wider">Cost Savings</p>
             </div>
           </div>
 
           {/* Tagline */}
           <p
-            className="text-lg md:text-xl text-gray-500 max-w-lg mx-auto leading-relaxed mt-12"
+            className="text-lg text-[#6B6963] italic mt-10 leading-relaxed"
             style={{
+              ...SERIF,
               opacity: yuliaDone ? 1 : 0,
               transition: 'opacity 700ms ease-out 600ms',
             }}
           >
-            She <span className="text-gray-300">doesn&apos;t</span> guess.
-            {' '}She <span className="text-gray-300">doesn&apos;t</span> hallucinate.
-            {' '}She <span className="text-gray-300">doesn&apos;t</span> charge by the hour.
+            Now you&apos;ll never wonder if you left money on the table.
           </p>
         </div>
       </section>
@@ -435,88 +421,92 @@ export default function Home() {
           ═══════════════════════════════════════ */}
       <div className="relative z-30">
 
-        {/* ─── SECTION 5 · WHAT SHE BUILDS ─── */}
+        {/* ─── SECTION 5 · DELIVERABLES — 2-col card grid ─── */}
         <section
-          className="px-6 py-24 md:py-36 bg-white rounded-t-3xl"
-          style={{ boxShadow: '0 -4px 30px rgba(0,0,0,0.15)' }}
+          className="bg-white rounded-t-3xl px-6 py-20 md:py-32"
+          style={{ boxShadow: '0 -4px 30px rgba(0,0,0,0.1)' }}
         >
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <FadeIn>
-              <p className="text-sm uppercase tracking-widest text-[#6B6963] mb-8 text-center">
-                The deliverables
+              <p className="text-sm uppercase tracking-widest text-[#6B6963] mb-6 text-center">
+                Your deliverables
               </p>
             </FadeIn>
             <FadeIn delay={100}>
               <h2 className="text-3xl md:text-5xl text-center leading-tight" style={SERIF}>
-                <span className="text-[#6B6963]">She doesn&apos;t just advise.</span>
+                <span className="text-[#6B6963]">Everything you need.</span>
                 <br />
-                <span className="text-[#1A1A18] font-semibold">She builds.</span>
+                <span className="text-[#1A1A18] font-semibold">Nothing you don&apos;t.</span>
               </h2>
             </FadeIn>
-            <div className="mt-16">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-14">
               {DELIVERABLES.map((text, i) => (
-                <SlideIn key={i} delay={200 + i * 100}>
-                  <div className="flex items-start py-6 border-b border-[#F0EDE6]">
+                <FadeIn key={i} delay={150 + i * 100}>
+                  <div className="bg-[#FAF9F5] rounded-2xl p-6 md:p-8 hover:shadow-md transition-all duration-300 h-full">
                     <span
-                      className="text-3xl md:text-5xl font-bold text-[#DA7756] opacity-20 w-16 md:w-24 shrink-0 leading-none"
+                      className="block text-[#DA7756] text-4xl font-bold opacity-15 mb-2"
                       style={SERIF}
                     >
                       {String(i + 1).padStart(2, '0')}
                     </span>
-                    <p className="text-lg md:text-xl text-[#6B6963] leading-relaxed">
+                    <p className="text-base md:text-lg text-[#6B6963] leading-relaxed">
                       {text}
                     </p>
                   </div>
-                </SlideIn>
+                </FadeIn>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ─── SECTION 6 · THE CONTRAST ─── */}
-        <section className="px-6 py-24 md:py-36 bg-[#FAF9F5]">
-          <div className="max-w-4xl mx-auto">
+        {/* ─── SECTION 6 · TWO PATHS — contrasting cards ─── */}
+        <section className="bg-[#FAF9F5] px-6 py-20 md:py-32">
+          <div className="max-w-5xl mx-auto">
             <FadeIn>
-              <h2 className="text-3xl md:text-5xl font-medium text-[#1A1A18] text-center mb-16" style={SERIF}>
+              <h2
+                className="text-3xl md:text-5xl font-medium text-[#1A1A18] text-center mb-14"
+                style={SERIF}
+              >
                 Two ways this goes.
               </h2>
             </FadeIn>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               <FadeIn delay={100}>
-                <div className="bg-white rounded-2xl p-8 md:p-12 border border-[#E5E2DC]">
+                <div className="bg-white rounded-2xl p-8 md:p-12 border border-[#E8E5DF] h-full">
                   <h3 className="text-xl md:text-2xl font-medium text-[#6B6963] mb-8" style={SERIF}>
                     The old way
                   </h3>
                   <div className="space-y-5">
                     {[
                       'You undervalue your business by 20-40%.',
-                      'You spend six months talking to the wrong buyers.',
-                      'Your deal falls apart in due diligence.',
+                      'Six months talking to the wrong buyers.',
+                      'Deal falls apart in due diligence.',
                       'You pay a broker 10% and still do most of the work.',
-                      'You wonder for years if you left money on the table.',
+                      'Years wondering if you left money on the table.',
                     ].map((line) => (
                       <p key={line} className="text-base md:text-lg text-[#6B6963]">
-                        <span className="text-[#DA7756] mr-2">&mdash;</span>{line}
+                        <span className="text-[#DA7756] mr-3">&mdash;</span>{line}
                       </p>
                     ))}
                   </div>
                 </div>
               </FadeIn>
               <FadeIn delay={250}>
-                <div className="bg-[#1A1A18] rounded-2xl p-8 md:p-12">
-                  <h3 className="text-xl md:text-2xl font-medium text-[#DA7756] mb-8" style={SERIF}>
+                <div className="bg-[#DA7756] rounded-2xl p-8 md:p-12 h-full">
+                  <h3 className="text-xl md:text-2xl font-medium text-white mb-8" style={SERIF}>
                     With Yulia
                   </h3>
                   <div className="space-y-5">
                     {[
                       'You know exactly what your business is worth.',
-                      'You talk only to qualified, serious buyers.',
-                      'Every document is ready before anyone asks.',
-                      'You pay a fraction of traditional fees.',
-                      'You close knowing you got the best possible outcome.',
+                      'Only qualified, serious buyers.',
+                      'Every document ready before anyone asks.',
+                      'A fraction of traditional advisory fees.',
+                      'Close knowing you got the best possible outcome.',
                     ].map((line) => (
-                      <p key={line} className="text-base md:text-lg text-gray-300">
-                        <span className="text-white mr-2">&mdash;</span>{line}
+                      <p key={line} className="text-base md:text-lg text-white/90">
+                        <span className="text-white mr-3">&mdash;</span>{line}
                       </p>
                     ))}
                   </div>
@@ -526,11 +516,14 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ─── SECTION 7 · THE PATHS ─── */}
-        <section className="px-6 py-24 md:py-36 bg-white">
-          <div className="max-w-4xl mx-auto">
+        {/* ─── SECTION 7 · PATHS — 2×2 card grid ─── */}
+        <section className="bg-white px-6 py-20 md:py-32">
+          <div className="max-w-5xl mx-auto">
             <FadeIn>
-              <h2 className="text-3xl md:text-5xl font-medium text-[#1A1A18] text-center" style={SERIF}>
+              <h2
+                className="text-3xl md:text-5xl font-medium text-[#1A1A18] text-center"
+                style={SERIF}
+              >
                 What brings you here?
               </h2>
             </FadeIn>
@@ -541,11 +534,14 @@ export default function Home() {
                     href={j.href}
                     className="group block bg-[#FAF9F5] rounded-2xl p-8 md:p-10 no-underline hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                   >
-                    <h3 className="text-xl md:text-2xl font-medium text-[#1A1A18]" style={SERIF}>
+                    <h3
+                      className="text-xl md:text-2xl font-medium text-[#1A1A18]"
+                      style={SERIF}
+                    >
                       {j.title}
                     </h3>
                     <p className="text-base md:text-lg text-[#6B6963] mt-3">{j.description}</p>
-                    <span className="inline-block text-[#DA7756] font-medium mt-6 transition-transform duration-200 group-hover:translate-x-1">
+                    <span className="inline-block text-[#DA7756] font-medium mt-5 transition-transform duration-200 group-hover:translate-x-1">
                       Start free &rarr;
                     </span>
                   </Link>
@@ -555,40 +551,33 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ─── SECTION 8 · FINAL CTA ─── */}
-        <section className="px-6 py-24 md:py-36 bg-[#1A1A18] text-center">
-          <div className="max-w-3xl mx-auto">
-            <FadeIn>
-              <h2 className="text-3xl md:text-6xl font-medium text-white leading-tight" style={SERIF}>
+        {/* ─── SECTION 8 · CTA — terra cotta card ─── */}
+        <section className="px-6 py-20 md:py-32 bg-[#FAF9F5]">
+          <FadeIn className="max-w-3xl mx-auto">
+            <div className="bg-[#DA7756] rounded-3xl shadow-xl p-10 md:p-16 text-center">
+              <h2
+                className="text-2xl md:text-4xl font-medium text-white leading-tight"
+                style={SERIF}
+              >
                 Your next deal starts with one conversation.
               </h2>
-            </FadeIn>
-            <FadeIn delay={100}>
-              <p className="text-lg md:text-xl text-gray-500 mt-6">
-                <span className="text-gray-300">No</span> credit card.
-                {' '}<span className="text-gray-300">No</span> commitment.
-                {' '}<span className="text-gray-300">No</span> minimums.
+              <p className="text-base md:text-lg text-white/70 mt-6">
+                No credit card. No commitment. No minimums.
               </p>
-            </FadeIn>
-            <FadeIn delay={150}>
-              <p className="text-lg md:text-xl text-gray-400 mt-2">
+              <p className="text-base md:text-lg text-white/80 mt-2">
                 Just an expert who&apos;s ready when you are.
               </p>
-            </FadeIn>
-            <FadeIn delay={200}>
               <Link
                 href="/signup"
-                className="inline-flex items-center mt-10 px-10 py-4 bg-[#DA7756] text-white text-lg font-medium rounded-full hover:bg-[#C4684A] no-underline transition-colors"
+                className="inline-flex items-center mt-8 px-10 py-4 bg-white text-[#DA7756] text-lg font-medium rounded-full hover:bg-gray-100 no-underline transition-colors"
               >
                 Meet Yulia &rarr;
               </Link>
-            </FadeIn>
-            <FadeIn delay={300}>
-              <p className="text-sm text-gray-600 mt-8">
+              <p className="text-sm text-white/50 mt-6">
                 Available in 🇺🇸 🇬🇧 🇨🇦 🇦🇺 and 20+ countries
               </p>
-            </FadeIn>
-          </div>
+            </div>
+          </FadeIn>
         </section>
       </div>
     </PublicLayout>
