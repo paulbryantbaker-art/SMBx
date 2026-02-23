@@ -1,128 +1,120 @@
-import { useState } from 'react';
 import { useLocation } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
-import Tag from '../../components/public/Tag';
-import PublicChatView from '../../components/public/PublicChatView';
+import Timeline from '../../components/public/Timeline';
+import PublicChatInput from '../../components/public/PublicChatInput';
 import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 
 /* ─── Data ─── */
 
-const DELIVERABLES = [
-  { name: 'Capital Strategy', price: 'Free', desc: 'Define your raise structure, target amount, and investor profile with Yulia.', free: true },
-  { name: 'Pre-Money Valuation', price: 'From $199', desc: 'Defensible valuation methodology tailored to your stage and industry.', free: false },
-  { name: 'Pitch Deck', price: 'From $199', desc: 'Investor-ready pitch deck built from your financials and growth story.', free: false },
-  { name: 'Investor Targeting', price: 'From $149', desc: 'Profiled and prioritized investors for your specific raise.', free: false },
-  { name: 'Term Sheet Analysis', price: 'From $199', desc: 'Side-by-side comparison and negotiation guidance on term sheets.', free: false },
+const TIMELINE_STEPS = [
+  {
+    num: 1,
+    title: 'Define your strategy',
+    price: 'Free',
+    free: true,
+    desc: 'How much do you need? What are you willing to give? Who should you approach? Yulia aligns your raise with your goals.',
+  },
+  {
+    num: 2,
+    title: 'Build your financial package',
+    price: 'Free',
+    free: true,
+    desc: 'Yulia organizes your numbers into the story investors need to see. Gaps identified. Weaknesses addressed before they\u2019re exposed.',
+  },
+  {
+    num: 3,
+    title: 'Valuation and pitch deck',
+    price: 'From $199',
+    free: false,
+    desc: 'Defensible pre-money valuation. 12-slide institutional deck built from YOUR actual data \u2014 not a template with your numbers pasted in.',
+  },
+  {
+    num: 4,
+    title: 'Target the right investors',
+    price: 'From $149',
+    free: false,
+    desc: 'Angels, VCs, family offices, strategics \u2014 profiled and prioritized for your specific raise. The right money, not just any money.',
+  },
+  {
+    num: 5,
+    title: 'Negotiate terms',
+    price: 'From $199',
+    free: false,
+    desc: 'Term sheet analysis. Side-by-side comparison. What each term means for your control, dilution, and economics. Negotiate informed.',
+  },
 ];
 
-const FAQS = [
-  {
-    q: 'What kind of raises?',
-    a: 'Angel, seed, Series A through growth equity. Debt structures too. Yulia adapts to your specific capital needs.',
-  },
-  {
-    q: 'Does Yulia find investors?',
-    a: 'She profiles and prioritizes investors for your specific raise. Introductions are yours to make.',
-  },
+const RAISE_PROMPTS = [
+  'I need $2M for expansion',
+  'Exploring Series A',
+  'Want to bring on a strategic partner',
 ];
 
 /* ─── Page ─── */
 
 export default function Raise() {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [, navigate] = useLocation();
   const chat = useAnonymousChat({ context: 'raise' });
 
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
-      <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-12">
-        <div className="flex items-center gap-3 mb-9 text-[13px] uppercase tracking-[.18em] text-[#DA7756] font-semibold">
+      <section className="max-w-site mx-auto px-10 pt-20 pb-12 max-md:px-5 max-md:pt-12 max-md:pb-8">
+        <div className="flex items-center gap-3 mb-8 text-[13px] uppercase tracking-[.18em] text-[#DA7756] font-semibold">
           <span className="w-9 h-0.5 bg-[#DA7756]" />
           Raise Capital
         </div>
-        <h1 className="font-serif text-[clamp(52px,7vw,92px)] font-black leading-none tracking-tight max-w-[14ch] mb-11 m-0">
-          Raise capital without losing control.
+        <h1 className="font-serif text-[clamp(44px,6vw,76px)] font-black leading-[1.05] tracking-[-0.03em] max-w-[14ch] mb-6 m-0">
+          Raise smart. <em className="italic text-[#DA7756]">Keep control.</em>
         </h1>
-        <p className="text-lg text-[#7A766E] max-w-[540px] leading-relaxed mb-10 m-0">
-          Investor-ready materials, valuation guidance, and term sheet analysis &mdash;
-          negotiate from strength.
+        <p className="text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-10 m-0">
+          The difference between a good raise and a great one is preparation. Yulia builds
+          your financial story, your deck, and your investor strategy &mdash; so you negotiate
+          from strength.
         </p>
+        <Button variant="primary" href="/signup">Start raising &mdash; free &rarr;</Button>
+      </section>
 
-        {/* ─── LIVE CHAT ─── */}
-        <div className="max-w-[600px]">
-          <PublicChatView
-            messages={chat.messages}
-            sending={chat.sending}
-            streamingText={chat.streamingText}
-            messagesRemaining={chat.messagesRemaining}
-            limitReached={chat.limitReached}
-            error={chat.error}
-            onSend={chat.sendMessage}
-            onSignup={() => navigate('/signup')}
-            placeholder="Tell Yulia about your raise \u2014 how much, what stage, what for\u2026"
+      {/* ═══ JOURNEY TIMELINE ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
+        <p className="text-xs uppercase tracking-[.2em] text-[#DA7756] font-semibold mb-4 m-0">
+          Your raise journey
+        </p>
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-12 m-0">
+          From strategy to <em className="italic text-[#DA7756]">term sheet.</em>
+        </h2>
+
+        <Timeline steps={TIMELINE_STEPS} />
+
+        <div className="text-center mt-12">
+          <p className="text-[15px] text-[#7A766E] mb-5 m-0">
+            Typical raise journey: <strong className="text-[#1A1A18]">From $749</strong>
+          </p>
+          <Button variant="primary" href="/signup">Start your journey &mdash; free &rarr;</Button>
+        </div>
+      </section>
+
+      {/* ═══ CHAT INPUT ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
+          Ready to start?
+        </h3>
+        <div className="max-w-[640px] mx-auto">
+          <PublicChatInput
+            onSend={(msg) => { chat.sendMessage(msg); navigate('/'); }}
+            placeholder="Tell Yulia about your raise..."
+            suggestedPrompts={RAISE_PROMPTS}
           />
-        </div>
-      </section>
-
-      {/* ═══ WHAT YOU GET ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
-          What you get.
-        </h2>
-        <div className="space-y-0">
-          {DELIVERABLES.map((d, i) => (
-            <div
-              key={d.name}
-              className={`flex flex-col md:flex-row md:items-center justify-between py-6 gap-4 ${
-                i < DELIVERABLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''
-              }`}
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-1">
-                  <h3 className="text-[17px] font-bold text-[#1A1A18] m-0">{d.name}</h3>
-                  <Tag variant={d.free ? 'free' : 'paid'}>{d.price}</Tag>
-                </div>
-                <p className="text-sm text-[#7A766E] leading-relaxed m-0">{d.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="flex items-center justify-between pt-6 mt-6 border-t-2 border-[#1A1A18]">
-          <span className="text-[15px] font-bold text-[#1A1A18]">Typical total</span>
-          <span className="text-[15px] font-bold text-[#DA7756]">From $749</span>
-        </div>
-      </section>
-
-      {/* ═══ FAQ ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
-          Common questions.
-        </h2>
-        <div className="space-y-0">
-          {FAQS.map((f, i) => (
-            <div key={i} className="border-b border-[#E0DCD4]">
-              <button
-                className="w-full flex items-center justify-between py-5 text-left bg-transparent border-none cursor-pointer"
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-              >
-                <span className="text-[15px] font-semibold text-[#1A1A18] pr-4">{f.q}</span>
-                <span className="text-[#7A766E] text-xl shrink-0">{openFaq === i ? '\u2212' : '+'}</span>
-              </button>
-              {openFaq === i && (
-                <p className="text-sm text-[#7A766E] leading-relaxed pb-5 m-0">{f.a}</p>
-              )}
-            </div>
-          ))}
         </div>
       </section>
 
       {/* ═══ FINAL CTA ═══ */}
       <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
         <div className="bg-gradient-to-br from-[#DA7756] to-[#C4684A] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
-          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-snug max-w-[480px] m-0 relative z-10">
-            Raise smart. Start free.
+          <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
+          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
+            Raise from strength. Talk to Yulia &mdash; free.
           </h3>
           <Button variant="ctaBlock" href="/signup" className="relative z-10">
             Start raising &rarr;

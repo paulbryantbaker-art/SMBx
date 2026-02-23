@@ -16,7 +16,7 @@ const COLUMNS = [
     links: [
       { href: '/how-it-works', label: 'How It Works' },
       { href: '/pricing', label: 'Pricing' },
-      { href: '/enterprise', label: 'Enterprise' },
+      { href: '/enterprise', label: 'For Brokers' },
     ],
   },
   {
@@ -32,19 +32,19 @@ export default function Footer() {
   return (
     <footer className="bg-[#F0EDE6] pt-16 pb-8 px-10 max-md:px-5 max-md:pt-10 max-md:pb-6">
       <div className="max-w-site mx-auto">
-        <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-12 max-md:grid-cols-1 max-md:gap-8">
+        <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-12 max-lg:grid-cols-2 max-md:grid-cols-1 max-md:gap-8">
           {/* Brand */}
           <div>
             <Logo linked={false} />
-            <p className="text-sm text-[#7A766E] leading-relaxed mt-3 max-w-[280px]">
-              AI-powered M&amp;A advisory. From valuation to close.
+            <p className="text-sm text-[#7A766E] leading-[1.55] mt-3 max-w-[280px]">
+              The AI deal advisor for brokers, owners, and investors. From valuation to close.
             </p>
           </div>
 
           {/* Link columns */}
           {COLUMNS.map(col => (
             <div key={col.title}>
-              <h4 className="text-xs uppercase tracking-widest text-[#7A766E] font-semibold mb-4">
+              <h4 className="text-xs uppercase tracking-[.12em] text-[#7A766E] font-semibold mb-4">
                 {col.title}
               </h4>
               <ul className="list-none p-0 m-0 space-y-2">

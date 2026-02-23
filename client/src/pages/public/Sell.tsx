@@ -1,180 +1,226 @@
-import { useState } from 'react';
 import { useLocation } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
-import Tag from '../../components/public/Tag';
-import PublicChatView from '../../components/public/PublicChatView';
+import Timeline from '../../components/public/Timeline';
+import PublicChatInput from '../../components/public/PublicChatInput';
 import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 
 /* ─── Data ─── */
 
+const TIMELINE_STEPS = [
+  {
+    num: 1,
+    title: 'Tell Yulia about your business',
+    price: 'Free',
+    free: true,
+    desc: 'No forms. Just a conversation. Describe your business \u2014 industry, location, revenue, team, whatever you know. Yulia asks smart follow-ups and builds your deal profile.',
+    detail: '\u201CI own an HVAC company in Dallas, 12 employees, $3.2M revenue, been running it for 15 years.\u201D \u2014 That\u2019s all it takes to start.',
+  },
+  {
+    num: 2,
+    title: 'See your real numbers',
+    price: 'Free',
+    free: true,
+    desc: 'Yulia calculates your SDE or EBITDA, identifies every legitimate add-back, and gives you a preliminary valuation range \u2014 with the math shown. Not a guess. A number you can take to your CPA.',
+    detail: 'Most owners discover add-backs they didn\u2019t know existed. Personal vehicle, one-time expenses, above-market rent to yourself \u2014 Yulia finds them all.',
+  },
+  {
+    num: 3,
+    title: 'Get your valuation report',
+    price: 'From $199',
+    free: false,
+    desc: 'Full multi-methodology valuation: comparable transactions, industry multiples, discounted cash flow. Benchmarked against real deals in your industry and region. The kind of report advisory firms charge $10K\u2013$25K to produce.',
+  },
+  {
+    num: 4,
+    title: 'Go to market',
+    price: 'From $299',
+    free: false,
+    desc: 'Yulia builds your Confidential Information Memorandum \u2014 the document that makes buyers take your business seriously. Then she identifies and scores qualified buyers for your specific deal.',
+    detail: 'Working with a broker? Invite them in. Yulia produces the CIM and buyer research \u2014 your broker focuses on relationships and negotiation. The deal moves faster for everyone.',
+  },
+  {
+    num: 5,
+    title: 'Close with confidence',
+    price: 'From $299',
+    free: false,
+    desc: 'LOI comparison, due diligence management, working capital analysis, deal structuring, and closing coordination. Yulia keeps every party organized and every document in one place.',
+  },
+];
+
 const DEAL_SIZES = [
-  { title: 'Under $500K', desc: 'First-time seller? Yulia walks you through every step in plain language.' },
-  { title: '$500K \u2013 $10M', desc: 'Experienced owner selling a real operation? Institutional-quality work product.' },
-  { title: '$10M+', desc: 'PE or strategic exit? Full CIM, buyer targeting, deal room management.' },
+  {
+    range: 'Under $500K',
+    title: 'First-time seller',
+    desc: "You\u2019ve never done this before. That\u2019s okay \u2014 Yulia walks you through every step in plain language. No jargon, no assumptions.",
+    result: '\u201CHe thought he\u2019d be lucky to get $200K. Yulia found $31K in add-backs he didn\u2019t know counted. Asking price: $425K.\u201D',
+  },
+  {
+    range: '$500K \u2013 $10M',
+    title: 'Serious operation',
+    desc: 'You know your business is valuable. Yulia produces institutional-quality work product \u2014 the same CIMs and valuations that $100K advisory firms deliver.',
+    result: '\u201CValued at $2.6M\u2013$3.9M using live comps. Three PE firms actively consolidating in her industry. Full CIM in 47 minutes.\u201D',
+  },
+  {
+    range: '$10M+',
+    title: 'Strategic exit',
+    desc: 'PE roll-up, strategic sale, or management buyout \u2014 Yulia handles the analytical heavy lifting while your deal team focuses on execution.',
+    result: '\u201CTheir team of 3 operated like a team of 12. Six platform acquisitions closed in 14 months.\u201D',
+  },
 ];
 
-const DELIVERABLES = [
-  { name: 'Financial Analysis', price: 'Free', desc: 'SDE/EBITDA calculated. Every legitimate add-back identified.', free: true },
-  { name: 'Defensible Valuation', price: 'From $199', desc: 'Multi-methodology using current market data for your industry.', free: false },
-  { name: 'Confidential Information Memorandum', price: 'From $299', desc: 'The document that makes buyers take your business seriously.', free: false },
-  { name: 'Buyer Identification', price: 'From $199', desc: 'Qualified buyers profiled and prioritized for your deal.', free: false },
-  { name: 'Closing Support', price: 'From $299', desc: 'LOI comparison, DD prep, working capital, funds flow \u2014 to the wire.', free: false },
-];
-
-const JOURNEY_STEPS = [
-  { num: '\u2460', name: 'Intake', price: 'Free' },
-  { num: '\u2461', name: 'Financial Package', price: 'Free' },
-  { num: '\u2462', name: 'Valuation', price: 'From $199' },
-  { num: '\u2463', name: 'CIM & Packaging', price: 'From $299' },
-  { num: '\u2464', name: 'Buyer Matching', price: 'From $199' },
-  { num: '\u2465', name: 'Closing', price: 'From $299' },
+const BROKER_BENEFITS = [
+  { bold: 'Invite your broker', rest: ' into the deal room \u2014 they see everything, collaborate in real time' },
+  { bold: 'CIMs in an hour', rest: ' \u2014 your broker reviews and refines instead of building from scratch' },
+  { bold: 'Attorneys and CPAs join free', rest: ' \u2014 no extra seats, no extra cost' },
+  { bold: "Your broker\u2019s expertise + Yulia\u2019s speed", rest: ' = deals that close faster at better terms' },
 ];
 
 const FAQS = [
   {
-    q: 'How accurate is an AI valuation?',
-    a: 'Multiple methodologies, real comps, shown work. Many users bring it to their CPA for confirmation.',
+    q: 'Can I trust an AI valuation?',
+    a: 'Yulia uses the same methodologies as human advisors \u2014 comparable transactions, industry multiples, discounted cash flow. Every calculation is shown, every comp is sourced. Many sellers bring Yulia\u2019s report to their CPA for review. The math speaks for itself.',
   },
   {
-    q: 'Will buyers take a CIM from an AI seriously?',
-    a: 'Same format and depth as a $50K advisory firm produces. Professional, institutional-quality documents.',
-  },
-  {
-    q: 'What if my business is complicated?',
-    a: '80+ industry verticals. Yulia adapts to your specific business type, deal structure, and market conditions.',
+    q: 'Will buyers take an AI-generated CIM seriously?',
+    a: 'The CIM format, depth, and quality match what top advisory firms produce. Buyers care about the information, not who typed it. Many of our CIMs are reviewed and co-branded by the seller\u2019s broker before going to market.',
   },
   {
     q: 'Do I still need a broker?',
-    a: 'Many users work with brokers who use Yulia. We complement, not replace. Your broker gets free access to your deal room.',
+    a: "That\u2019s your call. Some sellers use Yulia end-to-end. Others use Yulia for the analytical work and their broker for relationships and negotiation. Many brokers use Yulia themselves \u2014 she produces their work product faster so they can focus on what humans do best: building trust and closing deals.",
   },
+  {
+    q: 'What if my business is complicated?',
+    a: 'Yulia covers 80+ industry verticals with current market data. Whether you\u2019re a single-location restaurant or a multi-state healthcare practice, she adapts \u2014 different metrics, different comps, different buyer profiles. If something is truly unusual, she\u2019ll tell you.',
+  },
+];
+
+const SELL_PROMPTS = [
+  'I own a restaurant in Chicago',
+  'My SaaS does $2M ARR',
+  'Landscaping business, 3 employees',
 ];
 
 /* ─── Page ─── */
 
 export default function Sell() {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [, navigate] = useLocation();
   const chat = useAnonymousChat({ context: 'sell' });
 
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
-      <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-12">
-        <div className="flex items-center gap-3 mb-9 text-[13px] uppercase tracking-[.18em] text-[#DA7756] font-semibold">
+      <section className="max-w-site mx-auto px-10 pt-20 pb-12 max-md:px-5 max-md:pt-12 max-md:pb-8">
+        <div className="flex items-center gap-3 mb-8 text-[13px] uppercase tracking-[.18em] text-[#DA7756] font-semibold">
           <span className="w-9 h-0.5 bg-[#DA7756]" />
           Sell Your Business
         </div>
-        <h1 className="font-serif text-[clamp(52px,7vw,92px)] font-black leading-none tracking-tight max-w-[14ch] mb-11 m-0">
-          Know what your business is worth.
+        <h1 className="font-serif text-[clamp(44px,6vw,76px)] font-black leading-[1.05] tracking-[-0.03em] max-w-[14ch] mb-6 m-0">
+          You built it. Now <em className="italic text-[#DA7756]">own the exit.</em>
         </h1>
-        <p className="text-lg text-[#7A766E] max-w-[540px] leading-relaxed mb-10 m-0">
-          From first financial analysis to wire transfer &mdash; guided every step.
-          Your first analysis is free.
+        <p className="text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-10 m-0">
+          Most owners sell for less than they should &mdash; not because the business isn&apos;t
+          worth it, but because they didn&apos;t have the right information at the right time.
+          Yulia changes that.
         </p>
-
-        {/* ─── LIVE CHAT ─── */}
-        <div className="max-w-[600px]">
-          <PublicChatView
-            messages={chat.messages}
-            sending={chat.sending}
-            streamingText={chat.streamingText}
-            messagesRemaining={chat.messagesRemaining}
-            limitReached={chat.limitReached}
-            error={chat.error}
-            onSend={chat.sendMessage}
-            onSignup={() => navigate('/signup')}
-            placeholder="Tell Yulia about the business you want to sell\u2026"
-          />
+        <div className="flex flex-col md:flex-row gap-3 max-md:w-full">
+          <Button variant="primary" href="/signup">Start selling &mdash; free &rarr;</Button>
+          <Button variant="secondary" href="/how-it-works">See how it works</Button>
         </div>
       </section>
 
-      {/* ═══ BUILT FOR YOUR DEAL SIZE ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(36px,4.5vw,60px)] font-black tracking-tight leading-[1.05] mb-10 m-0">
-          Built for <em className="italic text-[#DA7756]">your</em> deal size.
+      {/* ═══ JOURNEY TIMELINE ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
+        <p className="text-xs uppercase tracking-[.2em] text-[#DA7756] font-semibold mb-4 m-0">
+          Your selling journey
+        </p>
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-12 m-0">
+          From &ldquo;what&apos;s it worth?&rdquo; to <em className="italic text-[#DA7756]">wire transfer.</em>
         </h2>
-        <div className="grid grid-cols-3 gap-5 max-md:grid-cols-1">
+
+        <Timeline steps={TIMELINE_STEPS} />
+
+        <div className="text-center mt-12">
+          <p className="text-[15px] text-[#7A766E] mb-5 m-0">
+            Typical sell-side journey: <strong className="text-[#1A1A18]">From $1,799</strong> &middot;
+            Traditional advisory: <span className="line-through">$50,000&ndash;$200,000</span>
+          </p>
+          <Button variant="primary" href="/signup">Start your journey &mdash; free &rarr;</Button>
+        </div>
+      </section>
+
+      {/* ═══ BUILT FOR YOUR DEAL ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
+          Built for <em className="italic text-[#DA7756]">your</em> deal.
+        </h2>
+        <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
           {DEAL_SIZES.map(d => (
-            <Card key={d.title} padding="px-8 py-10">
-              <h3 className="text-lg font-bold text-[#1A1A18] mb-2 m-0">{d.title}</h3>
-              <p className="text-sm text-[#7A766E] leading-relaxed m-0">{d.desc}</p>
+            <Card key={d.range} padding="px-7 py-9">
+              <p className="font-serif text-[28px] font-black text-[#DA7756] mb-3 m-0">{d.range}</p>
+              <h3 className="text-base font-bold text-[#1A1A18] mb-2 m-0">{d.title}</h3>
+              <p className="text-sm text-[#7A766E] leading-[1.55] mb-3 m-0">{d.desc}</p>
+              <div className="py-3 px-4 bg-[#F3F0EA] rounded-[10px]">
+                <p className="text-[13px] text-[#4A4843] italic leading-[1.45] m-0">{d.result}</p>
+              </div>
             </Card>
           ))}
         </div>
       </section>
 
-      {/* ═══ WHAT YOU GET ═══ */}
-      <section id="deliverables" className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
-          What you get.
-        </h2>
-        <div className="space-y-0">
-          {DELIVERABLES.map((d, i) => (
-            <div
-              key={d.name}
-              className={`flex flex-col md:flex-row md:items-center justify-between py-6 gap-4 ${
-                i < DELIVERABLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''
-              }`}
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-1">
-                  <h3 className="text-[17px] font-bold text-[#1A1A18] m-0">{d.name}</h3>
-                  <Tag variant={d.free ? 'free' : 'paid'}>{d.price}</Tag>
-                </div>
-                <p className="text-sm text-[#7A766E] leading-relaxed m-0">{d.desc}</p>
+      {/* ═══ BROKER CALLOUT ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
+        <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-[20px] py-12 px-14 grid grid-cols-2 gap-12 items-center max-md:grid-cols-1 max-md:py-8 max-md:px-6 max-md:gap-8">
+          <div>
+            <h3 className="font-serif text-[28px] font-black tracking-[-0.02em] leading-[1.15] mb-4 m-0">
+              Working with a <em className="italic text-[#DA7756]">broker?</em> Even better.
+            </h3>
+            <p className="text-[15px] text-[#7A766E] leading-[1.6] m-0">
+              Yulia doesn&apos;t replace your broker &mdash; she makes them faster. Many of our
+              most active users are brokers and advisors who use Yulia to produce work product,
+              screen buyers, and manage more deals simultaneously.
+            </p>
+          </div>
+          <div className="flex flex-col gap-4">
+            {BROKER_BENEFITS.map(b => (
+              <div key={b.bold} className="flex gap-3 items-start">
+                <span className="w-6 h-6 rounded-full bg-[#FFF0EB] text-[#DA7756] flex items-center justify-center text-xs font-bold shrink-0 mt-px">
+                  &#10003;
+                </span>
+                <span className="text-[15px] leading-[1.5]">
+                  <strong>{b.bold}</strong>{b.rest}
+                </span>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══ YOUR JOURNEY ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
-          Your journey.
-        </h2>
-        <div className="space-y-0">
-          {JOURNEY_STEPS.map((s, i) => (
-            <div
-              key={s.name}
-              className={`flex items-center justify-between py-4 ${
-                i < JOURNEY_STEPS.length - 1 ? 'border-b border-[#E0DCD4]' : ''
-              }`}
-            >
-              <div className="flex items-center gap-4">
-                <span className="text-lg text-[#DA7756]">{s.num}</span>
-                <span className="text-[15px] font-medium text-[#1A1A18]">{s.name}</span>
-              </div>
-              <span className="text-sm text-[#7A766E]">{s.price}</span>
-            </div>
-          ))}
-          <div className="flex items-center justify-between pt-6 border-t-2 border-[#1A1A18]">
-            <span className="text-[15px] font-bold text-[#1A1A18]">Typical total</span>
-            <span className="text-[15px] font-bold text-[#DA7756]">From $1,799</span>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ FAQ ═══ */}
+      {/* ═══ CHAT INPUT ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
-          Common questions.
+        <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
+          Ready to start?
+        </h3>
+        <div className="max-w-[640px] mx-auto">
+          <PublicChatInput
+            onSend={(msg) => { chat.sendMessage(msg); navigate('/'); }}
+            placeholder="Tell Yulia about the business you want to sell..."
+            suggestedPrompts={SELL_PROMPTS}
+          />
+        </div>
+      </section>
+
+      {/* ═══ FAQ ═══ */}
+      <section className="max-w-[800px] mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <h2 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-10 m-0 text-center">
+          Questions sellers ask.
         </h2>
-        <div className="space-y-0">
+        <div>
           {FAQS.map((f, i) => (
-            <div key={i} className="border-b border-[#E0DCD4]">
-              <button
-                className="w-full flex items-center justify-between py-5 text-left bg-transparent border-none cursor-pointer"
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-              >
-                <span className="text-[15px] font-semibold text-[#1A1A18] pr-4">{f.q}</span>
-                <span className="text-[#7A766E] text-xl shrink-0">{openFaq === i ? '\u2212' : '+'}</span>
-              </button>
-              {openFaq === i && (
-                <p className="text-sm text-[#7A766E] leading-relaxed pb-5 m-0">{f.a}</p>
-              )}
+            <div key={i} className={`py-6 ${i < FAQS.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>
+              <p className="text-base font-bold text-[#1A1A18] mb-2.5 m-0">{f.q}</p>
+              <p className="text-sm text-[#7A766E] leading-[1.65] m-0">{f.a}</p>
             </div>
           ))}
         </div>
@@ -183,11 +229,12 @@ export default function Sell() {
       {/* ═══ FINAL CTA ═══ */}
       <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
         <div className="bg-gradient-to-br from-[#DA7756] to-[#C4684A] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
-          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-snug max-w-[480px] m-0 relative z-10">
-            Know your number. Start free.
+          <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
+          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
+            You built something valuable. Let&apos;s prove it.
           </h3>
           <Button variant="ctaBlock" href="/signup" className="relative z-10">
-            Start selling &rarr;
+            Talk to Yulia &mdash; free &rarr;
           </Button>
         </div>
       </section>

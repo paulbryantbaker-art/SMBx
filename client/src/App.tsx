@@ -20,6 +20,8 @@ import HowItWorks from './pages/public/HowItWorks';
 import Enterprise from './pages/public/Enterprise';
 import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
+import Privacy from './pages/public/Privacy';
+import Terms from './pages/public/Terms';
 import Chat from './pages/Chat';
 
 export default function App() {
@@ -61,6 +63,13 @@ export default function App() {
       </Route>
       <Route path="/enterprise">
         <Enterprise />
+      </Route>
+
+      <Route path="/legal/privacy">
+        <Privacy />
+      </Route>
+      <Route path="/legal/terms">
+        <Terms />
       </Route>
 
       <Route path="/login">

@@ -101,10 +101,10 @@ export default function Pricing() {
     <PublicLayout>
       {/* ═══ HERO ═══ */}
       <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-12 text-center">
-        <h1 className="font-serif text-[clamp(52px,7vw,92px)] font-black leading-none tracking-tight mb-6 m-0">
-          Know exactly what you&apos;ll spend before you start.
+        <h1 className="font-serif text-[clamp(40px,5.5vw,72px)] font-black leading-[1.05] tracking-[-0.03em] mb-5 m-0">
+          Know what you&apos;ll spend <em className="italic text-[#DA7756]">before you start.</em>
         </h1>
-        <p className="text-lg text-[#7A766E] max-w-[600px] mx-auto leading-relaxed m-0">
+        <p className="text-[19px] text-[#7A766E] max-w-[560px] mx-auto leading-[1.6] m-0">
           Every journey has a clear price. No retainers. No surprises.
           Your first conversation and financial analysis are always free.
         </p>
@@ -153,7 +153,7 @@ export default function Pricing() {
 
       {/* ═══ EXAMPLES ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
           What does it <em className="italic text-[#DA7756]">actually</em> cost?
         </h2>
         <div className="grid grid-cols-3 gap-5 max-md:grid-cols-1">
@@ -169,7 +169,7 @@ export default function Pricing() {
 
       {/* ═══ WALLET OPTIONS ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
           How to pay.
         </h2>
         <div className="grid grid-cols-3 gap-5 max-md:grid-cols-1">
@@ -190,7 +190,7 @@ export default function Pricing() {
       {/* ═══ WHAT'S FREE ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
         <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-[20px] p-16 max-md:p-7">
-          <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-8 m-0">
+          <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-8 m-0">
             What&apos;s free.
           </h2>
           <ul className="space-y-3 mb-8 list-none p-0 m-0">
@@ -211,7 +211,7 @@ export default function Pricing() {
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
         <div className="grid grid-cols-2 gap-16 items-center max-md:grid-cols-1 max-md:gap-8">
           <div>
-            <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight leading-[1.1] mb-6 m-0">
+            <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] leading-[1.1] mb-6 m-0">
               Service providers collaborate <em className="italic text-[#DA7756]">free.</em>
             </h2>
             <p className="text-[17px] text-[#7A766E] leading-relaxed m-0">
@@ -232,7 +232,7 @@ export default function Pricing() {
 
       {/* ═══ FAQ ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
           Common questions.
         </h2>
         <div className="space-y-0">
@@ -256,7 +256,7 @@ export default function Pricing() {
       {/* ═══ FINAL CTA ═══ */}
       <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
         <div className="bg-gradient-to-br from-[#DA7756] to-[#C4684A] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
-          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-snug max-w-[480px] m-0 relative z-10">
+          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
             Start free. Pay when you&apos;re ready.
           </h3>
           <Button variant="ctaBlock" href="/signup" className="relative z-10">

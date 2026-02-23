@@ -26,7 +26,7 @@ const variants: Record<Variant, string> = {
   cardLink:
     `inline-flex items-center gap-1.5 text-[#DA7756] text-sm font-semibold font-sans bg-transparent border-none p-0 cursor-pointer no-underline transition-transform duration-200 hover:translate-x-1`,
   ctaBlock:
-    `${base} bg-white text-[#DA7756] border-none rounded-full text-base font-bold px-10 py-[18px] hover:-translate-y-0.5 hover:shadow-lg`,
+    `${base} bg-white text-[#DA7756] border-none rounded-full text-base font-bold px-10 py-[18px] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)]`,
 };
 
 export default function Button({
