@@ -16,7 +16,7 @@ export default function PublicLayout({ children, minimal }: Props) {
   const isMorphing = morphPhase === 'morphing';
 
   return (
-    <div className="min-h-dvh flex flex-col bg-[#FAF8F4]">
+    <div className={`flex flex-col bg-[#FAF8F4] ${isChat ? 'h-dvh overflow-hidden' : 'min-h-dvh'}`}>
       {!minimal && <PublicNav chatMode={isChat} />}
 
       <ChatMorph>{children}</ChatMorph>

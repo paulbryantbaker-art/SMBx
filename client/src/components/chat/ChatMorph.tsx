@@ -10,7 +10,7 @@ export default function ChatMorph({ children }: Props) {
 
   if (morphPhase === 'chat') {
     return (
-      <main className="flex-1 flex flex-col morph-fade-in">
+      <main className="flex-1 flex flex-col min-h-0 morph-fade-in">
         <ChatView />
       </main>
     );

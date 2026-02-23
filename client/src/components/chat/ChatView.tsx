@@ -23,9 +23,9 @@ export default function ChatView() {
   }, [messages, streamingContent, isStreaming]);
 
   return (
-    <div className="flex-1 flex flex-col max-w-[720px] w-full mx-auto px-5">
+    <div className="flex-1 flex flex-col min-h-0 max-w-[720px] w-full mx-auto px-5">
       {/* Messages — scrollable */}
-      <div className="flex-1 overflow-y-auto space-y-5 pt-6 pb-4">
+      <div className="flex-1 overflow-y-auto min-h-0 space-y-5 pt-6 pb-4">
         {messages.map(m => {
           if (m.role === 'user') {
             return (
@@ -104,9 +104,9 @@ export default function ChatView() {
         <div ref={endRef} />
       </div>
 
-      {/* Input — pinned at bottom (same PublicChatInput component) */}
+      {/* Input — pinned at bottom */}
       {!limitReached && (
-        <div className="pb-6 pt-2">
+        <div className="shrink-0 pb-6 pt-2">
           <PublicChatInput sourcePage={sourcePage} />
           {messages.length > 0 && messagesRemaining <= 5 && messagesRemaining > 0 && (
             <p className="text-xs text-[#9B9891] text-center mt-2 m-0">
