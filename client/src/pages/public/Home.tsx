@@ -1,442 +1,207 @@
-import { useState, useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
-import YuliaSection from '../../components/public/YuliaSection';
+import Button from '../../components/public/Button';
+import Card from '../../components/public/Card';
+import Tag from '../../components/public/Tag';
 
-const SERIF = { fontFamily: 'ui-serif, Georgia, Cambria, serif' } as const;
+/* ─── Data ─── */
 
-const TICKER_ITEMS = [
-  'Business Owners',
-  'First-Time Buyers',
-  'Search Funds',
-  'Brokers',
-  'PE Firms',
-  'Family Offices',
-  'Investors',
-  'Serial Acquirers',
-  'Holding Companies',
+const HERO_CARDS = [
+  { size: '$400K Landscaping', result: 'Found $31K in add-backs', journey: 'Selling' },
+  { size: '$3M HVAC', result: 'Valued at $2.6M\u2013$3.9M', journey: 'Selling' },
+  { size: '$12M Search Fund', result: '47 targets scored overnight', journey: 'Buying' },
+  { size: '$40M PE Roll-up', result: '6 acquisitions in 14 months', journey: 'Platform Build' },
 ];
 
-const WHAT_IFS = [
-  'What if you knew exactly what your business was worth — not a range, not a guess — before you talked to a single buyer?',
-  'What if someone had already identified the 50 most likely acquirers in your industry and ranked them by fit?',
-  'What if every document — valuation, memorandum, financial analysis — was ready before anyone asked?',
+const TRUST_STATS = [
+  { num: '$2.4T', desc: 'Annual SMB transaction volume' },
+  { num: '73%', desc: 'Deal failure rate without guidance' },
+  { num: '30%+', desc: 'Value left on the table' },
+  { num: '24hr', desc: 'From signup to first valuation' },
 ];
 
-const DELIVERABLES = [
-  'A clear picture of what your business is actually worth — backed by real market data, not guesswork.',
-  'Financial analysis that shows buyers the real story, not the tax story.',
-  'An offering memorandum so compelling that buyers compete to talk to you.',
-  'A ranked list of the buyers most likely to close — based on acquisition history and strategic fit.',
-  'Due diligence preparation that answers every question before it gets asked.',
-  'Negotiation strategy built around your specific leverage points and walk-away number.',
+const PROBLEM_STATS = [
+  { num: '10%', label: 'Typical broker commission on your deal' },
+  { num: '$25K+', label: 'Average advisory retainer before anything happens' },
+  { num: '6\u201312 mo', label: 'Average time to close with a traditional broker' },
+  { num: '70%', label: 'Of listed businesses never sell at all' },
+];
+
+const OUTCOMES = [
+  { number: '3\u20134\u00d7', title: 'EBITDA Multiples Captured', desc: 'AI-optimized positioning ensures you sell at the top of your range, not the bottom.' },
+  { number: '23+', title: 'Qualified Buyers, Day One', desc: 'Yulia screens and matches buyers by criteria, capacity, and deal history instantly.' },
+  { number: '80%', title: 'Less Time on Admin', desc: 'Automated CIM generation, document organization, and due diligence workflows.' },
+  { number: '90%', title: 'Cost Reduction vs. Brokers', desc: 'Pay per stage, not a 10% commission. Transparent, progressive pricing from day one.' },
+];
+
+const STEPS = [
+  { num: '01', title: 'Start a conversation', desc: 'Tell Yulia about your business or what you\u2019re looking to buy. She\u2019ll ask the right questions and build your profile.', tag: 'free' as const, tagLabel: 'Free to start' },
+  { num: '02', title: 'Get real deliverables', desc: 'Valuation report, buyer list, CIM, due diligence checklist \u2014 real documents, not summaries. Pay only for what you need.', tag: 'paid' as const, tagLabel: 'Pay as you go' },
+  { num: '03', title: 'Close with confidence', desc: 'Yulia guides you through negotiation, deal structuring, and closing. Every stage, every decision, every document.', tag: 'paid' as const, tagLabel: 'Stage-by-stage' },
 ];
 
 const JOURNEYS = [
-  { title: 'Sell your business', description: 'Know your number. Find your buyer. Close on your terms.', href: '/sell' },
-  { title: 'Buy a business', description: 'Define your thesis. Source targets. Model the returns.', href: '/buy' },
-  { title: 'Raise capital', description: 'Bring on investors. Keep control. Grow on your terms.', href: '/raise' },
-  { title: 'Post-acquisition', description: 'Your first 100 days, done right. Nothing falls through the cracks.', href: '/integrate' },
+  { title: 'Sell', desc: 'Know your number. Find qualified buyers. Close on your terms.', link: '/sell', cta: 'Start selling \u2192' },
+  { title: 'Buy', desc: 'Build your buy box. Find the right deal. Model the returns.', link: '/buy', cta: 'Start buying \u2192' },
+  { title: 'Raise Capital', desc: 'Structure your raise. Match with investors. Keep control.', link: '/raise', cta: 'Start raising \u2192' },
+  { title: 'Integrate', desc: 'Your first 100 days, done right. Systems, people, culture.', link: '/integrate', cta: 'Start planning \u2192' },
 ];
 
-/* ─────────────────────────────────────────
-   Animation primitives
-   ───────────────────────────────────────── */
-
-function useOnScreen(threshold = 0.15) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.unobserve(el); } },
-      { threshold },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return { ref, visible };
-}
-
-function FadeIn({ children, className = '', delay = 0, duration = 700 }: {
-  children: ReactNode; className?: string; delay?: number; duration?: number;
-}) {
-  const { ref, visible } = useOnScreen();
-  return (
-    <div ref={ref} className={className} style={{
-      opacity: visible ? 1 : 0,
-      transform: visible ? 'translateY(0)' : 'translateY(24px)',
-      transition: `opacity ${duration}ms ease-out ${delay}ms, transform ${duration}ms ease-out ${delay}ms`,
-    }}>{children}</div>
-  );
-}
-
-function CountUp({ target, suffix = '', active, delay = 0, className, style }: {
-  target: number; suffix?: string; active?: boolean; delay?: number;
-  className?: string; style?: React.CSSProperties;
-}) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const [value, setValue] = useState(0);
-  const started = useRef(false);
-  const [inView, setInView] = useState(false);
-
-  useEffect(() => {
-    if (active !== undefined) return;
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setInView(true); obs.unobserve(el); } },
-      { threshold: 0.3 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [active]);
-
-  const shouldStart = active !== undefined ? active : inView;
-
-  useEffect(() => {
-    if (!shouldStart || started.current) return;
-    started.current = true;
-    const timer = setTimeout(() => {
-      const t0 = performance.now();
-      const run = (now: number) => {
-        const p = Math.min((now - t0) / 1500, 1);
-        setValue(Math.round((1 - Math.pow(1 - p, 3)) * target));
-        if (p < 1) requestAnimationFrame(run);
-      };
-      requestAnimationFrame(run);
-    }, delay);
-    return () => clearTimeout(timer);
-  }, [shouldStart, target, delay]);
-
-  return <span ref={ref} className={className} style={style}>{value}{suffix}</span>;
-}
-
-function Ticker() {
-  const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
-  return (
-    <div className="overflow-hidden w-full mt-3 group">
-      <div
-        className="flex whitespace-nowrap group-hover:[animation-play-state:paused]"
-        style={{ animation: 'tickerScroll 30s linear infinite' }}
-      >
-        {items.map((item, i) => (
-          <span key={i} className="text-sm md:text-base text-[#6B6963] shrink-0">
-            {item}<span className="text-[#DA7756] mx-3">&middot;</span>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────
-   Page
-   ───────────────────────────────────────── */
+/* ─── Page ─── */
 
 export default function Home() {
   return (
     <PublicLayout>
-      {/* ═══════════════════════════════════════
-          SECTION 1 · HERO — centered, massive type
-          ═══════════════════════════════════════ */}
-      <section className="flex flex-col items-center justify-center px-6 py-20 md:py-32 bg-[#FAF9F5] min-h-[80vh] md:min-h-screen">
-        <div className="text-center flex flex-col items-center max-w-5xl w-full">
-          <span className="inline-block bg-[#F0EDE6] text-[#6B6963] text-sm px-4 py-1.5 rounded-full mb-8">
-            AI-Powered M&amp;A Advisory
-          </span>
-          <h1
-            className="text-5xl md:text-8xl lg:text-9xl text-[#1A1A18] font-medium leading-tight tracking-tight mb-8"
-            style={SERIF}
-          >
-            Sell or buy<br />
-            any business, <span className="text-[#DA7756]">anywhere</span>.
-          </h1>
-          <p className="text-lg md:text-xl text-[#6B6963] mt-8">Built for everyone.</p>
-          <Ticker />
-          <p className="text-base md:text-lg text-[#6B6963] mt-6 max-w-md mx-auto">
-            Harness deep intelligence and automation to close deals faster, easier, and smarter.
-          </p>
-          <Link
-            href="/signup"
-            className="inline-flex items-center mt-8 px-10 py-4 bg-[#DA7756] text-white text-lg font-medium rounded-full hover:bg-[#C4684A] no-underline transition-colors"
-          >
-            Meet Yulia &rarr;
-          </Link>
-          <p className="text-sm text-[#6B6963] opacity-50 mt-6">
-            Available in 🇺🇸 🇬🇧 🇨🇦 🇦🇺 and 20+ countries
-          </p>
+      {/* ═══ SECTION 1: HERO ═══ */}
+      <section className="max-w-site mx-auto px-10 pt-20 pb-12 max-md:px-5 max-md:pt-12 max-md:pb-8">
+        {/* Hero tag */}
+        <div className="flex items-center gap-3 mb-9 text-[13px] uppercase tracking-[.18em] text-[#DA7756] font-semibold">
+          <span className="w-9 h-0.5 bg-[#DA7756]" />
+          M&amp;A Advisory, Reinvented
         </div>
-        <svg
-          className="absolute bottom-8 left-1/2 w-5 h-5 text-[#6B6963] opacity-25"
-          style={{ animation: 'heroChevron 2s ease-in-out infinite' }}
-          viewBox="0 0 20 20" fill="none" stroke="currentColor"
-          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-        >
-          <path d="M4 7l6 6 6-6" />
-        </svg>
+
+        {/* H1 */}
+        <h1 className="font-serif text-[clamp(52px,7vw,92px)] font-black leading-none tracking-tight max-w-[11ch] mb-11">
+          Sell <em className="italic text-[#DA7756]">smart.</em><br />
+          Buy <em className="italic text-[#DA7756]">right.</em>
+        </h1>
+
+        {/* Visual strip — 4 mini-cards */}
+        <div className="flex gap-4 mb-10 overflow-x-auto pb-2 -mx-5 px-5 md:mx-0 md:px-0 scrollbar-none">
+          {HERO_CARDS.map(c => (
+            <div
+              key={c.size}
+              className="flex-shrink-0 w-[220px] bg-white border border-[#E0DCD4] rounded-xl px-5 py-4"
+            >
+              <p className="text-sm font-semibold text-[#1A1A18] m-0">{c.size}</p>
+              <p className="text-[13px] text-[#7A766E] mt-1 m-0">{c.result}</p>
+              <p className="text-[11px] uppercase tracking-wider text-[#DA7756] font-semibold mt-3 m-0">{c.journey}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom bar */}
+        <div className="border-t-2 border-[#1A1A18] pt-8 flex flex-col md:flex-row justify-between md:items-end gap-7">
+          <p className="text-lg text-[#7A766E] max-w-[440px] leading-relaxed m-0">
+            Yulia is your AI deal advisor. She handles valuation, buyer matching,
+            due diligence, and closing &mdash; for a fraction of the traditional cost.
+          </p>
+          <div className="flex flex-col md:flex-row gap-3 shrink-0 max-md:w-full">
+            <Button variant="primary" href="/signup">Start free &rarr;</Button>
+            <Button variant="secondary" href="/how-it-works">How it works</Button>
+          </div>
+        </div>
       </section>
 
-      {/* ═══════════════════════════════════════
-          SECTION 2 · WAKE-UP — asymmetric split
-          ═══════════════════════════════════════ */}
-      <section className="bg-white px-6 py-20 md:py-32">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
-          {/* LEFT — the punch */}
-          <FadeIn>
-            <div>
-              <p className="text-sm uppercase tracking-widest text-[#DA7756] mb-4">The reality</p>
-              <p className="text-xl md:text-2xl text-[#6B6963]" style={SERIF}>
-                Right now, someone is selling a business just like yours for
-              </p>
-              <div className="my-2">
-                <CountUp
-                  target={30} suffix="%" delay={200}
-                  className="block text-6xl md:text-8xl font-bold text-[#DA7756] leading-none"
-                  style={SERIF}
-                />
-                <span className="block text-2xl md:text-3xl font-bold text-[#DA7756] mt-1" style={SERIF}>
-                  less
+      {/* ─── TRUST STATS ─── */}
+      <div className="max-w-site mx-auto px-10 py-14 border-t border-[#E0DCD4] grid grid-cols-4 max-md:grid-cols-2 max-md:gap-6 max-md:px-5 max-md:py-8">
+        {TRUST_STATS.map((s, i) => (
+          <div
+            key={s.num}
+            className={`px-7 max-md:px-0 ${i < 3 ? 'border-r border-[#E0DCD4] max-md:border-r-0' : ''} ${i === 0 ? 'pl-0' : ''}`}
+          >
+            <p className="font-serif text-[42px] font-black tracking-tight leading-none m-0">{s.num}</p>
+            <p className="text-[13px] text-[#7A766E] mt-2 m-0 leading-snug">{s.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* ═══ SECTION 2: THE PROBLEM ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-[20px] p-16 grid grid-cols-2 gap-16 items-center max-md:grid-cols-1 max-md:p-7 max-md:gap-8">
+          <h2 className="font-serif text-[clamp(32px,3.5vw,44px)] font-black tracking-tight leading-[1.1] m-0">
+            Most owners sell for <em className="italic text-[#DA7756]">30% less</em> than their business is worth.
+          </h2>
+          <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
+            {PROBLEM_STATS.map(s => (
+              <div key={s.num} className="bg-white border border-[#E0DCD4] rounded-[14px] p-6">
+                <p className="font-serif text-[32px] font-black text-[#DA7756] leading-none mb-1.5 m-0">{s.num}</p>
+                <p className="text-[13px] text-[#7A766E] leading-snug m-0">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ SECTION 3: OUTCOMES ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <div className="grid grid-cols-2 gap-16 mb-14 items-end max-md:grid-cols-1 max-md:gap-6">
+          <h2 className="font-serif text-[clamp(36px,4.5vw,60px)] font-black tracking-tight leading-[1.05] m-0">
+            Your AI advisor delivers <em className="italic text-[#DA7756]">results.</em>
+          </h2>
+          <p className="text-[17px] text-[#7A766E] leading-relaxed m-0">
+            Yulia doesn&apos;t give generic advice. She builds deal-specific strategies using real
+            market data, comparable transactions, and industry benchmarks &mdash; then guides you
+            through every stage.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
+          {OUTCOMES.map(o => (
+            <Card key={o.title} padding="px-9 py-11">
+              <p className="font-serif text-5xl font-black text-[#DA7756] leading-none mb-3.5 m-0">{o.number}</p>
+              <h3 className="text-[17px] font-bold text-[#1A1A18] mb-2 m-0">{o.title}</h3>
+              <p className="text-sm text-[#7A766E] leading-relaxed m-0">{o.desc}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ SECTION 4: HOW IT WORKS ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <div className="text-center mb-14">
+          <p className="text-xs uppercase tracking-[.2em] text-[#DA7756] font-semibold mb-4 m-0">How It Works</p>
+          <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight m-0">
+            Three steps to your best deal.
+          </h2>
+        </div>
+        <div className="grid grid-cols-3 gap-5 max-md:grid-cols-1">
+          {STEPS.map(s => (
+            <Card key={s.num} hover={false} padding="px-8 py-10">
+              <p className="font-serif text-[56px] font-black text-[#E8E4DC] leading-none mb-5 m-0">{s.num}</p>
+              <h3 className="text-lg font-bold text-[#1A1A18] mb-2.5 m-0">{s.title}</h3>
+              <p className="text-sm text-[#7A766E] leading-relaxed m-0">{s.desc}</p>
+              <div className="mt-4">
+                <Tag variant={s.tag}>{s.tagLabel}</Tag>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ SECTION 5: JOURNEYS ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
+          What brings you here?
+        </h2>
+        <div className="grid grid-cols-4 gap-4 max-lg:grid-cols-2 max-md:grid-cols-1">
+          {JOURNEYS.map(j => (
+            <Link key={j.link} href={j.link} className="no-underline">
+              <Card padding="px-7 py-8" className="h-full flex flex-col">
+                <div className="w-11 h-11 rounded-xl bg-[rgba(218,119,86,.08)] flex items-center justify-center mb-5">
+                  <span className="w-5 h-5 rounded-full bg-[#DA7756] opacity-60" />
+                </div>
+                <h3 className="font-serif text-xl font-bold text-[#1A1A18] mb-2 m-0">{j.title}</h3>
+                <p className="text-sm text-[#7A766E] leading-relaxed flex-1 m-0">{j.desc}</p>
+                <span className="inline-flex items-center gap-1.5 text-[#DA7756] text-sm font-semibold mt-5 transition-transform duration-200 group-hover:translate-x-1">
+                  {j.cta}
                 </span>
-              </div>
-              <p className="text-xl md:text-2xl text-[#6B6963]" style={SERIF}>
-                than it&apos;s worth.
-              </p>
-            </div>
-          </FadeIn>
-
-          {/* RIGHT — context card */}
-          <FadeIn delay={150}>
-            <div className="bg-[#FAF9F5] rounded-2xl p-8 md:p-10">
-              <div className="space-y-6 text-base md:text-lg text-[#6B6963] leading-relaxed">
-                <p>
-                  Last year, over 10,000 small businesses sold below market value. Not because the businesses were bad — because the owners didn&apos;t have the right intelligence at the right time.
-                </p>
-                <p>
-                  They priced too low. Found the wrong buyer. Lost leverage in negotiation.
-                </p>
-                <p>
-                  This is the <span className="text-[#1A1A18] font-semibold">most important financial decision</span> you will ever make.
-                </p>
-              </div>
-            </div>
-          </FadeIn>
-        </div>
-
-        {/* The breather */}
-        <div className="py-16 text-center">
-          <FadeIn duration={1000}>
-            <p
-              className="text-3xl md:text-6xl text-[#1A1A18] font-medium italic leading-tight max-w-4xl mx-auto"
-              style={SERIF}
-            >
-              You don&apos;t have to do this alone.
-            </p>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* ─── SECTION 3 · THE SHIFT — 3-column card grid ─── */}
-      <section className="bg-[#FAF9F5] px-6 py-20 md:py-32">
-        <div className="max-w-6xl mx-auto">
-          <FadeIn>
-            <h2 className="text-3xl md:text-5xl leading-tight text-center md:text-left" style={SERIF}>
-              <span className="text-[#6B6963]">What if you had an </span>
-              <span className="text-[#1A1A18] font-semibold">unfair advantage?</span>
-            </h2>
-          </FadeIn>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-            {WHAT_IFS.map((text, i) => (
-              <FadeIn key={i} delay={100 + i * 150}>
-                <div className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
-                  <span
-                    className="block text-[#DA7756] text-6xl opacity-20 leading-none -mb-4 select-none"
-                    style={SERIF}
-                  >
-                    &ldquo;
-                  </span>
-                  <p className="text-lg md:text-xl text-[#6B6963] leading-relaxed italic" style={SERIF}>
-                    {text}
-                  </p>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-
-          <FadeIn delay={600}>
-            <div className="mt-16 text-center" style={SERIF}>
-              <p className="text-2xl md:text-4xl font-medium text-[#1A1A18]">
-                This isn&apos;t hypothetical.
-              </p>
-              <p className="text-2xl md:text-4xl font-medium text-[#DA7756] mt-1">
-                This exists. Right now.
-              </p>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════
-          SECTION 4 · MEET YULIA — cinematic scroll
-          ═══════════════════════════════════════ */}
-      <YuliaSection />
-
-      {/* ─── SECTION 5 · DELIVERABLES — 2-col card grid ─── */}
-      <section className="bg-white px-6 py-20 md:py-32">
-        <div className="max-w-5xl mx-auto">
-          <FadeIn>
-            <p className="text-sm uppercase tracking-widest text-[#6B6963] mb-6 text-center">
-              Your deliverables
-            </p>
-          </FadeIn>
-          <FadeIn delay={100}>
-            <h2 className="text-3xl md:text-5xl text-center leading-tight" style={SERIF}>
-              <span className="text-[#6B6963]">Everything you need.</span>
-              <br />
-              <span className="text-[#1A1A18] font-semibold">Nothing you don&apos;t.</span>
-            </h2>
-          </FadeIn>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-14">
-            {DELIVERABLES.map((text, i) => (
-              <FadeIn key={i} delay={150 + i * 100}>
-                <div className="bg-[#FAF9F5] rounded-2xl p-6 md:p-8 hover:shadow-md transition-all duration-300 h-full">
-                  <span
-                    className="block text-[#DA7756] text-4xl font-bold opacity-15 mb-2"
-                    style={SERIF}
-                  >
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <p className="text-base md:text-lg text-[#6B6963] leading-relaxed">
-                    {text}
-                  </p>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── SECTION 6 · TWO PATHS — contrasting cards ─── */}
-      <section className="bg-[#FAF9F5] px-6 py-20 md:py-32">
-        <div className="max-w-5xl mx-auto">
-          <FadeIn>
-            <h2
-              className="text-3xl md:text-5xl font-medium text-[#1A1A18] text-center mb-14"
-              style={SERIF}
-            >
-              Two ways this goes.
-            </h2>
-          </FadeIn>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            <FadeIn delay={100}>
-              <div className="bg-white rounded-2xl p-8 md:p-12 border border-[#E8E5DF] h-full">
-                <h3 className="text-xl md:text-2xl font-medium text-[#6B6963] mb-8" style={SERIF}>
-                  The old way
-                </h3>
-                <div className="space-y-5">
-                  {[
-                    'You undervalue your business by 20-40%.',
-                    'Six months talking to the wrong buyers.',
-                    'Deal falls apart in due diligence.',
-                    'You pay a broker 10% and still do most of the work.',
-                    'Years wondering if you left money on the table.',
-                  ].map((line) => (
-                    <p key={line} className="text-base md:text-lg text-[#6B6963]">
-                      <span className="text-[#DA7756] mr-3">&mdash;</span>{line}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </FadeIn>
-            <FadeIn delay={250}>
-              <div className="bg-[#DA7756] rounded-2xl p-8 md:p-12 h-full">
-                <h3 className="text-xl md:text-2xl font-medium text-white mb-8" style={SERIF}>
-                  With Yulia
-                </h3>
-                <div className="space-y-5">
-                  {[
-                    'You know exactly what your business is worth.',
-                    'Only qualified, serious buyers.',
-                    'Every document ready before anyone asks.',
-                    'A fraction of traditional advisory fees.',
-                    'Close knowing you got the best possible outcome.',
-                  ].map((line) => (
-                    <p key={line} className="text-base md:text-lg text-white/90">
-                      <span className="text-white mr-3">&mdash;</span>{line}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </FadeIn>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── SECTION 7 · PATHS — 2×2 card grid ─── */}
-      <section className="bg-white px-6 py-20 md:py-32">
-        <div className="max-w-5xl mx-auto">
-          <FadeIn>
-            <h2
-              className="text-3xl md:text-5xl font-medium text-[#1A1A18] text-center"
-              style={SERIF}
-            >
-              What brings you here?
-            </h2>
-          </FadeIn>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-12">
-            {JOURNEYS.map((j, i) => (
-              <FadeIn key={j.href} delay={100 + i * 100}>
-                <Link
-                  href={j.href}
-                  className="group block bg-[#FAF9F5] rounded-2xl p-8 md:p-10 no-underline hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-                >
-                  <h3
-                    className="text-xl md:text-2xl font-medium text-[#1A1A18]"
-                    style={SERIF}
-                  >
-                    {j.title}
-                  </h3>
-                  <p className="text-base md:text-lg text-[#6B6963] mt-3">{j.description}</p>
-                  <span className="inline-block text-[#DA7756] font-medium mt-5 transition-transform duration-200 group-hover:translate-x-1">
-                    Start free &rarr;
-                  </span>
-                </Link>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── SECTION 8 · CTA — terra cotta card ─── */}
-      <section className="px-6 py-20 md:py-32 bg-[#FAF9F5]">
-        <FadeIn className="max-w-3xl mx-auto">
-          <div className="bg-[#DA7756] rounded-3xl shadow-xl p-10 md:p-16 text-center">
-            <h2
-              className="text-2xl md:text-4xl font-medium text-white leading-tight"
-              style={SERIF}
-            >
-              Your next deal starts with one conversation.
-            </h2>
-            <p className="text-base md:text-lg text-white/70 mt-6">
-              No credit card. No commitment. No minimums.
-            </p>
-            <p className="text-base md:text-lg text-white/80 mt-2">
-              Just an expert who&apos;s ready when you are.
-            </p>
-            <Link
-              href="/signup"
-              className="inline-flex items-center mt-8 px-10 py-4 bg-white text-[#DA7756] text-lg font-medium rounded-full hover:bg-gray-100 no-underline transition-colors"
-            >
-              Meet Yulia &rarr;
+              </Card>
             </Link>
-            <p className="text-sm text-white/50 mt-6">
-              Available in 🇺🇸 🇬🇧 🇨🇦 🇦🇺 and 20+ countries
-            </p>
-          </div>
-        </FadeIn>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ SECTION 6: FINAL CTA ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
+        <div className="bg-gradient-to-br from-[#DA7756] to-[#C4684A] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
+          <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
+          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-snug max-w-[480px] m-0 relative z-10">
+            Ready to make your next deal your best deal?
+          </h3>
+          <Button variant="ctaBlock" href="/signup" className="relative z-10">
+            Start with Yulia &rarr;
+          </Button>
+        </div>
       </section>
     </PublicLayout>
   );

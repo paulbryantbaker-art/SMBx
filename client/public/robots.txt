@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /chat
+Disallow: /chat/
+
+Sitemap: https://smbx.ai/sitemap.xml

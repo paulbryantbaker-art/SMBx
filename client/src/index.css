@@ -2,13 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  background-color: #F5F5F0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+:root {
+  --cream: #FAF8F4;
+  --cream-deep: #F3F0EA;
+  --warm-white: #FFFFFF;
+  --stone: #E8E4DC;
+  --stone-light: #F0EDE6;
+  --terra: #DA7756;
+  --terra-hover: #C4684A;
+  --terra-soft: #FFF0EB;
+  --terra-glow: rgba(218, 119, 86, 0.08);
+  --text: #1A1A18;
+  --text-mid: #4A4843;
+  --muted: #7A766E;
+  --border: #E0DCD4;
+  --serif: 'Playfair Display', Georgia, ui-serif, serif;
+  --sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
 }
 
+body {
+  margin: 0;
+  background-color: #FAF8F4;
+  font-family: var(--sans);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Animation keyframes */
 @keyframes dotPulse {
   0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
   40% { opacity: 1; transform: scale(1); }
@@ -17,11 +39,6 @@ body {
 @keyframes logoBreathe {
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
-}
-
-@keyframes heroChevron {
-  0%, 100% { transform: translateX(-50%) translateY(0); }
-  50% { transform: translateX(-50%) translateY(4px); }
 }
 
 @keyframes tickerScroll {

@@ -7,51 +7,52 @@ const COLUMNS = [
     links: [
       { href: '/sell', label: 'Sell' },
       { href: '/buy', label: 'Buy' },
-      { href: '/raise', label: 'Raise' },
+      { href: '/raise', label: 'Raise Capital' },
+      { href: '/integrate', label: 'Integrate' },
     ],
   },
   {
     title: 'Company',
     links: [
+      { href: '/how-it-works', label: 'How It Works' },
       { href: '/pricing', label: 'Pricing' },
+      { href: '/enterprise', label: 'Enterprise' },
     ],
   },
   {
     title: 'Legal',
     links: [
-      { href: '#', label: 'Privacy' },
-      { href: '#', label: 'Terms' },
+      { href: '/legal/privacy', label: 'Privacy' },
+      { href: '/legal/terms', label: 'Terms' },
     ],
   },
 ];
 
 export default function Footer() {
   return (
-    <footer className="bg-[#1A1A18] text-[#A3A3A3] px-6 py-12">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
+    <footer className="bg-[#F0EDE6] pt-16 pb-8 px-10 max-md:px-5 max-md:pt-10 max-md:pb-6">
+      <div className="max-w-site mx-auto">
+        <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-12 max-md:grid-cols-1 max-md:gap-8">
           {/* Brand */}
           <div>
-            <Link href="/" className="no-underline">
-              <Logo className="text-lg" light />
-            </Link>
-            <p className="text-base mt-2 leading-relaxed m-0">
-              Your M&A advisor, on demand.
+            <Logo linked={false} />
+            <p className="text-sm text-[#7A766E] leading-relaxed mt-3 max-w-[280px]">
+              AI-powered M&amp;A advisory. From valuation to close.
             </p>
           </div>
 
           {/* Link columns */}
           {COLUMNS.map(col => (
             <div key={col.title}>
-              <p className="text-sm uppercase tracking-wider text-[#6B6B65] mb-3 m-0">
+              <h4 className="text-xs uppercase tracking-widest text-[#7A766E] font-semibold mb-4">
                 {col.title}
-              </p>
+              </h4>
               <ul className="list-none p-0 m-0 space-y-2">
                 {col.links.map(l => (
                   <li key={l.label}>
                     <Link
                       href={l.href}
-                      className="text-base text-[#A3A3A3] hover:text-white no-underline transition-colors"
+                      className="text-sm text-[#4A4843] hover:text-[#DA7756] no-underline transition-colors"
                     >
                       {l.label}
                     </Link>
@@ -62,8 +63,8 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="border-t border-[#333] pt-6">
-          <p className="text-sm text-[#6B6B65] m-0">
+        <div className="border-t border-[#E0DCD4] mt-8 pt-6">
+          <p className="text-[13px] text-[#7A766E] m-0">
             &copy; {new Date().getFullYear()} smbx.ai. All rights reserved.
           </p>
         </div>

@@ -27,13 +27,19 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup }: Logi
   };
 
   return (
-    <div style={styles.wrapper}>
-      <div style={styles.card}>
-        <h1 style={styles.brand}><Logo className="text-3xl" /></h1>
-        <p style={styles.subtitle}>Your AI M&A advisor</p>
+    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#FAF8F4]">
+      <div className="w-full max-w-[400px] bg-white rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.06)]">
+        <div className="text-center mb-7">
+          <Logo linked={false} />
+          <p className="text-sm text-[#7A766E] mt-2 m-0">Sign in to your account</p>
+        </div>
 
-        <button type="button" onClick={onGoogleLogin} style={styles.googleBtn}>
-          <svg width="18" height="18" viewBox="0 0 18 18" style={{ marginRight: 10, flexShrink: 0 }}>
+        <button
+          type="button"
+          onClick={onGoogleLogin}
+          className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-white border border-[#E0DCD4] rounded-xl text-[15px] text-[#1A1A18] font-medium cursor-pointer transition-colors hover:border-[#1A1A18]"
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18">
             <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
             <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
             <path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
@@ -42,29 +48,51 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup }: Logi
           Continue with Google
         </button>
 
-        <div style={styles.divider}>
-          <div style={styles.dividerLine} />
-          <span style={styles.dividerText}>or continue with email</span>
-          <div style={styles.dividerLine} />
+        <div className="flex items-center gap-3 my-6">
+          <div className="flex-1 h-px bg-[#E0DCD4]" />
+          <span className="text-[13px] text-[#7A766E] whitespace-nowrap">or continue with email</span>
+          <div className="flex-1 h-px bg-[#E0DCD4]" />
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
-          {error && <div style={styles.error}>{error}</div>}
+          {error && (
+            <div className="bg-[#FEF2F2] text-[#B91C1C] px-3.5 py-2.5 rounded-xl text-sm mb-4">{error}</div>
+          )}
 
-          <label style={styles.label}>Email</label>
-          <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" style={styles.input} />
+          <label className="block text-sm font-medium text-[#1A1A18] mb-1.5">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full px-3.5 py-2.5 text-[15px] border border-[#E0DCD4] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#DA7756]"
+          />
 
-          <label style={styles.label}>Password</label>
-          <input type="text" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" style={styles.input} />
+          <label className="block text-sm font-medium text-[#1A1A18] mb-1.5">Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+            className="w-full px-3.5 py-2.5 text-[15px] border border-[#E0DCD4] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#DA7756]"
+          />
 
-          <button type="submit" disabled={submitting} style={styles.submitBtn}>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full py-3 bg-[#DA7756] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#C4684A] transition-colors disabled:opacity-50"
+          >
             {submitting ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
 
-        <p style={styles.footer}>
-          Don't have an account?{' '}
-          <button type="button" onClick={onNavigateSignup} style={styles.link}>
+        <p className="text-center text-sm text-[#7A766E] mt-6 m-0">
+          Don&apos;t have an account?{' '}
+          <button
+            type="button"
+            onClick={onNavigateSignup}
+            className="bg-transparent border-none text-[#DA7756] font-semibold cursor-pointer text-sm p-0"
+          >
             Sign up
           </button>
         </p>
@@ -72,127 +100,3 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup }: Logi
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  wrapper: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '100vh',
-    padding: '16px',
-    backgroundColor: '#F5F5F0',
-  },
-  card: {
-    width: '100%',
-    maxWidth: 400,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 32,
-    boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.06)',
-  },
-  brand: {
-    fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", serif',
-    fontSize: '1.75rem',
-    color: '#DA7756',
-    textAlign: 'center' as const,
-    margin: 0,
-    fontWeight: 600,
-  },
-  subtitle: {
-    textAlign: 'center' as const,
-    color: '#6B6B65',
-    fontSize: '1rem',
-    margin: '6px 0 28px',
-    fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", serif',
-  },
-  googleBtn: {
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '12px 16px',
-    backgroundColor: '#FFFFFF',
-    border: '1px solid rgba(0,0,0,0.12)',
-    borderRadius: 10,
-    fontSize: '1rem',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
-    color: '#1A1A18',
-    cursor: 'pointer',
-    transition: 'background-color 0.1s',
-  },
-  divider: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    margin: '24px 0',
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: 'rgba(0,0,0,0.08)',
-  },
-  dividerText: {
-    fontSize: '0.875rem',
-    color: '#9B9B95',
-    whiteSpace: 'nowrap' as const,
-  },
-  label: {
-    display: 'block',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    color: '#1A1A18',
-    marginBottom: 6,
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
-  },
-  input: {
-    width: '100%',
-    padding: '10px 14px',
-    fontSize: '1rem',
-    border: '1px solid rgba(0,0,0,0.12)',
-    borderRadius: 10,
-    outline: 'none',
-    marginBottom: 16,
-    backgroundColor: '#FFFFFF',
-    color: '#1A1A18',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
-    boxSizing: 'border-box' as const,
-  },
-  submitBtn: {
-    width: '100%',
-    padding: '12px 16px',
-    backgroundColor: '#DA7756',
-    color: '#FFFFFF',
-    border: 'none',
-    borderRadius: 999,
-    fontSize: '1rem',
-    fontWeight: 500,
-    cursor: 'pointer',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
-    marginTop: 4,
-  },
-  error: {
-    backgroundColor: '#FEF2F2',
-    color: '#B91C1C',
-    padding: '10px 14px',
-    borderRadius: 10,
-    fontSize: '0.875rem',
-    marginBottom: 16,
-  },
-  footer: {
-    textAlign: 'center' as const,
-    fontSize: '0.875rem',
-    color: '#6B6B65',
-    marginTop: 24,
-    marginBottom: 0,
-  },
-  link: {
-    background: 'none',
-    border: 'none',
-    color: '#DA7756',
-    cursor: 'pointer',
-    fontWeight: 500,
-    fontSize: '0.875rem',
-    padding: 0,
-    textDecoration: 'underline',
-  },
-};

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import Logo from './Logo';
+import Button from './Button';
 
 const NAV_LINKS = [
   { href: '/sell', label: 'Sell' },
   { href: '/buy', label: 'Buy' },
-  { href: '/raise', label: 'Raise' },
+  { href: '/raise', label: 'Raise Capital' },
   { href: '/pricing', label: 'Pricing' },
 ];
 
@@ -14,23 +15,20 @@ export default function PublicNav() {
   const [location] = useLocation();
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-border">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-14">
-        {/* Logo */}
-        <Link href="/" className="no-underline">
-          <Logo className="text-xl" />
-        </Link>
+    <nav className="bg-[#FAF8F4]">
+      <div className="max-w-site mx-auto flex items-center justify-between px-10 py-5 max-md:px-5 max-md:py-4">
+        <Logo />
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-8">
           {NAV_LINKS.map(l => (
             <Link
               key={l.href}
               href={l.href}
-              className={`text-base no-underline transition-colors ${
+              className={`text-sm font-medium no-underline transition-colors ${
                 location === l.href
-                  ? 'text-terra font-medium'
-                  : 'text-text-secondary hover:text-text-primary'
+                  ? 'text-[#1A1A18]'
+                  : 'text-[#7A766E] hover:text-[#1A1A18]'
               }`}
             >
               {l.label}
@@ -38,25 +36,20 @@ export default function PublicNav() {
           ))}
           <Link
             href="/login"
-            className="text-base text-text-secondary hover:text-text-primary no-underline transition-colors"
+            className="text-sm font-medium text-[#7A766E] hover:text-[#1A1A18] no-underline transition-colors"
           >
-            Log in
+            Sign in
           </Link>
-          <Link
-            href="/signup"
-            className="text-base bg-terra text-white px-4 py-1.5 rounded-lg hover:bg-terra-hover no-underline transition-colors"
-          >
-            Get started
-          </Link>
+          <Button variant="nav" href="/signup">Get Started</Button>
         </div>
 
         {/* Mobile hamburger */}
         <button
           onClick={() => setOpen(!open)}
-          className="md:hidden p-2 text-text-primary bg-transparent border-none cursor-pointer"
+          className="md:hidden p-2 text-[#1A1A18] bg-transparent border-none cursor-pointer"
           aria-label="Toggle menu"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             {open ? (
               <path d="M18 6L6 18M6 6l12 12" />
             ) : (
@@ -68,13 +61,13 @@ export default function PublicNav() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="md:hidden border-t border-border bg-white px-6 py-4 space-y-3">
+        <div className="md:hidden border-t border-[#E0DCD4] bg-white px-5 py-5 space-y-4">
           {NAV_LINKS.map(l => (
             <Link
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="block text-base text-text-secondary hover:text-text-primary no-underline"
+              className="block text-[15px] font-medium text-[#4A4843] no-underline"
             >
               {l.label}
             </Link>
@@ -82,17 +75,13 @@ export default function PublicNav() {
           <Link
             href="/login"
             onClick={() => setOpen(false)}
-            className="block text-base text-text-secondary hover:text-text-primary no-underline"
+            className="block text-[15px] font-medium text-[#4A4843] no-underline"
           >
-            Log in
+            Sign in
           </Link>
-          <Link
-            href="/signup"
-            onClick={() => setOpen(false)}
-            className="block text-base bg-terra text-white px-4 py-2 rounded-lg text-center no-underline"
-          >
-            Get started
-          </Link>
+          <Button variant="primary" href="/signup" fullWidth className="mt-2">
+            Get Started &rarr;
+          </Button>
         </div>
       )}
     </nav>

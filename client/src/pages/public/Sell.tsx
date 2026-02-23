@@ -1,358 +1,179 @@
-import { useState, useEffect, useRef, type ReactNode } from 'react';
-import { Link } from 'wouter';
+import { useState } from 'react';
 import PublicLayout from '../../components/public/PublicLayout';
+import Button from '../../components/public/Button';
+import Card from '../../components/public/Card';
+import Tag from '../../components/public/Tag';
 
-const SERIF = { fontFamily: 'ui-serif, Georgia, Cambria, serif' } as const;
+/* ─── Data ─── */
 
-const FEARS = [
-  'Am I pricing too low? Too high? How would I even know?',
-  'What if I can\'t find a buyer — or worse, I find the wrong one?',
-  'I don\'t have an offering memorandum. I\'m not even sure what goes in one.',
-  'What happens during due diligence? What are they going to ask?',
-  'If I hire a broker, is 10% of my life\'s work really the going rate?',
+const DEAL_SIZES = [
+  { title: 'Under $500K', desc: 'First-time seller? Yulia walks you through every step in plain language.' },
+  { title: '$500K \u2013 $10M', desc: 'Experienced owner selling a real operation? Institutional-quality work product.' },
+  { title: '$10M+', desc: 'PE or strategic exit? Full CIM, buyer targeting, deal room management.' },
 ];
 
-const STAGES = [
+const DELIVERABLES = [
+  { name: 'Financial Analysis', price: 'Free', desc: 'SDE/EBITDA calculated. Every legitimate add-back identified.', free: true },
+  { name: 'Defensible Valuation', price: 'From $199', desc: 'Multi-methodology using current market data for your industry.', free: false },
+  { name: 'Confidential Information Memorandum', price: 'From $299', desc: 'The document that makes buyers take your business seriously.', free: false },
+  { name: 'Buyer Identification', price: 'From $199', desc: 'Qualified buyers profiled and prioritized for your deal.', free: false },
+  { name: 'Closing Support', price: 'From $299', desc: 'LOI comparison, DD prep, working capital, funds flow \u2014 to the wire.', free: false },
+];
+
+const JOURNEY_STEPS = [
+  { num: '\u2460', name: 'Intake', price: 'Free' },
+  { num: '\u2461', name: 'Financial Package', price: 'Free' },
+  { num: '\u2462', name: 'Valuation', price: 'From $199' },
+  { num: '\u2463', name: 'CIM & Packaging', price: 'From $299' },
+  { num: '\u2464', name: 'Buyer Matching', price: 'From $199' },
+  { num: '\u2465', name: 'Closing', price: 'From $299' },
+];
+
+const FAQS = [
   {
-    name: 'Intake & Discovery',
-    price: 'FREE',
-    free: true,
-    description: 'Tell Yulia about your business — what you do, how long you\'ve been doing it, why you\'re thinking about selling. She\'ll ask the right questions to understand your situation and goals.',
-    deliverables: 'A personalized deal profile, preliminary market positioning, and a clear roadmap of what comes next.',
+    q: 'How accurate is an AI valuation?',
+    a: 'Multiple methodologies, real comps, shown work. Many users bring it to their CPA for confirmation.',
   },
   {
-    name: 'Financial Analysis',
-    price: 'FREE',
-    free: true,
-    description: 'Yulia analyzes your financials and normalizes your books — recasting owner compensation, one-time expenses, and discretionary spending so buyers see the true earning power of your business.',
-    deliverables: 'Normalized financial statements, SDE/EBITDA calculations, trend analysis, and a financial summary ready for buyer review.',
+    q: 'Will buyers take a CIM from an AI seriously?',
+    a: 'Same format and depth as a $50K advisory firm produces. Professional, institutional-quality documents.',
   },
   {
-    name: 'Valuation',
-    price: 'FROM $15',
-    free: false,
-    description: 'Using real market data, comparable transactions, and industry-specific multiples, Yulia builds a defensible valuation — not a range from a free calculator.',
-    deliverables: 'A comprehensive valuation report with methodology, supporting data, market context, and a recommended asking price you can defend.',
+    q: 'What if my business is complicated?',
+    a: '80+ industry verticals. Yulia adapts to your specific business type, deal structure, and market conditions.',
   },
   {
-    name: 'Deal Packaging',
-    price: 'FROM $25',
-    free: false,
-    description: 'Yulia creates the materials that make buyers take you seriously — a professional offering memorandum, executive summary, and blind teaser that protects your identity while generating interest.',
-    deliverables: 'Offering memorandum, executive summary, blind profile/teaser, and a complete information packet ready for qualified buyers.',
-  },
-  {
-    name: 'Market Matching',
-    price: 'FROM $35',
-    free: false,
-    description: 'Yulia identifies and ranks the buyers most likely to acquire your business — based on acquisition history, strategic fit, geographic proximity, and financial capacity.',
-    deliverables: 'A ranked buyer list, outreach strategy, buyer qualification criteria, and tools to manage interest and offers.',
-  },
-  {
-    name: 'Closing Support',
-    price: 'FROM $50',
-    free: false,
-    description: 'From LOI review to due diligence preparation to closing checklist — Yulia makes sure nothing falls through the cracks in the final stretch.',
-    deliverables: 'Due diligence preparation package, negotiation framework, closing checklist, and transition planning guidance.',
+    q: 'Do I still need a broker?',
+    a: 'Many users work with brokers who use Yulia. We complement, not replace. Your broker gets free access to your deal room.',
   },
 ];
 
-/* ── Fade-in on scroll ── */
-function FadeIn({ children, className = '', delay = 0, duration = 700 }: {
-  children: ReactNode; className?: string; delay?: number; duration?: number;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.unobserve(el); } },
-      { threshold: 0.15 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-  return (
-    <div ref={ref} className={className} style={{
-      opacity: visible ? 1 : 0,
-      transform: visible ? 'translateY(0)' : 'translateY(24px)',
-      transition: `opacity ${duration}ms ease-out ${delay}ms, transform ${duration}ms ease-out ${delay}ms`,
-    }}>{children}</div>
-  );
-}
+/* ─── Page ─── */
 
-/* ── Page ── */
 export default function Sell() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
   return (
     <PublicLayout>
-      {/* ═══════════════════════════════════════
-          SECTION 1 · HERO — centered, bold
-          ═══════════════════════════════════════ */}
-      <section className="bg-[#FAF9F5] px-6 py-20 md:py-32 text-center">
-        <div className="max-w-3xl mx-auto">
-          <FadeIn>
-            <p className="text-sm uppercase tracking-widest text-[#DA7756] mb-6">
-              Sell your business
-            </p>
-          </FadeIn>
-          <h1 style={SERIF}>
-            <FadeIn delay={100}>
-              <span className="block text-4xl md:text-6xl lg:text-7xl font-medium leading-tight text-[#1A1A18]">
-                Know your number.
-              </span>
-            </FadeIn>
-            <FadeIn delay={250}>
-              <span className="block text-4xl md:text-6xl lg:text-7xl font-medium leading-tight text-[#1A1A18]">
-                Find your buyer.
-              </span>
-            </FadeIn>
-            <FadeIn delay={400}>
-              <span className="block text-4xl md:text-6xl lg:text-7xl font-medium leading-tight text-[#1A1A18]">
-                Close on your terms.
-              </span>
-            </FadeIn>
-          </h1>
-          <FadeIn delay={550}>
-            <p className="text-lg md:text-xl text-[#6B6963] mt-8 max-w-2xl mx-auto leading-relaxed">
-              Whether you&apos;re a business owner exploring a sale or a broker managing a client&apos;s exit — Yulia builds the strategy, the documents, and the buyer pipeline.
-            </p>
-          </FadeIn>
-          <FadeIn delay={650}>
-            <Link
-              href="/signup"
-              className="inline-flex items-center mt-10 px-10 py-4 bg-[#DA7756] text-white text-lg font-medium rounded-full hover:bg-[#C4684A] no-underline transition-colors"
-            >
-              Start your seller journey &rarr;
-            </Link>
-            <p className="text-sm text-[#6B6963] opacity-60 mt-4">
-              Free to start. Pay only when you&apos;re ready to move forward.
-            </p>
-          </FadeIn>
+      {/* ═══ HERO ═══ */}
+      <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-12">
+        <div className="flex items-center gap-3 mb-9 text-[13px] uppercase tracking-[.18em] text-[#DA7756] font-semibold">
+          <span className="w-9 h-0.5 bg-[#DA7756]" />
+          Sell Your Business
+        </div>
+        <h1 className="font-serif text-[clamp(52px,7vw,92px)] font-black leading-none tracking-tight max-w-[14ch] mb-11 m-0">
+          Know what your business is worth.
+        </h1>
+        <p className="text-lg text-[#7A766E] max-w-[540px] leading-relaxed mb-10 m-0">
+          From first financial analysis to wire transfer &mdash; guided every step.
+          Your first analysis is free.
+        </p>
+        <div className="flex flex-col md:flex-row gap-3 max-md:w-full">
+          <Button variant="primary" href="/signup">Start selling &mdash; free &rarr;</Button>
+          <Button variant="secondary" href="#deliverables">See deliverables</Button>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════
-          SECTION 2 · THE FEAR — asymmetric split
-          ═══════════════════════════════════════ */}
-      <section className="bg-white px-6 py-20 md:py-32">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
-          <FadeIn>
-            <div>
-              <p className="text-sm uppercase tracking-widest text-[#DA7756] mb-4">
-                The truth about selling
-              </p>
-              <h2 className="text-2xl md:text-4xl font-medium text-[#1A1A18] leading-tight" style={SERIF}>
-                Most business owners have never done this before.
-              </h2>
-              <p className="text-lg md:text-xl text-[#6B6963] mt-6 leading-relaxed">
-                And the ones who have will tell you — it was the hardest thing they&apos;ve ever done.
-              </p>
-            </div>
-          </FadeIn>
+      {/* ═══ BUILT FOR YOUR DEAL SIZE ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <h2 className="font-serif text-[clamp(36px,4.5vw,60px)] font-black tracking-tight leading-[1.05] mb-10 m-0">
+          Built for <em className="italic text-[#DA7756]">your</em> deal size.
+        </h2>
+        <div className="grid grid-cols-3 gap-5 max-md:grid-cols-1">
+          {DEAL_SIZES.map(d => (
+            <Card key={d.title} padding="px-8 py-10">
+              <h3 className="text-lg font-bold text-[#1A1A18] mb-2 m-0">{d.title}</h3>
+              <p className="text-sm text-[#7A766E] leading-relaxed m-0">{d.desc}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
 
-          <FadeIn delay={150}>
-            <div className="bg-[#FAF9F5] rounded-2xl p-8 md:p-10">
-              <h3 className="text-xl font-medium text-[#1A1A18] mb-6" style={SERIF}>
-                What keeps sellers up at night
-              </h3>
-              <div className="space-y-4">
-                {FEARS.map((fear) => (
-                  <p key={fear} className="text-base md:text-lg text-[#6B6963] leading-relaxed">
-                    {fear}
-                  </p>
-                ))}
+      {/* ═══ WHAT YOU GET ═══ */}
+      <section id="deliverables" className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
+          What you get.
+        </h2>
+        <div className="space-y-0">
+          {DELIVERABLES.map((d, i) => (
+            <div
+              key={d.name}
+              className={`flex flex-col md:flex-row md:items-center justify-between py-6 gap-4 ${
+                i < DELIVERABLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''
+              }`}
+            >
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-1">
+                  <h3 className="text-[17px] font-bold text-[#1A1A18] m-0">{d.name}</h3>
+                  <Tag variant={d.free ? 'free' : 'paid'}>{d.price}</Tag>
+                </div>
+                <p className="text-sm text-[#7A766E] leading-relaxed m-0">{d.desc}</p>
               </div>
             </div>
-          </FadeIn>
+          ))}
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════
-          SECTION 3 · THE ANSWER — centered moment
-          ═══════════════════════════════════════ */}
-      <section className="bg-[#FAF9F5] px-6 py-16 md:py-24 text-center">
-        <div className="max-w-3xl mx-auto">
-          <FadeIn>
-            <h2 className="text-3xl md:text-5xl font-medium text-[#1A1A18]" style={SERIF}>
-              Yulia was built for exactly this moment.
-            </h2>
-          </FadeIn>
-          <FadeIn delay={100}>
-            <p className="text-lg md:text-xl text-[#6B6963] mt-8 max-w-2xl mx-auto leading-relaxed">
-              She walks you through every step — from &ldquo;should I sell?&rdquo; to &ldquo;where do I sign?&rdquo; — with the intelligence of a $50,000 advisor and the patience to answer every question you&apos;re afraid to ask.
-            </p>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════
-          SECTION 4 · THE JOURNEY — stage cards
-          ═══════════════════════════════════════ */}
-      <section className="bg-white px-6 py-20 md:py-32">
-        <div className="max-w-5xl mx-auto">
-          <FadeIn>
-            <div className="text-center">
-              <h2 className="text-3xl md:text-5xl font-medium text-[#1A1A18]" style={SERIF}>
-                Your selling journey. Stage by stage.
-              </h2>
-              <p className="text-lg md:text-xl text-[#6B6963] mt-4 max-w-2xl mx-auto">
-                Every stage produces real deliverables. You pay only for the stages you need.
-              </p>
+      {/* ═══ YOUR JOURNEY ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
+          Your journey.
+        </h2>
+        <div className="space-y-0">
+          {JOURNEY_STEPS.map((s, i) => (
+            <div
+              key={s.name}
+              className={`flex items-center justify-between py-4 ${
+                i < JOURNEY_STEPS.length - 1 ? 'border-b border-[#E0DCD4]' : ''
+              }`}
+            >
+              <div className="flex items-center gap-4">
+                <span className="text-lg text-[#DA7756]">{s.num}</span>
+                <span className="text-[15px] font-medium text-[#1A1A18]">{s.name}</span>
+              </div>
+              <span className="text-sm text-[#7A766E]">{s.price}</span>
             </div>
-          </FadeIn>
-
-          <div className="mt-16 space-y-12">
-            {STAGES.map((stage, i) => (
-              <FadeIn key={stage.name} delay={100 + i * 100}>
-                <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-6 md:gap-8 items-start">
-                  {/* Big number */}
-                  <span
-                    className="text-7xl md:text-9xl font-bold text-[#DA7756] opacity-15 leading-none select-none"
-                    style={SERIF}
-                  >
-                    {i + 1}
-                  </span>
-
-                  {/* Content card */}
-                  <div className="bg-[#FAF9F5] rounded-2xl p-6 md:p-8">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h3 className="text-xl md:text-2xl font-medium text-[#1A1A18]" style={SERIF}>
-                        {stage.name}
-                      </h3>
-                      <span className={`text-sm font-medium rounded-full px-3 py-1 ${
-                        stage.free
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-[#F0EDE6] text-[#6B6963]'
-                      }`}>
-                        {stage.price}
-                      </span>
-                    </div>
-                    <p className="text-base md:text-lg text-[#6B6963] mt-4 leading-relaxed">
-                      {stage.description}
-                    </p>
-                    <p className="text-base text-[#6B6963] mt-3">
-                      <span className="text-[#1A1A18] font-medium">What you get: </span>
-                      {stage.deliverables}
-                    </p>
-                  </div>
-                </div>
-              </FadeIn>
-            ))}
+          ))}
+          <div className="flex items-center justify-between pt-6 border-t-2 border-[#1A1A18]">
+            <span className="text-[15px] font-bold text-[#1A1A18]">Typical total</span>
+            <span className="text-[15px] font-bold text-[#DA7756]">From $1,799</span>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════
-          SECTION 5 · BROKER CALLOUT — full-width terra cotta
-          ═══════════════════════════════════════ */}
-      <section className="bg-[#DA7756] px-6 py-16 md:py-24">
-        <FadeIn className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8 md:gap-12 items-center">
-            <div>
-              <p className="text-sm uppercase tracking-widest text-white/60 mb-4">
-                For brokers &amp; advisors
-              </p>
-              <h3 className="text-2xl md:text-4xl font-medium text-white leading-tight" style={SERIF}>
-                You close deals. Let Yulia do the rest.
-              </h3>
-              <p className="text-base md:text-lg text-white/80 mt-6 leading-relaxed">
-                Prep books, build CIMs, source buyers, manage pipeline — in a fraction of the time. Whether you&apos;re representing a seller or collaborating with other brokers on a deal, Yulia handles the heavy lifting. Your clients. Your commission. Her workflow.
-              </p>
-            </div>
-            <div className="text-center md:text-right">
-              <Link
-                href="/signup"
-                className="inline-flex items-center px-8 py-4 bg-white text-[#DA7756] text-lg font-medium rounded-full hover:bg-gray-100 no-underline transition-colors"
+      {/* ═══ FAQ ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
+          Common questions.
+        </h2>
+        <div className="space-y-0">
+          {FAQS.map((f, i) => (
+            <div key={i} className="border-b border-[#E0DCD4]">
+              <button
+                className="w-full flex items-center justify-between py-5 text-left bg-transparent border-none cursor-pointer"
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
               >
-                Start free &rarr;
-              </Link>
-              <p className="text-sm text-white/50 mt-4">
-                No commitment. Works alongside your existing process.
-              </p>
+                <span className="text-[15px] font-semibold text-[#1A1A18] pr-4">{f.q}</span>
+                <span className="text-[#7A766E] text-xl shrink-0">{openFaq === i ? '\u2212' : '+'}</span>
+              </button>
+              {openFaq === i && (
+                <p className="text-sm text-[#7A766E] leading-relaxed pb-5 m-0">{f.a}</p>
+              )}
             </div>
-          </div>
-        </FadeIn>
-      </section>
-
-      {/* ═══════════════════════════════════════
-          SECTION 6 · THE CONTRAST — two cards
-          ═══════════════════════════════════════ */}
-      <section className="bg-white px-6 py-20 md:py-32">
-        <div className="max-w-5xl mx-auto">
-          <FadeIn>
-            <h2 className="text-3xl md:text-5xl font-medium text-[#1A1A18] text-center mb-14" style={SERIF}>
-              Two ways to sell.
-            </h2>
-          </FadeIn>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            <FadeIn delay={100}>
-              <div className="bg-[#FAF9F5] rounded-2xl p-8 md:p-12 border border-[#E8E5DF] h-full">
-                <h3 className="text-xl md:text-2xl font-medium text-[#6B6963] mb-8" style={SERIF}>
-                  Going it alone
-                </h3>
-                <div className="space-y-5">
-                  {[
-                    'Google \'what is my business worth\' at 2am.',
-                    'Cobble together a CIM from a template you found.',
-                    'Post a listing and hope the right buyer finds you.',
-                    'Walk into due diligence blind.',
-                    'Accept the first offer because you\'re exhausted.',
-                  ].map((line) => (
-                    <p key={line} className="text-base md:text-lg text-[#6B6963]">
-                      <span className="text-[#DA7756] mr-3">&mdash;</span>{line}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </FadeIn>
-            <FadeIn delay={250}>
-              <div className="bg-[#DA7756] rounded-2xl p-8 md:p-12 h-full">
-                <h3 className="text-xl md:text-2xl font-medium text-white mb-8" style={SERIF}>
-                  With Yulia
-                </h3>
-                <div className="space-y-5">
-                  {[
-                    'Know your number before the first conversation.',
-                    'Present a CIM that makes buyers compete.',
-                    'Talk only to qualified, vetted acquirers.',
-                    'Walk into due diligence fully prepared.',
-                    'Close on your terms, at your price.',
-                  ].map((line) => (
-                    <p key={line} className="text-base md:text-lg text-white/90">
-                      <span className="text-white mr-3">&mdash;</span>{line}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </FadeIn>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════
-          SECTION 7 · FINAL CTA — terra cotta card
-          ═══════════════════════════════════════ */}
-      <section className="bg-[#FAF9F5] px-6 py-20 md:py-32">
-        <FadeIn className="max-w-3xl mx-auto">
-          <div className="bg-[#DA7756] rounded-3xl shadow-xl p-10 md:p-16 text-center">
-            <h2
-              className="text-2xl md:text-4xl font-medium text-white leading-tight"
-              style={SERIF}
-            >
-              You built this business. Let&apos;s make sure you get what it&apos;s worth.
-            </h2>
-            <p className="text-base md:text-lg text-white/70 mt-6">
-              Start free. Your first two stages cost nothing.
-            </p>
-            <Link
-              href="/signup"
-              className="inline-flex items-center mt-8 px-10 py-4 bg-white text-[#DA7756] text-lg font-medium rounded-full hover:bg-gray-100 no-underline transition-colors"
-            >
-              Start your seller journey &rarr;
-            </Link>
-          </div>
-        </FadeIn>
+      {/* ═══ FINAL CTA ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
+        <div className="bg-gradient-to-br from-[#DA7756] to-[#C4684A] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
+          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-snug max-w-[480px] m-0 relative z-10">
+            Know your number. Start free.
+          </h3>
+          <Button variant="ctaBlock" href="/signup" className="relative z-10">
+            Start selling &rarr;
+          </Button>
+        </div>
       </section>
     </PublicLayout>
   );

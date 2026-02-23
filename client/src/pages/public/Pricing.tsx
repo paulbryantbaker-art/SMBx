@@ -1,245 +1,267 @@
-import { Link } from 'wouter';
+import { useState } from 'react';
 import PublicLayout from '../../components/public/PublicLayout';
+import Button from '../../components/public/Button';
+import Card from '../../components/public/Card';
+import Tag from '../../components/public/Tag';
 
-const SERIF = { fontFamily: 'ui-serif, Georgia, Cambria, serif' } as const;
+/* ─── Data ─── */
 
-const HOW_STEPS = [
-  {
-    num: '01',
-    title: 'Sign up free',
-    description: 'Your first steps are on us. Explore valuation basics at no cost.',
+type Journey = 'sell' | 'buy' | 'raise' | 'integrate';
+
+const JOURNEY_PACKAGES: Record<Journey, { label: string; total: string; stages: { name: string; price: string; free: boolean }[] }> = {
+  sell: {
+    label: 'Sell-Side Complete',
+    total: 'From $1,799',
+    stages: [
+      { name: 'Intake & Classification', price: 'Free', free: true },
+      { name: 'Financial Package', price: 'Free', free: true },
+      { name: 'Defensible Valuation', price: 'From $199', free: false },
+      { name: 'CIM & Deal Packaging', price: 'From $299', free: false },
+      { name: 'Buyer Matching', price: 'From $199', free: false },
+      { name: 'Closing Support', price: 'From $299', free: false },
+    ],
   },
-  {
-    num: '02',
-    title: 'Top up your wallet',
-    description: 'Add funds via Stripe. Bonuses on larger amounts.',
+  buy: {
+    label: 'Buy-Side Complete',
+    total: 'From $1,399',
+    stages: [
+      { name: 'Acquisition Thesis', price: 'Free', free: true },
+      { name: 'Target Screening', price: 'From $199', free: false },
+      { name: 'Target Valuation', price: 'From $199', free: false },
+      { name: 'Due Diligence', price: 'From $299', free: false },
+      { name: 'Deal Structuring', price: 'From $199', free: false },
+      { name: 'Closing Support', price: 'From $299', free: false },
+    ],
   },
-  {
-    num: '03',
-    title: 'Unlock deliverables',
-    description: 'Pay per gate as you advance. Small steps, not big leaps.',
+  raise: {
+    label: 'Raise Capital',
+    total: 'From $749',
+    stages: [
+      { name: 'Capital Strategy', price: 'Free', free: true },
+      { name: 'Pre-Money Valuation', price: 'From $199', free: false },
+      { name: 'Pitch Deck', price: 'From $199', free: false },
+      { name: 'Investor Targeting', price: 'From $149', free: false },
+      { name: 'Term Sheet Analysis', price: 'From $199', free: false },
+    ],
   },
+  integrate: {
+    label: 'Integration',
+    total: 'From $899',
+    stages: [
+      { name: 'Day 0 Checklist', price: 'Free', free: true },
+      { name: '30-Day Stabilization', price: 'From $299', free: false },
+      { name: '60-Day Assessment', price: 'From $299', free: false },
+      { name: '100-Day Optimization', price: 'From $299', free: false },
+    ],
+  },
+};
+
+const TABS: { key: Journey; label: string }[] = [
+  { key: 'sell', label: 'Sell' },
+  { key: 'buy', label: 'Buy' },
+  { key: 'raise', label: 'Raise' },
+  { key: 'integrate', label: 'Integrate' },
 ];
 
-const WALLET_BLOCKS = [
-  { name: 'Starter', price: 50, bonus: 0, total: 50, discount: '0%' },
-  { name: 'Builder', price: 100, bonus: 5, total: 105, discount: '5%', popular: true },
-  { name: 'Momentum', price: 250, bonus: 25, total: 275, discount: '10%' },
-  { name: 'Accelerator', price: 500, bonus: 75, total: 575, discount: '15%' },
-  { name: 'Professional', price: 1_000, bonus: 200, total: 1_200, discount: '20%' },
-  { name: 'Scale', price: 2_500, bonus: 625, total: 3_125, discount: '25%' },
-  { name: 'Enterprise Lite', price: 5_000, bonus: 1_500, total: 6_500, discount: '30%' },
-  { name: 'Enterprise', price: 10_000, bonus: 3_000, total: 13_000, discount: '30%' },
-  { name: 'Enterprise Plus', price: 25_000, bonus: 7_500, total: 32_500, discount: '30%' },
-  { name: 'Institutional', price: 50_000, bonus: 15_000, total: 65_000, discount: '30%' },
+const EXAMPLES = [
+  { deal: '$400K landscaping business', typical: '~$1,800', traditional: '$40,000 (10% broker)' },
+  { deal: '$3M HVAC company', typical: '~$4,500', traditional: '$150,000+ (5% broker + advisor)' },
+  { deal: '$25M PE acquisition', typical: '~$12,000', traditional: '$500,000+ (banker + legal + advisor)' },
 ];
 
-const TIERS = [
-  { label: 'Free', range: '$0', items: 'Business intake, basic financials review' },
-  { label: 'Analyst', range: 'From $5', items: 'Quick valuations, market snapshots' },
-  { label: 'Associate', range: 'From $25', items: 'Full CIM drafts, buyer lists, financial models' },
-  { label: 'VP', range: 'From $100', items: 'Deep research, full due diligence suites' },
+const WALLETS = [
+  { name: 'Try Yulia', price: '$199', desc: 'See what the work product looks like.', popular: false },
+  { name: 'Run a Deal', price: '$999', desc: 'Most customers start here.', bonus: '+10% bonus', popular: true },
+  { name: 'Deal Pro', price: '$2,499', desc: 'Everything you need. One purchase.', bonus: '+20% bonus', popular: false },
 ];
 
-const LEAGUES = [
-  { league: 'L1', size: '< $500K', multiplier: '1.0\u00d7' },
-  { league: 'L2', size: '$500K \u2013 $1M', multiplier: '1.25\u00d7' },
-  { league: 'L3', size: '$1M \u2013 $5M', multiplier: '2.0\u00d7' },
-  { league: 'L4', size: '$5M \u2013 $10M', multiplier: '3.5\u00d7' },
-  { league: 'L5', size: '$10M \u2013 $50M', multiplier: '6.0\u00d7' },
-  { league: 'L6', size: '$50M+', multiplier: '10.0\u00d7' },
+const FREE_ITEMS = [
+  'Business intake and classification',
+  'SDE/EBITDA calculation',
+  'Add-back identification',
+  'Preliminary valuation range',
+  'Journey roadmap',
 ];
 
-function fmt(n: number) {
-  return n.toLocaleString('en-US');
-}
+const FAQS = [
+  { q: 'Why isn\u2019t it a subscription?', a: 'You pay for what you use. No monthly fee collecting dust.' },
+  { q: 'Can I start small and add more later?', a: 'Yes. Buy one deliverable or the whole journey. Top up anytime.' },
+  { q: 'What if I need a bigger deal analyzed?', a: 'Larger deals use adjusted pricing that reflects complexity. Still a fraction of traditional cost.' },
+  { q: 'Is there a refund policy?', a: 'If Yulia\u2019s work product doesn\u2019t meet professional standards, we\u2019ll make it right.' },
+];
+
+/* ─── Page ─── */
 
 export default function Pricing() {
+  const [tab, setTab] = useState<Journey>('sell');
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const pkg = JOURNEY_PACKAGES[tab];
+
   return (
     <PublicLayout>
-      {/* Hero */}
-      <section className="px-6 pt-20 pb-16 md:pt-28 md:pb-24">
-        <div className="max-w-2xl mx-auto text-center">
-          <h1
-            className="text-4xl md:text-6xl text-text-primary mb-4 font-medium leading-tight"
-            style={SERIF}
-          >
-            Pay as you go. No subscriptions.
-          </h1>
-          <p className="text-lg md:text-xl text-text-secondary leading-relaxed max-w-xl mx-auto">
-            Top up your wallet, spend on what you need. $1 in = $1 of purchasing power.
-          </p>
-        </div>
+      {/* ═══ HERO ═══ */}
+      <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-12 text-center">
+        <h1 className="font-serif text-[clamp(52px,7vw,92px)] font-black leading-none tracking-tight mb-6 m-0">
+          Know exactly what you&apos;ll spend before you start.
+        </h1>
+        <p className="text-lg text-[#7A766E] max-w-[600px] mx-auto leading-relaxed m-0">
+          Every journey has a clear price. No retainers. No surprises.
+          Your first conversation and financial analysis are always free.
+        </p>
       </section>
 
-      {/* How it works */}
-      <section className="px-6 pb-16 md:pb-24">
-        <div className="max-w-4xl mx-auto">
-          <h2
-            className="text-3xl md:text-4xl text-text-primary text-center mb-10 font-medium"
-            style={SERIF}
-          >
-            How it works
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {HOW_STEPS.map(step => (
-              <div key={step.num} className="text-center md:text-left">
-                <span className="text-base font-semibold text-terra">{step.num}</span>
-                <h3
-                  className="text-xl md:text-2xl text-text-primary mt-2 mb-2 font-medium"
-                  style={SERIF}
-                >
-                  {step.title}
-                </h3>
-                <p className="text-base md:text-lg text-text-secondary leading-relaxed m-0">
-                  {step.description}
-                </p>
-              </div>
-            ))}
-          </div>
+      {/* ═══ JOURNEY PACKAGES ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        {/* Tabs */}
+        <div className="flex gap-2 mb-10 overflow-x-auto pb-1">
+          {TABS.map(t => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`px-6 py-2.5 rounded-full text-sm font-semibold border-none cursor-pointer transition-all whitespace-nowrap ${
+                tab === t.key
+                  ? 'bg-[#DA7756] text-white'
+                  : 'bg-white text-[#4A4843] border border-[#E0DCD4] hover:border-[#1A1A18]'
+              }`}
+              style={tab !== t.key ? { border: '1px solid #E0DCD4' } : undefined}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
-      </section>
 
-      {/* Wallet top-up blocks */}
-      <section className="px-6 py-16 md:py-24 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <h2
-            className="text-3xl md:text-4xl text-text-primary text-center mb-4 font-medium"
-            style={SERIF}
-          >
-            Wallet top-ups
-          </h2>
-          <p className="text-lg md:text-xl text-text-secondary text-center mb-10 max-w-xl mx-auto">
-            Buy once, use anytime. Larger blocks include bonus credits. Your credits never expire.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            {WALLET_BLOCKS.map(block => (
-              <div
-                key={block.name}
-                className={`rounded-2xl border p-5 flex flex-col ${
-                  block.popular
-                    ? 'border-terra bg-cream shadow-md'
-                    : 'border-border bg-white'
-                }`}
-              >
-                {block.popular && (
-                  <span className="text-sm font-semibold text-terra uppercase tracking-wide mb-1">
-                    Most Popular
-                  </span>
-                )}
-                <p className="text-base text-text-secondary m-0 mb-1">{block.name}</p>
-                <p
-                  className="text-2xl text-text-primary m-0 font-medium"
-                  style={SERIF}
-                >
-                  ${fmt(block.price)}
-                </p>
-                {block.bonus > 0 ? (
-                  <p className="text-base text-terra m-0 mt-1">
-                    +${fmt(block.bonus)} bonus ({block.discount})
-                  </p>
-                ) : (
-                  <p className="text-base text-text-secondary m-0 mt-1">No minimum</p>
-                )}
-                <p className="text-sm text-text-secondary m-0 mt-2">
-                  ${fmt(block.total)} purchasing power
-                </p>
-                <Link
-                  href="/signup"
-                  className="mt-auto pt-4 text-base text-terra font-medium no-underline hover:text-terra-hover transition-colors"
-                >
-                  Top up &rarr;
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* What you get at each stage */}
-      <section className="px-6 py-16 md:py-24">
-        <div className="max-w-3xl mx-auto">
-          <h2
-            className="text-3xl md:text-4xl text-text-primary text-center mb-10 font-medium"
-            style={SERIF}
-          >
-            What your credits buy
-          </h2>
-          <div className="space-y-4">
-            {TIERS.map(tier => (
-              <div
-                key={tier.label}
-                className="flex items-start gap-4 bg-white rounded-2xl border border-border p-5"
-              >
-                <span
-                  className="text-xl text-terra font-medium whitespace-nowrap min-w-[90px]"
-                  style={SERIF}
-                >
-                  {tier.range}
-                </span>
-                <div>
-                  <p className="text-base font-semibold text-text-primary m-0">{tier.label}</p>
-                  <p className="text-base md:text-lg text-text-secondary m-0 mt-1">{tier.items}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* League multipliers */}
-      <section className="px-6 py-16 md:py-24 bg-white">
-        <div className="max-w-3xl mx-auto">
-          <h2
-            className="text-3xl md:text-4xl text-text-primary text-center mb-4 font-medium"
-            style={SERIF}
-          >
-            Pricing scales with deal size
-          </h2>
-          <p className="text-lg md:text-xl text-text-secondary text-center mb-10 max-w-xl mx-auto">
-            Your deal size determines your league. Larger deals require deeper analysis, so prices scale proportionally.
-          </p>
-          <div className="bg-cream rounded-2xl border border-border overflow-hidden">
-            <div className="grid grid-cols-3 text-base font-semibold text-text-primary border-b border-border px-6 py-3">
-              <span>League</span>
-              <span>Deal Size</span>
-              <span className="text-right">Multiplier</span>
+        {/* Package */}
+        <h3 className="font-serif text-2xl font-black mb-6 m-0">{pkg.label}</h3>
+        <div className="space-y-0">
+          {pkg.stages.map((s, i) => (
+            <div
+              key={s.name}
+              className={`flex items-center justify-between py-4 ${
+                i < pkg.stages.length - 1 ? 'border-b border-[#E0DCD4]' : ''
+              }`}
+            >
+              <span className="text-[15px] text-[#1A1A18]">{s.name}</span>
+              <Tag variant={s.free ? 'free' : 'paid'}>{s.price}</Tag>
             </div>
-            {LEAGUES.map(l => (
-              <div
-                key={l.league}
-                className="grid grid-cols-3 text-base text-text-secondary border-b border-border last:border-0 px-6 py-3"
-              >
-                <span className="font-medium text-text-primary">{l.league}</span>
-                <span>{l.size}</span>
-                <span className="text-right font-medium text-terra">{l.multiplier}</span>
-              </div>
-            ))}
+          ))}
+          <div className="flex items-center justify-between pt-6 border-t-2 border-[#1A1A18]">
+            <span className="text-[15px] font-bold text-[#1A1A18]">Total</span>
+            <span className="text-[15px] font-bold text-[#DA7756]">{pkg.total}</span>
           </div>
-          <p className="text-base text-text-secondary text-center mt-6">
-            A $25 deliverable at L1 costs $25. At L3 it costs $50.
+        </div>
+      </section>
+
+      {/* ═══ EXAMPLES ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
+          What does it <em className="italic text-[#DA7756]">actually</em> cost?
+        </h2>
+        <div className="grid grid-cols-3 gap-5 max-md:grid-cols-1">
+          {EXAMPLES.map(e => (
+            <Card key={e.deal} padding="px-8 py-8">
+              <p className="text-sm font-semibold text-[#1A1A18] mb-4 m-0">{e.deal}</p>
+              <p className="font-serif text-[32px] font-black text-[#DA7756] leading-none mb-1 m-0">{e.typical}</p>
+              <p className="text-[13px] text-[#7A766E] m-0">vs. {e.traditional}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ WALLET OPTIONS ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
+          How to pay.
+        </h2>
+        <div className="grid grid-cols-3 gap-5 max-md:grid-cols-1">
+          {WALLETS.map(w => (
+            <Card key={w.name} padding="px-8 py-10" className={w.popular ? 'ring-2 ring-[#DA7756]' : ''}>
+              {w.popular && (
+                <span className="inline-block text-[11px] font-bold uppercase tracking-wide text-[#DA7756] mb-3">Most Popular</span>
+              )}
+              <h3 className="text-lg font-bold text-[#1A1A18] mb-1 m-0">{w.name}</h3>
+              <p className="font-serif text-[32px] font-black text-[#1A1A18] leading-none mb-2 m-0">{w.price}</p>
+              {w.bonus && <Tag variant="paid">{w.bonus}</Tag>}
+              <p className="text-sm text-[#7A766E] mt-3 m-0">{w.desc}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ WHAT'S FREE ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-[20px] p-16 max-md:p-7">
+          <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-8 m-0">
+            What&apos;s free.
+          </h2>
+          <ul className="space-y-3 mb-8 list-none p-0 m-0">
+            {FREE_ITEMS.map(item => (
+              <li key={item} className="flex items-start gap-3 text-[15px] text-[#4A4843]">
+                <span className="text-[#DA7756] mt-0.5">&#10003;</span>
+                {item}
+              </li>
+            ))}
+          </ul>
+          <p className="text-[15px] text-[#7A766E] italic m-0">
+            Your first conversation with Yulia costs nothing.
           </p>
         </div>
       </section>
 
-      {/* Bottom CTA */}
-      <section className="px-6 py-16 md:py-24">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2
-            className="text-3xl md:text-4xl text-text-primary mb-4 font-medium"
-            style={SERIF}
-          >
-            Ready to start?
-          </h2>
-          <p className="text-lg md:text-xl text-text-secondary mb-8">
-            Your first conversation is free. No credit card required.
-          </p>
-          <Link
-            href="/signup"
-            className="inline-flex items-center px-8 py-3 md:px-10 md:py-4 bg-terra text-white text-base md:text-lg font-medium rounded-full hover:bg-terra-hover no-underline transition-colors"
-          >
-            Get started free &rarr;
-          </Link>
+      {/* ═══ SERVICE PROVIDER ACCESS ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <div className="grid grid-cols-2 gap-16 items-center max-md:grid-cols-1 max-md:gap-8">
+          <div>
+            <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight leading-[1.1] mb-6 m-0">
+              Service providers collaborate <em className="italic text-[#DA7756]">free.</em>
+            </h2>
+            <p className="text-[17px] text-[#7A766E] leading-relaxed m-0">
+              When a client invites you to their deal room, you get full access
+              at no cost. Focus on what you do best.
+            </p>
+          </div>
+          <Card hover={false} padding="px-8 py-10">
+            <p className="text-sm uppercase tracking-widest text-[#DA7756] font-semibold mb-4 m-0">Free access for</p>
+            <ul className="space-y-2 list-none p-0 m-0">
+              {['Attorneys', 'CPAs & Accountants', 'Real Estate Agents', 'Financial Advisors'].map(r => (
+                <li key={r} className="text-[15px] text-[#1A1A18] font-medium">{r}</li>
+              ))}
+            </ul>
+          </Card>
+        </div>
+      </section>
+
+      {/* ═══ FAQ ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-tight mb-10 m-0">
+          Common questions.
+        </h2>
+        <div className="space-y-0">
+          {FAQS.map((f, i) => (
+            <div key={i} className="border-b border-[#E0DCD4]">
+              <button
+                className="w-full flex items-center justify-between py-5 text-left bg-transparent border-none cursor-pointer"
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+              >
+                <span className="text-[15px] font-semibold text-[#1A1A18] pr-4">{f.q}</span>
+                <span className="text-[#7A766E] text-xl shrink-0">{openFaq === i ? '\u2212' : '+'}</span>
+              </button>
+              {openFaq === i && (
+                <p className="text-sm text-[#7A766E] leading-relaxed pb-5 m-0">{f.a}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ FINAL CTA ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
+        <div className="bg-gradient-to-br from-[#DA7756] to-[#C4684A] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
+          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-snug max-w-[480px] m-0 relative z-10">
+            Start free. Pay when you&apos;re ready.
+          </h3>
+          <Button variant="ctaBlock" href="/signup" className="relative z-10">
+            Get started &rarr;
+          </Button>
         </div>
       </section>
     </PublicLayout>

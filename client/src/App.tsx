@@ -9,11 +9,15 @@ function ScrollToTop() {
   }, [location]);
   return null;
 }
+
 import Home from './pages/public/Home';
 import Sell from './pages/public/Sell';
 import Buy from './pages/public/Buy';
 import Raise from './pages/public/Raise';
+import Integrate from './pages/public/Integrate';
 import Pricing from './pages/public/Pricing';
+import HowItWorks from './pages/public/HowItWorks';
+import Enterprise from './pages/public/Enterprise';
 import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
 import Chat from './pages/Chat';
@@ -24,8 +28,8 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-dvh bg-cream">
-        <p className="text-text-tertiary font-[Georgia,ui-serif,serif] text-base m-0">Loading...</p>
+      <div className="flex justify-center items-center min-h-dvh bg-[#FAF8F4]">
+        <p className="text-[#7A766E] font-sans text-base m-0">Loading...</p>
       </div>
     );
   }
@@ -47,10 +51,16 @@ export default function App() {
         <Raise />
       </Route>
       <Route path="/integrate">
-        <Home />
+        <Integrate />
       </Route>
       <Route path="/pricing">
         <Pricing />
+      </Route>
+      <Route path="/how-it-works">
+        <HowItWorks />
+      </Route>
+      <Route path="/enterprise">
+        <Enterprise />
       </Route>
 
       <Route path="/login">
