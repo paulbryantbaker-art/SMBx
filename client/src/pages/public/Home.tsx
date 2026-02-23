@@ -4,7 +4,7 @@ import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
 import ConversationPreview from '../../components/public/ConversationPreview';
 import PublicChatView from '../../components/public/PublicChatView';
-import { useAnonymousChat } from '../../hooks/useAnonymousChat';
+import { useChatContext } from '../../contexts/ChatContext';
 
 /* ─── Data ─── */
 
@@ -84,8 +84,16 @@ const TRUST_STATS = [
 
 export default function Home() {
   const [, navigate] = useLocation();
-  const chat = useAnonymousChat({ context: 'home' });
-  const hasMessages = chat.messages.length > 0 || chat.sending;
+  const {
+    messages,
+    sending,
+    streamingText,
+    messagesRemaining,
+    limitReached,
+    error,
+    sendMessage,
+  } = useChatContext();
+  const hasMessages = messages.length > 0 || sending;
 
   return (
     <PublicLayout>
@@ -102,13 +110,13 @@ export default function Home() {
         {/* Live chat area */}
         <div className="max-w-[640px] mx-auto">
           <PublicChatView
-            messages={chat.messages}
-            sending={chat.sending}
-            streamingText={chat.streamingText}
-            messagesRemaining={chat.messagesRemaining}
-            limitReached={chat.limitReached}
-            error={chat.error}
-            onSend={chat.sendMessage}
+            messages={messages}
+            sending={sending}
+            streamingText={streamingText}
+            messagesRemaining={messagesRemaining}
+            limitReached={limitReached}
+            error={error}
+            onSend={sendMessage}
             onSignup={() => navigate('/signup')}
             placeholder="Tell Yulia about your deal..."
             suggestedPrompts={SUGGESTED_PROMPTS}

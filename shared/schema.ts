@@ -60,7 +60,7 @@ export const walletBlocks = pgTable('wallet_blocks', {
 
 export const conversations = pgTable('conversations', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull(),
+  userId: integer('user_id').references(() => users.id),
   dealId: integer('deal_id'),
   title: varchar('title', { length: 255 }).default('New conversation'),
   isArchived: boolean('is_archived').default(false),
@@ -122,6 +122,21 @@ export const dealPackages = pgTable('deal_packages', {
   journeyType: varchar('journey_type', { length: 20 }),
   includedMenuItemIds: jsonb('included_menu_item_ids'),
   isActive: boolean('is_active').default(true),
+});
+
+// ─── Anonymous Sessions ────────────────────────────────────
+
+export const anonymousSessions = pgTable('anonymous_sessions', {
+  id: serial('id').primaryKey(),
+  sessionId: varchar('session_id', { length: 36 }).notNull().unique(),
+  ip: varchar('ip', { length: 45 }).notNull(),
+  sourcePage: varchar('source_page', { length: 50 }),
+  messages: jsonb('messages').default([]),
+  messageCount: integer('message_count').default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+  lastActiveAt: timestamp('last_active_at').defaultNow(),
+  expiresAt: timestamp('expires_at').notNull(),
+  convertedToUserId: integer('converted_to_user_id').references(() => users.id),
 });
 
 // ─── Deliverables ───────────────────────────────────────────

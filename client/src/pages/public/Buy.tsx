@@ -1,10 +1,9 @@
-import { useLocation } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
 import Timeline from '../../components/public/Timeline';
 import PublicChatInput from '../../components/public/PublicChatInput';
-import { useAnonymousChat } from '../../hooks/useAnonymousChat';
+import { useChatContext } from '../../contexts/ChatContext';
 
 /* ─── Data ─── */
 
@@ -105,8 +104,7 @@ const BUY_PROMPTS = [
 /* ─── Page ─── */
 
 export default function Buy() {
-  const [, navigate] = useLocation();
-  const chat = useAnonymousChat({ context: 'buy' });
+  const { triggerMorph } = useChatContext();
 
   return (
     <PublicLayout>
@@ -124,7 +122,7 @@ export default function Buy() {
           models returns, manages diligence, and keeps every party on track.
         </p>
         <div className="flex flex-col md:flex-row gap-3 max-md:w-full">
-          <Button variant="primary" href="/signup">Start buying &mdash; free &rarr;</Button>
+          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start buying &mdash; free &rarr;</Button>
           <Button variant="secondary" href="/how-it-works">See how it works</Button>
         </div>
       </section>
@@ -145,7 +143,7 @@ export default function Buy() {
             Typical buy-side journey: <strong className="text-[#1A1A18]">From $1,399</strong> &middot;
             Traditional advisory: <span className="line-through">$75,000&ndash;$250,000</span>
           </p>
-          <Button variant="primary" href="/signup">Start your journey &mdash; free &rarr;</Button>
+          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start your journey &mdash; free &rarr;</Button>
         </div>
       </section>
 
@@ -196,13 +194,13 @@ export default function Buy() {
       </section>
 
       {/* ═══ CHAT INPUT ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section id="chat-input" className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
         <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
           Ready to find your next deal?
         </h3>
         <div className="max-w-[640px] mx-auto">
           <PublicChatInput
-            onSend={(msg) => { chat.sendMessage(msg); navigate('/'); }}
+            onSend={(msg) => triggerMorph(msg, 'buy')}
             placeholder="Tell Yulia what kind of business you're looking for..."
             suggestedPrompts={BUY_PROMPTS}
           />
@@ -231,9 +229,12 @@ export default function Buy() {
           <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
             Your next acquisition starts with a conversation.
           </h3>
-          <Button variant="ctaBlock" href="/signup" className="relative z-10">
+          <button
+            onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}
+            className="bg-white text-[#DA7756] font-semibold text-[15px] px-8 py-4 rounded-full border-none cursor-pointer hover:bg-[#FFF0EB] transition-colors relative z-10 shrink-0"
+          >
             Talk to Yulia &mdash; free &rarr;
-          </Button>
+          </button>
         </div>
       </section>
     </PublicLayout>

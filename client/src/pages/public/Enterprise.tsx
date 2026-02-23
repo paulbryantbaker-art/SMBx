@@ -1,9 +1,7 @@
-import { useLocation } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
-import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
 import PublicChatInput from '../../components/public/PublicChatInput';
-import { useAnonymousChat } from '../../hooks/useAnonymousChat';
+import { useChatContext } from '../../contexts/ChatContext';
 
 /* ─── Data ─── */
 
@@ -55,8 +53,7 @@ const ENTERPRISE_PROMPTS = [
 /* ─── Page ─── */
 
 export default function Enterprise() {
-  const [, navigate] = useLocation();
-  const chat = useAnonymousChat({ context: 'enterprise' });
+  const { triggerMorph } = useChatContext();
 
   return (
     <PublicLayout>
@@ -146,13 +143,13 @@ export default function Enterprise() {
       </section>
 
       {/* ═══ CHAT INPUT ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section id="chat-input" className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
         <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
           See what Yulia can do for your practice.
         </h3>
         <div className="max-w-[640px] mx-auto">
           <PublicChatInput
-            onSend={(msg) => { chat.sendMessage(msg); navigate('/'); }}
+            onSend={(msg) => triggerMorph(msg, 'enterprise')}
             placeholder="Tell Yulia about your practice..."
             suggestedPrompts={ENTERPRISE_PROMPTS}
           />
@@ -166,9 +163,12 @@ export default function Enterprise() {
           <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
             Your expertise is the bottleneck. It doesn&apos;t have to be.
           </h3>
-          <Button variant="ctaBlock" href="/signup" className="relative z-10">
+          <button
+            onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}
+            className="bg-white text-[#DA7756] font-semibold text-[15px] px-8 py-4 rounded-full border-none cursor-pointer hover:bg-[#FFF0EB] transition-colors relative z-10 shrink-0"
+          >
             Talk to Yulia &rarr;
-          </Button>
+          </button>
         </div>
       </section>
     </PublicLayout>

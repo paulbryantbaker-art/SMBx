@@ -148,7 +148,7 @@ export async function streamAnonymousResponse(
 
   const response = await anthropic.messages.create({
     model: MODEL,
-    max_tokens: 400,
+    max_tokens: 1500,
     system: systemPrompt,
     messages,
   });

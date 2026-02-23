@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Route, Switch, Redirect, useLocation } from 'wouter';
 import { useAuth } from './hooks/useAuth';
+import { ChatProvider } from './contexts/ChatContext';
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -37,7 +38,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <ChatProvider>
     <ScrollToTop />
     <Switch>
       <Route path="/">
@@ -114,6 +115,6 @@ export default function App() {
         <Redirect to="/" />
       </Route>
     </Switch>
-    </>
+    </ChatProvider>
   );
 }

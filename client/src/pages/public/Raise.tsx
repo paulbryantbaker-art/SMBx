@@ -1,10 +1,9 @@
-import { useLocation } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
 import Timeline from '../../components/public/Timeline';
 import PublicChatInput from '../../components/public/PublicChatInput';
-import { useAnonymousChat } from '../../hooks/useAnonymousChat';
+import { useChatContext } from '../../contexts/ChatContext';
 
 /* ─── Data ─── */
 
@@ -105,8 +104,7 @@ const RAISE_PROMPTS = [
 /* ─── Page ─── */
 
 export default function Raise() {
-  const [, navigate] = useLocation();
-  const chat = useAnonymousChat({ context: 'raise' });
+  const { triggerMorph } = useChatContext();
 
   return (
     <PublicLayout>
@@ -125,7 +123,7 @@ export default function Raise() {
           from strength.
         </p>
         <div className="flex flex-col md:flex-row gap-3 max-md:w-full">
-          <Button variant="primary" href="/signup">Start raising &mdash; free &rarr;</Button>
+          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start raising &mdash; free &rarr;</Button>
           <Button variant="secondary" href="/how-it-works">See how it works</Button>
         </div>
       </section>
@@ -146,7 +144,7 @@ export default function Raise() {
             Typical raise journey: <strong className="text-[#1A1A18]">From $749</strong> &middot;
             Traditional advisory: <span className="line-through">$25,000&ndash;$100,000</span>
           </p>
-          <Button variant="primary" href="/signup">Start your raise &mdash; free &rarr;</Button>
+          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start your raise &mdash; free &rarr;</Button>
         </div>
       </section>
 
@@ -198,13 +196,13 @@ export default function Raise() {
       </section>
 
       {/* ═══ CHAT INPUT ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section id="chat-input" className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
         <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
           Ready to start your raise?
         </h3>
         <div className="max-w-[640px] mx-auto">
           <PublicChatInput
-            onSend={(msg) => { chat.sendMessage(msg); navigate('/'); }}
+            onSend={(msg) => triggerMorph(msg, 'raise')}
             placeholder="Tell Yulia about your raise..."
             suggestedPrompts={RAISE_PROMPTS}
           />
@@ -233,9 +231,12 @@ export default function Raise() {
           <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
             Raise from strength. Start with a conversation.
           </h3>
-          <Button variant="ctaBlock" href="/signup" className="relative z-10">
+          <button
+            onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}
+            className="bg-white text-[#DA7756] font-semibold text-[15px] px-8 py-4 rounded-full border-none cursor-pointer hover:bg-[#FFF0EB] transition-colors relative z-10 shrink-0"
+          >
             Talk to Yulia &mdash; free &rarr;
-          </Button>
+          </button>
         </div>
       </section>
     </PublicLayout>

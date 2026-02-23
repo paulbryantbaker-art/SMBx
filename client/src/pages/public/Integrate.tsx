@@ -1,10 +1,9 @@
-import { useLocation } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
 import Timeline from '../../components/public/Timeline';
 import PublicChatInput from '../../components/public/PublicChatInput';
-import { useAnonymousChat } from '../../hooks/useAnonymousChat';
+import { useChatContext } from '../../contexts/ChatContext';
 
 /* ─── Data ─── */
 
@@ -97,8 +96,7 @@ const INTEGRATE_PROMPTS = [
 /* ─── Page ─── */
 
 export default function Integrate() {
-  const [, navigate] = useLocation();
-  const chat = useAnonymousChat({ context: 'integrate' });
+  const { triggerMorph } = useChatContext();
 
   return (
     <PublicLayout>
@@ -116,7 +114,7 @@ export default function Integrate() {
           Most buyers wing it. You won&apos;t.
         </p>
         <div className="flex flex-col md:flex-row gap-3 max-md:w-full">
-          <Button variant="primary" href="/signup">Start planning &mdash; free &rarr;</Button>
+          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start planning &mdash; free &rarr;</Button>
           <Button variant="secondary" href="/how-it-works">See how it works</Button>
         </div>
       </section>
@@ -137,7 +135,7 @@ export default function Integrate() {
             Typical integration journey: <strong className="text-[#1A1A18]">From $899</strong> &middot;
             Traditional consulting: <span className="line-through">$50,000&ndash;$150,000</span>
           </p>
-          <Button variant="primary" href="/signup">Start your plan &mdash; free &rarr;</Button>
+          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start your plan &mdash; free &rarr;</Button>
         </div>
       </section>
 
@@ -189,13 +187,13 @@ export default function Integrate() {
       </section>
 
       {/* ═══ CHAT INPUT ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section id="chat-input" className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
         <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
           Ready to plan your first 100 days?
         </h3>
         <div className="max-w-[640px] mx-auto">
           <PublicChatInput
-            onSend={(msg) => { chat.sendMessage(msg); navigate('/'); }}
+            onSend={(msg) => triggerMorph(msg, 'integrate')}
             placeholder="Tell Yulia what you just acquired..."
             suggestedPrompts={INTEGRATE_PROMPTS}
           />
@@ -224,9 +222,12 @@ export default function Integrate() {
           <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
             Your first 100 days, done right.
           </h3>
-          <Button variant="ctaBlock" href="/signup" className="relative z-10">
+          <button
+            onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}
+            className="bg-white text-[#DA7756] font-semibold text-[15px] px-8 py-4 rounded-full border-none cursor-pointer hover:bg-[#FFF0EB] transition-colors relative z-10 shrink-0"
+          >
             Talk to Yulia &mdash; free &rarr;
-          </Button>
+          </button>
         </div>
       </section>
     </PublicLayout>
