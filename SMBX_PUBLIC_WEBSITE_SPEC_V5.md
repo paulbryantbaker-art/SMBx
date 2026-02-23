@@ -306,209 +306,290 @@ brokers, owners, and investors use to move faster, know more,
 and close with confidence."
 
 **Live Chat Input:**
-- Large text input with placeholder: "Tell Yulia about your deal..."
-- Send button (terra, rounded)
-- Below input: "Free to start · No credit card"
-- Below that: 4 suggested prompt pills:
+- Large text input (white bg, stone border, 20px radius, shadow)
+- Placeholder: "Tell Yulia about your deal..."
+- Bottom bar inside input: left "Free to start · No credit card", 
+  right terra send button (40px, rounded 12px, ↑ arrow)
+- Below input: 4 suggested prompt pills (white bg, stone border, pill):
   - "I want to sell my HVAC business"
   - "I'm looking to acquire a SaaS company"
   - "Help me value a $3M business"
   - "I need to raise $2M"
-- Below prompts: "Your first financial analysis is always free."
+- Pill hover: border terra, text terra, bg terra-soft
+- Below prompts: "Your first financial analysis is **always free**."
 
 The chat input is functional. It sends to the real Yulia API.
 When user sends a message, the page transitions to a chat view.
 
-### Section 2: WHO USES THIS
+### Section 2: ONE PLATFORM (Persona Cards)
 
 Overline: "Built for everyone on the deal"
-H2: "One platform. Every seat at the table."
+H2 (display-md): "One platform. Every seat at the table."
 
-4 persona cards:
+4 persona cards (standard card hover with terra top-line):
 
-**Business Owners**
-"Selling, buying, or raising — Yulia speaks your language. No jargon, 
-no assumptions. Just clear guidance from first question to closing day."
-Example: "I had no idea my add-backs were worth $127K. Yulia found every one."
+**🏢 Business Owners**
+"Selling, buying, or raising — Yulia speaks your language. No 
+jargon, no assumptions. Just clear guidance from first question 
+to closing day."
+*Italic example at bottom, border-top separator:*
+"I had no idea my add-backs were worth $127K. Yulia found every one."
 
-**Brokers & Advisors**
+**🤝 Brokers & Advisors**
 "Produce CIMs in an hour, not three weeks. Screen and score buyer 
 lists instantly. Manage 3× the deal flow with the same team."
-Example: "I closed 4 more deals last quarter using Yulia for work product."
+*"I closed 4 more deals last quarter using Yulia for work product."*
 
-**Attorneys & CPAs**
+**⚖️ Attorneys & CPAs**
 "Invited by your client? You're in — for free. Review financials, 
 flag risks, collaborate on documents in real time."
-Example: "Finally, one place to see the whole deal instead of chasing 6 inboxes."
+*"Finally, one place to see the whole deal instead of chasing 6 inboxes."*
 
-**Investors & Search Funds**
+**📊 Investors & Search Funds**
 "Screen hundreds of targets overnight. Model returns before your 
 first call. Manage diligence across a portfolio."
-Example: "Scored 47 acquisition targets against my thesis in one session."
+*"Scored 47 acquisition targets against my thesis in one session."*
 
-### Section 3: SHOW DON'T TELL (Conversation Preview)
+### Section 3: CONVERSATION PREVIEW
 
-Split header:
-- Left H2: "See what happens when you *start talking.*"
-- Right: "Yulia doesn't ask you to fill out forms. She has a 
-  conversation — and turns it into institutional-quality work 
-  product in minutes."
+Split header (2-col, aligned to bottom):
+- Left H2 (display-md): "See what happens when you *start talking.*"
+- Right (body, muted): "Yulia doesn't ask you to fill out forms. 
+  She has a conversation — and turns it into institutional-quality 
+  work product in minutes."
 
-Full conversation preview showing a realistic exchange:
-User describes HVAC business → Yulia responds with SDE estimate, 
-add-backs, market context (PE consolidation in DFW), preliminary 
-range of $3.5M–$4.7M → User reacts → Yulia suggests next steps 
-including "invite your broker."
+Conversation preview component (white bg, stone border, 20px radius, 
+large shadow — looks like an app window):
 
-Context line: "This analysis took 30 seconds. A traditional advisor 
-takes 2–4 weeks."
+Header bar: cream bg, border-bottom, Yulia avatar (terra 32px 
+square-rounded with white "Y") + "Yulia · AI Deal Advisor"
+
+Messages:
+
+**User (dark bubble, right-aligned):**
+"I want to sell my HVAC business in Dallas. Revenue is about 
+$3.2M, I take home around $640K."
+
+**Yulia (cream bubble, left-aligned):**
+"Great — let me work with those numbers. Based on your revenue 
+and owner compensation, I'm calculating an adjusted EBITDA of 
+approximately **$780K** after typical add-backs for owner-operated 
+HVAC businesses.
+
+[Terra-soft insight box:]
+📊 HVAC companies in the Dallas-Fort Worth market are currently 
+trading at 4.5–6× EBITDA. Three PE firms are actively consolidating 
+in your region. Your preliminary range: **$3.5M – $4.7M**."
+
+**Context line (centered, caption, muted):**
+"— This analysis took 30 seconds. A traditional advisor takes 
+2–4 weeks. —"
+
+**User:**
+"That's way more than I expected. What do we do next?"
+
+**Yulia:**
+"Let's build your financial package and identify your best buyers. 
+I'll walk you through every step — or if you're working with a 
+broker, invite them in and I'll produce the work product they need 
+to get you to market faster."
 
 ### Section 4: JOURNEYS
 
-H2: "What brings you here?"
-4 journey cards with hook lines:
+H2 (display-md): "What brings you here?"
 
-- **Sell** — "Know your real number." → From "what's my business 
-  worth?" to wire transfer.
-- **Buy** — "Find the right deal." → Build your thesis, screen 
-  targets, model returns.
-- **Raise** — "Raise without losing control." → Valuation, pitch 
-  deck, investor targeting, term sheet analysis.
-- **Integrate** — "Your first 100 days." → Day 0 checklist 
-  through 100-day optimization.
+4 journey cards (standard card hover with terra top-line):
+
+**Sell** 
+Hook (body, 500 weight): "Know your real number."
+Description (body-sm, muted): "From 'what's my business worth?' 
+to wire transfer — Yulia handles valuation, CIM, buyer matching, 
+and closing support."
+Card link: "Start selling →"
+
+**Buy**
+Hook: "Find the right deal."
+"Build your thesis, screen targets, model returns, manage diligence 
+— whether it's your first acquisition or your fifteenth."
+Card link: "Start buying →"
+
+**Raise Capital**
+Hook: "Raise without losing control."
+"Valuation, pitch deck, investor targeting, term sheet analysis. 
+Negotiate from strength, not desperation."
+Card link: "Start raising →"
+
+**Integrate**
+Hook: "Your first 100 days."
+"You just acquired a business. Now what? Day 0 checklist through 
+100-day optimization. Don't let value slip away."
+Card link: "Start planning →"
 
 ### Section 5: TRUST NUMBERS
 
-4-column stat grid:
-- $2.4T — Annual SMB transaction volume
-- 80+ — Industry verticals with live market data
-- Minutes — From conversation to deliverable
-- Free — For attorneys, CPAs, and service providers
+4-column stat grid (border-top, items separated by border-right):
+- **$2.4T** — Annual SMB transaction volume
+- **80+** — Industry verticals with live market data
+- **Minutes** — From conversation to deliverable
+- **Free** — For attorneys, CPAs, and service providers
 
 ### Section 6: FINAL CTA
 
-Terra gradient. "Your next deal starts with a conversation."
-CTA Block: "Talk to Yulia →"
+Terra gradient block, 20px radius.
+H3 (display-sm, white): "Your next deal starts with a conversation."
+CTA Block button: "Talk to Yulia →"
 
 ---
 
 ## SELL PAGE (/sell)
 
 ### Hero
-Tag: "Sell Your Business"
-H1: "You built it. Now *own the exit.*"
-Lead: "Most owners sell for less than they should — not because the 
-business isn't worth it, but because they didn't have the right 
-information at the right time. Yulia changes that."
+Tag (overline with terra line-before): "Sell Your Business"
+H1 (display-xl): "You built it. Now *own the exit.*"
+Lead (body-lg, muted, max-width 600px): "Most owners sell for less 
+than they should — not because the business isn't worth it, but 
+because they didn't have the right information at the right time. 
+Yulia changes that."
 CTA: Primary "Start selling — free →" + Secondary "See how it works"
 
-### Journey Timeline (Visual, Story-Driven)
+### Journey Timeline (Vertical, Story-Driven)
 
 Overline: "Your selling journey"
-H2: "From 'what's it worth?' to *wire transfer.*"
+H2 (display-md): "From 'what's it worth?' to *wire transfer.*"
 
-Vertical timeline with steps 1-5. Each step has:
-- Number in a dot on a vertical line
-- Title + price tag (Free / From $X)
-- Description paragraph
-- Optional "detail" box with example conversation or scenario
+Vertical timeline: line on left (2px stone), numbered dots (56px 
+circles, stone border, serif number). Dots highlight terra on hover.
 
-**Step 1: Tell Yulia about your business** (Free)
+**Step 1: Tell Yulia about your business** — [FREE tag, green]
 "No forms. Just a conversation. Describe your business — industry, 
 location, revenue, team, whatever you know. Yulia asks smart 
 follow-ups and builds your deal profile."
-Detail: "I own an HVAC company in Dallas, 12 employees, $3.2M 
-revenue, been running it for 15 years." — That's all it takes.
+Detail box (cream-deep, rounded): *"I own an HVAC company in Dallas, 
+12 employees, $3.2M revenue, been running it for 15 years." — That's 
+all it takes to start.*
 
-**Step 2: See your real numbers** (Free)
+**Step 2: See your real numbers** — [FREE tag, green]
 "Yulia calculates your SDE or EBITDA, identifies every legitimate 
 add-back, and gives you a preliminary valuation range — with the 
-math shown."
-Detail: "Most owners discover add-backs they didn't know existed. 
+math shown. Not a guess. A number you can take to your CPA."
+Detail box: *Most owners discover add-backs they didn't know existed. 
 Personal vehicle, one-time expenses, above-market rent to yourself, 
-family members on payroll — Yulia finds them all."
+family members on payroll — Yulia finds them all.*
 
-**Step 3: Get your valuation report** (From $199)
+**Step 3: Get your valuation report** — [FROM $199 tag, terra-soft]
 "Full multi-methodology valuation: comparable transactions, industry 
 multiples, discounted cash flow. Benchmarked against real deals in 
-your industry and region."
+your industry and region. The kind of report advisory firms charge 
+$10K–$25K to produce."
 
-**Step 4: Go to market** (From $299)
-"Yulia builds your CIM and identifies qualified buyers. Working with 
-a broker? Invite them in — Yulia produces the work product, your 
-broker focuses on relationships."
-Detail: "Your broker reviews and refines instead of building from 
-scratch. The deal moves faster for everyone."
+**Step 4: Go to market** — [FROM $299 tag, terra-soft]
+"Yulia builds your Confidential Information Memorandum — the document 
+that makes buyers take your business seriously. Then she identifies 
+and scores qualified buyers for your specific deal."
+Detail box: *Working with a broker? Invite them in. Yulia produces 
+the CIM and buyer research — your broker focuses on relationships 
+and negotiation. The deal moves faster for everyone.*
 
-**Step 5: Close with confidence** (From $299)
+**Step 5: Close with confidence** — [FROM $299 tag, terra-soft]
 "LOI comparison, due diligence management, working capital analysis, 
-deal structuring. Every party organized, every document in one place."
+deal structuring, and closing coordination. Yulia keeps every party 
+organized and every document in one place."
 
-Below timeline: "Typical sell-side journey: From $1,799 · Traditional 
-advisory: ~~$50,000–$200,000~~"
+Below timeline (centered):
+"Typical sell-side journey: **From $1,799** · Traditional advisory: 
+~~$50,000–$200,000~~"
 CTA: Primary "Start your journey — free →"
 
 ### Built for Your Deal (3 cards)
 
-H2: "Built for *your* deal."
+H2 (display-md): "Built for *your* deal."
+
+3 cards with terra stat number at top:
 
 **Under $500K** — "First-time seller"
-"Never done this before? Yulia walks you through every step in 
-plain language."
-Result: "He thought he'd be lucky to get $200K. Yulia found $31K 
-in add-backs. Asking price: $425K."
+"You've never done this before. That's okay — Yulia walks you 
+through every step in plain language. No jargon, no assumptions."
+Result box (cream-deep, italic): *"He thought he'd be lucky to get 
+$200K. Yulia found $31K in add-backs he didn't know counted. 
+Asking price: $425K."*
 
 **$500K – $10M** — "Serious operation"
-"Institutional-quality work product — same CIMs and valuations 
-that $100K advisory firms deliver."
-Result: "Valued at $2.6M–$3.9M using live comps. Full CIM in 
-47 minutes."
+"You know your business is valuable. Yulia produces institutional-
+quality work product — the same CIMs and valuations that $100K 
+advisory firms deliver."
+Result box: *"Valued at $2.6M–$3.9M using live comps. Three PE 
+firms actively consolidating in her industry. Full CIM in 47 minutes."*
 
 **$10M+** — "Strategic exit"
-"PE roll-up, strategic sale, management buyout — Yulia handles 
-the analytical heavy lifting."
-Result: "Their team of 3 operated like a team of 12. Six 
-acquisitions in 14 months."
+"PE roll-up, strategic sale, or management buyout — Yulia handles 
+the analytical heavy lifting while your deal team focuses on 
+execution."
+Result box: *"Their team of 3 operated like a team of 12. Six 
+platform acquisitions closed in 14 months."*
 
-### Broker Callout (Ally positioning)
+### Broker Callout (cream-deep box, 2-column)
 
-Cream-deep box, 2-column:
-Left: H3 "Working with a *broker?* Even better."
-"Yulia doesn't replace your broker — she makes them faster. Many 
-of our most active users are brokers who use Yulia to produce work 
-product and manage more deals simultaneously."
+Left column:
+H3 (display-sm): "Working with a *broker?* Even better."
+Body (muted): "Yulia doesn't replace your broker — she makes them 
+faster. Many of our most active users are brokers and advisors who 
+use Yulia to produce work product, screen buyers, and manage more 
+deals simultaneously."
 
-Right: 4 benefits with checkmarks:
-- Invite your broker into the deal room
-- CIMs in an hour — broker reviews instead of building
-- Attorneys and CPAs join free
-- Broker expertise + Yulia speed = faster close, better terms
+Right column (4 benefits with terra-soft circle checkmarks):
+- **Invite your broker** into the deal room — they see everything, 
+  collaborate in real time
+- **CIMs in an hour** — your broker reviews and refines instead of 
+  building from scratch
+- **Attorneys and CPAs join free** — no extra seats, no extra cost
+- **Your broker's expertise + Yulia's speed** = deals that close 
+  faster at better terms
 
 ### Chat Input (Live, contextual)
 
 H3: "Ready to start?"
-Chat input: "Tell Yulia about the business you want to sell..."
-Suggested: "I own a restaurant in Chicago" / "My SaaS does $2M ARR" / 
-"Landscaping business, 3 employees"
+Chat input component (same as homepage): 
+Placeholder: "Tell Yulia about the business you want to sell..."
+Suggested prompts: "I own a restaurant in Chicago" / "My SaaS does 
+$2M ARR" / "Landscaping business, 3 employees"
 
 ### FAQ
 
-"Can I trust an AI valuation?" → Same methodologies as human advisors. 
-Every calc shown, every comp sourced. Many sellers share with their CPA.
+H2 (display-sm, centered): "Questions sellers ask."
 
-"Will buyers take an AI-generated CIM seriously?" → Same format and depth. 
-Buyers care about the information. Many CIMs co-branded with the broker.
+Items (border-bottom separated):
 
-"Do I still need a broker?" → Your call. Some go end-to-end with Yulia. 
-Others use Yulia for analysis and their broker for relationships. Many 
-brokers use Yulia themselves.
+**"Can I trust an AI valuation?"**
+"Yulia uses the same methodologies as human advisors — comparable 
+transactions, industry multiples, discounted cash flow. Every 
+calculation is shown, every comp is sourced. Many sellers bring 
+Yulia's report to their CPA for review. The math speaks for itself."
 
-"What if my business is complicated?" → 80+ industry verticals. Yulia 
-adapts. If something is truly unusual, she'll tell you.
+**"Will buyers take an AI-generated CIM seriously?"**
+"The CIM format, depth, and quality match what top advisory firms 
+produce. Buyers care about the information, not who typed it. Many 
+of our CIMs are reviewed and co-branded by the seller's broker 
+before going to market."
 
-### CTA
-Terra gradient: "You built something valuable. Let's prove it."
-"Talk to Yulia — free →"
+**"Do I still need a broker?"**
+"That's your call. Some sellers use Yulia end-to-end. Others use 
+Yulia for the analytical work and their broker for relationships 
+and negotiation. Many brokers use Yulia themselves — she produces 
+their work product faster so they can focus on what humans do best: 
+building trust and closing deals."
+
+**"What if my business is complicated?"**
+"Yulia covers 80+ industry verticals with current market data. 
+Whether you're a single-location restaurant or a multi-state 
+healthcare practice, she adapts — different metrics, different comps, 
+different buyer profiles. If something is truly unusual, she'll 
+tell you."
+
+### Final CTA
+
+Terra gradient block.
+H3: "You built something valuable. Let's prove it."
+CTA Block: "Talk to Yulia — free →"
 
 ---
 
