@@ -2,8 +2,7 @@ import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
 import Timeline from '../../components/public/Timeline';
-import PublicChatInput from '../../components/public/PublicChatInput';
-import { useChatContext } from '../../contexts/ChatContext';
+import PublicChatInput from '../../components/chat/PublicChatInput';
 
 /* ─── Data ─── */
 
@@ -95,17 +94,9 @@ const FAQS = [
   },
 ];
 
-const SELL_PROMPTS = [
-  'I own a restaurant in Chicago',
-  'My SaaS does $2M ARR',
-  'Landscaping business, 3 employees',
-];
-
 /* ─── Page ─── */
 
 export default function Sell() {
-  const { triggerMorph } = useChatContext();
-
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
@@ -201,11 +192,7 @@ export default function Sell() {
           Ready to start?
         </h3>
         <div className="max-w-[640px] mx-auto">
-          <PublicChatInput
-            onSend={(msg) => triggerMorph(msg, 'sell')}
-            placeholder="Tell Yulia about the business you want to sell..."
-            suggestedPrompts={SELL_PROMPTS}
-          />
+          <PublicChatInput sourcePage="/sell" />
         </div>
       </section>
 

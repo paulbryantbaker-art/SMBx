@@ -58,6 +58,7 @@ body {
 
 .morph-fade-out {
   animation: morphFadeOut 400ms ease-out forwards;
+  pointer-events: none;
 }
 
 .morph-fade-in {

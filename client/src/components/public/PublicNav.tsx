@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import Logo from './Logo';
 import Button from './Button';
-import { useChatContext } from '../../contexts/ChatContext';
+import { useChatContext } from '../../context/ChatContext';
 
 const NAV_LINKS = [
   { href: '/sell', label: 'Sell' },
@@ -11,6 +11,17 @@ const NAV_LINKS = [
   { href: '/pricing', label: 'Pricing' },
 ];
 
+const PAGE_NAMES: Record<string, string> = {
+  '/': 'Home',
+  '/sell': 'Sell',
+  '/buy': 'Buy',
+  '/raise': 'Raise Capital',
+  '/integrate': 'Integrate',
+  '/how-it-works': 'How It Works',
+  '/enterprise': 'Enterprise',
+  '/pricing': 'Pricing',
+};
+
 interface Props {
   chatMode?: boolean;
 }
@@ -18,22 +29,24 @@ interface Props {
 export default function PublicNav({ chatMode }: Props) {
   const [open, setOpen] = useState(false);
   const [location] = useLocation();
-  const { exitChat } = useChatContext();
+  const { resetToPublic, sourcePage } = useChatContext();
 
   // Simplified nav during chat mode
   if (chatMode) {
+    const pageName = PAGE_NAMES[sourcePage] || 'site';
+
     return (
       <nav className="bg-[#FAF8F4]">
         <div className="max-w-site mx-auto flex items-center justify-between px-10 py-5 max-md:px-5 max-md:py-4">
           <Logo />
           <button
-            onClick={exitChat}
+            onClick={resetToPublic}
             className="flex items-center gap-1.5 text-sm font-medium text-[#7A766E] hover:text-[#1A1A18] bg-transparent border-none cursor-pointer transition-colors px-0"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
-            Back to site
+            Back to {pageName}
           </button>
         </div>
       </nav>

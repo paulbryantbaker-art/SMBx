@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Route, Switch, Redirect, useLocation } from 'wouter';
 import { useAuth } from './hooks/useAuth';
-import { ChatProvider } from './contexts/ChatContext';
+import { ChatProvider } from './context/ChatContext';
 
 function ScrollToTop() {
   const [location] = useLocation();

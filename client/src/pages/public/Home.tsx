@@ -1,19 +1,11 @@
-import { Link, useLocation } from 'wouter';
+import { Link } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
 import ConversationPreview from '../../components/public/ConversationPreview';
-import PublicChatView from '../../components/public/PublicChatView';
-import { useChatContext } from '../../contexts/ChatContext';
+import PublicChatInput from '../../components/chat/PublicChatInput';
 
 /* ─── Data ─── */
-
-const SUGGESTED_PROMPTS = [
-  'I want to sell my HVAC business',
-  "I'm looking to acquire a SaaS company",
-  'Help me value a $3M business',
-  'I need to raise $2M',
-];
 
 const PERSONAS = [
   {
@@ -83,18 +75,6 @@ const TRUST_STATS = [
 /* ─── Page ─── */
 
 export default function Home() {
-  const [, navigate] = useLocation();
-  const {
-    messages,
-    sending,
-    streamingText,
-    messagesRemaining,
-    limitReached,
-    error,
-    sendMessage,
-  } = useChatContext();
-  const hasMessages = messages.length > 0 || sending;
-
   return (
     <PublicLayout>
       {/* ═══ SECTION 1: HERO (Chat-First) ═══ */}
@@ -107,28 +87,14 @@ export default function Home() {
           use to move faster, know more, and close with confidence.
         </p>
 
-        {/* Live chat area */}
+        {/* Chat input */}
         <div className="max-w-[640px] mx-auto">
-          <PublicChatView
-            messages={messages}
-            sending={sending}
-            streamingText={streamingText}
-            messagesRemaining={messagesRemaining}
-            limitReached={limitReached}
-            error={error}
-            onSend={sendMessage}
-            onSignup={() => navigate('/signup')}
-            placeholder="Tell Yulia about your deal..."
-            suggestedPrompts={SUGGESTED_PROMPTS}
-          />
+          <PublicChatInput sourcePage="/" />
         </div>
 
-        {/* Free note — hide once chat starts */}
-        {!hasMessages && (
-          <p className="text-[13px] text-[#7A766E] mt-6 m-0">
-            Your first financial analysis is <strong className="text-[#4A4843]">always free</strong>.
-          </p>
-        )}
+        <p className="text-[13px] text-[#7A766E] mt-6 m-0">
+          Your first financial analysis is <strong className="text-[#4A4843]">always free</strong>.
+        </p>
       </section>
 
       {/* ═══ SECTION 2: WHO USES THIS ═══ */}

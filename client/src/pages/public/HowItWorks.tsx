@@ -1,7 +1,6 @@
 import PublicLayout from '../../components/public/PublicLayout';
 import Card from '../../components/public/Card';
-import PublicChatInput from '../../components/public/PublicChatInput';
-import { useChatContext } from '../../contexts/ChatContext';
+import PublicChatInput from '../../components/chat/PublicChatInput';
 
 /* ─── Data ─── */
 
@@ -72,18 +71,9 @@ const STORIES = [
   },
 ];
 
-const SUGGESTED_PROMPTS = [
-  'I want to sell my business',
-  'Help me value a company',
-  'I need to raise capital',
-  'I just acquired a business',
-];
-
 /* ─── Page ─── */
 
 export default function HowItWorks() {
-  const { triggerMorph } = useChatContext();
-
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
@@ -177,11 +167,7 @@ export default function HowItWorks() {
           See for yourself.
         </h3>
         <div className="max-w-[640px] mx-auto">
-          <PublicChatInput
-            onSend={(msg) => triggerMorph(msg, 'how-it-works')}
-            placeholder="Tell Yulia about your deal..."
-            suggestedPrompts={SUGGESTED_PROMPTS}
-          />
+          <PublicChatInput sourcePage="/how-it-works" />
         </div>
       </section>
 

@@ -2,8 +2,7 @@ import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
 import Timeline from '../../components/public/Timeline';
-import PublicChatInput from '../../components/public/PublicChatInput';
-import { useChatContext } from '../../contexts/ChatContext';
+import PublicChatInput from '../../components/chat/PublicChatInput';
 
 /* ─── Data ─── */
 
@@ -95,17 +94,9 @@ const FAQS = [
   },
 ];
 
-const RAISE_PROMPTS = [
-  'I need $2M for expansion',
-  'Exploring Series A options',
-  'Want to bring on a strategic partner',
-];
-
 /* ─── Page ─── */
 
 export default function Raise() {
-  const { triggerMorph } = useChatContext();
-
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
@@ -201,11 +192,7 @@ export default function Raise() {
           Ready to start your raise?
         </h3>
         <div className="max-w-[640px] mx-auto">
-          <PublicChatInput
-            onSend={(msg) => triggerMorph(msg, 'raise')}
-            placeholder="Tell Yulia about your raise..."
-            suggestedPrompts={RAISE_PROMPTS}
-          />
+          <PublicChatInput sourcePage="/raise" />
         </div>
       </section>
 

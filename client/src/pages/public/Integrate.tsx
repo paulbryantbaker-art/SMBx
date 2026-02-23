@@ -2,8 +2,7 @@ import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
 import Timeline from '../../components/public/Timeline';
-import PublicChatInput from '../../components/public/PublicChatInput';
-import { useChatContext } from '../../contexts/ChatContext';
+import PublicChatInput from '../../components/chat/PublicChatInput';
 
 /* ─── Data ─── */
 
@@ -87,17 +86,9 @@ const FAQS = [
   },
 ];
 
-const INTEGRATE_PROMPTS = [
-  'Just bought a plumbing company',
-  'Closing on a SaaS acquisition next month',
-  'Integrating a tuck-in acquisition',
-];
-
 /* ─── Page ─── */
 
 export default function Integrate() {
-  const { triggerMorph } = useChatContext();
-
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
@@ -192,11 +183,7 @@ export default function Integrate() {
           Ready to plan your first 100 days?
         </h3>
         <div className="max-w-[640px] mx-auto">
-          <PublicChatInput
-            onSend={(msg) => triggerMorph(msg, 'integrate')}
-            placeholder="Tell Yulia what you just acquired..."
-            suggestedPrompts={INTEGRATE_PROMPTS}
-          />
+          <PublicChatInput sourcePage="/integrate" />
         </div>
       </section>
 

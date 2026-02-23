@@ -1,7 +1,6 @@
 import PublicLayout from '../../components/public/PublicLayout';
 import Card from '../../components/public/Card';
-import PublicChatInput from '../../components/public/PublicChatInput';
-import { useChatContext } from '../../contexts/ChatContext';
+import PublicChatInput from '../../components/chat/PublicChatInput';
 
 /* ─── Data ─── */
 
@@ -44,17 +43,9 @@ const ROI_STATS = [
   { num: '$150K+', desc: 'additional annual revenue per broker from increased throughput' },
 ];
 
-const ENTERPRISE_PROMPTS = [
-  "I'm a business broker with 12 active listings",
-  'Our PE firm is building a healthcare platform',
-  'I need faster CIM production',
-];
-
 /* ─── Page ─── */
 
 export default function Enterprise() {
-  const { triggerMorph } = useChatContext();
-
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
@@ -148,11 +139,7 @@ export default function Enterprise() {
           See what Yulia can do for your practice.
         </h3>
         <div className="max-w-[640px] mx-auto">
-          <PublicChatInput
-            onSend={(msg) => triggerMorph(msg, 'enterprise')}
-            placeholder="Tell Yulia about your practice..."
-            suggestedPrompts={ENTERPRISE_PROMPTS}
-          />
+          <PublicChatInput sourcePage="/enterprise" />
         </div>
       </section>
 

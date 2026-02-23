@@ -1,34 +1,33 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import Markdown from 'react-markdown';
+import YuliaAvatar from '../public/YuliaAvatar';
 import PublicChatInput from './PublicChatInput';
-import YuliaAvatar from './YuliaAvatar';
-import { useChatContext } from '../../contexts/ChatContext';
+import { useChatContext } from '../../context/ChatContext';
 
-export default function MorphChatView() {
+export default function ChatView() {
   const {
     messages,
-    sending,
-    streamingText,
+    isStreaming,
+    streamingContent,
     messagesRemaining,
     limitReached,
     error,
-    sendMessage,
+    sourcePage,
   } = useChatContext();
   const [, navigate] = useLocation();
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, streamingText, sending]);
+  }, [messages, streamingContent, isStreaming]);
 
   return (
     <div className="flex-1 flex flex-col max-w-[720px] w-full mx-auto px-5">
-      {/* Messages area — scrollable */}
+      {/* Messages — scrollable */}
       <div className="flex-1 overflow-y-auto space-y-5 pt-6 pb-4">
         {messages.map(m => {
-          const isUser = m.role === 'user';
-          if (isUser) {
+          if (m.role === 'user') {
             return (
               <div key={m.id} className="flex justify-end">
                 <div className="max-w-[75%] bg-[#1A1A18] text-white rounded-2xl rounded-br-[4px] px-[18px] py-[14px]">
@@ -51,20 +50,20 @@ export default function MorphChatView() {
           );
         })}
 
-        {/* Streaming message */}
-        {streamingText && (
+        {/* Streaming */}
+        {streamingContent && (
           <div className="flex items-start gap-3">
             <YuliaAvatar size={32} className="mt-0.5" />
             <div className="max-w-[75%] bg-[#FAF8F4] border border-[#E0DCD4] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
               <div className="text-sm font-sans text-[#1A1A18] leading-[1.55] [&_p]:m-0 [&_p+p]:mt-2.5 [&_strong]:font-semibold">
-                <Markdown>{streamingText}</Markdown>
+                <Markdown>{streamingContent}</Markdown>
               </div>
             </div>
           </div>
         )}
 
         {/* Typing indicator */}
-        {sending && !streamingText && (
+        {isStreaming && !streamingContent && (
           <div className="flex items-start gap-3">
             <YuliaAvatar size={32} className="mt-0.5" />
             <div className="bg-[#FAF8F4] border border-[#E0DCD4] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
@@ -105,14 +104,10 @@ export default function MorphChatView() {
         <div ref={endRef} />
       </div>
 
-      {/* Input — pinned at bottom */}
+      {/* Input — pinned at bottom (same PublicChatInput component) */}
       {!limitReached && (
         <div className="pb-6 pt-2">
-          <PublicChatInput
-            onSend={sendMessage}
-            disabled={sending}
-            placeholder="Message Yulia..."
-          />
+          <PublicChatInput sourcePage={sourcePage} />
           {messages.length > 0 && messagesRemaining <= 5 && messagesRemaining > 0 && (
             <p className="text-xs text-[#9B9891] text-center mt-2 m-0">
               {messagesRemaining} preview message{messagesRemaining !== 1 ? 's' : ''} remaining
