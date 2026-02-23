@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMBX.ai — Homepage</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --cream: #FAF8F4;
+    --cream-deep: #F3F0EA;
+    --warm-white: #FFFFFF;
+    --stone: #E8E4DC;
+    --stone-light: #F0EDE6;
+    --terra: #DA7756;
+    --terra-hover: #C4684A;
+    --terra-soft: #FFF0EB;
+    --terra-glow: rgba(218,119,86,.08);
+    --text: #1A1A18;
+    --text-mid: #4A4843;
+    --muted: #7A766E;
+    --border: #E0DCD4;
+    --serif: 'Playfair Display', Georgia, ui-serif, serif;
+    --sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    background: var(--cream);
+    color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ══════════════════════════════════
+     LOGO — exact brand mark
+  ══════════════════════════════════ */
+  .logo {
+    font-family: var(--sans);
+    font-size: 22px; font-weight: 700;
+    letter-spacing: -.03em;
+    color: var(--text);
+  }
+  .logo .x { color: var(--terra); }
+
+  /* ══════════════════════════════════
+     BUTTONS — 5 types, standardized
+  ══════════════════════════════════ */
+
+  /* 1. PRIMARY — main CTA */
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--terra); color: #fff; border: none;
+    padding: 16px 32px; border-radius: 100px;
+    font-size: 15px; font-weight: 600; font-family: var(--sans);
+    cursor: pointer; transition: all .2s ease;
+    white-space: nowrap; text-decoration: none;
+  }
+  .btn-primary:hover { background: var(--terra-hover); transform: translateY(-1px); }
+
+  /* 2. SECONDARY — paired with primary */
+  .btn-secondary {
+    display: inline-flex; align-items: center;
+    background: transparent; color: var(--text);
+    border: 2px solid var(--stone);
+    padding: 14px 28px; border-radius: 100px;
+    font-size: 15px; font-weight: 600; font-family: var(--sans);
+    cursor: pointer; transition: all .2s ease;
+    white-space: nowrap; text-decoration: none;
+  }
+  .btn-secondary:hover { border-color: var(--text); }
+
+  /* 3. NAV CTA — nav bar only */
+  .btn-nav {
+    display: inline-flex; align-items: center;
+    background: var(--terra); color: #fff; border: none;
+    padding: 10px 22px; border-radius: 100px;
+    font-size: 13px; font-weight: 600; font-family: var(--sans);
+    cursor: pointer; transition: background .2s ease;
+    white-space: nowrap; text-decoration: none;
+  }
+  .btn-nav:hover { background: var(--terra-hover); }
+
+  /* 4. CARD LINK — inside cards */
+  .card-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 14px; font-weight: 600; color: var(--terra);
+    background: none; border: none; padding: 0;
+    font-family: var(--sans); cursor: pointer;
+    transition: transform .2s ease; text-decoration: none;
+  }
+  .card-link:hover { transform: translateX(4px); }
+
+  /* 5. CTA BLOCK — white on terra, bottom of page */
+  .btn-cta-block {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fff; color: var(--terra); border: none;
+    padding: 18px 40px; border-radius: 100px;
+    font-size: 16px; font-weight: 700; font-family: var(--sans);
+    cursor: pointer; transition: all .2s ease;
+    white-space: nowrap; text-decoration: none;
+  }
+  .btn-cta-block:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+
+  /* ══════════════════════════════════
+     NAV
+  ══════════════════════════════════ */
+  nav {
+    max-width: 1200px; margin: 0 auto;
+    padding: 20px 40px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-links {
+    display: flex; gap: 32px; align-items: center;
+  }
+  .nav-links a {
+    color: var(--muted); text-decoration: none; font-size: 14px;
+    font-weight: 500; transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  /* ══════════════════════════════════
+     HERO
+  ══════════════════════════════════ */
+  .hero {
+    max-width: 1200px; margin: 0 auto;
+    padding: 80px 40px 48px;
+  }
+  .hero-tag {
+    font-size: 13px; text-transform: uppercase; letter-spacing: .18em;
+    color: var(--terra); font-weight: 600; margin-bottom: 36px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .hero-tag::before {
+    content: ''; width: 36px; height: 2px; background: var(--terra);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(52px, 7vw, 92px); font-weight: 900;
+    line-height: 1.0; letter-spacing: -.03em;
+    max-width: 11ch; margin-bottom: 44px;
+  }
+  h1 em { font-style: italic; color: var(--terra); }
+
+  .hero-bottom {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    border-top: 2px solid var(--text); padding-top: 32px;
+  }
+  .hero-sub {
+    font-size: 18px; color: var(--muted); max-width: 440px; line-height: 1.65;
+  }
+  .hero-actions { display: flex; gap: 12px; flex-shrink: 0; }
+
+  /* ══════════════════════════════════
+     TRUST STATS
+  ══════════════════════════════════ */
+  .trust-bar {
+    max-width: 1200px; margin: 0 auto; padding: 56px 40px;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--border);
+  }
+  .trust-stat { padding: 0 28px; border-right: 1px solid var(--border); }
+  .trust-stat:last-child { border-right: none; }
+  .trust-stat:first-child { padding-left: 0; }
+  .trust-stat .num {
+    font-family: var(--serif);
+    font-size: 42px; font-weight: 900; letter-spacing: -.02em;
+    line-height: 1;
+  }
+  .trust-stat .desc {
+    font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.45;
+  }
+
+  /* ══════════════════════════════════
+     PROBLEM
+  ══════════════════════════════════ */
+  .problem {
+    max-width: 1200px; margin: 0 auto; padding: 80px 40px;
+  }
+  .problem-inner {
+    background: var(--cream-deep); border: 1px solid var(--border);
+    border-radius: 20px; padding: 64px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+    align-items: center;
+  }
+  .problem h2 {
+    font-family: var(--serif);
+    font-size: clamp(32px, 3.5vw, 44px); font-weight: 900;
+    letter-spacing: -.02em; line-height: 1.1;
+  }
+  .problem h2 em { color: var(--terra); font-style: italic; }
+  .problem-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .problem-stat {
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px;
+  }
+  .problem-stat .num {
+    font-family: var(--serif); font-size: 32px; font-weight: 900;
+    color: var(--terra); margin-bottom: 6px;
+  }
+  .problem-stat .label { font-size: 13px; color: var(--muted); line-height: 1.4; }
+
+  /* ══════════════════════════════════
+     YULIA / OUTCOMES
+  ══════════════════════════════════ */
+  .yulia {
+    max-width: 1200px; margin: 0 auto; padding: 80px 40px;
+  }
+  .yulia-header {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+    margin-bottom: 56px; align-items: end;
+  }
+  .yulia-header h2 {
+    font-family: var(--serif);
+    font-size: clamp(36px, 4.5vw, 60px); font-weight: 900;
+    letter-spacing: -.025em; line-height: 1.05;
+  }
+  .yulia-header h2 em { color: var(--terra); font-style: italic; }
+  .yulia-header p { font-size: 17px; color: var(--muted); line-height: 1.65; }
+
+  .outcome-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+  }
+  .outcome-card {
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 16px; padding: 44px 36px;
+    transition: all .25s ease; position: relative; overflow: hidden;
+  }
+  .outcome-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: var(--terra);
+    opacity: 0; transition: opacity .25s ease;
+  }
+  .outcome-card:hover {
+    border-color: var(--terra);
+    box-shadow: 0 8px 32px var(--terra-glow);
+    transform: translateY(-2px);
+  }
+  .outcome-card:hover::before { opacity: 1; }
+  .outcome-card .number {
+    font-family: var(--serif); font-size: 48px; font-weight: 900;
+    color: var(--terra); line-height: 1; margin-bottom: 14px;
+  }
+  .outcome-card h3 {
+    font-size: 17px; font-weight: 700; margin-bottom: 8px;
+    letter-spacing: -.01em;
+  }
+  .outcome-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* ══════════════════════════════════
+     HOW IT WORKS
+  ══════════════════════════════════ */
+  .how-it-works {
+    max-width: 1200px; margin: 0 auto; padding: 80px 40px;
+  }
+  .how-header { text-align: center; margin-bottom: 56px; }
+  .how-header .overline {
+    font-size: 12px; text-transform: uppercase; letter-spacing: .2em;
+    color: var(--terra); font-weight: 600; margin-bottom: 16px;
+  }
+  .how-header h2 {
+    font-family: var(--serif);
+    font-size: clamp(32px, 3.5vw, 48px); font-weight: 900;
+    letter-spacing: -.02em;
+  }
+  .steps {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .step {
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 16px; padding: 40px 32px;
+  }
+  .step-num {
+    font-family: var(--serif); font-size: 56px; font-weight: 900;
+    color: var(--stone); line-height: 1; margin-bottom: 20px;
+  }
+  .step h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+  .step p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .tag {
+    display: inline-block; margin-top: 16px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; padding: 4px 10px; border-radius: 100px;
+  }
+  .tag.free { background: #E8F5E9; color: #2E7D32; }
+  .tag.paid { background: var(--terra-soft); color: var(--terra); }
+
+  /* ══════════════════════════════════
+     JOURNEYS
+  ══════════════════════════════════ */
+  .journeys {
+    max-width: 1200px; margin: 0 auto; padding: 80px 40px;
+  }
+  .journeys h2 {
+    font-family: var(--serif);
+    font-size: clamp(32px, 3.5vw, 48px); font-weight: 900;
+    letter-spacing: -.02em; margin-bottom: 40px;
+  }
+  .journey-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  }
+  .journey-card {
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px 28px;
+    transition: all .25s ease; cursor: pointer;
+    display: flex; flex-direction: column;
+  }
+  .journey-card:hover {
+    border-color: var(--terra);
+    box-shadow: 0 8px 32px var(--terra-glow);
+    transform: translateY(-2px);
+  }
+  .journey-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--terra-glow);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px; font-size: 20px;
+  }
+  .journey-card h3 {
+    font-family: var(--serif); font-size: 20px; font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .journey-card p {
+    font-size: 14px; color: var(--muted); line-height: 1.55; flex: 1;
+  }
+  .journey-card .card-link { margin-top: 20px; }
+
+  /* ══════════════════════════════════
+     FINAL CTA — terra gradient
+  ══════════════════════════════════ */
+  .final-cta {
+    max-width: 1200px; margin: 0 auto; padding: 0 40px 80px;
+  }
+  .final-cta-inner {
+    background: linear-gradient(135deg, var(--terra), var(--terra-hover));
+    border-radius: 20px; padding: 80px 64px;
+    display: flex; justify-content: space-between;
+    align-items: center; position: relative; overflow: hidden;
+  }
+  .final-cta-inner::before {
+    content: ''; position: absolute;
+    top: -50%; right: -20%; width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,.1), transparent);
+    border-radius: 50%;
+  }
+  .final-cta h3 {
+    font-family: var(--serif);
+    font-size: clamp(28px, 3vw, 40px); font-weight: 900;
+    letter-spacing: -.02em; max-width: 480px; line-height: 1.15;
+    color: #fff; position: relative; z-index: 1;
+  }
+  .final-cta .btn-cta-block { position: relative; z-index: 1; }
+
+  /* ══════════════════════════════════
+     FOOTER
+  ══════════════════════════════════ */
+  footer {
+    background: var(--stone-light); padding: 64px 40px 32px;
+  }
+  .footer-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
+  }
+  .footer-brand p {
+    font-size: 14px; color: var(--muted); line-height: 1.55;
+    max-width: 280px; margin-top: 12px;
+  }
+  .footer-col h4 {
+    font-size: 12px; text-transform: uppercase; letter-spacing: .12em;
+    color: var(--muted); font-weight: 600; margin-bottom: 16px;
+  }
+  .footer-col a {
+    display: block; font-size: 14px; color: var(--text-mid);
+    text-decoration: none; padding: 4px 0; transition: color .2s;
+  }
+  .footer-col a:hover { color: var(--terra); }
+  .footer-bottom {
+    max-width: 1200px; margin: 32px auto 0;
+    padding-top: 24px; border-top: 1px solid var(--border);
+    font-size: 13px; color: var(--muted);
+  }
+
+  /* ══════════════════════════════════
+     RESPONSIVE
+  ══════════════════════════════════ */
+  @media (max-width: 960px) {
+    .steps { grid-template-columns: 1fr; }
+    .journey-grid { grid-template-columns: repeat(2, 1fr); }
+    .outcome-grid { grid-template-columns: 1fr; }
+    .yulia-header { grid-template-columns: 1fr; gap: 24px; }
+    .problem-inner { grid-template-columns: 1fr; padding: 40px; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 48px 20px 32px; }
+    .hero-bottom {
+      flex-direction: column; align-items: flex-start; gap: 28px;
+    }
+    .hero-actions { flex-direction: column; width: 100%; }
+    .hero-actions .btn-primary,
+    .hero-actions .btn-secondary { width: 100%; justify-content: center; }
+    .trust-bar {
+      grid-template-columns: repeat(2, 1fr); padding: 32px 20px; gap: 24px;
+    }
+    .trust-stat { border-right: none; padding: 0; }
+    .problem { padding: 40px 20px; }
+    .problem-inner { padding: 28px; gap: 32px; }
+    .problem-stats { grid-template-columns: 1fr; }
+    .yulia { padding: 48px 20px; }
+    .how-it-works { padding: 48px 20px; }
+    .journeys { padding: 48px 20px; }
+    .journey-grid { grid-template-columns: 1fr; }
+    .final-cta { padding: 0 20px 48px; }
+    .final-cta-inner {
+      flex-direction: column; gap: 32px;
+      padding: 48px 28px; text-align: center;
+    }
+    footer { padding: 40px 20px 24px; }
+    .footer-inner { grid-template-columns: 1fr; gap: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="logo">smb<span class="x">x</span>.ai</div>
+  <div class="nav-links">
+    <a href="#">Sell</a>
+    <a href="#">Buy</a>
+    <a href="#">Raise Capital</a>
+    <a href="#">Pricing</a>
+    <a href="#">Sign in</a>
+    <a href="#" class="btn-nav">Get Started</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-tag">M&A Advisory, Reinvented</div>
+  <h1>Sell <em>smart.</em><br>Buy <em>right.</em></h1>
+  <div class="hero-bottom">
+    <p class="hero-sub">
+      Yulia is your AI deal advisor. She handles valuation,
+      buyer matching, due diligence, and closing — for a
+      fraction of the traditional cost.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary">Get started free →</button>
+      <button class="btn-secondary">How it works</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── TRUST STATS ── -->
+<div class="trust-bar">
+  <div class="trust-stat">
+    <div class="num">$2.4T</div>
+    <div class="desc">Annual SMB<br>transaction volume</div>
+  </div>
+  <div class="trust-stat">
+    <div class="num">73%</div>
+    <div class="desc">Deal failure rate<br>without guidance</div>
+  </div>
+  <div class="trust-stat">
+    <div class="num">30%+</div>
+    <div class="desc">Value left on<br>the table</div>
+  </div>
+  <div class="trust-stat">
+    <div class="num">24hr</div>
+    <div class="desc">From signup to<br>first valuation</div>
+  </div>
+</div>
+
+<!-- ── PROBLEM ── -->
+<section class="problem">
+  <div class="problem-inner">
+    <h2>Most owners sell for <em>30% less</em> than their business is worth.</h2>
+    <div class="problem-stats">
+      <div class="problem-stat">
+        <div class="num">10%</div>
+        <div class="label">Typical broker commission on your deal</div>
+      </div>
+      <div class="problem-stat">
+        <div class="num">$25K+</div>
+        <div class="label">Average advisory retainer before anything happens</div>
+      </div>
+      <div class="problem-stat">
+        <div class="num">6–12 mo</div>
+        <div class="label">Average time to close with a traditional broker</div>
+      </div>
+      <div class="problem-stat">
+        <div class="num">70%</div>
+        <div class="label">Of listed businesses never sell at all</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── YULIA / OUTCOMES ── -->
+<section class="yulia">
+  <div class="yulia-header">
+    <h2>Your AI advisor delivers <em>results.</em></h2>
+    <p>Yulia doesn't give generic advice. She builds deal-specific strategies using real market data, comparable transactions, and industry benchmarks — then guides you through every stage.</p>
+  </div>
+  <div class="outcome-grid">
+    <div class="outcome-card">
+      <div class="number">3–4×</div>
+      <h3>EBITDA Multiples Captured</h3>
+      <p>AI-optimized positioning ensures you sell at the top of your range, not the bottom.</p>
+    </div>
+    <div class="outcome-card">
+      <div class="number">23+</div>
+      <h3>Qualified Buyers, Day One</h3>
+      <p>Yulia screens and matches buyers by criteria, capacity, and deal history instantly.</p>
+    </div>
+    <div class="outcome-card">
+      <div class="number">80%</div>
+      <h3>Less Time on Admin</h3>
+      <p>Automated CIM generation, document organization, and due diligence workflows.</p>
+    </div>
+    <div class="outcome-card">
+      <div class="number">90%</div>
+      <h3>Cost Reduction vs. Brokers</h3>
+      <p>Pay per stage, not a 10% commission. Transparent, progressive pricing from day one.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="how-it-works">
+  <div class="how-header">
+    <div class="overline">How It Works</div>
+    <h2>Three steps to your best deal.</h2>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3>Start a conversation</h3>
+      <p>Tell Yulia about your business or what you're looking to buy. She'll ask the right questions and build your profile.</p>
+      <span class="tag free">Free to start</span>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3>Get real deliverables</h3>
+      <p>Valuation report, buyer list, CIM, due diligence checklist — real documents, not summaries. Pay only for what you need.</p>
+      <span class="tag paid">Pay as you go</span>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3>Close with confidence</h3>
+      <p>Yulia guides you through negotiation, deal structuring, and closing. Every stage, every decision, every document.</p>
+      <span class="tag paid">Stage-by-stage</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── JOURNEYS ── -->
+<section class="journeys">
+  <h2>What brings you here?</h2>
+  <div class="journey-grid">
+    <div class="journey-card">
+      <div class="journey-icon">📈</div>
+      <h3>Sell</h3>
+      <p>Know your number. Find qualified buyers. Close on your terms.</p>
+      <span class="card-link">Start selling →</span>
+    </div>
+    <div class="journey-card">
+      <div class="journey-icon">🔍</div>
+      <h3>Buy</h3>
+      <p>Build your buy box. Find the right deal. Model the returns.</p>
+      <span class="card-link">Start buying →</span>
+    </div>
+    <div class="journey-card">
+      <div class="journey-icon">💰</div>
+      <h3>Raise Capital</h3>
+      <p>Structure your raise. Match with investors. Keep control.</p>
+      <span class="card-link">Start raising →</span>
+    </div>
+    <div class="journey-card">
+      <div class="journey-icon">🔗</div>
+      <h3>Integrate</h3>
+      <p>Your first 100 days, done right. Systems, people, culture.</p>
+      <span class="card-link">Start planning →</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ── -->
+<section class="final-cta">
+  <div class="final-cta-inner">
+    <h3>Ready to make your next deal your best deal?</h3>
+    <button class="btn-cta-block">Start with Yulia →</button>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">smb<span class="x">x</span>.ai</div>
+      <p>AI-powered M&A advisory. From valuation to close.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="#">Sell</a>
+      <a href="#">Buy</a>
+      <a href="#">Raise Capital</a>
+      <a href="#">Integrate</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="#">How It Works</a>
+      <a href="#">Pricing</a>
+      <a href="#">Enterprise</a>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 smbx.ai. All rights reserved.</div>
+</footer>
+
+</body>
+</html>
