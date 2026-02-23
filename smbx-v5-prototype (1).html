@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMBX.ai — Redesign V5</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --cream: #FAF8F4; --cream-deep: #F3F0EA; --warm-white: #FFFFFF;
+    --stone: #E8E4DC; --stone-light: #F0EDE6;
+    --terra: #DA7756; --terra-hover: #C4684A; --terra-soft: #FFF0EB;
+    --terra-glow: rgba(218,119,86,.08);
+    --text: #1A1A18; --text-mid: #4A4843; --muted: #7A766E;
+    --border: #E0DCD4;
+    --serif: 'Playfair Display', Georgia, ui-serif, serif;
+    --sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+  }
+  body { background: var(--cream); color: var(--text); font-family: var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+  /* ── Logo ── */
+  .logo { font-family: var(--sans); font-size: 22px; font-weight: 700; letter-spacing: -.03em; color: var(--text); }
+  .logo .x { color: var(--terra); }
+
+  /* ── Buttons (standardized) ── */
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--terra); color: #fff; border: none;
+    padding: 16px 32px; border-radius: 100px;
+    font-size: 15px; font-weight: 600; font-family: var(--sans);
+    cursor: pointer; transition: all .2s; text-decoration: none;
+  }
+  .btn-primary:hover { background: var(--terra-hover); transform: translateY(-1px); }
+  .btn-secondary {
+    display: inline-flex; align-items: center;
+    background: transparent; color: var(--text); border: 2px solid var(--stone);
+    padding: 14px 28px; border-radius: 100px;
+    font-size: 15px; font-weight: 600; font-family: var(--sans);
+    cursor: pointer; transition: all .2s; text-decoration: none;
+  }
+  .btn-secondary:hover { border-color: var(--text); }
+  .btn-nav {
+    display: inline-flex; align-items: center;
+    background: var(--terra); color: #fff; border: none;
+    padding: 10px 22px; border-radius: 100px;
+    font-size: 13px; font-weight: 600; font-family: var(--sans);
+    cursor: pointer; transition: background .2s; text-decoration: none;
+  }
+  .btn-nav:hover { background: var(--terra-hover); }
+  .card-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 14px; font-weight: 600; color: var(--terra);
+    background: none; border: none; padding: 0; font-family: var(--sans);
+    cursor: pointer; transition: transform .2s; text-decoration: none;
+  }
+  .card-link:hover { transform: translateX(4px); }
+  .btn-cta-block {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fff; color: var(--terra); border: none;
+    padding: 18px 40px; border-radius: 100px;
+    font-size: 16px; font-weight: 700; font-family: var(--sans);
+    cursor: pointer; transition: all .2s; text-decoration: none;
+  }
+  .btn-cta-block:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+
+  /* ── Page Switcher ── */
+  .switcher {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+    background: rgba(10,10,10,.92); backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    display: flex; justify-content: center; gap: 2px; padding: 12px 16px;
+  }
+  .switcher button {
+    padding: 10px 24px; border: none; border-radius: 8px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    color: rgba(255,255,255,.5); background: transparent;
+    font-family: var(--sans); transition: all .2s;
+  }
+  .switcher button:hover { color: rgba(255,255,255,.8); }
+  .switcher button.active { background: #fff; color: #0a0a0a; }
+  .switcher .label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .12em;
+    color: rgba(255,255,255,.3); align-self: center; margin-right: 16px;
+  }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── Nav ── */
+  nav { max-width: 1200px; margin: 0 auto; padding: 20px 40px; padding-top: 72px; display: flex; align-items: center; justify-content: space-between; }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+
+  /* ═══════════════════════════════════════
+     HOME PAGE — Chat-First Hero
+  ═══════════════════════════════════════ */
+
+  .home-hero {
+    max-width: 860px; margin: 0 auto; padding: 80px 40px 48px;
+    text-align: center;
+  }
+  .home-hero h1 {
+    font-family: var(--serif); font-size: clamp(40px, 5.5vw, 72px);
+    font-weight: 900; line-height: 1.05; letter-spacing: -.03em;
+    margin-bottom: 20px;
+  }
+  .home-hero h1 em { font-style: italic; color: var(--terra); }
+  .home-hero .subtitle {
+    font-size: 19px; color: var(--muted); line-height: 1.6;
+    max-width: 560px; margin: 0 auto 48px;
+  }
+
+  /* Chat input as CTA */
+  .chat-hero {
+    max-width: 640px; margin: 0 auto; position: relative;
+  }
+  .chat-input-wrapper {
+    background: var(--warm-white);
+    border: 2px solid var(--stone);
+    border-radius: 20px; padding: 8px;
+    transition: border-color .3s ease;
+    box-shadow: 0 8px 40px rgba(0,0,0,.04);
+  }
+  .chat-input-wrapper:focus-within {
+    border-color: var(--terra);
+    box-shadow: 0 8px 40px rgba(218,119,86,.1);
+  }
+  .chat-input-wrapper textarea {
+    width: 100%; border: none; outline: none; resize: none;
+    font-family: var(--sans); font-size: 16px; color: var(--text);
+    padding: 16px 20px 8px; background: transparent;
+    line-height: 1.5; min-height: 56px;
+  }
+  .chat-input-wrapper textarea::placeholder { color: #B5B1AA; }
+  .chat-input-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 12px 8px;
+  }
+  .chat-input-bar .hint {
+    font-size: 12px; color: var(--muted);
+  }
+  .chat-input-bar .send-btn {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: var(--terra); border: none; color: #fff;
+    font-size: 18px; cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chat-input-bar .send-btn:hover { background: var(--terra-hover); }
+
+  /* Suggested prompts */
+  .suggested {
+    display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;
+    justify-content: center;
+  }
+  .suggested button {
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 100px; padding: 10px 18px;
+    font-size: 13px; font-weight: 500; color: var(--text-mid);
+    font-family: var(--sans); cursor: pointer; transition: all .2s;
+  }
+  .suggested button:hover {
+    border-color: var(--terra); color: var(--terra);
+    background: var(--terra-soft);
+  }
+
+  .free-note {
+    text-align: center; margin-top: 24px;
+    font-size: 13px; color: var(--muted);
+  }
+  .free-note strong { color: var(--text-mid); }
+
+  /* ── Who's using it ── */
+  .social-proof {
+    max-width: 1200px; margin: 0 auto; padding: 80px 40px;
+    border-top: 1px solid var(--border);
+  }
+  .sp-header { text-align: center; margin-bottom: 48px; }
+  .sp-header .overline {
+    font-size: 12px; text-transform: uppercase; letter-spacing: .2em;
+    color: var(--terra); font-weight: 600; margin-bottom: 16px;
+  }
+  .sp-header h2 {
+    font-family: var(--serif); font-size: clamp(32px, 3.5vw, 48px);
+    font-weight: 900; letter-spacing: -.02em;
+  }
+  .persona-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  }
+  .persona-card {
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px 24px;
+    transition: all .25s; position: relative; overflow: hidden;
+  }
+  .persona-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: var(--terra); opacity: 0; transition: opacity .25s;
+  }
+  .persona-card:hover { border-color: var(--terra); box-shadow: 0 8px 32px var(--terra-glow); transform: translateY(-2px); }
+  .persona-card:hover::before { opacity: 1; }
+  .persona-card .emoji { font-size: 28px; margin-bottom: 16px; }
+  .persona-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .persona-card p { font-size: 14px; color: var(--muted); line-height: 1.55; }
+  .persona-card .example {
+    margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);
+    font-size: 13px; color: var(--text-mid); font-style: italic; line-height: 1.5;
+  }
+
+  /* ── What Yulia does (show, don't tell) ── */
+  .demo-section {
+    max-width: 1200px; margin: 0 auto; padding: 80px 40px;
+  }
+  .demo-header {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+    align-items: end; margin-bottom: 48px;
+  }
+  .demo-header h2 {
+    font-family: var(--serif); font-size: clamp(32px, 3.5vw, 52px);
+    font-weight: 900; letter-spacing: -.025em; line-height: 1.08;
+  }
+  .demo-header h2 em { color: var(--terra); font-style: italic; }
+  .demo-header p { font-size: 17px; color: var(--muted); line-height: 1.65; }
+
+  /* Conversation preview */
+  .convo-preview {
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 20px; padding: 0; overflow: hidden;
+    box-shadow: 0 16px 64px rgba(0,0,0,.04);
+  }
+  .convo-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 20px 28px; border-bottom: 1px solid var(--border);
+    background: var(--cream);
+  }
+  .convo-avatar {
+    width: 32px; height: 32px; border-radius: 8px; background: var(--terra);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 13px;
+  }
+  .convo-name { font-weight: 600; font-size: 14px; }
+  .convo-body { padding: 28px; display: flex; flex-direction: column; gap: 20px; }
+  .convo-msg { display: flex; gap: 12px; align-items: flex-start; }
+  .convo-msg.user { flex-direction: row-reverse; }
+  .convo-bubble {
+    max-width: 75%; padding: 14px 18px; border-radius: 16px;
+    font-size: 14px; line-height: 1.55;
+  }
+  .convo-msg.user .convo-bubble {
+    background: var(--text); color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .convo-msg.ai .convo-bubble {
+    background: var(--cream); border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+  .convo-bubble .hl { color: var(--terra); font-weight: 600; }
+  .convo-bubble .insight {
+    display: block; margin-top: 10px; padding: 10px 14px;
+    background: var(--terra-soft); border-radius: 10px;
+    font-size: 13px; color: var(--terra-hover); line-height: 1.5;
+  }
+  .convo-context {
+    text-align: center; font-size: 12px; color: var(--muted);
+    padding: 4px 0;
+  }
+
+  /* ── The journey overview ── */
+  .journey-section {
+    max-width: 1200px; margin: 0 auto; padding: 80px 40px;
+  }
+  .journey-section > h2 {
+    font-family: var(--serif); font-size: clamp(32px, 3.5vw, 48px);
+    font-weight: 900; letter-spacing: -.02em; margin-bottom: 40px;
+  }
+  .journey-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .j-card {
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px 24px;
+    transition: all .25s; cursor: pointer; display: flex;
+    flex-direction: column; position: relative; overflow: hidden;
+  }
+  .j-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: var(--terra); opacity: 0; transition: opacity .25s;
+  }
+  .j-card:hover { border-color: var(--terra); box-shadow: 0 8px 32px var(--terra-glow); transform: translateY(-2px); }
+  .j-card:hover::before { opacity: 1; }
+  .j-card h3 { font-family: var(--serif); font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+  .j-card .hook { font-size: 15px; color: var(--text); line-height: 1.5; margin-bottom: 16px; font-weight: 500; }
+  .j-card p { font-size: 14px; color: var(--muted); line-height: 1.55; flex: 1; }
+  .j-card .card-link { margin-top: 20px; }
+
+  /* ── Trust numbers ── */
+  .trust-section {
+    max-width: 1200px; margin: 0 auto; padding: 80px 40px;
+    border-top: 1px solid var(--border);
+  }
+  .trust-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+  }
+  .trust-item { padding: 0 28px; border-right: 1px solid var(--border); }
+  .trust-item:last-child { border-right: none; }
+  .trust-item:first-child { padding-left: 0; }
+  .trust-item .num { font-family: var(--serif); font-size: 42px; font-weight: 900; line-height: 1; }
+  .trust-item .desc { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.45; }
+
+  /* ── CTA ── */
+  .final-cta { max-width: 1200px; margin: 0 auto; padding: 0 40px 80px; }
+  .final-cta-inner {
+    background: linear-gradient(135deg, var(--terra), var(--terra-hover));
+    border-radius: 20px; padding: 80px 64px;
+    display: flex; justify-content: space-between; align-items: center;
+    position: relative; overflow: hidden;
+  }
+  .final-cta-inner::before {
+    content: ''; position: absolute; top: -50%; right: -20%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,.1), transparent);
+    border-radius: 50%;
+  }
+  .final-cta h3 {
+    font-family: var(--serif); font-size: clamp(28px, 3vw, 40px);
+    font-weight: 900; letter-spacing: -.02em; max-width: 480px;
+    line-height: 1.15; color: #fff; position: relative; z-index: 1;
+  }
+  .final-cta .btn-cta-block { position: relative; z-index: 1; }
+
+  /* ── Footer ── */
+  footer { background: var(--stone-light); padding: 64px 40px 32px; }
+  .footer-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
+  .footer-brand p { font-size: 14px; color: var(--muted); line-height: 1.55; max-width: 280px; margin-top: 12px; }
+  .footer-col h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 600; margin-bottom: 16px; }
+  .footer-col a { display: block; font-size: 14px; color: var(--text-mid); text-decoration: none; padding: 4px 0; transition: color .2s; }
+  .footer-col a:hover { color: var(--terra); }
+  .footer-bottom { max-width: 1200px; margin: 32px auto 0; padding-top: 24px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+
+
+  /* ═══════════════════════════════════════
+     SELL PAGE — Story-driven
+  ═══════════════════════════════════════ */
+
+  .sell-hero {
+    max-width: 1200px; margin: 0 auto; padding: 80px 40px 48px;
+  }
+  .sell-hero .hero-tag {
+    font-size: 13px; text-transform: uppercase; letter-spacing: .18em;
+    color: var(--terra); font-weight: 600; margin-bottom: 32px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .sell-hero .hero-tag::before { content: ''; width: 36px; height: 2px; background: var(--terra); }
+  .sell-hero h1 {
+    font-family: var(--serif); font-size: clamp(44px, 6vw, 76px);
+    font-weight: 900; line-height: 1.05; letter-spacing: -.03em;
+    max-width: 14ch; margin-bottom: 24px;
+  }
+  .sell-hero h1 em { font-style: italic; color: var(--terra); }
+  .sell-hero .lead {
+    font-size: 19px; color: var(--muted); max-width: 600px;
+    line-height: 1.65; margin-bottom: 40px;
+  }
+
+  /* Story section */
+  .story-section {
+    max-width: 1200px; margin: 0 auto; padding: 80px 40px;
+    border-top: 1px solid var(--border);
+  }
+  .story-section .overline {
+    font-size: 12px; text-transform: uppercase; letter-spacing: .2em;
+    color: var(--terra); font-weight: 600; margin-bottom: 16px;
+  }
+
+  /* Timeline journey */
+  .timeline {
+    max-width: 720px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 0;
+    position: relative;
+  }
+  .timeline::before {
+    content: ''; position: absolute; left: 27px; top: 24px;
+    bottom: 24px; width: 2px; background: var(--stone);
+  }
+  .tl-step {
+    display: flex; gap: 24px; padding: 32px 0;
+    position: relative;
+  }
+  .tl-dot {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--warm-white); border: 2px solid var(--stone);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-size: 18px; font-weight: 900;
+    color: var(--muted); flex-shrink: 0; z-index: 1;
+    transition: all .3s;
+  }
+  .tl-step:hover .tl-dot {
+    border-color: var(--terra); color: var(--terra);
+    background: var(--terra-soft);
+  }
+  .tl-content { padding-top: 8px; }
+  .tl-content h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .tl-content .price {
+    display: inline-block; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em;
+    padding: 3px 10px; border-radius: 100px; margin-bottom: 10px;
+  }
+  .tl-content .price.free { background: #E8F5E9; color: #2E7D32; }
+  .tl-content .price.paid { background: var(--terra-soft); color: var(--terra); }
+  .tl-content p { font-size: 14px; color: var(--muted); line-height: 1.6; max-width: 480px; }
+  .tl-content .detail {
+    margin-top: 12px; padding: 14px 18px; background: var(--cream-deep);
+    border-radius: 12px; font-size: 13px; color: var(--text-mid);
+    line-height: 1.55;
+  }
+
+  /* Deal size section */
+  .deal-sizes {
+    max-width: 1200px; margin: 0 auto; padding: 80px 40px;
+  }
+  .deal-sizes h2 {
+    font-family: var(--serif); font-size: clamp(32px, 3.5vw, 48px);
+    font-weight: 900; letter-spacing: -.02em; margin-bottom: 40px;
+  }
+  .deal-sizes h2 em { color: var(--terra); font-style: italic; }
+  .size-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .size-card {
+    background: var(--warm-white); border: 1px solid var(--border);
+    border-radius: 16px; padding: 36px 28px;
+    transition: all .25s; position: relative; overflow: hidden;
+  }
+  .size-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: var(--terra); opacity: 0; transition: opacity .25s;
+  }
+  .size-card:hover { border-color: var(--terra); box-shadow: 0 8px 32px var(--terra-glow); transform: translateY(-2px); }
+  .size-card:hover::before { opacity: 1; }
+  .size-card .range {
+    font-family: var(--serif); font-size: 28px; font-weight: 900;
+    color: var(--terra); margin-bottom: 12px;
+  }
+  .size-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .size-card p { font-size: 14px; color: var(--muted); line-height: 1.55; margin-bottom: 12px; }
+  .size-card .result {
+    padding: 12px 16px; background: var(--cream-deep);
+    border-radius: 10px; font-size: 13px; color: var(--text-mid);
+    font-style: italic; line-height: 1.45;
+  }
+
+  /* Broker callout — ally, not villain */
+  .broker-callout {
+    max-width: 1200px; margin: 0 auto; padding: 0 40px 80px;
+  }
+  .broker-inner {
+    background: var(--cream-deep); border: 1px solid var(--border);
+    border-radius: 20px; padding: 48px 56px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+    align-items: center;
+  }
+  .broker-inner h3 {
+    font-family: var(--serif); font-size: 28px; font-weight: 900;
+    letter-spacing: -.02em; line-height: 1.15; margin-bottom: 16px;
+  }
+  .broker-inner h3 em { color: var(--terra); font-style: italic; }
+  .broker-inner p { font-size: 15px; color: var(--muted); line-height: 1.6; }
+  .broker-benefits {
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .broker-benefit {
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .broker-benefit .check {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--terra-soft); color: var(--terra);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+  }
+  .broker-benefit span { font-size: 15px; line-height: 1.5; }
+
+  /* FAQ */
+  .faq-section {
+    max-width: 800px; margin: 0 auto; padding: 80px 40px;
+  }
+  .faq-section h2 {
+    font-family: var(--serif); font-size: clamp(28px, 3vw, 40px);
+    font-weight: 900; letter-spacing: -.02em; margin-bottom: 40px;
+    text-align: center;
+  }
+  .faq-item {
+    padding: 24px 0; border-bottom: 1px solid var(--border);
+  }
+  .faq-q { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+  .faq-a { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+  /* ── Responsive ── */
+  @media (max-width: 960px) {
+    .persona-grid, .journey-cards { grid-template-columns: repeat(2, 1fr); }
+    .size-cards { grid-template-columns: 1fr; }
+    .demo-header { grid-template-columns: 1fr; gap: 24px; }
+    .broker-inner { grid-template-columns: 1fr; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
+    .switcher { flex-wrap: wrap; } .switcher .label { display: none; }
+    .switcher button { padding: 8px 14px; font-size: 11px; }
+    nav { padding: 16px 20px; padding-top: 64px; }
+    .nav-links { display: none; }
+    .home-hero { padding: 48px 20px 32px; }
+    .suggested { justify-content: flex-start; }
+    .social-proof, .demo-section, .journey-section, .trust-section { padding: 48px 20px; }
+    .persona-grid, .journey-cards { grid-template-columns: 1fr; }
+    .trust-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .trust-item { border-right: none; padding: 0; }
+    .final-cta { padding: 0 20px 48px; }
+    .final-cta-inner { flex-direction: column; gap: 32px; padding: 48px 28px; text-align: center; }
+    .sell-hero { padding: 48px 20px 32px; }
+    .story-section, .deal-sizes, .faq-section { padding: 48px 20px; }
+    .broker-callout { padding: 0 20px 48px; }
+    .broker-inner { padding: 32px 24px; }
+    footer { padding: 40px 20px 24px; }
+    .footer-inner { grid-template-columns: 1fr; gap: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="switcher">
+  <span class="label">View:</span>
+  <button class="active" onclick="switchPage('home')">Homepage</button>
+  <button onclick="switchPage('sell')">Sell Page</button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HOME PAGE
+═══════════════════════════════════════ -->
+<div class="page active" id="page-home">
+
+<nav>
+  <div class="logo">smb<span class="x">x</span>.ai</div>
+  <div class="nav-links">
+    <a href="#">Sell</a>
+    <a href="#">Buy</a>
+    <a href="#">Raise Capital</a>
+    <a href="#">Pricing</a>
+    <a href="#">Sign in</a>
+    <a href="#" class="btn-nav">Get Started</a>
+  </div>
+</nav>
+
+<!-- Hero: Chat-first -->
+<section class="home-hero">
+  <h1>Every deal deserves an <em>expert.</em></h1>
+  <p class="subtitle">
+    Yulia is the AI deal advisor that brokers, owners, and investors 
+    use to move faster, know more, and close with confidence.
+  </p>
+
+  <div class="chat-hero">
+    <div class="chat-input-wrapper">
+      <textarea placeholder="Tell Yulia about your deal..." rows="2"></textarea>
+      <div class="chat-input-bar">
+        <span class="hint">Free to start · No credit card</span>
+        <button class="send-btn">↑</button>
+      </div>
+    </div>
+    <div class="suggested">
+      <button>"I want to sell my HVAC business"</button>
+      <button>"I'm looking to acquire a SaaS company"</button>
+      <button>"Help me value a $3M business"</button>
+      <button>"I need to raise $2M"</button>
+    </div>
+  </div>
+  <p class="free-note">Your first financial analysis is <strong>always free</strong>.</p>
+</section>
+
+<!-- Who uses this -->
+<section class="social-proof">
+  <div class="sp-header">
+    <div class="overline">Built for everyone on the deal</div>
+    <h2>One platform. Every seat at the table.</h2>
+  </div>
+  <div class="persona-grid">
+    <div class="persona-card">
+      <div class="emoji">🏢</div>
+      <h3>Business Owners</h3>
+      <p>Selling, buying, or raising — Yulia speaks your language. No jargon, no assumptions. Just clear guidance from first question to closing day.</p>
+      <div class="example">"I had no idea my add-backs were worth $127K. Yulia found every one."</div>
+    </div>
+    <div class="persona-card">
+      <div class="emoji">🤝</div>
+      <h3>Brokers & Advisors</h3>
+      <p>Produce CIMs in an hour, not three weeks. Screen and score buyer lists instantly. Manage 3× the deal flow with the same team.</p>
+      <div class="example">"I closed 4 more deals last quarter using Yulia for work product."</div>
+    </div>
+    <div class="persona-card">
+      <div class="emoji">⚖️</div>
+      <h3>Attorneys & CPAs</h3>
+      <p>Invited by your client? You're in — for free. Review financials, flag risks, collaborate on documents in real time.</p>
+      <div class="example">"Finally, one place to see the whole deal instead of chasing 6 inboxes."</div>
+    </div>
+    <div class="persona-card">
+      <div class="emoji">📊</div>
+      <h3>Investors & Search Funds</h3>
+      <p>Screen hundreds of targets overnight. Model returns before your first call. Manage diligence across a portfolio.</p>
+      <div class="example">"Scored 47 acquisition targets against my thesis in one session."</div>
+    </div>
+  </div>
+</section>
+
+<!-- Show, don't tell: conversation preview -->
+<section class="demo-section">
+  <div class="demo-header">
+    <h2>See what happens when you <em>start talking.</em></h2>
+    <p>Yulia doesn't ask you to fill out forms. She has a conversation — 
+    and turns it into institutional-quality work product in minutes.</p>
+  </div>
+
+  <div class="convo-preview">
+    <div class="convo-header">
+      <div class="convo-avatar">Y</div>
+      <div class="convo-name">Yulia · AI Deal Advisor</div>
+    </div>
+    <div class="convo-body">
+      <div class="convo-msg user">
+        <div class="convo-bubble">I want to sell my HVAC business in Dallas. Revenue is about $3.2M, I take home around $640K.</div>
+      </div>
+      <div class="convo-msg ai">
+        <div class="convo-bubble">
+          Great — let me work with those numbers. Based on your revenue 
+          and owner compensation, I'm calculating an adjusted EBITDA of 
+          approximately <span class="hl">$780K</span> after typical add-backs 
+          for owner-operated HVAC businesses.
+          <span class="insight">
+            📊 HVAC companies in the Dallas-Fort Worth market are currently 
+            trading at 4.5–6× EBITDA. Three PE firms are actively consolidating 
+            in your region. Your preliminary range: <strong>$3.5M – $4.7M</strong>.
+          </span>
+        </div>
+      </div>
+      <div class="convo-context">— This analysis took 30 seconds. A traditional advisor takes 2–4 weeks. —</div>
+      <div class="convo-msg user">
+        <div class="convo-bubble">That's way more than I expected. What do we do next?</div>
+      </div>
+      <div class="convo-msg ai">
+        <div class="convo-bubble">
+          Let's build your financial package and identify your best 
+          buyers. I'll walk you through every step — or if you're 
+          working with a broker, invite them in and I'll produce the 
+          work product they need to get you to market faster.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Journeys -->
+<section class="journey-section">
+  <h2>What brings you here?</h2>
+  <div class="journey-cards">
+    <div class="j-card">
+      <h3>Sell</h3>
+      <div class="hook">Know your real number.</div>
+      <p>From "what's my business worth?" to wire transfer — Yulia handles valuation, CIM, buyer matching, and closing support.</p>
+      <span class="card-link">Start selling →</span>
+    </div>
+    <div class="j-card">
+      <h3>Buy</h3>
+      <div class="hook">Find the right deal.</div>
+      <p>Build your thesis, screen targets, model returns, manage diligence — whether it's your first acquisition or your fifteenth.</p>
+      <span class="card-link">Start buying →</span>
+    </div>
+    <div class="j-card">
+      <h3>Raise Capital</h3>
+      <div class="hook">Raise without losing control.</div>
+      <p>Valuation, pitch deck, investor targeting, term sheet analysis. Negotiate from strength, not desperation.</p>
+      <span class="card-link">Start raising →</span>
+    </div>
+    <div class="j-card">
+      <h3>Integrate</h3>
+      <div class="hook">Your first 100 days.</div>
+      <p>You just acquired a business. Now what? Day 0 checklist through 100-day optimization. Don't let value slip away.</p>
+      <span class="card-link">Start planning →</span>
+    </div>
+  </div>
+</section>
+
+<!-- Trust numbers -->
+<section class="trust-section">
+  <div class="trust-grid">
+    <div class="trust-item">
+      <div class="num">$2.4T</div>
+      <div class="desc">Annual SMB<br>transaction volume</div>
+    </div>
+    <div class="trust-item">
+      <div class="num">80+</div>
+      <div class="desc">Industry verticals<br>with live market data</div>
+    </div>
+    <div class="trust-item">
+      <div class="num">Minutes</div>
+      <div class="desc">From conversation<br>to deliverable</div>
+    </div>
+    <div class="trust-item">
+      <div class="num">Free</div>
+      <div class="desc">For attorneys, CPAs,<br>and service providers</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="final-cta">
+  <div class="final-cta-inner">
+    <h3>Your next deal starts with a conversation.</h3>
+    <button class="btn-cta-block">Talk to Yulia →</button>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">smb<span class="x">x</span>.ai</div>
+      <p>The AI deal advisor for brokers, owners, and investors. From valuation to close.</p>
+    </div>
+    <div class="footer-col"><h4>Product</h4><a href="#">Sell</a><a href="#">Buy</a><a href="#">Raise Capital</a><a href="#">Integrate</a></div>
+    <div class="footer-col"><h4>Company</h4><a href="#">How It Works</a><a href="#">Pricing</a><a href="#">For Brokers</a></div>
+    <div class="footer-col"><h4>Legal</h4><a href="#">Privacy</a><a href="#">Terms</a></div>
+  </div>
+  <div class="footer-bottom">© 2026 smbx.ai. All rights reserved.</div>
+</footer>
+
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     SELL PAGE — Story-driven
+═══════════════════════════════════════ -->
+<div class="page" id="page-sell">
+
+<nav>
+  <div class="logo">smb<span class="x">x</span>.ai</div>
+  <div class="nav-links">
+    <a href="#">Sell</a>
+    <a href="#">Buy</a>
+    <a href="#">Raise Capital</a>
+    <a href="#">Pricing</a>
+    <a href="#">Sign in</a>
+    <a href="#" class="btn-nav">Get Started</a>
+  </div>
+</nav>
+
+<section class="sell-hero">
+  <div class="hero-tag">Sell Your Business</div>
+  <h1>You built it. Now <em>own the exit.</em></h1>
+  <p class="lead">
+    Most owners sell for less than they should — not because the 
+    business isn't worth it, but because they didn't have the right 
+    information at the right time. Yulia changes that.
+  </p>
+  <div style="display:flex;gap:12px">
+    <button class="btn-primary">Start selling — free →</button>
+    <button class="btn-secondary">See how it works</button>
+  </div>
+</section>
+
+<!-- The journey as a story -->
+<section class="story-section">
+  <div class="overline">Your selling journey</div>
+  <h2 style="font-family:var(--serif);font-size:clamp(32px,3.5vw,48px);font-weight:900;letter-spacing:-.02em;margin-bottom:48px">
+    From "what's it worth?" to <em style="color:var(--terra)">wire transfer.</em>
+  </h2>
+
+  <div class="timeline">
+    <div class="tl-step">
+      <div class="tl-dot">1</div>
+      <div class="tl-content">
+        <h3>Tell Yulia about your business</h3>
+        <span class="price free">Free</span>
+        <p>No forms. Just a conversation. Describe your business — industry, 
+        location, revenue, team, whatever you know. Yulia asks smart 
+        follow-ups and builds your deal profile.</p>
+        <div class="detail">
+          "I own an HVAC company in Dallas, 12 employees, $3.2M revenue, 
+          been running it for 15 years." — That's all it takes to start.
+        </div>
+      </div>
+    </div>
+    <div class="tl-step">
+      <div class="tl-dot">2</div>
+      <div class="tl-content">
+        <h3>See your real numbers</h3>
+        <span class="price free">Free</span>
+        <p>Yulia calculates your SDE or EBITDA, identifies every legitimate 
+        add-back, and gives you a preliminary valuation range — with the 
+        math shown. Not a guess. A number you can take to your CPA.</p>
+        <div class="detail">
+          Most owners discover add-backs they didn't know existed. Personal 
+          vehicle, one-time expenses, above-market rent to yourself — Yulia 
+          finds them all.
+        </div>
+      </div>
+    </div>
+    <div class="tl-step">
+      <div class="tl-dot">3</div>
+      <div class="tl-content">
+        <h3>Get your valuation report</h3>
+        <span class="price paid">From $199</span>
+        <p>Full multi-methodology valuation: comparable transactions, 
+        industry multiples, discounted cash flow. Benchmarked against 
+        real deals in your industry and region. The kind of report 
+        advisory firms charge $10K–$25K to produce.</p>
+      </div>
+    </div>
+    <div class="tl-step">
+      <div class="tl-dot">4</div>
+      <div class="tl-content">
+        <h3>Go to market</h3>
+        <span class="price paid">From $299</span>
+        <p>Yulia builds your Confidential Information Memorandum — the 
+        document that makes buyers take your business seriously. Then she 
+        identifies and scores qualified buyers for your specific deal.</p>
+        <div class="detail">
+          Working with a broker? Invite them in. Yulia produces the CIM 
+          and buyer research — your broker focuses on relationships and 
+          negotiation. The deal moves faster for everyone.
+        </div>
+      </div>
+    </div>
+    <div class="tl-step">
+      <div class="tl-dot">5</div>
+      <div class="tl-content">
+        <h3>Close with confidence</h3>
+        <span class="price paid">From $299</span>
+        <p>LOI comparison, due diligence management, working capital 
+        analysis, deal structuring, and closing coordination. Yulia keeps 
+        every party organized and every document in one place.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:48px">
+    <p style="font-size:15px;color:var(--muted);margin-bottom:20px">
+      Typical sell-side journey: <strong style="color:var(--text)">From $1,799</strong> 
+      · Traditional advisory: <span style="text-decoration:line-through">$50,000–$200,000</span>
+    </p>
+    <button class="btn-primary">Start your journey — free →</button>
+  </div>
+</section>
+
+<!-- Deal sizes -->
+<section class="deal-sizes">
+  <h2>Built for <em>your</em> deal.</h2>
+  <div class="size-cards">
+    <div class="size-card">
+      <div class="range">Under $500K</div>
+      <h3>First-time seller</h3>
+      <p>You've never done this before. That's okay — Yulia walks you 
+      through every step in plain language. No jargon, no assumptions.</p>
+      <div class="result">"He thought he'd be lucky to get $200K. 
+      Yulia found $31K in add-backs he didn't know counted. 
+      Asking price: $425K."</div>
+    </div>
+    <div class="size-card">
+      <div class="range">$500K – $10M</div>
+      <h3>Serious operation</h3>
+      <p>You know your business is valuable. Yulia produces institutional-quality 
+      work product — the same CIMs and valuations that $100K advisory firms deliver.</p>
+      <div class="result">"Valued at $2.6M–$3.9M using live comps. Three 
+      PE firms actively consolidating in her industry. Full CIM in 47 minutes."</div>
+    </div>
+    <div class="size-card">
+      <div class="range">$10M+</div>
+      <h3>Strategic exit</h3>
+      <p>PE roll-up, strategic sale, or management buyout — Yulia handles 
+      the analytical heavy lifting while your deal team focuses on execution.</p>
+      <div class="result">"Their team of 3 operated like a team of 12. 
+      Six platform acquisitions closed in 14 months."</div>
+    </div>
+  </div>
+</section>
+
+<!-- Broker callout — as allies -->
+<section class="broker-callout">
+  <div class="broker-inner">
+    <div>
+      <h3>Working with a <em>broker?</em> Even better.</h3>
+      <p>Yulia doesn't replace your broker — she makes them faster. 
+      Many of our most active users are brokers and advisors who use 
+      Yulia to produce work product, screen buyers, and manage more 
+      deals simultaneously.</p>
+    </div>
+    <div class="broker-benefits">
+      <div class="broker-benefit">
+        <span class="check">✓</span>
+        <span><strong>Invite your broker</strong> into the deal room — they see everything, collaborate in real time</span>
+      </div>
+      <div class="broker-benefit">
+        <span class="check">✓</span>
+        <span><strong>CIMs in an hour</strong> — your broker reviews and refines instead of building from scratch</span>
+      </div>
+      <div class="broker-benefit">
+        <span class="check">✓</span>
+        <span><strong>Attorneys and CPAs join free</strong> — no extra seats, no extra cost</span>
+      </div>
+      <div class="broker-benefit">
+        <span class="check">✓</span>
+        <span><strong>Your broker's expertise + Yulia's speed</strong> = deals that close faster at better terms</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <h2>Questions sellers ask.</h2>
+  <div class="faq-item">
+    <div class="faq-q">Can I trust an AI valuation?</div>
+    <div class="faq-a">Yulia uses the same methodologies as human advisors — comparable 
+    transactions, industry multiples, discounted cash flow. Every calculation is shown, 
+    every comp is sourced. Many sellers bring Yulia's report to their CPA for review. 
+    The math speaks for itself.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Will buyers take an AI-generated CIM seriously?</div>
+    <div class="faq-a">The CIM format, depth, and quality match what top advisory firms produce. 
+    Buyers care about the information, not who typed it. Many of our CIMs are 
+    reviewed and co-branded by the seller's broker before going to market.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Do I still need a broker?</div>
+    <div class="faq-a">That's your call. Some sellers use Yulia end-to-end. Others use Yulia 
+    for the analytical work and their broker for relationships and negotiation. 
+    Many brokers use Yulia themselves — she produces their work product faster 
+    so they can focus on what humans do best: building trust and closing deals.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">What if my business is complicated?</div>
+    <div class="faq-a">Yulia covers 80+ industry verticals with current market data. Whether 
+    you're a single-location restaurant or a multi-state healthcare practice, 
+    she adapts — different metrics, different comps, different buyer profiles. 
+    If something is truly unusual, she'll tell you.</div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="final-cta">
+  <div class="final-cta-inner">
+    <h3>You built something valuable. Let's prove it.</h3>
+    <button class="btn-cta-block">Talk to Yulia — free →</button>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">smb<span class="x">x</span>.ai</div>
+      <p>The AI deal advisor for brokers, owners, and investors. From valuation to close.</p>
+    </div>
+    <div class="footer-col"><h4>Product</h4><a href="#">Sell</a><a href="#">Buy</a><a href="#">Raise Capital</a><a href="#">Integrate</a></div>
+    <div class="footer-col"><h4>Company</h4><a href="#">How It Works</a><a href="#">Pricing</a><a href="#">For Brokers</a></div>
+    <div class="footer-col"><h4>Legal</h4><a href="#">Privacy</a><a href="#">Terms</a></div>
+  </div>
+  <div class="footer-bottom">© 2026 smbx.ai. All rights reserved.</div>
+</footer>
+
+</div>
+
+<script>
+function switchPage(p) {
+  document.querySelectorAll('.page').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.switcher button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
