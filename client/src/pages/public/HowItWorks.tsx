@@ -11,63 +11,74 @@ const PROCESS_STEPS = [
   {
     num: '01',
     title: 'Tell Yulia about your deal',
-    price: 'Free',
-    desc: 'Are you selling, buying, or raising? Yulia asks the right questions, classifies your business, and builds your profile.',
+    desc: 'You talk. She listens. Describe your business, your goals, your timeline \u2014 in your own words. Yulia asks smart follow-ups to fill in the gaps. No jargon required.',
   },
   {
     num: '02',
-    title: 'She analyzes everything',
-    price: 'Free',
-    desc: 'Yulia calculates your SDE or EBITDA, identifies add-backs, pulls industry comps, and gives you a preliminary range.',
+    title: 'Yulia analyzes everything',
+    desc: 'Industry classification, financial modeling, comparable transactions, market conditions, buyer/investor profiles. Yulia pulls from 80+ industry verticals with current market data.',
   },
   {
     num: '03',
-    title: 'Get real deliverables',
-    price: 'Pay as you go',
-    desc: 'Full valuation report. CIM. Buyer list. Pitch deck. DD checklist. Real documents you can hand to a buyer, investor, or attorney.',
+    title: 'You get real deliverables',
+    desc: 'Not summaries. Not suggestions. Actual work product \u2014 valuation reports, CIMs, pitch decks, DD checklists, term sheet analysis. The same documents advisory firms charge $50K\u2013$200K to produce.',
   },
   {
     num: '04',
-    title: 'Close with confidence',
-    price: 'Stage-by-stage',
-    desc: 'Yulia guides you through negotiation, deal structuring, and closing. Every stage, every decision, every document.',
+    title: 'Your team collaborates',
+    desc: 'Invite your broker, attorney, CPA, or investor into the deal room. Everyone sees the same information. Service providers join free. The deal moves forward with everyone aligned.',
   },
 ];
 
 const INTELLIGENCE = [
-  'HVAC companies in Dallas sell at 4.5\u20136\u00D7 EBITDA to PE consolidators',
-  'Your gross margins are 12% below industry median \u2014 here\u2019s how to fix it',
-  '3 PE firms actively acquiring veterinary practices in your region',
-  'Based on 847 comparable transactions in the last 24 months',
+  {
+    title: '80+ industry verticals',
+    desc: 'Current multiples, market trends, buyer activity for every major business category',
+  },
+  {
+    title: 'Real transaction data',
+    desc: 'Comparable sales benchmarked by industry, geography, and deal size',
+  },
+  {
+    title: 'Live market conditions',
+    desc: 'Interest rates, SBA lending environment, PE activity, regulatory changes',
+  },
+  {
+    title: 'Regional intelligence',
+    desc: 'Local market dynamics, cost of living adjustments, state-specific regulations',
+  },
+];
+
+const COLLABORATION = [
+  { bold: 'Business owners', rest: ' see their numbers, their documents, their deal progress' },
+  { bold: 'Brokers and advisors', rest: ' get instant work product \u2014 CIMs, valuations, buyer lists' },
+  { bold: 'Attorneys, CPAs, and service providers', rest: ' join free and collaborate in real time' },
 ];
 
 const STORIES = [
   {
-    deal: '$400K Landscaping',
-    name: 'Marco',
-    desc: 'First-time seller. Yulia identified $31K in legitimate add-backs Marco didn\u2019t know existed, increasing his valuation by 15%. Financial analysis to closing in under 90 days.',
+    deal: '$400K Landscaping Business',
+    desc: 'Solo owner, first-time seller. Never heard of SDE. Yulia found $31K in add-backs he didn\u2019t know counted. Full valuation, CIM, and 3 qualified buyers in one week. Asking price: $425K. Traditional advisory would have cost more than the deal was worth.',
   },
   {
     deal: '$3M HVAC Company',
-    name: 'Danielle',
-    desc: 'Experienced operator selling a mature business. Yulia produced an institutional-quality CIM, identified 23 qualified buyers, and helped Danielle close at 5.2\u00D7 EBITDA \u2014 top of range.',
+    desc: 'Owner-operated, Dallas market. Yulia calculated $780K adjusted EBITDA, identified 3 PE firms actively consolidating in the region. Full CIM in 47 minutes. Preliminary range: $3.5M\u2013$4.7M. Broker invited into deal room and co-branded the materials.',
   },
   {
-    deal: '$12M Search Fund',
-    name: 'Search Fund Team',
-    desc: 'Screened 200+ targets in one weekend. Scored and ranked by thesis fit, financial health, and owner readiness. First LOI submitted within 3 weeks.',
+    deal: '$12M Search Fund Acquisition',
+    desc: 'Independent sponsor screening B2B services. Yulia scored 47 targets against the thesis overnight. Top 8 flagged for deep dive. Full valuation and DD workflow on 3 finalists. LOI signed in 3 weeks.',
   },
   {
-    deal: '$40M PE Roll-up',
-    name: 'Platform Build',
-    desc: '6 acquisitions in 14 months. Yulia managed the pipeline, ran valuations on each target, and coordinated due diligence across all deals simultaneously.',
+    deal: '$40M PE Roll-Up',
+    desc: 'PE firm building a platform in healthcare services. Yulia handled analytical work product across 6 add-on acquisitions in 14 months. Deal team of 3 operated like 12. Integration plans delivered within 48 hours of each closing.',
   },
 ];
 
 const SUGGESTED_PROMPTS = [
   'I want to sell my business',
-  'Looking to buy a company',
-  'Need to raise capital',
+  'Help me value a company',
+  'I need to raise capital',
+  'I just acquired a business',
 ];
 
 /* ─── Page ─── */
@@ -80,36 +91,25 @@ export default function HowItWorks() {
     <PublicLayout>
       {/* ═══ HERO ═══ */}
       <section className="max-w-site mx-auto px-10 pt-20 pb-12 max-md:px-5 max-md:pt-12 max-md:pb-8">
-        <h1 className="font-serif text-[clamp(40px,5.5vw,72px)] font-black leading-[1.05] tracking-[-0.03em] max-w-[14ch] mb-5 m-0">
-          Talk to Yulia. She handles the rest.
+        <h1 className="font-serif text-[clamp(40px,5.5vw,72px)] font-black leading-[1.05] tracking-[-0.03em] max-w-[16ch] mb-5 m-0">
+          Talk to Yulia. She handles <em className="italic text-[#DA7756]">the rest.</em>
         </h1>
-        <p className="text-[19px] text-[#7A766E] max-w-[540px] leading-[1.6] mb-10 m-0">
-          Here&apos;s what happens when you start a deal. Try it now.
+        <p className="text-[19px] text-[#7A766E] max-w-[600px] leading-[1.6] m-0">
+          No forms. No uploads. No 47-field intake questionnaires. Just tell Yulia about your deal
+          and she turns the conversation into institutional-quality work product.
         </p>
-
-        {/* Live chat input */}
-        <div className="max-w-[640px]">
-          <PublicChatInput
-            onSend={(msg) => { chat.sendMessage(msg); navigate('/'); }}
-            placeholder="Try it \u2014 tell Yulia what you're working on\u2026"
-            suggestedPrompts={SUGGESTED_PROMPTS}
-          />
-        </div>
       </section>
 
-      {/* ═══ THE PROCESS ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      {/* ═══ 4-STEP PROCESS ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
         <div className="space-y-6">
           {PROCESS_STEPS.map(s => (
             <Card key={s.num} hover={false} padding="px-10 py-10 max-md:px-6 max-md:py-6">
               <div className="flex flex-col md:flex-row md:items-start gap-6">
                 <span className="font-serif text-[56px] font-black text-[#E8E4DC] leading-none shrink-0">{s.num}</span>
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-bold text-[#1A1A18] m-0">{s.title}</h3>
-                    <span className="text-[11px] font-bold uppercase tracking-wide text-[#DA7756]">{s.price}</span>
-                  </div>
-                  <p className="text-sm text-[#7A766E] leading-relaxed m-0 max-w-[600px]">{s.desc}</p>
+                  <h3 className="text-lg font-bold text-[#1A1A18] mb-2 m-0">{s.title}</h3>
+                  <p className="text-sm text-[#7A766E] leading-[1.6] m-0 max-w-[600px]">{s.desc}</p>
                 </div>
               </div>
             </Card>
@@ -119,13 +119,17 @@ export default function HowItWorks() {
 
       {/* ═══ APPLIED INTELLIGENCE ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(36px,4.5vw,60px)] font-black tracking-[-0.02em] leading-[1.05] mb-10 m-0">
-          Not generic advice. <em className="italic text-[#DA7756]">Your</em> deal, <em className="italic text-[#DA7756]">your</em> market.
+        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-3 m-0">
+          What Yulia knows.
         </h2>
+        <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-10 m-0">
+          Yulia doesn&apos;t guess. She analyzes.
+        </p>
         <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
           {INTELLIGENCE.map(item => (
-            <Card key={item} hover={false} padding="px-8 py-6">
-              <p className="text-[15px] text-[#4A4843] leading-relaxed m-0 italic font-serif">&ldquo;{item}&rdquo;</p>
+            <Card key={item.title} hover={false} padding="px-8 py-7">
+              <h4 className="text-[15px] font-bold text-[#1A1A18] mb-1.5 m-0">{item.title}</h4>
+              <p className="text-sm text-[#7A766E] leading-[1.55] m-0">{item.desc}</p>
             </Card>
           ))}
         </div>
@@ -133,18 +137,29 @@ export default function HowItWorks() {
 
       {/* ═══ COLLABORATION ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-[20px] p-16 max-md:p-7">
-          <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] leading-[1.1] mb-6 m-0">
-            Everyone on the deal. <em className="italic text-[#DA7756]">One room.</em>
-          </h2>
-          <p className="text-[17px] text-[#7A766E] leading-relaxed max-w-[700px] m-0">
-            Invite your broker, attorney, CPA, and real estate agent into your deal room.
-            They collaborate for free. Shared documents, shared timeline, no email scavenger hunts.
+        <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-[20px] py-12 px-14 max-md:py-8 max-md:px-6">
+          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
+            Everyone on the deal. One place.
+          </h3>
+          <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-8 m-0">
+            Deals involve more than one person. Yulia keeps everyone aligned.
           </p>
+          <div className="flex flex-col gap-4">
+            {COLLABORATION.map(c => (
+              <div key={c.bold} className="flex gap-3 items-start">
+                <span className="w-6 h-6 rounded-full bg-[#FFF0EB] text-[#DA7756] flex items-center justify-center text-xs font-bold shrink-0 mt-px">
+                  &#10003;
+                </span>
+                <span className="text-[15px] leading-[1.5]">
+                  <strong>{c.bold}</strong>{c.rest}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ═══ STORIES ═══ */}
+      {/* ═══ DEAL STORIES ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
         <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
           Built for every deal size.
@@ -152,11 +167,24 @@ export default function HowItWorks() {
         <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
           {STORIES.map(s => (
             <Card key={s.deal} padding="px-8 py-10">
-              <p className="text-[11px] uppercase tracking-wider text-[#DA7756] font-semibold mb-2 m-0">{s.deal}</p>
-              <h3 className="text-lg font-bold text-[#1A1A18] mb-3 m-0">{s.name}</h3>
-              <p className="text-sm text-[#7A766E] leading-relaxed m-0">{s.desc}</p>
+              <p className="text-[11px] uppercase tracking-[.12em] text-[#DA7756] font-semibold mb-3 m-0">{s.deal}</p>
+              <p className="text-sm text-[#7A766E] leading-[1.6] m-0">{s.desc}</p>
             </Card>
           ))}
+        </div>
+      </section>
+
+      {/* ═══ CHAT INPUT ═══ */}
+      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+        <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
+          See for yourself.
+        </h3>
+        <div className="max-w-[640px] mx-auto">
+          <PublicChatInput
+            onSend={(msg) => { chat.sendMessage(msg); navigate('/'); }}
+            placeholder="Tell Yulia about your deal..."
+            suggestedPrompts={SUGGESTED_PROMPTS}
+          />
         </div>
       </section>
 
@@ -165,10 +193,10 @@ export default function HowItWorks() {
         <div className="bg-gradient-to-br from-[#DA7756] to-[#C4684A] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
           <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
           <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
-            See it in action. Start free.
+            Every deal deserves an expert. Yours starts now.
           </h3>
           <Button variant="ctaBlock" href="/signup" className="relative z-10">
-            Start with Yulia &rarr;
+            Talk to Yulia &rarr;
           </Button>
         </div>
       </section>
