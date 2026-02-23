@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
 import Tag from '../../components/public/Tag';
+import PublicChatView from '../../components/public/PublicChatView';
+import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 
 /* ─── Data ─── */
 
@@ -52,6 +55,8 @@ const FAQS = [
 
 export default function Sell() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [, navigate] = useLocation();
+  const chat = useAnonymousChat({ context: 'sell' });
 
   return (
     <PublicLayout>
@@ -68,9 +73,20 @@ export default function Sell() {
           From first financial analysis to wire transfer &mdash; guided every step.
           Your first analysis is free.
         </p>
-        <div className="flex flex-col md:flex-row gap-3 max-md:w-full">
-          <Button variant="primary" href="/signup">Start selling &mdash; free &rarr;</Button>
-          <Button variant="secondary" href="#deliverables">See deliverables</Button>
+
+        {/* ─── LIVE CHAT ─── */}
+        <div className="max-w-[600px]">
+          <PublicChatView
+            messages={chat.messages}
+            sending={chat.sending}
+            streamingText={chat.streamingText}
+            messagesRemaining={chat.messagesRemaining}
+            limitReached={chat.limitReached}
+            error={chat.error}
+            onSend={chat.sendMessage}
+            onSignup={() => navigate('/signup')}
+            placeholder="Tell Yulia about the business you want to sell\u2026"
+          />
         </div>
       </section>
 

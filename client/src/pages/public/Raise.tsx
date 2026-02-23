@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Tag from '../../components/public/Tag';
+import PublicChatView from '../../components/public/PublicChatView';
+import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 
 /* ─── Data ─── */
 
@@ -28,6 +31,8 @@ const FAQS = [
 
 export default function Raise() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [, navigate] = useLocation();
+  const chat = useAnonymousChat({ context: 'raise' });
 
   return (
     <PublicLayout>
@@ -44,7 +49,21 @@ export default function Raise() {
           Investor-ready materials, valuation guidance, and term sheet analysis &mdash;
           negotiate from strength.
         </p>
-        <Button variant="primary" href="/signup">Start raising &mdash; free &rarr;</Button>
+
+        {/* ─── LIVE CHAT ─── */}
+        <div className="max-w-[600px]">
+          <PublicChatView
+            messages={chat.messages}
+            sending={chat.sending}
+            streamingText={chat.streamingText}
+            messagesRemaining={chat.messagesRemaining}
+            limitReached={chat.limitReached}
+            error={chat.error}
+            onSend={chat.sendMessage}
+            onSignup={() => navigate('/signup')}
+            placeholder="Tell Yulia about your raise \u2014 how much, what stage, what for\u2026"
+          />
+        </div>
       </section>
 
       {/* ═══ WHAT YOU GET ═══ */}

@@ -1,6 +1,9 @@
+import { useLocation } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Tag from '../../components/public/Tag';
+import PublicChatView from '../../components/public/PublicChatView';
+import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 
 /* ─── Data ─── */
 
@@ -14,6 +17,9 @@ const DELIVERABLES = [
 /* ─── Page ─── */
 
 export default function Integrate() {
+  const [, navigate] = useLocation();
+  const chat = useAnonymousChat({ context: 'integrate' });
+
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
@@ -29,7 +35,21 @@ export default function Integrate() {
           The first 100 days determine value creation or destruction.
           Yulia makes sure it&apos;s the former.
         </p>
-        <Button variant="primary" href="/signup">Start your integration &mdash; free &rarr;</Button>
+
+        {/* ─── LIVE CHAT ─── */}
+        <div className="max-w-[600px]">
+          <PublicChatView
+            messages={chat.messages}
+            sending={chat.sending}
+            streamingText={chat.streamingText}
+            messagesRemaining={chat.messagesRemaining}
+            limitReached={chat.limitReached}
+            error={chat.error}
+            onSend={chat.sendMessage}
+            onSignup={() => navigate('/signup')}
+            placeholder="Tell Yulia about your acquisition \u2014 what did you buy, when did it close\u2026"
+          />
+        </div>
       </section>
 
       {/* ═══ WHAT YOU GET ═══ */}

@@ -1,6 +1,9 @@
+import { useLocation } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
+import PublicChatInput from '../../components/public/PublicChatInput';
+import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 
 /* ─── Data ─── */
 
@@ -22,6 +25,9 @@ const USE_CASES = [
 /* ─── Page ─── */
 
 export default function Enterprise() {
+  const [, navigate] = useLocation();
+  const chat = useAnonymousChat({ context: 'enterprise' });
+
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
@@ -37,9 +43,17 @@ export default function Enterprise() {
           Close more deals. Produce better work product. Spend your time on
           relationships, not spreadsheets.
         </p>
-        <div className="flex flex-col md:flex-row gap-3 max-md:w-full">
+        <div className="flex flex-col md:flex-row gap-3 mb-10 max-md:w-full">
           <Button variant="primary" href="/signup">Get started &rarr;</Button>
           <Button variant="secondary" href="mailto:hello@smbx.ai">Talk to us</Button>
+        </div>
+
+        {/* ─── LIVE CHAT INPUT ─── */}
+        <div className="max-w-[600px]">
+          <PublicChatInput
+            onSend={(msg) => { chat.sendMessage(msg); navigate('/'); }}
+            placeholder="Tell Yulia about your deal flow or practice\u2026"
+          />
         </div>
       </section>
 

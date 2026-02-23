@@ -1,6 +1,9 @@
+import { useLocation } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
+import PublicChatInput from '../../components/public/PublicChatInput';
+import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 
 /* ─── Data ─── */
 
@@ -64,6 +67,9 @@ const STORIES = [
 /* ─── Page ─── */
 
 export default function HowItWorks() {
+  const [, navigate] = useLocation();
+  const chat = useAnonymousChat({ context: 'how-it-works' });
+
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
@@ -71,9 +77,17 @@ export default function HowItWorks() {
         <h1 className="font-serif text-[clamp(52px,7vw,92px)] font-black leading-none tracking-tight max-w-[14ch] mb-6 m-0">
           Talk to Yulia. She handles the rest.
         </h1>
-        <p className="text-lg text-[#7A766E] max-w-[540px] leading-relaxed m-0">
-          Here&apos;s what happens when you start a deal.
+        <p className="text-lg text-[#7A766E] max-w-[540px] leading-relaxed mb-10 m-0">
+          Here&apos;s what happens when you start a deal. Try it now.
         </p>
+
+        {/* ─── LIVE CHAT INPUT ─── */}
+        <div className="max-w-[600px]">
+          <PublicChatInput
+            onSend={(msg) => { chat.sendMessage(msg); navigate('/'); }}
+            placeholder="Try it \u2014 tell Yulia what you're working on\u2026"
+          />
+        </div>
       </section>
 
       {/* ═══ THE PROCESS ═══ */}

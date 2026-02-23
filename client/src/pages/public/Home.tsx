@@ -1,8 +1,10 @@
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
 import Tag from '../../components/public/Tag';
+import PublicChatView from '../../components/public/PublicChatView';
+import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 
 /* ─── Data ─── */
 
@@ -50,9 +52,13 @@ const JOURNEYS = [
 /* ─── Page ─── */
 
 export default function Home() {
+  const [, navigate] = useLocation();
+  const chat = useAnonymousChat({ context: 'home' });
+  const hasMessages = chat.messages.length > 0 || chat.sending;
+
   return (
     <PublicLayout>
-      {/* ═══ SECTION 1: HERO ═══ */}
+      {/* ═══ SECTION 1: HERO WITH LIVE CHAT ═══ */}
       <section className="max-w-site mx-auto px-10 pt-20 pb-12 max-md:px-5 max-md:pt-12 max-md:pb-8">
         {/* Hero tag */}
         <div className="flex items-center gap-3 mb-9 text-[13px] uppercase tracking-[.18em] text-[#DA7756] font-semibold">
@@ -66,29 +72,48 @@ export default function Home() {
           Buy <em className="italic text-[#DA7756]">right.</em>
         </h1>
 
-        {/* Visual strip — 4 mini-cards */}
-        <div className="flex gap-4 mb-10 overflow-x-auto pb-2 -mx-5 px-5 md:mx-0 md:px-0 scrollbar-none">
-          {HERO_CARDS.map(c => (
-            <div
-              key={c.size}
-              className="flex-shrink-0 w-[220px] bg-white border border-[#E0DCD4] rounded-xl px-5 py-4"
-            >
-              <p className="text-sm font-semibold text-[#1A1A18] m-0">{c.size}</p>
-              <p className="text-[13px] text-[#7A766E] mt-1 m-0">{c.result}</p>
-              <p className="text-[11px] uppercase tracking-wider text-[#DA7756] font-semibold mt-3 m-0">{c.journey}</p>
-            </div>
-          ))}
+        {/* Visual strip — 4 mini-cards (fade when chat starts) */}
+        <div className={`transition-all duration-500 ${hasMessages ? 'opacity-0 max-h-0 mb-0 overflow-hidden' : 'opacity-100 max-h-[200px] mb-10'}`}>
+          <div className="flex gap-4 overflow-x-auto pb-2 -mx-5 px-5 md:mx-0 md:px-0 scrollbar-none">
+            {HERO_CARDS.map(c => (
+              <div
+                key={c.size}
+                className="flex-shrink-0 w-[220px] bg-white border border-[#E0DCD4] rounded-xl px-5 py-4"
+              >
+                <p className="text-sm font-semibold text-[#1A1A18] m-0">{c.size}</p>
+                <p className="text-[13px] text-[#7A766E] mt-1 m-0">{c.result}</p>
+                <p className="text-[11px] uppercase tracking-wider text-[#DA7756] font-semibold mt-3 m-0">{c.journey}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="border-t-2 border-[#1A1A18] pt-8 flex flex-col md:flex-row justify-between md:items-end gap-7">
-          <p className="text-lg text-[#7A766E] max-w-[440px] leading-relaxed m-0">
-            Yulia is your AI deal advisor. She handles valuation, buyer matching,
-            due diligence, and closing &mdash; for a fraction of the traditional cost.
-          </p>
-          <div className="flex flex-col md:flex-row gap-3 shrink-0 max-md:w-full">
-            <Button variant="primary" href="/signup">Start free &rarr;</Button>
-            <Button variant="secondary" href="/how-it-works">How it works</Button>
+        {/* ─── LIVE CHAT AREA ─── */}
+        <div className={`transition-all duration-500 ${hasMessages ? 'min-h-[360px]' : ''}`}>
+          <PublicChatView
+            messages={chat.messages}
+            sending={chat.sending}
+            streamingText={chat.streamingText}
+            messagesRemaining={chat.messagesRemaining}
+            limitReached={chat.limitReached}
+            error={chat.error}
+            onSend={chat.sendMessage}
+            onSignup={() => navigate('/signup')}
+            placeholder="Tell Yulia about your business or what you're looking to do\u2026"
+          />
+        </div>
+
+        {/* Bottom bar (hidden once chat starts) */}
+        <div className={`transition-all duration-500 ${hasMessages ? 'opacity-0 max-h-0 overflow-hidden' : 'opacity-100 max-h-[200px]'}`}>
+          <div className="border-t-2 border-[#1A1A18] pt-8 flex flex-col md:flex-row justify-between md:items-end gap-7 mt-8">
+            <p className="text-lg text-[#7A766E] max-w-[440px] leading-relaxed m-0">
+              Yulia is your AI deal advisor. She handles valuation, buyer matching,
+              due diligence, and closing &mdash; for a fraction of the traditional cost.
+            </p>
+            <div className="flex flex-col md:flex-row gap-3 shrink-0 max-md:w-full">
+              <Button variant="primary" href="/signup">Start free &rarr;</Button>
+              <Button variant="secondary" href="/how-it-works">How it works</Button>
+            </div>
           </div>
         </div>
       </section>

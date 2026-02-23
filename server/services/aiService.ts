@@ -136,6 +136,36 @@ function streamText(res: Response, text: string) {
 }
 
 /**
+ * Streams a simple response (no tools) for anonymous/public chat.
+ * Lower token limit, no agentic loop.
+ */
+export async function streamAnonymousResponse(
+  systemPrompt: string,
+  messages: MessageParam[],
+  res: Response,
+): Promise<string> {
+  const anthropic = getClient();
+
+  const response = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 400,
+    system: systemPrompt,
+    messages,
+  });
+
+  const fullText = response.content
+    .filter(b => b.type === 'text')
+    .map(b => (b as any).text)
+    .join('');
+
+  if (fullText) {
+    streamText(res, fullText);
+  }
+
+  return fullText;
+}
+
+/**
  * Simple non-streaming call for when we don't need SSE.
  */
 export async function callClaude(

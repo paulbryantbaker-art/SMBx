@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { requireAuth } from './middleware/auth.js';
 import { authRouter } from './routes/auth.js';
 import { chatRouter } from './routes/chat.js';
+import { anonymousRouter } from './routes/anonymous.js';
 import type { Request, Response, NextFunction } from 'express';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -53,6 +54,7 @@ app.get('/api/test-db', async (_req, res) => {
 });
 
 app.use('/api/auth', authRouter);
+app.use('/api/chat/anonymous', anonymousRouter);
 app.use('/api/chat', chatRouter);
 
 // ─── 3. API routes (protected — everything else under /api) ─

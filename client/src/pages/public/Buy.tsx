@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import PublicLayout from '../../components/public/PublicLayout';
 import Button from '../../components/public/Button';
 import Card from '../../components/public/Card';
 import Tag from '../../components/public/Tag';
+import PublicChatView from '../../components/public/PublicChatView';
+import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 
 /* ─── Data ─── */
 
@@ -36,6 +39,8 @@ const FAQS = [
 
 export default function Buy() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [, navigate] = useLocation();
+  const chat = useAnonymousChat({ context: 'buy' });
 
   return (
     <PublicLayout>
@@ -51,7 +56,21 @@ export default function Buy() {
         <p className="text-lg text-[#7A766E] max-w-[540px] leading-relaxed mb-10 m-0">
           Build your acquisition thesis. Yulia screens targets, runs valuations, and manages diligence.
         </p>
-        <Button variant="primary" href="/signup">Start buying &mdash; free &rarr;</Button>
+
+        {/* ─── LIVE CHAT ─── */}
+        <div className="max-w-[600px]">
+          <PublicChatView
+            messages={chat.messages}
+            sending={chat.sending}
+            streamingText={chat.streamingText}
+            messagesRemaining={chat.messagesRemaining}
+            limitReached={chat.limitReached}
+            error={chat.error}
+            onSend={chat.sendMessage}
+            onSignup={() => navigate('/signup')}
+            placeholder="Tell Yulia about the kind of business you want to acquire\u2026"
+          />
+        </div>
       </section>
 
       {/* ═══ BUILT FOR YOUR DEAL SIZE ═══ */}
