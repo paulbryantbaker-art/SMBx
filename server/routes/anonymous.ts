@@ -34,11 +34,11 @@ anonymousRouter.post('/', async (req, res) => {
     }
 
     const sessionId = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+    const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
 
     await sql`
       INSERT INTO anonymous_sessions (session_id, ip, source_page, messages, message_count, expires_at)
-      VALUES (${sessionId}, ${ip}, ${req.body.context || null}, '[]'::jsonb, 0, ${expiresAt})
+      VALUES (${sessionId}, ${ip}, ${req.body.context || null}, '[]'::jsonb, 0, ${expiresAt}::timestamptz)
     `;
 
     return res.status(201).json({ sessionId, messagesRemaining: MAX_MESSAGES });
