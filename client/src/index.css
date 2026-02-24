@@ -64,3 +64,63 @@ body {
 .morph-fade-in {
   animation: morphFadeIn 400ms ease-out forwards;
 }
+
+/* ═══ HOMEPAGE APP SHELL ═══ */
+
+@keyframes homeFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes homeBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+@keyframes homeSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes homeTypingDot {
+  0%, 60%, 100% { opacity: 0.25; transform: scale(0.85); }
+  30% { opacity: 1; transform: scale(1); }
+}
+
+.home-fade-up { animation: homeFadeUp 0.45s ease both; }
+.home-fade-up-1 { animation-delay: 0.08s; }
+.home-fade-up-2 { animation-delay: 0.18s; }
+
+.home-bob svg { animation: homeBob 2.5s ease infinite; }
+
+.home-pillar, .home-scroll-cta {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.home-pillar.visible, .home-scroll-cta.visible {
+  opacity: 1; transform: translateY(0);
+}
+
+.home-msg-slide { animation: homeSlideIn 0.3s ease; }
+
+.home-typing-dot { animation: homeTypingDot 1.4s ease infinite; }
+.home-typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.home-typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+.home-yt p { margin-bottom: 10px; }
+.home-yt p:last-child { margin-bottom: 0; }
+.home-yt strong { font-weight: 700; }
+
+.home-pr-body p { font-size: 14px; color: #4A4843; line-height: 1.55; margin-bottom: 10px; }
+.home-pr-body p:last-child { margin-bottom: 0; }
+
+.home-pr-items { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.home-pr-item { padding: 10px 14px; background: #FAF8F4; border-radius: 10px; }
+.home-pr-item h4 { font-size: 13px; font-weight: 700; margin-bottom: 2px; margin-top: 0; }
+.home-pr-item p { font-size: 12px; color: #4A4843; line-height: 1.45; margin-bottom: 0; }
+
+.home-deal-strip { scrollbar-width: none; }
+.home-deal-strip::-webkit-scrollbar { display: none; }
+
+.home-input { box-shadow: 0 .25rem 1.25rem rgba(0,0,0,.035); }
+.home-input:focus { border-color: #DA7756; box-shadow: 0 0 0 3px rgba(218,119,86,.08), 0 .5rem 2rem rgba(0,0,0,.06); }
