@@ -95,6 +95,16 @@ const PILL_DATA: Record<string, { label: string; title: string; body: string; qu
 
 function genResp(m: string): string {
   const l = m.toLowerCase();
+  // Tool-triggered patterns (highest priority)
+  if (l.includes('upload') || l.includes('financial'))
+    return `<p>I can analyze your financials once you upload them. For now, <strong>tell me your approximate annual revenue and what you take home</strong> \u2014 I'll start calculating immediately.</p><p>When you're ready, the upload tool lets me process P&Ls, tax returns, and balance sheets directly.</p>`;
+  if (l.includes('valuation'))
+    return `<p>Let's calculate your real earnings. Most owners miss <strong>add-backs worth $30K\u2013$150K</strong> \u2014 vehicle, insurance, rent, family payroll.</p><p><strong>What's your industry, location, and approximate revenue?</strong></p>`;
+  if (l.includes('search') && (l.includes('market') || l.includes('business')))
+    return `<p>I can scan every market for businesses matching your criteria \u2014 industry, geography, size, profitability threshold.</p><p><strong>What industry are you targeting, and what's your size range?</strong></p>`;
+  if (l.includes('sba') || l.includes('bankab'))
+    return `<p>SBA bankability depends on <strong>DSCR, collateral coverage, industry risk</strong>, and the June 2025 rule changes. I check all of it instantly.</p><p><strong>What's the deal size and industry?</strong></p>`;
+  // Industry patterns
   if (l.includes('hvac') || l.includes('plumb') || l.includes('heat'))
     return `<p>Good market. HVAC is one of the hottest PE roll-up verticals \u2014 <strong>138 deals</strong> in 2024 alone.</p><p>At $3M revenue, likely <strong>$450K\u2013$700K SDE</strong>. Preliminary range: <strong>$1.1M\u2013$2.5M</strong> standalone, significantly more as a platform add-on at 5\u20137\u00D7.</p><p><strong>What did you take home last year</strong> \u2014 salary, distributions, benefits, truck, phone, everything?</p>`;
   if (l.includes('saas') || l.includes('software') || l.includes('arr'))
@@ -103,18 +113,21 @@ function genResp(m: string): string {
     return `<p>Landscaping at $400K \u2014 solid. We'll focus on <strong>total owner's earnings</strong>.</p><p>Most owners miss add-backs \u2014 <strong>vehicle, fuel, phone, depreciation, family payroll</strong>.</p><p><strong>What did you take home last year?</strong></p>`;
   if (l.includes('pe ') || l.includes('fund') || l.includes('roll-up') || l.includes('portfolio'))
     return `<p>Home services roll-up \u2014 proven playbook. I'll score every MSA for <strong>density, wage arbitrage, growth</strong>.</p><p><strong>Target EBITDA range and geographic preferences?</strong></p>`;
+  // Intent patterns
   if (l.includes('sell') || l.includes('exit') || l.includes('worth'))
     return `<p>Let's calculate your real earnings. Most owners miss <strong>add-backs</strong> worth $30K\u2013$150K.</p><p><strong>Industry, location, and approximate revenue?</strong></p>`;
   if (l.includes('buy') || l.includes('acquir') || l.includes('search'))
     return `<p>Key questions: <strong>industry, size, geography, financing plan</strong>. If SBA, I'll check bankability instantly.</p><p><strong>Specific deal or building thesis?</strong></p>`;
   if (l.includes('raise') || l.includes('capital'))
     return `<p>Growth capital \u2014 how much equity at what valuation?</p><p><strong>Current revenue, and what would the capital fund?</strong></p>`;
+  // Number patterns
   if (l.includes('$') || /\d+k/i.test(l) || /\d+,\d+/.test(l))
     return `<p>Good \u2014 let me work with those numbers.</p><p>Do you have any of these running through the business? Vehicle, phone, health insurance, family on payroll, one-time purchases?</p><p>Each is a legitimate <strong>add-back</strong> that increases your sale price.</p>`;
+  // Default
   return `<p><strong>Tell me what you're working on</strong> \u2014 selling, buying, raising capital, or post-acquisition?</p><p>Give me the basics and I'll start immediately.</p>`;
 }
 
-/* ═══ MINI-CARD DATA ═══ */
+/* ═══ PILLAR DATA ═══ */
 
 const PROCESS_CARDS = [
   { t: 'Intake & Analysis', d: 'Classifies your deal, calculates real earnings, identifies hidden add-backs, benchmarks against your industry.' },
@@ -142,6 +155,54 @@ const PERSONA_CARDS = [
   { key: 'pros', accent: false, title: 'CPAs, Attorneys & Lenders', desc: 'Your clients are doing deals. Yulia gives you the M&A intelligence to advise them \u2014 and a new revenue stream.', quote: '\u201CThree of my tax clients sold businesses this year. Yulia helped me advise all three.\u201D' },
 ];
 
+/* ═══ TOOL ICONS (15px SVGs) ═══ */
+
+const Icons = {
+  paperclip: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+    </svg>
+  ),
+  chart: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  ),
+  search: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+  ),
+  shield: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  ),
+};
+
+const HERO_TOOLS = [
+  { icon: Icons.paperclip, label: 'Upload financials', text: 'I want to upload my financials for a valuation' },
+  { icon: Icons.chart, label: 'Valuation', text: 'Run a valuation on my business' },
+  { icon: Icons.search, label: 'Market search', text: 'Search for businesses for sale in home services' },
+  { icon: Icons.shield, label: 'SBA check', text: 'Check SBA bankability for a $2M acquisition' },
+];
+
+const DOCK_TOOLS = [
+  { icon: Icons.paperclip, label: 'Upload', text: 'I want to upload my financials for a valuation' },
+  { icon: Icons.chart, label: 'Valuation', text: 'Run a valuation on my business' },
+  { icon: Icons.search, label: 'Search', text: 'Search for businesses for sale in home services' },
+  { icon: Icons.shield, label: 'SBA', text: 'Check SBA bankability for a $2M acquisition' },
+];
+
+/* ═══ SEND ICON ═══ */
+
+const SendIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="22" y1="2" x2="11" y2="13" />
+    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+  </svg>
+);
+
 /* ═══ COMPONENT ═══ */
 
 export default function Home() {
@@ -151,7 +212,8 @@ export default function Home() {
   const [typing, setTyping] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const heroRef = useRef<HTMLTextAreaElement>(null);
+  const dockRef = useRef<HTMLTextAreaElement>(null);
 
   /* ── Scroll to bottom ── */
 
@@ -179,59 +241,51 @@ export default function Home() {
     setMessages([]);
     setValue('');
     setTyping(false);
-    if (inputRef.current) inputRef.current.style.height = 'auto';
+    if (heroRef.current) heroRef.current.style.height = 'auto';
+    if (dockRef.current) dockRef.current.style.height = 'auto';
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   }, [chatActive]);
-
-  /* ── Auto-resize textarea ── */
-
-  const autoResize = useCallback(() => {
-    const el = inputRef.current;
-    if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
-  }, []);
 
   /* ── Send message ── */
 
   const send = useCallback(() => {
     const t = value.trim();
     if (!t || typing) return;
-    enterChat();
+    if (!chatActive) enterChat();
     setMessages(prev => [...prev, { type: 'user', text: t }]);
     setValue('');
-    if (inputRef.current) inputRef.current.style.height = 'auto';
+    if (heroRef.current) heroRef.current.style.height = 'auto';
+    if (dockRef.current) dockRef.current.style.height = 'auto';
     setTyping(true);
     const resp = genResp(t);
     setTimeout(() => {
       setTyping(false);
       setMessages(prev => [...prev, { type: 'yulia', html: resp }]);
-      inputRef.current?.focus();
+      dockRef.current?.focus();
     }, 1800 + Math.random() * 1000);
-  }, [value, typing, enterChat]);
+  }, [value, typing, chatActive, enterChat]);
 
-  /* ── Fill input and send (from deal chips) ── */
+  /* ── Fill input and send (deal chips) ── */
 
   const fillAndSend = useCallback((text: string) => {
     if (typing) return;
-    enterChat();
+    if (!chatActive) enterChat();
     setMessages(prev => [...prev, { type: 'user', text }]);
     setValue('');
-    if (inputRef.current) inputRef.current.style.height = 'auto';
     setTyping(true);
     const resp = genResp(text);
     setTimeout(() => {
       setTyping(false);
       setMessages(prev => [...prev, { type: 'yulia', html: resp }]);
-      inputRef.current?.focus();
+      dockRef.current?.focus();
     }, 1800 + Math.random() * 1000);
-  }, [typing, enterChat]);
+  }, [typing, chatActive, enterChat]);
 
   /* ── Trigger pill response ── */
 
   const triggerPill = useCallback((type: string) => {
     if (typing) return;
-    enterChat();
+    if (!chatActive) enterChat();
     const d = PILL_DATA[type];
     if (!d) return;
     setMessages(prev => [...prev, { type: 'pill-card', label: d.label, title: d.title, body: d.body }]);
@@ -239,9 +293,54 @@ export default function Home() {
     setTimeout(() => {
       setTyping(false);
       setMessages(prev => [...prev, { type: 'pill-question', html: d.question }]);
-      inputRef.current?.focus();
+      dockRef.current?.focus();
     }, 1200);
-  }, [typing, enterChat]);
+  }, [typing, chatActive, enterChat]);
+
+  /* ── Fill input (tool buttons) — fills but does NOT send ── */
+
+  const fillInput = useCallback((text: string) => {
+    setValue(text);
+    requestAnimationFrame(() => {
+      const ref = chatActive ? dockRef : heroRef;
+      if (ref.current) {
+        ref.current.style.height = 'auto';
+        ref.current.style.height = Math.min(ref.current.scrollHeight, 140) + 'px';
+        ref.current.focus();
+      }
+    });
+  }, [chatActive]);
+
+  /* ── Scroll to top and focus hero input (bottom CTA) ── */
+
+  const scrollToTopAndFocusHero = useCallback(() => {
+    if (scrollRef.current) scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => heroRef.current?.focus(), 500);
+  }, []);
+
+  /* ── Shared handlers ── */
+
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setValue(e.target.value);
+    const el = e.target;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+  };
+
+  /* ── Focus dock when entering chat ── */
+
+  useEffect(() => {
+    if (chatActive) {
+      setTimeout(() => dockRef.current?.focus(), 50);
+    }
+  }, [chatActive]);
 
   /* ── IntersectionObserver for pillar reveals ── */
 
@@ -267,16 +366,25 @@ export default function Home() {
     if (chatActive) scrollToBottom();
   }, [messages, typing, chatActive, scrollToBottom]);
 
-  /* ── Keyboard ── */
-
-  const handleKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      send();
-    }
-  };
-
   const hasContent = value.trim().length > 0;
+
+  /* ── Tool button renderer ── */
+
+  const renderTools = (tools: typeof HERO_TOOLS) => (
+    <div className="flex overflow-x-auto gap-1.5 px-3 pb-3">
+      {tools.map(t => (
+        <button
+          key={t.label}
+          className="shrink-0 flex items-center gap-1.5 py-[7px] px-3 rounded-lg text-[12.5px] font-medium text-[#7A766E] bg-transparent border-none font-sans cursor-pointer transition-colors hover:bg-[#F0EDE6] whitespace-nowrap"
+          onClick={() => fillInput(t.text)}
+          type="button"
+        >
+          {t.icon}
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <div className="h-dvh flex flex-col overflow-hidden bg-[#FAF8F4]">
@@ -295,9 +403,7 @@ export default function Home() {
             <Link href="/pricing" className="hidden md:block text-sm font-medium text-[#7A766E] hover:text-[#1A1A18] no-underline transition-colors">Pricing</Link>
             <button
               className="text-sm font-medium text-[#7A766E] hover:text-[#1A1A18] bg-transparent border-none font-sans p-0 cursor-pointer transition-colors"
-              onClick={() => {
-                if (!chatActive) document.getElementById('home-p1')?.scrollIntoView({ behavior: 'smooth' });
-              }}
+              onClick={() => { if (!chatActive) document.getElementById('home-p1')?.scrollIntoView({ behavior: 'smooth' }); }}
             >
               Learn more
             </button>
@@ -317,34 +423,62 @@ export default function Home() {
             <>
               {/* ═══ LANDING ═══ */}
               <div className="flex-1 flex flex-col items-center justify-center text-center py-5">
-                <h1 className="home-fade-up font-serif text-[clamp(26px,5.5vw,56px)] font-black leading-[1.1] tracking-[-0.025em] mb-2.5 m-0">
+                <h1 className="home-fade-up font-serif text-[clamp(24px,5vw,44px)] font-extrabold leading-[1.12] tracking-[-0.025em] mb-2 m-0">
                   Sell a business.<br />Buy a business.<br />Raise capital.
                 </h1>
-                <p className="home-fade-up home-fade-up-1 text-[clamp(15px,1.5vw,18px)] text-[#7A766E] leading-[1.5] max-w-[420px] mb-8 m-0">
-                  Your AI deal advisor handles the process and knows your market.
+                <p className="home-fade-up home-fade-up-1 text-[clamp(14px,1.4vw,17px)] text-[#7A766E] leading-[1.5] max-w-[400px] mb-9 m-0">
+                  Your AI M&A advisor. She runs the process, knows your market.
                 </p>
 
-                {/* Pills */}
-                <div className="home-fade-up home-fade-up-2 flex flex-col gap-2 w-full max-w-[400px] md:flex-row md:max-w-[680px] md:gap-2.5">
-                  {[
-                    { key: 'sell', label: 'I want to sell my business' },
-                    { key: 'buy', label: 'I want to buy a business' },
-                    { key: 'intelligence', label: 'What can Yulia actually do?' },
-                  ].map(pill => (
-                    <div
-                      key={pill.key}
-                      className="flex items-center gap-2.5 px-3.5 py-3 bg-white border border-[#E0DCD4] rounded-[14px] cursor-pointer transition-all text-left hover:border-[#DA7756] hover:shadow-[0_2px_12px_rgba(218,119,86,.06)] active:scale-[.985] md:flex-1 md:flex-col md:items-center md:text-center md:px-3.5 md:py-[18px] md:gap-2"
-                      onClick={() => triggerPill(pill.key)}
+                {/* Hero Input Card */}
+                <div className="home-fade-up home-fade-up-2 home-input-card w-full max-w-[580px] bg-white border-[1.5px] border-[#E0DCD4] rounded-[22px] overflow-hidden md:max-w-[660px]">
+                  <div className="relative">
+                    <textarea
+                      ref={heroRef}
+                      value={value}
+                      onChange={handleChange}
+                      onKeyDown={handleKey}
+                      placeholder="Tell Yulia about your deal..."
+                      className="w-full bg-transparent border-none outline-none resize-none text-[16.5px] font-sans text-[#1A1A18] leading-[1.5] placeholder:text-[#B5B0A8] px-5 pt-[18px] pb-2.5 pr-[50px]"
+                      style={{ minHeight: 56, maxHeight: 140 }}
+                      rows={1}
+                    />
+                    <button
+                      className={`absolute right-3 bottom-2 w-[38px] h-[38px] rounded-full border-none bg-[#DA7756] text-white cursor-pointer flex items-center justify-center transition-all duration-200 hover:bg-[#C4684A] active:scale-95 ${hasContent ? 'opacity-100 scale-100' : 'opacity-0 scale-[.8] pointer-events-none'}`}
+                      onClick={send}
+                      type="button"
                     >
-                      <div className="w-6 h-6 rounded-full bg-[#DA7756] text-white text-[10px] font-bold flex items-center justify-center shrink-0 font-sans">Y</div>
-                      <div className="text-sm font-medium text-[#4A4843] leading-[1.35] md:text-[13.5px]">{pill.label}</div>
-                    </div>
+                      <SendIcon />
+                    </button>
+                  </div>
+                  {renderTools(HERO_TOOLS)}
+                </div>
+
+                <p className="home-fade-up home-fade-up-3 text-[11.5px] text-[#C5C0B8] mt-3.5 m-0">
+                  No account needed &middot; Start talking
+                </p>
+
+                {/* Suggestion Chips */}
+                <div className="home-fade-up home-fade-up-4 flex flex-wrap justify-center gap-2 mt-5 max-w-[580px] md:max-w-[660px]">
+                  {[
+                    { label: 'Sell my business', pill: 'sell' },
+                    { label: 'Buy a business', pill: 'buy' },
+                    { label: 'What can Yulia do?', pill: 'intelligence' },
+                  ].map(chip => (
+                    <button
+                      key={chip.label}
+                      className="bg-white border border-[#E0DCD4] rounded-full py-[9px] px-[18px] text-[13.5px] font-medium text-[#4A4843] font-sans cursor-pointer transition-all whitespace-nowrap hover:border-[#DA7756] hover:text-[#DA7756] hover:bg-[#FFF0EB] active:scale-[.97]"
+                      onClick={() => triggerPill(chip.pill)}
+                      type="button"
+                    >
+                      {chip.label}
+                    </button>
                   ))}
                 </div>
 
                 {/* Scroll tease */}
                 <div
-                  className="home-bob mt-10 flex flex-col items-center gap-1 text-[#C5C0B8] text-[11px] font-medium tracking-[.06em] cursor-pointer"
+                  className="home-fade-up home-fade-up-5 home-bob mt-10 flex flex-col items-center gap-1 text-[#C5C0B8] text-[11px] font-medium tracking-[.06em] cursor-pointer"
                   onClick={() => document.getElementById('home-p1')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   <span>LEARN MORE</span>
@@ -352,9 +486,10 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* ═══ PILLARS ═══ */}
+              {/* Landing divider — full-width gradient */}
+              <div className="home-landing-divider" />
 
-              <div className="w-10 h-px bg-[#E0DCD4] mx-auto" />
+              {/* ═══ PILLARS ═══ */}
 
               {/* Pillar 1: The Process */}
               <div className="home-pillar py-[60px] md:py-20" id="home-p1">
@@ -460,10 +595,16 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Scroll CTA */}
+              {/* Bottom CTA */}
               <div className="home-scroll-cta text-center py-10 pb-[60px]">
-                <p className="font-serif text-[clamp(18px,3vw,24px)] font-bold mb-1 m-0">Your deal starts with a conversation.</p>
-                <span className="text-sm text-[#7A766E]">Type below &mdash; Yulia&apos;s ready.</span>
+                <p className="font-serif text-[clamp(18px,3vw,24px)] font-bold mb-4 m-0">Ready to start?</p>
+                <button
+                  className="bg-[#DA7756] text-white rounded-full py-3.5 px-8 text-[15px] font-semibold font-sans border-none cursor-pointer transition-all hover:bg-[#C4684A] hover:-translate-y-px hover:shadow-[0_.5rem_2rem_rgba(0,0,0,.06)] active:scale-[.97]"
+                  onClick={scrollToTopAndFocusHero}
+                  type="button"
+                >
+                  Talk to Yulia
+                </button>
               </div>
             </>
           ) : (
@@ -522,41 +663,38 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── DOCK ── */}
-      <div
-        className="shrink-0 px-5 py-2.5 bg-[#FAF8F4] z-10 md:px-10 md:py-3"
-        style={{ paddingBottom: 'max(10px, env(safe-area-inset-bottom))' }}
-      >
-        <div className="max-w-[640px] mx-auto">
-          <div className="relative">
-            <textarea
-              ref={inputRef}
-              className="home-input w-full bg-white border-[1.5px] border-[#E0DCD4] rounded-[18px] px-[18px] py-3.5 pr-[50px] text-base font-sans text-[#1A1A18] outline-none resize-none leading-[1.5] transition-[border-color,box-shadow] duration-200 placeholder:text-[#B5B0A8]"
-              style={{ minHeight: 52, maxHeight: 140 }}
-              placeholder="Tell Yulia about your deal..."
-              rows={1}
-              value={value}
-              onChange={e => { setValue(e.target.value); autoResize(); }}
-              onKeyDown={handleKey}
-            />
-            <button
-              className={`absolute right-2 bottom-2 w-[38px] h-[38px] rounded-full border-none bg-[#DA7756] text-white cursor-pointer flex items-center justify-center transition-all duration-200 hover:bg-[#C4684A] active:scale-95 ${hasContent ? 'opacity-100 scale-100' : 'opacity-0 scale-[.8]'}`}
-              onClick={send}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
-            </button>
-          </div>
-          <div
-            className="text-center text-[11px] text-[#C5C0B8] mt-1.5 transition-opacity duration-300"
-            style={{ opacity: chatActive ? 0 : 1 }}
-          >
-            No account needed &middot; Start talking
+      {/* ── DOCK (chat mode only) ── */}
+      {chatActive && (
+        <div
+          className="shrink-0 px-5 py-2.5 bg-[#FAF8F4] z-10 md:px-10 md:py-3"
+          style={{ paddingBottom: 'max(10px, env(safe-area-inset-bottom))' }}
+        >
+          <div className="max-w-[640px] mx-auto">
+            <div className="home-input-card bg-white border-[1.5px] border-[#E0DCD4] rounded-[20px] overflow-hidden">
+              <div className="relative">
+                <textarea
+                  ref={dockRef}
+                  value={value}
+                  onChange={handleChange}
+                  onKeyDown={handleKey}
+                  placeholder="Type a message..."
+                  className="w-full bg-transparent border-none outline-none resize-none text-[16.5px] font-sans text-[#1A1A18] leading-[1.5] placeholder:text-[#B5B0A8] px-5 pt-3.5 pb-2.5 pr-[50px]"
+                  style={{ minHeight: 52, maxHeight: 140 }}
+                  rows={1}
+                />
+                <button
+                  className={`absolute right-3 bottom-2 w-[38px] h-[38px] rounded-full border-none bg-[#DA7756] text-white cursor-pointer flex items-center justify-center transition-all duration-200 hover:bg-[#C4684A] active:scale-95 ${hasContent ? 'opacity-100 scale-100' : 'opacity-0 scale-[.8] pointer-events-none'}`}
+                  onClick={send}
+                  type="button"
+                >
+                  <SendIcon />
+                </button>
+              </div>
+              {renderTools(DOCK_TOOLS)}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

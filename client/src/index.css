@@ -87,12 +87,17 @@ body {
   30% { opacity: 1; transform: scale(1); }
 }
 
-.home-fade-up { animation: homeFadeUp 0.45s ease both; }
-.home-fade-up-1 { animation-delay: 0.08s; }
-.home-fade-up-2 { animation-delay: 0.18s; }
+/* Landing stagger animations */
+.home-fade-up { animation: homeFadeUp 0.4s ease both; }
+.home-fade-up-1 { animation-delay: 0.06s; }
+.home-fade-up-2 { animation-delay: 0.12s; }
+.home-fade-up-3 { animation-delay: 0.18s; }
+.home-fade-up-4 { animation-delay: 0.24s; }
+.home-fade-up-5 { animation-delay: 0.3s; }
 
 .home-bob svg { animation: homeBob 2.5s ease infinite; }
 
+/* Pillar + CTA reveal */
 .home-pillar, .home-scroll-cta {
   opacity: 0; transform: translateY(16px);
   transition: opacity 0.5s ease, transform 0.5s ease;
@@ -101,26 +106,46 @@ body {
   opacity: 1; transform: translateY(0);
 }
 
+/* Message slide-in */
 .home-msg-slide { animation: homeSlideIn 0.3s ease; }
 
+/* Typing dots */
 .home-typing-dot { animation: homeTypingDot 1.4s ease infinite; }
 .home-typing-dot:nth-child(2) { animation-delay: 0.15s; }
 .home-typing-dot:nth-child(3) { animation-delay: 0.3s; }
 
+/* Yulia message text */
 .home-yt p { margin-bottom: 10px; }
 .home-yt p:last-child { margin-bottom: 0; }
 .home-yt strong { font-weight: 700; }
 
+/* Pill response card body */
 .home-pr-body p { font-size: 14px; color: #4A4843; line-height: 1.55; margin-bottom: 10px; }
 .home-pr-body p:last-child { margin-bottom: 0; }
 
+/* Pill response items */
 .home-pr-items { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
 .home-pr-item { padding: 10px 14px; background: #FAF8F4; border-radius: 10px; }
 .home-pr-item h4 { font-size: 13px; font-weight: 700; margin-bottom: 2px; margin-top: 0; }
 .home-pr-item p { font-size: 12px; color: #4A4843; line-height: 1.45; margin-bottom: 0; }
 
+/* Deal strip scrollbar hidden */
 .home-deal-strip { scrollbar-width: none; }
 .home-deal-strip::-webkit-scrollbar { display: none; }
 
-.home-input { box-shadow: 0 .25rem 1.25rem rgba(0,0,0,.035); }
-.home-input:focus { border-color: #DA7756; box-shadow: 0 0 0 3px rgba(218,119,86,.08), 0 .5rem 2rem rgba(0,0,0,.06); }
+/* Input card focus-within */
+.home-input-card {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.home-input-card:focus-within {
+  border-color: #DA7756;
+  box-shadow: 0 0 0 4px rgba(218,119,86,0.08), 0 4px 24px rgba(0,0,0,0.08);
+}
+
+/* Landing divider — full-width gradient */
+.home-landing-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, #E0DCD4, transparent);
+  margin: 40px 0;
+}
