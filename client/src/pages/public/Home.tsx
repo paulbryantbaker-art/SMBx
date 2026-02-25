@@ -456,28 +456,53 @@ export default function Home() {
         className="shrink-0 z-20 relative"
         style={{ borderBottom: phase === 'chat' ? '1px solid #DDD9D1' : '1px solid transparent', transition: 'border-color .3s' }}
       >
-        <div className="flex items-center justify-between px-5 py-3 md:px-8 lg:px-12">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors"
-              type="button"
-              aria-label="Open sidebar"
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M3 12h18M3 6h18M3 18h18" />
-              </svg>
-            </button>
+        <div className="flex items-center justify-between px-3 py-3 md:px-8 lg:px-12 overflow-hidden">
+          <div className="flex items-center gap-1.5 min-w-0 shrink">
+            {phase !== 'landing' ? (
+              <button
+                onClick={goHome}
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors shrink-0"
+                type="button"
+                aria-label="Back"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors shrink-0"
+                type="button"
+                aria-label="Open sidebar"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M3 12h18M3 6h18M3 18h18" />
+                </svg>
+              </button>
+            )}
             <div
-              className="text-[26px] font-extrabold tracking-[-0.03em] text-[#1A1A18] cursor-pointer select-none lg:text-[28px]"
+              className="text-[24px] font-extrabold tracking-[-0.03em] text-[#1A1A18] cursor-pointer select-none shrink-0 md:text-[26px] lg:text-[28px]"
               onClick={goHome}
             >
               smb<span className="text-[#D4714E]">x</span>.ai
             </div>
           </div>
-          <div className="flex items-center gap-4 lg:gap-6">
+          <div className="flex items-center gap-2 shrink-0">
+            {phase !== 'landing' && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors"
+                type="button"
+                aria-label="Open sidebar"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M3 12h18M3 6h18M3 18h18" />
+                </svg>
+              </button>
+            )}
             <Link href="/login" className="flex items-center justify-center bg-transparent border-none cursor-pointer text-[#3D3B37] p-1.5 rounded-full transition-all hover:text-[#D4714E] hover:bg-[rgba(212,113,78,.08)] no-underline">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="26" height="26">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
               </svg>
             </Link>
@@ -504,14 +529,14 @@ export default function Home() {
               </p>
 
               <div className="home-agrid w-full home-fade-up md:max-w-[660px] lg:max-w-[900px] lg:mb-6" style={{ animationDelay: '.18s' }}>
-                {ACTION_CARDS.map((c, i) => (
+                {ACTION_CARDS.map((c) => (
                   <div
                     key={c.key}
-                    className={`home-acard ${i < 3 ? 'col-span-2' : 'col-span-3'}`}
+                    className="home-acard"
                     onClick={() => showJourney(c.key)}
                   >
                     {c.icon}
-                    <span className="text-[18px] font-bold leading-[1.25] text-[#1A1A18] lg:text-base">{c.label}</span>
+                    <span className="text-[16px] font-bold leading-[1.25] text-[#1A1A18] md:text-[18px] lg:text-base">{c.label}</span>
                   </div>
                 ))}
               </div>
@@ -600,22 +625,22 @@ export default function Home() {
             <div className="flex flex-col gap-4 py-5 pb-6 max-w-[640px] mx-auto w-full">
               {messages.map((msg) =>
                 msg.role === 'user' ? (
-                  <div key={msg.id} className="home-msg-slide self-end max-w-[82%] bg-[#D4714E] text-white px-[18px] py-3.5 rounded-[20px_20px_6px_20px] text-base leading-[1.5]" style={{ boxShadow: '0 2px 8px rgba(212,113,78,.2)' }}>
+                  <div key={msg.id} className="home-msg-slide self-end max-w-[82%] bg-[#D4714E] text-white px-[18px] py-3.5 rounded-[20px_20px_6px_20px] text-base leading-[1.5] break-words overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(212,113,78,.2)', overflowWrap: 'break-word' }}>
                     {msg.content}
                   </div>
                 ) : (
-                  <div key={msg.id} className="home-msg-slide self-start max-w-[90%]">
-                    <div className="w-8 h-8 rounded-full bg-[#D4714E] text-white text-xs font-bold flex items-center justify-center mb-2" style={{ boxShadow: '0 2px 6px rgba(212,113,78,.2)' }}>Y</div>
-                    <div className="bg-white rounded-[20px] px-[18px] py-4 text-base leading-[1.65] font-medium home-yt" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05)' }}>
+                  <div key={msg.id} className="home-msg-slide self-start max-w-[90%] min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-[#D4714E] text-white text-xs font-bold flex items-center justify-center mb-2 shrink-0" style={{ boxShadow: '0 2px 6px rgba(212,113,78,.2)' }}>Y</div>
+                    <div className="bg-white rounded-[20px] px-[18px] py-4 text-base leading-[1.65] font-medium home-yt overflow-hidden" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05)', overflowWrap: 'break-word' }}>
                       <Markdown>{msg.content}</Markdown>
                     </div>
                   </div>
                 ),
               )}
               {sending && streamingText && (
-                <div className="home-msg-slide self-start max-w-[90%]">
-                  <div className="w-8 h-8 rounded-full bg-[#D4714E] text-white text-xs font-bold flex items-center justify-center mb-2" style={{ boxShadow: '0 2px 6px rgba(212,113,78,.2)' }}>Y</div>
-                  <div className="bg-white rounded-[20px] px-[18px] py-4 text-base leading-[1.65] font-medium home-yt" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05)' }}>
+                <div className="home-msg-slide self-start max-w-[90%] min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-[#D4714E] text-white text-xs font-bold flex items-center justify-center mb-2 shrink-0" style={{ boxShadow: '0 2px 6px rgba(212,113,78,.2)' }}>Y</div>
+                  <div className="bg-white rounded-[20px] px-[18px] py-4 text-base leading-[1.65] font-medium home-yt overflow-hidden" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05)', overflowWrap: 'break-word' }}>
                     <Markdown>{streamingText}</Markdown>
                   </div>
                 </div>
@@ -653,7 +678,7 @@ export default function Home() {
 
       {/* ── DOCK ── */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-30 px-5 bg-[#FAF8F4] border-t border-[#DDD9D1]"
+        className="fixed bottom-0 left-0 right-0 z-30 px-3 md:px-5 bg-[#FAF8F4] border-t border-[#DDD9D1]"
         style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))', paddingTop: '8px' }}
       >
         <div className="max-w-[640px] mx-auto">
