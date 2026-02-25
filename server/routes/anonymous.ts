@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { sql } from '../db.js';
 import { buildAnonymousPrompt } from '../services/promptBuilder.js';
 import { streamAnonymousResponse } from '../services/aiService.js';
+import { extractFields } from '../services/fieldExtractor.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
 export const anonymousRouter = Router();
@@ -158,6 +159,25 @@ anonymousRouter.post('/:sessionId/messages', async (req, res) => {
       res.write(`data: ${JSON.stringify({ type: 'done', messagesRemaining: remaining })}\n\n`);
       res.write('data: [DONE]\n\n');
       res.end();
+
+      // Fire-and-forget: extract structured fields from conversation
+      if (assistantText) {
+        const finalMsgsForExtraction = [...updatedMsgs, { role: 'assistant', content: assistantText }];
+        extractFields(finalMsgsForExtraction).then(async (fields) => {
+          if (fields) {
+            try {
+              await sql`
+                UPDATE anonymous_sessions
+                SET data = COALESCE(data, '{}'::jsonb) || ${JSON.stringify(fields)}::jsonb
+                WHERE id = ${session.id}
+              `;
+            } catch (e: any) {
+              // data column may not exist yet — store in messages metadata instead
+              console.error('Field storage error:', e.message);
+            }
+          }
+        }).catch(() => {});
+      }
     } catch (err: any) {
       console.error('Anonymous chat error:', err.message);
       if (res.headersSent) {
