@@ -423,10 +423,10 @@ export default function Home() {
             <>
               {/* ═══ LANDING ═══ */}
               <div className="flex-1 flex flex-col items-center justify-center text-center py-5">
-                <h1 className="home-fade-up font-serif text-[clamp(24px,5vw,44px)] font-extrabold leading-[1.12] tracking-[-0.025em] mb-2 m-0">
+                <h1 className="home-fade-up font-serif text-[clamp(24px,5vw,44px)] font-extrabold leading-[1.12] tracking-[-0.025em] mb-2 lg:mb-4 m-0">
                   Sell a business.<br />Buy a business.<br />Raise capital.
                 </h1>
-                <p className="home-fade-up home-fade-up-1 text-[clamp(14px,1.4vw,17px)] text-[#7A766E] leading-[1.5] max-w-[400px] mb-9 m-0">
+                <p className="home-fade-up home-fade-up-1 text-[clamp(14px,1.4vw,17px)] text-[#7A766E] leading-[1.5] max-w-[400px] mb-9 lg:mb-12 m-0">
                   Your AI M&A advisor. She runs the process, knows your market.
                 </p>
 
@@ -454,12 +454,12 @@ export default function Home() {
                   {renderTools(HERO_TOOLS)}
                 </div>
 
-                <p className="home-fade-up home-fade-up-3 text-[11.5px] text-[#C5C0B8] mt-3.5 m-0">
+                <p className="home-fade-up home-fade-up-3 text-[11.5px] text-[#C5C0B8] mt-3.5 lg:mt-5 m-0">
                   No account needed &middot; Start talking
                 </p>
 
                 {/* Suggestion Chips */}
-                <div className="home-fade-up home-fade-up-4 flex flex-wrap justify-center gap-2 mt-5 max-w-[580px] md:max-w-[660px]">
+                <div className="home-fade-up home-fade-up-4 flex flex-wrap justify-center gap-2 mt-5 lg:mt-7 max-w-[580px] md:max-w-[660px]">
                   {[
                     { label: 'Sell my business', pill: 'sell' },
                     { label: 'Buy a business', pill: 'buy' },
@@ -478,7 +478,7 @@ export default function Home() {
 
                 {/* Scroll tease */}
                 <div
-                  className="home-fade-up home-fade-up-5 home-bob mt-10 flex flex-col items-center gap-1 text-[#C5C0B8] text-[11px] font-medium tracking-[.06em] cursor-pointer"
+                  className="home-fade-up home-fade-up-5 home-bob mt-10 lg:mt-14 flex flex-col items-center gap-1 text-[#C5C0B8] text-[11px] font-medium tracking-[.06em] cursor-pointer"
                   onClick={() => document.getElementById('home-p1')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   <span>LEARN MORE</span>

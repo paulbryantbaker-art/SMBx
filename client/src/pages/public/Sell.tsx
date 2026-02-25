@@ -49,19 +49,19 @@ const TIMELINE_STEPS = [
 
 const DEAL_SIZES = [
   {
-    range: 'Under $500K',
-    title: 'First-time seller',
-    desc: "You\u2019ve never done this before. That\u2019s okay \u2014 Yulia walks you through every step in plain language. No jargon, no assumptions.",
-    result: '\u201CHe thought he\u2019d be lucky to get $200K. Yulia found $31K in add-backs he didn\u2019t know counted. Asking price: $425K.\u201D',
-  },
-  {
-    range: '$500K \u2013 $10M',
-    title: 'Serious operation',
-    desc: 'You know your business is valuable. Yulia produces institutional-quality work product \u2014 the same CIMs and valuations that $100K advisory firms deliver.',
+    range: '$1.5M \u2013 $5M',
+    title: 'Established exit',
+    desc: 'You\u2019ve built a real business. Yulia produces institutional-quality valuations, CIMs, and buyer research \u2014 the same work product advisory firms charge $50K\u2013$100K to deliver.',
     result: '\u201CValued at $2.6M\u2013$3.9M using live comps. Three PE firms actively consolidating in her industry. Full CIM in 47 minutes.\u201D',
   },
   {
-    range: '$10M+',
+    range: '$5M \u2013 $25M',
+    title: 'Mid-market sale',
+    desc: 'At this size, buyer sophistication increases. Yulia handles QoE prep, management presentations, and buyer scoring at the level PE firms expect.',
+    result: '\u201CFull valuation, CIM, and 12 scored buyers in one week. Closed at 15% above initial offers.\u201D',
+  },
+  {
+    range: '$25M+',
     title: 'Strategic exit',
     desc: 'PE roll-up, strategic sale, or management buyout \u2014 Yulia handles the analytical heavy lifting while your deal team focuses on execution.',
     result: '\u201CTheir team of 3 operated like a team of 12. Six platform acquisitions closed in 14 months.\u201D',
@@ -226,6 +226,13 @@ export default function Sell() {
           </button>
         </div>
       </section>
+
+      {/* ═══ NUDGE ═══ */}
+      <div className="text-center pb-10 max-md:pb-6">
+        <p className="journey-nudge text-[22px] text-[#DA7756] m-0 max-md:text-lg">
+          most owners wish they&apos;d started this conversation sooner
+        </p>
+      </div>
     </PublicLayout>
   );
 }

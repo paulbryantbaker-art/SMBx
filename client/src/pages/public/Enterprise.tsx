@@ -158,6 +158,13 @@ export default function Enterprise() {
           </button>
         </div>
       </section>
+
+      {/* ═══ NUDGE ═══ */}
+      <div className="text-center pb-10 max-md:pb-6">
+        <p className="journey-nudge text-[22px] text-[#DA7756] m-0 max-md:text-lg">
+          your next deal is waiting
+        </p>
+      </div>
     </PublicLayout>
   );
 }

@@ -186,6 +186,13 @@ export default function HowItWorks() {
           </button>
         </div>
       </section>
+
+      {/* ═══ NUDGE ═══ */}
+      <div className="text-center pb-10 max-md:pb-6">
+        <p className="journey-nudge text-[22px] text-[#DA7756] m-0 max-md:text-lg">
+          every deal starts with a conversation
+        </p>
+      </div>
     </PublicLayout>
   );
 }

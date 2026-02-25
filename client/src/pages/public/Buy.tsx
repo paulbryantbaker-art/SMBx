@@ -49,20 +49,20 @@ const TIMELINE_STEPS = [
 
 const DEAL_SIZES = [
   {
-    range: 'Under $1M',
-    title: 'First-time buyer',
-    desc: "Buying your first business is terrifying. Yulia makes it methodical \u2014 from search criteria to LOI to closing checklist.",
-    result: '\u201CWent from \u2018I don\u2019t know where to start\u2019 to signed LOI in 6 weeks. Yulia walked me through every step.\u201D',
-  },
-  {
-    range: '$1M \u2013 $10M',
-    title: 'Search fund / independent sponsor',
-    desc: 'Screen hundreds of targets against your thesis. Move fast on the right ones. Manage multiple LOIs simultaneously.',
+    range: '$1.5M \u2013 $5M',
+    title: 'Independent buyer',
+    desc: 'First acquisition or adding to a portfolio. Yulia scores targets, models returns, checks SBA bankability, and manages diligence end to end.',
     result: '\u201CScored 47 deals overnight against my criteria. In LOI on the best one in 3 weeks.\u201D',
   },
   {
-    range: '$10M+',
-    title: 'PE / strategic acquirer',
+    range: '$5M \u2013 $25M',
+    title: 'Search fund / PE add-on',
+    desc: 'Screen hundreds of targets against your thesis. Move fast on the right ones. Full valuation and DD workflow on every finalist.',
+    result: '\u201CFull valuation and DD workflow on 3 finalists. LOI signed in 3 weeks.\u201D',
+  },
+  {
+    range: '$25M+',
+    title: 'Platform / strategic',
     desc: 'Roll-up modeling, platform builds, portfolio analytics. Your deal team of 3 operates like 12.',
     result: '\u201CSix platform acquisitions closed in 14 months. Yulia handled the analytical heavy lifting on every one.\u201D',
   },
@@ -224,6 +224,13 @@ export default function Buy() {
           </button>
         </div>
       </section>
+
+      {/* ═══ NUDGE ═══ */}
+      <div className="text-center pb-10 max-md:pb-6">
+        <p className="journey-nudge text-[22px] text-[#DA7756] m-0 max-md:text-lg">
+          the best deals go to prepared buyers
+        </p>
+      </div>
     </PublicLayout>
   );
 }

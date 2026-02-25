@@ -49,22 +49,22 @@ const TIMELINE_STEPS = [
 
 const DEAL_SIZES = [
   {
-    range: 'Seed / Angel',
-    title: 'First-time founder',
-    desc: 'First time raising? Yulia builds your story from the ground up. Financials, valuation, deck, and investor targets \u2014 all from one conversation.',
-    result: '\u201CWent from napkin idea to funded in 11 weeks. The deck Yulia built got me three term sheets.\u201D',
-  },
-  {
-    range: 'Series A\u2013B',
-    title: 'Growth stage',
-    desc: 'You have real numbers and real traction. Yulia makes them sing \u2014 institutional deck, defensible valuation, and a targeted investor list.',
+    range: '$1.5M \u2013 $5M',
+    title: 'Growth capital',
+    desc: 'Seed through Series A. Yulia builds your financial story, valuation, deck, and investor targets \u2014 all from one conversation.',
     result: '\u201CDeck built from actual financials. Closed $4.5M Series A in 6 weeks. Investors commented on how tight the materials were.\u201D',
   },
   {
-    range: 'Growth Equity / Debt',
-    title: 'Complex structures',
-    desc: 'Growth equity, revenue-based financing, mezzanine debt \u2014 Yulia models every scenario so you see what each option costs you.',
+    range: '$5M \u2013 $25M',
+    title: 'Growth equity',
+    desc: 'You have real traction. Yulia makes your numbers sing \u2014 institutional deck, defensible valuation, and a targeted investor list.',
     result: '\u201CCompared 4 term sheets side-by-side. Saved 8% dilution by understanding the real cost of each structure.\u201D',
+  },
+  {
+    range: '$25M+',
+    title: 'Institutional raise',
+    desc: 'Growth equity, mezzanine, or structured capital \u2014 Yulia models every scenario so you see what each option costs you.',
+    result: '\u201CModeled 6 capital structures across 3 investors. Board saw the real cost of each within hours.\u201D',
   },
 ];
 
@@ -226,6 +226,13 @@ export default function Raise() {
           </button>
         </div>
       </section>
+
+      {/* ═══ NUDGE ═══ */}
+      <div className="text-center pb-10 max-md:pb-6">
+        <p className="journey-nudge text-[22px] text-[#DA7756] m-0 max-md:text-lg">
+          investors fund preparation, not just ideas
+        </p>
+      </div>
     </PublicLayout>
   );
 }
