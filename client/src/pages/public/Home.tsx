@@ -255,6 +255,7 @@ export default function Home() {
   const showJourney = useCallback((key: string) => {
     setCurrentJ(key);
     setPhase('journey');
+    window.history.pushState({ smbx: key }, '', '/' + key);
     setTimeout(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
     }, 50);
@@ -263,6 +264,7 @@ export default function Home() {
   /* Enter chat */
   const enterChat = useCallback(() => {
     setPhase('chat');
+    window.history.pushState({ smbx: 'chat' }, '', '/#chat');
     setTimeout(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
     }, 50);
@@ -277,6 +279,7 @@ export default function Home() {
     setTyping(false);
     setToolsOpen(false);
     if (inputRef.current) inputRef.current.style.height = 'auto';
+    window.history.pushState({}, '', '/');
     setTimeout(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
     }, 50);
@@ -362,8 +365,40 @@ export default function Home() {
     if (phase === 'chat') setTimeout(() => inputRef.current?.focus(), 100);
   }, [phase]);
 
+  /* Browser back button */
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const s = e.state as { smbx?: string } | null;
+      if (s?.smbx && s.smbx !== 'chat' && J[s.smbx]) {
+        setCurrentJ(s.smbx);
+        setPhase('journey');
+      } else {
+        setPhase('landing');
+        setCurrentJ(null);
+        setMessages([]);
+        setValue('');
+        setTyping(false);
+        setToolsOpen(false);
+      }
+      setTimeout(() => {
+        if (scrollRef.current) scrollRef.current.scrollTop = 0;
+      }, 50);
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  /* Deep link support — check URL on mount */
+  useEffect(() => {
+    const path = window.location.pathname.replace(/^\//, '').toLowerCase();
+    if (path && J[path]) {
+      setCurrentJ(path);
+      setPhase('journey');
+      window.history.replaceState({ smbx: path }, '', '/' + path);
+    }
+  }, []);
+
   const hasContent = value.trim().length > 0;
-  const showBack = phase !== 'landing';
 
   return (
     <div className="h-dvh flex flex-col overflow-hidden bg-[#FAF8F4]" style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
@@ -373,26 +408,11 @@ export default function Home() {
         style={{ borderBottom: phase === 'chat' ? '1px solid #DDD9D1' : '1px solid transparent', transition: 'border-color .3s' }}
       >
         <div className="flex items-center justify-between px-5 py-3 md:px-8 lg:px-12">
-          <div className="flex items-center gap-3 relative" style={phase === 'chat' ? { flex: 1 } : undefined}>
-            {showBack && (
-              <button
-                onClick={goHome}
-                className="flex items-center gap-1 text-[15px] font-medium text-[#6E6A63] bg-transparent border-none cursor-pointer hover:text-[#D4714E] transition-colors"
-                style={{ fontFamily: 'inherit' }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="15 18 9 12 15 6" /></svg>
-                Home
-              </button>
-            )}
-            <div
-              className={`text-[26px] font-extrabold tracking-[-0.03em] text-[#1A1A18] cursor-pointer select-none lg:text-[28px] ${phase === 'chat' ? 'absolute left-1/2 -translate-x-1/2' : ''}`}
-              onClick={goHome}
-            >
-              smb<span className="text-[#D4714E]">x</span>.ai
-            </div>
-            {phase === 'chat' && (
-              <span className="absolute left-1/2 -translate-x-1/2 top-[34px] text-[13px] text-[#6E6A63]">Yulia</span>
-            )}
+          <div
+            className="text-[26px] font-extrabold tracking-[-0.03em] text-[#1A1A18] cursor-pointer select-none lg:text-[28px]"
+            onClick={goHome}
+          >
+            smb<span className="text-[#D4714E]">x</span>.ai
           </div>
           <div className="flex items-center gap-4 lg:gap-6">
             <Link href="/login" className="flex items-center justify-center bg-transparent border-none cursor-pointer text-[#3D3B37] p-1.5 rounded-full transition-all hover:text-[#D4714E] hover:bg-[rgba(212,113,78,.08)] no-underline">
@@ -422,7 +442,7 @@ export default function Home() {
                 AI-powered M&amp;A. From first question to closing day.
               </p>
 
-              <div className="home-agrid w-full home-fade-up md:max-w-[660px] lg:max-w-[900px]" style={{ animationDelay: '.18s' }}>
+              <div className="home-agrid w-full home-fade-up md:max-w-[660px] lg:max-w-[900px] lg:mb-6" style={{ animationDelay: '.18s' }}>
                 {ACTION_CARDS.map((c, i) => (
                   <div
                     key={c.key}
