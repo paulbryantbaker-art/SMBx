@@ -255,7 +255,7 @@ export default function Home() {
   const showJourney = useCallback((key: string) => {
     setCurrentJ(key);
     setPhase('journey');
-    window.history.pushState({ smbx: key }, '', '/' + key);
+    window.history.pushState({ smbx: key }, '', '/#' + key);
     setTimeout(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
     }, 50);
@@ -388,13 +388,13 @@ export default function Home() {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
-  /* Deep link support — check URL on mount */
+  /* Deep link support — check hash on mount */
   useEffect(() => {
-    const path = window.location.pathname.replace(/^\//, '').toLowerCase();
-    if (path && J[path]) {
-      setCurrentJ(path);
+    const hash = window.location.hash.replace(/^#/, '').toLowerCase();
+    if (hash && J[hash]) {
+      setCurrentJ(hash);
       setPhase('journey');
-      window.history.replaceState({ smbx: path }, '', '/' + path);
+      window.history.replaceState({ smbx: hash }, '', '/#' + hash);
     }
   }, []);
 
