@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>smbx.ai</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --cream:#FAF8F4;--fill:#F3F0EA;--white:#FFFFFF;
+  --terra:#D4714E;--terra-hover:#BE6342;--terra-soft:#FFF0EB;
+  --terra-glow:rgba(212,113,78,.12);
+  --text:#1A1A18;--text-mid:#3D3B37;--muted:#6E6A63;--faint:#A9A49C;
+  --border:#DDD9D1;
+  --shadow-sm:0 1px 3px rgba(26,26,24,.06);
+  --shadow-card:0 1px 4px rgba(26,26,24,.05);
+  --shadow-md:0 2px 8px rgba(26,26,24,.07),0 1px 2px rgba(26,26,24,.04);
+  --shadow-lg:0 4px 20px rgba(26,26,24,.08),0 1px 3px rgba(26,26,24,.05);
+  --serif:'Inter',system-ui,sans-serif;
+  --sans:'Inter',system-ui,-apple-system,sans-serif;
+}
+html{background:var(--cream)}
+body{background:var(--cream);color:var(--text);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;overflow:hidden;height:100dvh}
+.app{height:100dvh;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{flex-shrink:0;padding:12px 20px;display:flex;align-items:center;
+  justify-content:space-between;background:var(--cream);z-index:20;
+  border-bottom:1px solid transparent;transition:border-color .3s;position:relative}
+@media(min-width:768px){.topbar{padding:14px 32px}}
+@media(min-width:1024px){.topbar{padding:16px 48px}}
+.chat-mode .topbar{border-bottom-color:var(--border)}
+.tb-left{display:flex;align-items:center;gap:12px}
+.tb-logo{font-family:var(--sans);font-size:26px;font-weight:800;
+  color:var(--text);letter-spacing:-.03em;cursor:pointer;text-decoration:none}
+@media(min-width:1024px){.tb-logo{font-size:28px}}
+.tb-logo span{color:var(--terra)}
+.tb-right{display:flex;align-items:center;gap:16px}
+@media(min-width:1024px){.tb-right{gap:24px}}
+.tb-login{background:none;border:none;cursor:pointer;color:var(--text-mid);
+  padding:6px;border-radius:50%;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.tb-login:hover{color:var(--terra);background:rgba(212,113,78,.08)}
+.tb-login:active{transform:scale(.92)}
+.tb-back{display:none;align-items:center;gap:4px;font-size:15px;font-weight:500;
+  color:var(--muted);cursor:pointer;background:none;border:none;
+  font-family:var(--sans);transition:color .2s}
+.tb-back:hover{color:var(--terra)}
+.tb-back svg{width:18px;height:18px}
+.has-back .tb-back{display:flex}
+.chat-mode .tb-left{flex:1}
+.chat-mode .tb-logo{position:absolute;left:50%;transform:translateX(-50%)}
+.tb-sub{display:none;font-size:13px;color:var(--muted);font-weight:400;
+  position:absolute;left:50%;transform:translateX(-50%);top:34px}
+.chat-mode .tb-sub{display:block}
+
+/* SCROLL */
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+.has-dock .scroll-area{padding-bottom:80px}
+.scroll-inner{padding:0 20px}
+@media(min-width:768px){.scroll-inner{max-width:860px;padding:0 40px;margin:0 auto}}
+@media(min-width:1024px){.scroll-inner{max-width:960px;padding:0 48px}}
+
+/* DOCK — fixed bottom, always visible above keyboard */
+.dock{position:fixed;left:0;right:0;bottom:0;
+  padding:8px 20px;
+  padding-bottom:max(8px,env(safe-area-inset-bottom));
+  background:var(--cream);z-index:30;
+  border-top:1px solid var(--border);
+  opacity:0;transform:translateY(100%);
+  transition:opacity .3s,transform .3s;pointer-events:none}
+.dock.active{opacity:1;transform:translateY(0);pointer-events:auto}
+.dock-inner{max-width:640px;margin:0 auto}
+.dock-card{background:var(--white);border:1.5px solid rgba(212,113,78,.35);
+  border-radius:20px;overflow:visible;box-shadow:var(--shadow-lg);position:relative}
+.dock-card:focus-within{border-color:var(--terra);box-shadow:var(--shadow-lg),0 0 0 4px var(--terra-glow)}
+.dock-card .iw textarea{border:none;border-radius:0;box-shadow:none;
+  background:transparent;min-height:50px;padding:14px 52px 14px 50px;font-size:17px}
+.dock-card .iw textarea:focus{box-shadow:none}
+
+/* INPUT */
+.iw{position:relative}
+.ci{width:100%;background:transparent;border:none;padding:14px 52px 14px 18px;
+  font-size:17px;font-family:var(--sans);color:var(--text);outline:none;resize:none;
+  min-height:50px;max-height:140px;line-height:1.5}
+@media(min-width:1024px){.ci{font-size:18px;min-height:54px}}
+.ci::placeholder{color:var(--muted)}
+.send-btn{position:absolute;right:8px;top:8px;width:36px;height:36px;
+  border-radius:50%;border:none;background:var(--terra);color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:scale(.8);transition:all .2s;box-shadow:0 2px 8px rgba(212,113,78,.3)}
+.send-btn.vis{opacity:1;transform:scale(1)}
+.send-btn:hover{background:var(--terra-hover)}
+.send-btn:active{transform:scale(.9)}
+.send-btn svg{width:16px;height:16px}
+.plus-btn{position:absolute;left:10px;top:8px;width:36px;height:36px;
+  border-radius:50%;border:none;background:var(--fill);color:var(--terra);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:2}
+.plus-btn:hover{background:var(--terra-soft)}
+.plus-btn:active{transform:scale(.9)}
+.plus-btn svg{width:18px;height:18px;transition:transform .2s}
+.plus-btn.open svg{transform:rotate(45deg)}
+
+/* POPUP — drops DOWN by default, UP for dock and hero */
+.tools-popup{position:absolute;left:0;right:0;top:calc(100% + 8px);
+  background:var(--white);border-radius:16px;box-shadow:var(--shadow-lg);padding:6px;
+  opacity:0;transform:translateY(-8px) scale(.97);pointer-events:none;transition:all .2s;z-index:10}
+.tools-popup.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+/* Dock popup goes UP (it's at screen bottom) */
+.dock .tools-popup{top:auto;bottom:calc(100% + 8px);transform:translateY(8px) scale(.97)}
+.dock .tools-popup.open{transform:translateY(0) scale(1)}
+.tp-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
+  border-radius:12px;border:none;background:transparent;width:100%;
+  font-family:var(--sans);cursor:pointer;transition:background .15s;text-align:left}
+.tp-item:hover{background:var(--fill)}
+.tp-item:active{background:#EBE7DF}
+.tp-item svg{width:20px;height:20px;color:var(--terra);flex-shrink:0;margin-top:1px}
+.tp-title{font-size:15px;font-weight:600;color:var(--text);line-height:1.3}
+.tp-desc{font-size:13px;color:var(--muted);line-height:1.4;margin-top:2px}
+
+/* LANDING */
+.landing{display:flex;flex-direction:column;align-items:center;
+  text-align:center;padding:56px 0 40px;
+  transition:opacity .3s ease,transform .3s ease}
+@media(min-width:768px){.landing{padding:72px 0 60px}}
+.landing.out{opacity:0;transform:translateY(-10px);pointer-events:none}
+.landing h1{font-family:var(--serif);font-size:44px;font-weight:800;
+  line-height:1.08;letter-spacing:-.03em;color:var(--text);margin-bottom:20px;animation:fu .4s ease both}
+@media(min-width:768px){.landing h1{font-size:48px;margin-bottom:16px}}
+@media(min-width:1024px){.landing h1{font-size:54px}}
+.landing .sub{font-size:20px;color:var(--muted);line-height:1.45;max-width:360px;
+  margin-bottom:44px;animation:fu .4s ease .06s both}
+@media(min-width:768px){.landing .sub{font-size:19px;max-width:440px;margin-bottom:40px}}
+@media(min-width:1024px){.landing .sub{font-size:20px;max-width:480px}}
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;
+  animation:fu .4s ease .18s both}
+@media(min-width:768px){.agrid{max-width:660px;gap:14px}}
+@media(min-width:1024px){.agrid{max-width:720px;grid-template-columns:repeat(4,1fr);gap:14px}}
+.hero-card{width:100%;background:var(--white);border:1.5px solid rgba(212,113,78,.35);
+  border-radius:20px;overflow:visible;animation:fu .4s ease .2s both;
+  transition:all .3s;box-shadow:var(--shadow-lg);position:relative}
+.hero-card:focus-within{border-color:var(--terra);box-shadow:var(--shadow-lg),0 0 0 4px var(--terra-glow)}
+@media(min-width:768px){.hero-card{max-width:660px;border-radius:24px}}
+@media(min-width:1024px){.hero-card{max-width:720px}}
+.hero-card .ci{padding-left:50px}
+.hero-hint{text-align:center;font-size:13px;color:var(--faint);margin-top:10px;margin-bottom:24px;animation:fu .4s ease .16s both}
+@media(min-width:768px){.hero-hint{margin-bottom:32px}}
+.acard{background:var(--white);border:none;border-radius:20px;padding:28px 22px;
+  display:flex;flex-direction:column;align-items:flex-start;gap:14px;
+  cursor:pointer;transition:all .2s;box-shadow:var(--shadow-card)}
+@media(min-width:768px){.acard{border-radius:18px;padding:22px 18px;gap:10px}}
+@media(min-width:1024px){.acard{padding:24px 20px;gap:12px}}
+.acard:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.acard:active{transform:scale(.97);box-shadow:var(--shadow-sm)}
+.acard svg{width:32px;height:32px;color:var(--terra)}
+.acard span{font-size:18px;font-weight:700;color:var(--text);line-height:1.25}
+@media(min-width:1024px){.acard svg{width:24px;height:24px}.acard span{font-size:16px}}
+
+/* JOURNEY */
+.journey{display:none;padding:28px 0 100px}
+.journey.active{display:block;animation:fu .35s ease}
+.j-hero{margin-bottom:36px}
+.j-label{font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin-bottom:14px}
+.j-h1{font-family:var(--serif);font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-bottom:16px}
+@media(min-width:768px){.j-h1{font-size:36px}}
+@media(min-width:1024px){.j-h1{font-size:40px}}
+.j-h1 em{font-style:normal;color:var(--terra)}
+.j-sub{font-size:20px;color:var(--text-mid);line-height:1.5;max-width:560px}
+.j-insight{background:linear-gradient(135deg,#FFF8F4,#FFF0EB);border-radius:20px;padding:28px;margin-bottom:40px;
+  box-shadow:var(--shadow-card),inset 0 0 0 1px rgba(212,113,78,.06)}
+.j-insight .ya{width:28px;height:28px;border-radius:50%;background:var(--terra);color:#fff;
+  font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;
+  margin-right:8px;vertical-align:middle;font-family:var(--sans);box-shadow:0 2px 6px rgba(212,113,78,.2)}
+.j-insight p{font-family:var(--sans);font-size:18px;line-height:1.6;color:var(--text);font-weight:500}
+.j-insight strong{font-weight:700}
+.j-section{margin-bottom:40px}
+.j-section-label{font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:14px}
+.j-section h3{font-family:var(--serif);font-size:28px;font-weight:800;line-height:1.15;margin-bottom:18px;letter-spacing:-.015em}
+@media(min-width:1024px){.j-section h3{font-size:26px}}
+.j-section h3 em{font-style:normal;color:var(--terra)}
+.j-cards{display:flex;flex-direction:column;gap:14px}
+@media(min-width:768px){.j-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}}
+.j-card{background:var(--white);border:none;border-radius:20px;padding:28px;
+  box-shadow:var(--shadow-card);transition:all .2s}
+.j-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.j-card h4{font-size:19px;font-weight:700;margin-bottom:10px}
+.j-card p{font-size:17px;color:var(--text-mid);line-height:1.55}
+.j-deals{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px}
+@media(min-width:768px){.j-deals{grid-template-columns:repeat(4,1fr);gap:12px}}
+.j-deal{background:var(--white);border:none;border-radius:20px;padding:26px;
+  cursor:pointer;box-shadow:var(--shadow-card);transition:all .2s}
+.j-deal:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.j-deal:active{transform:scale(.97)}
+.j-deal-sz{font-family:var(--sans);font-size:30px;font-weight:800;letter-spacing:-.02em;color:var(--terra)}
+.j-deal-tp{font-size:16px;color:var(--text);font-weight:700;margin-bottom:8px}
+.j-deal-rs{font-size:16px;color:var(--text-mid);line-height:1.45}
+.j-quote{background:var(--white);border-radius:20px;padding:28px;box-shadow:var(--shadow-card)}
+.j-quote em{font-family:var(--sans);font-size:20px;line-height:1.5;color:var(--text);font-style:normal;font-weight:600;display:block;margin-bottom:12px}
+.j-quote .j-quote-who{font-size:15px;color:var(--terra);font-weight:600}
+.j-div{width:40px;height:1px;background:var(--border);margin:40px 0}
+
+/* MESSAGES */
+.msgs{display:none;flex-direction:column;gap:16px;padding:20px 0 24px;
+  max-width:640px;margin:0 auto;width:100%;opacity:0;transition:opacity .3s ease .1s}
+.msgs.active{display:flex}.msgs.show{opacity:1}
+.mu{align-self:flex-end;max-width:82%;background:var(--terra);color:#fff;
+  padding:14px 18px;border-radius:20px 20px 6px 20px;font-size:16px;line-height:1.5;
+  animation:si .3s ease;box-shadow:0 2px 8px rgba(212,113,78,.2)}
+.my{align-self:flex-start;max-width:90%;animation:si .35s ease}
+.my .ya{width:32px;height:32px;border-radius:50%;background:var(--terra);color:#fff;
+  font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;
+  margin-bottom:8px;font-family:var(--sans);box-shadow:0 2px 6px rgba(212,113,78,.2)}
+.my .yt{background:var(--white);border-radius:20px;padding:16px 18px;
+  box-shadow:var(--shadow-card);font-family:var(--sans);font-size:16px;line-height:1.65;font-weight:500}
+.my .yt p{margin-bottom:12px}.my .yt p:last-child{margin-bottom:0}
+.my .yt strong{font-weight:700}
+.typing{display:flex;gap:5px;padding:8px 4px;align-self:flex-start}
+.td{width:8px;height:8px;border-radius:50%;background:var(--faint);animation:dp 1.4s ease infinite}
+.td:nth-child(2){animation-delay:.15s}.td:nth-child(3){animation-delay:.3s}
+
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes si{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes dp{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+</style>
+</head>
+<body>
+<div class="app has-dock" id="app">
+  <div class="topbar">
+    <div class="tb-left">
+      <button class="tb-back" onclick="goHome()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>Home</button>
+      <a class="tb-logo" onclick="goHome()">smb<span>x</span>.ai</a>
+      <span class="tb-sub">Yulia</span>
+    </div>
+    <div class="tb-right">
+      <button class="tb-login" title="Log in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+    </div>
+  </div>
+  <div class="scroll-area" id="sa"><div class="scroll-inner">
+    <div class="landing" id="landing">
+      <h1>Sell a business.<br>Buy a business.<br>Raise capital.</h1>
+      <p class="sub">Meet Yulia, your expert M&amp;A advisor.</p>
+      <div class="agrid">
+        <div class="acard" onclick="showJourney('sell')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><span>Sell my business</span></div>
+        <div class="acard" onclick="showJourney('buy')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><span>Buy a business</span></div>
+        <div class="acard" onclick="showJourney('agency')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span>Agency &amp; automation</span></div>
+        <div class="acard" onclick="showJourney('intelligence')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><span>AI intelligence</span></div>
+      </div>
+
+    </div>
+    <div class="journey" id="journey"></div>
+    <div class="msgs" id="msgs"></div>
+  </div></div>
+  <div class="dock active" id="dock"><div class="dock-inner"><div class="dock-card">
+    <div class="tools-popup" id="toolsPopup">
+      <button class="tp-item" onclick="fc('I have financials to share — ');toggleTools()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg><div><div class="tp-title">Upload financials</div><div class="tp-desc">Share a P&amp;L, tax return, or balance sheet</div></div></button>
+      <button class="tp-item" onclick="fc('I need a business valuation — I own a ');toggleTools()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg><div><div class="tp-title">Business valuation</div><div class="tp-desc">Estimate worth based on revenue, earnings, and comps</div></div></button>
+      <button class="tp-item" onclick="fc(&quot;Help me find a business — I'm looking for &quot;);toggleTools()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div><div class="tp-title">Search for a business</div><div class="tp-desc">Find businesses by industry, location, size, or price</div></div></button>
+      <button class="tp-item" onclick="fc(&quot;Can this deal get SBA financing? I'm looking at a &quot;);toggleTools()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><div class="tp-title">SBA loan check</div><div class="tp-desc">See if a deal qualifies for SBA 7(a) — up to $5M, 10% down</div></div></button>
+    </div>
+    <div class="iw">
+      <button class="plus-btn" id="plusBtn" onclick="toggleTools()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      <textarea class="ci" id="ci" placeholder="Tell Yulia about your deal..." rows="1" oninput="ar(this,'cs')" onkeydown="ck(event)"></textarea>
+      <button class="send-btn" id="cs" onclick="sfc()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></button>
+    </div>
+  </div></div></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const app=$('app'),sa=$('sa'),land=$('landing'),msgs=$('msgs'),dock=$('dock'),
+  journey=$('journey'),cii=$('ci'),cs=$('cs'),
+  plusBtn=$('plusBtn'),toolsPopup=$('toolsPopup');
+let curJ=null;
+
+const J={
+  sell:{label:'SELL-SIDE',h1:'Know what you\'re worth. <em>Exactly.</em>',
+    sub:'58% of owners have no succession plan and no data on their position. 12 million businesses worth $10 trillion will change hands this decade. Don\'t be the one who leaves money on the table.',
+    insight:'The difference between a <strong>2\u00d7 and 4\u00d7 multiple</strong> on identical cash flow comes down to seven factors most owners don\'t know about. Recurring revenue, customer concentration, owner dependency, margin quality, growth rate, clean financials, and industry timing. Yulia quantifies every one \u2014 and shows you exactly where you stand before you talk to a single buyer.',
+    sections:[
+      {label:'PHASE 1: DISCOVERY',title:'Tell Yulia about <em>your business.</em>',cards:[
+        {h:'Business classification & market mapping',p:'Start by telling Yulia your industry, location, revenue, and what you take home. She classifies your business by NAICS code and immediately maps your competitive landscape \u2014 how many similar businesses operate in your market, how they\'re distributed by size, and whether your industry is fragmented or consolidated. This is Census County Business Patterns data that PE firms pay analysts to assemble manually. Yulia pulls it in seconds and uses it to frame every analysis that follows.'},
+        {h:'Your market position',p:'Yulia benchmarks your business against local peers using BLS wage data, BEA economic indicators, and IRS profitability benchmarks for your industry and size band. Are your labor costs above or below market? Is your margin normal for your sector? Is your local economy growing or contracting? Most owners have never seen this data about their own business \u2014 because until now, it didn\'t exist in any accessible format.'}]},
+      {label:'PHASE 2: VALUATION',title:'Find every dollar. <em>Show the math.</em>',cards:[
+        {h:'Add-back identification',p:'Owners routinely leave $30K\u2013$150K on the table in missed add-backs \u2014 personal vehicle expenses, family health insurance, above-market rent to a related entity, family members on payroll, one-time legal fees, owner perks. Yulia systematically identifies every legitimate add-back by checking your expenses against IRS Statistics of Income benchmarks for your industry. The difference between SDE under $100K (which commands 1.2\u00d7\u20132.4\u00d7) and SDE above $500K (which commands 2.5\u00d7\u20133.5\u00d7+) is enormous. Every add-back found directly increases your sale price.'},
+        {h:'Multi-methodology valuation',p:'Yulia doesn\'t give you one number \u2014 she gives you a defensible range using multiple approaches. Industry-specific SDE/EBITDA multiples calibrated to your geography and business quality. Comparable transaction analysis using recent deals in your sector and size band. Asset-based floor valuation. Each methodology shown with sources, so you \u2014 and potential buyers \u2014 can see exactly how the number was derived. This is the kind of valuation work that M&A advisors charge $5K\u2013$15K to produce.'},
+        {h:'The seven factors that move your multiple',p:'Within any size band, specific business characteristics create a spread of 1.5\u00d7\u20132.0\u00d7 in the multiple \u2014 the difference between a $1M exit and a $2M exit on identical cash flow. Recurring revenue above 50% is the single most powerful lever (pest control, IT services, and security companies command the highest multiples for this reason). Customer concentration below 15% adds a 20\u201330% premium. Owner independence, margin quality, growth rate, clean financials, and industry timing each move the needle. Yulia scores you on all seven and shows exactly where to improve before going to market.'}]},
+      {label:'PHASE 3: INTELLIGENCE',title:'The data that changes <em>your outcome.</em>',cards:[
+        {h:'Industry consolidation timing',p:'Is your industry in a PE roll-up cycle? 138 HVAC deals closed in 2024 alone, with multiples reaching 7\u00d7\u201311\u00d7 EBITDA for platform-quality businesses. Apex Service Partners completed 107+ acquisitions. Pest control, dental practices, veterinary clinics, IT managed services, and wealth management are all experiencing active PE-driven consolidation. If your industry is in cycle, your multiple could be 2\u00d7\u20133\u00d7 higher than the standard range \u2014 but only if you know it and position accordingly. Yulia tracks every consolidation wave and tells you if your exit window is open.'},
+        {h:'Geographic valuation intelligence',p:'Location changes everything. A 2025 case study compared two nearly identical manufacturing companies \u2014 $16.9M and $18.2M revenue, similar margins. Company A in Michigan\'s Lower Peninsula received 15 offers averaging $15.4M. Company B in the Upper Peninsula received 5 offers averaging $9.4M. A 40% gap from geography alone. Yulia uses BEA Regional Price Parities, Census competitive density data, and BLS wage benchmarks to show how your specific location affects your valuation \u2014 and helps you position the business to buyers in stronger markets.'}]},
+      {label:'PHASE 4: GO TO MARKET',title:'The package that <em>gets you offers.</em>',cards:[
+        {h:'CIM generation',p:'Yulia produces a presentation-ready Confidential Information Memorandum \u2014 the document that represents your business to every potential buyer. Executive summary, business narrative, financial analysis with every add-back detailed, market context pulled from Census/BLS/BEA data, comparable transaction analysis, and growth projections. What takes a broker two days in Word and Excel, Yulia builds in minutes \u2014 and the market intelligence woven in gives your CIM a depth that most broker-prepared packages lack entirely.'},
+        {h:'Buyer identification & scoring',p:'Not all buyers are equal. Yulia identifies likely buyer profiles for your business \u2014 strategic acquirers in your industry, PE firms running roll-ups in your sector, search funds targeting your size range, and individual operators. She scores each buyer type by strategic fit, financing ability, and likelihood to close. If your industry is in a consolidation cycle, she identifies the specific firms doing acquisitions and what they\'re paying. This is the difference between listing on a marketplace and hoping, versus targeting the buyers most likely to pay a premium.'}]},
+      {label:'PHASE 5: CLOSE THE DEAL',title:'From first offer <em>to closing day.</em>',cards:[
+        {h:'LOI evaluation & negotiation',p:'When offers arrive, Yulia evaluates each LOI against market benchmarks \u2014 is the proposed multiple fair for your industry and market? Are the terms standard or aggressive? She flags unfavorable provisions (excessive earnouts, unreasonable non-competes, below-market working capital targets) and models different deal structures: asset vs. stock sale implications, earnout scenarios with probability weighting, seller financing terms, and tax impact analysis. You go into negotiation knowing exactly what\'s standard and where you have leverage.'},
+        {h:'Due diligence management',p:'The diligence process is where deals die. Yulia organizes the process: financial document preparation, quality of earnings reconciliation, working capital analysis, customer and vendor contract review, and risk identification. She prepares you for the questions buyers will ask and helps you address potential issues before they become deal-breakers. The goal is a clean, fast diligence process that maintains deal momentum.'},
+        {h:'Deal structuring through closing',p:'Yulia models the complete deal structure: purchase price allocation, working capital targets and adjustment mechanisms, representations and warranties, indemnification terms, transition services, and non-compete provisions. She helps you understand the tax implications of different structures and works alongside your attorney and CPA to ensure nothing falls through the cracks on the way to closing day.'}]},
+      {label:'EVERY DEAL SIZE',title:'Your business. <em>Your scale.</em>',deals:[
+        {sz:'$350K',tp:'Cleaning Service',rs:'Found $28K in add-backs',msg:'I own a residential cleaning business doing about $350K'},
+        {sz:'$1.8M',tp:'Pest Control',rs:'87% recurring, 3.8\u00d7 SDE',msg:'I own a pest control company doing $1.8M'},
+        {sz:'$5M',tp:'HVAC',rs:'PE roll-up cycle, 5.2\u00d7',msg:'I own an HVAC company doing $5M in revenue'},
+        {sz:'$18M',tp:'Vet Group',rs:'Corporate buyer, 4.8\u00d7 EBITDA',msg:'I own a veterinary practice group doing $18M'}]}
+    ],quote:{t:'"Two nearly identical manufacturing companies \u2014 $16.9M and $18.2M revenue, similar margins. Company A in Michigan\'s Lower Peninsula got 15 offers averaging $15.4M. Company B in the Upper Peninsula got 5 offers averaging $9.4M. Location alone caused a 40% valuation gap."',w:'Breneman Advisors Case Study, 2025'},ph:'Tell Yulia about your business...'},
+  buy:{label:'BUY-SIDE',h1:'Find the deal. <em>Know the math.</em>',
+    sub:'Whether you\'re a first-time buyer with an SBA loan, a search fund screening 200 targets, or a PE firm running a 12-company roll-up \u2014 the question at every stage is the same: does this deal actually work?',
+    insight:'SBA acquisition lending hit <strong>$8.29 billion</strong> in the first 9 months of FY2025 \u2014 up 34.58% YoY across 7,003 deals. But June 2025\'s SOP 50 10 8 changed the rules: <strong>seller notes must now be on full standby for the entire loan term</strong>, and the 10% minimum equity injection is back. Most buyers haven\'t caught up yet. Yulia has.',
+    sections:[
+      {label:'PHASE 1: SOURCING',title:'Define your thesis. <em>Find your deal.</em>',cards:[
+        {h:'Acquisition criteria & buyer profile',p:'Tell Yulia what you\'re looking for \u2014 industry, geography, size range, SDE/EBITDA targets, deal structure preferences, and financing approach. She builds your buyer profile and calibrates every analysis to your specific criteria. A first-time buyer using SBA financing has fundamentally different needs than a PE firm building a platform \u2014 Yulia adapts her entire workflow to your situation, from the screening criteria she applies to the deal structures she models.'},
+        {h:'Target screening at scale',p:'For search funds and PE firms, Yulia can screen hundreds of opportunities against your thesis in minutes. She scores every target against the seven factors that separate a 2\u00d7 from a 4\u00d7 multiple: recurring revenue percentage, customer concentration, owner dependency, growth rate, margin quality, financial cleanliness, and industry timing. Deals that fail on fundamentals get flagged immediately \u2014 before you invest a single hour of diligence time. For individual buyers, she evaluates specific opportunities you bring to her with the same rigor.'}]},
+      {label:'PHASE 2: DEAL ANALYSIS',title:'Kill bad deals <em>in minutes.</em>',cards:[
+        {h:'SBA bankability analysis',p:'For deals under $5M, SBA 7(a) financing is the dominant mechanism \u2014 and June 2025\'s SOP 50 10 8 changed which deals can close. Yulia models the complete structure: 10% minimum equity injection, debt service coverage ratio at current SOFR + SBA margin (lenders require 1.15\u00d7\u20131.25\u00d7 DSCR), seller note standby requirements (now full standby for the entire loan term), personal guarantee obligations for all equity holders, and credit-elsewhere testing. She tells you whether the deal finances, what the monthly payment looks like, and how to structure the equity stack \u2014 before you write the LOI.'},
+        {h:'Red flag detection',p:'Customer concentration above 30% subtracts 0.5\u00d7\u20131.0\u00d7 from the multiple. A software company lost $2M in valuation when diligence revealed its largest client was 45% of revenue. Owner dependency \u2014 where the owner generates 80%+ of sales or is the primary client relationship \u2014 turns acquisitions into earnout nightmares. Revenue declining while expenses rise. Inconsistent financials that reduce multiples by 15\u201330%. Yulia flags every red flag systematically, scores the risk, and tells you whether it\'s fixable or a deal-killer.'},
+        {h:'Valuation with local intelligence',p:'The $1M\u2013$5M segment is an information desert. PitchBook and Grata start at $3M+ revenue. BIZCOMPS only covers asset sales under $1M. DealStats skews toward larger deals. For a search fund evaluating a $2.5M HVAC business in a mid-sized metro, finding five truly comparable recent transactions is nearly impossible through any single platform. Yulia fills the gap by synthesizing localized Census competitive density, BLS wage benchmarks, BEA economic context, and industry transaction multiples \u2014 creating the valuation intelligence that doesn\'t exist anywhere else at any price.'}]},
+      {label:'PHASE 3: BIDDING',title:'Bid with confidence. <em>Win the deal.</em>',cards:[
+        {h:'LOI preparation',p:'Yulia helps you structure a competitive offer that reflects the true market value of the business in its specific geography. She models multiple scenarios: all-cash vs. SBA-financed, different equity injection levels, earnout structures with probability weighting, and seller financing terms under the new standby rules. Your LOI arrives backed by real market data and a clear financing plan \u2014 which makes you the serious buyer that sellers and brokers want to work with.'},
+        {h:'Deal structure optimization',p:'Every deal has multiple ways to structure the transaction. Asset purchase vs. stock purchase has tax implications for both sides. Earnout terms need to be realistic and measurable. Working capital targets need to be set correctly or they become a last-minute fight. Seller financing under the new SBA rules requires careful standby period planning. Yulia models all of these scenarios, shows you the financial impact of each, and helps you propose a structure that works for both sides \u2014 increasing the probability of getting to closing.'}]},
+      {label:'PHASE 4: DUE DILIGENCE',title:'Find everything. <em>Miss nothing.</em>',cards:[
+        {h:'Quality of earnings deep dive',p:'The QoE analysis is where deals get made or broken. Yulia examines revenue quality (one-time vs. recurring, customer concentration trends, contract terms), expense normalization (add-backs that inflate earnings vs. missing costs that deflate them), working capital adequacy, and cash flow sustainability. She identifies the adjustments that buyers need to make to the seller\'s presented numbers \u2014 and quantifies the impact on valuation. This is the analysis that PE firms pay $50K\u2013$150K to accounting firms to produce.'},
+        {h:'Market context during diligence',p:'While you\'re in diligence, market conditions are changing. Interest rates shift. A competitor enters the market. A PE firm announces a roll-up in the sector. Yulia maintains a live market intelligence feed for your specific deal \u2014 recalculating DSCR when rates move, flagging competitive landscape changes from Census data updates, and alerting you to industry consolidation activity that could affect the deal\'s strategic value. Your diligence doesn\'t happen in a vacuum.'},
+        {h:'Risk identification & mitigation',p:'Yulia systematically identifies risks across every dimension: financial (revenue concentration, margin sustainability, working capital adequacy), operational (key employee dependency, system risks, regulatory exposure), market (competitive threats, industry headwinds, geographic risks), and legal (contract assignability, IP ownership, pending litigation). Each risk is scored by severity and probability, with mitigation strategies suggested. You go into closing with eyes open and a plan for every identified risk.'}]},
+      {label:'PHASE 5: CLOSING & BEYOND',title:'Close the deal. <em>Protect the value.</em>',cards:[
+        {h:'Closing management',p:'The period between signing the purchase agreement and closing is where deals slip away. Yulia tracks every closing condition: financing commitments, landlord consents, contract assignments, regulatory approvals, working capital calculations, and funds flow. She helps coordinate between your attorney, CPA, lender, and the seller\'s team to keep the process moving. When issues arise \u2014 and they always do \u2014 she helps you assess whether they\'re material and how to resolve them without killing the deal.'},
+        {h:'Post-merger integration: the first 100 days',p:'Most acquisitions lose value in the first year because integration is an afterthought. Yulia starts PMI planning during diligence \u2014 not after closing. Key employee identification and retention strategy (who are the critical people and how do you keep them?). Customer communication plan (how and when do you notify customers of the ownership change?). System and process transitions. Financial integration and reporting. Operational continuity planning. The first 100 days set the trajectory for the entire investment \u2014 Yulia makes sure you have a plan before day one.'}]},
+      {label:'EVERY BUYER TYPE',title:'Individual to <em>institutional.</em>',deals:[
+        {sz:'$400K',tp:'Laundromat',rs:'SBA qualified, 1.4\u00d7 DSCR',msg:'First-time buyer, looking at a laundromat listed at $400K'},
+        {sz:'$2.5M',tp:'Dental Practice',rs:'5 local comps, 2.8\u00d7 SDE',msg:'Search fund evaluating a $2.5M dental practice'},
+        {sz:'$12M',tp:'IT Services',rs:'47 targets scored for roll-up',msg:'Building a managed IT services roll-up, $1-5M ARR targets'},
+        {sz:'$200M',tp:'Home Services',rs:'6 bolt-ons in 14 months',msg:'PE platform, home services roll-up strategy'}]}
+    ],quote:{t:'"SBA acquisition loans default at just 1.93% \u2014 29% lower than non-acquisition SBA loans. The data is on your side if you structure the deal right. Most buyers don\'t know the June 2025 rules yet. That\'s an edge."',w:'Yulia, on SBA-backed acquisitions'},ph:'Tell Yulia what you\'re looking for...'},
+  intelligence:{label:'AI INTELLIGENCE',h1:'Intelligence no one <em>else has.</em>',
+    sub:'The answer to "What is this business worth in this market, can it be financed, and should you act now?" No platform answers that for SMB. We\'re the first.',
+    insight:'No existing platform combines local economic context with industry competitive density and valuation benchmarks. A PE firm using Grata has <strong>zero insight</strong> into local wage structure or cost-of-living dynamics. A broker listing in Boise has <strong>no systematic way</strong> to compare that market to Denver. We built the integration layer that turns free government data into institutional-grade intelligence.',
+    sections:[
+      {label:'THE DATA FOUNDATION',title:'Six federal engines. <em>One intelligence layer.</em>',cards:[
+        {h:'Census County Business Patterns',p:'Establishment counts by 6-digit NAICS code at the ZIP, county, and MSA level \u2014 along with employment and annual payroll. This is the foundation for competitive landscape intelligence: how many businesses like yours operate in your market, how they\'re distributed by size, and whether your industry is fragmented (roll-up opportunity) or consolidated (barrier to entry). PE firms currently pay junior analysts to assemble this manually over weeks.'},
+        {h:'BLS Quarterly Census of Employment & Wages',p:'Average weekly wages by industry at the county level, updated quarterly. This answers critical deal questions: Is a seller\'s payroll competitive or bloated? Are labor costs rising in this market? How does this geography compare to the national average for this industry? QCEW data turns gut feelings about "high labor costs" into precise numbers that affect valuation.'},
+        {h:'BEA Regional Economic Accounts',p:'County-level GDP, GDP growth rates, and Regional Price Parities that measure local purchasing power. $100 in San Francisco buys $84.58 worth of goods nationally, while $100 in Pine Bluff, Arkansas buys $124.49 \u2014 a 47% gap that should change how every comp is interpreted. No other platform adjusts for this.'},
+        {h:'FRED + Treasury + SBA Lending Data',p:'Real-time interest rates, SBA 7(a) lending volumes by district, inflation metrics, and Treasury yield curves \u2014 all feeding directly into deal structure analysis. When rates shift, Yulia recalculates every active deal\'s DSCR automatically. When SBA lending surges in a sector, that\'s a demand signal.'},
+        {h:'IRS Statistics of Income',p:'Profitability benchmarks by industry and business size \u2014 the only public dataset that shows what businesses actually earn as a percentage of revenue, broken down by NAICS code and revenue band. This is how Yulia calibrates add-back analysis and knows whether a seller\'s margins are normal for their peer group.'},
+        {h:'SEC EDGAR + Transaction Comparables',p:'Public company filings, M&A transaction records, and comparable deal multiples across sectors and sizes. Combined with localized data, this creates valuation context that\'s both industry-specific and geography-adjusted \u2014 institutional-grade analysis applied to the SMB segment where it\'s never existed.'}]},
+      {label:'WHAT THIS MAKES POSSIBLE',title:'Products no one <em>else can build.</em>',cards:[
+        {h:'One-Click Market Intelligence Report',p:'Enter any NAICS code and any geography. Yulia generates a complete market picture: competitive density and fragmentation score, local wage benchmarks vs. national averages, GDP trajectory, cost-of-living adjustment, estimated valuation ranges, and current buyer demand signals. The broker who walks into a listing pitch with this report looks like they have Bloomberg. The one who doesn\'t looks like they\'re guessing.'},
+        {h:'Market Fragmentation Heat Map',p:'Roll-up opportunity scored by industry and MSA \u2014 derived from Census establishment counts and size distributions, overlaid with BLS wage pressure data and BEA growth trajectories. The dashboard PE associates currently spend weeks building for each new thesis, updated continuously.'},
+        {h:'Your Business vs. Your Market',p:'How does your revenue and headcount compare to local industry peers? Are your labor costs above or below market? What are businesses like yours actually selling for in your geography? Data-driven context that replaces "I think it\'s worth about..." with "Here\'s exactly where you stand and why."'}]}
+    ],quote:{t:'"The moat isn\'t the data \u2014 it\'s free and public. The moat is the integration layer: cross-source NAICS concordance, temporal alignment across datasets with different update cycles, suppression gap-filling, and derived metrics. A ChatGPT prompt can\'t do any of this."',w:'smbx.ai Architecture'},ph:'Ask about any industry or market...'},
+  agency:{label:'AGENCY & AUTOMATION',h1:'She does <em>the work.</em>',
+    sub:'Ask ChatGPT about a deal and you get a paragraph. Ask Yulia and you get a CIM, a valuation model, an SBA financing analysis, and a deal memo. She doesn\'t answer questions. She produces work product.',
+    insight:'Upload a P&L and get a complete confidential information memorandum \u2014 <strong>narrative, financials, add-backs, projections, and market context</strong>. Describe a target and get it scored against seven valuation factors instantly. Tell her to screen a deal and she checks <strong>SBA eligibility, red flags, DSCR, and structure</strong> before you write the LOI.',
+    sections:[
+      {label:'WORK PRODUCT',title:'Deliverables. <em>Not paragraphs.</em>',cards:[
+        {h:'Confidential Information Memorandum',p:'Upload a P&L, tax return, or financial summary. Yulia produces a presentation-ready CIM: executive summary, business narrative, financial analysis with every add-back identified, market context from Census/BLS/BEA data, comparable transaction analysis, and growth projections. What takes a broker two days of Word and Excel, built in minutes with real market data woven in.'},
+        {h:'Multi-Methodology Valuation',p:'SDE and EBITDA calculation with systematic add-back identification \u2014 checked against IRS Statistics of Income benchmarks for your industry and size band. Then multiple valuation approaches: industry-specific multiples, comparable transactions adjusted for geography and business quality, and asset-based floor valuation. Every number sourced, every assumption shown.'},
+        {h:'SBA Financing Model',p:'Full deal structure analysis under the current SOP 50 10 8 rules: 10% equity injection requirement, DSCR at current SOFR + SBA margin, seller note standby period modeling, personal guarantee obligations, and credit-elsewhere test. Tells you exactly whether a deal finances, what the monthly payment looks like, and how to structure the equity stack.'},
+        {h:'Deal Screening Memo',p:'The seven valuation factors scored (recurring revenue %, customer concentration, owner dependency, growth rate, margin quality, financial cleanliness, industry timing), red flags identified, financing feasibility assessed, and a go/no-go recommendation with the reasoning shown. Kill bad deals in minutes, not months.'}]},
+      {label:'PROCESS MANAGEMENT',title:'From first message <em>to integration.</em>',cards:[
+        {h:'Adaptive deal workspace',p:'Every conversation builds context. Yulia maintains a living deal profile that evolves as you share more information. She doesn\'t start from scratch each time. She remembers your deal, tracks what\'s been completed, identifies what\'s missing, and proactively surfaces the next most valuable action.'},
+        {h:'Buyer/target matching',p:'For sellers: identifies likely buyer profiles \u2014 financial buyers, strategic acquirers, PE roll-ups, individual operators \u2014 scored by fit and financing ability. For buyers: screens targets against your thesis, ranks by attractiveness, and helps prioritize diligence time.'},
+        {h:'Diligence through closing',p:'Quality of earnings, working capital targets, deal structure comparison, risk identification, and closing checklists. Yulia doesn\'t replace your attorney or CPA \u2014 she arms them with organized, pre-analyzed information so their billable hours go further.'},
+        {h:'Post-merger integration',p:'The deal closes \u2014 now what? First 100 days: key employee retention, customer communication, system transitions, financial integration, and operational continuity. Most deals lose value because integration is an afterthought. Yulia makes it part of the process from day one.'}]}
+    ],quote:{t:'"The single most valuable intelligence is the specific, localized answer to: What is this business worth in this market, can it be financed, and should you act now? No one answered that for SMB until now."',w:'smbx.ai'},ph:'Tell Yulia what you need built...'}
+};
+
+function renderJ(k){const j=J[k];let h='';
+  h+=`<div class="j-hero"><div class="j-label">${j.label}</div><h1 class="j-h1">${j.h1}</h1><p class="j-sub">${j.sub}</p></div>`;
+  h+=`<div class="j-insight"><p><span class="ya">Y</span> ${j.insight}</p></div>`;
+  j.sections.forEach(s=>{
+    h+=`<div class="j-section">`;
+    if(s.label)h+=`<div class="j-section-label">${s.label}</div>`;
+    h+=`<h3>${s.title}</h3>`;
+    if(s.cards){h+=`<div class="j-cards">`;s.cards.forEach(c=>h+=`<div class="j-card"><h4>${c.h}</h4><p>${c.p}</p></div>`);h+=`</div>`}
+    if(s.deals){h+=`<div class="j-deals">`;s.deals.forEach(d=>{
+      const m=d.msg.replace(/'/g,"\'");
+      h+=`<div class="j-deal" onclick="dealTap('${m}')"><div class="j-deal-sz">${d.sz}</div><div class="j-deal-tp">${d.tp}</div><div class="j-deal-rs">${d.rs}</div></div>`;
+    });h+=`</div>`}
+    h+=`</div><div class="j-div"></div>`;
+  });
+  h+=`<div class="j-quote"><em>${j.quote.t}</em><div class="j-quote-who">— ${j.quote.w}</div></div>`;
+  journey.innerHTML=h;
+}
+
+function showJourney(k){curJ=k;renderJ(k);
+  land.classList.add('out');
+  setTimeout(()=>{land.style.display='none';journey.classList.add('active');
+    dock.classList.add('active');app.classList.add('has-back','has-dock');
+    cii.placeholder=J[k].ph;sa.scrollTop=0},300)}
+
+function enterChat(){if(app.classList.contains('chat-mode'))return;
+  journey.style.opacity='0';journey.style.transform='translateY(-10px)';journey.style.transition='opacity .3s,transform .3s';
+  setTimeout(()=>{journey.classList.remove('active');journey.style.opacity='';journey.style.transform='';journey.style.transition='';
+    msgs.classList.add('active');app.classList.add('chat-mode');sa.scrollTop=0;
+    requestAnimationFrame(()=>msgs.classList.add('show'))},300)}
+
+function enterChatDirect(){if(app.classList.contains('chat-mode'))return;
+  land.classList.add('out');
+  setTimeout(()=>{land.style.display='none';msgs.classList.add('active');dock.classList.add('active');
+    app.classList.add('has-back','has-dock','chat-mode');sa.scrollTop=0;
+    requestAnimationFrame(()=>msgs.classList.add('show'))},350)}
+
+function goHome(){closePopups();
+  if(app.classList.contains('chat-mode')){msgs.classList.remove('show');setTimeout(reset,300)}
+  else if(journey.classList.contains('active')){journey.style.opacity='0';journey.style.transition='opacity .2s';setTimeout(reset,250)}
+  else{sa.scrollTop=0}}
+function reset(){app.classList.remove('chat-mode','has-back');
+  msgs.innerHTML='';msgs.classList.remove('active','show');
+  journey.classList.remove('active');journey.style.opacity='';journey.style.transition='';journey.style.transform='';
+  land.style.display='';land.classList.remove('out');
+  cii.value='';cii.style.height='auto';cs.classList.remove('vis');cii.placeholder='Tell Yulia about your deal...';curJ=null;sa.scrollTop=0}
+
+function toggleTools(){const o=toolsPopup.classList.toggle('open');plusBtn.classList.toggle('open',o)}
+function closePopups(){toolsPopup.classList.remove('open');plusBtn.classList.remove('open')}
+document.addEventListener('click',e=>{
+  if(toolsPopup.classList.contains('open')&&!toolsPopup.contains(e.target)&&!plusBtn.contains(e.target)){toolsPopup.classList.remove('open');plusBtn.classList.remove('open')}
+});
+
+function ar(el,b){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,140)+'px';$(b).classList.toggle('vis',el.value.trim().length>0)}
+
+function ck(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(cii.value.trim())sfc()}}
+function fc(t){cii.value=t;ar(cii,'cs');cii.focus()}
+function sfc(){const t=cii.value.trim();if(!t)return;cii.value='';cii.style.height='auto';cs.classList.remove('vis');
+  if(!app.classList.contains('chat-mode')){
+    if(journey.classList.contains('active'))enterChat();
+    else enterChatDirect();
+  }
+  setTimeout(()=>{aum(t);resp(t)},app.classList.contains('chat-mode')?50:400)}
+function dealTap(m){cii.value=m;sfc()}
+function resp(t){st();setTimeout(()=>{rt();aym(gr(t));cii.focus()},1800+Math.random()*1000)}
+
+function aum(t){const e=document.createElement('div');e.className='mu';e.textContent=t;msgs.appendChild(e);sb()}
+function aym(h){const e=document.createElement('div');e.className='my';e.innerHTML='<div class="ya">Y</div><div class="yt">'+h+'</div>';msgs.appendChild(e);sb()}
+function st(){const e=document.createElement('div');e.className='typing';e.id='td';e.innerHTML='<div class="td"></div><div class="td"></div><div class="td"></div>';msgs.appendChild(e);sb()}
+function rt(){const e=$('td');if(e)e.remove()}
+function sb(){setTimeout(()=>{sa.scrollTop=sa.scrollHeight},50)}
+
+function gr(m){const l=m.toLowerCase();
+  if(l.includes('upload')||l.includes('financial'))return'<p>I can analyze financials once uploaded. For now, <strong>tell me your approximate revenue and what you take home</strong> — I\'ll start calculating.</p><p>The upload tool processes P&Ls, tax returns, and balance sheets.</p>';
+  if(l.includes('valuation')||l.includes('worth'))return'<p>Let\'s calculate your real earnings. Most owners miss <strong>add-backs worth $30K–$150K</strong> — vehicle, insurance, rent, family payroll.</p><p><strong>What\'s your industry, location, and approximate revenue?</strong></p>';
+  if(l.includes('find')||l.includes('looking')||l.includes('search'))return'<p>I can scan every market for businesses matching your criteria — industry, geography, size, profitability.</p><p><strong>What industry are you targeting, and what\'s your size range?</strong></p>';
+  if(l.includes('sba')||l.includes('bankab')||l.includes('financing'))return'<p>SBA bankability depends on <strong>DSCR, collateral, industry risk</strong>, and June 2025 rule changes.</p><p><strong>What\'s the deal size and industry?</strong></p>';
+  if(l.includes('hvac')||l.includes('plumb'))return'<p>HVAC — one of the hottest PE roll-up verticals. <strong>138 deals</strong> in 2024.</p><p>At $3M revenue, likely <strong>$450K–$700K SDE</strong>. Range: <strong>$1.1M–$2.5M</strong> standalone, more as a platform add-on.</p><p><strong>What did you take home last year?</strong></p>';
+  if(l.includes('saas')||l.includes('software'))return'<p>SaaS $1–5M ARR — sweet spot. Strong retention commands <strong>4–7× ARR</strong>.</p><p><strong>Specific deal, or building thesis?</strong></p>';
+  if(l.includes('landscap'))return'<p>Landscaping at $400K — solid. Most owners miss add-backs: <strong>vehicle, fuel, phone, depreciation</strong>.</p><p><strong>What did you take home last year?</strong></p>';
+  if(l.includes('pe ')||l.includes('fund')||l.includes('roll-up'))return'<p>I\'ll score every MSA for <strong>density, wage arbitrage, growth</strong>.</p><p><strong>Target EBITDA range and geographic preferences?</strong></p>';
+  if(l.includes('sell')||l.includes('exit'))return'<p>Most owners miss <strong>add-backs</strong> worth $30K–$150K.</p><p><strong>Industry, location, and approximate revenue?</strong></p>';
+  if(l.includes('buy')||l.includes('acquir'))return'<p>Key: <strong>industry, size, geography, financing</strong>. If SBA, I check bankability instantly.</p><p><strong>Specific deal or building thesis?</strong></p>';
+  if(l.includes('raise')||l.includes('capital'))return'<p>Growth capital — how much equity at what valuation?</p><p><strong>Current revenue, and what would the capital fund?</strong></p>';
+  return'<p><strong>Tell me what you\'re working on</strong> — selling, buying, raising, or post-acquisition?</p><p>Give me the basics and I\'ll start immediately.</p>';
+}
+
+</script>
+</body>
+</html>
