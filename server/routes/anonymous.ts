@@ -55,7 +55,7 @@ anonymousRouter.post('/', async (req, res) => {
 anonymousRouter.get('/:sessionId', async (req, res) => {
   try {
     const [session] = await sql`
-      SELECT session_id, source_page, messages, message_count, expires_at
+      SELECT session_id, source_page, messages, message_count, expires_at, data
       FROM anonymous_sessions
       WHERE session_id = ${req.params.sessionId}
         AND expires_at > NOW()
@@ -74,6 +74,7 @@ anonymousRouter.get('/:sessionId', async (req, res) => {
       messages: session.messages,
       messagesRemaining: MAX_MESSAGES - userMsgCount,
       limitReached: userMsgCount >= MAX_MESSAGES,
+      sessionData: session.data || null,
     });
   } catch (err: any) {
     console.error('Get anonymous session error:', err.message);

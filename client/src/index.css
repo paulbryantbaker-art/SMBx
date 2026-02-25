@@ -218,3 +218,9 @@ body {
   animation: nudgeBounce 2s ease-in-out infinite;
   font-family: 'Caveat', cursive;
 }
+
+/* Gate stepper pulse */
+@keyframes gatePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212,113,78,.3); }
+  50% { box-shadow: 0 0 0 4px rgba(212,113,78,.1); }
+}

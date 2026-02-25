@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 export interface AnonMessage {
   id: number;
@@ -186,6 +186,31 @@ export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
     try { sessionStorage.removeItem(SESSION_KEY); } catch {}
   }, []);
 
+  const [sessionData, setSessionData] = useState<Record<string, any> | null>(null);
+
+  // Poll for session data after each assistant message (extracted fields + scores)
+  const fetchSessionData = useCallback(async () => {
+    const sid = sessionIdRef.current;
+    if (!sid) return;
+    try {
+      const res = await fetch(`/api/chat/anonymous/${sid}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.sessionData) setSessionData(data.sessionData);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Fetch after messages change (delayed to let extraction complete)
+  useEffect(() => {
+    if (messages.length >= 2) {
+      const timer = setTimeout(fetchSessionData, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length, fetchSessionData]);
+
   return {
     messages,
     sending,
@@ -195,6 +220,7 @@ export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
     error,
     sendMessage,
     getSessionId,
+    sessionData,
     reset,
   };
 }

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'wouter';
 import Markdown from 'react-markdown';
 import { useAnonymousChat } from '../../hooks/useAnonymousChat';
+import HomeSidebar from '../../components/public/HomeSidebar';
 
 /* ═══ TYPES ═══ */
 
@@ -208,7 +209,8 @@ export default function Home() {
   const [currentJ, setCurrentJ] = useState<string | null>(null);
   const [value, setValue] = useState('');
   const [toolsOpen, setToolsOpen] = useState(false);
-  const { messages, sending, streamingText, error, limitReached, sendMessage, reset: resetChat } = useAnonymousChat({ context: currentJ || undefined });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { messages, sending, streamingText, error, limitReached, sendMessage, getSessionId, sessionData, reset: resetChat } = useAnonymousChat({ context: currentJ || undefined });
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -357,17 +359,39 @@ export default function Home() {
 
   return (
     <div className="h-dvh flex flex-col overflow-hidden bg-[#FAF8F4]" style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
+      {/* ── SIDEBAR ── */}
+      <HomeSidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        onNewConversation={() => { goHome(); setSidebarOpen(false); }}
+        currentSessionId={getSessionId()}
+        messages={messages}
+        sessionData={sessionData}
+      />
+
       {/* ── TOPBAR ── */}
       <div
         className="shrink-0 z-20 relative"
         style={{ borderBottom: phase === 'chat' ? '1px solid #DDD9D1' : '1px solid transparent', transition: 'border-color .3s' }}
       >
         <div className="flex items-center justify-between px-5 py-3 md:px-8 lg:px-12">
-          <div
-            className="text-[26px] font-extrabold tracking-[-0.03em] text-[#1A1A18] cursor-pointer select-none lg:text-[28px]"
-            onClick={goHome}
-          >
-            smb<span className="text-[#D4714E]">x</span>.ai
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors"
+              type="button"
+              aria-label="Open sidebar"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              </svg>
+            </button>
+            <div
+              className="text-[26px] font-extrabold tracking-[-0.03em] text-[#1A1A18] cursor-pointer select-none lg:text-[28px]"
+              onClick={goHome}
+            >
+              smb<span className="text-[#D4714E]">x</span>.ai
+            </div>
           </div>
           <div className="flex items-center gap-4 lg:gap-6">
             <Link href="/login" className="flex items-center justify-center bg-transparent border-none cursor-pointer text-[#3D3B37] p-1.5 rounded-full transition-all hover:text-[#D4714E] hover:bg-[rgba(212,113,78,.08)] no-underline">
