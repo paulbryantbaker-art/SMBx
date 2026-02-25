@@ -273,15 +273,10 @@ anonymousRouter.post('/:sessionId/upload', upload.single('file'), async (req, re
       mimeType: req.file.mimetype,
     };
 
-    // Add a system note as a message so Yulia knows about the upload
-    const msgs = (session.messages as any[]) || [];
-    const systemNote = `[SYSTEM: User uploaded ${req.file.originalname} (${(req.file.size / 1024).toFixed(0)} KB). Ask them to walk through key numbers: revenue, net income, owner salary, personal expenses. Guide the extraction conversationally.]`;
-    const updatedMsgs = [...msgs, { role: 'user', content: systemNote }];
-
+    // Store file info in session data (will be included in next prompt context)
     await sql`
       UPDATE anonymous_sessions
-      SET messages = ${JSON.stringify(updatedMsgs)}::jsonb,
-          message_count = ${updatedMsgs.length},
+      SET data = COALESCE(data, '{}'::jsonb) || ${JSON.stringify({ uploaded_file: fileInfo })}::jsonb,
           last_active_at = NOW()
       WHERE id = ${session.id}
     `;
