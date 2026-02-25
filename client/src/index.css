@@ -8,16 +8,15 @@
   --warm-white: #FFFFFF;
   --stone: #E8E4DC;
   --stone-light: #F0EDE6;
-  --terra: #DA7756;
-  --terra-hover: #C4684A;
+  --terra: #D4714E;
+  --terra-hover: #BE6342;
   --terra-soft: #FFF0EB;
   --terra-glow: rgba(218, 119, 86, 0.08);
   --text: #1A1A18;
   --text-mid: #4A4843;
   --muted: #7A766E;
   --border: #E0DCD4;
-  --serif: 'Playfair Display', Georgia, ui-serif, serif;
-  --sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 body {

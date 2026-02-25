@@ -137,8 +137,8 @@ export default function Pricing() {
     <PublicLayout>
       {/* ═══ HERO ═══ */}
       <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-12 text-center">
-        <h1 className="font-serif text-[clamp(40px,5.5vw,72px)] font-black leading-[1.05] tracking-[-0.03em] mb-5 m-0">
-          Know what you&apos;ll spend <em className="italic text-[#DA7756]">before you start.</em>
+        <h1 className="font-sans text-[clamp(40px,5.5vw,72px)] font-black leading-[1.05] tracking-[-0.03em] mb-5 m-0">
+          Know what you&apos;ll spend <em className="italic text-[#D4714E]">before you start.</em>
         </h1>
         <p className="text-[19px] text-[#7A766E] max-w-[560px] mx-auto leading-[1.6] m-0">
           Every journey has a clear price. No retainers. No surprises.
@@ -156,7 +156,7 @@ export default function Pricing() {
               onClick={() => setTab(t.key)}
               className={`px-6 py-2.5 rounded-full text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
                 tab === t.key
-                  ? 'bg-[#DA7756] text-white border-transparent'
+                  ? 'bg-[#D4714E] text-white border-transparent'
                   : 'bg-white text-[#4A4843] hover:border-[#1A1A18]'
               }`}
               style={{ border: tab === t.key ? '1px solid transparent' : '1px solid #E0DCD4' }}
@@ -182,7 +182,7 @@ export default function Pricing() {
               <span className={`inline-block text-xs font-bold uppercase tracking-[.08em] px-2.5 py-[3px] rounded-full whitespace-nowrap ${
                 s.free
                   ? 'bg-[#E8F5E9] text-[#2E7D32]'
-                  : 'bg-[#FFF0EB] text-[#DA7756]'
+                  : 'bg-[#FFF0EB] text-[#D4714E]'
               }`}>
                 {s.price}
               </span>
@@ -190,15 +190,15 @@ export default function Pricing() {
           ))}
           <div className="grid grid-cols-[1fr_auto] gap-8 pt-6 border-t-2 border-[#1A1A18]">
             <span className="text-[15px] font-bold text-[#1A1A18]">{pkg.totalLabel}</span>
-            <span className="text-[15px] font-bold text-[#DA7756]">{pkg.total}</span>
+            <span className="text-[15px] font-bold text-[#D4714E]">{pkg.total}</span>
           </div>
         </div>
       </section>
 
       {/* ═══ DEAL SIZE EXAMPLES ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
-          What does it <em className="italic text-[#DA7756]">actually</em> cost?
+        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
+          What does it <em className="italic text-[#D4714E]">actually</em> cost?
         </h2>
         <div className="max-w-[800px]">
           <div className="grid grid-cols-[1fr_auto_auto] gap-x-8 gap-y-0 items-center">
@@ -209,7 +209,7 @@ export default function Pricing() {
             {EXAMPLES.map((e, i) => (
               <>
                 <p key={`d-${i}`} className={`text-[15px] text-[#1A1A18] py-4 m-0 ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.deal}</p>
-                <p key={`y-${i}`} className={`text-[15px] font-bold text-[#DA7756] py-4 m-0 text-right ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.yulia}</p>
+                <p key={`y-${i}`} className={`text-[15px] font-bold text-[#D4714E] py-4 m-0 text-right ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.yulia}</p>
                 <p key={`t-${i}`} className={`text-[15px] text-[#7A766E] line-through py-4 m-0 text-right ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.traditional}</p>
               </>
             ))}
@@ -219,7 +219,7 @@ export default function Pricing() {
 
       {/* ═══ WALLET SECTION ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-3 m-0">
+        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-3 m-0">
           Add funds. Use them anywhere.
         </h2>
         <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-10 m-0">
@@ -227,9 +227,9 @@ export default function Pricing() {
         </p>
         <div className="grid grid-cols-3 gap-5 max-md:grid-cols-1">
           {WALLETS.map(w => (
-            <Card key={w.name} padding="px-8 py-10" className={w.popular ? 'ring-2 ring-[#DA7756]' : ''}>
+            <Card key={w.name} padding="px-8 py-10" className={w.popular ? 'ring-2 ring-[#D4714E]' : ''}>
               {w.popular && (
-                <span className="inline-block text-[11px] font-bold uppercase tracking-wide text-[#DA7756] mb-3">Popular</span>
+                <span className="inline-block text-[11px] font-bold uppercase tracking-wide text-[#D4714E] mb-3">Popular</span>
               )}
               <h3 className="text-lg font-bold text-[#1A1A18] mb-1 m-0">{w.name} &mdash; {w.price}</h3>
               <p className="text-sm text-[#7A766E] leading-[1.55] mt-2 mb-2 m-0">{w.desc}</p>
@@ -245,13 +245,13 @@ export default function Pricing() {
       {/* ═══ WHAT'S ALWAYS FREE ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
         <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-[20px] p-16 max-md:p-7">
-          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0">
+          <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0">
             What&apos;s always free.
           </h3>
           <ul className="space-y-3 list-none p-0 m-0">
             {FREE_ITEMS.map(item => (
               <li key={item} className="flex items-start gap-3 text-[15px] text-[#4A4843]">
-                <span className="w-6 h-6 rounded-full bg-[#FFF0EB] text-[#DA7756] flex items-center justify-center text-xs font-bold shrink-0 mt-px">&#10003;</span>
+                <span className="w-6 h-6 rounded-full bg-[#FFF0EB] text-[#D4714E] flex items-center justify-center text-xs font-bold shrink-0 mt-px">&#10003;</span>
                 {item}
               </li>
             ))}
@@ -261,7 +261,7 @@ export default function Pricing() {
 
       {/* ═══ FAQ ═══ */}
       <section className="max-w-[800px] mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-10 m-0 text-center">
+        <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-10 m-0 text-center">
           Pricing questions.
         </h2>
         <div>
@@ -276,9 +276,9 @@ export default function Pricing() {
 
       {/* ═══ FINAL CTA ═══ */}
       <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
-        <div className="bg-gradient-to-br from-[#DA7756] to-[#C4684A] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
+        <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
           <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
-          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
+          <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
             Start free. Pay only when you&apos;re ready.
           </h3>
           <Button variant="ctaBlock" href="/signup" className="relative z-10">

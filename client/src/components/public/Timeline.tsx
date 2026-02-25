@@ -20,7 +20,7 @@ export default function Timeline({ steps }: Props) {
       {steps.map((step) => (
         <div key={step.num} className="flex gap-6 py-8 relative group">
           {/* Numbered dot */}
-          <div className="w-14 h-14 rounded-full bg-white border-2 border-[#E8E4DC] flex items-center justify-center font-serif text-lg font-black text-[#7A766E] shrink-0 z-10 transition-all duration-300 group-hover:border-[#DA7756] group-hover:text-[#DA7756] group-hover:bg-[#FFF0EB]">
+          <div className="w-14 h-14 rounded-full bg-white border-2 border-[#E8E4DC] flex items-center justify-center font-sans text-lg font-black text-[#7A766E] shrink-0 z-10 transition-all duration-300 group-hover:border-[#D4714E] group-hover:text-[#D4714E] group-hover:bg-[#FFF0EB]">
             {step.num}
           </div>
 
@@ -30,7 +30,7 @@ export default function Timeline({ steps }: Props) {
             <span className={`inline-block text-xs font-bold uppercase tracking-[.08em] px-2.5 py-[3px] rounded-full mb-2.5 ${
               step.free
                 ? 'bg-[#E8F5E9] text-[#2E7D32]'
-                : 'bg-[#FFF0EB] text-[#DA7756]'
+                : 'bg-[#FFF0EB] text-[#D4714E]'
             }`}>
               {step.price}
             </span>

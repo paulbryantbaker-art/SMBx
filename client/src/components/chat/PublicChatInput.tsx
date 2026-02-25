@@ -76,7 +76,7 @@ export default function PublicChatInput({ sourcePage, className = '' }: Props) {
         <button
           onClick={handleSend}
           disabled={isStreaming || !hasContent}
-          className="shrink-0 w-10 h-10 rounded-full bg-[#DA7756] text-white flex items-center justify-center border-none cursor-pointer hover:bg-[#C4684A] transition-all duration-200 ease-out disabled:cursor-default"
+          className="shrink-0 w-10 h-10 rounded-full bg-[#D4714E] text-white flex items-center justify-center border-none cursor-pointer hover:bg-[#BE6342] transition-all duration-200 ease-out disabled:cursor-default"
           style={{
             opacity: hasContent ? 1 : 0,
             transform: hasContent ? 'scale(1)' : 'scale(0.8)',

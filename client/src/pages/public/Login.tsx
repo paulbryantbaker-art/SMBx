@@ -65,7 +65,7 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup }: Logi
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full px-3.5 py-2.5 text-[15px] border border-[#E0DCD4] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#DA7756]"
+            className="w-full px-3.5 py-2.5 text-[15px] border border-[#E0DCD4] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#D4714E]"
           />
 
           <label className="block text-sm font-medium text-[#1A1A18] mb-1.5">Password</label>
@@ -74,13 +74,13 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup }: Logi
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
-            className="w-full px-3.5 py-2.5 text-[15px] border border-[#E0DCD4] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#DA7756]"
+            className="w-full px-3.5 py-2.5 text-[15px] border border-[#E0DCD4] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#D4714E]"
           />
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 bg-[#DA7756] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#C4684A] transition-colors disabled:opacity-50"
+            className="w-full py-3 bg-[#D4714E] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#BE6342] transition-colors disabled:opacity-50"
           >
             {submitting ? 'Signing in...' : 'Sign in'}
           </button>
@@ -91,7 +91,7 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup }: Logi
           <button
             type="button"
             onClick={onNavigateSignup}
-            className="bg-transparent border-none text-[#DA7756] font-semibold cursor-pointer text-sm p-0"
+            className="bg-transparent border-none text-[#D4714E] font-semibold cursor-pointer text-sm p-0"
           >
             Sign up
           </button>

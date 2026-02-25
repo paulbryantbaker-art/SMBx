@@ -13,8 +13,8 @@ export default {
         },
         sidebar: '#F0EDE6',
         terra: {
-          DEFAULT: '#DA7756',
-          hover: '#C4684A',
+          DEFAULT: '#D4714E',
+          hover: '#BE6342',
           soft: '#FFF0EB',
         },
         stone: {
@@ -32,8 +32,7 @@ export default {
         },
       },
       fontFamily: {
-        serif: ["'Playfair Display'", 'Georgia', 'ui-serif', 'serif'],
-        sans: ["'Instrument Sans'", 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ["'Inter'", 'system-ui', '-apple-system', 'sans-serif'],
       },
       maxWidth: {
         site: '1200px',

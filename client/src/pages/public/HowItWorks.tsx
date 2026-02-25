@@ -78,8 +78,8 @@ export default function HowItWorks() {
     <PublicLayout>
       {/* ═══ HERO ═══ */}
       <section className="max-w-site mx-auto px-10 pt-20 pb-12 max-md:px-5 max-md:pt-12 max-md:pb-8">
-        <h1 className="font-serif text-[clamp(40px,5.5vw,72px)] font-black leading-[1.05] tracking-[-0.03em] max-w-[16ch] mb-5 m-0">
-          Talk to Yulia. She handles <em className="italic text-[#DA7756]">the rest.</em>
+        <h1 className="font-sans text-[clamp(40px,5.5vw,72px)] font-black leading-[1.05] tracking-[-0.03em] max-w-[16ch] mb-5 m-0">
+          Talk to Yulia. She handles <em className="italic text-[#D4714E]">the rest.</em>
         </h1>
         <p className="text-[19px] text-[#7A766E] max-w-[600px] leading-[1.6] m-0">
           No forms. No uploads. No 47-field intake questionnaires. Just tell Yulia about your deal
@@ -93,7 +93,7 @@ export default function HowItWorks() {
           {PROCESS_STEPS.map(s => (
             <Card key={s.num} hover={false} padding="px-10 py-10 max-md:px-6 max-md:py-6">
               <div className="flex flex-col md:flex-row md:items-start gap-6">
-                <span className="font-serif text-[56px] font-black text-[#E8E4DC] leading-none shrink-0">{s.num}</span>
+                <span className="font-sans text-[56px] font-black text-[#E8E4DC] leading-none shrink-0">{s.num}</span>
                 <div className="flex-1">
                   <h3 className="text-lg font-bold text-[#1A1A18] mb-2 m-0">{s.title}</h3>
                   <p className="text-sm text-[#7A766E] leading-[1.6] m-0 max-w-[600px]">{s.desc}</p>
@@ -106,7 +106,7 @@ export default function HowItWorks() {
 
       {/* ═══ APPLIED INTELLIGENCE ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-3 m-0">
+        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-3 m-0">
           What Yulia knows.
         </h2>
         <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-10 m-0">
@@ -125,7 +125,7 @@ export default function HowItWorks() {
       {/* ═══ COLLABORATION ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
         <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-[20px] py-12 px-14 max-md:py-8 max-md:px-6">
-          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
+          <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
             Everyone on the deal. One place.
           </h3>
           <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-8 m-0">
@@ -134,7 +134,7 @@ export default function HowItWorks() {
           <div className="flex flex-col gap-4">
             {COLLABORATION.map(c => (
               <div key={c.bold} className="flex gap-3 items-start">
-                <span className="w-6 h-6 rounded-full bg-[#FFF0EB] text-[#DA7756] flex items-center justify-center text-xs font-bold shrink-0 mt-px">
+                <span className="w-6 h-6 rounded-full bg-[#FFF0EB] text-[#D4714E] flex items-center justify-center text-xs font-bold shrink-0 mt-px">
                   &#10003;
                 </span>
                 <span className="text-[15px] leading-[1.5]">
@@ -148,13 +148,13 @@ export default function HowItWorks() {
 
       {/* ═══ DEAL STORIES ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
+        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
           Built for every deal size.
         </h2>
         <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
           {STORIES.map(s => (
             <Card key={s.deal} padding="px-8 py-10">
-              <p className="text-[11px] uppercase tracking-[.12em] text-[#DA7756] font-semibold mb-3 m-0">{s.deal}</p>
+              <p className="text-[11px] uppercase tracking-[.12em] text-[#D4714E] font-semibold mb-3 m-0">{s.deal}</p>
               <p className="text-sm text-[#7A766E] leading-[1.6] m-0">{s.desc}</p>
             </Card>
           ))}
@@ -163,7 +163,7 @@ export default function HowItWorks() {
 
       {/* ═══ CHAT INPUT ═══ */}
       <section id="chat-input" className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
+        <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
           See for yourself.
         </h3>
         <div className="max-w-[640px] mx-auto">
@@ -173,14 +173,14 @@ export default function HowItWorks() {
 
       {/* ═══ FINAL CTA ═══ */}
       <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
-        <div className="bg-gradient-to-br from-[#DA7756] to-[#C4684A] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
+        <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
           <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
-          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
+          <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
             Every deal deserves an expert. Yours starts now.
           </h3>
           <button
             onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-white text-[#DA7756] font-semibold text-[15px] px-8 py-4 rounded-full border-none cursor-pointer hover:bg-[#FFF0EB] transition-colors relative z-10 shrink-0"
+            className="bg-white text-[#D4714E] font-semibold text-[15px] px-8 py-4 rounded-full border-none cursor-pointer hover:bg-[#FFF0EB] transition-colors relative z-10 shrink-0"
           >
             Talk to Yulia &rarr;
           </button>
@@ -189,7 +189,7 @@ export default function HowItWorks() {
 
       {/* ═══ NUDGE ═══ */}
       <div className="text-center pb-10 max-md:pb-6">
-        <p className="journey-nudge text-[22px] text-[#DA7756] m-0 max-md:text-lg">
+        <p className="journey-nudge text-[22px] text-[#D4714E] m-0 max-md:text-lg">
           every deal starts with a conversation
         </p>
       </div>

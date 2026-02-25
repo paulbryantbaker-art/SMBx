@@ -78,14 +78,14 @@ export default function PublicChatView({
           {limitReached && (
             <div className="flex items-start gap-3">
               <YuliaAvatar size={32} className="mt-0.5" />
-              <div className="max-w-[75%] bg-[#FFF0EB] border border-[#DA7756]/20 rounded-2xl rounded-bl-[4px] px-5 py-4">
+              <div className="max-w-[75%] bg-[#FFF0EB] border border-[#D4714E]/20 rounded-2xl rounded-bl-[4px] px-5 py-4">
                 <p className="text-sm font-sans text-[#1A1A18] leading-relaxed m-0 mb-3">
                   You&apos;ve used all your preview messages. Create a free account to continue our conversation &mdash; I&apos;ll pick up right where we left off.
                 </p>
                 {onSignup && (
                   <button
                     onClick={onSignup}
-                    className="bg-[#DA7756] text-white border-none rounded-full text-sm font-semibold px-6 py-2.5 cursor-pointer hover:bg-[#C4684A] transition-colors"
+                    className="bg-[#D4714E] text-white border-none rounded-full text-sm font-semibold px-6 py-2.5 cursor-pointer hover:bg-[#BE6342] transition-colors"
                   >
                     Create free account &rarr;
                   </button>

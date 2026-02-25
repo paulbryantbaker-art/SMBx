@@ -101,12 +101,12 @@ export default function Buy() {
     <PublicLayout>
       {/* ═══ HERO ═══ */}
       <section className="max-w-site mx-auto px-10 pt-20 pb-12 max-md:px-5 max-md:pt-12 max-md:pb-8">
-        <div className="flex items-center gap-3 mb-8 text-[13px] uppercase tracking-[.18em] text-[#DA7756] font-semibold">
-          <span className="w-9 h-0.5 bg-[#DA7756]" />
+        <div className="flex items-center gap-3 mb-8 text-[13px] uppercase tracking-[.18em] text-[#D4714E] font-semibold">
+          <span className="w-9 h-0.5 bg-[#D4714E]" />
           Buy a Business
         </div>
-        <h1 className="font-serif text-[clamp(44px,6vw,76px)] font-black leading-[1.05] tracking-[-0.03em] max-w-[14ch] mb-6 m-0">
-          Find the right deal. <em className="italic text-[#DA7756]">Own it.</em>
+        <h1 className="font-sans text-[clamp(44px,6vw,76px)] font-black leading-[1.05] tracking-[-0.03em] max-w-[14ch] mb-6 m-0">
+          Find the right deal. <em className="italic text-[#D4714E]">Own it.</em>
         </h1>
         <p className="text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-10 m-0">
           Whether it&apos;s your first acquisition or your fifteenth &mdash; Yulia screens targets,
@@ -120,11 +120,11 @@ export default function Buy() {
 
       {/* ═══ JOURNEY TIMELINE ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
-        <p className="text-xs uppercase tracking-[.2em] text-[#DA7756] font-semibold mb-4 m-0">
+        <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">
           Your buying journey
         </p>
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-12 m-0">
-          From thesis to <em className="italic text-[#DA7756]">closing table.</em>
+        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-12 m-0">
+          From thesis to <em className="italic text-[#D4714E]">closing table.</em>
         </h2>
 
         <Timeline steps={TIMELINE_STEPS} />
@@ -140,13 +140,13 @@ export default function Buy() {
 
       {/* ═══ BUILT FOR YOUR DEAL ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
-          Built for <em className="italic text-[#DA7756]">your</em> deal.
+        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
+          Built for <em className="italic text-[#D4714E]">your</em> deal.
         </h2>
         <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
           {DEAL_SIZES.map(d => (
             <Card key={d.range} padding="px-7 py-9">
-              <p className="font-serif text-[28px] font-black text-[#DA7756] mb-3 m-0">{d.range}</p>
+              <p className="font-sans text-[28px] font-black text-[#D4714E] mb-3 m-0">{d.range}</p>
               <h3 className="text-base font-bold text-[#1A1A18] mb-2 m-0">{d.title}</h3>
               <p className="text-sm text-[#7A766E] leading-[1.55] mb-3 m-0">{d.desc}</p>
               <div className="py-3 px-4 bg-[#F3F0EA] rounded-[10px]">
@@ -161,8 +161,8 @@ export default function Buy() {
       <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
         <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-[20px] py-12 px-14 grid grid-cols-2 gap-12 items-center max-md:grid-cols-1 max-md:py-8 max-md:px-6 max-md:gap-8">
           <div>
-            <h3 className="font-serif text-[28px] font-black tracking-[-0.02em] leading-[1.15] mb-4 m-0">
-              Working with a <em className="italic text-[#DA7756]">broker?</em> Yulia is their secret weapon.
+            <h3 className="font-sans text-[28px] font-black tracking-[-0.02em] leading-[1.15] mb-4 m-0">
+              Working with a <em className="italic text-[#D4714E]">broker?</em> Yulia is their secret weapon.
             </h3>
             <p className="text-[15px] text-[#7A766E] leading-[1.6] m-0">
               Brokers bring you deals. Yulia arms them with instant valuations, buyer scoring,
@@ -172,7 +172,7 @@ export default function Buy() {
           <div className="flex flex-col gap-4">
             {BROKER_BENEFITS.map(b => (
               <div key={b.bold} className="flex gap-3 items-start">
-                <span className="w-6 h-6 rounded-full bg-[#FFF0EB] text-[#DA7756] flex items-center justify-center text-xs font-bold shrink-0 mt-px">
+                <span className="w-6 h-6 rounded-full bg-[#FFF0EB] text-[#D4714E] flex items-center justify-center text-xs font-bold shrink-0 mt-px">
                   &#10003;
                 </span>
                 <span className="text-[15px] leading-[1.5]">
@@ -186,7 +186,7 @@ export default function Buy() {
 
       {/* ═══ CHAT INPUT ═══ */}
       <section id="chat-input" className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
+        <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
           Ready to find your next deal?
         </h3>
         <div className="max-w-[640px] mx-auto">
@@ -196,7 +196,7 @@ export default function Buy() {
 
       {/* ═══ FAQ ═══ */}
       <section className="max-w-[800px] mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h2 className="font-serif text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-10 m-0 text-center">
+        <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-10 m-0 text-center">
           Questions buyers ask.
         </h2>
         <div>
@@ -211,14 +211,14 @@ export default function Buy() {
 
       {/* ═══ FINAL CTA ═══ */}
       <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
-        <div className="bg-gradient-to-br from-[#DA7756] to-[#C4684A] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
+        <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
           <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
-          <h3 className="font-serif text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
+          <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
             Your next acquisition starts with a conversation.
           </h3>
           <button
             onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-white text-[#DA7756] font-semibold text-[15px] px-8 py-4 rounded-full border-none cursor-pointer hover:bg-[#FFF0EB] transition-colors relative z-10 shrink-0"
+            className="bg-white text-[#D4714E] font-semibold text-[15px] px-8 py-4 rounded-full border-none cursor-pointer hover:bg-[#FFF0EB] transition-colors relative z-10 shrink-0"
           >
             Talk to Yulia &mdash; free &rarr;
           </button>
@@ -227,7 +227,7 @@ export default function Buy() {
 
       {/* ═══ NUDGE ═══ */}
       <div className="text-center pb-10 max-md:pb-6">
-        <p className="journey-nudge text-[22px] text-[#DA7756] m-0 max-md:text-lg">
+        <p className="journey-nudge text-[22px] text-[#D4714E] m-0 max-md:text-lg">
           the best deals go to prepared buyers
         </p>
       </div>
