@@ -65,16 +65,11 @@ body {
   animation: morphFadeIn 400ms ease-out forwards;
 }
 
-/* ═══ HOMEPAGE APP SHELL ═══ */
+/* ═══ HOMEPAGE V12 ═══ */
 
 @keyframes homeFadeUp {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes homeBob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(3px); }
 }
 
 @keyframes homeSlideIn {
@@ -83,28 +78,17 @@ body {
 }
 
 @keyframes homeTypingDot {
-  0%, 60%, 100% { opacity: 0.25; transform: scale(0.85); }
-  30% { opacity: 1; transform: scale(1); }
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
 }
 
-/* Landing stagger animations */
+@keyframes nudgeBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+/* Fade-up animation */
 .home-fade-up { animation: homeFadeUp 0.4s ease both; }
-.home-fade-up-1 { animation-delay: 0.06s; }
-.home-fade-up-2 { animation-delay: 0.12s; }
-.home-fade-up-3 { animation-delay: 0.18s; }
-.home-fade-up-4 { animation-delay: 0.24s; }
-.home-fade-up-5 { animation-delay: 0.3s; }
-
-.home-bob svg { animation: homeBob 2.5s ease infinite; }
-
-/* Pillar + CTA reveal */
-.home-pillar, .home-scroll-cta {
-  opacity: 0; transform: translateY(16px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-.home-pillar.visible, .home-scroll-cta.visible {
-  opacity: 1; transform: translateY(0);
-}
 
 /* Message slide-in */
 .home-msg-slide { animation: homeSlideIn 0.3s ease; }
@@ -115,48 +99,123 @@ body {
 .home-typing-dot:nth-child(3) { animation-delay: 0.3s; }
 
 /* Yulia message text */
-.home-yt p { margin-bottom: 10px; }
+.home-yt p { margin-bottom: 12px; }
 .home-yt p:last-child { margin-bottom: 0; }
 .home-yt strong { font-weight: 700; }
 
-/* Pill response card body */
-.home-pr-body p { font-size: 14px; color: #4A4843; line-height: 1.55; margin-bottom: 10px; }
-.home-pr-body p:last-child { margin-bottom: 0; }
-
-/* Pill response items */
-.home-pr-items { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
-.home-pr-item { padding: 10px 14px; background: #FAF8F4; border-radius: 10px; }
-.home-pr-item h4 { font-size: 13px; font-weight: 700; margin-bottom: 2px; margin-top: 0; }
-.home-pr-item p { font-size: 12px; color: #4A4843; line-height: 1.45; margin-bottom: 0; }
-
-/* Deal strip scrollbar hidden */
-.home-deal-strip { scrollbar-width: none; }
-.home-deal-strip::-webkit-scrollbar { display: none; }
-
-/* Input card focus-within */
-.home-input-card {
-  box-shadow: 0 4px 24px rgba(0,0,0,0.05);
-  transition: border-color 0.2s, box-shadow 0.2s;
+/* Action card grid */
+.home-agrid {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px;
 }
-.home-input-card:focus-within {
-  border-color: #DA7756;
-  box-shadow: 0 0 0 4px rgba(218,119,86,0.08), 0 4px 24px rgba(0,0,0,0.08);
+.home-agrid > * { grid-column: span 2; }
+.home-agrid > *:nth-child(4) { grid-column: span 3; }
+.home-agrid > *:nth-child(5) { grid-column: span 3; }
+@media(min-width: 768px) { .home-agrid { max-width: 660px; } }
+@media(min-width: 1024px) {
+  .home-agrid { max-width: 900px; grid-template-columns: repeat(5, 1fr); }
+  .home-agrid > *,
+  .home-agrid > *:nth-child(4),
+  .home-agrid > *:nth-child(5) { grid-column: span 1; }
 }
 
-/* Journey page nudge */
-@keyframes nudgeBounce {
-  0%, 100% { transform: translateY(0) rotate(-1deg); }
-  50% { transform: translateY(-4px) rotate(-1deg); }
+/* Action cards */
+.home-acard {
+  background: #fff; border: none; border-radius: 20px;
+  padding: 28px 22px; display: flex; flex-direction: column;
+  align-items: flex-start; gap: 14px;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(26,26,24,.05);
+}
+@media(min-width: 1024px) {
+  .home-acard { padding: 24px 20px; gap: 12px; }
+  .home-acard svg { width: 24px; height: 24px; }
+  .home-acard span { font-size: 16px; }
+}
+.home-acard:hover { box-shadow: 0 2px 8px rgba(26,26,24,.07), 0 1px 2px rgba(26,26,24,.04); transform: translateY(-1px); }
+.home-acard:active { transform: scale(0.97); box-shadow: 0 1px 3px rgba(26,26,24,.06); }
+
+/* Landing nudge — desktop only */
+.home-landing-nudge { display: none; }
+@media(min-width: 768px) { .home-landing-nudge { display: flex; } }
+
+/* Desktop spacing */
+@media(min-width: 1024px) {
+  .home-landing-nudge { margin-top: 64px; }
 }
 
+/* Dock card */
+.home-dock-card {
+  background: #fff; border: 1.5px solid rgba(212,113,78,.35);
+  border-radius: 20px; overflow: visible; position: relative;
+  box-shadow: 0 4px 20px rgba(26,26,24,.08), 0 1px 3px rgba(26,26,24,.05);
+}
+.home-dock-card:focus-within {
+  border-color: #D4714E;
+  box-shadow: 0 4px 20px rgba(26,26,24,.08), 0 1px 3px rgba(26,26,24,.05), 0 0 0 4px rgba(212,113,78,.12);
+}
+
+/* Tool popup — drops UP from dock */
+.home-tools-popup {
+  position: absolute; left: 0; right: 0; bottom: calc(100% + 8px);
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(26,26,24,.08), 0 1px 3px rgba(26,26,24,.05);
+  padding: 6px;
+  opacity: 0; transform: translateY(8px) scale(0.97);
+  pointer-events: none; transition: all 0.2s; z-index: 10;
+}
+.home-tools-popup.open {
+  opacity: 1; transform: translateY(0) scale(1); pointer-events: auto;
+}
+
+/* Tool popup items */
+.home-tp-item {
+  display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
+  border-radius: 12px; border: none; background: transparent; width: 100%;
+  font-family: inherit; cursor: pointer; transition: background 0.15s; text-align: left;
+}
+.home-tp-item:hover { background: #F3F0EA; }
+.home-tp-item:active { background: #EBE7DF; }
+.home-tp-item svg { width: 20px; height: 20px; color: #D4714E; flex-shrink: 0; margin-top: 1px; }
+
+/* Journey insight card */
+.home-j-insight {
+  background: linear-gradient(135deg, #FFF8F4, #FFF0EB);
+  border-radius: 20px; padding: 28px;
+  box-shadow: 0 1px 4px rgba(26,26,24,.05), inset 0 0 0 1px rgba(212,113,78,.06);
+}
+
+/* Journey content cards */
+.home-j-card {
+  background: #fff; border: none; border-radius: 20px; padding: 28px;
+  box-shadow: 0 1px 4px rgba(26,26,24,.05); transition: all 0.2s;
+}
+.home-j-card:hover {
+  box-shadow: 0 2px 8px rgba(26,26,24,.07), 0 1px 2px rgba(26,26,24,.04);
+  transform: translateY(-1px);
+}
+
+/* Journey deal chips */
+.home-j-deal {
+  background: #fff; border: none; border-radius: 20px; padding: 26px;
+  cursor: pointer; box-shadow: 0 1px 4px rgba(26,26,24,.05); transition: all 0.2s;
+}
+.home-j-deal:hover {
+  box-shadow: 0 2px 8px rgba(26,26,24,.07), 0 1px 2px rgba(26,26,24,.04);
+  transform: translateY(-1px);
+}
+.home-j-deal:active { transform: scale(0.97); }
+
+/* Journey quote card */
+.home-j-quote {
+  background: #fff; border-radius: 20px; padding: 28px;
+  box-shadow: 0 1px 4px rgba(26,26,24,.05);
+}
+
+/* Journey heading em styling */
+.home-j-heading em { font-style: normal; color: #D4714E; }
+
+/* Journey page nudge (separate route pages) */
 .journey-nudge {
-  animation: nudgeBounce 3s ease-in-out infinite;
+  animation: nudgeBounce 2s ease-in-out infinite;
   font-family: 'Caveat', cursive;
-}
-
-/* Landing divider — full-width gradient */
-.home-landing-divider {
-  height: 1px;
-  background: linear-gradient(to right, transparent, #E0DCD4, transparent);
-  margin: 40px 0;
 }
