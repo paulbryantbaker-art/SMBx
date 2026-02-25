@@ -4,6 +4,7 @@ import { sql } from '../db.js';
 import { buildAnonymousPrompt } from '../services/promptBuilder.js';
 import { streamAnonymousResponse } from '../services/aiService.js';
 import { extractFields } from '../services/fieldExtractor.js';
+import { scoreSevenFactors, calculateCompositeScore, scoredFactorCount } from '../services/sevenFactorScoring.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
 export const anonymousRouter = Router();
@@ -160,7 +161,7 @@ anonymousRouter.post('/:sessionId/messages', async (req, res) => {
       res.write('data: [DONE]\n\n');
       res.end();
 
-      // Fire-and-forget: extract structured fields from conversation
+      // Fire-and-forget: extract structured fields + seven-factor scoring
       if (assistantText) {
         const finalMsgsForExtraction = [...updatedMsgs, { role: 'assistant', content: assistantText }];
         extractFields(finalMsgsForExtraction).then(async (fields) => {
@@ -171,8 +172,25 @@ anonymousRouter.post('/:sessionId/messages', async (req, res) => {
                 SET data = COALESCE(data, '{}'::jsonb) || ${JSON.stringify(fields)}::jsonb
                 WHERE id = ${session.id}
               `;
+
+              // Run seven-factor scoring if we have enough data
+              const [currentSession] = await sql`
+                SELECT data FROM anonymous_sessions WHERE id = ${session.id}
+              `;
+              const allData = currentSession?.data || {};
+              if (allData.industry && allData.revenue) {
+                const scores = await scoreSevenFactors(allData);
+                if (scores && scoredFactorCount(scores) >= 2) {
+                  const composite = calculateCompositeScore(scores);
+                  await sql`
+                    UPDATE anonymous_sessions
+                    SET data = COALESCE(data, '{}'::jsonb)
+                      || ${JSON.stringify({ seven_factor_scores: scores, seven_factor_composite: composite })}::jsonb
+                    WHERE id = ${session.id}
+                  `;
+                }
+              }
             } catch (e: any) {
-              // data column may not exist yet — store in messages metadata instead
               console.error('Field storage error:', e.message);
             }
           }
