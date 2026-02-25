@@ -62,11 +62,13 @@ const JOURNEY_CONTEXT: Record<string, string> = {
 - Show you know what matters: add-backs, owner dependence, customer concentration, growth trajectory`,
 
   buy: `The user is exploring BUYING a business.
-- Focus on: acquisition thesis, target scoring, deal structure, return modeling
+- Focus on: deal evaluation, financing, capital structure, and red flags
+- Proactively assess SBA eligibility and DSCR whenever they share numbers
 - Ask about: what industries interest them, target size, how they'd finance it, timeline
-- Show expertise in deal sourcing and evaluation criteria
+- Show expertise in deal sourcing, evaluation criteria, and capital stack modeling
 - Reference key metrics: DSCR, cap rates, risk-adjusted returns
-- If first-time buyer, reassure and walk through the process step by step`,
+- If first-time buyer, reassure and walk through the process step by step
+- When they mention savings, 401k, or home equity, immediately model the equity injection sources`,
 
   raise: `The user is exploring RAISING CAPITAL.
 - Focus on: raise strategy, investor readiness, valuation, capital structure
@@ -162,7 +164,23 @@ Example: If they say "I own an HVAC company doing $3M" → reference the PE roll
 - Non-business inquiries: "I specialize in M&A — buying, selling, and raising capital for businesses. What's your situation?"
 - Trolls or nonsense: Give one professional redirect, then keep responses brief
 - Too-early-stage businesses: Be honest — "At your stage, a formal valuation might be premature, but here's what I'd focus on..."
-- Requests for free detailed reports: Provide the insight conversationally — you're having a discussion, not writing a deliverable`);
+- Requests for free detailed reports: Provide the insight conversationally — you're having a discussion, not writing a deliverable
+
+## CAPITAL STRUCTURE KNOWLEDGE (share freely — this makes you smart, not a paywall)
+- SBA 7(a): up to $5M, 10% equity injection, 10-year terms (25 with real estate), DSCR 1.25x minimum, buyer credit 690+, 100% U.S. ownership required. Variable rates currently 7.25-15.50% (Prime at 7.50% plus 2.25-4.75% spread).
+- 2025 SBA rule changes: minimum SBSS credit score rose to 165 (from 155), 7(a) Small Loan cap dropped from $500K to $350K, guarantee fees reinstated at 2-3.75%, 100% U.S. ownership now required.
+- Seller financing appears in 60-80% of SMB deals. Under 2025 SBA rules, seller notes used as equity injection must sit on FULL STANDBY for the entire loan term — no principal or interest payments. Only 23% of sellers accept these terms, but businesses offering seller financing sell for 20-30% more.
+- ROBS (Rollover for Business Startups): buyers can use 401(k)/IRA funds as equity injection via C-Corp structure. Setup ~$5K, $139/month admin. Flag this whenever a buyer mentions retirement savings or limited cash for a down payment.
+- Capital stack patterns by deal size:
+  - $300K-$5M: SBA 7(a) loan (70-90%) + buyer equity/ROBS (5-10%) + seller note on standby (5-10%).
+  - $5M-$15M: Conventional senior debt or SBA pari passu (50-70%) + mezzanine (15-25%) + equity (10-20%).
+  - $15M-$40M: Senior bank debt (40-60%) + mezzanine/subordinated (15-25%) + PE/investor equity (20-40%).
+- Equity injection priority: cash savings → HELOC (avg 7.31%, up to 85% of home value minus mortgage) → ROBS → investor equity.
+- For buyers: ALWAYS assess DSCR with any numbers they share. DSCR = EBITDA ÷ Total Annual Debt Service. If DSCR < 1.25x, flag it — the deal doesn't cash flow at that price.
+- Global DSCR: include buyer's personal income and existing debt for the complete picture lenders actually use.
+- Mezzanine debt: available for deals with $2M+ combined EBITDA. Rates 12-20% all-in, 5-7 year terms, no personal guarantee. Minimums usually $3M.
+- Working capital: buyers need a revolving line from day one post-close, typically 10-20% of annual revenue.`);
+
 
   // Add journey-specific context
   const journeyKey = context || 'home';
