@@ -1,5 +1,9 @@
 import { Router } from 'express';
 import crypto from 'crypto';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import multer from 'multer';
 import { sql } from '../db.js';
 import { buildAnonymousPrompt } from '../services/promptBuilder.js';
 import { streamAnonymousResponse } from '../services/aiService.js';
@@ -7,7 +11,34 @@ import { extractFields } from '../services/fieldExtractor.js';
 import { scoreSevenFactors, calculateCompositeScore, scoredFactorCount } from '../services/sevenFactorScoring.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export const anonymousRouter = Router();
+
+// Upload config
+const UPLOAD_DIR = path.resolve(__dirname, '../../uploads');
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: UPLOAD_DIR,
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `${crypto.randomUUID()}${ext}`);
+    },
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = ['.pdf', '.xlsx', '.xls', '.csv'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF, XLSX, XLS, and CSV files are allowed'));
+    }
+  },
+});
 
 const MAX_MESSAGES = 20;
 const MAX_SESSIONS_PER_IP = 3;
@@ -212,6 +243,62 @@ anonymousRouter.post('/:sessionId/messages', async (req, res) => {
     if (!res.headersSent) {
       res.status(500).json({ error: 'Failed to process message' });
     }
+  }
+});
+
+// ─── Upload file in anonymous session ────────────────────────
+
+anonymousRouter.post('/:sessionId/upload', upload.single('file'), async (req, res) => {
+  try {
+    const [session] = await sql`
+      SELECT id, session_id, messages, message_count, expires_at
+      FROM anonymous_sessions
+      WHERE session_id = ${req.params.sessionId}
+        AND expires_at > NOW()
+        AND converted_to_user_id IS NULL
+    `;
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found or expired' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const fileInfo = {
+      originalName: req.file.originalname,
+      storedName: req.file.filename,
+      size: req.file.size,
+      mimeType: req.file.mimetype,
+    };
+
+    // Add a system note as a message so Yulia knows about the upload
+    const msgs = (session.messages as any[]) || [];
+    const systemNote = `[SYSTEM: User uploaded ${req.file.originalname} (${(req.file.size / 1024).toFixed(0)} KB). Ask them to walk through key numbers: revenue, net income, owner salary, personal expenses. Guide the extraction conversationally.]`;
+    const updatedMsgs = [...msgs, { role: 'user', content: systemNote }];
+
+    await sql`
+      UPDATE anonymous_sessions
+      SET messages = ${JSON.stringify(updatedMsgs)}::jsonb,
+          message_count = ${updatedMsgs.length},
+          last_active_at = NOW()
+      WHERE id = ${session.id}
+    `;
+
+    return res.json({
+      success: true,
+      file: {
+        name: fileInfo.originalName,
+        size: fileInfo.size,
+        sizeFormatted: fileInfo.size > 1024 * 1024
+          ? `${(fileInfo.size / (1024 * 1024)).toFixed(1)} MB`
+          : `${(fileInfo.size / 1024).toFixed(0)} KB`,
+      },
+    });
+  } catch (err: any) {
+    console.error('Upload error:', err.message);
+    return res.status(500).json({ error: 'Upload failed' });
   }
 });
 

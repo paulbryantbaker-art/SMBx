@@ -195,8 +195,16 @@ const ACTION_CARDS = [
 
 /* ═══ TOOL ITEMS ═══ */
 
-const TOOLS = [
-  { label: 'Upload financials', desc: 'Share a P&L, tax return, or balance sheet', fill: 'I have financials to share \u2014 ', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg> },
+interface ToolItem {
+  label: string;
+  desc: string;
+  fill?: string;
+  action?: 'upload';
+  icon: React.ReactNode;
+}
+
+const TOOLS: ToolItem[] = [
+  { label: 'Upload financials', desc: 'Share a P&L, tax return, or balance sheet', action: 'upload', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg> },
   { label: 'Business valuation', desc: 'Estimate worth based on revenue, earnings, and comps', fill: 'I need a business valuation \u2014 I own a ', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" /></svg> },
   { label: 'Search for a business', desc: 'Find businesses by industry, location, size, or price', fill: "Help me find a business \u2014 I'm looking for ", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg> },
   { label: 'SBA loan check', desc: 'See if a deal qualifies for SBA 7(a) \u2014 up to $5M, 10% down', fill: "Can this deal get SBA financing? I'm looking at a ", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg> },
@@ -212,10 +220,14 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { messages, sending, streamingText, error, limitReached, sendMessage, getSessionId, sessionData, reset: resetChat } = useAnonymousChat({ context: currentJ || undefined });
 
+  const [attachment, setAttachment] = useState<{ name: string; size: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const toolsRef = useRef<HTMLDivElement>(null);
   const plusRef = useRef<HTMLButtonElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   /* Scroll to bottom */
   const scrollToBottom = useCallback(() => {
@@ -287,6 +299,76 @@ export default function Home() {
       }
     });
   }, []);
+
+  /* Handle tool click — either fill or action */
+  const handleToolClick = useCallback((tool: ToolItem) => {
+    if (tool.action === 'upload') {
+      setToolsOpen(false);
+      fileInputRef.current?.click();
+    } else if (tool.fill) {
+      fillInput(tool.fill);
+    }
+  }, [fillInput]);
+
+  /* File upload handler */
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Ensure session exists
+    const sessionId = getSessionId();
+    if (!sessionId) {
+      // Need to start a session first — enter chat mode
+      if (phase !== 'chat') enterChat();
+    }
+
+    setUploading(true);
+    setToolsOpen(false);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Ensure session exists before upload
+      const sid = getSessionId() || await (async () => {
+        // Create session by sending a dummy — actually, let's just create one
+        const res = await fetch('/api/chat/anonymous', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ context: currentJ || undefined }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data.sessionId;
+        }
+        return null;
+      })();
+
+      if (!sid) {
+        setUploading(false);
+        return;
+      }
+
+      const res = await fetch(`/api/chat/anonymous/${sid}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setAttachment({ name: data.file.name, size: data.file.sizeFormatted });
+        if (phase !== 'chat') enterChat();
+        // Auto-send a message about the upload
+        sendMessage(`I've uploaded my financials: ${data.file.name}. Let me walk you through the key numbers.`);
+      }
+    } catch {
+      // ignore upload errors silently
+    } finally {
+      setUploading(false);
+      // Reset file input
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }, [getSessionId, phase, enterChat, sendMessage, currentJ]);
 
   /* Textarea handlers */
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -560,17 +642,38 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,.xlsx,.xls,.csv"
+        onChange={handleFileUpload}
+        className="hidden"
+      />
+
       {/* ── DOCK ── */}
       <div
         className="fixed bottom-0 left-0 right-0 z-30 px-5 bg-[#FAF8F4] border-t border-[#DDD9D1]"
         style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))', paddingTop: '8px' }}
       >
         <div className="max-w-[640px] mx-auto">
+          {/* Attachment bubble */}
+          {attachment && (
+            <div className="flex items-center gap-2 px-3 py-2 mb-2 bg-white rounded-lg border border-[#DDD9D1]">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+              <span className="text-sm font-medium text-[#1A1A18] truncate flex-1">{attachment.name}</span>
+              <span className="text-xs text-[#A9A49C]">{attachment.size}</span>
+              <button onClick={() => setAttachment(null)} className="text-[#A9A49C] hover:text-[#1A1A18] bg-transparent border-none cursor-pointer p-0.5" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+          )}
+
           <div className="home-dock-card relative">
             {/* Tool popup */}
             <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
               {TOOLS.map(t => (
-                <button key={t.label} className="home-tp-item" onClick={() => fillInput(t.fill)} type="button">
+                <button key={t.label} className="home-tp-item" onClick={() => handleToolClick(t)} type="button">
                   {t.icon}
                   <div>
                     <div className="text-[15px] font-semibold text-[#1A1A18] leading-[1.3]">{t.label}</div>
@@ -588,9 +691,13 @@ export default function Home() {
                 style={{ transition: 'all .2s' }}
                 type="button"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transform: toolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
-                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
+                {uploading ? (
+                  <div className="w-4 h-4 border-2 border-[#D4714E] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transform: toolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
+                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                )}
               </button>
               <textarea
                 ref={inputRef}
