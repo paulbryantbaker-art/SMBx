@@ -31,27 +31,46 @@ export interface ExtractedFields {
   target_industry?: string;
   target_size_range?: string;
   financing_approach?: string;
+  // Buyer profile fields (stored in dollars from Haiku, converted to cents before DB write)
+  buyer_credit_score_range?: string;
+  buyer_liquid_assets_cents?: number;
+  buyer_retirement_funds_cents?: number;
+  buyer_home_equity_cents?: number;
+  buyer_citizenship_status?: string;
+  buyer_industry_experience_years?: number;
+  buyer_existing_debt_annual_cents?: number;
+  seller_financing_willingness?: string;
+  seller_standby_willingness?: string;
 }
 
 const EXTRACTION_PROMPT = `You are a data extraction engine. Analyze the conversation below and extract any business/deal fields mentioned.
 
-Return ONLY a JSON object with fields you found. Use null for fields not mentioned. Convert dollar amounts to cents (multiply by 100). Only include fields you are confident about.
+Return ONLY a JSON object with fields you found. Use null for fields not mentioned. Report dollar amounts in DOLLARS (the app will convert to cents). Only include fields you are confident about.
 
 Fields to extract:
 - journey_type: "sell", "buy", "raise", or "pmi" (detect from conversation intent)
 - industry: business industry/sector (e.g. "HVAC", "Dental Practice", "IT Services")
 - location: city/state/region mentioned
 - business_name: name of the business if mentioned
-- revenue: annual revenue in CENTS (e.g. $3M = 300000000)
-- owner_salary: owner's annual take-home in CENTS
-- sde: seller's discretionary earnings in CENTS if calculable
-- ebitda: EBITDA in CENTS if mentioned
+- revenue: annual revenue in DOLLARS (e.g. $3M = 3000000)
+- owner_salary: owner's annual take-home in DOLLARS
+- sde: seller's discretionary earnings in DOLLARS if calculable
+- ebitda: EBITDA in DOLLARS if mentioned
 - employee_count: number of employees
-- asking_price: desired sale price in CENTS
-- raise_amount: capital amount seeking in CENTS
+- asking_price: desired sale/purchase price in DOLLARS
+- raise_amount: capital amount seeking in DOLLARS
 - target_industry: (for buyers) industry they're targeting
-- target_size_range: (for buyers) deal size range they want
-- financing_approach: how they plan to finance (SBA, conventional, cash, equity)
+- target_size_range: (for buyers) deal size range they want (e.g. "$1-3M")
+- financing_approach: how they plan to finance (SBA, conventional, cash, equity, ROBS)
+- buyer_credit_score_range: credit score or range (e.g. "720", "690-720")
+- buyer_liquid_assets: cash/savings in DOLLARS (e.g. 150000)
+- buyer_retirement_funds: 401k/IRA funds in DOLLARS (e.g. 200000)
+- buyer_home_equity: home equity in DOLLARS
+- buyer_citizenship_status: "us_citizen", "permanent_resident", or "other"
+- buyer_industry_experience_years: years of experience in the target industry
+- buyer_existing_debt_annual: annual existing debt payments in DOLLARS
+- seller_financing_willingness: "yes", "no", "negotiable", or "unknown"
+- seller_standby_willingness: "full_standby", "partial", "no", or "unknown"
 
 Respond with ONLY valid JSON. No markdown, no explanation.`;
 
@@ -86,11 +105,31 @@ export async function extractFields(
     const cleaned = text.replace(/```json\n?|\n?```/g, '').trim();
     const parsed = JSON.parse(cleaned);
 
-    // Filter out null values
+    // Fields that need dollar-to-cents conversion
+    const DOLLAR_FIELDS = new Set([
+      'revenue', 'owner_salary', 'sde', 'ebitda', 'asking_price', 'raise_amount',
+      'buyer_liquid_assets', 'buyer_retirement_funds', 'buyer_home_equity',
+      'buyer_existing_debt_annual',
+    ]);
+
+    // Map from extraction field names to DB column names
+    const FIELD_RENAMES: Record<string, string> = {
+      buyer_liquid_assets: 'buyer_liquid_assets_cents',
+      buyer_retirement_funds: 'buyer_retirement_funds_cents',
+      buyer_home_equity: 'buyer_home_equity_cents',
+      buyer_existing_debt_annual: 'buyer_existing_debt_annual_cents',
+    };
+
+    // Filter out null values, convert dollars to cents
     const result: ExtractedFields = {};
     for (const [key, value] of Object.entries(parsed)) {
       if (value !== null && value !== undefined) {
-        (result as any)[key] = value;
+        const dbKey = FIELD_RENAMES[key] || key;
+        if (DOLLAR_FIELDS.has(key) && typeof value === 'number') {
+          (result as any)[dbKey] = Math.round(value * 100);
+        } else {
+          (result as any)[dbKey] = value;
+        }
       }
     }
 
