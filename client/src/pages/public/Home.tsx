@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'wouter';
+import Markdown from 'react-markdown';
+import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 
 /* ═══ TYPES ═══ */
 
 type Phase = 'landing' | 'journey' | 'chat';
-type Msg = { type: 'user'; text: string } | { type: 'yulia'; html: string };
 
 interface JSection {
   label?: string;
@@ -181,35 +182,6 @@ const J: Record<string, JData> = {
   },
 };
 
-/* ═══ RESPONSE GENERATOR ═══ */
-
-function gr(m: string): string {
-  const l = m.toLowerCase();
-  if (l.includes('upload') || l.includes('financial'))
-    return '<p>I can analyze financials once uploaded. For now, <strong>tell me your approximate revenue and what you take home</strong> \u2014 I\u2019ll start calculating.</p><p>The upload tool processes P&Ls, tax returns, and balance sheets.</p>';
-  if (l.includes('valuation') || l.includes('worth'))
-    return '<p>Let\u2019s calculate your real earnings. Most owners miss <strong>add-backs worth $30K\u2013$150K</strong> \u2014 vehicle, insurance, rent, family payroll.</p><p><strong>What\u2019s your industry, location, and approximate revenue?</strong></p>';
-  if (l.includes('find') || l.includes('looking') || l.includes('search'))
-    return '<p>I can scan every market for businesses matching your criteria \u2014 industry, geography, size, profitability.</p><p><strong>What industry are you targeting, and what\u2019s your size range?</strong></p>';
-  if (l.includes('sba') || l.includes('bankab') || l.includes('financing'))
-    return '<p>SBA bankability depends on <strong>DSCR, collateral, industry risk</strong>, and June 2025 rule changes.</p><p><strong>What\u2019s the deal size and industry?</strong></p>';
-  if (l.includes('hvac') || l.includes('plumb'))
-    return '<p>HVAC \u2014 one of the hottest PE roll-up verticals. <strong>138 deals</strong> in 2024.</p><p>At $3M revenue, likely <strong>$450K\u2013$700K SDE</strong>. Range: <strong>$1.1M\u2013$2.5M</strong> standalone, more as a platform add-on.</p><p><strong>What did you take home last year?</strong></p>';
-  if (l.includes('saas') || l.includes('software'))
-    return '<p>SaaS $1\u20135M ARR \u2014 sweet spot. Strong retention commands <strong>4\u20137\u00d7 ARR</strong>.</p><p><strong>Specific deal, or building thesis?</strong></p>';
-  if (l.includes('landscap'))
-    return '<p>Landscaping at $400K \u2014 solid. Most owners miss add-backs: <strong>vehicle, fuel, phone, depreciation</strong>.</p><p><strong>What did you take home last year?</strong></p>';
-  if (l.includes('pe ') || l.includes('fund') || l.includes('roll-up'))
-    return '<p>I\u2019ll score every MSA for <strong>density, wage arbitrage, growth</strong>.</p><p><strong>Target EBITDA range and geographic preferences?</strong></p>';
-  if (l.includes('sell') || l.includes('exit'))
-    return '<p>Most owners miss <strong>add-backs</strong> worth $30K\u2013$150K.</p><p><strong>Industry, location, and approximate revenue?</strong></p>';
-  if (l.includes('buy') || l.includes('acquir'))
-    return '<p>Key: <strong>industry, size, geography, financing</strong>. If SBA, I check bankability instantly.</p><p><strong>Specific deal or building thesis?</strong></p>';
-  if (l.includes('raise') || l.includes('capital'))
-    return '<p>Growth capital \u2014 how much equity at what valuation?</p><p><strong>Current revenue, and what would the capital fund?</strong></p>';
-  return '<p><strong>Tell me what you\u2019re working on</strong> \u2014 selling, buying, raising, or post-acquisition?</p><p>Give me the basics and I\u2019ll start immediately.</p>';
-}
-
 /* ═══ ACTION CARDS ═══ */
 
 const ACTION_CARDS = [
@@ -234,10 +206,9 @@ const TOOLS = [
 export default function Home() {
   const [phase, setPhase] = useState<Phase>('landing');
   const [currentJ, setCurrentJ] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Msg[]>([]);
   const [value, setValue] = useState('');
-  const [typing, setTyping] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const { messages, sending, streamingText, error, limitReached, sendMessage, reset: resetChat } = useAnonymousChat({ context: currentJ || undefined });
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -274,48 +245,33 @@ export default function Home() {
   const goHome = useCallback(() => {
     setPhase('landing');
     setCurrentJ(null);
-    setMessages([]);
+    resetChat();
     setValue('');
-    setTyping(false);
     setToolsOpen(false);
     if (inputRef.current) inputRef.current.style.height = 'auto';
     window.history.pushState({}, '', '/');
     setTimeout(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
     }, 50);
-  }, []);
+  }, [resetChat]);
 
   /* Send message */
   const send = useCallback(() => {
     const t = value.trim();
-    if (!t || typing) return;
+    if (!t || sending) return;
     setToolsOpen(false);
     if (phase !== 'chat') enterChat();
-    setMessages(prev => [...prev, { type: 'user', text: t }]);
     setValue('');
     if (inputRef.current) inputRef.current.style.height = 'auto';
-    setTyping(true);
-    const resp = gr(t);
-    setTimeout(() => {
-      setTyping(false);
-      setMessages(prev => [...prev, { type: 'yulia', html: resp }]);
-      inputRef.current?.focus();
-    }, 1800 + Math.random() * 1000);
-  }, [value, typing, phase, enterChat]);
+    sendMessage(t);
+  }, [value, sending, phase, enterChat, sendMessage]);
 
   /* Deal tap */
   const dealTap = useCallback((msg: string) => {
-    if (typing) return;
+    if (sending) return;
     if (phase !== 'chat') enterChat();
-    setMessages(prev => [...prev, { type: 'user', text: msg }]);
-    setTyping(true);
-    const resp = gr(msg);
-    setTimeout(() => {
-      setTyping(false);
-      setMessages(prev => [...prev, { type: 'yulia', html: resp }]);
-      inputRef.current?.focus();
-    }, 1800 + Math.random() * 1000);
-  }, [typing, phase, enterChat]);
+    sendMessage(msg);
+  }, [sending, phase, enterChat, sendMessage]);
 
   /* Fill input from tool popup */
   const fillInput = useCallback((text: string) => {
@@ -358,7 +314,7 @@ export default function Home() {
   /* Scroll to bottom on new messages / typing */
   useEffect(() => {
     if (phase === 'chat') scrollToBottom();
-  }, [messages, typing, phase, scrollToBottom]);
+  }, [messages, sending, streamingText, phase, scrollToBottom]);
 
   /* Focus input on chat enter */
   useEffect(() => {
@@ -375,9 +331,8 @@ export default function Home() {
       } else {
         setPhase('landing');
         setCurrentJ(null);
-        setMessages([]);
+        resetChat();
         setValue('');
-        setTyping(false);
         setToolsOpen(false);
       }
       setTimeout(() => {
@@ -386,7 +341,7 @@ export default function Home() {
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
-  }, []);
+  }, [resetChat]);
 
   /* Deep link support — check hash on mount */
   useEffect(() => {
@@ -537,23 +492,42 @@ export default function Home() {
           {/* ═══ CHAT MESSAGES ═══ */}
           {phase === 'chat' && (
             <div className="flex flex-col gap-4 py-5 pb-6 max-w-[640px] mx-auto w-full">
-              {messages.map((msg, i) =>
-                msg.type === 'user' ? (
-                  <div key={i} className="home-msg-slide self-end max-w-[82%] bg-[#D4714E] text-white px-[18px] py-3.5 rounded-[20px_20px_6px_20px] text-base leading-[1.5]" style={{ boxShadow: '0 2px 8px rgba(212,113,78,.2)' }}>
-                    {msg.text}
+              {messages.map((msg) =>
+                msg.role === 'user' ? (
+                  <div key={msg.id} className="home-msg-slide self-end max-w-[82%] bg-[#D4714E] text-white px-[18px] py-3.5 rounded-[20px_20px_6px_20px] text-base leading-[1.5]" style={{ boxShadow: '0 2px 8px rgba(212,113,78,.2)' }}>
+                    {msg.content}
                   </div>
                 ) : (
-                  <div key={i} className="home-msg-slide self-start max-w-[90%]">
+                  <div key={msg.id} className="home-msg-slide self-start max-w-[90%]">
                     <div className="w-8 h-8 rounded-full bg-[#D4714E] text-white text-xs font-bold flex items-center justify-center mb-2" style={{ boxShadow: '0 2px 6px rgba(212,113,78,.2)' }}>Y</div>
-                    <div className="bg-white rounded-[20px] px-[18px] py-4 text-base leading-[1.65] font-medium home-yt" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05)' }} dangerouslySetInnerHTML={{ __html: msg.html }} />
+                    <div className="bg-white rounded-[20px] px-[18px] py-4 text-base leading-[1.65] font-medium home-yt" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05)' }}>
+                      <Markdown>{msg.content}</Markdown>
+                    </div>
                   </div>
                 ),
               )}
-              {typing && (
+              {sending && streamingText && (
+                <div className="home-msg-slide self-start max-w-[90%]">
+                  <div className="w-8 h-8 rounded-full bg-[#D4714E] text-white text-xs font-bold flex items-center justify-center mb-2" style={{ boxShadow: '0 2px 6px rgba(212,113,78,.2)' }}>Y</div>
+                  <div className="bg-white rounded-[20px] px-[18px] py-4 text-base leading-[1.65] font-medium home-yt" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05)' }}>
+                    <Markdown>{streamingText}</Markdown>
+                  </div>
+                </div>
+              )}
+              {sending && !streamingText && (
                 <div className="flex gap-[5px] py-2 self-start">
                   <div className="home-typing-dot w-2 h-2 rounded-full bg-[#A9A49C]" />
                   <div className="home-typing-dot w-2 h-2 rounded-full bg-[#A9A49C]" />
                   <div className="home-typing-dot w-2 h-2 rounded-full bg-[#A9A49C]" />
+                </div>
+              )}
+              {error && (
+                <div className="self-center text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg">{error}</div>
+              )}
+              {limitReached && (
+                <div className="self-center text-sm text-[#6E6A63] bg-[#F3F0EA] px-4 py-3 rounded-lg text-center">
+                  <p className="font-semibold mb-1">Message limit reached</p>
+                  <Link href="/signup" className="text-[#D4714E] font-semibold hover:underline">Sign up for unlimited access</Link>
                 </div>
               )}
             </div>
@@ -606,7 +580,7 @@ export default function Home() {
               />
               <button
                 onClick={send}
-                className={`absolute right-2 top-2 w-9 h-9 rounded-full border-none bg-[#D4714E] text-white cursor-pointer flex items-center justify-center hover:bg-[#BE6342] active:scale-90 ${hasContent ? 'opacity-100 scale-100' : 'opacity-0 scale-[.8] pointer-events-none'}`}
+                className={`absolute right-2 top-2 w-9 h-9 rounded-full border-none bg-[#D4714E] text-white cursor-pointer flex items-center justify-center hover:bg-[#BE6342] active:scale-90 ${hasContent && !sending ? 'opacity-100 scale-100' : 'opacity-0 scale-[.8] pointer-events-none'}`}
                 style={{ boxShadow: '0 2px 8px rgba(212,113,78,.3)', transition: 'all .2s' }}
                 type="button"
               >

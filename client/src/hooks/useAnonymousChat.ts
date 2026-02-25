@@ -68,10 +68,8 @@ export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
 
   const sendMessage = useCallback(async (content: string) => {
     setError(null);
-    const sessionId = await ensureSession();
-    if (!sessionId) return;
 
-    // Optimistic user message
+    // Optimistic user message — show immediately
     const userMsg: AnonMessage = {
       id: Date.now(),
       role: 'user',
@@ -81,6 +79,12 @@ export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
     setMessages(prev => [...prev, userMsg]);
     setSending(true);
     setStreamingText('');
+
+    const sessionId = await ensureSession();
+    if (!sessionId) {
+      setSending(false);
+      return;
+    }
 
     try {
       const controller = new AbortController();
@@ -167,6 +171,21 @@ export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
 
   const getSessionId = useCallback(() => sessionIdRef.current, []);
 
+  const reset = useCallback(() => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+    setMessages([]);
+    setSending(false);
+    setStreamingText('');
+    setMessagesRemaining(20);
+    setLimitReached(false);
+    setError(null);
+    sessionIdRef.current = null;
+    try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+  }, []);
+
   return {
     messages,
     sending,
@@ -176,5 +195,6 @@ export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
     error,
     sendMessage,
     getSessionId,
+    reset,
   };
 }
