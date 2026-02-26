@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 :root {
-  --app-height: 100dvh;
   --cream: #FAF8F4;
   --cream-deep: #F3F0EA;
   --warm-white: #FFFFFF;

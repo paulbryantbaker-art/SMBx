@@ -444,7 +444,11 @@ export default function Home() {
   const hasContent = value.trim().length > 0;
 
   return (
-    <div className="flex flex-col bg-[#FAF8F4]" style={{ height: 'var(--app-height)', fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
+    <div
+      id="app-root"
+      className="flex flex-col bg-[#FAF8F4]"
+      style={{ position: 'fixed', left: 0, right: 0, top: 0, height: '100%', fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}
+    >
       {/* ── SIDEBAR ── */}
       <HomeSidebar
         open={sidebarOpen}

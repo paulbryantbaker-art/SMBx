@@ -194,7 +194,11 @@ export default function Chat({ user, onLogout }: ChatProps) {
   const showWelcome = messages.length === 0 && !sending;
 
   return (
-    <div className="flex bg-cream" style={{ height: 'var(--app-height)' }}>
+    <div
+      id="app-root"
+      className="flex bg-cream"
+      style={{ position: 'fixed', left: 0, right: 0, top: 0, height: '100%' }}
+    >
       {sidebarOpen && (
         <div className="fixed inset-0 bg-[rgba(0,0,0,0.2)] z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
@@ -241,7 +245,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4">
+        <div className="flex-1 overflow-y-auto overscroll-y-contain min-h-0 px-4 py-4">
           <div className="max-w-3xl mx-auto space-y-4">
             {showWelcome && (
               <div className="py-12 px-2">

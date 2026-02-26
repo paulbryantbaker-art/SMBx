@@ -2,28 +2,24 @@ import { useEffect } from 'react';
 
 export function useAppHeight() {
   useEffect(() => {
-    const viewport = window.visualViewport;
-    if (!viewport) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
 
-    let rafId: number;
-    const update = () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        document.documentElement.style.setProperty(
-          '--app-height',
-          `${viewport.height}px`
-        );
-      });
-    };
+    const app = document.getElementById('app-root');
+    if (!app) return;
 
-    viewport.addEventListener('resize', update);
-    viewport.addEventListener('scroll', update);
-    update();
+    function onViewportChange() {
+      app!.style.height = vv!.height + 'px';
+      app!.style.top = vv!.offsetTop + 'px';
+    }
+
+    vv.addEventListener('resize', onViewportChange);
+    vv.addEventListener('scroll', onViewportChange);
+    onViewportChange();
 
     return () => {
-      viewport.removeEventListener('resize', update);
-      viewport.removeEventListener('scroll', update);
-      if (rafId) cancelAnimationFrame(rafId);
+      vv.removeEventListener('resize', onViewportChange);
+      vv.removeEventListener('scroll', onViewportChange);
     };
   }, []);
 }
