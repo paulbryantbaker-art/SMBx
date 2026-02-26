@@ -3,6 +3,8 @@ import { PERSONAS } from '../prompts/personas.js';
 import { JOURNEY_DETECTION_PROMPT } from '../prompts/journeyDetection.js';
 import { GATE_PROMPTS } from '../prompts/gatePrompts.js';
 import { BRANCHING_LOGIC } from '../prompts/branchingLogic.js';
+import { isPaywallGate } from './gateReadinessService.js';
+import { generatePaywallPrompt } from './paywallService.js';
 
 interface UserContext {
   id: number;
@@ -237,6 +239,24 @@ export function buildSystemPrompt(
     // Layer 3c: Gate-specific prompt
     if (GATE_PROMPTS[deal.current_gate]) {
       layers.push(GATE_PROMPTS[deal.current_gate]);
+    }
+
+    // Layer 3d: Paywall context (if at a paywall gate)
+    if (isPaywallGate(deal.current_gate)) {
+      const paywallCtx = generatePaywallPrompt({
+        gate: deal.current_gate,
+        league: deal.league || user.league || 'L1',
+        journeyType: deal.journey_type,
+        dealData: {
+          industry: deal.industry || undefined,
+          revenue: deal.revenue || undefined,
+          sde: deal.sde || undefined,
+          ebitda: deal.ebitda || undefined,
+          business_name: deal.business_name || undefined,
+          asking_price: deal.asking_price || undefined,
+        },
+      });
+      layers.push(paywallCtx.systemPromptAddition);
     }
   }
 
