@@ -683,7 +683,7 @@ export default function Home() {
       />
 
       {/* ── DOCK (position: fixed, OUTSIDE flex container) ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 px-3 md:px-5 bg-[#FAF8F4]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div className="fixed left-0 right-0 z-50 px-3 md:px-5 bg-[#FAF8F4]" style={{ bottom: 'var(--keyboard-offset, 0px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="max-w-[640px] mx-auto pb-2 pt-2">
           <div className="home-dock-card relative">
             {/* Tool popup */}

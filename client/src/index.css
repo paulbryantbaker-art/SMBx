@@ -4,6 +4,7 @@
 
 :root {
   --app-height: 100dvh;
+  --keyboard-offset: 0px;
   --cream: #FAF8F4;
   --cream-deep: #F3F0EA;
   --warm-white: #FFFFFF;
