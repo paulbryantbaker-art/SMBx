@@ -9,10 +9,9 @@ export function useAppHeight() {
     const update = () => {
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
-        document.documentElement.style.setProperty(
-          '--app-height',
-          `${viewport.height}px`
-        );
+        const root = document.documentElement;
+        root.style.setProperty('--app-height', `${viewport.height}px`);
+        root.style.setProperty('--app-offset', `${viewport.offsetTop}px`);
       });
     };
 

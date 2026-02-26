@@ -444,7 +444,7 @@ export default function Home() {
   const hasContent = value.trim().length > 0;
 
   return (
-    <div className="flex flex-col overflow-hidden bg-[#FAF8F4]" style={{ height: 'var(--app-height)', fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
+    <div className="flex flex-col overflow-hidden bg-[#FAF8F4]" style={{ position: 'fixed', top: 'var(--app-offset, 0px)', left: 0, right: 0, height: 'var(--app-height)', fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
       {/* ── SIDEBAR ── */}
       <HomeSidebar
         open={sidebarOpen}
@@ -519,7 +519,7 @@ export default function Home() {
         ref={scrollRef}
         className="flex-1 overflow-y-auto overscroll-y-contain min-h-0"
       >
-        <div className="px-5 md:max-w-[860px] md:px-10 md:mx-auto lg:max-w-[960px] lg:px-12">
+        <div className="px-5 md:max-w-[860px] md:px-10 md:mx-auto lg:max-w-[960px] lg:px-12 flex flex-col min-h-full">
 
           {/* ═══ LANDING ═══ */}
           {phase === 'landing' && (
