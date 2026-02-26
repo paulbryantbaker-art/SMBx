@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useAppHeight } from '../hooks/useAppHeight';
 import Sidebar, { type Conversation } from '../components/chat/Sidebar';
 import MessageBubble, { type Message } from '../components/chat/MessageBubble';
 import InputBar from '../components/chat/InputBar';
@@ -22,6 +23,7 @@ const JOURNEY_CARDS = [
 ];
 
 export default function Chat({ user, onLogout }: ChatProps) {
+  useAppHeight();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -192,7 +194,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
   const showWelcome = messages.length === 0 && !sending;
 
   return (
-    <div className="flex h-dvh bg-cream overflow-hidden">
+    <div className="flex bg-cream overflow-hidden" style={{ height: 'var(--app-height)' }}>
       {sidebarOpen && (
         <div className="fixed inset-0 bg-[rgba(0,0,0,0.2)] z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'wouter';
 import Markdown from 'react-markdown';
 import { useAnonymousChat } from '../../hooks/useAnonymousChat';
+import { useAppHeight } from '../../hooks/useAppHeight';
 import HomeSidebar from '../../components/public/HomeSidebar';
 
 /* ═══ TYPES ═══ */
@@ -213,6 +214,7 @@ const TOOLS: ToolItem[] = [
 /* ═══ COMPONENT ═══ */
 
 export default function Home() {
+  useAppHeight();
   const [phase, setPhase] = useState<Phase>('landing');
   const [currentJ, setCurrentJ] = useState<string | null>(null);
   const [value, setValue] = useState('');
@@ -442,7 +444,7 @@ export default function Home() {
   const hasContent = value.trim().length > 0;
 
   return (
-    <div className="h-dvh flex flex-col overflow-hidden bg-[#FAF8F4]" style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
+    <div className="flex flex-col overflow-hidden bg-[#FAF8F4]" style={{ height: 'var(--app-height)', fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
       {/* ── SIDEBAR ── */}
       <HomeSidebar
         open={sidebarOpen}
