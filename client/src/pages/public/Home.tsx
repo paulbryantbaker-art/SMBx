@@ -228,7 +228,7 @@ export default function Home() {
   const toolsRef = useRef<HTMLDivElement>(null);
   const plusRef = useRef<HTMLButtonElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dockRef = useRef<HTMLDivElement>(null);
+
 
   /* Scroll to bottom */
   const scrollToBottom = useCallback(() => {
@@ -436,31 +436,6 @@ export default function Home() {
       setPhase('journey');
       window.history.replaceState({ smbx: hash }, '', '/#' + hash);
     }
-  }, []);
-
-  /* iOS keyboard: reposition dock above keyboard using visualViewport */
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    let rafId: number;
-    const update = () => {
-      const dock = dockRef.current;
-      if (!dock) return;
-      const offsetBottom = window.innerHeight - vv.height - vv.offsetTop;
-      dock.style.bottom = `${Math.max(0, offsetBottom)}px`;
-    };
-    const onVV = () => { cancelAnimationFrame(rafId); rafId = requestAnimationFrame(update); };
-    vv.addEventListener('resize', onVV);
-    vv.addEventListener('scroll', onVV);
-    /* Also re-apply on scroll-container scroll so dock stays put while user scrolls chat */
-    const scroll = scrollRef.current;
-    if (scroll) scroll.addEventListener('scroll', onVV, { passive: true });
-    return () => {
-      vv.removeEventListener('resize', onVV);
-      vv.removeEventListener('scroll', onVV);
-      if (scroll) scroll.removeEventListener('scroll', onVV);
-      cancelAnimationFrame(rafId);
-    };
   }, []);
 
   /* Swipe down on messages to dismiss keyboard (iMessage-style) */
@@ -721,9 +696,8 @@ export default function Home() {
 
       {/* ── DOCK ── */}
       <div
-        ref={dockRef}
         className="fixed bottom-0 left-0 right-0 z-30 px-3 md:px-5 bg-[#FAF8F4] border-t border-[#DDD9D1]"
-        style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))', paddingTop: '8px' }}
+        style={{ paddingBottom: '8px', paddingTop: '8px' }}
       >
         <div className="max-w-[640px] mx-auto">
           {/* Attachment bubble */}
