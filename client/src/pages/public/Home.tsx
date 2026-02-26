@@ -4,6 +4,7 @@ import Markdown from 'react-markdown';
 import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 import { useAppHeight } from '../../hooks/useAppHeight';
 import HomeSidebar from '../../components/public/HomeSidebar';
+import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
 
 /* ═══ TYPES ═══ */
 
@@ -193,43 +194,17 @@ const ACTION_CARDS = [
   { key: 'agency', label: 'Agentic AI', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg> },
   { key: 'intelligence', label: 'AI intelligence', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg> },
 ];
-
-/* ═══ TOOL ITEMS ═══ */
-
-interface ToolItem {
-  label: string;
-  desc: string;
-  fill?: string;
-  action?: 'upload';
-  icon: React.ReactNode;
-}
-
-const TOOLS: ToolItem[] = [
-  { label: 'Upload financials', desc: 'Share a P&L, tax return, or balance sheet', action: 'upload', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg> },
-  { label: 'Business valuation', desc: 'Estimate worth based on revenue, earnings, and comps', fill: 'I need a business valuation \u2014 I own a ', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" /></svg> },
-  { label: 'Search for a business', desc: 'Find businesses by industry, location, size, or price', fill: "Help me find a business \u2014 I'm looking for ", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg> },
-  { label: 'SBA loan check', desc: 'See if a deal qualifies for SBA 7(a) \u2014 up to $5M, 10% down', fill: "Can this deal get SBA financing? I'm looking at a ", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg> },
-];
-
 /* ═══ COMPONENT ═══ */
 
 export default function Home() {
   useAppHeight();
   const [phase, setPhase] = useState<Phase>('landing');
   const [currentJ, setCurrentJ] = useState<string | null>(null);
-  const [value, setValue] = useState('');
-  const [toolsOpen, setToolsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { messages, sending, streamingText, error, limitReached, sendMessage, getSessionId, sessionData, reset: resetChat } = useAnonymousChat({ context: currentJ || undefined });
 
-  const [attachment, setAttachment] = useState<{ name: string; size: string } | null>(null);
-  const [uploading, setUploading] = useState(false);
-
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const toolsRef = useRef<HTMLDivElement>(null);
-  const plusRef = useRef<HTMLButtonElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dockRef = useRef<ChatDockHandle>(null);
 
 
   /* Scroll to bottom */
@@ -263,25 +238,19 @@ export default function Home() {
     setPhase('landing');
     setCurrentJ(null);
     resetChat();
-    setValue('');
-    setToolsOpen(false);
-    if (inputRef.current) inputRef.current.style.height = 'auto';
+    dockRef.current?.clear();
     window.history.pushState({}, '', '/');
     setTimeout(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
     }, 50);
   }, [resetChat]);
 
-  /* Send message */
-  const send = useCallback(() => {
-    const t = value.trim();
-    if (!t || sending) return;
-    setToolsOpen(false);
+  /* Dock: send handler */
+  const handleDockSend = useCallback((text: string) => {
+    if (sending) return;
     if (phase !== 'chat') enterChat();
-    setValue('');
-    if (inputRef.current) inputRef.current.style.height = 'auto';
-    sendMessage(t);
-  }, [value, sending, phase, enterChat, sendMessage]);
+    sendMessage(text);
+  }, [sending, phase, enterChat, sendMessage]);
 
   /* Deal tap */
   const dealTap = useCallback((msg: string) => {
@@ -290,122 +259,50 @@ export default function Home() {
     sendMessage(msg);
   }, [sending, phase, enterChat, sendMessage]);
 
-  /* Fill input from tool popup */
-  const fillInput = useCallback((text: string) => {
-    setValue(text);
-    setToolsOpen(false);
-    requestAnimationFrame(() => {
-      if (inputRef.current) {
-        inputRef.current.style.height = 'auto';
-        inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 140) + 'px';
-        inputRef.current.focus();
-      }
-    });
-  }, []);
+  /* Dock: file upload handler */
+  const handleDockFileUpload = useCallback(async (file: File): Promise<{ name: string; size: string } | null> => {
+    if (phase !== 'chat') enterChat();
 
-  /* Handle tool click — either fill or action */
-  const handleToolClick = useCallback((tool: ToolItem) => {
-    if (tool.action === 'upload') {
-      setToolsOpen(false);
-      fileInputRef.current?.click();
-    } else if (tool.fill) {
-      fillInput(tool.fill);
-    }
-  }, [fillInput]);
+    const formData = new FormData();
+    formData.append('file', file);
 
-  /* File upload handler */
-  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Ensure session exists
-    const sessionId = getSessionId();
-    if (!sessionId) {
-      // Need to start a session first — enter chat mode
-      if (phase !== 'chat') enterChat();
-    }
-
-    setUploading(true);
-    setToolsOpen(false);
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      // Ensure session exists before upload
-      const sid = getSessionId() || await (async () => {
-        // Create session by sending a dummy — actually, let's just create one
-        const res = await fetch('/api/chat/anonymous', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ context: currentJ || undefined }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          return data.sessionId;
-        }
-        return null;
-      })();
-
-      if (!sid) {
-        setUploading(false);
-        return;
-      }
-
-      const res = await fetch(`/api/chat/anonymous/${sid}/upload`, {
+    // Ensure session exists before upload
+    const sid = getSessionId() || await (async () => {
+      const res = await fetch('/api/chat/anonymous', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ context: currentJ || undefined }),
       });
-
       if (res.ok) {
         const data = await res.json();
-        setAttachment({ name: data.file.name, size: data.file.sizeFormatted });
-        if (phase !== 'chat') enterChat();
-        // Auto-send a message about the upload
-        sendMessage(`I've uploaded my financials: ${data.file.name}. Let me walk you through the key numbers.`);
+        return data.sessionId;
       }
-    } catch {
-      // ignore upload errors silently
-    } finally {
-      setUploading(false);
-      // Reset file input
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      return null;
+    })();
+
+    if (!sid) return null;
+
+    const res = await fetch(`/api/chat/anonymous/${sid}/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      sendMessage(`I've uploaded my financials: ${data.file.name}. Let me walk you through the key numbers.`);
+      return { name: data.file.name, size: data.file.sizeFormatted };
     }
+    return null;
   }, [getSessionId, phase, enterChat, sendMessage, currentJ]);
-
-  /* Textarea handlers */
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setValue(e.target.value);
-    const el = e.target;
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
-  }, []);
-
-  const handleKey = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-  }, [send]);
-
-  /* Click outside to close tools */
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (toolsOpen &&
-        toolsRef.current && !toolsRef.current.contains(e.target as Node) &&
-        plusRef.current && !plusRef.current.contains(e.target as Node)) {
-        setToolsOpen(false);
-      }
-    };
-    document.addEventListener('click', handler);
-    return () => document.removeEventListener('click', handler);
-  }, [toolsOpen]);
 
   /* Scroll to bottom on new messages / typing */
   useEffect(() => {
     if (phase === 'chat') scrollToBottom();
   }, [messages, sending, streamingText, phase, scrollToBottom]);
 
-  /* Focus input on chat enter */
+  /* Focus dock on chat enter */
   useEffect(() => {
-    if (phase === 'chat') setTimeout(() => inputRef.current?.focus(), 100);
+    if (phase === 'chat') dockRef.current?.focus();
   }, [phase]);
 
   /* Browser back button — use URL hash as source of truth, not e.state
@@ -420,8 +317,7 @@ export default function Home() {
         setPhase('landing');
         setCurrentJ(null);
         resetChat();
-        setValue('');
-        setToolsOpen(false);
+        dockRef.current?.clear();
       }
       setTimeout(() => {
         if (scrollRef.current) scrollRef.current.scrollTop = 0;
@@ -441,8 +337,6 @@ export default function Home() {
     }
   }, []);
 
-
-  const hasContent = value.trim().length > 0;
 
   return (
     <div
@@ -672,86 +566,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".pdf,.xlsx,.xls,.csv"
-        onChange={handleFileUpload}
-        className="hidden"
+      {/* ── DOCK (shared component) ── */}
+      <ChatDock
+        ref={dockRef}
+        onSend={handleDockSend}
+        onFileUpload={handleDockFileUpload}
+        disabled={sending}
       />
-
-      {/* ── DOCK (shrink-0 flex child) ── */}
-      <div className="shrink-0 px-3 md:px-5 bg-[#FAF8F4]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="max-w-[640px] mx-auto pb-2 pt-2">
-          <div className="home-dock-card relative">
-            {/* Tool popup */}
-            <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
-              {TOOLS.map(t => (
-                <button key={t.label} className="home-tp-item" onClick={() => handleToolClick(t)} type="button">
-                  {t.icon}
-                  <div>
-                    <div className="text-[15px] font-semibold text-[#1A1A18] leading-[1.3]">{t.label}</div>
-                    <div className="text-[13px] text-[#6E6A63] leading-[1.4] mt-0.5">{t.desc}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* Attachment chips */}
-            {attachment && (
-              <div className="flex flex-wrap gap-2 px-3.5 pt-3 pb-0">
-                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F3F0EA] rounded-lg max-w-[260px]">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-                  <span className="text-[13px] font-medium text-[#1A1A18] truncate">{attachment.name}</span>
-                  <button onClick={() => setAttachment(null)} className="text-[#A9A49C] hover:text-[#1A1A18] bg-transparent border-none cursor-pointer p-0 ml-0.5 flex-shrink-0" type="button">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Textarea */}
-            <textarea
-              ref={inputRef}
-              value={value}
-              onChange={handleChange}
-              onKeyDown={handleKey}
-              placeholder="Tell Yulia about your deal..."
-              className="w-full bg-transparent border-none outline-none resize-none text-[16px] text-[#1A1A18] leading-[1.5] placeholder:text-[#A9A49C] lg:text-[17px]"
-              style={{ fontFamily: 'inherit', minHeight: '24px', maxHeight: '160px', padding: '12px 16px 4px 16px' }}
-              rows={1}
-            />
-
-            {/* Toolbar row */}
-            <div className="flex items-center justify-between px-2 pb-2 pt-0.5">
-              <button
-                ref={plusRef}
-                onClick={() => setToolsOpen(prev => !prev)}
-                className="w-8 h-8 rounded-full border-none bg-[#F3F0EA] text-[#8C877D] cursor-pointer flex items-center justify-center hover:bg-[#EBE7DF] active:scale-90"
-                style={{ transition: 'all .2s' }}
-                type="button"
-              >
-                {uploading ? (
-                  <div className="w-4 h-4 border-2 border-[#D4714E] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ transform: toolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
-                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                )}
-              </button>
-              <button
-                onClick={send}
-                className={`w-8 h-8 rounded-full border-none bg-[#D4714E] text-white cursor-pointer flex items-center justify-center hover:bg-[#BE6342] active:scale-90 ${hasContent && !sending ? 'opacity-100 scale-100' : 'opacity-0 scale-[.8] pointer-events-none'}`}
-                style={{ boxShadow: '0 2px 8px rgba(212,113,78,.3)', transition: 'all .2s' }}
-                type="button"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

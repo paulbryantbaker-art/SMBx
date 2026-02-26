@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppHeight } from '../hooks/useAppHeight';
 import Sidebar, { type Conversation } from '../components/chat/Sidebar';
 import MessageBubble, { type Message } from '../components/chat/MessageBubble';
-import InputBar from '../components/chat/InputBar';
+import ChatDock from '../components/shared/ChatDock';
 import TypingIndicator from '../components/chat/TypingIndicator';
 import WalletBadge from '../components/chat/WalletBadge';
 import DataRoom from '../components/chat/DataRoom';
@@ -292,7 +292,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
           </div>
         </div>
 
-        <InputBar onSend={handleSend} disabled={sending} />
+        <ChatDock onSend={handleSend} disabled={sending} />
       </div>
 
       {/* Data Room Panel */}

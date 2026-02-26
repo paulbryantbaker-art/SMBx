@@ -1,5 +1,6 @@
 {
   "permissions": {
+    "defaultMode": "bypassPermissions",
     "allow": [
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
@@ -37,7 +38,18 @@
       "Bash(git rm:*)",
       "Bash(npx tsc:*)",
       "Bash(psql:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(lsof:*)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:smbx.ai)",
+      "WebFetch(domain:www.smbx.ai)",
+      "WebFetch(domain:smbx-production.up.railway.app)",
+      "Bash(npx playwright test:*)",
+      "Bash(python3:*)",
+      "Bash(npx playwright install:*)",
+      "Bash(git reset:*)",
+      "Bash(npx esbuild:*)",
+      "Bash(sudo npm install:*)"
     ]
   }
 }
