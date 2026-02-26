@@ -23,6 +23,11 @@
   --sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+html {
+  overflow: hidden;
+  height: 100%;
+}
+
 body {
   margin: 0;
   background-color: #FAF8F4;
@@ -30,7 +35,8 @@ body {
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow: hidden;
+  height: 100%;
 }
 
 /* Animation keyframes */
