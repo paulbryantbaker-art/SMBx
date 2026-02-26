@@ -1,5 +1,7 @@
 import postgres from 'postgres';
 import type { Tool } from '@anthropic-ai/sdk/resources/messages';
+import { checkGateReadiness as checkReadiness, isPaywallGate, getPaywallBasePrice } from './gateReadinessService.js';
+import { getLeagueMultiplier } from './leagueClassifier.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
@@ -253,36 +255,61 @@ async function advanceGate(input: Record<string, any>, userId: number): Promise<
     return JSON.stringify({ error: `Current gate is ${deal.current_gate}, not ${fromGate}` });
   }
 
-  // Check basic readiness based on gate
-  const missing = checkGateReadiness(deal, toGate);
-  if (missing.length > 0) {
-    return JSON.stringify({ ready: false, missing, message: `Cannot advance to ${toGate}. Missing: ${missing.join(', ')}` });
+  // Check readiness for current gate completion
+  const readiness = checkReadiness(fromGate, deal);
+  if (!readiness.ready) {
+    return JSON.stringify({
+      ready: false,
+      missing: readiness.missing,
+      message: `Cannot advance from ${fromGate}. Missing: ${readiness.missing.join(', ')}`,
+    });
   }
 
+  // Check paywall — if next gate requires payment, check wallet
+  if (isPaywallGate(toGate)) {
+    const basePriceCents = getPaywallBasePrice(toGate);
+    const multiplier = getLeagueMultiplier(deal.league || 'L1');
+    const finalPriceCents = Math.round(basePriceCents * multiplier);
+
+    // Check wallet balance
+    const [wallet] = await sql`SELECT balance_cents FROM wallets WHERE user_id = ${userId} LIMIT 1`;
+    const balance = wallet?.balance_cents ?? 0;
+
+    if (balance < finalPriceCents) {
+      return JSON.stringify({
+        ready: true,
+        paywallRequired: true,
+        gate: toGate,
+        priceCents: finalPriceCents,
+        priceDisplay: `$${(finalPriceCents / 100).toFixed(2)}`,
+        currentBalance: balance,
+        balanceDisplay: `$${(balance / 100).toFixed(2)}`,
+        message: `Gate ${toGate} requires $${(finalPriceCents / 100).toFixed(2)}. Current balance: $${(balance / 100).toFixed(2)}. Please top up your wallet to continue.`,
+      });
+    }
+
+    // Deduct from wallet
+    await sql`UPDATE wallets SET balance_cents = balance_cents - ${finalPriceCents}, updated_at = NOW() WHERE user_id = ${userId}`;
+    await sql`
+      INSERT INTO wallet_transactions (user_id, type, amount_cents, description, deal_id)
+      VALUES (${userId}, 'debit', ${finalPriceCents}, ${`Gate unlock: ${toGate}`}, ${dealId})
+    `;
+  }
+
+  // Advance the gate
   await sql`UPDATE deals SET current_gate = ${toGate}, updated_at = NOW() WHERE id = ${dealId}`;
+
+  // Update gate_progress if it exists
+  await sql`
+    UPDATE gate_progress SET status = 'completed', completed_at = NOW()
+    WHERE deal_id = ${dealId} AND gate = ${fromGate}
+  `.catch(() => {});
+  await sql`
+    UPDATE gate_progress SET status = 'active'
+    WHERE deal_id = ${dealId} AND gate = ${toGate}
+  `.catch(() => {});
+
   return JSON.stringify({ success: true, newGate: toGate });
-}
-
-function checkGateReadiness(deal: any, toGate: string): string[] {
-  const missing: string[] = [];
-
-  switch (toGate) {
-    case 'S1':
-      if (!deal.industry) missing.push('industry');
-      if (!deal.location) missing.push('location');
-      if (!deal.revenue) missing.push('revenue');
-      break;
-    case 'S2':
-      if (!deal.sde && !deal.ebitda) missing.push('SDE or EBITDA calculation');
-      if (!deal.league) missing.push('league classification');
-      break;
-    case 'B1':
-      if (!deal.financials?.acquisition_budget) missing.push('acquisition budget');
-      break;
-    // Other gates have lighter requirements for now
-  }
-
-  return missing;
 }
 
 async function generateFreeDeliverable(input: Record<string, any>, userId: number): Promise<string> {
