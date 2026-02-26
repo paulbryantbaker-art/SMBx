@@ -361,29 +361,16 @@ export default function Home() {
       >
         <div className="flex items-center justify-between px-3 py-3 md:px-8 lg:px-12 overflow-hidden">
           <div className="flex items-center gap-1.5 min-w-0 shrink">
-            {phase !== 'landing' ? (
-              <button
-                onClick={goHome}
-                className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors shrink-0"
-                type="button"
-                aria-label="Back"
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M19 12H5M12 19l-7-7 7-7" />
-                </svg>
-              </button>
-            ) : (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors shrink-0"
-                type="button"
-                aria-label="Open sidebar"
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M3 12h18M3 6h18M3 18h18" />
-                </svg>
-              </button>
-            )}
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors shrink-0"
+              type="button"
+              aria-label="Open sidebar"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              </svg>
+            </button>
             <div
               className="text-[24px] font-extrabold tracking-[-0.03em] text-[#1A1A18] cursor-pointer select-none shrink-0 md:text-[26px] lg:text-[28px]"
               onClick={goHome}
@@ -392,18 +379,6 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {phase !== 'landing' && (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors"
-                type="button"
-                aria-label="Open sidebar"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M3 12h18M3 6h18M3 18h18" />
-                </svg>
-              </button>
-            )}
             <Link href="/login" className="flex items-center justify-center bg-transparent border-none cursor-pointer text-[#3D3B37] p-1.5 rounded-full transition-all hover:text-[#D4714E] hover:bg-[rgba(212,113,78,.08)] no-underline">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="24" height="24">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
@@ -521,7 +496,7 @@ export default function Home() {
 
           {/* ═══ CHAT MESSAGES ═══ */}
           {phase === 'chat' && (
-            <div className="flex flex-col gap-4 py-5 pb-6 max-w-[640px] mx-auto w-full">
+            <div className="flex flex-col gap-4 py-5 pb-6 max-w-[820px] mx-auto w-full">
               {messages.map((msg) =>
                 msg.role === 'user' ? (
                   <div key={msg.id} className="home-msg-slide self-end max-w-[82%] bg-[#D4714E] text-white px-[18px] py-3.5 rounded-[20px_20px_6px_20px] text-base leading-[1.5] break-words overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(212,113,78,.2)', overflowWrap: 'break-word' }}>
