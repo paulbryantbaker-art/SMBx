@@ -10,7 +10,7 @@
  * - score-seven-factors: Seven-factor business scoring
  */
 import 'dotenv/config';
-import PgBoss from 'pg-boss';
+import { PgBoss } from 'pg-boss';
 import { sql } from './db.js';
 import { callClaude } from './services/aiService.js';
 import { generateValuationReport } from './services/generators/valuationReport.js';
@@ -31,17 +31,17 @@ if (!DATABASE_URL) {
 
 // ─── pg-boss setup ──────────────────────────────────────────
 
-const boss = new PgBoss({
+const boss = new (PgBoss as any)({
   connectionString: DATABASE_URL,
   ssl: { rejectUnauthorized: false },
   retryLimit: 2,
-  retryDelay: 5,       // seconds
+  retryDelay: 5,
   expireInHours: 1,
-  archiveCompletedAfterSeconds: 86400, // 24 hours
+  archiveCompletedAfterSeconds: 86400,
   deleteAfterDays: 7,
 });
 
-boss.on('error', (err) => {
+boss.on('error', (err: Error) => {
   console.error('pg-boss error:', err);
 });
 
@@ -55,7 +55,7 @@ interface GenerateDeliverableJob {
   deliverableType: string;
 }
 
-async function handleGenerateDeliverable(job: PgBoss.Job<GenerateDeliverableJob>) {
+async function handleGenerateDeliverable(job: { data: GenerateDeliverableJob }) {
   const { deliverableId, dealId, userId, menuItemSlug, deliverableType } = job.data;
   console.log(`Generating deliverable ${deliverableId}: ${menuItemSlug}`);
 
@@ -324,7 +324,7 @@ async function start() {
   console.log('pg-boss started');
 
   // Register handlers
-  await boss.work('generate-deliverable', { teamSize: 3, teamConcurrency: 1 }, handleGenerateDeliverable);
+  await (boss as any).work('generate-deliverable', { teamSize: 3, teamConcurrency: 1 }, handleGenerateDeliverable);
   console.log('Registered job handlers: generate-deliverable');
 
   console.log('Worker ready — listening for jobs');

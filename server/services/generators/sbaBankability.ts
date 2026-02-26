@@ -40,7 +40,8 @@ export interface SBAReport {
     equity_sources: Array<{
       source: string;
       amount: number;          // cents
-      available: boolean;
+      priority: number;
+      notes: string;
     }>;
     seller_note: number;       // cents
     seller_note_terms: string;

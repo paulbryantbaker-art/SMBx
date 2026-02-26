@@ -55,20 +55,28 @@ export interface CapStructReport {
 export function generateCapitalStructureAnalysis(input: CapStructInput): CapStructReport {
   const earnings = input.ebitda || input.sde || 0;
 
+  // Map CapStructInput → CapitalStackInput
+  function toStackInput(overrides: Partial<{
+    dealSize: number; buyerEquity: number;
+    sellerFinancingAvailable: boolean; sellerStandbyWilling: boolean;
+  }> = {}) {
+    return {
+      dealSize: overrides.dealSize ?? input.deal_size,
+      ebitda: input.ebitda,
+      sde: input.sde,
+      buyerEquity: overrides.buyerEquity ?? input.buyer_equity,
+      buyerCreditScore: input.buyer_credit_score,
+      isUSCitizen: input.is_us_citizen,
+      hasRealEstate: input.has_real_estate,
+      sellerFinancingAvailable: overrides.sellerFinancingAvailable ?? input.seller_financing,
+      sellerStandbyWilling: overrides.sellerStandbyWilling ?? input.seller_standby,
+      industry: input.industry,
+      league: input.league,
+    };
+  }
+
   // ─── Primary structure ───────────────────────────────────
-  const primary = buildCapitalStack({
-    dealSize: input.deal_size,
-    ebitda: input.ebitda,
-    sde: input.sde,
-    buyerEquity: input.buyer_equity,
-    buyerCreditScore: input.buyer_credit_score,
-    isUSCitizen: input.is_us_citizen,
-    hasRealEstate: input.has_real_estate,
-    sellerFinancingAvailable: input.seller_financing,
-    sellerStandbyWilling: input.seller_standby,
-    industry: input.industry,
-    league: input.league,
-  });
+  const primary = buildCapitalStack(toStackInput());
 
   // ─── Alternative scenarios ───────────────────────────────
   const scenarios: CapStructReport['scenarios'] = [];
@@ -78,15 +86,7 @@ export function generateCapitalStructureAnalysis(input: CapStructInput): CapStru
   scenarios.push({
     name: '10% Lower Purchase Price',
     description: `What if you negotiate the price down to $${(lowerPrice / 100).toLocaleString()}?`,
-    structure: buildCapitalStack({
-      ...input, dealSize: lowerPrice,
-      sellerFinancingAvailable: input.seller_financing,
-      sellerStandbyWilling: input.seller_standby,
-      isUSCitizen: input.is_us_citizen,
-      hasRealEstate: input.has_real_estate,
-      buyerEquity: input.buyer_equity,
-      buyerCreditScore: input.buyer_credit_score,
-    }),
+    structure: buildCapitalStack(toStackInput({ dealSize: lowerPrice })),
   });
 
   // Scenario: More equity (20% instead of default)
@@ -94,15 +94,7 @@ export function generateCapitalStructureAnalysis(input: CapStructInput): CapStru
   scenarios.push({
     name: 'Increased Equity Injection',
     description: `What if you inject $${(moreEquity / 100).toLocaleString()} in equity?`,
-    structure: buildCapitalStack({
-      ...input,
-      buyerEquity: moreEquity,
-      sellerFinancingAvailable: input.seller_financing,
-      sellerStandbyWilling: input.seller_standby,
-      isUSCitizen: input.is_us_citizen,
-      hasRealEstate: input.has_real_estate,
-      buyerCreditScore: input.buyer_credit_score,
-    }),
+    structure: buildCapitalStack(toStackInput({ buyerEquity: moreEquity })),
   });
 
   // Scenario: With seller financing on standby
@@ -110,15 +102,7 @@ export function generateCapitalStructureAnalysis(input: CapStructInput): CapStru
     scenarios.push({
       name: 'With Seller Note (Full Standby)',
       description: 'What if the seller agrees to a 10% note on full standby?',
-      structure: buildCapitalStack({
-        ...input,
-        sellerFinancingAvailable: true,
-        sellerStandbyWilling: true,
-        isUSCitizen: input.is_us_citizen,
-        hasRealEstate: input.has_real_estate,
-        buyerEquity: input.buyer_equity,
-        buyerCreditScore: input.buyer_credit_score,
-      }),
+      structure: buildCapitalStack(toStackInput({ sellerFinancingAvailable: true, sellerStandbyWilling: true })),
     });
   }
 
@@ -136,15 +120,7 @@ export function generateCapitalStructureAnalysis(input: CapStructInput): CapStru
   const priceChanges = [-20, -10, -5, 0, 5, 10, 20]; // percent
   const priceSensitivity = priceChanges.map(pct => {
     const newSize = Math.round(input.deal_size * (1 + pct / 100));
-    const struct = buildCapitalStack({
-      ...input, dealSize: newSize,
-      sellerFinancingAvailable: input.seller_financing,
-      sellerStandbyWilling: input.seller_standby,
-      isUSCitizen: input.is_us_citizen,
-      hasRealEstate: input.has_real_estate,
-      buyerEquity: input.buyer_equity,
-      buyerCreditScore: input.buyer_credit_score,
-    });
+    const struct = buildCapitalStack(toStackInput({ dealSize: newSize }));
     return {
       price_change_pct: pct,
       new_deal_size: newSize,

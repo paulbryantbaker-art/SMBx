@@ -49,7 +49,7 @@ export function checkGateReadiness(
     ready: missing.length === 0,
     missing,
     paywallRequired,
-    paywallGate: paywallRequired ? nextGate : undefined,
+    paywallGate: paywallRequired && nextGate ? nextGate : undefined,
     nextGate,
   };
 }

@@ -137,7 +137,7 @@ chatRouter.post('/conversations/:id/messages', async (req, res) => {
     }
 
     // Build system prompt
-    const systemPrompt = buildSystemPrompt(user, deal, convId);
+    const systemPrompt = buildSystemPrompt(user as any, deal as any, convId);
 
     // Load conversation history (last 50 messages max)
     const history = await sql`

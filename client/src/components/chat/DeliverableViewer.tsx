@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { authHeaders } from '../../hooks/useAuth';
 import Button from '../ui/Button';
 
@@ -145,7 +145,7 @@ function DeliverableContent({ content }: { content: Record<string, any> }) {
   );
 }
 
-function renderValue(value: any): JSX.Element {
+function renderValue(value: any): React.ReactElement {
   if (value === null || value === undefined) return <span className="text-text-secondary">—</span>;
   if (typeof value === 'boolean') return <span>{value ? 'Yes' : 'No'}</span>;
   if (typeof value === 'number') return <span>{value.toLocaleString()}</span>;

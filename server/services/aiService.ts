@@ -100,7 +100,7 @@ export async function streamAgenticResponse(
 
     // If Claude also produced text alongside tool calls, hold it for now
     // (the final round after all tools will produce the complete text)
-    if (response.stop_reason === 'end_turn') {
+    if ((response.stop_reason as string) === 'end_turn') {
       if (fullText) streamText(res, fullText);
       break;
     }

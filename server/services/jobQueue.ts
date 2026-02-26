@@ -2,19 +2,18 @@
  * Job Queue Client — Enqueues jobs for the pg-boss worker.
  * Used by the web server to dispatch deliverable generation.
  */
-import PgBoss from 'pg-boss';
+import { PgBoss } from 'pg-boss';
 
-let boss: PgBoss | null = null;
+let boss: any = null;
 
-async function getBoss(): Promise<PgBoss> {
+async function getBoss(): Promise<any> {
   if (!boss) {
     const dbUrl = process.env.DATABASE_URL;
     if (!dbUrl) throw new Error('DATABASE_URL not set');
 
-    boss = new PgBoss({
+    boss = new (PgBoss as any)({
       connectionString: dbUrl,
       ssl: { rejectUnauthorized: false },
-      // Client-only: no worker processing, just enqueueing
       noScheduling: true,
       noSupervisor: true,
     });
@@ -35,13 +34,13 @@ export interface DeliverableJobData {
 /** Enqueue a deliverable generation job */
 export async function enqueueDeliverableGeneration(data: DeliverableJobData): Promise<string | null> {
   const queue = await getBoss();
-  return queue.send('generate-deliverable', data);
+  return queue.send('generate-deliverable', data) as Promise<string | null>;
 }
 
 /** Check job status */
 export async function getJobStatus(jobId: string): Promise<string | null> {
   const queue = await getBoss();
-  const job = await queue.getJobById(jobId);
+  const job = await queue.getJobById('generate-deliverable', jobId);
   return job?.state ?? null;
 }
 
