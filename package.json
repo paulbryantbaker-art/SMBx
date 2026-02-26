@@ -24,6 +24,7 @@
     "jiti": "^2.6.1",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.0.2",
+    "pg-boss": "^12.13.0",
     "postgres": "^3.4.0",
     "react-markdown": "^10.1.0",
     "stripe": "^17.0.0",
