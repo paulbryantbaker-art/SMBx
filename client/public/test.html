@@ -3,75 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>iOS Keyboard Test v3</title>
+<title>iOS Keyboard Test v4</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { background: #FAF8F4; font-family: -apple-system, system-ui, sans-serif; }
-
   #app {
     position: fixed;
-    top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
+    top: 0;
+    height: 100%;
     display: flex;
     flex-direction: column;
     background: #FAF8F4;
   }
-
-  .header {
-    flex-shrink: 0;
-    padding: 12px 16px;
-    border-bottom: 1px solid #E0DCD4;
-    font-size: 24px;
-    font-weight: 800;
-  }
+  .header { flex-shrink: 0; padding: 12px 16px; border-bottom: 1px solid #E0DCD4; font-size: 24px; font-weight: 800; }
   .header span { color: #D4714E; }
-
-  .messages {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    min-height: 0;
-    padding: 16px;
-    overscroll-behavior: contain;
-  }
-
+  .messages { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; min-height: 0; padding: 16px; overscroll-behavior: contain; }
   .msg { max-width: 80%; padding: 12px 16px; border-radius: 18px; margin-bottom: 8px; font-size: 16px; line-height: 1.5; }
   .msg.user { background: #D4714E; color: white; margin-left: auto; border-bottom-right-radius: 4px; }
   .msg.ai { background: white; color: #1A1A18; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-
-  .dock {
-    flex-shrink: 0;
-    padding: 8px 12px;
-    padding-bottom: max(8px, env(safe-area-inset-bottom));
-    background: #FAF8F4;
-  }
-  .dock-inner {
-    max-width: 640px;
-    margin: 0 auto;
-    background: white;
-    border: 1px solid rgba(196,168,130,0.3);
-    border-radius: 20px;
-    overflow: hidden;
-  }
-  .dock textarea {
-    width: 100%;
-    border: none;
-    outline: none;
-    resize: none;
-    font-size: 16px;
-    line-height: 1.5;
-    padding: 12px 16px 4px;
-    font-family: inherit;
-    background: transparent;
-  }
-  .dock-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 4px 8px 8px;
-  }
+  .dock { flex-shrink: 0; padding: 8px 12px; padding-bottom: max(8px, env(safe-area-inset-bottom)); background: #FAF8F4; }
+  .dock-inner { max-width: 640px; margin: 0 auto; background: white; border: 1px solid rgba(196,168,130,0.3); border-radius: 20px; overflow: hidden; }
+  .dock textarea { width: 100%; border: none; outline: none; resize: none; font-size: 16px; line-height: 1.5; padding: 12px 16px 4px; font-family: inherit; background: transparent; }
+  .dock-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px 8px; }
   .btn-plus, .btn-send { width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .btn-plus { background: #F3F0EA; color: #8C877D; font-size: 20px; }
   .btn-send { background: #D4714E; color: white; font-size: 16px; }
@@ -82,15 +37,15 @@
   <div class="header">smb<span>x</span>.ai</div>
   <div class="messages" id="messages">
     <div class="msg user">I own a pest control company doing $1.5M</div>
-    <div class="msg ai">Great — pest control is hot in SMB M&A. 138 deals in 2024. What's your annual take-home?</div>
+    <div class="msg ai">Great — pest control is hot. 138 deals in 2024. What's your annual take-home?</div>
     <div class="msg user">About $350K total</div>
-    <div class="msg ai">$350K SDE on $1.5M is 23% margin — strong. With 80%+ recurring, you're at 3.5-4.2x SDE. Range: $1.22M-$1.47M.</div>
+    <div class="msg ai">$350K SDE on $1.5M is 23% margin — strong. Range: $1.22M-$1.47M.</div>
     <div class="msg user">What factors move the multiple?</div>
     <div class="msg ai">Seven factors: recurring revenue, customer concentration, owner dependency, margin quality, growth rate, financial cleanliness, and industry timing.</div>
-    <div class="msg user">No, biggest customer is maybe 3%</div>
+    <div class="msg user">Biggest customer is maybe 3%</div>
     <div class="msg ai">Excellent — low concentration is a premium signal. Two of seven in premium range.</div>
     <div class="msg user">What about growth rate?</div>
-    <div class="msg ai">12% annual growth beats the 8% median. Three of seven in premium territory. If you stepped away 3 months, what happens?</div>
+    <div class="msg ai">12% annual growth beats the 8% median. Three of seven in premium territory.</div>
     <div class="msg user">I have a great ops manager</div>
     <div class="msg ai">Low owner dependency is one of the strongest premium signals. Four of seven in premium range. Do you have clean books going back 3 years?</div>
   </div>
@@ -105,10 +60,15 @@
   </div>
 </div>
 <script>
+  // Auto-resize textarea
   var ta = document.getElementById('input');
   ta.addEventListener('input', function() { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'; });
+
+  // Scroll messages to bottom
   var msgs = document.getElementById('messages');
   msgs.scrollTop = msgs.scrollHeight;
+
+  // Send button
   document.getElementById('sendBtn').addEventListener('click', function() {
     var t = ta.value.trim();
     if (!t) return;
@@ -120,6 +80,19 @@
     ta.style.height = 'auto';
     msgs.scrollTop = msgs.scrollHeight;
   });
+
+  // THIS IS THE KEY: Pin the app container to the visual viewport
+  var app = document.getElementById('app');
+  if (window.visualViewport) {
+    var vv = window.visualViewport;
+    function onViewportChange() {
+      app.style.height = vv.height + 'px';
+      app.style.top = vv.offsetTop + 'px';
+    }
+    vv.addEventListener('resize', onViewportChange);
+    vv.addEventListener('scroll', onViewportChange);
+    onViewportChange();
+  }
 </script>
 </body>
 </html>
