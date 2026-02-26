@@ -1,13 +1,15 @@
 import { useState, useRef, useCallback, type KeyboardEvent } from 'react';
 
 interface InputBarProps {
-  onSend: (content: string) => void;
+  onSend: (content: string, file?: File) => void;
   disabled?: boolean;
 }
 
 export default function InputBar({ onSend, disabled }: InputBarProps) {
   const [value, setValue] = useState('');
+  const [attachment, setAttachment] = useState<File | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const resize = useCallback(() => {
     const el = textareaRef.current;
@@ -19,8 +21,9 @@ export default function InputBar({ onSend, disabled }: InputBarProps) {
   const handleSend = () => {
     const trimmed = value.trim();
     if (!trimmed || disabled) return;
-    onSend(trimmed);
+    onSend(trimmed, attachment || undefined);
     setValue('');
+    setAttachment(null);
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
@@ -46,6 +49,26 @@ export default function InputBar({ onSend, disabled }: InputBarProps) {
             overflow: 'hidden',
           }}
         >
+          {attachment && (
+            <div className="px-3 pt-2.5">
+              <span className="inline-flex items-center gap-1.5 bg-[#F3F0EA] rounded-lg px-2.5 py-1.5 text-sm text-[#1A1A18]">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[#8C877D]">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                  <path d="M14 2v6h6" />
+                </svg>
+                <span className="truncate max-w-[200px]">{attachment.name}</span>
+                <button
+                  onClick={() => setAttachment(null)}
+                  className="w-4 h-4 rounded-full border-none bg-transparent text-[#8C877D] cursor-pointer flex items-center justify-center hover:text-[#1A1A18] p-0"
+                  type="button"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </span>
+            </div>
+          )}
           <textarea
             ref={textareaRef}
             value={value}
@@ -58,7 +81,14 @@ export default function InputBar({ onSend, disabled }: InputBarProps) {
             style={{ fontFamily: 'inherit', minHeight: '24px', maxHeight: '160px', padding: '12px 16px 4px 16px' }}
           />
           <div className="flex items-center justify-between px-2 pb-2 pt-0.5">
+            <input
+              ref={fileRef}
+              type="file"
+              className="hidden"
+              onChange={(e) => { if (e.target.files?.[0]) setAttachment(e.target.files[0]); e.target.value = ''; }}
+            />
             <button
+              onClick={() => fileRef.current?.click()}
               className="w-8 h-8 rounded-full border-none bg-[#F3F0EA] text-[#8C877D] cursor-pointer flex items-center justify-center hover:bg-[#EBE7DF] active:scale-90"
               style={{ transition: 'all .2s' }}
               type="button"

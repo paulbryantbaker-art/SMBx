@@ -216,21 +216,18 @@ export default function Chat({ user, onLogout }: ChatProps) {
 
       <div className="flex-1 flex flex-col min-w-0 bg-[#FAF8F4]">
         {/* Top bar */}
-        <div className="shrink-0 flex items-center justify-between px-3 py-3 md:px-8 bg-[#FAF8F4]" style={{ borderBottom: '1px solid #DDD9D1' }}>
-          <div className="flex items-center gap-1.5">
+        <div className="shrink-0 flex items-center justify-between px-4 py-3 bg-[#FAF8F4]" style={{ borderBottom: '1px solid #DDD9D1' }}>
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setSidebarOpen(true)}
               className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors md:hidden"
               type="button"
-              aria-label="Open sidebar"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M3 12h18M3 6h18M3 18h18" />
               </svg>
             </button>
-            <div className="text-[24px] font-extrabold tracking-[-0.03em] text-[#1A1A18] select-none md:text-[26px]">
-              smb<span className="text-[#D4714E]">x</span>.ai
-            </div>
+            <h1 className="text-lg font-semibold text-[#1A1A18] m-0" style={{ fontFamily: 'Georgia, ui-serif, serif' }}>Yulia</h1>
           </div>
           <div className="flex items-center gap-2">
             <WalletBadge />
@@ -239,7 +236,6 @@ export default function Chat({ user, onLogout }: ChatProps) {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer border-0 ${
                 dataRoomOpen ? 'bg-[#D4714E] text-white' : 'bg-[#F3F0EA] text-[#1A1A18] hover:bg-[#EBE7DF]'
               }`}
-              aria-label="Toggle data room"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
