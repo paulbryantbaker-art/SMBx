@@ -37,7 +37,7 @@ export default function InputBar({ onSend, disabled }: InputBarProps) {
   const hasText = value.trim().length > 0;
 
   return (
-    <div className="fixed left-0 right-0 z-40 bg-white border-t border-border" style={{ bottom: 'var(--keyboard-offset, 0px)' }}>
+    <div className="shrink-0 bg-white border-t border-border">
       <div className="max-w-3xl mx-auto px-4 py-3">
         <div className="flex items-end gap-2">
           <textarea

@@ -194,7 +194,6 @@ export default function Chat({ user, onLogout }: ChatProps) {
   const showWelcome = messages.length === 0 && !sending;
 
   return (
-    <>
     <div className="flex bg-cream" style={{ height: 'var(--app-height)' }}>
       {sidebarOpen && (
         <div className="fixed inset-0 bg-[rgba(0,0,0,0.2)] z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
@@ -285,9 +284,9 @@ export default function Chat({ user, onLogout }: ChatProps) {
             {sending && !streamingText && <TypingIndicator />}
             <div ref={messagesEndRef} />
           </div>
-          {/* Spacer for fixed input bar */}
-          <div className="h-[70px] shrink-0" />
         </div>
+
+        <InputBar onSend={handleSend} disabled={sending} />
       </div>
 
       {/* Data Room Panel */}
@@ -311,8 +310,5 @@ export default function Chat({ user, onLogout }: ChatProps) {
         />
       )}
     </div>
-
-    <InputBar onSend={handleSend} disabled={sending} />
-    </>
   );
 }

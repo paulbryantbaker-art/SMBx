@@ -444,7 +444,7 @@ export default function Home() {
   const hasContent = value.trim().length > 0;
 
   return (
-    <>
+    <div className="flex flex-col bg-[#FAF8F4]" style={{ height: 'var(--app-height)', fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
       {/* ── SIDEBAR ── */}
       <HomeSidebar
         open={sidebarOpen}
@@ -454,9 +454,6 @@ export default function Home() {
         messages={messages}
         sessionData={sessionData}
       />
-
-      {/* ── MAIN CONTENT ── */}
-      <div className="flex flex-col bg-[#FAF8F4]" style={{ height: 'var(--app-height)', fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
 
       {/* ── TOPBAR ── */}
       <div
@@ -668,9 +665,6 @@ export default function Home() {
           )}
 
         </div>
-        {/* Spacer so content isn't hidden behind fixed dock */}
-        <div className="h-[90px] shrink-0" />
-      </div>
       </div>
 
       {/* Hidden file input */}
@@ -682,8 +676,8 @@ export default function Home() {
         className="hidden"
       />
 
-      {/* ── DOCK (position: fixed, OUTSIDE flex container) ── */}
-      <div className="fixed left-0 right-0 z-50 px-3 md:px-5 bg-[#FAF8F4]" style={{ bottom: 'var(--keyboard-offset, 0px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      {/* ── DOCK (shrink-0 flex child) ── */}
+      <div className="shrink-0 px-3 md:px-5 bg-[#FAF8F4]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="max-w-[640px] mx-auto pb-2 pt-2">
           <div className="home-dock-card relative">
             {/* Tool popup */}
@@ -753,6 +747,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
