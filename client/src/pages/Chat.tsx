@@ -7,7 +7,6 @@ import TypingIndicator from '../components/chat/TypingIndicator';
 import WalletBadge from '../components/chat/WalletBadge';
 import DataRoom from '../components/chat/DataRoom';
 import DeliverableViewer from '../components/chat/DeliverableViewer';
-import Button from '../components/ui/Button';
 import { authHeaders, type User } from '../hooks/useAuth';
 
 interface ChatProps {
@@ -215,23 +214,30 @@ export default function Chat({ user, onLogout }: ChatProps) {
         />
       </div>
 
-      <div className="flex-1 flex flex-col min-w-0 bg-white">
+      <div className="flex-1 flex flex-col min-w-0 bg-[#FAF8F4]">
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-white">
-          <div className="flex items-center gap-2">
-            <Button variant="icon" onClick={() => setSidebarOpen(true)} aria-label="Open sidebar" className="md:hidden">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className="shrink-0 flex items-center justify-between px-3 py-3 md:px-8 bg-[#FAF8F4]" style={{ borderBottom: '1px solid #DDD9D1' }}>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors md:hidden"
+              type="button"
+              aria-label="Open sidebar"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M3 12h18M3 6h18M3 18h18" />
               </svg>
-            </Button>
-            <h1 className="text-lg font-semibold text-text-primary font-[Georgia,ui-serif,serif] m-0">Yulia</h1>
+            </button>
+            <div className="text-[24px] font-extrabold tracking-[-0.03em] text-[#1A1A18] select-none md:text-[26px]">
+              smb<span className="text-[#D4714E]">x</span>.ai
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <WalletBadge />
             <button
               onClick={() => setDataRoomOpen(!dataRoomOpen)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer border-0 ${
-                dataRoomOpen ? 'bg-terra text-white' : 'bg-cream text-text-primary hover:bg-cream-dark'
+                dataRoomOpen ? 'bg-[#D4714E] text-white' : 'bg-[#F3F0EA] text-[#1A1A18] hover:bg-[#EBE7DF]'
               }`}
               aria-label="Toggle data room"
             >
@@ -245,7 +251,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto overscroll-y-contain min-h-0 px-4 py-4">
+        <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4" style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
           <div className="max-w-3xl mx-auto space-y-4">
             {showWelcome && (
               <div className="py-12 px-2">
