@@ -3,6 +3,9 @@ import Sidebar, { type Conversation } from '../components/chat/Sidebar';
 import MessageBubble, { type Message } from '../components/chat/MessageBubble';
 import InputBar from '../components/chat/InputBar';
 import TypingIndicator from '../components/chat/TypingIndicator';
+import WalletBadge from '../components/chat/WalletBadge';
+import DataRoom from '../components/chat/DataRoom';
+import DeliverableViewer from '../components/chat/DeliverableViewer';
 import Button from '../components/ui/Button';
 import { authHeaders, type User } from '../hooks/useAuth';
 
@@ -25,6 +28,9 @@ export default function Chat({ user, onLogout }: ChatProps) {
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dataRoomOpen, setDataRoomOpen] = useState(false);
+  const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
+  const [activeDealId, setActiveDealId] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -135,6 +141,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
                 setMessages(prev => [...prev.slice(0, -1), parsed.message]);
               } else if (parsed.type === 'done') {
                 finalAssistantMsg = parsed.message;
+                if (parsed.dealId) setActiveDealId(parsed.dealId);
               } else if (parsed.type === 'error') {
                 accumulated = parsed.error || 'Something went wrong.';
               } else if (parsed.text) {
@@ -205,13 +212,30 @@ export default function Chat({ user, onLogout }: ChatProps) {
       <div className="flex-1 flex flex-col min-w-0 bg-white">
         {/* Top bar */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-white">
-          <Button variant="icon" onClick={() => setSidebarOpen(true)} aria-label="Open sidebar" className="md:hidden">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 12h18M3 6h18M3 18h18" />
-            </svg>
-          </Button>
-          <h1 className="text-lg font-semibold text-text-primary font-[Georgia,ui-serif,serif] m-0">Yulia</h1>
-          <div className="w-9 md:hidden" />
+          <div className="flex items-center gap-2">
+            <Button variant="icon" onClick={() => setSidebarOpen(true)} aria-label="Open sidebar" className="md:hidden">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              </svg>
+            </Button>
+            <h1 className="text-lg font-semibold text-text-primary font-[Georgia,ui-serif,serif] m-0">Yulia</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <WalletBadge />
+            <button
+              onClick={() => setDataRoomOpen(!dataRoomOpen)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer border-0 ${
+                dataRoomOpen ? 'bg-terra text-white' : 'bg-cream text-text-primary hover:bg-cream-dark'
+              }`}
+              aria-label="Toggle data room"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                <path d="M14 2v6h6" />
+              </svg>
+              <span className="hidden sm:inline">Data Room</span>
+            </button>
+          </div>
         </div>
 
         {/* Messages */}
@@ -262,6 +286,27 @@ export default function Chat({ user, onLogout }: ChatProps) {
 
         <InputBar onSend={handleSend} disabled={sending} />
       </div>
+
+      {/* Data Room Panel */}
+      {dataRoomOpen && (
+        <div className="hidden md:flex flex-col w-72 border-l border-border bg-white shrink-0">
+          <div className="px-4 py-3 border-b border-border">
+            <h2 className="text-sm font-semibold text-text-primary m-0">Data Room</h2>
+            <p className="text-xs text-text-secondary m-0 mt-0.5">Your generated deliverables</p>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <DataRoom dealId={activeDealId} onViewDeliverable={setViewingDeliverable} />
+          </div>
+        </div>
+      )}
+
+      {/* Deliverable Viewer Modal */}
+      {viewingDeliverable !== null && (
+        <DeliverableViewer
+          deliverableId={viewingDeliverable}
+          onClose={() => setViewingDeliverable(null)}
+        />
+      )}
     </div>
   );
 }
