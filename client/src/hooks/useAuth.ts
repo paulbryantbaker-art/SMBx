@@ -93,10 +93,45 @@ export function useAuth() {
     return data.user;
   };
 
+  const loginWithGoogle = async (credential: string) => {
+    const res = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Google login failed');
+    }
+    const data = await res.json();
+    setToken(data.token);
+    setUser(data.user);
+    return data.user;
+  };
+
+  const migrateSession = async (sessionId: string) => {
+    const token = getToken();
+    if (!token || !sessionId) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.userId;
+      const res = await fetch(`/api/chat/anonymous/${sessionId}/convert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ userId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.conversationId as number;
+      }
+    } catch { /* ignore */ }
+    return null;
+  };
+
   const logout = async () => {
     clearToken();
     setUser(null);
   };
 
-  return { user, loading, login, register, logout };
+  return { user, loading, login, register, loginWithGoogle, migrateSession, logout };
 }

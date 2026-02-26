@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Route, Switch, Redirect, useLocation } from 'wouter';
 import { useAuth } from './hooks/useAuth';
 import { ChatProvider } from './context/ChatContext';
@@ -26,8 +26,66 @@ import Terms from './pages/public/Terms';
 import Chat from './pages/Chat';
 
 export default function App() {
-  const { user, loading, login, register, logout } = useAuth();
+  const { user, loading, login, register, loginWithGoogle, migrateSession, logout } = useAuth();
   const [, navigate] = useLocation();
+
+  const handleGoogleLogin = useCallback(() => {
+    const clientId = (window as any).__GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      console.warn('Google Client ID not configured');
+      return;
+    }
+    const google = (window as any).google;
+    if (!google?.accounts?.id) {
+      console.warn('Google Identity Services not loaded');
+      return;
+    }
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: async (response: any) => {
+        try {
+          await loginWithGoogle(response.credential);
+          // Migrate anonymous session if present
+          const anonId = sessionStorage.getItem('smbx_anon_session');
+          if (anonId) {
+            await migrateSession(anonId);
+            sessionStorage.removeItem('smbx_anon_session');
+          }
+          navigate('/chat');
+        } catch (err: any) {
+          console.error('Google login error:', err.message);
+        }
+      },
+    });
+    google.accounts.id.prompt();
+  }, [loginWithGoogle, migrateSession, navigate]);
+
+  const handleLoginSuccess = useCallback(async (email: string, password: string) => {
+    await login(email, password);
+    const anonId = sessionStorage.getItem('smbx_anon_session');
+    if (anonId) {
+      await migrateSession(anonId);
+      sessionStorage.removeItem('smbx_anon_session');
+    }
+    navigate('/chat');
+  }, [login, migrateSession, navigate]);
+
+  const handleRegisterSuccess = useCallback(async (name: string, email: string, password: string) => {
+    await register(name, email, password);
+    const anonId = sessionStorage.getItem('smbx_anon_session');
+    if (anonId) {
+      await migrateSession(anonId);
+      sessionStorage.removeItem('smbx_anon_session');
+    }
+    navigate('/chat');
+  }, [register, migrateSession, navigate]);
+
+  // Load public config (Google Client ID, etc.)
+  useEffect(() => {
+    fetch('/api/config').then(r => r.json()).then(cfg => {
+      if (cfg.googleClientId) (window as any).__GOOGLE_CLIENT_ID = cfg.googleClientId;
+    }).catch(() => {});
+  }, []);
 
   if (loading) {
     return (
@@ -78,11 +136,8 @@ export default function App() {
           <Redirect to="/chat" />
         ) : (
           <Login
-            onLogin={async (email, password) => {
-              await login(email, password);
-              navigate('/chat');
-            }}
-            onGoogleLogin={() => {}}
+            onLogin={handleLoginSuccess}
+            onGoogleLogin={handleGoogleLogin}
             onNavigateSignup={() => navigate('/signup')}
           />
         )}
@@ -93,11 +148,8 @@ export default function App() {
           <Redirect to="/chat" />
         ) : (
           <Signup
-            onRegister={async (name, email, password) => {
-              await register(name, email, password);
-              navigate('/chat');
-            }}
-            onGoogleLogin={() => {}}
+            onRegister={handleRegisterSuccess}
+            onGoogleLogin={handleGoogleLogin}
             onNavigateLogin={() => navigate('/login')}
           />
         )}

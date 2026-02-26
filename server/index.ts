@@ -47,6 +47,13 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.get('/api/config', (_req, res) => {
+  res.json({
+    googleClientId: process.env.GOOGLE_CLIENT_ID || null,
+    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
+  });
+});
+
 app.get('/api/test-db', async (_req, res) => {
   try {
     const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
