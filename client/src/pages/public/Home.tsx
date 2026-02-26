@@ -228,6 +228,7 @@ export default function Home() {
   const toolsRef = useRef<HTMLDivElement>(null);
   const plusRef = useRef<HTMLButtonElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dockRef = useRef<HTMLDivElement>(null);
 
   /* Scroll to bottom */
   const scrollToBottom = useCallback(() => {
@@ -437,6 +438,24 @@ export default function Home() {
     }
   }, []);
 
+  /* iOS keyboard: reposition dock above keyboard using visualViewport */
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      const dock = dockRef.current;
+      if (!dock) return;
+      const offsetBottom = window.innerHeight - vv.height - vv.offsetTop;
+      dock.style.bottom = `${Math.max(0, offsetBottom)}px`;
+    };
+    vv.addEventListener('resize', onResize);
+    vv.addEventListener('scroll', onResize);
+    return () => {
+      vv.removeEventListener('resize', onResize);
+      vv.removeEventListener('scroll', onResize);
+    };
+  }, []);
+
   const hasContent = value.trim().length > 0;
 
   return (
@@ -536,7 +555,7 @@ export default function Home() {
                     onClick={() => showJourney(c.key)}
                   >
                     {c.icon}
-                    <span className="text-[11px] font-bold leading-[1.2] text-[#1A1A18] md:text-[16px] lg:text-base">{c.label}</span>
+                    <span className="text-[14px] font-bold leading-[1.2] text-[#1A1A18] md:text-[16px] lg:text-base">{c.label}</span>
                   </div>
                 ))}
               </div>
@@ -678,6 +697,7 @@ export default function Home() {
 
       {/* ── DOCK ── */}
       <div
+        ref={dockRef}
         className="fixed bottom-0 left-0 right-0 z-30 px-3 md:px-5 bg-[#FAF8F4] border-t border-[#DDD9D1]"
         style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))', paddingTop: '8px' }}
       >
