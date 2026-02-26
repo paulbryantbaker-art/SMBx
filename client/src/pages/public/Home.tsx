@@ -545,8 +545,8 @@ export default function Home() {
                 <p className="text-[22px] text-[#6E6A63] leading-[1.4] text-center max-w-[420px] font-medium lg:text-[24px] lg:max-w-[480px]" style={{ fontFamily: "'Caveat', cursive" }}>
                   Pick a card to learn more, or just start chatting with Yulia and dive right in &mdash; for free.
                 </p>
-                <svg className="mt-4" width="28" height="52" viewBox="0 0 24 48" fill="none" stroke="rgba(212,113,78,.45)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'nudgeBounce 2s ease infinite' }}>
-                  <path d="M12 4v28" /><path d="M6 26l6 8 6-8" />
+                <svg className="mt-5" width="36" height="72" viewBox="0 0 36 72" fill="none" style={{ animation: 'nudgeBounce 2s ease-in-out infinite' }}>
+                  <path d="M18 4 C15 18, 21 26, 18 48 C16 54, 11 60, 6 66 M18 48 C20 54, 25 60, 30 66" stroke="#C4A882" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
             </div>
@@ -612,8 +612,8 @@ export default function Home() {
                   <p className="text-[22px] text-[#6E6A63] leading-[1.4] text-center max-w-[360px] font-medium lg:text-[24px] lg:max-w-[420px]" style={{ fontFamily: "'Caveat', cursive" }}>
                     Just start chatting to get started &mdash; it&apos;s free.
                   </p>
-                  <svg className="mt-4" width="28" height="52" viewBox="0 0 24 48" fill="none" stroke="rgba(212,113,78,.45)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'nudgeBounce 2s ease infinite' }}>
-                    <path d="M12 4v28" /><path d="M6 26l6 8 6-8" />
+                  <svg className="mt-5" width="36" height="72" viewBox="0 0 36 72" fill="none" style={{ animation: 'nudgeBounce 2s ease-in-out infinite' }}>
+                    <path d="M18 4 C15 18, 21 26, 18 48 C16 54, 11 60, 6 66 M18 48 C20 54, 25 60, 30 66" stroke="#C4A882" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
               </div>
