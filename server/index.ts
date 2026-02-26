@@ -82,10 +82,12 @@ app.use('/api', (err: any, _req: Request, res: Response, _next: NextFunction) =>
 
 // ─── 5. Static file serving ────────────────────────────────
 const clientPath = path.resolve(__dirname, '../client');
-app.use(express.static(clientPath));
+app.use('/assets', express.static(path.join(clientPath, 'assets'), { maxAge: '1y', immutable: true }));
+app.use(express.static(clientPath, { maxAge: 0 }));
 
 // ─── 6. SPA catch-all (must be LAST) ──────────────────────
 app.get('*', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.sendFile(path.join(clientPath, 'index.html'));
 });
 
