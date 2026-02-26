@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>iOS Keyboard Test</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #FAF8F4; font-family: -apple-system, system-ui, sans-serif; }
+  #app { display: flex; flex-direction: column; height: 100dvh; }
+  .header { flex-shrink: 0; padding: 12px 16px; border-bottom: 1px solid #E0DCD4; font-size: 24px; font-weight: 800; }
+  .header span { color: #D4714E; }
+  .messages { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; min-height: 0; padding: 16px; }
+  .msg { max-width: 80%; padding: 12px 16px; border-radius: 18px; margin-bottom: 8px; font-size: 16px; line-height: 1.5; }
+  .msg.user { background: #D4714E; color: white; margin-left: auto; border-bottom-right-radius: 4px; }
+  .msg.ai { background: white; color: #1A1A18; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .dock { flex-shrink: 0; padding: 8px 12px; padding-bottom: max(8px, env(safe-area-inset-bottom)); background: #FAF8F4; }
+  .dock-inner { max-width: 640px; margin: 0 auto; background: white; border: 1px solid rgba(196,168,130,0.3); border-radius: 20px; overflow: hidden; }
+  .dock textarea { width: 100%; border: none; outline: none; resize: none; font-size: 16px; line-height: 1.5; padding: 12px 16px 4px; font-family: inherit; background: transparent; }
+  .dock-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px 8px; }
+  .btn-plus, .btn-send { width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .btn-plus { background: #F3F0EA; color: #8C877D; font-size: 20px; }
+  .btn-send { background: #D4714E; color: white; font-size: 16px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">smb<span>x</span>.ai</div>
+  <div class="messages" id="messages">
+    <div class="msg user">I own a pest control company doing $1.5M</div>
+    <div class="msg ai">Great — pest control is hot in SMB M&A. 138 deals in 2024. What's your annual take-home?</div>
+    <div class="msg user">About $350K total</div>
+    <div class="msg ai">$350K SDE on $1.5M is 23% margin — strong. With 80%+ recurring, you're at 3.5-4.2x SDE. Range: $1.22M-$1.47M.</div>
+    <div class="msg user">What factors move the multiple?</div>
+    <div class="msg ai">Seven factors: recurring revenue, customer concentration, owner dependency, margin quality, growth rate, financial cleanliness, and industry timing. Does any customer represent more than 15% of revenue?</div>
+    <div class="msg user">No, biggest is maybe 3%</div>
+    <div class="msg ai">Excellent — low concentration is a premium signal. Two of seven in premium range.</div>
+    <div class="msg user">What about growth rate?</div>
+    <div class="msg ai">12% annual growth beats the 8% median. Three of seven in premium territory. If you stepped away 3 months, what happens?</div>
+    <div class="msg user">I have a great ops manager</div>
+    <div class="msg ai">Low owner dependency is one of the strongest premium signals. Four of seven in premium range. Do you have clean books going back 3 years?</div>
+  </div>
+  <div class="dock">
+    <div class="dock-inner">
+      <textarea id="input" rows="1" placeholder="Tell Yulia about your deal..."></textarea>
+      <div class="dock-toolbar">
+        <button class="btn-plus">+</button>
+        <button class="btn-send" id="sendBtn">↑</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const ta = document.getElementById('input');
+  ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'; });
+  document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+</script>
+</body>
+</html>
