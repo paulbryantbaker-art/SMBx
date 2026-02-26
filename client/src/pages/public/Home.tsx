@@ -545,8 +545,8 @@ export default function Home() {
                 <p className="text-[22px] text-[#6E6A63] leading-[1.4] text-center max-w-[420px] font-medium lg:text-[24px] lg:max-w-[480px]" style={{ fontFamily: "'Caveat', cursive" }}>
                   Pick a card to learn more, or just start chatting with Yulia and dive right in &mdash; for free.
                 </p>
-                <svg className="mt-3" width="24" height="48" viewBox="0 0 24 48" fill="none" stroke="rgba(180,160,130,.55)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'nudgeBounce 2s ease infinite' }}>
-                  <path d="M12 4 C12 4 8 18 12 32 C14 26 16 22 12 32" /><path d="M6 28l6 8 6-8" />
+                <svg className="mt-4" width="28" height="52" viewBox="0 0 24 48" fill="none" stroke="rgba(212,113,78,.45)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'nudgeBounce 2s ease infinite' }}>
+                  <path d="M12 4v28" /><path d="M6 26l6 8 6-8" />
                 </svg>
               </div>
             </div>
@@ -612,8 +612,8 @@ export default function Home() {
                   <p className="text-[22px] text-[#6E6A63] leading-[1.4] text-center max-w-[360px] font-medium lg:text-[24px] lg:max-w-[420px]" style={{ fontFamily: "'Caveat', cursive" }}>
                     Just start chatting to get started &mdash; it&apos;s free.
                   </p>
-                  <svg className="mt-3" width="24" height="48" viewBox="0 0 24 48" fill="none" stroke="rgba(180,160,130,.55)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'nudgeBounce 2s ease infinite' }}>
-                    <path d="M12 4 C12 4 8 18 12 32 C14 26 16 22 12 32" /><path d="M6 28l6 8 6-8" />
+                  <svg className="mt-4" width="28" height="52" viewBox="0 0 24 48" fill="none" stroke="rgba(212,113,78,.45)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'nudgeBounce 2s ease infinite' }}>
+                    <path d="M12 4v28" /><path d="M6 26l6 8 6-8" />
                   </svg>
                 </div>
               </div>
