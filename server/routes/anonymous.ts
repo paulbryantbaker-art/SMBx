@@ -9,6 +9,7 @@ import { buildAnonymousPrompt } from '../services/promptBuilder.js';
 import { streamAnonymousResponse } from '../services/aiService.js';
 import { extractFields } from '../services/fieldExtractor.js';
 import { scoreSevenFactors, calculateCompositeScore, scoredFactorCount } from '../services/sevenFactorScoring.js';
+import { extractFromDocument } from '../services/documentExtractor.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -273,13 +274,29 @@ anonymousRouter.post('/:sessionId/upload', upload.single('file'), async (req, re
       mimeType: req.file.mimetype,
     };
 
-    // Store file info in session data (will be included in next prompt context)
+    // Store file info in session data
     await sql`
       UPDATE anonymous_sessions
       SET data = COALESCE(data, '{}'::jsonb) || ${JSON.stringify({ uploaded_file: fileInfo })}::jsonb,
           last_active_at = NOW()
       WHERE id = ${session.id}
     `;
+
+    // Fire-and-forget: extract financial data from the document
+    const fullPath = path.resolve(UPLOAD_DIR, req.file.filename);
+    extractFromDocument(fullPath, req.file.originalname).then(async (extracted) => {
+      if (extracted && extracted.confidence !== 'low') {
+        try {
+          await sql`
+            UPDATE anonymous_sessions
+            SET data = COALESCE(data, '{}'::jsonb) || ${JSON.stringify({ extracted_financials: extracted })}::jsonb
+            WHERE id = ${session.id}
+          `;
+        } catch (e: any) {
+          console.error('Document extraction storage error:', e.message);
+        }
+      }
+    }).catch((e) => console.error('Document extraction error:', e.message));
 
     return res.json({
       success: true,
