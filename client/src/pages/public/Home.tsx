@@ -442,17 +442,44 @@ export default function Home() {
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
-    const onResize = () => {
+    let rafId: number;
+    const update = () => {
       const dock = dockRef.current;
       if (!dock) return;
       const offsetBottom = window.innerHeight - vv.height - vv.offsetTop;
       dock.style.bottom = `${Math.max(0, offsetBottom)}px`;
     };
-    vv.addEventListener('resize', onResize);
-    vv.addEventListener('scroll', onResize);
+    const onVV = () => { cancelAnimationFrame(rafId); rafId = requestAnimationFrame(update); };
+    vv.addEventListener('resize', onVV);
+    vv.addEventListener('scroll', onVV);
+    /* Also re-apply on scroll-container scroll so dock stays put while user scrolls chat */
+    const scroll = scrollRef.current;
+    if (scroll) scroll.addEventListener('scroll', onVV, { passive: true });
     return () => {
-      vv.removeEventListener('resize', onResize);
-      vv.removeEventListener('scroll', onResize);
+      vv.removeEventListener('resize', onVV);
+      vv.removeEventListener('scroll', onVV);
+      if (scroll) scroll.removeEventListener('scroll', onVV);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  /* Swipe down on messages to dismiss keyboard (iMessage-style) */
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let startY = 0;
+    const onStart = (e: TouchEvent) => { startY = e.touches[0].clientY; };
+    const onMove = (e: TouchEvent) => {
+      const active = document.activeElement as HTMLElement;
+      if (active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT')) {
+        if (e.touches[0].clientY - startY > 10) active.blur();
+      }
+    };
+    el.addEventListener('touchstart', onStart, { passive: true });
+    el.addEventListener('touchmove', onMove, { passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onStart);
+      el.removeEventListener('touchmove', onMove);
     };
   }, []);
 
