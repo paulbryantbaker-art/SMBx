@@ -591,8 +591,8 @@ export default function Home() {
                 <p className="text-[22px] text-[#6E6A63] leading-[1.4] text-center max-w-[420px] font-medium lg:text-[24px] lg:max-w-[480px]" style={{ fontFamily: "'Caveat', cursive" }}>
                   Pick a card to learn more, or just start chatting with Yulia and dive right in &mdash; for free.
                 </p>
-                <div style={{ textAlign: 'center', margin: '16px 0', animation: 'bounce 2s ease-in-out infinite' }}>
-                  <span style={{ fontSize: '36px', color: '#C4A882' }}>↓</span>
+                <div className="flex justify-center my-6 animate-bounce">
+                  <span style={{ fontSize: '42px', color: '#C4A882' }}>↓</span>
                 </div>
               </div>
             </div>
@@ -658,9 +658,6 @@ export default function Home() {
                   <p className="text-[22px] text-[#6E6A63] leading-[1.4] text-center max-w-[360px] font-medium lg:text-[24px] lg:max-w-[420px]" style={{ fontFamily: "'Caveat', cursive" }}>
                     Just start chatting to get started &mdash; it&apos;s free.
                   </p>
-                  <div style={{ textAlign: 'center', margin: '16px 0', animation: 'bounce 2s ease-in-out infinite' }}>
-                    <span style={{ fontSize: '36px', color: '#C4A882' }}>↓</span>
-                  </div>
                 </div>
               </div>
             );

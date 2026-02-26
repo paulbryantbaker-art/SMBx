@@ -81,15 +81,6 @@ body {
   40% { opacity: 1; transform: scale(1); }
 }
 
-@keyframes nudgeBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(8px); }
-}
-
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(8px); }
-}
 
 /* Fade-up animation */
 .home-fade-up { animation: homeFadeUp 0.4s ease both; }
@@ -234,6 +225,7 @@ body {
 .home-j-heading em { font-style: normal; color: #D4714E; }
 
 /* Journey page nudge (separate route pages) */
+@keyframes nudgeBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
 .journey-nudge {
   animation: nudgeBounce 2s ease-in-out infinite;
   font-family: 'Caveat', cursive;
