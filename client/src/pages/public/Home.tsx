@@ -160,7 +160,7 @@ const J: Record<string, JData> = {
     ph: 'Ask about any industry or market...',
   },
   agency: {
-    label: 'AGENCY & AUTOMATION',
+    label: 'AGENTIC AI',
     h1: 'She does <em>the work.</em>',
     sub: 'Ask ChatGPT about a deal and you get a paragraph. Ask Yulia and you get a CIM, a valuation model, an SBA financing analysis, and a deal memo. She doesn\u2019t answer questions. She produces work product.',
     insight: 'Upload a P&L and get a complete confidential information memorandum \u2014 <strong>narrative, financials, add-backs, projections, and market context</strong>. Describe a target and get it scored against seven valuation factors instantly. Tell her to screen a deal and she checks <strong>SBA eligibility, red flags, DSCR, and structure</strong> before you write the LOI.',
@@ -189,7 +189,7 @@ const ACTION_CARDS = [
   { key: 'sell', label: 'Sell my business', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" /></svg> },
   { key: 'buy', label: 'Buy a business', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg> },
   { key: 'raise', label: 'Raise capital', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M12 20V10" /><path d="M18 20V4" /><path d="M6 20v-4" /></svg> },
-  { key: 'agency', label: 'Agency & automation', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg> },
+  { key: 'agency', label: 'Agentic AI', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg> },
   { key: 'intelligence', label: 'AI intelligence', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg> },
 ];
 
@@ -536,7 +536,7 @@ export default function Home() {
                     onClick={() => showJourney(c.key)}
                   >
                     {c.icon}
-                    <span className="text-[16px] font-bold leading-[1.25] text-[#1A1A18] md:text-[18px] lg:text-base">{c.label}</span>
+                    <span className="text-[11px] font-bold leading-[1.2] text-[#1A1A18] md:text-[16px] lg:text-base">{c.label}</span>
                   </div>
                 ))}
               </div>
