@@ -7,6 +7,7 @@ import { requireAuth } from './middleware/auth.js';
 import { authRouter } from './routes/auth.js';
 import { chatRouter } from './routes/chat.js';
 import { anonymousRouter } from './routes/anonymous.js';
+import { stripeRouter, handleStripeWebhook } from './routes/stripe.js';
 import type { Request, Response, NextFunction } from 'express';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,7 +35,10 @@ if (!process.env.ANTHROPIC_API_KEY) {
 // ─── 0. Trust proxy (Railway) ───────────────────────────────
 app.set('trust proxy', 1);
 
-// ─── 1. Body parsing ───────────────────────────────────────
+// ─── 1. Stripe webhook (raw body — MUST be before json parser) ──
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
+
+// ─── 2. Body parsing ───────────────────────────────────────
 app.use(express.json());
 
 // ─── 2. API routes (public) ────────────────────────────────
@@ -56,6 +60,7 @@ app.get('/api/test-db', async (_req, res) => {
 app.use('/api/auth', authRouter);
 app.use('/api/chat/anonymous', anonymousRouter);
 app.use('/api/chat', chatRouter);
+app.use('/api/stripe', stripeRouter);
 
 // ─── 3. API routes (protected — everything else under /api) ─
 app.use('/api', requireAuth);
