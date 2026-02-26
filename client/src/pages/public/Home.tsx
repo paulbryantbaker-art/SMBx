@@ -564,10 +564,9 @@ export default function Home() {
                 <p className="text-[22px] text-[#6E6A63] leading-[1.4] text-center max-w-[420px] font-medium lg:text-[24px] lg:max-w-[480px]" style={{ fontFamily: "'Caveat', cursive" }}>
                   Pick a card to learn more, or just start chatting with Yulia and dive right in &mdash; for free.
                 </p>
-                <svg className="mt-5" width="24" height="80" viewBox="0 0 24 80" fill="none" style={{ animation: 'nudgeBounce 2s ease-in-out infinite' }}>
-                  <path d="M14 2 C14 10, 10 18, 10 26 C10 34, 16 38, 14 46 C12 54, 10 58, 12 66" stroke="#C4A882" strokeWidth="2.5" strokeLinecap="round"/>
-                  <path d="M5 60 L12 70 L19 60" stroke="#C4A882" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                </svg>
+                <div style={{ textAlign: 'center', margin: '16px 0', animation: 'bounce 2s ease-in-out infinite' }}>
+                  <span style={{ fontSize: '36px', color: '#C4A882' }}>↓</span>
+                </div>
               </div>
             </div>
           )}
@@ -632,10 +631,9 @@ export default function Home() {
                   <p className="text-[22px] text-[#6E6A63] leading-[1.4] text-center max-w-[360px] font-medium lg:text-[24px] lg:max-w-[420px]" style={{ fontFamily: "'Caveat', cursive" }}>
                     Just start chatting to get started &mdash; it&apos;s free.
                   </p>
-                  <svg className="mt-5" width="24" height="80" viewBox="0 0 24 80" fill="none" style={{ animation: 'nudgeBounce 2s ease-in-out infinite' }}>
-                    <path d="M14 2 C14 10, 10 18, 10 26 C10 34, 16 38, 14 46 C12 54, 10 58, 12 66" stroke="#C4A882" strokeWidth="2.5" strokeLinecap="round"/>
-                    <path d="M5 60 L12 70 L19 60" stroke="#C4A882" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                  </svg>
+                  <div style={{ textAlign: 'center', margin: '16px 0', animation: 'bounce 2s ease-in-out infinite' }}>
+                    <span style={{ fontSize: '36px', color: '#C4A882' }}>↓</span>
+                  </div>
                 </div>
               </div>
             );
