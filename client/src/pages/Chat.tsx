@@ -239,7 +239,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-4">
+        <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4">
           <div className="max-w-3xl mx-auto space-y-4">
             {showWelcome && (
               <div className="py-12 px-2">

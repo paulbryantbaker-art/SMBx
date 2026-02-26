@@ -521,7 +521,7 @@ export default function Home() {
 
           {/* ═══ LANDING ═══ */}
           {phase === 'landing' && (
-            <div className="flex flex-col items-center justify-center text-center py-10 min-h-[calc(100dvh-60px-80px)]">
+            <div className="flex flex-col items-center justify-center text-center py-10 flex-1">
               <h1 className="home-fade-up text-[44px] font-extrabold leading-[1.08] tracking-[-0.03em] mb-5 md:text-[48px] md:mb-7 lg:text-[54px] lg:mb-11">
                 Sell a business.<br />Buy a business.<br />Raise capital.
               </h1>
