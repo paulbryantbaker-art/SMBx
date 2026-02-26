@@ -515,7 +515,7 @@ export default function Home() {
       {/* ── SCROLL AREA ── */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto overscroll-y-contain pb-24"
+        className="flex-1 overflow-y-auto overscroll-y-contain min-h-0"
       >
         <div className="px-5 md:max-w-[860px] md:px-10 md:mx-auto lg:max-w-[960px] lg:px-12">
 
@@ -674,11 +674,8 @@ export default function Home() {
         className="hidden"
       />
 
-      {/* ── DOCK ── */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-50 px-3 md:px-5"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-      >
+      {/* ── DOCK (flex child, NOT fixed) ── */}
+      <div className="shrink-0 px-3 md:px-5 bg-[#FAF8F4]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="max-w-[640px] mx-auto pb-2 pt-2">
           <div className="home-dock-card relative">
             {/* Tool popup */}
