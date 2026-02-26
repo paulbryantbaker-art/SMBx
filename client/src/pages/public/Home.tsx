@@ -408,12 +408,13 @@ export default function Home() {
     if (phase === 'chat') setTimeout(() => inputRef.current?.focus(), 100);
   }, [phase]);
 
-  /* Browser back button */
+  /* Browser back button — use URL hash as source of truth, not e.state
+     (Safari fires popstate on initial page load with stale state) */
   useEffect(() => {
-    const onPop = (e: PopStateEvent) => {
-      const s = e.state as { smbx?: string } | null;
-      if (s?.smbx && s.smbx !== 'chat' && J[s.smbx]) {
-        setCurrentJ(s.smbx);
+    const onPop = () => {
+      const hash = window.location.hash.replace(/^#/, '').toLowerCase();
+      if (hash && J[hash]) {
+        setCurrentJ(hash);
         setPhase('journey');
       } else {
         setPhase('landing');
