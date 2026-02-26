@@ -158,7 +158,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
         className="hidden"
       />
 
-      <div className="max-w-[720px] mx-auto pb-2 pt-2">
+      <div className="max-w-[860px] mx-auto pb-3 pt-2 lg:pb-4">
         <div className="home-dock-card relative">
           {/* Tool popup */}
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
@@ -210,12 +210,12 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             onKeyDown={handleKey}
             placeholder={placeholder}
             className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1A1A18] leading-[1.5] placeholder:text-[#A9A49C] lg:text-[18px]"
-            style={{ fontFamily: 'inherit', minHeight: '44px', maxHeight: '160px', padding: '16px 20px 8px 20px' }}
+            style={{ fontFamily: 'inherit', minHeight: '52px', maxHeight: '200px', padding: '18px 22px 10px 22px' }}
             rows={1}
           />
 
           {/* Toolbar row */}
-          <div className="flex items-center justify-between px-3 pb-3 pt-0">
+          <div className="flex items-center justify-between px-4 pb-3.5 pt-0">
             <button
               ref={plusRef}
               onClick={() => setToolsOpen(prev => !prev)}

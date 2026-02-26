@@ -165,12 +165,12 @@ body {
 /* Dock card */
 .home-dock-card {
   background: #fff; border: 1.5px solid rgba(212,113,78,.35);
-  border-radius: 20px; overflow: visible; position: relative;
-  box-shadow: 0 4px 20px rgba(26,26,24,.08), 0 1px 3px rgba(26,26,24,.05);
+  border-radius: 22px; overflow: visible; position: relative;
+  box-shadow: 0 6px 28px rgba(26,26,24,.10), 0 2px 6px rgba(26,26,24,.06);
 }
 .home-dock-card:focus-within {
   border-color: #D4714E;
-  box-shadow: 0 4px 20px rgba(26,26,24,.08), 0 1px 3px rgba(26,26,24,.05), 0 0 0 4px rgba(212,113,78,.12);
+  box-shadow: 0 8px 32px rgba(26,26,24,.12), 0 2px 6px rgba(26,26,24,.06), 0 0 0 4px rgba(212,113,78,.14);
 }
 
 /* Tool popup — drops UP from dock */

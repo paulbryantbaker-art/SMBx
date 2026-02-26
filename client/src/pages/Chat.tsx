@@ -248,7 +248,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4" style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
-          <div className="max-w-3xl mx-auto space-y-4">
+          <div className="max-w-[860px] w-full mx-auto space-y-4">
             {showWelcome && (
               <div className="py-12 px-2">
                 <h2 className="text-2xl font-semibold text-terra font-[Georgia,ui-serif,serif] m-0 mb-2 text-center">
@@ -257,7 +257,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
                 <p className="text-base text-text-secondary font-[system-ui,sans-serif] m-0 mb-8 text-center max-w-md mx-auto leading-relaxed">
                   I'm Yulia, your M&A advisor. I handle the entire process — from first conversation to closing. What are we working on?
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto">
                   {JOURNEY_CARDS.map(card => (
                     <button
                       key={card.id}
