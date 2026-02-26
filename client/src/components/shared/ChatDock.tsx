@@ -7,14 +7,19 @@ interface ToolItem {
   desc: string;
   fill?: string;
   action?: 'upload';
+  group?: 'journey' | 'tool';
   icon: React.ReactNode;
 }
 
 const TOOLS: ToolItem[] = [
-  { label: 'Upload financials', desc: 'Share a P&L, tax return, or balance sheet', action: 'upload', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg> },
-  { label: 'Business valuation', desc: 'Estimate worth based on revenue, earnings, and comps', fill: 'I need a business valuation — I own a ', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" /></svg> },
-  { label: 'Search for a business', desc: 'Find businesses by industry, location, size, or price', fill: "Help me find a business — I'm looking for ", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg> },
-  { label: 'SBA loan check', desc: 'See if a deal qualifies for SBA 7(a) — up to $5M, 10% down', fill: "Can this deal get SBA financing? I'm looking at a ", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg> },
+  { group: 'journey', label: 'Sell my business', desc: 'Valuation, packaging, buyer matching, and closing', fill: 'I want to sell my business — ', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> },
+  { group: 'journey', label: 'Buy a business', desc: 'Thesis, sourcing, diligence, and deal structuring', fill: 'I want to buy a business — ', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> },
+  { group: 'tool', label: 'Business valuation', desc: 'Multi-methodology estimate with defensible range', fill: 'I need a business valuation — I own a ', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> },
+  { group: 'tool', label: 'SBA loan check', desc: 'Eligibility, DSCR analysis, and equity injection modeling', fill: "Can this deal get SBA financing? I'm looking at a ", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
+  { group: 'tool', label: 'Capital structure', desc: 'Financing model — SBA, seller note, equity, mezzanine', fill: 'Help me figure out financing for a ', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> },
+  { group: 'tool', label: 'Search for a business', desc: 'Define criteria and evaluate opportunities', fill: "Help me find a business — I'm looking for ", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> },
+  { group: 'tool', label: 'Upload financials', desc: 'P&L, tax return, or balance sheet — PDF, XLSX, CSV', action: 'upload', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg> },
+  { group: 'tool', label: 'Post-acquisition help', desc: '100-day plan, integration, synergy tracking', fill: "I just acquired a business and need help with ", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> },
 ];
 
 /* ═══ PUBLIC HANDLE ═══ */
@@ -143,7 +148,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
   }, [toolsOpen]);
 
   return (
-    <div className="shrink-0 px-3 md:px-5 bg-[#FAF8F4]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div className="shrink-0 px-3 md:px-6 lg:px-8 bg-[#FAF8F4]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -153,11 +158,27 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
         className="hidden"
       />
 
-      <div className="max-w-[640px] mx-auto pb-2 pt-2">
+      <div className="max-w-[720px] mx-auto pb-2 pt-2">
         <div className="home-dock-card relative">
           {/* Tool popup */}
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
-            {TOOLS.map(t => (
+            <div className="px-4 pt-3 pb-2">
+              <span className="text-[12px] font-semibold tracking-wide uppercase text-[#A9A49C]">Start with Yulia</span>
+            </div>
+            {TOOLS.filter(t => t.group === 'journey').map(t => (
+              <button key={t.label} className="home-tp-item" onClick={() => handleToolClick(t)} type="button">
+                {t.icon}
+                <div>
+                  <div className="text-[15px] font-semibold text-[#1A1A18] leading-[1.3]">{t.label}</div>
+                  <div className="text-[13px] text-[#6E6A63] leading-[1.4] mt-0.5">{t.desc}</div>
+                </div>
+              </button>
+            ))}
+            <div className="mx-4 my-1 border-t border-[#EBE7DF]" />
+            <div className="px-4 pt-2 pb-1">
+              <span className="text-[12px] font-semibold tracking-wide uppercase text-[#A9A49C]">Tools</span>
+            </div>
+            {TOOLS.filter(t => t.group === 'tool').map(t => (
               <button key={t.label} className="home-tp-item" onClick={() => handleToolClick(t)} type="button">
                 {t.icon}
                 <div>
@@ -170,7 +191,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
 
           {/* Attachment chips */}
           {attachment && (
-            <div className="flex flex-wrap gap-2 px-3.5 pt-3 pb-0">
+            <div className="flex flex-wrap gap-2 px-4 pt-3 pb-0">
               <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F3F0EA] rounded-lg max-w-[260px]">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                 <span className="text-[13px] font-medium text-[#1A1A18] truncate">{attachment.name}</span>
@@ -188,35 +209,35 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             onChange={handleChange}
             onKeyDown={handleKey}
             placeholder={placeholder}
-            className="w-full bg-transparent border-none outline-none resize-none text-[16px] text-[#1A1A18] leading-[1.5] placeholder:text-[#A9A49C] lg:text-[17px]"
-            style={{ fontFamily: 'inherit', minHeight: '24px', maxHeight: '160px', padding: '12px 16px 4px 16px' }}
+            className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1A1A18] leading-[1.5] placeholder:text-[#A9A49C] lg:text-[18px]"
+            style={{ fontFamily: 'inherit', minHeight: '44px', maxHeight: '160px', padding: '16px 20px 8px 20px' }}
             rows={1}
           />
 
           {/* Toolbar row */}
-          <div className="flex items-center justify-between px-2 pb-2 pt-0.5">
+          <div className="flex items-center justify-between px-3 pb-3 pt-0">
             <button
               ref={plusRef}
               onClick={() => setToolsOpen(prev => !prev)}
-              className="w-8 h-8 rounded-full border-none bg-[#F3F0EA] text-[#8C877D] cursor-pointer flex items-center justify-center hover:bg-[#EBE7DF] active:scale-90"
+              className="w-9 h-9 rounded-full border-none bg-[#F3F0EA] text-[#8C877D] cursor-pointer flex items-center justify-center hover:bg-[#EBE7DF] active:scale-90"
               style={{ transition: 'all .2s' }}
               type="button"
             >
               {uploading ? (
                 <div className="w-4 h-4 border-2 border-[#D4714E] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
               ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ transform: toolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transform: toolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
                   <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
               )}
             </button>
             <button
               onClick={send}
-              className={`w-8 h-8 rounded-full border-none bg-[#D4714E] text-white cursor-pointer flex items-center justify-center hover:bg-[#BE6342] active:scale-90 ${hasContent && !disabled ? 'opacity-100 scale-100' : 'opacity-0 scale-[.8] pointer-events-none'}`}
+              className={`w-9 h-9 rounded-full border-none bg-[#D4714E] text-white cursor-pointer flex items-center justify-center hover:bg-[#BE6342] active:scale-90 ${hasContent && !disabled ? 'opacity-100 scale-100' : 'opacity-0 scale-[.8] pointer-events-none'}`}
               style={{ boxShadow: '0 2px 8px rgba(212,113,78,.3)', transition: 'all .2s' }}
               type="button"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
             </button>
           </div>
         </div>
