@@ -564,8 +564,10 @@ export default function Home() {
                 <p className="text-[22px] text-[#6E6A63] leading-[1.4] text-center max-w-[420px] font-medium lg:text-[24px] lg:max-w-[480px]" style={{ fontFamily: "'Caveat', cursive" }}>
                   Pick a card to learn more, or just start chatting with Yulia and dive right in &mdash; for free.
                 </p>
-                <svg className="mt-5" width="36" height="72" viewBox="0 0 36 72" fill="none" style={{ animation: 'nudgeBounce 2s ease-in-out infinite' }}>
-                  <path d="M18 4 C15 18, 21 26, 18 48 C16 54, 11 60, 6 66 M18 48 C20 54, 25 60, 30 66" stroke="#C4A882" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <svg className="mt-5" width="44" height="60" viewBox="0 0 44 60" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ animation: 'nudgeBounce 2s ease-in-out infinite' }}>
+                  <path d="M22 4 C20 12, 24 18, 22 26 C20 34, 18 38, 22 46" stroke="#C4A882" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+                  <path d="M12 38 C16 44, 20 48, 22 52" stroke="#C4A882" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+                  <path d="M32 38 C28 44, 24 48, 22 52" stroke="#C4A882" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
                 </svg>
               </div>
             </div>
