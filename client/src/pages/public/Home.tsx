@@ -376,7 +376,7 @@ export default function Home() {
     setValue(e.target.value);
     const el = e.target;
     el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
   }, []);
 
   const handleKey = useCallback((e: React.KeyboardEvent) => {
@@ -438,25 +438,6 @@ export default function Home() {
     }
   }, []);
 
-  /* Swipe down on messages to dismiss keyboard (iMessage-style) */
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    let startY = 0;
-    const onStart = (e: TouchEvent) => { startY = e.touches[0].clientY; };
-    const onMove = (e: TouchEvent) => {
-      const active = document.activeElement as HTMLElement;
-      if (active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT')) {
-        if (e.touches[0].clientY - startY > 10) active.blur();
-      }
-    };
-    el.addEventListener('touchstart', onStart, { passive: true });
-    el.addEventListener('touchmove', onMove, { passive: true });
-    return () => {
-      el.removeEventListener('touchstart', onStart);
-      el.removeEventListener('touchmove', onMove);
-    };
-  }, []);
 
   const hasContent = value.trim().length > 0;
 
@@ -534,8 +515,7 @@ export default function Home() {
       {/* ── SCROLL AREA ── */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto overscroll-y-contain pb-20"
-        style={{ WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+        className="flex-1 overflow-y-auto overscroll-y-contain pb-24"
       >
         <div className="px-5 md:max-w-[860px] md:px-10 md:mx-auto lg:max-w-[960px] lg:px-12">
 
@@ -696,22 +676,10 @@ export default function Home() {
 
       {/* ── DOCK ── */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-30 px-3 md:px-5 bg-[#FAF8F4] border-t border-[#DDD9D1]"
-        style={{ paddingBottom: '8px', paddingTop: '8px' }}
+        className="fixed bottom-0 left-0 right-0 z-50 px-3 md:px-5"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="max-w-[640px] mx-auto">
-          {/* Attachment bubble */}
-          {attachment && (
-            <div className="flex items-center gap-2 px-3 py-2 mb-2 bg-white rounded-lg border border-[#DDD9D1]">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-              <span className="text-sm font-medium text-[#1A1A18] truncate flex-1">{attachment.name}</span>
-              <span className="text-xs text-[#A9A49C]">{attachment.size}</span>
-              <button onClick={() => setAttachment(null)} className="text-[#A9A49C] hover:text-[#1A1A18] bg-transparent border-none cursor-pointer p-0.5" type="button">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-              </button>
-            </div>
-          )}
-
+        <div className="max-w-[640px] mx-auto pb-2 pt-2">
           <div className="home-dock-card relative">
             {/* Tool popup */}
             <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
@@ -726,39 +694,55 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="relative">
+            {/* Attachment chips */}
+            {attachment && (
+              <div className="flex flex-wrap gap-2 px-3.5 pt-3 pb-0">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F3F0EA] rounded-lg max-w-[260px]">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                  <span className="text-[13px] font-medium text-[#1A1A18] truncate">{attachment.name}</span>
+                  <button onClick={() => setAttachment(null)} className="text-[#A9A49C] hover:text-[#1A1A18] bg-transparent border-none cursor-pointer p-0 ml-0.5 flex-shrink-0" type="button">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Textarea */}
+            <textarea
+              ref={inputRef}
+              value={value}
+              onChange={handleChange}
+              onKeyDown={handleKey}
+              placeholder="Tell Yulia about your deal..."
+              className="w-full bg-transparent border-none outline-none resize-none text-[16px] text-[#1A1A18] leading-[1.5] placeholder:text-[#A9A49C] lg:text-[17px]"
+              style={{ fontFamily: 'inherit', minHeight: '24px', maxHeight: '160px', padding: '12px 16px 4px 16px' }}
+              rows={1}
+            />
+
+            {/* Toolbar row */}
+            <div className="flex items-center justify-between px-2 pb-2 pt-0.5">
               <button
                 ref={plusRef}
                 onClick={() => setToolsOpen(prev => !prev)}
-                className="absolute left-2.5 top-2 w-9 h-9 rounded-full border-none bg-[#F3F0EA] text-[#D4714E] cursor-pointer flex items-center justify-center z-[2] hover:bg-[#FFF0EB] active:scale-90"
+                className="w-8 h-8 rounded-full border-none bg-[#F3F0EA] text-[#8C877D] cursor-pointer flex items-center justify-center hover:bg-[#EBE7DF] active:scale-90"
                 style={{ transition: 'all .2s' }}
                 type="button"
               >
                 {uploading ? (
                   <div className="w-4 h-4 border-2 border-[#D4714E] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
                 ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transform: toolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ transform: toolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
                     <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                 )}
               </button>
-              <textarea
-                ref={inputRef}
-                value={value}
-                onChange={handleChange}
-                onKeyDown={handleKey}
-                placeholder="Tell Yulia about your deal..."
-                className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1A1A18] leading-[1.5] placeholder:text-[#6E6A63] lg:text-[18px]"
-                style={{ fontFamily: 'inherit', minHeight: 50, maxHeight: 140, padding: '14px 52px 14px 50px' }}
-                rows={1}
-              />
               <button
                 onClick={send}
-                className={`absolute right-2 top-2 w-9 h-9 rounded-full border-none bg-[#D4714E] text-white cursor-pointer flex items-center justify-center hover:bg-[#BE6342] active:scale-90 ${hasContent && !sending ? 'opacity-100 scale-100' : 'opacity-0 scale-[.8] pointer-events-none'}`}
+                className={`w-8 h-8 rounded-full border-none bg-[#D4714E] text-white cursor-pointer flex items-center justify-center hover:bg-[#BE6342] active:scale-90 ${hasContent && !sending ? 'opacity-100 scale-100' : 'opacity-0 scale-[.8] pointer-events-none'}`}
                 style={{ boxShadow: '0 2px 8px rgba(212,113,78,.3)', transition: 'all .2s' }}
                 type="button"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5" /><path d="M5 12l7-7 7 7" /></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
               </button>
             </div>
           </div>
