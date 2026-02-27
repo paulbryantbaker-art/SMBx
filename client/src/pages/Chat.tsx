@@ -95,14 +95,8 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
 
   const handleNew = async () => { await createConversation(); };
 
-  // Send message with SSE streaming
+  // Send message with SSE streaming via POST /api/chat/message
   const handleSend = async (content: string) => {
-    let convId = activeId;
-    if (!convId) {
-      convId = await createConversation();
-      if (!convId) return;
-    }
-
     // Optimistic user message
     const tempMsg: Message = { id: Date.now(), role: 'user', content, created_at: new Date().toISOString() };
     setMessages(prev => [...prev, tempMsg]);
@@ -113,10 +107,10 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const res = await fetch(`/api/chat/conversations/${convId}/messages`, {
+      const res = await fetch('/api/chat/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ message: content, conversationId: activeId }),
         signal: controller.signal,
       });
 
@@ -129,7 +123,6 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let accumulated = '';
-      let finalAssistantMsg: Message | null = null;
 
       if (reader) {
         while (true) {
@@ -147,32 +140,17 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
             try {
               const parsed = JSON.parse(data);
 
-              if (parsed.type === 'user_message') {
-                // Replace optimistic message with real one
-                setMessages(prev => [...prev.slice(0, -1), parsed.message]);
-              } else if (parsed.type === 'done') {
-                finalAssistantMsg = parsed.message;
-                if (parsed.dealId) setActiveDealId(parsed.dealId);
-              } else if (parsed.type === 'gate_advance') {
-                // Gate advanced — update progress indicator and inject transition message
-                setCurrentGate(parsed.toGate);
-                setPaywallData(null);
-                setMessages(prev => [...prev, {
-                  id: Date.now() + 2,
-                  role: 'assistant' as const,
-                  content: `**Gate complete** — advancing to **${parsed.gateName}**`,
-                  created_at: new Date().toISOString(),
-                  metadata: { type: 'gate_transition', fromGate: parsed.fromGate, toGate: parsed.toGate },
-                }]);
-              } else if (parsed.type === 'paywall') {
-                // Paywall gate reached — show purchase card
-                setPaywallData(parsed);
-              } else if (parsed.type === 'error') {
-                accumulated = parsed.error || 'Something went wrong.';
-              } else if (parsed.text) {
-                // Streaming text chunk
+              if (parsed.type === 'text_delta') {
+                // Streaming text chunk from Anthropic
                 accumulated += parsed.text;
                 setStreamingText(accumulated);
+              } else if (parsed.type === 'message_stop') {
+                // Stream complete — set conversationId if new
+                if (parsed.conversationId && !activeId) {
+                  setActiveId(parsed.conversationId);
+                }
+              } else if (parsed.type === 'error') {
+                accumulated = parsed.error || 'Something went wrong.';
               }
             } catch {
               // ignore parse errors on partial chunks
@@ -183,10 +161,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
 
       // Replace streaming text with final message
       setStreamingText('');
-      if (finalAssistantMsg) {
-        setMessages(prev => [...prev, finalAssistantMsg!]);
-      } else if (accumulated) {
-        // Fallback: create message from accumulated text
+      if (accumulated) {
         setMessages(prev => [...prev, {
           id: Date.now() + 1,
           role: 'assistant' as const,
