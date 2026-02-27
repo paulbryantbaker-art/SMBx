@@ -201,7 +201,7 @@ export default function Home() {
   const [phase, setPhase] = useState<Phase>('landing');
   const [currentJ, setCurrentJ] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { messages, sending, streamingText, error, limitReached, sendMessage, getSessionId, sessionData, reset: resetChat } = useAnonymousChat({ context: currentJ || undefined });
+  const { messages, sending, streamingText, messagesRemaining, error, limitReached, sendMessage, getSessionId, sessionData, reset: resetChat } = useAnonymousChat({ context: currentJ || undefined });
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const dockRef = useRef<ChatDockHandle>(null);
@@ -295,9 +295,12 @@ export default function Home() {
     return null;
   }, [getSessionId, phase, enterChat, sendMessage, currentJ]);
 
-  /* Scroll to bottom on new messages / typing */
+  /* Scroll to bottom on new messages / typing — only if near bottom */
   useEffect(() => {
-    if (phase === 'chat') scrollToBottom();
+    if (phase !== 'chat' || !scrollRef.current) return;
+    const el = scrollRef.current;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+    if (nearBottom) scrollToBottom();
   }, [messages, sending, streamingText, phase, scrollToBottom]);
 
   /* Focus dock on chat enter */
@@ -336,6 +339,15 @@ export default function Home() {
       window.history.replaceState({ smbx: hash }, '', '/#' + hash);
     }
   }, []);
+
+  /* Session restore — if messages exist on mount, jump to chat */
+  useEffect(() => {
+    if (messages.length > 0 && phase === 'landing') {
+      setPhase('chat');
+    }
+    // Only run once when messages first load from restore
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length > 0]);
 
 
   return (
@@ -545,6 +557,11 @@ export default function Home() {
               )}
               {error && (
                 <div className="self-center text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg">{error}</div>
+              )}
+              {!limitReached && messagesRemaining <= 5 && messagesRemaining > 0 && (
+                <div className="self-center text-[13px] text-[#6E6A63] py-2 text-center">
+                  {messagesRemaining} message{messagesRemaining !== 1 ? 's' : ''} remaining &middot; <Link href="/signup" className="text-[#D4714E] font-semibold hover:underline no-underline">Create account for unlimited</Link>
+                </div>
               )}
               {limitReached && (
                 <div className="self-center text-sm text-[#6E6A63] bg-[#F3F0EA] px-4 py-3 rounded-lg text-center">

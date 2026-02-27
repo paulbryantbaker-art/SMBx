@@ -187,6 +187,35 @@ export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
   }, []);
 
   const [sessionData, setSessionData] = useState<Record<string, any> | null>(null);
+  const [restored, setRestored] = useState(false);
+
+  // Restore session on mount if one exists
+  useEffect(() => {
+    const sid = getStoredSession();
+    if (!sid || restored) return;
+    setRestored(true);
+
+    (async () => {
+      try {
+        const res = await fetch(`/api/chat/anonymous/${sid}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.messages && data.messages.length > 0) {
+            setMessages(data.messages);
+            setMessagesRemaining(data.messagesRemaining);
+            setLimitReached(data.limitReached || false);
+            if (data.sessionData) setSessionData(data.sessionData);
+          }
+        } else if (res.status === 404) {
+          // Session expired, clear it
+          sessionIdRef.current = null;
+          try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+        }
+      } catch {
+        // ignore restore errors
+      }
+    })();
+  }, [restored]);
 
   // Poll for session data after each assistant message (extracted fields + scores)
   const fetchSessionData = useCallback(async () => {
