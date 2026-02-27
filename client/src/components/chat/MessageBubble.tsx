@@ -32,6 +32,7 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
               color: '#1A1A18',
               borderRadius: '20px 20px 6px 20px',
               boxShadow: '0 1px 3px rgba(26,26,24,.06)',
+              fontFamily: "'Inter', system-ui, sans-serif",
               overflowWrap: 'break-word',
             }}
           >
