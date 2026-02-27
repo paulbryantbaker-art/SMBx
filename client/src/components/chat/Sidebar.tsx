@@ -3,6 +3,7 @@ import Button from '../ui/Button';
 export interface Conversation {
   id: number;
   title: string;
+  deal_id: number | null;
   created_at: string;
   updated_at: string;
 }

@@ -172,8 +172,8 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
 
   const revokeShareLink = async (linkId: number) => {
     try {
-      await fetch(`/api/share-links/${linkId}/revoke`, {
-        method: 'POST',
+      await fetch(`/api/share-links/${linkId}`, {
+        method: 'DELETE',
         headers: authHeaders(),
       });
       loadShareLinks();

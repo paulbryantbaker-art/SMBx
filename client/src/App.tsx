@@ -32,6 +32,7 @@ const Pipeline = lazy(() => import('./pages/Pipeline'));
 const Intelligence = lazy(() => import('./pages/Intelligence'));
 const Sourcing = lazy(() => import('./pages/Sourcing'));
 const Settings = lazy(() => import('./pages/Settings'));
+const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 
 export default function App() {
   const { user, loading, login, register, loginWithGoogle, migrateSession, logout } = useAuth();
@@ -120,6 +121,13 @@ export default function App() {
       <Route path="/legal/terms">
         <Terms />
       </Route>
+      <Route path="/shared/:token">
+        {(params) => (
+          <Suspense fallback={<PageLoader />}>
+            <SharedDocument token={params.token} />
+          </Suspense>
+        )}
+      </Route>
 
       <Route path="/login">
         {user ? (
@@ -146,8 +154,8 @@ export default function App() {
       </Route>
 
       <Route path="/chat/:id?">
-        {user ? (
-          <Chat user={user} onLogout={() => { logout(); navigate('/'); }} />
+        {(params) => user ? (
+          <Chat user={user} onLogout={() => { logout(); navigate('/'); }} initialConversationId={params.id ? parseInt(params.id, 10) : undefined} />
         ) : (
           <Redirect to="/login" />
         )}

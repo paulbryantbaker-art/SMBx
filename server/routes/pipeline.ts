@@ -19,7 +19,8 @@ pipelineRouter.get('/deals', async (req, res) => {
              d.business_name, d.industry, d.revenue, d.sde, d.ebitda,
              d.asking_price, d.location, d.created_at, d.updated_at,
              (SELECT COUNT(*) FROM deliverables del WHERE del.deal_id = d.id AND del.status = 'complete') as deliverable_count,
-             (SELECT COUNT(*) FROM data_room_documents doc WHERE doc.deal_id = d.id) as document_count
+             (SELECT COUNT(*) FROM data_room_documents doc WHERE doc.deal_id = d.id) as document_count,
+             (SELECT c.id FROM conversations c WHERE c.deal_id = d.id ORDER BY c.updated_at DESC LIMIT 1) as conversation_id
       FROM deals d
       WHERE d.user_id = ${userId}
       ORDER BY d.updated_at DESC

@@ -19,6 +19,7 @@ interface Deal {
   updated_at: string;
   deliverable_count: number;
   document_count: number;
+  conversation_id: number | null;
 }
 
 interface PipelineProps {
@@ -188,7 +189,7 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
             return (
               <button
                 key={deal.id}
-                onClick={() => navigate('/chat')}
+                onClick={() => navigate(deal.conversation_id ? `/chat/${deal.conversation_id}` : '/chat')}
                 className="w-full text-left bg-white rounded-2xl p-5 border border-border hover:border-[#D4714E] hover:shadow-sm transition-all cursor-pointer"
               >
                 {/* Header */}

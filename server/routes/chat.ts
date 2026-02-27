@@ -51,7 +51,7 @@ chatRouter.get('/conversations', async (req, res) => {
     const userId = (req as any).userId;
 
     const convos = await sql`
-      SELECT id, title, is_archived, created_at, updated_at
+      SELECT id, title, deal_id, is_archived, created_at, updated_at
       FROM conversations
       WHERE user_id = ${userId} AND is_archived = false
       ORDER BY updated_at DESC

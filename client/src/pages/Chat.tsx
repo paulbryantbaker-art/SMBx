@@ -17,6 +17,7 @@ import { authHeaders, type User } from '../hooks/useAuth';
 interface ChatProps {
   user: User;
   onLogout: () => void;
+  initialConversationId?: number;
 }
 
 const JOURNEY_CARDS = [
@@ -26,11 +27,11 @@ const JOURNEY_CARDS = [
   { id: 'pmi', title: 'Post-Acquisition', description: "I'll build your 100-day integration plan, track synergies, and stabilize operations.", prompt: 'I just acquired a business and need help with integration.' },
 ];
 
-export default function Chat({ user, onLogout }: ChatProps) {
+export default function Chat({ user, onLogout, initialConversationId }: ChatProps) {
   useAppHeight();
   const [, navigate] = useLocation();
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeId, setActiveId] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<number | null>(initialConversationId || null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState('');
@@ -284,6 +285,15 @@ export default function Chat({ user, onLogout }: ChatProps) {
             </button>
             <NotificationBell />
             <WalletBadge />
+            <button
+              onClick={() => navigate('/settings')}
+              className="flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-colors cursor-pointer border-0 bg-[#F3F0EA] text-[#6E6A63] hover:bg-[#EBE7DF] hover:text-[#1A1A18]"
+              title="Settings"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="3" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+              </svg>
+            </button>
             <button
               onClick={() => setDataRoomOpen(!dataRoomOpen)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer border-0 ${
