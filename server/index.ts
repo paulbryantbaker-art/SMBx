@@ -14,6 +14,7 @@ import { collaborationRouter } from './routes/collaboration.js';
 import { pipelineRouter } from './routes/pipeline.js';
 import { notificationRouter } from './routes/notifications.js';
 import { intelligenceRouter } from './routes/intelligence.js';
+import { sourcingRouter } from './routes/sourcing.js';
 import rateLimit from 'express-rate-limit';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -98,6 +99,7 @@ app.use('/api', collaborationRouter);
 app.use('/api', pipelineRouter);
 app.use('/api', notificationRouter);
 app.use('/api', intelligenceRouter);
+app.use('/api', sourcingRouter);
 
 // ─── 4. JSON error handler for API routes ──────────────────
 app.use('/api', (err: any, _req: Request, res: Response, _next: NextFunction) => {
