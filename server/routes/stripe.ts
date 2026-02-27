@@ -69,6 +69,27 @@ stripeRouter.get('/wallet', async (req, res) => {
   }
 });
 
+// ─── Get transaction history ─────────────────────────────────
+
+stripeRouter.get('/transactions', async (req, res) => {
+  const userId = (req as any).userId;
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const transactions = await sql`
+      SELECT id, type, amount_cents, description, created_at
+      FROM wallet_transactions
+      WHERE user_id = ${userId}
+      ORDER BY created_at DESC
+      LIMIT 50
+    `;
+    return res.json(transactions);
+  } catch (err: any) {
+    console.error('Transaction history error:', err.message);
+    return res.status(500).json({ error: 'Failed to fetch transactions' });
+  }
+});
+
 // ─── Create Checkout Session ────────────────────────────────
 
 stripeRouter.post('/checkout', async (req, res) => {

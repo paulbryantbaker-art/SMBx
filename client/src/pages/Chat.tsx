@@ -6,6 +6,7 @@ import ChatDock from '../components/shared/ChatDock';
 import TypingIndicator from '../components/chat/TypingIndicator';
 import WalletBadge from '../components/chat/WalletBadge';
 import GateProgress from '../components/chat/GateProgress';
+import PaywallCard from '../components/chat/PaywallCard';
 import DataRoom from '../components/chat/DataRoom';
 import DeliverableViewer from '../components/chat/DeliverableViewer';
 import { authHeaders, type User } from '../hooks/useAuth';
@@ -34,6 +35,8 @@ export default function Chat({ user, onLogout }: ChatProps) {
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
   const [activeDealId, setActiveDealId] = useState<number | null>(null);
   const [currentGate, setCurrentGate] = useState<string | undefined>();
+  const [paywallData, setPaywallData] = useState<any | null>(null);
+  const [showTransactions, setShowTransactions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -148,6 +151,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
               } else if (parsed.type === 'gate_advance') {
                 // Gate advanced — update progress indicator and inject transition message
                 setCurrentGate(parsed.toGate);
+                setPaywallData(null);
                 setMessages(prev => [...prev, {
                   id: Date.now() + 2,
                   role: 'assistant' as const,
@@ -155,6 +159,9 @@ export default function Chat({ user, onLogout }: ChatProps) {
                   created_at: new Date().toISOString(),
                   metadata: { type: 'gate_transition', fromGate: parsed.fromGate, toGate: parsed.toGate },
                 }]);
+              } else if (parsed.type === 'paywall') {
+                // Paywall gate reached — show purchase card
+                setPaywallData(parsed);
               } else if (parsed.type === 'error') {
                 accumulated = parsed.error || 'Something went wrong.';
               } else if (parsed.text) {
@@ -301,6 +308,30 @@ export default function Chat({ user, onLogout }: ChatProps) {
             {streamingText && (
               <MessageBubble
                 message={{ id: -1, role: 'assistant', content: streamingText, created_at: new Date().toISOString() }}
+              />
+            )}
+
+            {/* Paywall card */}
+            {paywallData && activeDealId && (
+              <PaywallCard
+                paywall={paywallData}
+                dealId={activeDealId}
+                onUnlocked={(toGate) => {
+                  setCurrentGate(toGate);
+                  setPaywallData(null);
+                  setMessages(prev => [...prev, {
+                    id: Date.now() + 3,
+                    role: 'assistant' as const,
+                    content: `**Gate unlocked** — advancing to the next phase. Let's continue.`,
+                    created_at: new Date().toISOString(),
+                    metadata: { type: 'gate_transition' },
+                  }]);
+                }}
+                onTopUp={() => {
+                  // Trigger wallet top-up via the WalletBadge
+                  const walletBtn = document.querySelector('[data-wallet-toggle]') as HTMLButtonElement;
+                  if (walletBtn) walletBtn.click();
+                }}
               />
             )}
 

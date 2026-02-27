@@ -3,8 +3,12 @@ import postgres from 'postgres';
 import { requireAuth } from '../middleware/auth.js';
 import { buildSystemPrompt } from '../services/promptBuilder.js';
 import { streamAgenticResponse } from '../services/aiService.js';
-import { checkAndAutoAdvance, updateDealFields, updateDealFinancials } from '../services/dealService.js';
+import { checkAndAutoAdvance, getDeal, updateDealFields, updateDealFinancials, advanceGate } from '../services/dealService.js';
 import { extractFields } from '../services/fieldExtractor.js';
+import { checkGateReadiness } from '../services/gateReadinessService.js';
+import { generatePaywallPrompt } from '../services/paywallService.js';
+import { getBalance, debitWallet } from '../services/walletService.js';
+import { getLeagueMultiplier } from '../services/leagueClassifier.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
 const sql = postgres(process.env.DATABASE_URL!, {
@@ -113,6 +117,80 @@ chatRouter.get('/deals/:dealId/gates', async (req, res) => {
   } catch (err: any) {
     console.error('Get gate progress error:', err.message);
     return res.status(500).json({ error: 'Failed to get gate progress' });
+  }
+});
+
+// ─── Unlock a paywall gate (purchase) ───────────────────────
+
+chatRouter.post('/deals/:dealId/unlock-gate', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const dealId = parseInt(req.params.dealId, 10);
+    const { gate } = req.body;
+
+    if (!gate) return res.status(400).json({ error: 'Gate ID required' });
+
+    // Verify ownership
+    const deal = await getDeal(dealId);
+    if (!deal || deal.user_id !== userId) return res.status(404).json({ error: 'Deal not found' });
+
+    // Verify this is a valid paywall transition
+    const readiness = checkGateReadiness(deal.current_gate, deal);
+    if (!readiness.ready) {
+      return res.status(400).json({ error: 'Current gate not ready for advancement', missing: readiness.missing });
+    }
+    if (!readiness.paywallRequired || readiness.nextGate !== gate) {
+      return res.status(400).json({ error: 'Invalid gate unlock request' });
+    }
+
+    // Calculate price
+    const league = deal.league || 'L1';
+    const paywall = generatePaywallPrompt({
+      gate,
+      league,
+      journeyType: deal.journey_type,
+      dealData: {
+        industry: deal.industry || undefined,
+        revenue: deal.revenue || undefined,
+        sde: deal.sde || undefined,
+        ebitda: deal.ebitda || undefined,
+        business_name: deal.business_name || undefined,
+        asking_price: deal.asking_price || undefined,
+      },
+    });
+
+    // Check balance
+    const balance = await getBalance(userId);
+    if (balance < paywall.priceCents) {
+      return res.status(402).json({
+        error: 'Insufficient wallet balance',
+        required: paywall.priceCents,
+        requiredDisplay: paywall.priceDisplay,
+        balance,
+        balanceDisplay: `$${(balance / 100).toFixed(2)}`,
+        shortfall: paywall.priceCents - balance,
+        shortfallDisplay: `$${((paywall.priceCents - balance) / 100).toFixed(2)}`,
+      });
+    }
+
+    // Debit wallet
+    await debitWallet(userId, paywall.priceCents, `Gate unlock: ${gate} (${deal.journey_type})`);
+
+    // Advance gate
+    const newGate = await advanceGate(dealId, deal.current_gate);
+
+    return res.json({
+      success: true,
+      fromGate: deal.current_gate,
+      toGate: newGate,
+      priceCharged: paywall.priceCents,
+      priceDisplay: paywall.priceDisplay,
+      newBalance: balance - paywall.priceCents,
+      newBalanceDisplay: `$${((balance - paywall.priceCents) / 100).toFixed(2)}`,
+    });
+  } catch (err: any) {
+    console.error('Gate unlock error:', err.message);
+    return res.status(500).json({ error: 'Failed to unlock gate' });
   }
 });
 
@@ -251,6 +329,42 @@ chatRouter.post('/conversations/:id/messages', async (req, res) => {
           const gateResult = await checkAndAutoAdvance(deal.id);
           if (gateResult) {
             res.write(`data: ${JSON.stringify({ type: 'gate_advance', ...gateResult })}\n\n`);
+          } else {
+            // Check if we're at a paywall — gate is ready but next gate requires payment
+            const freshDeal = await getDeal(deal.id);
+            if (freshDeal) {
+              const readiness = checkGateReadiness(freshDeal.current_gate, freshDeal);
+              if (readiness.ready && readiness.paywallRequired && readiness.nextGate) {
+                const league = freshDeal.league || user.league || 'L1';
+                const paywall = generatePaywallPrompt({
+                  gate: readiness.nextGate,
+                  league,
+                  journeyType: freshDeal.journey_type,
+                  dealData: {
+                    industry: freshDeal.industry || undefined,
+                    revenue: freshDeal.revenue || undefined,
+                    sde: freshDeal.sde || undefined,
+                    ebitda: freshDeal.ebitda || undefined,
+                    business_name: freshDeal.business_name || undefined,
+                    asking_price: freshDeal.asking_price || undefined,
+                  },
+                });
+                const balance = await getBalance(userId);
+                res.write(`data: ${JSON.stringify({
+                  type: 'paywall',
+                  gate: readiness.nextGate,
+                  currentGate: freshDeal.current_gate,
+                  priceCents: paywall.priceCents,
+                  priceDisplay: paywall.priceDisplay,
+                  valueProps: paywall.valueProps,
+                  comparisonText: paywall.comparisonText,
+                  callToAction: paywall.callToAction,
+                  balanceCents: balance,
+                  balanceDisplay: `$${(balance / 100).toFixed(2)}`,
+                  sufficient: balance >= paywall.priceCents,
+                })}\n\n`);
+              }
+            }
           }
         } catch (e: any) {
           console.error('Gate auto-advance error:', e.message);
