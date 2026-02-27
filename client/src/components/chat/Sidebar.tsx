@@ -175,10 +175,10 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
       )}
 
       {anonymous && (
-        <div className="px-3.5 py-2.5 text-center" style={{ borderTop: '1px solid #DDD9D1', minWidth: 260 }}>
-          <a href="/login" className="text-[13px] text-[#6E6A63] hover:text-[#D4714E] no-underline transition-colors font-sans">
-            Sign in for more features
-          </a>
+        <div className="border-t border-border px-4 py-3 text-center">
+          <span className="text-[13px] text-[#A9A49C]">
+            Free preview · <a href="/signup" className="text-[#D4714E] no-underline hover:underline font-medium">Create account</a> for full access
+          </span>
         </div>
       )}
     </div>

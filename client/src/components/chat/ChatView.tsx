@@ -37,8 +37,8 @@ export default function ChatView() {
             return (
               <div key={m.id} className="flex justify-end">
                 <div
-                  className="max-w-[75%] bg-[#FFF0EB] text-[#1A1A18] border border-[rgba(212,113,78,0.2)] px-[18px] py-[14px]"
-                  style={{ borderRadius: '20px 20px 6px 20px' }}
+                  className="max-w-[75%] rounded-2xl rounded-br-[4px] px-[18px] py-[14px]"
+                  style={{ background: '#FFF0EB', border: '1px solid rgba(212,113,78,0.18)', color: '#1A1A18', boxShadow: '0 1px 3px rgba(26,26,24,.06)' }}
                 >
                   <p className="text-sm font-sans leading-[1.55] m-0 whitespace-pre-wrap">
                     {m.content}

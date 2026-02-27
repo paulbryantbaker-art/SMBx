@@ -36,18 +36,20 @@ export default function PublicNav({ chatMode }: Props) {
     const pageName = PAGE_NAMES[sourcePage] || 'site';
 
     return (
-      <nav className="bg-[#FAF8F4]">
-        <div className="max-w-site mx-auto flex items-center justify-between px-10 py-5 max-md:px-5 max-md:py-4">
-          <Logo />
+      <nav className="shrink-0 bg-[#FAF8F4] border-b border-[#E0DCD4]">
+        <div className="flex items-center justify-between px-4 py-3 md:px-10 md:py-4">
           <button
             onClick={resetToPublic}
-            className="flex items-center gap-1.5 text-sm font-medium text-[#7A766E] hover:text-[#1A1A18] bg-transparent border-none cursor-pointer transition-colors px-0"
+            className="flex items-center gap-1.5 text-[15px] font-medium text-[#6E6A63] hover:text-[#1A1A18] bg-transparent border-none cursor-pointer transition-colors px-0"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
-            Back to {pageName}
+            <span className="hidden md:inline">Back to {pageName}</span>
+            <span className="md:hidden">Back</span>
           </button>
+          <Logo />
+          <div className="w-[52px]" />
         </div>
       </nav>
     );

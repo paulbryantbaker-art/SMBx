@@ -201,7 +201,7 @@ export default function Home() {
         .home-msg-user-bubble {
           max-width: 85%; padding: 12px 18px;
           background: ${T.terraSoft}; color: ${T.text};
-          border: 1px solid rgba(212,113,78,0.2);
+          border: 1px solid rgba(212,113,78,0.18);
           border-radius: 20px 20px 4px 20px;
           box-shadow: 0 1px 3px rgba(26,26,24,.06);
           font-size: 15px; line-height: 1.55; word-break: break-word;

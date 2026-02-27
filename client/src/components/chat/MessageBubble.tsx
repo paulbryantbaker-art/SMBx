@@ -28,7 +28,7 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
             className="px-[18px] py-3.5 text-base leading-[1.5] break-words"
             style={{
               background: '#FFF0EB',
-              border: '1px solid rgba(212,113,78,0.2)',
+              border: '1px solid rgba(212,113,78,0.18)',
               color: '#1A1A18',
               borderRadius: '20px 20px 6px 20px',
               boxShadow: '0 1px 3px rgba(26,26,24,.06)',

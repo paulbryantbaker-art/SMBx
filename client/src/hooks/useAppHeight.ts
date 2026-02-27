@@ -3,23 +3,35 @@ import { useEffect } from 'react';
 export function useAppHeight() {
   useEffect(() => {
     const vv = window.visualViewport;
-    if (!vv) return;
-
-    const app = document.getElementById('app-root');
-    if (!app) return;
 
     function onViewportChange() {
-      app!.style.height = vv!.height + 'px';
-      app!.style.top = vv!.offsetTop + 'px';
+      const h = vv ? vv.height : window.innerHeight;
+      const t = vv ? vv.offsetTop : 0;
+
+      // Set CSS variable for any component that needs it (e.g. PublicLayout)
+      document.documentElement.style.setProperty('--app-height', h + 'px');
+
+      // Also target #app-root directly (Home page uses this)
+      const app = document.getElementById('app-root');
+      if (app) {
+        app.style.height = h + 'px';
+        app.style.top = t + 'px';
+      }
     }
 
-    vv.addEventListener('resize', onViewportChange);
-    vv.addEventListener('scroll', onViewportChange);
+    if (vv) {
+      vv.addEventListener('resize', onViewportChange);
+      vv.addEventListener('scroll', onViewportChange);
+    }
+    window.addEventListener('resize', onViewportChange);
     onViewportChange();
 
     return () => {
-      vv.removeEventListener('resize', onViewportChange);
-      vv.removeEventListener('scroll', onViewportChange);
+      if (vv) {
+        vv.removeEventListener('resize', onViewportChange);
+        vv.removeEventListener('scroll', onViewportChange);
+      }
+      window.removeEventListener('resize', onViewportChange);
     };
   }, []);
 }

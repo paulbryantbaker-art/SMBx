@@ -229,7 +229,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const onPop = () => {
-      if (morphPhase === 'chat') setMorphPhase('public');
+      if (!window.location.hash.includes('chat') && morphPhase === 'chat') {
+        setMorphPhase('public');
+        setIsStreaming(false);
+        setStreamingContent('');
+        if (abortRef.current) {
+          abortRef.current.abort();
+          abortRef.current = null;
+        }
+      }
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
@@ -362,9 +370,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   /* ── Reset to public ─────────────────────────────────────── */
 
   const resetToPublic = useCallback(() => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
     setMorphPhase('public');
-    if (location.hash === '#chat') {
-      window.history.replaceState(null, '', location.pathname);
+    setIsStreaming(false);
+    setStreamingContent('');
+    if (window.location.hash.includes('chat')) {
+      window.history.replaceState(null, '', window.location.pathname);
     }
   }, []);
 

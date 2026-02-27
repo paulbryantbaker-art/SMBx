@@ -28,7 +28,14 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
   };
 
   return (
-    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#FAF8F4]">
+    <div className="flex flex-col justify-center items-center min-h-dvh px-5 bg-[#FAF8F4]">
+      <a
+        href="/"
+        className="flex items-center gap-1.5 text-[14px] font-medium text-[#7A766E] hover:text-[#1A1A18] no-underline transition-colors mb-5"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+        Back to smbx.ai
+      </a>
       <div className="w-full max-w-[400px] bg-white rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.06)]">
         <div className="text-center mb-7">
           <Logo linked={false} />
