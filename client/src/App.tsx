@@ -18,6 +18,7 @@ import Signup from './pages/public/Signup';
 import Privacy from './pages/public/Privacy';
 import Terms from './pages/public/Terms';
 import Chat from './pages/Chat';
+import Pipeline from './pages/Pipeline';
 
 export default function App() {
   const { user, loading, login, register, loginWithGoogle, migrateSession, logout } = useAuth();
@@ -134,6 +135,14 @@ export default function App() {
       <Route path="/chat/:id?">
         {user ? (
           <Chat user={user} onLogout={() => { logout(); navigate('/'); }} />
+        ) : (
+          <Redirect to="/login" />
+        )}
+      </Route>
+
+      <Route path="/pipeline">
+        {user ? (
+          <Pipeline user={user} onLogout={() => { logout(); navigate('/'); }} />
         ) : (
           <Redirect to="/login" />
         )}

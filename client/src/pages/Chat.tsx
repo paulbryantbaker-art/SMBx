@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation } from 'wouter';
 import { useAppHeight } from '../hooks/useAppHeight';
 import Sidebar, { type Conversation } from '../components/chat/Sidebar';
 import MessageBubble, { type Message } from '../components/chat/MessageBubble';
@@ -26,6 +27,7 @@ const JOURNEY_CARDS = [
 
 export default function Chat({ user, onLogout }: ChatProps) {
   useAppHeight();
+  const [, navigate] = useLocation();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -252,6 +254,15 @@ export default function Chat({ user, onLogout }: ChatProps) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/pipeline')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer border-0 bg-[#F3F0EA] text-[#1A1A18] hover:bg-[#EBE7DF]"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+              </svg>
+              <span className="hidden sm:inline">Pipeline</span>
+            </button>
             <WalletBadge />
             <button
               onClick={() => setDataRoomOpen(!dataRoomOpen)}
