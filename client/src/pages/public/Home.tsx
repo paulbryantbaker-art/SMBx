@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useLocation } from 'wouter';
 import Markdown from 'react-markdown';
 import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
@@ -27,7 +26,6 @@ const CHIPS = [
 type Phase = 'landing' | 'chat';
 
 export default function Home() {
-  const [, navigate] = useLocation();
   const [phase, setPhase] = useState<Phase>('landing');
   const [barsVisible, setBarsVisible] = useState(true);
   const lastY = useRef(0);
@@ -44,27 +42,29 @@ export default function Home() {
 
   // Enter chat phase — push history so browser back returns to landing
   const enterChat = useCallback(() => {
-    if (phase === 'landing') {
+    if (phase !== 'chat') {
       window.history.pushState({ homeChat: true }, '', window.location.pathname + '#chat');
       setPhase('chat');
     }
   }, [phase]);
 
-  // Transition to chat phase on first message
+  // If user lands on /#chat with existing messages, show chat
   useEffect(() => {
-    if (hasMessages && phase === 'landing') enterChat();
-  }, [hasMessages, phase, enterChat]);
+    if (window.location.hash.includes('chat') && hasMessages && phase === 'landing') {
+      setPhase('chat');
+    }
+  }, [hasMessages, phase]);
 
   // Browser back — return to landing
   useEffect(() => {
     const onPop = () => {
-      if (phase === 'chat' && !window.location.hash.includes('chat')) {
+      if (!window.location.hash.includes('chat')) {
         setPhase('landing');
       }
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
-  }, [phase]);
+  }, []);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
