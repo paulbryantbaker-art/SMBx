@@ -162,7 +162,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       // Ensure we are in chat phase
       if (morphPhase !== 'chat') {
         setMorphPhase('chat');
-        window.history.pushState({ smbxChat: true }, '', location.pathname + '#chat');
+        window.history.pushState({ smbxChat: true }, '', window.location.pathname + '#chat');
       }
     } catch {
       // ignore
@@ -215,7 +215,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         if (restored.length > 0) {
           setMessages(restored);
           setMorphPhase('chat');
-          window.history.pushState({ smbxChat: true }, '', location.pathname + '#chat');
+          window.history.pushState({ smbxChat: true }, '', window.location.pathname + '#chat');
         }
       } catch {
         clearStoredConv();
@@ -271,7 +271,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setTimeout(() => {
       setMorphPhase(prev => {
         if (prev === 'morphing') {
-          window.history.pushState({ smbxChat: true }, '', location.pathname + '#chat');
+          window.history.pushState({ smbxChat: true }, '', window.location.pathname + '#chat');
           return 'chat';
         }
         return prev;

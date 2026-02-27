@@ -42,10 +42,29 @@ export default function Home() {
 
   const hasMessages = messages.length > 0;
 
+  // Enter chat phase — push history so browser back returns to landing
+  const enterChat = useCallback(() => {
+    if (phase === 'landing') {
+      window.history.pushState({ homeChat: true }, '', window.location.pathname + '#chat');
+      setPhase('chat');
+    }
+  }, [phase]);
+
   // Transition to chat phase on first message
   useEffect(() => {
-    if (hasMessages && phase === 'landing') setPhase('chat');
-  }, [hasMessages, phase]);
+    if (hasMessages && phase === 'landing') enterChat();
+  }, [hasMessages, phase, enterChat]);
+
+  // Browser back — return to landing
+  useEffect(() => {
+    const onPop = () => {
+      if (phase === 'chat' && !window.location.hash.includes('chat')) {
+        setPhase('landing');
+      }
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [phase]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -56,16 +75,16 @@ export default function Home() {
 
   // Send handler
   const handleSend = useCallback((text: string) => {
-    if (phase === 'landing') setPhase('chat');
+    enterChat();
     sendMessage(text);
     dockRef.current?.clear();
-  }, [phase, sendMessage]);
+  }, [enterChat, sendMessage]);
 
   // Chip click — fill dock and focus
   const handleChipClick = useCallback((fill: string) => {
-    setPhase('chat');
+    enterChat();
     sendMessage(fill);
-  }, [sendMessage]);
+  }, [enterChat, sendMessage]);
 
   // Scroll-hide topbar on mobile
   const handleScroll = useCallback(() => {
