@@ -5,6 +5,7 @@ import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 import { useAppHeight } from '../../hooks/useAppHeight';
 import HomeSidebar from '../../components/public/HomeSidebar';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
+import InlineSignupCard from '../../components/chat/InlineSignupCard';
 
 /* ═══ TYPES ═══ */
 
@@ -203,6 +204,7 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { messages, sending, streamingText, messagesRemaining, error, limitReached, sendMessage, getSessionId, sessionData, reset: resetChat } = useAnonymousChat({ context: currentJ || undefined });
 
+  const [signupDismissed, setSignupDismissed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const dockRef = useRef<ChatDockHandle>(null);
 
@@ -563,11 +565,20 @@ export default function Home() {
                   {messagesRemaining} message{messagesRemaining !== 1 ? 's' : ''} remaining &middot; <Link href="/signup" className="text-[#D4714E] font-semibold hover:underline no-underline">Create account for unlimited</Link>
                 </div>
               )}
-              {limitReached && (
-                <div className="self-center text-sm text-[#6E6A63] bg-[#F3F0EA] px-4 py-3 rounded-lg text-center">
-                  <p className="font-semibold mb-1">Message limit reached</p>
-                  <Link href="/signup" className="text-[#D4714E] font-semibold hover:underline">Sign up for unlimited access</Link>
-                </div>
+              {/* Inline signup card — show when approaching limit or at limit */}
+              {(messagesRemaining <= 3 || limitReached) && !signupDismissed && (
+                <InlineSignupCard
+                  sessionId={getSessionId()}
+                  onDismiss={limitReached ? undefined : () => setSignupDismissed(true)}
+                  canDismiss={!limitReached}
+                />
+              )}
+              {/* Re-show card after 3 more messages if dismissed */}
+              {signupDismissed && limitReached && (
+                <InlineSignupCard
+                  sessionId={getSessionId()}
+                  canDismiss={false}
+                />
               )}
             </div>
           )}
@@ -580,8 +591,8 @@ export default function Home() {
         ref={dockRef}
         onSend={handleDockSend}
         onFileUpload={handleDockFileUpload}
-        disabled={sending}
-        placeholder={currentJ && J[currentJ] ? J[currentJ].ph : 'Tell Yulia about your deal...'}
+        disabled={sending || limitReached}
+        placeholder={limitReached ? 'Create an account to continue...' : (currentJ && J[currentJ] ? J[currentJ].ph : 'Tell Yulia about your deal...')}
       />
     </div>
   );
