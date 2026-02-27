@@ -28,7 +28,11 @@ interface FredIndicator {
   units: string;
 }
 
-export default function IntelPanel() {
+interface IntelPanelProps {
+  isFullscreen?: boolean;
+}
+
+export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
   const [tab, setTab] = useState<'overview' | 'reports' | 'sba'>('overview');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -110,7 +114,8 @@ export default function IntelPanel() {
   ];
 
   return (
-    <div className="px-5 py-6">
+    <div style={{ padding: isFullscreen ? '24px 40px' : 20 }}>
+      <div style={{ maxWidth: isFullscreen ? 900 : undefined, margin: isFullscreen ? '0 auto' : undefined }}>
       {/* FRED Economic Indicators */}
       <div className="mb-6">
         <h2 className="text-[11px] font-bold text-[#6E6A63] uppercase tracking-wide m-0 mb-2">Economic Indicators</h2>
@@ -410,6 +415,7 @@ export default function IntelPanel() {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

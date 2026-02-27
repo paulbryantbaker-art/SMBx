@@ -24,6 +24,7 @@ interface Deal {
 interface PipelinePanelProps {
   onOpenConversation?: (conversationId: number) => void;
   onNewDeal?: () => void;
+  isFullscreen?: boolean;
 }
 
 const JOURNEY_LABELS: Record<string, { label: string; color: string }> = {
@@ -64,7 +65,7 @@ function timeAgo(date: string): string {
   return `${days}d ago`;
 }
 
-export default function PipelinePanel({ onOpenConversation, onNewDeal }: PipelinePanelProps) {
+export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscreen }: PipelinePanelProps) {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -91,7 +92,8 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal }: Pipelin
   };
 
   return (
-    <div className="px-5 py-6">
+    <div style={{ padding: isFullscreen ? '24px 40px' : 20 }}>
+      <div style={{ maxWidth: isFullscreen ? 900 : undefined, margin: isFullscreen ? '0 auto' : undefined }}>
       <div className="flex items-center justify-between mb-5">
         <p className="text-sm text-[#6E6A63] m-0">
           {deals.length} {deals.length === 1 ? 'deal' : 'deals'}
@@ -210,6 +212,7 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal }: Pipelin
             </button>
           );
         })}
+      </div>
       </div>
     </div>
   );

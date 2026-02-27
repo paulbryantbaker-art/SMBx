@@ -279,14 +279,15 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
           <PipelinePanel
             onOpenConversation={(convId) => { setActiveId(convId); closeCanvas(); }}
             onNewDeal={() => { closeCanvas(); }}
+            isFullscreen={canvasFS}
           />
         );
       case 'intel':
-        return <IntelPanel />;
+        return <IntelPanel isFullscreen={canvasFS} />;
       case 'sourcing':
-        return <SourcingPanel />;
+        return <SourcingPanel isFullscreen={canvasFS} />;
       case 'settings':
-        return <SettingsPanel user={user} onLogout={onLogout} />;
+        return <SettingsPanel user={user} onLogout={onLogout} isFullscreen={canvasFS} />;
       case 'dataroom':
         return (
           <>

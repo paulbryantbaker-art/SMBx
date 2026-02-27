@@ -4,6 +4,7 @@ import { authHeaders, type User } from '../../hooks/useAuth';
 interface SettingsPanelProps {
   user: User;
   onLogout: () => void;
+  isFullscreen?: boolean;
 }
 
 interface UsageDay {
@@ -32,7 +33,7 @@ interface BenchmarkStats {
   avg_days_to_close: number;
 }
 
-export default function SettingsPanel({ user, onLogout }: SettingsPanelProps) {
+export default function SettingsPanel({ user, onLogout, isFullscreen }: SettingsPanelProps) {
   const [tab, setTab] = useState<'account' | 'usage' | 'benchmarks'>('account');
 
   const [usageDaily, setUsageDaily] = useState<UsageDay[]>([]);
@@ -82,7 +83,8 @@ export default function SettingsPanel({ user, onLogout }: SettingsPanelProps) {
   ];
 
   return (
-    <div className="px-5 py-6">
+    <div style={{ padding: isFullscreen ? '24px 40px' : 20 }}>
+      <div style={{ maxWidth: isFullscreen ? 900 : undefined, margin: isFullscreen ? '0 auto' : undefined }}>
       {/* Tabs */}
       <div className="flex gap-1 mb-5 bg-[#EBE7DF] rounded-xl p-1">
         {TABS.map(t => (
@@ -257,6 +259,7 @@ export default function SettingsPanel({ user, onLogout }: SettingsPanelProps) {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

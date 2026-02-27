@@ -44,7 +44,11 @@ function scoreColor(score: number): string {
   return 'text-red-600 bg-red-50';
 }
 
-export default function SourcingPanel() {
+interface SourcingPanelProps {
+  isFullscreen?: boolean;
+}
+
+export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
   const [theses, setTheses] = useState<Thesis[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedThesis, setSelectedThesis] = useState<number | null>(null);
@@ -118,7 +122,8 @@ export default function SourcingPanel() {
   };
 
   return (
-    <div className="px-5 py-6">
+    <div style={{ padding: isFullscreen ? '24px 40px' : 20 }}>
+      <div style={{ maxWidth: isFullscreen ? 900 : undefined, margin: isFullscreen ? '0 auto' : undefined }}>
       <div className="flex items-center justify-between mb-5">
         <p className="text-sm text-[#6E6A63] m-0">
           {theses.length} {theses.length === 1 ? 'thesis' : 'theses'}
@@ -372,6 +377,7 @@ export default function SourcingPanel() {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }
