@@ -15,6 +15,7 @@ import { pipelineRouter } from './routes/pipeline.js';
 import { notificationRouter } from './routes/notifications.js';
 import { intelligenceRouter } from './routes/intelligence.js';
 import { sourcingRouter } from './routes/sourcing.js';
+import { shareLinksRouter } from './routes/shareLinks.js';
 import rateLimit from 'express-rate-limit';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -90,6 +91,7 @@ app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/chat/anonymous', chatLimiter, anonymousRouter);
 app.use('/api/chat', chatLimiter, chatRouter);
 app.use('/api/stripe', stripeRouter);
+app.use('/api', shareLinksRouter); // has both public (/shared/:token) and protected routes
 
 // ─── 3. API routes (protected — everything else under /api) ─
 app.use('/api', apiLimiter, requireAuth);
