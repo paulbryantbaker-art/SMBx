@@ -5,6 +5,7 @@ import MessageBubble, { type Message } from '../components/chat/MessageBubble';
 import ChatDock from '../components/shared/ChatDock';
 import TypingIndicator from '../components/chat/TypingIndicator';
 import WalletBadge from '../components/chat/WalletBadge';
+import GateProgress from '../components/chat/GateProgress';
 import DataRoom from '../components/chat/DataRoom';
 import DeliverableViewer from '../components/chat/DeliverableViewer';
 import { authHeaders, type User } from '../hooks/useAuth';
@@ -32,6 +33,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
   const [dataRoomOpen, setDataRoomOpen] = useState(false);
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
   const [activeDealId, setActiveDealId] = useState<number | null>(null);
+  const [currentGate, setCurrentGate] = useState<string | undefined>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -143,6 +145,16 @@ export default function Chat({ user, onLogout }: ChatProps) {
               } else if (parsed.type === 'done') {
                 finalAssistantMsg = parsed.message;
                 if (parsed.dealId) setActiveDealId(parsed.dealId);
+              } else if (parsed.type === 'gate_advance') {
+                // Gate advanced — update progress indicator and inject transition message
+                setCurrentGate(parsed.toGate);
+                setMessages(prev => [...prev, {
+                  id: Date.now() + 2,
+                  role: 'assistant' as const,
+                  content: `**Gate complete** — advancing to **${parsed.gateName}**`,
+                  created_at: new Date().toISOString(),
+                  metadata: { type: 'gate_transition', fromGate: parsed.fromGate, toGate: parsed.toGate },
+                }]);
               } else if (parsed.type === 'error') {
                 accumulated = parsed.error || 'Something went wrong.';
               } else if (parsed.text) {
@@ -247,6 +259,9 @@ export default function Chat({ user, onLogout }: ChatProps) {
             </button>
           </div>
         </div>
+
+        {/* Gate progress indicator */}
+        <GateProgress dealId={activeDealId} currentGate={currentGate} />
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4" style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>

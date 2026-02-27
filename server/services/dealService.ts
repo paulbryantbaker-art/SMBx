@@ -3,7 +3,8 @@
  * Uses raw postgres-js (no ORM).
  */
 import { sql } from '../db.js';
-import { getFirstGate, GATE_MAP, getNextGate, getJourneyGates } from '../../shared/gateRegistry.js';
+import { getFirstGate, GATE_MAP, getNextGate, getJourneyGates, isGateFree } from '../../shared/gateRegistry.js';
+import { checkGateReadiness } from './gateReadinessService.js';
 
 export interface Deal {
   id: number;
@@ -164,7 +165,45 @@ export async function advanceGate(dealId: number, currentGate: string): Promise<
     WHERE id = ${dealId}
   `;
 
+  // Log gate transition event
+  await sql`
+    INSERT INTO gate_events (deal_id, from_gate, to_gate, event_type)
+    VALUES (${dealId}, ${currentGate}, ${nextGateId}, 'auto_advance')
+    ON CONFLICT DO NOTHING
+  `.catch((e: any) => console.error('Gate event log error (table may not exist):', e.message));
+
   return nextGateId;
+}
+
+/** Check gate readiness and auto-advance if ready + free */
+export async function checkAndAutoAdvance(dealId: number): Promise<{
+  advanced: boolean;
+  fromGate: string;
+  toGate: string;
+  gateName: string;
+} | null> {
+  const deal = await getDeal(dealId);
+  if (!deal) return null;
+
+  const readiness = checkGateReadiness(deal.current_gate, deal);
+  if (!readiness.ready || !readiness.nextGate) return null;
+
+  // Don't auto-advance through paywall gates
+  if (readiness.paywallRequired) return null;
+
+  // Only auto-advance if next gate is free
+  if (!isGateFree(readiness.nextGate)) return null;
+
+  const toGate = await advanceGate(dealId, deal.current_gate);
+  if (!toGate) return null;
+
+  const gateInfo = GATE_MAP[toGate];
+  return {
+    advanced: true,
+    fromGate: deal.current_gate,
+    toGate,
+    gateName: gateInfo?.name || toGate,
+  };
 }
 
 /** Link an anonymous session to a deal */

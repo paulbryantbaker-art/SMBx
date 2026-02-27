@@ -3,6 +3,8 @@ import postgres from 'postgres';
 import { requireAuth } from '../middleware/auth.js';
 import { buildSystemPrompt } from '../services/promptBuilder.js';
 import { streamAgenticResponse } from '../services/aiService.js';
+import { checkAndAutoAdvance, updateDealFields, updateDealFinancials } from '../services/dealService.js';
+import { extractFields } from '../services/fieldExtractor.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
 const sql = postgres(process.env.DATABASE_URL!, {
@@ -78,6 +80,39 @@ chatRouter.get('/conversations/:id/messages', async (req, res) => {
   } catch (err: any) {
     console.error('Get messages error:', err.message);
     return res.status(500).json({ error: 'Failed to get messages' });
+  }
+});
+
+// ─── Get gate progress for a deal ────────────────────────────
+
+chatRouter.get('/deals/:dealId/gates', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const dealId = parseInt(req.params.dealId, 10);
+
+    // Verify ownership
+    const [deal] = await sql`
+      SELECT id, journey_type, current_gate FROM deals
+      WHERE id = ${dealId} AND user_id = ${userId} LIMIT 1
+    `;
+    if (!deal) return res.status(404).json({ error: 'Deal not found' });
+
+    const gates = await sql`
+      SELECT gate, status, completed_at
+      FROM gate_progress
+      WHERE deal_id = ${dealId}
+      ORDER BY gate
+    `;
+
+    return res.json({
+      dealId: deal.id,
+      journeyType: deal.journey_type,
+      currentGate: deal.current_gate,
+      gates,
+    });
+  } catch (err: any) {
+    console.error('Get gate progress error:', err.message);
+    return res.status(500).json({ error: 'Failed to get gate progress' });
   }
 });
 
@@ -179,7 +214,48 @@ chatRouter.post('/conversations/:id/messages', async (req, res) => {
       await sql`UPDATE conversations SET updated_at = NOW() WHERE id = ${convId}`;
 
       // Send completion event
-      res.write(`data: ${JSON.stringify({ type: 'done', message: assistantMsg })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'done', message: assistantMsg, dealId: deal?.id || null })}\n\n`);
+
+      // Extract fields from conversation and update deal, then check gate advancement
+      if (deal) {
+        try {
+          const allMsgs = [...messages, { role: 'assistant' as const, content: assistantText }];
+          const fields = await extractFields(allMsgs);
+          if (fields) {
+            const dealColumns: Record<string, any> = {};
+            const financialsFields: Record<string, any> = {};
+            const DEAL_COLUMNS = new Set(['industry', 'location', 'business_name', 'revenue', 'sde', 'ebitda', 'asking_price', 'employee_count', 'naics_code', 'league']);
+
+            for (const [key, value] of Object.entries(fields)) {
+              if (key === 'journey_type') continue;
+              if (DEAL_COLUMNS.has(key)) {
+                dealColumns[key] = value;
+              } else {
+                financialsFields[key] = value;
+              }
+            }
+
+            if (Object.keys(dealColumns).length > 0) {
+              await updateDealFields(deal.id, dealColumns);
+            }
+            if (Object.keys(financialsFields).length > 0) {
+              await updateDealFinancials(deal.id, financialsFields);
+            }
+          }
+        } catch (e: any) {
+          console.error('Field extraction/update error:', e.message);
+        }
+
+        // Now check gate advancement with updated fields
+        try {
+          const gateResult = await checkAndAutoAdvance(deal.id);
+          if (gateResult) {
+            res.write(`data: ${JSON.stringify({ type: 'gate_advance', ...gateResult })}\n\n`);
+          }
+        } catch (e: any) {
+          console.error('Gate auto-advance error:', e.message);
+        }
+      }
     }
 
     res.write('data: [DONE]\n\n');
