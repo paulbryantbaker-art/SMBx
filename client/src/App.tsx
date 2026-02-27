@@ -12,13 +12,7 @@ function ScrollToTop() {
 }
 
 import Home from './pages/public/Home';
-import Sell from './pages/public/Sell';
-import Buy from './pages/public/Buy';
-import Raise from './pages/public/Raise';
-import Integrate from './pages/public/Integrate';
 import Pricing from './pages/public/Pricing';
-import HowItWorks from './pages/public/HowItWorks';
-import Enterprise from './pages/public/Enterprise';
 import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
 import Privacy from './pages/public/Privacy';
@@ -102,26 +96,8 @@ export default function App() {
       <Route path="/">
         <Home />
       </Route>
-      <Route path="/sell">
-        <Sell />
-      </Route>
-      <Route path="/buy">
-        <Buy />
-      </Route>
-      <Route path="/raise">
-        <Raise />
-      </Route>
-      <Route path="/integrate">
-        <Integrate />
-      </Route>
       <Route path="/pricing">
         <Pricing />
-      </Route>
-      <Route path="/how-it-works">
-        <HowItWorks />
-      </Route>
-      <Route path="/enterprise">
-        <Enterprise />
       </Route>
 
       <Route path="/legal/privacy">

@@ -359,24 +359,41 @@ export default function Home() {
         className="shrink-0 z-20 relative"
         style={{ borderBottom: phase === 'chat' ? '1px solid #DDD9D1' : '1px solid transparent', transition: 'border-color .3s' }}
       >
-        <div className="flex items-center justify-between px-3 py-3 md:px-8 lg:px-12 overflow-hidden">
-          <div className="flex items-center gap-1.5 min-w-0 shrink">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors shrink-0"
-              type="button"
-              aria-label="Open sidebar"
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M3 12h18M3 6h18M3 18h18" />
-              </svg>
-            </button>
+        <div className="flex items-center justify-between px-3 py-3 md:px-8 lg:px-12 overflow-hidden relative">
+          <div className={`flex items-center gap-1.5 min-w-0 shrink ${phase === 'chat' ? 'flex-1' : ''}`}>
+            {phase === 'landing' ? (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors shrink-0"
+                type="button"
+                aria-label="Open sidebar"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M3 12h18M3 6h18M3 18h18" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                onClick={goHome}
+                className="flex items-center gap-1 bg-transparent border-none cursor-pointer text-[#6E6A63] hover:text-[#D4714E] transition-colors shrink-0"
+                style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '15px', fontWeight: 500, padding: '4px 8px' }}
+                type="button"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                Back
+              </button>
+            )}
             <div
-              className="text-[24px] font-extrabold tracking-[-0.03em] text-[#1A1A18] cursor-pointer select-none shrink-0 md:text-[26px] lg:text-[28px]"
+              className={`text-[24px] font-extrabold tracking-[-0.03em] text-[#1A1A18] cursor-pointer select-none shrink-0 md:text-[26px] lg:text-[28px] transition-all duration-300 ${
+                phase === 'chat' ? 'absolute left-1/2 -translate-x-1/2' : ''
+              }`}
               onClick={goHome}
             >
               smb<span className="text-[#D4714E]">x</span>.ai
             </div>
+            {phase === 'chat' && (
+              <div className="absolute left-1/2 -translate-x-1/2 top-[34px] text-[13px] text-[#6E6A63] font-normal">Yulia</div>
+            )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <Link href="/login" className="flex items-center justify-center bg-transparent border-none cursor-pointer text-[#3D3B37] p-1.5 rounded-full transition-all hover:text-[#D4714E] hover:bg-[rgba(212,113,78,.08)] no-underline">

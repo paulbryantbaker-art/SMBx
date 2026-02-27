@@ -227,7 +227,9 @@ export default function Chat({ user, onLogout }: ChatProps) {
                 <path d="M3 12h18M3 6h18M3 18h18" />
               </svg>
             </button>
-            <h1 className="text-lg font-semibold text-[#1A1A18] m-0" style={{ fontFamily: 'Georgia, ui-serif, serif' }}>Yulia</h1>
+            <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1A1A18] m-0" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+              smb<span className="text-[#D4714E]">x</span>.ai
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <WalletBadge />
@@ -251,8 +253,8 @@ export default function Chat({ user, onLogout }: ChatProps) {
           <div className="max-w-[860px] w-full mx-auto space-y-4">
             {showWelcome && (
               <div className="py-12 px-2">
-                <h2 className="text-2xl font-semibold text-terra font-[Georgia,ui-serif,serif] m-0 mb-2 text-center">
-                  smbx.ai
+                <h2 className="text-[26px] font-extrabold tracking-[-0.03em] text-[#1A1A18] m-0 mb-2 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+                  smb<span className="text-[#D4714E]">x</span>.ai
                 </h2>
                 <p className="text-base text-text-secondary font-[system-ui,sans-serif] m-0 mb-8 text-center max-w-md mx-auto leading-relaxed">
                   I'm Yulia, your M&A advisor. I handle the entire process — from first conversation to closing. What are we working on?

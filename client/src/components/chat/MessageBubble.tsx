@@ -9,36 +9,62 @@ export interface Message {
 
 interface MessageBubbleProps {
   message: Message;
+  showAvatar?: boolean;
 }
 
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
-export default function MessageBubble({ message }: MessageBubbleProps) {
+export default function MessageBubble({ message, showAvatar = true }: MessageBubbleProps) {
   const isUser = message.role === 'user';
 
-  return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className="max-w-[80%]">
-        <div
-          className={`rounded-2xl px-4 py-3 ${
-            isUser
-              ? 'bg-terra text-white'
-              : 'bg-cream text-text-primary'
-          }`}
-        >
-          {isUser ? (
-            <p className="text-base font-[system-ui,sans-serif] leading-relaxed m-0 whitespace-pre-wrap">
-              {message.content}
-            </p>
-          ) : (
-            <div className="text-base font-[system-ui,sans-serif] leading-relaxed prose-sm [&_p]:m-0 [&_p+p]:mt-3 [&_strong]:font-semibold [&_code]:bg-[rgba(0,0,0,0.05)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_ul]:mt-2 [&_ul]:pl-5 [&_ol]:mt-2 [&_ol]:pl-5 [&_li]:mt-1">
-              <Markdown>{message.content}</Markdown>
-            </div>
-          )}
+  if (isUser) {
+    return (
+      <div className="flex justify-end">
+        <div className="max-w-[82%]">
+          <div
+            className="bg-[#D4714E] text-white px-[18px] py-3.5 text-base leading-[1.5] break-words"
+            style={{
+              borderRadius: '20px 20px 6px 20px',
+              boxShadow: '0 2px 8px rgba(212,113,78,.2)',
+              fontFamily: "'Inter', system-ui, sans-serif",
+              overflowWrap: 'break-word',
+            }}
+          >
+            <p className="m-0 whitespace-pre-wrap">{message.content}</p>
+          </div>
+          <p className="text-[13px] text-[#A9A49C] mt-1 mb-0 text-right" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            {formatTime(message.created_at)}
+          </p>
         </div>
-        <p className={`text-sm text-text-tertiary font-[system-ui,sans-serif] mt-1 mb-0 ${isUser ? 'text-right' : 'text-left'}`}>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex justify-start">
+      <div className="max-w-[90%] min-w-0">
+        {showAvatar && (
+          <div
+            className="w-8 h-8 rounded-full bg-[#D4714E] text-white text-xs font-bold flex items-center justify-center mb-2 shrink-0"
+            style={{ boxShadow: '0 2px 6px rgba(212,113,78,.2)', fontFamily: "'Inter', system-ui, sans-serif" }}
+          >
+            Y
+          </div>
+        )}
+        <div
+          className="bg-white px-[18px] py-4 text-base leading-[1.65] font-medium home-yt overflow-hidden"
+          style={{
+            borderRadius: '20px',
+            boxShadow: '0 1px 4px rgba(26,26,24,.05)',
+            fontFamily: "'Inter', system-ui, sans-serif",
+            overflowWrap: 'break-word',
+          }}
+        >
+          <Markdown>{message.content}</Markdown>
+        </div>
+        <p className="text-[13px] text-[#A9A49C] mt-1 mb-0 text-left" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
           {formatTime(message.created_at)}
         </p>
       </div>
