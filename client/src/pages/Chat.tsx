@@ -164,7 +164,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
 
   const handleNew = async () => { await createConversation(); };
 
-  // Send message with SSE streaming
+  // Send message with SSE streaming via authenticated agentic endpoint
   const handleSend = async (content: string) => {
     const tempMsg: Message = { id: Date.now(), role: 'user', content, created_at: new Date().toISOString() };
     setMessages(prev => [...prev, tempMsg]);
@@ -175,10 +175,17 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const res = await fetch('/api/chat/message', {
+      // Ensure we have a conversation
+      let convId = activeId;
+      if (!convId) {
+        convId = await createConversation();
+        if (!convId) throw new Error('Failed to create conversation');
+      }
+
+      const res = await fetch(`/api/chat/conversations/${convId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
-        body: JSON.stringify({ message: content, conversationId: activeId }),
+        body: JSON.stringify({ content }),
         signal: controller.signal,
       });
 
@@ -210,10 +217,23 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
               if (parsed.type === 'text_delta') {
                 accumulated += parsed.text;
                 setStreamingText(accumulated);
-              } else if (parsed.type === 'message_stop') {
-                if (parsed.conversationId && !activeId) {
+              } else if (parsed.type === 'done') {
+                // Agentic endpoint returns dealId and conversationId on completion
+                if (parsed.dealId) {
+                  setActiveDealId(parsed.dealId);
+                }
+                if (parsed.conversationId) {
                   setActiveId(parsed.conversationId);
                 }
+              } else if (parsed.type === 'gate_advance') {
+                // Gate advanced — update current gate and refresh conversations
+                if (parsed.toGate) {
+                  setCurrentGate(parsed.toGate);
+                }
+                loadConversations();
+              } else if (parsed.type === 'paywall') {
+                // Paywall triggered — render PaywallCard
+                setPaywallData(parsed);
               } else if (parsed.type === 'error') {
                 accumulated = parsed.error || 'Something went wrong.';
               }

@@ -128,14 +128,14 @@ function streamText(res: Response, text: string) {
     buffer += word;
     // Send every few words for smooth streaming
     if (buffer.length >= 10 || word.includes('\n')) {
-      res.write(`data: ${JSON.stringify({ text: buffer })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'text_delta', text: buffer })}\n\n`);
       buffer = '';
     }
   }
 
   // Flush remaining
   if (buffer) {
-    res.write(`data: ${JSON.stringify({ text: buffer })}\n\n`);
+    res.write(`data: ${JSON.stringify({ type: 'text_delta', text: buffer })}\n\n`);
   }
 }
 

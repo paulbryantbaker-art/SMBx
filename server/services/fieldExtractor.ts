@@ -31,7 +31,16 @@ export interface ExtractedFields {
   target_industry?: string;
   target_size_range?: string;
   financing_approach?: string;
-  // Buyer profile fields (stored in dollars from Haiku, converted to cents before DB write)
+  // Gate progression fields
+  exit_motivation?: string;
+  timeline_preference?: string;
+  owner_compensation?: number;   // in cents
+  net_income?: number;            // in cents
+  add_backs_confirmed?: boolean;
+  // Buyer profile fields
+  buyer_type?: string;
+  capital_available?: number;     // in cents
+  target_geography?: string;
   buyer_credit_score_range?: string;
   buyer_liquid_assets_cents?: number;
   buyer_retirement_funds_cents?: number;
@@ -71,6 +80,14 @@ Fields to extract:
 - buyer_existing_debt_annual: annual existing debt payments in DOLLARS
 - seller_financing_willingness: "yes", "no", "negotiable", or "unknown"
 - seller_standby_willingness: "full_standby", "partial", "no", or "unknown"
+- exit_motivation: why the seller wants to exit (e.g. "retirement", "burnout", "new venture", "health")
+- timeline_preference: desired exit timeline (e.g. "ASAP", "6 months", "12 months", "flexible")
+- owner_compensation: owner's total annual compensation (salary + distributions + benefits) in DOLLARS
+- net_income: business net income in DOLLARS
+- add_backs_confirmed: true if the user has confirmed/documented add-backs
+- buyer_type: type of buyer (e.g. "individual_operator", "search_fund", "pe_firm", "strategic")
+- capital_available: total capital available for acquisition in DOLLARS
+- target_geography: geographic focus for acquisition targets
 
 Respond with ONLY valid JSON. No markdown, no explanation.`;
 
@@ -109,7 +126,7 @@ export async function extractFields(
     const DOLLAR_FIELDS = new Set([
       'revenue', 'owner_salary', 'sde', 'ebitda', 'asking_price', 'raise_amount',
       'buyer_liquid_assets', 'buyer_retirement_funds', 'buyer_home_equity',
-      'buyer_existing_debt_annual',
+      'buyer_existing_debt_annual', 'net_income', 'owner_compensation', 'capital_available',
     ]);
 
     // Map from extraction field names to DB column names

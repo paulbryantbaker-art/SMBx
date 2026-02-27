@@ -523,8 +523,17 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
       // Update conversation timestamp
       await sql`UPDATE conversations SET updated_at = NOW() WHERE id = ${convId}`;
 
+      // Re-load deal — the create_deal tool may have linked one during the agentic loop
+      if (!deal) {
+        const [freshConv] = await sql`SELECT deal_id FROM conversations WHERE id = ${convId} LIMIT 1`;
+        if (freshConv?.deal_id) {
+          const [d] = await sql`SELECT * FROM deals WHERE id = ${freshConv.deal_id} AND user_id = ${userId} LIMIT 1`;
+          deal = d || null;
+        }
+      }
+
       // Send completion event
-      res.write(`data: ${JSON.stringify({ type: 'done', message: assistantMsg, dealId: deal?.id || null })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'done', message: assistantMsg, dealId: deal?.id || null, conversationId: convId })}\n\n`);
 
       // Extract fields from conversation and update deal, then check gate advancement
       if (deal) {
@@ -532,6 +541,8 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
           const allMsgs = [...messages, { role: 'assistant' as const, content: assistantText }];
           const fields = await extractFields(allMsgs);
           if (fields) {
+            // Load current deal values to guard against overwriting tool-saved data
+            const currentDeal = await getDeal(deal.id);
             const dealColumns: Record<string, any> = {};
             const financialsFields: Record<string, any> = {};
             const DEAL_COLUMNS = new Set(['industry', 'location', 'business_name', 'revenue', 'sde', 'ebitda', 'asking_price', 'employee_count', 'naics_code', 'league']);
@@ -539,9 +550,17 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
             for (const [key, value] of Object.entries(fields)) {
               if (key === 'journey_type') continue;
               if (DEAL_COLUMNS.has(key)) {
-                dealColumns[key] = value;
+                // Only apply if current DB value is null/empty (don't overwrite tool-saved values)
+                const currentVal = currentDeal ? (currentDeal as any)[key] : null;
+                if (currentVal === null || currentVal === undefined || currentVal === '') {
+                  dealColumns[key] = value;
+                }
               } else {
-                financialsFields[key] = value;
+                // For financials, only apply if not already set
+                const currentFin = currentDeal?.financials || {};
+                if (currentFin[key] === null || currentFin[key] === undefined) {
+                  financialsFields[key] = value;
+                }
               }
             }
 

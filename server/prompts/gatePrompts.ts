@@ -82,7 +82,13 @@ Step 4: Packaging — CIM that positions your business to attract premium offers
 Step 5: Buyer matching — targeted outreach to qualified buyers
 Step 6: Closing — LOI negotiation, DD management, funds flow to your account
 
-The first two steps are on the house. Let's start with your financials — do you have your tax returns or P&L statements handy? That's the fastest way to get accurate numbers."`,
+The first two steps are on the house. Let's start with your financials — do you have your tax returns or P&L statements handy? That's the fastest way to get accurate numbers."
+
+SELF-CHECK before advancing:
+- Have I saved ALL discovered fields via update_deal_field?
+- Have I classified league (if industry + revenue + location known)?
+- Have I called advance_gate to move forward?
+- Have I generated the free deliverable for this gate?`,
 
   S1: `## CURRENT GATE: S1 — Financial Preflight
 OBJECTIVE: Ingest, verify, and normalize financial data for valuation.
@@ -201,7 +207,13 @@ Run this analysis automatically before moving to valuation:
    IF NOT READY: "I'd recommend [specific improvements] before going to market. Here's a [30/60/90] day improvement plan."
 
 ON COMPLETION:
-"Your adjusted [SDE/EBITDA] is $[X]. This is the foundation for everything that comes next. Now let's talk about what your business is actually worth on the open market — that's the valuation step. Ready?"`,
+"Your adjusted [SDE/EBITDA] is $[X]. This is the foundation for everything that comes next. Now let's talk about what your business is actually worth on the open market — that's the valuation step. Ready?"
+
+SELF-CHECK before advancing:
+- Have I saved ALL discovered fields via update_deal_field?
+- Have I classified league (if industry + revenue + location known)?
+- Have I called advance_gate to move forward?
+- Have I generated the free deliverable for this gate?`,
 
   S2: `## CURRENT GATE: S2 — Valuation & Reality Check
 OBJECTIVE: Calculate defensible valuation, compare to seller expectations, go/no-go.
@@ -487,7 +499,13 @@ ON COMPLETION:
 5. Structure the deal and manage through closing
 6. Build your 100-day integration plan
 
-Let's start sourcing."`,
+Let's start sourcing."
+
+SELF-CHECK before advancing:
+- Have I saved ALL discovered fields via update_deal_field?
+- Have I classified league (if industry + revenue + location known)?
+- Have I called advance_gate to move forward?
+- Have I generated the free deliverable for this gate?`,
 
   B1: `## CURRENT GATE: B1 — Deal Sourcing
 OBJECTIVE: Build a qualified pipeline of acquisition targets.
@@ -532,7 +550,13 @@ When a user brings a specific deal, don't wait for questions. Immediately:
 2. Estimate valuation range from available data
 3. Model preliminary financing and returns
 4. Identify top 3 risks and top 3 opportunities
-5. Recommend whether to pursue or pass`,
+5. Recommend whether to pursue or pass
+
+SELF-CHECK before advancing:
+- Have I saved ALL discovered fields via update_deal_field?
+- Have I classified league (if industry + revenue + location known)?
+- Have I called advance_gate to move forward?
+- Have I generated the free deliverable for this gate?`,
 
   B2: `## CURRENT GATE: B2 — Valuation & Offer (FIRST PAYWALL)
 OBJECTIVE: Analyze target financials and calculate defensible value from buyer perspective.

@@ -70,13 +70,14 @@ const GATE_CHECKS: Record<string, GateChecker> = {
     const fin = f(deal);
     if (!fin.exit_motivation && !fin.reason_for_selling) missing.push('exit motivation');
     if (!fin.timeline_preference && !fin.timeline) missing.push('timeline preference');
+    if (!deal.owner_salary && !fin.owner_compensation) missing.push('owner compensation');
   },
 
   S1: (deal, missing) => {
     if (!deal.sde && !deal.ebitda) missing.push('SDE or EBITDA calculation');
     // Need at least 1 year of financials verified
     const fin = f(deal);
-    if (!fin.net_income && !deal.sde && !deal.ebitda) missing.push('verified financials (at least 1 year)');
+    if (!fin.net_income && !deal.sde && !deal.ebitda && !deal.owner_salary) missing.push('verified financials (at least 1 year)');
     // Add-backs should be documented
     if (!fin.add_backs_confirmed && !fin.add_backs_documented) missing.push('add-backs documented');
   },
@@ -112,6 +113,7 @@ const GATE_CHECKS: Record<string, GateChecker> = {
     if (!fin.target_geography && !deal.location) missing.push('target geography');
     if (!fin.target_size_range && !deal.revenue) missing.push('target size range');
     if (!deal.league) missing.push('league classification');
+    if (!fin.buyer_type) missing.push('buyer type');
   },
 
   B1: (deal, missing) => {
