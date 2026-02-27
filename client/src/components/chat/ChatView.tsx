@@ -36,7 +36,10 @@ export default function ChatView() {
           if (m.role === 'user') {
             return (
               <div key={m.id} className="flex justify-end">
-                <div className="max-w-[75%] bg-[#1A1A18] text-white rounded-2xl rounded-br-[4px] px-[18px] py-[14px]">
+                <div
+                  className="max-w-[75%] bg-[#FFF0EB] text-[#1A1A18] border border-[rgba(212,113,78,0.2)] px-[18px] py-[14px]"
+                  style={{ borderRadius: '20px 20px 6px 20px' }}
+                >
                   <p className="text-sm font-sans leading-[1.55] m-0 whitespace-pre-wrap">
                     {m.content}
                   </p>
@@ -47,7 +50,10 @@ export default function ChatView() {
           return (
             <div key={m.id} className="flex items-start gap-3">
               <YuliaAvatar size={32} className="mt-0.5" />
-              <div className="max-w-[75%] bg-[#FAF8F4] border border-[#E0DCD4] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
+              <div
+                className="max-w-[75%] bg-white rounded-[20px] px-[18px] py-[14px]"
+                style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05)' }}
+              >
                 <div className="text-sm font-sans text-[#1A1A18] leading-[1.55] [&_p]:m-0 [&_p+p]:mt-2.5 [&_strong]:font-semibold [&_code]:bg-[rgba(0,0,0,0.04)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_ul]:mt-2 [&_ul]:pl-5 [&_ol]:mt-2 [&_ol]:pl-5 [&_li]:mt-1">
                   <Markdown>{m.content}</Markdown>
                 </div>
@@ -60,7 +66,10 @@ export default function ChatView() {
         {streamingContent && (
           <div className="flex items-start gap-3">
             <YuliaAvatar size={32} className="mt-0.5" />
-            <div className="max-w-[75%] bg-[#FAF8F4] border border-[#E0DCD4] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
+            <div
+              className="max-w-[75%] bg-white rounded-[20px] px-[18px] py-[14px]"
+              style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05)' }}
+            >
               <div className="text-sm font-sans text-[#1A1A18] leading-[1.55] [&_p]:m-0 [&_p+p]:mt-2.5 [&_strong]:font-semibold">
                 <Markdown>{streamingContent}</Markdown>
               </div>
@@ -72,7 +81,7 @@ export default function ChatView() {
         {isStreaming && !streamingContent && (
           <div className="flex items-start gap-3">
             <YuliaAvatar size={32} className="mt-0.5" />
-            <div className="bg-[#FAF8F4] border border-[#E0DCD4] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
+            <div className="bg-white rounded-[20px] px-[18px] py-[14px]" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05)' }}>
               <div className="flex gap-1.5 items-center h-5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#9B9891] animate-[dotPulse_1s_ease-in-out_infinite]" />
                 <span className="w-1.5 h-1.5 rounded-full bg-[#9B9891] animate-[dotPulse_1s_ease-in-out_infinite]" style={{ animationDelay: '150ms' }} />

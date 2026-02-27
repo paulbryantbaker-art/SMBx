@@ -226,60 +226,47 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
                 <path d="M3 12h18M3 6h18M3 18h18" />
               </svg>
             </button>
-            <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1A1A18] m-0" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1A1A18] font-sans m-0">
               smb<span className="text-[#D4714E]">x</span>.ai
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => navigate('/pipeline')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer border-0 bg-[#F3F0EA] text-[#1A1A18] hover:bg-[#EBE7DF]"
+              className="hidden sm:block px-3.5 py-2 rounded-lg bg-transparent border-none cursor-pointer text-sm font-semibold tracking-[-0.01em] text-[#3D3B37] hover:text-[#D4714E] transition-colors"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
-              </svg>
-              <span className="hidden sm:inline">Pipeline</span>
+              Pipeline
             </button>
             <button
               onClick={() => navigate('/intelligence')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer border-0 bg-[#F3F0EA] text-[#1A1A18] hover:bg-[#EBE7DF]"
+              className="hidden sm:block px-3.5 py-2 rounded-lg bg-transparent border-none cursor-pointer text-sm font-semibold tracking-[-0.01em] text-[#3D3B37] hover:text-[#D4714E] transition-colors"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-              </svg>
-              <span className="hidden lg:inline">Intel</span>
+              Intel
             </button>
             <button
               onClick={() => navigate('/sourcing')}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer border-0 bg-[#F3F0EA] text-[#1A1A18] hover:bg-[#EBE7DF]"
+              className="hidden lg:block px-3.5 py-2 rounded-lg bg-transparent border-none cursor-pointer text-sm font-semibold tracking-[-0.01em] text-[#3D3B37] hover:text-[#D4714E] transition-colors"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" />
-              </svg>
-              <span className="hidden lg:inline">Sourcing</span>
+              Sourcing
+            </button>
+            <button
+              onClick={() => setDataRoomOpen(!dataRoomOpen)}
+              className={`hidden sm:block px-3.5 py-2 rounded-lg border-none cursor-pointer text-sm font-semibold tracking-[-0.01em] transition-colors ${
+                dataRoomOpen ? 'bg-transparent text-[#D4714E]' : 'bg-transparent text-[#3D3B37] hover:text-[#D4714E]'
+              }`}
+            >
+              Data Room
             </button>
             <NotificationBell />
             <WalletBadge />
             <button
               onClick={() => navigate('/settings')}
-              className="flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-colors cursor-pointer border-0 bg-[#F3F0EA] text-[#6E6A63] hover:bg-[#EBE7DF] hover:text-[#1A1A18]"
+              className="flex items-center justify-center w-8 h-8 rounded-full text-sm transition-colors cursor-pointer border-0 bg-transparent text-[#6E6A63] hover:bg-[#F3F0EA] hover:text-[#1A1A18]"
               title="Settings"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="3" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
               </svg>
-            </button>
-            <button
-              onClick={() => setDataRoomOpen(!dataRoomOpen)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer border-0 ${
-                dataRoomOpen ? 'bg-[#D4714E] text-white' : 'bg-[#F3F0EA] text-[#1A1A18] hover:bg-[#EBE7DF]'
-              }`}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                <path d="M14 2v6h6" />
-              </svg>
-              <span className="hidden sm:inline">Data Room</span>
             </button>
           </div>
         </div>
@@ -292,23 +279,26 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
           <div className="max-w-[860px] w-full mx-auto space-y-4">
             {showWelcome && (
               <div className="py-12 px-2">
-                <h2 className="text-[26px] font-extrabold tracking-[-0.03em] text-[#1A1A18] m-0 mb-2 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+                <h2 className="text-[26px] font-extrabold tracking-[-0.03em] text-[#1A1A18] font-sans m-0 mb-2 text-center">
                   smb<span className="text-[#D4714E]">x</span>.ai
                 </h2>
-                <p className="text-base text-text-secondary font-[system-ui,sans-serif] m-0 mb-8 text-center max-w-md mx-auto leading-relaxed">
+                <p className="text-base text-[#6E6A63] font-sans m-0 mb-8 text-center max-w-md mx-auto leading-relaxed">
                   I'm Yulia, your M&A advisor. I handle the entire process — from first conversation to closing. What are we working on?
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-w-xl mx-auto">
                   {JOURNEY_CARDS.map(card => (
                     <button
                       key={card.id}
                       onClick={() => handleSend(card.prompt)}
-                      className="text-left bg-white rounded-2xl border border-border p-4 hover:bg-cream-dark transition-colors duration-150 cursor-pointer"
+                      className="text-left bg-white rounded-[20px] p-7 border-none cursor-pointer transition-all duration-200 hover:-translate-y-px"
+                      style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05)' }}
+                      onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 2px 8px rgba(26,26,24,.07), 0 1px 2px rgba(26,26,24,.04)')}
+                      onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 1px 4px rgba(26,26,24,.05)')}
                     >
-                      <p className="text-base font-semibold text-text-primary font-[system-ui,sans-serif] m-0 mb-1">
+                      <p className="text-[19px] font-bold text-[#1A1A18] font-sans m-0 mb-1">
                         {card.title}
                       </p>
-                      <p className="text-sm text-text-secondary font-[system-ui,sans-serif] m-0 leading-snug">
+                      <p className="text-[15px] text-[#3D3B37] font-sans m-0 leading-[1.55]">
                         {card.description}
                       </p>
                     </button>

@@ -7,28 +7,24 @@ export default {
         cream: {
           DEFAULT: '#FAF8F4',
           deep: '#F3F0EA',
-          /* Legacy alias for chat app */
           dark: '#F0EDE6',
           hover: '#E8E4DC',
         },
-        sidebar: '#F0EDE6',
         terra: {
           DEFAULT: '#D4714E',
           hover: '#BE6342',
           soft: '#FFF0EB',
+          glow: 'rgba(212, 113, 78, 0.12)',
         },
-        stone: {
-          DEFAULT: '#E8E4DC',
-          light: '#F0EDE6',
-        },
-        border: '#E0DCD4',
+        border: '#DDD9D1',
         text: {
           DEFAULT: '#1A1A18',
           primary: '#1A1A18',
-          mid: '#4A4843',
+          mid: '#3D3B37',
           secondary: '#6B6963',
           tertiary: '#9B9891',
-          muted: '#7A766E',
+          muted: '#6E6A63',
+          faint: '#A9A49C',
         },
       },
       fontFamily: {

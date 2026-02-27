@@ -358,12 +358,12 @@ Plus button:   36×36, radius 50%, --fill bg, --terra icon
 User message:
   align-self:    flex-end
   max-width:     82%
-  background:    --terra
-  color:         #fff
+  background:    --terra-soft (#FFF0EB)
+  border:        1px solid rgba(212, 113, 78, 0.2)
+  color:         --text (#1A1A18)
   padding:       14px 18px
   border-radius: 20px 20px 6px 20px
   font-size:     16px, line-height 1.5
-  shadow:        0 2px 8px rgba(212,113,78,.2)
 
 Yulia message:
   align-self:    flex-start
@@ -403,6 +403,59 @@ Three dots:    8×8 each, radius 50%, --faint bg
 Gap:           5px
 Animation:     dp 1.4s ease infinite (staggered by .15s)
                opacity 0.3 → 1, scale 0.8 → 1
+```
+
+### 6.14 Sidebar
+```
+Layout:        flex column, height 100%, width 280px
+Background:    --cream
+Border-right:  1px solid --border
+
+Header:        flex row, space-between, padding 16px 16px 8px
+  Logo:        22px, weight 800, "x" in --terra
+  New Chat:    36×36 circle, --fill bg, --terra icon (plus), hover: --terra-soft bg
+
+Sections:
+  Active Deals:
+    Label:     11px, weight 700, uppercase, letter-spacing 0.1em, --terra
+    Items:     journey dot (8×8, colored by journey) + title (13px weight 600)
+               + gate badge + timestamp
+    Badge:     10px, weight 700, --terra text, --terra-soft bg, border-radius 4px
+  Recent:
+    Label:     11px, weight 700, uppercase, letter-spacing 0.1em, --muted
+    Items:     optional journey dot + title (13px weight 500, --text-mid)
+               + timestamp (12px, --faint)
+
+Item states:
+  Default:     transparent bg
+  Hover:       rgba(243, 240, 234, 0.6)
+  Active:      --fill (#F3F0EA)
+  Radius:      12px, padding 8-10px
+
+Footer:        border-top --border, padding 12px 16px
+  Avatar:      28×28 circle, --fill bg, initial letter
+  Name:        13px, weight 500, --text
+  Sign out:    12px, weight 500, --muted, no bg
+
+No navigation links in sidebar. Pipeline, Intel, Sourcing, Data Room
+live in the topbar only.
+```
+
+### 6.15 Topbar Navigation (Authenticated)
+```
+Text-only links (no pill backgrounds, no icons).
+Font-size:     14px
+Font-weight:   600
+Letter-spacing: -0.01em
+Color:         --text-mid (#3D3B37)
+Hover:         --terra (#D4714E)
+Transition:    color 0.2s
+Padding:       8px 14px
+Border-radius: 8px (for focus outline only)
+
+Items: Pipeline, Intel, Sourcing, Data Room
+Utility icons (notification bell, settings gear, wallet) remain as
+small circles.
 ```
 
 ---

@@ -25,17 +25,15 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
       <div className="flex justify-end">
         <div className="max-w-[82%]">
           <div
-            className="bg-[#D4714E] text-white px-[18px] py-3.5 text-base leading-[1.5] break-words"
+            className="bg-[#FFF0EB] text-[#1A1A18] px-[18px] py-3.5 text-base leading-[1.5] break-words border border-[rgba(212,113,78,0.2)]"
             style={{
               borderRadius: '20px 20px 6px 20px',
-              boxShadow: '0 2px 8px rgba(212,113,78,.2)',
-              fontFamily: "'Inter', system-ui, sans-serif",
               overflowWrap: 'break-word',
             }}
           >
             <p className="m-0 whitespace-pre-wrap">{message.content}</p>
           </div>
-          <p className="text-[13px] text-[#A9A49C] mt-1 mb-0 text-right" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+          <p className="text-[13px] text-[#A9A49C] mt-1 mb-0 text-right font-sans">
             {formatTime(message.created_at)}
           </p>
         </div>
@@ -48,8 +46,8 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
       <div className="max-w-[90%] min-w-0">
         {showAvatar && (
           <div
-            className="w-8 h-8 rounded-full bg-[#D4714E] text-white text-xs font-bold flex items-center justify-center mb-2 shrink-0"
-            style={{ boxShadow: '0 2px 6px rgba(212,113,78,.2)', fontFamily: "'Inter', system-ui, sans-serif" }}
+            className="w-8 h-8 rounded-full bg-[#D4714E] text-white text-xs font-bold flex items-center justify-center mb-2 shrink-0 font-sans"
+            style={{ boxShadow: '0 2px 6px rgba(212,113,78,.2)' }}
           >
             Y
           </div>
@@ -59,13 +57,12 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
           style={{
             borderRadius: '20px',
             boxShadow: '0 1px 4px rgba(26,26,24,.05)',
-            fontFamily: "'Inter', system-ui, sans-serif",
             overflowWrap: 'break-word',
           }}
         >
           <Markdown>{message.content}</Markdown>
         </div>
-        <p className="text-[13px] text-[#A9A49C] mt-1 mb-0 text-left" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <p className="text-[13px] text-[#A9A49C] mt-1 mb-0 text-left font-sans">
           {formatTime(message.created_at)}
         </p>
       </div>

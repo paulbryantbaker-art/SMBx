@@ -207,17 +207,21 @@ chatRouter.get('/conversations', async (req, res) => {
     let convos;
     if (userId) {
       convos = await sql`
-        SELECT id, title, deal_id, is_archived, created_at, updated_at
-        FROM conversations
-        WHERE user_id = ${userId} AND is_archived = false
-        ORDER BY updated_at DESC
+        SELECT c.id, c.title, c.deal_id, c.is_archived, c.created_at, c.updated_at,
+               d.journey_type as journey, d.current_gate
+        FROM conversations c
+        LEFT JOIN deals d ON c.deal_id = d.id
+        WHERE c.user_id = ${userId} AND c.is_archived = false
+        ORDER BY c.updated_at DESC
       `;
     } else if (sessionId) {
       convos = await sql`
-        SELECT id, title, deal_id, is_archived, created_at, updated_at
-        FROM conversations
-        WHERE session_id = ${sessionId} AND is_archived = false
-        ORDER BY updated_at DESC
+        SELECT c.id, c.title, c.deal_id, c.is_archived, c.created_at, c.updated_at,
+               d.journey_type as journey, d.current_gate
+        FROM conversations c
+        LEFT JOIN deals d ON c.deal_id = d.id
+        WHERE c.session_id = ${sessionId} AND c.is_archived = false
+        ORDER BY c.updated_at DESC
         LIMIT 50
       `;
     } else {
