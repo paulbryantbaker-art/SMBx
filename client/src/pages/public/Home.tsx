@@ -88,9 +88,10 @@ export default function Home() {
     sendMessage(fill);
   }, [enterChat, sendMessage]);
 
-  // Scroll-hide topbar on mobile
-  const handleScroll = useCallback(() => {
-    const y = window.scrollY;
+  // Scroll-hide topbar on mobile — listen to messages container in chat, window on landing
+  const handleScroll = useCallback((e?: Event) => {
+    const target = e?.target as HTMLElement | null;
+    const y = target && target !== document.documentElement ? target.scrollTop : window.scrollY;
     if (y < 10) setBarsVisible(true);
     else if (y - lastY.current > 6) setBarsVisible(false);
     else if (lastY.current - y > 6) setBarsVisible(true);
@@ -98,9 +99,15 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+    const el = scrollRef.current;
+    if (phase === 'chat' && el) {
+      el.addEventListener('scroll', handleScroll, { passive: true });
+      return () => el.removeEventListener('scroll', handleScroll);
+    } else {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      return () => window.removeEventListener('scroll', handleScroll);
+    }
+  }, [handleScroll, phase]);
 
   // Show signup card when messages are running low or limit reached
   const showSignup = limitReached || (messagesRemaining !== null && messagesRemaining <= 5 && hasMessages);
