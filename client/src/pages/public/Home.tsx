@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import Markdown from 'react-markdown';
 import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
@@ -26,6 +27,7 @@ const CHIPS = [
 type Phase = 'landing' | 'chat';
 
 export default function Home() {
+  const [, navigate] = useLocation();
   const [phase, setPhase] = useState<Phase>('landing');
   const [barsVisible, setBarsVisible] = useState(true);
   const lastY = useRef(0);
