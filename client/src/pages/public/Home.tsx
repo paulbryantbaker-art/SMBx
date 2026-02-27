@@ -136,7 +136,7 @@ export default function Home() {
           transition: transform 0.3s ease;
         }
         @media (max-width: 768px) { .home-topbar { padding: 12px 16px; } }
-        @media (max-width: 768px) { .home-topbar.hidden { transform: translateY(-100%); } }
+        .home-topbar.hidden { transform: translateY(-100%); }
 
         .home-logo { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; color: ${T.text}; }
         @media (max-width: 768px) { .home-logo { font-size: 22px; } }
@@ -262,6 +262,11 @@ export default function Home() {
           text-align: center; padding: 8px; margin-bottom: 12px;
           font-size: 12px; color: ${T.faint}; font-weight: 500;
         }
+
+        .home-dock-bottom {
+          transition: transform 0.3s ease;
+        }
+        .home-dock-bottom.hidden { transform: translateY(100%); }
       `}</style>
 
       {/* ═══ TOPBAR ═══ */}
@@ -358,7 +363,9 @@ export default function Home() {
 
           {/* Dock — pinned to bottom */}
           {!limitReached && (
-            <ChatDock ref={dockRef} onSend={handleSend} disabled={sending} />
+            <div className={`home-dock-bottom${!barsVisible ? ' hidden' : ''}`}>
+              <ChatDock ref={dockRef} onSend={handleSend} disabled={sending} />
+            </div>
           )}
         </div>
       )}
