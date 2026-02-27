@@ -1,3 +1,4 @@
+import { useLocation } from 'wouter';
 import Button from '../ui/Button';
 
 export interface Conversation {
@@ -57,7 +58,15 @@ function formatShortTime(iso: string): string {
   return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
+const NAV_LINKS = [
+  { path: '/pipeline', label: 'Pipeline', icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' },
+  { path: '/intelligence', label: 'Intelligence', icon: 'M21 21l-4.35-4.35M11 3a8 8 0 100 16 8 8 0 000-16z' },
+  { path: '/sourcing', label: 'Sourcing', icon: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 3a4 4 0 100 8 4 4 0 000-8z' },
+  { path: '/settings', label: 'Settings', icon: 'M12 9a3 3 0 100 6 3 3 0 000-6zM12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42' },
+];
+
 export default function Sidebar({ conversations, activeId, onSelect, onNew, onClose, userName, onSignOut }: SidebarProps) {
+  const [, navigate] = useLocation();
   const groups = groupByDate(conversations);
 
   return (
@@ -113,6 +122,24 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
             No conversations yet
           </p>
         )}
+      </div>
+
+      {/* Navigation */}
+      <div className="border-t border-border px-3 py-2">
+        <div className="grid grid-cols-4 gap-1">
+          {NAV_LINKS.map(link => (
+            <button
+              key={link.path}
+              onClick={() => { onClose(); navigate(link.path); }}
+              className="flex flex-col items-center gap-0.5 py-2 rounded-lg text-[#6E6A63] hover:bg-[#F3F0EA] hover:text-[#D4714E] transition-colors border-0 bg-transparent cursor-pointer"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d={link.icon} />
+              </svg>
+              <span className="text-[9px] font-medium">{link.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Footer */}
