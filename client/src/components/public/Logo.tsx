@@ -1,4 +1,5 @@
 import { Link } from 'wouter';
+import { useAuth } from '../../hooks/useAuth';
 
 interface LogoProps {
   className?: string;
@@ -7,6 +8,8 @@ interface LogoProps {
 }
 
 export default function Logo({ className = '', light = false, linked = true }: LogoProps) {
+  const { user } = useAuth();
+
   const mark = (
     <span
       className={`font-bold tracking-tight ${className}`}
@@ -19,5 +22,5 @@ export default function Logo({ className = '', light = false, linked = true }: L
   );
 
   if (!linked) return mark;
-  return <Link href="/" className="no-underline">{mark}</Link>;
+  return <Link href={user ? '/chat' : '/'} className="no-underline">{mark}</Link>;
 }
