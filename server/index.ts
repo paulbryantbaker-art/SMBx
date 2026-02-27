@@ -12,6 +12,7 @@ import { deliverablesRouter } from './routes/deliverables.js';
 import { dataRoomRouter } from './routes/dataRoom.js';
 import { collaborationRouter } from './routes/collaboration.js';
 import { pipelineRouter } from './routes/pipeline.js';
+import { notificationRouter } from './routes/notifications.js';
 import rateLimit from 'express-rate-limit';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -94,6 +95,7 @@ app.use('/api', deliverablesRouter);
 app.use('/api', dataRoomRouter);
 app.use('/api', collaborationRouter);
 app.use('/api', pipelineRouter);
+app.use('/api', notificationRouter);
 
 // ─── 4. JSON error handler for API routes ──────────────────
 app.use('/api', (err: any, _req: Request, res: Response, _next: NextFunction) => {

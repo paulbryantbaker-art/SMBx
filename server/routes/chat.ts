@@ -11,6 +11,7 @@ import { getBalance, debitWallet } from '../services/walletService.js';
 import { getLeagueMultiplier } from '../services/leagueClassifier.js';
 import { getGateMenuItems } from '../services/menuCatalogService.js';
 import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
+import { createNotification } from './notifications.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
 const sql = postgres(process.env.DATABASE_URL!, {
@@ -356,6 +357,7 @@ chatRouter.post('/conversations/:id/messages', async (req, res) => {
           const gateResult = await checkAndAutoAdvance(deal.id);
           if (gateResult) {
             res.write(`data: ${JSON.stringify({ type: 'gate_advance', ...gateResult })}\n\n`);
+            createNotification({ userId, dealId: deal.id, type: 'gate_advance', title: `Gate complete: ${gateResult.gateName || gateResult.toGate}`, body: `Your deal has advanced to ${gateResult.toGate}`, actionUrl: '/chat' }).catch(() => {});
           } else {
             // Check if we're at a paywall — gate is ready but next gate requires payment
             const freshDeal = await getDeal(deal.id);

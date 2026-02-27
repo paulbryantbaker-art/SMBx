@@ -11,6 +11,7 @@ import PaywallCard from '../components/chat/PaywallCard';
 import DataRoom from '../components/chat/DataRoom';
 import Canvas from '../components/chat/Canvas';
 import ParticipantPanel from '../components/chat/ParticipantPanel';
+import NotificationBell from '../components/chat/NotificationBell';
 import { authHeaders, type User } from '../hooks/useAuth';
 
 interface ChatProps {
@@ -263,6 +264,7 @@ export default function Chat({ user, onLogout }: ChatProps) {
               </svg>
               <span className="hidden sm:inline">Pipeline</span>
             </button>
+            <NotificationBell />
             <WalletBadge />
             <button
               onClick={() => setDataRoomOpen(!dataRoomOpen)}
