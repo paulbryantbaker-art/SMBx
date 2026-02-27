@@ -2,6 +2,9 @@ import postgres from 'postgres';
 import type { Tool } from '@anthropic-ai/sdk/resources/messages';
 import { checkGateReadiness as checkReadiness, isPaywallGate, getPaywallBasePrice } from './gateReadinessService.js';
 import { getLeagueMultiplier } from './leagueClassifier.js';
+import { generateProviderRecommendation, findProviders, trackReferral } from './providerMatchingService.js';
+import { matchFranchises } from './franchiseMatchingService.js';
+import { matchBuyersForSeller } from './buyerSourcingService.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
@@ -84,6 +87,45 @@ export const TOOL_DEFINITIONS: Tool[] = [
       required: ['dealId', 'deliverableType'],
     },
   },
+  {
+    name: 'recommend_providers',
+    description: 'Recommend service providers (attorneys, CPAs, appraisers, etc.) based on the deal context. Call this when the user asks about finding a service provider, or proactively at gate transitions that typically require professional services. Can also search by type and location directly.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'The deal ID for contextual recommendations. If provided, returns providers matched to the current gate.' },
+        type: { type: 'string', enum: ['attorney', 'cpa', 'appraiser', 're_agent', 'insurance', 'consultant'], description: 'Specific provider type to search for. If dealId is not provided, this is required.' },
+        state: { type: 'string', description: 'State to filter providers (e.g., "TX", "CA")' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'analyze_buyer_demand',
+    description: 'Analyze buyer demand for a seller\'s business. Returns matching active buyer count (anonymized), buyer type analysis, and demand signal strength. Call this when a seller asks "who would buy my business?" or wants to understand their market of potential buyers.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'The deal ID to analyze buyer demand for' },
+      },
+      required: ['dealId'],
+    },
+  },
+  {
+    name: 'match_franchises',
+    description: 'Match franchise opportunities for a buyer based on their budget, preferences, and interests. Call this when a buyer is exploring franchise options, or when no suitable existing business listings match their criteria. Helps buyers discover franchise alternatives.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        budget: { type: 'number', description: 'Total investment budget in cents' },
+        liquidCapital: { type: 'number', description: 'Available liquid capital in cents' },
+        modelType: { type: 'string', enum: ['owner_operator', 'semi_absentee', 'absentee', 'executive'], description: 'Preferred ownership model' },
+        category: { type: 'string', description: 'Industry category (e.g., QSR, fitness, home_services, automotive, cleaning, education, health, pet)' },
+        state: { type: 'string', description: 'State for franchise registration check (e.g., "TX")' },
+      },
+      required: [],
+    },
+  },
 ];
 
 // ─── Tool Execution ────────────────────────────────────────
@@ -114,6 +156,12 @@ export async function executeTool(
         return await advanceGate(input, userId);
       case 'generate_free_deliverable':
         return await generateFreeDeliverable(input, userId);
+      case 'recommend_providers':
+        return await recommendProviders(input, userId);
+      case 'analyze_buyer_demand':
+        return await analyzeBuyerDemandTool(input, userId);
+      case 'match_franchises':
+        return await matchFranchiseTool(input);
       default:
         return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
@@ -390,4 +438,79 @@ function getJourneyGates(journey: string): string[] {
     pmi: ['PMI0 Day Zero', 'PMI1 Stabilization', 'PMI2 Assessment', 'PMI3 Optimization'],
   };
   return gates[journey] || [];
+}
+
+async function recommendProviders(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealId, type, state } = input;
+
+  // If dealId provided, use contextual recommendations
+  if (dealId) {
+    const [deal] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
+    if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+    const result = await generateProviderRecommendation(dealId);
+
+    // Track referrals for recommended providers
+    for (const [, providers] of Object.entries(result.recommendations)) {
+      for (const p of providers) {
+        await trackReferral(dealId, p.id, userId, `AI recommendation at gate`).catch(() => {});
+      }
+    }
+
+    return JSON.stringify({
+      success: true,
+      context: result.context,
+      neededTypes: result.neededTypes,
+      recommendations: result.recommendations,
+    });
+  }
+
+  // Direct search by type
+  if (type) {
+    const providers = await findProviders({ type, state, limit: 5 });
+    return JSON.stringify({
+      success: true,
+      type,
+      state: state || 'all',
+      providers,
+    });
+  }
+
+  return JSON.stringify({ error: 'Provide dealId for contextual recommendations, or type for direct search' });
+}
+
+async function analyzeBuyerDemandTool(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealId } = input;
+  const [deal] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  const result = await matchBuyersForSeller(dealId);
+  return JSON.stringify({ success: true, ...result });
+}
+
+async function matchFranchiseTool(input: Record<string, any>): Promise<string> {
+  const { budget, liquidCapital, modelType, category, state } = input;
+
+  const results = await matchFranchises({
+    budget: budget || undefined,
+    liquidCapital: liquidCapital || undefined,
+    modelType: modelType || undefined,
+    category: category || undefined,
+    state: state || undefined,
+    limit: 5,
+  });
+
+  if (results.length === 0) {
+    return JSON.stringify({
+      success: true,
+      message: 'No franchise matches found for the given criteria. Try broadening your search.',
+      franchises: [],
+    });
+  }
+
+  return JSON.stringify({
+    success: true,
+    count: results.length,
+    franchises: results,
+  });
 }

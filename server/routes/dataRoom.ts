@@ -4,6 +4,8 @@
 import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
+import { hasDealAccess, getVisibleFolderIds } from '../services/dealAccessService.js';
+import { createNotification } from './notifications.js';
 
 export const dataRoomRouter = Router();
 dataRoomRouter.use(requireAuth);
@@ -68,41 +70,54 @@ dataRoomRouter.get('/deals/:dealId/data-room', async (req, res) => {
     const userId = (req as any).userId;
     const dealId = parseInt(req.params.dealId, 10);
 
-    const [deal] = await sql`SELECT id, journey_type, current_gate FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
+    // RBAC: check access (owner or participant)
+    const access = await hasDealAccess(dealId, userId);
+    if (!access) return res.status(404).json({ error: 'Deal not found' });
+
+    const [deal] = await sql`SELECT id, journey_type, current_gate FROM deals WHERE id = ${dealId}`;
     if (!deal) return res.status(404).json({ error: 'Deal not found' });
 
     // Ensure folders exist
     await ensureFolders(dealId, deal.journey_type, deal.current_gate);
 
-    // Get folders
-    const folders = await sql`
+    // Get all folders
+    const allFolders = await sql`
       SELECT id, name, gate, sort_order
       FROM data_room_folders
       WHERE deal_id = ${dealId}
       ORDER BY sort_order
     `;
 
-    // Get documents
-    const documents = await sql`
-      SELECT d.id, d.folder_id, d.name, d.file_type, d.status, d.version,
-             d.deliverable_id, d.created_at, d.updated_at,
-             del.status as deliverable_status, del.completed_at as deliverable_completed_at
-      FROM data_room_documents d
-      LEFT JOIN deliverables del ON del.id = d.deliverable_id
-      WHERE d.deal_id = ${dealId}
-      ORDER BY d.created_at DESC
-    `;
+    // Filter folders by role
+    const visibleFolderIds = getVisibleFolderIds(access, allFolders as any[]);
+    const folders = (allFolders as any[]).filter(f => visibleFolderIds.includes(f.id));
 
-    // Get generated deliverables not yet filed
-    const unfiledDeliverables = await sql`
-      SELECT d.id, d.status, d.created_at, d.completed_at,
-             m.name, m.slug, m.tier, m.gate, m.journey
-      FROM deliverables d
-      JOIN menu_items m ON m.id = d.menu_item_id
-      WHERE d.deal_id = ${dealId} AND d.user_id = ${userId}
-        AND d.id NOT IN (SELECT deliverable_id FROM data_room_documents WHERE deliverable_id IS NOT NULL AND deal_id = ${dealId})
-      ORDER BY d.created_at DESC
-    `;
+    // Get documents — only from visible folders
+    const documents = visibleFolderIds.length > 0
+      ? await sql`
+          SELECT d.id, d.folder_id, d.name, d.file_type, d.status, d.version,
+                 d.deliverable_id, d.created_at, d.updated_at,
+                 del.status as deliverable_status, del.completed_at as deliverable_completed_at
+          FROM data_room_documents d
+          LEFT JOIN deliverables del ON del.id = d.deliverable_id
+          WHERE d.deal_id = ${dealId} AND (d.folder_id = ANY(${visibleFolderIds}) OR d.folder_id IS NULL)
+          ORDER BY d.created_at DESC
+        `
+      : [];
+
+    // Unfiled deliverables: only show to owner
+    let unfiledDeliverables: any[] = [];
+    if (access.role === 'owner') {
+      unfiledDeliverables = await sql`
+        SELECT d.id, d.status, d.created_at, d.completed_at,
+               m.name, m.slug, m.tier, m.gate, m.journey
+        FROM deliverables d
+        JOIN menu_items m ON m.id = d.menu_item_id
+        WHERE d.deal_id = ${dealId} AND d.user_id = ${userId}
+          AND d.id NOT IN (SELECT deliverable_id FROM data_room_documents WHERE deliverable_id IS NOT NULL AND deal_id = ${dealId})
+        ORDER BY d.created_at DESC
+      `;
+    }
 
     return res.json({ folders, documents, unfiledDeliverables });
   } catch (err: any) {
@@ -119,20 +134,44 @@ dataRoomRouter.post('/deals/:dealId/data-room/file', async (req, res) => {
     const dealId = parseInt(req.params.dealId, 10);
     const { deliverableId, folderId } = req.body;
 
-    const [deal] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
-    if (!deal) return res.status(404).json({ error: 'Deal not found' });
+    // RBAC: require full access to file documents
+    const access = await hasDealAccess(dealId, userId);
+    if (!access) return res.status(404).json({ error: 'Deal not found' });
+    if (access.access_level === 'read') return res.status(403).json({ error: 'Read-only access cannot file documents' });
 
     const [deliverable] = await sql`SELECT id, status FROM deliverables d JOIN menu_items m ON m.id = d.menu_item_id WHERE d.id = ${deliverableId} AND d.deal_id = ${dealId}`;
     if (!deliverable) return res.status(404).json({ error: 'Deliverable not found' });
 
     const [menuItem] = await sql`SELECT name FROM menu_items WHERE id = (SELECT menu_item_id FROM deliverables WHERE id = ${deliverableId})`;
+    const docName = menuItem?.name || 'Deliverable';
 
     const [doc] = await sql`
       INSERT INTO data_room_documents (deal_id, folder_id, user_id, deliverable_id, name, file_type, status)
-      VALUES (${dealId}, ${folderId || null}, ${userId}, ${deliverableId}, ${menuItem?.name || 'Deliverable'}, 'deliverable', 'draft')
+      VALUES (${dealId}, ${folderId || null}, ${userId}, ${deliverableId}, ${docName}, 'deliverable', 'draft')
       ON CONFLICT DO NOTHING
       RETURNING id, name, status
     `;
+
+    // Notify participants of new document
+    if (doc) {
+      const participants = await sql`
+        SELECT user_id FROM deal_participants WHERE deal_id = ${dealId} AND accepted_at IS NOT NULL AND user_id != ${userId}
+      `;
+      const [deal] = await sql`SELECT user_id FROM deals WHERE id = ${dealId}`;
+      const allRecipients = new Set([deal?.user_id, ...participants.map((p: any) => p.user_id)].filter(Boolean));
+      allRecipients.delete(userId);
+
+      for (const recipientId of allRecipients) {
+        await createNotification({
+          userId: recipientId,
+          dealId,
+          type: 'new_document',
+          title: 'New document filed',
+          body: `"${docName}" was added to the data room`,
+          actionUrl: `/chat`,
+        });
+      }
+    }
 
     return res.json(doc || { filed: true });
   } catch (err: any) {
@@ -152,9 +191,13 @@ dataRoomRouter.patch('/data-room/documents/:docId', async (req, res) => {
     const validStatuses = ['draft', 'review', 'approved', 'locked'];
     if (!validStatuses.includes(status)) return res.status(400).json({ error: 'Invalid status' });
 
-    // Check ownership
-    const [doc] = await sql`SELECT id, status FROM data_room_documents WHERE id = ${docId} AND user_id = ${userId}`;
+    // Look up document's deal_id and check RBAC
+    const [doc] = await sql`SELECT id, deal_id, status FROM data_room_documents WHERE id = ${docId}`;
     if (!doc) return res.status(404).json({ error: 'Document not found' });
+
+    const access = await hasDealAccess(doc.deal_id, userId);
+    if (!access) return res.status(404).json({ error: 'Document not found' });
+    if (access.access_level === 'read') return res.status(403).json({ error: 'Read-only access cannot update documents' });
     if (doc.status === 'locked') return res.status(400).json({ error: 'Document is locked and cannot be modified' });
 
     const [updated] = await sql`

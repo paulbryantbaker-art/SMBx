@@ -63,6 +63,15 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
     minRevenue: '', maxRevenue: '', minPrice: '', maxPrice: '',
   });
   const [saving, setSaving] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [scanResult, setScanResult] = useState<{ newMatches: number; total: number } | null>(null);
+  const [marketOpps, setMarketOpps] = useState<any[]>([]);
+  const [marketLoading, setMarketLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'matches' | 'market'>('matches');
+  const [sellDeals, setSellDeals] = useState<any[]>([]);
+  const [buyerDemand, setBuyerDemand] = useState<any>(null);
+  const [demandLoading, setDemandLoading] = useState(false);
+  const [showBuyerDemand, setShowBuyerDemand] = useState(false);
 
   // Load theses
   const loadTheses = useCallback(async () => {
@@ -74,6 +83,33 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
   }, []);
 
   useEffect(() => { loadTheses(); }, [loadTheses]);
+
+  // Load sell deals for buyer demand section
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/chat/conversations', { headers: authHeaders() });
+        if (!res.ok) return;
+        const convs = await res.json();
+        // Find deals with sell journey from conversations
+        const dealRes = await fetch('/api/pipeline/deals', { headers: authHeaders() }).catch(() => null);
+        if (dealRes?.ok) {
+          const deals = await dealRes.json();
+          setSellDeals((deals || []).filter((d: any) => d.journey_type === 'sell' && d.status === 'active'));
+        }
+      } catch { /* ignore */ }
+    })();
+  }, []);
+
+  const loadBuyerDemand = async (dealId: number) => {
+    setDemandLoading(true);
+    setBuyerDemand(null);
+    try {
+      const res = await fetch(`/api/sourcing/buyer-demand/${dealId}`, { headers: authHeaders() });
+      if (res.ok) setBuyerDemand(await res.json());
+    } catch { /* ignore */ }
+    finally { setDemandLoading(false); }
+  };
 
   // Load matches for selected thesis
   useEffect(() => {
@@ -114,6 +150,40 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
       }
     } catch { /* ignore */ }
     finally { setSaving(false); }
+  };
+
+  // Scan thesis against Core DB
+  const scanThesis = async (thesisId: number) => {
+    setScanning(true);
+    setScanResult(null);
+    try {
+      const res = await fetch(`/api/sourcing/theses/${thesisId}/scan`, {
+        method: 'POST',
+        headers: authHeaders(),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        setScanResult(result);
+        // Reload matches
+        const mRes = await fetch(`/api/sourcing/theses/${thesisId}/matches`, { headers: authHeaders() });
+        if (mRes.ok) setMatches(await mRes.json());
+      }
+    } catch { /* ignore */ }
+    finally { setScanning(false); }
+  };
+
+  // Load market opportunities for a NAICS code
+  const loadMarketOpportunities = async (naicsCode: string) => {
+    if (!naicsCode) return;
+    setMarketLoading(true);
+    try {
+      const res = await fetch(`/api/sourcing/market-opportunities/${naicsCode}`, { headers: authHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        setMarketOpps(data.opportunities || []);
+      }
+    } catch { /* ignore */ }
+    finally { setMarketLoading(false); }
   };
 
   // Update match status
@@ -169,6 +239,75 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
             + New Thesis
           </button>
         </div>
+
+        {/* Buyer Demand for Sellers */}
+        {sellDeals.length > 0 && (
+          <div className="mb-6">
+            <button
+              onClick={() => setShowBuyerDemand(!showBuyerDemand)}
+              className="flex items-center gap-2 text-sm font-semibold text-[#D4714E] bg-transparent border-0 cursor-pointer hover:underline mb-3"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d={showBuyerDemand ? "M18 15l-6-6-6 6" : "M6 9l6 6 6-6"} />
+              </svg>
+              Buyer Demand Analysis ({sellDeals.length} sell deal{sellDeals.length > 1 ? 's' : ''})
+            </button>
+            {showBuyerDemand && (
+              <div className="bg-white rounded-2xl border border-border p-5">
+                <div className="flex gap-2 mb-4">
+                  {sellDeals.map((d: any) => (
+                    <button
+                      key={d.id}
+                      onClick={() => loadBuyerDemand(d.id)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F3F0EA] text-[#1A1A18] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
+                    >
+                      {d.business_name || d.name || `Deal #${d.id}`}
+                    </button>
+                  ))}
+                </div>
+                {demandLoading && <p className="text-sm text-[#6E6A63] animate-pulse">Analyzing buyer demand...</p>}
+                {buyerDemand && !demandLoading && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
+                        buyerDemand.demandSignal === 'high' ? 'bg-green-100 text-green-800' :
+                        buyerDemand.demandSignal === 'moderate' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {buyerDemand.demandSignal?.toUpperCase()} DEMAND
+                      </span>
+                      <span className="text-sm text-[#6E6A63]">
+                        {buyerDemand.matchingThesesCount} active buyer{buyerDemand.matchingThesesCount !== 1 ? 's' : ''} match your criteria
+                      </span>
+                    </div>
+                    <p className="text-sm text-[#1A1A18] m-0">{buyerDemand.summary}</p>
+                    {buyerDemand.buyerTypes?.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-semibold text-[#6E6A63] uppercase tracking-wider m-0 mb-2">Likely Buyer Types</h4>
+                        <div className="space-y-2">
+                          {buyerDemand.buyerTypes.map((bt: any, idx: number) => (
+                            <div key={idx} className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-[#F3F0EA] flex items-center justify-center text-xs font-bold text-[#1A1A18]">
+                                {bt.likelihood}%
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-[#1A1A18] m-0 capitalize">{bt.type.replace(/_/g, ' ')}</p>
+                                <p className="text-[11px] text-[#6E6A63] m-0">{bt.description}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {!buyerDemand && !demandLoading && (
+                  <p className="text-sm text-[#6E6A63] m-0">Select a deal above to analyze buyer demand.</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* New Thesis Form */}
         {showNewThesis && (
@@ -342,7 +481,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
               ))}
             </div>
 
-            {/* Right: Matches */}
+            {/* Right: Matches + Market Opportunities */}
             <div className="md:col-span-2">
               {!selectedThesis && (
                 <div className="text-center py-12">
@@ -350,7 +489,55 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                 </div>
               )}
 
-              {selectedThesis && matchesLoading && (
+              {selectedThesis && (
+                <>
+                  {/* Scan button + tabs */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex gap-1 bg-[#F3F0EA] rounded-xl p-1">
+                      <button
+                        onClick={() => setActiveTab('matches')}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
+                          activeTab === 'matches' ? 'bg-white text-[#1A1A18] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#1A1A18]'
+                        }`}
+                      >
+                        Matches ({matches.length})
+                      </button>
+                      <button
+                        onClick={() => {
+                          setActiveTab('market');
+                          const thesis = theses.find(t => t.id === selectedThesis);
+                          if (thesis?.naics_code && marketOpps.length === 0) loadMarketOpportunities(thesis.naics_code);
+                        }}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
+                          activeTab === 'market' ? 'bg-white text-[#1A1A18] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#1A1A18]'
+                        }`}
+                      >
+                        Market Opportunities
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => scanThesis(selectedThesis)}
+                      disabled={scanning}
+                      className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#1A1A18] text-white border-0 cursor-pointer hover:bg-[#3A3630] transition-colors disabled:opacity-50"
+                    >
+                      {scanning ? 'Scanning...' : 'Scan Now'}
+                    </button>
+                  </div>
+
+                  {/* Scan result banner */}
+                  {scanResult && (
+                    <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4 flex items-center justify-between">
+                      <p className="text-sm text-green-800 m-0">
+                        Scan complete: <strong>{scanResult.newMatches}</strong> new match{scanResult.newMatches !== 1 ? 'es' : ''} found from {scanResult.total} listings
+                      </p>
+                      <button onClick={() => setScanResult(null)} className="text-green-600 hover:text-green-800 bg-transparent border-0 cursor-pointer text-sm">Dismiss</button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Matches tab */}
+              {selectedThesis && activeTab === 'matches' && matchesLoading && (
                 <div className="space-y-3">
                   {[1,2,3].map(i => (
                     <div key={i} className="animate-pulse bg-white rounded-2xl p-5 border border-border">
@@ -366,14 +553,14 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                 </div>
               )}
 
-              {selectedThesis && !matchesLoading && matches.length === 0 && (
+              {selectedThesis && activeTab === 'matches' && !matchesLoading && matches.length === 0 && (
                 <div className="text-center py-12 bg-white rounded-2xl border border-border">
                   <p className="text-base font-semibold text-[#1A1A18] m-0 mb-1">No matches yet</p>
-                  <p className="text-sm text-[#6E6A63] m-0">Matches will appear here as opportunities are scored against this thesis.</p>
+                  <p className="text-sm text-[#6E6A63] m-0 mb-3">Click "Scan Now" to search the listing database for matches.</p>
                 </div>
               )}
 
-              {selectedThesis && !matchesLoading && matches.length > 0 && (
+              {selectedThesis && activeTab === 'matches' && !matchesLoading && matches.length > 0 && (
                 <div className="space-y-3">
                   {matches.map(m => (
                     <div key={m.id} className="bg-white rounded-2xl border border-border p-5 hover:shadow-sm transition-shadow">
@@ -440,6 +627,50 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                                 View listing
                               </a>
                             )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Market Opportunities tab */}
+              {selectedThesis && activeTab === 'market' && marketLoading && (
+                <div className="space-y-3">
+                  {[1,2,3].map(i => (
+                    <div key={i} className="animate-pulse bg-white rounded-2xl p-5 border border-border">
+                      <div className="h-4 bg-[#EBE7DF] rounded w-1/3 mb-3" />
+                      <div className="h-3 bg-[#F3F0EA] rounded w-2/3" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {selectedThesis && activeTab === 'market' && !marketLoading && marketOpps.length === 0 && (
+                <div className="text-center py-12 bg-white rounded-2xl border border-border">
+                  <p className="text-base font-semibold text-[#1A1A18] m-0 mb-1">No market data available</p>
+                  <p className="text-sm text-[#6E6A63] m-0">Add a NAICS code to your thesis to see underserved market opportunities.</p>
+                </div>
+              )}
+
+              {selectedThesis && activeTab === 'market' && !marketLoading && marketOpps.length > 0 && (
+                <div className="space-y-3">
+                  {marketOpps.map((opp, idx) => (
+                    <div key={idx} className="bg-white rounded-2xl border border-border p-5 hover:shadow-sm transition-shadow">
+                      <div className="flex items-start gap-3">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold shrink-0 ${scoreColor(opp.opportunityScore)}`}>
+                          {opp.opportunityScore}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-semibold text-[#1A1A18] m-0 mb-1">
+                            State: {opp.stateCode}
+                          </h4>
+                          <p className="text-xs text-[#6E6A63] m-0 mb-2">{opp.reasoning}</p>
+                          <div className="flex items-center gap-3 text-[11px] text-[#A9A49C]">
+                            <span>Establishments: {opp.establishments?.toLocaleString()}</span>
+                            <span>Employees: {opp.employees?.toLocaleString()}</span>
+                            <span>Payroll/Employee: ${opp.payrollPerEmployee?.toLocaleString()}</span>
                           </div>
                         </div>
                       </div>

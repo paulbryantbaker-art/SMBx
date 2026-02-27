@@ -19,6 +19,7 @@ import { generateBlindTeaser } from './generators/blindTeaser.js';
 import { generateDDPackage } from './generators/ddPackage.js';
 import { generateWorkingCapitalAnalysis } from './generators/workingCapital.js';
 import { generateDealScreeningMemo } from './generators/dealScreeningMemo.js';
+import { generateIntelligenceReport } from './generators/intelligenceReport.js';
 
 export interface DeliverableJobData {
   deliverableId: number;
@@ -228,6 +229,22 @@ export async function processDeliverable(data: DeliverableJobData): Promise<void
           historical_nwc: financials.historical_nwc,
           industry: deal.industry, league: deal.league,
         });
+        break;
+
+      case 'intelligence_report':
+        result = await generateIntelligenceReport({
+          naicsCode: financials.naics_code || deal.naics_code || '',
+          stateCode: financials.state_code || '',
+          countyCode: financials.county_code,
+          purchasePrice: deal.asking_price,
+          ebitda: deal.ebitda,
+          sde: deal.sde,
+          revenue: deal.revenue,
+          industry: deal.industry,
+          businessName: deal.business_name,
+          league: deal.league,
+        });
+        model = 'claude-sonnet + government-data';
         break;
 
       case 'buy_deal_screening_memo':

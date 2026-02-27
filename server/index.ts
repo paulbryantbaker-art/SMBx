@@ -19,6 +19,9 @@ import { shareLinksRouter } from './routes/shareLinks.js';
 import { deepDataRouter } from './routes/deepData.js';
 import { gtmRouter } from './routes/gtm.js';
 import { flywheelRouter } from './routes/flywheel.js';
+import { searchRouter } from './routes/search.js';
+import { providerRouter } from './routes/providers.js';
+import { franchiseRouter } from './routes/franchise.js';
 import rateLimit from 'express-rate-limit';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -143,6 +146,63 @@ app.use('/api/chat', chatLimiter, chatRouter);
 app.use('/api/stripe', stripeRouter);
 app.use('/api', shareLinksRouter); // has both public (/shared/:token) and protected routes
 
+// ─── Public info endpoints (no auth) for invitations and day passes ─
+app.get('/api/invitations/:token/info', async (req, res) => {
+  try {
+    const dbSql = (await import('./db.js')).sql;
+    const { token } = req.params;
+    const [inv] = await dbSql`
+      SELECT di.deal_id, di.email, di.role, di.access_level, di.expires_at, di.accepted_at,
+             u.display_name as inviter_name,
+             d.name as deal_name
+      FROM deal_invitations di
+      JOIN users u ON u.id = di.invited_by
+      JOIN deals d ON d.id = di.deal_id
+      WHERE di.token = ${token}
+    `;
+    if (!inv) return res.status(404).json({ error: 'Invitation not found' });
+    return res.json({
+      dealName: inv.deal_name || 'Untitled Deal',
+      inviterName: inv.inviter_name || 'Someone',
+      role: inv.role,
+      accessLevel: inv.access_level,
+      expiresAt: inv.expires_at,
+      accepted: !!inv.accepted_at,
+      expired: new Date(inv.expires_at) < new Date(),
+    });
+  } catch (err: any) {
+    console.error('Invitation info error:', err.message);
+    return res.status(500).json({ error: 'Failed to get invitation info' });
+  }
+});
+
+app.get('/api/day-pass/:token/info', async (req, res) => {
+  try {
+    const dbSql = (await import('./db.js')).sql;
+    const { token } = req.params;
+    const [pass] = await dbSql`
+      SELECT dp.deal_id, dp.role, dp.access_level, dp.first_accessed_at, dp.expires_at, dp.revoked_at,
+             d.name as deal_name
+      FROM day_passes dp
+      JOIN deals d ON d.id = dp.deal_id
+      WHERE dp.token = ${token}
+    `;
+    if (!pass) return res.status(404).json({ error: 'Day pass not found' });
+    return res.json({
+      dealName: pass.deal_name || 'Untitled Deal',
+      role: pass.role,
+      accessLevel: pass.access_level,
+      activated: !!pass.first_accessed_at,
+      expiresAt: pass.expires_at,
+      revoked: !!pass.revoked_at,
+      expired: pass.first_accessed_at && new Date(pass.expires_at) < new Date(),
+    });
+  } catch (err: any) {
+    console.error('Day pass info error:', err.message);
+    return res.status(500).json({ error: 'Failed to get day pass info' });
+  }
+});
+
 // ─── 3. API routes (protected — everything else under /api) ─
 app.use('/api', apiLimiter, requireAuth);
 app.use('/api', deliverablesRouter);
@@ -155,6 +215,9 @@ app.use('/api', sourcingRouter);
 app.use('/api', deepDataRouter);
 app.use('/api', gtmRouter);
 app.use('/api', flywheelRouter);
+app.use('/api', searchRouter);
+app.use('/api', providerRouter);
+app.use('/api', franchiseRouter);
 
 // ─── 4. JSON error handler for API routes ──────────────────
 app.use('/api', (err: any, _req: Request, res: Response, _next: NextFunction) => {

@@ -7,6 +7,7 @@ import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
 import { processDeliverable } from '../services/deliverableProcessor.js';
 import { getBalance, debitWallet } from '../services/walletService.js';
 import { getLeagueMultiplier } from '../services/leagueClassifier.js';
+import { hasDealAccess } from '../services/dealAccessService.js';
 
 export const deliverablesRouter = Router();
 
@@ -20,9 +21,9 @@ deliverablesRouter.get('/deals/:dealId/deliverables', async (req, res) => {
   if (!dealId) return res.status(400).json({ error: 'Invalid deal ID' });
 
   try {
-    // Verify user owns this deal
-    const [deal] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
-    if (!deal) return res.status(404).json({ error: 'Deal not found' });
+    // RBAC: check access (owner or participant)
+    const access = await hasDealAccess(dealId, userId);
+    if (!access) return res.status(404).json({ error: 'Deal not found' });
 
     const deliverables = await sql`
       SELECT d.id, d.deal_id, d.menu_item_id, d.status, d.created_at, d.completed_at,
@@ -30,7 +31,7 @@ deliverablesRouter.get('/deals/:dealId/deliverables', async (req, res) => {
              m.slug, m.name, m.description, m.tier, m.journey, m.gate
       FROM deliverables d
       JOIN menu_items m ON m.id = d.menu_item_id
-      WHERE d.deal_id = ${dealId} AND d.user_id = ${userId}
+      WHERE d.deal_id = ${dealId}
       ORDER BY d.created_at DESC
     `;
 
@@ -55,10 +56,14 @@ deliverablesRouter.get('/deliverables/:id', async (req, res) => {
       SELECT d.*, m.slug, m.name, m.description, m.tier
       FROM deliverables d
       JOIN menu_items m ON m.id = d.menu_item_id
-      WHERE d.id = ${deliverableId} AND d.user_id = ${userId}
+      WHERE d.id = ${deliverableId}
     `;
 
     if (!deliverable) return res.status(404).json({ error: 'Deliverable not found' });
+
+    // RBAC: check access via deliverable's deal
+    const access = await hasDealAccess(deliverable.deal_id, userId);
+    if (!access) return res.status(404).json({ error: 'Deliverable not found' });
 
     return res.json(deliverable);
   } catch (err: any) {

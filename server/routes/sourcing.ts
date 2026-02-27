@@ -4,6 +4,9 @@
 import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
+import { runThesisMatch } from '../services/thesisMatchingService.js';
+import { findUnderservedMarkets } from '../services/marketOpportunityService.js';
+import { matchBuyersForSeller, estimateDemand } from '../services/buyerSourcingService.js';
 
 export const sourcingRouter = Router();
 sourcingRouter.use(requireAuth);
@@ -203,6 +206,70 @@ sourcingRouter.patch('/sourcing/matches/:matchId', async (req, res) => {
   } catch (err: any) {
     console.error('Update match error:', err.message);
     return res.status(500).json({ error: 'Failed to update match' });
+  }
+});
+
+// ─── Thesis Scan ────────────────────────────────────────────
+
+sourcingRouter.post('/sourcing/theses/:thesisId/scan', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const thesisId = parseInt(req.params.thesisId, 10);
+
+    const [thesis] = await sql`SELECT id FROM buyer_theses WHERE id = ${thesisId} AND user_id = ${userId}`;
+    if (!thesis) return res.status(404).json({ error: 'Thesis not found' });
+
+    const result = await runThesisMatch(thesisId);
+    return res.json(result);
+  } catch (err: any) {
+    console.error('Thesis scan error:', err.message);
+    return res.status(500).json({ error: 'Failed to scan thesis' });
+  }
+});
+
+// ─── Market Opportunities ───────────────────────────────────
+
+sourcingRouter.get('/sourcing/market-opportunities/:naicsCode', async (req, res) => {
+  try {
+    const naicsCode = req.params.naicsCode;
+    if (!naicsCode || naicsCode.length < 2) return res.status(400).json({ error: 'Valid NAICS code required' });
+
+    const opportunities = await findUnderservedMarkets(naicsCode);
+    return res.json({ naicsCode, opportunities });
+  } catch (err: any) {
+    console.error('Market opportunities error:', err.message);
+    return res.status(500).json({ error: 'Failed to fetch market opportunities' });
+  }
+});
+
+// ─── Buyer Demand (for sellers) ─────────────────────────────
+
+sourcingRouter.get('/sourcing/buyer-demand/:dealId', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const dealId = parseInt(req.params.dealId, 10);
+
+    const [deal] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
+    if (!deal) return res.status(404).json({ error: 'Deal not found' });
+
+    const result = await matchBuyersForSeller(dealId);
+    return res.json(result);
+  } catch (err: any) {
+    console.error('Buyer demand error:', err.message);
+    return res.status(500).json({ error: 'Failed to analyze buyer demand' });
+  }
+});
+
+sourcingRouter.get('/sourcing/buyer-types/:naicsCode', async (req, res) => {
+  try {
+    const naicsCode = req.params.naicsCode;
+    const state = req.query.state as string || '';
+
+    const demand = await estimateDemand(naicsCode, state);
+    return res.json({ naicsCode, state: state || 'all', ...demand });
+  } catch (err: any) {
+    console.error('Buyer types error:', err.message);
+    return res.status(500).json({ error: 'Failed to get buyer type data' });
   }
 });
 

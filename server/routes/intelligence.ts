@@ -5,6 +5,8 @@ import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { fetchCBPData, fetchFREDData, calculateSBABankability, generateMarketOverview } from '../services/marketDataService.js';
+import { generateIntelligenceReport } from '../services/generators/intelligenceReport.js';
+import { debitWallet, getBalance } from '../services/walletService.js';
 
 export const intelligenceRouter = Router();
 intelligenceRouter.use(requireAuth);
@@ -157,5 +159,81 @@ intelligenceRouter.get('/intelligence/reports/:reportId', async (req, res) => {
   } catch (err: any) {
     console.error('Get intelligence report error:', err.message);
     return res.status(500).json({ error: 'Failed to get report' });
+  }
+});
+
+// ─── Generate intelligence report ────────────────────────────
+
+intelligenceRouter.post('/intelligence/reports/generate', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const { dealId, naicsCode, stateCode, countyCode, reportType } = req.body;
+
+    if (!naicsCode || !stateCode) {
+      return res.status(400).json({ error: 'naicsCode and stateCode are required' });
+    }
+
+    // Optional: get deal data for enriched report
+    let dealData: any = {};
+    if (dealId) {
+      const [deal] = await sql`SELECT * FROM deals WHERE id = ${dealId}`;
+      if (deal) {
+        dealData = {
+          purchasePrice: deal.asking_price,
+          ebitda: deal.ebitda,
+          sde: deal.sde,
+          revenue: deal.revenue,
+          industry: deal.industry,
+          businessName: deal.business_name,
+          league: deal.league,
+        };
+      }
+    }
+
+    // Charge for report (2500 cents = $25)
+    const reportPrice = 2500;
+    const balance = await getBalance(userId);
+    if (balance < reportPrice) {
+      return res.status(402).json({
+        error: 'Insufficient wallet balance',
+        required: reportPrice,
+        balance,
+        requiredDisplay: `$${(reportPrice / 100).toFixed(2)}`,
+        balanceDisplay: `$${(balance / 100).toFixed(2)}`,
+      });
+    }
+    await debitWallet(userId, reportPrice, `Intelligence Report: ${naicsCode} in ${stateCode}`);
+
+    // Create report record
+    const [reportRecord] = await sql`
+      INSERT INTO intelligence_reports (user_id, deal_id, report_type, naics_code, geography, status, price_charged_cents)
+      VALUES (${userId}, ${dealId || null}, ${reportType || 'market_intelligence'}, ${naicsCode}, ${stateCode}, 'generating', ${reportPrice})
+      RETURNING id
+    `;
+
+    // Generate report
+    const content = await generateIntelligenceReport({
+      naicsCode,
+      stateCode,
+      countyCode,
+      ...dealData,
+    });
+
+    // Save completed report
+    await sql`
+      UPDATE intelligence_reports
+      SET status = 'completed', content = ${JSON.stringify(content)}::jsonb, completed_at = NOW()
+      WHERE id = ${reportRecord.id}
+    `;
+
+    return res.status(201).json({
+      reportId: reportRecord.id,
+      status: 'completed',
+      priceCharged: reportPrice,
+      content,
+    });
+  } catch (err: any) {
+    console.error('Generate intelligence report error:', err.message);
+    return res.status(500).json({ error: 'Failed to generate intelligence report' });
   }
 });

@@ -10,6 +10,7 @@
 import 'dotenv/config';
 import { PgBoss } from 'pg-boss';
 import { processDeliverable, type DeliverableJobData } from './services/deliverableProcessor.js';
+import { runAllActiveTheses, detectNewListingMatches } from './services/thesisMatchingService.js';
 
 const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
@@ -33,10 +34,23 @@ boss.on('error', (err: Error) => {
   console.error('pg-boss error:', err);
 });
 
-// ─── Job Handler ────────────────────────────────────────────
+// ─── Job Handlers ───────────────────────────────────────────
 
 async function handleGenerateDeliverable(job: { data: DeliverableJobData }) {
   await processDeliverable(job.data);
+}
+
+async function handleThesisDailyScan() {
+  console.log('Running daily thesis scan...');
+  const result = await runAllActiveTheses();
+  console.log(`Thesis scan complete: ${result.thesesScanned} theses, ${result.totalNewMatches} new matches`);
+}
+
+async function handleListingMatchCheck(job: { data: { listingId: number } }) {
+  const matchCount = await detectNewListingMatches(job.data.listingId);
+  if (matchCount > 0) {
+    console.log(`Listing ${job.data.listingId} matched ${matchCount} active theses`);
+  }
 }
 
 // ─── Start worker ───────────────────────────────────────────
@@ -47,7 +61,13 @@ async function start() {
   console.log('pg-boss started');
 
   await (boss as any).work('generate-deliverable', { teamSize: 3, teamConcurrency: 1 }, handleGenerateDeliverable);
-  console.log('Registered job handlers: generate-deliverable');
+  await (boss as any).work('listing-match-check', { teamSize: 2, teamConcurrency: 1 }, handleListingMatchCheck);
+  console.log('Registered job handlers: generate-deliverable, listing-match-check');
+
+  // Schedule daily thesis scan at 6 AM UTC
+  await (boss as any).schedule('thesis-daily-scan', '0 6 * * *', {}, {});
+  await (boss as any).work('thesis-daily-scan', handleThesisDailyScan);
+  console.log('Scheduled: thesis-daily-scan (daily 6 AM UTC)');
 
   console.log('Worker ready — listening for jobs');
 }

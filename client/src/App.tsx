@@ -52,6 +52,9 @@ const Raise = lazy(() => import('./pages/public/Raise'));
 const Integrate = lazy(() => import('./pages/public/Integrate'));
 const HowItWorks = lazy(() => import('./pages/public/HowItWorks'));
 const Enterprise = lazy(() => import('./pages/public/Enterprise'));
+const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
+const Search = lazy(() => import('./pages/Search'));
+const DayPassView = lazy(() => import('./pages/public/DayPassView'));
 
 export default function App() {
   const { user, loading, login, register, loginWithGoogle, migrateSession, logout } = useAuth();
@@ -168,6 +171,29 @@ export default function App() {
       </Route>
       <Route path="/enterprise">
         <Suspense fallback={<PageLoader />}><Enterprise /></Suspense>
+      </Route>
+
+      <Route path="/search">
+        {user ? (
+          <Suspense fallback={<PageLoader />}><Search /></Suspense>
+        ) : (
+          <Redirect to="/login" />
+        )}
+      </Route>
+
+      <Route path="/invite/:token">
+        {(params) => (
+          <Suspense fallback={<PageLoader />}>
+            <AcceptInvite token={params.token} />
+          </Suspense>
+        )}
+      </Route>
+      <Route path="/day-pass/:token">
+        {(params) => (
+          <Suspense fallback={<PageLoader />}>
+            <DayPassView token={params.token} />
+          </Suspense>
+        )}
       </Route>
 
       <Route path="/login">

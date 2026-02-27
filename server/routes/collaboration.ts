@@ -5,51 +5,12 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
+import { VALID_ROLES, VALID_ACCESS_LEVELS, isDealOwner, hasDealAccess, logActivity } from '../services/dealAccessService.js';
+import { createNotification } from './notifications.js';
+import { sendInvitationEmail, sendDayPassEmail } from '../services/emailService.js';
 
 export const collaborationRouter = Router();
 collaborationRouter.use(requireAuth);
-
-const VALID_ROLES = ['owner', 'attorney', 'cpa', 'broker', 'lender', 'consultant', 'counterparty'];
-const VALID_ACCESS_LEVELS = ['full', 'comment', 'read'];
-
-// Role-based folder visibility: which folder names each role can see
-const ROLE_FOLDER_ACCESS: Record<string, string[] | null> = {
-  owner: null, // all folders
-  attorney: ['Closing', 'Due Diligence', 'Deal Structure'],
-  cpa: ['Financials', 'Valuation', 'Due Diligence'],
-  broker: ['Marketing', 'Buyer Management', 'Investor Materials', 'Outreach'],
-  lender: ['Financials', 'Valuation'],
-  consultant: null, // scoped by folder_scope
-  counterparty: null, // scoped by folder_scope
-};
-
-/** Check if user is deal owner */
-async function isDealOwner(dealId: number, userId: number): Promise<boolean> {
-  const [deal] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
-  return !!deal;
-}
-
-/** Check if user has any access to deal */
-async function hasDealAccess(dealId: number, userId: number): Promise<any> {
-  // Check if owner
-  const [deal] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
-  if (deal) return { role: 'owner', access_level: 'full', folder_scope: null };
-
-  // Check if participant
-  const [participant] = await sql`
-    SELECT role, access_level, folder_scope FROM deal_participants
-    WHERE deal_id = ${dealId} AND user_id = ${userId} AND accepted_at IS NOT NULL
-  `;
-  return participant || null;
-}
-
-/** Log activity */
-async function logActivity(dealId: number, userId: number | null, action: string, targetType?: string, targetId?: number, metadata?: Record<string, any>) {
-  await sql`
-    INSERT INTO deal_activity_log (deal_id, user_id, action, target_type, target_id, metadata)
-    VALUES (${dealId}, ${userId}, ${action}, ${targetType || null}, ${targetId || null}, ${JSON.stringify(metadata || {})})
-  `.catch(() => {});
-}
 
 // ─── Get deal participants ───────────────────────────────────
 
@@ -136,9 +97,23 @@ collaborationRouter.post('/deals/:dealId/invite', async (req, res) => {
 
     await logActivity(dealId, userId, 'invited', 'participant', invitation.id, { email, role });
 
+    const inviteUrl = `/invite/${token}`;
+    console.log(`[INVITE] Deal ${dealId} → ${email} (${role}): ${inviteUrl}`);
+
+    // Send invitation email (async, non-blocking)
+    const [deal] = await sql`SELECT name FROM deals WHERE id = ${dealId}`.catch(() => [null]);
+    const [inviter] = await sql`SELECT display_name FROM users WHERE id = ${userId}`.catch(() => [null]);
+    sendInvitationEmail({
+      email,
+      token,
+      role: role || 'consultant',
+      dealName: deal?.name,
+      inviterName: inviter?.display_name,
+    }).catch(() => {});
+
     return res.status(201).json({
       invitation,
-      inviteLink: `/invite/${token}`,
+      inviteLink: inviteUrl,
     });
   } catch (err: any) {
     console.error('Invite participant error:', err.message);
@@ -277,9 +252,24 @@ collaborationRouter.post('/deals/:dealId/day-pass', async (req, res) => {
 
     await logActivity(dealId, userId, 'created_day_pass', 'day_pass', pass.id);
 
+    const passUrl = `/day-pass/${token}`;
+    console.log(`[DAY-PASS] Deal ${dealId} → ${role || 'consultant'}: ${passUrl}`);
+
+    // Send day pass email if an email was provided in request
+    const recipientEmail = req.body.email;
+    if (recipientEmail) {
+      const [deal] = await sql`SELECT name FROM deals WHERE id = ${dealId}`.catch(() => [null]);
+      sendDayPassEmail({
+        email: recipientEmail,
+        token,
+        role: role || 'consultant',
+        dealName: deal?.name,
+      }).catch(() => {});
+    }
+
     return res.status(201).json({
       ...pass,
-      link: `/day-pass/${token}`,
+      link: passUrl,
     });
   } catch (err: any) {
     console.error('Create day pass error:', err.message);
@@ -363,9 +353,103 @@ collaborationRouter.post('/deals/:dealId/messages', async (req, res) => {
 
     await logActivity(dealId, userId, 'commented', 'message', message.id);
 
+    // Notify all other participants + deal owner
+    const [deal] = await sql`SELECT user_id FROM deals WHERE id = ${dealId}`;
+    const participants = await sql`
+      SELECT user_id FROM deal_participants WHERE deal_id = ${dealId} AND accepted_at IS NOT NULL
+    `;
+    const [sender] = await sql`SELECT display_name, email FROM users WHERE id = ${userId}`;
+    const senderName = sender?.display_name || sender?.email || 'Someone';
+    const allUserIds = new Set([deal?.user_id, ...participants.map((p: any) => p.user_id)].filter(Boolean));
+    allUserIds.delete(userId); // Don't notify the sender
+
+    for (const recipientId of allUserIds) {
+      await createNotification({
+        userId: recipientId,
+        dealId,
+        type: 'deal_comment',
+        title: `${senderName} commented on a deal`,
+        body: content.trim().substring(0, 120),
+        actionUrl: `/chat`,
+      });
+    }
+
     return res.status(201).json(message);
   } catch (err: any) {
     console.error('Send deal message error:', err.message);
     return res.status(500).json({ error: 'Failed to send message' });
+  }
+});
+
+// ─── Day pass activation ───────────────────────────────────
+
+collaborationRouter.post('/deals/day-pass/:token/activate', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const { token } = req.params;
+
+    const [pass] = await sql`
+      SELECT id, deal_id, role, access_level, folder_scope, first_accessed_at, expires_at, revoked_at
+      FROM day_passes
+      WHERE token = ${token}
+    `;
+
+    if (!pass) return res.status(404).json({ error: 'Day pass not found' });
+    if (pass.revoked_at) return res.status(400).json({ error: 'Day pass has been revoked' });
+
+    // If already activated, check expiry
+    if (pass.first_accessed_at) {
+      if (new Date(pass.expires_at) < new Date()) {
+        return res.status(400).json({ error: 'Day pass has expired' });
+      }
+      return res.json({ dealId: pass.deal_id, role: pass.role, expiresAt: pass.expires_at, alreadyActive: true });
+    }
+
+    // Activate: set first_accessed_at and expires_at to 48 hours from now
+    const [activated] = await sql`
+      UPDATE day_passes
+      SET first_accessed_at = NOW(), expires_at = NOW() + INTERVAL '48 hours'
+      WHERE id = ${pass.id}
+      RETURNING expires_at
+    `;
+
+    // Create participant record
+    await sql`
+      INSERT INTO deal_participants (deal_id, user_id, role, access_level, folder_scope, accepted_at)
+      VALUES (${pass.deal_id}, ${userId}, ${pass.role}, ${pass.access_level}, ${pass.folder_scope}, NOW())
+      ON CONFLICT (deal_id, user_id) DO UPDATE SET
+        role = ${pass.role}, access_level = ${pass.access_level}, accepted_at = NOW()
+    `;
+
+    await logActivity(pass.deal_id, userId, 'day_pass_activated', 'day_pass', pass.id);
+
+    return res.json({ dealId: pass.deal_id, role: pass.role, expiresAt: activated.expires_at });
+  } catch (err: any) {
+    console.error('Day pass activation error:', err.message);
+    return res.status(500).json({ error: 'Failed to activate day pass' });
+  }
+});
+
+// ─── Sign NDA ──────────────────────────────────────────────
+
+collaborationRouter.post('/deals/:dealId/sign-nda', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const dealId = parseInt(req.params.dealId, 10);
+
+    const [updated] = await sql`
+      UPDATE deal_participants SET nda_signed_at = NOW()
+      WHERE deal_id = ${dealId} AND user_id = ${userId} AND nda_signed_at IS NULL
+      RETURNING id, nda_signed_at
+    `;
+
+    if (!updated) return res.status(404).json({ error: 'Participant not found or NDA already signed' });
+
+    await logActivity(dealId, userId, 'nda_signed', 'participant', updated.id);
+
+    return res.json({ signed: true, signedAt: updated.nda_signed_at });
+  } catch (err: any) {
+    console.error('Sign NDA error:', err.message);
+    return res.status(500).json({ error: 'Failed to sign NDA' });
   }
 });
