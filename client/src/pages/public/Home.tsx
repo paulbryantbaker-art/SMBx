@@ -17,11 +17,11 @@ const T = {
 };
 
 const CHIPS = [
-  { key: 'sell', label: 'Sell my business', fill: 'I want to sell my business — ', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" /></svg> },
-  { key: 'buy', label: 'Buy a business', fill: 'I want to buy a business — ', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg> },
-  { key: 'raise', label: 'Raise capital', fill: 'I need to raise capital for my business — ', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 20V10" /><path d="M18 20V4" /><path d="M6 20v-4" /></svg> },
-  { key: 'value', label: 'Valuation', fill: 'I need a business valuation — I own a ', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> },
-  { key: 'sba', label: 'SBA check', fill: "Can this deal get SBA financing? I'm looking at a ", icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg> },
+  { key: 'sell', label: 'Sell my business', href: '/sell', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" /></svg> },
+  { key: 'buy', label: 'Buy a business', href: '/buy', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg> },
+  { key: 'raise', label: 'Raise capital', href: '/raise', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 20V10" /><path d="M18 20V4" /><path d="M6 20v-4" /></svg> },
+  { key: 'value', label: 'Valuation', href: '/sell', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> },
+  { key: 'sba', label: 'SBA check', href: '/buy', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg> },
 ];
 
 type Phase = 'landing' | 'chat';
@@ -82,11 +82,10 @@ export default function Home() {
     dockRef.current?.clear();
   }, [enterChat, sendMessage]);
 
-  // Chip click — fill dock and focus
-  const handleChipClick = useCallback((fill: string) => {
-    enterChat();
-    sendMessage(fill);
-  }, [enterChat, sendMessage]);
+  // Chip click — navigate to journey page
+  const handleChipClick = useCallback((href: string) => {
+    navigate(href);
+  }, [navigate]);
 
   // Scroll-hide topbar on mobile — listen to messages container in chat, window on landing
   const handleScroll = useCallback((e?: Event) => {
@@ -292,7 +291,7 @@ export default function Home() {
           <div className="home-chips">
             <span className="home-chips-label">Try:</span>
             {CHIPS.map(c => (
-              <button key={c.key} className="home-chip" onClick={() => handleChipClick(c.fill)}>
+              <button key={c.key} className="home-chip" onClick={() => handleChipClick(c.href)}>
                 <span style={{ color: T.terra, display: 'flex' }}>{c.icon}</span>
                 {c.label}
               </button>
