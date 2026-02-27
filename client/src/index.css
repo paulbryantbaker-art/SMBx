@@ -248,6 +248,23 @@ body {
   50% { box-shadow: 0 0 0 4px rgba(212,113,78,.1); }
 }
 
+/* Canvas content styles */
+.canvas-md h1 { font-size: 20px; font-weight: 700; color: #1A1A18; margin: 1.5em 0 0.5em; padding-bottom: 6px; border-bottom: 2px solid #D4714E; }
+.canvas-md h2 { font-size: 16px; font-weight: 700; color: #3D3B37; margin: 1.2em 0 0.4em; }
+.canvas-md h3 { font-size: 14px; font-weight: 600; color: #6E6A63; margin: 1em 0 0.3em; }
+.canvas-md p { font-size: 14px; line-height: 1.7; color: #3D3B37; margin: 0.6em 0; }
+.canvas-md ul, .canvas-md ol { font-size: 14px; line-height: 1.7; padding-left: 24px; color: #3D3B37; }
+.canvas-md li { margin: 0.3em 0; }
+.canvas-md strong { color: #1A1A18; }
+.canvas-md table { border-collapse: collapse; width: 100%; margin: 12px 0; border: 1px solid #DDD9D1; border-radius: 8px; overflow: hidden; }
+.canvas-md th { background: #F3F0EA; text-align: left; padding: 8px 12px; font-size: 12px; font-weight: 600; color: #3D3B37; border-bottom: 1px solid #DDD9D1; }
+.canvas-md td { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid #EBE7DF; }
+.canvas-md blockquote { border-left: 3px solid #D4714E; margin: 1em 0; padding: 0.5em 1em; background: #FFF8F5; border-radius: 0 8px 8px 0; }
+.canvas-md code { background: #F3F0EA; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+.canvas-md pre { background: #F3F0EA; padding: 16px; border-radius: 8px; overflow-x: auto; }
+.canvas-md pre code { background: none; padding: 0; }
+.canvas-md hr { border: none; border-top: 1px solid #DDD9D1; margin: 1.5em 0; }
+
 /* Spinner */
 @keyframes spin {
   to { transform: rotate(360deg); }

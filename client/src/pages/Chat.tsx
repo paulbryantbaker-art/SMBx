@@ -8,7 +8,7 @@ import WalletBadge from '../components/chat/WalletBadge';
 import GateProgress from '../components/chat/GateProgress';
 import PaywallCard from '../components/chat/PaywallCard';
 import DataRoom from '../components/chat/DataRoom';
-import DeliverableViewer from '../components/chat/DeliverableViewer';
+import Canvas from '../components/chat/Canvas';
 import { authHeaders, type User } from '../hooks/useAuth';
 
 interface ChatProps {
@@ -343,25 +343,57 @@ export default function Chat({ user, onLogout }: ChatProps) {
         <ChatDock onSend={handleSend} disabled={sending} />
       </div>
 
-      {/* Data Room Panel */}
+      {/* Right Panel: Canvas (deliverable open) or Data Room (list) */}
       {dataRoomOpen && (
-        <div className="hidden md:flex flex-col w-72 border-l border-border bg-white shrink-0">
-          <div className="px-4 py-3 border-b border-border">
-            <h2 className="text-sm font-semibold text-text-primary m-0">Data Room</h2>
-            <p className="text-xs text-text-secondary m-0 mt-0.5">Your generated deliverables</p>
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            <DataRoom dealId={activeDealId} onViewDeliverable={setViewingDeliverable} />
+        <div className="hidden md:flex flex-col border-l border-border bg-white shrink-0" style={{ width: viewingDeliverable ? '50%' : '18rem', maxWidth: viewingDeliverable ? '50%' : '18rem', transition: 'width .2s ease, max-width .2s ease' }}>
+          {viewingDeliverable ? (
+            <Canvas
+              deliverableId={viewingDeliverable}
+              onClose={() => setViewingDeliverable(null)}
+            />
+          ) : (
+            <>
+              <div className="px-4 py-3 border-b border-border shrink-0">
+                <h2 className="text-sm font-semibold text-text-primary m-0">Data Room</h2>
+                <p className="text-xs text-text-secondary m-0 mt-0.5">Your generated deliverables</p>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <DataRoom dealId={activeDealId} onViewDeliverable={setViewingDeliverable} />
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Mobile: Data Room sheet (no deliverable selected) */}
+      {dataRoomOpen && !viewingDeliverable && (
+        <div className="fixed inset-0 z-50 md:hidden flex flex-col">
+          <div className="fixed inset-0 bg-[rgba(0,0,0,0.2)]" onClick={() => setDataRoomOpen(false)} />
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[70vh] flex flex-col shadow-xl z-10">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+              <div>
+                <h2 className="text-sm font-semibold text-text-primary m-0">Data Room</h2>
+                <p className="text-xs text-text-secondary m-0 mt-0.5">Your generated deliverables</p>
+              </div>
+              <button onClick={() => setDataRoomOpen(false)} className="w-7 h-7 rounded-full hover:bg-[#F3F0EA] flex items-center justify-center cursor-pointer border-0 bg-transparent">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <DataRoom dealId={activeDealId} onViewDeliverable={(id) => { setViewingDeliverable(id); setDataRoomOpen(false); }} />
+            </div>
           </div>
         </div>
       )}
 
-      {/* Deliverable Viewer Modal */}
+      {/* Mobile Canvas: full-screen sheet */}
       {viewingDeliverable !== null && (
-        <DeliverableViewer
-          deliverableId={viewingDeliverable}
-          onClose={() => setViewingDeliverable(null)}
-        />
+        <div className="fixed inset-0 z-50 bg-white md:hidden flex flex-col">
+          <Canvas
+            deliverableId={viewingDeliverable}
+            onClose={() => setViewingDeliverable(null)}
+          />
+        </div>
       )}
     </div>
   );
