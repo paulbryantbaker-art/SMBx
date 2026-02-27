@@ -21,7 +21,7 @@ const sql = postgres(process.env.DATABASE_URL!, {
   prepare: false,
 });
 
-const STREAMING_MODEL = 'claude-sonnet-4-20250514';
+const STREAMING_MODEL = 'claude-sonnet-4-5-20250929';
 
 let anthropicClient: Anthropic | null = null;
 function getAnthropicClient(): Anthropic {
@@ -145,7 +145,7 @@ Use this context to inform your first response, but always confirm their intent.
     res.write('data: [DONE]\n\n');
     res.end();
   } catch (err: any) {
-    console.error('Chat message error:', err.message, err.stack);
+    console.error('Chat message error:', err.message, err.status, JSON.stringify(err.error || err.body || {}).substring(0, 500), err.stack);
 
     if (res.headersSent) {
       res.write(`data: ${JSON.stringify({ type: 'error', error: 'Something went wrong. Please try again.' })}\n\n`);

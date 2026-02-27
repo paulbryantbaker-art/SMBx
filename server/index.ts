@@ -90,6 +90,53 @@ app.get('/api/config', (_req, res) => {
   });
 });
 
+app.get('/api/debug/check-ai', async (_req, res) => {
+  const checks: Record<string, any> = {};
+
+  checks.apiKeySet = !!process.env.ANTHROPIC_API_KEY;
+  checks.apiKeyPrefix = process.env.ANTHROPIC_API_KEY
+    ? process.env.ANTHROPIC_API_KEY.substring(0, 10) + '...'
+    : 'NOT SET';
+
+  try {
+    const testSql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
+    const result = await testSql`SELECT COUNT(*)::int as count FROM conversations`;
+    checks.dbConnected = true;
+    checks.conversationCount = result[0]?.count;
+
+    const cols = await testSql`
+      SELECT column_name FROM information_schema.columns
+      WHERE table_name = 'conversations' AND column_name = 'session_id'
+    `;
+    checks.sessionIdColumnExists = cols.length > 0;
+    await testSql.end();
+  } catch (e: any) {
+    checks.dbError = e.message;
+  }
+
+  if (process.env.ANTHROPIC_API_KEY) {
+    try {
+      const { default: Anthropic } = await import('@anthropic-ai/sdk');
+      const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+      const response = await client.messages.create({
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 50,
+        messages: [{ role: 'user', content: 'Say hello in 5 words' }],
+      });
+      checks.anthropicWorking = true;
+      checks.testResponse = response.content[0]?.type === 'text'
+        ? (response.content[0] as any).text
+        : 'non-text';
+    } catch (e: any) {
+      checks.anthropicError = e.message;
+      checks.anthropicStatus = e.status;
+      checks.anthropicBody = JSON.stringify(e.error || e.body || {}).substring(0, 300);
+    }
+  }
+
+  res.json(checks);
+});
+
 app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/chat/anonymous', chatLimiter, anonymousRouter);
 app.use('/api/chat', chatLimiter, chatRouter);
