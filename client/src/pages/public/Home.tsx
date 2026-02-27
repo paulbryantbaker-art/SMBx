@@ -513,7 +513,7 @@ export default function Home() {
 
           {/* ═══ CHAT MESSAGES ═══ */}
           {phase === 'chat' && (
-            <div className="flex flex-col gap-4 py-5 pb-6 max-w-[860px] mx-auto w-full">
+            <div className="home-fade-up flex flex-col gap-4 py-5 pb-6 max-w-[860px] mx-auto w-full" style={{ animationDuration: '.3s' }}>
               {messages.map((msg) =>
                 msg.role === 'user' ? (
                   <div key={msg.id} className="home-msg-slide self-end max-w-[82%] bg-[#D4714E] text-white px-[18px] py-3.5 rounded-[20px_20px_6px_20px] text-base leading-[1.5] break-words overflow-hidden" style={{ boxShadow: '0 2px 8px rgba(212,113,78,.2)', overflowWrap: 'break-word' }}>
@@ -564,6 +564,7 @@ export default function Home() {
         onSend={handleDockSend}
         onFileUpload={handleDockFileUpload}
         disabled={sending}
+        placeholder={currentJ && J[currentJ] ? J[currentJ].ph : 'Tell Yulia about your deal...'}
       />
     </div>
   );
