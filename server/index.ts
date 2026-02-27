@@ -9,6 +9,7 @@ import { chatRouter } from './routes/chat.js';
 import { anonymousRouter } from './routes/anonymous.js';
 import { stripeRouter, handleStripeWebhook } from './routes/stripe.js';
 import { deliverablesRouter } from './routes/deliverables.js';
+import { dataRoomRouter } from './routes/dataRoom.js';
 import type { Request, Response, NextFunction } from 'express';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -73,6 +74,7 @@ app.use('/api/stripe', stripeRouter);
 // ─── 3. API routes (protected — everything else under /api) ─
 app.use('/api', requireAuth);
 app.use('/api', deliverablesRouter);
+app.use('/api', dataRoomRouter);
 
 // ─── 4. JSON error handler for API routes ──────────────────
 app.use('/api', (err: any, _req: Request, res: Response, _next: NextFunction) => {
