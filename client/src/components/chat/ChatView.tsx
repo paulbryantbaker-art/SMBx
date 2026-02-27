@@ -2,18 +2,24 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import Markdown from 'react-markdown';
 import YuliaAvatar from '../public/YuliaAvatar';
-import PublicChatInput from './PublicChatInput';
+import ChatDock from '../shared/ChatDock';
 import { useChatContext } from '../../context/ChatContext';
+
+const PLACEHOLDER_MAP: Record<string, string> = {
+  '/sell': 'Tell Yulia about your business...',
+  '/buy': 'Tell Yulia what you\'re looking for...',
+  '/raise': 'Tell Yulia about your raise...',
+  '/integrate': 'Tell Yulia about your acquisition...',
+};
 
 export default function ChatView() {
   const {
     messages,
     isStreaming,
     streamingContent,
-    messagesRemaining,
-    limitReached,
     error,
     sourcePage,
+    sendMessage,
   } = useChatContext();
   const [, navigate] = useLocation();
   const endRef = useRef<HTMLDivElement>(null);
@@ -76,24 +82,6 @@ export default function ChatView() {
           </div>
         )}
 
-        {/* Limit reached */}
-        {limitReached && (
-          <div className="flex items-start gap-3">
-            <YuliaAvatar size={32} className="mt-0.5" />
-            <div className="max-w-[75%] bg-[#FFF0EB] border border-[#D4714E]/20 rounded-2xl rounded-bl-[4px] px-5 py-4">
-              <p className="text-sm font-sans text-[#1A1A18] leading-relaxed m-0 mb-3">
-                You&apos;ve used all your preview messages. Create a free account to continue our conversation &mdash; I&apos;ll pick up right where we left off.
-              </p>
-              <button
-                onClick={() => navigate('/signup')}
-                className="bg-[#D4714E] text-white border-none rounded-full text-sm font-semibold px-6 py-2.5 cursor-pointer hover:bg-[#BE6342] transition-colors"
-              >
-                Create free account &rarr;
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Error */}
         {error && (
           <div className="text-center">
@@ -104,17 +92,14 @@ export default function ChatView() {
         <div ref={endRef} />
       </div>
 
-      {/* Input — pinned at bottom */}
-      {!limitReached && (
-        <div className="shrink-0 pb-6 pt-2">
-          <PublicChatInput sourcePage={sourcePage} />
-          {messages.length > 0 && messagesRemaining <= 5 && messagesRemaining > 0 && (
-            <p className="text-xs text-[#9B9891] text-center mt-2 m-0">
-              {messagesRemaining} preview message{messagesRemaining !== 1 ? 's' : ''} remaining
-            </p>
-          )}
-        </div>
-      )}
+      {/* Input — pinned at bottom (shared ChatDock) */}
+      <div className="shrink-0 pb-2">
+        <ChatDock
+          onSend={(text) => sendMessage(text)}
+          disabled={isStreaming}
+          placeholder={PLACEHOLDER_MAP[sourcePage] || 'Message Yulia...'}
+        />
+      </div>
     </div>
   );
 }

@@ -93,8 +93,13 @@ chatRouter.post('/message', async (req, res) => {
 
     // Build system prompt — include journey context if provided
     let systemPrompt = MASTER_SYSTEM_PROMPT;
-    if (journeyContext) {
-      systemPrompt += `\n\nCURRENT CONTEXT: The user is interested in: ${journeyContext}`;
+    if (journeyContext && journeyContext !== 'unknown') {
+      systemPrompt += `\n\nJOURNEY CONTEXT: The user started on the "${journeyContext}" page of smbx.ai.
+If they came from /sell, they likely want to sell a business.
+If they came from /buy, they likely want to buy a business.
+If they came from /raise, they likely want to raise capital.
+If they came from /integrate, they likely just acquired a business and need post-merger integration help.
+Use this context to inform your first response, but always confirm their intent.`;
     }
 
     // SSE headers

@@ -26,20 +26,14 @@ interface ChatContextValue {
   sourcePage: string;
   journeyContext: JourneyContext;
 
-  // Session
-  anonymousSessionId: string | null;
+  // Conversation
+  conversationId: number | null;
 
   // Messages
   messages: ChatMessage[];
   isStreaming: boolean;
   streamingContent: string;
-  messageCount: number;
-  messagesRemaining: number;
-  limitReached: boolean;
   error: string | null;
-
-  // Flags
-  showSaveProgress: boolean;
 
   // Actions
   sendMessage: (content: string, fromPage?: string) => void;
@@ -50,38 +44,41 @@ const ChatCtx = createContext<ChatContextValue | null>(null);
 
 /* ─── Helpers ────────────────────────────────────────────────── */
 
-const STORAGE_KEY = 'smbx_anonymous_session';
+const CONV_KEY = 'smbx_public_conv';
 
-function getStoredSessionId(): string | null {
-  try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+function getStoredConvId(): number | null {
+  try {
+    const val = localStorage.getItem(CONV_KEY);
+    return val ? parseInt(val, 10) : null;
+  } catch { return null; }
 }
-function storeSessionId(id: string) {
-  try { localStorage.setItem(STORAGE_KEY, id); } catch {}
+function storeConvId(id: number) {
+  try { localStorage.setItem(CONV_KEY, String(id)); } catch {}
 }
-function clearStoredSession() {
-  try { localStorage.removeItem(STORAGE_KEY); } catch {}
+function clearStoredConv() {
+  try { localStorage.removeItem(CONV_KEY); } catch {}
 }
 
 function deriveJourney(page: string): JourneyContext {
-  if (page === '/sell') return 'sell';
+  if (page === '/' || page === '/sell') return 'sell';
   if (page === '/buy') return 'buy';
   if (page === '/raise') return 'raise';
   if (page === '/integrate') return 'pmi';
   return 'unknown';
 }
 
-// Map sourcePage to the context string the backend expects
-function pageToBackendContext(page: string): string {
+function deriveJourneyContextString(page: string): string {
   const map: Record<string, string> = {
+    '/': 'sell',
     '/sell': 'sell',
     '/buy': 'buy',
     '/raise': 'raise',
     '/integrate': 'integrate',
-    '/how-it-works': 'how-it-works',
-    '/enterprise': 'enterprise',
+    '/how-it-works': 'unknown',
+    '/enterprise': 'unknown',
     '/pricing': 'unknown',
   };
-  return map[page] || 'home';
+  return map[page] || 'unknown';
 }
 
 /* ─── Provider ───────────────────────────────────────────────── */
@@ -92,55 +89,45 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
-  const [messageCount, setMessageCount] = useState(0);
-  const [messagesRemaining, setMessagesRemaining] = useState(20);
-  const [limitReached, setLimitReached] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showSaveProgress, setShowSaveProgress] = useState(false);
 
-  const sessionIdRef = useRef<string | null>(getStoredSessionId());
+  const convIdRef = useRef<number | null>(getStoredConvId());
   const abortRef = useRef<AbortController | null>(null);
 
   const journeyContext = deriveJourney(sourcePage);
-  const anonymousSessionId = sessionIdRef.current;
+  const conversationId = convIdRef.current;
 
-  /* ── Restore session on mount ────────────────────────────── */
+  /* ── Restore conversation on mount ─────────────────────────── */
 
   useEffect(() => {
-    const stored = getStoredSessionId();
+    const stored = getStoredConvId();
     if (!stored) return;
 
     (async () => {
       try {
-        const res = await fetch(`/api/chat/anonymous/${stored}`);
+        const res = await fetch(`/api/chat/conversations/${stored}/messages`);
         if (!res.ok) {
-          clearStoredSession();
-          sessionIdRef.current = null;
+          clearStoredConv();
+          convIdRef.current = null;
           return;
         }
 
-        const data = await res.json();
-        const restored: ChatMessage[] = (data.messages || []).map((m: any, i: number) => ({
-          id: i + 1,
+        const msgs = await res.json();
+        const restored: ChatMessage[] = (msgs || []).map((m: any) => ({
+          id: m.id,
           role: m.role,
           content: m.content,
-          createdAt: new Date().toISOString(),
+          createdAt: m.created_at,
         }));
 
         if (restored.length > 0) {
           setMessages(restored);
-          setMessagesRemaining(data.messagesRemaining ?? 20);
-          setLimitReached(data.limitReached ?? false);
-          setSourcePage(data.sourcePage ? `/${data.sourcePage}` : '/');
-          const userCount = restored.filter(m => m.role === 'user').length;
-          setMessageCount(userCount);
-          if (userCount >= 10) setShowSaveProgress(true);
           setMorphPhase('chat');
           window.history.pushState({ smbxChat: true }, '', location.pathname + '#chat');
         }
       } catch {
-        clearStoredSession();
-        sessionIdRef.current = null;
+        clearStoredConv();
+        convIdRef.current = null;
       }
     })();
   }, []);
@@ -155,36 +142,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('popstate', onPop);
   }, [morphPhase]);
 
-  /* ── Ensure backend session exists ───────────────────────── */
-
-  const ensureSession = useCallback(async (ctx: string): Promise<string | null> => {
-    if (sessionIdRef.current) return sessionIdRef.current;
-
-    try {
-      const res = await fetch('/api/chat/anonymous', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ context: ctx }),
-      });
-
-      if (res.status === 429) {
-        setError('Session limit reached. Sign up for unlimited access.');
-        return null;
-      }
-      if (!res.ok) return null;
-
-      const data = await res.json();
-      sessionIdRef.current = data.sessionId;
-      storeSessionId(data.sessionId);
-      setMessagesRemaining(data.messagesRemaining);
-      return data.sessionId;
-    } catch {
-      setError('Failed to start session. Please try again.');
-      return null;
-    }
-  }, []);
-
-  /* ── Send message (core) ─────────────────────────────────── */
+  /* ── Send message via POST /api/chat/message ───────────────── */
 
   const sendMessage = useCallback(async (content: string, fromPage?: string) => {
     // Determine source page — use fromPage if provided (first message), else current
@@ -208,15 +166,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setIsStreaming(true);
     setStreamingContent('');
 
-    // 3. Ensure session
-    const backendCtx = pageToBackendContext(page);
-    const sessionId = await ensureSession(backendCtx);
-    if (!sessionId) {
-      setIsStreaming(false);
-      return;
-    }
-
-    // 4. Transition to chat after morph animation
+    // 3. Transition to chat after morph animation
     setTimeout(() => {
       setMorphPhase(prev => {
         if (prev === 'morphing') {
@@ -227,23 +177,23 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       });
     }, 200);
 
-    // 5. POST message and read SSE stream
+    // 4. POST to /api/chat/message with SSE streaming
     try {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const res = await fetch(`/api/chat/anonymous/${sessionId}/messages`, {
+      const jCtx = deriveJourneyContextString(page);
+
+      const res = await fetch('/api/chat/message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({
+          message: content,
+          conversationId: convIdRef.current,
+          journeyContext: jCtx,
+        }),
         signal: controller.signal,
       });
-
-      if (res.status === 403) {
-        setLimitReached(true);
-        setIsStreaming(false);
-        return;
-      }
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: 'Request failed' }));
@@ -268,16 +218,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             try {
               const parsed = JSON.parse(raw);
 
-              if (parsed.type === 'done') {
-                if (typeof parsed.messagesRemaining === 'number') {
-                  setMessagesRemaining(parsed.messagesRemaining);
-                  if (parsed.messagesRemaining <= 0) setLimitReached(true);
+              if (parsed.type === 'text_delta') {
+                accumulated += parsed.text;
+                setStreamingContent(accumulated);
+              } else if (parsed.type === 'message_stop') {
+                // Save conversation ID for subsequent messages
+                if (parsed.conversationId && !convIdRef.current) {
+                  convIdRef.current = parsed.conversationId;
+                  storeConvId(parsed.conversationId);
                 }
               } else if (parsed.type === 'error') {
                 accumulated = parsed.error || 'Something went wrong.';
-              } else if (parsed.text) {
-                accumulated += parsed.text;
-                setStreamingContent(accumulated);
               }
             } catch {
               /* partial chunk — ignore */
@@ -286,7 +237,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // 6. Finalize assistant message
+      // 5. Finalize assistant message
       setStreamingContent('');
       if (accumulated) {
         setMessages(prev => [...prev, {
@@ -296,13 +247,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           createdAt: new Date().toISOString(),
         }]);
       }
-
-      // 7. Track message count
-      setMessageCount(prev => {
-        const next = prev + 1;
-        if (next >= 10) setShowSaveProgress(true);
-        return next;
-      });
     } catch (err: any) {
       if (err.name !== 'AbortError') {
         console.error('Chat error:', err);
@@ -313,7 +257,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       setStreamingContent('');
       abortRef.current = null;
     }
-  }, [morphPhase, sourcePage, ensureSession]);
+  }, [morphPhase, sourcePage]);
 
   /* ── Reset to public ─────────────────────────────────────── */
 
@@ -330,15 +274,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         morphPhase,
         sourcePage,
         journeyContext,
-        anonymousSessionId,
+        conversationId,
         messages,
         isStreaming,
         streamingContent,
-        messageCount,
-        messagesRemaining,
-        limitReached,
         error,
-        showSaveProgress,
         sendMessage,
         resetToPublic,
       }}
