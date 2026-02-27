@@ -45,10 +45,6 @@ import Terms from './pages/public/Terms';
 import Chat from './pages/Chat';
 
 // Lazy-load secondary pages to keep initial bundle lean
-const Pipeline = lazy(() => import('./pages/Pipeline'));
-const Intelligence = lazy(() => import('./pages/Intelligence'));
-const Sourcing = lazy(() => import('./pages/Sourcing'));
-const Settings = lazy(() => import('./pages/Settings'));
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const Sell = lazy(() => import('./pages/public/Sell'));
 const Buy = lazy(() => import('./pages/public/Buy'));
@@ -201,46 +197,6 @@ export default function App() {
       <Route path="/chat/:id?">
         {(params) => user ? (
           <Chat user={user} onLogout={() => { logout(); navigate('/'); }} initialConversationId={params.id ? parseInt(params.id, 10) : undefined} />
-        ) : (
-          <Redirect to="/login" />
-        )}
-      </Route>
-
-      <Route path="/pipeline">
-        {user ? (
-          <Suspense fallback={<PageLoader />}>
-            <Pipeline user={user} onLogout={() => { logout(); navigate('/'); }} />
-          </Suspense>
-        ) : (
-          <Redirect to="/login" />
-        )}
-      </Route>
-
-      <Route path="/intelligence">
-        {user ? (
-          <Suspense fallback={<PageLoader />}>
-            <Intelligence user={user} onLogout={() => { logout(); navigate('/'); }} />
-          </Suspense>
-        ) : (
-          <Redirect to="/login" />
-        )}
-      </Route>
-
-      <Route path="/sourcing">
-        {user ? (
-          <Suspense fallback={<PageLoader />}>
-            <Sourcing user={user} onLogout={() => { logout(); navigate('/'); }} />
-          </Suspense>
-        ) : (
-          <Redirect to="/login" />
-        )}
-      </Route>
-
-      <Route path="/settings">
-        {user ? (
-          <Suspense fallback={<PageLoader />}>
-            <Settings user={user} onLogout={() => { logout(); navigate('/'); }} />
-          </Suspense>
         ) : (
           <Redirect to="/login" />
         )}

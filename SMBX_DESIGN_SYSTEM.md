@@ -411,8 +411,8 @@ Layout:        flex column, height 100%, width 280px
 Background:    --cream
 Border-right:  1px solid --border
 
-Header:        flex row, space-between, padding 16px 16px 8px
-  Logo:        22px, weight 800, "x" in --terra
+Header:        flex row, justify-end, padding 16px 16px 8px
+  No logo (logo lives in the topbar).
   New Chat:    36×36 circle, --fill bg, --terra icon (plus), hover: --terra-soft bg
 
 Sections:
@@ -454,8 +454,49 @@ Padding:       8px 14px
 Border-radius: 8px (for focus outline only)
 
 Items: Pipeline, Intel, Sourcing, Data Room
+Active state: --terra color (text turns terra when panel is open)
 Utility icons (notification bell, settings gear, wallet) remain as
-small circles.
+small circles. Settings gear also toggles --terra when active.
+
+Topbar links toggle canvas panels alongside chat (not separate routes).
+Clicking an active link closes its panel.
+```
+
+### 6.16 Canvas Panels (Pipeline, Intel, Sourcing, Settings, Data Room)
+```
+Architecture:   Tool pages are NO LONGER standalone routes.
+                They render as resizable side panels alongside the chat.
+                Chat is always the base layer — it never goes away.
+
+Layout:         [Sidebar] [Chat Column] [ResizeHandle] [Canvas Panel]
+                Desktop: side-by-side with drag-to-resize handle
+                Mobile:  canvas opens as full-screen overlay (z-index 50)
+
+CanvasShell:    Wrapper for all panel content
+  Header:       flex row, space-between, border-bottom --border
+                Title: 14px weight 600 --text, truncated
+                Subtitle: 12px --muted
+                Buttons: fullscreen toggle + close (7×7 circles, --muted → --text on hover)
+
+ResizeHandle:   4px wide, --border bg, hover: --terra bg
+                Cursor: col-resize
+                Min width: 320px, max width: 60% of container
+                Default width: 480px
+                Grip dots: 3 vertical dots, visible on hover
+
+Fullscreen:     Hides sidebar + chat, canvas fills entire width
+                Toggle via expand/collapse icon in CanvasShell header
+                Mobile: always fullscreen (no resize handle)
+
+Panel bg:       --white (panels render inside CanvasShell)
+Inner cards:    --cream bg (#FAF8F4) instead of white-on-white
+                This inverts the card pattern: cream cards on white canvas
+
+Auto-behaviors:
+  - Opening canvas closes mobile sidebar
+  - Switching panels resets fullscreen to off
+  - Opening a deliverable viewer replaces the active canvas content
+  - Chat message area narrows (max-w-640px) when canvas is open
 ```
 
 ---
