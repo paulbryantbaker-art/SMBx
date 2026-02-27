@@ -22,26 +22,34 @@ interface DeliverableData {
 export default function Canvas({ deliverableId, onClose }: CanvasProps) {
   const [data, setData] = useState<DeliverableData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!deliverableId) return;
     try {
       const res = await fetch(`/api/deliverables/${deliverableId}`, { headers: authHeaders() });
-      if (res.ok) {
-        const d = await res.json();
-        setData(d);
-        // Keep polling if still generating
-        if (d.status === 'queued' || d.status === 'generating') {
-          setTimeout(fetchData, 3000);
-        }
+      if (!res.ok) {
+        setError(res.status === 404 ? 'Deliverable not found' : 'Failed to load deliverable');
+        setLoading(false);
+        return;
       }
-    } catch { /* ignore */ }
+      const d = await res.json();
+      setData(d);
+      setError(null);
+      // Keep polling if still generating
+      if (d.status === 'queued' || d.status === 'generating') {
+        setTimeout(fetchData, 3000);
+      }
+    } catch {
+      setError('Network error — please check your connection');
+    }
     finally { setLoading(false); }
   }, [deliverableId]);
 
   useEffect(() => {
     setLoading(true);
     setData(null);
+    setError(null);
     fetchData();
   }, [fetchData]);
 
@@ -166,9 +174,17 @@ export default function Canvas({ deliverableId, onClose }: CanvasProps) {
           </div>
         )}
 
-        {!loading && !data && (
+        {!loading && (error || !data) && (
           <div className="flex items-center justify-center p-12">
-            <p className="text-sm text-[#6E6A63]">Deliverable not found.</p>
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+              </div>
+              <p className="text-sm text-[#6E6A63]">{error || 'Deliverable not found.'}</p>
+              <button onClick={fetchData} className="text-sm font-semibold text-[#D4714E] bg-transparent border-0 cursor-pointer hover:underline">
+                Try again
+              </button>
+            </div>
           </div>
         )}
       </div>

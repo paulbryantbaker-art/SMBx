@@ -10,6 +10,7 @@ import { anonymousRouter } from './routes/anonymous.js';
 import { stripeRouter, handleStripeWebhook } from './routes/stripe.js';
 import { deliverablesRouter } from './routes/deliverables.js';
 import { dataRoomRouter } from './routes/dataRoom.js';
+import rateLimit from 'express-rate-limit';
 import type { Request, Response, NextFunction } from 'express';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -17,6 +18,31 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ─── Rate limiters ──────────────────────────────────────────
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 attempts per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts, please try again later' },
+});
+
+const chatLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 20, // 20 messages per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many messages, please slow down' },
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 100, // 100 requests per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later' },
+});
 
 // ─── Startup checks ─────────────────────────────────────────
 if (!process.env.ANTHROPIC_API_KEY) {
@@ -55,24 +81,13 @@ app.get('/api/config', (_req, res) => {
   });
 });
 
-app.get('/api/test-db', async (_req, res) => {
-  try {
-    const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
-    const users = await sql`SELECT id, email, display_name FROM users`;
-    await sql.end();
-    res.json({ success: true, users });
-  } catch (error: any) {
-    res.json({ success: false, error: error.message, stack: error.stack });
-  }
-});
-
-app.use('/api/auth', authRouter);
-app.use('/api/chat/anonymous', anonymousRouter);
-app.use('/api/chat', chatRouter);
+app.use('/api/auth', authLimiter, authRouter);
+app.use('/api/chat/anonymous', chatLimiter, anonymousRouter);
+app.use('/api/chat', chatLimiter, chatRouter);
 app.use('/api/stripe', stripeRouter);
 
 // ─── 3. API routes (protected — everything else under /api) ─
-app.use('/api', requireAuth);
+app.use('/api', apiLimiter, requireAuth);
 app.use('/api', deliverablesRouter);
 app.use('/api', dataRoomRouter);
 

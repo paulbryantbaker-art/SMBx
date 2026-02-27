@@ -75,14 +75,18 @@ export async function streamAgenticResponse(
     const toolResults: ContentBlockParam[] = [];
     for (const block of toolUseBlocks) {
       if (block.type === 'tool_use') {
-        console.log(`Tool call: ${block.name}(${JSON.stringify(block.input)})`);
+        if (process.env.NODE_ENV !== 'production') {
+          console.log(`Tool call: ${block.name}(${JSON.stringify(block.input).substring(0, 200)})`);
+        }
         const result = await executeTool(
           block.name,
           block.input as Record<string, any>,
           ctx.userId,
           ctx.conversationId,
         );
-        console.log(`Tool result: ${result.substring(0, 200)}`);
+        if (process.env.NODE_ENV !== 'production') {
+          console.log(`Tool result: ${result.substring(0, 200)}`);
+        }
         toolResults.push({
           type: 'tool_result' as const,
           tool_use_id: block.id,

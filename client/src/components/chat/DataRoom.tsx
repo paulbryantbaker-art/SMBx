@@ -59,27 +59,33 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
   const [unfiledDeliverables, setUnfiledDeliverables] = useState<UnfiledDeliverable[]>([]);
   const [expandedFolders, setExpandedFolders] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [filingId, setFilingId] = useState<number | null>(null);
 
   const fetchDataRoom = useCallback(async () => {
     if (!dealId) return;
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`/api/deals/${dealId}/data-room`, { headers: authHeaders() });
-      if (res.ok) {
-        const data = await res.json();
-        setFolders(data.folders || []);
-        setDocuments(data.documents || []);
-        setUnfiledDeliverables(data.unfiledDeliverables || []);
-        // Auto-expand all folders on first load
-        if (data.folders?.length) {
-          setExpandedFolders(prev => {
-            if (prev.size === 0) return new Set(data.folders.map((f: Folder) => f.id));
-            return prev;
-          });
-        }
+      if (!res.ok) {
+        setError('Failed to load data room');
+        return;
       }
-    } catch { /* ignore */ }
+      const data = await res.json();
+      setFolders(data.folders || []);
+      setDocuments(data.documents || []);
+      setUnfiledDeliverables(data.unfiledDeliverables || []);
+      // Auto-expand all folders on first load
+      if (data.folders?.length) {
+        setExpandedFolders(prev => {
+          if (prev.size === 0) return new Set(data.folders.map((f: Folder) => f.id));
+          return prev;
+        });
+      }
+    } catch {
+      setError('Network error — please check your connection');
+    }
     finally { setLoading(false); }
   }, [dealId]);
 
@@ -129,8 +135,33 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
 
   if (loading && folders.length === 0 && documents.length === 0) {
     return (
+      <div className="p-4 space-y-3">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="animate-pulse">
+            <div className="flex items-center gap-2 px-3 py-2">
+              <div className="w-3 h-3 bg-[#EBE7DF] rounded" />
+              <div className="w-3.5 h-3.5 bg-[#EBE7DF] rounded" />
+              <div className="h-3 bg-[#EBE7DF] rounded" style={{ width: `${50 + i * 15}%` }} />
+            </div>
+            <div className="ml-9 space-y-1.5 pl-3" style={{ borderLeft: '1px solid #EBE7DF' }}>
+              <div className="flex items-center gap-2 px-3 py-1">
+                <div className="w-3 h-3 bg-[#F3F0EA] rounded" />
+                <div className="h-2.5 bg-[#F3F0EA] rounded" style={{ width: `${40 + i * 10}%` }} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
       <div className="p-6 text-center">
-        <p className="text-sm text-text-secondary m-0">Loading data room...</p>
+        <p className="text-sm text-red-600 m-0 mb-2">{error}</p>
+        <button onClick={fetchDataRoom} className="text-sm font-semibold text-[#D4714E] bg-transparent border-0 cursor-pointer hover:underline">
+          Try again
+        </button>
       </div>
     );
   }
