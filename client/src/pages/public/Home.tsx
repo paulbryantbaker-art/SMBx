@@ -136,7 +136,7 @@ export default function Home() {
           transition: transform 0.3s ease;
         }
         @media (max-width: 768px) { .home-topbar { padding: 12px 16px; } }
-        .home-topbar.hidden { transform: translateY(-100%); }
+        @media (max-width: 768px) { .home-topbar.hidden { transform: translateY(-100%); } }
 
         .home-logo { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; color: ${T.text}; }
         @media (max-width: 768px) { .home-logo { font-size: 22px; } }
@@ -266,7 +266,7 @@ export default function Home() {
         .home-dock-bottom {
           transition: transform 0.3s ease;
         }
-        .home-dock-bottom.hidden { transform: translateY(100%); }
+        @media (max-width: 768px) { .home-dock-bottom.hidden { transform: translateY(100%); } }
       `}</style>
 
       {/* ═══ TOPBAR ═══ */}
