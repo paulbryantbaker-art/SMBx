@@ -17,6 +17,7 @@ import { intelligenceRouter } from './routes/intelligence.js';
 import { sourcingRouter } from './routes/sourcing.js';
 import { shareLinksRouter } from './routes/shareLinks.js';
 import { deepDataRouter } from './routes/deepData.js';
+import { gtmRouter } from './routes/gtm.js';
 import rateLimit from 'express-rate-limit';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -104,6 +105,7 @@ app.use('/api', notificationRouter);
 app.use('/api', intelligenceRouter);
 app.use('/api', sourcingRouter);
 app.use('/api', deepDataRouter);
+app.use('/api', gtmRouter);
 
 // ─── 4. JSON error handler for API routes ──────────────────
 app.use('/api', (err: any, _req: Request, res: Response, _next: NextFunction) => {
