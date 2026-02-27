@@ -9,6 +9,8 @@ import { checkGateReadiness } from '../services/gateReadinessService.js';
 import { generatePaywallPrompt } from '../services/paywallService.js';
 import { getBalance, debitWallet } from '../services/walletService.js';
 import { getLeagueMultiplier } from '../services/leagueClassifier.js';
+import { getGateMenuItems } from '../services/menuCatalogService.js';
+import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
 const sql = postgres(process.env.DATABASE_URL!, {
@@ -179,6 +181,30 @@ chatRouter.post('/deals/:dealId/unlock-gate', async (req, res) => {
     // Advance gate
     const newGate = await advanceGate(dealId, deal.current_gate);
 
+    // Auto-trigger primary deliverable for the unlocked gate
+    let deliverableId: number | null = null;
+    try {
+      const gateItems = await getGateMenuItems(gate);
+      if (gateItems.length > 0) {
+        const primaryItem = gateItems[0]; // First item is the primary deliverable
+        const [deliverable] = await sql`
+          INSERT INTO deliverables (deal_id, user_id, menu_item_id, status, price_charged_cents)
+          VALUES (${dealId}, ${userId}, ${primaryItem.id}, 'queued', 0)
+          RETURNING id
+        `;
+        deliverableId = deliverable.id;
+        await enqueueDeliverableGeneration({
+          deliverableId: deliverable.id,
+          dealId,
+          userId,
+          menuItemSlug: primaryItem.slug,
+          deliverableType: primaryItem.slug.replace(/-/g, '_'),
+        });
+      }
+    } catch (e: any) {
+      console.error('Auto-trigger deliverable error:', e.message);
+    }
+
     return res.json({
       success: true,
       fromGate: deal.current_gate,
@@ -187,6 +213,7 @@ chatRouter.post('/deals/:dealId/unlock-gate', async (req, res) => {
       priceDisplay: paywall.priceDisplay,
       newBalance: balance - paywall.priceCents,
       newBalanceDisplay: `$${((balance - paywall.priceCents) / 100).toFixed(2)}`,
+      deliverableId,
     });
   } catch (err: any) {
     console.error('Gate unlock error:', err.message);

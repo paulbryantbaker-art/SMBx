@@ -17,7 +17,7 @@ interface PaywallData {
 interface PaywallCardProps {
   paywall: PaywallData;
   dealId: number;
-  onUnlocked: (toGate: string) => void;
+  onUnlocked: (toGate: string, deliverableId?: number) => void;
   onTopUp: () => void;
 }
 
@@ -57,7 +57,7 @@ export default function PaywallCard({ paywall, dealId, onUnlocked, onTopUp }: Pa
 
       const data = await res.json();
       setSuccess(true);
-      setTimeout(() => onUnlocked(data.toGate), 1500);
+      setTimeout(() => onUnlocked(data.toGate, data.deliverableId || undefined), 1500);
     } catch {
       setError('Something went wrong. Please try again.');
     } finally {

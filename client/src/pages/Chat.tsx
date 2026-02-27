@@ -316,16 +316,23 @@ export default function Chat({ user, onLogout }: ChatProps) {
               <PaywallCard
                 paywall={paywallData}
                 dealId={activeDealId}
-                onUnlocked={(toGate) => {
+                onUnlocked={(toGate, deliverableId) => {
                   setCurrentGate(toGate);
                   setPaywallData(null);
                   setMessages(prev => [...prev, {
                     id: Date.now() + 3,
                     role: 'assistant' as const,
-                    content: `**Gate unlocked** — advancing to the next phase. Let's continue.`,
+                    content: deliverableId
+                      ? `**Gate unlocked** — generating your deliverable now. This takes 30-60 seconds.`
+                      : `**Gate unlocked** — advancing to the next phase. Let's continue.`,
                     created_at: new Date().toISOString(),
                     metadata: { type: 'gate_transition' },
                   }]);
+                  // Auto-open canvas if deliverable was triggered
+                  if (deliverableId) {
+                    setDataRoomOpen(true);
+                    setViewingDeliverable(deliverableId);
+                  }
                 }}
                 onTopUp={() => {
                   // Trigger wallet top-up via the WalletBadge
