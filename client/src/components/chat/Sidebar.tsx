@@ -15,8 +15,9 @@ interface SidebarProps {
   onSelect: (id: number) => void;
   onNew: () => void;
   onClose: () => void;
-  userName: string;
-  onSignOut: () => void;
+  userName?: string;
+  onSignOut?: () => void;
+  anonymous?: boolean;
 }
 
 function groupByDate(convos: Conversation[]) {
@@ -65,7 +66,7 @@ const NAV_LINKS = [
   { path: '/settings', label: 'Settings', icon: 'M12 9a3 3 0 100 6 3 3 0 000-6zM12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42' },
 ];
 
-export default function Sidebar({ conversations, activeId, onSelect, onNew, onClose, userName, onSignOut }: SidebarProps) {
+export default function Sidebar({ conversations, activeId, onSelect, onNew, onClose, userName, onSignOut, anonymous }: SidebarProps) {
   const [, navigate] = useLocation();
   const groups = groupByDate(conversations);
 
@@ -124,33 +125,45 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
         )}
       </div>
 
-      {/* Navigation */}
-      <div className="border-t border-border px-3 py-2">
-        <div className="grid grid-cols-4 gap-1">
-          {NAV_LINKS.map(link => (
-            <button
-              key={link.path}
-              onClick={() => { onClose(); navigate(link.path); }}
-              className="flex flex-col items-center gap-0.5 py-2 rounded-lg text-[#6E6A63] hover:bg-[#F3F0EA] hover:text-[#D4714E] transition-colors border-0 bg-transparent cursor-pointer"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d={link.icon} />
-              </svg>
-              <span className="text-[9px] font-medium">{link.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      {!anonymous && (
+        <>
+          {/* Navigation */}
+          <div className="border-t border-border px-3 py-2">
+            <div className="grid grid-cols-4 gap-1">
+              {NAV_LINKS.map(link => (
+                <button
+                  key={link.path}
+                  onClick={() => { onClose(); navigate(link.path); }}
+                  className="flex flex-col items-center gap-0.5 py-2 rounded-lg text-[#6E6A63] hover:bg-[#F3F0EA] hover:text-[#D4714E] transition-colors border-0 bg-transparent cursor-pointer"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d={link.icon} />
+                  </svg>
+                  <span className="text-[9px] font-medium">{link.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
-      {/* Footer */}
-      <div className="border-t border-border px-4 py-3 flex items-center justify-between">
-        <span className="text-sm font-medium text-text-primary font-[system-ui,sans-serif] truncate max-w-[140px]">
-          {userName}
-        </span>
-        <Button variant="ghost" onClick={onSignOut} className="!text-sm !px-2 !py-1 !h-auto">
-          Sign out
-        </Button>
-      </div>
+          {/* Footer */}
+          <div className="border-t border-border px-4 py-3 flex items-center justify-between">
+            <span className="text-sm font-medium text-text-primary font-[system-ui,sans-serif] truncate max-w-[140px]">
+              {userName}
+            </span>
+            <Button variant="ghost" onClick={onSignOut} className="!text-sm !px-2 !py-1 !h-auto">
+              Sign out
+            </Button>
+          </div>
+        </>
+      )}
+
+      {anonymous && (
+        <div className="border-t border-border px-4 py-3 text-center">
+          <a href="/login" className="text-sm text-[#7A766E] hover:text-[#D4714E] no-underline transition-colors">
+            Sign in for more features
+          </a>
+        </div>
+      )}
     </div>
   );
 }

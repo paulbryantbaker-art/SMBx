@@ -7,6 +7,7 @@ import {
   useEffect,
   type ReactNode,
 } from 'react';
+import type { Conversation } from '../components/chat/Sidebar';
 
 /* ─── Types ──────────────────────────────────────────────────── */
 
@@ -26,8 +27,10 @@ interface ChatContextValue {
   sourcePage: string;
   journeyContext: JourneyContext;
 
-  // Conversation
-  conversationId: number | null;
+  // Conversations
+  conversations: Conversation[];
+  activeConversationId: number | null;
+  sidebarOpen: boolean;
 
   // Messages
   messages: ChatMessage[];
@@ -38,6 +41,9 @@ interface ChatContextValue {
   // Actions
   sendMessage: (content: string, fromPage?: string) => void;
   resetToPublic: () => void;
+  loadConversation: (id: number) => void;
+  startNewConversation: () => void;
+  setSidebarOpen: (open: boolean) => void;
 }
 
 const ChatCtx = createContext<ChatContextValue | null>(null);
@@ -45,6 +51,7 @@ const ChatCtx = createContext<ChatContextValue | null>(null);
 /* ─── Helpers ────────────────────────────────────────────────── */
 
 const CONV_KEY = 'smbx_public_conv';
+const SESSION_KEY = 'smbx_session_id';
 
 function getStoredConvId(): number | null {
   try {
@@ -57,6 +64,23 @@ function storeConvId(id: number) {
 }
 function clearStoredConv() {
   try { localStorage.removeItem(CONV_KEY); } catch {}
+}
+
+function getOrCreateSessionId(): string {
+  try {
+    let id = localStorage.getItem(SESSION_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(SESSION_KEY, id);
+    }
+    return id;
+  } catch {
+    return crypto.randomUUID();
+  }
+}
+
+function sessionHeaders(): Record<string, string> {
+  return { 'X-Session-ID': getOrCreateSessionId() };
 }
 
 function deriveJourney(page: string): JourneyContext {
@@ -90,24 +114,92 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<number | null>(getStoredConvId());
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const convIdRef = useRef<number | null>(getStoredConvId());
   const abortRef = useRef<AbortController | null>(null);
 
   const journeyContext = deriveJourney(sourcePage);
-  const conversationId = convIdRef.current;
+
+  /* ── Load conversations list ─────────────────────────────── */
+
+  const loadConversations = useCallback(async () => {
+    try {
+      const res = await fetch('/api/chat/conversations', {
+        headers: sessionHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setConversations(data);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  /* ── Load a specific conversation ────────────────────────── */
+
+  const loadConversation = useCallback(async (id: number) => {
+    try {
+      const res = await fetch(`/api/chat/conversations/${id}/messages`, {
+        headers: sessionHeaders(),
+      });
+      if (!res.ok) return;
+      const msgs = await res.json();
+      const restored: ChatMessage[] = (msgs || []).map((m: any) => ({
+        id: m.id,
+        role: m.role,
+        content: m.content,
+        createdAt: m.created_at,
+      }));
+      setMessages(restored);
+      setActiveConversationId(id);
+      convIdRef.current = id;
+      storeConvId(id);
+      setSidebarOpen(false);
+      // Ensure we are in chat phase
+      if (morphPhase !== 'chat') {
+        setMorphPhase('chat');
+        window.history.pushState({ smbxChat: true }, '', location.pathname + '#chat');
+      }
+    } catch {
+      // ignore
+    }
+  }, [morphPhase]);
+
+  /* ── Start new conversation ──────────────────────────────── */
+
+  const startNewConversation = useCallback(() => {
+    setMessages([]);
+    setActiveConversationId(null);
+    convIdRef.current = null;
+    clearStoredConv();
+    setStreamingContent('');
+    setError(null);
+    setSidebarOpen(false);
+    // Stay in chat phase — show empty composer ready for input
+  }, []);
 
   /* ── Restore conversation on mount ─────────────────────────── */
 
   useEffect(() => {
+    // Load all conversations for this session
+    loadConversations();
+
+    // Try to restore the last active conversation
     const stored = getStoredConvId();
     if (!stored) return;
 
     (async () => {
       try {
-        const res = await fetch(`/api/chat/conversations/${stored}/messages`);
+        const res = await fetch(`/api/chat/conversations/${stored}/messages`, {
+          headers: sessionHeaders(),
+        });
         if (!res.ok) {
           clearStoredConv();
+          setActiveConversationId(null);
           convIdRef.current = null;
           return;
         }
@@ -127,10 +219,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         }
       } catch {
         clearStoredConv();
+        setActiveConversationId(null);
         convIdRef.current = null;
       }
     })();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Browser back button ─────────────────────────────────── */
 
@@ -186,7 +279,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
       const res = await fetch('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...sessionHeaders(),
+        },
         body: JSON.stringify({
           message: content,
           conversationId: convIdRef.current,
@@ -225,6 +321,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                 // Save conversation ID for subsequent messages
                 if (parsed.conversationId && !convIdRef.current) {
                   convIdRef.current = parsed.conversationId;
+                  setActiveConversationId(parsed.conversationId);
                   storeConvId(parsed.conversationId);
                 }
               } else if (parsed.type === 'error') {
@@ -247,6 +344,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           createdAt: new Date().toISOString(),
         }]);
       }
+
+      // 6. Refresh conversations list (for new title, updated_at)
+      loadConversations();
     } catch (err: any) {
       if (err.name !== 'AbortError') {
         console.error('Chat error:', err);
@@ -257,7 +357,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       setStreamingContent('');
       abortRef.current = null;
     }
-  }, [morphPhase, sourcePage]);
+  }, [morphPhase, sourcePage, loadConversations]);
 
   /* ── Reset to public ─────────────────────────────────────── */
 
@@ -274,13 +374,18 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         morphPhase,
         sourcePage,
         journeyContext,
-        conversationId,
+        conversations,
+        activeConversationId,
+        sidebarOpen,
         messages,
         isStreaming,
         streamingContent,
         error,
         sendMessage,
         resetToPublic,
+        loadConversation,
+        startNewConversation,
+        setSidebarOpen,
       }}
     >
       {children}

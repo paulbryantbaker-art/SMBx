@@ -43,6 +43,7 @@ chatRouter.use(optionalAuth);
 
 chatRouter.post('/message', async (req, res) => {
   const userId = (req as any).userId || null;
+  const sessionId = req.headers['x-session-id'] as string | undefined;
   const { message, conversationId, journeyContext } = req.body;
 
   if (!message?.trim()) {
@@ -56,8 +57,8 @@ chatRouter.post('/message', async (req, res) => {
     if (!convId) {
       const shortTitle = message.trim().substring(0, 60) + (message.trim().length > 60 ? '...' : '');
       const [conv] = await sql`
-        INSERT INTO conversations (user_id, title)
-        VALUES (${userId}, ${shortTitle})
+        INSERT INTO conversations (user_id, title, session_id)
+        VALUES (${userId}, ${shortTitle}, ${userId ? null : sessionId || null})
         RETURNING id
       `;
       convId = conv.id;
@@ -176,26 +177,52 @@ chatRouter.post('/conversations', async (req, res) => {
   }
 });
 
+// ─── Migrate anonymous session conversations to authenticated user ──
+
+chatRouter.post('/conversations/migrate-session', requireAuth, async (req, res) => {
+  const userId = (req as any).userId;
+  const { sessionId } = req.body;
+  if (!sessionId) return res.status(400).json({ error: 'sessionId required' });
+
+  try {
+    const result = await sql`
+      UPDATE conversations
+      SET user_id = ${userId}, session_id = NULL
+      WHERE session_id = ${sessionId} AND user_id IS NULL
+    `;
+    return res.json({ success: true, migrated: result.count });
+  } catch (err: any) {
+    console.error('Session migration error:', err.message);
+    return res.status(500).json({ error: 'Migration failed' });
+  }
+});
+
 // ─── List conversations ─────────────────────────────────────
 
 chatRouter.get('/conversations', async (req, res) => {
   try {
     const userId = (req as any).userId || null;
+    const sessionId = req.headers['x-session-id'] as string | undefined;
 
-    const convos = userId
-      ? await sql`
-          SELECT id, title, deal_id, is_archived, created_at, updated_at
-          FROM conversations
-          WHERE user_id = ${userId} AND is_archived = false
-          ORDER BY updated_at DESC
-        `
-      : await sql`
-          SELECT id, title, deal_id, is_archived, created_at, updated_at
-          FROM conversations
-          WHERE user_id IS NULL AND is_archived = false
-          ORDER BY updated_at DESC
-          LIMIT 50
-        `;
+    let convos;
+    if (userId) {
+      convos = await sql`
+        SELECT id, title, deal_id, is_archived, created_at, updated_at
+        FROM conversations
+        WHERE user_id = ${userId} AND is_archived = false
+        ORDER BY updated_at DESC
+      `;
+    } else if (sessionId) {
+      convos = await sql`
+        SELECT id, title, deal_id, is_archived, created_at, updated_at
+        FROM conversations
+        WHERE session_id = ${sessionId} AND is_archived = false
+        ORDER BY updated_at DESC
+        LIMIT 50
+      `;
+    } else {
+      convos = [];
+    }
 
     return res.json(convos);
   } catch (err: any) {
@@ -209,12 +236,16 @@ chatRouter.get('/conversations', async (req, res) => {
 chatRouter.get('/conversations/:id/messages', async (req, res) => {
   try {
     const userId = (req as any).userId || null;
+    const sessionId = req.headers['x-session-id'] as string | undefined;
     const convId = parseInt(req.params.id, 10);
 
-    // Allow access if user owns it or if conversation has no owner
-    const [conv] = userId
-      ? await sql`SELECT id FROM conversations WHERE id = ${convId} AND user_id = ${userId} LIMIT 1`
-      : await sql`SELECT id FROM conversations WHERE id = ${convId} LIMIT 1`;
+    // Allow access if user owns it or if session_id matches
+    let conv;
+    if (userId) {
+      [conv] = await sql`SELECT id FROM conversations WHERE id = ${convId} AND user_id = ${userId} LIMIT 1`;
+    } else if (sessionId) {
+      [conv] = await sql`SELECT id FROM conversations WHERE id = ${convId} AND session_id = ${sessionId} LIMIT 1`;
+    }
     if (!conv) return res.status(404).json({ error: 'Conversation not found' });
 
     const msgs = await sql`
@@ -236,12 +267,16 @@ chatRouter.get('/conversations/:id/messages', async (req, res) => {
 chatRouter.delete('/conversations/:id', async (req, res) => {
   try {
     const userId = (req as any).userId || null;
+    const sessionId = req.headers['x-session-id'] as string | undefined;
     const convId = parseInt(req.params.id, 10);
 
-    // Verify ownership (or allow if no owner)
-    const [conv] = userId
-      ? await sql`SELECT id FROM conversations WHERE id = ${convId} AND user_id = ${userId} LIMIT 1`
-      : await sql`SELECT id FROM conversations WHERE id = ${convId} AND user_id IS NULL LIMIT 1`;
+    // Verify ownership
+    let conv;
+    if (userId) {
+      [conv] = await sql`SELECT id FROM conversations WHERE id = ${convId} AND user_id = ${userId} LIMIT 1`;
+    } else if (sessionId) {
+      [conv] = await sql`SELECT id FROM conversations WHERE id = ${convId} AND session_id = ${sessionId} LIMIT 1`;
+    }
     if (!conv) return res.status(404).json({ error: 'Conversation not found' });
 
     // Delete messages first, then conversation

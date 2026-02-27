@@ -1,7 +1,24 @@
 import { useEffect, useCallback, lazy, Suspense } from 'react';
 import { Route, Switch, Redirect, useLocation } from 'wouter';
-import { useAuth } from './hooks/useAuth';
+import { useAuth, authHeaders } from './hooks/useAuth';
 import { ChatProvider } from './context/ChatContext';
+
+/** Transfer anonymous conversations to the newly-authenticated user */
+async function migrateSessionConversations() {
+  const sessionId = localStorage.getItem('smbx_session_id');
+  if (!sessionId) return;
+  try {
+    await fetch('/api/chat/conversations/migrate-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({ sessionId }),
+    });
+    localStorage.removeItem('smbx_session_id');
+    localStorage.removeItem('smbx_public_conv');
+  } catch {
+    // non-critical
+  }
+}
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -60,12 +77,13 @@ export default function App() {
       callback: async (response: any) => {
         try {
           await loginWithGoogle(response.credential);
-          // Migrate anonymous session if present
+          // Migrate anonymous sessions
           const anonId = sessionStorage.getItem('smbx_anon_session');
           if (anonId) {
             await migrateSession(anonId);
             sessionStorage.removeItem('smbx_anon_session');
           }
+          await migrateSessionConversations();
           navigate('/chat');
         } catch (err: any) {
           console.error('Google login error:', err.message);
@@ -82,6 +100,7 @@ export default function App() {
       await migrateSession(anonId);
       sessionStorage.removeItem('smbx_anon_session');
     }
+    await migrateSessionConversations();
     navigate('/chat');
   }, [login, migrateSession, navigate]);
 
@@ -92,6 +111,7 @@ export default function App() {
       await migrateSession(anonId);
       sessionStorage.removeItem('smbx_anon_session');
     }
+    await migrateSessionConversations();
     navigate('/chat');
   }, [register, migrateSession, navigate]);
 
