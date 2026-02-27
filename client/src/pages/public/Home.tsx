@@ -239,19 +239,8 @@ export default function Home() {
 
       {/* ═══ TOPBAR ═══ */}
       <header className={`home-topbar${!barsVisible ? ' hidden' : ''}`}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {phase === 'chat' ? (
-            <button className="home-icon-btn" onClick={() => { setPhase('landing'); }} aria-label="Back">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-            </button>
-          ) : (
-            <button className="home-icon-btn" aria-label="Menu">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12h18M3 6h18M3 18h18" /></svg>
-            </button>
-          )}
-          <div className="home-logo">
-            smb<span style={{ color: T.terra }}>x</span>.ai
-          </div>
+        <div className="home-logo">
+          smb<span style={{ color: T.terra }}>x</span>.ai
         </div>
         <button className="home-icon-btn" onClick={() => navigate('/login')} aria-label="Sign in">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>

@@ -37,19 +37,8 @@ export default function PublicNav({ chatMode }: Props) {
 
     return (
       <nav className="shrink-0 bg-[#FAF8F4] border-b border-[#E0DCD4]">
-        <div className="flex items-center justify-between px-4 py-3 md:px-10 md:py-4">
-          <button
-            onClick={resetToPublic}
-            className="flex items-center gap-1.5 text-[15px] font-medium text-[#6E6A63] hover:text-[#1A1A18] bg-transparent border-none cursor-pointer transition-colors px-0"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-            <span className="hidden md:inline">Back to {pageName}</span>
-            <span className="md:hidden">Back</span>
-          </button>
+        <div className="flex items-center justify-center px-4 py-3 md:px-10 md:py-4">
           <Logo />
-          <div className="w-[52px]" />
         </div>
       </nav>
     );
