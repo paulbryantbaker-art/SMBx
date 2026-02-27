@@ -4,6 +4,7 @@
 import { Router } from 'express';
 import { sql } from '../db.js';
 import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
+import { processDeliverable } from '../services/deliverableProcessor.js';
 import { getBalance, debitWallet } from '../services/walletService.js';
 import { getLeagueMultiplier } from '../services/leagueClassifier.js';
 
@@ -118,12 +119,21 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
     `;
 
     // Enqueue generation job
-    const jobId = await enqueueDeliverableGeneration({
+    const jobData = {
       deliverableId: deliverable.id,
       dealId,
       userId,
       menuItemSlug,
       deliverableType: menuItem.slug.replace(/-/g, '_'),
+    };
+    const jobId = await enqueueDeliverableGeneration(jobData);
+
+    // Inline fallback: process in this process if worker isn't running.
+    // The idempotency guard in processDeliverable prevents double-processing.
+    setImmediate(() => {
+      processDeliverable(jobData).catch(err =>
+        console.error('Inline deliverable generation error:', err.message),
+      );
     });
 
     return res.status(201).json({

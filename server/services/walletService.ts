@@ -166,7 +166,7 @@ export async function purchaseDeliverable(
   }
 
   const [deliverable] = await sql`
-    INSERT INTO deliverables (deal_id, user_id, menu_item_id, type, status, price_paid_cents)
+    INSERT INTO deliverables (deal_id, user_id, menu_item_id, type, status, price_charged_cents)
     VALUES (${dealId}, ${userId}, ${menuItemId}, ${deliverableType}, 'pending', ${priceCents})
     RETURNING id
   `;

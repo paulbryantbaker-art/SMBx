@@ -12,6 +12,7 @@ import { getBalance, debitWallet } from '../services/walletService.js';
 import { getLeagueMultiplier } from '../services/leagueClassifier.js';
 import { getGateMenuItems } from '../services/menuCatalogService.js';
 import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
+import { processDeliverable } from '../services/deliverableProcessor.js';
 import { createNotification } from './notifications.js';
 import { MASTER_SYSTEM_PROMPT } from '../prompts/masterPrompt.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
@@ -398,12 +399,20 @@ chatRouter.post('/deals/:dealId/unlock-gate', requireAuth, async (req, res) => {
           RETURNING id
         `;
         deliverableId = deliverable.id;
-        await enqueueDeliverableGeneration({
+        const jobData = {
           deliverableId: deliverable.id,
           dealId,
           userId,
           menuItemSlug: primaryItem.slug,
           deliverableType: primaryItem.slug.replace(/-/g, '_'),
+        };
+        await enqueueDeliverableGeneration(jobData);
+
+        // Inline fallback — idempotency guard prevents double-processing
+        setImmediate(() => {
+          processDeliverable(jobData).catch(err =>
+            console.error('Inline gate deliverable generation error:', err.message),
+          );
         });
       }
     } catch (e: any) {

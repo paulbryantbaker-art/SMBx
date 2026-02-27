@@ -357,7 +357,7 @@ async function generateFreeDeliverable(input: Record<string, any>, userId: numbe
 
   // Save deliverable
   const [deliverable] = await sql`
-    INSERT INTO deliverables (deal_id, user_id, type, status, content, price_paid_cents)
+    INSERT INTO deliverables (deal_id, user_id, type, status, content, price_charged_cents)
     VALUES (${dealId}, ${userId}, ${deliverableType}, 'complete', ${JSON.stringify(content)}::jsonb, 0)
     RETURNING id, type
   `;
