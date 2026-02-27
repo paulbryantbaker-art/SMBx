@@ -9,6 +9,7 @@ import GateProgress from '../components/chat/GateProgress';
 import PaywallCard from '../components/chat/PaywallCard';
 import DataRoom from '../components/chat/DataRoom';
 import Canvas from '../components/chat/Canvas';
+import ParticipantPanel from '../components/chat/ParticipantPanel';
 import { authHeaders, type User } from '../hooks/useAuth';
 
 interface ChatProps {
@@ -362,10 +363,13 @@ export default function Chat({ user, onLogout }: ChatProps) {
             <>
               <div className="px-4 py-3 border-b border-border shrink-0">
                 <h2 className="text-sm font-semibold text-text-primary m-0">Data Room</h2>
-                <p className="text-xs text-text-secondary m-0 mt-0.5">Your generated deliverables</p>
+                <p className="text-xs text-text-secondary m-0 mt-0.5">Documents & team</p>
               </div>
               <div className="flex-1 overflow-y-auto">
                 <DataRoom dealId={activeDealId} onViewDeliverable={setViewingDeliverable} />
+                <div className="border-t border-border">
+                  <ParticipantPanel dealId={activeDealId} />
+                </div>
               </div>
             </>
           )}
