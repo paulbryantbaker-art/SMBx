@@ -112,7 +112,7 @@ export default function Home() {
   const showSignup = limitReached || (messagesRemaining !== null && messagesRemaining <= 5 && hasMessages);
 
   return (
-    <div className="home-root">
+    <div className={`home-root${phase === 'chat' ? ' in-chat' : ''}`}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
@@ -124,6 +124,11 @@ export default function Home() {
           background: ${T.cream};
           min-height: 100dvh;
           display: flex; flex-direction: column;
+        }
+        .home-root.in-chat {
+          height: 100dvh;
+          max-height: 100dvh;
+          overflow: hidden;
         }
 
         /* ── Topbar ── */
@@ -211,11 +216,13 @@ export default function Home() {
         /* ── Chat phase ── */
         .home-chat {
           flex: 1; display: flex; flex-direction: column;
-          min-height: 100dvh;
+          min-height: 0;
         }
         .home-messages {
           flex: 1; overflow-y: auto; padding: 72px 16px 8px;
+          min-height: 0;
           max-width: 860px; margin: 0 auto; width: 100%;
+          -webkit-overflow-scrolling: touch;
         }
         @media (min-width: 768px) { .home-messages { padding: 72px 40px 8px; } }
 
