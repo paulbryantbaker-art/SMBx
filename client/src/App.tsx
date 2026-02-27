@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, lazy, Suspense } from 'react';
 import { Route, Switch, Redirect, useLocation } from 'wouter';
 import { useAuth } from './hooks/useAuth';
 import { ChatProvider } from './context/ChatContext';
@@ -11,6 +11,14 @@ function ScrollToTop() {
   return null;
 }
 
+function PageLoader() {
+  return (
+    <div className="flex justify-center items-center min-h-dvh bg-[#FAF8F4]">
+      <p className="text-[#7A766E] font-sans text-base m-0">Loading...</p>
+    </div>
+  );
+}
+
 import Home from './pages/public/Home';
 import Pricing from './pages/public/Pricing';
 import Login from './pages/public/Login';
@@ -18,7 +26,12 @@ import Signup from './pages/public/Signup';
 import Privacy from './pages/public/Privacy';
 import Terms from './pages/public/Terms';
 import Chat from './pages/Chat';
-import Pipeline from './pages/Pipeline';
+
+// Lazy-load secondary pages to keep initial bundle lean
+const Pipeline = lazy(() => import('./pages/Pipeline'));
+const Intelligence = lazy(() => import('./pages/Intelligence'));
+const Sourcing = lazy(() => import('./pages/Sourcing'));
+const Settings = lazy(() => import('./pages/Settings'));
 
 export default function App() {
   const { user, loading, login, register, loginWithGoogle, migrateSession, logout } = useAuth();
@@ -142,7 +155,39 @@ export default function App() {
 
       <Route path="/pipeline">
         {user ? (
-          <Pipeline user={user} onLogout={() => { logout(); navigate('/'); }} />
+          <Suspense fallback={<PageLoader />}>
+            <Pipeline user={user} onLogout={() => { logout(); navigate('/'); }} />
+          </Suspense>
+        ) : (
+          <Redirect to="/login" />
+        )}
+      </Route>
+
+      <Route path="/intelligence">
+        {user ? (
+          <Suspense fallback={<PageLoader />}>
+            <Intelligence user={user} onLogout={() => { logout(); navigate('/'); }} />
+          </Suspense>
+        ) : (
+          <Redirect to="/login" />
+        )}
+      </Route>
+
+      <Route path="/sourcing">
+        {user ? (
+          <Suspense fallback={<PageLoader />}>
+            <Sourcing user={user} onLogout={() => { logout(); navigate('/'); }} />
+          </Suspense>
+        ) : (
+          <Redirect to="/login" />
+        )}
+      </Route>
+
+      <Route path="/settings">
+        {user ? (
+          <Suspense fallback={<PageLoader />}>
+            <Settings user={user} onLogout={() => { logout(); navigate('/'); }} />
+          </Suspense>
         ) : (
           <Redirect to="/login" />
         )}

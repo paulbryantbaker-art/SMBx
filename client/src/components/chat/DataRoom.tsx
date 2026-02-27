@@ -34,6 +34,18 @@ interface UnfiledDeliverable {
   journey: string;
 }
 
+interface ShareLink {
+  id: number;
+  token: string;
+  access_level: 'blind' | 'teaser' | 'full';
+  require_nda: boolean;
+  view_count: number;
+  max_views: number | null;
+  expires_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+}
+
 interface DataRoomProps {
   dealId: number | null;
   onViewDeliverable: (id: number) => void;
@@ -61,6 +73,14 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filingId, setFilingId] = useState<number | null>(null);
+
+  // Share links
+  const [shareLinks, setShareLinks] = useState<ShareLink[]>([]);
+  const [showSharePanel, setShowSharePanel] = useState(false);
+  const [shareAccess, setShareAccess] = useState<'blind' | 'teaser' | 'full'>('teaser');
+  const [shareRequireNda, setShareRequireNda] = useState(true);
+  const [creatingLink, setCreatingLink] = useState(false);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const fetchDataRoom = useCallback(async () => {
     if (!dealId) return;
@@ -124,6 +144,49 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
 
   const getDocsForFolder = (folderId: number) =>
     documents.filter(d => d.folder_id === folderId);
+
+  // Load share links
+  const loadShareLinks = useCallback(async () => {
+    if (!dealId) return;
+    try {
+      const res = await fetch(`/api/deals/${dealId}/share-links`, { headers: authHeaders() });
+      if (res.ok) setShareLinks(await res.json());
+    } catch { /* ignore */ }
+  }, [dealId]);
+
+  useEffect(() => { if (showSharePanel) loadShareLinks(); }, [showSharePanel, loadShareLinks]);
+
+  const createShareLink = async () => {
+    if (!dealId) return;
+    setCreatingLink(true);
+    try {
+      const res = await fetch(`/api/deals/${dealId}/share-links`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ accessLevel: shareAccess, requireNda: shareRequireNda }),
+      });
+      if (res.ok) loadShareLinks();
+    } catch { /* ignore */ }
+    finally { setCreatingLink(false); }
+  };
+
+  const revokeShareLink = async (linkId: number) => {
+    try {
+      await fetch(`/api/share-links/${linkId}/revoke`, {
+        method: 'POST',
+        headers: authHeaders(),
+      });
+      loadShareLinks();
+    } catch { /* ignore */ }
+  };
+
+  const copyLink = (link: ShareLink) => {
+    const url = `${window.location.origin}/shared/${link.token}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedId(link.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    });
+  };
 
   if (!dealId) {
     return (
@@ -245,6 +308,92 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
           </div>
         );
       })}
+
+      {/* Share Link Button */}
+      <div className="mt-3 pt-3 px-3" style={{ borderTop: '1px solid #EBE7DF' }}>
+        <button
+          onClick={() => setShowSharePanel(!showSharePanel)}
+          className={`w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[12px] font-medium border-0 cursor-pointer transition-colors ${
+            showSharePanel ? 'bg-[#D4714E] text-white' : 'bg-[#F3F0EA] text-[#6E6A63] hover:bg-[#EBE7DF]'
+          }`}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" /><path d="M16 6l-4-4-4 4" /><path d="M12 2v13" />
+          </svg>
+          Share
+        </button>
+      </div>
+
+      {/* Share Links Panel */}
+      {showSharePanel && (
+        <div className="px-3 pb-3">
+          <div className="mt-2 p-3 bg-[#FAF8F4] rounded-lg">
+            <p className="text-[11px] font-semibold text-[#6E6A63] m-0 mb-2">Create Share Link</p>
+            <div className="flex gap-1 mb-2">
+              {(['blind', 'teaser', 'full'] as const).map(level => (
+                <button
+                  key={level}
+                  onClick={() => setShareAccess(level)}
+                  className={`flex-1 py-1 rounded text-[10px] font-medium border-0 cursor-pointer transition-colors ${
+                    shareAccess === level ? 'bg-[#D4714E] text-white' : 'bg-white text-[#6E6A63]'
+                  }`}
+                >
+                  {level.charAt(0).toUpperCase() + level.slice(1)}
+                </button>
+              ))}
+            </div>
+            <label className="flex items-center gap-1.5 text-[11px] text-[#6E6A63] mb-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={shareRequireNda}
+                onChange={e => setShareRequireNda(e.target.checked)}
+                className="rounded"
+              />
+              Require NDA
+            </label>
+            <button
+              onClick={createShareLink}
+              disabled={creatingLink}
+              className="w-full py-1.5 rounded-lg text-[11px] font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-50"
+            >
+              {creatingLink ? 'Creating...' : 'Create Link'}
+            </button>
+          </div>
+
+          {/* Existing links */}
+          {shareLinks.filter(l => !l.revoked_at).length > 0 && (
+            <div className="mt-2 space-y-1.5">
+              <p className="text-[10px] font-semibold text-[#A9A49C] uppercase tracking-wider m-0">Active Links</p>
+              {shareLinks.filter(l => !l.revoked_at).map(link => (
+                <div key={link.id} className="flex items-center gap-1.5 p-2 bg-white rounded-lg">
+                  <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
+                    link.access_level === 'full' ? 'bg-green-50 text-green-700' :
+                    link.access_level === 'teaser' ? 'bg-blue-50 text-blue-700' :
+                    'bg-gray-100 text-gray-600'
+                  }`}>
+                    {link.access_level}
+                  </span>
+                  <span className="text-[10px] text-[#A9A49C]">{link.view_count} views</span>
+                  <div className="flex gap-1 ml-auto">
+                    <button
+                      onClick={() => copyLink(link)}
+                      className="text-[10px] px-2 py-0.5 rounded bg-[#F3F0EA] text-[#6E6A63] border-0 cursor-pointer hover:bg-[#EBE7DF]"
+                    >
+                      {copiedId === link.id ? 'Copied!' : 'Copy'}
+                    </button>
+                    <button
+                      onClick={() => revokeShareLink(link.id)}
+                      className="text-[10px] px-2 py-0.5 rounded bg-red-50 text-red-600 border-0 cursor-pointer hover:bg-red-100"
+                    >
+                      Revoke
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Unfiled deliverables */}
       {unfiledDeliverables.length > 0 && (
