@@ -91,8 +91,10 @@ export default function Home() {
   const activeTimer = useRef<ReturnType<typeof setTimeout>>();
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // Resize chat container to visual viewport (handles iOS keyboard)
-  // Like useAppHeight but WITHOUT setting top:offsetTop which shifts the container
+  // Resize chat container to match visual viewport (handles iOS keyboard).
+  // Sets BOTH height and top — top:offsetTop is required because iOS Safari
+  // scrolls the layout viewport when keyboard opens, and fixed elements
+  // need to follow. Only active during chat phase (landing is normal flow).
   useEffect(() => {
     if (phase !== 'chat') return;
     const el = rootRef.current;
@@ -100,7 +102,9 @@ export default function Home() {
     const vv = window.visualViewport;
     function update() {
       const h = vv ? vv.height : window.innerHeight;
+      const t = vv ? vv.offsetTop : 0;
       el!.style.height = h + 'px';
+      el!.style.top = t + 'px';
     }
     if (vv) {
       vv.addEventListener('resize', update);
@@ -115,6 +119,7 @@ export default function Home() {
       }
       window.removeEventListener('resize', update);
       el!.style.height = '';
+      el!.style.top = '';
     };
   }, [phase]);
 
