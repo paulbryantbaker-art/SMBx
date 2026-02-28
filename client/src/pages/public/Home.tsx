@@ -9,51 +9,68 @@ import Logo from '../../components/public/Logo';
 /* ═══ DESIGN TOKENS ═══ */
 
 const T = {
-  bg: '#F6F5F1', fill: '#F3F0EA', white: '#FFFFFF',
-  terra: '#D4714E', terraHover: '#BE6342', terraSoft: '#FFF0EB',
-  text: '#1A1A18', sub: '#525252', muted: '#6E6A63', faint: '#A9A49C',
+  bg: '#F4F2ED',
+  fill: '#F3F0EA',
+  white: '#FFFFFF',
+  terra: '#B5522F',          // was #D4714E — deeper, richer
+  terraHover: '#9A4526',     // was #BE6342
+  terraLight: '#E8845E',     // NEW — bright accent for gradients
+  terraSoft: '#FFF0EB',
+  text: '#0C0A09',           // was #1A1A18 — near-black for max contrast
+  body: '#292524',           // NEW — stone-800 for body text
+  sub: '#44403C',            // was #525252 — stone-700
+  muted: '#6E6A63',
+  faint: '#A8A29E',
   border: '#DDD9D1',
 };
 
 /* ═══ PROMPT CHIPS ═══ */
 
 const PROMPT_CHIPS = [
-  { key: 'buy-services', label: 'I want to buy a home services business in Texas.', fill: 'I want to buy a home services business in Texas.' },
-  { key: 'valuation', label: 'Help me understand what my company might be worth.', fill: 'Help me understand what my company might be worth.' },
-  { key: 'sba', label: 'Screen this deal for SBA financing fit.', fill: 'Screen this deal for SBA financing fit.' },
-  { key: 'prepare', label: 'Show me what I should prepare before going to market.', fill: 'Show me what I should prepare before going to market.' },
+  { key: 'sell', label: 'I want to sell my business', fill: 'I want to sell my business.' },
+  { key: 'worth', label: "What's my company worth?", fill: 'Help me understand what my company might be worth.' },
+  { key: 'buy', label: 'Find me a business to buy', fill: 'I want to buy a business.' },
+  { key: 'raise', label: "I'm raising capital", fill: "I'm raising capital for my business." },
 ];
 
 /* ═══ LEARN CARDS ═══ */
 
 const LEARN_CARDS = [
   {
-    title: 'How Yulia works',
-    desc: 'Four steps from conversation to deliverables.',
-    cta: 'See how it works',
+    title: 'How it works',
+    desc: 'Four steps from prompt to finished deliverables.',
+    cta: 'See the flow',
     href: '/how-it-works',
-    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>,
+    badgeBg: 'linear-gradient(135deg, #E07A4E 0%, #D4914E 100%)',
+    badgeGlow: '0 6px 20px rgba(224,122,78,0.30)',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="rgba(255,255,255,0.3)" stroke="white"/></svg>,
   },
   {
-    title: 'Intelligence engine',
-    desc: '80+ verticals, real transaction data, live market conditions.',
-    cta: 'Explore the data',
+    title: 'Intelligence',
+    desc: '80+ verticals, live data, real comparables.',
+    cta: 'Explore data',
     href: '/how-it-works',
-    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+    badgeBg: 'linear-gradient(135deg, #C47A52 0%, #D49A5E 100%)',
+    badgeGlow: '0 6px 20px rgba(196,122,82,0.30)',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2" fill="rgba(255,255,255,0.2)"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
   },
   {
-    title: 'Deal workspace',
-    desc: 'One place for every document, every party.',
-    cta: 'See the workspace',
+    title: 'Workspace',
+    desc: 'Every document, every party, one space.',
+    cta: 'See workspace',
     href: '/enterprise',
-    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+    badgeBg: 'linear-gradient(135deg, #B5522F 0%, #D4714E 100%)',
+    badgeGlow: '0 6px 20px rgba(181,82,47,0.30)',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.25)"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.25)"/></svg>,
   },
   {
     title: 'Every journey',
-    desc: 'Sell, buy, raise, integrate — any deal size.',
+    desc: 'Sell, buy, raise, integrate — any size.',
     cta: 'View journeys',
     href: '/sell',
-    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+    badgeBg: 'linear-gradient(135deg, #D4735E 0%, #E8945E 100%)',
+    badgeGlow: '0 6px 20px rgba(212,115,94,0.30)',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="5" cy="6" r="2.5" fill="rgba(255,255,255,0.3)"/><circle cx="12" cy="18" r="2.5" fill="rgba(255,255,255,0.3)"/><circle cx="19" cy="10" r="2.5" fill="rgba(255,255,255,0.3)"/><path d="M6.5 7.5L10.5 16"/><path d="M13.5 16.5L17 11.5"/></svg>,
   },
 ];
 
@@ -184,20 +201,26 @@ export default function Home() {
 
         /* ── Floating pill nav ── */
         .home-pill {
-          position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+          position: sticky; top: 16px; left: 50%; transform: translateX(-50%);
           z-index: 50; width: auto;
           backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
-          background: rgba(255,255,255,0.85);
-          border: 1px solid rgba(221,217,209,0.5);
-          box-shadow: 0 4px 20px rgba(26,26,24,.06), 0 1px 3px rgba(26,26,24,.04);
+          background: rgba(255,255,255,0.93);
+          border: 1px solid rgba(12,10,9,0.06);
+          box-shadow: 0 4px 20px rgba(12,10,9,0.06);
           border-radius: 100px;
           padding: 10px 24px;
           display: flex; align-items: center; gap: 20px;
           transition: transform 0.3s ease, opacity 0.3s ease;
+          margin: 0 auto;
+          width: fit-content;
         }
         @media (max-width: 768px) {
-          .home-pill { padding: 10px 16px; gap: 12px; }
-          .home-pill.hidden { transform: translateX(-50%) translateY(-120%); opacity: 0; }
+          .home-pill {
+            position: relative; top: auto; left: auto; transform: none;
+            padding: 9px 18px; gap: 12px;
+            margin: 12px auto 0;
+          }
+          .home-pill.hidden { /* no-op on mobile — scrolls naturally */ }
         }
 
         /* ── Landing hero ── */
@@ -211,36 +234,56 @@ export default function Home() {
           position: relative; z-index: 1;
         }
         @media (max-width: 1100px) { .home-hero { padding: 60px 40px 40px; } }
-        @media (max-width: 768px)  { .home-hero { padding: 40px 20px 32px; } }
+        @media (max-width: 768px) {
+          .home-hero {
+            min-height: auto;
+            justify-content: flex-start;
+            padding: 16px 18px 24px;
+          }
+        }
 
         .home-h1 {
-          font-size: 72px; font-weight: 600; line-height: 1.05;
-          letter-spacing: -0.05em; color: ${T.text};
-          margin: 0 0 28px; animation: fadeUp 0.6s ease both;
+          font-size: 64px; font-weight: 700; line-height: 1.06;
+          letter-spacing: -0.04em; color: ${T.text};
+          margin: 0 0 20px; animation: fadeUp 0.6s ease both;
         }
-        @media (max-width: 1100px) { .home-h1 { font-size: 56px; margin-bottom: 24px; } }
-        @media (max-width: 768px)  { .home-h1 { font-size: 40px; margin-bottom: 20px; } }
+        @media (max-width: 1100px) { .home-h1 { font-size: 52px; margin-bottom: 18px; } }
+        @media (max-width: 768px) { .home-h1 { font-size: 34px; margin-bottom: 14px; } }
 
         .home-sub {
-          font-size: 18px; color: ${T.sub}; line-height: 1.75;
-          font-weight: 400; max-width: 560px; margin: 0 0 64px;
+          font-size: 17px; color: ${T.body}; line-height: 1.6;
+          font-weight: 400; max-width: 480px; margin: 0 0 48px;
           animation: fadeUp 0.6s ease 0.08s both;
         }
-        @media (max-width: 1100px) { .home-sub { font-size: 17px; max-width: 480px; margin-bottom: 48px; } }
-        @media (max-width: 768px)  { .home-sub { font-size: 16px; max-width: 360px; margin-bottom: 40px; } }
+        @media (max-width: 1100px) { .home-sub { font-size: 16px; max-width: 400px; margin-bottom: 36px; } }
+        @media (max-width: 768px) { .home-sub { font-size: 14px; max-width: 280px; margin-bottom: 22px; } }
 
         /* ── 2-Layer chat card ── */
-        .home-card-outer {
-          width: 100%; max-width: 760px;
-          border-radius: 34px;
-          border: 1px solid rgba(0,0,0,0.08);
-          background: rgba(255,255,255,0.84);
-          backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
-          box-shadow: 0 24px 80px rgba(0,0,0,0.07);
-          padding: 24px;
-          animation: fadeUp 0.6s ease 0.16s both;
+        .home-card-glow {
+          position: absolute;
+          left: 50%; top: 50%;
+          transform: translate(-50%, -50%);
+          width: calc(100% + 80px); height: calc(100% + 60px);
+          max-width: 780px;
+          border-radius: 56px;
+          background: radial-gradient(ellipse, rgba(181,82,47,0.07) 0%, transparent 65%);
+          pointer-events: none;
+          z-index: 0;
         }
-        @media (max-width: 768px) { .home-card-outer { border-radius: 28px; padding: 16px; } }
+        @media (max-width: 768px) { .home-card-glow { display: none; } }
+
+        .home-card-outer {
+          width: 100%; max-width: 680px;
+          border-radius: 28px;
+          border: 1px solid rgba(12,10,9,0.06);
+          background: rgba(255,255,255,0.88);
+          backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);
+          box-shadow: 0 4px 10px rgba(12,10,9,0.02), 0 16px 48px rgba(12,10,9,0.06);
+          padding: 18px;
+          animation: fadeUp 0.6s ease 0.16s both;
+          position: relative; z-index: 1;
+        }
+        @media (max-width: 768px) { .home-card-outer { border-radius: 18px; padding: 10px; max-width: 100%; } }
 
         .home-card-label {
           font-size: 14px; font-weight: 600; color: #0a0a0a;
@@ -248,27 +291,26 @@ export default function Home() {
         }
 
         .home-input-card {
-          border-radius: 26px;
-          border: 1px solid rgba(0,0,0,0.10);
+          border-radius: 20px;
+          border: 1px solid rgba(12,10,9,0.07);
           background: #FFFFFF;
-          box-shadow: 0 12px 32px rgba(0,0,0,0.05);
-          padding: 24px;
+          padding: 18px;
           transition: border-color 0.3s, box-shadow 0.3s;
         }
         .home-input-card.active {
-          border-color: rgba(212,113,78,0.45);
-          box-shadow: 0 0 0 4px rgba(212,113,78,0.10);
+          border-color: rgba(181,82,47,0.40);
+          box-shadow: 0 0 0 4px rgba(181,82,47,0.08);
         }
-        @media (max-width: 768px) { .home-input-card { border-radius: 22px; padding: 18px; } }
+        @media (max-width: 768px) { .home-input-card { border-radius: 14px; padding: 12px; } }
 
         .home-hero-textarea {
-          width: 100%; min-height: 120px; resize: none;
+          width: 100%; min-height: 72px; resize: none;
           background: transparent; border: none; outline: none;
-          font-size: 17px; line-height: 2; color: #171717;
+          font-size: 16px; line-height: 1.75; color: #171717;
           font-family: 'Inter', system-ui, sans-serif;
         }
-        .home-hero-textarea::placeholder { color: #a3a3a3; }
-        @media (max-width: 768px) { .home-hero-textarea { min-height: 100px; font-size: 16px; } }
+        .home-hero-textarea::placeholder { color: ${T.faint}; }
+        @media (max-width: 768px) { .home-hero-textarea { min-height: 44px; font-size: 14.5px; } }
 
         .home-hero-send-row {
           border-top: 1px solid rgba(0,0,0,0.10);
@@ -276,16 +318,18 @@ export default function Home() {
           display: flex; justify-content: flex-end;
         }
         .home-hero-send {
-          width: 48px; height: 48px; border-radius: 9999px;
-          background: ${T.terra}; color: #fff; border: none;
+          width: 42px; height: 42px; border-radius: 9999px;
+          background: linear-gradient(135deg, ${T.terra} 0%, ${T.terraLight} 100%);
+          color: #fff; border: none;
           cursor: pointer; display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 2px 8px rgba(212,113,78,0.3);
+          box-shadow: 0 4px 16px rgba(181,82,47,0.28);
           transition: all 0.15s;
           font-family: inherit;
         }
-        .home-hero-send:hover { background: ${T.terraHover}; transform: scale(1.02); }
+        .home-hero-send:hover { filter: brightness(1.05); transform: scale(1.02); }
         .home-hero-send:disabled { opacity: 0.5; cursor: default; transform: none; }
-        .home-hero-send:disabled:hover { background: ${T.terra}; }
+        .home-hero-send:disabled:hover { filter: none; }
+        @media (max-width: 768px) { .home-hero-send { width: 36px; height: 36px; } }
 
         /* ── Prompt chips ── */
         .home-chips {
@@ -295,17 +339,19 @@ export default function Home() {
         }
 
         .home-chip {
-          padding: 10px 16px; border-radius: 16px;
-          border: 1px solid rgba(0,0,0,0.10);
-          background: rgba(255,255,255,0.88);
-          cursor: pointer; font-size: 14px; font-weight: 400;
+          padding: 7px 18px; border-radius: 100px;
+          border: 1px solid rgba(12,10,9,0.07);
+          background: rgba(255,255,255,0.92);
+          backdrop-filter: blur(24px);
+          cursor: pointer; font-size: 13px; font-weight: 550;
           color: ${T.sub};
           font-family: 'Inter', system-ui, sans-serif;
           transition: all 0.15s;
-          white-space: normal; text-align: left;
+          box-shadow: 0 2px 10px rgba(12,10,9,0.04);
         }
-        .home-chip:hover { background: #fff; color: #0a0a0a; }
+        .home-chip:hover { background: #fff; color: ${T.text}; }
         .home-chip:active { transform: scale(0.97); }
+        @media (max-width: 768px) { .home-chip { padding: 6px 13px; font-size: 11.5px; } }
 
         /* ── Learn cards ── */
         .home-learn {
@@ -321,12 +367,12 @@ export default function Home() {
         .home-learn-card {
           display: flex; flex-direction: column;
           height: 100%;
-          border-radius: 24px;
-          border: 1px solid rgba(0,0,0,0.10);
-          background: rgba(255,255,255,0.84);
+          border-radius: 22px;
+          border: 1px solid rgba(12,10,9,0.06);
+          background: rgba(255,255,255,0.88);
           backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-          box-shadow: 0 12px 30px rgba(0,0,0,0.05);
-          padding: 20px;
+          box-shadow: 0 2px 6px rgba(12,10,9,0.03), 0 10px 36px rgba(12,10,9,0.04);
+          padding: 14px;
           text-align: left; text-decoration: none; color: inherit;
           transition: all 0.2s;
         }
@@ -334,36 +380,40 @@ export default function Home() {
           transform: translateY(-2px);
           background: #fff;
         }
+        @media (max-width: 768px) { .home-learn-card { border-radius: 16px; padding: 8px; } }
 
         .home-learn-inner {
           display: flex; flex-direction: column;
           flex: 1;
-          border-radius: 20px;
-          border: 1px solid rgba(0,0,0,0.08);
+          border-radius: 18px;
+          border: 1px solid rgba(12,10,9,0.04);
           background: #FFFFFF;
           padding: 16px;
+          height: 210px;
         }
+        @media (max-width: 768px) { .home-learn-inner { height: 186px; padding: 12px; border-radius: 12px; } }
 
         .home-learn-icon {
-          width: 44px; height: 44px; border-radius: 16px;
-          border: 1px solid rgba(0,0,0,0.10);
-          background: white;
+          width: 44px; height: 44px; border-radius: 12px;
           display: flex; align-items: center; justify-content: center;
-          color: #0a0a0a;
+          /* background and box-shadow set inline per-card */
         }
+        @media (max-width: 768px) { .home-learn-icon { width: 36px; height: 36px; border-radius: 10px; } }
 
         .home-learn-title {
-          font-size: 18px; font-weight: 600;
+          font-size: 16px; font-weight: 700;
           letter-spacing: -0.02em;
-          color: #0a0a0a;
-          margin: 20px 0 0; line-height: 1.3;
+          color: ${T.text};
+          margin: 16px 0 0; line-height: 1.25;
         }
+        @media (max-width: 768px) { .home-learn-title { font-size: 14px; margin-top: 12px; } }
 
         .home-learn-desc {
-          font-size: 14px; line-height: 1.75;
-          color: ${T.sub};
-          margin: 12px 0 0; flex: 1;
+          font-size: 13px; line-height: 1.55;
+          color: ${T.body};
+          margin: 8px 0 0; flex: 1;
         }
+        @media (max-width: 768px) { .home-learn-desc { font-size: 11.5px; margin-top: 5px; } }
 
         .home-learn-cta {
           display: flex; align-items: center; justify-content: space-between;
@@ -371,19 +421,21 @@ export default function Home() {
           padding-top: 16px; margin-top: 20px;
         }
         .home-learn-cta-text {
-          font-size: 14px; font-weight: 500;
-          color: #0a0a0a; padding-right: 12px;
+          font-size: 12.5px; font-weight: 600;
+          color: ${T.terra}; padding-right: 12px;
         }
+        @media (max-width: 768px) { .home-learn-cta-text { font-size: 11px; } }
         .home-learn-cta-btn {
-          width: 40px; height: 40px; border-radius: 16px;
-          border: 1px solid rgba(0,0,0,0.10);
-          background: white;
+          width: 30px; height: 30px; border-radius: 9px;
+          border: 1px solid rgba(181,82,47,0.12);
+          background: linear-gradient(135deg, rgba(181,82,47,0.08), rgba(232,132,94,0.08));
           display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0; color: #0a0a0a;
+          flex-shrink: 0; color: ${T.terra};
           transition: background 0.15s;
         }
+        @media (max-width: 768px) { .home-learn-cta-btn { width: 24px; height: 24px; border-radius: 7px; } }
         .home-learn-card:hover .home-learn-cta-btn {
-          background: rgba(0,0,0,0.05);
+          background: linear-gradient(135deg, rgba(181,82,47,0.14), rgba(232,132,94,0.14));
         }
 
         /* ── Chat phase ── */
@@ -452,14 +504,20 @@ export default function Home() {
       {/* ═══ AMBIENT BACKGROUND ═══ */}
       <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
         <div style={{
-          position: 'absolute', left: '-10%', top: '-10%',
-          width: '28rem', height: '28rem', borderRadius: '9999px',
-          background: 'rgba(255,255,255,0.70)', filter: 'blur(48px)',
+          position: 'absolute', left: '-5%', top: '-8%',
+          width: '34rem', height: '34rem', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(224,122,78,0.07) 0%, transparent 70%)',
         }} />
         <div style={{
-          position: 'absolute', bottom: '-12%', right: '-8%',
-          width: '34rem', height: '34rem', borderRadius: '9999px',
-          background: 'rgba(233,228,218,0.70)', filter: 'blur(48px)',
+          position: 'absolute', left: '40%', top: '25%',
+          width: '44rem', height: '30rem', borderRadius: '50%',
+          background: 'radial-gradient(ellipse, rgba(181,82,47,0.05) 0%, transparent 60%)',
+        }} />
+        <div style={{
+          position: 'absolute', right: '-8%', bottom: '-10%',
+          width: '28rem', height: '28rem', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(240,235,225,0.5) 0%, transparent 65%)',
+          filter: 'blur(30px)',
         }} />
       </div>
 
@@ -481,11 +539,21 @@ export default function Home() {
       {phase === 'landing' && (
         <>
           <main className="home-hero">
-            <h1 className="home-h1">Start with the deal.</h1>
+            <h1 className="home-h1">
+              Start with{' '}
+              <span style={{
+                background: `linear-gradient(135deg, ${T.terra}, ${T.terraLight})`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}>the deal.</span>
+            </h1>
             <p className="home-sub">
               AI-powered M&A advisory. From first question to closing day.
             </p>
 
+            {/* Warm glow behind card */}
+            <div className="home-card-glow" />
             {/* 2-layer chat card */}
             <div className="home-card-outer">
               <span className="home-card-label">Talk through the deal</span>
@@ -531,13 +599,18 @@ export default function Home() {
               {LEARN_CARDS.map(card => (
                 <Link key={card.title} href={card.href} className="home-learn-card">
                   <div className="home-learn-inner">
-                    <div className="home-learn-icon">{card.icon}</div>
+                    <div
+                      className="home-learn-icon"
+                      style={{ background: card.badgeBg, boxShadow: card.badgeGlow }}
+                    >
+                      {card.icon}
+                    </div>
                     <h3 className="home-learn-title">{card.title}</h3>
                     <p className="home-learn-desc">{card.desc}</p>
                     <div className="home-learn-cta">
                       <span className="home-learn-cta-text">{card.cta}</span>
                       <span className="home-learn-cta-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M9 18l6-6-6-6" />
                         </svg>
                       </span>
