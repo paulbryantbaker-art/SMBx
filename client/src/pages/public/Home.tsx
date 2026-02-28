@@ -9,21 +9,20 @@ import Logo from '../../components/public/Logo';
 /* ═══ DESIGN TOKENS ═══ */
 
 const T = {
-  cream: '#FAF8F4', fill: '#F3F0EA', white: '#FFFFFF',
+  bg: '#F6F5F1', fill: '#F3F0EA', white: '#FFFFFF',
   terra: '#D4714E', terraHover: '#BE6342', terraSoft: '#FFF0EB',
-  text: '#1A1A18', textMid: '#3D3B37', muted: '#6E6A63', faint: '#A9A49C',
+  text: '#1A1A18', textMid: '#3D3B37', sub: '#525252', muted: '#6E6A63', faint: '#A9A49C',
   border: '#DDD9D1',
   shadowCard: '0 1px 4px rgba(26, 26, 24, 0.05)',
-  shadowXl: '0 8px 32px rgba(26, 26, 24, 0.1), 0 2px 6px rgba(26, 26, 24, 0.05)',
 };
 
 /* ═══ PROMPT CHIPS ═══ */
 
 const PROMPT_CHIPS = [
-  { key: 'sell', label: 'I want to sell my business', fill: 'I want to sell my business — ' },
-  { key: 'value', label: "What's my business worth?", fill: "What's my business worth? I own a " },
-  { key: 'buy', label: 'Help me find businesses to buy', fill: "Help me find businesses to buy — I'm looking for " },
-  { key: 'raise', label: "I'm raising capital", fill: "I'm raising capital for my " },
+  { key: 'sell', label: 'I want to sell my business' },
+  { key: 'value', label: "What's my business worth?" },
+  { key: 'buy', label: 'Help me find a business to buy' },
+  { key: 'raise', label: "I'm raising capital" },
 ];
 
 /* ═══ LEARN CARDS ═══ */
@@ -31,27 +30,31 @@ const PROMPT_CHIPS = [
 const LEARN_CARDS = [
   {
     title: 'How Yulia works',
-    desc: 'Tell her about your deal. She handles analysis, documents, and strategy. Four steps from conversation to deliverables.',
+    desc: 'Four steps from conversation to deliverables.',
+    cta: 'See how it works',
     href: '/how-it-works',
-    icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>,
+    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>,
   },
   {
     title: 'Intelligence engine',
-    desc: '80+ industry verticals, real transaction data, Census economics, live market conditions. Analysis, not guesses.',
+    desc: '80+ verticals, real transaction data, live market conditions.',
+    cta: 'Explore the data',
     href: '/how-it-works',
-    icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
   },
   {
-    title: 'Your deal workspace',
-    desc: 'Invite your broker, attorney, CPA. One place for every document, every party, every decision.',
+    title: 'Deal workspace',
+    desc: 'One place for every document, every party.',
+    cta: 'See the workspace',
     href: '/enterprise',
-    icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
   },
   {
-    title: 'Every deal journey',
-    desc: 'Sell, buy, raise capital, integrate. From $400K landscaping exits to $40M PE roll-ups.',
+    title: 'Every journey',
+    desc: 'Sell, buy, raise, integrate — any deal size.',
+    cta: 'View journeys',
     href: '/sell',
-    icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
   },
 ];
 
@@ -65,6 +68,11 @@ export default function Home() {
   const dockRef = useRef<ChatDockHandle>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  /* Hero standalone textarea state */
+  const [heroText, setHeroText] = useState('');
+  const heroInputRef = useRef<HTMLTextAreaElement>(null);
+  const [heroInputActive, setHeroInputActive] = useState(false);
 
   const {
     messages, sending, streamingText, messagesRemaining,
@@ -106,18 +114,37 @@ export default function Home() {
     }
   }, [messages, streamingText, phase]);
 
-  // Send handler
+  // Chat-phase dock send handler
   const handleSend = useCallback((text: string) => {
     enterChat();
     sendMessage(text);
     dockRef.current?.clear();
   }, [enterChat, sendMessage]);
 
-  // Chip click — fill and send
-  const handleChipClick = useCallback((fill: string) => {
+  // Hero textarea send handler
+  const handleHeroSend = useCallback(() => {
+    const text = heroText.trim();
+    if (!text) return;
     enterChat();
-    sendMessage(fill);
-  }, [enterChat, sendMessage]);
+    sendMessage(text);
+    setHeroText('');
+  }, [heroText, enterChat, sendMessage]);
+
+  // Hero textarea keydown — Enter sends, Shift+Enter newline
+  const handleHeroKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleHeroSend();
+    }
+  }, [handleHeroSend]);
+
+  // Chip click — fill textarea and focus (don't auto-send)
+  const handleChipClick = useCallback((label: string) => {
+    setHeroText(label);
+    heroInputRef.current?.focus();
+    setHeroInputActive(true);
+    setTimeout(() => setHeroInputActive(false), 900);
+  }, []);
 
   // Scroll-hide topbar on mobile — listen to messages container in chat, window on landing
   const handleScroll = useCallback((e?: Event) => {
@@ -153,14 +180,28 @@ export default function Home() {
         .home-root {
           font-family: 'Inter', system-ui, sans-serif;
           -webkit-font-smoothing: antialiased;
-          background: ${T.cream};
-          min-height: 100dvh;
+          background: ${T.bg};
           display: flex; flex-direction: column;
         }
         .home-root.in-chat {
           height: 100dvh;
           max-height: 100dvh;
           overflow: hidden;
+        }
+
+        /* ── Ambient blur circles ── */
+        .home-ambient {
+          position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+        }
+        .home-ambient-1 {
+          position: absolute; border-radius: 50%;
+          width: 600px; height: 600px; top: -120px; right: -100px;
+          background: radial-gradient(circle, rgba(212,113,78,0.06) 0%, transparent 70%);
+        }
+        .home-ambient-2 {
+          position: absolute; border-radius: 50%;
+          width: 500px; height: 500px; bottom: -80px; left: -120px;
+          background: radial-gradient(circle, rgba(120,120,180,0.04) 0%, transparent 70%);
         }
 
         /* ── Floating pill nav ── */
@@ -184,125 +225,180 @@ export default function Home() {
         /* ── Landing hero ── */
         .home-hero {
           display: flex; flex-direction: column;
-          align-items: center;
-          text-align: center;
-          padding: 100px 40px 60px;
+          align-items: center; text-align: center;
+          padding: 90px 24px 60px;
           max-width: 1200px; margin: 0 auto; width: 100%;
+          position: relative; z-index: 1;
         }
-        @media (max-width: 1100px) { .home-hero { padding: 90px 40px 40px; } }
-        @media (max-width: 768px)  { .home-hero { padding: 80px 20px 32px; } }
+        @media (max-width: 1100px) { .home-hero { padding: 90px 24px 48px; } }
+        @media (max-width: 768px)  { .home-hero { padding: 80px 20px 40px; } }
 
         .home-h1 {
-          font-size: 80px; font-weight: 700; line-height: 1.05;
-          letter-spacing: -0.04em; color: ${T.text};
+          font-size: 72px; font-weight: 600; line-height: 1.05;
+          letter-spacing: -0.05em; color: ${T.text};
           margin: 0 0 20px; animation: fadeUp 0.6s ease both;
         }
-        @media (max-width: 1100px) { .home-h1 { font-size: 56px; margin-bottom: 16px; } }
-        @media (max-width: 768px)  { .home-h1 { font-size: 38px; margin-bottom: 14px; } }
+        @media (max-width: 1100px) { .home-h1 { font-size: 52px; margin-bottom: 16px; } }
+        @media (max-width: 768px)  { .home-h1 { font-size: 36px; margin-bottom: 14px; } }
 
         .home-sub {
-          font-size: 20px; color: ${T.muted}; line-height: 1.6;
-          font-weight: 400; max-width: 480px; margin: 0 0 48px;
+          font-size: 19px; color: ${T.sub}; line-height: 1.75;
+          font-weight: 400; max-width: 560px; margin: 0 0 40px;
           animation: fadeUp 0.6s ease 0.08s both;
         }
-        @media (max-width: 1100px) { .home-sub { font-size: 18px; max-width: 420px; margin-bottom: 36px; } }
-        @media (max-width: 768px)  { .home-sub { font-size: 16px; max-width: 320px; margin-bottom: 28px; } }
+        @media (max-width: 1100px) { .home-sub { font-size: 17px; max-width: 480px; margin-bottom: 32px; } }
+        @media (max-width: 768px)  { .home-sub { font-size: 16px; max-width: 340px; margin-bottom: 28px; } }
 
-        /* ── Card-in-card ── */
+        /* ── 3-Layer chat card ── */
         .home-card-outer {
           width: 100%; max-width: 720px;
-          background: ${T.white};
-          border-radius: 34px;
-          box-shadow: 0 8px 40px rgba(26,26,24,.08), 0 2px 8px rgba(26,26,24,.04);
-          padding: 12px;
+          background: rgba(255,255,255,0.6);
+          backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+          border: 1px solid rgba(255,255,255,0.5);
+          border-radius: 28px;
+          box-shadow: 0 8px 40px rgba(26,26,24,.07), 0 2px 8px rgba(26,26,24,.03);
+          padding: 16px;
           animation: fadeUp 0.6s ease 0.16s both;
         }
         @media (max-width: 1100px) { .home-card-outer { max-width: 580px; } }
-        @media (max-width: 768px)  { .home-card-outer { max-width: 100%; border-radius: 28px; padding: 8px; } }
+        @media (max-width: 768px)  { .home-card-outer { max-width: 100%; border-radius: 22px; padding: 10px; } }
 
-        .home-card-inner {
-          background: ${T.cream};
-          border-radius: 26px;
-          padding: 24px 24px 8px;
-          position: relative;
+        .home-card-mid {
+          background: ${T.fill};
+          border-radius: 20px;
+          padding: 20px;
         }
-        @media (max-width: 768px) { .home-card-inner { border-radius: 22px; padding: 16px 16px 4px; } }
+        @media (max-width: 768px) { .home-card-mid { border-radius: 16px; padding: 14px; } }
 
-        .home-card-label {
-          font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
-          text-transform: uppercase; color: ${T.faint};
-          margin-bottom: 8px; display: block;
+        .home-card-input {
+          background: ${T.white};
+          border-radius: 16px;
+          padding: 16px;
+          box-shadow: 0 1px 4px rgba(26,26,24,.05);
+          border: 1.5px solid transparent;
+          transition: border-color 0.25s ease, box-shadow 0.25s ease;
         }
+        .home-card-input:focus-within,
+        .home-card-input.active {
+          border-color: rgba(212,113,78,0.45);
+          box-shadow: 0 1px 4px rgba(26,26,24,.05), 0 0 0 4px rgba(212,113,78,0.10);
+        }
+        @media (max-width: 768px) { .home-card-input { border-radius: 14px; padding: 14px; } }
+
+        .home-textarea {
+          width: 100%; min-height: 80px; max-height: 200px;
+          border: none; outline: none; resize: none;
+          font-size: 15px; line-height: 1.6; color: ${T.text};
+          background: transparent; font-family: 'Inter', system-ui, sans-serif;
+          display: block;
+        }
+        .home-textarea::placeholder { color: ${T.faint}; }
+
+        .home-input-divider { height: 1px; background: #E8E4DC; margin: 12px 0; }
+
+        .home-send-row { display: flex; justify-content: flex-end; }
+
+        .home-send-btn {
+          width: 48px; height: 48px; border-radius: 50%;
+          background: ${T.terra}; border: none; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          transition: background 0.2s, opacity 0.2s, transform 0.15s;
+          color: #fff;
+        }
+        .home-send-btn:hover { background: ${T.terraHover}; }
+        .home-send-btn:active { transform: scale(0.95); }
+        .home-send-btn:disabled { opacity: 0.35; cursor: default; }
+        .home-send-btn:disabled:hover { background: ${T.terra}; }
+        .home-send-btn:disabled:active { transform: none; }
 
         /* ── Prompt chips ── */
         .home-chips {
           display: flex; flex-wrap: wrap; justify-content: center;
-          gap: 10px; margin-top: 32px;
+          gap: 10px; margin-top: 28px;
           animation: fadeUp 0.6s ease 0.28s both;
         }
-        @media (max-width: 1100px) { .home-chips { gap: 8px; margin-top: 24px; } }
-        @media (max-width: 768px)  { .home-chips { gap: 6px; margin-top: 20px; } }
-
-        .home-chips-label { font-size: 14px; color: ${T.faint}; font-weight: 500; padding: 9px 0; }
-        @media (max-width: 768px)  { .home-chips-label { display: none; } }
+        @media (max-width: 1100px) { .home-chips { gap: 8px; margin-top: 22px; } }
+        @media (max-width: 768px)  { .home-chips { gap: 6px; margin-top: 18px; } }
 
         .home-chip {
-          padding: 10px 20px; border-radius: 100px;
-          background: transparent; border: 1px solid rgba(221,217,209,0.6);
+          padding: 10px 18px; border-radius: 16px;
+          background: ${T.white}; border: 1px solid rgba(221,217,209,0.5);
           cursor: pointer; font-size: 14px; font-weight: 500; color: ${T.muted};
           font-family: 'Inter', system-ui, sans-serif;
           transition: all 0.2s; white-space: nowrap;
+          box-shadow: 0 1px 3px rgba(26,26,24,.03);
         }
-        .home-chip:hover { background: ${T.white}; border-color: ${T.border}; box-shadow: ${T.shadowCard}; color: ${T.text}; }
+        .home-chip:hover { border-color: ${T.border}; box-shadow: ${T.shadowCard}; color: ${T.text}; }
         .home-chip:active { transform: scale(0.97); }
-        @media (max-width: 1100px) { .home-chip { padding: 8px 16px; font-size: 13px; } }
-        @media (max-width: 768px)  { .home-chip { padding: 8px 14px; font-size: 12px; } }
+        @media (max-width: 1100px) { .home-chip { padding: 8px 14px; font-size: 13px; } }
+        @media (max-width: 768px)  { .home-chip { padding: 8px 12px; font-size: 12px; border-radius: 12px; } }
 
         /* ── Learn cards ── */
         .home-learn {
-          width: 100%; max-width: 780px;
-          margin-top: 80px; padding: 0 0 40px;
+          width: 100%; max-width: 900px;
+          margin-top: 72px; padding: 0 0 40px;
           animation: fadeUp 0.6s ease 0.4s both;
         }
-        @media (max-width: 1100px) { .home-learn { margin-top: 60px; max-width: 580px; } }
-        @media (max-width: 768px)  { .home-learn { margin-top: 48px; max-width: 100%; } }
+        @media (max-width: 1100px) { .home-learn { margin-top: 56px; max-width: 600px; } }
+        @media (max-width: 768px)  { .home-learn { margin-top: 44px; max-width: 100%; } }
 
-        .home-learn-card {
+        .home-learn-shell {
           display: flex; flex-direction: column;
-          background: ${T.white}; border: 1px solid rgba(221,217,209,0.4);
-          border-radius: 24px; padding: 28px;
+          background: rgba(255,255,255,0.5);
+          backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(221,217,209,0.35);
+          border-radius: 20px; padding: 6px;
           text-decoration: none; color: inherit;
-          transition: all 0.2s;
+          transition: all 0.25s;
         }
-        .home-learn-card:hover {
-          box-shadow: 0 4px 20px rgba(26,26,24,.07), 0 1px 3px rgba(26,26,24,.04);
+        .home-learn-shell:hover {
+          box-shadow: 0 4px 20px rgba(26,26,24,.06);
           transform: translateY(-2px);
-          border-color: ${T.border};
+        }
+
+        .home-learn-inner {
+          background: ${T.white};
+          border-radius: 16px;
+          padding: 22px;
+          display: flex; flex-direction: column;
+          flex: 1;
         }
 
         .home-learn-icon {
-          width: 44px; height: 44px; border-radius: 14px;
-          background: ${T.terraSoft};
+          width: 40px; height: 40px; border-radius: 12px;
+          background: ${T.fill};
           display: flex; align-items: center; justify-content: center;
-          margin-bottom: 16px; color: ${T.terra};
+          margin-bottom: 14px; color: ${T.muted};
         }
 
         .home-learn-title {
-          font-size: 17px; font-weight: 700; color: ${T.text};
-          margin: 0 0 6px;
+          font-size: 15px; font-weight: 700; color: ${T.text};
+          margin: 0 0 4px;
         }
 
         .home-learn-desc {
-          font-size: 14px; color: ${T.muted}; line-height: 1.55;
+          font-size: 13px; color: ${T.muted}; line-height: 1.5;
           margin: 0 0 16px; flex: 1;
         }
 
-        .home-learn-arrow {
-          display: flex; align-items: center; gap: 4px;
-          font-size: 13px; font-weight: 600; color: ${T.terra};
-          transition: transform 0.2s;
+        .home-learn-cta {
+          display: flex; align-items: center; justify-content: space-between;
         }
-        .home-learn-card:hover .home-learn-arrow { transform: translateX(4px); }
+
+        .home-learn-cta-text {
+          font-size: 13px; font-weight: 600; color: ${T.terra};
+        }
+
+        .home-learn-arrow-btn {
+          width: 32px; height: 32px; border-radius: 50%;
+          border: 1px solid ${T.border}; background: transparent;
+          display: flex; align-items: center; justify-content: center;
+          color: ${T.muted}; transition: all 0.2s;
+        }
+        .home-learn-shell:hover .home-learn-arrow-btn {
+          border-color: ${T.terra}; color: ${T.terra};
+          background: ${T.terraSoft};
+        }
 
         /* ── Chat phase ── */
         .home-chat {
@@ -367,6 +463,12 @@ export default function Home() {
         @media (max-width: 768px) { .home-dock-bottom.hidden { transform: translateY(100%); } }
       `}</style>
 
+      {/* ═══ AMBIENT BLUR CIRCLES ═══ */}
+      <div className="home-ambient">
+        <div className="home-ambient-1" />
+        <div className="home-ambient-2" />
+      </div>
+
       {/* ═══ FLOATING PILL NAV ═══ */}
       <header className={`home-pill${!barsVisible ? ' hidden' : ''}`}>
         <Logo />
@@ -384,26 +486,46 @@ export default function Home() {
       {/* ═══ LANDING PHASE ═══ */}
       {phase === 'landing' && (
         <main className="home-hero">
-          <h1 className="home-h1">
-            Start with<br />the deal.
-          </h1>
+          <h1 className="home-h1">Start with the deal.</h1>
           <p className="home-sub">
             AI-powered M&A advisory. From first question to closing day.
           </p>
 
-          {/* Card-in-card chat input */}
+          {/* 3-layer card-in-card chat input */}
           <div className="home-card-outer">
-            <div className="home-card-inner">
-              <span className="home-card-label">Talk through the deal</span>
-              <ChatDock ref={dockRef} onSend={handleSend} disabled={sending || limitReached} variant="hero" />
+            <div className="home-card-mid">
+              <div className={`home-card-input${heroInputActive ? ' active' : ''}`}>
+                <textarea
+                  ref={heroInputRef}
+                  className="home-textarea"
+                  placeholder="Tell Yulia about your deal..."
+                  value={heroText}
+                  onChange={e => setHeroText(e.target.value)}
+                  onKeyDown={handleHeroKeyDown}
+                  disabled={sending || limitReached}
+                  rows={3}
+                />
+                <div className="home-input-divider" />
+                <div className="home-send-row">
+                  <button
+                    className="home-send-btn"
+                    onClick={handleHeroSend}
+                    disabled={!heroText.trim() || sending || limitReached}
+                    aria-label="Send message"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Prompt suggestion chips */}
           <div className="home-chips">
-            <span className="home-chips-label">Suggested:</span>
             {PROMPT_CHIPS.map(c => (
-              <button key={c.key} className="home-chip" onClick={() => handleChipClick(c.fill)}>
+              <button key={c.key} className="home-chip" onClick={() => handleChipClick(c.label)}>
                 {c.label}
               </button>
             ))}
@@ -413,14 +535,18 @@ export default function Home() {
           <section className="home-learn">
             <div className="learn-cards">
               {LEARN_CARDS.map(card => (
-                <Link key={card.title} href={card.href} className="home-learn-card">
-                  <div className="home-learn-icon">{card.icon}</div>
-                  <h3 className="home-learn-title">{card.title}</h3>
-                  <p className="home-learn-desc">{card.desc}</p>
-                  <span className="home-learn-arrow">
-                    Learn more
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-                  </span>
+                <Link key={card.title} href={card.href} className="home-learn-shell">
+                  <div className="home-learn-inner">
+                    <div className="home-learn-icon">{card.icon}</div>
+                    <h3 className="home-learn-title">{card.title}</h3>
+                    <p className="home-learn-desc">{card.desc}</p>
+                    <div className="home-learn-cta">
+                      <span className="home-learn-cta-text">{card.cta}</span>
+                      <span className="home-learn-arrow-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                      </span>
+                    </div>
+                  </div>
                 </Link>
               ))}
             </div>
