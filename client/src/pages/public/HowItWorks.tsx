@@ -77,18 +77,18 @@ export default function HowItWorks() {
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
-      <section className="max-w-site mx-auto px-10 pt-8 pb-12 max-md:px-5 max-md:pt-4 max-md:pb-8">
-        <h1 className="animate-fadeInUp font-sans text-[clamp(40px,5.5vw,72px)] font-extrabold leading-[1.05] tracking-tight max-w-[16ch] mb-5 m-0">
+      <section className="max-w-site mx-auto px-10 pt-16 pb-20 max-md:px-5 max-md:pt-10 max-md:pb-14">
+        <h1 className="animate-fadeInUp font-sans text-[clamp(40px,5.5vw,72px)] font-extrabold leading-[1.05] tracking-tight max-w-[16ch] mb-8 m-0">
           Talk to Yulia. She handles <em className="italic text-[#D4714E]">the rest.</em>
         </h1>
-        <p className="animate-fadeInUp stagger-1 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.6] m-0">
+        <p className="animate-fadeInUp stagger-1 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.6] mb-14 m-0">
           No forms. No uploads. No 47-field intake questionnaires. Just tell Yulia about your deal
           and she turns the conversation into institutional-quality work product.
         </p>
       </section>
 
       {/* ═══ 4-STEP PROCESS ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
+      <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
         <div className="space-y-6">
           {PROCESS_STEPS.map(s => (
             <Card key={s.num} hover={false} padding="px-10 py-10 max-md:px-6 max-md:py-6">
@@ -105,7 +105,7 @@ export default function HowItWorks() {
       </section>
 
       {/* ═══ APPLIED INTELLIGENCE ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-3 m-0">
           What Yulia knows.
         </h2>
@@ -123,7 +123,7 @@ export default function HowItWorks() {
       </section>
 
       {/* ═══ COLLABORATION ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-4xl py-12 px-14 max-md:py-8 max-md:px-6">
           <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
             Everyone on the deal. One place.
@@ -147,7 +147,7 @@ export default function HowItWorks() {
       </section>
 
       {/* ═══ DEAL STORIES ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
           Built for every deal size.
         </h2>
@@ -162,7 +162,7 @@ export default function HowItWorks() {
       </section>
 
       {/* ═══ CHAT INPUT ═══ */}
-      <section id="chat-input" className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section id="chat-input" className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
           See for yourself.
         </h3>
@@ -172,8 +172,8 @@ export default function HowItWorks() {
       </section>
 
       {/* ═══ FINAL CTA ═══ */}
-      <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
-        <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-4xl px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-4xl px-16 py-24 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
           <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
           <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
             Every deal deserves an expert. Yours starts now.

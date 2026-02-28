@@ -100,15 +100,15 @@ export default function Raise() {
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
-      <section className="max-w-site mx-auto px-10 pt-8 pb-12 max-md:px-5 max-md:pt-4 max-md:pb-8">
+      <section className="max-w-site mx-auto px-10 pt-16 pb-20 max-md:px-5 max-md:pt-10 max-md:pb-14">
         <div className="animate-fadeInUp flex items-center gap-3 mb-8 text-[13px] uppercase tracking-[.18em] text-[#D4714E] font-semibold">
           <span className="w-9 h-0.5 bg-[#D4714E]" />
           Raise Capital
         </div>
-        <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(44px,6vw,76px)] font-extrabold leading-[1.05] tracking-tight max-w-[14ch] mb-6 m-0">
+        <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(44px,6vw,76px)] font-extrabold leading-[1.05] tracking-tight max-w-[14ch] mb-8 m-0">
           Raise smart. <em className="italic text-[#D4714E]">Keep control.</em>
         </h1>
-        <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-10 m-0">
+        <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-14 m-0">
           The difference between a good raise and a great one is preparation. Yulia builds
           your financial story, your deck, and your investor strategy &mdash; so you negotiate
           from strength.
@@ -120,7 +120,7 @@ export default function Raise() {
       </section>
 
       {/* ═══ JOURNEY TIMELINE ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
+      <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
         <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">
           Your capital raise
         </p>
@@ -140,7 +140,7 @@ export default function Raise() {
       </section>
 
       {/* ═══ BUILT FOR YOUR DEAL ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
           Built for <em className="italic text-[#D4714E]">your</em> deal.
         </h2>
@@ -159,7 +159,7 @@ export default function Raise() {
       </section>
 
       {/* ═══ BROKER CALLOUT ═══ */}
-      <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
         <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-4xl py-12 px-14 grid grid-cols-2 gap-12 items-center max-md:grid-cols-1 max-md:py-8 max-md:px-6 max-md:gap-8">
           <div>
             <h3 className="font-sans text-[28px] font-black tracking-[-0.02em] leading-[1.15] mb-4 m-0">
@@ -187,7 +187,7 @@ export default function Raise() {
       </section>
 
       {/* ═══ CHAT INPUT ═══ */}
-      <section id="chat-input" className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section id="chat-input" className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-extrabold tracking-tight mb-8 m-0 text-center">
           Ready to start your raise?
         </h3>
@@ -199,7 +199,7 @@ export default function Raise() {
       </section>
 
       {/* ═══ FAQ ═══ */}
-      <section className="max-w-[800px] mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section className="max-w-[800px] mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-10 m-0 text-center">
           Questions founders ask.
         </h2>
@@ -214,8 +214,8 @@ export default function Raise() {
       </section>
 
       {/* ═══ FINAL CTA ═══ */}
-      <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
-        <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-4xl px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-4xl px-16 py-24 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
           <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
           <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
             Raise from strength. Start with a conversation.

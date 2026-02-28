@@ -11,18 +11,17 @@ import Logo from '../../components/public/Logo';
 const T = {
   bg: '#F6F5F1', fill: '#F3F0EA', white: '#FFFFFF',
   terra: '#D4714E', terraHover: '#BE6342', terraSoft: '#FFF0EB',
-  text: '#1A1A18', textMid: '#3D3B37', sub: '#525252', muted: '#6E6A63', faint: '#A9A49C',
+  text: '#1A1A18', sub: '#525252', muted: '#6E6A63', faint: '#A9A49C',
   border: '#DDD9D1',
-  shadowCard: '0 1px 4px rgba(26, 26, 24, 0.05)',
 };
 
 /* ═══ PROMPT CHIPS ═══ */
 
 const PROMPT_CHIPS = [
-  { key: 'sell', label: 'I want to sell my business' },
-  { key: 'value', label: "What's my business worth?" },
-  { key: 'buy', label: 'Help me find a business to buy' },
-  { key: 'raise', label: "I'm raising capital" },
+  { key: 'buy-services', label: 'I want to buy a home services business in Texas.', fill: 'I want to buy a home services business in Texas.' },
+  { key: 'valuation', label: 'Help me understand what my company might be worth.', fill: 'Help me understand what my company might be worth.' },
+  { key: 'sba', label: 'Screen this deal for SBA financing fit.', fill: 'Screen this deal for SBA financing fit.' },
+  { key: 'prepare', label: 'Show me what I should prepare before going to market.', fill: 'Show me what I should prepare before going to market.' },
 ];
 
 /* ═══ LEARN CARDS ═══ */
@@ -72,7 +71,8 @@ export default function Home() {
   /* Hero standalone textarea state */
   const [heroText, setHeroText] = useState('');
   const heroInputRef = useRef<HTMLTextAreaElement>(null);
-  const [heroInputActive, setHeroInputActive] = useState(false);
+  const [inputActive, setInputActive] = useState(false);
+  const activeTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const {
     messages, sending, streamingText, messagesRemaining,
@@ -125,25 +125,18 @@ export default function Home() {
   const handleHeroSend = useCallback(() => {
     const text = heroText.trim();
     if (!text) return;
+    setHeroText('');
     enterChat();
     sendMessage(text);
-    setHeroText('');
   }, [heroText, enterChat, sendMessage]);
 
-  // Hero textarea keydown — Enter sends, Shift+Enter newline
-  const handleHeroKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleHeroSend();
-    }
-  }, [handleHeroSend]);
-
   // Chip click — fill textarea and focus (don't auto-send)
-  const handleChipClick = useCallback((label: string) => {
-    setHeroText(label);
-    heroInputRef.current?.focus();
-    setHeroInputActive(true);
-    setTimeout(() => setHeroInputActive(false), 900);
+  const handleChipClick = useCallback((fill: string) => {
+    setHeroText(fill);
+    setInputActive(true);
+    clearTimeout(activeTimer.current);
+    activeTimer.current = setTimeout(() => setInputActive(false), 900);
+    setTimeout(() => heroInputRef.current?.focus(), 50);
   }, []);
 
   // Scroll-hide topbar on mobile — listen to messages container in chat, window on landing
@@ -189,21 +182,6 @@ export default function Home() {
           overflow: hidden;
         }
 
-        /* ── Ambient blur circles ── */
-        .home-ambient {
-          position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
-        }
-        .home-ambient-1 {
-          position: absolute; border-radius: 50%;
-          width: 600px; height: 600px; top: -120px; right: -100px;
-          background: radial-gradient(circle, rgba(212,113,78,0.06) 0%, transparent 70%);
-        }
-        .home-ambient-2 {
-          position: absolute; border-radius: 50%;
-          width: 500px; height: 500px; bottom: -80px; left: -120px;
-          background: radial-gradient(circle, rgba(120,120,180,0.04) 0%, transparent 70%);
-        }
-
         /* ── Floating pill nav ── */
         .home-pill {
           position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
@@ -226,178 +204,190 @@ export default function Home() {
         .home-hero {
           display: flex; flex-direction: column;
           align-items: center; text-align: center;
-          padding: 90px 24px 60px;
-          max-width: 1200px; margin: 0 auto; width: 100%;
+          padding: 140px 40px 80px;
+          max-width: 80rem; margin: 0 auto; width: 100%;
           position: relative; z-index: 1;
         }
-        @media (max-width: 1100px) { .home-hero { padding: 90px 24px 48px; } }
-        @media (max-width: 768px)  { .home-hero { padding: 80px 20px 40px; } }
+        @media (max-width: 1100px) { .home-hero { padding: 120px 40px 60px; } }
+        @media (max-width: 768px)  { .home-hero { padding: 100px 20px 48px; } }
 
         .home-h1 {
           font-size: 72px; font-weight: 600; line-height: 1.05;
           letter-spacing: -0.05em; color: ${T.text};
-          margin: 0 0 20px; animation: fadeUp 0.6s ease both;
+          margin: 0 0 24px; animation: fadeUp 0.6s ease both;
         }
-        @media (max-width: 1100px) { .home-h1 { font-size: 52px; margin-bottom: 16px; } }
-        @media (max-width: 768px)  { .home-h1 { font-size: 36px; margin-bottom: 14px; } }
+        @media (max-width: 1100px) { .home-h1 { font-size: 56px; margin-bottom: 20px; } }
+        @media (max-width: 768px)  { .home-h1 { font-size: 40px; margin-bottom: 18px; } }
 
         .home-sub {
-          font-size: 19px; color: ${T.sub}; line-height: 1.75;
-          font-weight: 400; max-width: 560px; margin: 0 0 40px;
+          font-size: 18px; color: ${T.sub}; line-height: 1.75;
+          font-weight: 400; max-width: 560px; margin: 0 0 56px;
           animation: fadeUp 0.6s ease 0.08s both;
         }
-        @media (max-width: 1100px) { .home-sub { font-size: 17px; max-width: 480px; margin-bottom: 32px; } }
-        @media (max-width: 768px)  { .home-sub { font-size: 16px; max-width: 340px; margin-bottom: 28px; } }
+        @media (max-width: 1100px) { .home-sub { font-size: 17px; max-width: 480px; margin-bottom: 44px; } }
+        @media (max-width: 768px)  { .home-sub { font-size: 16px; max-width: 360px; margin-bottom: 36px; } }
 
         /* ── 3-Layer chat card ── */
         .home-card-outer {
-          width: 100%; max-width: 720px;
-          background: rgba(255,255,255,0.6);
+          width: 100%; max-width: 900px;
+          border-radius: 34px;
+          border: 1px solid rgba(0,0,0,0.10);
+          background: rgba(255,255,255,0.84);
           backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
-          border: 1px solid rgba(255,255,255,0.5);
-          border-radius: 28px;
-          box-shadow: 0 8px 40px rgba(26,26,24,.07), 0 2px 8px rgba(26,26,24,.03);
-          padding: 16px;
+          box-shadow: 0 24px 80px rgba(0,0,0,0.07);
+          padding: 20px;
           animation: fadeUp 0.6s ease 0.16s both;
         }
-        @media (max-width: 1100px) { .home-card-outer { max-width: 580px; } }
-        @media (max-width: 768px)  { .home-card-outer { max-width: 100%; border-radius: 22px; padding: 10px; } }
+        @media (max-width: 768px) { .home-card-outer { border-radius: 28px; padding: 14px; } }
 
-        .home-card-mid {
-          background: ${T.fill};
-          border-radius: 20px;
-          padding: 20px;
+        .home-card-inner {
+          border-radius: 28px;
+          border: 1px solid rgba(0,0,0,0.10);
+          background: #FAFAF8;
+          padding: 24px;
         }
-        @media (max-width: 768px) { .home-card-mid { border-radius: 16px; padding: 14px; } }
+        @media (max-width: 768px) { .home-card-inner { border-radius: 22px; padding: 18px; } }
 
-        .home-card-input {
-          background: ${T.white};
-          border-radius: 16px;
-          padding: 16px;
-          box-shadow: 0 1px 4px rgba(26,26,24,.05);
-          border: 1.5px solid transparent;
-          transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        .home-card-label {
+          font-size: 14px; font-weight: 600; color: #0a0a0a;
+          text-align: left; margin-bottom: 16px; display: block;
         }
-        .home-card-input:focus-within,
-        .home-card-input.active {
+
+        .home-input-card {
+          border-radius: 26px;
+          border: 1px solid rgba(0,0,0,0.10);
+          background: #FFFFFF;
+          box-shadow: 0 12px 32px rgba(0,0,0,0.05);
+          padding: 24px;
+          transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .home-input-card.active {
           border-color: rgba(212,113,78,0.45);
-          box-shadow: 0 1px 4px rgba(26,26,24,.05), 0 0 0 4px rgba(212,113,78,0.10);
+          box-shadow: 0 0 0 4px rgba(212,113,78,0.10);
         }
-        @media (max-width: 768px) { .home-card-input { border-radius: 14px; padding: 14px; } }
+        @media (max-width: 768px) { .home-input-card { border-radius: 22px; padding: 18px; } }
 
-        .home-textarea {
-          width: 100%; min-height: 80px; max-height: 200px;
-          border: none; outline: none; resize: none;
-          font-size: 15px; line-height: 1.6; color: ${T.text};
-          background: transparent; font-family: 'Inter', system-ui, sans-serif;
-          display: block;
+        .home-hero-textarea {
+          width: 100%; min-height: 160px; resize: none;
+          background: transparent; border: none; outline: none;
+          font-size: 17px; line-height: 2; color: #171717;
+          font-family: 'Inter', system-ui, sans-serif;
         }
-        .home-textarea::placeholder { color: ${T.faint}; }
+        .home-hero-textarea::placeholder { color: #a3a3a3; }
+        @media (max-width: 768px) { .home-hero-textarea { min-height: 130px; font-size: 16px; } }
 
-        .home-input-divider { height: 1px; background: #E8E4DC; margin: 12px 0; }
-
-        .home-send-row { display: flex; justify-content: flex-end; }
-
-        .home-send-btn {
-          width: 48px; height: 48px; border-radius: 50%;
-          background: ${T.terra}; border: none; cursor: pointer;
-          display: flex; align-items: center; justify-content: center;
-          transition: background 0.2s, opacity 0.2s, transform 0.15s;
-          color: #fff;
+        .home-hero-send-row {
+          border-top: 1px solid rgba(0,0,0,0.10);
+          margin-top: 16px; padding-top: 16px;
+          display: flex; justify-content: flex-end;
         }
-        .home-send-btn:hover { background: ${T.terraHover}; }
-        .home-send-btn:active { transform: scale(0.95); }
-        .home-send-btn:disabled { opacity: 0.35; cursor: default; }
-        .home-send-btn:disabled:hover { background: ${T.terra}; }
-        .home-send-btn:disabled:active { transform: none; }
+        .home-hero-send {
+          width: 48px; height: 48px; border-radius: 9999px;
+          background: ${T.terra}; color: #fff; border: none;
+          cursor: pointer; display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 2px 8px rgba(212,113,78,0.3);
+          transition: all 0.15s;
+          font-family: inherit;
+        }
+        .home-hero-send:hover { background: ${T.terraHover}; transform: scale(1.02); }
+        .home-hero-send:disabled { opacity: 0.5; cursor: default; transform: none; }
+        .home-hero-send:disabled:hover { background: ${T.terra}; }
 
         /* ── Prompt chips ── */
         .home-chips {
           display: flex; flex-wrap: wrap; justify-content: center;
-          gap: 10px; margin-top: 28px;
+          gap: 8px; margin-top: 24px; max-width: 900px;
           animation: fadeUp 0.6s ease 0.28s both;
         }
-        @media (max-width: 1100px) { .home-chips { gap: 8px; margin-top: 22px; } }
-        @media (max-width: 768px)  { .home-chips { gap: 6px; margin-top: 18px; } }
 
         .home-chip {
-          padding: 10px 18px; border-radius: 16px;
-          background: ${T.white}; border: 1px solid rgba(221,217,209,0.5);
-          cursor: pointer; font-size: 14px; font-weight: 500; color: ${T.muted};
+          padding: 10px 16px; border-radius: 16px;
+          border: 1px solid rgba(0,0,0,0.10);
+          background: rgba(255,255,255,0.88);
+          cursor: pointer; font-size: 14px; font-weight: 400;
+          color: ${T.sub};
           font-family: 'Inter', system-ui, sans-serif;
-          transition: all 0.2s; white-space: nowrap;
-          box-shadow: 0 1px 3px rgba(26,26,24,.03);
+          transition: all 0.15s;
+          white-space: normal; text-align: left;
         }
-        .home-chip:hover { border-color: ${T.border}; box-shadow: ${T.shadowCard}; color: ${T.text}; }
+        .home-chip:hover { background: #fff; color: #0a0a0a; }
         .home-chip:active { transform: scale(0.97); }
-        @media (max-width: 1100px) { .home-chip { padding: 8px 14px; font-size: 13px; } }
-        @media (max-width: 768px)  { .home-chip { padding: 8px 12px; font-size: 12px; border-radius: 12px; } }
 
         /* ── Learn cards ── */
         .home-learn {
           width: 100%; max-width: 900px;
-          margin-top: 72px; padding: 0 0 40px;
+          margin-top: 64px; padding: 0 0 60px;
           animation: fadeUp 0.6s ease 0.4s both;
         }
-        @media (max-width: 1100px) { .home-learn { margin-top: 56px; max-width: 600px; } }
-        @media (max-width: 768px)  { .home-learn { margin-top: 44px; max-width: 100%; } }
+        @media (max-width: 1100px) { .home-learn { margin-top: 48px; max-width: 720px; } }
+        @media (max-width: 768px)  { .home-learn { margin-top: 40px; max-width: 100%; } }
 
-        .home-learn-shell {
+        .home-learn-card {
           display: flex; flex-direction: column;
-          background: rgba(255,255,255,0.5);
-          backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(221,217,209,0.35);
-          border-radius: 20px; padding: 6px;
-          text-decoration: none; color: inherit;
-          transition: all 0.25s;
+          height: 100%;
+          border-radius: 24px;
+          border: 1px solid rgba(0,0,0,0.10);
+          background: rgba(255,255,255,0.84);
+          backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+          box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+          padding: 20px;
+          text-align: left; text-decoration: none; color: inherit;
+          transition: all 0.2s;
         }
-        .home-learn-shell:hover {
-          box-shadow: 0 4px 20px rgba(26,26,24,.06);
+        .home-learn-card:hover {
           transform: translateY(-2px);
+          background: #fff;
         }
 
         .home-learn-inner {
-          background: ${T.white};
-          border-radius: 16px;
-          padding: 22px;
           display: flex; flex-direction: column;
           flex: 1;
+          border-radius: 20px;
+          border: 1px solid rgba(0,0,0,0.08);
+          background: #FFFFFF;
+          padding: 16px;
         }
 
         .home-learn-icon {
-          width: 40px; height: 40px; border-radius: 12px;
-          background: ${T.fill};
+          width: 44px; height: 44px; border-radius: 16px;
+          border: 1px solid rgba(0,0,0,0.10);
+          background: white;
           display: flex; align-items: center; justify-content: center;
-          margin-bottom: 14px; color: ${T.muted};
+          color: #0a0a0a;
         }
 
         .home-learn-title {
-          font-size: 15px; font-weight: 700; color: ${T.text};
-          margin: 0 0 4px;
+          font-size: 18px; font-weight: 600;
+          letter-spacing: -0.02em;
+          color: #0a0a0a;
+          margin: 20px 0 0; line-height: 1.3;
         }
 
         .home-learn-desc {
-          font-size: 13px; color: ${T.muted}; line-height: 1.5;
-          margin: 0 0 16px; flex: 1;
+          font-size: 14px; line-height: 1.75;
+          color: ${T.sub};
+          margin: 12px 0 0; flex: 1;
         }
 
         .home-learn-cta {
           display: flex; align-items: center; justify-content: space-between;
+          border-top: 1px solid rgba(0,0,0,0.10);
+          padding-top: 16px; margin-top: 20px;
         }
-
         .home-learn-cta-text {
-          font-size: 13px; font-weight: 600; color: ${T.terra};
+          font-size: 14px; font-weight: 500;
+          color: #0a0a0a; padding-right: 12px;
         }
-
-        .home-learn-arrow-btn {
-          width: 32px; height: 32px; border-radius: 50%;
-          border: 1px solid ${T.border}; background: transparent;
+        .home-learn-cta-btn {
+          width: 40px; height: 40px; border-radius: 16px;
+          border: 1px solid rgba(0,0,0,0.10);
+          background: white;
           display: flex; align-items: center; justify-content: center;
-          color: ${T.muted}; transition: all 0.2s;
+          flex-shrink: 0; color: #0a0a0a;
+          transition: background 0.15s;
         }
-        .home-learn-shell:hover .home-learn-arrow-btn {
-          border-color: ${T.terra}; color: ${T.terra};
-          background: ${T.terraSoft};
+        .home-learn-card:hover .home-learn-cta-btn {
+          background: rgba(0,0,0,0.05);
         }
 
         /* ── Chat phase ── */
@@ -463,10 +453,18 @@ export default function Home() {
         @media (max-width: 768px) { .home-dock-bottom.hidden { transform: translateY(100%); } }
       `}</style>
 
-      {/* ═══ AMBIENT BLUR CIRCLES ═══ */}
-      <div className="home-ambient">
-        <div className="home-ambient-1" />
-        <div className="home-ambient-2" />
+      {/* ═══ AMBIENT BACKGROUND ═══ */}
+      <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+        <div style={{
+          position: 'absolute', left: '-10%', top: '-10%',
+          width: '28rem', height: '28rem', borderRadius: '9999px',
+          background: 'rgba(255,255,255,0.70)', filter: 'blur(48px)',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '-12%', right: '-8%',
+          width: '34rem', height: '34rem', borderRadius: '9999px',
+          background: 'rgba(233,228,218,0.70)', filter: 'blur(48px)',
+        }} />
       </div>
 
       {/* ═══ FLOATING PILL NAV ═══ */}
@@ -493,28 +491,28 @@ export default function Home() {
 
           {/* 3-layer card-in-card chat input */}
           <div className="home-card-outer">
-            <div className="home-card-mid">
-              <div className={`home-card-input${heroInputActive ? ' active' : ''}`}>
+            <div className="home-card-inner">
+              <span className="home-card-label">Talk through the deal</span>
+              <div className={`home-input-card${inputActive ? ' active' : ''}`}>
                 <textarea
                   ref={heroInputRef}
-                  className="home-textarea"
-                  placeholder="Tell Yulia about your deal..."
                   value={heroText}
                   onChange={e => setHeroText(e.target.value)}
-                  onKeyDown={handleHeroKeyDown}
-                  disabled={sending || limitReached}
-                  rows={3}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleHeroSend(); }
+                  }}
+                  placeholder="Tell Yulia about your deal..."
+                  rows={5}
+                  className="home-hero-textarea"
                 />
-                <div className="home-input-divider" />
-                <div className="home-send-row">
+                <div className="home-hero-send-row">
                   <button
-                    className="home-send-btn"
                     onClick={handleHeroSend}
-                    disabled={!heroText.trim() || sending || limitReached}
-                    aria-label="Send message"
+                    className="home-hero-send"
+                    disabled={!heroText.trim()}
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M5 12l7-7 7 7" /><path d="M12 19V5" />
                     </svg>
                   </button>
                 </div>
@@ -522,10 +520,10 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Prompt suggestion chips */}
+          {/* Prompt chips */}
           <div className="home-chips">
             {PROMPT_CHIPS.map(c => (
-              <button key={c.key} className="home-chip" onClick={() => handleChipClick(c.label)}>
+              <button key={c.key} className="home-chip" onClick={() => handleChipClick(c.fill)}>
                 {c.label}
               </button>
             ))}
@@ -535,15 +533,17 @@ export default function Home() {
           <section className="home-learn">
             <div className="learn-cards">
               {LEARN_CARDS.map(card => (
-                <Link key={card.title} href={card.href} className="home-learn-shell">
+                <Link key={card.title} href={card.href} className="home-learn-card">
                   <div className="home-learn-inner">
                     <div className="home-learn-icon">{card.icon}</div>
                     <h3 className="home-learn-title">{card.title}</h3>
                     <p className="home-learn-desc">{card.desc}</p>
                     <div className="home-learn-cta">
                       <span className="home-learn-cta-text">{card.cta}</span>
-                      <span className="home-learn-arrow-btn">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                      <span className="home-learn-cta-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9 18l6-6-6-6" />
+                        </svg>
                       </span>
                     </div>
                   </div>
