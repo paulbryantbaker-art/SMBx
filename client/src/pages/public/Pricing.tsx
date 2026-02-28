@@ -136,11 +136,11 @@ export default function Pricing() {
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
-      <section className="max-w-site mx-auto px-10 pt-16 pb-24 max-md:px-5 max-md:pt-10 max-md:pb-14 text-center">
-        <h1 className="animate-fadeInUp font-sans text-[clamp(40px,5.5vw,72px)] font-extrabold leading-[1.05] tracking-tight mb-5 m-0">
+      <section className="max-w-site mx-auto px-10 pt-20 pb-24 max-md:px-5 max-md:pt-12 max-md:pb-14 text-center">
+        <h1 className="animate-fadeInUp font-sans text-[clamp(40px,5.5vw,72px)] font-extrabold leading-[1.05] tracking-tight mb-10 m-0">
           Know what you&apos;ll spend <em className="italic text-[#D4714E]">before you start.</em>
         </h1>
-        <p className="animate-fadeInUp stagger-1 text-[19px] text-[#7A766E] max-w-[560px] mx-auto leading-[1.6] m-0">
+        <p className="animate-fadeInUp stagger-1 text-[19px] text-[#7A766E] max-w-[560px] mx-auto leading-[1.6] mb-16 m-0">
           Every journey has a clear price. No retainers. No surprises.
           Your first conversation and financial analysis are always free.
         </p>

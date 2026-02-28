@@ -77,11 +77,11 @@ export default function HowItWorks() {
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
-      <section className="max-w-site mx-auto px-10 pt-16 pb-20 max-md:px-5 max-md:pt-10 max-md:pb-14">
-        <h1 className="animate-fadeInUp font-sans text-[clamp(40px,5.5vw,72px)] font-extrabold leading-[1.05] tracking-tight max-w-[16ch] mb-8 m-0">
+      <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-14">
+        <h1 className="animate-fadeInUp font-sans text-[clamp(40px,5.5vw,72px)] font-extrabold leading-[1.05] tracking-tight max-w-[16ch] mb-10 m-0">
           Talk to Yulia. She handles <em className="italic text-[#D4714E]">the rest.</em>
         </h1>
-        <p className="animate-fadeInUp stagger-1 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.6] mb-14 m-0">
+        <p className="animate-fadeInUp stagger-1 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.6] mb-16 m-0">
           No forms. No uploads. No 47-field intake questionnaires. Just tell Yulia about your deal
           and she turns the conversation into institutional-quality work product.
         </p>

@@ -204,49 +204,43 @@ export default function Home() {
         .home-hero {
           display: flex; flex-direction: column;
           align-items: center; text-align: center;
-          padding: 140px 40px 80px;
+          justify-content: center;
+          min-height: 100dvh;
+          padding: 80px 40px 40px;
           max-width: 80rem; margin: 0 auto; width: 100%;
           position: relative; z-index: 1;
         }
-        @media (max-width: 1100px) { .home-hero { padding: 120px 40px 60px; } }
-        @media (max-width: 768px)  { .home-hero { padding: 100px 20px 48px; } }
+        @media (max-width: 1100px) { .home-hero { padding: 60px 40px 40px; } }
+        @media (max-width: 768px)  { .home-hero { padding: 40px 20px 32px; } }
 
         .home-h1 {
           font-size: 72px; font-weight: 600; line-height: 1.05;
           letter-spacing: -0.05em; color: ${T.text};
-          margin: 0 0 24px; animation: fadeUp 0.6s ease both;
+          margin: 0 0 28px; animation: fadeUp 0.6s ease both;
         }
-        @media (max-width: 1100px) { .home-h1 { font-size: 56px; margin-bottom: 20px; } }
-        @media (max-width: 768px)  { .home-h1 { font-size: 40px; margin-bottom: 18px; } }
+        @media (max-width: 1100px) { .home-h1 { font-size: 56px; margin-bottom: 24px; } }
+        @media (max-width: 768px)  { .home-h1 { font-size: 40px; margin-bottom: 20px; } }
 
         .home-sub {
           font-size: 18px; color: ${T.sub}; line-height: 1.75;
-          font-weight: 400; max-width: 560px; margin: 0 0 56px;
+          font-weight: 400; max-width: 560px; margin: 0 0 64px;
           animation: fadeUp 0.6s ease 0.08s both;
         }
-        @media (max-width: 1100px) { .home-sub { font-size: 17px; max-width: 480px; margin-bottom: 44px; } }
-        @media (max-width: 768px)  { .home-sub { font-size: 16px; max-width: 360px; margin-bottom: 36px; } }
+        @media (max-width: 1100px) { .home-sub { font-size: 17px; max-width: 480px; margin-bottom: 48px; } }
+        @media (max-width: 768px)  { .home-sub { font-size: 16px; max-width: 360px; margin-bottom: 40px; } }
 
-        /* ── 3-Layer chat card ── */
+        /* ── 2-Layer chat card ── */
         .home-card-outer {
-          width: 100%; max-width: 900px;
+          width: 100%; max-width: 760px;
           border-radius: 34px;
-          border: 1px solid rgba(0,0,0,0.10);
+          border: 1px solid rgba(0,0,0,0.08);
           background: rgba(255,255,255,0.84);
           backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
           box-shadow: 0 24px 80px rgba(0,0,0,0.07);
-          padding: 20px;
+          padding: 24px;
           animation: fadeUp 0.6s ease 0.16s both;
         }
-        @media (max-width: 768px) { .home-card-outer { border-radius: 28px; padding: 14px; } }
-
-        .home-card-inner {
-          border-radius: 28px;
-          border: 1px solid rgba(0,0,0,0.10);
-          background: #FAFAF8;
-          padding: 24px;
-        }
-        @media (max-width: 768px) { .home-card-inner { border-radius: 22px; padding: 18px; } }
+        @media (max-width: 768px) { .home-card-outer { border-radius: 28px; padding: 16px; } }
 
         .home-card-label {
           font-size: 14px; font-weight: 600; color: #0a0a0a;
@@ -296,7 +290,7 @@ export default function Home() {
         /* ── Prompt chips ── */
         .home-chips {
           display: flex; flex-wrap: wrap; justify-content: center;
-          gap: 8px; margin-top: 24px; max-width: 900px;
+          gap: 8px; margin-top: 32px; max-width: 760px;
           animation: fadeUp 0.6s ease 0.28s both;
         }
 
@@ -315,12 +309,12 @@ export default function Home() {
 
         /* ── Learn cards ── */
         .home-learn {
-          width: 100%; max-width: 900px;
-          margin-top: 64px; padding: 0 0 60px;
+          width: 100%; max-width: 1100px;
+          padding: 80px 40px 60px;
           animation: fadeUp 0.6s ease 0.4s both;
         }
-        @media (max-width: 1100px) { .home-learn { margin-top: 48px; max-width: 720px; } }
-        @media (max-width: 768px)  { .home-learn { margin-top: 40px; max-width: 100%; } }
+        @media (max-width: 1100px) { .home-learn { max-width: 720px; padding: 60px 20px 48px; } }
+        @media (max-width: 768px)  { .home-learn { max-width: 100%; padding: 48px 0 40px; } }
 
         .home-learn-card {
           display: flex; flex-direction: column;
@@ -489,33 +483,31 @@ export default function Home() {
             AI-powered M&A advisory. From first question to closing day.
           </p>
 
-          {/* 3-layer card-in-card chat input */}
+          {/* 2-layer chat card */}
           <div className="home-card-outer">
-            <div className="home-card-inner">
-              <span className="home-card-label">Talk through the deal</span>
-              <div className={`home-input-card${inputActive ? ' active' : ''}`}>
-                <textarea
-                  ref={heroInputRef}
-                  value={heroText}
-                  onChange={e => setHeroText(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleHeroSend(); }
-                  }}
-                  placeholder="Tell Yulia about your deal..."
-                  rows={5}
-                  className="home-hero-textarea"
-                />
-                <div className="home-hero-send-row">
-                  <button
-                    onClick={handleHeroSend}
-                    className="home-hero-send"
-                    disabled={!heroText.trim()}
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <path d="M5 12l7-7 7 7" /><path d="M12 19V5" />
-                    </svg>
-                  </button>
-                </div>
+            <span className="home-card-label">Talk through the deal</span>
+            <div className={`home-input-card${inputActive ? ' active' : ''}`}>
+              <textarea
+                ref={heroInputRef}
+                value={heroText}
+                onChange={e => setHeroText(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleHeroSend(); }
+                }}
+                placeholder="Tell Yulia about your deal..."
+                rows={5}
+                className="home-hero-textarea"
+              />
+              <div className="home-hero-send-row">
+                <button
+                  onClick={handleHeroSend}
+                  className="home-hero-send"
+                  disabled={!heroText.trim()}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M5 12l7-7 7 7" /><path d="M12 19V5" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
