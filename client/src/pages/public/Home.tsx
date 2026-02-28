@@ -297,7 +297,7 @@ export default function Home() {
 
         /* ── 2-Layer chat card ── */
         .home-card-outer {
-          width: 100%; max-width: 680px;
+          width: 100%; max-width: 780px;
           border-radius: 28px;
           border: 1px solid rgba(12,10,9,0.06);
           background: rgba(255,255,255,0.88);
@@ -358,7 +358,7 @@ export default function Home() {
         /* ── Prompt chips ── */
         .home-chips {
           display: flex; flex-wrap: wrap; justify-content: center;
-          gap: 8px; margin-top: 28px; max-width: 680px;
+          gap: 8px; margin-top: 28px; max-width: 780px;
           animation: fadeUp 0.6s ease 0.28s both;
         }
 
