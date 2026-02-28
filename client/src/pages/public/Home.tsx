@@ -5,6 +5,7 @@ import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
 import Logo from '../../components/public/Logo';
+import { useAppHeight } from '../../hooks/useAppHeight';
 
 /* ═══ DESIGN TOKENS ═══ */
 
@@ -90,6 +91,7 @@ export default function Home() {
   const heroInputRef = useRef<HTMLTextAreaElement>(null);
   const [inputActive, setInputActive] = useState(false);
   const activeTimer = useRef<ReturnType<typeof setTimeout>>();
+  useAppHeight();
 
   const {
     messages, sending, streamingText, messagesRemaining,
@@ -181,7 +183,10 @@ export default function Home() {
   const showSignup = limitReached || (messagesRemaining !== null && messagesRemaining <= 5 && hasMessages);
 
   return (
-    <div className={`home-root${phase === 'chat' ? ' in-chat' : ''}`}>
+    <div
+      id={phase === 'chat' ? 'app-root' : undefined}
+      className={`home-root${phase === 'chat' ? ' in-chat' : ''}`}
+    >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -194,33 +199,44 @@ export default function Home() {
           display: flex; flex-direction: column;
         }
         .home-root.in-chat {
-          height: 100dvh;
-          max-height: 100dvh;
+          position: fixed;
+          inset: 0;
+          height: var(--app-height, 100dvh);
           overflow: hidden;
         }
 
-        /* ── Floating pill nav ── */
+        /* ── Pill nav — floats on desktop, header bar on mobile ── */
         .home-pill {
-          position: sticky; top: 16px; left: 50%; transform: translateX(-50%);
+          position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
           z-index: 50; width: auto;
           backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
-          background: rgba(255,255,255,0.93);
+          background: rgba(255,255,255,0.95);
           border: 1px solid rgba(12,10,9,0.06);
-          box-shadow: 0 4px 20px rgba(12,10,9,0.06);
+          box-shadow:
+            0 4px 20px rgba(12,10,9,0.08),
+            0 1px 3px rgba(12,10,9,0.04),
+            0 0 0 1px rgba(255,255,255,0.7) inset;
           border-radius: 100px;
           padding: 10px 24px;
           display: flex; align-items: center; gap: 20px;
           transition: transform 0.3s ease, opacity 0.3s ease;
-          margin: 0 auto;
-          width: fit-content;
         }
         @media (max-width: 768px) {
           .home-pill {
-            position: relative; top: auto; left: auto; transform: none;
-            padding: 9px 18px; gap: 12px;
-            margin: 12px auto 0;
+            position: sticky; top: 0; left: 0; right: 0;
+            transform: none;
+            width: 100%; justify-content: center;
+            border-radius: 0;
+            padding: 14px 20px;
+            gap: 12px;
+            background: rgba(244,242,237,0.92);
+            border: none;
+            border-bottom: 1px solid rgba(12,10,9,0.06);
+            box-shadow: 0 1px 8px rgba(12,10,9,0.04);
           }
-          .home-pill.hidden { /* no-op on mobile — scrolls naturally */ }
+          .home-pill.hidden {
+            transform: translateY(-100%); opacity: 0;
+          }
         }
 
         /* ── Landing hero ── */
@@ -238,7 +254,7 @@ export default function Home() {
           .home-hero {
             min-height: auto;
             justify-content: flex-start;
-            padding: 16px 18px 24px;
+            padding: 36px 18px 28px;
           }
         }
 
@@ -248,7 +264,7 @@ export default function Home() {
           margin: 0 0 20px; animation: fadeUp 0.6s ease both;
         }
         @media (max-width: 1100px) { .home-h1 { font-size: 52px; margin-bottom: 18px; } }
-        @media (max-width: 768px) { .home-h1 { font-size: 34px; margin-bottom: 14px; } }
+        @media (max-width: 768px) { .home-h1 { font-size: 34px; margin-bottom: 12px; } }
 
         .home-sub {
           font-size: 17px; color: ${T.body}; line-height: 1.6;
@@ -256,7 +272,7 @@ export default function Home() {
           animation: fadeUp 0.6s ease 0.08s both;
         }
         @media (max-width: 1100px) { .home-sub { font-size: 16px; max-width: 400px; margin-bottom: 36px; } }
-        @media (max-width: 768px) { .home-sub { font-size: 14px; max-width: 280px; margin-bottom: 22px; } }
+        @media (max-width: 768px) { .home-sub { font-size: 14px; max-width: 280px; margin-bottom: 24px; } }
 
         /* ── 2-Layer chat card ── */
         .home-card-glow {
@@ -283,7 +299,7 @@ export default function Home() {
           animation: fadeUp 0.6s ease 0.16s both;
           position: relative; z-index: 1;
         }
-        @media (max-width: 768px) { .home-card-outer { border-radius: 18px; padding: 10px; max-width: 100%; } }
+        @media (max-width: 768px) { .home-card-outer { border-radius: 20px; padding: 12px; max-width: 100%; } }
 
         .home-card-label {
           font-size: 14px; font-weight: 600; color: #0a0a0a;
@@ -306,11 +322,11 @@ export default function Home() {
         .home-hero-textarea {
           width: 100%; min-height: 72px; resize: none;
           background: transparent; border: none; outline: none;
-          font-size: 16px; line-height: 1.75; color: #171717;
+          font-size: 16px; line-height: 1.75; color: ${T.text};
           font-family: 'Inter', system-ui, sans-serif;
         }
         .home-hero-textarea::placeholder { color: ${T.faint}; }
-        @media (max-width: 768px) { .home-hero-textarea { min-height: 44px; font-size: 14.5px; } }
+        @media (max-width: 768px) { .home-hero-textarea { min-height: 48px; font-size: 14.5px; } }
 
         .home-hero-send-row {
           border-top: 1px solid rgba(0,0,0,0.10);
@@ -342,7 +358,7 @@ export default function Home() {
           padding: 7px 18px; border-radius: 100px;
           border: 1px solid rgba(12,10,9,0.07);
           background: rgba(255,255,255,0.92);
-          backdrop-filter: blur(24px);
+          backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
           cursor: pointer; font-size: 13px; font-weight: 550;
           color: ${T.sub};
           font-family: 'Inter', system-ui, sans-serif;
@@ -351,7 +367,7 @@ export default function Home() {
         }
         .home-chip:hover { background: #fff; color: ${T.text}; }
         .home-chip:active { transform: scale(0.97); }
-        @media (max-width: 768px) { .home-chip { padding: 6px 13px; font-size: 11.5px; } }
+        @media (max-width: 768px) { .home-chip { padding: 6px 13px; font-size: 12px; } }
 
         /* ── Learn cards ── */
         .home-learn {
@@ -435,7 +451,7 @@ export default function Home() {
         }
         @media (max-width: 768px) { .home-learn-cta-btn { width: 24px; height: 24px; border-radius: 7px; } }
         .home-learn-card:hover .home-learn-cta-btn {
-          background: linear-gradient(135deg, rgba(181,82,47,0.14), rgba(232,132,94,0.14));
+          background: rgba(181,82,47,0.12);
         }
 
         /* ── Chat phase ── */
@@ -496,9 +512,12 @@ export default function Home() {
         }
 
         .home-dock-bottom {
-          transition: transform 0.3s ease;
+          flex-shrink: 0;
+          transition: transform 0.3s ease, opacity 0.3s ease;
         }
-        @media (max-width: 768px) { .home-dock-bottom.hidden { transform: translateY(100%); } }
+        @media (max-width: 768px) {
+          .home-dock-bottom.hidden { transform: translateY(100%); opacity: 0; }
+        }
       `}</style>
 
       {/* ═══ AMBIENT BACKGROUND ═══ */}
