@@ -198,14 +198,17 @@ export default function Home() {
           background: ${T.bg};
           display: flex; flex-direction: column;
         }
+        /* Chat phase: PROVEN iOS PATTERN from Chat.tsx
+           position:fixed + useAppHeight sets height via visualViewport.
+           Everything inside is flex children — NO position:fixed on pill or dock. */
         .home-root.in-chat {
           position: fixed;
-          inset: 0;
-          height: var(--app-height, 100dvh);
+          left: 0; right: 0; top: 0;
+          height: 100%;
           overflow: hidden;
         }
 
-        /* ── Pill nav — floats on desktop, header bar on mobile ── */
+        /* ── Pill nav ── */
         .home-pill {
           position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
           z-index: 50; width: auto;
@@ -223,20 +226,34 @@ export default function Home() {
         }
         @media (max-width: 768px) {
           .home-pill {
-            position: sticky; top: 0; left: 0; right: 0;
-            transform: none;
-            width: 100%; justify-content: center;
-            border-radius: 0;
-            padding: 14px 20px;
-            gap: 12px;
-            background: rgba(244,242,237,0.92);
-            border: none;
-            border-bottom: 1px solid rgba(12,10,9,0.06);
-            box-shadow: 0 1px 8px rgba(12,10,9,0.04);
+            position: sticky; top: 0;
+            left: auto; transform: none;
+            margin: 0 auto; width: fit-content;
+            padding: 10px 20px; gap: 12px;
+            top: 12px; z-index: 50;
           }
-          .home-pill.hidden {
-            transform: translateY(-100%); opacity: 0;
-          }
+          .home-pill.hidden { transform: translateY(-120%); opacity: 0; }
+        }
+
+        /* ── Chat phase: pill becomes a flex-child header, NOT fixed ── */
+        .in-chat .home-pill {
+          position: static !important;
+          left: auto; top: auto; transform: none;
+          flex-shrink: 0;
+          width: auto;
+          margin: 0;
+          border-radius: 0;
+          justify-content: center;
+          padding: 12px 24px;
+          border: none;
+          border-bottom: 1px solid rgba(12,10,9,0.06);
+          box-shadow: 0 1px 4px rgba(12,10,9,0.04);
+          background: rgba(244,242,237,0.95);
+          backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+        }
+        @media (max-width: 768px) {
+          .in-chat .home-pill { padding: 10px 20px; }
+          .in-chat .home-pill.hidden { transform: translateY(-100%); margin-top: -60px; }
         }
 
         /* ── Landing hero ── */
@@ -460,12 +477,13 @@ export default function Home() {
           min-height: 0;
         }
         .home-messages {
-          flex: 1; overflow-y: auto; padding: 72px 16px 8px;
+          flex: 1; overflow-y: auto;
+          padding: 20px 16px 8px;
           min-height: 0;
           max-width: 860px; margin: 0 auto; width: 100%;
           -webkit-overflow-scrolling: touch;
         }
-        @media (min-width: 768px) { .home-messages { padding: 72px 40px 8px; } }
+        @media (min-width: 768px) { .home-messages { padding: 20px 40px 8px; } }
 
         .home-msg {
           margin-bottom: 20px; animation: fadeUp 0.25s ease both;
@@ -542,7 +560,9 @@ export default function Home() {
 
       {/* ═══ FLOATING PILL NAV ═══ */}
       <header className={`home-pill${!barsVisible ? ' hidden' : ''}`}>
-        <Logo />
+        <div style={{ display: 'flex', alignItems: 'center', gap: phase === 'chat' ? '12px' : undefined }}>
+          <Logo />
+        </div>
         <button
           className="bg-transparent border-none cursor-pointer p-1 text-[#3D3B37] flex items-center"
           onClick={() => navigate('/login')}
