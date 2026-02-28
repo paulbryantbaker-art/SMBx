@@ -747,7 +747,7 @@ export default function Home() {
 
           {/* Dock — pinned to bottom */}
           {!limitReached && (
-            <div className={`home-dock-bottom${!barsVisible ? ' hidden' : ''}`}>
+            <div className="home-dock-bottom">
               <ChatDock ref={dockRef} onSend={handleSend} disabled={sending} />
             </div>
           )}
