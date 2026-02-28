@@ -4,7 +4,6 @@ import Markdown from 'react-markdown';
 import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
-import Logo from '../../components/public/Logo';
 import { useAppHeight } from '../../hooks/useAppHeight';
 
 /* ═══ DESIGN TOKENS ═══ */
@@ -93,6 +92,14 @@ export default function Home() {
   const activeTimer = useRef<ReturnType<typeof setTimeout>>();
   useAppHeight();
 
+  // Navigate from chat back to landing
+  const goHome = useCallback(() => {
+    if (phase === 'chat') {
+      window.history.replaceState(null, '', window.location.pathname);
+      setPhase('landing');
+    }
+  }, [phase]);
+
   const {
     messages, sending, streamingText, messagesRemaining,
     limitReached, sendMessage, getSessionId,
@@ -125,6 +132,27 @@ export default function Home() {
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
+
+  // Lock body scroll when entering chat (iOS Safari fix)
+  useEffect(() => {
+    if (phase === 'chat') {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = '0';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+    };
+  }, [phase]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -238,13 +266,13 @@ export default function Home() {
         /* ── Chat phase: pill becomes a flex-child header, NOT fixed ── */
         .in-chat .home-pill {
           position: static !important;
-          left: auto; top: auto; transform: none;
+          left: auto; top: auto; transform: none !important;
           flex-shrink: 0;
-          width: auto;
-          margin: 0;
-          border-radius: 0;
+          width: 100%;
           justify-content: center;
+          border-radius: 0;
           padding: 12px 24px;
+          padding-top: calc(12px + env(safe-area-inset-top, 0px));
           border: none;
           border-bottom: 1px solid rgba(12,10,9,0.06);
           box-shadow: 0 1px 4px rgba(12,10,9,0.04);
@@ -252,8 +280,8 @@ export default function Home() {
           backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
         }
         @media (max-width: 768px) {
-          .in-chat .home-pill { padding: 10px 20px; }
-          .in-chat .home-pill.hidden { transform: translateY(-100%); margin-top: -60px; }
+          .in-chat .home-pill { padding: 10px 20px; padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
+          .in-chat .home-pill.hidden { transform: translateY(-100%) !important; opacity: 0; margin-top: -80px; }
         }
 
         /* ── Landing hero ── */
@@ -261,12 +289,12 @@ export default function Home() {
           display: flex; flex-direction: column;
           align-items: center; text-align: center;
           justify-content: center;
-          min-height: 100dvh;
-          padding: 80px 40px 40px;
+          min-height: calc(100dvh - 140px);
+          padding: 80px 40px 20px;
           max-width: 80rem; margin: 0 auto; width: 100%;
           position: relative; z-index: 1;
         }
-        @media (max-width: 1100px) { .home-hero { padding: 60px 40px 40px; } }
+        @media (max-width: 1100px) { .home-hero { padding: 60px 40px 20px; } }
         @media (max-width: 768px) {
           .home-hero {
             min-height: auto;
@@ -292,19 +320,6 @@ export default function Home() {
         @media (max-width: 768px) { .home-sub { font-size: 14px; max-width: 280px; margin-bottom: 24px; } }
 
         /* ── 2-Layer chat card ── */
-        .home-card-glow {
-          position: absolute;
-          left: 50%; top: 50%;
-          transform: translate(-50%, -50%);
-          width: calc(100% + 80px); height: calc(100% + 60px);
-          max-width: 780px;
-          border-radius: 56px;
-          background: radial-gradient(ellipse, rgba(181,82,47,0.07) 0%, transparent 65%);
-          pointer-events: none;
-          z-index: 0;
-        }
-        @media (max-width: 768px) { .home-card-glow { display: none; } }
-
         .home-card-outer {
           width: 100%; max-width: 680px;
           border-radius: 28px;
@@ -319,8 +334,8 @@ export default function Home() {
         @media (max-width: 768px) { .home-card-outer { border-radius: 20px; padding: 12px; max-width: 100%; } }
 
         .home-card-label {
-          font-size: 14px; font-weight: 600; color: #0a0a0a;
-          text-align: left; margin-bottom: 16px; display: block;
+          font-size: 14px; font-weight: 600; color: ${T.text};
+          text-align: left; margin-bottom: 12px; display: block;
         }
 
         .home-input-card {
@@ -346,8 +361,8 @@ export default function Home() {
         @media (max-width: 768px) { .home-hero-textarea { min-height: 48px; font-size: 14.5px; } }
 
         .home-hero-send-row {
-          border-top: 1px solid rgba(0,0,0,0.10);
-          margin-top: 16px; padding-top: 16px;
+          border-top: 1px solid rgba(12,10,9,0.06);
+          margin-top: 12px; padding-top: 12px;
           display: flex; justify-content: flex-end;
         }
         .home-hero-send {
@@ -367,7 +382,7 @@ export default function Home() {
         /* ── Prompt chips ── */
         .home-chips {
           display: flex; flex-wrap: wrap; justify-content: center;
-          gap: 8px; margin-top: 32px; max-width: 760px;
+          gap: 8px; margin-top: 28px; max-width: 680px;
           animation: fadeUp 0.6s ease 0.28s both;
         }
 
@@ -390,12 +405,12 @@ export default function Home() {
         .home-learn {
           width: 100%; max-width: 1100px;
           margin: 0 auto;
-          padding: 40px 40px 100px;
+          padding: 0 40px 100px;
           position: relative; z-index: 1;
           animation: fadeUp 0.6s ease 0.4s both;
         }
-        @media (max-width: 1100px) { .home-learn { max-width: 720px; padding: 32px 20px 80px; } }
-        @media (max-width: 768px)  { .home-learn { max-width: 100%; padding: 24px 20px 64px; } }
+        @media (max-width: 1100px) { .home-learn { max-width: 720px; padding: 0 20px 80px; } }
+        @media (max-width: 768px)  { .home-learn { max-width: 100%; padding: 8px 20px 64px; } }
 
         .home-learn-card {
           display: flex; flex-direction: column;
@@ -450,8 +465,8 @@ export default function Home() {
 
         .home-learn-cta {
           display: flex; align-items: center; justify-content: space-between;
-          border-top: 1px solid rgba(0,0,0,0.10);
-          padding-top: 16px; margin-top: 20px;
+          border-top: 1px solid rgba(12,10,9,0.06);
+          padding-top: 12px; margin-top: auto;
         }
         .home-learn-cta-text {
           font-size: 12.5px; font-weight: 600;
@@ -482,6 +497,7 @@ export default function Home() {
           min-height: 0;
           max-width: 860px; margin: 0 auto; width: 100%;
           -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
         }
         @media (min-width: 768px) { .home-messages { padding: 20px 40px 8px; } }
 
@@ -494,7 +510,7 @@ export default function Home() {
         .home-msg-user-bubble {
           max-width: 85%; padding: 12px 18px;
           background: ${T.terraSoft}; color: ${T.text};
-          border: 1px solid rgba(212,113,78,0.18);
+          border: 1px solid rgba(181,82,47,0.18);
           border-radius: 20px 20px 4px 20px;
           box-shadow: 0 1px 3px rgba(26,26,24,.06);
           font-size: 15px; line-height: 1.55; word-break: break-word;
@@ -560,9 +576,22 @@ export default function Home() {
 
       {/* ═══ FLOATING PILL NAV ═══ */}
       <header className={`home-pill${!barsVisible ? ' hidden' : ''}`}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: phase === 'chat' ? '12px' : undefined }}>
-          <Logo />
-        </div>
+        <a
+          href="/"
+          onClick={(e) => {
+            if (phase === 'chat') {
+              e.preventDefault();
+              goHome();
+            }
+          }}
+          style={{ textDecoration: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+        >
+          <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.03em', fontFamily: 'Inter, system-ui, sans-serif' }}>
+            <span style={{ color: T.text }}>smb</span>
+            <span style={{ color: T.terra }}>x</span>
+            <span style={{ color: T.text }}>.ai</span>
+          </span>
+        </a>
         <button
           className="bg-transparent border-none cursor-pointer p-1 text-[#3D3B37] flex items-center"
           onClick={() => navigate('/login')}
@@ -591,8 +620,6 @@ export default function Home() {
               AI-powered M&A advisory. From first question to closing day.
             </p>
 
-            {/* Warm glow behind card */}
-            <div className="home-card-glow" />
             {/* 2-layer chat card */}
             <div className="home-card-outer">
               <span className="home-card-label">Talk through the deal</span>
