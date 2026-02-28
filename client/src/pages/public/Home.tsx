@@ -4,7 +4,6 @@ import Markdown from 'react-markdown';
 import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
-import { useAppHeight } from '../../hooks/useAppHeight';
 
 /* ═══ DESIGN TOKENS ═══ */
 
@@ -90,7 +89,34 @@ export default function Home() {
   const heroInputRef = useRef<HTMLTextAreaElement>(null);
   const [inputActive, setInputActive] = useState(false);
   const activeTimer = useRef<ReturnType<typeof setTimeout>>();
-  useAppHeight();
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // Resize chat container to visual viewport (handles iOS keyboard)
+  // Like useAppHeight but WITHOUT setting top:offsetTop which shifts the container
+  useEffect(() => {
+    if (phase !== 'chat') return;
+    const el = rootRef.current;
+    if (!el) return;
+    const vv = window.visualViewport;
+    function update() {
+      const h = vv ? vv.height : window.innerHeight;
+      el!.style.height = h + 'px';
+    }
+    if (vv) {
+      vv.addEventListener('resize', update);
+      vv.addEventListener('scroll', update);
+    }
+    window.addEventListener('resize', update);
+    update();
+    return () => {
+      if (vv) {
+        vv.removeEventListener('resize', update);
+        vv.removeEventListener('scroll', update);
+      }
+      window.removeEventListener('resize', update);
+      el!.style.height = '';
+    };
+  }, [phase]);
 
   // Navigate from chat back to landing
   const goHome = useCallback(() => {
@@ -190,7 +216,7 @@ export default function Home() {
   const showSignup = limitReached || (messagesRemaining !== null && messagesRemaining <= 5 && hasMessages);
 
   return (
-    <div className={`home-root${phase === 'chat' ? ' in-chat' : ''}`}>
+    <div ref={rootRef} className={`home-root${phase === 'chat' ? ' in-chat' : ''}`}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -208,7 +234,7 @@ export default function Home() {
         .home-root.in-chat {
           position: fixed;
           left: 0; right: 0; top: 0;
-          height: var(--app-height, 100dvh);
+          height: 100dvh;
           overflow: hidden;
         }
 
