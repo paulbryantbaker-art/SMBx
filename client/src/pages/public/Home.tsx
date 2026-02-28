@@ -262,13 +262,13 @@ export default function Home() {
         @media (max-width: 768px) { .home-input-card { border-radius: 22px; padding: 18px; } }
 
         .home-hero-textarea {
-          width: 100%; min-height: 160px; resize: none;
+          width: 100%; min-height: 120px; resize: none;
           background: transparent; border: none; outline: none;
           font-size: 17px; line-height: 2; color: #171717;
           font-family: 'Inter', system-ui, sans-serif;
         }
         .home-hero-textarea::placeholder { color: #a3a3a3; }
-        @media (max-width: 768px) { .home-hero-textarea { min-height: 130px; font-size: 16px; } }
+        @media (max-width: 768px) { .home-hero-textarea { min-height: 100px; font-size: 16px; } }
 
         .home-hero-send-row {
           border-top: 1px solid rgba(0,0,0,0.10);
@@ -310,11 +310,13 @@ export default function Home() {
         /* ── Learn cards ── */
         .home-learn {
           width: 100%; max-width: 1100px;
-          padding: 80px 40px 60px;
+          margin: 0 auto;
+          padding: 40px 40px 100px;
+          position: relative; z-index: 1;
           animation: fadeUp 0.6s ease 0.4s both;
         }
-        @media (max-width: 1100px) { .home-learn { max-width: 720px; padding: 60px 20px 48px; } }
-        @media (max-width: 768px)  { .home-learn { max-width: 100%; padding: 48px 0 40px; } }
+        @media (max-width: 1100px) { .home-learn { max-width: 720px; padding: 32px 20px 80px; } }
+        @media (max-width: 768px)  { .home-learn { max-width: 100%; padding: 24px 20px 64px; } }
 
         .home-learn-card {
           display: flex; flex-direction: column;
@@ -477,51 +479,53 @@ export default function Home() {
 
       {/* ═══ LANDING PHASE ═══ */}
       {phase === 'landing' && (
-        <main className="home-hero">
-          <h1 className="home-h1">Start with the deal.</h1>
-          <p className="home-sub">
-            AI-powered M&A advisory. From first question to closing day.
-          </p>
+        <>
+          <main className="home-hero">
+            <h1 className="home-h1">Start with the deal.</h1>
+            <p className="home-sub">
+              AI-powered M&A advisory. From first question to closing day.
+            </p>
 
-          {/* 2-layer chat card */}
-          <div className="home-card-outer">
-            <span className="home-card-label">Talk through the deal</span>
-            <div className={`home-input-card${inputActive ? ' active' : ''}`}>
-              <textarea
-                ref={heroInputRef}
-                value={heroText}
-                onChange={e => setHeroText(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleHeroSend(); }
-                }}
-                placeholder="Tell Yulia about your deal..."
-                rows={5}
-                className="home-hero-textarea"
-              />
-              <div className="home-hero-send-row">
-                <button
-                  onClick={handleHeroSend}
-                  className="home-hero-send"
-                  disabled={!heroText.trim()}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M5 12l7-7 7 7" /><path d="M12 19V5" />
-                  </svg>
-                </button>
+            {/* 2-layer chat card */}
+            <div className="home-card-outer">
+              <span className="home-card-label">Talk through the deal</span>
+              <div className={`home-input-card${inputActive ? ' active' : ''}`}>
+                <textarea
+                  ref={heroInputRef}
+                  value={heroText}
+                  onChange={e => setHeroText(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleHeroSend(); }
+                  }}
+                  placeholder="Tell Yulia about your deal..."
+                  rows={5}
+                  className="home-hero-textarea"
+                />
+                <div className="home-hero-send-row">
+                  <button
+                    onClick={handleHeroSend}
+                    className="home-hero-send"
+                    disabled={!heroText.trim()}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M5 12l7-7 7 7" /><path d="M12 19V5" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Prompt chips */}
-          <div className="home-chips">
-            {PROMPT_CHIPS.map(c => (
-              <button key={c.key} className="home-chip" onClick={() => handleChipClick(c.fill)}>
-                {c.label}
-              </button>
-            ))}
-          </div>
+            {/* Prompt chips */}
+            <div className="home-chips">
+              {PROMPT_CHIPS.map(c => (
+                <button key={c.key} className="home-chip" onClick={() => handleChipClick(c.fill)}>
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </main>
 
-          {/* Learn cards */}
+          {/* Learn cards — OUTSIDE hero so they scroll below the fold */}
           <section className="home-learn">
             <div className="learn-cards">
               {LEARN_CARDS.map(card => (
@@ -543,7 +547,7 @@ export default function Home() {
               ))}
             </div>
           </section>
-        </main>
+        </>
       )}
 
       {/* ═══ CHAT PHASE ═══ */}
