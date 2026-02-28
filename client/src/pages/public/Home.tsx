@@ -1,9 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import Markdown from 'react-markdown';
 import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
+import Logo from '../../components/public/Logo';
 
 /* ═══ DESIGN TOKENS ═══ */
 
@@ -16,12 +17,42 @@ const T = {
   shadowXl: '0 8px 32px rgba(26, 26, 24, 0.1), 0 2px 6px rgba(26, 26, 24, 0.05)',
 };
 
-const CHIPS = [
-  { key: 'sell', label: 'Sell my business', href: '/sell', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" /></svg> },
-  { key: 'buy', label: 'Buy a business', href: '/buy', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg> },
-  { key: 'raise', label: 'Raise capital', href: '/raise', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 20V10" /><path d="M18 20V4" /><path d="M6 20v-4" /></svg> },
-  { key: 'value', label: 'Valuation', href: '/sell', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> },
-  { key: 'sba', label: 'SBA check', href: '/buy', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg> },
+/* ═══ PROMPT CHIPS ═══ */
+
+const PROMPT_CHIPS = [
+  { key: 'sell', label: 'I want to sell my business', fill: 'I want to sell my business — ' },
+  { key: 'value', label: "What's my business worth?", fill: "What's my business worth? I own a " },
+  { key: 'buy', label: 'Help me find businesses to buy', fill: "Help me find businesses to buy — I'm looking for " },
+  { key: 'raise', label: "I'm raising capital", fill: "I'm raising capital for my " },
+];
+
+/* ═══ LEARN CARDS ═══ */
+
+const LEARN_CARDS = [
+  {
+    title: 'How Yulia works',
+    desc: 'Tell her about your deal. She handles analysis, documents, and strategy. Four steps from conversation to deliverables.',
+    href: '/how-it-works',
+    icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>,
+  },
+  {
+    title: 'Intelligence engine',
+    desc: '80+ industry verticals, real transaction data, Census economics, live market conditions. Analysis, not guesses.',
+    href: '/how-it-works',
+    icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+  },
+  {
+    title: 'Your deal workspace',
+    desc: 'Invite your broker, attorney, CPA. One place for every document, every party, every decision.',
+    href: '/enterprise',
+    icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+  },
+  {
+    title: 'Every deal journey',
+    desc: 'Sell, buy, raise capital, integrate. From $400K landscaping exits to $40M PE roll-ups.',
+    href: '/sell',
+    icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+  },
 ];
 
 type Phase = 'landing' | 'chat';
@@ -82,10 +113,11 @@ export default function Home() {
     dockRef.current?.clear();
   }, [enterChat, sendMessage]);
 
-  // Chip click — navigate to journey page
-  const handleChipClick = useCallback((href: string) => {
-    navigate(href);
-  }, [navigate]);
+  // Chip click — fill and send
+  const handleChipClick = useCallback((fill: string) => {
+    enterChat();
+    sendMessage(fill);
+  }, [enterChat, sendMessage]);
 
   // Scroll-hide topbar on mobile — listen to messages container in chat, window on landing
   const handleScroll = useCallback((e?: Event) => {
@@ -115,7 +147,7 @@ export default function Home() {
     <div className={`home-root${phase === 'chat' ? ' in-chat' : ''}`}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadePulse { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
 
         .home-root {
@@ -131,87 +163,146 @@ export default function Home() {
           overflow: hidden;
         }
 
-        /* ── Topbar ── */
-        .home-topbar {
-          position: fixed; top: 0; left: 0; right: 0; z-index: 40;
-          display: flex; align-items: center; justify-content: space-between;
-          padding: 12px 48px;
-          background: rgba(250,248,244,0.95);
-          backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-          transition: transform 0.3s ease;
+        /* ── Floating pill nav ── */
+        .home-pill {
+          position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+          z-index: 50; width: auto;
+          backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+          background: rgba(255,255,255,0.85);
+          border: 1px solid rgba(221,217,209,0.5);
+          box-shadow: 0 4px 20px rgba(26,26,24,.06), 0 1px 3px rgba(26,26,24,.04);
+          border-radius: 100px;
+          padding: 10px 24px;
+          display: flex; align-items: center; gap: 20px;
+          transition: transform 0.3s ease, opacity 0.3s ease;
         }
-        @media (max-width: 768px) { .home-topbar { padding: 12px 16px; } }
-        @media (max-width: 768px) { .home-topbar.hidden { transform: translateY(-100%); } }
-
-        .home-logo { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; color: ${T.text}; }
-        @media (max-width: 768px) { .home-logo { font-size: 22px; } }
-
-        .home-icon-btn {
-          width: 36px; height: 36px; border-radius: 50%;
-          background: transparent; border: none; cursor: pointer;
-          display: flex; align-items: center; justify-content: center;
-          color: ${T.textMid}; transition: background 0.15s;
+        @media (max-width: 768px) {
+          .home-pill { padding: 10px 16px; gap: 12px; }
+          .home-pill.hidden { transform: translateX(-50%) translateY(-120%); opacity: 0; }
         }
-        .home-icon-btn:hover { background: ${T.fill}; }
 
         /* ── Landing hero ── */
         .home-hero {
           display: flex; flex-direction: column;
-          align-items: center; justify-content: center;
+          align-items: center;
           text-align: center;
-          flex: 1; min-height: 100dvh;
-          padding: 60px 40px 40px;
+          padding: 100px 40px 60px;
           max-width: 1200px; margin: 0 auto; width: 100%;
         }
-        @media (max-width: 1100px) { .home-hero { padding: 60px 40px 24px; } }
-        @media (max-width: 768px)  { .home-hero { padding: 60px 20px 24px; } }
+        @media (max-width: 1100px) { .home-hero { padding: 90px 40px 40px; } }
+        @media (max-width: 768px)  { .home-hero { padding: 80px 20px 32px; } }
 
         .home-h1 {
-          font-size: 88px; font-weight: 800; line-height: 1.06;
-          letter-spacing: -0.035em; color: ${T.text};
-          margin: 0 0 32px; animation: fadeUp 0.5s ease both;
+          font-size: 80px; font-weight: 700; line-height: 1.05;
+          letter-spacing: -0.04em; color: ${T.text};
+          margin: 0 0 20px; animation: fadeUp 0.6s ease both;
         }
-        @media (max-width: 1100px) { .home-h1 { font-size: 64px; margin-bottom: 20px; } }
-        @media (max-width: 768px)  { .home-h1 { font-size: 40px; margin-bottom: 16px; } }
+        @media (max-width: 1100px) { .home-h1 { font-size: 56px; margin-bottom: 16px; } }
+        @media (max-width: 768px)  { .home-h1 { font-size: 38px; margin-bottom: 14px; } }
 
         .home-sub {
-          font-size: 23px; color: ${T.muted}; line-height: 1.5;
-          font-weight: 400; max-width: 540px; margin: 0 0 72px;
-          animation: fadeUp 0.5s ease 0.08s both;
+          font-size: 20px; color: ${T.muted}; line-height: 1.6;
+          font-weight: 400; max-width: 480px; margin: 0 0 48px;
+          animation: fadeUp 0.6s ease 0.08s both;
         }
-        @media (max-width: 1100px) { .home-sub { font-size: 19px; max-width: 440px; margin-bottom: 40px; } }
-        @media (max-width: 768px)  { .home-sub { font-size: 17px; max-width: 320px; margin-bottom: 28px; } }
+        @media (max-width: 1100px) { .home-sub { font-size: 18px; max-width: 420px; margin-bottom: 36px; } }
+        @media (max-width: 768px)  { .home-sub { font-size: 16px; max-width: 320px; margin-bottom: 28px; } }
 
-        .home-dock-wrap {
-          width: 100%; max-width: 680px;
-          animation: fadeUp 0.5s ease 0.16s both;
+        /* ── Card-in-card ── */
+        .home-card-outer {
+          width: 100%; max-width: 720px;
+          background: ${T.white};
+          border-radius: 34px;
+          box-shadow: 0 8px 40px rgba(26,26,24,.08), 0 2px 8px rgba(26,26,24,.04);
+          padding: 12px;
+          animation: fadeUp 0.6s ease 0.16s both;
         }
-        @media (max-width: 1100px) { .home-dock-wrap { max-width: 540px; } }
-        @media (max-width: 768px)  { .home-dock-wrap { max-width: 100%; } }
+        @media (max-width: 1100px) { .home-card-outer { max-width: 580px; } }
+        @media (max-width: 768px)  { .home-card-outer { max-width: 100%; border-radius: 28px; padding: 8px; } }
 
+        .home-card-inner {
+          background: ${T.cream};
+          border-radius: 26px;
+          padding: 24px 24px 8px;
+          position: relative;
+        }
+        @media (max-width: 768px) { .home-card-inner { border-radius: 22px; padding: 16px 16px 4px; } }
+
+        .home-card-label {
+          font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+          text-transform: uppercase; color: ${T.faint};
+          margin-bottom: 8px; display: block;
+        }
+
+        /* ── Prompt chips ── */
         .home-chips {
           display: flex; flex-wrap: wrap; justify-content: center;
-          gap: 10px; margin-top: 48px;
-          animation: fadeUp 0.5s ease 0.28s both;
+          gap: 10px; margin-top: 32px;
+          animation: fadeUp 0.6s ease 0.28s both;
         }
-        @media (max-width: 1100px) { .home-chips { gap: 8px; margin-top: 28px; } }
+        @media (max-width: 1100px) { .home-chips { gap: 8px; margin-top: 24px; } }
         @media (max-width: 768px)  { .home-chips { gap: 6px; margin-top: 20px; } }
 
-        .home-chips-label { font-size: 15px; color: ${T.faint}; font-weight: 500; padding: 7px 0; margin-right: 2px; }
-        @media (max-width: 1100px) { .home-chips-label { font-size: 13px; } }
+        .home-chips-label { font-size: 14px; color: ${T.faint}; font-weight: 500; padding: 9px 0; }
         @media (max-width: 768px)  { .home-chips-label { display: none; } }
 
         .home-chip {
-          display: flex; align-items: center; gap: 5px;
-          padding: 9px 18px; border-radius: 100px;
+          padding: 10px 20px; border-radius: 100px;
           background: transparent; border: 1px solid rgba(221,217,209,0.6);
           cursor: pointer; font-size: 14px; font-weight: 500; color: ${T.muted};
           font-family: 'Inter', system-ui, sans-serif;
           transition: all 0.2s; white-space: nowrap;
         }
         .home-chip:hover { background: ${T.white}; border-color: ${T.border}; box-shadow: ${T.shadowCard}; color: ${T.text}; }
-        @media (max-width: 1100px) { .home-chip { padding: 7px 14px; font-size: 13px; } }
-        @media (max-width: 768px)  { .home-chip { padding: 6px 12px; font-size: 12px; } }
+        .home-chip:active { transform: scale(0.97); }
+        @media (max-width: 1100px) { .home-chip { padding: 8px 16px; font-size: 13px; } }
+        @media (max-width: 768px)  { .home-chip { padding: 8px 14px; font-size: 12px; } }
+
+        /* ── Learn cards ── */
+        .home-learn {
+          width: 100%; max-width: 780px;
+          margin-top: 80px; padding: 0 0 40px;
+          animation: fadeUp 0.6s ease 0.4s both;
+        }
+        @media (max-width: 1100px) { .home-learn { margin-top: 60px; max-width: 580px; } }
+        @media (max-width: 768px)  { .home-learn { margin-top: 48px; max-width: 100%; } }
+
+        .home-learn-card {
+          display: flex; flex-direction: column;
+          background: ${T.white}; border: 1px solid rgba(221,217,209,0.4);
+          border-radius: 24px; padding: 28px;
+          text-decoration: none; color: inherit;
+          transition: all 0.2s;
+        }
+        .home-learn-card:hover {
+          box-shadow: 0 4px 20px rgba(26,26,24,.07), 0 1px 3px rgba(26,26,24,.04);
+          transform: translateY(-2px);
+          border-color: ${T.border};
+        }
+
+        .home-learn-icon {
+          width: 44px; height: 44px; border-radius: 14px;
+          background: ${T.terraSoft};
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 16px; color: ${T.terra};
+        }
+
+        .home-learn-title {
+          font-size: 17px; font-weight: 700; color: ${T.text};
+          margin: 0 0 6px;
+        }
+
+        .home-learn-desc {
+          font-size: 14px; color: ${T.muted}; line-height: 1.55;
+          margin: 0 0 16px; flex: 1;
+        }
+
+        .home-learn-arrow {
+          display: flex; align-items: center; gap: 4px;
+          font-size: 13px; font-weight: 600; color: ${T.terra};
+          transition: transform 0.2s;
+        }
+        .home-learn-card:hover .home-learn-arrow { transform: translateX(4px); }
 
         /* ── Chat phase ── */
         .home-chat {
@@ -276,13 +367,17 @@ export default function Home() {
         @media (max-width: 768px) { .home-dock-bottom.hidden { transform: translateY(100%); } }
       `}</style>
 
-      {/* ═══ TOPBAR ═══ */}
-      <header className={`home-topbar${!barsVisible ? ' hidden' : ''}`}>
-        <div className="home-logo">
-          smb<span style={{ color: T.terra }}>x</span>.ai
-        </div>
-        <button className="home-icon-btn" onClick={() => navigate('/login')} aria-label="Sign in">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+      {/* ═══ FLOATING PILL NAV ═══ */}
+      <header className={`home-pill${!barsVisible ? ' hidden' : ''}`}>
+        <Logo />
+        <button
+          className="bg-transparent border-none cursor-pointer p-1 text-[#3D3B37] flex items-center"
+          onClick={() => navigate('/login')}
+          aria-label="Sign in"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+          </svg>
         </button>
       </header>
 
@@ -290,25 +385,46 @@ export default function Home() {
       {phase === 'landing' && (
         <main className="home-hero">
           <h1 className="home-h1">
-            Sell a business.<br />Buy a business.<br />Raise capital.
+            Start with<br />the deal.
           </h1>
           <p className="home-sub">
             AI-powered M&A advisory. From first question to closing day.
           </p>
 
-          <div className="home-dock-wrap">
-            <ChatDock ref={dockRef} onSend={handleSend} disabled={sending || limitReached} />
+          {/* Card-in-card chat input */}
+          <div className="home-card-outer">
+            <div className="home-card-inner">
+              <span className="home-card-label">Talk through the deal</span>
+              <ChatDock ref={dockRef} onSend={handleSend} disabled={sending || limitReached} variant="hero" />
+            </div>
           </div>
 
+          {/* Prompt suggestion chips */}
           <div className="home-chips">
-            <span className="home-chips-label">Try:</span>
-            {CHIPS.map(c => (
-              <button key={c.key} className="home-chip" onClick={() => handleChipClick(c.href)}>
-                <span style={{ color: T.terra, display: 'flex' }}>{c.icon}</span>
+            <span className="home-chips-label">Suggested:</span>
+            {PROMPT_CHIPS.map(c => (
+              <button key={c.key} className="home-chip" onClick={() => handleChipClick(c.fill)}>
                 {c.label}
               </button>
             ))}
           </div>
+
+          {/* Learn cards */}
+          <section className="home-learn">
+            <div className="learn-cards">
+              {LEARN_CARDS.map(card => (
+                <Link key={card.title} href={card.href} className="home-learn-card">
+                  <div className="home-learn-icon">{card.icon}</div>
+                  <h3 className="home-learn-title">{card.title}</h3>
+                  <p className="home-learn-desc">{card.desc}</p>
+                  <span className="home-learn-arrow">
+                    Learn more
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
         </main>
       )}
 

@@ -36,7 +36,7 @@ export default function Timeline({ steps }: Props) {
             </span>
             <p className="text-sm text-[#7A766E] leading-[1.6] max-w-[480px] m-0">{step.desc}</p>
             {step.detail && (
-              <div className="mt-3 px-[18px] py-[14px] bg-[#F3F0EA] rounded-xl text-[13px] text-[#4A4843] leading-[1.55]">
+              <div className="mt-3 px-[18px] py-[14px] bg-[#F3F0EA] rounded-2xl text-[13px] text-[#4A4843] leading-[1.55]">
                 {step.detail}
               </div>
             )}

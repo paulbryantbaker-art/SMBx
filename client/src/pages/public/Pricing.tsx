@@ -136,11 +136,11 @@ export default function Pricing() {
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
-      <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-12 text-center">
-        <h1 className="font-sans text-[clamp(40px,5.5vw,72px)] font-black leading-[1.05] tracking-[-0.03em] mb-5 m-0">
+      <section className="max-w-site mx-auto px-10 pt-8 pb-20 max-md:px-5 max-md:pt-4 max-md:pb-12 text-center">
+        <h1 className="animate-fadeInUp font-sans text-[clamp(40px,5.5vw,72px)] font-extrabold leading-[1.05] tracking-tight mb-5 m-0">
           Know what you&apos;ll spend <em className="italic text-[#D4714E]">before you start.</em>
         </h1>
-        <p className="text-[19px] text-[#7A766E] max-w-[560px] mx-auto leading-[1.6] m-0">
+        <p className="animate-fadeInUp stagger-1 text-[19px] text-[#7A766E] max-w-[560px] mx-auto leading-[1.6] m-0">
           Every journey has a clear price. No retainers. No surprises.
           Your first conversation and financial analysis are always free.
         </p>
@@ -244,7 +244,7 @@ export default function Pricing() {
 
       {/* ═══ WHAT'S ALWAYS FREE ═══ */}
       <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-[20px] p-16 max-md:p-7">
+        <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-4xl p-16 max-md:p-7">
           <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0">
             What&apos;s always free.
           </h3>
@@ -276,7 +276,7 @@ export default function Pricing() {
 
       {/* ═══ FINAL CTA ═══ */}
       <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
-        <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-[20px] px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
+        <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-4xl px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
           <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
           <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
             Start free. Pay only when you&apos;re ready.

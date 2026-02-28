@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import Logo from './Logo';
 import Button from './Button';
@@ -11,17 +11,6 @@ const NAV_LINKS = [
   { href: '/pricing', label: 'Pricing' },
 ];
 
-const PAGE_NAMES: Record<string, string> = {
-  '/': 'Home',
-  '/sell': 'Sell',
-  '/buy': 'Buy',
-  '/raise': 'Raise Capital',
-  '/integrate': 'Integrate',
-  '/how-it-works': 'How It Works',
-  '/enterprise': 'Enterprise',
-  '/pricing': 'Pricing',
-};
-
 interface Props {
   chatMode?: boolean;
 }
@@ -29,15 +18,16 @@ interface Props {
 export default function PublicNav({ chatMode }: Props) {
   const [open, setOpen] = useState(false);
   const [location] = useLocation();
-  const { resetToPublic, sourcePage } = useChatContext();
+  const { sourcePage } = useChatContext();
 
-  // Simplified nav during chat mode
+  // Close mobile menu on route change
+  useEffect(() => { setOpen(false); }, [location]);
+
+  // Chat mode — minimal centered logo pill
   if (chatMode) {
-    const pageName = PAGE_NAMES[sourcePage] || 'site';
-
     return (
-      <nav className="shrink-0 bg-[#FAF8F4] border-b border-[#E0DCD4]">
-        <div className="flex items-center justify-center px-4 py-3 md:px-10 md:py-4">
+      <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 w-auto">
+        <div className="pill-nav rounded-full px-6 py-3 flex items-center justify-center">
           <Logo />
         </div>
       </nav>
@@ -45,17 +35,17 @@ export default function PublicNav({ chatMode }: Props) {
   }
 
   return (
-    <nav className="bg-[#FAF8F4]">
-      <div className="max-w-site mx-auto flex items-center justify-between px-10 py-5 max-md:px-5 max-md:py-4">
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4">
+      <div className="pill-nav rounded-full px-5 py-2.5 flex items-center justify-between">
         <Logo />
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-6">
           {NAV_LINKS.map(l => (
             <Link
               key={l.href}
               href={l.href}
-              className={`text-sm font-medium no-underline transition-colors ${
+              className={`text-[13px] font-medium no-underline transition-colors ${
                 location === l.href
                   ? 'text-[#1A1A18]'
                   : 'text-[#7A766E] hover:text-[#1A1A18]'
@@ -64,9 +54,13 @@ export default function PublicNav({ chatMode }: Props) {
               {l.label}
             </Link>
           ))}
+        </div>
+
+        {/* Desktop auth */}
+        <div className="hidden md:flex items-center gap-3">
           <Link
             href="/login"
-            className="text-sm font-medium text-[#7A766E] hover:text-[#1A1A18] no-underline transition-colors"
+            className="text-[13px] font-medium text-[#7A766E] hover:text-[#1A1A18] no-underline transition-colors"
           >
             Sign in
           </Link>
@@ -79,7 +73,7 @@ export default function PublicNav({ chatMode }: Props) {
           className="md:hidden p-2 text-[#1A1A18] bg-transparent border-none cursor-pointer"
           aria-label="Toggle menu"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             {open ? (
               <path d="M18 6L6 18M6 6l12 12" />
             ) : (
@@ -89,9 +83,9 @@ export default function PublicNav({ chatMode }: Props) {
         </button>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile dropdown menu */}
       {open && (
-        <div className="md:hidden border-t border-[#E0DCD4] bg-white px-5 py-5 space-y-4">
+        <div className="md:hidden mt-2 rounded-3xl bg-white shadow-xl border border-[#E8E4DC] px-5 py-5 space-y-4">
           {NAV_LINKS.map(l => (
             <Link
               key={l.href}

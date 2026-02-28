@@ -11,7 +11,7 @@ export default function Card({ children, className = '', hover = true, padding =
   return (
     <div
       className={`
-        bg-white border border-[#E0DCD4] rounded-2xl ${padding}
+        bg-white border border-[#E0DCD4] rounded-3xl ${padding}
         ${hover ? 'transition-all duration-250 ease-out hover:border-[#D4714E] hover:shadow-[0_8px_32px_rgba(218,119,86,.08)] hover:-translate-y-0.5 relative overflow-hidden group' : ''}
         ${className}
       `}

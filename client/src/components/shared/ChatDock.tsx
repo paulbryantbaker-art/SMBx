@@ -36,14 +36,17 @@ interface ChatDockProps {
   onFileUpload?: (file: File) => Promise<{ name: string; size: string } | null>;
   disabled?: boolean;
   placeholder?: string;
+  /** 'hero' = large textarea for landing page, 'dock' = compact for chat */
+  variant?: 'hero' | 'dock';
 }
 
 /* ═══ COMPONENT ═══ */
 
 const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
-  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal..." },
+  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock' },
   ref,
 ) {
+  const isHero = variant === 'hero';
   const [value, setValue] = useState('');
   const [toolsOpen, setToolsOpen] = useState(false);
   const [attachment, setAttachment] = useState<{ name: string; size: string } | null>(null);
@@ -148,7 +151,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
   }, [toolsOpen]);
 
   return (
-    <div className="shrink-0 px-3 md:px-6 lg:px-8 bg-[#FAF8F4]" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div className={isHero ? '' : 'shrink-0 px-3 md:px-6 lg:px-8 bg-[#FAF8F4]'} style={isHero ? undefined : { paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -158,8 +161,8 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
         className="hidden"
       />
 
-      <div className="max-w-[860px] mx-auto pb-3 pt-2 lg:pb-4">
-        <div className="home-dock-card relative">
+      <div className={isHero ? '' : 'max-w-[860px] mx-auto pb-3 pt-2 lg:pb-4'}>
+        <div className="home-dock-card relative" style={isHero ? { border: 'none', boxShadow: 'none', background: 'transparent', borderRadius: 0 } : undefined}>
           {/* Tool popup */}
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
             <div className="px-4 pt-3 pb-2">
@@ -210,8 +213,8 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             onKeyDown={handleKey}
             placeholder={placeholder}
             className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1A1A18] leading-[1.5] placeholder:text-[#A9A49C] lg:text-[18px]"
-            style={{ fontFamily: 'inherit', minHeight: '52px', maxHeight: '200px', padding: '18px 22px 10px 22px' }}
-            rows={1}
+            style={{ fontFamily: 'inherit', minHeight: isHero ? '100px' : '52px', maxHeight: '200px', padding: '18px 22px 10px 22px' }}
+            rows={isHero ? 3 : 1}
           />
 
           {/* Toolbar row */}

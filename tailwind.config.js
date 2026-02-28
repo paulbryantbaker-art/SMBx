@@ -27,11 +27,15 @@ export default {
           faint: '#A9A49C',
         },
       },
+      borderRadius: {
+        '4xl': '34px',
+      },
       fontFamily: {
         sans: ["'Inter'", 'system-ui', '-apple-system', 'sans-serif'],
       },
       maxWidth: {
         site: '1200px',
+        'chat-card': '768px',
       },
     },
   },
