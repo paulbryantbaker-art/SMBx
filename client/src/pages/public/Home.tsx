@@ -111,6 +111,7 @@ export default function Home() {
       vv.addEventListener('scroll', update);
     }
     window.addEventListener('resize', update);
+    window.scrollTo(0, 0); // Ensure no accumulated scroll offset
     update();
     return () => {
       if (vv) {
@@ -141,6 +142,7 @@ export default function Home() {
   // Enter chat phase — push history so browser back returns to landing
   const enterChat = useCallback(() => {
     if (phase !== 'chat') {
+      window.scrollTo(0, 0); // Reset scroll so offsetTop starts at 0
       window.history.pushState({ homeChat: true }, '', window.location.pathname + '#chat');
       setPhase('chat');
     }
