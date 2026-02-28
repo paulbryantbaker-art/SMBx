@@ -133,27 +133,6 @@ export default function Home() {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
-  // Lock body scroll when entering chat (iOS Safari fix)
-  useEffect(() => {
-    if (phase === 'chat') {
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-      document.body.style.top = '0';
-    } else {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-    };
-  }, [phase]);
-
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (phase === 'chat') {
@@ -211,10 +190,7 @@ export default function Home() {
   const showSignup = limitReached || (messagesRemaining !== null && messagesRemaining <= 5 && hasMessages);
 
   return (
-    <div
-      id={phase === 'chat' ? 'app-root' : undefined}
-      className={`home-root${phase === 'chat' ? ' in-chat' : ''}`}
-    >
+    <div className={`home-root${phase === 'chat' ? ' in-chat' : ''}`}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -232,7 +208,7 @@ export default function Home() {
         .home-root.in-chat {
           position: fixed;
           left: 0; right: 0; top: 0;
-          height: 100%;
+          height: var(--app-height, 100dvh);
           overflow: hidden;
         }
 
