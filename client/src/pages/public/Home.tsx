@@ -137,8 +137,8 @@ export default function Home() {
     const target = e?.target as HTMLElement | null;
     const y = target && target !== document.documentElement ? target.scrollTop : window.scrollY;
     if (y < 10) setBarsVisible(true);
-    else if (y - lastY.current > 6) setBarsVisible(false);
-    else if (lastY.current - y > 6) setBarsVisible(true);
+    else if (y - lastY.current > 20) setBarsVisible(false);
+    else if (lastY.current - y > 20) setBarsVisible(true);
     lastY.current = y;
   }, []);
 
@@ -197,8 +197,11 @@ export default function Home() {
           border-bottom: 1px solid rgba(26,26,24,0.06);
           transition: transform 0.3s ease, opacity 0.3s ease;
         }
+        /* Mobile home only: slide topbar out without layout shift */
         @media (max-width: 768px) {
-          .home-topbar.scroll-hidden:not(.home-topbar-sticky) { transform: translateY(-100%); opacity: 0; margin-top: -56px; }
+          .home-root:not(.in-chat) .home-topbar.scroll-hidden {
+            transform: translateY(-100%); opacity: 0; pointer-events: none;
+          }
         }
         .home-root:not(.in-chat) .home-topbar {
           position: sticky; top: 0; z-index: 50;
@@ -660,7 +663,7 @@ export default function Home() {
       {/* ═══ MAIN ═══ */}
       <div className="home-main">
         {/* ── Topbar ── */}
-        <header className={`home-topbar${!barsVisible ? ' scroll-hidden' : ''}`}>
+        <header className={`home-topbar${!barsVisible && phase === 'home' ? ' scroll-hidden' : ''}`}>
           <button className="home-topbar-btn" onClick={() => setSidebarOpen(v => !v)} aria-label="Toggle sidebar">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="3" y1="6" x2="21" y2="6" />
