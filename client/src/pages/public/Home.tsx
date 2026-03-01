@@ -83,16 +83,24 @@ export default function Home() {
     }
   }, [hasMessages, phase]);
 
-  // Auto-send advisor context when arriving from /advisors page (?advisor=1)
-  const advisorHandled = useRef(false);
+  // Auto-send context when arriving from entry-ramp pages (?advisor=1, ?sell=1, ?buy=1)
+  const contextHandled = useRef(false);
   useEffect(() => {
-    if (advisorHandled.current) return;
+    if (contextHandled.current) return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get('advisor') === '1' && !hasMessages) {
-      advisorHandled.current = true;
+    let msg = '';
+    if (params.get('advisor') === '1') {
+      msg = "I'm a business broker evaluating SMBX for my practice. What can you do for advisors?";
+    } else if (params.get('sell') === '1') {
+      msg = 'I\u2019m thinking about selling my business. Help me understand what it might be worth and walk me through the process.';
+    } else if (params.get('buy') === '1') {
+      msg = 'I\u2019m looking to buy a business. Help me evaluate opportunities and understand the acquisition process.';
+    }
+    if (msg && !hasMessages) {
+      contextHandled.current = true;
       window.history.replaceState(null, '', '/');
       enterChat();
-      sendMessage("I'm a business broker evaluating SMBX for my practice. What can you do for advisors?");
+      sendMessage(msg);
     }
   }, [hasMessages, enterChat, sendMessage]);
 
@@ -680,8 +688,8 @@ export default function Home() {
           {phase === 'home' && (
             <>
               <nav className="hidden md:flex items-center gap-1">
-                <a href="/sell" className="home-topbar-link" onClick={(e) => { e.preventDefault(); handleSuggestion('Walk me through selling my company. I want to understand the full process.'); }}>Sell</a>
-                <a href="/buy" className="home-topbar-link" onClick={(e) => { e.preventDefault(); handleSuggestion('Help me find acquisition targets. I\u2019m looking at potential businesses to buy.'); }}>Buy</a>
+                <a href="/sell" className="home-topbar-link">Sell</a>
+                <a href="/buy" className="home-topbar-link">Buy</a>
                 <a href="/advisors" className="home-topbar-link">Advisors</a>
               </nav>
               <button
