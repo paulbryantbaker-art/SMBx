@@ -193,12 +193,12 @@ export default function HowItWorks() {
           Adaptive intelligence
         </p>
         <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-4 m-0">
-          Calibrated to your <em className="italic text-[#D4714E]">deal size.</em>
+          A different advisor for <em className="italic text-[#D4714E]">every deal size.</em>
         </h2>
         <p className="text-[17px] text-[#7A766E] leading-[1.6] max-w-[700px] mb-10 m-0">
-          Yulia doesn&apos;t give the same advice to a $500K landscaping company and a $500M healthcare
-          platform. She adapts her vocabulary, methodology, financial metrics, and deliverable depth
-          to match your deal&apos;s complexity &mdash; from Main Street to mega-cap.
+          Yulia adapts to your deal. First-time seller? She coaches you through every step in plain English.
+          PE firm running a roll-up? She models IRR waterfalls and identifies bolt-on targets before your
+          first call. Same platform. Different depth. Your deal, your language.
         </p>
         <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
           {LEAGUE_TIERS.map(tier => (
@@ -297,10 +297,11 @@ export default function HowItWorks() {
               Does this deal pencil? <em className="italic text-[#D4714E]">Know in 30 seconds.</em>
             </h2>
             <p className="text-[15px] text-[#7A766E] leading-[1.65] mb-6 m-0">
-              65% of business acquisitions use SBA financing. Yulia tells you instantly whether a deal
-              is bankable &mdash; current SOFR-plus rates, June 2025 SOP 50 10 8 rules, DSCR analysis,
-              LTV ratios, and SBA eligibility by NAICS code. Before you waste three months on diligence
-              for a deal that can&apos;t close.
+              Sixty-five percent of business acquisitions use SBA financing. Yulia tells you instantly
+              whether a deal pencils &mdash; current SOFR-plus rates, June 2025 SOP 50 10 8 rules,
+              DSCR analysis, LTV ratios, and SBA eligibility by NAICS code &mdash; before you spend
+              three months on diligence for a deal that can&apos;t close. Current rates. Current rules.
+              Current reality.
             </p>
             <ul className="space-y-2 list-none p-0 m-0">
               {['Instant go/no-go with current rates and rules', 'DSCR, LTV, and equity injection modeling', 'June 2025 seller note and standby provisions', 'Alternative structure suggestions if SBA fails'].map(item => (
@@ -344,9 +345,10 @@ export default function HowItWorks() {
           A CIM in one hour. A valuation in <em className="italic text-[#D4714E]">five minutes.</em>
         </h2>
         <p className="text-[15px] text-[#7A766E] leading-[1.65] mb-10 m-0 max-w-[700px]">
-          91+ institutional-grade deliverable types generated in minutes. Not templates.
-          Not fill-in-the-blanks. Real analysis built from your actual financials, version-controlled,
-          exportable, and stored in your deal room. Change an assumption &mdash; Yulia regenerates.
+          A CIM that used to take three weeks? Generated in minutes. A valuation that used to
+          cost $25,000? Done for $350. 91+ institutional-grade documents, version-controlled,
+          exportable, and stored in your deal room. Not templates. Not fill-in-the-blanks.
+          Real analysis, built from your actual financials.
         </p>
         <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
           {[
@@ -377,9 +379,10 @@ export default function HowItWorks() {
           One room. <em className="italic text-[#D4714E]">Every seat at the table.</em>
         </h2>
         <p className="text-[15px] text-[#7A766E] leading-[1.65] mb-10 m-0 max-w-[700px]">
-          Every deal becomes a multi-party workspace. Invite your broker, attorney, CPA, and lender &mdash;
-          each sees exactly what they need and nothing they shouldn&apos;t. Documents organized, version-controlled,
-          and tracked. No more email chains. No more &ldquo;which version is current?&rdquo;
+          Every deal becomes a workspace. Invite your broker, attorney, CPA, and lender &mdash;
+          each sees exactly what they need. Documents organized, version-controlled, and tracked.
+          No more email chains. No more &ldquo;which version is current?&rdquo; One room. Every seat
+          at the table.
         </p>
         <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
           {[
@@ -405,9 +408,9 @@ export default function HowItWorks() {
           From first question to <em className="italic text-[#D4714E]">wire transfer.</em>
         </h2>
         <p className="text-[15px] text-[#7A766E] leading-[1.65] mb-10 m-0 max-w-[700px]">
-          SMBX doesn&apos;t just advise on the deal. It connects you to everyone you need to close
-          and operate &mdash; financing partners, service providers, escrow integration, and post-acquisition
-          operations. One platform for the full lifecycle.
+          From your first question to your 100th day as a new owner. Valuation. Financing. Documents.
+          Diligence. Closing. Integration. One platform. One advisor. Every professional you need,
+          already connected.
         </p>
         <div className="flex flex-wrap gap-3 mb-6">
           {['SBA lending partners', 'ROBS/401k financing', 'M&A attorneys', 'CPAs & tax advisors', 'Business appraisers', 'Insurance brokers', 'Payroll & HR setup', 'Escrow integration'].map(item => (

@@ -106,8 +106,9 @@ export default function Integrate() {
           You closed the deal. Now <em className="italic text-[#D4714E]">protect the value.</em>
         </h1>
         <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-16 m-0">
-          The first 100 days determine whether your acquisition creates value or destroys it.
-          Most buyers plan the deal meticulously and then wing the integration. You won&apos;t.
+          From your first day as owner to your 100th. Yulia builds your Day Zero checklist,
+          employee communication plan, synergy analysis, and full integration roadmap &mdash;
+          with every professional you need already connected. One platform. Full lifecycle.
         </p>
         <div className="animate-fadeInUp stagger-3 flex flex-col md:flex-row gap-3 max-md:w-full">
           <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Plan your first 100 days &rarr;</Button>
@@ -173,12 +174,12 @@ export default function Integrate() {
       <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
         <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Transaction ecosystem</p>
         <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
-          Every party. Every document. <em className="italic text-[#D4714E]">One system.</em>
+          One room. Every seat at <em className="italic text-[#D4714E]">the table.</em>
         </h2>
         <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-8 m-0 max-w-[600px]">
-          Integration touches every part of the business and every party to the deal.
-          Yulia&apos;s deal room keeps attorneys, CPAs, lenders, and operators aligned &mdash;
-          with role-based access, shared documents, and real-time task tracking.
+          Every deal becomes a workspace. Invite your broker, attorney, CPA, and lender &mdash;
+          each sees exactly what they need. Documents organized, version-controlled, and tracked.
+          No more email chains. No more &ldquo;which version is current?&rdquo;
         </p>
         <div className="flex flex-wrap gap-3 mb-8">
           {['Buyer', 'Seller', 'Broker', 'Attorney', 'CPA', 'Lender', 'Advisor'].map(r => (

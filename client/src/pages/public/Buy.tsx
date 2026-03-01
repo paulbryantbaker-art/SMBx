@@ -114,8 +114,10 @@ export default function Buy() {
           Source smarter. Screen faster. <em className="italic text-[#D4714E]">Build conviction.</em>
         </h1>
         <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-16 m-0">
-          Whether it&apos;s your first acquisition or your fifteenth &mdash; Yulia screens targets,
-          models returns, manages diligence, and keeps every party on track.
+          First-time buyer? Yulia coaches you through every step in plain English. PE firm
+          running a roll-up? She models IRR waterfalls and identifies bolt-on targets before
+          your first call. She screens, scores, values, and manages diligence &mdash; adapting
+          to your deal size and experience level.
         </p>
         <div className="animate-fadeInUp stagger-3 flex flex-col md:flex-row gap-3 max-md:w-full">
           <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start screening &mdash; free &rarr;</Button>
@@ -128,12 +130,13 @@ export default function Buy() {
         <div className="bg-gradient-to-br from-[#FFF8F4] to-[#FFF0EB] rounded-4xl p-12 max-md:p-7" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05), inset 0 0 0 1px rgba(212,113,78,.06)' }}>
           <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Localized market intelligence</p>
           <h3 className="font-sans text-[clamp(24px,2.5vw,32px)] font-black tracking-[-0.02em] mb-4 m-0">
-            Intelligence that goes beyond the listing.
+            Your market. Your industry. Your ZIP code.
           </h3>
           <p className="text-[15px] text-[#4A4843] leading-[1.65] mb-5 m-0">
-            For every target, Yulia delivers competitive intelligence most buyers never see: competitive density
-            in the market, PE consolidation activity, average multiples by sub-region, SBA bankability scores,
-            and fragmentation analysis. Not national averages &mdash; localized to the target&apos;s ZIP code.
+            For every target, Yulia delivers competitive intelligence most buyers never see &mdash; grounded
+            in Census Bureau, BLS, Federal Reserve, SEC EDGAR, and IRS data. Competitive density, PE consolidation
+            activity, average multiples by sub-region, SBA bankability scores, and fragmentation analysis. The same
+            sources that power Wall Street, localized to the target&apos;s ZIP code.
           </p>
           <div className="grid grid-cols-4 gap-4 max-md:grid-cols-2">
             {[
@@ -162,9 +165,10 @@ export default function Buy() {
             Does this deal pencil? Know in 30 seconds.
           </h3>
           <p className="text-[15px] text-[#4A4843] leading-[1.65] mb-4 m-0 max-w-[700px]">
-            65% of business acquisitions use SBA financing. Yulia tells you instantly whether a deal is
-            bankable &mdash; current SOFR-plus rates, June 2025 SOP 50 10 8 rules, DSCR analysis, and
-            equity injection requirements. Before you waste three months on diligence for a deal that can&apos;t close.
+            Sixty-five percent of business acquisitions use SBA financing. Yulia tells you instantly
+            whether a deal pencils &mdash; current SOFR-plus rates, June 2025 SOP 50 10 8 rules, DSCR analysis,
+            and equity injection requirements &mdash; before you spend three months on diligence for a deal
+            that can&apos;t close. Current rates. Current rules. Current reality.
           </p>
           <div className="grid grid-cols-4 gap-4 max-md:grid-cols-2 mt-6">
             {[

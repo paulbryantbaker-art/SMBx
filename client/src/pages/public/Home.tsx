@@ -591,17 +591,18 @@ export default function Home() {
         <>
           <main className="home-hero">
             <h1 className="home-h1">
-              The data is public.{' '}
+              Yulia finds the money{' '}
               <span style={{
                 background: `linear-gradient(135deg, ${T.terra}, ${T.terraLight})`,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-              }}>The intelligence is not.</span>
+              }}>you didn&apos;t know was there.</span>
             </h1>
             <p className="home-sub">
-              She finds hidden add-backs. Models your financing. Generates your documents.
-              Manages your deal from first question to closing day.
+              She doesn&apos;t wait for you to ask the right questions. She finds hidden add-backs,
+              models your financing, flags your risks, generates your documents, and manages
+              your deal from first conversation to wire transfer.
             </p>
 
             {/* 2-layer chat card */}
@@ -650,23 +651,24 @@ export default function Home() {
             animation: 'fadeUp 0.6s ease 0.36s both',
           }}>
             <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: T.terra, fontWeight: 600, marginBottom: 8 }}>
-              The platform
+              How she does it
             </p>
             <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em', color: T.text, margin: '0 0 12px', lineHeight: 1.15 }}>
               Seven capabilities. One conversation.
             </h2>
             <p style={{ fontSize: 15, lineHeight: 1.6, color: T.body, margin: '0 0 32px', maxWidth: 600 }}>
               Each one could be its own product. Together, they&apos;re the operating system for business transactions.
+              The moat isn&apos;t any one feature &mdash; it&apos;s the integration.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {[
-                { num: '01', title: 'Agentic advisor', proof: 'She finds $127K in add-backs in 4 minutes. Models your financing before you ask. Flags risks before buyers find them.' },
-                { num: '02', title: 'League system', proof: 'A different advisor for every deal size. L1 Coach for $400K exits. L6 Partner for $500M platforms. Same Yulia. Different depth.' },
-                { num: '03', title: 'Localized intelligence', proof: 'Census Bureau, BLS, FRED, SEC EDGAR, IRS SOI \u2014 synthesized to your ZIP code. Not national averages. Your market.' },
-                { num: '04', title: 'SBA bankability engine', proof: 'Does this deal pencil? Current rates. June 2025 rules. DSCR analysis. Go/no-go in 30 seconds \u2014 before you waste 3 months on diligence.' },
-                { num: '05', title: 'Deliverable engine', proof: 'A CIM in one hour. A valuation in five minutes. 91+ institutional-grade documents generated from your conversation.' },
-                { num: '06', title: 'Deal room', proof: 'One room. Every seat at the table. Broker, attorney, CPA, lender \u2014 each sees exactly what they need. Role-based. Version-controlled.' },
-                { num: '07', title: 'Transaction ecosystem', proof: 'From first question to wire transfer. Financing partners. Service provider network. 100-day integration plans. Full lifecycle.' },
+                { num: '01', title: "Yulia doesn\u2019t answer questions. She runs deals.", proof: 'She finds $127K in hidden add-backs you didn\u2019t know existed. Models your financing before your first call with a lender. Flags the risks in your deal before buyers find them. She runs the process \u2014 you make the decisions.' },
+                { num: '02', title: 'A different advisor for every deal size.', proof: 'First-time seller? She coaches you through every step in plain English. PE firm running a roll-up? She models IRR waterfalls and identifies bolt-on targets. Same platform. Different depth. Your deal, your language.' },
+                { num: '03', title: 'Your market. Your industry. Your ZIP code.', proof: 'Census Bureau, BLS, Federal Reserve, SEC EDGAR, IRS Statistics of Income. The same sources that power Wall Street, localized to your market. Not national averages. Not guesses. Your competitive landscape.' },
+                { num: '04', title: 'Does this deal pencil? Know in 30 seconds.', proof: '65% of acquisitions use SBA financing. Yulia tells you instantly whether a deal is bankable \u2014 current rates, June 2025 rules, DSCR analysis \u2014 before you spend three months on diligence for a deal that can\u2019t close.' },
+                { num: '05', title: 'A CIM in one hour. A valuation in five minutes.', proof: 'A CIM that used to take three weeks? Generated in minutes. A valuation that used to cost $25,000? Done for $350. 91+ institutional-grade documents. Real analysis, built from your actual financials.' },
+                { num: '06', title: 'One room. Every seat at the table.', proof: 'Invite your broker, attorney, CPA, and lender \u2014 each sees exactly what they need. Documents organized, version-controlled, and tracked. No more email chains. No more \u201Cwhich version is current?\u201D' },
+                { num: '07', title: 'From first question to wire transfer.', proof: 'Valuation. Financing. Documents. Diligence. Closing. Integration. One platform. One advisor. Every professional you need, already connected. From your first question to your 100th day as a new owner.' },
               ].map(f => (
                 <div key={f.num} style={{
                   display: 'flex', gap: 16, alignItems: 'flex-start',
@@ -691,7 +693,7 @@ export default function Home() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               gap: 8, flexWrap: 'wrap',
             }}>
-              <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: T.muted }}>Powered by:</span>
+              <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: T.muted }}>Powered by</span>
               {['U.S. Census Bureau', 'Bureau of Labor Statistics', 'Federal Reserve (FRED)', 'SEC EDGAR', 'IRS Statistics of Income'].map((src, i) => (
                 <span key={src} style={{ fontSize: 12, color: T.sub, fontWeight: 500 }}>
                   {src}{i < 4 ? <span style={{ margin: '0 4px', color: T.faint }}>&middot;</span> : ''}

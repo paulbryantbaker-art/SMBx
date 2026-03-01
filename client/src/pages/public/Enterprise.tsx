@@ -185,11 +185,12 @@ export default function Enterprise() {
       <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
         <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Deal room</p>
         <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
-          One room. Every party. <em className="italic text-[#D4714E]">Total control.</em>
+          One room. Every seat at <em className="italic text-[#D4714E]">the table.</em>
         </h2>
         <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-8 m-0 max-w-[600px]">
-          Every deal has multiple parties who need different access to different information.
-          The deal room keeps everyone organized, everyone informed, and everyone in their lane.
+          Every deal becomes a workspace. Invite your broker, attorney, CPA, and lender &mdash;
+          each sees exactly what they need. Documents organized, version-controlled, and tracked.
+          No more email chains. No more &ldquo;which version is current?&rdquo;
         </p>
         <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
           {DEAL_ROOM_FEATURES.map(f => (

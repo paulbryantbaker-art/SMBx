@@ -121,9 +121,9 @@ export default function Raise() {
           The right capital. The right terms. <em className="italic text-[#D4714E]">The right partner.</em>
         </h1>
         <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-16 m-0">
-          The difference between a good raise and a great one is preparation. Yulia builds
-          your financial story, your deck, and your investor strategy &mdash; so you negotiate
-          from strength, not hope.
+          Defensible valuation in five minutes. Institutional pitch deck in two hours. Term
+          sheet analysis that shows what each clause really costs you. Yulia doesn&apos;t just prepare
+          your raise &mdash; she builds the financial story that makes investors compete.
         </p>
         <div className="animate-fadeInUp stagger-3 flex flex-col md:flex-row gap-3 max-md:w-full">
           <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start your strategy &mdash; free &rarr;</Button>
@@ -192,9 +192,9 @@ export default function Raise() {
           Everything investors need. <em className="italic text-[#D4714E]">Before they ask.</em>
         </h2>
         <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-8 m-0 max-w-[600px]">
-          Yulia doesn&apos;t just model your raise &mdash; she produces every document the process demands.
-          Pitch decks built from your actual data. Financial models with scenario analysis. Term sheet
-          breakdowns that show what each clause really costs you.
+          A pitch deck that used to take your banker two weeks? Yulia builds it in hours from your
+          actual financials. Every document is institutional-grade and version-controlled. Not templates.
+          Not fill-in-the-blanks. Real analysis, built from your numbers.
         </p>
         <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
           {[

@@ -120,9 +120,10 @@ export default function Sell() {
           Know your number <em className="italic text-[#D4714E]">before anyone else does.</em>
         </h1>
         <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-16 m-0">
-          Yulia proactively finds hidden add-backs in your P&amp;L, flags risks in your CIM before buyers
-          find them, and produces institutional-quality deliverables from conversation. She doesn&apos;t
-          wait for you to ask the right questions &mdash; she asks them for you.
+          Yulia doesn&apos;t wait for you to ask the right questions. She finds $100K+ in hidden
+          add-backs you didn&apos;t know existed. Models your financing before your first call
+          with a lender. Flags the risks in your CIM before buyers find them. She runs the
+          process &mdash; you make the decisions.
         </p>
         <div className="animate-fadeInUp stagger-3 flex flex-col md:flex-row gap-3 max-md:w-full">
           <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Get your number &mdash; free &rarr;</Button>
@@ -143,9 +144,10 @@ export default function Sell() {
             Yulia&apos;s first analysis is free because finding hidden value is how we earn your trust.
           </p>
           <p className="text-[15px] text-[#4A4843] leading-[1.65] m-0">
-            Every insight is grounded in authoritative federal data &mdash; Census Bureau, BLS, FRED,
-            SEC EDGAR &mdash; synthesized with 80+ industry verticals of transaction data and localized
-            to your market. Not national averages. Your city. Your industry. Your competitive environment.
+            Every number Yulia gives you is grounded in authoritative federal data &mdash; Census Bureau,
+            Bureau of Labor Statistics, Federal Reserve, SEC EDGAR, IRS Statistics of Income. The same
+            sources that power Wall Street, localized to your market. Not national averages. Not guesses.
+            Your industry, your city, your competitive landscape.
           </p>
         </div>
       </section>
@@ -208,11 +210,12 @@ export default function Sell() {
       <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
         <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Deliverable engine</p>
         <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
-          Institutional work product. <em className="italic text-[#D4714E]">In minutes.</em>
+          A CIM in one hour. A valuation in <em className="italic text-[#D4714E]">five minutes.</em>
         </h2>
         <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-8 m-0 max-w-[600px]">
-          Yulia doesn&apos;t just answer questions &mdash; she produces the documents that move deals forward.
-          Every deliverable built from your actual data, formatted to institutional standards.
+          A CIM that used to take three weeks? Yulia generates it in minutes. A valuation that
+          used to cost $25,000? Done for $350. Every document is institutional-grade, version-controlled,
+          and stored in your deal room. Not templates. Real analysis, built from your actual financials.
         </p>
         <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
           {DELIVERABLES.map(d => (
