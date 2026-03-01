@@ -236,11 +236,11 @@ export default function Home() {
         }
         .home-hero-wrap::before {
           content: '';
-          position: absolute; top: -10%; left: 50%; transform: translateX(-50%);
-          width: 900px; height: 700px;
+          position: absolute; inset: 0;
           background:
-            radial-gradient(ellipse at 40% 45%, rgba(212,113,78,0.07) 0%, transparent 60%),
-            radial-gradient(ellipse at 65% 50%, rgba(212,113,78,0.04) 0%, transparent 55%);
+            radial-gradient(ellipse 80% 60% at 25% 30%, rgba(212,113,78,0.18) 0%, transparent 70%),
+            radial-gradient(ellipse 70% 50% at 75% 25%, rgba(212,113,78,0.10) 0%, transparent 65%),
+            radial-gradient(ellipse 60% 40% at 50% 80%, rgba(212,113,78,0.07) 0%, transparent 60%);
           pointer-events: none; z-index: 0;
         }
 
