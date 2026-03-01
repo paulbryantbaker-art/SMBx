@@ -281,14 +281,21 @@ export default function Home() {
           border-radius: 20px;
           border: 1px solid rgba(26,26,24,0.08);
           background: #FFFFFF;
-          box-shadow: 0 2px 12px rgba(26,26,24,0.06);
+          box-shadow:
+            0 4px 16px rgba(26,26,24,0.08),
+            0 1px 3px rgba(26,26,24,0.06),
+            0 12px 40px rgba(26,26,24,0.04);
           padding: 0;
           animation: fadeUp 0.5s ease 0.12s both;
           transition: border-color 0.2s, box-shadow 0.2s;
         }
         .home-hero-input:focus-within {
           border-color: rgba(212,113,78,0.35);
-          box-shadow: 0 2px 12px rgba(26,26,24,0.06), 0 0 0 3px rgba(212,113,78,0.10);
+          box-shadow:
+            0 4px 16px rgba(26,26,24,0.10),
+            0 1px 3px rgba(26,26,24,0.06),
+            0 12px 40px rgba(26,26,24,0.06),
+            0 0 0 3px rgba(212,113,78,0.10);
         }
 
         .home-hero-textarea {
