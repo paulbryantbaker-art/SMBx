@@ -199,7 +199,10 @@ export default function Home() {
           transition: transform 0.3s ease, opacity 0.3s ease;
         }
         @media (max-width: 768px) {
-          .home-topbar.hidden { transform: translateY(-100%); opacity: 0; margin-top: -56px; }
+          .home-topbar.hidden:not(.home-topbar-sticky) { transform: translateY(-100%); opacity: 0; margin-top: -56px; }
+        }
+        .home-root:not(.in-chat) .home-topbar {
+          position: sticky; top: 0; z-index: 50;
         }
 
         .home-topbar-btn {
