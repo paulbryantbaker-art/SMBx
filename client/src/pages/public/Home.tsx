@@ -627,21 +627,24 @@ export default function Home() {
 
         .home-dock-bottom {
           flex-shrink: 0;
+          width: 100%;
+        }
+        .home-dock-bottom-inner {
           padding: 0 16px 12px;
+          padding-bottom: max(12px, env(safe-area-inset-bottom));
           max-width: 900px; margin: 0 auto; width: 100%;
           box-sizing: border-box;
-          padding-bottom: max(12px, env(safe-area-inset-bottom));
         }
         @media (min-width: 769px) {
-          .home-dock-bottom { padding: 0 40px 20px; }
+          .home-dock-bottom-inner { padding: 0 40px 20px; }
         }
         /* Strip ChatDock default wrapper chrome — we style from here */
-        .home-dock-bottom > div {
+        .home-dock-bottom-inner > div {
           background: transparent !important;
           border: none !important;
           padding: 0 !important;
         }
-        .home-dock-bottom .home-dock-card {
+        .home-dock-bottom-inner .home-dock-card {
           border-radius: 20px;
           border: 1px solid rgba(26,26,24,0.10) !important;
           background: #FFFFFF;
@@ -976,7 +979,9 @@ export default function Home() {
 
             {!limitReached && (
               <div className={`home-dock-bottom${!barsVisible ? ' hidden' : ''}`}>
-                <ChatDock ref={dockRef} onSend={handleSend} disabled={sending} />
+                <div className="home-dock-bottom-inner">
+                  <ChatDock ref={dockRef} onSend={handleSend} disabled={sending} />
+                </div>
               </div>
             )}
           </div>
