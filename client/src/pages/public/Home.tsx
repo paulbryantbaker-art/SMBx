@@ -83,6 +83,19 @@ export default function Home() {
     }
   }, [hasMessages, phase]);
 
+  // Auto-send advisor context when arriving from /advisors page (?advisor=1)
+  const advisorHandled = useRef(false);
+  useEffect(() => {
+    if (advisorHandled.current) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('advisor') === '1' && !hasMessages) {
+      advisorHandled.current = true;
+      window.history.replaceState(null, '', '/');
+      enterChat();
+      sendMessage("I'm a business broker evaluating SMBX for my practice. What can you do for advisors?");
+    }
+  }, [hasMessages, enterChat, sendMessage]);
+
   useEffect(() => {
     const onPop = () => {
       if (!window.location.hash.includes('chat')) setPhase('home');
@@ -669,7 +682,7 @@ export default function Home() {
               <nav className="hidden md:flex items-center gap-1">
                 <a href="/sell" className="home-topbar-link" onClick={(e) => { e.preventDefault(); handleSuggestion('Walk me through selling my company. I want to understand the full process.'); }}>Sell</a>
                 <a href="/buy" className="home-topbar-link" onClick={(e) => { e.preventDefault(); handleSuggestion('Help me find acquisition targets. I\u2019m looking at potential businesses to buy.'); }}>Buy</a>
-                <a href="/advisors" className="home-topbar-link" onClick={(e) => { e.preventDefault(); handleSuggestion("I'm a business broker. Show me how you can help me with my practice."); }}>Advisors</a>
+                <a href="/advisors" className="home-topbar-link">Advisors</a>
               </nav>
               <button
                 className="home-topbar-btn"

@@ -44,6 +44,7 @@ import Terms from './pages/public/Terms';
 import Chat from './pages/Chat';
 
 // Lazy-load secondary pages to keep initial bundle lean
+const Advisors = lazy(() => import('./pages/public/Advisors'));
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
 const Search = lazy(() => import('./pages/Search'));
@@ -128,6 +129,9 @@ export default function App() {
     <Switch>
       <Route path="/">
         <Home />
+      </Route>
+      <Route path="/advisors">
+        <Suspense fallback={<PageLoader />}><Advisors /></Suspense>
       </Route>
       <Route path="/legal/privacy">
         <Privacy />
