@@ -183,6 +183,10 @@ export default function Home() {
           display: flex; flex-direction: column;
         }
 
+        .home-sidebar-wrap {
+          position: relative; z-index: 45;
+        }
+
         /* ── Topbar ── */
         .home-topbar {
           flex-shrink: 0;
@@ -320,7 +324,7 @@ export default function Home() {
         /* ═══ BELOW-FOLD SECTIONS ═══ */
 
         .home-below-fold {
-          background: linear-gradient(to bottom, ${T.bg} 0%, #F0EDE8 100%);
+          background: ${T.bg};
         }
 
         .home-section {
@@ -640,32 +644,42 @@ export default function Home() {
             0 12px 40px rgba(26,26,24,0.04);
         }
 
-        /* Mobile only: scroll-hide */
-        @media (max-width: 768px) {
-          .home-dock-bottom { transition: transform 0.3s ease, opacity 0.3s ease; }
-          .home-dock-bottom.scroll-hidden { transform: translateY(100%); opacity: 0; }
+        /* ── Sidebar backdrop ── */
+        .home-sidebar-backdrop {
+          position: fixed; inset: 0; z-index: 40;
+          background: rgba(0,0,0,0.2);
+          opacity: 0; pointer-events: none;
+          transition: opacity 0.25s ease;
+        }
+        .home-sidebar-backdrop.open {
+          opacity: 1; pointer-events: auto;
         }
       `}</style>
 
-      {/* ═══ SIDEBAR ═══ */}
-      <Sidebar
-        conversations={[]}
-        activeId={null}
-        onSelect={() => {}}
-        onNew={() => { goHome(); setSidebarOpen(false); }}
-        onClose={() => setSidebarOpen(false)}
-        anonymous={true}
-        visible={sidebarOpen}
+      {/* ═══ SIDEBAR BACKDROP ═══ */}
+      <div
+        className={`home-sidebar-backdrop${sidebarOpen ? ' open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
       />
+
+      {/* ═══ SIDEBAR ═══ */}
+      <div className="home-sidebar-wrap">
+        <Sidebar
+          conversations={[]}
+          activeId={null}
+          onSelect={() => {}}
+          onNew={() => { goHome(); setSidebarOpen(false); }}
+          onClose={() => setSidebarOpen(false)}
+          anonymous={true}
+          visible={sidebarOpen}
+        />
+      </div>
 
       {/* ═══ MAIN ═══ */}
       <div className="home-main">
         {/* ── Topbar ── */}
         <header className={`home-topbar${!barsVisible ? ' scroll-hidden' : ''}`}>
-          <button className="home-topbar-btn" onClick={() => {
-            if (phase === 'chat' && !sidebarOpen) { goHome(); }
-            else { setSidebarOpen(v => !v); }
-          }} aria-label={phase === 'chat' && !sidebarOpen ? 'Back to home' : 'Toggle sidebar'}>
+          <button className="home-topbar-btn" onClick={() => setSidebarOpen(v => !v)} aria-label="Toggle sidebar">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="3" y1="6" x2="21" y2="6" />
               <line x1="3" y1="12" x2="21" y2="12" />
@@ -965,7 +979,7 @@ export default function Home() {
             </div>
 
             {!limitReached && (
-              <div className={`home-dock-bottom${!barsVisible ? ' scroll-hidden' : ''}`}>
+              <div className="home-dock-bottom">
                 <div className="home-dock-bottom-inner">
                   <ChatDock ref={dockRef} onSend={handleSend} disabled={sending} />
                 </div>
