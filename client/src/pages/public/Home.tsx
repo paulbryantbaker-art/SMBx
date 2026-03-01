@@ -89,40 +89,6 @@ export default function Home() {
   const heroInputRef = useRef<HTMLTextAreaElement>(null);
   const [inputActive, setInputActive] = useState(false);
   const activeTimer = useRef<ReturnType<typeof setTimeout>>();
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  // Resize chat container to match visual viewport (handles iOS keyboard).
-  // Sets BOTH height and top — top:offsetTop is required because iOS Safari
-  // scrolls the layout viewport when keyboard opens, and fixed elements
-  // need to follow. Only active during chat phase (landing is normal flow).
-  useEffect(() => {
-    if (phase !== 'chat') return;
-    const el = rootRef.current;
-    if (!el) return;
-    const vv = window.visualViewport;
-    function update() {
-      const h = vv ? vv.height : window.innerHeight;
-      const t = vv ? vv.offsetTop : 0;
-      el!.style.height = h + 'px';
-      el!.style.top = t + 'px';
-    }
-    if (vv) {
-      vv.addEventListener('resize', update);
-      vv.addEventListener('scroll', update);
-    }
-    window.addEventListener('resize', update);
-    window.scrollTo(0, 0); // Ensure no accumulated scroll offset
-    update();
-    return () => {
-      if (vv) {
-        vv.removeEventListener('resize', update);
-        vv.removeEventListener('scroll', update);
-      }
-      window.removeEventListener('resize', update);
-      el!.style.height = '';
-      el!.style.top = '';
-    };
-  }, [phase]);
 
   // Navigate from chat back to landing
   const goHome = useCallback(() => {
@@ -142,7 +108,6 @@ export default function Home() {
   // Enter chat phase — push history so browser back returns to landing
   const enterChat = useCallback(() => {
     if (phase !== 'chat') {
-      window.scrollTo(0, 0); // Reset scroll so offsetTop starts at 0
       window.history.pushState({ homeChat: true }, '', window.location.pathname + '#chat');
       setPhase('chat');
     }
@@ -223,7 +188,7 @@ export default function Home() {
   const showSignup = limitReached || (messagesRemaining !== null && messagesRemaining <= 5 && hasMessages);
 
   return (
-    <div ref={rootRef} className={`home-root${phase === 'chat' ? ' in-chat' : ''}`}>
+    <div className={`home-root${phase === 'chat' ? ' in-chat' : ''}`}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -235,12 +200,8 @@ export default function Home() {
           background: ${T.bg};
           display: flex; flex-direction: column;
         }
-        /* Chat phase: PROVEN iOS PATTERN from Chat.tsx
-           position:fixed + useAppHeight sets height via visualViewport.
-           Everything inside is flex children — NO position:fixed on pill or dock. */
+        /* Chat phase: h-dvh shrinks automatically with iOS keyboard */
         .home-root.in-chat {
-          position: fixed;
-          left: 0; right: 0; top: 0;
           height: 100dvh;
           overflow: hidden;
         }

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation } from 'wouter';
-import { useAppHeight } from '../hooks/useAppHeight';
 import Sidebar, { type Conversation } from '../components/chat/Sidebar';
 import MessageBubble, { type Message } from '../components/chat/MessageBubble';
 import ChatDock from '../components/shared/ChatDock';
@@ -51,7 +50,6 @@ const JOURNEY_CARDS = [
 ];
 
 export default function Chat({ user, onLogout, initialConversationId }: ChatProps) {
-  useAppHeight();
   const [, navigate] = useLocation();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<number | null>(initialConversationId || null);
@@ -324,10 +322,8 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
 
   return (
     <div
-      id="app-root"
       ref={containerRef}
-      className="flex bg-[#FAF8F4] font-sans"
-      style={{ position: 'fixed', left: 0, right: 0, top: 0, height: '100%' }}
+      className="flex h-dvh overflow-hidden bg-[#FAF8F4] font-sans"
     >
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (

@@ -2,7 +2,6 @@ import PublicNav from './PublicNav';
 import Footer from './Footer';
 import ChatMorph from '../chat/ChatMorph';
 import { useChatContext } from '../../context/ChatContext';
-import { useAppHeight } from '../../hooks/useAppHeight';
 
 interface Props {
   children: React.ReactNode;
@@ -11,14 +10,13 @@ interface Props {
 }
 
 export default function PublicLayout({ children, minimal }: Props) {
-  useAppHeight();
   const { morphPhase } = useChatContext();
 
   const isChat = morphPhase === 'chat';
   const isMorphing = morphPhase === 'morphing';
 
   return (
-    <div className={`flex flex-col bg-[#FAF8F4] ${isChat ? 'overflow-hidden' : 'min-h-dvh pt-28'}`} style={isChat ? { height: 'var(--app-height, 100dvh)', position: 'fixed', inset: 0 } : undefined}>
+    <div className={`flex flex-col bg-[#FAF8F4] ${isChat ? 'h-dvh overflow-hidden' : 'min-h-dvh pt-28'}`}>
       {!minimal && <PublicNav chatMode={isChat} />}
 
       <ChatMorph>{children}</ChatMorph>
