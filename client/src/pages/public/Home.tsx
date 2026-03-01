@@ -658,30 +658,35 @@ export default function Home() {
 
         .home-dock-bottom {
           flex-shrink: 0;
-          padding: 0 16px 16px;
-          max-width: 900px; margin: 0 auto; width: 100%;
-          box-sizing: border-box;
         }
-        @media (min-width: 769px) {
-          .home-dock-bottom { padding: 0 40px 20px; }
-        }
-        .home-dock-bottom > div {
-          background: transparent !important;
-          border: none !important;
-          padding: 0 !important;
-        }
-        .home-dock-bottom .home-dock-card {
-          border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.10) !important;
-          background: #FFFFFF;
-          box-shadow:
-            0 4px 16px rgba(26,26,24,0.08),
-            0 1px 3px rgba(26,26,24,0.06),
-            0 12px 40px rgba(26,26,24,0.04);
-        }
+
+        /* Mobile: default ChatDock styling, scroll-hide */
         @media (max-width: 768px) {
           .home-dock-bottom { transition: transform 0.3s ease, opacity 0.3s ease; }
           .home-dock-bottom.hidden { transform: translateY(100%); opacity: 0; }
+        }
+
+        /* Desktop: floating card style matching hero input */
+        @media (min-width: 769px) {
+          .home-dock-bottom {
+            padding: 0 40px 20px;
+            max-width: 900px; margin: 0 auto; width: 100%;
+            box-sizing: border-box;
+          }
+          .home-dock-bottom > div {
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+          }
+          .home-dock-bottom .home-dock-card {
+            border-radius: 20px;
+            border: 1px solid rgba(26,26,24,0.10) !important;
+            background: #FFFFFF;
+            box-shadow:
+              0 4px 16px rgba(26,26,24,0.08),
+              0 1px 3px rgba(26,26,24,0.06),
+              0 12px 40px rgba(26,26,24,0.04);
+          }
         }
       `}</style>
 
