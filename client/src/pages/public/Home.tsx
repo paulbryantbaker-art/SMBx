@@ -238,9 +238,8 @@ export default function Home() {
           content: '';
           position: absolute; inset: 0;
           background:
-            radial-gradient(ellipse 80% 60% at 25% 30%, rgba(212,113,78,0.18) 0%, transparent 70%),
-            radial-gradient(ellipse 70% 50% at 75% 25%, rgba(212,113,78,0.10) 0%, transparent 65%),
-            radial-gradient(ellipse 60% 40% at 50% 80%, rgba(212,113,78,0.07) 0%, transparent 60%);
+            radial-gradient(ellipse 80% 60% at 25% 30%, rgba(212,113,78,0.09) 0%, transparent 70%),
+            radial-gradient(ellipse 70% 50% at 75% 25%, rgba(212,113,78,0.06) 0%, transparent 65%);
           pointer-events: none; z-index: 0;
         }
 
@@ -271,7 +270,7 @@ export default function Home() {
 
         .home-greeting-sub {
           font-size: 32px; font-weight: 600; line-height: 1.2;
-          letter-spacing: -0.03em; color: ${T.faint};
+          letter-spacing: -0.03em; color: ${T.muted};
           margin: 0 0 36px;
           animation: fadeUp 0.5s ease 0.06s both;
         }
@@ -720,8 +719,8 @@ export default function Home() {
             {/* ── SECTION 0: HERO ── */}
             <div className="home-hero-wrap">
             <section className="home-hero">
-              <h1 className="home-greeting">{getGreeting()},</h1>
-              <p className="home-greeting-sub">what deal are we working on?</p>
+              <h1 className="home-greeting">{getGreeting()}.</h1>
+              <p className="home-greeting-sub">Tell me about your deal.</p>
 
               <div className="home-hero-input">
                 <textarea
