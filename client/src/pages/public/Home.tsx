@@ -269,9 +269,23 @@ export default function Home() {
           width: 100%; max-width: 620px;
           animation: fadeUp 0.5s ease 0.12s both;
         }
+        /* Strip ChatDock's outer + inner wrapper chrome */
+        .home-hero-dock > div {
+          background: transparent !important;
+          border: none !important;
+          padding: 0 !important;
+          flex-shrink: unset !important;
+        }
+        .home-hero-dock > div > div {
+          padding: 0 !important;
+          max-width: none !important;
+          margin: 0 !important;
+        }
+        /* Single card — the dock-card is the only visible container */
         .home-hero-dock .home-dock-card {
           border-radius: 20px;
           border: 1px solid rgba(26,26,24,0.10) !important;
+          background: #FFFFFF;
           box-shadow:
             0 4px 16px rgba(26,26,24,0.08),
             0 1px 3px rgba(26,26,24,0.06),
@@ -284,6 +298,11 @@ export default function Home() {
             0 1px 3px rgba(26,26,24,0.06),
             0 12px 40px rgba(26,26,24,0.06),
             0 0 0 3px rgba(212,113,78,0.10);
+        }
+        /* Remove inner textarea bg/card — flat inside the dock-card */
+        .home-hero-dock .home-dock-card > div:not(.home-tools-popup) {
+          background: transparent !important;
+          border-radius: 0 !important;
         }
 
         /* ── Suggestion cards ── */
@@ -634,6 +653,11 @@ export default function Home() {
           border: none !important;
           padding: 0 !important;
         }
+        .home-dock-bottom-inner > div > div {
+          padding: 0 !important;
+          max-width: none !important;
+          margin: 0 !important;
+        }
         .home-dock-bottom-inner .home-dock-card {
           border-radius: 20px;
           border: 1px solid rgba(26,26,24,0.10) !important;
@@ -642,6 +666,11 @@ export default function Home() {
             0 4px 16px rgba(26,26,24,0.08),
             0 1px 3px rgba(26,26,24,0.06),
             0 12px 40px rgba(26,26,24,0.04);
+        }
+        /* Remove inner textarea bg/card — flat inside the dock-card */
+        .home-dock-bottom-inner .home-dock-card > div:not(.home-tools-popup) {
+          background: transparent !important;
+          border-radius: 0 !important;
         }
 
         /* ── Sidebar backdrop ── */
