@@ -195,7 +195,7 @@ export default function Home() {
           transition: transform 0.3s ease, opacity 0.3s ease;
         }
         @media (max-width: 768px) {
-          .home-topbar.hidden:not(.home-topbar-sticky) { transform: translateY(-100%); opacity: 0; margin-top: -56px; }
+          .home-topbar.scroll-hidden:not(.home-topbar-sticky) { transform: translateY(-100%); opacity: 0; margin-top: -56px; }
         }
         .home-root:not(.in-chat) .home-topbar {
           position: sticky; top: 0; z-index: 50;
@@ -228,22 +228,8 @@ export default function Home() {
           -webkit-overflow-scrolling: touch;
         }
 
-        /* ── Hero ambient glow ── */
-        .home-hero-wrap {
-          position: relative;
-          overflow: hidden;
-        }
-        .home-hero-wrap::before {
-          content: '';
-          position: absolute; inset: 0;
-          background:
-            radial-gradient(ellipse 50% 40% at 50% 55%, rgba(212,113,78,0.05) 0%, transparent 100%);
-          pointer-events: none; z-index: 0;
-        }
-
         /* ── Hero section ── */
         .home-hero {
-          position: relative; z-index: 1;
           display: flex; flex-direction: column;
           align-items: center; justify-content: center;
           text-align: center;
@@ -657,7 +643,7 @@ export default function Home() {
         /* Mobile only: scroll-hide */
         @media (max-width: 768px) {
           .home-dock-bottom { transition: transform 0.3s ease, opacity 0.3s ease; }
-          .home-dock-bottom.hidden { transform: translateY(100%); opacity: 0; }
+          .home-dock-bottom.scroll-hidden { transform: translateY(100%); opacity: 0; }
         }
       `}</style>
 
@@ -675,8 +661,11 @@ export default function Home() {
       {/* ═══ MAIN ═══ */}
       <div className="home-main">
         {/* ── Topbar ── */}
-        <header className={`home-topbar${!barsVisible ? ' hidden' : ''}`}>
-          <button className="home-topbar-btn" onClick={() => setSidebarOpen(v => !v)} aria-label="Toggle sidebar">
+        <header className={`home-topbar${!barsVisible ? ' scroll-hidden' : ''}`}>
+          <button className="home-topbar-btn" onClick={() => {
+            if (phase === 'chat' && !sidebarOpen) { goHome(); }
+            else { setSidebarOpen(v => !v); }
+          }} aria-label={phase === 'chat' && !sidebarOpen ? 'Back to home' : 'Toggle sidebar'}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="3" y1="6" x2="21" y2="6" />
               <line x1="3" y1="12" x2="21" y2="12" />
@@ -726,7 +715,6 @@ export default function Home() {
         {phase === 'home' && (
           <div className="home-scroll">
             {/* ── SECTION 0: HERO ── */}
-            <div className="home-hero-wrap">
             <section className="home-hero">
               <h1 className="home-greeting">{getGreeting()}.</h1>
               <p className="home-greeting-sub">Tell me about your deal.</p>
@@ -747,7 +735,6 @@ export default function Home() {
                 Powered by {TRUST_SOURCES.join(' \u00B7 ')}
               </div>
             </section>
-            </div>
 
             <div className="home-below-fold">
             {/* ── SECTION 1: INTELLIGENCE STORY ── */}
@@ -978,7 +965,7 @@ export default function Home() {
             </div>
 
             {!limitReached && (
-              <div className={`home-dock-bottom${!barsVisible ? ' hidden' : ''}`}>
+              <div className={`home-dock-bottom${!barsVisible ? ' scroll-hidden' : ''}`}>
                 <div className="home-dock-bottom-inner">
                   <ChatDock ref={dockRef} onSend={handleSend} disabled={sending} />
                 </div>
