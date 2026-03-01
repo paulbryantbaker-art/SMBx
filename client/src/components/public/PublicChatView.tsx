@@ -52,7 +52,7 @@ export default function PublicChatView({
           {streamingText && (
             <div className="flex items-start gap-3">
               <YuliaAvatar size={32} className="mt-0.5" />
-              <div className="max-w-[75%] bg-[#FAF8F4] border border-[#E0DCD4] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
+              <div className="max-w-[75%] bg-white px-4 py-3" style={{ borderRadius: '18px 18px 18px 4px', border: '1px solid rgba(224,220,212,0.6)', boxShadow: '0 1px 4px rgba(26,26,24,0.04)' }}>
                 <p className="text-sm font-sans text-[#1A1A18] leading-[1.55] m-0 whitespace-pre-wrap">
                   {streamingText}
                 </p>
@@ -64,7 +64,7 @@ export default function PublicChatView({
           {sending && !streamingText && (
             <div className="flex items-start gap-3">
               <YuliaAvatar size={32} className="mt-0.5" />
-              <div className="bg-[#FAF8F4] border border-[#E0DCD4] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
+              <div className="bg-white px-4 py-3" style={{ borderRadius: '18px 18px 18px 4px', border: '1px solid rgba(224,220,212,0.6)', boxShadow: '0 1px 4px rgba(26,26,24,0.04)' }}>
                 <div className="flex gap-1.5 items-center h-5">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#9B9891] animate-[dotPulse_1s_ease-in-out_infinite]" />
                   <span className="w-1.5 h-1.5 rounded-full bg-[#9B9891] animate-[dotPulse_1s_ease-in-out_infinite]" style={{ animationDelay: '150ms' }} />

@@ -480,9 +480,9 @@ export default function Home() {
         .home-msg-user-bubble {
           max-width: 85%; padding: 12px 18px;
           background: ${T.terraSoft}; color: ${T.text};
-          border: 1px solid rgba(181,82,47,0.18);
+          border: 1px solid rgba(181,82,47,0.22);
           border-radius: 20px 20px 4px 20px;
-          box-shadow: 0 1px 3px rgba(26,26,24,.06);
+          box-shadow: 0 2px 8px rgba(26,26,24,0.08), 0 0 0 1px rgba(181,82,47,0.06);
           font-size: 15px; line-height: 1.55; word-break: break-word;
         }
         .home-msg-ai {
@@ -496,6 +496,11 @@ export default function Home() {
         }
         .home-msg-ai-bubble {
           max-width: 85%; font-size: 15px; line-height: 1.6; color: ${T.text};
+          background: #FFFFFF;
+          border: 1px solid rgba(224,220,212,0.6);
+          border-radius: 18px 18px 18px 4px;
+          box-shadow: 0 1px 4px rgba(26,26,24,0.04);
+          padding: 12px 16px;
         }
         .home-msg-ai-bubble p { margin: 0 0 12px; }
         .home-msg-ai-bubble p:last-child { margin-bottom: 0; }
