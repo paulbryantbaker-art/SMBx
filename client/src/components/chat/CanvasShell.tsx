@@ -11,7 +11,7 @@ interface CanvasShellProps {
 
 export default function CanvasShell({ title, subtitle, onClose, onFullscreen, isFullscreen, children }: CanvasShellProps) {
   return (
-    <div className="flex flex-col h-full" style={{ background: '#FAF8F4' }}>
+    <div className="flex flex-col h-full" style={{ background: '#FAF9F7' }}>
       {/* Header */}
       <div
         className="shrink-0 flex items-center justify-between"

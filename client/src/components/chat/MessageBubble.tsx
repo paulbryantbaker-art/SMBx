@@ -23,15 +23,15 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
   if (isUser) {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[82%]">
+        <div className="max-w-[80%]">
           <div
             className="px-[18px] py-3.5 text-base leading-[1.5] break-words"
             style={{
               background: '#FFF0EB',
-              border: '1px solid rgba(212,113,78,0.22)',
+              border: '1px solid rgba(212,113,78,0.18)',
               color: '#1A1A18',
-              borderRadius: '20px 20px 6px 20px',
-              boxShadow: '0 2px 8px rgba(26,26,24,0.08), 0 0 0 1px rgba(212,113,78,0.06)',
+              borderRadius: '20px 20px 4px 20px',
+              boxShadow: '0 1px 3px rgba(26,26,24,0.06)',
               fontFamily: "'Inter', system-ui, sans-serif",
               overflowWrap: 'break-word',
             }}
@@ -48,7 +48,7 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
 
   return (
     <div className="flex justify-start">
-      <div className="max-w-[90%] min-w-0">
+      <div className="max-w-[80%] min-w-0">
         {showAvatar && (
           <div
             className="w-8 h-8 rounded-full bg-[#D4714E] text-white text-xs font-bold flex items-center justify-center mb-2 shrink-0 font-sans"
@@ -60,9 +60,9 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
         <div
           className="bg-white px-4 py-3 text-base leading-[1.65] font-medium home-yt overflow-hidden"
           style={{
-            borderRadius: '18px 18px 18px 4px',
-            border: '1px solid rgba(224,220,212,0.6)',
-            boxShadow: '0 1px 4px rgba(26,26,24,0.04)',
+            borderRadius: '20px 20px 20px 4px',
+            border: '1px solid rgba(26,26,24,0.08)',
+            boxShadow: '0 1px 3px rgba(26,26,24,0.04)',
             overflowWrap: 'break-word',
           }}
         >

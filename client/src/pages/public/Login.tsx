@@ -27,7 +27,7 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup }: Logi
   };
 
   return (
-    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#FAF8F4]">
+    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#FAF9F7]">
       <div className="w-full max-w-[400px] bg-white rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.06)]">
         <div className="text-center mb-7">
           <Logo linked={false} />

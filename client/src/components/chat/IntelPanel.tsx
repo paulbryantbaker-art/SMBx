@@ -122,7 +122,7 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
         {fredLoading ? (
           <div className="grid grid-cols-2 gap-2">
             {[1,2,3,4].map(i => (
-              <div key={i} className="animate-pulse bg-[#FAF8F4] rounded-xl p-3">
+              <div key={i} className="animate-pulse bg-[#FAF9F7] rounded-xl p-3">
                 <div className="h-2.5 bg-[#EBE7DF] rounded w-2/3 mb-1.5" />
                 <div className="h-5 bg-[#EBE7DF] rounded w-1/2" />
               </div>
@@ -131,7 +131,7 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
         ) : (
           <div className="grid grid-cols-2 gap-2">
             {fredData.slice(0, 6).map(ind => (
-              <div key={ind.series_id} className="bg-[#FAF8F4] rounded-xl p-3">
+              <div key={ind.series_id} className="bg-[#FAF9F7] rounded-xl p-3">
                 <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5 truncate">{ind.name}</p>
                 <p className="text-base font-bold text-[#1A1A18] m-0">
                   {ind.value !== null ? `${ind.value}${ind.units === 'percent' ? '%' : ''}` : '—'}
@@ -168,7 +168,7 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
       {/* Market Overview Tab */}
       {tab === 'overview' && (
         <div>
-          <div className="bg-[#FAF8F4] rounded-2xl p-4 mb-4">
+          <div className="bg-[#FAF9F7] rounded-2xl p-4 mb-4">
             <h3 className="text-sm font-semibold text-[#1A1A18] m-0 mb-3">Look Up a Market</h3>
             <div className="space-y-2.5">
               <div>
@@ -204,7 +204,7 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
           {overview && (
             <div className="space-y-3">
               {overview.cbpData && (
-                <div className="bg-[#FAF8F4] rounded-2xl p-4">
+                <div className="bg-[#FAF9F7] rounded-2xl p-4">
                   <h3 className="text-xs font-semibold text-[#1A1A18] m-0 mb-2">Census Business Patterns</h3>
                   <div className="grid grid-cols-2 gap-3">
                     {overview.cbpData.totalEstablishments !== undefined && (
@@ -246,7 +246,7 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
               )}
 
               {overview.sbaAnalysis && (
-                <div className="bg-[#FAF8F4] rounded-2xl p-4">
+                <div className="bg-[#FAF9F7] rounded-2xl p-4">
                   <h3 className="text-xs font-semibold text-[#1A1A18] m-0 mb-2">SBA Bankability</h3>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -287,7 +287,7 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
           {reportsLoading ? (
             <div className="space-y-2">
               {[1,2,3].map(i => (
-                <div key={i} className="animate-pulse bg-[#FAF8F4] rounded-2xl p-4">
+                <div key={i} className="animate-pulse bg-[#FAF9F7] rounded-2xl p-4">
                   <div className="h-3 bg-[#EBE7DF] rounded w-1/3 mb-1.5" />
                   <div className="h-2.5 bg-[#F3F0EA] rounded w-2/3" />
                 </div>
@@ -301,7 +301,7 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
           ) : (
             <div className="space-y-2">
               {reports.map(r => (
-                <div key={r.id} className="bg-[#FAF8F4] rounded-2xl p-4 hover:bg-[#F3F0EA] transition-colors">
+                <div key={r.id} className="bg-[#FAF9F7] rounded-2xl p-4 hover:bg-[#F3F0EA] transition-colors">
                   <div className="flex items-center gap-1.5 mb-1">
                     <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700">
                       {r.report_type}
@@ -328,7 +328,7 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
       {/* SBA Calculator Tab */}
       {tab === 'sba' && (
         <div>
-          <div className="bg-[#FAF8F4] rounded-2xl p-4 mb-4">
+          <div className="bg-[#FAF9F7] rounded-2xl p-4 mb-4">
             <h3 className="text-sm font-semibold text-[#1A1A18] m-0 mb-2">SBA Loan Calculator</h3>
             <p className="text-xs text-[#6E6A63] m-0 mb-3">Check SBA 7(a) eligibility with live FRED prime rate.</p>
             <div className="space-y-2.5">
@@ -373,7 +373,7 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
           </div>
 
           {sbaResult && (
-            <div className="bg-[#FAF8F4] rounded-2xl p-4">
+            <div className="bg-[#FAF9F7] rounded-2xl p-4">
               <h3 className="text-xs font-semibold text-[#1A1A18] m-0 mb-3">Results</h3>
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>

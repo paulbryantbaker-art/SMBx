@@ -117,7 +117,7 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
       {/* Invite form */}
       {showInvite && (
         <div className="px-3 pb-3">
-          <div className="p-3 rounded-xl bg-[#FAF8F4] space-y-2">
+          <div className="p-3 rounded-xl bg-[#FAF9F7] space-y-2">
             <input
               type="email"
               placeholder="Email address"

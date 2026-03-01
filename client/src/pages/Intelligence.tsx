@@ -125,9 +125,9 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
   ];
 
   return (
-    <div className="min-h-dvh bg-[#FAF8F4]">
+    <div className="min-h-dvh bg-[#FAF9F7]">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 bg-[#FAF8F4]" style={{ borderBottom: '1px solid #DDD9D1' }}>
+      <div className="flex items-center justify-between px-6 py-4 bg-[#FAF9F7]" style={{ borderBottom: '1px solid #DDD9D1' }}>
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/chat')}
@@ -218,7 +218,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={naicsCode}
                     onChange={e => setNaicsCode(e.target.value)}
                     placeholder="e.g. 561710 (Pest Control)"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                   />
                 </div>
                 <div className="flex-1">
@@ -228,7 +228,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={geography}
                     onChange={e => setGeography(e.target.value)}
                     placeholder="e.g. Texas, Dallas County"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                   />
                 </div>
                 <div className="flex items-end">
@@ -386,7 +386,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={sbaInputs.purchasePrice}
                     onChange={e => setSbaInputs(p => ({ ...p, purchasePrice: e.target.value }))}
                     placeholder="1,000,000"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                   />
                 </div>
                 <div>
@@ -396,7 +396,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={sbaInputs.annualDebtService}
                     onChange={e => setSbaInputs(p => ({ ...p, annualDebtService: e.target.value }))}
                     placeholder="120,000"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                   />
                 </div>
                 <div>
@@ -406,7 +406,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={sbaInputs.ebitda}
                     onChange={e => setSbaInputs(p => ({ ...p, ebitda: e.target.value }))}
                     placeholder="250,000"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                   />
                 </div>
               </div>
@@ -452,7 +452,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                   )}
                 </div>
                 {sbaResult.notes && (
-                  <p className="text-sm text-[#6E6A63] m-0 p-3 bg-[#FAF8F4] rounded-lg">{sbaResult.notes}</p>
+                  <p className="text-sm text-[#6E6A63] m-0 p-3 bg-[#FAF9F7] rounded-lg">{sbaResult.notes}</p>
                 )}
               </div>
             )}

@@ -26,10 +26,11 @@ export default function PublicNav({ chatMode }: Props) {
   // Chat mode — minimal centered logo pill
   if (chatMode) {
     return (
-      <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 w-auto">
-        <div className="pill-nav rounded-full px-6 py-3 flex items-center justify-center">
-          <Logo />
-        </div>
+      <nav
+        className="shrink-0 flex items-center justify-center w-full z-50"
+        style={{ background: '#FAF9F7', height: 56, borderBottom: '1px solid rgba(26,26,24,0.06)' }}
+      >
+        <Logo />
       </nav>
     );
   }

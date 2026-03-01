@@ -199,9 +199,9 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
   };
 
   return (
-    <div className="min-h-dvh bg-[#FAF8F4]">
+    <div className="min-h-dvh bg-[#FAF9F7]">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 bg-[#FAF8F4]" style={{ borderBottom: '1px solid #DDD9D1' }}>
+      <div className="flex items-center justify-between px-6 py-4 bg-[#FAF9F7]" style={{ borderBottom: '1px solid #DDD9D1' }}>
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/chat')}
@@ -326,7 +326,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.name}
                   onChange={e => setNewThesis(p => ({ ...p, name: e.target.value }))}
                   placeholder="e.g. DFW HVAC Roll-up"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
@@ -336,7 +336,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.industry}
                   onChange={e => setNewThesis(p => ({ ...p, industry: e.target.value }))}
                   placeholder="e.g. HVAC, Pest Control"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
@@ -346,7 +346,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.geography}
                   onChange={e => setNewThesis(p => ({ ...p, geography: e.target.value }))}
                   placeholder="e.g. Dallas-Fort Worth"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
@@ -356,7 +356,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.minRevenue}
                   onChange={e => setNewThesis(p => ({ ...p, minRevenue: e.target.value }))}
                   placeholder="500000"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
@@ -366,7 +366,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.maxRevenue}
                   onChange={e => setNewThesis(p => ({ ...p, maxRevenue: e.target.value }))}
                   placeholder="2000000"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
@@ -376,7 +376,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.minPrice}
                   onChange={e => setNewThesis(p => ({ ...p, minPrice: e.target.value }))}
                   placeholder="300000"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                 />
               </div>
               <div>
@@ -386,7 +386,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.maxPrice}
                   onChange={e => setNewThesis(p => ({ ...p, maxPrice: e.target.value }))}
                   placeholder="1500000"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                 />
               </div>
             </div>

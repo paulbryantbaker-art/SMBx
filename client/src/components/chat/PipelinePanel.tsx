@@ -111,7 +111,7 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
       {loading && (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="animate-pulse bg-[#FAF8F4] rounded-2xl p-4">
+            <div key={i} className="animate-pulse bg-[#FAF9F7] rounded-2xl p-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-14 h-4 bg-[#EBE7DF] rounded-full" />
                 <div className="h-4 bg-[#EBE7DF] rounded" style={{ width: '40%' }} />
@@ -157,7 +157,7 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
             <button
               key={deal.id}
               onClick={() => deal.conversation_id && onOpenConversation?.(deal.conversation_id)}
-              className="w-full text-left bg-[#FAF8F4] rounded-2xl p-4 border border-transparent hover:border-[#D4714E] transition-all cursor-pointer"
+              className="w-full text-left bg-[#FAF9F7] rounded-2xl p-4 border border-transparent hover:border-[#D4714E] transition-all cursor-pointer"
             >
               <div className="flex items-center gap-2.5 mb-2.5">
                 <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${journey.color}`}>

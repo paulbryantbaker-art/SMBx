@@ -30,7 +30,7 @@ function ScrollToTop() {
 
 function PageLoader() {
   return (
-    <div className="flex justify-center items-center min-h-dvh bg-[#FAF8F4]">
+    <div className="flex justify-center items-center min-h-dvh bg-[#FAF9F7]">
       <p className="text-[#7A766E] font-sans text-base m-0">Loading...</p>
     </div>
   );
@@ -123,7 +123,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-dvh bg-[#FAF8F4]">
+      <div className="flex justify-center items-center min-h-dvh bg-[#FAF9F7]">
         <p className="text-[#7A766E] font-sans text-base m-0">Loading...</p>
       </div>
     );

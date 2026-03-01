@@ -327,7 +327,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
       {/* Share Links Panel */}
       {showSharePanel && (
         <div className="px-3 pb-3">
-          <div className="mt-2 p-3 bg-[#FAF8F4] rounded-lg">
+          <div className="mt-2 p-3 bg-[#FAF9F7] rounded-lg">
             <p className="text-[11px] font-semibold text-[#6E6A63] m-0 mb-2">Create Share Link</p>
             <div className="flex gap-1 mb-2">
               {(['blind', 'teaser', 'full'] as const).map(level => (

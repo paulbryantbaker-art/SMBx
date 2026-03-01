@@ -241,13 +241,14 @@ export default function Home() {
           width: 100%;
           justify-content: center;
           border-radius: 0;
-          padding: 12px 24px;
-          padding-top: calc(12px + env(safe-area-inset-top, 0px));
+          height: 56px;
+          padding: 0 24px;
+          padding-top: env(safe-area-inset-top, 0px);
           border: none;
-          border-bottom: 1px solid rgba(12,10,9,0.06);
-          box-shadow: 0 1px 4px rgba(12,10,9,0.04);
-          background: rgba(244,242,237,0.95);
-          backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+          border-bottom: 1px solid rgba(26,26,24,0.06);
+          box-shadow: none;
+          background: #FAF9F7;
+          backdrop-filter: none; -webkit-backdrop-filter: none;
         }
         @media (max-width: 768px) {
           .in-chat .home-pill { padding: 10px 20px; padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
@@ -485,11 +486,11 @@ export default function Home() {
           display: flex; justify-content: flex-end;
         }
         .home-msg-user-bubble {
-          max-width: 85%; padding: 12px 18px;
-          background: ${T.terraSoft}; color: ${T.text};
-          border: 1px solid rgba(181,82,47,0.22);
+          max-width: 80%; padding: 12px 18px;
+          background: ${T.terraSoft}; color: #1A1A18;
+          border: 1px solid rgba(212,113,78,0.18);
           border-radius: 20px 20px 4px 20px;
-          box-shadow: 0 2px 8px rgba(26,26,24,0.08), 0 0 0 1px rgba(181,82,47,0.06);
+          box-shadow: 0 1px 3px rgba(26,26,24,0.06);
           font-size: 15px; line-height: 1.55; word-break: break-word;
         }
         .home-msg-ai {
@@ -502,11 +503,11 @@ export default function Home() {
           font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px;
         }
         .home-msg-ai-bubble {
-          max-width: 85%; font-size: 15px; line-height: 1.6; color: ${T.text};
+          max-width: 80%; font-size: 15px; line-height: 1.6; color: #1A1A18;
           background: #FFFFFF;
-          border: 1px solid rgba(224,220,212,0.6);
-          border-radius: 18px 18px 18px 4px;
-          box-shadow: 0 1px 4px rgba(26,26,24,0.04);
+          border: 1px solid rgba(26,26,24,0.08);
+          border-radius: 20px 20px 20px 4px;
+          box-shadow: 0 1px 3px rgba(26,26,24,0.04);
           padding: 12px 16px;
         }
         .home-msg-ai-bubble p { margin: 0 0 12px; }

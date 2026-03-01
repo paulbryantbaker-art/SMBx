@@ -45,7 +45,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
 
   return (
     <div
-      className="flex flex-col h-full bg-[#FAF8F4] overflow-hidden"
+      className="flex flex-col h-full bg-[#FAF9F7] overflow-hidden"
       style={{
         width: visible ? 260 : 0,
         minWidth: visible ? 260 : 0,

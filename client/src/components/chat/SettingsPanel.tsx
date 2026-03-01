@@ -103,7 +103,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
       {/* Account Tab */}
       {tab === 'account' && (
         <div className="space-y-3">
-          <div className="bg-[#FAF8F4] rounded-2xl p-4">
+          <div className="bg-[#FAF9F7] rounded-2xl p-4">
             <h3 className="text-sm font-semibold text-[#1A1A18] m-0 mb-3">Profile</h3>
             <div className="space-y-2.5">
               <div>
@@ -117,7 +117,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
             </div>
           </div>
 
-          <div className="bg-[#FAF8F4] rounded-2xl p-4">
+          <div className="bg-[#FAF9F7] rounded-2xl p-4">
             <h3 className="text-sm font-semibold text-[#1A1A18] m-0 mb-1.5">Account</h3>
             <p className="text-xs text-[#6E6A63] m-0 mb-3">Member since {new Date(user.created_at || Date.now()).toLocaleDateString()}</p>
             <button
@@ -150,7 +150,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
           {usageLoading ? (
             <div className="grid grid-cols-2 gap-2 mb-4">
               {[1,2,3,4].map(i => (
-                <div key={i} className="animate-pulse bg-[#FAF8F4] rounded-xl p-3">
+                <div key={i} className="animate-pulse bg-[#FAF9F7] rounded-xl p-3">
                   <div className="h-2.5 bg-[#EBE7DF] rounded w-2/3 mb-1.5" />
                   <div className="h-5 bg-[#EBE7DF] rounded w-1/2" />
                 </div>
@@ -158,21 +158,21 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2 mb-4">
-              <div className="bg-[#FAF8F4] rounded-xl p-3">
+              <div className="bg-[#FAF9F7] rounded-xl p-3">
                 <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Tokens</p>
                 <p className="text-base font-bold text-[#1A1A18] m-0">
                   {formatNumber((usageTotals?.total_input_tokens || 0) + (usageTotals?.total_output_tokens || 0))}
                 </p>
               </div>
-              <div className="bg-[#FAF8F4] rounded-xl p-3">
+              <div className="bg-[#FAF9F7] rounded-xl p-3">
                 <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Tool Calls</p>
                 <p className="text-base font-bold text-[#1A1A18] m-0">{formatNumber(usageTotals?.total_tool_calls || 0)}</p>
               </div>
-              <div className="bg-[#FAF8F4] rounded-xl p-3">
+              <div className="bg-[#FAF9F7] rounded-xl p-3">
                 <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Deliverables</p>
                 <p className="text-base font-bold text-[#D4714E] m-0">{usageTotals?.total_deliverables || 0}</p>
               </div>
-              <div className="bg-[#FAF8F4] rounded-xl p-3">
+              <div className="bg-[#FAF9F7] rounded-xl p-3">
                 <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Queries</p>
                 <p className="text-base font-bold text-[#1A1A18] m-0">{usageTotals?.total_queries || 0}</p>
               </div>
@@ -180,7 +180,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
           )}
 
           {!usageLoading && usageDaily.length > 0 && (
-            <div className="bg-[#FAF8F4] rounded-2xl p-4">
+            <div className="bg-[#FAF9F7] rounded-2xl p-4">
               <h3 className="text-xs font-semibold text-[#1A1A18] m-0 mb-2">Daily Activity</h3>
               <div className="space-y-1.5">
                 {usageDaily.map(d => {
@@ -202,7 +202,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
           )}
 
           {!usageLoading && usageDaily.length === 0 && (
-            <div className="text-center py-6 bg-[#FAF8F4] rounded-xl">
+            <div className="text-center py-6 bg-[#FAF9F7] rounded-xl">
               <p className="text-xs text-[#6E6A63] m-0">No usage data for this period.</p>
             </div>
           )}
@@ -217,7 +217,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
           {benchLoading ? (
             <div className="space-y-2">
               {[1,2].map(i => (
-                <div key={i} className="animate-pulse bg-[#FAF8F4] rounded-2xl p-4">
+                <div key={i} className="animate-pulse bg-[#FAF9F7] rounded-2xl p-4">
                   <div className="h-3 bg-[#EBE7DF] rounded w-1/3 mb-2" />
                   <div className="flex gap-4">
                     <div className="h-6 bg-[#EBE7DF] rounded w-14" />
@@ -227,14 +227,14 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
               ))}
             </div>
           ) : benchmarks.length === 0 ? (
-            <div className="text-center py-8 bg-[#FAF8F4] rounded-xl">
+            <div className="text-center py-8 bg-[#FAF9F7] rounded-xl">
               <p className="text-sm font-semibold text-[#1A1A18] m-0 mb-0.5">No benchmarks yet</p>
               <p className="text-xs text-[#6E6A63] m-0">Benchmarks appear as deals close.</p>
             </div>
           ) : (
             <div className="space-y-2">
               {benchmarks.map((b, i) => (
-                <div key={i} className="bg-[#FAF8F4] rounded-2xl p-4">
+                <div key={i} className="bg-[#FAF9F7] rounded-2xl p-4">
                   <div className="flex items-center gap-1.5 mb-2">
                     <h3 className="text-sm font-semibold text-[#1A1A18] m-0">{b.industry || b.naics_code}</h3>
                     <span className="text-[9px] text-[#A9A49C] bg-white px-1.5 py-0.5 rounded-full">n={b.sample_size}</span>

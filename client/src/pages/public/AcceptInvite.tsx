@@ -51,7 +51,7 @@ export default function AcceptInvite({ token }: { token: string }) {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-dvh bg-[#FAF8F4]">
+      <div className="flex items-center justify-center min-h-dvh bg-[#FAF9F7]">
         <div className="bg-white rounded-xl p-8 shadow-sm max-w-md w-full mx-4 text-center">
           <h1 className="text-xl font-semibold text-[#23201A] mb-2">Invalid Invitation</h1>
           <p className="text-[#7A766E]">{error}</p>
@@ -65,7 +65,7 @@ export default function AcceptInvite({ token }: { token: string }) {
 
   if (!info) {
     return (
-      <div className="flex items-center justify-center min-h-dvh bg-[#FAF8F4]">
+      <div className="flex items-center justify-center min-h-dvh bg-[#FAF9F7]">
         <p className="text-[#7A766E]">Loading invitation...</p>
       </div>
     );
@@ -73,7 +73,7 @@ export default function AcceptInvite({ token }: { token: string }) {
 
   if (info.accepted) {
     return (
-      <div className="flex items-center justify-center min-h-dvh bg-[#FAF8F4]">
+      <div className="flex items-center justify-center min-h-dvh bg-[#FAF9F7]">
         <div className="bg-white rounded-xl p-8 shadow-sm max-w-md w-full mx-4 text-center">
           <h1 className="text-xl font-semibold text-[#23201A] mb-2">Already Accepted</h1>
           <p className="text-[#7A766E]">This invitation has already been accepted.</p>
@@ -87,7 +87,7 @@ export default function AcceptInvite({ token }: { token: string }) {
 
   if (info.expired) {
     return (
-      <div className="flex items-center justify-center min-h-dvh bg-[#FAF8F4]">
+      <div className="flex items-center justify-center min-h-dvh bg-[#FAF9F7]">
         <div className="bg-white rounded-xl p-8 shadow-sm max-w-md w-full mx-4 text-center">
           <h1 className="text-xl font-semibold text-[#23201A] mb-2">Invitation Expired</h1>
           <p className="text-[#7A766E]">This invitation has expired. Please ask the deal owner to send a new one.</p>
@@ -97,7 +97,7 @@ export default function AcceptInvite({ token }: { token: string }) {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-dvh bg-[#FAF8F4]">
+    <div className="flex items-center justify-center min-h-dvh bg-[#FAF9F7]">
       <div className="bg-white rounded-xl p-8 shadow-sm max-w-md w-full mx-4">
         <div className="text-center mb-6">
           <div className="w-12 h-12 bg-[#C06B3E]/10 rounded-full flex items-center justify-center mx-auto mb-4">

@@ -88,9 +88,9 @@ export default function Settings({ user, onLogout }: SettingsProps) {
   ];
 
   return (
-    <div className="min-h-dvh bg-[#FAF8F4]">
+    <div className="min-h-dvh bg-[#FAF9F7]">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 bg-[#FAF8F4]" style={{ borderBottom: '1px solid #DDD9D1' }}>
+      <div className="flex items-center justify-between px-6 py-4 bg-[#FAF9F7]" style={{ borderBottom: '1px solid #DDD9D1' }}>
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/chat')}
@@ -139,11 +139,11 @@ export default function Settings({ user, onLogout }: SettingsProps) {
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs font-medium text-[#6E6A63] mb-1">Name</label>
-                  <p className="text-sm text-[#1A1A18] m-0 px-3 py-2 bg-[#FAF8F4] rounded-lg border border-border">{user.display_name || '—'}</p>
+                  <p className="text-sm text-[#1A1A18] m-0 px-3 py-2 bg-[#FAF9F7] rounded-lg border border-border">{user.display_name || '—'}</p>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[#6E6A63] mb-1">Email</label>
-                  <p className="text-sm text-[#1A1A18] m-0 px-3 py-2 bg-[#FAF8F4] rounded-lg border border-border">{user.email}</p>
+                  <p className="text-sm text-[#1A1A18] m-0 px-3 py-2 bg-[#FAF9F7] rounded-lg border border-border">{user.email}</p>
                 </div>
               </div>
             </div>

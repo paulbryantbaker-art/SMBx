@@ -59,7 +59,7 @@ export default function DayPassView({ token }: { token: string }) {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-dvh bg-[#FAF8F4]">
+      <div className="flex items-center justify-center min-h-dvh bg-[#FAF9F7]">
         <div className="bg-white rounded-xl p-8 shadow-sm max-w-md w-full mx-4 text-center">
           <h1 className="text-xl font-semibold text-[#23201A] mb-2">Invalid Day Pass</h1>
           <p className="text-[#7A766E]">{error}</p>
@@ -73,7 +73,7 @@ export default function DayPassView({ token }: { token: string }) {
 
   if (!info) {
     return (
-      <div className="flex items-center justify-center min-h-dvh bg-[#FAF8F4]">
+      <div className="flex items-center justify-center min-h-dvh bg-[#FAF9F7]">
         <p className="text-[#7A766E]">Loading day pass...</p>
       </div>
     );
@@ -81,7 +81,7 @@ export default function DayPassView({ token }: { token: string }) {
 
   if (info.revoked) {
     return (
-      <div className="flex items-center justify-center min-h-dvh bg-[#FAF8F4]">
+      <div className="flex items-center justify-center min-h-dvh bg-[#FAF9F7]">
         <div className="bg-white rounded-xl p-8 shadow-sm max-w-md w-full mx-4 text-center">
           <h1 className="text-xl font-semibold text-[#23201A] mb-2">Day Pass Revoked</h1>
           <p className="text-[#7A766E]">This day pass has been revoked by the deal owner.</p>
@@ -92,7 +92,7 @@ export default function DayPassView({ token }: { token: string }) {
 
   if (info.expired) {
     return (
-      <div className="flex items-center justify-center min-h-dvh bg-[#FAF8F4]">
+      <div className="flex items-center justify-center min-h-dvh bg-[#FAF9F7]">
         <div className="bg-white rounded-xl p-8 shadow-sm max-w-md w-full mx-4 text-center">
           <h1 className="text-xl font-semibold text-[#23201A] mb-2">Day Pass Expired</h1>
           <p className="text-[#7A766E]">This 48-hour day pass has expired. Please ask the deal owner for a new one.</p>
@@ -104,7 +104,7 @@ export default function DayPassView({ token }: { token: string }) {
   // Already activated — show countdown and continue button
   if (info.activated) {
     return (
-      <div className="flex items-center justify-center min-h-dvh bg-[#FAF8F4]">
+      <div className="flex items-center justify-center min-h-dvh bg-[#FAF9F7]">
         <div className="bg-white rounded-xl p-8 shadow-sm max-w-md w-full mx-4 text-center">
           <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-green-600 text-xl">&#10003;</span>
@@ -125,7 +125,7 @@ export default function DayPassView({ token }: { token: string }) {
 
   // Not yet activated
   return (
-    <div className="flex items-center justify-center min-h-dvh bg-[#FAF8F4]">
+    <div className="flex items-center justify-center min-h-dvh bg-[#FAF9F7]">
       <div className="bg-white rounded-xl p-8 shadow-sm max-w-md w-full mx-4">
         <div className="text-center mb-6">
           <div className="w-12 h-12 bg-[#C06B3E]/10 rounded-full flex items-center justify-center mx-auto mb-4">

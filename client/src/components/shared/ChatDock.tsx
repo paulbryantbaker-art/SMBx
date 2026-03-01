@@ -151,7 +151,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
   }, [toolsOpen]);
 
   return (
-    <div className={isHero ? '' : 'shrink-0 px-3 md:px-6 lg:px-8 bg-[#FAF8F4]'} style={isHero ? undefined : { paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div className={isHero ? '' : 'shrink-0 bg-white border-t border-[rgba(26,26,24,0.06)]'} style={isHero ? undefined : { padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -206,16 +206,18 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           )}
 
           {/* Textarea */}
-          <textarea
-            ref={inputRef}
-            value={value}
-            onChange={handleChange}
-            onKeyDown={handleKey}
-            placeholder={placeholder}
-            className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1A1A18] leading-[1.5] placeholder:text-[#A9A49C] lg:text-[18px]"
-            style={{ fontFamily: 'inherit', minHeight: isHero ? '100px' : '52px', maxHeight: '200px', padding: '18px 22px 10px 22px' }}
-            rows={isHero ? 3 : 1}
-          />
+          <div className={isHero ? '' : 'mx-3 mt-2'} style={isHero ? undefined : { background: '#FAF9F7', borderRadius: '24px' }}>
+            <textarea
+              ref={inputRef}
+              value={value}
+              onChange={handleChange}
+              onKeyDown={handleKey}
+              placeholder={placeholder}
+              className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1A1A18] leading-[1.5] placeholder:text-[#A9A49C] lg:text-[18px]"
+              style={{ fontFamily: 'inherit', minHeight: isHero ? '100px' : '52px', maxHeight: '200px', padding: '18px 22px 10px 22px' }}
+              rows={isHero ? 3 : 1}
+            />
+          </div>
 
           {/* Toolbar row */}
           <div className="flex items-center justify-between px-4 pb-3.5 pt-0">

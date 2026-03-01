@@ -323,7 +323,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
   return (
     <div
       ref={containerRef}
-      className="flex h-dvh overflow-hidden bg-[#FAF8F4] font-sans"
+      className="flex h-dvh overflow-hidden bg-[#FAF9F7] font-sans"
     >
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
@@ -350,7 +350,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
       <div className="flex-1 flex flex-col min-w-0">
         {/* TOPBAR — single logo lives here */}
         <div
-          className="shrink-0 flex items-center justify-between bg-[#FAF8F4]"
+          className="shrink-0 flex items-center justify-between bg-[#FAF9F7]"
           style={{ padding: '10px 20px', borderBottom: '1px solid #DDD9D1' }}
         >
           <div className="flex items-center gap-2.5">
@@ -525,7 +525,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
               style={{
                 ...canvasStyle(),
                 borderLeft: canvasFS ? 'none' : '1px solid #DDD9D1',
-                background: '#FAF8F4',
+                background: '#FAF9F7',
                 transition: canvasW ? 'none' : 'all 0.25s ease',
               }}
             >
@@ -552,7 +552,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
 
       {/* Mobile: Canvas panel as full-screen overlay */}
       {showCanvasPanel && (
-        <div className="fixed inset-0 z-50 md:hidden flex flex-col" style={{ background: '#FAF8F4' }}>
+        <div className="fixed inset-0 z-50 md:hidden flex flex-col" style={{ background: '#FAF9F7' }}>
           {showDeliverableCanvas ? (
             <Canvas
               deliverableId={viewingDeliverable!}

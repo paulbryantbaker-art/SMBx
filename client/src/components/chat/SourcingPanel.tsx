@@ -138,7 +138,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
 
       {/* New Thesis Form */}
       {showNewThesis && (
-        <div className="bg-[#FAF8F4] rounded-2xl border border-[#D4714E] p-4 mb-5">
+        <div className="bg-[#FAF9F7] rounded-2xl border border-[#D4714E] p-4 mb-5">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-[#1A1A18] m-0">Create Buy Thesis</h3>
             <button onClick={() => setShowNewThesis(false)} className="w-6 h-6 rounded-full hover:bg-[#F3F0EA] flex items-center justify-center cursor-pointer border-0 bg-transparent">
@@ -218,7 +218,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
       {loading && (
         <div className="space-y-3">
           {[1, 2].map(i => (
-            <div key={i} className="animate-pulse bg-[#FAF8F4] rounded-2xl p-4">
+            <div key={i} className="animate-pulse bg-[#FAF9F7] rounded-2xl p-4">
               <div className="h-4 bg-[#EBE7DF] rounded w-1/3 mb-2" />
               <div className="flex gap-3">
                 <div className="h-3 bg-[#F3F0EA] rounded w-1/4" />
@@ -258,8 +258,8 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                 onClick={() => setSelectedThesis(selectedThesis === t.id ? null : t.id)}
                 className={`w-full text-left rounded-xl p-3 border transition-all cursor-pointer ${
                   selectedThesis === t.id
-                    ? 'bg-[#FAF8F4] border-[#D4714E]'
-                    : 'bg-[#FAF8F4] border-transparent hover:border-[#D4714E]'
+                    ? 'bg-[#FAF9F7] border-[#D4714E]'
+                    : 'bg-[#FAF9F7] border-transparent hover:border-[#D4714E]'
                 }`}
               >
                 <div className="flex items-center gap-1.5 mb-0.5">
@@ -291,7 +291,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
               {matchesLoading && (
                 <div className="space-y-2">
                   {[1,2].map(i => (
-                    <div key={i} className="animate-pulse bg-[#FAF8F4] rounded-xl p-3">
+                    <div key={i} className="animate-pulse bg-[#FAF9F7] rounded-xl p-3">
                       <div className="flex gap-2 mb-1.5">
                         <div className="w-10 h-10 bg-[#EBE7DF] rounded-lg" />
                         <div className="flex-1">
@@ -305,7 +305,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
               )}
 
               {!matchesLoading && matches.length === 0 && (
-                <div className="text-center py-6 bg-[#FAF8F4] rounded-xl">
+                <div className="text-center py-6 bg-[#FAF9F7] rounded-xl">
                   <p className="text-sm font-semibold text-[#1A1A18] m-0 mb-0.5">No matches yet</p>
                   <p className="text-xs text-[#6E6A63] m-0">Matches appear as opportunities are scored.</p>
                 </div>
@@ -314,7 +314,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
               {!matchesLoading && matches.length > 0 && (
                 <div className="space-y-2">
                   {matches.map(m => (
-                    <div key={m.id} className="bg-[#FAF8F4] rounded-xl p-3">
+                    <div key={m.id} className="bg-[#FAF9F7] rounded-xl p-3">
                       <div className="flex items-start gap-2.5">
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${scoreColor(m.score)}`}>
                           {m.score}

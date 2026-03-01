@@ -77,7 +77,7 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
         <div className="prose prose-sm max-w-none">
           <div className="whitespace-pre-wrap text-sm text-[#3D3B37] leading-relaxed">{data.markdown}</div>
           {data.teaser && (
-            <div className="mt-6 p-4 bg-[#FAF8F4] rounded-xl border border-border text-center">
+            <div className="mt-6 p-4 bg-[#FAF9F7] rounded-xl border border-border text-center">
               <p className="text-sm font-semibold text-[#1A1A18] m-0 mb-1">This is a teaser preview</p>
               <p className="text-xs text-[#6E6A63] m-0">{data.fullSectionsCount ? `${data.fullSectionsCount} sections available in the full document` : 'Full details available upon request'}</p>
             </div>
@@ -91,7 +91,7 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
       return (
         <div className="space-y-6">
           {data.summary && (
-            <div className="p-4 bg-[#FAF8F4] rounded-xl border border-border">
+            <div className="p-4 bg-[#FAF9F7] rounded-xl border border-border">
               <p className="text-sm text-[#3D3B37] m-0">{data.summary}</p>
             </div>
           )}
@@ -104,7 +104,7 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
             </div>
           ))}
           {data.teaser && data.fullSectionsCount && (
-            <div className="p-4 bg-[#FAF8F4] rounded-xl border border-border text-center">
+            <div className="p-4 bg-[#FAF9F7] rounded-xl border border-border text-center">
               <p className="text-sm font-semibold text-[#1A1A18] m-0 mb-1">Teaser Preview</p>
               <p className="text-xs text-[#6E6A63] m-0">Showing 2 of {data.fullSectionsCount} sections. Request full access for the complete document.</p>
             </div>
@@ -115,7 +115,7 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
 
     // Fallback: JSON display
     return (
-      <pre className="text-xs text-[#3D3B37] bg-[#FAF8F4] p-4 rounded-xl overflow-auto">
+      <pre className="text-xs text-[#3D3B37] bg-[#FAF9F7] p-4 rounded-xl overflow-auto">
         {JSON.stringify(data, null, 2)}
       </pre>
     );
@@ -128,7 +128,7 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
   };
 
   return (
-    <div className="min-h-dvh bg-[#FAF8F4]">
+    <div className="min-h-dvh bg-[#FAF9F7]">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 bg-white" style={{ borderBottom: '1px solid #DDD9D1' }}>
         <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1A1A18]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
@@ -183,7 +183,7 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
             </p>
 
             <div className="bg-white rounded-2xl border border-border p-5 text-left">
-              <div className="mb-4 p-3 bg-[#FAF8F4] rounded-lg text-xs text-[#6E6A63] leading-relaxed">
+              <div className="mb-4 p-3 bg-[#FAF9F7] rounded-lg text-xs text-[#6E6A63] leading-relaxed">
                 By signing below, I agree that all information contained in this document is confidential
                 and proprietary. I will not disclose, distribute, or use any information for purposes
                 other than evaluating this potential transaction.
@@ -196,7 +196,7 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
                     value={ndaName}
                     onChange={e => setNdaName(e.target.value)}
                     placeholder="John Smith"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                   />
                 </div>
                 <div>
@@ -206,7 +206,7 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
                     value={ndaEmail}
                     onChange={e => setNdaEmail(e.target.value)}
                     placeholder="john@example.com"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF8F4] text-[#1A1A18] outline-none focus:border-[#D4714E]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#D4714E]"
                   />
                 </div>
               </div>

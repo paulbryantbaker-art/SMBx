@@ -73,7 +73,7 @@ export default function Search() {
   useEffect(() => { doSearch(); }, []);
 
   return (
-    <div className="min-h-dvh bg-[#FAF8F4]">
+    <div className="min-h-dvh bg-[#FAF9F7]">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-semibold text-[#23201A] mb-6">Search Listings</h1>
 
