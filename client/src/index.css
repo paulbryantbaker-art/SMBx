@@ -109,57 +109,6 @@ body {
 .home-yt ul, .home-yt ol { padding-left: 1.25em; margin: 8px 0; }
 .home-yt li { margin-bottom: 4px; }
 
-/* Action card grid — 3 top + 2 bottom centered */
-.home-agrid {
-  display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;
-}
-/* Top row: 3 equal cards each span 2 of 6 */
-.home-agrid > *:nth-child(1),
-.home-agrid > *:nth-child(2),
-.home-agrid > *:nth-child(3) { grid-column: span 2; }
-/* Bottom row: 2 wider cards each span 3 of 6 */
-.home-agrid > *:nth-child(4),
-.home-agrid > *:nth-child(5) { grid-column: span 3; }
-
-@media(min-width: 768px) {
-  .home-agrid { max-width: 660px; gap: 14px; }
-}
-@media(min-width: 1024px) {
-  .home-agrid { max-width: 900px; gap: 14px; }
-}
-
-/* Action cards */
-.home-acard {
-  background: #fff; border: none; border-radius: 16px;
-  padding: 18px 14px; display: flex; flex-direction: column;
-  align-items: flex-start; gap: 8px; min-height: 100px;
-  cursor: pointer; transition: all 0.2s;
-  box-shadow: 0 1px 4px rgba(26,26,24,.05);
-}
-.home-acard svg { width: 30px; height: 30px; }
-.home-acard span { font-size: 14px; }
-@media(min-width: 768px) {
-  .home-acard { padding: 24px 18px; gap: 12px; border-radius: 20px; }
-  .home-acard svg { width: 32px; height: 32px; }
-  .home-acard span { font-size: 16px; }
-}
-@media(min-width: 1024px) {
-  .home-acard { padding: 24px 20px; gap: 12px; }
-  .home-acard svg { width: 28px; height: 28px; }
-  .home-acard span { font-size: 16px; }
-}
-.home-acard:hover { box-shadow: 0 2px 8px rgba(26,26,24,.07), 0 1px 2px rgba(26,26,24,.04); transform: translateY(-1px); }
-.home-acard:active { transform: scale(0.97); box-shadow: 0 1px 3px rgba(26,26,24,.06); }
-
-/* Landing nudge — desktop only */
-.home-landing-nudge { display: none; }
-@media(min-width: 768px) { .home-landing-nudge { display: flex; } }
-
-/* Desktop spacing */
-@media(min-width: 1024px) {
-  .home-landing-nudge { margin-top: 64px; }
-}
-
 /* Dock card */
 .home-dock-card {
   background: #fff; border: 1px solid rgba(26,26,24,0.08);
@@ -196,50 +145,6 @@ body {
 .home-tp-item:active { background: #EBE7DF; }
 .home-tp-item svg { width: 20px; height: 20px; color: #D4714E; flex-shrink: 0; margin-top: 1px; }
 
-/* Journey insight card */
-.home-j-insight {
-  background: linear-gradient(135deg, #FFF8F4, #FFF0EB);
-  border-radius: 20px; padding: 28px;
-  box-shadow: 0 1px 4px rgba(26,26,24,.05), inset 0 0 0 1px rgba(212,113,78,.06);
-}
-
-/* Journey content cards */
-.home-j-card {
-  background: #fff; border: none; border-radius: 20px; padding: 28px;
-  box-shadow: 0 1px 4px rgba(26,26,24,.05); transition: all 0.2s;
-}
-.home-j-card:hover {
-  box-shadow: 0 2px 8px rgba(26,26,24,.07), 0 1px 2px rgba(26,26,24,.04);
-  transform: translateY(-1px);
-}
-
-/* Journey deal chips */
-.home-j-deal {
-  background: #fff; border: none; border-radius: 20px; padding: 26px;
-  cursor: pointer; box-shadow: 0 1px 4px rgba(26,26,24,.05); transition: all 0.2s;
-}
-.home-j-deal:hover {
-  box-shadow: 0 2px 8px rgba(26,26,24,.07), 0 1px 2px rgba(26,26,24,.04);
-  transform: translateY(-1px);
-}
-.home-j-deal:active { transform: scale(0.97); }
-
-/* Journey quote card */
-.home-j-quote {
-  background: #fff; border-radius: 20px; padding: 28px;
-  box-shadow: 0 1px 4px rgba(26,26,24,.05);
-}
-
-/* Journey heading em styling */
-.home-j-heading em { font-style: normal; color: #D4714E; }
-
-/* Journey page nudge (separate route pages) */
-@keyframes nudgeBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
-.journey-nudge {
-  animation: nudgeBounce 2s ease-in-out infinite;
-  font-family: 'Caveat', cursive;
-}
-
 /* Gate stepper pulse */
 @keyframes gatePulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(212,113,78,.3); }
@@ -262,60 +167,6 @@ body {
 .canvas-md pre { background: #F3F0EA; padding: 16px; border-radius: 8px; overflow-x: auto; }
 .canvas-md pre code { background: none; padding: 0; }
 .canvas-md hr { border: none; border-top: 1px solid #DDD9D1; margin: 1.5em 0; }
-
-/* ═══ NEW DESIGN LANGUAGE ═══ */
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-/* Stagger animation utilities */
-.animate-fadeInUp { animation: fadeInUp 0.6s ease both; }
-.stagger-1 { animation-delay: 0.1s; }
-.stagger-2 { animation-delay: 0.2s; }
-.stagger-3 { animation-delay: 0.3s; }
-.stagger-4 { animation-delay: 0.4s; }
-.stagger-5 { animation-delay: 0.5s; }
-
-/* Card-in-card depth */
-.card-outer {
-  background: #FFFFFF;
-  border-radius: 34px;
-  box-shadow: 0 8px 32px rgba(26,26,24,.08), 0 2px 8px rgba(26,26,24,.04);
-}
-.card-inner {
-  background: #FAF9F7;
-  border-radius: 24px;
-}
-
-/* Floating pill nav */
-.pill-nav {
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
-  background: rgba(255,255,255,0.85);
-  border: 1px solid rgba(221,217,209,0.5);
-  box-shadow: 0 4px 20px rgba(26,26,24,.06), 0 1px 3px rgba(26,26,24,.04);
-}
-
-/* Learn cards grid */
-.learn-cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  width: 100%;
-}
-@media (max-width: 1100px) {
-  .learn-cards { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 640px) {
-  .learn-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-}
 
 /* Spinner */
 @keyframes spin {

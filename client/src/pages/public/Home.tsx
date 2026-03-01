@@ -1,83 +1,49 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useLocation, Link } from 'wouter';
+import { useLocation } from 'wouter';
 import Markdown from 'react-markdown';
 import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
+import Sidebar from '../../components/chat/Sidebar';
 
 /* ═══ DESIGN TOKENS ═══ */
 
 const T = {
-  bg: '#F4F2ED',
-  fill: '#F3F0EA',
-  white: '#FFFFFF',
-  terra: '#B5522F',          // was #D4714E — deeper, richer
-  terraHover: '#9A4526',     // was #BE6342
-  terraLight: '#E8845E',     // NEW — bright accent for gradients
+  bg: '#FAF9F7',
+  terra: '#D4714E',
+  terraHover: '#BE6342',
   terraSoft: '#FFF0EB',
-  text: '#0C0A09',           // was #1A1A18 — near-black for max contrast
-  body: '#292524',           // NEW — stone-800 for body text
-  sub: '#44403C',            // was #525252 — stone-700
+  text: '#1A1A18',
+  sub: '#44403C',
   muted: '#6E6A63',
-  faint: '#A8A29E',
+  faint: '#A9A49C',
   border: '#DDD9D1',
 };
 
-/* ═══ PROMPT CHIPS ═══ */
+/* ═══ SUGGESTIONS ═══ */
 
-const PROMPT_CHIPS = [
-  { key: 'sell', label: 'I want to sell my business', fill: 'I want to sell my business. Can you help me understand what it might be worth?' },
-  { key: 'worth', label: "What's my business worth?", fill: 'Help me understand what my business might be worth.' },
-  { key: 'buy', label: 'Help me find a business to buy', fill: 'I want to buy a business. Can you help me screen targets?' },
-  { key: 'raise', label: "I'm raising capital", fill: "I'm raising capital for my business. Can you help me build my strategy?" },
+const SUGGESTIONS = [
+  { key: 'sell', label: 'I want to sell my business', message: 'I want to sell my business. Can you help me understand what it might be worth?' },
+  { key: 'worth', label: "What's my business worth?", message: 'Help me understand what my business might be worth.' },
+  { key: 'buy', label: 'Help me find a business to buy', message: 'I want to buy a business. Can you help me screen targets?' },
+  { key: 'raise', label: "I'm raising capital", message: "I'm raising capital for my business. Can you help me build my strategy?" },
 ];
 
-/* ═══ LEARN CARDS ═══ */
+/* ═══ GREETING ═══ */
 
-const LEARN_CARDS = [
-  {
-    title: 'The methodology',
-    desc: 'Seven Layers of Intelligence. Sovereign federal data. Localized to your market.',
-    cta: 'See how it works',
-    href: '/how-it-works',
-    badgeBg: 'linear-gradient(135deg, #E07A4E 0%, #D4914E 100%)',
-    badgeGlow: '0 6px 20px rgba(224,122,78,0.30)',
-    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="rgba(255,255,255,0.3)" stroke="white"/></svg>,
-  },
-  {
-    title: 'Sell or exit',
-    desc: 'Know your number. Find hidden value. Full valuation to closing table.',
-    cta: 'Explore selling',
-    href: '/sell',
-    badgeBg: 'linear-gradient(135deg, #C47A52 0%, #D49A5E 100%)',
-    badgeGlow: '0 6px 20px rgba(196,122,82,0.30)',
-    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6" /></svg>,
-  },
-  {
-    title: 'Buy or grow',
-    desc: 'Screen targets. Build conviction. From thesis to closing table.',
-    cta: 'Explore buying',
-    href: '/buy',
-    badgeBg: 'linear-gradient(135deg, #B5522F 0%, #D4714E 100%)',
-    badgeGlow: '0 6px 20px rgba(181,82,47,0.30)',
-    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>,
-  },
-  {
-    title: 'Raise capital',
-    desc: 'Defensible valuation. Investor targeting. Term sheet intelligence.',
-    cta: 'Explore raising',
-    href: '/raise',
-    badgeBg: 'linear-gradient(135deg, #D4735E 0%, #E8945E 100%)',
-    badgeGlow: '0 6px 20px rgba(212,115,94,0.30)',
-    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
-  },
-];
+function getGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
 
-type Phase = 'landing' | 'chat';
+type Phase = 'home' | 'chat';
 
 export default function Home() {
   const [, navigate] = useLocation();
-  const [phase, setPhase] = useState<Phase>('landing');
+  const [phase, setPhase] = useState<Phase>('home');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [barsVisible, setBarsVisible] = useState(true);
   const lastY = useRef(0);
   const dockRef = useRef<ChatDockHandle>(null);
@@ -87,14 +53,11 @@ export default function Home() {
   /* Hero standalone textarea state */
   const [heroText, setHeroText] = useState('');
   const heroInputRef = useRef<HTMLTextAreaElement>(null);
-  const [inputActive, setInputActive] = useState(false);
-  const activeTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  // Navigate from chat back to landing
   const goHome = useCallback(() => {
     if (phase === 'chat') {
       window.history.replaceState(null, '', window.location.pathname);
-      setPhase('landing');
+      setPhase('home');
     }
   }, [phase]);
 
@@ -105,7 +68,6 @@ export default function Home() {
 
   const hasMessages = messages.length > 0;
 
-  // Enter chat phase — push history so browser back returns to landing
   const enterChat = useCallback(() => {
     if (phase !== 'chat') {
       window.history.pushState({ homeChat: true }, '', window.location.pathname + '#chat');
@@ -115,16 +77,16 @@ export default function Home() {
 
   // If user lands on /#chat with existing messages, show chat
   useEffect(() => {
-    if (window.location.hash.includes('chat') && hasMessages && phase === 'landing') {
+    if (window.location.hash.includes('chat') && hasMessages && phase === 'home') {
       setPhase('chat');
     }
   }, [hasMessages, phase]);
 
-  // Browser back — return to landing
+  // Browser back — return to home
   useEffect(() => {
     const onPop = () => {
       if (!window.location.hash.includes('chat')) {
-        setPhase('landing');
+        setPhase('home');
       }
     };
     window.addEventListener('popstate', onPop);
@@ -154,16 +116,13 @@ export default function Home() {
     sendMessage(text);
   }, [heroText, enterChat, sendMessage]);
 
-  // Chip click — fill textarea and focus (don't auto-send)
-  const handleChipClick = useCallback((fill: string) => {
-    setHeroText(fill);
-    setInputActive(true);
-    clearTimeout(activeTimer.current);
-    activeTimer.current = setTimeout(() => setInputActive(false), 900);
-    setTimeout(() => heroInputRef.current?.focus(), 50);
-  }, []);
+  // Suggestion card click — send immediately
+  const handleSuggestion = useCallback((message: string) => {
+    enterChat();
+    sendMessage(message);
+  }, [enterChat, sendMessage]);
 
-  // Scroll-hide topbar on mobile — listen to messages container in chat, window on landing
+  // Scroll-hide topbar on mobile
   const handleScroll = useCallback((e?: Event) => {
     const target = e?.target as HTMLElement | null;
     const y = target && target !== document.documentElement ? target.scrollTop : window.scrollY;
@@ -184,13 +143,11 @@ export default function Home() {
     }
   }, [handleScroll, phase]);
 
-  // Show signup card when messages are running low or limit reached
   const showSignup = limitReached || (messagesRemaining !== null && messagesRemaining <= 5 && hasMessages);
 
   return (
     <div className={`home-root${phase === 'chat' ? ' in-chat' : ''}`}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadePulse { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
 
@@ -198,271 +155,147 @@ export default function Home() {
           font-family: 'Inter', system-ui, sans-serif;
           -webkit-font-smoothing: antialiased;
           background: ${T.bg};
-          display: flex; flex-direction: column;
+          display: flex; flex-direction: row;
+          min-height: 100dvh;
         }
-        /* Chat phase: h-dvh shrinks automatically with iOS keyboard */
         .home-root.in-chat {
           height: 100dvh;
           overflow: hidden;
         }
 
-        /* ── Pill nav ── */
-        .home-pill {
-          position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
-          z-index: 50; width: auto;
-          backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
-          background: rgba(255,255,255,0.95);
-          border: 1px solid rgba(12,10,9,0.06);
-          box-shadow:
-            0 4px 20px rgba(12,10,9,0.08),
-            0 1px 3px rgba(12,10,9,0.04),
-            0 0 0 1px rgba(255,255,255,0.7) inset;
-          border-radius: 100px;
-          padding: 10px 24px;
-          display: flex; align-items: center; gap: 20px;
+        .home-main {
+          flex: 1; min-width: 0;
+          display: flex; flex-direction: column;
+        }
+
+        /* ── Topbar ── */
+        .home-topbar {
+          flex-shrink: 0;
+          height: 56px;
+          padding: 0 20px;
+          padding-top: env(safe-area-inset-top, 0px);
+          display: flex; align-items: center; gap: 16px;
+          background: ${T.bg};
+          border-bottom: 1px solid rgba(26,26,24,0.06);
           transition: transform 0.3s ease, opacity 0.3s ease;
         }
         @media (max-width: 768px) {
-          .home-pill {
-            position: sticky; top: 0;
-            left: auto; transform: none;
-            margin: 0 auto; width: fit-content;
-            padding: 10px 20px; gap: 12px;
-            top: 12px; z-index: 50;
-          }
-          .home-pill.hidden { transform: translateY(-120%); opacity: 0; }
+          .home-topbar.hidden { transform: translateY(-100%); opacity: 0; margin-top: -56px; }
         }
 
-        /* ── Chat phase: pill becomes a flex-child header, NOT fixed ── */
-        .in-chat .home-pill {
-          position: static !important;
-          left: auto; top: auto; transform: none !important;
-          flex-shrink: 0;
-          width: 100%;
-          justify-content: center;
-          border-radius: 0;
-          height: 56px;
-          padding: 0 24px;
-          padding-top: env(safe-area-inset-top, 0px);
-          border: none;
-          border-bottom: 1px solid rgba(26,26,24,0.06);
-          box-shadow: none;
-          background: #FAF9F7;
-          backdrop-filter: none; -webkit-backdrop-filter: none;
+        .home-topbar-btn {
+          width: 36px; height: 36px; border-radius: 10px;
+          border: none; background: transparent; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          color: ${T.muted}; transition: background 0.15s;
         }
-        @media (max-width: 768px) {
-          .in-chat .home-pill { padding: 10px 20px; padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
-          .in-chat .home-pill.hidden { transform: translateY(-100%) !important; opacity: 0; margin-top: -80px; }
+        .home-topbar-btn:hover { background: rgba(26,26,24,0.04); }
+
+        .home-topbar-logo {
+          font-size: 18px; font-weight: 800; letter-spacing: -0.03em;
+          font-family: 'Inter', system-ui, sans-serif;
+          display: flex; align-items: center; gap: 6px;
         }
 
-        /* ── Landing hero ── */
+        /* ── Home state hero ── */
         .home-hero {
-          display: flex; flex-direction: column;
-          align-items: center; text-align: center;
-          justify-content: center;
-          min-height: calc(100dvh - 140px);
-          padding: 80px 40px 20px;
-          max-width: 80rem; margin: 0 auto; width: 100%;
-          position: relative; z-index: 1;
+          flex: 1; display: flex; flex-direction: column;
+          align-items: center; justify-content: center;
+          text-align: center;
+          padding: 40px 24px 40px;
+          max-width: 700px; margin: 0 auto; width: 100%;
         }
-        @media (max-width: 1100px) { .home-hero { padding: 60px 40px 20px; } }
         @media (max-width: 768px) {
           .home-hero {
-            min-height: auto;
-            justify-content: flex-start;
-            padding: 36px 18px 28px;
+            justify-content: center;
+            padding: 24px 18px 28px;
           }
         }
 
-        .home-h1 {
-          font-size: 64px; font-weight: 700; line-height: 1.06;
-          letter-spacing: -0.04em; color: ${T.text};
-          margin: 0 0 20px; animation: fadeUp 0.6s ease both;
+        .home-greeting {
+          font-size: 32px; font-weight: 600; line-height: 1.2;
+          letter-spacing: -0.03em; color: ${T.text};
+          margin: 0 0 6px;
+          animation: fadeUp 0.5s ease both;
         }
-        @media (max-width: 1100px) { .home-h1 { font-size: 52px; margin-bottom: 18px; } }
-        @media (max-width: 768px) { .home-h1 { font-size: 34px; margin-bottom: 12px; } }
+        @media (max-width: 768px) { .home-greeting { font-size: 26px; } }
 
-        .home-sub {
-          font-size: 17px; color: ${T.body}; line-height: 1.6;
-          font-weight: 400; max-width: 480px; margin: 0 0 48px;
-          animation: fadeUp 0.6s ease 0.08s both;
+        .home-greeting-sub {
+          font-size: 32px; font-weight: 600; line-height: 1.2;
+          letter-spacing: -0.03em; color: ${T.faint};
+          margin: 0 0 36px;
+          animation: fadeUp 0.5s ease 0.06s both;
         }
-        @media (max-width: 1100px) { .home-sub { font-size: 16px; max-width: 400px; margin-bottom: 36px; } }
-        @media (max-width: 768px) { .home-sub { font-size: 14px; max-width: 280px; margin-bottom: 24px; } }
+        @media (max-width: 768px) { .home-greeting-sub { font-size: 26px; margin-bottom: 28px; } }
 
-        /* ── 2-Layer chat card ── */
-        .home-card-outer {
-          width: 100%; max-width: 820px;
-          border-radius: 28px;
-          border: 1px solid rgba(12,10,9,0.06);
-          background: rgba(255,255,255,0.88);
-          backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);
-          box-shadow: 0 4px 10px rgba(12,10,9,0.02), 0 16px 48px rgba(12,10,9,0.06);
-          padding: 18px;
-          animation: fadeUp 0.6s ease 0.16s both;
-          position: relative; z-index: 1;
-        }
-        @media (max-width: 768px) { .home-card-outer { border-radius: 20px; padding: 12px; max-width: 100%; } }
-
-        .home-card-label {
-          font-size: 14px; font-weight: 600; color: ${T.text};
-          text-align: left; margin-bottom: 12px; display: block;
-        }
-
-        .home-input-card {
+        /* ── Hero input ── */
+        .home-hero-input {
+          width: 100%; max-width: 620px;
           border-radius: 20px;
-          border: 1px solid rgba(12,10,9,0.07);
+          border: 1px solid rgba(26,26,24,0.08);
           background: #FFFFFF;
-          padding: 18px;
-          transition: border-color 0.3s, box-shadow 0.3s;
+          box-shadow: 0 2px 12px rgba(26,26,24,0.06);
+          padding: 0;
+          animation: fadeUp 0.5s ease 0.12s both;
+          transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .home-input-card.active {
-          border-color: rgba(181,82,47,0.40);
-          box-shadow: 0 0 0 4px rgba(181,82,47,0.08);
+        .home-hero-input:focus-within {
+          border-color: rgba(212,113,78,0.35);
+          box-shadow: 0 2px 12px rgba(26,26,24,0.06), 0 0 0 3px rgba(212,113,78,0.10);
         }
-        @media (max-width: 768px) { .home-input-card { border-radius: 14px; padding: 12px; } }
 
         .home-hero-textarea {
-          width: 100%; min-height: 120px; resize: none;
+          width: 100%; min-height: 100px; resize: none;
           background: transparent; border: none; outline: none;
-          font-size: 16px; line-height: 1.75; color: ${T.text};
+          font-size: 16px; line-height: 1.6; color: ${T.text};
           font-family: 'Inter', system-ui, sans-serif;
+          padding: 18px 20px 8px;
+          box-sizing: border-box;
         }
         .home-hero-textarea::placeholder { color: ${T.faint}; }
-        @media (max-width: 768px) { .home-hero-textarea { min-height: 80px; font-size: 14.5px; } }
+        @media (max-width: 768px) { .home-hero-textarea { min-height: 80px; font-size: 15px; padding: 14px 16px 6px; } }
 
-        .home-hero-send-row {
-          border-top: 1px solid rgba(12,10,9,0.06);
-          margin-top: 12px; padding-top: 12px;
+        .home-hero-toolbar {
           display: flex; justify-content: flex-end;
+          padding: 8px 16px 14px;
         }
         .home-hero-send {
-          width: 42px; height: 42px; border-radius: 9999px;
-          background: linear-gradient(135deg, ${T.terra} 0%, ${T.terraLight} 100%);
-          color: #fff; border: none;
+          width: 36px; height: 36px; border-radius: 9999px;
+          background: ${T.terra}; color: #fff; border: none;
           cursor: pointer; display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 4px 16px rgba(181,82,47,0.28);
+          box-shadow: 0 2px 8px rgba(212,113,78,0.3);
           transition: all 0.15s;
-          font-family: inherit;
+          opacity: 0; transform: scale(0.8); pointer-events: none;
         }
-        .home-hero-send:hover { filter: brightness(1.05); transform: scale(1.02); }
-        .home-hero-send:disabled { opacity: 0.5; cursor: default; transform: none; }
-        .home-hero-send:disabled:hover { filter: none; }
-        @media (max-width: 768px) { .home-hero-send { width: 36px; height: 36px; } }
+        .home-hero-send.visible { opacity: 1; transform: scale(1); pointer-events: auto; }
+        .home-hero-send:hover { background: ${T.terraHover}; }
 
-        /* ── Prompt chips ── */
-        .home-chips {
-          display: flex; flex-wrap: wrap; justify-content: center;
-          gap: 8px; margin-top: 28px; max-width: 820px;
-          animation: fadeUp 0.6s ease 0.28s both;
+        /* ── Suggestion cards ── */
+        .home-suggestions {
+          display: grid; grid-template-columns: repeat(2, 1fr);
+          gap: 10px; max-width: 620px; width: 100%;
+          margin-top: 20px;
+          animation: fadeUp 0.5s ease 0.2s both;
+        }
+        @media (max-width: 480px) {
+          .home-suggestions { grid-template-columns: 1fr; gap: 8px; }
         }
 
-        .home-chip {
-          padding: 7px 18px; border-radius: 100px;
-          border: 1px solid rgba(12,10,9,0.07);
-          background: rgba(255,255,255,0.92);
-          backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-          cursor: pointer; font-size: 13px; font-weight: 550;
-          color: ${T.sub};
+        .home-suggestion {
+          padding: 14px 16px; border-radius: 14px;
+          border: 1px solid rgba(26,26,24,0.07);
+          background: #FFFFFF; cursor: pointer;
+          font-size: 14px; font-weight: 500; color: ${T.sub};
           font-family: 'Inter', system-ui, sans-serif;
-          transition: all 0.15s;
-          box-shadow: 0 2px 10px rgba(12,10,9,0.04);
+          text-align: left; transition: all 0.15s;
+          box-shadow: 0 1px 3px rgba(26,26,24,0.03);
         }
-        .home-chip:hover { background: #fff; color: ${T.text}; }
-        .home-chip:active { transform: scale(0.97); }
-        @media (max-width: 768px) { .home-chip { padding: 6px 13px; font-size: 12px; } }
-
-        /* ── Learn cards ── */
-        .home-learn {
-          width: 100%; max-width: 1100px;
-          margin: 0 auto;
-          padding: 0 40px 100px;
-          position: relative; z-index: 1;
-          animation: fadeUp 0.6s ease 0.4s both;
-        }
-        @media (max-width: 1100px) { .home-learn { max-width: 720px; padding: 0 20px 80px; } }
-        @media (max-width: 768px)  { .home-learn { max-width: 100%; padding: 8px 20px 64px; } }
-
-        .home-intel-section { padding: 0 40px 60px; }
-        .home-intel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-        @media (max-width: 768px) {
-          .home-intel-section { padding: 0 20px 40px; }
-          .home-intel-grid { grid-template-columns: 1fr; }
-        }
-
-        .home-learn-card {
-          display: flex; flex-direction: column;
-          height: 100%;
-          border-radius: 22px;
-          border: 1px solid rgba(12,10,9,0.06);
-          background: rgba(255,255,255,0.88);
-          backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-          box-shadow: 0 2px 6px rgba(12,10,9,0.03), 0 10px 36px rgba(12,10,9,0.04);
-          padding: 14px;
-          text-align: left; text-decoration: none; color: inherit;
-          transition: all 0.2s;
-        }
-        .home-learn-card:hover {
-          transform: translateY(-2px);
-          background: #fff;
-        }
-        @media (max-width: 768px) { .home-learn-card { border-radius: 16px; padding: 8px; } }
-
-        .home-learn-inner {
-          display: flex; flex-direction: column;
-          flex: 1;
-          border-radius: 18px;
-          border: 1px solid rgba(12,10,9,0.04);
-          background: #FFFFFF;
-          padding: 16px;
-          height: 210px;
-        }
-        @media (max-width: 768px) { .home-learn-inner { height: 186px; padding: 12px; border-radius: 12px; } }
-
-        .home-learn-icon {
-          width: 44px; height: 44px; border-radius: 12px;
-          display: flex; align-items: center; justify-content: center;
-          /* background and box-shadow set inline per-card */
-        }
-        @media (max-width: 768px) { .home-learn-icon { width: 36px; height: 36px; border-radius: 10px; } }
-
-        .home-learn-title {
-          font-size: 16px; font-weight: 700;
-          letter-spacing: -0.02em;
+        .home-suggestion:hover {
+          background: #FFFFFF; border-color: rgba(212,113,78,0.25);
+          box-shadow: 0 2px 8px rgba(26,26,24,0.06);
           color: ${T.text};
-          margin: 16px 0 0; line-height: 1.25;
         }
-        @media (max-width: 768px) { .home-learn-title { font-size: 14px; margin-top: 12px; } }
-
-        .home-learn-desc {
-          font-size: 13px; line-height: 1.55;
-          color: ${T.body};
-          margin: 8px 0 0; flex: 1;
-        }
-        @media (max-width: 768px) { .home-learn-desc { font-size: 11.5px; margin-top: 5px; } }
-
-        .home-learn-cta {
-          display: flex; align-items: center; justify-content: space-between;
-          border-top: 1px solid rgba(12,10,9,0.06);
-          padding-top: 12px; margin-top: auto;
-        }
-        .home-learn-cta-text {
-          font-size: 12.5px; font-weight: 600;
-          color: ${T.terra}; padding-right: 12px;
-        }
-        @media (max-width: 768px) { .home-learn-cta-text { font-size: 11px; } }
-        .home-learn-cta-btn {
-          width: 30px; height: 30px; border-radius: 9px;
-          border: 1px solid rgba(181,82,47,0.12);
-          background: linear-gradient(135deg, rgba(181,82,47,0.08), rgba(232,132,94,0.08));
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0; color: ${T.terra};
-          transition: background 0.15s;
-        }
-        @media (max-width: 768px) { .home-learn-cta-btn { width: 24px; height: 24px; border-radius: 7px; } }
-        .home-learn-card:hover .home-learn-cta-btn {
-          background: rgba(181,82,47,0.12);
-        }
+        .home-suggestion:active { transform: scale(0.98); }
 
         /* ── Chat phase ── */
         .home-chat {
@@ -477,24 +310,28 @@ export default function Home() {
           -webkit-overflow-scrolling: touch;
           overscroll-behavior: contain;
         }
-        @media (min-width: 768px) { .home-messages { padding: 20px 40px 8px; } }
+        @media (min-width: 768px) { .home-messages { padding: 24px 40px 8px; } }
 
         .home-msg {
-          margin-bottom: 20px; animation: fadeUp 0.25s ease both;
+          margin-bottom: 24px; animation: fadeUp 0.25s ease both;
         }
+
+        /* User message — right-aligned bubble */
         .home-msg-user {
           display: flex; justify-content: flex-end;
         }
         .home-msg-user-bubble {
           max-width: 80%; padding: 12px 18px;
-          background: ${T.terraSoft}; color: #1A1A18;
+          background: ${T.terraSoft}; color: ${T.text};
           border: 1px solid rgba(212,113,78,0.18);
           border-radius: 20px 20px 4px 20px;
           box-shadow: 0 1px 3px rgba(26,26,24,0.06);
           font-size: 15px; line-height: 1.55; word-break: break-word;
         }
+
+        /* AI message — flat, no bubble */
         .home-msg-ai {
-          display: flex; gap: 10px; align-items: flex-start;
+          display: flex; gap: 12px; align-items: flex-start;
         }
         .home-msg-ai-avatar {
           width: 28px; height: 28px; border-radius: 50%;
@@ -502,19 +339,24 @@ export default function Home() {
           display: flex; align-items: center; justify-content: center;
           font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px;
         }
-        .home-msg-ai-bubble {
-          max-width: 80%; font-size: 15px; line-height: 1.6; color: #1A1A18;
-          background: #FFFFFF;
-          border: 1px solid rgba(26,26,24,0.08);
-          border-radius: 20px 20px 20px 4px;
-          box-shadow: 0 1px 3px rgba(26,26,24,0.04);
-          padding: 12px 16px;
+        .home-msg-ai-body {
+          flex: 1; min-width: 0;
         }
-        .home-msg-ai-bubble p { margin: 0 0 12px; }
-        .home-msg-ai-bubble p:last-child { margin-bottom: 0; }
-        .home-msg-ai-bubble strong { font-weight: 600; }
-        .home-msg-ai-bubble ul, .home-msg-ai-bubble ol { margin: 0 0 12px; padding-left: 20px; }
-        .home-msg-ai-bubble li { margin-bottom: 4px; }
+        .home-msg-ai-name {
+          font-size: 13px; font-weight: 600; color: ${T.sub};
+          margin-bottom: 4px;
+        }
+        .home-msg-ai-text {
+          font-size: 15px; line-height: 1.65; color: ${T.text};
+        }
+        .home-msg-ai-text p { margin: 0 0 12px; }
+        .home-msg-ai-text p:last-child { margin-bottom: 0; }
+        .home-msg-ai-text strong { font-weight: 600; }
+        .home-msg-ai-text ul, .home-msg-ai-text ol { margin: 0 0 12px; padding-left: 20px; }
+        .home-msg-ai-text li { margin-bottom: 4px; }
+        .home-msg-ai-text code { background: #F3F0EA; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+        .home-msg-ai-text pre { background: #F3F0EA; padding: 12px 16px; border-radius: 8px; overflow-x: auto; }
+        .home-msg-ai-text pre code { background: none; padding: 0; }
 
         .home-streaming-dot {
           display: inline-block; width: 6px; height: 6px;
@@ -537,265 +379,184 @@ export default function Home() {
         }
       `}</style>
 
-      {/* ═══ AMBIENT BACKGROUND ═══ */}
-      <div style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-        <div style={{
-          position: 'absolute', left: '-5%', top: '-8%',
-          width: '34rem', height: '34rem', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(224,122,78,0.07) 0%, transparent 70%)',
-        }} />
-        <div style={{
-          position: 'absolute', left: '40%', top: '25%',
-          width: '44rem', height: '30rem', borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(181,82,47,0.05) 0%, transparent 60%)',
-        }} />
-        <div style={{
-          position: 'absolute', right: '-8%', bottom: '-10%',
-          width: '28rem', height: '28rem', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(240,235,225,0.5) 0%, transparent 65%)',
-          filter: 'blur(30px)',
-        }} />
-      </div>
+      {/* ═══ SIDEBAR ═══ */}
+      <Sidebar
+        conversations={[]}
+        activeId={null}
+        onSelect={() => {}}
+        onNew={() => { goHome(); setSidebarOpen(false); }}
+        onClose={() => setSidebarOpen(false)}
+        anonymous={true}
+        visible={sidebarOpen}
+      />
 
-      {/* ═══ FLOATING PILL NAV ═══ */}
-      <header className={`home-pill${!barsVisible ? ' hidden' : ''}`}>
-        <a
-          href="/"
-          onClick={(e) => {
-            if (phase === 'chat') {
-              e.preventDefault();
-              goHome();
-            }
-          }}
-          style={{ textDecoration: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-        >
-          <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.03em', fontFamily: 'Inter, system-ui, sans-serif' }}>
-            <span style={{ color: T.text }}>smb</span>
-            <span style={{ color: T.terra }}>x</span>
-            <span style={{ color: T.text }}>.ai</span>
-          </span>
-        </a>
-        <button
-          className="bg-transparent border-none cursor-pointer p-1 text-[#3D3B37] flex items-center"
-          onClick={() => navigate('/login')}
-          aria-label="Sign in"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-          </svg>
-        </button>
-      </header>
+      {/* ═══ MAIN ═══ */}
+      <div className="home-main">
+        {/* ── Topbar ── */}
+        <header className={`home-topbar${!barsVisible ? ' hidden' : ''}`}>
+          {/* Sidebar toggle */}
+          <button className="home-topbar-btn" onClick={() => setSidebarOpen(v => !v)} aria-label="Toggle sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
 
-      {/* ═══ LANDING PHASE ═══ */}
-      {phase === 'landing' && (
-        <>
+          {phase === 'chat' && (
+            <button className="home-topbar-btn" onClick={goHome} aria-label="Back to home">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5" /><path d="M12 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+
+          <div className="home-topbar-logo">
+            <a
+              href="/"
+              onClick={(e) => { if (phase === 'chat') { e.preventDefault(); goHome(); } }}
+              style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}
+            >
+              <span style={{ color: T.text }}>smb</span>
+              <span style={{ color: T.terra }}>x</span>
+              <span style={{ color: T.text }}>.ai</span>
+            </a>
+            {phase === 'chat' && (
+              <span style={{ color: T.faint, fontWeight: 400, fontSize: 15 }}>· Yulia</span>
+            )}
+          </div>
+
+          <div style={{ flex: 1 }} />
+
+          {phase === 'home' && (
+            <button
+              className="home-topbar-btn"
+              onClick={() => navigate('/login')}
+              aria-label="Sign in"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+              </svg>
+            </button>
+          )}
+        </header>
+
+        {/* ═══ HOME STATE ═══ */}
+        {phase === 'home' && (
           <main className="home-hero">
-            <h1 className="home-h1">
-              Yulia finds the money{' '}
-              <span style={{
-                background: `linear-gradient(135deg, ${T.terra}, ${T.terraLight})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}>you didn&apos;t know was there.</span>
-            </h1>
-            <p className="home-sub">
-              She doesn&apos;t wait for you to ask the right questions. She finds hidden add-backs,
-              models your financing, flags your risks, generates your documents, and manages
-              your deal from first conversation to wire transfer.
-            </p>
+            <h1 className="home-greeting">{getGreeting()},</h1>
+            <p className="home-greeting-sub">what deal are we working on?</p>
 
-            {/* 2-layer chat card */}
-            <div className="home-card-outer">
-              <span className="home-card-label">Talk through the deal</span>
-              <div className={`home-input-card${inputActive ? ' active' : ''}`}>
-                <textarea
-                  ref={heroInputRef}
-                  value={heroText}
-                  onChange={e => setHeroText(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleHeroSend(); }
-                  }}
-                  placeholder="Tell Yulia about your deal..."
-                  rows={5}
-                  className="home-hero-textarea"
-                />
-                <div className="home-hero-send-row">
-                  <button
-                    onClick={handleHeroSend}
-                    className="home-hero-send"
-                    disabled={!heroText.trim()}
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <path d="M5 12l7-7 7 7" /><path d="M12 19V5" />
-                    </svg>
-                  </button>
-                </div>
+            {/* Input */}
+            <div className="home-hero-input">
+              <textarea
+                ref={heroInputRef}
+                value={heroText}
+                onChange={e => setHeroText(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleHeroSend(); }
+                }}
+                placeholder="Tell Yulia about your deal..."
+                rows={4}
+                className="home-hero-textarea"
+              />
+              <div className="home-hero-toolbar">
+                <button
+                  onClick={handleHeroSend}
+                  className={`home-hero-send${heroText.trim() ? ' visible' : ''}`}
+                  disabled={!heroText.trim()}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M5 12l7-7 7 7" /><path d="M12 19V5" />
+                  </svg>
+                </button>
               </div>
             </div>
 
-            {/* Prompt chips */}
-            <div className="home-chips">
-              {PROMPT_CHIPS.map(c => (
-                <button key={c.key} className="home-chip" onClick={() => handleChipClick(c.fill)}>
-                  {c.label}
+            {/* Suggestion cards */}
+            <div className="home-suggestions">
+              {SUGGESTIONS.map(s => (
+                <button key={s.key} className="home-suggestion" onClick={() => handleSuggestion(s.message)}>
+                  {s.label}
                 </button>
               ))}
             </div>
           </main>
+        )}
 
-          {/* The Platform — 7-feature stack */}
-          <section className="home-intel-section" style={{
-            width: '100%', maxWidth: 1100, margin: '0 auto',
-            position: 'relative', zIndex: 1,
-            animation: 'fadeUp 0.6s ease 0.36s both',
-          }}>
-            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: T.terra, fontWeight: 600, marginBottom: 8 }}>
-              How she does it
-            </p>
-            <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em', color: T.text, margin: '0 0 12px', lineHeight: 1.15 }}>
-              Seven capabilities. One conversation.
-            </h2>
-            <p style={{ fontSize: 15, lineHeight: 1.6, color: T.body, margin: '0 0 32px', maxWidth: 600 }}>
-              Each one could be its own product. Together, they&apos;re the operating system for business transactions.
-              The moat isn&apos;t any one feature &mdash; it&apos;s the integration.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {[
-                { num: '01', title: "Yulia doesn\u2019t answer questions. She runs deals.", proof: 'She finds $127K in hidden add-backs you didn\u2019t know existed. Models your financing before your first call with a lender. Flags the risks in your deal before buyers find them. She runs the process \u2014 you make the decisions.' },
-                { num: '02', title: 'A different advisor for every deal size.', proof: 'First-time seller? She coaches you through every step in plain English. PE firm running a roll-up? She models IRR waterfalls and identifies bolt-on targets. Same platform. Different depth. Your deal, your language.' },
-                { num: '03', title: 'Your market. Your industry. Your ZIP code.', proof: 'Census Bureau, BLS, Federal Reserve, SEC EDGAR, IRS Statistics of Income. The same sources that power Wall Street, localized to your market. Not national averages. Not guesses. Your competitive landscape.' },
-                { num: '04', title: 'Does this deal pencil? Know in 30 seconds.', proof: '65% of acquisitions use SBA financing. Yulia tells you instantly whether a deal is bankable \u2014 current rates, June 2025 rules, DSCR analysis \u2014 before you spend three months on diligence for a deal that can\u2019t close.' },
-                { num: '05', title: 'A CIM in one hour. A valuation in five minutes.', proof: 'A CIM that used to take three weeks? Generated in minutes. A valuation that used to cost $25,000? Done for $350. 91+ institutional-grade documents. Real analysis, built from your actual financials.' },
-                { num: '06', title: 'One room. Every seat at the table.', proof: 'Invite your broker, attorney, CPA, and lender \u2014 each sees exactly what they need. Documents organized, version-controlled, and tracked. No more email chains. No more \u201Cwhich version is current?\u201D' },
-                { num: '07', title: 'From first question to wire transfer.', proof: 'Valuation. Financing. Documents. Diligence. Closing. Integration. One platform. One advisor. Every professional you need, already connected. From your first question to your 100th day as a new owner.' },
-              ].map(f => (
-                <div key={f.num} style={{
-                  display: 'flex', gap: 16, alignItems: 'flex-start',
-                  borderRadius: 16, border: '1px solid rgba(12,10,9,0.06)',
-                  background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                  boxShadow: '0 2px 6px rgba(12,10,9,0.03)',
-                  padding: '16px 20px', textAlign: 'left',
-                }}>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: T.terra, fontFamily: 'Inter, system-ui, sans-serif', flexShrink: 0, marginTop: 1 }}>{f.num}</span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, color: T.text, margin: '0 0 4px', letterSpacing: '-0.01em' }}>{f.title}</h3>
-                    <p style={{ fontSize: 13, lineHeight: 1.55, color: T.body, margin: 0 }}>{f.proof}</p>
-                  </div>
+        {/* ═══ CHAT STATE ═══ */}
+        {phase === 'chat' && (
+          <div className="home-chat">
+            <div className="home-messages" ref={scrollRef}>
+              {messages.map((m, i) => (
+                <div key={i} className={`home-msg ${m.role === 'user' ? 'home-msg-user' : 'home-msg-ai'}`}>
+                  {m.role === 'assistant' && <div className="home-msg-ai-avatar">Y</div>}
+                  {m.role === 'user' ? (
+                    <div className="home-msg-user-bubble">{m.content}</div>
+                  ) : (
+                    <div className="home-msg-ai-body">
+                      <div className="home-msg-ai-name">Yulia</div>
+                      <div className="home-msg-ai-text">
+                        <Markdown>{m.content}</Markdown>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
-            </div>
-            {/* Data trust bar */}
-            <div style={{
-              marginTop: 24, padding: '14px 20px', borderRadius: 100,
-              background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(12,10,9,0.05)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: 8, flexWrap: 'wrap',
-            }}>
-              <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: T.muted }}>Powered by</span>
-              {['U.S. Census Bureau', 'Bureau of Labor Statistics', 'Federal Reserve (FRED)', 'SEC EDGAR', 'IRS Statistics of Income'].map((src, i) => (
-                <span key={src} style={{ fontSize: 12, color: T.sub, fontWeight: 500 }}>
-                  {src}{i < 4 ? <span style={{ margin: '0 4px', color: T.faint }}>&middot;</span> : ''}
-                </span>
-              ))}
-            </div>
-          </section>
 
-          {/* Learn cards — OUTSIDE hero so they scroll below the fold */}
-          <section className="home-learn">
-            <div className="learn-cards">
-              {LEARN_CARDS.map(card => (
-                <Link key={card.title} href={card.href} className="home-learn-card">
-                  <div className="home-learn-inner">
-                    <div
-                      className="home-learn-icon"
-                      style={{ background: card.badgeBg, boxShadow: card.badgeGlow }}
-                    >
-                      {card.icon}
-                    </div>
-                    <h3 className="home-learn-title">{card.title}</h3>
-                    <p className="home-learn-desc">{card.desc}</p>
-                    <div className="home-learn-cta">
-                      <span className="home-learn-cta-text">{card.cta}</span>
-                      <span className="home-learn-cta-btn">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M9 18l6-6-6-6" />
-                        </svg>
-                      </span>
+              {/* Streaming response */}
+              {streamingText && (
+                <div className="home-msg home-msg-ai">
+                  <div className="home-msg-ai-avatar">Y</div>
+                  <div className="home-msg-ai-body">
+                    <div className="home-msg-ai-name">Yulia</div>
+                    <div className="home-msg-ai-text">
+                      <Markdown>{streamingText}</Markdown>
+                      <span className="home-streaming-dot" />
                     </div>
                   </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        </>
-      )}
+                </div>
+              )}
 
-      {/* ═══ CHAT PHASE ═══ */}
-      {phase === 'chat' && (
-        <div className="home-chat">
-          {/* Messages */}
-          <div className="home-messages" ref={scrollRef}>
-            {messages.map((m, i) => (
-              <div key={i} className={`home-msg ${m.role === 'user' ? 'home-msg-user' : 'home-msg-ai'}`}>
-                {m.role === 'assistant' && <div className="home-msg-ai-avatar">Y</div>}
-                {m.role === 'user' ? (
-                  <div className="home-msg-user-bubble">{m.content}</div>
-                ) : (
-                  <div className="home-msg-ai-bubble">
-                    <Markdown>{m.content}</Markdown>
+              {/* Sending indicator */}
+              {sending && !streamingText && (
+                <div className="home-msg home-msg-ai">
+                  <div className="home-msg-ai-avatar">Y</div>
+                  <div className="home-msg-ai-body">
+                    <div className="home-msg-ai-name">Yulia</div>
+                    <div className="home-msg-ai-text">
+                      <span className="home-streaming-dot" />
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
-
-            {/* Streaming response */}
-            {streamingText && (
-              <div className="home-msg home-msg-ai">
-                <div className="home-msg-ai-avatar">Y</div>
-                <div className="home-msg-ai-bubble">
-                  <Markdown>{streamingText}</Markdown>
-                  <span className="home-streaming-dot" />
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Sending indicator */}
-            {sending && !streamingText && (
-              <div className="home-msg home-msg-ai">
-                <div className="home-msg-ai-avatar">Y</div>
-                <div className="home-msg-ai-bubble">
-                  <span className="home-streaming-dot" />
+              {/* Messages remaining indicator */}
+              {messagesRemaining !== null && messagesRemaining <= 10 && messagesRemaining > 0 && (
+                <div className="home-remaining">
+                  {messagesRemaining} message{messagesRemaining !== 1 ? 's' : ''} remaining — sign up to continue
                 </div>
+              )}
+
+              {/* Inline signup card */}
+              {showSignup && (
+                <div style={{ maxWidth: 400, margin: '12px auto 20px' }}>
+                  <InlineSignupCard sessionId={getSessionId()} canDismiss={!limitReached} />
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Dock — pinned to bottom */}
+            {!limitReached && (
+              <div className={`home-dock-bottom${!barsVisible ? ' hidden' : ''}`}>
+                <ChatDock ref={dockRef} onSend={handleSend} disabled={sending} />
               </div>
             )}
-
-            {/* Messages remaining indicator */}
-            {messagesRemaining !== null && messagesRemaining <= 10 && messagesRemaining > 0 && (
-              <div className="home-remaining">
-                {messagesRemaining} message{messagesRemaining !== 1 ? 's' : ''} remaining — sign up to continue
-              </div>
-            )}
-
-            {/* Inline signup card */}
-            {showSignup && (
-              <div style={{ maxWidth: 400, margin: '12px auto 20px' }}>
-                <InlineSignupCard sessionId={getSessionId()} canDismiss={!limitReached} />
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
           </div>
-
-          {/* Dock — pinned to bottom */}
-          {!limitReached && (
-            <div className="home-dock-bottom">
-              <ChatDock ref={dockRef} onSend={handleSend} disabled={sending} />
-            </div>
-          )}
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

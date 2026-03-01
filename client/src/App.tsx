@@ -37,7 +37,6 @@ function PageLoader() {
 }
 
 import Home from './pages/public/Home';
-import Pricing from './pages/public/Pricing';
 import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
 import Privacy from './pages/public/Privacy';
@@ -46,12 +45,6 @@ import Chat from './pages/Chat';
 
 // Lazy-load secondary pages to keep initial bundle lean
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
-const Sell = lazy(() => import('./pages/public/Sell'));
-const Buy = lazy(() => import('./pages/public/Buy'));
-const Raise = lazy(() => import('./pages/public/Raise'));
-const Integrate = lazy(() => import('./pages/public/Integrate'));
-const HowItWorks = lazy(() => import('./pages/public/HowItWorks'));
-const Enterprise = lazy(() => import('./pages/public/Enterprise'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
 const Search = lazy(() => import('./pages/Search'));
 const DayPassView = lazy(() => import('./pages/public/DayPassView'));
@@ -136,10 +129,6 @@ export default function App() {
       <Route path="/">
         <Home />
       </Route>
-      <Route path="/pricing">
-        <Pricing />
-      </Route>
-
       <Route path="/legal/privacy">
         <Privacy />
       </Route>
@@ -152,25 +141,6 @@ export default function App() {
             <SharedDocument token={params.token} />
           </Suspense>
         )}
-      </Route>
-
-      <Route path="/sell">
-        <Suspense fallback={<PageLoader />}><Sell /></Suspense>
-      </Route>
-      <Route path="/buy">
-        <Suspense fallback={<PageLoader />}><Buy /></Suspense>
-      </Route>
-      <Route path="/raise">
-        <Suspense fallback={<PageLoader />}><Raise /></Suspense>
-      </Route>
-      <Route path="/integrate">
-        <Suspense fallback={<PageLoader />}><Integrate /></Suspense>
-      </Route>
-      <Route path="/how-it-works">
-        <Suspense fallback={<PageLoader />}><HowItWorks /></Suspense>
-      </Route>
-      <Route path="/enterprise">
-        <Suspense fallback={<PageLoader />}><Enterprise /></Suspense>
       </Route>
 
       <Route path="/search">
