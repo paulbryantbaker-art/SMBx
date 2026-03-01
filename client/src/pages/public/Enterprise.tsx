@@ -86,12 +86,12 @@ export default function Enterprise() {
           For Teams
         </div>
         <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(44px,6vw,76px)] font-extrabold leading-[1.05] tracking-tight max-w-[16ch] mb-10 m-0">
-          Deal intelligence at <em className="italic text-[#D4714E]">institutional scale.</em>
+          Built to make great advisors <em className="italic text-[#D4714E]">unstoppable.</em>
         </h1>
         <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-10 m-0">
           You have 15 active listings. Each needs a valuation, CIM, buyer outreach, DD management.
           Your associates are drowning. Yulia produces institutional-quality work product in minutes
-          &mdash; so your team focuses on what humans do best.
+          &mdash; so your team focuses on what humans do best: relationships, negotiation, and judgment.
         </p>
       </section>
 
@@ -152,18 +152,40 @@ export default function Enterprise() {
         </div>
       </section>
 
-      {/* ═══ THE PROBLEM ═══ */}
+      {/* ═══ YOUR EXPERTISE + YULIA'S INTELLIGENCE ═══ */}
       <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
         <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-4xl py-12 px-14 max-md:py-8 max-md:px-6">
           <h3 className="font-sans text-[28px] font-black tracking-[-0.02em] leading-[1.15] mb-4 m-0">
-            The math doesn&apos;t work <em className="italic text-[#D4714E]">without Yulia.</em>
+            Your expertise is irreplaceable. <em className="italic text-[#D4714E]">Now it scales.</em>
           </h3>
-          <p className="text-[15px] text-[#7A766E] leading-[1.6] max-w-[700px] m-0">
+          <p className="text-[15px] text-[#7A766E] leading-[1.6] max-w-[700px] mb-6 m-0">
             A typical business broker manages 8&ndash;12 active listings. Each requires 40&ndash;60
             hours of analytical work &mdash; valuations, CIMs, buyer research, DD management.
             That&apos;s 500+ hours of work product per year, per broker. You&apos;re either hiring
-            analysts you can&apos;t afford, or your deal quality suffers. Yulia changes the equation.
+            analysts you can&apos;t afford, or your deal quality suffers.
           </p>
+          <p className="text-[15px] text-[#7A766E] leading-[1.6] max-w-[700px] m-0">
+            Yulia doesn&apos;t replace your judgment &mdash; she handles the analytical heavy lift so you
+            can spend more time where it matters: client relationships, negotiations, and closing.
+            Brokers using Yulia report managing 3&times; the deal flow with the same team, adding
+            $150K+ in annual revenue from increased throughput alone.
+          </p>
+        </div>
+      </section>
+
+      {/* ═══ INTELLIGENCE STACK ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
+          What powers it.
+        </h2>
+        <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-8 m-0 max-w-[600px]">
+          Same sovereign data sources that power institutional research. Seven layers of intelligence
+          calibrated to every deal.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          {['U.S. Census Bureau', 'Bureau of Labor Statistics', 'Federal Reserve (FRED)', 'SEC EDGAR', 'IRS Statistics of Income'].map(s => (
+            <span key={s} className="text-[13px] text-[#7A766E] bg-white border border-[#E0DCD4] rounded-full px-4 py-2">{s}</span>
+          ))}
         </div>
       </section>
 
@@ -184,7 +206,7 @@ export default function Enterprise() {
         <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-4xl px-16 py-24 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
           <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
           <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
-            Your expertise is the bottleneck. It doesn&apos;t have to be.
+            More deals. Better work product. Same team.
           </h3>
           <button
             onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}

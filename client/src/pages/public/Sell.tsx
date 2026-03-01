@@ -123,6 +123,26 @@ export default function Sell() {
         </div>
       </section>
 
+      {/* ═══ WHY SELLERS LEAVE MONEY ON THE TABLE ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <div className="bg-gradient-to-br from-[#FFF8F4] to-[#FFF0EB] rounded-4xl p-12 max-md:p-7" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05), inset 0 0 0 1px rgba(212,113,78,.06)' }}>
+          <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">The intelligence gap</p>
+          <h3 className="font-sans text-[clamp(24px,2.5vw,32px)] font-black tracking-[-0.02em] mb-4 m-0">
+            Why sellers leave $100K&ndash;$500K on the table.
+          </h3>
+          <p className="text-[15px] text-[#4A4843] leading-[1.65] mb-4 m-0">
+            Most business owners don&apos;t know their real number. They miss add-backs, underestimate
+            market multiples, and don&apos;t know which buyers are actively acquiring in their space.
+            Yulia&apos;s first analysis is free because finding hidden value is how we earn your trust.
+          </p>
+          <p className="text-[15px] text-[#4A4843] leading-[1.65] m-0">
+            Every insight is grounded in authoritative federal data &mdash; Census Bureau, BLS, FRED,
+            SEC EDGAR &mdash; synthesized with 80+ industry verticals of transaction data and localized
+            to your market. Not national averages. Your city. Your industry. Your competitive environment.
+          </p>
+        </div>
+      </section>
+
       {/* ═══ JOURNEY TIMELINE ═══ */}
       <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
         <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">

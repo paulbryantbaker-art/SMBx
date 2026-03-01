@@ -144,6 +144,36 @@ export default function Pricing() {
         </p>
       </section>
 
+      {/* ═══ PRICING PHILOSOPHY ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-14">
+        <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-4xl p-16 max-md:p-7">
+          <div className="grid grid-cols-2 gap-16 max-md:grid-cols-1 max-md:gap-10">
+            <div>
+              <p className="text-[15px] font-bold text-[#D4714E] mb-2 m-0">Free</p>
+              <p className="text-[22px] font-bold text-[#1A1A18] leading-[1.3] mb-4 m-0">What the data says.</p>
+              <p className="text-[15px] text-[#7A766E] leading-[1.65] m-0">
+                Our free analysis uses the same rigor as our premium intelligence &mdash; because the
+                underlying data comes from the same authoritative federal sources: U.S. Census Bureau,
+                Bureau of Labor Statistics, Federal Reserve (FRED), SEC EDGAR, and IRS Statistics of Income.
+                Ask Yulia anything. She&apos;ll classify your business, calculate SDE/EBITDA, identify
+                add-backs, and give you a preliminary valuation range. No charge, no commitment, no walls.
+              </p>
+            </div>
+            <div>
+              <p className="text-[15px] font-bold text-[#D4714E] mb-2 m-0">Premium</p>
+              <p className="text-[22px] font-bold text-[#1A1A18] leading-[1.3] mb-4 m-0">What the data means for <em className="italic">your</em> deal.</p>
+              <p className="text-[15px] text-[#7A766E] leading-[1.65] m-0">
+                What you pay for isn&apos;t better data. It&apos;s personalized analysis &mdash;
+                contextualized to your industry, localized to your geography, calibrated to your deal size.
+                A full valuation report with comparable transactions, a CIM that positions your business
+                for maximum value, a financial model with scenario analysis. The kind of work product
+                that used to require a $15K&ndash;$50K advisory engagement.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ═══ HOW IT WORKS ═══ */}
       <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
         <div className="grid grid-cols-3 gap-5 max-md:grid-cols-1">

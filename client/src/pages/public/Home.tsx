@@ -382,6 +382,13 @@ export default function Home() {
         @media (max-width: 1100px) { .home-learn { max-width: 720px; padding: 0 20px 80px; } }
         @media (max-width: 768px)  { .home-learn { max-width: 100%; padding: 8px 20px 64px; } }
 
+        .home-intel-section { padding: 0 40px 60px; }
+        .home-intel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        @media (max-width: 768px) {
+          .home-intel-section { padding: 0 20px 40px; }
+          .home-intel-grid { grid-template-columns: 1fr; }
+        }
+
         .home-learn-card {
           display: flex; flex-direction: column;
           height: 100%;
@@ -592,7 +599,8 @@ export default function Home() {
               }}>The intelligence is not.</span>
             </h1>
             <p className="home-sub">
-              Deal intelligence for every stage. From first conversation to closing day.
+              Census Bureau. BLS. Federal Reserve. SEC EDGAR. Synthesized into M&A intelligence
+              localized to your market, calibrated to your deal size.
             </p>
 
             {/* 2-layer chat card */}
@@ -633,6 +641,61 @@ export default function Home() {
               ))}
             </div>
           </main>
+
+          {/* Intelligence section */}
+          <section className="home-intel-section" style={{
+            width: '100%', maxWidth: 1100, margin: '0 auto',
+            position: 'relative', zIndex: 1,
+            animation: 'fadeUp 0.6s ease 0.36s both',
+          }}>
+            <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: T.terra, fontWeight: 600, marginBottom: 8 }}>
+              How it works
+            </p>
+            <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em', color: T.text, margin: '0 0 28px', lineHeight: 1.15 }}>
+              Yulia doesn&apos;t guess. She analyzes.
+            </h2>
+            <div className="home-intel-grid">
+              {[
+                {
+                  title: 'Sovereign data',
+                  desc: 'Every insight grounded in authoritative federal data \u2014 Census Bureau, BLS, FRED, SEC EDGAR, IRS SOI. The same sources that power Wall Street, synthesized for your deal.',
+                },
+                {
+                  title: 'Seven layers of intelligence',
+                  desc: 'Industry structure. Regional economics. Financial normalization. Buyer landscape. Deal structure. Risk assessment. Forward signals. Every analysis covers all seven.',
+                },
+                {
+                  title: 'Localized to your market',
+                  desc: 'National averages hide what matters. SMBX delivers intelligence specific to your city, your industry, and your competitive environment \u2014 down to the ZIP code.',
+                },
+              ].map(card => (
+                <div key={card.title} style={{
+                  borderRadius: 20, border: '1px solid rgba(12,10,9,0.06)',
+                  background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  boxShadow: '0 2px 6px rgba(12,10,9,0.03), 0 10px 36px rgba(12,10,9,0.04)',
+                  padding: 20, textAlign: 'left',
+                }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, color: T.text, margin: '0 0 8px', letterSpacing: '-0.01em' }}>{card.title}</h3>
+                  <p style={{ fontSize: 13, lineHeight: 1.55, color: T.body, margin: 0 }}>{card.desc}</p>
+                </div>
+              ))}
+            </div>
+            {/* Data trust bar */}
+            <div style={{
+              marginTop: 24, padding: '14px 20px', borderRadius: 100,
+              background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(12,10,9,0.05)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: 8, flexWrap: 'wrap',
+            }}>
+              <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: T.muted }}>Powered by:</span>
+              {['U.S. Census Bureau', 'Bureau of Labor Statistics', 'Federal Reserve (FRED)', 'SEC EDGAR', 'IRS Statistics of Income'].map((src, i) => (
+                <span key={src} style={{ fontSize: 12, color: T.sub, fontWeight: 500 }}>
+                  {src}{i < 4 ? <span style={{ margin: '0 4px', color: T.faint }}>&middot;</span> : ''}
+                </span>
+              ))}
+            </div>
+          </section>
 
           {/* Learn cards — OUTSIDE hero so they scroll below the fold */}
           <section className="home-learn">

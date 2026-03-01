@@ -123,6 +123,37 @@ export default function Buy() {
         </div>
       </section>
 
+      {/* ═══ COMPETITIVE INTELLIGENCE TEASER ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <div className="bg-gradient-to-br from-[#FFF8F4] to-[#FFF0EB] rounded-4xl p-12 max-md:p-7" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05), inset 0 0 0 1px rgba(212,113,78,.06)' }}>
+          <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Localized market intelligence</p>
+          <h3 className="font-sans text-[clamp(24px,2.5vw,32px)] font-black tracking-[-0.02em] mb-4 m-0">
+            Intelligence that goes beyond the listing.
+          </h3>
+          <p className="text-[15px] text-[#4A4843] leading-[1.65] mb-5 m-0">
+            For every target, Yulia delivers competitive intelligence most buyers never see: competitive density
+            in the market, PE consolidation activity, average multiples by sub-region, SBA bankability scores,
+            and fragmentation analysis. Not national averages &mdash; localized to the target&apos;s ZIP code.
+          </p>
+          <div className="grid grid-cols-4 gap-4 max-md:grid-cols-2">
+            {[
+              { label: 'Competitive density', value: '47 operators' },
+              { label: 'PE activity', value: '3 active consolidators' },
+              { label: 'Avg. multiple (DFW)', value: '4.2\u00D7 SDE' },
+              { label: 'SBA bankability', value: '92% qualified' },
+            ].map(stat => (
+              <div key={stat.label} className="bg-white rounded-2xl p-4" style={{ border: '1px solid rgba(224,220,212,0.5)' }}>
+                <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-1 m-0">{stat.label}</p>
+                <p className="text-lg font-bold text-[#1A1A18] m-0">{stat.value}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-[13px] text-[#A9A49C] mt-4 m-0 italic">
+            Example: HVAC competitive intelligence for Dallas-Fort Worth. Powered by Census Bureau, BLS, and transaction data.
+          </p>
+        </div>
+      </section>
+
       {/* ═══ JOURNEY TIMELINE ═══ */}
       <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
         <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">

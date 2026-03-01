@@ -4,6 +4,59 @@ import PublicChatInput from '../../components/chat/PublicChatInput';
 
 /* ─── Data ─── */
 
+const SEVEN_LAYERS = [
+  {
+    num: '01',
+    title: 'Industry structure',
+    desc: 'Classification across 80+ verticals with sub-sector specificity. Current multiples, market trends, buyer activity, and consolidation patterns for your exact business category.',
+  },
+  {
+    num: '02',
+    title: 'Regional economics',
+    desc: 'Local market dynamics, cost of living adjustments, state-specific regulations, and regional buyer pools. Because a $3M HVAC company in Dallas is worth something different than one in Portland.',
+  },
+  {
+    num: '03',
+    title: 'Financial normalization',
+    desc: 'SDE/EBITDA calculation with systematic add-back identification across 47 categories. Most owners discover $30K\u2013$80K in legitimate add-backs they didn\u2019t know existed.',
+  },
+  {
+    num: '04',
+    title: 'Buyer landscape',
+    desc: 'Who\u2019s buying in your space, at your size, in your geography. Strategic acquirers, PE firms, independent buyers, search funds \u2014 profiled by acquisition history and capacity.',
+  },
+  {
+    num: '05',
+    title: 'Deal structure',
+    desc: 'Comparable transactions sourced from real deal databases. Purchase price, structure, terms, and multiples \u2014 filtered by industry, geography, and size bracket.',
+  },
+  {
+    num: '06',
+    title: 'Risk assessment',
+    desc: 'Customer concentration, key-person dependency, regulatory exposure, competitive threats. Every risk quantified and scored before it surfaces in diligence.',
+  },
+  {
+    num: '07',
+    title: 'Forward signals',
+    desc: 'Interest rate trajectory, SBA lending environment, PE dry powder, regulatory pipeline, demographic shifts. The factors that will affect your deal 6\u201312 months from now.',
+  },
+];
+
+const DATA_SOURCES = [
+  { name: 'U.S. Census Bureau', desc: 'Business demographics, county economics, industry classification' },
+  { name: 'Bureau of Labor Statistics', desc: 'Employment data, wage benchmarks, cost-of-living indices' },
+  { name: 'Federal Reserve (FRED)', desc: 'Interest rates, lending conditions, economic indicators' },
+  { name: 'SEC EDGAR', desc: 'Public company transactions, filing data, institutional activity' },
+  { name: 'IRS Statistics of Income', desc: 'Business tax data, industry profitability, revenue distributions' },
+];
+
+const LEAGUE_TIERS = [
+  { range: 'Under $500K', label: 'L1', metric: 'SDE', desc: 'Coach-level guidance. First-time sellers and lifestyle businesses. Simple metrics, clear language, actionable steps.' },
+  { range: '$500K \u2013 $5M', label: 'L2\u2013L3', metric: 'SDE \u2192 EBITDA', desc: 'Analyst-level rigor. Owner-operated businesses with real enterprise value. Add-back sophistication, buyer qualification, market positioning.' },
+  { range: '$5M \u2013 $50M', label: 'L4\u2013L5', metric: 'EBITDA', desc: 'Associate-to-partner depth. Institutional buyers, PE roll-ups, search funds. QoE-level analysis, management presentations, board-ready materials.' },
+  { range: '$50M+', label: 'L6', metric: 'EBITDA', desc: 'Partner-level strategic advisory. Complex structures, multiple bidders, cross-border considerations. The same rigor Wall Street expects.' },
+];
+
 const PROCESS_STEPS = [
   {
     num: '01',
@@ -37,41 +90,6 @@ const PROCESS_STEPS = [
   },
 ];
 
-const INTELLIGENCE = [
-  {
-    title: '80+ industry verticals',
-    desc: 'Current multiples, market trends, and buyer activity for every major business category \u2014 from HVAC to healthcare, SaaS to restaurants.',
-  },
-  {
-    title: 'Real transaction data',
-    desc: 'Comparable sales benchmarked by industry, geography, deal size, and structure. Not estimates \u2014 sourced transactions.',
-  },
-  {
-    title: 'Live market conditions',
-    desc: 'Interest rates, SBA lending environment, PE activity, regulatory changes \u2014 factors that affect your deal today, not last quarter.',
-  },
-  {
-    title: 'Regional intelligence',
-    desc: 'Local market dynamics, cost of living adjustments, state-specific regulations. Because a $3M HVAC company in Dallas is worth something different than one in Portland.',
-  },
-];
-
-const METHODOLOGY = [
-  { title: 'Industry classification', desc: 'Categorized across 80+ verticals with sub-sector specificity' },
-  { title: 'Financial normalization', desc: 'SDE/EBITDA with systematic add-back identification (47 categories)' },
-  { title: 'Comparable transactions', desc: 'Sourced from real deal databases, filtered by industry, geography, and size' },
-  { title: 'Multiple analysis', desc: 'Industry-specific multiples benchmarked against current market conditions' },
-  { title: 'Discounted cash flow', desc: 'Forward-looking valuation with risk-adjusted discount rates' },
-  { title: 'Market context', desc: 'Interest rates, buyer activity, regulatory environment, and regional factors' },
-  { title: 'Scenario modeling', desc: 'Base, upside, and downside scenarios with sensitivity analysis' },
-];
-
-const COLLABORATION = [
-  { bold: 'Business owners', rest: ' see their numbers, their documents, their deal progress' },
-  { bold: 'Brokers and advisors', rest: ' get instant work product \u2014 CIMs, valuations, buyer lists' },
-  { bold: 'Attorneys, CPAs, and service providers', rest: ' join free and collaborate in real time' },
-];
-
 const STORIES = [
   {
     deal: '$850K Landscaping \u2014 Portland, OR',
@@ -100,19 +118,112 @@ export default function HowItWorks() {
       <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-14">
         <div className="animate-fadeInUp flex items-center gap-3 mb-8 text-[13px] uppercase tracking-[.18em] text-[#D4714E] font-semibold">
           <span className="w-9 h-0.5 bg-[#D4714E]" />
-          The Process
+          The Methodology
         </div>
         <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(40px,5.5vw,72px)] font-extrabold leading-[1.05] tracking-tight max-w-[18ch] mb-10 m-0">
-          One conversation. Complete <em className="italic text-[#D4714E]">deal intelligence.</em>
+          Seven layers of intelligence. <em className="italic text-[#D4714E]">One conversation.</em>
         </h1>
         <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.6] mb-16 m-0">
-          No forms. No uploads. No 47-field intake questionnaires. Tell Yulia about your deal
-          and she turns the conversation into institutional-quality work product.
+          Every analysis Yulia produces follows the same structured methodology &mdash; seven layers
+          of intelligence synthesized from authoritative federal data, localized to your market,
+          and calibrated to your deal size. Every insight is traceable. Every number is explainable.
         </p>
       </section>
 
-      {/* ═══ 6-STEP PROCESS ═══ */}
+      {/* ═══ SEVEN LAYERS OF INTELLIGENCE ═══ */}
       <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
+        <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">
+          Seven Layers of Intelligence&trade;
+        </p>
+        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-4 m-0">
+          The framework behind <em className="italic text-[#D4714E]">every analysis.</em>
+        </h2>
+        <p className="text-[17px] text-[#7A766E] leading-[1.6] max-w-[700px] mb-12 m-0">
+          This isn&apos;t a chatbot searching the internet. It&apos;s a structured analytical framework
+          that covers seven dimensions of intelligence on every deal &mdash; the same dimensions that
+          top advisory firms evaluate, delivered in minutes instead of weeks.
+        </p>
+
+        <div className="space-y-4">
+          {SEVEN_LAYERS.map(layer => (
+            <Card key={layer.num} hover={false} padding="px-10 py-8 max-md:px-6 max-md:py-6">
+              <div className="flex flex-col md:flex-row md:items-start gap-6">
+                <span className="font-sans text-[48px] font-black text-[#E8E4DC] leading-none shrink-0">{layer.num}</span>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-[#1A1A18] mb-2 m-0">{layer.title}</h3>
+                  <p className="text-sm text-[#7A766E] leading-[1.6] m-0 max-w-[600px]">{layer.desc}</p>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ SOVEREIGN DATA SOURCES ═══ */}
+      <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
+        <div className="bg-gradient-to-br from-[#FFF8F4] to-[#FFF0EB] rounded-4xl p-12 max-md:p-7" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05), inset 0 0 0 1px rgba(212,113,78,.06)' }}>
+          <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Sovereign data sources</p>
+          <h3 className="font-sans text-[clamp(24px,2.5vw,32px)] font-black tracking-[-0.02em] mb-3 m-0">
+            The same data that powers the Federal Reserve and Wall Street.
+          </h3>
+          <p className="text-[15px] text-[#4A4843] leading-[1.65] max-w-[700px] mb-8 m-0">
+            Every insight Yulia produces is grounded in authoritative U.S. government data sources.
+            Bloomberg built a $27B business on this data. SMBX synthesizes it into localized M&amp;A
+            intelligence that was previously available only to firms charging $25,000+ per engagement.
+          </p>
+          <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
+            {DATA_SOURCES.map(src => (
+              <div key={src.name} className="flex gap-3 items-start">
+                <span className="w-6 h-6 rounded-full bg-white text-[#D4714E] flex items-center justify-center text-xs font-bold shrink-0 mt-px" style={{ border: '1px solid rgba(212,113,78,0.15)' }}>
+                  &#10003;
+                </span>
+                <div>
+                  <p className="text-[15px] font-semibold text-[#1A1A18] mb-0.5 m-0">{src.name}</p>
+                  <p className="text-sm text-[#7A766E] leading-[1.5] m-0">{src.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ THE LEAGUE SYSTEM ═══ */}
+      <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
+        <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">
+          Adaptive intelligence
+        </p>
+        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-4 m-0">
+          Calibrated to your <em className="italic text-[#D4714E]">deal size.</em>
+        </h2>
+        <p className="text-[17px] text-[#7A766E] leading-[1.6] max-w-[700px] mb-10 m-0">
+          Yulia doesn&apos;t give the same advice to a $400K landscaping company and a $40M manufacturing
+          platform. She adapts her vocabulary, methodology, financial metrics, and deliverable depth
+          to match your deal&apos;s complexity.
+        </p>
+        <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
+          {LEAGUE_TIERS.map(tier => (
+            <Card key={tier.range} hover={false} padding="px-8 py-7">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="inline-block text-[11px] font-bold uppercase tracking-[.08em] px-2.5 py-[3px] rounded-full bg-[#FFF0EB] text-[#D4714E]">
+                  {tier.label}
+                </span>
+                <span className="text-xs text-[#7A766E] font-medium">{tier.metric}</span>
+              </div>
+              <h4 className="text-[15px] font-bold text-[#1A1A18] mb-1.5 m-0">{tier.range}</h4>
+              <p className="text-sm text-[#7A766E] leading-[1.55] m-0">{tier.desc}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ HOW IT WORKS — THE PROCESS ═══ */}
+      <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
+        <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">
+          The process
+        </p>
+        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-12 m-0">
+          One conversation. <em className="italic text-[#D4714E]">Complete intelligence.</em>
+        </h2>
         <div className="space-y-6">
           {PROCESS_STEPS.map(s => (
             <Card key={s.num} hover={false} padding="px-10 py-10 max-md:px-6 max-md:py-6">
@@ -128,65 +239,49 @@ export default function HowItWorks() {
         </div>
       </section>
 
-      {/* ═══ APPLIED INTELLIGENCE ═══ */}
-      <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
-        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-3 m-0">
-          What Yulia <em className="italic text-[#D4714E]">knows.</em>
-        </h2>
-        <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-10 m-0">
-          Intelligence, not guesses. Methodology, not templates.
-        </p>
-        <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
-          {INTELLIGENCE.map(item => (
-            <Card key={item.title} hover={false} padding="px-8 py-7">
-              <h4 className="text-[15px] font-bold text-[#1A1A18] mb-1.5 m-0">{item.title}</h4>
-              <p className="text-sm text-[#7A766E] leading-[1.55] m-0">{item.desc}</p>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══ METHODOLOGY ═══ */}
-      <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
-        <div className="bg-gradient-to-br from-[#FFF8F4] to-[#FFF0EB] rounded-4xl p-12 max-md:p-7" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05), inset 0 0 0 1px rgba(212,113,78,.06)' }}>
-          <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">The methodology</p>
-          <h3 className="font-sans text-[clamp(24px,2.5vw,32px)] font-black tracking-[-0.02em] mb-8 m-0">
-            Seven layers of analysis. Every deal.
-          </h3>
-          <div className="grid grid-cols-2 gap-x-8 gap-y-5 max-md:grid-cols-1">
-            {METHODOLOGY.map((m, i) => (
-              <div key={m.title} className="flex gap-3 items-start">
-                <span className="font-sans text-sm font-bold text-[#D4714E] mt-0.5 shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                <div>
-                  <p className="text-[15px] font-semibold text-[#1A1A18] mb-0.5 m-0">{m.title}</p>
-                  <p className="text-sm text-[#7A766E] leading-[1.55] m-0">{m.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ COLLABORATION ═══ */}
+      {/* ═══ NOT CHATGPT ═══ */}
       <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-4xl py-12 px-14 max-md:py-8 max-md:px-6">
-          <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
-            Everyone on the deal. <em className="italic text-[#D4714E]">One place.</em>
+          <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-4 m-0">
+            &ldquo;How is this different from ChatGPT?&rdquo;
           </h3>
-          <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-8 m-0">
-            Deals involve more than one person. Yulia keeps everyone aligned.
-          </p>
-          <div className="flex flex-col gap-4">
-            {COLLABORATION.map(c => (
-              <div key={c.bold} className="flex gap-3 items-start">
-                <span className="w-6 h-6 rounded-full bg-[#FFF0EB] text-[#D4714E] flex items-center justify-center text-xs font-bold shrink-0 mt-px">
-                  &#10003;
-                </span>
-                <span className="text-[15px] leading-[1.5]">
-                  <strong>{c.bold}</strong>{c.rest}
-                </span>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 gap-8 max-md:grid-cols-1 mt-6">
+            <div>
+              <p className="text-xs uppercase tracking-[.12em] text-[#7A766E] font-semibold mb-3 m-0">ChatGPT / Generic AI</p>
+              <ul className="space-y-2 list-none p-0 m-0">
+                {[
+                  'Searches the internet for general information',
+                  'No structured methodology',
+                  'No real transaction data',
+                  'No localized market intelligence',
+                  'Can\u2019t tell you what your business is worth',
+                  'Hallucinate numbers with confidence',
+                ].map(item => (
+                  <li key={item} className="flex gap-2.5 items-start text-sm text-[#7A766E] leading-[1.55]">
+                    <span className="text-[#A9A49C] shrink-0 mt-px">&times;</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[.12em] text-[#D4714E] font-semibold mb-3 m-0">SMBX.ai / Yulia</p>
+              <ul className="space-y-2 list-none p-0 m-0">
+                {[
+                  'Synthesizes sovereign federal data sources',
+                  'Seven Layers of Intelligence\u2122 methodology',
+                  'Real comparable transactions, sourced and cited',
+                  'Localized to your city, industry, and ZIP code',
+                  'Multi-methodology valuation with math shown',
+                  'Every insight traceable, every analysis explainable',
+                ].map(item => (
+                  <li key={item} className="flex gap-2.5 items-start text-sm text-[#4A4843] leading-[1.55]">
+                    <span className="text-[#D4714E] shrink-0 mt-px">&#10003;</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </section>
@@ -206,10 +301,22 @@ export default function HowItWorks() {
         </div>
       </section>
 
+      {/* ═══ DATA TRUST BAR ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-12 max-md:px-5 max-md:pb-8">
+        <div className="flex items-center justify-center gap-2 flex-wrap py-4 px-6 rounded-full bg-[#F3F0EA] border border-[#E0DCD4]">
+          <span className="text-[11px] font-semibold uppercase tracking-[.1em] text-[#7A766E]">Powered by:</span>
+          {['U.S. Census Bureau', 'Bureau of Labor Statistics', 'Federal Reserve (FRED)', 'SEC EDGAR', 'IRS Statistics of Income'].map((src, i) => (
+            <span key={src} className="text-xs text-[#4A4843] font-medium">
+              {src}{i < 4 && <span className="mx-1 text-[#A9A49C]">&middot;</span>}
+            </span>
+          ))}
+        </div>
+      </section>
+
       {/* ═══ CHAT INPUT ═══ */}
       <section id="chat-input" className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
-          See for yourself.
+          See the methodology in action.
         </h3>
         <div className="card-outer max-w-[640px] mx-auto p-3">
           <div className="card-inner p-4">
