@@ -52,9 +52,7 @@ export default function Home() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  /* Hero standalone textarea state */
-  const [heroText, setHeroText] = useState('');
-  const heroInputRef = useRef<HTMLTextAreaElement>(null);
+  const heroDockRef = useRef<ChatDockHandle>(null);
 
   const goHome = useCallback(() => {
     if (phase === 'chat') {
@@ -124,13 +122,11 @@ export default function Home() {
     dockRef.current?.clear();
   }, [enterChat, sendMessage]);
 
-  const handleHeroSend = useCallback(() => {
-    const text = heroText.trim();
-    if (!text) return;
-    setHeroText('');
+  const handleHeroSend = useCallback((text: string) => {
     enterChat();
     sendMessage(text);
-  }, [heroText, enterChat, sendMessage]);
+    heroDockRef.current?.clear();
+  }, [enterChat, sendMessage]);
 
   const handleSuggestion = useCallback((message: string) => {
     enterChat();
@@ -161,7 +157,7 @@ export default function Home() {
 
   const scrollToChat = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(() => heroInputRef.current?.focus(), 400);
+    setTimeout(() => heroDockRef.current?.focus(), 400);
   };
 
   return (
@@ -278,54 +274,27 @@ export default function Home() {
         }
         @media (max-width: 768px) { .home-greeting-sub { font-size: 26px; margin-bottom: 28px; } }
 
-        /* ── Hero input ── */
-        .home-hero-input {
+        /* ── Hero dock wrapper ── */
+        .home-hero-dock {
           width: 100%; max-width: 620px;
+          animation: fadeUp 0.5s ease 0.12s both;
+        }
+        .home-hero-dock .home-dock-card {
           border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.08);
-          background: #FFFFFF;
+          border: 1px solid rgba(26,26,24,0.10) !important;
           box-shadow:
             0 4px 16px rgba(26,26,24,0.08),
             0 1px 3px rgba(26,26,24,0.06),
             0 12px 40px rgba(26,26,24,0.04);
-          padding: 0;
-          animation: fadeUp 0.5s ease 0.12s both;
-          transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .home-hero-input:focus-within {
-          border-color: rgba(212,113,78,0.35);
+        .home-hero-dock .home-dock-card:focus-within {
+          border-color: rgba(212,113,78,0.35) !important;
           box-shadow:
             0 4px 16px rgba(26,26,24,0.10),
             0 1px 3px rgba(26,26,24,0.06),
             0 12px 40px rgba(26,26,24,0.06),
             0 0 0 3px rgba(212,113,78,0.10);
         }
-
-        .home-hero-textarea {
-          width: 100%; min-height: 100px; resize: none;
-          background: transparent; border: none; outline: none;
-          font-size: 16px; line-height: 1.6; color: ${T.text};
-          font-family: 'Inter', system-ui, sans-serif;
-          padding: 18px 20px 8px;
-          box-sizing: border-box;
-        }
-        .home-hero-textarea::placeholder { color: ${T.faint}; }
-        @media (max-width: 768px) { .home-hero-textarea { min-height: 80px; font-size: 15px; padding: 14px 16px 6px; } }
-
-        .home-hero-toolbar {
-          display: flex; justify-content: flex-end;
-          padding: 8px 16px 14px;
-        }
-        .home-hero-send {
-          width: 36px; height: 36px; border-radius: 9999px;
-          background: ${T.terra}; color: #fff; border: none;
-          cursor: pointer; display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 2px 8px rgba(212,113,78,0.3);
-          transition: all 0.15s;
-          opacity: 0; transform: scale(0.8); pointer-events: none;
-        }
-        .home-hero-send.visible { opacity: 1; transform: scale(1); pointer-events: auto; }
-        .home-hero-send:hover { background: ${T.terraHover}; }
 
         /* ── Suggestion cards ── */
         .home-suggestions {
@@ -658,35 +627,34 @@ export default function Home() {
 
         .home-dock-bottom {
           flex-shrink: 0;
+          padding: 0 16px 12px;
+          max-width: 900px; margin: 0 auto; width: 100%;
+          box-sizing: border-box;
+          padding-bottom: max(12px, env(safe-area-inset-bottom));
+        }
+        @media (min-width: 769px) {
+          .home-dock-bottom { padding: 0 40px 20px; }
+        }
+        /* Strip ChatDock default wrapper chrome — we style from here */
+        .home-dock-bottom > div {
+          background: transparent !important;
+          border: none !important;
+          padding: 0 !important;
+        }
+        .home-dock-bottom .home-dock-card {
+          border-radius: 20px;
+          border: 1px solid rgba(26,26,24,0.10) !important;
+          background: #FFFFFF;
+          box-shadow:
+            0 4px 16px rgba(26,26,24,0.08),
+            0 1px 3px rgba(26,26,24,0.06),
+            0 12px 40px rgba(26,26,24,0.04);
         }
 
-        /* Mobile: default ChatDock styling, scroll-hide */
+        /* Mobile only: scroll-hide */
         @media (max-width: 768px) {
           .home-dock-bottom { transition: transform 0.3s ease, opacity 0.3s ease; }
           .home-dock-bottom.hidden { transform: translateY(100%); opacity: 0; }
-        }
-
-        /* Desktop: floating card style matching hero input */
-        @media (min-width: 769px) {
-          .home-dock-bottom {
-            padding: 0 40px 20px;
-            max-width: 900px; margin: 0 auto; width: 100%;
-            box-sizing: border-box;
-          }
-          .home-dock-bottom > div {
-            background: transparent !important;
-            border: none !important;
-            padding: 0 !important;
-          }
-          .home-dock-bottom .home-dock-card {
-            border-radius: 20px;
-            border: 1px solid rgba(26,26,24,0.10) !important;
-            background: #FFFFFF;
-            box-shadow:
-              0 4px 16px rgba(26,26,24,0.08),
-              0 1px 3px rgba(26,26,24,0.06),
-              0 12px 40px rgba(26,26,24,0.04);
-          }
         }
       `}</style>
 
@@ -760,29 +728,8 @@ export default function Home() {
               <h1 className="home-greeting">{getGreeting()}.</h1>
               <p className="home-greeting-sub">Tell me about your deal.</p>
 
-              <div className="home-hero-input">
-                <textarea
-                  ref={heroInputRef}
-                  value={heroText}
-                  onChange={e => setHeroText(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleHeroSend(); }
-                  }}
-                  placeholder="Tell Yulia about your deal..."
-                  rows={4}
-                  className="home-hero-textarea"
-                />
-                <div className="home-hero-toolbar">
-                  <button
-                    onClick={handleHeroSend}
-                    className={`home-hero-send${heroText.trim() ? ' visible' : ''}`}
-                    disabled={!heroText.trim()}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                      <path d="M5 12l7-7 7 7" /><path d="M12 19V5" />
-                    </svg>
-                  </button>
-                </div>
+              <div className="home-hero-dock">
+                <ChatDock ref={heroDockRef} onSend={handleHeroSend} />
               </div>
 
               <div className="home-suggestions">
