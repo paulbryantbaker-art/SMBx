@@ -238,8 +238,7 @@ export default function Home() {
           content: '';
           position: absolute; inset: 0;
           background:
-            radial-gradient(ellipse 80% 60% at 25% 30%, rgba(212,113,78,0.09) 0%, transparent 70%),
-            radial-gradient(ellipse 70% 50% at 75% 25%, rgba(212,113,78,0.06) 0%, transparent 65%);
+            radial-gradient(ellipse 50% 40% at 50% 55%, rgba(212,113,78,0.05) 0%, transparent 100%);
           pointer-events: none; z-index: 0;
         }
 
@@ -354,6 +353,10 @@ export default function Home() {
         @media (max-width: 768px) { .home-trust { font-size: 11px; margin-top: 20px; } }
 
         /* ═══ BELOW-FOLD SECTIONS ═══ */
+
+        .home-below-fold {
+          background: linear-gradient(to bottom, ${T.bg} 0%, #F0EDE8 100%);
+        }
 
         .home-section {
           max-width: 960px; margin: 0 auto; width: 100%;
@@ -761,6 +764,7 @@ export default function Home() {
             </section>
             </div>
 
+            <div className="home-below-fold">
             {/* ── SECTION 1: INTELLIGENCE STORY ── */}
             <hr className="home-section-divider" />
             <section className="home-section">
@@ -909,6 +913,8 @@ export default function Home() {
                 </svg>
               </button>
             </div>
+
+            </div>{/* end home-below-fold */}
 
             {/* ── FOOTER ── */}
             <footer className="home-footer">
