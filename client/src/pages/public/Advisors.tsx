@@ -142,8 +142,8 @@ export default function Advisors() {
 
         .adv-card {
           background: #FFFFFF; border-radius: 16px;
-          border: 1px solid rgba(26,26,24,0.06);
-          padding: 28px; box-shadow: 0 1px 4px rgba(26,26,24,0.04);
+          border: 1px solid rgba(26,26,24,0.08);
+          padding: 28px; box-shadow: 0 2px 8px rgba(26,26,24,0.07);
         }
         .adv-card h3 {
           font-size: 16px; font-weight: 700; color: ${T.text};
@@ -157,8 +157,8 @@ export default function Advisors() {
         .adv-preview {
           max-width: 720px; margin: 0 auto;
           background: #FFFFFF; border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.06);
-          box-shadow: 0 2px 12px rgba(26,26,24,0.05);
+          border: 1px solid rgba(26,26,24,0.08);
+          box-shadow: 0 2px 12px rgba(26,26,24,0.08);
           padding: 28px 24px;
         }
         @media (max-width: 768px) { .adv-preview { padding: 20px 16px; border-radius: 16px; } }
@@ -250,9 +250,9 @@ export default function Advisors() {
         /* ── White-label highlight ── */
         .adv-highlight {
           background: #FFFFFF; border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.06);
+          border: 1px solid rgba(26,26,24,0.08);
           padding: 36px 32px;
-          box-shadow: 0 2px 12px rgba(26,26,24,0.05);
+          box-shadow: 0 2px 12px rgba(26,26,24,0.08);
           max-width: 720px;
         }
         @media (max-width: 768px) { .adv-highlight { padding: 28px 20px; border-radius: 16px; } }

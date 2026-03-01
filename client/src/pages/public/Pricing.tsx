@@ -193,8 +193,8 @@ export default function Pricing() {
 
         .price-free-card {
           background: #FFFFFF; border-radius: 16px;
-          border: 1px solid rgba(26,26,24,0.06);
-          padding: 24px; box-shadow: 0 1px 4px rgba(26,26,24,0.04);
+          border: 1px solid rgba(26,26,24,0.08);
+          padding: 24px; box-shadow: 0 2px 8px rgba(26,26,24,0.07);
         }
         .price-free-card h3 {
           font-size: 15px; font-weight: 700; color: ${T.text};
@@ -226,8 +226,8 @@ export default function Pricing() {
 
         .price-deliverable {
           background: #FFFFFF; border-radius: 16px;
-          border: 1px solid rgba(26,26,24,0.06);
-          padding: 24px; box-shadow: 0 1px 4px rgba(26,26,24,0.04);
+          border: 1px solid rgba(26,26,24,0.08);
+          padding: 24px; box-shadow: 0 2px 8px rgba(26,26,24,0.07);
           display: flex; flex-direction: column; gap: 8px;
         }
         .price-deliverable-header {
@@ -249,9 +249,9 @@ export default function Pricing() {
         /* ── Wallet ── */
         .price-wallet {
           background: #FFFFFF; border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.06);
+          border: 1px solid rgba(26,26,24,0.08);
           padding: 36px 32px;
-          box-shadow: 0 2px 12px rgba(26,26,24,0.05);
+          box-shadow: 0 2px 12px rgba(26,26,24,0.08);
           max-width: 720px;
         }
         @media (max-width: 768px) { .price-wallet { padding: 28px 20px; border-radius: 16px; } }
@@ -259,9 +259,9 @@ export default function Pricing() {
         /* ── Advisor teaser ── */
         .price-advisor-box {
           background: #FFFFFF; border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.06);
+          border: 1px solid rgba(26,26,24,0.08);
           padding: 36px 32px;
-          box-shadow: 0 2px 12px rgba(26,26,24,0.05);
+          box-shadow: 0 2px 12px rgba(26,26,24,0.08);
           max-width: 720px;
         }
         @media (max-width: 768px) { .price-advisor-box { padding: 28px 20px; border-radius: 16px; } }

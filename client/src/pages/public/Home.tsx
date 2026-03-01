@@ -229,8 +229,24 @@ export default function Home() {
           -webkit-overflow-scrolling: touch;
         }
 
+        /* ── Hero ambient glow ── */
+        .home-hero-wrap {
+          position: relative;
+          overflow: hidden;
+        }
+        .home-hero-wrap::before {
+          content: '';
+          position: absolute; top: -10%; left: 50%; transform: translateX(-50%);
+          width: 900px; height: 700px;
+          background:
+            radial-gradient(ellipse at 40% 45%, rgba(212,113,78,0.07) 0%, transparent 60%),
+            radial-gradient(ellipse at 65% 50%, rgba(212,113,78,0.04) 0%, transparent 55%);
+          pointer-events: none; z-index: 0;
+        }
+
         /* ── Hero section ── */
         .home-hero {
+          position: relative; z-index: 1;
           display: flex; flex-direction: column;
           align-items: center; justify-content: center;
           text-align: center;
@@ -377,8 +393,8 @@ export default function Home() {
 
         .home-pillar {
           background: #FFFFFF; border-radius: 16px;
-          border: 1px solid rgba(26,26,24,0.06);
-          padding: 24px; box-shadow: 0 1px 4px rgba(26,26,24,0.04);
+          border: 1px solid rgba(26,26,24,0.08);
+          padding: 24px; box-shadow: 0 2px 8px rgba(26,26,24,0.07);
         }
         .home-pillar h3 {
           font-size: 16px; font-weight: 700; color: ${T.text};
@@ -392,8 +408,8 @@ export default function Home() {
         .home-preview {
           max-width: 720px; margin: 0 auto;
           background: #FFFFFF; border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.06);
-          box-shadow: 0 2px 12px rgba(26,26,24,0.05);
+          border: 1px solid rgba(26,26,24,0.08);
+          box-shadow: 0 2px 12px rgba(26,26,24,0.08);
           padding: 28px 24px;
         }
         @media (max-width: 768px) { .home-preview { padding: 20px 16px; border-radius: 16px; } }
@@ -446,8 +462,8 @@ export default function Home() {
 
         .home-persona {
           background: #FFFFFF; border-radius: 16px;
-          border: 1px solid rgba(26,26,24,0.06);
-          padding: 24px; box-shadow: 0 1px 4px rgba(26,26,24,0.04);
+          border: 1px solid rgba(26,26,24,0.08);
+          padding: 24px; box-shadow: 0 2px 8px rgba(26,26,24,0.07);
           transition: all 0.15s;
         }
         .home-persona:hover {
@@ -702,6 +718,7 @@ export default function Home() {
         {phase === 'home' && (
           <div className="home-scroll">
             {/* ── SECTION 0: HERO ── */}
+            <div className="home-hero-wrap">
             <section className="home-hero">
               <h1 className="home-greeting">{getGreeting()},</h1>
               <p className="home-greeting-sub">what deal are we working on?</p>
@@ -743,6 +760,7 @@ export default function Home() {
                 Powered by {TRUST_SOURCES.join(' \u00B7 ')}
               </div>
             </section>
+            </div>
 
             {/* ── SECTION 1: INTELLIGENCE STORY ── */}
             <hr className="home-section-divider" />

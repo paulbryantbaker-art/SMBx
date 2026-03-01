@@ -169,8 +169,8 @@ export default function Sell() {
 
         .sell-analyze-card {
           background: #FFFFFF; border-radius: 16px;
-          border: 1px solid rgba(26,26,24,0.06);
-          padding: 28px; box-shadow: 0 1px 4px rgba(26,26,24,0.04);
+          border: 1px solid rgba(26,26,24,0.08);
+          padding: 28px; box-shadow: 0 2px 8px rgba(26,26,24,0.07);
         }
         .sell-analyze-card h3 {
           font-size: 16px; font-weight: 700; color: ${T.text};
@@ -230,9 +230,9 @@ export default function Sell() {
         /* ── Advisor complement ── */
         .sell-highlight {
           background: #FFFFFF; border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.06);
+          border: 1px solid rgba(26,26,24,0.08);
           padding: 36px 32px;
-          box-shadow: 0 2px 12px rgba(26,26,24,0.05);
+          box-shadow: 0 2px 12px rgba(26,26,24,0.08);
           max-width: 720px;
         }
         @media (max-width: 768px) { .sell-highlight { padding: 28px 20px; border-radius: 16px; } }
