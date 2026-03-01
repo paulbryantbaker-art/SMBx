@@ -291,7 +291,7 @@ export default function Home() {
 
         /* ── 2-Layer chat card ── */
         .home-card-outer {
-          width: 100%; max-width: 780px;
+          width: 100%; max-width: 820px;
           border-radius: 28px;
           border: 1px solid rgba(12,10,9,0.06);
           background: rgba(255,255,255,0.88);
@@ -322,13 +322,13 @@ export default function Home() {
         @media (max-width: 768px) { .home-input-card { border-radius: 14px; padding: 12px; } }
 
         .home-hero-textarea {
-          width: 100%; min-height: 72px; resize: none;
+          width: 100%; min-height: 120px; resize: none;
           background: transparent; border: none; outline: none;
           font-size: 16px; line-height: 1.75; color: ${T.text};
           font-family: 'Inter', system-ui, sans-serif;
         }
         .home-hero-textarea::placeholder { color: ${T.faint}; }
-        @media (max-width: 768px) { .home-hero-textarea { min-height: 48px; font-size: 14.5px; } }
+        @media (max-width: 768px) { .home-hero-textarea { min-height: 80px; font-size: 14.5px; } }
 
         .home-hero-send-row {
           border-top: 1px solid rgba(12,10,9,0.06);
@@ -352,7 +352,7 @@ export default function Home() {
         /* ── Prompt chips ── */
         .home-chips {
           display: flex; flex-wrap: wrap; justify-content: center;
-          gap: 8px; margin-top: 28px; max-width: 780px;
+          gap: 8px; margin-top: 28px; max-width: 820px;
           animation: fadeUp 0.6s ease 0.28s both;
         }
 
