@@ -64,7 +64,7 @@ const LEARN_CARDS = [
   },
   {
     title: 'Every deal journey',
-    desc: 'Sell, buy, raise, integrate. $400K exits to $40M roll-ups.',
+    desc: 'Sell, buy, raise, integrate. $500K exits to $500M platforms.',
     cta: 'View journeys',
     href: '/sell',
     badgeBg: 'linear-gradient(135deg, #D4735E 0%, #E8945E 100%)',

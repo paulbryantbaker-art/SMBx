@@ -52,13 +52,13 @@ const USE_CASES = [
     title: 'Brokers & Intermediaries',
     stat: '3\u00D7',
     statDesc: 'more deals managed with the same team',
-    desc: 'Produce CIMs in under an hour, not three weeks. Screen and score buyer lists in minutes. Manage 3\u00D7 the deal flow without hiring analysts.',
+    desc: 'Produce CIMs in under an hour. Screen and score buyer lists in minutes. Manage 3\u00D7 the deal flow \u2014 from Main Street to mid-market \u2014 without hiring analysts.',
   },
   {
-    title: 'PE Firms & Search Funds',
+    title: 'PE Firms & Investment Banks',
     stat: '47 min',
     statDesc: 'average CIM production time',
-    desc: 'Screen hundreds of targets against your thesis overnight. Full valuations on any target in minutes. Integration plans delivered within 48 hours of closing.',
+    desc: 'Screen hundreds of targets against your thesis overnight. Full valuations on any target in minutes. Run competitive processes and integration plans at institutional speed.',
   },
   {
     title: 'Attorneys & CPAs',
@@ -89,9 +89,10 @@ export default function Enterprise() {
           Built to make great advisors <em className="italic text-[#D4714E]">unstoppable.</em>
         </h1>
         <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-10 m-0">
-          You have 15 active listings. Each needs a valuation, CIM, buyer outreach, DD management.
-          Your associates are drowning. Yulia produces institutional-quality work product in minutes
-          &mdash; so your team focuses on what humans do best: relationships, negotiation, and judgment.
+          Whether you&apos;re managing 15 active listings or running 6 platform builds in parallel &mdash;
+          every deal needs valuations, CIMs, buyer outreach, and DD management. Yulia produces
+          institutional-quality work product in minutes, so your team focuses on what humans do best:
+          relationships, negotiation, and judgment.
         </p>
       </section>
 
@@ -159,10 +160,10 @@ export default function Enterprise() {
             Your expertise is irreplaceable. <em className="italic text-[#D4714E]">Now it scales.</em>
           </h3>
           <p className="text-[15px] text-[#7A766E] leading-[1.6] max-w-[700px] mb-6 m-0">
-            A typical business broker manages 8&ndash;12 active listings. Each requires 40&ndash;60
-            hours of analytical work &mdash; valuations, CIMs, buyer research, DD management.
-            That&apos;s 500+ hours of work product per year, per broker. You&apos;re either hiring
-            analysts you can&apos;t afford, or your deal quality suffers.
+            Every deal professional hits the same wall &mdash; each engagement requires 40&ndash;60
+            hours of analytical work product. Valuations, CIMs, buyer research, DD management.
+            Whether you&apos;re a broker managing 12 listings or a PE firm running 6 platform builds,
+            the analytical workload is the bottleneck.
           </p>
           <p className="text-[15px] text-[#7A766E] leading-[1.6] max-w-[700px] m-0">
             Yulia doesn&apos;t replace your judgment &mdash; she handles the analytical heavy lift so you

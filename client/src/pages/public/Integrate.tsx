@@ -42,21 +42,21 @@ const TIMELINE_STEPS = [
 const DEAL_EXAMPLES = [
   {
     deal: 'First Acquisition \u2014 $1.4M HVAC',
-    desc: 'Solo buyer, first deal. Day Zero checklist caught 3 critical items the closing attorney missed. Employee retention plan delivered before day one. Zero key-person departures in 90 days.',
-    yulia: '$825',
-    traditional: '$50K\u2013$100K integration consulting',
+    desc: 'Solo buyer, first deal. Day Zero checklist caught 3 critical items the closing attorney missed. Employee retention plan delivered before day one.',
+    cost: '$825',
+    outcome: 'Zero key-person departures in 90 days',
   },
   {
-    deal: 'PE Add-on \u2014 $5.2M Dental Group',
-    desc: 'Tuck-in to existing platform. Yulia mapped operational overlaps, identified $340K in annual cost synergies, and delivered the integration timeline to the team in 48 hours.',
-    yulia: '$1,100',
-    traditional: '$75K\u2013$150K consulting engagement',
+    deal: 'PE Roll-Up \u2014 $65M Dental Group',
+    desc: 'Platform integration of 4 practices acquired in 8 months. Yulia produced integration playbooks for each tuck-in, mapped operational overlaps, and surfaced synergies across all locations.',
+    cost: '$4,400',
+    outcome: '$1.2M annual synergies identified',
   },
   {
-    deal: 'Portfolio Company \u2014 $18M Healthcare Services',
-    desc: 'PE-backed operations. 100-day value creation plan delivered to the board 48 hours after closing. Every KPI tracked, every milestone assigned, every risk flagged.',
-    yulia: '$825',
-    traditional: '$100K+ management consulting',
+    deal: 'Strategic Acquisition \u2014 $340M Healthcare Platform',
+    desc: 'PE-backed operations, 22 locations. 100-day value creation plan delivered to the board 48 hours after closing. Integration milestones tracked across all locations.',
+    cost: '$12,000',
+    outcome: 'Board-ready 100-day plan in 48 hours',
   },
 ];
 
@@ -129,7 +129,7 @@ export default function Integrate() {
         <div className="text-center mt-12">
           <p className="text-[15px] text-[#7A766E] mb-5 m-0">
             Complete integration journey: <strong className="text-[#1A1A18]">from $825</strong> &middot;
-            Traditional consulting: <span className="line-through">$50,000&ndash;$150,000</span>
+            every deliverable priced individually
           </p>
           <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start your plan &mdash; free &rarr;</Button>
         </div>
@@ -147,12 +147,12 @@ export default function Integrate() {
               <p className="text-sm text-[#7A766E] leading-[1.55] mb-4 m-0">{d.desc}</p>
               <div className="flex justify-between items-center pt-3 border-t border-[#E0DCD4]">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Yulia</p>
-                  <p className="text-[15px] font-bold text-[#D4714E] m-0">{d.yulia}</p>
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Deliverables</p>
+                  <p className="text-[15px] font-bold text-[#D4714E] m-0">{d.cost}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Traditional</p>
-                  <p className="text-[13px] text-[#A9A49C] line-through m-0">{d.traditional}</p>
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Outcome</p>
+                  <p className="text-[13px] font-medium text-[#1A1A18] m-0">{d.outcome}</p>
                 </div>
               </div>
             </Card>

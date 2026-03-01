@@ -50,21 +50,21 @@ const TIMELINE_STEPS = [
 const DEAL_EXAMPLES = [
   {
     deal: '$1.8M Pest Control \u2014 Phoenix, AZ',
-    desc: 'Owner-operated, 8 trucks, 11 years. Yulia identified $47K in add-backs the owner didn\u2019t know counted. Preliminary range: $620K\u2013$780K. Full valuation, CIM, and 4 qualified buyers delivered in one session.',
-    yulia: '$800',
-    traditional: '$15K\u2013$30K broker commission',
+    desc: 'Owner-operated, 8 trucks, 11 years. Yulia identified $47K in add-backs the owner didn\u2019t know counted. Full valuation, CIM, and 4 qualified buyers delivered in one session.',
+    cost: '$800',
+    outcome: 'Closed at $780K \u2014 26% above initial estimate',
   },
   {
-    deal: '$4.5M Commercial Cleaning \u2014 Atlanta, GA',
-    desc: '$780K adjusted EBITDA. Three PE firms actively consolidating in the region identified. CIM produced in under an hour. Closed at 12% above initial offers.',
-    yulia: '$2,400',
-    traditional: '$90K\u2013$180K advisory + success fee',
+    deal: '$45M Manufacturing Platform \u2014 Southeast',
+    desc: '$8.2M adjusted EBITDA. Seven Layers analysis identified regional consolidation trend and two PE firms actively building in the sector. CIM and management presentation produced same-day.',
+    cost: '$4,200',
+    outcome: 'Closed at 6.1\u00D7 EBITDA \u2014 above market avg.',
   },
   {
-    deal: '$850K Landscaping \u2014 Portland, OR',
-    desc: 'First-time seller. Never heard of SDE. Yulia found $31K in add-backs, produced institutional-quality materials for a deal most advisors wouldn\u2019t touch.',
-    yulia: '$525',
-    traditional: 'Most advisors decline sub-$1M deals',
+    deal: '$210M Healthcare Services \u2014 Multi-State',
+    desc: 'PE-backed platform with 14 locations. Full analytical package: valuation, buyer universe, management presentation, and deal book. Due diligence data room organized for 8 bidders in parallel.',
+    cost: '$12,000',
+    outcome: 'Process ran in 90 days \u2014 4 final bidders',
   },
 ];
 
@@ -90,12 +90,12 @@ const FAQS = [
     a: 'The format, depth, and quality match what top advisory firms produce. Buyers evaluate the information, not who assembled it. Many CIMs are reviewed and co-branded by the seller\u2019s broker before going to market.',
   },
   {
-    q: 'Do I still need a broker?',
-    a: 'That\u2019s your call. Some sellers use Yulia end-to-end. Others use Yulia for the analytical work and their broker for relationships and negotiation. Many brokers use Yulia themselves \u2014 she produces their work product faster so they can focus on what humans do best.',
+    q: 'How does Yulia work with my broker?',
+    a: 'Seamlessly. Your broker joins the deal room free and gets instant access to valuations, CIMs, and buyer research. Many of our most active users are brokers who use Yulia to produce analytical work product \u2014 so they can focus on relationships, negotiation, and closing.',
   },
   {
     q: 'What if my business is complicated?',
-    a: 'Yulia covers 80+ industry verticals with current market data. Whether you\u2019re a single-location restaurant or a multi-state healthcare practice, she adapts \u2014 different metrics, different comps, different buyer profiles. If something is truly outside her range, she\u2019ll tell you.',
+    a: 'Yulia covers 80+ industry verticals with current market data. Whether you\u2019re a single-location business or a multi-state platform with 50 locations, she adapts \u2014 different metrics, different comps, different buyer profiles, different complexity. The methodology scales with the deal.',
   },
 ];
 
@@ -157,7 +157,7 @@ export default function Sell() {
         <div className="text-center mt-12">
           <p className="text-[15px] text-[#7A766E] mb-5 m-0">
             Complete exit journey: <strong className="text-[#1A1A18]">from $800</strong> &middot;
-            Traditional advisory: <span className="line-through">$50,000&ndash;$200,000</span>
+            every deliverable priced individually
           </p>
           <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start your journey &mdash; free &rarr;</Button>
         </div>
@@ -175,12 +175,12 @@ export default function Sell() {
               <p className="text-sm text-[#7A766E] leading-[1.55] mb-4 m-0">{d.desc}</p>
               <div className="flex justify-between items-center pt-3 border-t border-[#E0DCD4]">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Yulia</p>
-                  <p className="text-[15px] font-bold text-[#D4714E] m-0">{d.yulia}</p>
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Deliverables</p>
+                  <p className="text-[15px] font-bold text-[#D4714E] m-0">{d.cost}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Traditional</p>
-                  <p className="text-[13px] text-[#A9A49C] line-through m-0">{d.traditional}</p>
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Outcome</p>
+                  <p className="text-[13px] font-medium text-[#1A1A18] m-0">{d.outcome}</p>
                 </div>
               </div>
             </Card>

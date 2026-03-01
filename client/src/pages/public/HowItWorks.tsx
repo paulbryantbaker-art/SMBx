@@ -13,7 +13,7 @@ const SEVEN_LAYERS = [
   {
     num: '02',
     title: 'Regional economics',
-    desc: 'Local market dynamics, cost of living adjustments, state-specific regulations, and regional buyer pools. Because a $3M HVAC company in Dallas is worth something different than one in Portland.',
+    desc: 'Local market dynamics, cost of living adjustments, state-specific regulations, and regional buyer pools. Because the same business in Dallas is worth something different than one in Portland \u2014 at every deal size.',
   },
   {
     num: '03',
@@ -53,8 +53,8 @@ const DATA_SOURCES = [
 const LEAGUE_TIERS = [
   { range: 'Under $500K', label: 'L1', metric: 'SDE', desc: 'Coach-level guidance. First-time sellers and lifestyle businesses. Simple metrics, clear language, actionable steps.' },
   { range: '$500K \u2013 $5M', label: 'L2\u2013L3', metric: 'SDE \u2192 EBITDA', desc: 'Analyst-level rigor. Owner-operated businesses with real enterprise value. Add-back sophistication, buyer qualification, market positioning.' },
-  { range: '$5M \u2013 $50M', label: 'L4\u2013L5', metric: 'EBITDA', desc: 'Associate-to-partner depth. Institutional buyers, PE roll-ups, search funds. QoE-level analysis, management presentations, board-ready materials.' },
-  { range: '$50M+', label: 'L6', metric: 'EBITDA', desc: 'Partner-level strategic advisory. Complex structures, multiple bidders, cross-border considerations. The same rigor Wall Street expects.' },
+  { range: '$5M \u2013 $100M', label: 'L4\u2013L5', metric: 'EBITDA', desc: 'Associate-to-partner depth. Institutional buyers, PE platforms, search funds. QoE-level analysis, management presentations, board-ready materials.' },
+  { range: '$100M+', label: 'L6', metric: 'EBITDA', desc: 'Partner-level strategic advisory. Complex structures, competitive processes, cross-border considerations, multi-bidder dynamics. The same rigor Wall Street expects.' },
 ];
 
 const PROCESS_STEPS = [
@@ -92,20 +92,20 @@ const PROCESS_STEPS = [
 
 const STORIES = [
   {
-    deal: '$850K Landscaping \u2014 Portland, OR',
-    desc: 'Solo owner, first-time seller. Never heard of SDE. Yulia found $31K in add-backs he didn\u2019t know counted. Full valuation, CIM, and 3 qualified buyers in one session. A deal most advisors wouldn\u2019t touch.',
+    deal: '$1.8M Pest Control \u2014 Phoenix, AZ',
+    desc: 'Owner-operated, 8 trucks, 11 years. Yulia found $47K in add-backs the owner didn\u2019t know counted. Full valuation, CIM, and 4 qualified buyers delivered in one session.',
   },
   {
     deal: '$4.5M Commercial Cleaning \u2014 Atlanta, GA',
     desc: 'Owner-operated, 15 years. Yulia calculated $780K adjusted EBITDA, identified 3 PE firms actively consolidating in the region. Full CIM in under an hour. Closed at 12% above initial offers.',
   },
   {
-    deal: '$6.8M Dental Group \u2014 Chicago, IL',
-    desc: 'PE add-on. Screened 140+ practices, identified 12 strategic fits. Full valuation and DD workflow on 4 finalists. Two acquisitions closed in the same quarter.',
+    deal: '$68M Industrial Services \u2014 Midwest',
+    desc: 'PE platform build. Screened 340+ targets, scored the top 40, ran parallel valuations on 8 finalists. Two platform acquisitions and three add-ons closed within the year.',
   },
   {
-    deal: '$25M PE Roll-Up \u2014 Healthcare Services',
-    desc: 'PE firm building a platform. Yulia handled analytical work product across 6 add-on acquisitions in 14 months. Deal team of 3 operated like 12. Integration plans delivered within 48 hours of each closing.',
+    deal: '$340M Healthcare Platform \u2014 Multi-State',
+    desc: 'PE-backed operations, 22 locations. Full analytical package for a competitive sell-side process: valuation, management presentation, buyer universe, and data room. Eight bidders, four finalists, 90-day process.',
   },
 ];
 
@@ -167,9 +167,9 @@ export default function HowItWorks() {
             The same data that powers the Federal Reserve and Wall Street.
           </h3>
           <p className="text-[15px] text-[#4A4843] leading-[1.65] max-w-[700px] mb-8 m-0">
-            Every insight Yulia produces is grounded in authoritative U.S. government data sources.
-            Bloomberg built a $27B business on this data. SMBX synthesizes it into localized M&amp;A
-            intelligence that was previously available only to firms charging $25,000+ per engagement.
+            Every insight Yulia produces is grounded in authoritative U.S. government data sources &mdash;
+            the same data that powers Bloomberg terminals and Wall Street research desks. SMBX synthesizes
+            it into localized M&amp;A intelligence calibrated to every deal size, from $500K to $500M+.
           </p>
           <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
             {DATA_SOURCES.map(src => (
@@ -196,9 +196,9 @@ export default function HowItWorks() {
           Calibrated to your <em className="italic text-[#D4714E]">deal size.</em>
         </h2>
         <p className="text-[17px] text-[#7A766E] leading-[1.6] max-w-[700px] mb-10 m-0">
-          Yulia doesn&apos;t give the same advice to a $400K landscaping company and a $40M manufacturing
+          Yulia doesn&apos;t give the same advice to a $500K landscaping company and a $500M healthcare
           platform. She adapts her vocabulary, methodology, financial metrics, and deliverable depth
-          to match your deal&apos;s complexity.
+          to match your deal&apos;s complexity &mdash; from Main Street to mega-cap.
         </p>
         <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
           {LEAGUE_TIERS.map(tier => (

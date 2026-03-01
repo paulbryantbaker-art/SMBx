@@ -13,7 +13,7 @@ const TIMELINE_STEPS = [
     price: 'Free',
     free: true,
     desc: 'What kind of business? What size? What geography? What returns? Yulia builds your acquisition criteria and search strategy from a single conversation.',
-    detail: '\u201CI\u2019m looking for B2B services companies, $1\u20135M revenue, 70%+ gross margins, in the Southeast.\u201D \u2014 That\u2019s enough to start screening.',
+    detail: '\u201CI\u2019m looking for B2B services companies, $5\u201350M revenue, 70%+ gross margins, in the Southeast.\u201D \u2014 That\u2019s enough to start screening.',
   },
   {
     num: 2,
@@ -50,21 +50,21 @@ const TIMELINE_STEPS = [
 const DEAL_EXAMPLES = [
   {
     deal: '$2.1M HVAC Company \u2014 Dallas, TX',
-    desc: 'First-time buyer. Yulia scored 23 targets against the thesis, produced full valuations on 3 finalists, and managed the DD workflow. LOI signed in 3 weeks.',
-    yulia: '$1,050',
-    traditional: '$40K\u2013$75K advisory retainer',
+    desc: 'First-time buyer. Yulia scored 23 targets against the thesis, produced full valuations on 3 finalists, and managed the DD workflow through close.',
+    cost: '$1,050',
+    outcome: 'Thesis to LOI in 3 weeks',
   },
   {
-    deal: '$6.8M Dental Practice Group \u2014 Chicago, IL',
-    desc: 'PE add-on. Yulia screened 140+ practices, identified 12 strategic fits, and ran parallel DD on 4 targets. Two acquisitions closed in the same quarter.',
-    yulia: '$3,200',
-    traditional: '$120K+ advisory + success fee',
+    deal: '$68M Industrial Services \u2014 Midwest',
+    desc: 'PE platform build. Yulia screened 340+ targets against a 12-criteria thesis, scored the top 40, and ran parallel valuations on 8 finalists. Two platform acquisitions and three add-ons closed within the year.',
+    cost: '$8,400',
+    outcome: '5 acquisitions closed in 11 months',
   },
   {
-    deal: '$950K E-Commerce Brand \u2014 Remote',
-    desc: 'Independent buyer, SBA-backed. Yulia verified financials, modeled SBA bankability, and produced a full DD package. Closed at asking with seller financing on the gap.',
-    yulia: '$625',
-    traditional: 'Most advisors decline sub-$1M buy-side',
+    deal: '$185M SaaS Platform \u2014 National',
+    desc: 'Growth equity fund evaluating a competitive process. Yulia produced QoE-level analysis, commercial DD workstream, and integration model within 72 hours of first contact.',
+    cost: '$12,000',
+    outcome: 'Full DD package in 72 hours',
   },
 ];
 
@@ -90,8 +90,8 @@ const FAQS = [
     a: 'Absolutely. Roll-up operators and search funds use Yulia for serial acquisitions \u2014 screening, valuing, and managing diligence across multiple targets simultaneously.',
   },
   {
-    q: 'How is this different from hiring an analyst?',
-    a: 'An analyst gives you 40 hours a week. Yulia gives you institutional-quality analysis in minutes, 24/7. Many PE firms use Yulia alongside their deal teams to move faster on competitive deals.',
+    q: 'How does this fit with my existing deal team?',
+    a: 'Yulia produces the analytical work product \u2014 valuations, models, DD checklists \u2014 so your team can focus on relationships, strategy, and judgment. PE firms, brokers, and advisors use Yulia alongside their deal teams to move faster on competitive deals.',
   },
   {
     q: 'What if I\u2019m buying through a broker?',
@@ -149,7 +149,7 @@ export default function Buy() {
             ))}
           </div>
           <p className="text-[13px] text-[#A9A49C] mt-4 m-0 italic">
-            Example: HVAC competitive intelligence for Dallas-Fort Worth. Powered by Census Bureau, BLS, and transaction data.
+            Example: Industrial services competitive intelligence for Dallas-Fort Worth. Powered by Census Bureau, BLS, and transaction data.
           </p>
         </div>
       </section>
@@ -168,7 +168,7 @@ export default function Buy() {
         <div className="text-center mt-12">
           <p className="text-[15px] text-[#7A766E] mb-5 m-0">
             Complete buy-side journey: <strong className="text-[#1A1A18]">from $1,050</strong> &middot;
-            Traditional advisory: <span className="line-through">$75,000&ndash;$250,000</span>
+            every deliverable priced individually
           </p>
           <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start your journey &mdash; free &rarr;</Button>
         </div>
@@ -186,12 +186,12 @@ export default function Buy() {
               <p className="text-sm text-[#7A766E] leading-[1.55] mb-4 m-0">{d.desc}</p>
               <div className="flex justify-between items-center pt-3 border-t border-[#E0DCD4]">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Yulia</p>
-                  <p className="text-[15px] font-bold text-[#D4714E] m-0">{d.yulia}</p>
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Deliverables</p>
+                  <p className="text-[15px] font-bold text-[#D4714E] m-0">{d.cost}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Traditional</p>
-                  <p className="text-[13px] text-[#A9A49C] line-through m-0">{d.traditional}</p>
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Outcome</p>
+                  <p className="text-[13px] font-medium text-[#1A1A18] m-0">{d.outcome}</p>
                 </div>
               </div>
             </Card>

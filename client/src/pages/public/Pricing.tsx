@@ -93,10 +93,11 @@ const FREE_ITEMS = [
 ];
 
 const EXAMPLES = [
-  { deal: '$850K landscaping (sell)', yulia: '$525', traditional: 'Most advisors decline' },
-  { deal: '$3M HVAC company (sell)', yulia: '$2,400', traditional: '$90K\u2013$180K advisory' },
-  { deal: '$6.8M dental group (buy, 2 targets)', yulia: '$3,200', traditional: '$120K+ advisory' },
-  { deal: '$25M PE platform (buy, 6 add-ons)', yulia: '$12,000', traditional: '$500K+ retainer' },
+  { deal: '$1.8M pest control (sell)', cost: '$800' },
+  { deal: '$12M dental group (buy, 3 targets)', cost: '$3,200' },
+  { deal: '$75M growth equity raise', cost: '$4,800' },
+  { deal: '$210M healthcare platform (sell)', cost: '$12,000' },
+  { deal: '$340M PE integration (6 add-ons)', cost: '$14,500' },
 ];
 
 const FAQS = [
@@ -166,8 +167,8 @@ export default function Pricing() {
                 What you pay for isn&apos;t better data. It&apos;s personalized analysis &mdash;
                 contextualized to your industry, localized to your geography, calibrated to your deal size.
                 A full valuation report with comparable transactions, a CIM that positions your business
-                for maximum value, a financial model with scenario analysis. The kind of work product
-                that used to require a $15K&ndash;$50K advisory engagement.
+                for maximum value, a financial model with scenario analysis. Institutional-quality work
+                product, delivered in minutes.
               </p>
             </div>
           </div>
@@ -238,19 +239,20 @@ export default function Pricing() {
 
       {/* ═══ DEAL SIZE EXAMPLES ═══ */}
       <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
-        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
+        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-3 m-0">
           What does it <em className="italic text-[#D4714E]">actually</em> cost?
         </h2>
-        <div className="max-w-[800px]">
-          <div className="grid grid-cols-[1fr_auto_auto] gap-x-8 gap-y-0 items-center">
+        <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-10 m-0">
+          Same intelligence. Same methodology. From first-time sellers to PE platforms.
+        </p>
+        <div className="max-w-[640px]">
+          <div className="grid grid-cols-[1fr_auto] gap-x-8 gap-y-0 items-center">
             <p className="text-xs uppercase tracking-[.12em] text-[#7A766E] font-semibold pb-4 m-0">Your Deal</p>
-            <p className="text-xs uppercase tracking-[.12em] text-[#7A766E] font-semibold pb-4 m-0 text-right">Yulia</p>
-            <p className="text-xs uppercase tracking-[.12em] text-[#7A766E] font-semibold pb-4 m-0 text-right">Traditional</p>
+            <p className="text-xs uppercase tracking-[.12em] text-[#7A766E] font-semibold pb-4 m-0 text-right">Deliverables</p>
             {EXAMPLES.map((e, i) => (
               <div key={i} className="contents">
                 <p className={`text-[15px] text-[#1A1A18] py-4 m-0 ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.deal}</p>
-                <p className={`text-[15px] font-bold text-[#D4714E] py-4 m-0 text-right ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.yulia}</p>
-                <p className={`text-[15px] text-[#7A766E] line-through py-4 m-0 text-right ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.traditional}</p>
+                <p className={`text-[15px] font-bold text-[#D4714E] py-4 m-0 text-right ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.cost}</p>
               </div>
             ))}
           </div>

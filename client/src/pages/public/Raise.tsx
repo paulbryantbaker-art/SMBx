@@ -57,21 +57,21 @@ const TIMELINE_STEPS = [
 const DEAL_EXAMPLES = [
   {
     deal: '$3.5M Series A \u2014 B2B SaaS',
-    desc: 'Deck built from actual financials. Defensible valuation methodology. Investor list prioritized by stage, sector, and check size. Closed in 6 weeks.',
-    yulia: '$950',
-    traditional: '$25K\u2013$50K advisory retainer',
+    desc: 'Deck built from actual financials. Defensible valuation methodology. Investor list prioritized by stage, sector, and check size.',
+    cost: '$950',
+    outcome: 'Oversubscribed \u2014 closed in 6 weeks',
   },
   {
-    deal: '$8M Growth Equity \u2014 Healthcare Services',
-    desc: 'Compared 4 term sheets side-by-side. Modeled dilution across every scenario. Saved 8% dilution by understanding the real cost of each structure.',
-    yulia: '$1,400',
-    traditional: '$75K+ advisory + success fee',
+    deal: '$75M Growth Equity \u2014 Healthcare IT',
+    desc: 'Compared 6 term sheets side-by-side. Modeled dilution, control, and economics across every scenario. Management presentation produced for board in under 24 hours.',
+    cost: '$4,800',
+    outcome: 'Saved 6% dilution through structure optimization',
   },
   {
-    deal: '$1.2M Seed \u2014 Consumer Tech',
-    desc: 'First-time founder. Yulia built the financial model, pitch deck, and investor strategy from a single conversation. Angel round closed in 4 weeks.',
-    yulia: '$625',
-    traditional: 'Most advisors don\u2019t take sub-$2M raises',
+    deal: '$250M PE Recapitalization \u2014 Industrial',
+    desc: 'Sponsor-backed recapitalization with complex capital structure. Yulia produced the full financial model, pitch materials, and investor targeting across 40+ institutional LPs and co-invest vehicles.',
+    cost: '$12,000',
+    outcome: 'Full capital raise package in 5 business days',
   },
 ];
 
@@ -145,7 +145,7 @@ export default function Raise() {
         <div className="text-center mt-12">
           <p className="text-[15px] text-[#7A766E] mb-5 m-0">
             Complete raise journey: <strong className="text-[#1A1A18]">from $950</strong> &middot;
-            Traditional advisory: <span className="line-through">$25,000&ndash;$100,000</span>
+            every deliverable priced individually
           </p>
           <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start your raise &mdash; free &rarr;</Button>
         </div>
@@ -163,12 +163,12 @@ export default function Raise() {
               <p className="text-sm text-[#7A766E] leading-[1.55] mb-4 m-0">{d.desc}</p>
               <div className="flex justify-between items-center pt-3 border-t border-[#E0DCD4]">
                 <div>
-                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Yulia</p>
-                  <p className="text-[15px] font-bold text-[#D4714E] m-0">{d.yulia}</p>
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Deliverables</p>
+                  <p className="text-[15px] font-bold text-[#D4714E] m-0">{d.cost}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Traditional</p>
-                  <p className="text-[13px] text-[#A9A49C] line-through m-0">{d.traditional}</p>
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Outcome</p>
+                  <p className="text-[13px] font-medium text-[#1A1A18] m-0">{d.outcome}</p>
                 </div>
               </div>
             </Card>
