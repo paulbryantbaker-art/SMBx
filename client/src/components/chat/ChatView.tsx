@@ -67,8 +67,8 @@ export default function ChatView() {
           <div className="flex items-start gap-3">
             <YuliaAvatar size={32} className="mt-0.5" />
             <div
-              className="max-w-[75%] bg-white px-4 py-3"
-              style={{ borderRadius: '18px 18px 18px 4px', border: '1px solid rgba(224,220,212,0.6)', boxShadow: '0 1px 4px rgba(26,26,24,0.04)' }}
+              className="max-w-[80%] bg-white px-4 py-3"
+              style={{ borderRadius: '20px 20px 20px 4px', border: '1px solid rgba(26,26,24,0.08)', boxShadow: '0 1px 3px rgba(26,26,24,0.04)' }}
             >
               <div className="text-sm font-sans text-[#1A1A18] leading-[1.55] [&_p]:m-0 [&_p+p]:mt-2.5 [&_strong]:font-semibold">
                 <Markdown>{streamingContent}</Markdown>

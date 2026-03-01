@@ -54,22 +54,22 @@ body {
 }
 
 @keyframes morphFadeOut {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-20px); }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 @keyframes morphFadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .morph-fade-out {
-  animation: morphFadeOut 400ms ease-out forwards;
+  animation: morphFadeOut 300ms ease forwards;
   pointer-events: none;
 }
 
 .morph-fade-in {
-  animation: morphFadeIn 400ms ease-out forwards;
+  animation: morphFadeIn 300ms ease 100ms forwards;
 }
 
 /* ═══ HOMEPAGE V12 ═══ */

@@ -4,15 +4,15 @@ import { useChatContext } from '../../context/ChatContext';
 /* ─── Placeholder map ──────────────────────────────────────── */
 
 const PLACEHOLDERS: Record<string, string> = {
-  '/sell': 'Describe your business \u2014 industry, revenue, location\u2026',
-  '/buy': "What kind of business are you looking to acquire?",
-  '/raise': 'Tell Yulia about your raise \u2014 how much and why\u2026',
-  '/integrate': 'Tell Yulia about your recent acquisition\u2026',
-  '/': 'Tell Yulia about your business\u2026',
+  '/sell': 'Tell Yulia about your business...',
+  '/buy': 'Tell Yulia what you\u2019re looking for...',
+  '/raise': 'Tell Yulia about your raise...',
+  '/integrate': 'Tell Yulia about your acquisition...',
+  '/': 'Tell Yulia about your deal...',
 };
 
 function getPlaceholder(page: string): string {
-  return PLACEHOLDERS[page] || 'Ask Yulia anything about buying or selling a business\u2026';
+  return PLACEHOLDERS[page] || 'Ask Yulia anything...';
 }
 
 /* ─── Component ────────────────────────────────────────────── */

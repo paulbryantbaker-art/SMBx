@@ -18,19 +18,33 @@ interface Props {
 export default function PublicNav({ chatMode }: Props) {
   const [open, setOpen] = useState(false);
   const [location] = useLocation();
-  const { sourcePage } = useChatContext();
+  const { sourcePage, resetToPublic } = useChatContext();
 
   // Close mobile menu on route change
   useEffect(() => { setOpen(false); }, [location]);
 
-  // Chat mode — minimal centered logo pill
+  // Chat mode — full-width bar with back arrow + logo + "Yulia"
   if (chatMode) {
     return (
       <nav
-        className="shrink-0 flex items-center justify-center w-full z-50"
+        className="shrink-0 flex items-center w-full z-50 px-4"
         style={{ background: '#FAF9F7', height: 56, borderBottom: '1px solid rgba(26,26,24,0.06)' }}
       >
-        <Logo />
+        <button
+          onClick={() => resetToPublic()}
+          className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#6E6A63] hover:text-[#1A1A18] hover:bg-[rgba(26,26,24,0.04)] transition-colors shrink-0"
+          type="button"
+          aria-label="Back to page"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <div className="flex-1 flex items-center justify-center gap-2">
+          <Logo />
+          <span className="text-[13px] font-medium text-[#6E6A63]">&middot; Yulia</span>
+        </div>
+        <div className="w-9" /> {/* Spacer to balance back arrow */}
       </nav>
     );
   }
