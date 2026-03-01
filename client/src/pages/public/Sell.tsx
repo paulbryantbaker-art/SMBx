@@ -12,85 +12,90 @@ const TIMELINE_STEPS = [
     title: 'Tell Yulia about your business',
     price: 'Free',
     free: true,
-    desc: 'No forms. Just a conversation. Describe your business \u2014 industry, location, revenue, team, whatever you know. Yulia asks smart follow-ups and builds your deal profile.',
-    detail: '\u201CI own an HVAC company in Dallas, 12 employees, $3.2M revenue, been running it for 15 years.\u201D \u2014 That\u2019s all it takes to start.',
+    desc: 'No forms. Just a conversation. Revenue, team, industry, location \u2014 whatever you know. Yulia asks the follow-ups that matter and builds your deal profile in minutes.',
+    detail: '\u201CI own a pest control company in Phoenix, 8 trucks, $1.8M revenue, been running it for 11 years.\u201D \u2014 That\u2019s all it takes to start.',
   },
   {
     num: 2,
     title: 'See your real numbers',
     price: 'Free',
     free: true,
-    desc: 'Yulia calculates your SDE or EBITDA, identifies every legitimate add-back, and gives you a preliminary valuation range \u2014 with the math shown. Not a guess. A number you can take to your CPA.',
-    detail: 'Most owners discover add-backs they didn\u2019t know existed. Personal vehicle, one-time expenses, above-market rent to yourself \u2014 Yulia finds them all.',
+    desc: 'SDE or EBITDA calculated. Every legitimate add-back identified. Preliminary valuation range with the methodology shown. Not a guess \u2014 a number you can take to your CPA.',
+    detail: 'Most owners discover $30K\u2013$80K in add-backs they didn\u2019t know existed. Personal vehicle, one-time expenses, above-market rent to yourself \u2014 Yulia surfaces them all.',
   },
   {
     num: 3,
-    title: 'Get your valuation report',
-    price: 'From $199',
+    title: 'Full valuation report',
+    price: '$350',
     free: false,
-    desc: 'Full multi-methodology valuation: comparable transactions, industry multiples, discounted cash flow. Benchmarked against real deals in your industry and region. The kind of report advisory firms charge $10K\u2013$25K to produce.',
+    desc: 'Multi-methodology valuation: comparable transactions, industry multiples, discounted cash flow. Benchmarked against real deals in your industry, geography, and size bracket.',
   },
   {
     num: 4,
-    title: 'Go to market',
-    price: 'From $299',
+    title: 'CIM and buyer matching',
+    price: '$175',
     free: false,
-    desc: 'Yulia builds your Confidential Information Memorandum \u2014 the document that makes buyers take your business seriously. Then she identifies and scores qualified buyers for your specific deal.',
-    detail: 'Working with a broker? Invite them in. Yulia produces the CIM and buyer research \u2014 your broker focuses on relationships and negotiation. The deal moves faster for everyone.',
+    desc: 'Confidential Information Memorandum \u2014 the document that makes buyers take your business seriously. Qualified buyer list scored by strategic fit, financial capacity, and acquisition history.',
+    detail: 'Working with a broker? Invite them in. Yulia produces the CIM and buyer research \u2014 your broker focuses on relationships and negotiation.',
   },
   {
     num: 5,
-    title: 'Close with confidence',
-    price: 'From $299',
+    title: 'Deal management and close',
+    price: '$275',
     free: false,
-    desc: 'LOI comparison, due diligence management, working capital analysis, deal structuring, and closing coordination. Yulia keeps every party organized and every document in one place.',
+    desc: 'LOI comparison, due diligence management, working capital analysis, deal structuring, and closing coordination. Every party organized, every document in one place.',
   },
 ];
 
-const DEAL_SIZES = [
+const DEAL_EXAMPLES = [
   {
-    range: '$1.5M \u2013 $5M',
-    title: 'Established exit',
-    desc: 'You\u2019ve built a real business. Yulia produces institutional-quality valuations, CIMs, and buyer research \u2014 the same work product advisory firms charge $50K\u2013$100K to deliver.',
-    result: '\u201CValued at $2.6M\u2013$3.9M using live comps. Three PE firms actively consolidating in her industry. Full CIM in 47 minutes.\u201D',
+    deal: '$1.8M Pest Control \u2014 Phoenix, AZ',
+    desc: 'Owner-operated, 8 trucks, 11 years. Yulia identified $47K in add-backs the owner didn\u2019t know counted. Preliminary range: $620K\u2013$780K. Full valuation, CIM, and 4 qualified buyers delivered in one session.',
+    yulia: '$800',
+    traditional: '$15K\u2013$30K broker commission',
   },
   {
-    range: '$5M \u2013 $25M',
-    title: 'Mid-market sale',
-    desc: 'At this size, buyer sophistication increases. Yulia handles QoE prep, management presentations, and buyer scoring at the level PE firms expect.',
-    result: '\u201CFull valuation, CIM, and 12 scored buyers in one week. Closed at 15% above initial offers.\u201D',
+    deal: '$4.5M Commercial Cleaning \u2014 Atlanta, GA',
+    desc: '$780K adjusted EBITDA. Three PE firms actively consolidating in the region identified. CIM produced in under an hour. Closed at 12% above initial offers.',
+    yulia: '$2,400',
+    traditional: '$90K\u2013$180K advisory + success fee',
   },
   {
-    range: '$25M+',
-    title: 'Strategic exit',
-    desc: 'PE roll-up, strategic sale, or management buyout \u2014 Yulia handles the analytical heavy lifting while your deal team focuses on execution.',
-    result: '\u201CTheir team of 3 operated like a team of 12. Six platform acquisitions closed in 14 months.\u201D',
+    deal: '$850K Landscaping \u2014 Portland, OR',
+    desc: 'First-time seller. Never heard of SDE. Yulia found $31K in add-backs, produced institutional-quality materials for a deal most advisors wouldn\u2019t touch.',
+    yulia: '$525',
+    traditional: 'Most advisors decline sub-$1M deals',
   },
 ];
+
+const INSIGHT = {
+  title: 'The add-back problem',
+  body: 'The average business owner misses $30K\u2013$80K in legitimate add-backs during their first valuation attempt. That\u2019s not a rounding error \u2014 at a 3x multiple, that\u2019s $90K\u2013$240K left on the table. Yulia\u2019s methodology checks against 47 common add-back categories before producing a range.',
+};
 
 const BROKER_BENEFITS = [
   { bold: 'Invite your broker', rest: ' into the deal room \u2014 they see everything, collaborate in real time' },
-  { bold: 'CIMs in an hour', rest: ' \u2014 your broker reviews and refines instead of building from scratch' },
+  { bold: 'CIMs in under an hour', rest: ' \u2014 your broker reviews and refines instead of building from scratch' },
   { bold: 'Attorneys and CPAs join free', rest: ' \u2014 no extra seats, no extra cost' },
-  { bold: "Your broker\u2019s expertise + Yulia\u2019s speed", rest: ' = deals that close faster at better terms' },
+  { bold: "Your broker\u2019s expertise + Yulia\u2019s intelligence", rest: ' = deals that close faster at better terms' },
 ];
 
 const FAQS = [
   {
-    q: 'Can I trust an AI valuation?',
-    a: 'Yulia uses the same methodologies as human advisors \u2014 comparable transactions, industry multiples, discounted cash flow. Every calculation is shown, every comp is sourced. Many sellers bring Yulia\u2019s report to their CPA for review. The math speaks for itself.',
+    q: 'Can I trust this valuation?',
+    a: 'Yulia uses the same methodologies as human advisors \u2014 comparable transactions, industry multiples, discounted cash flow. Every calculation is shown, every comp is sourced. The methodology is the same. The speed is different.',
   },
   {
-    q: 'Will buyers take an AI-generated CIM seriously?',
-    a: 'The CIM format, depth, and quality match what top advisory firms produce. Buyers care about the information, not who typed it. Many of our CIMs are reviewed and co-branded by the seller\u2019s broker before going to market.',
+    q: 'Will buyers take this CIM seriously?',
+    a: 'The format, depth, and quality match what top advisory firms produce. Buyers evaluate the information, not who assembled it. Many CIMs are reviewed and co-branded by the seller\u2019s broker before going to market.',
   },
   {
     q: 'Do I still need a broker?',
-    a: "That\u2019s your call. Some sellers use Yulia end-to-end. Others use Yulia for the analytical work and their broker for relationships and negotiation. Many brokers use Yulia themselves \u2014 she produces their work product faster so they can focus on what humans do best: building trust and closing deals.",
+    a: 'That\u2019s your call. Some sellers use Yulia end-to-end. Others use Yulia for the analytical work and their broker for relationships and negotiation. Many brokers use Yulia themselves \u2014 she produces their work product faster so they can focus on what humans do best.',
   },
   {
     q: 'What if my business is complicated?',
-    a: 'Yulia covers 80+ industry verticals with current market data. Whether you\u2019re a single-location restaurant or a multi-state healthcare practice, she adapts \u2014 different metrics, different comps, different buyer profiles. If something is truly unusual, she\u2019ll tell you.',
+    a: 'Yulia covers 80+ industry verticals with current market data. Whether you\u2019re a single-location restaurant or a multi-state healthcare practice, she adapts \u2014 different metrics, different comps, different buyer profiles. If something is truly outside her range, she\u2019ll tell you.',
   },
 ];
 
@@ -103,18 +108,17 @@ export default function Sell() {
       <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-14">
         <div className="animate-fadeInUp flex items-center gap-3 mb-8 text-[13px] uppercase tracking-[.18em] text-[#D4714E] font-semibold">
           <span className="w-9 h-0.5 bg-[#D4714E]" />
-          Sell Your Business
+          Exit Strategy
         </div>
-        <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(44px,6vw,76px)] font-extrabold leading-[1.05] tracking-tight max-w-[14ch] mb-10 m-0">
-          You built it. Now <em className="italic text-[#D4714E]">own the exit.</em>
+        <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(44px,6vw,76px)] font-extrabold leading-[1.05] tracking-tight max-w-[16ch] mb-10 m-0">
+          Know your number <em className="italic text-[#D4714E]">before anyone else does.</em>
         </h1>
         <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-16 m-0">
           Most owners sell for less than they should &mdash; not because the business isn&apos;t
-          worth it, but because they didn&apos;t have the right information at the right time.
-          Yulia changes that.
+          worth it, but because they didn&apos;t have the right intelligence at the right time.
         </p>
         <div className="animate-fadeInUp stagger-3 flex flex-col md:flex-row gap-3 max-md:w-full">
-          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start selling &mdash; free &rarr;</Button>
+          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Get your number &mdash; free &rarr;</Button>
           <Button variant="secondary" href="/how-it-works">See how it works</Button>
         </div>
       </section>
@@ -122,7 +126,7 @@ export default function Sell() {
       {/* ═══ JOURNEY TIMELINE ═══ */}
       <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
         <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">
-          Your selling journey
+          Your exit journey
         </p>
         <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-12 m-0">
           From &ldquo;what&apos;s it worth?&rdquo; to <em className="italic text-[#D4714E]">wire transfer.</em>
@@ -132,29 +136,44 @@ export default function Sell() {
 
         <div className="text-center mt-12">
           <p className="text-[15px] text-[#7A766E] mb-5 m-0">
-            Typical sell-side journey: <strong className="text-[#1A1A18]">From $1,799</strong> &middot;
+            Complete exit journey: <strong className="text-[#1A1A18]">from $800</strong> &middot;
             Traditional advisory: <span className="line-through">$50,000&ndash;$200,000</span>
           </p>
           <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start your journey &mdash; free &rarr;</Button>
         </div>
       </section>
 
-      {/* ═══ BUILT FOR YOUR DEAL ═══ */}
+      {/* ═══ DEAL EXAMPLES ═══ */}
       <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
-          Built for <em className="italic text-[#D4714E]">your</em> deal.
+          Real deals. <em className="italic text-[#D4714E]">Real numbers.</em>
         </h2>
         <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
-          {DEAL_SIZES.map(d => (
-            <Card key={d.range} padding="px-7 py-9">
-              <p className="font-sans text-[28px] font-black text-[#D4714E] mb-3 m-0">{d.range}</p>
-              <h3 className="text-base font-bold text-[#1A1A18] mb-2 m-0">{d.title}</h3>
-              <p className="text-sm text-[#7A766E] leading-[1.55] mb-3 m-0">{d.desc}</p>
-              <div className="py-3 px-4 bg-[#F3F0EA] rounded-[10px]">
-                <p className="text-[13px] text-[#4A4843] italic leading-[1.45] m-0">{d.result}</p>
+          {DEAL_EXAMPLES.map(d => (
+            <Card key={d.deal} padding="px-7 py-9">
+              <p className="text-[11px] uppercase tracking-[.12em] text-[#D4714E] font-semibold mb-3 m-0">{d.deal}</p>
+              <p className="text-sm text-[#7A766E] leading-[1.55] mb-4 m-0">{d.desc}</p>
+              <div className="flex justify-between items-center pt-3 border-t border-[#E0DCD4]">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Yulia</p>
+                  <p className="text-[15px] font-bold text-[#D4714E] m-0">{d.yulia}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Traditional</p>
+                  <p className="text-[13px] text-[#A9A49C] line-through m-0">{d.traditional}</p>
+                </div>
               </div>
             </Card>
           ))}
+        </div>
+      </section>
+
+      {/* ═══ INSIGHT BOX ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <div className="bg-gradient-to-br from-[#FFF8F4] to-[#FFF0EB] rounded-4xl p-12 max-md:p-7" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05), inset 0 0 0 1px rgba(212,113,78,.06)' }}>
+          <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Methodology insight</p>
+          <h3 className="font-sans text-xl font-bold text-[#1A1A18] mb-3 m-0">{INSIGHT.title}</h3>
+          <p className="text-[15px] text-[#4A4843] leading-[1.65] m-0">{INSIGHT.body}</p>
         </div>
       </section>
 
@@ -189,7 +208,7 @@ export default function Sell() {
       {/* ═══ CHAT INPUT ═══ */}
       <section id="chat-input" className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-extrabold tracking-tight mb-8 m-0 text-center">
-          Ready to start?
+          Ready to know your number?
         </h3>
         <div className="card-outer max-w-[640px] mx-auto p-3">
           <div className="card-inner p-4">

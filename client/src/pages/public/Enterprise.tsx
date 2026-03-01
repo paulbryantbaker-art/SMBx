@@ -4,36 +4,67 @@ import PublicChatInput from '../../components/chat/PublicChatInput';
 
 /* ─── Data ─── */
 
+const FEATURES = [
+  {
+    title: 'Multi-Deal Pipeline',
+    desc: 'Screen, value, and manage diligence across dozens of targets simultaneously. Every deal scored, every document organized, every deadline tracked.',
+    points: [
+      'Pipeline-wide target scoring and prioritization',
+      'Parallel DD workflows across multiple targets',
+      'Portfolio analytics and roll-up modeling',
+      'Consistent methodology across every deal',
+    ],
+  },
+  {
+    title: 'Team Collaboration',
+    desc: 'Every team member gets their own access. Work product stays consistent. Client-facing materials match your standards. One deal room for every party.',
+    points: [
+      'Role-based access for analysts, partners, and clients',
+      'Shared deal rooms with real-time collaboration',
+      'Service providers join free \u2014 no per-seat fees',
+      'Consistent deliverable quality across the team',
+    ],
+  },
+  {
+    title: 'Market Intelligence Engine',
+    desc: 'Real-time market data across 80+ verticals. Comparable transactions, industry multiples, buyer activity, and regulatory changes \u2014 updated continuously.',
+    points: [
+      '80+ industry verticals with current multiples',
+      'Comparable transaction database',
+      'Regional market dynamics and adjustments',
+      'Live lending environment and PE activity data',
+    ],
+  },
+  {
+    title: 'Custom Deliverables',
+    desc: 'Institutional-quality work product in minutes. Valuations, CIMs, pitch decks, DD checklists, financial models, and term sheet analysis \u2014 all from conversation.',
+    points: [
+      'Full valuation reports in minutes, not weeks',
+      'CIMs produced in under an hour',
+      'Financial models with scenario analysis',
+      'Client-ready formatting and branding',
+    ],
+  },
+];
+
 const USE_CASES = [
   {
     title: 'Brokers & Intermediaries',
-    points: [
-      'Produce CIMs in an hour, not three weeks',
-      'Screen and score buyer lists in minutes',
-      'Manage 3\u00D7 the deal flow with the same team',
-      'Every deliverable is institutional quality \u2014 your brand, Yulia\u2019s speed',
-    ],
-    result: 'A broker producing 2 more CIMs per month adds $150K+ in annual revenue.',
-  },
-  {
-    title: 'Attorneys & CPAs',
-    points: [
-      'Review deal financials instantly',
-      'Flag risks and issues before they become problems',
-      'Collaborate on documents in real time with every party',
-      'Join any client\u2019s deal room free \u2014 no seat fees, no subscriptions',
-    ],
-    result: 'Our M&A practice handles twice the deal volume with the same team.',
+    stat: '3\u00D7',
+    statDesc: 'more deals managed with the same team',
+    desc: 'Produce CIMs in under an hour, not three weeks. Screen and score buyer lists in minutes. Manage 3\u00D7 the deal flow without hiring analysts.',
   },
   {
     title: 'PE Firms & Search Funds',
-    points: [
-      'Screen hundreds of targets against your thesis overnight',
-      'Full valuations on any target in minutes',
-      'Structured DD workflows across your entire portfolio',
-      'Integration plans delivered within 48 hours of closing',
-    ],
-    result: 'Six platform acquisitions in 14 months. Yulia was on every deal.',
+    stat: '47 min',
+    statDesc: 'average CIM production time',
+    desc: 'Screen hundreds of targets against your thesis overnight. Full valuations on any target in minutes. Integration plans delivered within 48 hours of closing.',
+  },
+  {
+    title: 'Attorneys & CPAs',
+    stat: 'Free',
+    statDesc: 'for service providers, always',
+    desc: 'Join any client\u2019s deal room at no cost. Review financials instantly. Flag risks before they become problems. Collaborate on documents with every party in real time.',
   },
 ];
 
@@ -49,13 +80,13 @@ export default function Enterprise() {
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
-      <section className="max-w-site mx-auto px-10 pt-8 pb-12 max-md:px-5 max-md:pt-4 max-md:pb-8">
+      <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-14">
         <div className="animate-fadeInUp flex items-center gap-3 mb-8 text-[13px] uppercase tracking-[.18em] text-[#D4714E] font-semibold">
           <span className="w-9 h-0.5 bg-[#D4714E]" />
-          For Professionals
+          For Teams
         </div>
-        <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(44px,6vw,76px)] font-extrabold leading-[1.05] tracking-tight max-w-[14ch] mb-6 m-0">
-          Your expertise. Yulia&apos;s <em className="italic text-[#D4714E]">horsepower.</em>
+        <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(44px,6vw,76px)] font-extrabold leading-[1.05] tracking-tight max-w-[16ch] mb-10 m-0">
+          Deal intelligence at <em className="italic text-[#D4714E]">institutional scale.</em>
         </h1>
         <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-10 m-0">
           You have 15 active listings. Each needs a valuation, CIM, buyer outreach, DD management.
@@ -64,45 +95,45 @@ export default function Enterprise() {
         </p>
       </section>
 
-      {/* ═══ THE PROBLEM ═══ */}
-      <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
-        <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-4xl py-12 px-14 max-md:py-8 max-md:px-6">
-          <h3 className="font-sans text-[28px] font-black tracking-[-0.02em] leading-[1.15] mb-4 m-0">
-            The math doesn&apos;t work.
-          </h3>
-          <p className="text-[15px] text-[#7A766E] leading-[1.6] max-w-[700px] m-0">
-            A typical business broker manages 8&ndash;12 active listings. Each requires 40&ndash;60
-            hours of analytical work &mdash; valuations, CIMs, buyer research, DD management.
-            That&apos;s 500+ hours of work product per year, per broker. You&apos;re either hiring
-            analysts you can&apos;t afford, or your deal quality suffers.
-          </p>
-        </div>
-      </section>
-
-      {/* ═══ USE CASES ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <div className="grid grid-cols-3 gap-5 max-md:grid-cols-1">
-          {USE_CASES.map(u => (
-            <Card key={u.title} padding="px-8 py-10">
-              <h3 className="text-lg font-bold text-[#1A1A18] mb-4 m-0">{u.title}</h3>
-              <ul className="space-y-2 list-none p-0 m-0 mb-6">
-                {u.points.map(p => (
-                  <li key={p} className="flex gap-2.5 items-start text-sm text-[#7A766E] leading-[1.55]">
+      {/* ═══ ENTERPRISE FEATURES ═══ */}
+      <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
+        <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+          {FEATURES.map(f => (
+            <Card key={f.title} padding="px-8 py-10">
+              <h3 className="text-lg font-bold text-[#1A1A18] mb-2 m-0">{f.title}</h3>
+              <p className="text-sm text-[#7A766E] leading-[1.55] mb-5 m-0">{f.desc}</p>
+              <ul className="space-y-2 list-none p-0 m-0">
+                {f.points.map(p => (
+                  <li key={p} className="flex gap-2.5 items-start text-sm text-[#4A4843] leading-[1.55]">
                     <span className="text-[#D4714E] shrink-0 mt-px">&#10003;</span>
                     {p}
                   </li>
                 ))}
               </ul>
-              <div className="py-3 px-4 bg-[#F3F0EA] rounded-[10px]">
-                <p className="text-[13px] text-[#4A4843] italic leading-[1.45] m-0">&ldquo;{u.result}&rdquo;</p>
-              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ USE CASES ═══ */}
+      <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
+        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
+          Built for <em className="italic text-[#D4714E]">deal professionals.</em>
+        </h2>
+        <div className="grid grid-cols-3 gap-5 max-md:grid-cols-1">
+          {USE_CASES.map(u => (
+            <Card key={u.title} padding="px-8 py-10">
+              <p className="font-sans text-[36px] font-black text-[#D4714E] leading-none mb-1 m-0">{u.stat}</p>
+              <p className="text-xs text-[#7A766E] mb-5 m-0">{u.statDesc}</p>
+              <h3 className="text-base font-bold text-[#1A1A18] mb-2 m-0">{u.title}</h3>
+              <p className="text-sm text-[#7A766E] leading-[1.55] m-0">{u.desc}</p>
             </Card>
           ))}
         </div>
       </section>
 
       {/* ═══ ROI ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
+      <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
         <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-12 m-0">
           Yulia pays for herself on <em className="italic text-[#D4714E]">deal one.</em>
         </h2>
@@ -121,31 +152,36 @@ export default function Enterprise() {
         </div>
       </section>
 
-      {/* ═══ HOW IT WORKS FOR TEAMS ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
-        <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
-          Your team. Yulia&apos;s leverage.
-        </h3>
-        <p className="text-[17px] text-[#7A766E] leading-[1.6] max-w-[700px] m-0">
-          Every team member gets their own access. Work product stays consistent. Client-facing
-          materials match your brand. Yulia handles the analytical heavy lifting &mdash; your team
-          handles relationships, negotiation, and closing.
-        </p>
+      {/* ═══ THE PROBLEM ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-4xl py-12 px-14 max-md:py-8 max-md:px-6">
+          <h3 className="font-sans text-[28px] font-black tracking-[-0.02em] leading-[1.15] mb-4 m-0">
+            The math doesn&apos;t work <em className="italic text-[#D4714E]">without Yulia.</em>
+          </h3>
+          <p className="text-[15px] text-[#7A766E] leading-[1.6] max-w-[700px] m-0">
+            A typical business broker manages 8&ndash;12 active listings. Each requires 40&ndash;60
+            hours of analytical work &mdash; valuations, CIMs, buyer research, DD management.
+            That&apos;s 500+ hours of work product per year, per broker. You&apos;re either hiring
+            analysts you can&apos;t afford, or your deal quality suffers. Yulia changes the equation.
+          </p>
+        </div>
       </section>
 
       {/* ═══ CHAT INPUT ═══ */}
-      <section id="chat-input" className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section id="chat-input" className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-8 m-0 text-center">
           See what Yulia can do for your practice.
         </h3>
-        <div className="max-w-[640px] mx-auto">
-          <PublicChatInput sourcePage="/enterprise" />
+        <div className="card-outer max-w-[640px] mx-auto p-3">
+          <div className="card-inner p-4">
+            <PublicChatInput sourcePage="/enterprise" />
+          </div>
         </div>
       </section>
 
       {/* ═══ FINAL CTA ═══ */}
-      <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
-        <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-4xl px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-4xl px-16 py-24 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
           <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
           <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
             Your expertise is the bottleneck. It doesn&apos;t have to be.

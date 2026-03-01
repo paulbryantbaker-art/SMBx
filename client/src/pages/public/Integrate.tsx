@@ -12,13 +12,13 @@ const TIMELINE_STEPS = [
     title: 'Day 0: Secure the business',
     price: 'Free',
     free: true,
-    desc: 'Change passwords. Lock accounts. Notify key people. Transfer critical access. Yulia\u2019s Day Zero checklist makes sure nothing slips.',
-    detail: 'You\u2019d be surprised how many acquisitions stumble because someone forgot to change the bank login on day one. Yulia\u2019s checklist covers every critical item.',
+    desc: 'Change passwords. Lock accounts. Notify key people. Transfer critical access. Yulia\u2019s Day Zero checklist makes sure nothing slips through the cracks.',
+    detail: 'You\u2019d be surprised how many acquisitions stumble because someone forgot to change the bank login on day one.',
   },
   {
     num: 2,
     title: 'Days 1\u201330: Stabilize',
-    price: 'From $299',
+    price: '$275',
     free: false,
     desc: 'Employee communication plan. Customer retention strategy. Vendor renegotiation. Quick wins that build momentum and trust with your new team.',
     detail: 'The first 30 days set the tone. Yulia helps you communicate clearly, retain key people, and build credibility before making changes.',
@@ -26,41 +26,46 @@ const TIMELINE_STEPS = [
   {
     num: 3,
     title: 'Days 31\u201360: Assess',
-    price: 'From $299',
+    price: '$275',
     free: false,
-    desc: 'SWOT analysis. Operational benchmarking. Where are the cost savings? Where are the revenue opportunities? What did due diligence miss?',
+    desc: 'SWOT analysis. Operational benchmarking against industry standards. Where are the cost savings? Where are the revenue opportunities? What did due diligence miss?',
   },
   {
     num: 4,
     title: 'Days 61\u2013100: Optimize',
-    price: 'From $299',
+    price: '$275',
     free: false,
-    desc: 'Full integration roadmap with KPIs, milestones, and accountability. The plan that turns your acquisition into a compounding asset.',
+    desc: 'Full integration roadmap with KPIs, milestones, and accountability. The plan that turns your acquisition from a transaction into a compounding asset.',
   },
 ];
 
-const DEAL_SIZES = [
+const DEAL_EXAMPLES = [
   {
-    range: 'First Acquisition',
-    title: 'New owner',
-    desc: 'Just bought your first business? The learning curve is steep. Yulia flattens it \u2014 Day Zero through Day 100, every step mapped.',
-    result: '\u201CDay Zero checklist caught 3 critical items the closing attorney missed. Would have cost me $40K if we hadn\u2019t caught them.\u201D',
+    deal: 'First Acquisition \u2014 $1.4M HVAC',
+    desc: 'Solo buyer, first deal. Day Zero checklist caught 3 critical items the closing attorney missed. Employee retention plan delivered before day one. Zero key-person departures in 90 days.',
+    yulia: '$825',
+    traditional: '$50K\u2013$100K integration consulting',
   },
   {
-    range: 'Add-on / Tuck-in',
-    title: 'Platform builder',
-    desc: 'Integrating into an existing platform? Yulia maps the operational overlaps, identifies synergies, and builds the integration timeline.',
-    result: '\u201CIdentified $340K in annual cost synergies in the first assessment. Integration plan delivered to the team in 48 hours.\u201D',
+    deal: 'PE Add-on \u2014 $5.2M Dental Group',
+    desc: 'Tuck-in to existing platform. Yulia mapped operational overlaps, identified $340K in annual cost synergies, and delivered the integration timeline to the team in 48 hours.',
+    yulia: '$1,100',
+    traditional: '$75K\u2013$150K consulting engagement',
   },
   {
-    range: 'Portfolio Company',
-    title: 'PE-backed operations',
-    desc: 'PE-backed operations need a 100-day value creation plan your LPs expect. Yulia builds it with the rigor your board demands.',
-    result: '\u201C100-day plan delivered to the board 48 hours after closing. Every KPI tracked, every milestone assigned.\u201D',
+    deal: 'Portfolio Company \u2014 $18M Healthcare Services',
+    desc: 'PE-backed operations. 100-day value creation plan delivered to the board 48 hours after closing. Every KPI tracked, every milestone assigned, every risk flagged.',
+    yulia: '$825',
+    traditional: '$100K+ management consulting',
   },
 ];
 
-const BROKER_BENEFITS = [
+const INSIGHT = {
+  title: 'The 100-day window',
+  body: '70\u201380% of acquisition value is either created or destroyed in the first 100 days. Most buyers plan the acquisition meticulously and then wing the integration. The businesses that compound are the ones where the integration plan was ready before the wire hit.',
+};
+
+const TEAM_BENEFITS = [
   { bold: 'Day Zero checklist', rest: ' \u2014 nothing critical slips through the cracks' },
   { bold: 'Employee communication templates', rest: ' \u2014 say the right things on day one' },
   { bold: 'Synergy identification', rest: ' \u2014 cost savings and revenue opportunities surfaced in days, not months' },
@@ -74,7 +79,7 @@ const FAQS = [
   },
   {
     q: 'What if I already closed?',
-    a: 'Start now. Whether you\u2019re on day 1 or day 60, Yulia assesses where you are and builds a plan from there. Better late than never \u2014 but the sooner, the more value you protect.',
+    a: 'Start now. Whether you\u2019re on day 1 or day 60, Yulia assesses where you are and builds a plan from there. The sooner you start, the more value you protect.',
   },
   {
     q: 'Do I need a big team for this?',
@@ -92,26 +97,26 @@ export default function Integrate() {
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
-      <section className="max-w-site mx-auto px-10 pt-8 pb-12 max-md:px-5 max-md:pt-4 max-md:pb-8">
+      <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-14">
         <div className="animate-fadeInUp flex items-center gap-3 mb-8 text-[13px] uppercase tracking-[.18em] text-[#D4714E] font-semibold">
           <span className="w-9 h-0.5 bg-[#D4714E]" />
           Post-Acquisition
         </div>
-        <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(44px,6vw,76px)] font-extrabold leading-[1.05] tracking-tight max-w-[14ch] mb-6 m-0">
-          You bought it. Now <em className="italic text-[#D4714E]">make it work.</em>
+        <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(44px,6vw,76px)] font-extrabold leading-[1.05] tracking-tight max-w-[16ch] mb-10 m-0">
+          You closed the deal. Now <em className="italic text-[#D4714E]">protect the value.</em>
         </h1>
-        <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-10 m-0">
+        <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-16 m-0">
           The first 100 days determine whether your acquisition creates value or destroys it.
-          Most buyers wing it. You won&apos;t.
+          Most buyers plan the deal meticulously and then wing the integration. You won&apos;t.
         </p>
         <div className="animate-fadeInUp stagger-3 flex flex-col md:flex-row gap-3 max-md:w-full">
-          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start planning &mdash; free &rarr;</Button>
+          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Plan your first 100 days &rarr;</Button>
           <Button variant="secondary" href="/how-it-works">See how it works</Button>
         </div>
       </section>
 
       {/* ═══ JOURNEY TIMELINE ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
+      <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
         <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">
           Your first 100 days
         </p>
@@ -123,38 +128,53 @@ export default function Integrate() {
 
         <div className="text-center mt-12">
           <p className="text-[15px] text-[#7A766E] mb-5 m-0">
-            Typical integration journey: <strong className="text-[#1A1A18]">From $899</strong> &middot;
+            Complete integration journey: <strong className="text-[#1A1A18]">from $825</strong> &middot;
             Traditional consulting: <span className="line-through">$50,000&ndash;$150,000</span>
           </p>
           <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start your plan &mdash; free &rarr;</Button>
         </div>
       </section>
 
-      {/* ═══ BUILT FOR YOUR DEAL ═══ */}
-      <section className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      {/* ═══ DEAL EXAMPLES ═══ */}
+      <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
-          Built for <em className="italic text-[#D4714E]">your</em> deal.
+          Real integrations. <em className="italic text-[#D4714E]">Real outcomes.</em>
         </h2>
         <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
-          {DEAL_SIZES.map(d => (
-            <Card key={d.range} padding="px-7 py-9">
-              <p className="font-sans text-[28px] font-black text-[#D4714E] mb-3 m-0">{d.range}</p>
-              <h3 className="text-base font-bold text-[#1A1A18] mb-2 m-0">{d.title}</h3>
-              <p className="text-sm text-[#7A766E] leading-[1.55] mb-3 m-0">{d.desc}</p>
-              <div className="py-3 px-4 bg-[#F3F0EA] rounded-[10px]">
-                <p className="text-[13px] text-[#4A4843] italic leading-[1.45] m-0">{d.result}</p>
+          {DEAL_EXAMPLES.map(d => (
+            <Card key={d.deal} padding="px-7 py-9">
+              <p className="text-[11px] uppercase tracking-[.12em] text-[#D4714E] font-semibold mb-3 m-0">{d.deal}</p>
+              <p className="text-sm text-[#7A766E] leading-[1.55] mb-4 m-0">{d.desc}</p>
+              <div className="flex justify-between items-center pt-3 border-t border-[#E0DCD4]">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Yulia</p>
+                  <p className="text-[15px] font-bold text-[#D4714E] m-0">{d.yulia}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Traditional</p>
+                  <p className="text-[13px] text-[#A9A49C] line-through m-0">{d.traditional}</p>
+                </div>
               </div>
             </Card>
           ))}
         </div>
       </section>
 
-      {/* ═══ BROKER CALLOUT ═══ */}
-      <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
+      {/* ═══ INSIGHT BOX ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <div className="bg-gradient-to-br from-[#FFF8F4] to-[#FFF0EB] rounded-4xl p-12 max-md:p-7" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05), inset 0 0 0 1px rgba(212,113,78,.06)' }}>
+          <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Methodology insight</p>
+          <h3 className="font-sans text-xl font-bold text-[#1A1A18] mb-3 m-0">{INSIGHT.title}</h3>
+          <p className="text-[15px] text-[#4A4843] leading-[1.65] m-0">{INSIGHT.body}</p>
+        </div>
+      </section>
+
+      {/* ═══ TEAM CALLOUT ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
         <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-4xl py-12 px-14 grid grid-cols-2 gap-12 items-center max-md:grid-cols-1 max-md:py-8 max-md:px-6 max-md:gap-8">
           <div>
             <h3 className="font-sans text-[28px] font-black tracking-[-0.02em] leading-[1.15] mb-4 m-0">
-              Working with an <em className="italic text-[#D4714E]">integration team?</em> Yulia accelerates them.
+              Have a <em className="italic text-[#D4714E]">team?</em> Yulia accelerates them.
             </h3>
             <p className="text-[15px] text-[#7A766E] leading-[1.6] m-0">
               Whether you have a full ops team or you&apos;re doing this solo, Yulia produces the
@@ -163,7 +183,7 @@ export default function Integrate() {
             </p>
           </div>
           <div className="flex flex-col gap-4">
-            {BROKER_BENEFITS.map(b => (
+            {TEAM_BENEFITS.map(b => (
               <div key={b.bold} className="flex gap-3 items-start">
                 <span className="w-6 h-6 rounded-full bg-[#FFF0EB] text-[#D4714E] flex items-center justify-center text-xs font-bold shrink-0 mt-px">
                   &#10003;
@@ -178,7 +198,7 @@ export default function Integrate() {
       </section>
 
       {/* ═══ CHAT INPUT ═══ */}
-      <section id="chat-input" className="max-w-site mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section id="chat-input" className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-extrabold tracking-tight mb-8 m-0 text-center">
           Ready to plan your first 100 days?
         </h3>
@@ -190,7 +210,7 @@ export default function Integrate() {
       </section>
 
       {/* ═══ FAQ ═══ */}
-      <section className="max-w-[800px] mx-auto px-10 py-20 max-md:px-5 max-md:py-12">
+      <section className="max-w-[800px] mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-10 m-0 text-center">
           Questions new owners ask.
         </h2>
@@ -205,8 +225,8 @@ export default function Integrate() {
       </section>
 
       {/* ═══ FINAL CTA ═══ */}
-      <section className="max-w-site mx-auto px-10 pb-20 max-md:px-5 max-md:pb-12">
-        <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-4xl px-16 py-20 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-4xl px-16 py-24 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
           <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
           <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
             Your first 100 days, done right.
@@ -219,6 +239,13 @@ export default function Integrate() {
           </button>
         </div>
       </section>
+
+      {/* ═══ NUDGE ═══ */}
+      <div className="text-center pb-10 max-md:pb-6">
+        <p className="journey-nudge text-[22px] text-[#D4714E] m-0 max-md:text-lg">
+          the deal is done &mdash; now the real work begins
+        </p>
+      </div>
     </PublicLayout>
   );
 }

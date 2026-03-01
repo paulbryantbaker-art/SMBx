@@ -9,64 +9,69 @@ import PublicChatInput from '../../components/chat/PublicChatInput';
 const TIMELINE_STEPS = [
   {
     num: 1,
-    title: 'Define your thesis',
+    title: 'Define your acquisition thesis',
     price: 'Free',
     free: true,
-    desc: 'What kind of business? What size? What geography? What returns? Yulia builds your acquisition criteria and search strategy.',
-    detail: '\u201CI\u2019m looking for B2B SaaS companies, $1-5M ARR, 70%+ gross margins, in healthcare or fintech.\u201D \u2014 That\u2019s enough to start screening.',
+    desc: 'What kind of business? What size? What geography? What returns? Yulia builds your acquisition criteria and search strategy from a single conversation.',
+    detail: '\u201CI\u2019m looking for B2B services companies, $1\u20135M revenue, 70%+ gross margins, in the Southeast.\u201D \u2014 That\u2019s enough to start screening.',
   },
   {
     num: 2,
     title: 'Screen and score targets',
-    price: 'Free',
-    free: true,
-    desc: 'Yulia analyzes market data to identify businesses matching your thesis. Each target scored on financial fit, strategic fit, and acquisition feasibility.',
-    detail: '47 targets scored overnight. Top 8 flagged for deep dive. You spend time on winners, not searching.',
+    price: '$150',
+    free: false,
+    desc: 'Every target scored on 7 factors: financial fit, strategic alignment, market position, growth trajectory, operational risk, acquisition feasibility, and integration complexity.',
+    detail: '47 targets scored against your criteria. Top 8 flagged for deep dive. You spend time on winners, not searching.',
   },
   {
     num: 3,
     title: 'Value your targets',
-    price: 'From $199',
+    price: '$350',
     free: false,
-    desc: "Full valuation on any target \u2014 comps, multiples, DCF. Know what it\u2019s worth before your first conversation with the seller.",
+    desc: 'Full valuation on any target \u2014 comps, multiples, DCF. Know what it\u2019s worth before your first conversation with the seller.',
   },
   {
     num: 4,
     title: 'Run diligence',
-    price: 'From $299',
+    price: '$275',
     free: false,
-    desc: 'Structured DD workflow \u2014 financial, operational, legal, commercial. Risks surfaced early. Documents organized. Nothing falls through.',
+    desc: 'Structured DD workflow \u2014 financial, operational, legal, commercial. Risks surfaced early. Documents organized. Nothing falls through the cracks.',
     detail: 'Most deals die in diligence because something gets missed. Yulia tracks every item, flags every gap, and keeps every party on schedule.',
   },
   {
     num: 5,
     title: 'Structure and close',
-    price: 'From $299',
+    price: '$275',
     free: false,
     desc: 'Offer modeling, scenario analysis, deal terms, LOI drafting, closing coordination. Every decision supported with data.',
   },
 ];
 
-const DEAL_SIZES = [
+const DEAL_EXAMPLES = [
   {
-    range: '$1.5M \u2013 $5M',
-    title: 'Independent buyer',
-    desc: 'First acquisition or adding to a portfolio. Yulia scores targets, models returns, checks SBA bankability, and manages diligence end to end.',
-    result: '\u201CScored 47 deals overnight against my criteria. In LOI on the best one in 3 weeks.\u201D',
+    deal: '$2.1M HVAC Company \u2014 Dallas, TX',
+    desc: 'First-time buyer. Yulia scored 23 targets against the thesis, produced full valuations on 3 finalists, and managed the DD workflow. LOI signed in 3 weeks.',
+    yulia: '$1,050',
+    traditional: '$40K\u2013$75K advisory retainer',
   },
   {
-    range: '$5M \u2013 $25M',
-    title: 'Search fund / PE add-on',
-    desc: 'Screen hundreds of targets against your thesis. Move fast on the right ones. Full valuation and DD workflow on every finalist.',
-    result: '\u201CFull valuation and DD workflow on 3 finalists. LOI signed in 3 weeks.\u201D',
+    deal: '$6.8M Dental Practice Group \u2014 Chicago, IL',
+    desc: 'PE add-on. Yulia screened 140+ practices, identified 12 strategic fits, and ran parallel DD on 4 targets. Two acquisitions closed in the same quarter.',
+    yulia: '$3,200',
+    traditional: '$120K+ advisory + success fee',
   },
   {
-    range: '$25M+',
-    title: 'Platform / strategic',
-    desc: 'Roll-up modeling, platform builds, portfolio analytics. Your deal team of 3 operates like 12.',
-    result: '\u201CSix platform acquisitions closed in 14 months. Yulia handled the analytical heavy lifting on every one.\u201D',
+    deal: '$950K E-Commerce Brand \u2014 Remote',
+    desc: 'Independent buyer, SBA-backed. Yulia verified financials, modeled SBA bankability, and produced a full DD package. Closed at asking with seller financing on the gap.',
+    yulia: '$625',
+    traditional: 'Most advisors decline sub-$1M buy-side',
   },
 ];
+
+const INSIGHT = {
+  title: 'The 7-factor scoring model',
+  body: 'Most buyers evaluate targets on financials alone. Yulia\u2019s 7-factor model scores every target on financial fit, strategic alignment, market position, growth trajectory, operational risk, acquisition feasibility, and integration complexity. This surfaces deals that look mediocre on paper but are exceptional in context \u2014 and flags deals that look great but carry hidden risk.',
+};
 
 const BROKER_BENEFITS = [
   { bold: 'Your broker gets Yulia\u2019s analysis', rest: ' on every target \u2014 instantly' },
@@ -103,17 +108,17 @@ export default function Buy() {
       <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-14">
         <div className="animate-fadeInUp flex items-center gap-3 mb-8 text-[13px] uppercase tracking-[.18em] text-[#D4714E] font-semibold">
           <span className="w-9 h-0.5 bg-[#D4714E]" />
-          Buy a Business
+          Acquisition Intelligence
         </div>
-        <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(44px,6vw,76px)] font-extrabold leading-[1.05] tracking-tight max-w-[14ch] mb-10 m-0">
-          Find the right deal. <em className="italic text-[#D4714E]">Own it.</em>
+        <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(44px,6vw,76px)] font-extrabold leading-[1.05] tracking-tight max-w-[16ch] mb-10 m-0">
+          Source smarter. Screen faster. <em className="italic text-[#D4714E]">Build conviction.</em>
         </h1>
         <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-16 m-0">
           Whether it&apos;s your first acquisition or your fifteenth &mdash; Yulia screens targets,
           models returns, manages diligence, and keeps every party on track.
         </p>
         <div className="animate-fadeInUp stagger-3 flex flex-col md:flex-row gap-3 max-md:w-full">
-          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start buying &mdash; free &rarr;</Button>
+          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start screening &mdash; free &rarr;</Button>
           <Button variant="secondary" href="/how-it-works">See how it works</Button>
         </div>
       </section>
@@ -121,7 +126,7 @@ export default function Buy() {
       {/* ═══ JOURNEY TIMELINE ═══ */}
       <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
         <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">
-          Your buying journey
+          Your acquisition journey
         </p>
         <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-12 m-0">
           From thesis to <em className="italic text-[#D4714E]">closing table.</em>
@@ -131,29 +136,44 @@ export default function Buy() {
 
         <div className="text-center mt-12">
           <p className="text-[15px] text-[#7A766E] mb-5 m-0">
-            Typical buy-side journey: <strong className="text-[#1A1A18]">From $1,399</strong> &middot;
+            Complete buy-side journey: <strong className="text-[#1A1A18]">from $1,050</strong> &middot;
             Traditional advisory: <span className="line-through">$75,000&ndash;$250,000</span>
           </p>
           <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start your journey &mdash; free &rarr;</Button>
         </div>
       </section>
 
-      {/* ═══ BUILT FOR YOUR DEAL ═══ */}
+      {/* ═══ DEAL EXAMPLES ═══ */}
       <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
-          Built for <em className="italic text-[#D4714E]">your</em> deal.
+          Real deals. <em className="italic text-[#D4714E]">Real numbers.</em>
         </h2>
         <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
-          {DEAL_SIZES.map(d => (
-            <Card key={d.range} padding="px-7 py-9">
-              <p className="font-sans text-[28px] font-black text-[#D4714E] mb-3 m-0">{d.range}</p>
-              <h3 className="text-base font-bold text-[#1A1A18] mb-2 m-0">{d.title}</h3>
-              <p className="text-sm text-[#7A766E] leading-[1.55] mb-3 m-0">{d.desc}</p>
-              <div className="py-3 px-4 bg-[#F3F0EA] rounded-[10px]">
-                <p className="text-[13px] text-[#4A4843] italic leading-[1.45] m-0">{d.result}</p>
+          {DEAL_EXAMPLES.map(d => (
+            <Card key={d.deal} padding="px-7 py-9">
+              <p className="text-[11px] uppercase tracking-[.12em] text-[#D4714E] font-semibold mb-3 m-0">{d.deal}</p>
+              <p className="text-sm text-[#7A766E] leading-[1.55] mb-4 m-0">{d.desc}</p>
+              <div className="flex justify-between items-center pt-3 border-t border-[#E0DCD4]">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Yulia</p>
+                  <p className="text-[15px] font-bold text-[#D4714E] m-0">{d.yulia}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Traditional</p>
+                  <p className="text-[13px] text-[#A9A49C] line-through m-0">{d.traditional}</p>
+                </div>
               </div>
             </Card>
           ))}
+        </div>
+      </section>
+
+      {/* ═══ INSIGHT BOX ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <div className="bg-gradient-to-br from-[#FFF8F4] to-[#FFF0EB] rounded-4xl p-12 max-md:p-7" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05), inset 0 0 0 1px rgba(212,113,78,.06)' }}>
+          <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Methodology insight</p>
+          <h3 className="font-sans text-xl font-bold text-[#1A1A18] mb-3 m-0">{INSIGHT.title}</h3>
+          <p className="text-[15px] text-[#4A4843] leading-[1.65] m-0">{INSIGHT.body}</p>
         </div>
       </section>
 
@@ -162,10 +182,10 @@ export default function Buy() {
         <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-4xl py-12 px-14 grid grid-cols-2 gap-12 items-center max-md:grid-cols-1 max-md:py-8 max-md:px-6 max-md:gap-8">
           <div>
             <h3 className="font-sans text-[28px] font-black tracking-[-0.02em] leading-[1.15] mb-4 m-0">
-              Working with a <em className="italic text-[#D4714E]">broker?</em> Yulia is their secret weapon.
+              Working with a <em className="italic text-[#D4714E]">broker?</em> Even better.
             </h3>
             <p className="text-[15px] text-[#7A766E] leading-[1.6] m-0">
-              Brokers bring you deals. Yulia arms them with instant valuations, buyer scoring,
+              Brokers bring you deals. Yulia arms them with instant valuations, target scoring,
               and DD workflows &mdash; so your broker spends time on the deals that matter, not the spreadsheets.
             </p>
           </div>
@@ -216,7 +236,7 @@ export default function Buy() {
         <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-4xl px-16 py-24 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
           <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
           <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
-            Your next acquisition starts with a conversation.
+            Your next acquisition starts with conviction.
           </h3>
           <button
             onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}

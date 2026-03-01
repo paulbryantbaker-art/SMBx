@@ -5,95 +5,79 @@ import Card from '../../components/public/Card';
 
 /* ─── Data ─── */
 
-type Journey = 'sell' | 'buy' | 'raise' | 'integrate';
-
-interface Stage {
-  name: string;
-  desc: string;
-  price: string;
-  free: boolean;
-}
-
-const JOURNEY_PACKAGES: Record<Journey, { stages: Stage[]; total: string; totalLabel: string }> = {
-  sell: {
-    total: 'From $1,799',
-    totalLabel: 'Complete Sell Journey',
-    stages: [
-      { name: 'S0\u2013S1: Financial Analysis', desc: 'Business classification, SDE/EBITDA, add-backs, preliminary range, deal roadmap', price: 'Free', free: true },
-      { name: 'S2: Valuation Report', desc: 'Multi-methodology valuation, comps, industry multiples, DCF', price: '$199', free: false },
-      { name: 'S3: CIM + Buyer Matching', desc: 'Confidential Information Memorandum, qualified buyer list, scoring', price: '$299', free: false },
-      { name: 'S4: Deal Management', desc: 'LOI comparison, DD management, working capital analysis', price: '$299', free: false },
-      { name: 'S5: Closing Support', desc: 'Deal structuring, closing coordination, document management', price: '$299', free: false },
-    ],
+const HOW_IT_WORKS = [
+  {
+    num: '01',
+    title: 'Talk to Yulia \u2014 free',
+    desc: 'Tell her about your deal. She\u2019ll classify your business, calculate your SDE or EBITDA, identify add-backs, and give you a preliminary valuation range. No charge, no commitment.',
   },
-  buy: {
-    total: 'From $1,399',
-    totalLabel: 'Complete Buy Journey',
-    stages: [
-      { name: 'B0\u2013B1: Thesis + Screening', desc: 'Acquisition criteria, target identification, scoring', price: 'Free', free: true },
-      { name: 'B2: Target Valuation', desc: 'Full valuation on any target \u2014 comps, multiples, DCF', price: '$199', free: false },
-      { name: 'B3: Due Diligence', desc: 'Structured DD workflow, risk identification, document tracking', price: '$299', free: false },
-      { name: 'B4: Deal Structuring', desc: 'Offer modeling, scenario analysis, LOI drafting', price: '$299', free: false },
-      { name: 'B5: Closing Support', desc: 'Closing coordination, document management', price: '$299', free: false },
-    ],
+  {
+    num: '02',
+    title: 'Choose your deliverables',
+    desc: 'When you\u2019re ready for deeper work \u2014 a full valuation report, CIM, pitch deck, DD workflow \u2014 each deliverable has a clear, fixed price. Pay only for what you need.',
   },
-  raise: {
-    total: 'From $749',
-    totalLabel: 'Complete Raise Journey',
-    stages: [
-      { name: 'R0\u2013R1: Strategy + Financials', desc: 'Raise strategy, financial package, gap analysis', price: 'Free', free: true },
-      { name: 'R2: Valuation + Deck', desc: 'Pre-money valuation, 12-slide institutional pitch deck', price: '$199', free: false },
-      { name: 'R3: Investor Targeting', desc: 'Investor profiling, prioritization, outreach strategy', price: '$149', free: false },
-      { name: 'R4: Term Negotiation', desc: 'Term sheet analysis, side-by-side comparison', price: '$199', free: false },
-    ],
+  {
+    num: '03',
+    title: 'Invite your team',
+    desc: 'Brokers, attorneys, CPAs, and other service providers join your deal room free. No per-seat fees. No subscriptions. They collaborate in real time, always.',
   },
-  integrate: {
-    total: 'From $899',
-    totalLabel: 'Complete Integration Journey',
-    stages: [
-      { name: 'I0: Day Zero', desc: 'Day Zero checklist, critical access transfer, notifications', price: 'Free', free: true },
-      { name: 'I1: Stabilize (Days 1\u201330)', desc: 'Employee comms, customer retention, vendor strategy', price: '$299', free: false },
-      { name: 'I2: Assess (Days 31\u201360)', desc: 'SWOT, benchmarking, synergy identification', price: '$299', free: false },
-      { name: 'I3: Optimize (Days 61\u2013100)', desc: 'Integration roadmap, KPIs, milestones', price: '$299', free: false },
-    ],
-  },
-};
-
-const TABS: { key: Journey; label: string }[] = [
-  { key: 'sell', label: 'Sell' },
-  { key: 'buy', label: 'Buy' },
-  { key: 'raise', label: 'Raise' },
-  { key: 'integrate', label: 'Integrate' },
 ];
 
-const EXAMPLES = [
-  { deal: '$400K landscaping business (sell)', yulia: '~$1,800', traditional: '$20K\u2013$40K broker commission' },
-  { deal: '$3M HVAC company (sell)', yulia: '~$4,500', traditional: '$150K\u2013$300K advisory + success fee' },
-  { deal: '$25M PE platform (buy, 3 targets)', yulia: '~$12,000', traditional: '$500K+ advisory retainer' },
+const DELIVERABLES = [
+  {
+    name: 'Business Valuation',
+    price: '$350',
+    desc: 'Multi-methodology valuation report: comparable transactions, industry multiples, DCF. Benchmarked against real deals in your industry and geography.',
+    includes: ['Comp analysis with sourced transactions', 'Industry multiple benchmarking', 'Discounted cash flow model', 'Sensitivity analysis'],
+  },
+  {
+    name: 'Deal Screening',
+    price: '$150',
+    desc: 'Target identification and scoring against your acquisition thesis. Each target evaluated on 7 factors including financial fit, strategic alignment, and integration complexity.',
+    includes: ['Target identification and filtering', '7-factor scoring model', 'Deep-dive recommendations', 'Market landscape summary'],
+  },
+  {
+    name: 'Full CIM',
+    price: '$700',
+    desc: 'Confidential Information Memorandum \u2014 institutional quality. Investment thesis, financial analysis, market positioning, growth opportunities, and risk factors.',
+    includes: ['Executive summary and investment thesis', 'Financial analysis and projections', 'Market and competitive positioning', 'Qualified buyer list with scoring'],
+  },
+  {
+    name: 'Financial Model',
+    price: '$275',
+    desc: 'Deal-specific financial model with scenario analysis. SBA bankability, return modeling, working capital analysis, and sensitivity testing.',
+    includes: ['Revenue and expense projections', 'Scenario analysis (base, upside, downside)', 'Working capital and cash flow modeling', 'Return analysis for buyers/investors'],
+  },
+  {
+    name: 'LOI Draft',
+    price: '$70',
+    desc: 'Letter of intent drafted from deal terms. Purchase price, structure, contingencies, timeline, and key provisions \u2014 ready for legal review.',
+    includes: ['Deal structure and purchase price', 'Key contingencies and timelines', 'Working capital provisions', 'Ready for attorney review'],
+  },
 ];
 
 const WALLETS = [
   {
     name: 'Try Yulia',
-    price: '$199',
-    desc: 'Great for a single valuation or getting started',
-    power: '$199 purchasing power',
+    price: '$350',
+    desc: 'One valuation or one deliverable to see the quality firsthand.',
+    power: '$350 purchasing power',
     bonus: null,
     popular: false,
   },
   {
     name: 'Run a Deal',
     price: '$999',
-    desc: 'Enough for most complete journeys',
-    power: '$1,099 purchasing power (+10% bonus)',
+    desc: 'Enough for most complete journeys. The most popular choice.',
+    power: '$1,099 purchasing power (+10%)',
     bonus: '+10% bonus',
     popular: true,
   },
   {
     name: 'Deal Pro',
     price: '$2,499',
-    desc: 'For serial acquirers and active brokers',
-    power: '$2,999 purchasing power (+20% bonus)',
+    desc: 'For serial acquirers, active brokers, and multi-deal operators.',
+    power: '$2,999 purchasing power (+20%)',
     bonus: '+20% bonus',
     popular: false,
   },
@@ -103,19 +87,26 @@ const FREE_ITEMS = [
   'Conversation with Yulia \u2014 unlimited',
   'Business classification and industry analysis',
   'SDE/EBITDA calculation with add-back identification',
-  'Preliminary valuation range',
-  'Deal roadmap and next steps',
-  'Service provider access (attorneys, CPAs, real estate agents collaborate free \u2014 always)',
+  'Preliminary valuation range with methodology shown',
+  'Deal roadmap and recommended next steps',
+  'Service provider access \u2014 attorneys, CPAs, and brokers collaborate free, always',
+];
+
+const EXAMPLES = [
+  { deal: '$850K landscaping (sell)', yulia: '$525', traditional: 'Most advisors decline' },
+  { deal: '$3M HVAC company (sell)', yulia: '$2,400', traditional: '$90K\u2013$180K advisory' },
+  { deal: '$6.8M dental group (buy, 2 targets)', yulia: '$3,200', traditional: '$120K+ advisory' },
+  { deal: '$25M PE platform (buy, 6 add-ons)', yulia: '$12,000', traditional: '$500K+ retainer' },
 ];
 
 const FAQS = [
   {
     q: 'Do I need to buy a whole journey?',
-    a: 'No. You pay stage by stage. Start free, and only pay when you\u2019re ready for the next deliverable. Stop anytime.',
+    a: 'No. You choose individual deliverables. Start free, and only pay when you\u2019re ready for the next piece of work. Stop anytime.',
   },
   {
     q: 'What if I don\u2019t use all my wallet funds?',
-    a: 'They never expire. Use them on any journey, any stage, anytime.',
+    a: 'They never expire. Use them on any journey, any deliverable, anytime.',
   },
   {
     q: 'Is there a subscription?',
@@ -123,75 +114,95 @@ const FAQS = [
   },
   {
     q: 'How does service provider access work?',
-    a: 'When a business owner or buyer invites their attorney, CPA, or real estate agent into a deal, those professionals join free. They see the documents, collaborate in real time, and never pay a cent.',
+    a: 'When a business owner or buyer invites their attorney, CPA, or broker into a deal, those professionals join free. They see the documents, collaborate in real time, and never pay a cent.',
+  },
+  {
+    q: 'What\u2019s the difference between the free analysis and the paid valuation?',
+    a: 'The free analysis gives you SDE/EBITDA, add-backs, and a preliminary range. The paid valuation is a full multi-methodology report with comparable transactions, industry multiples, DCF, and sensitivity analysis \u2014 the kind of report you can take to a buyer, investor, or your CPA.',
   },
 ];
 
 /* ─── Page ─── */
 
 export default function Pricing() {
-  const [tab, setTab] = useState<Journey>('sell');
-  const pkg = JOURNEY_PACKAGES[tab];
+  const [expandedDeliverable, setExpandedDeliverable] = useState<string | null>(null);
 
   return (
     <PublicLayout>
       {/* ═══ HERO ═══ */}
       <section className="max-w-site mx-auto px-10 pt-20 pb-24 max-md:px-5 max-md:pt-12 max-md:pb-14 text-center">
-        <h1 className="animate-fadeInUp font-sans text-[clamp(40px,5.5vw,72px)] font-extrabold leading-[1.05] tracking-tight mb-10 m-0">
-          Know what you&apos;ll spend <em className="italic text-[#D4714E]">before you start.</em>
+        <div className="animate-fadeInUp flex items-center gap-3 mb-8 text-[13px] uppercase tracking-[.18em] text-[#D4714E] font-semibold justify-center">
+          <span className="w-9 h-0.5 bg-[#D4714E]" />
+          Transparent Pricing
+        </div>
+        <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(40px,5.5vw,72px)] font-extrabold leading-[1.05] tracking-tight mb-10 m-0">
+          If you could Google it, <em className="italic text-[#D4714E]">it should be free.</em>
         </h1>
-        <p className="animate-fadeInUp stagger-1 text-[19px] text-[#7A766E] max-w-[560px] mx-auto leading-[1.6] mb-16 m-0">
-          Every journey has a clear price. No retainers. No surprises.
-          Your first conversation and financial analysis are always free.
+        <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[560px] mx-auto leading-[1.6] mb-16 m-0">
+          Your first conversation and financial analysis cost nothing. When you&apos;re ready for
+          deeper work, every deliverable has a clear, fixed price. No retainers. No surprises.
         </p>
       </section>
 
-      {/* ═══ JOURNEY PACKAGES ═══ */}
+      {/* ═══ HOW IT WORKS ═══ */}
       <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
-        {/* Tabs */}
-        <div className="flex gap-2 mb-10 overflow-x-auto pb-1">
-          {TABS.map(t => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`px-6 py-2.5 rounded-full text-sm font-semibold cursor-pointer transition-all whitespace-nowrap ${
-                tab === t.key
-                  ? 'bg-[#D4714E] text-white border-transparent'
-                  : 'bg-white text-[#4A4843] hover:border-[#1A1A18]'
-              }`}
-              style={{ border: tab === t.key ? '1px solid transparent' : '1px solid #E0DCD4' }}
-            >
-              {t.label}
-            </button>
+        <div className="grid grid-cols-3 gap-5 max-md:grid-cols-1">
+          {HOW_IT_WORKS.map(s => (
+            <Card key={s.num} hover={false} padding="px-8 py-10">
+              <span className="font-sans text-[48px] font-black text-[#E8E4DC] leading-none">{s.num}</span>
+              <h3 className="text-lg font-bold text-[#1A1A18] mt-4 mb-2 m-0">{s.title}</h3>
+              <p className="text-sm text-[#7A766E] leading-[1.6] m-0">{s.desc}</p>
+            </Card>
           ))}
         </div>
+      </section>
 
-        {/* Stage table */}
-        <div className="max-w-[800px]">
-          {pkg.stages.map((s, i) => (
-            <div
-              key={s.name}
-              className={`grid grid-cols-[1fr_auto] gap-8 py-5 items-start ${
-                i < pkg.stages.length - 1 ? 'border-b border-[#E0DCD4]' : ''
-              }`}
-            >
-              <div>
-                <p className="text-[15px] font-semibold text-[#1A1A18] mb-1 m-0">{s.name}</p>
-                <p className="text-sm text-[#7A766E] leading-[1.55] m-0">{s.desc}</p>
+      {/* ═══ DELIVERABLES ═══ */}
+      <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
+        <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-3 m-0">
+          Deliverables. <em className="italic text-[#D4714E]">Clear prices.</em>
+        </h2>
+        <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-10 m-0">
+          Each piece of work has a fixed price. No hourly rates, no scope creep, no surprises.
+        </p>
+        <div className="space-y-4">
+          {DELIVERABLES.map(d => (
+            <Card key={d.name} hover={false} padding="px-8 py-8 max-md:px-5 max-md:py-6">
+              <div
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => setExpandedDeliverable(expandedDeliverable === d.name ? null : d.name)}
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <h3 className="text-base font-bold text-[#1A1A18] m-0">{d.name}</h3>
+                    <span className="inline-block text-xs font-bold uppercase tracking-[.08em] px-2.5 py-[3px] rounded-full bg-[#FFF0EB] text-[#D4714E]">
+                      {d.price}
+                    </span>
+                  </div>
+                  <p className="text-sm text-[#7A766E] leading-[1.55] mt-2 m-0">{d.desc}</p>
+                </div>
+                <svg
+                  width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7A766E" strokeWidth="2" strokeLinecap="round"
+                  className={`shrink-0 ml-4 transition-transform ${expandedDeliverable === d.name ? 'rotate-180' : ''}`}
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
               </div>
-              <span className={`inline-block text-xs font-bold uppercase tracking-[.08em] px-2.5 py-[3px] rounded-full whitespace-nowrap ${
-                s.free
-                  ? 'bg-[#E8F5E9] text-[#2E7D32]'
-                  : 'bg-[#FFF0EB] text-[#D4714E]'
-              }`}>
-                {s.price}
-              </span>
-            </div>
+              {expandedDeliverable === d.name && (
+                <div className="mt-4 pt-4 border-t border-[#E0DCD4]">
+                  <p className="text-xs uppercase tracking-[.12em] text-[#7A766E] font-semibold mb-3 m-0">Includes</p>
+                  <ul className="space-y-2 list-none p-0 m-0">
+                    {d.includes.map(item => (
+                      <li key={item} className="flex gap-2.5 items-start text-sm text-[#4A4843] leading-[1.55]">
+                        <span className="text-[#D4714E] shrink-0 mt-px">&#10003;</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </Card>
           ))}
-          <div className="grid grid-cols-[1fr_auto] gap-8 pt-6 border-t-2 border-[#1A1A18]">
-            <span className="text-[15px] font-bold text-[#1A1A18]">{pkg.totalLabel}</span>
-            <span className="text-[15px] font-bold text-[#D4714E]">{pkg.total}</span>
-          </div>
         </div>
       </section>
 
@@ -202,16 +213,15 @@ export default function Pricing() {
         </h2>
         <div className="max-w-[800px]">
           <div className="grid grid-cols-[1fr_auto_auto] gap-x-8 gap-y-0 items-center">
-            {/* Header */}
             <p className="text-xs uppercase tracking-[.12em] text-[#7A766E] font-semibold pb-4 m-0">Your Deal</p>
             <p className="text-xs uppercase tracking-[.12em] text-[#7A766E] font-semibold pb-4 m-0 text-right">Yulia</p>
             <p className="text-xs uppercase tracking-[.12em] text-[#7A766E] font-semibold pb-4 m-0 text-right">Traditional</p>
             {EXAMPLES.map((e, i) => (
-              <>
-                <p key={`d-${i}`} className={`text-[15px] text-[#1A1A18] py-4 m-0 ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.deal}</p>
-                <p key={`y-${i}`} className={`text-[15px] font-bold text-[#D4714E] py-4 m-0 text-right ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.yulia}</p>
-                <p key={`t-${i}`} className={`text-[15px] text-[#7A766E] line-through py-4 m-0 text-right ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.traditional}</p>
-              </>
+              <div key={i} className="contents">
+                <p className={`text-[15px] text-[#1A1A18] py-4 m-0 ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.deal}</p>
+                <p className={`text-[15px] font-bold text-[#D4714E] py-4 m-0 text-right ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.yulia}</p>
+                <p className={`text-[15px] text-[#7A766E] line-through py-4 m-0 text-right ${i < EXAMPLES.length - 1 ? 'border-b border-[#E0DCD4]' : ''}`}>{e.traditional}</p>
+              </div>
             ))}
           </div>
         </div>
@@ -223,13 +233,13 @@ export default function Pricing() {
           Add funds. Use them anywhere.
         </h2>
         <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-10 m-0">
-          $1 = $1. Load your wallet and use it across any journey, any stage. Larger blocks include bonus credits.
+          $1 = $1. Load your wallet and use it across any journey, any deliverable. Larger amounts include bonus credits.
         </p>
         <div className="grid grid-cols-3 gap-5 max-md:grid-cols-1">
           {WALLETS.map(w => (
             <Card key={w.name} padding="px-8 py-10" className={w.popular ? 'ring-2 ring-[#D4714E]' : ''}>
               {w.popular && (
-                <span className="inline-block text-[11px] font-bold uppercase tracking-wide text-[#D4714E] mb-3">Popular</span>
+                <span className="inline-block text-[11px] font-bold uppercase tracking-wide text-[#D4714E] mb-3">Most Popular</span>
               )}
               <h3 className="text-lg font-bold text-[#1A1A18] mb-1 m-0">{w.name} &mdash; {w.price}</h3>
               <p className="text-sm text-[#7A766E] leading-[1.55] mt-2 mb-2 m-0">{w.desc}</p>
@@ -238,7 +248,7 @@ export default function Pricing() {
           ))}
         </div>
         <p className="text-[15px] text-[#7A766E] mt-6 m-0">
-          Need more? Contact us for custom volumes.
+          Need custom volumes? <a href="/enterprise" className="text-[#D4714E] hover:underline">Talk to us about team pricing.</a>
         </p>
       </section>
 

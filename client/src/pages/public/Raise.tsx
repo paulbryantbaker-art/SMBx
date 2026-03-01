@@ -9,66 +9,78 @@ import PublicChatInput from '../../components/chat/PublicChatInput';
 const TIMELINE_STEPS = [
   {
     num: 1,
-    title: 'Define your strategy',
+    title: 'Define your capital strategy',
     price: 'Free',
     free: true,
-    desc: 'How much do you need? What are you willing to give? Who should you approach? Yulia aligns your raise with your goals and risk tolerance.',
-    detail: '\u201CI need $2M to expand into two new markets. Open to giving up 15-20% equity.\u201D \u2014 Yulia starts building your strategy from there.',
+    desc: 'How much do you need? What are you willing to give? Who should you approach? Yulia aligns your raise with your goals, timeline, and risk tolerance.',
+    detail: '\u201CI need $2M to expand into two new markets. Open to giving up 15\u201320% equity.\u201D \u2014 Yulia starts building your strategy from there.',
   },
   {
     num: 2,
     title: 'Build your financial package',
     price: 'Free',
     free: true,
-    desc: 'Yulia organizes your numbers into the story investors need to see. Gaps identified. Weaknesses addressed before they\u2019re exposed in diligence.',
+    desc: 'Your numbers organized into the story investors need to see. Gaps identified. Weaknesses addressed before they\u2019re exposed in diligence.',
     detail: 'Most founders discover gaps in their financials they didn\u2019t know existed. Yulia finds them before investors do.',
   },
   {
     num: 3,
-    title: 'Valuation and pitch deck',
-    price: 'From $199',
+    title: 'Defensible valuation',
+    price: '$350',
     free: false,
-    desc: 'Defensible pre-money valuation. 12-slide institutional deck built from YOUR actual data \u2014 not a template with your numbers pasted in.',
+    desc: 'Pre-money valuation built on methodology, not aspiration. Comps, multiples, and scenario analysis that hold up under investor scrutiny.',
   },
   {
     num: 4,
-    title: 'Target the right investors',
-    price: 'From $149',
+    title: 'Institutional pitch deck',
+    price: '$275',
     free: false,
-    desc: 'Angels, VCs, family offices, strategics \u2014 profiled and prioritized for your specific raise. The right money, not just any money.',
-    detail: 'Not every investor is right for your deal. Yulia profiles who\u2019s investing at your stage, in your industry, at your size \u2014 so you pitch warm, not cold.',
+    desc: '12-slide deck built from YOUR actual data \u2014 not a template with your numbers pasted in. Market sizing, competitive positioning, financial projections, and the ask.',
   },
   {
     num: 5,
-    title: 'Negotiate terms',
-    price: 'From $199',
+    title: 'Investor targeting',
+    price: '$150',
     free: false,
-    desc: 'Term sheet analysis. Side-by-side comparison. What each term means for your control, dilution, and economics. Negotiate informed.',
+    desc: 'Angels, VCs, family offices, strategics \u2014 profiled and prioritized for your specific raise. The right capital, not just any capital.',
+    detail: 'Not every investor is right for your deal. Yulia profiles who\u2019s investing at your stage, in your industry, at your size \u2014 so you pitch warm, not cold.',
+  },
+  {
+    num: 6,
+    title: 'Term sheet analysis',
+    price: '$175',
+    free: false,
+    desc: 'Side-by-side comparison of every term sheet. What each clause means for your control, dilution, and economics. Negotiate from intelligence, not instinct.',
   },
 ];
 
-const DEAL_SIZES = [
+const DEAL_EXAMPLES = [
   {
-    range: '$1.5M \u2013 $5M',
-    title: 'Growth capital',
-    desc: 'Seed through Series A. Yulia builds your financial story, valuation, deck, and investor targets \u2014 all from one conversation.',
-    result: '\u201CDeck built from actual financials. Closed $4.5M Series A in 6 weeks. Investors commented on how tight the materials were.\u201D',
+    deal: '$3.5M Series A \u2014 B2B SaaS',
+    desc: 'Deck built from actual financials. Defensible valuation methodology. Investor list prioritized by stage, sector, and check size. Closed in 6 weeks.',
+    yulia: '$950',
+    traditional: '$25K\u2013$50K advisory retainer',
   },
   {
-    range: '$5M \u2013 $25M',
-    title: 'Growth equity',
-    desc: 'You have real traction. Yulia makes your numbers sing \u2014 institutional deck, defensible valuation, and a targeted investor list.',
-    result: '\u201CCompared 4 term sheets side-by-side. Saved 8% dilution by understanding the real cost of each structure.\u201D',
+    deal: '$8M Growth Equity \u2014 Healthcare Services',
+    desc: 'Compared 4 term sheets side-by-side. Modeled dilution across every scenario. Saved 8% dilution by understanding the real cost of each structure.',
+    yulia: '$1,400',
+    traditional: '$75K+ advisory + success fee',
   },
   {
-    range: '$25M+',
-    title: 'Institutional raise',
-    desc: 'Growth equity, mezzanine, or structured capital \u2014 Yulia models every scenario so you see what each option costs you.',
-    result: '\u201CModeled 6 capital structures across 3 investors. Board saw the real cost of each within hours.\u201D',
+    deal: '$1.2M Seed \u2014 Consumer Tech',
+    desc: 'First-time founder. Yulia built the financial model, pitch deck, and investor strategy from a single conversation. Angel round closed in 4 weeks.',
+    yulia: '$625',
+    traditional: 'Most advisors don\u2019t take sub-$2M raises',
   },
 ];
 
-const BROKER_BENEFITS = [
+const INSIGHT = {
+  title: 'The dilution blind spot',
+  body: 'Most founders focus on valuation and miss the terms that actually determine their outcome. Liquidation preferences, participation rights, anti-dilution provisions \u2014 a $10M valuation with aggressive terms can leave you worse off than an $8M valuation with clean terms. Yulia models every scenario so you see the real cost of each offer.',
+};
+
+const ADVISOR_BENEFITS = [
   { bold: 'Pitch decks in hours', rest: ' \u2014 your advisor reviews and refines instead of building from scratch' },
   { bold: 'Every scenario modeled', rest: ' \u2014 dilution, control, economics across every term sheet' },
   { bold: 'Attorneys and CPAs join free', rest: ' \u2014 everyone sees the same numbers' },
@@ -103,18 +115,18 @@ export default function Raise() {
       <section className="max-w-site mx-auto px-10 pt-20 pb-20 max-md:px-5 max-md:pt-12 max-md:pb-14">
         <div className="animate-fadeInUp flex items-center gap-3 mb-8 text-[13px] uppercase tracking-[.18em] text-[#D4714E] font-semibold">
           <span className="w-9 h-0.5 bg-[#D4714E]" />
-          Raise Capital
+          Capital Strategy
         </div>
-        <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(44px,6vw,76px)] font-extrabold leading-[1.05] tracking-tight max-w-[14ch] mb-10 m-0">
-          Raise smart. <em className="italic text-[#D4714E]">Keep control.</em>
+        <h1 className="animate-fadeInUp stagger-1 font-sans text-[clamp(44px,6vw,76px)] font-extrabold leading-[1.05] tracking-tight max-w-[16ch] mb-10 m-0">
+          The right capital. The right terms. <em className="italic text-[#D4714E]">The right partner.</em>
         </h1>
         <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-16 m-0">
           The difference between a good raise and a great one is preparation. Yulia builds
           your financial story, your deck, and your investor strategy &mdash; so you negotiate
-          from strength.
+          from strength, not hope.
         </p>
         <div className="animate-fadeInUp stagger-3 flex flex-col md:flex-row gap-3 max-md:w-full">
-          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start raising &mdash; free &rarr;</Button>
+          <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start your strategy &mdash; free &rarr;</Button>
           <Button variant="secondary" href="/how-it-works">See how it works</Button>
         </div>
       </section>
@@ -132,33 +144,48 @@ export default function Raise() {
 
         <div className="text-center mt-12">
           <p className="text-[15px] text-[#7A766E] mb-5 m-0">
-            Typical raise journey: <strong className="text-[#1A1A18]">From $749</strong> &middot;
+            Complete raise journey: <strong className="text-[#1A1A18]">from $950</strong> &middot;
             Traditional advisory: <span className="line-through">$25,000&ndash;$100,000</span>
           </p>
           <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Start your raise &mdash; free &rarr;</Button>
         </div>
       </section>
 
-      {/* ═══ BUILT FOR YOUR DEAL ═══ */}
+      {/* ═══ DEAL EXAMPLES ═══ */}
       <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
-          Built for <em className="italic text-[#D4714E]">your</em> deal.
+          Real raises. <em className="italic text-[#D4714E]">Real numbers.</em>
         </h2>
         <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
-          {DEAL_SIZES.map(d => (
-            <Card key={d.range} padding="px-7 py-9">
-              <p className="font-sans text-[28px] font-black text-[#D4714E] mb-3 m-0">{d.range}</p>
-              <h3 className="text-base font-bold text-[#1A1A18] mb-2 m-0">{d.title}</h3>
-              <p className="text-sm text-[#7A766E] leading-[1.55] mb-3 m-0">{d.desc}</p>
-              <div className="py-3 px-4 bg-[#F3F0EA] rounded-[10px]">
-                <p className="text-[13px] text-[#4A4843] italic leading-[1.45] m-0">{d.result}</p>
+          {DEAL_EXAMPLES.map(d => (
+            <Card key={d.deal} padding="px-7 py-9">
+              <p className="text-[11px] uppercase tracking-[.12em] text-[#D4714E] font-semibold mb-3 m-0">{d.deal}</p>
+              <p className="text-sm text-[#7A766E] leading-[1.55] mb-4 m-0">{d.desc}</p>
+              <div className="flex justify-between items-center pt-3 border-t border-[#E0DCD4]">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Yulia</p>
+                  <p className="text-[15px] font-bold text-[#D4714E] m-0">{d.yulia}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-0.5 m-0">Traditional</p>
+                  <p className="text-[13px] text-[#A9A49C] line-through m-0">{d.traditional}</p>
+                </div>
               </div>
             </Card>
           ))}
         </div>
       </section>
 
-      {/* ═══ BROKER CALLOUT ═══ */}
+      {/* ═══ INSIGHT BOX ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <div className="bg-gradient-to-br from-[#FFF8F4] to-[#FFF0EB] rounded-4xl p-12 max-md:p-7" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05), inset 0 0 0 1px rgba(212,113,78,.06)' }}>
+          <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Methodology insight</p>
+          <h3 className="font-sans text-xl font-bold text-[#1A1A18] mb-3 m-0">{INSIGHT.title}</h3>
+          <p className="text-[15px] text-[#4A4843] leading-[1.65] m-0">{INSIGHT.body}</p>
+        </div>
+      </section>
+
+      {/* ═══ ADVISOR CALLOUT ═══ */}
       <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
         <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-4xl py-12 px-14 grid grid-cols-2 gap-12 items-center max-md:grid-cols-1 max-md:py-8 max-md:px-6 max-md:gap-8">
           <div>
@@ -172,7 +199,7 @@ export default function Raise() {
             </p>
           </div>
           <div className="flex flex-col gap-4">
-            {BROKER_BENEFITS.map(b => (
+            {ADVISOR_BENEFITS.map(b => (
               <div key={b.bold} className="flex gap-3 items-start">
                 <span className="w-6 h-6 rounded-full bg-[#FFF0EB] text-[#D4714E] flex items-center justify-center text-xs font-bold shrink-0 mt-px">
                   &#10003;
@@ -189,7 +216,7 @@ export default function Raise() {
       {/* ═══ CHAT INPUT ═══ */}
       <section id="chat-input" className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-extrabold tracking-tight mb-8 m-0 text-center">
-          Ready to start your raise?
+          Ready to raise from strength?
         </h3>
         <div className="card-outer max-w-[640px] mx-auto p-3">
           <div className="card-inner p-4">
@@ -218,7 +245,7 @@ export default function Raise() {
         <div className="bg-gradient-to-br from-[#D4714E] to-[#BE6342] rounded-4xl px-16 py-24 flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden max-md:px-7 max-md:py-12 max-md:text-center">
           <div className="absolute -top-1/2 -right-1/5 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,.1),transparent)]" />
           <h3 className="font-sans text-[clamp(28px,3vw,40px)] font-black text-white leading-[1.15] tracking-[-0.02em] max-w-[480px] m-0 relative z-10">
-            Raise from strength. Start with a conversation.
+            Investors fund preparation. Start yours now.
           </h3>
           <button
             onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}

@@ -26,10 +26,10 @@ const T = {
 /* ═══ PROMPT CHIPS ═══ */
 
 const PROMPT_CHIPS = [
-  { key: 'sell', label: 'I want to sell my business', fill: 'I want to sell my business.' },
-  { key: 'worth', label: "What's my company worth?", fill: 'Help me understand what my company might be worth.' },
-  { key: 'buy', label: 'Find me a business to buy', fill: 'I want to buy a business.' },
-  { key: 'raise', label: "I'm raising capital", fill: "I'm raising capital for my business." },
+  { key: 'sell', label: 'I want to sell my business', fill: 'I want to sell my business. Can you help me understand what it might be worth?' },
+  { key: 'worth', label: "What's my business worth?", fill: 'Help me understand what my business might be worth.' },
+  { key: 'buy', label: 'Help me find a business to buy', fill: 'I want to buy a business. Can you help me screen targets?' },
+  { key: 'raise', label: "I'm raising capital", fill: "I'm raising capital for my business. Can you help me build my strategy?" },
 ];
 
 /* ═══ LEARN CARDS ═══ */
@@ -37,25 +37,25 @@ const PROMPT_CHIPS = [
 const LEARN_CARDS = [
   {
     title: 'How it works',
-    desc: 'Four steps from prompt to finished deliverables.',
-    cta: 'See the flow',
+    desc: 'One conversation to complete deal intelligence. Six steps, no forms.',
+    cta: 'See the process',
     href: '/how-it-works',
     badgeBg: 'linear-gradient(135deg, #E07A4E 0%, #D4914E 100%)',
     badgeGlow: '0 6px 20px rgba(224,122,78,0.30)',
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="rgba(255,255,255,0.3)" stroke="white"/></svg>,
   },
   {
-    title: 'Intelligence',
-    desc: '80+ verticals, live data, real comparables.',
-    cta: 'Explore data',
+    title: 'Intelligence engine',
+    desc: '80+ verticals, real transaction data, live market conditions.',
+    cta: 'Explore methodology',
     href: '/how-it-works',
     badgeBg: 'linear-gradient(135deg, #C47A52 0%, #D49A5E 100%)',
     badgeGlow: '0 6px 20px rgba(196,122,82,0.30)',
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2" fill="rgba(255,255,255,0.2)"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
   },
   {
-    title: 'Workspace',
-    desc: 'Every document, every party, one space.',
+    title: 'Your deal workspace',
+    desc: 'Invite your broker, attorney, CPA. One place for every party.',
     cta: 'See workspace',
     href: '/enterprise',
     badgeBg: 'linear-gradient(135deg, #B5522F 0%, #D4714E 100%)',
@@ -63,8 +63,8 @@ const LEARN_CARDS = [
     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.25)"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5" fill="rgba(255,255,255,0.25)"/></svg>,
   },
   {
-    title: 'Every journey',
-    desc: 'Sell, buy, raise, integrate — any size.',
+    title: 'Every deal journey',
+    desc: 'Sell, buy, raise, integrate. $400K exits to $40M roll-ups.',
     cta: 'View journeys',
     href: '/sell',
     badgeBg: 'linear-gradient(135deg, #D4735E 0%, #E8945E 100%)',
@@ -578,16 +578,16 @@ export default function Home() {
         <>
           <main className="home-hero">
             <h1 className="home-h1">
-              Start with{' '}
+              The data is public.{' '}
               <span style={{
                 background: `linear-gradient(135deg, ${T.terra}, ${T.terraLight})`,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-              }}>the deal.</span>
+              }}>The intelligence is not.</span>
             </h1>
             <p className="home-sub">
-              AI-powered M&A advisory. From first question to closing day.
+              Deal intelligence for every stage. From first conversation to closing day.
             </p>
 
             {/* 2-layer chat card */}
