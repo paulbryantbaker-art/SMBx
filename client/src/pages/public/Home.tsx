@@ -183,9 +183,8 @@ export default function Home() {
           display: flex; flex-direction: column;
         }
 
-        .home-sidebar-wrap {
-          position: relative; z-index: 45;
-        }
+        /* Sidebar z-index to sit above backdrop */
+        .home-root > .home-sidebar-wrap { position: relative; z-index: 45; }
 
         /* ── Topbar ── */
         .home-topbar {
@@ -264,45 +263,26 @@ export default function Home() {
         }
         @media (max-width: 768px) { .home-greeting-sub { font-size: 26px; margin-bottom: 28px; } }
 
-        /* ── Hero dock wrapper ── */
+        /* ── Dock card (shared for hero + chat) ── */
+        .home-dock-card {
+          border-radius: 20px !important;
+          border: 1px solid rgba(26,26,24,0.10) !important;
+          background: #FFFFFF !important;
+          box-shadow: 0 4px 16px rgba(26,26,24,0.08), 0 1px 3px rgba(26,26,24,0.06), 0 12px 40px rgba(26,26,24,0.04) !important;
+        }
+        .home-dock-card:focus-within {
+          border-color: rgba(212,113,78,0.35) !important;
+          box-shadow: 0 4px 16px rgba(26,26,24,0.10), 0 1px 3px rgba(26,26,24,0.06), 0 12px 40px rgba(26,26,24,0.06), 0 0 0 3px rgba(212,113,78,0.10) !important;
+        }
+        /* Compact textarea (hero variant defaults to tall) */
+        .home-dock-card textarea {
+          min-height: 48px !important;
+          max-height: 160px !important;
+        }
+
         .home-hero-dock {
           width: 100%; max-width: 620px;
           animation: fadeUp 0.5s ease 0.12s both;
-        }
-        /* Strip ChatDock's outer + inner wrapper chrome */
-        .home-hero-dock > div {
-          background: transparent !important;
-          border: none !important;
-          padding: 0 !important;
-          flex-shrink: unset !important;
-        }
-        .home-hero-dock > div > div {
-          padding: 0 !important;
-          max-width: none !important;
-          margin: 0 !important;
-        }
-        /* Single card — the dock-card is the only visible container */
-        .home-hero-dock .home-dock-card {
-          border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.10) !important;
-          background: #FFFFFF;
-          box-shadow:
-            0 4px 16px rgba(26,26,24,0.08),
-            0 1px 3px rgba(26,26,24,0.06),
-            0 12px 40px rgba(26,26,24,0.04);
-        }
-        .home-hero-dock .home-dock-card:focus-within {
-          border-color: rgba(212,113,78,0.35) !important;
-          box-shadow:
-            0 4px 16px rgba(26,26,24,0.10),
-            0 1px 3px rgba(26,26,24,0.06),
-            0 12px 40px rgba(26,26,24,0.06),
-            0 0 0 3px rgba(212,113,78,0.10);
-        }
-        /* Remove inner textarea bg/card — flat inside the dock-card */
-        .home-hero-dock .home-dock-card > div:not(.home-tools-popup) {
-          background: transparent !important;
-          border-radius: 0 !important;
         }
 
         /* ── Suggestion cards ── */
@@ -637,40 +617,13 @@ export default function Home() {
         .home-dock-bottom {
           flex-shrink: 0;
           width: 100%;
-        }
-        .home-dock-bottom-inner {
           padding: 0 16px 12px;
           padding-bottom: max(12px, env(safe-area-inset-bottom));
-          max-width: 900px; margin: 0 auto; width: 100%;
+          max-width: 900px; margin: 0 auto;
           box-sizing: border-box;
         }
         @media (min-width: 769px) {
-          .home-dock-bottom-inner { padding: 0 40px 20px; }
-        }
-        /* Strip ChatDock default wrapper chrome — we style from here */
-        .home-dock-bottom-inner > div {
-          background: transparent !important;
-          border: none !important;
-          padding: 0 !important;
-        }
-        .home-dock-bottom-inner > div > div {
-          padding: 0 !important;
-          max-width: none !important;
-          margin: 0 !important;
-        }
-        .home-dock-bottom-inner .home-dock-card {
-          border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.10) !important;
-          background: #FFFFFF;
-          box-shadow:
-            0 4px 16px rgba(26,26,24,0.08),
-            0 1px 3px rgba(26,26,24,0.06),
-            0 12px 40px rgba(26,26,24,0.04);
-        }
-        /* Remove inner textarea bg/card — flat inside the dock-card */
-        .home-dock-bottom-inner .home-dock-card > div:not(.home-tools-popup) {
-          background: transparent !important;
-          border-radius: 0 !important;
+          .home-dock-bottom { padding: 0 40px 20px; }
         }
 
         /* ── Sidebar backdrop ── */
@@ -763,7 +716,7 @@ export default function Home() {
               <p className="home-greeting-sub">Tell me about your deal.</p>
 
               <div className="home-hero-dock">
-                <ChatDock ref={heroDockRef} onSend={handleHeroSend} />
+                <ChatDock ref={heroDockRef} onSend={handleHeroSend} variant="hero" />
               </div>
 
               <div className="home-suggestions">
@@ -1009,9 +962,7 @@ export default function Home() {
 
             {!limitReached && (
               <div className="home-dock-bottom">
-                <div className="home-dock-bottom-inner">
-                  <ChatDock ref={dockRef} onSend={handleSend} disabled={sending} />
-                </div>
+                <ChatDock ref={dockRef} onSend={handleSend} disabled={sending} variant="hero" />
               </div>
             )}
           </div>
