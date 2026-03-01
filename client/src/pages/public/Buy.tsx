@@ -295,6 +295,7 @@ export default function Buy() {
           <a href="/sell" className="buy-topbar-link">Sell</a>
           <a href="/buy" className="buy-topbar-link active">Buy</a>
           <a href="/advisors" className="buy-topbar-link">Advisors</a>
+          <a href="/pricing" className="buy-topbar-link">Pricing</a>
         </nav>
         <button className="buy-topbar-btn" onClick={() => navigate('/login')} aria-label="Sign in">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">

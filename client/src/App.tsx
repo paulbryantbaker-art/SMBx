@@ -47,6 +47,7 @@ import Chat from './pages/Chat';
 const Advisors = lazy(() => import('./pages/public/Advisors'));
 const Sell = lazy(() => import('./pages/public/Sell'));
 const Buy = lazy(() => import('./pages/public/Buy'));
+const Pricing = lazy(() => import('./pages/public/Pricing'));
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
 const Search = lazy(() => import('./pages/Search'));
@@ -140,6 +141,9 @@ export default function App() {
       </Route>
       <Route path="/buy">
         <Suspense fallback={<PageLoader />}><Buy /></Suspense>
+      </Route>
+      <Route path="/pricing">
+        <Suspense fallback={<PageLoader />}><Pricing /></Suspense>
       </Route>
       <Route path="/legal/privacy">
         <Privacy />

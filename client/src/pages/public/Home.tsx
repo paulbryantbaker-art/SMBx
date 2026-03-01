@@ -691,6 +691,7 @@ export default function Home() {
                 <a href="/sell" className="home-topbar-link">Sell</a>
                 <a href="/buy" className="home-topbar-link">Buy</a>
                 <a href="/advisors" className="home-topbar-link">Advisors</a>
+                <a href="/pricing" className="home-topbar-link">Pricing</a>
               </nav>
               <button
                 className="home-topbar-btn"
