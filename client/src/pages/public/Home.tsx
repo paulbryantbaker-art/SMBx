@@ -599,8 +599,8 @@ export default function Home() {
               }}>The intelligence is not.</span>
             </h1>
             <p className="home-sub">
-              Census Bureau. BLS. Federal Reserve. SEC EDGAR. Synthesized into M&A intelligence
-              localized to your market, calibrated to your deal size.
+              She finds hidden add-backs. Models your financing. Generates your documents.
+              Manages your deal from first question to closing day.
             </p>
 
             {/* 2-layer chat card */}
@@ -642,42 +642,44 @@ export default function Home() {
             </div>
           </main>
 
-          {/* Intelligence section */}
+          {/* The Platform — 7-feature stack */}
           <section className="home-intel-section" style={{
             width: '100%', maxWidth: 1100, margin: '0 auto',
             position: 'relative', zIndex: 1,
             animation: 'fadeUp 0.6s ease 0.36s both',
           }}>
             <p style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: T.terra, fontWeight: 600, marginBottom: 8 }}>
-              How it works
+              The platform
             </p>
-            <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em', color: T.text, margin: '0 0 28px', lineHeight: 1.15 }}>
-              Yulia doesn&apos;t guess. She analyzes.
+            <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em', color: T.text, margin: '0 0 12px', lineHeight: 1.15 }}>
+              Seven capabilities. One conversation.
             </h2>
-            <div className="home-intel-grid">
+            <p style={{ fontSize: 15, lineHeight: 1.6, color: T.body, margin: '0 0 32px', maxWidth: 600 }}>
+              Each one could be its own product. Together, they&apos;re the operating system for business transactions.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {[
-                {
-                  title: 'Sovereign data',
-                  desc: 'Every insight grounded in authoritative federal data \u2014 Census Bureau, BLS, FRED, SEC EDGAR, IRS SOI. The same sources that power Wall Street, synthesized for your deal.',
-                },
-                {
-                  title: 'Seven layers of intelligence',
-                  desc: 'Industry structure. Regional economics. Financial normalization. Buyer landscape. Deal structure. Risk assessment. Forward signals. Every analysis covers all seven.',
-                },
-                {
-                  title: 'Localized to your market',
-                  desc: 'National averages hide what matters. SMBX delivers intelligence specific to your city, your industry, and your competitive environment \u2014 down to the ZIP code.',
-                },
-              ].map(card => (
-                <div key={card.title} style={{
-                  borderRadius: 20, border: '1px solid rgba(12,10,9,0.06)',
+                { num: '01', title: 'Agentic advisor', proof: 'She finds $127K in add-backs in 4 minutes. Models your financing before you ask. Flags risks before buyers find them.' },
+                { num: '02', title: 'League system', proof: 'A different advisor for every deal size. L1 Coach for $400K exits. L6 Partner for $500M platforms. Same Yulia. Different depth.' },
+                { num: '03', title: 'Localized intelligence', proof: 'Census Bureau, BLS, FRED, SEC EDGAR, IRS SOI \u2014 synthesized to your ZIP code. Not national averages. Your market.' },
+                { num: '04', title: 'SBA bankability engine', proof: 'Does this deal pencil? Current rates. June 2025 rules. DSCR analysis. Go/no-go in 30 seconds \u2014 before you waste 3 months on diligence.' },
+                { num: '05', title: 'Deliverable engine', proof: 'A CIM in one hour. A valuation in five minutes. 91+ institutional-grade documents generated from your conversation.' },
+                { num: '06', title: 'Deal room', proof: 'One room. Every seat at the table. Broker, attorney, CPA, lender \u2014 each sees exactly what they need. Role-based. Version-controlled.' },
+                { num: '07', title: 'Transaction ecosystem', proof: 'From first question to wire transfer. Financing partners. Service provider network. 100-day integration plans. Full lifecycle.' },
+              ].map(f => (
+                <div key={f.num} style={{
+                  display: 'flex', gap: 16, alignItems: 'flex-start',
+                  borderRadius: 16, border: '1px solid rgba(12,10,9,0.06)',
                   background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(16px)',
                   WebkitBackdropFilter: 'blur(16px)',
-                  boxShadow: '0 2px 6px rgba(12,10,9,0.03), 0 10px 36px rgba(12,10,9,0.04)',
-                  padding: 20, textAlign: 'left',
+                  boxShadow: '0 2px 6px rgba(12,10,9,0.03)',
+                  padding: '16px 20px', textAlign: 'left',
                 }}>
-                  <h3 style={{ fontSize: 15, fontWeight: 700, color: T.text, margin: '0 0 8px', letterSpacing: '-0.01em' }}>{card.title}</h3>
-                  <p style={{ fontSize: 13, lineHeight: 1.55, color: T.body, margin: 0 }}>{card.desc}</p>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: T.terra, fontFamily: 'Inter, system-ui, sans-serif', flexShrink: 0, marginTop: 1 }}>{f.num}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, color: T.text, margin: '0 0 4px', letterSpacing: '-0.01em' }}>{f.title}</h3>
+                    <p style={{ fontSize: 13, lineHeight: 1.55, color: T.body, margin: 0 }}>{f.proof}</p>
+                  </div>
                 </div>
               ))}
             </div>

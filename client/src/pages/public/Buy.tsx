@@ -154,6 +154,34 @@ export default function Buy() {
         </div>
       </section>
 
+      {/* ═══ SBA BANKABILITY ═══ */}
+      <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
+        <div className="bg-gradient-to-br from-[#FFF8F4] to-[#FFF0EB] rounded-4xl p-12 max-md:p-7" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05), inset 0 0 0 1px rgba(212,113,78,.06)' }}>
+          <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">SBA Bankability Engine</p>
+          <h3 className="font-sans text-[clamp(24px,2.5vw,32px)] font-black tracking-[-0.02em] mb-4 m-0">
+            Does this deal pencil? Know in 30 seconds.
+          </h3>
+          <p className="text-[15px] text-[#4A4843] leading-[1.65] mb-4 m-0 max-w-[700px]">
+            65% of business acquisitions use SBA financing. Yulia tells you instantly whether a deal is
+            bankable &mdash; current SOFR-plus rates, June 2025 SOP 50 10 8 rules, DSCR analysis, and
+            equity injection requirements. Before you waste three months on diligence for a deal that can&apos;t close.
+          </p>
+          <div className="grid grid-cols-4 gap-4 max-md:grid-cols-2 mt-6">
+            {[
+              { label: 'DSCR analysis', value: 'Instant' },
+              { label: 'Equity injection', value: '10% minimum' },
+              { label: 'Seller note rules', value: 'June 2025' },
+              { label: 'Alternative structures', value: 'Auto-modeled' },
+            ].map(stat => (
+              <div key={stat.label} className="bg-white rounded-2xl p-4" style={{ border: '1px solid rgba(224,220,212,0.5)' }}>
+                <p className="text-[11px] uppercase tracking-[.1em] text-[#7A766E] mb-1 m-0">{stat.label}</p>
+                <p className="text-base font-bold text-[#1A1A18] m-0">{stat.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ═══ JOURNEY TIMELINE ═══ */}
       <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
         <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">

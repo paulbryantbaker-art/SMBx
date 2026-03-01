@@ -70,8 +70,14 @@ const DEAL_EXAMPLES = [
 
 const INSIGHT = {
   title: 'The add-back problem',
-  body: 'The average business owner misses $30K\u2013$80K in legitimate add-backs during their first valuation attempt. That\u2019s not a rounding error \u2014 at a 3x multiple, that\u2019s $90K\u2013$240K left on the table. Yulia\u2019s methodology checks against 47 common add-back categories before producing a range.',
+  body: 'The average business owner misses $30K\u2013$80K in legitimate add-backs during their first valuation attempt. That\u2019s not a rounding error \u2014 at a 3x multiple, that\u2019s $90K\u2013$240K left on the table. Yulia doesn\u2019t just list add-back categories \u2014 she proactively analyzes your P&L, flags every legitimate adjustment, shows you the math, and recalculates your valuation in real time. She\u2019s the analyst who catches what you didn\u2019t know to look for.',
 };
+
+const DELIVERABLES = [
+  { title: 'Full Valuation Report', time: '5 minutes', desc: 'Multi-methodology: comps, multiples, DCF. Benchmarked to your industry, geography, and deal size.' },
+  { title: 'Confidential Information Memorandum', time: '1 hour', desc: 'The document that makes buyers compete. Financials, operations, growth story \u2014 formatted to institutional standards.' },
+  { title: 'Buyer Universe Analysis', time: '10 minutes', desc: 'Strategic, financial, and individual buyers scored by fit, capacity, and acquisition history in your sector.' },
+];
 
 const BROKER_BENEFITS = [
   { bold: 'Invite your broker', rest: ' into the deal room \u2014 they see everything, collaborate in real time' },
@@ -114,8 +120,9 @@ export default function Sell() {
           Know your number <em className="italic text-[#D4714E]">before anyone else does.</em>
         </h1>
         <p className="animate-fadeInUp stagger-2 text-[19px] text-[#7A766E] max-w-[600px] leading-[1.65] mb-16 m-0">
-          Most owners sell for less than they should &mdash; not because the business isn&apos;t
-          worth it, but because they didn&apos;t have the right intelligence at the right time.
+          Yulia proactively finds hidden add-backs in your P&amp;L, flags risks in your CIM before buyers
+          find them, and produces institutional-quality deliverables from conversation. She doesn&apos;t
+          wait for you to ask the right questions &mdash; she asks them for you.
         </p>
         <div className="animate-fadeInUp stagger-3 flex flex-col md:flex-row gap-3 max-md:w-full">
           <Button variant="primary" onClick={() => document.getElementById('chat-input')?.scrollIntoView({ behavior: 'smooth' })}>Get your number &mdash; free &rarr;</Button>
@@ -194,6 +201,27 @@ export default function Sell() {
           <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Methodology insight</p>
           <h3 className="font-sans text-xl font-bold text-[#1A1A18] mb-3 m-0">{INSIGHT.title}</h3>
           <p className="text-[15px] text-[#4A4843] leading-[1.65] m-0">{INSIGHT.body}</p>
+        </div>
+      </section>
+
+      {/* ═══ DELIVERABLE ENGINE ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Deliverable engine</p>
+        <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
+          Institutional work product. <em className="italic text-[#D4714E]">In minutes.</em>
+        </h2>
+        <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-8 m-0 max-w-[600px]">
+          Yulia doesn&apos;t just answer questions &mdash; she produces the documents that move deals forward.
+          Every deliverable built from your actual data, formatted to institutional standards.
+        </p>
+        <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
+          {DELIVERABLES.map(d => (
+            <Card key={d.title} padding="px-7 py-8">
+              <p className="font-sans text-[28px] font-black text-[#D4714E] leading-none mb-1 m-0">{d.time}</p>
+              <h3 className="text-base font-bold text-[#1A1A18] mb-2 m-0">{d.title}</h3>
+              <p className="text-sm text-[#7A766E] leading-[1.55] m-0">{d.desc}</p>
+            </Card>
+          ))}
         </div>
       </section>
 

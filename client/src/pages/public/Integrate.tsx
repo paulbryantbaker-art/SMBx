@@ -169,6 +169,37 @@ export default function Integrate() {
         </div>
       </section>
 
+      {/* ═══ TRANSACTION ECOSYSTEM ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Transaction ecosystem</p>
+        <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
+          Every party. Every document. <em className="italic text-[#D4714E]">One system.</em>
+        </h2>
+        <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-8 m-0 max-w-[600px]">
+          Integration touches every part of the business and every party to the deal.
+          Yulia&apos;s deal room keeps attorneys, CPAs, lenders, and operators aligned &mdash;
+          with role-based access, shared documents, and real-time task tracking.
+        </p>
+        <div className="flex flex-wrap gap-3 mb-8">
+          {['Buyer', 'Seller', 'Broker', 'Attorney', 'CPA', 'Lender', 'Advisor'].map(r => (
+            <span key={r} className="text-[13px] text-[#7A766E] bg-white border border-[#E0DCD4] rounded-full px-4 py-2">{r}</span>
+          ))}
+        </div>
+        <div className="grid grid-cols-4 gap-4 max-md:grid-cols-2">
+          {[
+            { phase: 'Close', desc: 'Day Zero checklist, access transfers, critical notifications' },
+            { phase: 'Stabilize', desc: 'Employee comms, customer retention, vendor renegotiation' },
+            { phase: 'Assess', desc: 'SWOT, benchmarking, synergy identification, gap analysis' },
+            { phase: 'Optimize', desc: 'Integration roadmap, KPIs, milestones, accountability' },
+          ].map(p => (
+            <div key={p.phase} className="bg-white border border-[#E0DCD4] rounded-2xl px-5 py-4">
+              <p className="font-sans text-sm font-bold text-[#D4714E] mb-1 m-0">{p.phase}</p>
+              <p className="text-xs text-[#7A766E] leading-[1.5] m-0">{p.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ═══ TEAM CALLOUT ═══ */}
       <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
         <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-4xl py-12 px-14 grid grid-cols-2 gap-12 items-center max-md:grid-cols-1 max-md:py-8 max-md:px-6 max-md:gap-8">

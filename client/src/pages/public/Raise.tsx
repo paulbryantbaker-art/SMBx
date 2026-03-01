@@ -185,6 +185,32 @@ export default function Raise() {
         </div>
       </section>
 
+      {/* ═══ CAPITAL STACK ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Deliverable engine</p>
+        <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
+          Everything investors need. <em className="italic text-[#D4714E]">Before they ask.</em>
+        </h2>
+        <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-8 m-0 max-w-[600px]">
+          Yulia doesn&apos;t just model your raise &mdash; she produces every document the process demands.
+          Pitch decks built from your actual data. Financial models with scenario analysis. Term sheet
+          breakdowns that show what each clause really costs you.
+        </p>
+        <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
+          {[
+            { time: '2 hours', title: 'Institutional Pitch Deck', desc: '12 slides built from your financials, not a template. Market sizing, competitive positioning, and the ask.' },
+            { time: '10 min', title: 'Financial Model', desc: 'Revenue projections, unit economics, scenario analysis. The model investors will stress-test.' },
+            { time: '5 min', title: 'Term Sheet Analysis', desc: 'Side-by-side comparison of every offer. Dilution, control, economics \u2014 modeled across all scenarios.' },
+          ].map(d => (
+            <Card key={d.title} padding="px-7 py-8">
+              <p className="font-sans text-[28px] font-black text-[#D4714E] leading-none mb-1 m-0">{d.time}</p>
+              <h3 className="text-base font-bold text-[#1A1A18] mb-2 m-0">{d.title}</h3>
+              <p className="text-sm text-[#7A766E] leading-[1.55] m-0">{d.desc}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
       {/* ═══ ADVISOR CALLOUT ═══ */}
       <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
         <div className="bg-[#F3F0EA] border border-[#E0DCD4] rounded-4xl py-12 px-14 grid grid-cols-2 gap-12 items-center max-md:grid-cols-1 max-md:py-8 max-md:px-6 max-md:gap-8">

@@ -36,15 +36,22 @@ const FEATURES = [
     ],
   },
   {
-    title: 'Custom Deliverables',
-    desc: 'Institutional-quality work product in minutes. Valuations, CIMs, pitch decks, DD checklists, financial models, and term sheet analysis \u2014 all from conversation.',
+    title: 'Deliverable Engine',
+    desc: '91+ document types produced from conversation. Valuations, CIMs, pitch decks, DD checklists, financial models, term sheet analysis \u2014 institutional quality in minutes.',
     points: [
-      'Full valuation reports in minutes, not weeks',
+      'Full valuation reports in 5 minutes',
       'CIMs produced in under an hour',
       'Financial models with scenario analysis',
       'Client-ready formatting and branding',
     ],
   },
+];
+
+const DEAL_ROOM_FEATURES = [
+  { title: '7 participant roles', desc: 'Buyer, seller, broker, attorney, CPA, lender, advisor \u2014 every seat at the table with role-based permissions.' },
+  { title: 'Chinese Wall controls', desc: 'Buyers see buyer materials. Sellers see seller materials. Brokers see both. Automatically enforced.' },
+  { title: 'Document lifecycle', desc: 'Draft, review, approve, execute. Every document versioned, every change tracked, every signature recorded.' },
+  { title: 'Deal velocity dashboard', desc: 'Real-time view of every task, deadline, and deliverable across the deal. Nothing falls through the cracks.' },
 ];
 
 const USE_CASES = [
@@ -171,6 +178,26 @@ export default function Enterprise() {
             Brokers using Yulia report managing 3&times; the deal flow with the same team, adding
             $150K+ in annual revenue from increased throughput alone.
           </p>
+        </div>
+      </section>
+
+      {/* ═══ DEAL ROOM ═══ */}
+      <section className="max-w-site mx-auto px-10 pb-24 max-md:px-5 max-md:pb-12">
+        <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Deal room</p>
+        <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-3 m-0">
+          One room. Every party. <em className="italic text-[#D4714E]">Total control.</em>
+        </h2>
+        <p className="text-[17px] text-[#7A766E] leading-[1.6] mb-8 m-0 max-w-[600px]">
+          Every deal has multiple parties who need different access to different information.
+          The deal room keeps everyone organized, everyone informed, and everyone in their lane.
+        </p>
+        <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+          {DEAL_ROOM_FEATURES.map(f => (
+            <Card key={f.title} padding="px-8 py-8">
+              <h3 className="text-base font-bold text-[#1A1A18] mb-2 m-0">{f.title}</h3>
+              <p className="text-sm text-[#7A766E] leading-[1.55] m-0">{f.desc}</p>
+            </Card>
+          ))}
         </div>
       </section>
 

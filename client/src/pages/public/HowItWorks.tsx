@@ -286,6 +286,150 @@ export default function HowItWorks() {
         </div>
       </section>
 
+      {/* ═══ SBA BANKABILITY ENGINE ═══ */}
+      <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
+        <div className="grid grid-cols-2 gap-12 items-start max-md:grid-cols-1 max-md:gap-8">
+          <div>
+            <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">
+              SBA Bankability Engine
+            </p>
+            <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-4 m-0">
+              Does this deal pencil? <em className="italic text-[#D4714E]">Know in 30 seconds.</em>
+            </h2>
+            <p className="text-[15px] text-[#7A766E] leading-[1.65] mb-6 m-0">
+              65% of business acquisitions use SBA financing. Yulia tells you instantly whether a deal
+              is bankable &mdash; current SOFR-plus rates, June 2025 SOP 50 10 8 rules, DSCR analysis,
+              LTV ratios, and SBA eligibility by NAICS code. Before you waste three months on diligence
+              for a deal that can&apos;t close.
+            </p>
+            <ul className="space-y-2 list-none p-0 m-0">
+              {['Instant go/no-go with current rates and rules', 'DSCR, LTV, and equity injection modeling', 'June 2025 seller note and standby provisions', 'Alternative structure suggestions if SBA fails'].map(item => (
+                <li key={item} className="flex gap-2.5 items-start text-sm text-[#4A4843] leading-[1.55]">
+                  <span className="text-[#D4714E] shrink-0 mt-px">&#10003;</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <Card hover={false} padding="px-8 py-8">
+            <p className="text-[11px] uppercase tracking-[.12em] text-[#7A766E] font-semibold mb-4 m-0">Example: $850K deal, $220K SDE</p>
+            <div className="space-y-3">
+              {[
+                { label: 'Equity injection (10%)', value: '$85,000' },
+                { label: 'SBA 7(a) at current rates', value: '$765,000' },
+                { label: 'Monthly debt service', value: '$6,200' },
+                { label: 'DSCR', value: '2.95\u00D7' },
+                { label: 'Minimum required', value: '1.25\u00D7' },
+              ].map(row => (
+                <div key={row.label} className="flex justify-between items-center text-sm">
+                  <span className="text-[#7A766E]">{row.label}</span>
+                  <span className="font-semibold text-[#1A1A18]">{row.value}</span>
+                </div>
+              ))}
+              <div className="mt-4 pt-4 border-t border-[#E0DCD4] flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-[#E8F5E9] text-[#2E7D32] flex items-center justify-center text-xs font-bold">&#10003;</span>
+                <span className="text-sm font-bold text-[#2E7D32]">This deal is bankable.</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      {/* ═══ DELIVERABLE ENGINE ═══ */}
+      <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
+        <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">
+          Deliverable Engine
+        </p>
+        <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-4 m-0">
+          A CIM in one hour. A valuation in <em className="italic text-[#D4714E]">five minutes.</em>
+        </h2>
+        <p className="text-[15px] text-[#7A766E] leading-[1.65] mb-10 m-0 max-w-[700px]">
+          91+ institutional-grade deliverable types generated in minutes. Not templates.
+          Not fill-in-the-blanks. Real analysis built from your actual financials, version-controlled,
+          exportable, and stored in your deal room. Change an assumption &mdash; Yulia regenerates.
+        </p>
+        <div className="grid grid-cols-3 gap-4 max-md:grid-cols-1">
+          {[
+            { type: 'Valuations', time: '5 minutes', desc: 'Multi-methodology: comps, multiples, DCF. Sensitivity analysis. League-adapted depth.' },
+            { type: 'CIMs', time: '1 hour', desc: '10\u201360 pages. Investment thesis, financial analysis, market positioning, qualified buyer list.' },
+            { type: 'Financial models', time: '10 minutes', desc: 'Scenario analysis, return modeling, working capital, SBA bankability. Live recalculation.' },
+          ].map(d => (
+            <Card key={d.type} hover={false} padding="px-7 py-8">
+              <div className="flex items-center gap-3 mb-3">
+                <h3 className="text-base font-bold text-[#1A1A18] m-0">{d.type}</h3>
+                <span className="inline-block text-[11px] font-bold uppercase tracking-[.08em] px-2.5 py-[3px] rounded-full bg-[#FFF0EB] text-[#D4714E]">{d.time}</span>
+              </div>
+              <p className="text-sm text-[#7A766E] leading-[1.55] m-0">{d.desc}</p>
+            </Card>
+          ))}
+        </div>
+        <p className="text-[15px] text-[#7A766E] mt-6 m-0">
+          Plus: LOI drafts, DD checklists, pitch decks, QoE reports, integration plans, blind teasers, working capital models, closing funds flow calculators, and more.
+        </p>
+      </section>
+
+      {/* ═══ DEAL ROOM ═══ */}
+      <section className="max-w-site mx-auto px-10 py-24 border-t border-[#E0DCD4] max-md:px-5 max-md:py-12">
+        <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">
+          Deal Room
+        </p>
+        <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-4 m-0">
+          One room. <em className="italic text-[#D4714E]">Every seat at the table.</em>
+        </h2>
+        <p className="text-[15px] text-[#7A766E] leading-[1.65] mb-10 m-0 max-w-[700px]">
+          Every deal becomes a multi-party workspace. Invite your broker, attorney, CPA, and lender &mdash;
+          each sees exactly what they need and nothing they shouldn&apos;t. Documents organized, version-controlled,
+          and tracked. No more email chains. No more &ldquo;which version is current?&rdquo;
+        </p>
+        <div className="grid grid-cols-2 gap-4 max-md:grid-cols-1">
+          {[
+            { title: '7 participant roles', desc: 'Buyer, seller, attorney, CPA, lender, broker, consultant. Each with scoped access to exactly the right documents.' },
+            { title: 'Chinese Wall enforcement', desc: 'Buyer data and seller data strictly isolated. No cross-deal leakage. Automatic role-based access control.' },
+            { title: 'Document lifecycle', desc: 'Draft \u2192 Review \u2192 Approved \u2192 Locked. Version history, diff views, watermarking, and full audit trails.' },
+            { title: 'Deal velocity tracking', desc: '10-stage pipeline analytics. Identify bottlenecks, benchmark against platform averages, keep every deal moving.' },
+          ].map(f => (
+            <Card key={f.title} hover={false} padding="px-7 py-7">
+              <h3 className="text-[15px] font-bold text-[#1A1A18] mb-2 m-0">{f.title}</h3>
+              <p className="text-sm text-[#7A766E] leading-[1.55] m-0">{f.desc}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ TRANSACTION ECOSYSTEM ═══ */}
+      <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
+        <p className="text-xs uppercase tracking-[.2em] text-[#D4714E] font-semibold mb-4 m-0">
+          Transaction Ecosystem
+        </p>
+        <h2 className="font-sans text-[clamp(28px,3vw,40px)] font-black tracking-[-0.02em] mb-4 m-0">
+          From first question to <em className="italic text-[#D4714E]">wire transfer.</em>
+        </h2>
+        <p className="text-[15px] text-[#7A766E] leading-[1.65] mb-10 m-0 max-w-[700px]">
+          SMBX doesn&apos;t just advise on the deal. It connects you to everyone you need to close
+          and operate &mdash; financing partners, service providers, escrow integration, and post-acquisition
+          operations. One platform for the full lifecycle.
+        </p>
+        <div className="flex flex-wrap gap-3 mb-6">
+          {['SBA lending partners', 'ROBS/401k financing', 'M&A attorneys', 'CPAs & tax advisors', 'Business appraisers', 'Insurance brokers', 'Payroll & HR setup', 'Escrow integration'].map(item => (
+            <span key={item} className="text-[13px] text-[#4A4843] bg-white border border-[#E0DCD4] rounded-full px-4 py-2">{item}</span>
+          ))}
+        </div>
+        <div className="bg-gradient-to-br from-[#FFF8F4] to-[#FFF0EB] rounded-4xl p-10 max-md:p-6" style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05), inset 0 0 0 1px rgba(212,113,78,.06)' }}>
+          <p className="text-[11px] uppercase tracking-[.15em] text-[#D4714E] font-semibold mb-3 m-0">Full buyer lifecycle</p>
+          <div className="flex items-center gap-3 flex-wrap">
+            {['Browsing', 'Under LOI', 'Due diligence', 'Closing', 'Post-close'].map((stage, i) => (
+              <div key={stage} className="flex items-center gap-3">
+                <span className="text-sm font-semibold text-[#1A1A18]">{stage}</span>
+                {i < 4 && <span className="text-[#D4714E]">&rarr;</span>}
+              </div>
+            ))}
+          </div>
+          <p className="text-[13px] text-[#7A766E] mt-3 m-0">
+            Pre-qualify with lenders &rarr; connect attorneys &amp; CPAs &rarr; lock in insurance &rarr; finalize SBA &rarr; set up payroll &amp; operations. Every touchpoint, one platform.
+          </p>
+        </div>
+      </section>
+
       {/* ═══ DEAL STORIES ═══ */}
       <section className="max-w-site mx-auto px-10 py-24 max-md:px-5 max-md:py-12">
         <h2 className="font-sans text-[clamp(32px,3.5vw,48px)] font-black tracking-[-0.02em] mb-10 m-0">
