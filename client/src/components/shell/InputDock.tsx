@@ -27,14 +27,17 @@ export const SUGGESTION_CHIPS: Record<string, { label: string; prompt: string }[
     { label: '"Walk me through the selling process"', prompt: 'Walk me through selling my company. I want to understand the full process from start to close.' },
   ],
   buy: [
-    { label: '"Find acquisition targets in HVAC"', prompt: 'Find acquisition targets in HVAC. I\'m looking to buy in the $1-3M revenue range.' },
-    { label: '"Model SBA financing for a $2M deal"', prompt: 'Help me model SBA financing for a $2M business acquisition. What would the capital structure look like?' },
+    { label: '"Find acquisition targets in home healthcare"', prompt: 'Find acquisition targets in home healthcare. I\'m looking to buy in the $1-3M revenue range.' },
+    { label: '"Evaluate a business I\'m looking at"', prompt: 'I\'m looking at a specific business to acquire. Help me evaluate whether it\'s a good deal.' },
   ],
   advisors: [
-    { label: '"Package a commercial cleaning listing"', prompt: 'I need to package a commercial cleaning business listing. Help me build a professional CIM.' },
-    { label: '"Pre-screen a buyer for SBA"', prompt: 'I need to pre-screen a buyer for SBA eligibility. What do I need to check?' },
+    { label: '"I have a new listing \u2014 help me package it"', prompt: 'I have a new listing and need to package it quickly. Help me build the market intelligence and CIM.' },
+    { label: '"Show me what white-label deliverables look like"', prompt: 'Show me what white-label deliverables look like. I want to see the quality of reports I can brand with my firm\'s identity.' },
   ],
-  pricing: [],
+  pricing: [
+    { label: '"What can you do for free? Show me."', prompt: 'What can you do for free? Show me the quality of your free analysis.' },
+    { label: '"What\'s included in a full valuation report?"', prompt: 'What\'s included in a full valuation report? Walk me through what I\'d get.' },
+  ],
 };
 
 export default function InputDock({ viewState, activeTab, onSend, disabled }: InputDockProps) {

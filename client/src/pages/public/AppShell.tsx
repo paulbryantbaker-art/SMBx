@@ -172,11 +172,11 @@ export default function AppShell() {
 
   // Content map for educational tabs
   const contentMap: Record<TabId, JSX.Element> = {
-    home: <HomeContent />,
-    sell: <SellContent />,
-    buy: <BuyContent />,
-    advisors: <AdvisorsContent />,
-    pricing: <PricingContent />,
+    home: <HomeContent onSend={handleSend} />,
+    sell: <SellContent onSend={handleSend} />,
+    buy: <BuyContent onSend={handleSend} />,
+    advisors: <AdvisorsContent onSend={handleSend} />,
+    pricing: <PricingContent onSend={handleSend} />,
   };
 
   // Should we show the input dock?
