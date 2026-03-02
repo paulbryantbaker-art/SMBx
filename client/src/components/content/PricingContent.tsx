@@ -157,7 +157,7 @@ export default function PricingContent({ onSend }: Props) {
       <div className="border-t border-gray-100 pt-12 mb-12">
         <h2 className="text-[22px] font-bold text-[#2D3142] mb-6">How the wallet works</h2>
         <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-4">
-          SMBX uses a wallet system. Add funds when you&apos;re ready &mdash; Yulia tells you the cost before you commit, you approve each purchase individually.
+          smb<span className="text-[#D4714E] font-bold">X</span>.ai uses a wallet system. Add funds when you&apos;re ready &mdash; Yulia tells you the cost before you commit, you approve each purchase individually.
         </p>
         <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-4">
           No subscriptions. No contracts. No recurring charges. Your balance carries forward indefinitely across all your deals. Pause for six months &mdash; your funds are waiting.
@@ -194,14 +194,14 @@ export default function PricingContent({ onSend }: Props) {
           <div>
             <h3 className="text-[15px] font-bold text-[#2D3142] mb-2">&ldquo;How is this different from ChatGPT?&rdquo;</h3>
             <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-              ChatGPT generates plausible text about M&amp;A. SMBX follows a structured seven-layer methodology, synthesizes data from sovereign government sources, and delivers traceable analysis calibrated to your deal. The difference: reading a Wikipedia article about surgery vs. consulting a specialist with your chart open.
+              ChatGPT generates plausible text about M&amp;A. smb<span className="text-[#D4714E] font-bold">X</span>.ai follows a structured seven-layer methodology, synthesizes data from sovereign government sources, and delivers traceable analysis calibrated to your deal. The difference: reading a Wikipedia article about surgery vs. consulting a specialist with your chart open.
             </p>
           </div>
 
           <div>
             <h3 className="text-[15px] font-bold text-[#2D3142] mb-2">&ldquo;What if I&apos;m already working with a broker?&rdquo;</h3>
             <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-              Great &mdash; they should be using SMBX too. Share your analysis with your advisor or invite them to the platform. Many of our most active users are brokers and M&amp;A advisors.
+              Great &mdash; they should be using smb<span className="text-[#D4714E] font-bold">X</span>.ai too. Share your analysis with your advisor or invite them to the platform. Many of our most active users are brokers and M&amp;A advisors.
             </p>
           </div>
 

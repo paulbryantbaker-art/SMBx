@@ -8,7 +8,7 @@ export default function SellContent({ onSend }: Props) {
   return (
     <div className="max-w-4xl mx-auto px-6 pt-12 pb-8 animate-[fadeIn_0.5s_ease]">
       <span className="inline-block px-3 py-1 rounded-full bg-orange-50 text-[#D4714E] text-[12px] font-semibold uppercase tracking-wide mb-6">
-        Sell Your Business
+        Sell your business
       </span>
 
       <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05] text-[#2D3142] mb-8">
@@ -189,19 +189,19 @@ export default function SellContent({ onSend }: Props) {
       <div className="border-t border-gray-100 pt-12 mb-4">
         <h2 className="text-[22px] font-bold text-[#2D3142] mb-6">Working with a broker or advisor</h2>
         <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-4">
-          SMBX intelligence makes every advisory engagement more productive. If you&apos;re already working with a broker:
+          smb<span className="text-[#D4714E] font-bold">X</span>.ai intelligence makes every advisory engagement more productive. If you&apos;re already working with a broker:
         </p>
         <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-4">
-          <strong className="text-[#2D3142]">Share your analysis</strong> &mdash; Give your advisor your SMBX valuation and market intelligence to accelerate the engagement. The market research Yulia provides is the same groundwork your broker would do in the first weeks &mdash; having it ready from day one lets them focus on relationships and negotiations.
+          <strong className="text-[#2D3142]">Share your analysis</strong> &mdash; Give your advisor your smb<span className="text-[#D4714E] font-bold">X</span>.ai valuation and market intelligence to accelerate the engagement. The market research Yulia provides is the same groundwork your broker would do in the first weeks &mdash; having it ready from day one lets them focus on relationships and negotiations.
         </p>
         <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-4">
-          <strong className="text-[#2D3142]">Invite your advisor</strong> &mdash; Brokers can access SMBX directly to package deals, qualify buyers, and generate white-label deliverables under their own brand.
+          <strong className="text-[#2D3142]">Invite your advisor</strong> &mdash; Brokers can access smb<span className="text-[#D4714E] font-bold">X</span>.ai directly to package deals, qualify buyers, and generate white-label deliverables under their own brand.
         </p>
         <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-6">
           <strong className="text-[#2D3142]">You don&apos;t have to choose.</strong> Whether you work with a professional or explore independently, the intelligence adapts to your situation.
         </p>
         <div className="flex flex-wrap gap-2">
-          <PromptChip label="I'm working with a broker &mdash; how does SMBX fit in?" prompt="I'm working with a broker. How does SMBX fit into our process?" onSend={onSend} />
+          <PromptChip label="I'm working with a broker &mdash; how does smbX.ai fit in?" prompt="I'm working with a broker. How does smbX.ai fit into our process?" onSend={onSend} />
         </div>
       </div>
     </div>

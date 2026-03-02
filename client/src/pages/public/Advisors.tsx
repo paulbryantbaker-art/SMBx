@@ -311,7 +311,7 @@ export default function Advisors() {
       <section className="adv-hero">
         <h1>Your expertise closes deals. Now close more of them.</h1>
         <p className="adv-hero-sub">
-          SMBX gives M&amp;A advisors, business brokers, and deal professionals the intelligence infrastructure to serve more clients, package better deals, and move through engagements faster.
+          smbX.ai gives M&amp;A advisors, business brokers, and deal professionals the intelligence infrastructure to serve more clients, package better deals, and move through engagements faster.
         </p>
         <div className="adv-hero-ctas">
           <button className="adv-btn-primary" onClick={talkToYulia}>
@@ -341,7 +341,7 @@ export default function Advisors() {
           Every hour spent on data assembly is an hour not spent on what actually moves the needle: client relationships, negotiations, and strategic counsel.
         </p>
         <p className="adv-body">
-          SMBX handles the intelligence work so you can focus on the advisory work.
+          smbX.ai handles the intelligence work so you can focus on the advisory work.
         </p>
       </section>
 
@@ -353,7 +353,7 @@ export default function Advisors() {
           <div className="adv-card">
             <h3>Package a new listing</h3>
             <p>
-              A new seller engagement used to mean days of manual research before you could have an informed conversation about price. With SMBX, tell Yulia about the business and get instant market intelligence &mdash; industry multiples, competitive landscape, regional economics, preliminary valuation range, and add-back identification. All sourced. All defensible.
+              A new seller engagement used to mean days of manual research before you could have an informed conversation about price. With smbX.ai, tell Yulia about the business and get instant market intelligence &mdash; industry multiples, competitive landscape, regional economics, preliminary valuation range, and add-back identification. All sourced. All defensible.
             </p>
           </div>
           <div className="adv-card">
@@ -371,7 +371,7 @@ export default function Advisors() {
           <div className="adv-card">
             <h3>Make smaller deals profitable</h3>
             <p>
-              There are deals in the $500K&ndash;$2M range that your expertise could close &mdash; but they don&apos;t justify 40 hours of manual prep. SMBX changes the economics. The intelligence infrastructure that makes a $10M engagement great makes a $1M engagement viable.
+              There are deals in the $500K&ndash;$2M range that your expertise could close &mdash; but they don&apos;t justify 40 hours of manual prep. smbX.ai changes the economics. The intelligence infrastructure that makes a $10M engagement great makes a $1M engagement viable.
             </p>
           </div>
         </div>
@@ -381,7 +381,7 @@ export default function Advisors() {
       <hr className="adv-divider" />
       <section className="adv-section">
         <div className="adv-highlight">
-          <h2 className="adv-heading" style={{ marginBottom: 16 }}>Present SMBX intelligence under your brand.</h2>
+          <h2 className="adv-heading" style={{ marginBottom: 16 }}>Present smbX.ai intelligence under your brand.</h2>
           <p className="adv-body" style={{ marginBottom: 16 }}>
             Every deliverable Yulia generates &mdash; valuations, market intelligence reports, CIMs, financial analyses &mdash; can be white-labeled with your firm&apos;s identity. Your client sees a polished, professional document from their advisor. You get institutional-quality analysis without the institutional overhead.
           </p>
@@ -396,10 +396,10 @@ export default function Advisors() {
       <section className="adv-section">
         <h2 className="adv-heading">Intelligence you can stake your reputation on.</h2>
         <p className="adv-body">
-          Advisors don&apos;t need more opinions. They need defensible data. SMBX is built on the same sovereign data sources that inform institutional research desks &mdash; Census Bureau demographics, BLS industry data, Federal Reserve economic indicators, SEC filings, and SBA lending records.
+          Advisors don&apos;t need more opinions. They need defensible data. smbX.ai is built on the same sovereign data sources that inform institutional research desks &mdash; Census Bureau demographics, BLS industry data, Federal Reserve economic indicators, SEC filings, and SBA lending records.
         </p>
         <p className="adv-body">
-          Yulia&apos;s Seven Layers of Intelligence methodology evaluates every deal across industry structure, regional economics, financial normalization, buyer landscape, deal architecture, risk assessment, and forward signals. When you present an SMBX analysis to a client, every number has a source and every conclusion has a methodology behind it.
+          Yulia&apos;s Seven Layers of Intelligence methodology evaluates every deal across industry structure, regional economics, financial normalization, buyer landscape, deal architecture, risk assessment, and forward signals. When you present an smbX.ai analysis to a client, every number has a source and every conclusion has a methodology behind it.
         </p>
         <p className="adv-body">
           That&apos;s the difference between intelligence you&apos;ll put your name on and a printout from a chatbot.
@@ -450,7 +450,7 @@ export default function Advisors() {
       {/* ═══ SECTION 6: GETTING STARTED ═══ */}
       <hr className="adv-divider" />
       <section className="adv-section">
-        <h2 className="adv-heading">Start using SMBX in your next engagement.</h2>
+        <h2 className="adv-heading">Start using smbX.ai in your next engagement.</h2>
         <div className="adv-steps">
           <div className="adv-step">
             <h3>Tell Yulia about the deal.</h3>
@@ -472,7 +472,7 @@ export default function Advisors() {
       <section className="adv-section">
         <h2 className="adv-heading">Built with advisors. Growing with advisors.</h2>
         <p className="adv-body">
-          SMBX is building the intelligence infrastructure that M&amp;A professionals have needed for years. Our methodology is informed by real transaction experience, and we&apos;re actively developing our advisor program &mdash; including partnership tiers, volume pricing, and co-branded capabilities.
+          smbX.ai is building the intelligence infrastructure that M&amp;A professionals have needed for years. Our methodology is informed by real transaction experience, and we&apos;re actively developing our advisor program &mdash; including partnership tiers, volume pricing, and co-branded capabilities.
         </p>
         <p className="adv-body">
           If you&apos;re a broker, M&amp;A advisor, or deal professional who wants to shape how this platform evolves, we want to hear from you.

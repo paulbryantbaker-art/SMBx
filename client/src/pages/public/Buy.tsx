@@ -308,7 +308,7 @@ export default function Buy() {
       <section className="buy-hero">
         <h1>Find the right deal. Know it&apos;s the right deal.</h1>
         <p className="buy-hero-sub">
-          Whether you&apos;re a first-time buyer or a seasoned acquirer, the hardest part isn&apos;t finding a business &mdash; it&apos;s knowing whether the numbers work. SMBX gives you the market intelligence, financial modeling, and deal analysis to buy with conviction.
+          Whether you&apos;re a first-time buyer or a seasoned acquirer, the hardest part isn&apos;t finding a business &mdash; it&apos;s knowing whether the numbers work. smbX.ai gives you the market intelligence, financial modeling, and deal analysis to buy with conviction.
         </p>
         <button className="buy-btn-primary" onClick={startBuy}>
           Start evaluating opportunities
@@ -366,7 +366,7 @@ export default function Buy() {
       {/* ═══ SECTION 2: THE BUY JOURNEY ═══ */}
       <hr className="buy-divider" />
       <section className="buy-section">
-        <h2 className="buy-heading">Your buying journey with SMBX</h2>
+        <h2 className="buy-heading">Your buying journey with smbX.ai</h2>
         <p className="buy-body" style={{ marginBottom: 32 }}>
           From market screening to close, Yulia gives you the intelligence to move with confidence. The first two steps are free &mdash; no account required.
         </p>
@@ -395,7 +395,7 @@ export default function Buy() {
         <div className="buy-highlight">
           <h2 className="buy-heading" style={{ marginBottom: 16 }}>For search funds &amp; PE professionals</h2>
           <p className="buy-body" style={{ marginBottom: 16 }}>
-            Screen industries at portfolio speed. Model acquisitions across deal sizes. Build conviction on targets before committing diligence resources. SMBX gives institutional buyers the analytical infrastructure to evaluate more opportunities &mdash; faster and with better data.
+            Screen industries at portfolio speed. Model acquisitions across deal sizes. Build conviction on targets before committing diligence resources. smbX.ai gives institutional buyers the analytical infrastructure to evaluate more opportunities &mdash; faster and with better data.
           </p>
           <p className="buy-body" style={{ marginBottom: 0 }}>
             Whether you&apos;re a solo searcher evaluating your first acquisition or a platform running a buy-and-build strategy, the intelligence scales with your thesis.

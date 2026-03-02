@@ -308,7 +308,7 @@ export default function Sell() {
       <section className="sell-hero">
         <h1>Know your number before you negotiate.</h1>
         <p className="sell-hero-sub">
-          Most business owners have never seen a real valuation of their company. SMBX gives you the market intelligence, financial analysis, and deal preparation that used to require a $15K engagement &mdash; starting with a conversation.
+          Most business owners have never seen a real valuation of their company. smbX.ai gives you the market intelligence, financial analysis, and deal preparation that used to require a $15K engagement &mdash; starting with a conversation.
         </p>
         <button className="sell-btn-primary" onClick={startSell}>
           Start with your valuation
@@ -366,7 +366,7 @@ export default function Sell() {
       {/* ═══ SECTION 2: THE SELL JOURNEY ═══ */}
       <hr className="sell-divider" />
       <section className="sell-section">
-        <h2 className="sell-heading">Your selling journey with SMBX</h2>
+        <h2 className="sell-heading">Your selling journey with smbX.ai</h2>
         <p className="sell-body" style={{ marginBottom: 32 }}>
           From first question to close, Yulia walks with you through every stage. The first two steps are free &mdash; no account required.
         </p>
@@ -395,10 +395,10 @@ export default function Sell() {
         <div className="sell-highlight">
           <h2 className="sell-heading" style={{ marginBottom: 16 }}>Working with an advisor? Even better.</h2>
           <p className="sell-body" style={{ marginBottom: 16 }}>
-            SMBX doesn&apos;t replace your broker or M&amp;A advisor. It makes them faster. Many sellers use SMBX to get informed before hiring an advisor &mdash; so the first meeting is a strategic conversation, not an education session.
+            smbX.ai doesn&apos;t replace your broker or M&amp;A advisor. It makes them faster. Many sellers use smbX.ai to get informed before hiring an advisor &mdash; so the first meeting is a strategic conversation, not an education session.
           </p>
           <p className="sell-body" style={{ marginBottom: 0 }}>
-            Your advisor can also use SMBX directly to generate market intelligence, build financial analyses, and package deliverables under their brand. Ask them about it &mdash; or <a href="/advisors" style={{ color: T.terra, fontWeight: 600 }}>share our advisor page</a>.
+            Your advisor can also use smbX.ai directly to generate market intelligence, build financial analyses, and package deliverables under their brand. Ask them about it &mdash; or <a href="/advisors" style={{ color: T.terra, fontWeight: 600 }}>share our advisor page</a>.
           </p>
         </div>
       </section>

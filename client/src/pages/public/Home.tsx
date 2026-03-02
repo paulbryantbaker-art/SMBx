@@ -88,7 +88,7 @@ export default function Home() {
     const params = new URLSearchParams(window.location.search);
     let msg = '';
     if (params.get('advisor') === '1') {
-      msg = "I'm a business broker evaluating SMBX for my practice. What can you do for advisors?";
+      msg = "I'm a business broker evaluating smbX.ai for my practice. What can you do for advisors?";
     } else if (params.get('sell') === '1') {
       msg = 'I\u2019m thinking about selling my business. Help me understand what it might be worth and walk me through the process.';
     } else if (params.get('buy') === '1') {
@@ -739,7 +739,7 @@ export default function Home() {
             {/* ── SECTION 1: INTELLIGENCE STORY ── */}
             <hr className="home-section-divider" />
             <section className="home-section">
-              <p className="home-overline">The SMBX methodology</p>
+              <p className="home-overline">The smbX.ai methodology</p>
               <h2 className="home-section-heading">The data is public. The intelligence is not.</h2>
               <p className="home-section-body">
                 The same market data that powers Wall Street &mdash; Census Bureau demographics, Bureau of Labor Statistics industry reports, Federal Reserve economic indicators, SEC filings, SBA lending records &mdash; is technically available to anyone.
@@ -762,7 +762,7 @@ export default function Home() {
                 </div>
                 <div className="home-pillar">
                   <h3>Localized to your market</h3>
-                  <p>National averages hide what matters. A plumbing company in Phoenix and a plumbing company in rural Pennsylvania are fundamentally different deals. SMBX intelligence is specific to your metro, your industry, and your competitive environment.</p>
+                  <p>National averages hide what matters. A plumbing company in Phoenix and a plumbing company in rural Pennsylvania are fundamentally different deals. smbX.ai intelligence is specific to your metro, your industry, and your competitive environment.</p>
                 </div>
                 <div className="home-pillar">
                   <h3>Calibrated to every deal size</h3>
@@ -815,7 +815,7 @@ export default function Home() {
                 <div className="home-persona">
                   <h3>Brokers &amp; M&amp;A advisors</h3>
                   <p>Package listings faster. Qualify buyers instantly. Walk into every pitch with localized market intelligence that demonstrates your analytical depth.</p>
-                  <button className="home-persona-cta" onClick={() => handleSuggestion("I'm a business broker. Show me how you can help me with my practice \u2014 valuations, CIMs, buyer matching, deal management.")}>See how advisors use SMBX &rarr;</button>
+                  <button className="home-persona-cta" onClick={() => handleSuggestion("I'm a business broker. Show me how you can help me with my practice \u2014 valuations, CIMs, buyer matching, deal management.")}>See how advisors use smbX.ai &rarr;</button>
                 </div>
                 <div className="home-persona">
                   <h3>PE, family offices &amp; search funds</h3>
@@ -855,7 +855,7 @@ export default function Home() {
             <section className="home-section">
               <h2 className="home-section-heading">Every insight is traceable. Every analysis is explainable.</h2>
               <p className="home-section-body">
-                SMBX is built on data from agencies required by law to collect it &mdash; the same sovereign data sources that inform the Federal Reserve, Wall Street research desks, and the world&apos;s largest financial institutions.
+                smbX.ai is built on data from agencies required by law to collect it &mdash; the same sovereign data sources that inform the Federal Reserve, Wall Street research desks, and the world&apos;s largest financial institutions.
               </p>
               <p className="home-section-body">
                 Yulia doesn&apos;t generate plausible-sounding text about your deal. She runs a structured methodology against authoritative data and delivers traceable conclusions. When she says there are 847 HVAC companies in your metro, that number comes from Census Bureau County Business Patterns data. When she cites an industry multiple, it&apos;s grounded in comparable transaction analysis.

@@ -47,14 +47,14 @@ const FAQS = [
   },
   {
     q: 'How is this different from ChatGPT?',
-    a: 'ChatGPT is a general-purpose language model. SMBX is a purpose-built deal intelligence platform. Yulia follows a structured seven-layer methodology, synthesizes data from authoritative government sources (Census, BLS, FRED, SEC EDGAR), and delivers traceable analysis calibrated to your specific deal. The difference is the difference between a search engine and a research department.',
+    a: 'ChatGPT is a general-purpose language model. smbX.ai is a purpose-built deal intelligence platform. Yulia follows a structured seven-layer methodology, synthesizes data from authoritative government sources (Census, BLS, FRED, SEC EDGAR), and delivers traceable analysis calibrated to your specific deal. The difference is the difference between a search engine and a research department.',
   },
   {
     q: 'What if I\u2019m working with a broker or advisor?',
-    a: 'Great \u2014 they should be using SMBX too. Our intelligence complements advisory relationships. Share your analysis with your advisor to accelerate the engagement, or invite them directly into the platform. Many brokers use SMBX to package deals and generate client-ready deliverables.',
+    a: 'Great \u2014 they should be using smbX.ai too. Our intelligence complements advisory relationships. Share your analysis with your advisor to accelerate the engagement, or invite them directly into the platform. Many brokers use smbX.ai to package deals and generate client-ready deliverables.',
   },
   {
-    q: 'Can I use SMBX deliverables with my clients?',
+    q: 'Can I use smbX.ai deliverables with my clients?',
     a: 'Yes. All deliverables can be white-labeled with your firm\u2019s branding. The analysis is yours to use however it serves your practice and your clients.',
   },
   {
@@ -461,7 +461,7 @@ export default function Pricing() {
         <div className="price-wallet">
           <h2 className="price-heading" style={{ marginBottom: 16 }}>Pay as you go. No subscriptions. No surprises.</h2>
           <p className="price-body" style={{ marginBottom: 16 }}>
-            SMBX uses a wallet system. Add funds when you&apos;re ready for a premium deliverable &mdash; Yulia will let you know exactly what it costs before you commit. No recurring charges, no contracts, no hidden fees.
+            smbX.ai uses a wallet system. Add funds when you&apos;re ready for a premium deliverable &mdash; Yulia will let you know exactly what it costs before you commit. No recurring charges, no contracts, no hidden fees.
           </p>
           <p className="price-body" style={{ marginBottom: 0 }}>
             Your wallet balance carries forward across deals. If you&apos;re an advisor running multiple engagements, your funds work across all of them.

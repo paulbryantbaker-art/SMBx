@@ -16,7 +16,7 @@ export default function AdvisorsContent({ onSend }: Props) {
       </h1>
 
       <p className="text-[18px] leading-relaxed text-[#4F5D75] max-w-2xl mb-16">
-        SMBX gives M&amp;A advisors, business brokers, and deal professionals the intelligence infrastructure
+        smb<span className="text-[#D4714E] font-bold">X</span>.ai gives M&amp;A advisors, business brokers, and deal professionals the intelligence infrastructure
         to serve more clients, package better deals, and move through engagements faster.
       </p>
 
@@ -52,7 +52,7 @@ export default function AdvisorsContent({ onSend }: Props) {
       {/* ── Below-fold educational content ── */}
 
       <div className="border-t border-gray-100 pt-12 mb-12">
-        <h2 className="text-[22px] font-bold text-[#2D3142] mb-6">How advisors use SMBX</h2>
+        <h2 className="text-[22px] font-bold text-[#2D3142] mb-6">How advisors use smb<span className="text-[#D4714E]">X</span>.ai</h2>
 
         <div className="space-y-8">
           <div>
@@ -78,7 +78,7 @@ export default function AdvisorsContent({ onSend }: Props) {
 
           <div>
             <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-3">
-              <strong className="text-[#2D3142]">Make smaller deals profitable.</strong> Deals in the $500K&ndash;$2M range that don&apos;t justify 40 hours of manual prep become viable with SMBX. Same intelligence, same deliverable quality, fraction of the time investment. Grow your practice without growing overhead.
+              <strong className="text-[#2D3142]">Make smaller deals profitable.</strong> Deals in the $500K&ndash;$2M range that don&apos;t justify 40 hours of manual prep become viable with smb<span className="text-[#D4714E] font-bold">X</span>.ai. Same intelligence, same deliverable quality, fraction of the time investment. Grow your practice without growing overhead.
             </p>
             <PromptChip label='Try it: "Quick valuation for a $600K landscaping company"' prompt="Quick valuation for a $600K landscaping company. I need to see if this deal is worth my time." onSend={onSend} />
           </div>
@@ -109,7 +109,7 @@ export default function AdvisorsContent({ onSend }: Props) {
           </p>
         </div>
         <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-          Every number Yulia cites has a source. Every valuation shows its methodology. When you present an SMBX analysis to a client, you&apos;re presenting intelligence that survives scrutiny.
+          Every number Yulia cites has a source. Every valuation shows its methodology. When you present an smb<span className="text-[#D4714E] font-bold">X</span>.ai analysis to a client, you&apos;re presenting intelligence that survives scrutiny.
         </p>
       </div>
 
@@ -157,13 +157,13 @@ export default function AdvisorsContent({ onSend }: Props) {
       <div className="border-t border-gray-100 pt-12 mb-4">
         <h2 className="text-[22px] font-bold text-[#2D3142] mb-6">Building our advisor program</h2>
         <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-4">
-          We&apos;re actively developing partnership tiers, volume pricing, and co-branded capabilities for advisors who want to integrate SMBX into their practice.
+          We&apos;re actively developing partnership tiers, volume pricing, and co-branded capabilities for advisors who want to integrate smbX.ai into their practice.
         </p>
         <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-6">
           If you&apos;re a broker or M&amp;A advisor who wants to shape how this platform evolves, we want to hear from you.
         </p>
         <div className="flex flex-wrap gap-2">
-          <PromptChip label="Tell me about advisor partnership options" prompt="Tell me about advisor partnership options. I'm a broker interested in integrating SMBX into my practice." onSend={onSend} />
+          <PromptChip label="Tell me about advisor partnership options" prompt="Tell me about advisor partnership options. I'm a broker interested in integrating smbX.ai into my practice." onSend={onSend} />
         </div>
       </div>
     </div>
