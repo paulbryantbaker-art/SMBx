@@ -70,15 +70,6 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
     }
   }, [viewState]);
 
-  // Prevent focus from scrolling viewport on mobile
-  const handleFocus = useCallback(() => {
-    // On iOS, focusing a fixed-position input can cause the viewport to jump.
-    // preventScroll on programmatic focus handles it, but taps need this:
-    requestAnimationFrame(() => {
-      window.scrollTo(0, 0);
-    });
-  }, []);
-
   return (
     <div className="flex-shrink-0 w-full bg-white relative z-20" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
       {/* Gradient fade above dock — taller for more presence */}
@@ -107,7 +98,6 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
               value={value}
               onChange={handleChange}
               onKeyDown={handleKey}
-              onFocus={handleFocus}
               placeholder={placeholder}
               className="flex-1 bg-transparent border-none outline-none resize-none text-[16px] text-[#2D3142] leading-[1.5] placeholder:text-[#6B7280] placeholder:font-medium"
               style={{ fontFamily: 'inherit', minHeight: '26px', maxHeight: '160px' }}

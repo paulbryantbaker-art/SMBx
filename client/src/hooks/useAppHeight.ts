@@ -8,15 +8,8 @@ export function useAppHeight() {
       const h = vv ? vv.height : window.innerHeight;
       const t = vv ? vv.offsetTop : 0;
 
-      // Set CSS variable for any component that needs it (e.g. PublicLayout)
       document.documentElement.style.setProperty('--app-height', h + 'px');
-
-      // Also target #app-root directly (Home page uses this)
-      const app = document.getElementById('app-root');
-      if (app) {
-        app.style.height = h + 'px';
-        app.style.top = t + 'px';
-      }
+      document.documentElement.style.setProperty('--app-top', t + 'px');
     }
 
     if (vv) {

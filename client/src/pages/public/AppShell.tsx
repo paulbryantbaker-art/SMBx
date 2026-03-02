@@ -87,7 +87,14 @@ export default function AppShell() {
   return (
     <div
       className="flex bg-white text-[#2D3142] font-sans overflow-hidden selection:bg-[#D4714E] selection:text-white"
-      style={{ height: 'var(--app-height, 100dvh)', overscrollBehavior: 'none', position: 'fixed', inset: 0 }}
+      style={{
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        top: 'var(--app-top, 0px)',
+        height: 'var(--app-height, 100dvh)',
+        overscrollBehavior: 'none',
+      }}
     >
       {/* ── Desktop sidebar ── */}
       {!isMobile && (
