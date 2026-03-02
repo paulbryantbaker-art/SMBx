@@ -42,8 +42,9 @@ export const SUGGESTION_CHIPS: Record<string, { label: string; prompt: string }[
 
 export default function InputDock({ viewState, activeTab, onSend, disabled }: InputDockProps) {
   const [value, setValue] = useState('');
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const hasContent = value.trim().length > 0;
+  const isLanding = viewState === 'landing';
 
   const placeholder = viewState === 'chat' ? PLACEHOLDERS.chat : (PLACEHOLDERS[activeTab] || PLACEHOLDERS.home);
 
@@ -51,7 +52,7 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
     const t = value.trim();
     if (!t || disabled) return;
     setValue('');
-    if (inputRef.current) inputRef.current.style.height = 'auto';
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
     onSend(t);
   }, [value, disabled, onSend]);
 
@@ -69,63 +70,85 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
   // Auto-focus after morph to chat
   useEffect(() => {
     if (viewState === 'chat') {
-      setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 300);
+      setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 300);
     }
   }, [viewState]);
 
-  return (
-    <div className="flex-shrink-0 w-full bg-white relative z-20" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
-      {/* Gradient fade above dock — taller for more presence */}
-      <div className="pointer-events-none absolute -top-16 left-0 right-0 h-16" style={{ background: 'linear-gradient(to bottom, transparent, white)' }} />
-
-      <div className="max-w-3xl mx-auto px-4">
-        {/* Input bar */}
-        <div
-          className={`relative bg-white rounded-2xl transition-all duration-300 ${
-            viewState === 'landing'
-              ? 'border-2 border-gray-300 shadow-[0_4px_20px_rgba(0,0,0,0.1),0_8px_40px_rgba(0,0,0,0.06)]'
-              : 'border border-gray-200 shadow-lg'
-          } focus-within:border-[#D4714E] focus-within:shadow-[0_4px_20px_rgba(212,113,78,0.15),0_8px_40px_rgba(212,113,78,0.08)]`}
-        >
-          <div className="flex items-end gap-3 px-4 py-3.5">
-            {/* Sparkles icon — larger, filled */}
-            <div className="flex-shrink-0 pb-0.5">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="#D4714E" stroke="#D4714E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z" />
-              </svg>
-            </div>
-
-            {/* Textarea */}
+  if (isLanding) {
+    return (
+      <div className="fixed bottom-6 md:bottom-10 left-0 right-0 px-4 z-50 pointer-events-none" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="max-w-[700px] mx-auto pointer-events-auto">
+          {/* Pill input */}
+          <div className="bg-white rounded-[28px] p-2 pl-6 flex items-end shadow-[0_8px_30px_rgba(0,0,0,0.12),0_20px_60px_rgba(0,0,0,0.08)] ring-2 ring-black/[0.04] border border-[#D4714E]/20 transition-all hover:scale-[1.02] focus-within:scale-[1.02] focus-within:border-[#D4714E]/40">
+            <span className="text-[#D4714E] text-2xl leading-none mr-2 font-serif pb-3.5">&#10023;</span>
             <textarea
-              ref={inputRef}
+              ref={textareaRef}
               value={value}
               onChange={handleChange}
               onKeyDown={handleKey}
               placeholder={placeholder}
-              className="flex-1 bg-transparent border-none outline-none resize-none text-[16px] text-[#2D3142] leading-[1.5] placeholder:text-[#6B7280] placeholder:font-medium"
+              className="flex-1 bg-transparent border-none outline-none resize-none text-[16px] text-[#1A1A18] placeholder:text-[#A9A49C] py-3.5 px-2 font-medium leading-[1.5]"
               style={{ fontFamily: 'inherit', minHeight: '26px', maxHeight: '160px' }}
               rows={1}
             />
-
-            {/* Send button — always visible, larger */}
             <button
               onClick={send}
               disabled={!hasContent || disabled}
-              className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border-none cursor-pointer transition-all ${
+              className={`px-6 py-3.5 rounded-full flex items-center justify-center font-bold text-sm tracking-widest uppercase transition-colors border-none cursor-pointer ${
                 hasContent && !disabled
-                  ? 'bg-[#D4714E] text-white hover:bg-[#BE6342] shadow-md'
+                  ? 'bg-[#D4714E] text-white hover:bg-[#b8613d]'
                   : 'bg-gray-200 text-gray-400'
               }`}
               type="button"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 2L11 13" /><path d="M22 2l-7 20-4-9-9-4 20-7z" />
-              </svg>
+              Send
+            </button>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+  // Chat mode
+  return (
+    <div className="flex-shrink-0 w-full bg-white relative z-20" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
+      {/* Gradient fade above dock */}
+      <div className="pointer-events-none absolute -top-16 left-0 right-0 h-16" style={{ background: 'linear-gradient(to bottom, transparent, white)' }} />
+
+      <div className="max-w-3xl mx-auto px-4">
+        <div className="relative bg-white rounded-2xl border border-gray-200 shadow-lg focus-within:border-[#D4714E] focus-within:shadow-[0_4px_20px_rgba(212,113,78,0.15)] transition-all duration-300">
+          <div className="flex items-end gap-3 px-4 py-3.5">
+            <div className="flex-shrink-0 pb-0.5">
+              <span className="text-[#D4714E] text-[22px] leading-none font-serif">&#10023;</span>
+            </div>
+
+            <textarea
+              ref={textareaRef}
+              value={value}
+              onChange={handleChange}
+              onKeyDown={handleKey}
+              placeholder={placeholder}
+              className="flex-1 bg-transparent border-none outline-none resize-none text-[16px] text-[#1A1A18] leading-[1.5] placeholder:text-[#6B7280] placeholder:font-medium font-medium"
+              style={{ fontFamily: 'inherit', minHeight: '26px', maxHeight: '160px' }}
+              rows={1}
+            />
+
+            <button
+              onClick={send}
+              disabled={!hasContent || disabled}
+              className={`flex-shrink-0 px-5 py-2 rounded-xl flex items-center justify-center border-none cursor-pointer transition-all font-bold text-sm tracking-wider uppercase ${
+                hasContent && !disabled
+                  ? 'bg-[#D4714E] text-white hover:bg-[#b8613d] shadow-md'
+                  : 'bg-gray-200 text-gray-400'
+              }`}
+              type="button"
+            >
+              Send
             </button>
           </div>
         </div>
 
-        {/* Footer text */}
         <p className="text-center text-[12px] text-[#9CA3AF] mt-2.5 hidden sm:block">
           Yulia is an AI advisor. Built on Census, BLS, FRED, and SEC EDGAR data.
         </p>

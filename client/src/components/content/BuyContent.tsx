@@ -1,181 +1,199 @@
-import PromptChip from './PromptChip';
-
 interface Props {
   onSend?: (prompt: string) => void;
 }
 
 export default function BuyContent({ onSend }: Props) {
   return (
-    <div className="max-w-4xl mx-auto px-6 pt-12 pb-8 animate-[fadeIn_0.5s_ease]">
-      <span className="inline-block px-3 py-1 rounded-full bg-orange-50 text-[#D4714E] text-[12px] font-semibold uppercase tracking-wide mb-6">
-        Buy a Business
-      </span>
+    <div className="bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white pb-32 min-h-screen">
 
-      <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05] text-[#2D3142] mb-8">
-        Find the right deal.<br />Know it&apos;s the right deal.
-      </h1>
-
-      <p className="text-[18px] leading-relaxed text-[#4F5D75] max-w-2xl mb-16">
-        Acquisitions fail when buyers don&apos;t have the intelligence to evaluate what they&apos;re buying.
-        Yulia gives you market intelligence, financial modeling, and deal analysis that turns conviction
-        from a feeling into a number.
-      </p>
-
-      {/* Insight cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
-        <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6">
-          <h3 className="text-[16px] font-bold text-[#2D3142] mb-3">The numbers behind every deal</h3>
-          <p className="text-[14px] leading-relaxed text-[#4F5D75] mb-4">
-            Asking price is a starting point, not a destination. Yulia models DSCR, return on equity, sources and uses, and cash-on-cash returns &mdash; so you know whether a deal meets your financial objectives before you commit.
-          </p>
-          <ul className="space-y-2 text-[14px] text-[#4F5D75]">
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Debt service coverage analysis</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Return projections at multiple scenarios</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>SBA financing feasibility</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Sensitivity analysis</li>
-          </ul>
+      {/* HERO */}
+      <section className="px-6 pt-12 md:pt-24 pb-16 max-w-6xl mx-auto w-full relative z-10">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] text-xs font-bold tracking-wider uppercase mb-8 border border-[#FBE3D9]">
+          For Buyers &amp; Investors
         </div>
+        <h1 className="text-5xl md:text-[80px] font-extrabold tracking-tight leading-[1.05] mb-8 text-left">
+          Find the right deal.<br />
+          <span className="text-[#D4714E]">Know it&apos;s the right deal.</span>
+        </h1>
+        <p className="text-xl md:text-2xl text-[#6E6A63] font-medium max-w-3xl leading-relaxed mb-12 text-left">
+          Acquisitions fail when buyers lack the intelligence to evaluate targets properly. Turn conviction from a gut feeling into a defensible number.
+        </p>
+        <div className="flex flex-wrap justify-start gap-3 max-w-3xl">
+          <Suggestion text="Find acquisition targets in HVAC" onClick={() => onSend?.("I am looking for acquisition targets in the HVAC industry.")} />
+          <Suggestion text="Model SBA financing for a $2M deal" onClick={() => onSend?.("Can you help me model SBA financing for a $2M acquisition?")} />
+          <Suggestion text="Draft an LOI" onClick={() => onSend?.("I need to draft an LOI for a dental practice acquisition.")} />
+        </div>
+      </section>
 
-        <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6">
-          <h3 className="text-[16px] font-bold text-[#2D3142] mb-3">Market intelligence before you buy</h3>
-          <p className="text-[14px] leading-relaxed text-[#4F5D75] mb-4">
-            Understanding your target market changes how you negotiate. Yulia maps competitive density, consolidation trends, PE activity, and regional dynamics for any industry and geography.
-          </p>
-          <ul className="space-y-2 text-[14px] text-[#4F5D75]">
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Competitive landscape mapping</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Industry multiple benchmarks</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Consolidation and PE activity</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Regional economic indicators</li>
-          </ul>
+      {/* TICKER */}
+      <div className="border-y border-[#EAE6DF] bg-white py-6">
+        <div className="max-w-6xl mx-auto px-6 flex flex-wrap justify-between items-center gap-6 text-sm font-bold text-[#A9A49C] tracking-widest uppercase">
+          <span className="hidden md:inline-block">Powered By:</span>
+          <span className="text-[#1A1A18] flex items-center gap-2"><span className="text-[#D4714E] text-lg leading-none">&middot;</span> U.S. Census</span>
+          <span className="text-[#1A1A18] flex items-center gap-2"><span className="text-[#D4714E] text-lg leading-none">&middot;</span> BLS</span>
+          <span className="text-[#1A1A18] flex items-center gap-2"><span className="text-[#D4714E] text-lg leading-none">&middot;</span> Federal Reserve</span>
+          <span className="text-[#1A1A18] flex items-center gap-2"><span className="text-[#D4714E] text-lg leading-none">&middot;</span> SEC EDGAR</span>
+          <span className="text-[#1A1A18] flex items-center gap-2"><span className="text-[#D4714E] text-lg leading-none">&middot;</span> SBA</span>
         </div>
       </div>
 
-      {/* ── Below-fold educational content ── */}
-
-      <div className="border-t border-gray-100 pt-12 mb-12">
-        <h2 className="text-[22px] font-bold text-[#2D3142] mb-6">Understanding the market before you buy</h2>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-4">
-          <strong className="text-[#2D3142]">Industry dynamics matter more than most buyers realize.</strong> Whether an industry is fragmenting or consolidating changes everything about your acquisition strategy. In a fragmented market (hundreds of small operators, no dominant players), you&apos;re buying a standalone business. In a consolidating market (PE firms actively rolling up competitors), you may be building or joining a platform &mdash; which changes your target profile, your valuation framework, and your exit strategy.
-        </p>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-6">
-          <strong className="text-[#2D3142]">Competitive density shapes pricing.</strong> The number of similar businesses in your target market directly affects what you&apos;ll pay. In a market with 200 competitors, sellers have less leverage. In a market with 15, they have more. Understanding this before you negotiate puts you in a fundamentally different position.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <PromptChip label="Map the competitive landscape for my target industry" prompt="Map the competitive landscape for my target industry and geography. I want to understand the market before I buy." onSend={onSend} />
-        </div>
-      </div>
-
-      <div className="border-t border-gray-100 pt-12 mb-12">
-        <h2 className="text-[22px] font-bold text-[#2D3142] mb-6">Financial modeling: the numbers that matter</h2>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-6">
-          The asking price is a starting point. What matters is what the business is actually worth to you &mdash; after financing costs, operating assumptions, and return requirements.
-        </p>
-
-        <div className="space-y-5 mb-6">
-          <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-            <strong className="text-[#2D3142]">Debt Service Coverage Ratio (DSCR)</strong> &mdash; The number lenders care about most. It&apos;s the business&apos;s adjusted earnings divided by annual debt payments. SBA lenders require minimum 1.25x. Conventional lenders typically want 1.50x. If the DSCR doesn&apos;t work at your offer price, the deal doesn&apos;t close.
-          </p>
-          <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-            <strong className="text-[#2D3142]">Return on equity</strong> &mdash; After debt service, what&apos;s your cash return on the equity you invested? A deal at a 3x multiple might deliver a 15% cash-on-cash return &mdash; or 40%, depending on the debt structure. Modeling this before you offer tells you whether this deal meets your objectives.
-          </p>
-          <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-            <strong className="text-[#2D3142]">Sources and uses</strong> &mdash; Where is the money coming from (SBA loan, seller note, buyer equity) and where is it going (purchase price, working capital, closing costs)? Understanding the full capital stack before you negotiate means you know exactly what you&apos;re committing.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <PromptChip label="Model the financing for a $2M acquisition" prompt="Model the financing for a $2M acquisition. Help me understand the full capital structure." onSend={onSend} />
-        </div>
-      </div>
-
-      <div className="border-t border-gray-100 pt-12 mb-12">
-        <h2 className="text-[22px] font-bold text-[#2D3142] mb-6">SBA financing: what buyers need to know</h2>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-4">
-          For deals under $5M, SBA financing is how most acquisitions get done.
-        </p>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-4">
-          <strong className="text-[#2D3142]">The basics:</strong> Minimum 10% buyer equity injection. Maximum $5M on the standard 7(a) program. Current rates range from 6.75% to 9.25%. The business must demonstrate a DSCR of at least 1.25x &mdash; meaning its earnings cover debt payments with a 25% cushion.
-        </p>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-4">
-          <strong className="text-[#2D3142]">What disqualifies a deal:</strong> Businesses in certain excluded industries, deals where the seller retains more than 20% ownership, businesses that can&apos;t demonstrate sufficient earnings to service the debt. Yulia pre-screens every deal for SBA eligibility so you don&apos;t waste months on something that won&apos;t get financed.
-        </p>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-6">
-          <strong className="text-[#2D3142]">The equity injection question:</strong> The 10% minimum is the floor, not the ceiling. Lenders often want more &mdash; especially for larger deals or businesses with concentration risk. Yulia models the actual equity requirement based on the specific deal and current lending conditions.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <PromptChip label="Check SBA eligibility for a deal I'm considering" prompt="Check SBA eligibility for a deal I'm considering. I want to know if it can be financed." onSend={onSend} />
-        </div>
-      </div>
-
-      <div className="border-t border-gray-100 pt-12 mb-12">
-        <h2 className="text-[22px] font-bold text-[#2D3142] mb-8">The acquisition journey: stage by stage</h2>
-
-        <div className="space-y-4">
-          <div className="bg-gray-50 rounded-xl border border-gray-100 p-5">
-            <div className="text-[12px] font-semibold uppercase tracking-wide text-[#D4714E] mb-1">Stage 1</div>
-            <h3 className="text-[16px] font-bold text-[#2D3142] mb-2">Thesis &amp; sourcing <span className="text-[#9CA3AF] font-normal text-[13px]">(free)</span></h3>
-            <p className="text-[14px] leading-relaxed text-[#4F5D75] mb-3">
-              Define what you&apos;re looking for &mdash; industry, geography, size, financial criteria. Yulia maps the market: how many businesses fit your criteria, what they trade for, where consolidation is happening.
-            </p>
-            <PromptChip label='Try it: "I want to buy an HVAC company in Texas under $3M"' prompt="I want to buy an HVAC company in Texas under $3M. Help me understand the market." onSend={onSend} />
+      {/* INFOGRAPHIC */}
+      <section className="px-6 py-24 bg-[#F8F6F1] text-[#1A1A18] border-b border-[#EAE6DF]">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-16 md:flex justify-between items-end gap-8">
+            <div className="max-w-2xl">
+              <div className="text-sm font-bold text-[#A9A49C] uppercase tracking-widest mb-4">The Buyer Advantage</div>
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">Institutional intelligence.<br /><span className="text-[#D4714E]">Zero wait time.</span></h2>
+              <p className="text-[#6E6A63] text-lg leading-relaxed">
+                The smbX.ai Engine evaluates targets, maps the competitive landscape, and runs live financing math so you know exactly what you&apos;re buying into before you write a check.
+              </p>
+            </div>
+            <div className="mt-8 md:mt-0 flex items-center gap-4 bg-white px-6 py-5 rounded-2xl border border-[#EAE6DF] shadow-sm">
+              <div className="w-10 h-10 rounded-full bg-[#1A1A18] flex items-center justify-center text-white font-black text-lg">%</div>
+              <div>
+                <div className="text-xs text-[#A9A49C] uppercase tracking-wider font-bold">Financial Engine</div>
+                <div className="font-bold text-lg text-[#1A1A18]">Deal Feasibility</div>
+              </div>
+            </div>
           </div>
-
-          <div className="bg-gray-50 rounded-xl border border-gray-100 p-5">
-            <div className="text-[12px] font-semibold uppercase tracking-wide text-[#D4714E] mb-1">Stage 2</div>
-            <h3 className="text-[16px] font-bold text-[#2D3142] mb-2">Target screening <span className="text-[#9CA3AF] font-normal text-[13px]">(free)</span></h3>
-            <p className="text-[14px] leading-relaxed text-[#4F5D75] mb-3">
-              Evaluate specific opportunities. Bring Yulia a listing, a deal your broker sent, or a business you heard about &mdash; get an instant assessment of financials, market position, and whether the asking price is realistic.
-            </p>
-            <PromptChip label='Try it: "Evaluate this business &mdash; $1.5M revenue, $380K SDE, asking $1.2M"' prompt="Evaluate this business — $1.5M revenue, $380K SDE, asking $1.2M. Is it a good deal?" onSend={onSend} />
-          </div>
-
-          <div className="bg-gray-50 rounded-xl border border-gray-100 p-5">
-            <div className="text-[12px] font-semibold uppercase tracking-wide text-[#D4714E] mb-1">Stage 3</div>
-            <h3 className="text-[16px] font-bold text-[#2D3142] mb-2">Financial modeling</h3>
-            <p className="text-[14px] leading-relaxed text-[#4F5D75] mb-3">
-              Deep modeling on a specific target: DSCR at various price and rate assumptions, return on equity, sources and uses, SBA bankability, and sensitivity analysis. The numbers behind the decision.
-            </p>
-            <PromptChip label='Try it: "Build a financial model for this acquisition"' prompt="Build a financial model for this acquisition. I need the full numbers — DSCR, ROI, sources and uses." onSend={onSend} />
-          </div>
-
-          <div className="bg-gray-50 rounded-xl border border-gray-100 p-5">
-            <div className="text-[12px] font-semibold uppercase tracking-wide text-[#D4714E] mb-1">Stage 4</div>
-            <h3 className="text-[16px] font-bold text-[#2D3142] mb-2">Due diligence intelligence</h3>
-            <p className="text-[14px] leading-relaxed text-[#4F5D75] mb-3">
-              Before you spend $15K&ndash;$50K on professional diligence, know what you&apos;re walking into. Customer concentration, owner dependency, financial hygiene, red flags. This isn&apos;t a replacement for professional diligence &mdash; it&apos;s the intelligence that helps you decide whether to spend the money.
-            </p>
-            <PromptChip label='Try it: "What should I look for in diligence on this deal?"' prompt="What should I look for in diligence on this deal? Help me understand the risks before I commit to full DD." onSend={onSend} />
-          </div>
-
-          <div className="bg-gray-50 rounded-xl border border-gray-100 p-5">
-            <div className="text-[12px] font-semibold uppercase tracking-wide text-[#D4714E] mb-1">Stage 5</div>
-            <h3 className="text-[16px] font-bold text-[#2D3142] mb-2">Structuring &amp; close</h3>
-            <p className="text-[14px] leading-relaxed text-[#4F5D75] mb-3">
-              Deal structure determines returns. Asset vs. stock, allocation strategy, seller financing terms, earnout scenarios, working capital pegs. Yulia models the options and shows the tradeoffs.
-            </p>
-            <PromptChip label='Try it: "Help me structure my offer"' prompt="Help me structure my offer. I want to understand asset vs. stock, seller financing options, and the best deal structure." onSend={onSend} />
+          <div className="grid md:grid-cols-3 gap-4 md:gap-6">
+            <div className="md:col-span-2 bg-white rounded-3xl p-8 border border-[#EAE6DF] shadow-sm relative overflow-hidden group">
+              <h3 className="text-2xl font-bold mb-4 relative z-10">Instant SBA Bankability &amp; DSCR</h3>
+              <p className="text-[#6E6A63] mb-8 relative z-10 max-w-lg leading-relaxed">SBA financing feasibility, debt service coverage ratios (DSCR), and cash-on-cash return projections modeled side-by-side using live federal rates.</p>
+              <div className="flex flex-wrap gap-2 relative z-10">
+                <Badge text="DSCR Analysis" /><Badge text="Cash-on-Cash Return" /><Badge text="SBA 7(a) Modeling" />
+              </div>
+            </div>
+            <div className="bg-white rounded-3xl p-8 border border-[#EAE6DF] shadow-sm flex flex-col">
+              <div className="w-12 h-12 bg-[#F8F6F1] rounded-xl flex items-center justify-center text-[#D4714E] font-black text-xl mb-6">01</div>
+              <h3 className="text-xl font-bold mb-3">Target Evaluation</h3>
+              <p className="text-[#6E6A63] text-sm leading-relaxed mt-auto">Valuation benchmarking against comparable transactions and red-flag identification. Know if the asking price is justified.</p>
+            </div>
+            <div className="bg-white rounded-3xl p-8 border border-[#EAE6DF] shadow-sm flex flex-col md:col-span-3 lg:col-span-1">
+              <div className="w-12 h-12 bg-[#F8F6F1] rounded-xl flex items-center justify-center text-[#D4714E] font-black text-xl mb-6">02</div>
+              <h3 className="text-xl font-bold mb-3">Market Intelligence</h3>
+              <p className="text-[#6E6A63] text-sm leading-relaxed mt-auto">Industry landscape, competitive density, and consolidation activity in your target sector.</p>
+            </div>
+            <div className="bg-[#D4714E] rounded-3xl p-8 flex items-center justify-between md:col-span-2 text-white shadow-md">
+              <div className="max-w-lg">
+                <h3 className="text-3xl font-bold mb-3">Deal structuring and optimization.</h3>
+                <p className="text-orange-100 font-medium leading-relaxed">Understand the levers that get a deal done. We model earnouts, seller financing scenarios, equity rolls, and working capital pegs automatically.</p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="border-t border-gray-100 pt-12 mb-4">
-        <h2 className="text-[22px] font-bold text-[#2D3142] mb-6">For search funds, PE, and institutional buyers</h2>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-4">
-          Managing a pipeline of targets? Yulia delivers institutional-grade intelligence at deal-flow speed.
-        </p>
-        <div className="space-y-5 mb-6">
-          <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-            <strong className="text-[#2D3142]">Search fund operators:</strong> Define your thesis and get instant market intelligence for every industry and geography you&apos;re evaluating. Model acquisitions against your fund structure and SBA eligibility.
-          </p>
-          <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-            <strong className="text-[#2D3142]">PE deal teams:</strong> Screen bolt-on targets against your platform. Map consolidation activity across geographies. Generate preliminary models for IC review in minutes.
-          </p>
-          <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-            <strong className="text-[#2D3142]">Family offices:</strong> Evaluate direct investments with institutional analytical depth, calibrated to your criteria and return expectations.
-          </p>
+      {/* LIVE PREVIEW */}
+      <section className="px-6 py-24 max-w-5xl mx-auto w-full">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold mb-4">The numbers behind the decision</h2>
+          <p className="text-[#6E6A63] text-lg">See how Yulia instantly models SBA bankability and debt service coverage.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <PromptChip label="I'm a search fund operator &mdash; help me screen industries" prompt="I'm a search fund operator. Help me screen industries and geographies for acquisition targets that fit my thesis." onSend={onSend} />
+        <div className="bg-[#F8F6F1] rounded-[40px] p-6 md:p-10 border border-[#EAE6DF] shadow-xl max-w-4xl mx-auto">
+          <div className="flex flex-col gap-6">
+            <div className="self-end bg-[#D4714E] text-white p-6 rounded-[24px] rounded-br-[8px] max-w-[85%] md:max-w-[75%] shadow-md text-[16px] leading-relaxed">
+              I found a commercial landscaping business asking $2.4M. SDE is $600K. I have $250K liquid for a down payment. Can I finance this with an SBA loan?
+            </div>
+            <div className="self-start flex gap-4 max-w-[95%] md:max-w-[85%]">
+              <div className="w-10 h-10 rounded-full bg-white border border-[#EAE6DF] flex items-center justify-center text-[#D4714E] font-black text-sm shrink-0 shadow-sm mt-1">Y</div>
+              <div className="bg-white border border-[#EAE6DF] p-6 md:p-8 rounded-[24px] rounded-tl-[8px] shadow-md text-[#1A1A18] text-[16px] leading-relaxed">
+                <p className="mb-6">Let&apos;s run the SBA bankability model on that $2.4M asking price using current 7(a) lending rates. The critical metric here is the <strong>Debt Service Coverage Ratio (DSCR)</strong>.</p>
+                <div className="bg-[#FDFCFB] border border-[#EAE6DF] rounded-2xl p-6 mb-6 shadow-sm font-mono text-sm">
+                  <div className="text-xs font-sans text-[#6E6A63] uppercase tracking-wider font-bold mb-4 border-b border-[#EAE6DF] pb-2">SBA Feasibility Model</div>
+                  <div className="flex justify-between mb-2"><span>Target Asking Price:</span> <span className="font-bold">$2,400,000</span></div>
+                  <div className="flex justify-between mb-2 text-[#6E6A63]"><span>Buyer Equity (Min 10%):</span> <span>$240,000</span></div>
+                  <div className="flex justify-between mb-4 text-[#6E6A63] border-b border-[#EAE6DF] pb-3"><span>SBA Loan Amount:</span> <span>$2,160,000</span></div>
+                  <div className="flex justify-between mb-2"><span className="text-[#6E6A63]">Est. Annual Debt Service (9.25%):</span> <span className="font-bold text-red-700">($332,410)</span></div>
+                  <div className="flex justify-between mb-4 text-[#6E6A63] border-b border-[#EAE6DF] pb-3"><span>Target SDE:</span> <span className="font-bold text-green-700">$600,000</span></div>
+                  <div className="flex justify-between pt-1 items-center">
+                    <span className="font-bold font-sans text-lg">DSCR:</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-sans text-green-700 font-bold bg-green-50 px-2 py-1 rounded border border-green-100">Passes SBA Min (1.25x)</span>
+                      <span className="font-bold text-[#D4714E] text-xl">1.80x</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4 text-[15px] mb-6">
+                  <div className="flex items-start gap-3 bg-green-50/50 p-4 rounded-xl border border-green-100">
+                    <div className="mt-1 font-black text-green-600">✓</div>
+                    <div><strong>Good news:</strong> With a 1.80x DSCR, this comfortably beats the SBA&apos;s 1.25x minimum. Your $250K liquidity covers the 10% injection.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
+
+      {/* OUTCOMES */}
+      <section className="px-6 py-24 bg-white border-y border-[#EAE6DF]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="text-sm font-bold text-[#A9A49C] uppercase tracking-widest mb-4">The Deliverables</div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What you actually walk away with.</h2>
+            <p className="text-[#6E6A63] text-lg max-w-2xl mx-auto">Yulia instantly generates the exact institutional-grade collateral you need to evaluate targets, secure funding, and close deals.</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+            <OutcomeCard tag="Analysis" title="Target Financial Models" desc="Deep financial modeling including DSCR, ROI projections, cash-on-cash returns, and SBA financing scenarios." />
+            <OutcomeCard tag="Intelligence" title="Market & Competitive Reports" desc="Industry mapping, competitive density analysis, and consolidation trends matched directly to your buy thesis." />
+            <OutcomeCard tag="Diligence" title="Due Diligence Checklists" desc="Pre-diligence risk assessments and automated data room request lists tailored to the specific industry." />
+            <OutcomeCard tag="Execution" title="LOIs & Deal Structuring" desc="Draft Letters of Intent, model sources & uses, analyze seller note scenarios, and construct the final offer terms." />
+          </div>
+        </div>
+      </section>
+
+      {/* EMPOWERMENT */}
+      <section className="px-6 py-24 bg-[#F8F6F1] border-t border-[#EAE6DF]">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white border border-[#EAE6DF] rounded-[40px] p-8 md:p-12 shadow-xl shadow-[#1A1A18]/5">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">Move with the speed of an institutional fund.</h2>
+              <p className="text-lg text-[#6E6A63] leading-relaxed">Whether you are a solo searcher evaluating your first acquisition or a platform running a buy-and-build strategy, smbX.ai scales with your thesis.</p>
+            </div>
+            <div className="space-y-6">
+              <StepCard num="1" title="Instant Conviction" desc="Stop wasting weeks on targets that don't pencil out. Run the math and check the multiples before you ever schedule the first call." />
+              <StepCard num="2" title="Capital Stack Clarity" desc="Know exactly how you will fund the deal. Yulia models the senior debt, seller financing, and equity required to hit your target return." />
+              <StepCard num="3" title="Negotiation Leverage" desc="Sellers respect buyers who know the market. Walk into negotiations armed with clear Census data and BLS wage reports." />
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/* ── Sub-components ── */
+
+function Suggestion({ text, onClick }: { text: string; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="bg-white border border-[#EAE6DF] text-[#6E6A63] text-[13px] md:text-sm font-medium px-4 py-2.5 rounded-full hover:border-[#D4714E] hover:text-[#D4714E] hover:shadow-sm transition-all cursor-pointer text-left" type="button">
+      &ldquo;{text}&rdquo;
+    </button>
+  );
+}
+
+function Badge({ text }: { text: string }) {
+  return <div className="bg-[#F8F6F1] border border-[#EAE6DF] text-[#6E6A63] text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">{text}</div>;
+}
+
+function OutcomeCard({ tag, title, desc }: { tag: string; title: string; desc: string }) {
+  return (
+    <div className="bg-[#FDFCFB] border border-[#EAE6DF] p-8 rounded-3xl hover:shadow-md transition-all flex flex-col">
+      <div className="text-xs font-black text-[#A9A49C] uppercase tracking-widest mb-4">{tag}</div>
+      <h3 className="text-2xl font-bold mb-3">{title}</h3>
+      <p className="text-[#6E6A63] leading-relaxed text-[15px] flex-1">{desc}</p>
+    </div>
+  );
+}
+
+function StepCard({ num, title, desc }: { num: string; title: string; desc: string }) {
+  return (
+    <div className="flex gap-6 items-start p-6 bg-[#FDFCFB] rounded-2xl border border-[#EAE6DF]">
+      <div className="w-12 h-12 rounded-full bg-[#FFF0EB] text-[#D4714E] flex items-center justify-center font-black text-xl shrink-0">{num}</div>
+      <div>
+        <h4 className="text-xl font-bold mb-2">{title}</h4>
+        <p className="text-[#6E6A63] leading-relaxed">{desc}</p>
       </div>
     </div>
   );

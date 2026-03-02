@@ -1,225 +1,127 @@
-import PromptChip from './PromptChip';
-
 interface Props {
   onSend?: (prompt: string) => void;
 }
 
-export default function PricingContent({ onSend }: Props) {
+export default function PricingContent(_props: Props) {
   return (
-    <div className="max-w-4xl mx-auto px-6 pt-12 pb-8 animate-[fadeIn_0.5s_ease]">
-      <span className="inline-block px-3 py-1 rounded-full bg-orange-50 text-[#D4714E] text-[12px] font-semibold uppercase tracking-wide mb-6">
-        Pricing &amp; Free Tier
-      </span>
+    <div className="bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white pb-32 min-h-screen">
 
-      <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05] text-[#2D3142] mb-8">
-        If you could Google it,<br />it should be free.
-      </h1>
-
-      <p className="text-[18px] leading-relaxed text-[#4F5D75] max-w-2xl mb-16">
-        The conversation with Yulia is always free. Foundational analysis &mdash; classification, preliminary valuation,
-        market overview &mdash; is free because the underlying data comes from authoritative public sources. What you invest
-        in is personalized intelligence, built for your specific deal.
-      </p>
-
-      {/* Insight cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <h3 className="text-[20px] font-bold text-[#2D3142] mb-1">What&apos;s always free</h3>
-          <p className="text-[14px] text-[#4F5D75] mb-6">No credit card. No trial period. No bait-and-switch.</p>
-          <ul className="space-y-3 text-[14px] text-[#4F5D75]">
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Unlimited conversation with Yulia</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Business classification &amp; deal sizing</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Preliminary valuation range</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Market overview &amp; add-back identification</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>SBA bankability check</li>
-          </ul>
+      {/* HERO */}
+      <section className="px-6 pt-12 md:pt-24 pb-16 max-w-6xl mx-auto w-full relative z-10">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] text-xs font-bold tracking-wider uppercase mb-8 border border-[#FBE3D9]">
+          Pay-As-You-Go Pricing
         </div>
-
-        <div className="rounded-2xl border border-[rgba(212,113,78,0.2)] p-6" style={{ background: '#FFF8F4' }}>
-          <h3 className="text-[20px] font-bold text-[#2D3142] mb-1">How premium works</h3>
-          <p className="text-[14px] text-[#4F5D75] mb-6">No subscriptions, no retainers. You approve each purchase individually.</p>
-          <ul className="space-y-3 text-[14px] text-[#4F5D75]">
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Full valuation reports</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Market Intelligence Reports</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>CIM generation</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>Deal structuring &amp; modeling</li>
-            <li className="flex items-start gap-2"><span className="text-[#D4714E] mt-0.5">&#10003;</span>White-label deliverables</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* ── Below-fold educational content ── */}
-
-      <div className="border-t border-gray-100 pt-12 mb-12">
-        <h2 className="text-[22px] font-bold text-[#2D3142] mb-6">The free tier in detail</h2>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-6">
-          Every deal starts with a conversation &mdash; and the foundational analysis is genuinely free.
+        <h1 className="text-5xl md:text-[80px] font-extrabold tracking-tight leading-[1.05] mb-8 text-left">
+          If you could Google it,<br />
+          <span className="text-[#D4714E]">it should be free.</span>
+        </h1>
+        <p className="text-xl md:text-2xl text-[#6E6A63] font-medium max-w-3xl leading-relaxed mb-12 text-left">
+          The conversation with Yulia is always free. Foundational analysis is free because the underlying data is public. You only pay for personalized intelligence and document generation.
         </p>
+      </section>
 
-        <div className="space-y-5 mb-6">
-          <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-            <strong className="text-[#2D3142]">Unlimited conversation</strong> &mdash; Ask Yulia anything about your deal, your market, the M&amp;A process, financing structures, deal strategy. No message limits. No session timeouts.
-          </p>
-          <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-            <strong className="text-[#2D3142]">Business classification</strong> &mdash; Yulia identifies which earnings metric applies (SDE vs. EBITDA), which buyer pool is relevant, and which valuation methodology fits. This classification drives every subsequent analysis.
-          </p>
-          <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-            <strong className="text-[#2D3142]">Preliminary valuation range</strong> &mdash; An initial estimate based on industry multiples, your financial profile, and current market conditions. Not a guess &mdash; a methodology-driven range with the logic explained.
-          </p>
-          <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-            <strong className="text-[#2D3142]">Market overview</strong> &mdash; Industry dynamics for your sector: fragmentation vs. consolidation, PE activity, regional competitive context.
-          </p>
-          <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-            <strong className="text-[#2D3142]">Add-back identification</strong> &mdash; Yulia scans your financial profile for common add-backs: owner compensation adjustments, personal expenses, one-time costs. Many owners miss tens or hundreds of thousands in legitimate add-backs.
-          </p>
-          <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-            <strong className="text-[#2D3142]">SBA bankability check</strong> &mdash; Whether your deal qualifies for SBA financing at current rates, the DSCR outlook, and what it means for your buyer pool (sellers) or financing options (buyers).
-          </p>
+      {/* FREE TIER */}
+      <section className="px-6 py-20 bg-white border-y border-[#EAE6DF]">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold mb-2">Start here. It&apos;s on us.</h2>
+            <p className="text-[#6E6A63] text-lg">No credit card. No signup wall. Just tell Yulia about your deal.</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FreeCard title="Unlimited Chat" desc="Ask anything about your deal, market, or the process. Yulia's advisory conversation has no limits." />
+            <FreeCard title="Business Classification" desc="Yulia identifies your deal's framework (SDE vs EBITDA) and applicable buyer pool instantly." />
+            <FreeCard title="Preliminary Valuation" desc="An initial estimate based on industry multiples, your profile, and current market conditions." />
+            <FreeCard title="Market Overview" desc="Industry dynamics, competitive landscape, and regional context for your specific deal." />
+            <FreeCard title="Add-back Discovery" desc="Yulia scans your profile for common add-backs that increase your business's actual earnings." />
+            <FreeCard title="SBA Pre-qualification" desc="Check if your deal qualifies for SBA financing and understand what that means for the buyer pool." />
+          </div>
         </div>
+      </section>
 
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-6">
-          <strong className="text-[#2D3142]">Why this is genuinely free:</strong> The data sources are publicly available &mdash; Census, BLS, FRED, SEC EDGAR, SBA. The intelligence layer takes seconds to generate. We&apos;d rather you experience the analysis firsthand than trust a marketing page.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <PromptChip label="Start my free analysis &mdash; I'll tell you about my deal" prompt="Start my free analysis. I'll tell you about my deal and I want to see the quality of your intelligence." onSend={onSend} />
-        </div>
-      </div>
-
-      <div className="border-t border-gray-100 pt-12 mb-12">
-        <h2 className="text-[22px] font-bold text-[#2D3142] mb-6">Premium deliverables</h2>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-8">
-          When you&apos;re ready to go deeper, Yulia tells you exactly what a deliverable costs before you commit. You approve each purchase individually.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-[16px] font-bold text-[#2D3142] mb-4">For sellers</h3>
-            <div className="space-y-4">
-              <div className="bg-gray-50 rounded-xl border border-gray-100 p-4">
-                <h4 className="text-[14px] font-semibold text-[#2D3142] mb-1">Market Intelligence Report</h4>
-                <p className="text-[13px] leading-relaxed text-[#4F5D75]">
-                  Comprehensive analysis of your industry&apos;s deal environment, localized to your metro. Competitive density, current multiples, PE activity, buyer landscape, and positioning recommendations.
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-xl border border-gray-100 p-4">
-                <h4 className="text-[14px] font-semibold text-[#2D3142] mb-1">Full Valuation Analysis</h4>
-                <p className="text-[13px] leading-relaxed text-[#4F5D75]">
-                  Multi-methodology valuation built for scrutiny. SDE/EBITDA calculation with complete add-back schedule, multiple approaches, sensitivity analysis, and recommendations for maximizing value.
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-xl border border-gray-100 p-4">
-                <h4 className="text-[14px] font-semibold text-[#2D3142] mb-1">Confidential Information Memorandum (CIM)</h4>
-                <p className="text-[13px] leading-relaxed text-[#4F5D75]">
-                  Professional deal book for buyer distribution. Financial summary, business overview, growth narrative, market position, investment thesis. White-label available.
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-xl border border-gray-100 p-4">
-                <h4 className="text-[14px] font-semibold text-[#2D3142] mb-1">Deal Structuring &amp; Negotiation</h4>
-                <p className="text-[13px] leading-relaxed text-[#4F5D75]">
-                  Offer comparison, asset vs. stock analysis, seller financing optimization, earnout modeling, SBA impact analysis.
-                </p>
+      {/* PREMIUM DELIVERABLES */}
+      <section className="px-6 py-24 bg-[#F8F6F1]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Go deeper when your deal is ready.</h2>
+            <p className="text-[#6E6A63] text-lg max-w-2xl mx-auto">Premium deliverables are generated when you need them. No subscriptions. No retainers. Your investment grows with your deal.</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Sell Side */}
+            <div className="bg-white p-8 rounded-3xl border border-[#EAE6DF] shadow-sm">
+              <h3 className="text-2xl font-bold mb-6 border-b border-[#EAE6DF] pb-4">Seller Deliverables</h3>
+              <div className="space-y-6">
+                <PriceItem title="Market Intelligence Report" price="$200" desc="Comprehensive analysis of your industry, competitive landscape, and buyer activity localized to your metro." />
+                <PriceItem title="Full Valuation Analysis" price="$350" desc="Multi-methodology valuation (SDE/EBITDA/DCF) built to withstand buyer and lender scrutiny." />
+                <PriceItem title="Confidential Info Memo (CIM)" price="$700" desc="A professional 25+ page deal book presenting your business to potential buyers." />
+                <PriceItem title="Deal Structuring Intel" price="$250" desc="Offer evaluation, deal structure optimization, and negotiation strategy through close." />
               </div>
             </div>
-          </div>
-
-          <div>
-            <h3 className="text-[16px] font-bold text-[#2D3142] mb-4">For buyers</h3>
-            <div className="space-y-4">
-              <div className="bg-gray-50 rounded-xl border border-gray-100 p-4">
-                <h4 className="text-[14px] font-semibold text-[#2D3142] mb-1">Market &amp; Competitive Intelligence</h4>
-                <p className="text-[13px] leading-relaxed text-[#4F5D75]">
-                  Industry mapping, competitive density, consolidation trends, multiples, target identification framework.
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-xl border border-gray-100 p-4">
-                <h4 className="text-[14px] font-semibold text-[#2D3142] mb-1">Target Financial Analysis</h4>
-                <p className="text-[13px] leading-relaxed text-[#4F5D75]">
-                  Full model: DSCR, ROI, sources and uses, SBA bankability, sensitivity analysis, deal structure recommendations.
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-xl border border-gray-100 p-4">
-                <h4 className="text-[14px] font-semibold text-[#2D3142] mb-1">Due Diligence Intelligence</h4>
-                <p className="text-[13px] leading-relaxed text-[#4F5D75]">
-                  Pre-diligence risk assessment, red flags, concentration analysis, data room guidance.
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-xl border border-gray-100 p-4">
-                <h4 className="text-[14px] font-semibold text-[#2D3142] mb-1">Deal Structuring</h4>
-                <p className="text-[13px] leading-relaxed text-[#4F5D75]">
-                  Sources and uses optimization, financing mix, seller note and earnout modeling, offer construction.
-                </p>
+            {/* Buy Side */}
+            <div className="bg-white p-8 rounded-3xl border border-[#EAE6DF] shadow-sm">
+              <h3 className="text-2xl font-bold mb-6 border-b border-[#EAE6DF] pb-4">Buyer Deliverables</h3>
+              <div className="space-y-6">
+                <PriceItem title="Target Financial Analysis" price="$275" desc="Deep financial modeling including DSCR, ROI projections, and SBA financing scenarios." />
+                <PriceItem title="Market & Competitive Intel" price="$200" desc="Industry mapping, competitive density, and target identification for your thesis." />
+                <PriceItem title="Due Diligence Report" price="$300" desc="Pre-diligence risk assessment and red flag identification before engaging outside counsel." />
+                <PriceItem title="Deal Structuring" price="$250" desc="Sources & uses, seller note modeling, earnout scenarios, and final offer construction." />
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="border-t border-gray-100 pt-12 mb-12">
-        <h2 className="text-[22px] font-bold text-[#2D3142] mb-6">How the wallet works</h2>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-4">
-          smb<span className="text-[#D4714E] font-bold">X</span>.ai uses a wallet system. Add funds when you&apos;re ready &mdash; Yulia tells you the cost before you commit, you approve each purchase individually.
-        </p>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-4">
-          No subscriptions. No contracts. No recurring charges. Your balance carries forward indefinitely across all your deals. Pause for six months &mdash; your funds are waiting.
-        </p>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-6">
-          <strong className="text-[#2D3142]">In practice:</strong> Yulia delivers free analysis as you work. When a premium deliverable would add value, she explains what it is, what it costs, and what you&apos;ll get. You choose whether to proceed. The deliverable generates in minutes.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <PromptChip label="How much would a full valuation cost for my business?" prompt="How much would a full valuation cost for my business? I want to understand the pricing before I commit." onSend={onSend} />
-        </div>
-      </div>
-
-      <div className="border-t border-gray-100 pt-12 mb-12">
-        <h2 className="text-[22px] font-bold text-[#2D3142] mb-6">For advisors and teams</h2>
-        <p className="text-[15px] leading-relaxed text-[#4F5D75] mb-6">
-          Running multiple engagements? We&apos;re building advisor-specific pricing: volume considerations, white-label options, multi-user access.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <PromptChip label="Tell me about advisor pricing options" prompt="Tell me about advisor pricing options. I run multiple engagements and want to understand volume pricing." onSend={onSend} />
-        </div>
-      </div>
-
-      <div className="border-t border-gray-100 pt-12 mb-4">
-        <h2 className="text-[22px] font-bold text-[#2D3142] mb-8">Common questions</h2>
-
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-[15px] font-bold text-[#2D3142] mb-2">&ldquo;Is the free analysis really free?&rdquo;</h3>
-            <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-              No catch. No credit card. No trial that auto-converts. The data sources are publicly available and the synthesis takes seconds to generate. Once you experience it, you&apos;ll recognize the value of going deeper.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="text-[15px] font-bold text-[#2D3142] mb-2">&ldquo;How is this different from ChatGPT?&rdquo;</h3>
-            <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-              ChatGPT generates plausible text about M&amp;A. smb<span className="text-[#D4714E] font-bold">X</span>.ai follows a structured seven-layer methodology, synthesizes data from sovereign government sources, and delivers traceable analysis calibrated to your deal. The difference: reading a Wikipedia article about surgery vs. consulting a specialist with your chart open.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="text-[15px] font-bold text-[#2D3142] mb-2">&ldquo;What if I&apos;m already working with a broker?&rdquo;</h3>
-            <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-              Great &mdash; they should be using smb<span className="text-[#D4714E] font-bold">X</span>.ai too. Share your analysis with your advisor or invite them to the platform. Many of our most active users are brokers and M&amp;A advisors.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="text-[15px] font-bold text-[#2D3142] mb-2">&ldquo;Can I use deliverables with my clients?&rdquo;</h3>
-            <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-              Yes. All deliverables can be white-labeled with your firm&apos;s branding.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="text-[15px] font-bold text-[#2D3142] mb-2">&ldquo;How do you handle confidential information?&rdquo;</h3>
-            <p className="text-[15px] leading-relaxed text-[#4F5D75]">
-              All data is encrypted and strictly isolated. Buyer and seller data are never mixed. Your information is never shared or used to train models.
-            </p>
+      {/* WALLET FAQ */}
+      <section className="px-6 py-24 bg-white border-t border-[#EAE6DF]">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">How the Wallet works.</h2>
+          <p className="text-lg text-[#6E6A63] leading-relaxed mb-12 text-center">
+            smbX.ai uses a transparent wallet system. Add funds when you&apos;re ready for a premium deliverable. Yulia tells you exactly what it costs before you commit. No recurring charges, no hidden fees. $1 in your wallet equals $1 of purchasing power.
+          </p>
+          <div className="bg-[#FDFCFB] p-8 md:p-12 rounded-[40px] border border-[#EAE6DF] shadow-sm">
+            <h3 className="font-bold text-2xl mb-8">Frequently Asked Questions</h3>
+            <div className="space-y-8">
+              <div>
+                <h4 className="font-bold text-[#1A1A18] text-lg">Is the free analysis really free?</h4>
+                <p className="text-[#6E6A63] mt-2 leading-relaxed">Yes. No credit card required. We built it this way because the underlying data is public. What you pay for is the personalized synthesis and document generation.</p>
+              </div>
+              <div className="h-px w-full bg-[#EAE6DF]" />
+              <div>
+                <h4 className="font-bold text-[#1A1A18] text-lg">How is this different from ChatGPT?</h4>
+                <p className="text-[#6E6A63] mt-2 leading-relaxed">ChatGPT is a general model. smbX.ai is a purpose-built intelligence engine grounded in sovereign Federal data (Census, BLS, SEC) executing a strict 7-layer M&amp;A methodology.</p>
+              </div>
+              <div className="h-px w-full bg-[#EAE6DF]" />
+              <div>
+                <h4 className="font-bold text-[#1A1A18] text-lg">Can I use deliverables with my clients?</h4>
+                <p className="text-[#6E6A63] mt-2 leading-relaxed">Yes. All paid deliverables can be white-labeled with your firm&apos;s branding at no extra cost.</p>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
+    </div>
+  );
+}
+
+/* ── Sub-components ── */
+
+function FreeCard({ title, desc }: { title: string; desc: string }) {
+  return (
+    <div className="p-6 border border-[#EAE6DF] rounded-2xl bg-[#FDFCFB] hover:shadow-sm transition-shadow">
+      <div className="font-black text-[#D4714E] text-xl mb-3">✓</div>
+      <h4 className="font-bold text-lg mb-2">{title}</h4>
+      <p className="text-[#6E6A63] text-sm leading-relaxed">{desc}</p>
+    </div>
+  );
+}
+
+function PriceItem({ title, price, desc }: { title: string; price: string; desc: string }) {
+  return (
+    <div className="flex flex-col md:flex-row gap-4 items-start border-b border-[#EAE6DF] pb-6 last:border-0 last:pb-0">
+      <div className="flex-1">
+        <h4 className="font-bold text-[#1A1A18] text-lg">{title}</h4>
+        <p className="text-[#6E6A63] text-sm mt-1 leading-relaxed">{desc}</p>
       </div>
+      <div className="font-black text-xl text-[#D4714E] shrink-0">{price}</div>
     </div>
   );
 }
