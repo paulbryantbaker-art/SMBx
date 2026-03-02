@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation } from 'wouter';
 import { useAnonymousChat } from '../../hooks/useAnonymousChat';
+import Logo from '../../components/public/Logo';
 import Sidebar, { type TabId, type ViewState } from '../../components/shell/Sidebar';
 import InputDock, { SUGGESTION_CHIPS } from '../../components/shell/InputDock';
 import ChatMessages from '../../components/shell/ChatMessages';
@@ -37,13 +38,24 @@ export default function AppShell() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Sync URL changes to activeTab
+  // Sync URL changes to activeTab (covers initial load + programmatic navigate)
   useEffect(() => {
     const tab = pathToTab(location);
-    if (tab !== activeTab && viewState === 'landing') {
+    if (tab !== activeTab) {
       setActiveTab(tab);
     }
   }, [location]);
+
+  // Handle browser back/forward — sync tab and return to landing if in chat
+  useEffect(() => {
+    const onPopState = () => {
+      const tab = pathToTab(window.location.pathname);
+      setActiveTab(tab);
+      setViewState('landing');
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -133,10 +145,7 @@ export default function AppShell() {
                 <line x1="3" y1="18" x2="21" y2="18" />
               </svg>
             </button>
-            <span className="text-[16px] font-extrabold tracking-tight">
-              <span className="text-[#2D3142]">smbx</span>
-              <span className="text-[#2D3142]">.ai</span>
-            </span>
+            <Logo linked={false} />
           </header>
         )}
 

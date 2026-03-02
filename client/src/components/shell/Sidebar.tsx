@@ -1,4 +1,5 @@
 import { useLocation } from 'wouter';
+import Logo from '../public/Logo';
 
 export type TabId = 'home' | 'sell' | 'buy' | 'advisors' | 'pricing';
 export type ViewState = 'landing' | 'chat';
@@ -74,7 +75,7 @@ export default function Sidebar({
     setActiveTab(tab);
     if (viewState === 'chat') setViewState('landing');
     if (isMobile && onClose) onClose();
-    // Update URL to match tab
+    // Push URL so browser back/forward works between tabs
     const urlMap: Record<TabId, string> = {
       home: '/',
       sell: '/sell',
@@ -82,14 +83,17 @@ export default function Sidebar({
       advisors: '/advisors',
       pricing: '/pricing',
     };
-    window.history.replaceState(null, '', urlMap[tab]);
+    const target = urlMap[tab];
+    if (window.location.pathname !== target) {
+      navigate(target);
+    }
   };
 
   const handleLogoClick = () => {
     setActiveTab('home');
     if (viewState === 'chat') setViewState('landing');
     if (isMobile && onClose) onClose();
-    window.history.replaceState(null, '', '/');
+    if (window.location.pathname !== '/') navigate('/');
   };
 
   return (
@@ -101,11 +105,7 @@ export default function Sidebar({
           className="bg-transparent border-none cursor-pointer p-0 text-left"
           type="button"
         >
-          <span className="text-[20px] font-extrabold tracking-tight" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-            <span className="text-[#2D3142]">smbx</span>
-            <span className="text-[#2D3142]">.</span>
-            <span className="text-[#2D3142]">ai</span>
-          </span>
+          <Logo linked={false} />
         </button>
       </div>
 

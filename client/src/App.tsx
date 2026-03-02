@@ -43,7 +43,7 @@ const DayPassView = lazy(() => import('./pages/public/DayPassView'));
 
 export default function App() {
   const { user, loading, login, register, loginWithGoogle, migrateSession, logout } = useAuth();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
 
   const handleGoogleLogin = useCallback(() => {
     const clientId = (window as any).__GOOGLE_CLIENT_ID;
@@ -113,26 +113,17 @@ export default function App() {
     );
   }
 
+  const publicPaths = ['/', '/sell', '/buy', '/advisors', '/pricing'];
+  const isPublicRoute = publicPaths.includes(location);
+
   return (
     <ChatProvider>
-    <Switch>
-      {/* App shell handles: /, /sell, /buy, /advisors, /pricing */}
-      <Route path="/">
-        <AppShell />
-      </Route>
-      <Route path="/sell">
-        <AppShell />
-      </Route>
-      <Route path="/buy">
-        <AppShell />
-      </Route>
-      <Route path="/advisors">
-        <AppShell />
-      </Route>
-      <Route path="/pricing">
-        <AppShell />
-      </Route>
+    {/* AppShell rendered as a single instance outside Switch so tab navigation
+        via pushState doesn't unmount/remount and lose component state */}
+    {isPublicRoute && <AppShell />}
 
+    {!isPublicRoute && (
+    <Switch>
       {/* Legal */}
       <Route path="/legal/privacy">
         <Privacy />
@@ -211,6 +202,7 @@ export default function App() {
         <Redirect to="/" />
       </Route>
     </Switch>
+    )}
     </ChatProvider>
   );
 }
