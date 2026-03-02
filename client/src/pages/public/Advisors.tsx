@@ -1,6 +1,4 @@
 import { useLocation } from 'wouter';
-import DataSourceBadge from '../../components/content/DataSourceBadge';
-import { Icons } from '../../components/content/icons';
 
 /* ═══ DESIGN TOKENS ═══ */
 
@@ -232,22 +230,6 @@ export default function Advisors() {
           font-size: 13px; color: ${T.muted};
         }
 
-        /* ── Icon in card heading ── */
-        .adv-card-icon {
-          width: 36px; height: 36px; border-radius: 10px;
-          background: ${T.terraSoft}; color: ${T.terra};
-          display: flex; align-items: center; justify-content: center;
-          margin-bottom: 14px;
-        }
-
-        /* ── DataSource badges grid ── */
-        .adv-datasources {
-          display: grid; grid-template-columns: repeat(3, 1fr);
-          gap: 12px; margin-top: 28px;
-        }
-        @media (max-width: 768px) { .adv-datasources { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 480px) { .adv-datasources { grid-template-columns: 1fr; } }
-
         /* ── Final CTA ── */
         .adv-final-cta {
           text-align: center; max-width: 600px;
@@ -369,28 +351,24 @@ export default function Advisors() {
         <h2 className="adv-heading">Intelligence on demand for every engagement.</h2>
         <div className="adv-cards">
           <div className="adv-card">
-            <div className="adv-card-icon">{Icons.FileText()}</div>
             <h3>Package a new listing</h3>
             <p>
               A new seller engagement used to mean days of manual research before you could have an informed conversation about price. With SMBX, tell Yulia about the business and get instant market intelligence &mdash; industry multiples, competitive landscape, regional economics, preliminary valuation range, and add-back identification. All sourced. All defensible.
             </p>
           </div>
           <div className="adv-card">
-            <div className="adv-card-icon">{Icons.Users()}</div>
             <h3>Qualify buyers in minutes</h3>
             <p>
               Yulia can pre-screen buyer financials against SBA lending requirements, model debt service coverage ratios, and assess financing feasibility before you schedule a single call. Know which buyers can actually close &mdash; and which structures work for the deal at hand.
             </p>
           </div>
           <div className="adv-card">
-            <div className="adv-card-icon">{Icons.BarChart()}</div>
             <h3>Win the pitch</h3>
             <p>
               When you&apos;re competing for a listing, the advisor who shows up with localized market intelligence, industry-specific benchmarks, and a clear methodology wins the engagement. Yulia gives you that preparation in the time it takes to describe the opportunity.
             </p>
           </div>
           <div className="adv-card">
-            <div className="adv-card-icon">{Icons.DollarSign()}</div>
             <h3>Make smaller deals profitable</h3>
             <p>
               There are deals in the $500K&ndash;$2M range that your expertise could close &mdash; but they don&apos;t justify 40 hours of manual prep. SMBX changes the economics. The intelligence infrastructure that makes a $10M engagement great makes a $1M engagement viable.
@@ -426,13 +404,13 @@ export default function Advisors() {
         <p className="adv-body">
           That&apos;s the difference between intelligence you&apos;ll put your name on and a printout from a chatbot.
         </p>
-        <div className="adv-datasources">
-          <DataSourceBadge icon={Icons.Building()} name="U.S. Census Bureau" desc="Business counts, competitive density, demographics" />
-          <DataSourceBadge icon={Icons.BarChart()} name="Bureau of Labor Statistics" desc="Industry reports, employment, wage data" />
-          <DataSourceBadge icon={Icons.TrendingUp()} name="Federal Reserve (FRED)" desc="Economic indicators, interest rates, lending" />
-          <DataSourceBadge icon={Icons.FileText()} name="SEC EDGAR" desc="Public filings, comparable transactions" />
-          <DataSourceBadge icon={Icons.DollarSign()} name="IRS Statistics of Income" desc="Tax data, business profitability benchmarks" />
-          <DataSourceBadge icon={Icons.ShieldCheck()} name="SBA Lending Data" desc="Loan programs, bankability requirements" />
+        <div className="adv-trust-bar">
+          <span style={{ fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Built on:</span>
+          {TRUST_SOURCES.map((src, i, arr) => (
+            <span key={src}>
+              {src}{i < arr.length - 1 ? ' \u00B7' : ''}
+            </span>
+          ))}
         </div>
       </section>
 

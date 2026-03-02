@@ -1,6 +1,4 @@
 import { useLocation } from 'wouter';
-import StatCallout from '../../components/content/StatCallout';
-import { Icons } from '../../components/content/icons';
 
 /* ═══ DESIGN TOKENS ═══ */
 
@@ -229,21 +227,6 @@ export default function Buy() {
           border-radius: 6px; flex-shrink: 0;
         }
 
-        /* ── Stat callouts row ── */
-        .buy-stats {
-          display: grid; grid-template-columns: repeat(3, 1fr);
-          gap: 16px; margin-top: 28px;
-        }
-        @media (max-width: 640px) { .buy-stats { grid-template-columns: 1fr; } }
-
-        /* ── Icon in card heading ── */
-        .buy-card-icon {
-          width: 36px; height: 36px; border-radius: 10px;
-          background: ${T.terraSoft}; color: ${T.terra};
-          display: flex; align-items: center; justify-content: center;
-          margin-bottom: 14px;
-        }
-
         /* ── PE/Search fund highlight ── */
         .buy-highlight {
           background: #FFFFFF; border-radius: 20px;
@@ -354,38 +337,29 @@ export default function Buy() {
         <h2 className="buy-heading">The intelligence behind your offer.</h2>
         <div className="buy-analyze">
           <div className="buy-analyze-card">
-            <div className="buy-card-icon">{Icons.Search()}</div>
             <h3>Market intelligence</h3>
             <p>
               Industry landscape, competitive density, growth trends, and consolidation activity in your target sector and geography. Know exactly what you&apos;re buying into before you write a check.
             </p>
           </div>
           <div className="buy-analyze-card">
-            <div className="buy-card-icon">{Icons.Calculator()}</div>
             <h3>Financial modeling</h3>
             <p>
               SBA financing feasibility, debt service coverage ratios, cash-on-cash return projections, and multiple deal structures modeled side-by-side. See which structures work &mdash; and which don&apos;t &mdash; before you negotiate.
             </p>
           </div>
           <div className="buy-analyze-card">
-            <div className="buy-card-icon">{Icons.Target()}</div>
             <h3>Target evaluation</h3>
             <p>
               Valuation benchmarking against comparable transactions, financial normalization, add-back verification, and red-flag identification. The analysis that tells you whether the asking price is justified.
             </p>
           </div>
           <div className="buy-analyze-card">
-            <div className="buy-card-icon">{Icons.Layers()}</div>
             <h3>Deal structuring</h3>
             <p>
               Earnout modeling, seller financing scenarios, equity roll structures, and negotiation intelligence. Understand the levers that get a deal done &mdash; and what to push for.
             </p>
           </div>
-        </div>
-        <div className="buy-stats">
-          <StatCallout value="1.25x DSCR" label="SBA minimum requirement" desc="Debt service coverage ratio for loan qualification" />
-          <StatCallout value="10% min equity" label="Buyer injection required" desc="Typical minimum down payment for SBA acquisition" />
-          <StatCallout value="$5M max" label="SBA 7(a) loan limit" desc="Maximum SBA financing for business acquisitions" />
         </div>
       </section>
 

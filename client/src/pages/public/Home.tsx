@@ -5,10 +5,6 @@ import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
 import Sidebar from '../../components/chat/Sidebar';
-import StepCard from '../../components/content/StepCard';
-import ComparisonBlock from '../../components/content/ComparisonBlock';
-import DataSourceBadge from '../../components/content/DataSourceBadge';
-import { Icons } from '../../components/content/icons';
 
 /* ═══ DESIGN TOKENS ═══ */
 
@@ -495,24 +491,6 @@ export default function Home() {
           font-size: 13px; color: ${T.muted};
         }
 
-        /* ── StepCards grid ── */
-        .home-stepcards {
-          display: grid; grid-template-columns: repeat(2, 1fr);
-          gap: 16px; margin-top: 28px;
-        }
-        @media (max-width: 640px) { .home-stepcards { grid-template-columns: 1fr; } }
-
-        /* ── DataSource badges grid ── */
-        .home-datasources {
-          display: grid; grid-template-columns: repeat(3, 1fr);
-          gap: 12px; margin-top: 28px;
-        }
-        @media (max-width: 768px) { .home-datasources { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 480px) { .home-datasources { grid-template-columns: 1fr; } }
-
-        /* ── Comparison block wrapper ── */
-        .home-comparison { margin-top: 28px; }
-
         /* ── Final CTA ── */
         .home-final-cta {
           text-align: center; max-width: 600px;
@@ -764,15 +742,12 @@ export default function Home() {
               <p className="home-overline">The SMBX methodology</p>
               <h2 className="home-section-heading">The data is public. The intelligence is not.</h2>
               <p className="home-section-body">
-                The same market data that powers Wall Street &mdash; Census Bureau demographics, Bureau of Labor Statistics industry reports, Federal Reserve economic indicators, SEC filings, SBA lending records &mdash; is technically available to anyone. What isn&apos;t available is someone who can synthesize all of it into a deal-specific analysis in minutes.
+                The same market data that powers Wall Street &mdash; Census Bureau demographics, Bureau of Labor Statistics industry reports, Federal Reserve economic indicators, SEC filings, SBA lending records &mdash; is technically available to anyone.
               </p>
-              <div className="home-stepcards">
-                <StepCard num={1} title="Industry multiples" desc="What your industry's multiples are doing — calibrated to deal size, geography, and business characteristics." />
-                <StepCard num={2} title="Competitive landscape" desc="How many competitors operate in your market and which PE firms are actively consolidating your space." />
-                <StepCard num={3} title="SBA financing" desc="Whether a buyer can finance this deal through SBA — debt service coverage, lending requirements, bankability." />
-                <StepCard num={4} title="Financial normalization" desc="What add-backs you're missing and how normalization adjustments change your effective earnings." />
-              </div>
-              <p className="home-section-body" style={{ marginTop: 24 }}>
+              <p className="home-section-body">
+                What isn&apos;t available is someone who can synthesize all of it into a deal-specific analysis in minutes. What your industry&apos;s multiples are doing. How many competitors operate in your market. Whether a buyer can finance this deal through SBA. What add-backs you&apos;re missing. Which PE firms are actively consolidating your space.
+              </p>
+              <p className="home-section-body">
                 That&apos;s what Yulia does. Not generic answers &mdash; localized, industry-specific, deal-size-calibrated intelligence grounded in authoritative data. Every number is sourced. Every analysis shows its work.
               </p>
             </section>
@@ -885,35 +860,16 @@ export default function Home() {
               <p className="home-section-body">
                 Yulia doesn&apos;t generate plausible-sounding text about your deal. She runs a structured methodology against authoritative data and delivers traceable conclusions. When she says there are 847 HVAC companies in your metro, that number comes from Census Bureau County Business Patterns data. When she cites an industry multiple, it&apos;s grounded in comparable transaction analysis.
               </p>
-              <div className="home-comparison">
-                <ComparisonBlock
-                  left={{
-                    heading: 'Generic AI chatbot',
-                    items: [
-                      'No structured methodology',
-                      'No authoritative data sources',
-                      'Generic, non-localized answers',
-                      'No traceable citations',
-                    ],
-                  }}
-                  right={{
-                    heading: 'SMBX intelligence',
-                    items: [
-                      'Seven-layer analytical methodology',
-                      'Government & institutional data sources',
-                      'Localized to your metro and industry',
-                      'Every number sourced and traceable',
-                    ],
-                  }}
-                />
-              </div>
-              <div className="home-datasources">
-                <DataSourceBadge icon={Icons.Building()} name="U.S. Census Bureau" desc="Business counts, competitive density, demographics" />
-                <DataSourceBadge icon={Icons.BarChart()} name="Bureau of Labor Statistics" desc="Industry reports, employment, wage data" />
-                <DataSourceBadge icon={Icons.TrendingUp()} name="Federal Reserve (FRED)" desc="Economic indicators, interest rates, lending" />
-                <DataSourceBadge icon={Icons.FileText()} name="SEC EDGAR" desc="Public filings, comparable transactions" />
-                <DataSourceBadge icon={Icons.DollarSign()} name="IRS Statistics of Income" desc="Tax data, business profitability benchmarks" />
-                <DataSourceBadge icon={Icons.ShieldCheck()} name="SBA Lending Data" desc="Loan programs, bankability requirements" />
+              <p className="home-section-body">
+                That&apos;s the difference between a chatbot and an intelligence engine.
+              </p>
+              <div className="home-trust-bar">
+                <span style={{ fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Built on:</span>
+                {['U.S. Census Bureau', 'Bureau of Labor Statistics', 'Federal Reserve (FRED)', 'SEC EDGAR', 'IRS Statistics of Income', 'SBA Lending Data'].map((src, i, arr) => (
+                  <span key={src}>
+                    {src}{i < arr.length - 1 ? ' \u00B7' : ''}
+                  </span>
+                ))}
               </div>
             </section>
 
