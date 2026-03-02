@@ -1,4 +1,6 @@
 import { useLocation } from 'wouter';
+import StatCallout from '../../components/content/StatCallout';
+import { Icons } from '../../components/content/icons';
 
 /* ═══ DESIGN TOKENS ═══ */
 
@@ -227,6 +229,21 @@ export default function Sell() {
           border-radius: 6px; flex-shrink: 0;
         }
 
+        /* ── Stat callouts row ── */
+        .sell-stats {
+          display: grid; grid-template-columns: repeat(3, 1fr);
+          gap: 16px; margin-top: 28px;
+        }
+        @media (max-width: 640px) { .sell-stats { grid-template-columns: 1fr; } }
+
+        /* ── Icon in card heading ── */
+        .sell-card-icon {
+          width: 36px; height: 36px; border-radius: 10px;
+          background: ${T.terraSoft}; color: ${T.terra};
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 14px;
+        }
+
         /* ── Advisor complement ── */
         .sell-highlight {
           background: #FFFFFF; border-radius: 20px;
@@ -337,29 +354,38 @@ export default function Sell() {
         <h2 className="sell-heading">The intelligence behind your asking price.</h2>
         <div className="sell-analyze">
           <div className="sell-analyze-card">
+            <div className="sell-card-icon">{Icons.Scale()}</div>
             <h3>Valuation &amp; multiples</h3>
             <p>
               Industry-specific multiples calibrated to your deal size, geography, and business characteristics. Not a generic calculator &mdash; a methodology that accounts for what buyers in your market are actually paying.
             </p>
           </div>
           <div className="sell-analyze-card">
+            <div className="sell-card-icon">{Icons.Tag()}</div>
             <h3>Add-back identification</h3>
             <p>
               Most owners leave money on the table. Yulia identifies discretionary expenses, one-time costs, owner benefits, and normalization adjustments that increase your effective earnings &mdash; and your sale price.
             </p>
           </div>
           <div className="sell-analyze-card">
+            <div className="sell-card-icon">{Icons.Search()}</div>
             <h3>Market intelligence</h3>
             <p>
               How many competitors operate in your metro. What the buyer demand looks like. Whether PE firms are consolidating your industry. The context that determines whether it&apos;s a seller&apos;s market or a buyer&apos;s market for your specific business.
             </p>
           </div>
           <div className="sell-analyze-card">
+            <div className="sell-card-icon">{Icons.ShieldCheck()}</div>
             <h3>Deal readiness</h3>
             <p>
               SBA bankability modeling, buyer qualification analysis, and deal structure recommendations. Know which buyers can actually close &mdash; and which deal structures maximize your net proceeds.
             </p>
           </div>
+        </div>
+        <div className="sell-stats">
+          <StatCallout value="2.0x–6.0x" label="Typical SDE/EBITDA multiples" desc="Calibrated to your industry and deal size" />
+          <StatCallout value="20–40%" label="Add-back impact" desc="Average valuation lift from proper normalization" />
+          <StatCallout value="1.25x DSCR" label="SBA minimum threshold" desc="Debt service coverage ratio required for bankability" />
         </div>
       </section>
 

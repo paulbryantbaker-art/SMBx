@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
+import StepCard from '../../components/content/StepCard';
+import { Icons } from '../../components/content/icons';
 
 /* ═══ DESIGN TOKENS ═══ */
 
@@ -18,12 +20,12 @@ const T = {
 /* ═══ DATA ═══ */
 
 const FREE_ITEMS = [
-  { title: 'Unlimited conversation with Yulia', desc: 'Ask anything about your deal, your market, or the M&A process. Yulia\u2019s advisory conversation has no limits.' },
-  { title: 'Business classification', desc: 'Yulia identifies your league, deal size range, and the appropriate analytical framework for your specific situation.' },
-  { title: 'Preliminary valuation range', desc: 'An initial estimate based on industry multiples, your financial profile, and current market conditions. Sourced and methodical.' },
-  { title: 'Market overview', desc: 'Industry dynamics, competitive landscape, and regional context for your deal.' },
-  { title: 'Add-back identification', desc: 'Common adjustments that increase your business\u2019s actual earnings \u2014 the value most owners don\u2019t know they have.' },
-  { title: 'SBA pre-qualification check', desc: 'Whether your deal qualifies for SBA financing and what that means for your buyer pool.' },
+  { title: 'Unlimited conversation with Yulia', desc: 'Ask anything about your deal, your market, or the M&A process. Yulia\u2019s advisory conversation has no limits.', icon: 'MessageCircle' as const },
+  { title: 'Business classification', desc: 'Yulia identifies your league, deal size range, and the appropriate analytical framework for your specific situation.', icon: 'Layers' as const },
+  { title: 'Preliminary valuation range', desc: 'An initial estimate based on industry multiples, your financial profile, and current market conditions. Sourced and methodical.', icon: 'Scale' as const },
+  { title: 'Market overview', desc: 'Industry dynamics, competitive landscape, and regional context for your deal.', icon: 'Search' as const },
+  { title: 'Add-back identification', desc: 'Common adjustments that increase your business\u2019s actual earnings \u2014 the value most owners don\u2019t know they have.', icon: 'Tag' as const },
+  { title: 'SBA pre-qualification check', desc: 'Whether your deal qualifies for SBA financing and what that means for your buyer pool.', icon: 'ShieldCheck' as const },
 ];
 
 const SELL_DELIVERABLES = [
@@ -209,6 +211,21 @@ export default function Pricing() {
         .price-free-card p {
           font-size: 14px; line-height: 1.65; color: ${T.sub}; margin: 0;
         }
+
+        /* ── Icon in free card heading ── */
+        .price-card-icon {
+          width: 36px; height: 36px; border-radius: 10px;
+          background: ${T.terraSoft}; color: ${T.terra};
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 14px;
+        }
+
+        /* ── Wallet step cards ── */
+        .price-wallet-steps {
+          display: grid; grid-template-columns: repeat(3, 1fr);
+          gap: 16px; margin-top: 28px;
+        }
+        @media (max-width: 640px) { .price-wallet-steps { grid-template-columns: 1fr; } }
 
         /* ── Premium deliverables ── */
         .price-journey-label {
@@ -408,6 +425,7 @@ export default function Pricing() {
         <div className="price-free-grid">
           {FREE_ITEMS.map((item, i) => (
             <div key={i} className="price-free-card">
+              <div className="price-card-icon">{Icons[item.icon]()}</div>
               <h3>
                 {item.title}
                 <span className="price-free-badge">Free</span>
@@ -466,6 +484,11 @@ export default function Pricing() {
           <p className="price-body" style={{ marginBottom: 0 }}>
             Your wallet balance carries forward across deals. If you&apos;re an advisor running multiple engagements, your funds work across all of them.
           </p>
+        </div>
+        <div className="price-wallet-steps">
+          <StepCard num={1} title="Add funds" desc="Top up your wallet when you're ready. Larger blocks include bonus funds up to 30%." />
+          <StepCard num={2} title="Yulia quotes the cost" desc="Before generating any premium deliverable, Yulia tells you exactly what it costs." />
+          <StepCard num={3} title="Pay per deliverable" desc="Only pay for what you use. Funds carry forward across all your deals." />
         </div>
       </section>
 
