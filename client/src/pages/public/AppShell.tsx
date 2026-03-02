@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation } from 'wouter';
 import { useAnonymousChat } from '../../hooks/useAnonymousChat';
-import { useAppHeight } from '../../hooks/useAppHeight';
 import Sidebar, { type TabId, type ViewState } from '../../components/shell/Sidebar';
 import InputDock, { SUGGESTION_CHIPS } from '../../components/shell/InputDock';
 import ChatMessages from '../../components/shell/ChatMessages';
@@ -23,7 +22,6 @@ function pathToTab(path: string): TabId {
 
 export default function AppShell() {
   const [location] = useLocation();
-  useAppHeight();
 
   // Core state
   const [viewState, setViewState] = useState<ViewState>('landing');
@@ -86,15 +84,7 @@ export default function AppShell() {
 
   return (
     <div
-      className="flex bg-white text-[#2D3142] font-sans overflow-hidden selection:bg-[#D4714E] selection:text-white"
-      style={{
-        position: 'fixed',
-        left: 0,
-        right: 0,
-        top: 'var(--app-top, 0px)',
-        height: 'var(--app-height, 100dvh)',
-        overscrollBehavior: 'none',
-      }}
+      className="flex h-dvh bg-white text-[#2D3142] font-sans overflow-hidden selection:bg-[#D4714E] selection:text-white"
     >
       {/* ── Desktop sidebar ── */}
       {!isMobile && (
