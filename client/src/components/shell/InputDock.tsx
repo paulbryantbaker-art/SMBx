@@ -17,7 +17,7 @@ const PLACEHOLDERS: Record<string, string> = {
   chat: 'Reply to Yulia...',
 };
 
-const SUGGESTION_CHIPS: Record<string, { label: string; prompt: string }[]> = {
+export const SUGGESTION_CHIPS: Record<string, { label: string; prompt: string }[]> = {
   home: [
     { label: '"What would a buyer pay for my business?"', prompt: 'What would a buyer pay for my business? I want to understand what it might be worth in today\'s market.' },
     { label: '"I\'m a broker \u2014 show me what you can do"', prompt: "I'm a business broker. Show me how you can help me with my practice \u2014 valuations, CIMs, buyer matching, deal management." },
@@ -43,7 +43,6 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
   const hasContent = value.trim().length > 0;
 
   const placeholder = viewState === 'chat' ? PLACEHOLDERS.chat : (PLACEHOLDERS[activeTab] || PLACEHOLDERS.home);
-  const chips = viewState === 'landing' ? (SUGGESTION_CHIPS[activeTab] || []) : [];
 
   const send = useCallback(() => {
     const t = value.trim();
@@ -63,10 +62,6 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
   const handleKey = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   }, [send]);
-
-  const handleChip = useCallback((prompt: string) => {
-    onSend(prompt);
-  }, [onSend]);
 
   // Auto-focus after morph to chat
   useEffect(() => {
@@ -90,24 +85,7 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
       <div className="pointer-events-none absolute -top-16 left-0 right-0 h-16" style={{ background: 'linear-gradient(to bottom, transparent, white)' }} />
 
       <div className="max-w-3xl mx-auto px-4">
-        {/* Suggestion chips — bolder, more visible */}
-        {chips.length > 0 && (
-          <div className="flex flex-wrap gap-2.5 mb-4 justify-center">
-            {chips.map((chip) => (
-              <button
-                key={chip.label}
-                onClick={() => handleChip(chip.prompt)}
-                className="px-5 py-2.5 rounded-full border-2 border-gray-200 bg-white text-[14px] font-medium text-[#2D3142] hover:border-[#D4714E] hover:bg-[#FFF8F4] hover:text-[#D4714E] transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-[0.97]"
-                style={{ fontFamily: 'inherit' }}
-                type="button"
-              >
-                {chip.label}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Input bar — more prominent with stronger border + shadow */}
+        {/* Input bar */}
         <div
           className={`relative bg-white rounded-2xl transition-all duration-300 ${
             viewState === 'landing'
