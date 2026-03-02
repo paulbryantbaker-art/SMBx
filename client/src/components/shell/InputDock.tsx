@@ -1,0 +1,154 @@
+import { useState, useRef, useCallback, useEffect } from 'react';
+import type { TabId, ViewState } from './Sidebar';
+
+interface InputDockProps {
+  viewState: ViewState;
+  activeTab: TabId;
+  onSend: (content: string) => void;
+  disabled?: boolean;
+}
+
+const PLACEHOLDERS: Record<string, string> = {
+  home: 'Tell Yulia about your deal...',
+  sell: 'Tell Yulia about the business you want to sell...',
+  buy: 'Tell Yulia what kind of business you\'re looking for...',
+  advisors: 'Tell Yulia about your client\'s deal...',
+  pricing: 'Tell Yulia about your deal...',
+  chat: 'Reply to Yulia...',
+};
+
+const SUGGESTION_CHIPS: Record<string, { label: string; prompt: string }[]> = {
+  home: [
+    { label: '"What would a buyer pay for my business?"', prompt: 'What would a buyer pay for my business? I want to understand what it might be worth in today\'s market.' },
+    { label: '"I\'m a broker \u2014 show me what you can do"', prompt: "I'm a business broker. Show me how you can help me with my practice \u2014 valuations, CIMs, buyer matching, deal management." },
+  ],
+  sell: [
+    { label: '"Value my $1.8M pest control business"', prompt: 'Value my $1.8M revenue pest control business. Help me understand what it might be worth.' },
+    { label: '"Walk me through the selling process"', prompt: 'Walk me through selling my company. I want to understand the full process from start to close.' },
+  ],
+  buy: [
+    { label: '"Find acquisition targets in HVAC"', prompt: 'Find acquisition targets in HVAC. I\'m looking to buy in the $1-3M revenue range.' },
+    { label: '"Model SBA financing for a $2M deal"', prompt: 'Help me model SBA financing for a $2M business acquisition. What would the capital structure look like?' },
+  ],
+  advisors: [
+    { label: '"Package a commercial cleaning listing"', prompt: 'I need to package a commercial cleaning business listing. Help me build a professional CIM.' },
+    { label: '"Pre-screen a buyer for SBA"', prompt: 'I need to pre-screen a buyer for SBA eligibility. What do I need to check?' },
+  ],
+  pricing: [],
+};
+
+export default function InputDock({ viewState, activeTab, onSend, disabled }: InputDockProps) {
+  const [value, setValue] = useState('');
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const hasContent = value.trim().length > 0;
+
+  const placeholder = viewState === 'chat' ? PLACEHOLDERS.chat : (PLACEHOLDERS[activeTab] || PLACEHOLDERS.home);
+  const chips = viewState === 'landing' ? (SUGGESTION_CHIPS[activeTab] || []) : [];
+
+  const send = useCallback(() => {
+    const t = value.trim();
+    if (!t || disabled) return;
+    setValue('');
+    if (inputRef.current) inputRef.current.style.height = 'auto';
+    onSend(t);
+  }, [value, disabled, onSend]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setValue(e.target.value);
+    const el = e.target;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }, []);
+
+  const handleKey = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  }, [send]);
+
+  const handleChip = useCallback((prompt: string) => {
+    onSend(prompt);
+  }, [onSend]);
+
+  // Auto-focus after morph to chat
+  useEffect(() => {
+    if (viewState === 'chat') {
+      setTimeout(() => inputRef.current?.focus(), 300);
+    }
+  }, [viewState]);
+
+  return (
+    <div className="flex-shrink-0 w-full" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+      {/* Gradient fade above dock */}
+      <div className="pointer-events-none h-8 -mt-8 relative z-10" style={{ background: 'linear-gradient(to bottom, transparent, white)' }} />
+
+      <div className="max-w-3xl mx-auto px-4">
+        {/* Suggestion chips */}
+        {chips.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3 justify-center">
+            {chips.map((chip) => (
+              <button
+                key={chip.label}
+                onClick={() => handleChip(chip.prompt)}
+                className="px-4 py-2 rounded-full border border-gray-200 bg-white text-[13px] text-[#4F5D75] hover:border-[#D4714E] hover:text-[#D4714E] transition-all cursor-pointer"
+                style={{ fontFamily: 'inherit' }}
+                type="button"
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Input bar */}
+        <div
+          className={`relative bg-white border border-gray-200 rounded-2xl transition-all duration-300 ${
+            viewState === 'landing'
+              ? 'shadow-[0_8px_30px_rgba(0,0,0,0.08)]'
+              : 'shadow-md'
+          } focus-within:border-[#D4714E] focus-within:shadow-[0_8px_30px_rgba(212,113,78,0.12)]`}
+        >
+          <div className="flex items-end gap-2 px-4 py-3">
+            {/* Sparkles icon */}
+            <div className="flex-shrink-0 pb-0.5">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z" />
+              </svg>
+            </div>
+
+            {/* Textarea */}
+            <textarea
+              ref={inputRef}
+              value={value}
+              onChange={handleChange}
+              onKeyDown={handleKey}
+              placeholder={placeholder}
+              className="flex-1 bg-transparent border-none outline-none resize-none text-[16px] text-[#2D3142] leading-[1.5] placeholder:text-[#9CA3AF]"
+              style={{ fontFamily: 'inherit', minHeight: '24px', maxHeight: '160px' }}
+              rows={1}
+            />
+
+            {/* Send button */}
+            <button
+              onClick={send}
+              disabled={!hasContent || disabled}
+              className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center border-none cursor-pointer transition-all ${
+                hasContent && !disabled
+                  ? 'bg-[#D4714E] text-white hover:bg-[#BE6342]'
+                  : 'bg-gray-100 text-gray-300'
+              }`}
+              type="button"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 2L11 13" /><path d="M22 2l-7 20-4-9-9-4 20-7z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Footer text */}
+        <p className="text-center text-[12px] text-[#9CA3AF] mt-2 hidden sm:block">
+          Yulia is an AI advisor. Built on Census, BLS, FRED, and SEC EDGAR data.
+        </p>
+      </div>
+    </div>
+  );
+}

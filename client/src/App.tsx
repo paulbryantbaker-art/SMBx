@@ -20,34 +20,22 @@ async function migrateSessionConversations() {
   }
 }
 
-function ScrollToTop() {
-  const [location] = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location]);
-  return null;
-}
-
 function PageLoader() {
   return (
-    <div className="flex justify-center items-center min-h-dvh bg-[#FAF9F7]">
-      <p className="text-[#7A766E] font-sans text-base m-0">Loading...</p>
+    <div className="flex justify-center items-center min-h-dvh bg-white">
+      <p className="text-[#9CA3AF] font-sans text-base m-0">Loading...</p>
     </div>
   );
 }
 
-import Home from './pages/public/Home';
+import AppShell from './pages/public/AppShell';
 import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
 import Privacy from './pages/public/Privacy';
 import Terms from './pages/public/Terms';
 import Chat from './pages/Chat';
 
-// Lazy-load secondary pages to keep initial bundle lean
-const Advisors = lazy(() => import('./pages/public/Advisors'));
-const Sell = lazy(() => import('./pages/public/Sell'));
-const Buy = lazy(() => import('./pages/public/Buy'));
-const Pricing = lazy(() => import('./pages/public/Pricing'));
+// Lazy-load secondary pages
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
 const Search = lazy(() => import('./pages/Search'));
@@ -73,7 +61,6 @@ export default function App() {
       callback: async (response: any) => {
         try {
           await loginWithGoogle(response.credential);
-          // Migrate anonymous sessions
           const anonId = sessionStorage.getItem('smbx_anon_session');
           if (anonId) {
             await migrateSession(anonId);
@@ -111,7 +98,7 @@ export default function App() {
     navigate('/chat');
   }, [register, migrateSession, navigate]);
 
-  // Load public config (Google Client ID, etc.)
+  // Load public config
   useEffect(() => {
     fetch('/api/config').then(r => r.json()).then(cfg => {
       if (cfg.googleClientId) (window as any).__GOOGLE_CLIENT_ID = cfg.googleClientId;
@@ -120,37 +107,41 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-dvh bg-[#FAF9F7]">
-        <p className="text-[#7A766E] font-sans text-base m-0">Loading...</p>
+      <div className="flex justify-center items-center min-h-dvh bg-white">
+        <p className="text-[#9CA3AF] font-sans text-base m-0">Loading...</p>
       </div>
     );
   }
 
   return (
     <ChatProvider>
-    <ScrollToTop />
     <Switch>
+      {/* App shell handles: /, /sell, /buy, /advisors, /pricing */}
       <Route path="/">
-        <Home />
-      </Route>
-      <Route path="/advisors">
-        <Suspense fallback={<PageLoader />}><Advisors /></Suspense>
+        <AppShell />
       </Route>
       <Route path="/sell">
-        <Suspense fallback={<PageLoader />}><Sell /></Suspense>
+        <AppShell />
       </Route>
       <Route path="/buy">
-        <Suspense fallback={<PageLoader />}><Buy /></Suspense>
+        <AppShell />
+      </Route>
+      <Route path="/advisors">
+        <AppShell />
       </Route>
       <Route path="/pricing">
-        <Suspense fallback={<PageLoader />}><Pricing /></Suspense>
+        <AppShell />
       </Route>
+
+      {/* Legal */}
       <Route path="/legal/privacy">
         <Privacy />
       </Route>
       <Route path="/legal/terms">
         <Terms />
       </Route>
+
+      {/* Shared / invite / day-pass */}
       <Route path="/shared/:token">
         {(params) => (
           <Suspense fallback={<PageLoader />}>
@@ -158,15 +149,6 @@ export default function App() {
           </Suspense>
         )}
       </Route>
-
-      <Route path="/search">
-        {user ? (
-          <Suspense fallback={<PageLoader />}><Search /></Suspense>
-        ) : (
-          <Redirect to="/login" />
-        )}
-      </Route>
-
       <Route path="/invite/:token">
         {(params) => (
           <Suspense fallback={<PageLoader />}>
@@ -182,6 +164,7 @@ export default function App() {
         )}
       </Route>
 
+      {/* Auth */}
       <Route path="/login">
         {user ? (
           <Redirect to="/chat" />
@@ -193,7 +176,6 @@ export default function App() {
           />
         )}
       </Route>
-
       <Route path="/signup">
         {user ? (
           <Redirect to="/chat" />
@@ -206,6 +188,16 @@ export default function App() {
         )}
       </Route>
 
+      {/* Search (authenticated) */}
+      <Route path="/search">
+        {user ? (
+          <Suspense fallback={<PageLoader />}><Search /></Suspense>
+        ) : (
+          <Redirect to="/login" />
+        )}
+      </Route>
+
+      {/* Authenticated chat */}
       <Route path="/chat/:id?">
         {(params) => user ? (
           <Chat user={user} onLogout={() => { logout(); navigate('/'); }} initialConversationId={params.id ? parseInt(params.id, 10) : undefined} />
@@ -214,6 +206,7 @@ export default function App() {
         )}
       </Route>
 
+      {/* Catch-all */}
       <Route>
         <Redirect to="/" />
       </Route>
