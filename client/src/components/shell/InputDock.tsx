@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import type { TabId, ViewState } from './Sidebar';
+import type { TabId } from './Sidebar';
 
 interface InputDockProps {
-  viewState: ViewState;
+  viewState: string;
   activeTab: TabId;
   onSend: (content: string) => void;
   disabled?: boolean;

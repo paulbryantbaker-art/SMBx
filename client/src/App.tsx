@@ -33,13 +33,20 @@ import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
 import Privacy from './pages/public/Privacy';
 import Terms from './pages/public/Terms';
-import Chat from './pages/Chat';
 
 // Lazy-load secondary pages
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
 const Search = lazy(() => import('./pages/Search'));
 const DayPassView = lazy(() => import('./pages/public/DayPassView'));
+
+/** Check if a path should be handled by the unified AppShell */
+function isShellPath(path: string): boolean {
+  const shellExact = ['/', '/sell', '/buy', '/advisors', '/pricing', '/pipeline', '/dataroom', '/settings', '/chat'];
+  if (shellExact.includes(path)) return true;
+  if (path.startsWith('/chat/')) return true;
+  return false;
+}
 
 export default function App() {
   const { user, loading, login, register, loginWithGoogle, migrateSession, logout } = useAuth();
@@ -113,16 +120,12 @@ export default function App() {
     );
   }
 
-  const publicPaths = ['/', '/sell', '/buy', '/advisors', '/pricing'];
-  const isPublicRoute = publicPaths.includes(location);
-
   return (
     <ChatProvider>
-    {/* AppShell rendered as a single instance outside Switch so tab navigation
-        via pushState doesn't unmount/remount and lose component state */}
-    {isPublicRoute && <AppShell />}
+    {/* AppShell handles all main routes as a single persistent instance */}
+    {isShellPath(location) && <AppShell />}
 
-    {!isPublicRoute && (
+    {!isShellPath(location) && (
     <Switch>
       {/* Legal */}
       <Route path="/legal/privacy">
@@ -183,15 +186,6 @@ export default function App() {
       <Route path="/search">
         {user ? (
           <Suspense fallback={<PageLoader />}><Search /></Suspense>
-        ) : (
-          <Redirect to="/login" />
-        )}
-      </Route>
-
-      {/* Authenticated chat */}
-      <Route path="/chat/:id?">
-        {(params) => user ? (
-          <Chat user={user} onLogout={() => { logout(); navigate('/'); }} initialConversationId={params.id ? parseInt(params.id, 10) : undefined} />
         ) : (
           <Redirect to="/login" />
         )}
