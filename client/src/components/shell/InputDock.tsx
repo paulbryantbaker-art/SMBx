@@ -71,14 +71,23 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
   // Auto-focus after morph to chat
   useEffect(() => {
     if (viewState === 'chat') {
-      setTimeout(() => inputRef.current?.focus(), 300);
+      setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 300);
     }
   }, [viewState]);
 
+  // Prevent focus from scrolling viewport on mobile
+  const handleFocus = useCallback(() => {
+    // On iOS, focusing a fixed-position input can cause the viewport to jump.
+    // preventScroll on programmatic focus handles it, but taps need this:
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+    });
+  }, []);
+
   return (
-    <div className="flex-shrink-0 w-full" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
-      {/* Gradient fade above dock */}
-      <div className="pointer-events-none h-8 -mt-8 relative z-10" style={{ background: 'linear-gradient(to bottom, transparent, white)' }} />
+    <div className="flex-shrink-0 w-full bg-white relative z-20" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+      {/* Gradient fade above dock — pointer-events-none so scroll works through it */}
+      <div className="pointer-events-none absolute -top-8 left-0 right-0 h-8" style={{ background: 'linear-gradient(to bottom, transparent, white)' }} />
 
       <div className="max-w-3xl mx-auto px-4">
         {/* Suggestion chips */}
@@ -120,6 +129,7 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
               value={value}
               onChange={handleChange}
               onKeyDown={handleKey}
+              onFocus={handleFocus}
               placeholder={placeholder}
               className="flex-1 bg-transparent border-none outline-none resize-none text-[16px] text-[#2D3142] leading-[1.5] placeholder:text-[#9CA3AF]"
               style={{ fontFamily: 'inherit', minHeight: '24px', maxHeight: '160px' }}

@@ -11,7 +11,7 @@ interface ChatMessagesProps {
 
 export default function ChatMessages({ messages, streamingText, sending, onBack }: ChatMessagesProps) {
   return (
-    <div className="max-w-3xl mx-auto w-full px-4 pt-4 pb-8">
+    <div className="max-w-3xl mx-auto w-full px-4 pt-4 pb-32">
       {/* Header bar */}
       <div className="flex items-center justify-between mb-6">
         <button
