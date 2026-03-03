@@ -7,7 +7,7 @@
  */
 import Anthropic from '@anthropic-ai/sdk';
 
-const OPUS_MODEL = 'claude-opus-4-20250514';
+const OPUS_MODEL = 'claude-opus-4-6';
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {

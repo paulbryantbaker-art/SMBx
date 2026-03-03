@@ -11,7 +11,7 @@ import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
 
-const SONNET_MODEL = 'claude-sonnet-4-5-20250929';
+const SONNET_MODEL = 'claude-sonnet-4-6';
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {

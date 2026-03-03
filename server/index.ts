@@ -122,7 +122,7 @@ app.get('/api/debug/check-ai', async (_req, res) => {
       const { default: Anthropic } = await import('@anthropic-ai/sdk');
       const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
       const response = await client.messages.create({
-        model: 'claude-sonnet-4-5-20250929',
+        model: 'claude-sonnet-4-6',
         max_tokens: 50,
         messages: [{ role: 'user', content: 'Say hello in 5 words' }],
       });

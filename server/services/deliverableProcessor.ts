@@ -134,7 +134,7 @@ export async function processDeliverable(data: DeliverableJobData): Promise<void
           asking_price: deal.asking_price,
           financials, seven_factor_scores: financials.seven_factor_scores,
         });
-        model = 'claude-opus-4-20250514';
+        model = 'claude-opus-4-6';
         break;
 
       case 'loi':

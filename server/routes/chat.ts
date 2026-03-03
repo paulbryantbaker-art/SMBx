@@ -22,7 +22,7 @@ const sql = postgres(process.env.DATABASE_URL!, {
   prepare: false,
 });
 
-const STREAMING_MODEL = 'claude-sonnet-4-5-20250929';
+const STREAMING_MODEL = 'claude-sonnet-4-6';
 
 let anthropicClient: Anthropic | null = null;
 function getAnthropicClient(): Anthropic {
