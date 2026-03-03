@@ -179,9 +179,10 @@ export default function AppShell() {
     pricing: <PricingContent onSend={handleSend} />,
   };
 
-  // Should we show the input dock?
+  // Should we show the input dock? (Home page has its own gravity well input)
   const showInputDock = (viewState === 'landing' || viewState === 'chat') &&
-    !((!user && anonChat.limitReached));
+    !((!user && anonChat.limitReached)) &&
+    !(viewState === 'landing' && activeTab === 'home');
 
   return (
     <div
@@ -277,8 +278,8 @@ export default function AppShell() {
             <div key={activeTab} className="transition-opacity duration-500">
               {contentMap[activeTab]}
 
-              {/* Suggestion chips — inside scroll area */}
-              {(SUGGESTION_CHIPS[activeTab] || []).length > 0 && (
+              {/* Suggestion chips — inside scroll area (skip home tab, it has its own) */}
+              {activeTab !== 'home' && (SUGGESTION_CHIPS[activeTab] || []).length > 0 && (
                 <div className="max-w-3xl mx-auto px-4 pb-8">
                   <div className="flex flex-wrap gap-2.5 justify-center">
                     {(SUGGESTION_CHIPS[activeTab] || []).map((chip) => (
