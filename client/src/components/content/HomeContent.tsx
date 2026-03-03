@@ -90,17 +90,12 @@ export default function HomeContent() {
       <div className={`grid transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'landing' ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
         <div className="overflow-hidden">
           <section className="px-6 pt-[22vh] md:pt-[28vh] pb-8 max-w-5xl mx-auto w-full flex flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] text-xs font-bold tracking-wider uppercase mb-10 border border-[#FBE3D9]">
-              The new standard for M&amp;A
-            </div>
-
             <h1 className="text-5xl md:text-[80px] font-extrabold tracking-tight leading-[1.05] mb-8">
-              Buy or sell a business.<br />
-              <span className="text-[#D4714E]">Just by chatting.</span>
+              What deal are we<br />analyzing today?
             </h1>
 
             <p className="text-xl md:text-2xl text-[#6E6A63] font-medium max-w-3xl mx-auto leading-relaxed">
-              Our AI intelligence and deal automation take the guesswork out of buying or selling any business. Just type, and Yulia runs the numbers.
+              Our AI intelligence and deal automation take the guesswork out of buying or selling any business.
             </p>
           </section>
         </div>
@@ -130,13 +125,9 @@ export default function HomeContent() {
           <div className={`grid transition-all duration-700 ease-in-out w-full ${viewState === 'landing' ? 'grid-rows-[1fr] opacity-100 mt-8' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
             <div className="overflow-hidden flex flex-col items-center">
               <div className="flex flex-wrap justify-center gap-3 max-w-3xl mb-6">
-                <Suggestion text="What would a buyer pay for my business?" onClick={() => handleChipSend("What would a buyer pay for my business?")} />
-                <Suggestion text="Walk me through selling my company" onClick={() => handleChipSend("Walk me through selling my company")} />
-                <Suggestion text="Find acquisition targets in my industry" onClick={() => handleChipSend("Find acquisition targets in my industry")} />
-                <Suggestion text="I&apos;m a broker &mdash; show me what you can do" onClick={() => handleChipSend("I'm a broker — show me what you can do")} />
-              </div>
-              <div className="text-center text-[13px] font-bold text-[#A9A49C] uppercase tracking-widest">
-                Instant valuations &bull; SBA Bankability &bull; Localized Market Intelligence
+                <Suggestion text="Value my $2M plumbing business" onClick={() => handleChipSend("Value my $2M plumbing business")} />
+                <Suggestion text="Model SBA financing for a $1.5M target" onClick={() => handleChipSend("Model SBA financing for a $1.5M target")} />
+                <Suggestion text="Find HVAC acquisition targets in Texas" onClick={() => handleChipSend("Find HVAC acquisition targets in Texas")} />
               </div>
             </div>
           </div>

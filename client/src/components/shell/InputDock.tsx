@@ -103,7 +103,7 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
                 }`}
                 type="button"
               >
-                SEND
+                EXECUTE
               </button>
             </div>
           </div>

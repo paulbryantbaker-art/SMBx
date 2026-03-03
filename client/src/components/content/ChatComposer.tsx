@@ -14,7 +14,7 @@ export default function ChatComposer({
   value,
   onChange,
   onSend,
-  placeholder = 'Tell Yulia about your deal...',
+  placeholder = 'Message Yulia or paste a listing URL...',
   disabled = false,
   variant = 'hero',
   autoFocus = false,
@@ -91,7 +91,10 @@ export default function ChatComposer({
               : 'bg-[#D4714E] text-white opacity-50 shadow-none cursor-default'
           }`}
         >
-          SEND
+          EXECUTE{' '}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="inline -mt-px ml-1">
+            <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
+          </svg>
         </button>
       </div>
     </form>
