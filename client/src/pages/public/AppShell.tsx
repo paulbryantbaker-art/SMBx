@@ -5,7 +5,7 @@ import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 import { useAuthChat } from '../../hooks/useAuthChat';
 import Logo from '../../components/public/Logo';
 import Sidebar, { type TabId, type ViewState } from '../../components/shell/Sidebar';
-import InputDock, { SUGGESTION_CHIPS } from '../../components/shell/InputDock';
+import InputDock from '../../components/shell/InputDock';
 import ChatMessages from '../../components/shell/ChatMessages';
 import HomeContent from '../../components/content/HomeContent';
 import SellContent from '../../components/content/SellContent';
@@ -172,17 +172,16 @@ export default function AppShell() {
 
   // Content map for educational tabs
   const contentMap: Record<TabId, JSX.Element> = {
-    home: <HomeContent onSend={handleSend} />,
-    sell: <SellContent onSend={handleSend} />,
-    buy: <BuyContent onSend={handleSend} />,
-    advisors: <AdvisorsContent onSend={handleSend} />,
-    pricing: <PricingContent onSend={handleSend} />,
+    home: <HomeContent />,
+    sell: <SellContent />,
+    buy: <BuyContent />,
+    advisors: <AdvisorsContent />,
+    pricing: <PricingContent />,
   };
 
   // Should we show the input dock? (Home page has its own gravity well input)
-  const showInputDock = (viewState === 'landing' || viewState === 'chat') &&
-    !((!user && anonChat.limitReached)) &&
-    !(viewState === 'landing' && activeTab === 'home');
+  const showInputDock = viewState === 'chat' &&
+    !((!user && anonChat.limitReached));
 
   return (
     <div
@@ -278,27 +277,6 @@ export default function AppShell() {
             <div key={activeTab} className="transition-opacity duration-500">
               {contentMap[activeTab]}
 
-              {/* Suggestion chips — inside scroll area (skip home tab, it has its own) */}
-              {activeTab !== 'home' && (SUGGESTION_CHIPS[activeTab] || []).length > 0 && (
-                <div className="max-w-3xl mx-auto px-4 pb-8">
-                  <div className="flex flex-wrap gap-2.5 justify-center">
-                    {(SUGGESTION_CHIPS[activeTab] || []).map((chip) => (
-                      <button
-                        key={chip.label}
-                        onClick={() => handleSend(chip.prompt)}
-                        className="px-5 py-2.5 rounded-full border-2 border-gray-200 bg-white text-[14px] font-medium text-[#2D3142] hover:border-[#D4714E] hover:bg-[#FFF8F4] hover:text-[#D4714E] transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-[0.97]"
-                        style={{ fontFamily: 'inherit' }}
-                        type="button"
-                      >
-                        {chip.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Spacer for input dock clearance */}
-              <div className="h-24" />
             </div>
           )}
 

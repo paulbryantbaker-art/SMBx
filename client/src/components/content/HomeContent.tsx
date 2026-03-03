@@ -1,16 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { Suggestion, Badge } from './ui';
-
-interface Props {
-  onSend?: (prompt: string) => void;
-}
+import { Suggestion, Badge, AudienceCard } from './ui';
 
 interface Message {
   role: 'user' | 'yulia';
   content: string;
 }
 
-export default function HomeContent({ onSend }: Props) {
+export default function HomeContent() {
   const [viewState, setViewState] = useState<'landing' | 'chat'>('landing');
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -361,23 +357,6 @@ export default function HomeContent({ onSend }: Props) {
         </div>
       </div>
 
-    </div>
-  );
-}
-
-/* ── Home-specific sub-components ── */
-
-function AudienceCard({ letter, title, desc, cta }: { letter: string; title: string; desc: string; cta: string }) {
-  return (
-    <div className="bg-[#FDFCFB] border border-[#EAE6DF] p-8 rounded-3xl hover:shadow-md transition-all group flex flex-col">
-      <div className="w-12 h-12 bg-[#FFF0EB] rounded-2xl flex items-center justify-center text-[#D4714E] font-black text-xl mb-6 group-hover:scale-110 transition-transform">
-        {letter}
-      </div>
-      <h3 className="text-xl font-bold mb-3">{title}</h3>
-      <p className="text-[#6E6A63] mb-8 leading-relaxed text-[15px] flex-1">{desc}</p>
-      <div className="inline-flex items-center text-sm font-bold text-[#1A1A18] group-hover:text-[#D4714E] transition-colors cursor-pointer mt-auto">
-        {cta} <span className="ml-2 font-bold text-lg leading-none">&rarr;</span>
-      </div>
     </div>
   );
 }
