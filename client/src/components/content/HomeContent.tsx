@@ -34,7 +34,7 @@ export default function HomeContent() {
   };
 
   return (
-    <div className="bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white overflow-x-hidden min-h-screen">
+    <div className="bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white overflow-x-hidden">
 
       {/* --- 1. CHAT MESSAGES AREA (Hidden on landing, expands in chat) --- */}
       <div className={`w-full max-w-4xl mx-auto px-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'py-8 opacity-100 pb-32' : 'h-0 opacity-0 overflow-hidden'}`}>
@@ -88,67 +88,73 @@ export default function HomeContent() {
         </div>
       </div>
 
-      {/* --- 2. TOP LANDING CONTENT (Fades out when chatting) --- */}
-      <div className={`grid transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'landing' ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-        <div className="overflow-hidden">
-          <section className="px-6 pt-20 md:pt-40 pb-8 max-w-5xl mx-auto w-full relative z-10 flex flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] text-xs font-bold tracking-wider uppercase mb-10 border border-[#FBE3D9]">
-              The new standard for M&amp;A
-            </div>
+      {/* --- 2. HERO SECTION (Full viewport, centered) --- */}
+      <div className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'landing' ? 'min-h-[100vh] flex flex-col justify-center items-center' : 'hidden'}`}>
+        <div className="w-full max-w-5xl mx-auto px-6 flex flex-col items-center text-center mt-auto pt-20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] text-xs font-bold tracking-wider uppercase mb-10 border border-[#FBE3D9]">
+            The new standard for M&amp;A
+          </div>
 
-            <h1 className="text-5xl md:text-[80px] font-extrabold tracking-tight leading-[1.05] mb-8">
-              Buy or sell a business.<br />
-              <span className="text-[#D4714E]">Just by chatting.</span>
-            </h1>
+          <h1 className="text-5xl md:text-[80px] font-extrabold tracking-tight leading-[1.05] mb-8">
+            Buy or sell a business.<br />
+            <span className="text-[#D4714E]">Just by chatting.</span>
+          </h1>
 
-            <p className="text-xl md:text-2xl text-[#6E6A63] font-medium max-w-3xl mx-auto leading-relaxed">
-              Our AI intelligence and deal automation take the guesswork out of buying or selling any business. Just type, and Yulia runs the numbers.
-            </p>
-          </section>
+          <p className="text-xl md:text-2xl text-[#6E6A63] font-medium max-w-3xl mx-auto leading-relaxed mb-12">
+            Our AI intelligence and deal automation take the guesswork out of buying or selling any business. Just type, and Yulia runs the numbers.
+          </p>
+
+          <div className="w-full max-w-[800px]">
+            <ChatComposer
+              value={inputValue}
+              onChange={setInputValue}
+              onSend={handleSend}
+              placeholder="Tell Yulia about your deal..."
+              disabled={isStreaming}
+              variant="hero"
+            />
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-3 max-w-3xl mt-8 mb-6">
+            <Suggestion text="What would a buyer pay for my business?" onClick={() => handleChipSend("What would a buyer pay for my business?")} />
+            <Suggestion text="Walk me through selling my company" onClick={() => handleChipSend("Walk me through selling my company")} />
+            <Suggestion text="Find acquisition targets in my industry" onClick={() => handleChipSend("Find acquisition targets in my industry")} />
+            <Suggestion text="I&apos;m a broker &mdash; show me what you can do" onClick={() => handleChipSend("I'm a broker — show me what you can do")} />
+          </div>
+
+          <div className="text-center text-[13px] font-bold text-[#A9A49C] uppercase tracking-widest">
+            Instant valuations &bull; SBA Bankability &bull; Localized Market Intelligence
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="mt-auto pb-8 pt-12 text-center text-[#A9A49C] animate-bounce">
+          <div className="text-xs font-bold uppercase tracking-widest mb-2">Scroll to learn more</div>
+          <span className="text-lg">&darr;</span>
         </div>
       </div>
 
-      {/* --- 3. THE CHAT STAGE (Centered Gravity Well, Morphs to Bottom) --- */}
-      <div className={`w-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-4 pt-4 bg-gradient-to-t from-[#FDFCFB] via-[#FDFCFB] to-transparent' : 'px-4 py-16 md:py-24 z-50'}`} style={{ paddingBottom: viewState === 'chat' ? 'max(32px, env(safe-area-inset-bottom))' : undefined }}>
-        <div className={`max-w-[800px] mx-auto w-full flex flex-col items-center ${viewState === 'chat' ? 'pointer-events-auto' : ''}`}>
-
+      {/* --- 3. DOCKED CHAT INPUT (visible in chat mode) --- */}
+      <div className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-4 pt-4 bg-gradient-to-t from-[#FDFCFB] via-[#FDFCFB] to-transparent' : 'hidden'}`} style={{ paddingBottom: viewState === 'chat' ? 'max(32px, env(safe-area-inset-bottom))' : undefined }}>
+        <div className="max-w-[800px] mx-auto w-full pointer-events-auto">
           <ChatComposer
             value={inputValue}
             onChange={setInputValue}
             onSend={handleSend}
             placeholder="Tell Yulia about your deal..."
             disabled={isStreaming}
-            variant={viewState === 'chat' ? 'docked' : 'hero'}
-            autoFocus={viewState === 'chat'}
+            variant="docked"
+            autoFocus
           />
-
-          {/* Chips & Tagline */}
-          <div className={`grid transition-all duration-700 ease-in-out w-full ${viewState === 'landing' ? 'grid-rows-[1fr] opacity-100 mt-10' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
-            <div className="overflow-hidden flex flex-col items-center">
-
-              <div className="flex flex-wrap justify-center gap-3 max-w-3xl mb-8">
-                <Suggestion text="What would a buyer pay for my business?" onClick={() => handleChipSend("What would a buyer pay for my business?")} />
-                <Suggestion text="Walk me through selling my company" onClick={() => handleChipSend("Walk me through selling my company")} />
-                <Suggestion text="Find acquisition targets in my industry" onClick={() => handleChipSend("Find acquisition targets in my industry")} />
-                <Suggestion text="I&apos;m a broker &mdash; show me what you can do" onClick={() => handleChipSend("I'm a broker — show me what you can do")} />
-              </div>
-
-              <div className="text-center text-[13px] font-bold text-[#A9A49C] uppercase tracking-widest">
-                Instant valuations &bull; SBA Bankability &bull; Localized Market Intelligence
-              </div>
-
-            </div>
-          </div>
-
         </div>
       </div>
 
-      {/* --- 4. BOTTOM LANDING CONTENT (Fades out when chatting) --- */}
-      <div className={`grid transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] pb-32 ${viewState === 'landing' ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pb-0'}`}>
-        <div className="overflow-hidden">
+      {/* --- 4. BELOW-FOLD MARKETING CONTENT --- */}
+      <div className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'landing' ? 'opacity-100' : 'hidden'}`}>
+        <div className="border-t border-[#EAE6DF]">
 
           {/* TRUST TICKER */}
-          <div className="border-y border-[#EAE6DF] bg-white py-6 relative z-10 mt-12">
+          <div className="border-b border-[#EAE6DF] bg-white py-6">
             <div className="max-w-6xl mx-auto px-6 flex flex-wrap justify-between items-center gap-6 text-sm font-bold text-[#A9A49C] tracking-widest uppercase">
               <span className="hidden md:inline-block">Powered By:</span>
               <span className="text-[#1A1A18] flex items-center gap-2"><span className="text-[#D4714E] text-lg leading-none">&middot;</span> U.S. Census</span>
@@ -160,7 +166,7 @@ export default function HomeContent() {
           </div>
 
           {/* THE INFOGRAPHIC: smbX.ai ENGINE */}
-          <section className="px-6 py-24 bg-[#F8F6F1] text-[#1A1A18] border-b border-[#EAE6DF] relative z-10">
+          <section className="px-6 py-24 bg-[#F8F6F1] text-[#1A1A18] border-b border-[#EAE6DF]">
             <div className="max-w-6xl mx-auto">
               <div className="mb-16 md:flex justify-between items-end gap-8">
                 <div className="max-w-2xl">
@@ -224,7 +230,7 @@ export default function HomeContent() {
           </section>
 
           {/* LIVE PREVIEW SECTION */}
-          <section className="px-6 py-24 max-w-5xl mx-auto w-full relative z-10">
+          <section className="px-6 py-24 max-w-5xl mx-auto w-full">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">See Yulia in action</h2>
               <p className="text-[#6E6A63] text-lg">Every number is sourced. Every analysis shows its work.</p>
@@ -252,7 +258,7 @@ export default function HomeContent() {
 
                     <div className="space-y-4 text-[15px] mb-6">
                       <div className="flex items-start gap-3 bg-green-50/50 p-4 rounded-xl border border-green-100">
-                        <div className="mt-1 font-black text-green-600">✓</div>
+                        <div className="mt-1 font-black text-green-600">&check;</div>
                         <div><strong>Working for you:</strong> DFW is a high-demand market. I&apos;m tracking 14 PE-backed HVAC platforms actively acquiring in Texas.</div>
                       </div>
                       <div className="flex items-start gap-3 bg-amber-50/50 p-4 rounded-xl border border-amber-100">
@@ -267,7 +273,7 @@ export default function HomeContent() {
           </section>
 
           {/* AUDIENCE GRID */}
-          <section className="px-6 py-24 bg-white border-y border-[#EAE6DF] relative z-10">
+          <section className="px-6 py-24 bg-white border-y border-[#EAE6DF]">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Built for everyone in the deal.</h2>
@@ -304,10 +310,10 @@ export default function HomeContent() {
           </section>
 
           {/* TRACEABILITY / TRUST SECTION */}
-          <section className="px-6 py-24 bg-[#F8F6F1] relative z-10">
+          <section className="px-6 py-24 bg-[#F8F6F1]">
             <div className="max-w-4xl mx-auto text-center">
               <div className="w-16 h-16 bg-white border border-[#EAE6DF] shadow-sm rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#D4714E] font-black text-2xl">
-                ✓
+                &check;
               </div>
               <h2 className="text-3xl md:text-4xl font-bold mb-6">Every insight is traceable. <br />Every analysis is explainable.</h2>
               <p className="text-lg text-[#6E6A63] leading-relaxed mb-8">
@@ -319,6 +325,8 @@ export default function HomeContent() {
             </div>
           </section>
 
+          {/* Bottom spacer */}
+          <div className="pb-32" />
         </div>
       </div>
 

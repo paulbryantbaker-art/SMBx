@@ -34,7 +34,7 @@ export default function PricingContent() {
   };
 
   return (
-    <div className="bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white overflow-x-hidden min-h-screen">
+    <div className="bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white overflow-x-hidden">
 
       {/* --- 1. CHAT MESSAGES AREA --- */}
       <div className={`w-full max-w-4xl mx-auto px-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'py-8 opacity-100 pb-32' : 'h-0 opacity-0 overflow-hidden'}`}>
@@ -86,59 +86,70 @@ export default function PricingContent() {
         </div>
       </div>
 
-      {/* --- 2. TOP LANDING CONTENT --- */}
-      <div className={`grid transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'landing' ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-        <div className="overflow-hidden">
-          <section className="px-6 pt-20 md:pt-40 pb-8 max-w-5xl mx-auto w-full relative z-10 flex flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] text-xs font-bold tracking-wider uppercase mb-10 border border-[#FBE3D9]">
-              Pay-As-You-Go Pricing
-            </div>
+      {/* --- 2. HERO SECTION (Full viewport, centered) --- */}
+      <div className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'landing' ? 'min-h-[100vh] flex flex-col justify-center items-center' : 'hidden'}`}>
+        <div className="w-full max-w-5xl mx-auto px-6 flex flex-col items-center text-center mt-auto pt-20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] text-xs font-bold tracking-wider uppercase mb-10 border border-[#FBE3D9]">
+            Pay-As-You-Go Pricing
+          </div>
 
-            <h1 className="text-5xl md:text-[80px] font-extrabold tracking-tight leading-[1.05] mb-8">
-              If you could Google it,<br />
-              <span className="text-[#D4714E]">it should be free.</span>
-            </h1>
+          <h1 className="text-5xl md:text-[80px] font-extrabold tracking-tight leading-[1.05] mb-8">
+            If you could Google it,<br />
+            <span className="text-[#D4714E]">it should be free.</span>
+          </h1>
 
-            <p className="text-xl md:text-2xl text-[#6E6A63] font-medium max-w-3xl mx-auto leading-relaxed">
-              The conversation with Yulia is always free. Foundational analysis is free because the underlying data is public. You only pay for personalized intelligence and document generation.
-            </p>
-          </section>
+          <p className="text-xl md:text-2xl text-[#6E6A63] font-medium max-w-3xl mx-auto leading-relaxed mb-12">
+            The conversation with Yulia is always free. Foundational analysis is free because the underlying data is public. You only pay for personalized intelligence and document generation.
+          </p>
+
+          <div className="w-full max-w-[800px]">
+            <ChatComposer
+              value={inputValue}
+              onChange={setInputValue}
+              onSend={handleSend}
+              placeholder="Ask Yulia about pricing or start a deal..."
+              disabled={isStreaming}
+              variant="hero"
+            />
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-3 max-w-3xl mt-8 mb-6">
+            <Suggestion text="What does a valuation report cost?" onClick={() => handleChipSend("What does a valuation report cost?")} />
+            <Suggestion text="How does the wallet work?" onClick={() => handleChipSend("How does the wallet work? What do I get for free?")} />
+          </div>
+
+          <div className="text-center text-[13px] font-bold text-[#A9A49C] uppercase tracking-widest">
+            No Retainer &bull; No Subscription &bull; $1 = $1 Purchasing Power
+          </div>
+        </div>
+
+        <div className="mt-auto pb-8 pt-12 text-center text-[#A9A49C] animate-bounce">
+          <div className="text-xs font-bold uppercase tracking-widest mb-2">Scroll to learn more</div>
+          <span className="text-lg">&darr;</span>
         </div>
       </div>
 
-      {/* --- 3. THE CHAT STAGE (Gravity Well) --- */}
-      <div className={`w-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-4 pt-4 bg-gradient-to-t from-[#FDFCFB] via-[#FDFCFB] to-transparent' : 'px-4 py-16 md:py-24 z-50'}`} style={{ paddingBottom: viewState === 'chat' ? 'max(32px, env(safe-area-inset-bottom))' : undefined }}>
-        <div className={`max-w-[800px] mx-auto w-full flex flex-col items-center ${viewState === 'chat' ? 'pointer-events-auto' : ''}`}>
+      {/* --- 3. DOCKED CHAT INPUT (visible in chat mode) --- */}
+      <div className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-4 pt-4 bg-gradient-to-t from-[#FDFCFB] via-[#FDFCFB] to-transparent' : 'hidden'}`} style={{ paddingBottom: viewState === 'chat' ? 'max(32px, env(safe-area-inset-bottom))' : undefined }}>
+        <div className="max-w-[800px] mx-auto w-full pointer-events-auto">
           <ChatComposer
             value={inputValue}
             onChange={setInputValue}
             onSend={handleSend}
             placeholder="Ask Yulia about pricing or start a deal..."
             disabled={isStreaming}
-            variant={viewState === 'chat' ? 'docked' : 'hero'}
-            autoFocus={viewState === 'chat'}
+            variant="docked"
+            autoFocus
           />
-
-          <div className={`grid transition-all duration-700 ease-in-out w-full ${viewState === 'landing' ? 'grid-rows-[1fr] opacity-100 mt-10' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
-            <div className="overflow-hidden flex flex-col items-center">
-              <div className="flex flex-wrap justify-center gap-3 max-w-3xl mb-8">
-                <Suggestion text="What does a valuation report cost?" onClick={() => handleChipSend("What does a valuation report cost?")} />
-                <Suggestion text="How does the wallet work?" onClick={() => handleChipSend("How does the wallet work? What do I get for free?")} />
-              </div>
-              <div className="text-center text-[13px] font-bold text-[#A9A49C] uppercase tracking-widest">
-                No Retainer &bull; No Subscription &bull; $1 = $1 Purchasing Power
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* --- 4. BOTTOM LANDING CONTENT --- */}
-      <div className={`grid transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] pb-32 ${viewState === 'landing' ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pb-0'}`}>
-        <div className="overflow-hidden">
+      {/* --- 4. BELOW-FOLD MARKETING CONTENT --- */}
+      <div className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'landing' ? 'opacity-100' : 'hidden'}`}>
+        <div className="border-t border-[#EAE6DF]">
 
           {/* FREE TIER */}
-          <section className="px-6 py-20 bg-white border-y border-[#EAE6DF] relative z-10 mt-12">
+          <section className="px-6 py-20 bg-white border-b border-[#EAE6DF]">
             <div className="max-w-6xl mx-auto">
               <div className="mb-12">
                 <h2 className="text-3xl font-bold mb-2">Start here. It&apos;s on us.</h2>
@@ -156,7 +167,7 @@ export default function PricingContent() {
           </section>
 
           {/* PREMIUM DELIVERABLES */}
-          <section className="px-6 py-24 bg-[#F8F6F1] relative z-10">
+          <section className="px-6 py-24 bg-[#F8F6F1]">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Go deeper when your deal is ready.</h2>
@@ -186,7 +197,7 @@ export default function PricingContent() {
           </section>
 
           {/* WALLET FAQ */}
-          <section className="px-6 py-24 bg-white border-t border-[#EAE6DF] relative z-10">
+          <section className="px-6 py-24 bg-white border-t border-[#EAE6DF]">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">How the Wallet works.</h2>
               <p className="text-lg text-[#6E6A63] leading-relaxed mb-12 text-center">
@@ -214,6 +225,8 @@ export default function PricingContent() {
             </div>
           </section>
 
+          {/* Bottom spacer */}
+          <div className="pb-32" />
         </div>
       </div>
 
@@ -221,12 +234,12 @@ export default function PricingContent() {
   );
 }
 
-/* ── Pricing-specific sub-components ── */
+/* -- Pricing-specific sub-components -- */
 
 function FreeCard({ title, desc }: { title: string; desc: string }) {
   return (
     <div className="p-6 border border-[#EAE6DF] rounded-2xl bg-[#FDFCFB] hover:shadow-sm transition-shadow">
-      <div className="font-black text-[#D4714E] text-xl mb-3">✓</div>
+      <div className="font-black text-[#D4714E] text-xl mb-3">&check;</div>
       <h4 className="font-bold text-lg mb-2">{title}</h4>
       <p className="text-[#6E6A63] text-sm leading-relaxed">{desc}</p>
     </div>

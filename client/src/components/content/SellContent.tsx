@@ -34,7 +34,7 @@ export default function SellContent() {
   };
 
   return (
-    <div className="bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white overflow-x-hidden min-h-screen">
+    <div className="bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white overflow-x-hidden">
 
       {/* --- 1. CHAT MESSAGES AREA --- */}
       <div className={`w-full max-w-4xl mx-auto px-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'py-8 opacity-100 pb-32' : 'h-0 opacity-0 overflow-hidden'}`}>
@@ -86,60 +86,71 @@ export default function SellContent() {
         </div>
       </div>
 
-      {/* --- 2. TOP LANDING CONTENT --- */}
-      <div className={`grid transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'landing' ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-        <div className="overflow-hidden">
-          <section className="px-6 pt-20 md:pt-40 pb-8 max-w-5xl mx-auto w-full relative z-10 flex flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] text-xs font-bold tracking-wider uppercase mb-10 border border-[#FBE3D9]">
-              For Business Owners
-            </div>
+      {/* --- 2. HERO SECTION (Full viewport, centered) --- */}
+      <div className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'landing' ? 'min-h-[100vh] flex flex-col justify-center items-center' : 'hidden'}`}>
+        <div className="w-full max-w-5xl mx-auto px-6 flex flex-col items-center text-center mt-auto pt-20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] text-xs font-bold tracking-wider uppercase mb-10 border border-[#FBE3D9]">
+            For Business Owners
+          </div>
 
-            <h1 className="text-5xl md:text-[80px] font-extrabold tracking-tight leading-[1.05] mb-8">
-              Know your number.<br />
-              <span className="text-[#D4714E]">Before you negotiate.</span>
-            </h1>
+          <h1 className="text-5xl md:text-[80px] font-extrabold tracking-tight leading-[1.05] mb-8">
+            Know your number.<br />
+            <span className="text-[#D4714E]">Before you negotiate.</span>
+          </h1>
 
-            <p className="text-xl md:text-2xl text-[#6E6A63] font-medium max-w-3xl mx-auto leading-relaxed">
-              Most owners leave money on the table. Yulia calculates your true adjusted earnings, finds hidden add-backs, and generates a defensible valuation in minutes.
-            </p>
-          </section>
+          <p className="text-xl md:text-2xl text-[#6E6A63] font-medium max-w-3xl mx-auto leading-relaxed mb-12">
+            Most owners leave money on the table. Yulia calculates your true adjusted earnings, finds hidden add-backs, and generates a defensible valuation in minutes.
+          </p>
+
+          <div className="w-full max-w-[800px]">
+            <ChatComposer
+              value={inputValue}
+              onChange={setInputValue}
+              onSend={handleSend}
+              placeholder="Tell Yulia about the business you want to sell..."
+              disabled={isStreaming}
+              variant="hero"
+            />
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-3 max-w-3xl mt-8 mb-6">
+            <Suggestion text="Value my $1.8M pest control business" onClick={() => handleChipSend("I want to sell my pest control business doing $1.8M in revenue. What is it worth?")} />
+            <Suggestion text="Walk me through the selling process" onClick={() => handleChipSend("Walk me through the selling process. Where do I start?")} />
+            <Suggestion text="What are common add-backs?" onClick={() => handleChipSend("What are common add-backs I should be looking for in my financials?")} />
+          </div>
+
+          <div className="text-center text-[13px] font-bold text-[#A9A49C] uppercase tracking-widest">
+            Find Hidden Value &bull; Prove Your Price &bull; Generate CIMs
+          </div>
+        </div>
+
+        <div className="mt-auto pb-8 pt-12 text-center text-[#A9A49C] animate-bounce">
+          <div className="text-xs font-bold uppercase tracking-widest mb-2">Scroll to learn more</div>
+          <span className="text-lg">&darr;</span>
         </div>
       </div>
 
-      {/* --- 3. THE CHAT STAGE (Gravity Well) --- */}
-      <div className={`w-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-4 pt-4 bg-gradient-to-t from-[#FDFCFB] via-[#FDFCFB] to-transparent' : 'px-4 py-16 md:py-24 z-50'}`} style={{ paddingBottom: viewState === 'chat' ? 'max(32px, env(safe-area-inset-bottom))' : undefined }}>
-        <div className={`max-w-[800px] mx-auto w-full flex flex-col items-center ${viewState === 'chat' ? 'pointer-events-auto' : ''}`}>
+      {/* --- 3. DOCKED CHAT INPUT (visible in chat mode) --- */}
+      <div className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-4 pt-4 bg-gradient-to-t from-[#FDFCFB] via-[#FDFCFB] to-transparent' : 'hidden'}`} style={{ paddingBottom: viewState === 'chat' ? 'max(32px, env(safe-area-inset-bottom))' : undefined }}>
+        <div className="max-w-[800px] mx-auto w-full pointer-events-auto">
           <ChatComposer
             value={inputValue}
             onChange={setInputValue}
             onSend={handleSend}
             placeholder="Tell Yulia about the business you want to sell..."
             disabled={isStreaming}
-            variant={viewState === 'chat' ? 'docked' : 'hero'}
-            autoFocus={viewState === 'chat'}
+            variant="docked"
+            autoFocus
           />
-
-          <div className={`grid transition-all duration-700 ease-in-out w-full ${viewState === 'landing' ? 'grid-rows-[1fr] opacity-100 mt-10' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
-            <div className="overflow-hidden flex flex-col items-center">
-              <div className="flex flex-wrap justify-center gap-3 max-w-3xl mb-8">
-                <Suggestion text="Value my $1.8M pest control business" onClick={() => handleChipSend("I want to sell my pest control business doing $1.8M in revenue. What is it worth?")} />
-                <Suggestion text="Walk me through the selling process" onClick={() => handleChipSend("Walk me through the selling process. Where do I start?")} />
-                <Suggestion text="What are common add-backs?" onClick={() => handleChipSend("What are common add-backs I should be looking for in my financials?")} />
-              </div>
-              <div className="text-center text-[13px] font-bold text-[#A9A49C] uppercase tracking-widest">
-                Find Hidden Value &bull; Prove Your Price &bull; Generate CIMs
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* --- 4. BOTTOM LANDING CONTENT --- */}
-      <div className={`grid transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] pb-32 ${viewState === 'landing' ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pb-0'}`}>
-        <div className="overflow-hidden">
+      {/* --- 4. BELOW-FOLD MARKETING CONTENT --- */}
+      <div className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'landing' ? 'opacity-100' : 'hidden'}`}>
+        <div className="border-t border-[#EAE6DF]">
 
           {/* TICKER */}
-          <div className="border-y border-[#EAE6DF] bg-white py-6 relative z-10 mt-12">
+          <div className="border-b border-[#EAE6DF] bg-white py-6">
             <div className="max-w-6xl mx-auto px-6 flex flex-wrap justify-between items-center gap-6 text-sm font-bold text-[#A9A49C] tracking-widest uppercase">
               <span className="hidden md:inline-block">Powered By:</span>
               <span className="text-[#1A1A18] flex items-center gap-2"><span className="text-[#D4714E] text-lg leading-none">&middot;</span> U.S. Census</span>
@@ -151,7 +162,7 @@ export default function SellContent() {
           </div>
 
           {/* INFOGRAPHIC */}
-          <section className="px-6 py-24 bg-[#F8F6F1] text-[#1A1A18] border-b border-[#EAE6DF] relative z-10">
+          <section className="px-6 py-24 bg-[#F8F6F1] text-[#1A1A18] border-b border-[#EAE6DF]">
             <div className="max-w-6xl mx-auto">
               <div className="mb-16 md:flex justify-between items-end gap-8">
                 <div className="max-w-2xl">
@@ -198,7 +209,7 @@ export default function SellContent() {
           </section>
 
           {/* LIVE PREVIEW */}
-          <section className="px-6 py-24 max-w-5xl mx-auto w-full relative z-10">
+          <section className="px-6 py-24 max-w-5xl mx-auto w-full">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4">Finding the hidden money</h2>
               <p className="text-[#6E6A63] text-lg">See how Yulia extracts your actual Seller&apos;s Discretionary Earnings (SDE).</p>
@@ -225,7 +236,7 @@ export default function SellContent() {
                     </div>
                     <div className="space-y-4 text-[15px] mb-6">
                       <div className="flex items-start gap-3 bg-green-50/50 p-4 rounded-xl border border-green-100">
-                        <div className="mt-1 font-black text-green-600">✓</div>
+                        <div className="mt-1 font-black text-green-600">&check;</div>
                         <div><strong>Valuation Impact:</strong> By identifying just those basic add-backs, your valuation basis jumped from $50K to $200K. At a standard 2.5x&ndash;3.2x multiple, your enterprise value is roughly <strong>$500K to $640K</strong>.</div>
                       </div>
                     </div>
@@ -236,7 +247,7 @@ export default function SellContent() {
           </section>
 
           {/* OUTCOMES */}
-          <section className="px-6 py-24 bg-white border-y border-[#EAE6DF] relative z-10">
+          <section className="px-6 py-24 bg-white border-y border-[#EAE6DF]">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
                 <div className="text-sm font-bold text-[#A9A49C] uppercase tracking-widest mb-4">The Deliverables</div>
@@ -253,7 +264,7 @@ export default function SellContent() {
           </section>
 
           {/* EMPOWERMENT */}
-          <section className="px-6 py-24 bg-[#F8F6F1] border-t border-[#EAE6DF] relative z-10">
+          <section className="px-6 py-24 bg-[#F8F6F1] border-t border-[#EAE6DF]">
             <div className="max-w-4xl mx-auto">
               <div className="bg-white border border-[#EAE6DF] rounded-[40px] p-8 md:p-12 shadow-xl shadow-[#1A1A18]/5">
                 <div className="text-center mb-12">
@@ -269,6 +280,8 @@ export default function SellContent() {
             </div>
           </section>
 
+          {/* Bottom spacer */}
+          <div className="pb-32" />
         </div>
       </div>
 

@@ -10,15 +10,6 @@ interface ChatComposerProps {
   autoFocus?: boolean;
 }
 
-function ArrowUp() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="19" x2="12" y2="5" />
-      <polyline points="5 12 12 5 19 12" />
-    </svg>
-  );
-}
-
 export default function ChatComposer({
   value,
   onChange,
@@ -35,7 +26,7 @@ export default function ChatComposer({
     onChange(e.target.value);
     const el = e.target;
     el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+    el.style.height = Math.min(el.scrollHeight, 200) + 'px';
   }, [onChange]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -63,15 +54,15 @@ export default function ChatComposer({
     }
   }, [value]);
 
-  const isHero = variant === 'hero';
+  const isDocked = variant === 'docked';
 
   return (
     <form
       onSubmit={handleSubmit}
-      className={`w-full bg-white rounded-2xl flex items-end transition-all duration-200 ${
-        isHero
-          ? 'shadow-[0_8px_30px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)] border border-[#e0ddd7] focus-within:border-[#c9a08a] focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.1),0_0_0_1px_rgba(174,86,48,0.15)]'
-          : 'shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035)] border border-[#e5e5e0] focus-within:border-[#c9a08a] focus-within:shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.05),0_0_0_1px_rgba(174,86,48,0.12)]'
+      className={`w-full bg-white border border-[#EAE6DF] rounded-2xl flex flex-col overflow-hidden transition-all duration-300 ${
+        isDocked
+          ? 'shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035)] focus-within:shadow-[0_8px_30px_rgba(212,113,78,0.12)] focus-within:border-[#D4714E]/50'
+          : 'shadow-[0_4px_12px_rgba(212,113,78,0.04)] focus-within:shadow-[0_8px_30px_rgba(212,113,78,0.12)] focus-within:border-[#D4714E]/50 focus-within:ring-4 focus-within:ring-[#FFF0EB]'
       }`}
     >
       <textarea
@@ -80,21 +71,29 @@ export default function ChatComposer({
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        rows={1}
-        className="flex-1 bg-transparent border-none outline-none resize-none text-[16px] text-[#1A1A18] placeholder:text-[#9a958e] py-4 pl-5 pr-2 leading-[1.5]"
-        style={{ fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", serif', minHeight: '26px', maxHeight: '160px' }}
+        rows={2}
+        className="w-full bg-transparent border-none focus:outline-none text-[16px] md:text-[18px] text-[#1A1A18] placeholder:text-[#A9A49C] p-5 resize-none min-h-[80px]"
+        style={{ fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", serif', maxHeight: '200px' }}
       />
-      <button
-        type="submit"
-        disabled={!hasContent || disabled}
-        className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-150 mr-3 mb-3 ${
-          hasContent && !disabled
-            ? 'bg-[#D4714E] text-white hover:bg-[#b8613d] shadow-sm cursor-pointer'
-            : 'bg-[#EDEDEA] text-[#b5b0a8] cursor-default'
-        }`}
-      >
-        <ArrowUp />
-      </button>
+
+      {/* Footer: status + send */}
+      <div className="flex items-center justify-between px-5 pb-4 pt-1">
+        <div className="text-xs text-[#A9A49C] font-bold tracking-wide flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-green-500" />
+          Federal Data Sync Active
+        </div>
+        <button
+          type="submit"
+          disabled={!hasContent || disabled}
+          className={`px-5 py-2.5 rounded-xl font-bold text-sm tracking-widest uppercase transition-all shadow-sm ${
+            hasContent && !disabled
+              ? 'bg-[#D4714E] text-white hover:bg-[#b8613d] cursor-pointer'
+              : 'bg-[#D4714E] text-white opacity-50 shadow-none cursor-default'
+          }`}
+        >
+          SEND
+        </button>
+      </div>
     </form>
   );
 }
