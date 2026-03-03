@@ -40,6 +40,15 @@ export const SUGGESTION_CHIPS: Record<string, { label: string; prompt: string }[
   ],
 };
 
+function ArrowUp() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="19" x2="12" y2="5" />
+      <polyline points="5 12 12 5 19 12" />
+    </svg>
+  );
+}
+
 export default function InputDock({ viewState, activeTab, onSend, disabled }: InputDockProps) {
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -67,7 +76,6 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   }, [send]);
 
-  // Auto-focus after morph to chat
   useEffect(() => {
     if (viewState === 'chat') {
       setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 300);
@@ -78,33 +86,30 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
     return (
       <div className="fixed bottom-6 md:bottom-10 left-0 right-0 px-4 z-50 pointer-events-none" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="max-w-[700px] mx-auto pointer-events-auto">
-          {/* Pill input */}
-          <div className="bg-white rounded-[28px] p-2 pl-6 flex items-end shadow-[0_8px_30px_rgba(0,0,0,0.12),0_20px_60px_rgba(0,0,0,0.08)] ring-2 ring-black/[0.04] border border-[#D4714E]/20 transition-all hover:scale-[1.02] focus-within:scale-[1.02] focus-within:border-[#D4714E]/40">
-            <span className="text-[#D4714E] text-2xl leading-none mr-2 font-serif pb-3.5">&#10023;</span>
+          <div className="bg-white rounded-2xl flex items-end shadow-[0_8px_30px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)] border border-[#e0ddd7] transition-all duration-200 focus-within:border-[#c9a08a] focus-within:shadow-[0_8px_30px_rgba(0,0,0,0.1),0_0_0_1px_rgba(174,86,48,0.15)]">
             <textarea
               ref={textareaRef}
               value={value}
               onChange={handleChange}
               onKeyDown={handleKey}
               placeholder={placeholder}
-              className="flex-1 bg-transparent border-none outline-none resize-none text-[16px] text-[#1A1A18] placeholder:text-[#A9A49C] py-3.5 px-2 font-medium leading-[1.5]"
-              style={{ fontFamily: 'inherit', minHeight: '26px', maxHeight: '160px' }}
+              className="flex-1 bg-transparent border-none outline-none resize-none text-[16px] text-[#1A1A18] placeholder:text-[#9a958e] py-4 pl-5 pr-2 leading-[1.5]"
+              style={{ fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", serif', minHeight: '26px', maxHeight: '160px' }}
               rows={1}
             />
             <button
               onClick={send}
               disabled={!hasContent || disabled}
-              className={`px-6 py-3.5 rounded-full flex items-center justify-center font-bold text-sm tracking-widest uppercase transition-colors border-none cursor-pointer ${
+              className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-150 mr-3 mb-3 ${
                 hasContent && !disabled
-                  ? 'bg-[#D4714E] text-white hover:bg-[#b8613d]'
-                  : 'bg-gray-200 text-gray-400'
+                  ? 'bg-[#D4714E] text-white hover:bg-[#b8613d] shadow-sm cursor-pointer'
+                  : 'bg-[#EDEDEA] text-[#b5b0a8] cursor-default'
               }`}
               type="button"
             >
-              Send
+              <ArrowUp />
             </button>
           </div>
-
         </div>
       </div>
     );
@@ -113,43 +118,35 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
   // Chat mode
   return (
     <div className="flex-shrink-0 w-full bg-white relative z-20" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
-      {/* Gradient fade above dock */}
       <div className="pointer-events-none absolute -top-16 left-0 right-0 h-16" style={{ background: 'linear-gradient(to bottom, transparent, white)' }} />
 
       <div className="max-w-3xl mx-auto px-4">
-        <div className="relative bg-white rounded-2xl border border-gray-200 shadow-lg focus-within:border-[#D4714E] focus-within:shadow-[0_4px_20px_rgba(212,113,78,0.15)] transition-all duration-300">
-          <div className="flex items-end gap-3 px-4 py-3.5">
-            <div className="flex-shrink-0 pb-0.5">
-              <span className="text-[#D4714E] text-[22px] leading-none font-serif">&#10023;</span>
-            </div>
-
-            <textarea
-              ref={textareaRef}
-              value={value}
-              onChange={handleChange}
-              onKeyDown={handleKey}
-              placeholder={placeholder}
-              className="flex-1 bg-transparent border-none outline-none resize-none text-[16px] text-[#1A1A18] leading-[1.5] placeholder:text-[#6B7280] placeholder:font-medium font-medium"
-              style={{ fontFamily: 'inherit', minHeight: '26px', maxHeight: '160px' }}
-              rows={1}
-            />
-
-            <button
-              onClick={send}
-              disabled={!hasContent || disabled}
-              className={`flex-shrink-0 px-5 py-2 rounded-xl flex items-center justify-center border-none cursor-pointer transition-all font-bold text-sm tracking-wider uppercase ${
-                hasContent && !disabled
-                  ? 'bg-[#D4714E] text-white hover:bg-[#b8613d] shadow-md'
-                  : 'bg-gray-200 text-gray-400'
-              }`}
-              type="button"
-            >
-              Send
-            </button>
-          </div>
+        <div className="bg-white rounded-2xl flex items-end shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035)] border border-[#e5e5e0] transition-all duration-200 focus-within:border-[#c9a08a] focus-within:shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.05),0_0_0_1px_rgba(174,86,48,0.12)]">
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={handleChange}
+            onKeyDown={handleKey}
+            placeholder={placeholder}
+            className="flex-1 bg-transparent border-none outline-none resize-none text-[16px] text-[#1A1A18] placeholder:text-[#9a958e] py-4 pl-5 pr-2 leading-[1.5]"
+            style={{ fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", serif', minHeight: '26px', maxHeight: '160px' }}
+            rows={1}
+          />
+          <button
+            onClick={send}
+            disabled={!hasContent || disabled}
+            className={`flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-150 mr-3 mb-3 ${
+              hasContent && !disabled
+                ? 'bg-[#D4714E] text-white hover:bg-[#b8613d] shadow-sm cursor-pointer'
+                : 'bg-[#EDEDEA] text-[#b5b0a8] cursor-default'
+            }`}
+            type="button"
+          >
+            <ArrowUp />
+          </button>
         </div>
 
-        <p className="text-center text-[12px] text-[#9CA3AF] mt-2.5 hidden sm:block">
+        <p className="text-center text-[12px] text-[#9CA3AF] mt-2.5 hidden sm:block" style={{ fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", serif' }}>
           Yulia is an AI advisor. Built on Census, BLS, FRED, and SEC EDGAR data.
         </p>
       </div>

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Suggestion, Badge, OutcomeCard, StepCard } from './ui';
+import ChatComposer from './ChatComposer';
 import { useChatContext } from '../../context/ChatContext';
 
 export default function SellContent() {
@@ -7,7 +8,6 @@ export default function SellContent() {
 
   const [viewState, setViewState] = useState<'landing' | 'chat'>('landing');
   const [inputValue, setInputValue] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -18,24 +18,19 @@ export default function SellContent() {
     if (viewState === 'chat') messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, isStreaming, streamingContent, viewState]);
 
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputValue(e.target.value);
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 160) + 'px';
-    }
+  const handleSend = () => {
+    if (!inputValue.trim() || isStreaming) return;
+    setViewState('chat');
+    const text = inputValue;
+    setInputValue('');
+    sendMessage(text, '/sell');
   };
 
-  const handleSend = (e: React.SyntheticEvent | null, forcedText?: string) => {
-    e?.preventDefault();
-    const textToSend = forcedText || inputValue;
-    if (!textToSend.trim() || isStreaming) return;
-
+  const handleChipSend = (text: string) => {
+    if (isStreaming) return;
     setViewState('chat');
     setInputValue('');
-    if (textareaRef.current) textareaRef.current.style.height = 'auto';
-
-    sendMessage(textToSend, '/sell');
+    sendMessage(text, '/sell');
   };
 
   return (
@@ -114,42 +109,22 @@ export default function SellContent() {
       {/* --- 3. THE CHAT STAGE (Gravity Well) --- */}
       <div className={`w-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-4 pt-4 bg-gradient-to-t from-[#FDFCFB] via-[#FDFCFB] to-transparent' : 'px-4 py-16 md:py-24 z-50'}`} style={{ paddingBottom: viewState === 'chat' ? 'max(32px, env(safe-area-inset-bottom))' : undefined }}>
         <div className={`max-w-[800px] mx-auto w-full flex flex-col items-center ${viewState === 'chat' ? 'pointer-events-auto' : ''}`}>
-          <form
-            onSubmit={handleSend}
-            className={`w-full bg-white rounded-[28px] p-2 pl-6 flex items-end transition-all ${viewState === 'chat' ? 'shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-200 ring-1 ring-black/[0.04]' : 'shadow-[0_8px_30px_rgba(0,0,0,0.08),0_20px_60px_rgba(212,113,78,0.18)] border-2 border-[#D4714E]/35 ring-2 ring-[#D4714E]/15 hover:scale-[1.01] focus-within:scale-[1.01] focus-within:border-[#D4714E]/50 focus-within:ring-[#D4714E]/25'}`}
-          >
-            <span className="text-[#D4714E] text-2xl leading-none mr-2 mb-[14px] font-serif select-none">&loz;</span>
-            <textarea
-              ref={textareaRef}
-              value={inputValue}
-              onChange={handleInput}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend(e);
-                }
-              }}
-              placeholder="Tell Yulia about the business you want to sell..."
-              rows={1}
-              className="flex-1 bg-transparent border-none outline-none resize-none text-[16px] text-[#1A1A18] placeholder:text-[#A9A49C] py-3.5 px-2 font-medium leading-[1.5]"
-              style={{ fontFamily: 'inherit', minHeight: '26px', maxHeight: '160px' }}
-            />
-            <button
-              type="button"
-              onClick={(e) => handleSend(e)}
-              disabled={!inputValue.trim() || isStreaming}
-              className="px-6 py-3.5 mb-1 rounded-full flex items-center justify-center bg-[#D4714E] text-white font-bold text-sm tracking-widest uppercase hover:bg-[#b8613d] transition-colors disabled:opacity-50 disabled:hover:bg-[#D4714E]"
-            >
-              Send
-            </button>
-          </form>
+          <ChatComposer
+            value={inputValue}
+            onChange={setInputValue}
+            onSend={handleSend}
+            placeholder="Tell Yulia about the business you want to sell..."
+            disabled={isStreaming}
+            variant={viewState === 'chat' ? 'docked' : 'hero'}
+            autoFocus={viewState === 'chat'}
+          />
 
           <div className={`grid transition-all duration-700 ease-in-out w-full ${viewState === 'landing' ? 'grid-rows-[1fr] opacity-100 mt-10' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
             <div className="overflow-hidden flex flex-col items-center">
               <div className="flex flex-wrap justify-center gap-3 max-w-3xl mb-8">
-                <Suggestion text="Value my $1.8M pest control business" onClick={() => handleSend(null, "I want to sell my pest control business doing $1.8M in revenue. What is it worth?")} />
-                <Suggestion text="Walk me through the selling process" onClick={() => handleSend(null, "Walk me through the selling process. Where do I start?")} />
-                <Suggestion text="What are common add-backs?" onClick={() => handleSend(null, "What are common add-backs I should be looking for in my financials?")} />
+                <Suggestion text="Value my $1.8M pest control business" onClick={() => handleChipSend("I want to sell my pest control business doing $1.8M in revenue. What is it worth?")} />
+                <Suggestion text="Walk me through the selling process" onClick={() => handleChipSend("Walk me through the selling process. Where do I start?")} />
+                <Suggestion text="What are common add-backs?" onClick={() => handleChipSend("What are common add-backs I should be looking for in my financials?")} />
               </div>
               <div className="text-center text-[13px] font-bold text-[#A9A49C] uppercase tracking-widest">
                 Find Hidden Value &bull; Prove Your Price &bull; Generate CIMs

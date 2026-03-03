@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Suggestion, Badge, AudienceCard } from './ui';
+import ChatComposer from './ChatComposer';
 import { useChatContext } from '../../context/ChatContext';
 
 export default function HomeContent() {
@@ -7,45 +8,29 @@ export default function HomeContent() {
 
   const [viewState, setViewState] = useState<'landing' | 'chat'>('landing');
   const [inputValue, setInputValue] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // If ChatContext already has messages (e.g. restored session), show chat
   useEffect(() => {
-    if (chatMessages.length > 0 && viewState === 'landing') {
-      setViewState('chat');
-    }
+    if (chatMessages.length > 0 && viewState === 'landing') setViewState('chat');
   }, [chatMessages.length]);
 
-  // Auto-scroll chat
   useEffect(() => {
-    if (viewState === 'chat') {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (viewState === 'chat') messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, isStreaming, streamingContent, viewState]);
 
-  // Auto-expand textarea
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputValue(e.target.value);
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 160) + 'px';
-    }
+  const handleSend = () => {
+    if (!inputValue.trim() || isStreaming) return;
+    setViewState('chat');
+    const text = inputValue;
+    setInputValue('');
+    sendMessage(text, '/');
   };
 
-  const handleSend = (e: React.SyntheticEvent | null, forcedText?: string) => {
-    e?.preventDefault();
-    const textToSend = forcedText || inputValue;
-    if (!textToSend.trim() || isStreaming) return;
-
+  const handleChipSend = (text: string) => {
+    if (isStreaming) return;
     setViewState('chat');
     setInputValue('');
-
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
-
-    sendMessage(textToSend, '/');
+    sendMessage(text, '/');
   };
 
   return (
@@ -127,46 +112,25 @@ export default function HomeContent() {
       <div className={`w-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-4 pt-4 bg-gradient-to-t from-[#FDFCFB] via-[#FDFCFB] to-transparent' : 'px-4 py-16 md:py-24 z-50'}`} style={{ paddingBottom: viewState === 'chat' ? 'max(32px, env(safe-area-inset-bottom))' : undefined }}>
         <div className={`max-w-[800px] mx-auto w-full flex flex-col items-center ${viewState === 'chat' ? 'pointer-events-auto' : ''}`}>
 
-          {/* Expanding Chat Form */}
-          <form
-            onSubmit={handleSend}
-            className={`w-full bg-white rounded-[28px] p-2 pl-6 flex items-end transition-all ${viewState === 'chat' ? 'shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-200 ring-1 ring-black/[0.04]' : 'shadow-[0_8px_30px_rgba(0,0,0,0.08),0_20px_60px_rgba(212,113,78,0.18)] border-2 border-[#D4714E]/35 ring-2 ring-[#D4714E]/15 hover:scale-[1.01] focus-within:scale-[1.01] focus-within:border-[#D4714E]/50 focus-within:ring-[#D4714E]/25'}`}
-          >
-            <span className="text-[#D4714E] text-2xl leading-none mr-2 mb-[14px] font-serif select-none">&loz;</span>
-            <textarea
-              ref={textareaRef}
-              value={inputValue}
-              onChange={handleInput}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend(e);
-                }
-              }}
-              placeholder="Tell Yulia about your deal..."
-              rows={1}
-              className="flex-1 bg-transparent border-none outline-none resize-none text-[16px] text-[#1A1A18] placeholder:text-[#A9A49C] py-3.5 px-2 font-medium leading-[1.5]"
-              style={{ fontFamily: 'inherit', minHeight: '26px', maxHeight: '160px' }}
-            />
-            <button
-              type="button"
-              onClick={(e) => handleSend(e)}
-              disabled={!inputValue.trim() || isStreaming}
-              className="px-6 py-3.5 mb-1 rounded-full flex items-center justify-center bg-[#D4714E] text-white font-bold text-sm tracking-widest uppercase hover:bg-[#b8613d] transition-colors disabled:opacity-50 disabled:hover:bg-[#D4714E]"
-            >
-              Send
-            </button>
-          </form>
+          <ChatComposer
+            value={inputValue}
+            onChange={setInputValue}
+            onSend={handleSend}
+            placeholder="Tell Yulia about your deal..."
+            disabled={isStreaming}
+            variant={viewState === 'chat' ? 'docked' : 'hero'}
+            autoFocus={viewState === 'chat'}
+          />
 
           {/* Chips & Tagline */}
           <div className={`grid transition-all duration-700 ease-in-out w-full ${viewState === 'landing' ? 'grid-rows-[1fr] opacity-100 mt-10' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
             <div className="overflow-hidden flex flex-col items-center">
 
               <div className="flex flex-wrap justify-center gap-3 max-w-3xl mb-8">
-                <Suggestion text="What would a buyer pay for my business?" onClick={() => handleSend(null, "What would a buyer pay for my business?")} />
-                <Suggestion text="Walk me through selling my company" onClick={() => handleSend(null, "Walk me through selling my company")} />
-                <Suggestion text="Find acquisition targets in my industry" onClick={() => handleSend(null, "Find acquisition targets in my industry")} />
-                <Suggestion text="I&apos;m a broker &mdash; show me what you can do" onClick={() => handleSend(null, "I'm a broker — show me what you can do")} />
+                <Suggestion text="What would a buyer pay for my business?" onClick={() => handleChipSend("What would a buyer pay for my business?")} />
+                <Suggestion text="Walk me through selling my company" onClick={() => handleChipSend("Walk me through selling my company")} />
+                <Suggestion text="Find acquisition targets in my industry" onClick={() => handleChipSend("Find acquisition targets in my industry")} />
+                <Suggestion text="I&apos;m a broker &mdash; show me what you can do" onClick={() => handleChipSend("I'm a broker — show me what you can do")} />
               </div>
 
               <div className="text-center text-[13px] font-bold text-[#A9A49C] uppercase tracking-widest">
