@@ -45,15 +45,6 @@ function formatShortTime(iso: string): string {
 
 const NAV_ITEMS: { id: TabId; label: string; icon: JSX.Element }[] = [
   {
-    id: 'home',
-    label: 'Why it Works',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />
-      </svg>
-    ),
-  },
-  {
     id: 'sell',
     label: 'Sell a Business',
     icon: (
@@ -82,7 +73,7 @@ const NAV_ITEMS: { id: TabId; label: string; icon: JSX.Element }[] = [
   },
   {
     id: 'pricing',
-    label: 'Pricing & Free Tier',
+    label: 'Pricing & Wallet',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" />
@@ -314,14 +305,26 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* Section label — Methodology */}
+        {/* + New Workspace button */}
+        <div className="px-3 mb-3">
+          <button
+            onClick={handleNewChat}
+            className="flex items-center justify-center gap-2 w-full bg-white border border-[#EAE6DF] shadow-sm text-[#1A1A18] font-bold text-sm px-3 py-2.5 rounded-lg hover:bg-[#FDFCFB] transition-colors cursor-pointer"
+            style={{ fontFamily: 'inherit' }}
+            type="button"
+          >
+            + New Workspace
+          </button>
+        </div>
+
+        {/* Section label */}
         <div className="px-5 pt-2 pb-2">
           <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#4F5D75]">
-            The Methodology
+            Use Cases
           </span>
         </div>
 
-        {/* Educational nav items */}
+        {/* Nav items */}
         <nav className="px-3 space-y-0.5">
           {NAV_ITEMS.map((item) => {
             const isActive = activeTab === item.id && viewState === 'landing';
