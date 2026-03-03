@@ -1,10 +1,12 @@
+import { Suggestion, Badge, StepCard } from './ui';
+
 interface Props {
   onSend?: (prompt: string) => void;
 }
 
 export default function AdvisorsContent({ onSend }: Props) {
   return (
-    <div className="bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white pb-32 min-h-screen">
+    <div className="bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white pb-32 min-h-screen w-full">
 
       {/* HERO */}
       <section className="px-6 pt-12 md:pt-24 pb-16 max-w-6xl mx-auto w-full relative z-10">
@@ -139,28 +141,3 @@ export default function AdvisorsContent({ onSend }: Props) {
   );
 }
 
-/* ── Sub-components ── */
-
-function Suggestion({ text, onClick }: { text: string; onClick: () => void }) {
-  return (
-    <button onClick={onClick} className="bg-white border border-[#EAE6DF] text-[#6E6A63] text-[13px] md:text-sm font-medium px-4 py-2.5 rounded-full hover:border-[#D4714E] hover:text-[#D4714E] hover:shadow-sm transition-all cursor-pointer text-left" type="button">
-      &ldquo;{text}&rdquo;
-    </button>
-  );
-}
-
-function Badge({ text }: { text: string }) {
-  return <div className="bg-[#F8F6F1] border border-[#EAE6DF] text-[#6E6A63] text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">{text}</div>;
-}
-
-function StepCard({ num, title, desc }: { num: string; title: string; desc: string }) {
-  return (
-    <div className="flex gap-6 items-start p-6 bg-[#FDFCFB] rounded-2xl border border-[#EAE6DF]">
-      <div className="w-12 h-12 rounded-full bg-[#FFF0EB] text-[#D4714E] flex items-center justify-center font-black text-xl shrink-0">{num}</div>
-      <div>
-        <h4 className="text-xl font-bold mb-2">{title}</h4>
-        <p className="text-[#6E6A63] leading-relaxed">{desc}</p>
-      </div>
-    </div>
-  );
-}
