@@ -1,5 +1,4 @@
 import { useLocation } from 'wouter';
-import Logo from '../public/Logo';
 import type { User } from '../../hooks/useAuth';
 import type { Conversation } from '../../hooks/useAuthChat';
 
@@ -48,7 +47,7 @@ const NAV_ITEMS: { id: TabId; label: string; icon: JSX.Element }[] = [
     label: 'Sell a Business',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 7V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3" /><polyline points="14 2 14 8 20 8" /><line x1="2" y1="15" x2="10" y2="15" /><polyline points="7 12 10 15 7 18" />
+        <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" /><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
       </svg>
     ),
   },
@@ -57,7 +56,7 @@ const NAV_ITEMS: { id: TabId; label: string; icon: JSX.Element }[] = [
     label: 'Buy a Business',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
+        <line x1="3" y1="22" x2="21" y2="22" /><line x1="6" y1="18" x2="6" y2="11" /><line x1="10" y1="18" x2="10" y2="11" /><line x1="14" y1="18" x2="14" y2="11" /><line x1="18" y1="18" x2="18" y2="11" /><polygon points="12 2 20 7 4 7" /><line x1="2" y1="18" x2="22" y2="18" />
       </svg>
     ),
   },
@@ -80,7 +79,6 @@ const NAV_ITEMS: { id: TabId; label: string; icon: JSX.Element }[] = [
     ),
   },
 ];
-
 
 export default function Sidebar({
   activeTab,
@@ -155,142 +153,110 @@ export default function Sidebar({
       className="flex flex-col h-full bg-[#F8F9FA] border-r border-gray-200 select-none"
       style={{ width: isMobile ? 280 : 256 }}
     >
-      {/* Brand */}
-      <div className="px-5 pt-6 pb-3 flex items-center justify-between">
+      {/* 1. BRAND HEADER */}
+      <div className="p-4 pt-5 flex items-center justify-between">
         <button
           onClick={handleLogoClick}
           className="bg-transparent border-none cursor-pointer p-0 text-left"
           type="button"
         >
-          <Logo linked={false} />
+          <div className="font-bold text-xl tracking-tight text-[#1A1A18]">
+            smbx<span className="text-[#D4714E]">.ai</span>
+          </div>
         </button>
+      </div>
 
-        {/* Sidebar collapse toggle */}
-        {isMobile ? (
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-transparent border-none cursor-pointer flex items-center justify-center text-[#9CA3AF] hover:text-[#1A1A18] transition-colors"
-            type="button"
-            aria-label="Close sidebar"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="9" y1="3" x2="9" y2="21" />
-            </svg>
-          </button>
-        ) : (
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-transparent border-none cursor-pointer flex items-center justify-center text-[#9CA3AF] hover:text-[#1A1A18] transition-colors"
-            type="button"
-            aria-label="Collapse sidebar"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="9" y1="3" x2="9" y2="21" />
-            </svg>
-          </button>
-        )}
+      {/* 2. NEW WORKSPACE BUTTON */}
+      <div className="px-4 mb-6 mt-2">
+        <button
+          onClick={handleNewChat}
+          className="flex items-center justify-center gap-2 w-full bg-white border border-[#EAE6DF] shadow-sm text-[#1A1A18] font-bold text-sm px-3 py-2.5 rounded-lg hover:bg-[#FDFCFB] transition-colors cursor-pointer"
+          style={{ fontFamily: 'inherit' }}
+          type="button"
+        >
+          <svg className="w-4 h-4 text-[#D4714E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          New Workspace
+        </button>
       </div>
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto min-h-0">
-        {/* + New Workspace button */}
-        <div className="px-3 mb-3">
-          <button
-            onClick={handleNewChat}
-            className="flex items-center justify-center gap-2 w-full bg-white border border-[#EAE6DF] shadow-sm text-[#1A1A18] font-bold text-sm px-3 py-2.5 rounded-lg hover:bg-[#FDFCFB] transition-colors cursor-pointer"
-            style={{ fontFamily: 'inherit' }}
-            type="button"
-          >
-            <span className="text-[#D4714E]">+</span> New Workspace
-          </button>
+        {/* 3. USE CASES NAVIGATION */}
+        <div className="px-3">
+          <div className="text-[11px] font-bold text-[#A9A49C] uppercase tracking-wider mb-2 px-3">Use Cases</div>
+          <nav className="space-y-0.5">
+            {NAV_ITEMS.map((item) => {
+              const isActive = activeTab === item.id && viewState === 'landing';
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleTabClick(item.id)}
+                  className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-white text-[#1A1A18] shadow-sm border border-[#EAE6DF] font-bold'
+                      : 'text-[#6E6A63] hover:bg-white hover:text-[#1A1A18] font-medium border border-transparent'
+                  }`}
+                  style={{ fontFamily: 'inherit' }}
+                  type="button"
+                >
+                  <span className={isActive ? 'text-[#D4714E]' : 'text-[#A9A49C]'}>{item.icon}</span>
+                  {item.label}
+                </button>
+              );
+            })}
+          </nav>
         </div>
-
-        {/* Section label */}
-        <div className="px-5 pt-2 pb-2">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#4F5D75]">
-            Use Cases
-          </span>
-        </div>
-
-        {/* Nav items */}
-        <nav className="px-3 space-y-0.5">
-          {NAV_ITEMS.map((item) => {
-            const isActive = activeTab === item.id && viewState === 'landing';
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleTabClick(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all border-none cursor-pointer ${
-                  isActive
-                    ? 'bg-white border border-gray-200 shadow-sm text-[#2D3142]'
-                    : 'bg-transparent text-[#4F5D75] hover:bg-gray-100'
-                }`}
-                style={{ fontFamily: 'inherit' }}
-                type="button"
-              >
-                <span className={isActive ? 'text-[#D4714E]' : 'text-[#9CA3AF]'}>{item.icon}</span>
-                <span className="text-[14px] font-medium">{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
 
         {/* Conversation history — authenticated only */}
         {user && conversations.length > 0 && (
-          <div className="px-1.5 mt-2">
+          <div className="px-3 mt-4">
             {deals.length > 0 && (
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#9CA3AF] px-2 pt-2 pb-1 m-0">
-                  Active Deals
-                </p>
+                <div className="text-[11px] font-bold text-[#A9A49C] uppercase tracking-wider mb-2 px-3">Active Deals</div>
                 {deals.map(c => (
                   <button
                     key={c.id}
                     onClick={() => handleConversationClick(c.id)}
-                    className={`w-full text-left border-none cursor-pointer rounded-[10px] px-2 py-2 mb-0.5 transition-colors ${
+                    className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${
                       c.id === activeConversationId && viewState === 'chat'
-                        ? 'bg-white shadow-sm'
-                        : 'bg-transparent hover:bg-gray-100'
+                        ? 'bg-white text-[#1A1A18] shadow-sm border border-[#EAE6DF] font-bold'
+                        : 'text-[#6E6A63] hover:bg-white hover:text-[#1A1A18] font-medium border border-transparent'
                     }`}
-                    type="button"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="w-2 h-2 rounded-full shrink-0"
-                        style={{ backgroundColor: c.journey ? (JOURNEY_COLORS[c.journey] || '#6E6A63') : '#9CA3AF' }}
-                      />
-                      <span className="text-[13px] font-medium text-[#2D3142] truncate flex-1 min-w-0">
-                        {c.title}
-                      </span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {recent.length > 0 && (
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#9CA3AF] px-2 pt-2 pb-1 m-0">
-                  Recent
-                </p>
-                {recent.map(c => (
-                  <button
-                    key={c.id}
-                    onClick={() => handleConversationClick(c.id)}
-                    className={`w-full text-left border-none cursor-pointer rounded-[10px] px-2 py-1.5 mb-0.5 flex items-center gap-2 transition-colors ${
-                      c.id === activeConversationId && viewState === 'chat'
-                        ? 'bg-white shadow-sm'
-                        : 'bg-transparent hover:bg-gray-100'
-                    }`}
+                    style={{ fontFamily: 'inherit' }}
                     type="button"
                   >
                     <span
                       className="w-2 h-2 rounded-full shrink-0"
                       style={{ backgroundColor: c.journey ? (JOURNEY_COLORS[c.journey] || '#6E6A63') : '#9CA3AF' }}
                     />
-                    <span className="text-[13px] font-medium text-[#4F5D75] truncate flex-1 min-w-0">
-                      {c.title}
-                    </span>
+                    <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {recent.length > 0 && (
+              <div className="mt-2">
+                <div className="text-[11px] font-bold text-[#A9A49C] uppercase tracking-wider mb-2 px-3">Recent</div>
+                {recent.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => handleConversationClick(c.id)}
+                    className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-all cursor-pointer ${
+                      c.id === activeConversationId && viewState === 'chat'
+                        ? 'bg-white text-[#1A1A18] shadow-sm border border-[#EAE6DF] font-medium'
+                        : 'text-[#6E6A63] hover:bg-white hover:text-[#1A1A18] font-medium border border-transparent'
+                    }`}
+                    style={{ fontFamily: 'inherit' }}
+                    type="button"
+                  >
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: c.journey ? (JOURNEY_COLORS[c.journey] || '#6E6A63') : '#9CA3AF' }}
+                    />
+                    <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
                   </button>
                 ))}
               </div>
@@ -299,7 +265,7 @@ export default function Sidebar({
         )}
       </div>
 
-      {/* Bottom section */}
+      {/* Bottom — Account Settings */}
       <div className="px-3 pb-4 mt-auto">
         <button
           onClick={() => {
@@ -309,16 +275,16 @@ export default function Sidebar({
               navigate('/login');
             }
           }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all border-none cursor-pointer bg-transparent text-[#4F5D75] hover:bg-gray-100"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer text-[#6E6A63] hover:bg-white hover:text-[#1A1A18] font-medium border border-transparent"
           style={{ fontFamily: 'inherit' }}
           type="button"
         >
-          <span className="text-[#9CA3AF]">
+          <span className="text-[#A9A49C]">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
             </svg>
           </span>
-          <span className="text-[14px] font-medium">Account Settings</span>
+          Account Settings
         </button>
       </div>
     </div>
