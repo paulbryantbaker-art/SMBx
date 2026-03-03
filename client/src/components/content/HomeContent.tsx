@@ -58,11 +58,11 @@ export default function HomeContent() {
   };
 
   return (
-    <div className={`bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white overflow-x-hidden ${viewState === 'chat' ? 'h-full flex flex-col overflow-hidden' : 'min-h-screen'}`}>
+    <div className="bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white overflow-x-hidden min-h-screen">
 
       {/* --- 1. CHAT MESSAGES AREA (Hidden on landing, expands in chat) --- */}
-      <div className={`w-full max-w-4xl mx-auto px-6 flex flex-col transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'flex-1 py-8 opacity-100 overflow-y-auto min-h-0' : 'h-0 opacity-0 overflow-hidden'}`} style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
-        <div className="flex-1 flex flex-col justify-end gap-6 pb-4">
+      <div className={`w-full max-w-4xl mx-auto px-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'py-8 opacity-100 pb-32' : 'h-0 opacity-0 overflow-hidden'}`}>
+        <div className="flex flex-col gap-6 pb-4">
 
           {/* Header to exit chat */}
           {viewState === 'chat' && (
@@ -124,8 +124,8 @@ export default function HomeContent() {
       </div>
 
       {/* --- 3. THE CHAT STAGE (Centered Gravity Well, Morphs to Bottom) --- */}
-      <div className={`w-full px-4 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] z-50 ${viewState === 'chat' ? 'shrink-0 pb-8 pt-4 bg-gradient-to-t from-[#FDFCFB] via-[#FDFCFB] to-transparent' : 'py-16 md:py-24'}`} style={{ paddingBottom: viewState === 'chat' ? 'max(32px, env(safe-area-inset-bottom))' : undefined }}>
-        <div className="max-w-[800px] mx-auto w-full flex flex-col items-center">
+      <div className={`w-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-4 pt-4 bg-gradient-to-t from-[#FDFCFB] via-[#FDFCFB] to-transparent' : 'px-4 py-16 md:py-24 z-50'}`} style={{ paddingBottom: viewState === 'chat' ? 'max(32px, env(safe-area-inset-bottom))' : undefined }}>
+        <div className={`max-w-[800px] mx-auto w-full flex flex-col items-center ${viewState === 'chat' ? 'pointer-events-auto' : ''}`}>
 
           {/* Expanding Chat Form */}
           <form

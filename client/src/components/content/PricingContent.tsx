@@ -53,11 +53,11 @@ export default function PricingContent() {
   };
 
   return (
-    <div className={`bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white overflow-x-hidden ${viewState === 'chat' ? 'h-full flex flex-col overflow-hidden' : 'min-h-screen'}`}>
+    <div className="bg-[#FDFCFB] text-[#1A1A18] font-sans relative selection:bg-[#D4714E] selection:text-white overflow-x-hidden min-h-screen">
 
       {/* --- 1. CHAT MESSAGES AREA --- */}
-      <div className={`w-full max-w-4xl mx-auto px-6 flex flex-col transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'flex-1 py-8 opacity-100 overflow-y-auto min-h-0' : 'h-0 opacity-0 overflow-hidden'}`} style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
-        <div className="flex-1 flex flex-col justify-end gap-6 pb-4">
+      <div className={`w-full max-w-4xl mx-auto px-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'py-8 opacity-100 pb-32' : 'h-0 opacity-0 overflow-hidden'}`}>
+        <div className="flex flex-col gap-6 pb-4">
           {viewState === 'chat' && (
             <div className="flex items-center justify-between pb-4 border-b border-[#EAE6DF] mb-4">
               <button onClick={() => setViewState('landing')} className="text-sm font-bold text-[#A9A49C] hover:text-[#1A1A18] transition-colors" type="button">
@@ -117,8 +117,8 @@ export default function PricingContent() {
       </div>
 
       {/* --- 3. THE CHAT STAGE (Gravity Well) --- */}
-      <div className={`w-full px-4 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] z-50 ${viewState === 'chat' ? 'shrink-0 pb-8 pt-4 bg-gradient-to-t from-[#FDFCFB] via-[#FDFCFB] to-transparent' : 'py-16 md:py-24'}`} style={{ paddingBottom: viewState === 'chat' ? 'max(32px, env(safe-area-inset-bottom))' : undefined }}>
-        <div className="max-w-[800px] mx-auto w-full flex flex-col items-center">
+      <div className={`w-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${viewState === 'chat' ? 'fixed bottom-0 left-0 right-0 z-50 pointer-events-none px-4 pt-4 bg-gradient-to-t from-[#FDFCFB] via-[#FDFCFB] to-transparent' : 'px-4 py-16 md:py-24 z-50'}`} style={{ paddingBottom: viewState === 'chat' ? 'max(32px, env(safe-area-inset-bottom))' : undefined }}>
+        <div className={`max-w-[800px] mx-auto w-full flex flex-col items-center ${viewState === 'chat' ? 'pointer-events-auto' : ''}`}>
           <form
             onSubmit={handleSend}
             className={`w-full bg-white rounded-[28px] p-2 pl-6 flex items-end transition-all ${viewState === 'chat' ? 'shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-gray-200 ring-1 ring-black/[0.04]' : 'shadow-[0_8px_30px_rgba(0,0,0,0.08),0_20px_60px_rgba(212,113,78,0.18)] border-2 border-[#D4714E]/35 ring-2 ring-[#D4714E]/15 hover:scale-[1.01] focus-within:scale-[1.01] focus-within:border-[#D4714E]/50 focus-within:ring-[#D4714E]/25'}`}
