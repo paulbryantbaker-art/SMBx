@@ -15,6 +15,7 @@ import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
 import { processDeliverable } from '../services/deliverableProcessor.js';
 import { createNotification } from './notifications.js';
 import { MASTER_SYSTEM_PROMPT } from '../prompts/masterPrompt.js';
+import { buildAnonymousPrompt } from '../services/promptBuilder.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
 const sql = postgres(process.env.DATABASE_URL!, {
@@ -93,16 +94,13 @@ chatRouter.post('/message', async (req, res) => {
       content: m.content,
     }));
 
-    // Build system prompt — include journey context if provided
-    let systemPrompt = MASTER_SYSTEM_PROMPT;
-    if (journeyContext && journeyContext !== 'unknown') {
-      systemPrompt += `\n\nJOURNEY CONTEXT: The user started on the "${journeyContext}" page of smbx.ai.
-If they came from /sell, they likely want to sell a business.
-If they came from /buy, they likely want to buy a business.
-If they came from /raise, they likely want to raise capital.
-If they came from /integrate, they likely just acquired a business and need post-merger integration help.
-Use this context to inform your first response, but always confirm their intent.`;
-    }
+    // Build rich system prompt with industry knowledge, capital structure, first-response formula
+    const userMsgCount = apiMessages.filter(m => m.role === 'user').length;
+    const systemPrompt = buildAnonymousPrompt({
+      sourcePage: journeyContext || 'home',
+      isFirstMessage: userMsgCount <= 1,
+      messageCount: userMsgCount,
+    });
 
     // SSE headers
     res.setHeader('Content-Type', 'text/event-stream');

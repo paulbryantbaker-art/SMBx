@@ -1,25 +1,28 @@
 import { useState, useRef, useEffect } from 'react';
 import { Suggestion, Badge, AudienceCard } from './ui';
-
-interface Message {
-  role: 'user' | 'yulia';
-  content: string;
-}
+import { useChatContext } from '../../context/ChatContext';
 
 export default function HomeContent() {
+  const { messages: chatMessages, isStreaming, streamingContent, sendMessage } = useChatContext();
+
   const [viewState, setViewState] = useState<'landing' | 'chat'>('landing');
   const [inputValue, setInputValue] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // If ChatContext already has messages (e.g. restored session), show chat
+  useEffect(() => {
+    if (chatMessages.length > 0 && viewState === 'landing') {
+      setViewState('chat');
+    }
+  }, [chatMessages.length]);
 
   // Auto-scroll chat
   useEffect(() => {
     if (viewState === 'chat') {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isTyping, viewState]);
+  }, [chatMessages, isStreaming, streamingContent, viewState]);
 
   // Auto-expand textarea
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -33,28 +36,16 @@ export default function HomeContent() {
   const handleSend = (e: React.SyntheticEvent | null, forcedText?: string) => {
     e?.preventDefault();
     const textToSend = forcedText || inputValue;
-    if (!textToSend.trim()) return;
+    if (!textToSend.trim() || isStreaming) return;
 
-    // Trigger smooth transition to chat state
     setViewState('chat');
-    setMessages(prev => [...prev, { role: 'user', content: textToSend }]);
     setInputValue('');
 
-    // Reset textarea height
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
     }
 
-    setIsTyping(true);
-
-    // Mock Yulia's response
-    setTimeout(() => {
-      setIsTyping(false);
-      setMessages(prev => [...prev, {
-        role: 'yulia',
-        content: "I can absolutely help you with that. To give you the most accurate market data and valuation multipliers, what is the approximate annual revenue and SDE (Seller's Discretionary Earnings) of the business?"
-      }]);
-    }, 1500);
+    sendMessage(textToSend, '/');
   };
 
   return (
@@ -74,9 +65,9 @@ export default function HomeContent() {
             </div>
           )}
 
-          {messages.map((msg, idx) => (
-            <div key={idx} className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              {msg.role === 'yulia' && (
+          {chatMessages.map((msg, idx) => (
+            <div key={msg.id || idx} className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              {msg.role === 'assistant' && (
                 <div className="w-8 h-8 rounded-full bg-[#D4714E] flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-sm mt-1">Y</div>
               )}
               <div className={`p-5 rounded-2xl max-w-[85%] sm:max-w-[75%] leading-relaxed text-[16px] shadow-sm border ${
@@ -89,7 +80,16 @@ export default function HomeContent() {
             </div>
           ))}
 
-          {isTyping && (
+          {isStreaming && streamingContent && (
+            <div className="flex gap-4 justify-start">
+              <div className="w-8 h-8 rounded-full bg-[#D4714E] flex items-center justify-center text-white font-bold text-xs shrink-0 mt-1 shadow-sm">Y</div>
+              <div className="p-5 rounded-2xl rounded-tl-sm bg-[#F8F6F1] border border-[#EAE6DF] max-w-[85%] sm:max-w-[75%] leading-relaxed text-[16px] shadow-sm text-[#6E6A63]">
+                {streamingContent}
+              </div>
+            </div>
+          )}
+
+          {isStreaming && !streamingContent && (
             <div className="flex gap-4 justify-start">
               <div className="w-8 h-8 rounded-full bg-[#D4714E] flex items-center justify-center text-white font-bold text-xs shrink-0 mt-1 shadow-sm">Y</div>
               <div className="p-5 rounded-2xl rounded-tl-sm bg-[#F8F6F1] border border-[#EAE6DF] flex items-center gap-1.5 shadow-sm h-[60px]">
@@ -151,7 +151,7 @@ export default function HomeContent() {
             <button
               type="button"
               onClick={(e) => handleSend(e)}
-              disabled={!inputValue.trim() && !isTyping}
+              disabled={!inputValue.trim() || isStreaming}
               className="px-6 py-3.5 mb-1 rounded-full flex items-center justify-center bg-[#D4714E] text-white font-bold text-sm tracking-widest uppercase hover:bg-[#b8613d] transition-colors disabled:opacity-50 disabled:hover:bg-[#D4714E]"
             >
               Send
