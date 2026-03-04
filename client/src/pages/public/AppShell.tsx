@@ -556,54 +556,93 @@ export default function AppShell() {
               <>
                 {/* ═══ HOME PAGE — Gemini × Uber layout ═══ */}
 
-                {/* Hero */}
-                <div className="pt-9 px-6 md:pt-20 md:px-8">
-                  <p className="text-[16px] md:text-[18px] font-medium text-[#6E6A63] mb-1 md:text-center">Meet Yulia</p>
-                  <h1 className="text-[32px] md:text-[48px] font-extrabold leading-[1.12] md:leading-[1.1] md:text-center md:max-w-[720px] md:mx-auto" style={{ letterSpacing: '-0.03em' }}>
-                    {page.h1Line1}
-                  </h1>
-                  <p className="text-[16px] md:text-[18px] font-normal leading-[1.5] text-[#6E6A63] mt-3.5 md:mt-4 md:text-center md:max-w-[580px] md:mx-auto">
-                    {page.subtitle}
-                  </p>
-                </div>
-
-                {/* Chips — mobile: full-width Gemini buttons, desktop: horizontal pills */}
-                <div className="px-6 pt-5 md:pt-0 md:mt-7 md:px-8">
-                  <div className="md:hidden flex flex-col gap-2.5">
-                    {[
-                      { text: page.chips[0], emoji: '\uD83D\uDCCA', bg: 'rgba(212,113,78,0.1)' },
-                      { text: page.chips[1], emoji: '\uD83C\uDFE6', bg: 'rgba(74,144,226,0.1)' },
-                      { text: page.chips[2], emoji: '\uD83E\uDD1D', bg: 'rgba(74,222,128,0.1)' },
-                    ].map(chip => (
-                      <button key={chip.text} onClick={() => handleChipClick(chip.text)} className="flex items-center gap-2.5 w-full text-left text-[15px] font-medium text-[#1A1A18] bg-[#F7F7F7] border border-[#E5E5E5] rounded-2xl cursor-pointer transition-colors hover:bg-[#F0F0F0]" style={{ padding: '14px 16px', fontFamily: 'inherit' }} type="button">
-                        <span className="w-7 h-7 rounded-full flex items-center justify-center text-[14px] shrink-0" style={{ background: chip.bg }}>{chip.emoji}</span>
-                        {chip.text}
-                      </button>
-                    ))}
+                {/* ═══ MOBILE HERO ═══ */}
+                <div className="md:hidden">
+                  <div className="pt-9 px-6">
+                    <p className="text-[16px] font-medium text-[#6E6A63] mb-1">Meet Yulia</p>
+                    <h1 className="text-[32px] font-extrabold leading-[1.12]" style={{ letterSpacing: '-0.03em' }}>
+                      {page.h1Line1}
+                    </h1>
+                    <p className="text-[16px] font-normal leading-[1.5] text-[#6E6A63] mt-3.5">
+                      {page.subtitle}
+                    </p>
                   </div>
-                  <div className="hidden md:flex flex-wrap justify-center gap-2.5">
-                    {page.chips.map(chip => (
-                      <button key={chip} onClick={() => handleChipClick(chip)} className="text-[14px] font-medium text-[#4A4843] bg-[#F7F7F7] border border-[#E5E5E5] rounded-full px-5 py-2.5 cursor-pointer transition-all hover:bg-[#FFF0EB] hover:border-[rgba(212,113,78,0.15)] hover:text-[#D4714E]" style={{ fontFamily: 'inherit' }} type="button">
-                        &ldquo;{chip}&rdquo;
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Data status line */}
-                <div className="flex items-center gap-1.5 px-6 pt-5 md:pt-0 md:mt-4 md:justify-center">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" style={{ boxShadow: '0 0 4px rgba(74,222,128,0.5)', animation: 'statusPulse 2s ease infinite' }} />
-                  <span className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#A8A49C]">Live federal data &middot; Census &middot; BLS &middot; SBA &middot; SEC</span>
-                </div>
-
-                {/* Chat input */}
-                <div className="mx-6 mt-5 md:max-w-[640px] md:mx-auto md:mt-6 mb-10 md:mb-20">
-                  <div className="home-input-wrap bg-white relative overflow-visible" style={{ borderRadius: isMobile ? '20px' : '24px', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)' }}>
-                    <div className="hidden md:flex items-center gap-2 px-6 pt-4 pb-0">
-                      <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                      <span className="text-[12px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>Federal Data Sync Active</span>
+                  <div className="px-6 pt-5">
+                    <div className="flex flex-col gap-2.5">
+                      {[
+                        { text: page.chips[0], emoji: '\uD83D\uDCCA', bg: 'rgba(212,113,78,0.1)' },
+                        { text: page.chips[1], emoji: '\uD83C\uDFE6', bg: 'rgba(74,144,226,0.1)' },
+                        { text: page.chips[2], emoji: '\uD83E\uDD1D', bg: 'rgba(74,222,128,0.1)' },
+                      ].map(chip => (
+                        <button key={chip.text} onClick={() => handleChipClick(chip.text)} className="flex items-center gap-2.5 w-full text-left text-[15px] font-medium text-[#1A1A18] bg-[#F7F7F7] border border-[#E5E5E5] rounded-2xl cursor-pointer transition-colors hover:bg-[#F0F0F0]" style={{ padding: '14px 16px', fontFamily: 'inherit' }} type="button">
+                          <span className="w-7 h-7 rounded-full flex items-center justify-center text-[14px] shrink-0" style={{ background: chip.bg }}>{chip.emoji}</span>
+                          {chip.text}
+                        </button>
+                      ))}
                     </div>
-                    <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder="Tell Yulia about your deal..." disabled={sending} />
+                  </div>
+                  <div className="flex items-center gap-1.5 px-6 pt-5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" style={{ boxShadow: '0 0 4px rgba(74,222,128,0.5)', animation: 'statusPulse 2s ease infinite' }} />
+                    <span className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#A8A49C]">Live federal data &middot; Census &middot; BLS &middot; SBA &middot; SEC</span>
+                  </div>
+                  <div className="mx-6 mt-5 mb-10">
+                    <div className="home-input-wrap bg-white relative overflow-visible" style={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)' }}>
+                      <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder="Tell Yulia about your deal..." disabled={sending} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* ═══ DESKTOP HERO — matches Sell/Buy page layout ═══ */}
+                <div className="hidden md:flex min-h-[calc(100vh-80px)] flex-col items-center justify-center px-6" style={{ gap: '7vh' }}>
+                  {/* Headline group */}
+                  <div className="w-full max-w-5xl text-center">
+                    <p className="text-[18px] font-medium text-[#6E6A63]" style={{ marginBottom: '12px' }}>Meet Yulia</p>
+                    <h1
+                      className="text-[56px] font-extrabold leading-[1.08]"
+                      style={{ letterSpacing: '-0.04em', marginBottom: '20px' }}
+                    >
+                      {page.h1Line1}
+                    </h1>
+                    <p className="text-[20px] font-medium text-[#6E6A63] max-w-3xl mx-auto" style={{ lineHeight: 1.65 }}>
+                      {page.subtitle}
+                    </p>
+                  </div>
+
+                  {/* Chat bar — same card as Sell/Buy pages */}
+                  <div className="w-full max-w-[860px]">
+                    <div
+                      className="home-input-wrap bg-white shadow-2xl transition-all relative overflow-visible"
+                      style={{ borderRadius: '40px', border: '2px solid #D1D5DB' }}
+                    >
+                      <div className="flex items-center gap-2 px-6 pt-4 pb-0">
+                        <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                        <span className="text-[12px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>
+                          Federal Data Sync Active
+                        </span>
+                      </div>
+                      <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder="Tell Yulia about your deal..." disabled={sending} />
+                    </div>
+                  </div>
+
+                  {/* Chips + data status */}
+                  <div className="flex flex-col items-center">
+                    <div className="flex flex-wrap justify-center gap-3 max-w-3xl" style={{ marginBottom: '16px' }}>
+                      {page.chips.map(chip => (
+                        <button
+                          key={chip}
+                          onClick={() => handleChipClick(chip)}
+                          className="bg-white border border-[#F3F4F6] px-5 py-3 cursor-pointer hover:border-[#D4714E] hover:text-[#D4714E] transition-all text-[#6E6A63]"
+                          style={{ borderRadius: '12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'inherit' }}
+                          type="button"
+                        >
+                          &ldquo;{chip}&rdquo;
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" style={{ boxShadow: '0 0 4px rgba(74,222,128,0.5)', animation: 'statusPulse 2s ease infinite' }} />
+                      <span className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#A8A49C]">Live federal data &middot; Census &middot; BLS &middot; SBA &middot; SEC</span>
+                    </div>
                   </div>
                 </div>
 
