@@ -587,8 +587,8 @@ export default function AppShell() {
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
             <div key={activeTab} style={{ animation: morphing ? 'morphOut 0.45s ease forwards' : 'fadeIn 0.4s ease', pointerEvents: morphing ? 'none' as const : undefined }}>
-              {/* Hero — viewport-height, centered in middle 2/3, even gaps */}
-              <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-6" style={{ gap: '7vh' }}>
+              {/* Hero — viewport-height (uses --app-height for iOS visual viewport), centered, even gaps */}
+              <div className="flex flex-col items-center justify-center px-6" style={{ minHeight: 'calc(var(--app-height, 100dvh) - 80px)', gap: '7vh' }}>
                 {/* Headline group */}
                 <div className="w-full max-w-5xl text-center">
                   {page.overline && (
