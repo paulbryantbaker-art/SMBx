@@ -172,3 +172,16 @@ body {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* Home chat input — focus border */
+.home-input-wrap { transition: border-color 0.15s; }
+.home-input-wrap:focus-within {
+  border-color: #1A1A18 !important;
+  border-width: 2px !important;
+}
+
+/* Status dot pulse */
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

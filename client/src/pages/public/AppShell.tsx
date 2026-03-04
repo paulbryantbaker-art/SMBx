@@ -35,13 +35,13 @@ const PAGE_COPY: Record<TabId, {
     overline: '',
     h1Line1: 'We take the stress out of buying and selling any business.',
     h1Line2: '',
-    subtitle: 'From \u201Cwhat\u2019s it worth?\u201D to \u201Cdeal closed\u201D \u2014 Yulia automates weeks of financial analysis, market intelligence, and deal preparation into a single guided conversation.',
+    subtitle: 'From \u201Cwhat\u2019s it worth?\u201D to \u201Cdeal closed\u201D \u2014 Yulia automates weeks of analysis, intelligence, and deal prep into a single conversation.',
     chips: [
       'Value my plumbing business in Phoenix',
-      'Can I finance a $2M acquisition with SBA?',
+      'Model SBA financing on a $2M target',
       "I'm a broker \u2014 show me what Yulia can do",
     ],
-    tagline: 'Powered by live U.S. federal data \u00B7 Any deal size \u00B7 Every number is sourced',
+    tagline: 'Live federal data \u00B7 Census \u00B7 BLS \u00B7 SBA \u00B7 SEC',
     placeholder: 'Tell Yulia about your deal...',
   },
   sell: {
@@ -552,6 +552,228 @@ export default function AppShell() {
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
             <div key={activeTab} style={{ animation: morphing ? 'morphOut 0.45s ease forwards' : 'fadeIn 0.4s ease', pointerEvents: morphing ? 'none' as const : undefined }}>
+              {activeTab === 'home' ? (
+              <>
+                {/* ═══ HOME PAGE — Gemini × Uber layout ═══ */}
+
+                {/* Hero */}
+                <div className="pt-9 px-6 md:pt-12 md:px-8">
+                  <p className="text-[16px] md:text-[18px] font-medium text-[#6E6A63] mb-1 md:text-center">Meet Yulia</p>
+                  <h1 className="text-[32px] md:text-[48px] font-extrabold leading-[1.12] md:leading-[1.1] md:text-center md:max-w-[720px] md:mx-auto" style={{ letterSpacing: '-0.03em' }}>
+                    {page.h1Line1}
+                  </h1>
+                  <p className="text-[16px] md:text-[18px] font-normal leading-[1.5] text-[#6E6A63] mt-3.5 md:mt-4 md:text-center md:max-w-[580px] md:mx-auto">
+                    {page.subtitle}
+                  </p>
+                </div>
+
+                {/* Chips — mobile: full-width Gemini buttons, desktop: horizontal pills */}
+                <div className="px-6 pt-5 md:pt-6 md:px-8">
+                  <div className="md:hidden flex flex-col gap-2.5">
+                    {[
+                      { text: page.chips[0], emoji: '\uD83D\uDCCA', bg: 'rgba(212,113,78,0.1)' },
+                      { text: page.chips[1], emoji: '\uD83C\uDFE6', bg: 'rgba(74,144,226,0.1)' },
+                      { text: page.chips[2], emoji: '\uD83E\uDD1D', bg: 'rgba(74,222,128,0.1)' },
+                    ].map(chip => (
+                      <button key={chip.text} onClick={() => handleChipClick(chip.text)} className="flex items-center gap-2.5 w-full text-left text-[15px] font-medium text-[#1A1A18] bg-[#F7F7F7] border border-[#E5E5E5] rounded-2xl cursor-pointer transition-colors hover:bg-[#F0F0F0]" style={{ padding: '14px 16px', fontFamily: 'inherit' }} type="button">
+                        <span className="w-7 h-7 rounded-full flex items-center justify-center text-[14px] shrink-0" style={{ background: chip.bg }}>{chip.emoji}</span>
+                        {chip.text}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="hidden md:flex flex-wrap justify-center gap-2.5">
+                    {page.chips.map(chip => (
+                      <button key={chip} onClick={() => handleChipClick(chip)} className="text-[14px] font-medium text-[#4A4843] bg-[#F7F7F7] border border-[#E5E5E5] rounded-full px-5 py-2.5 cursor-pointer transition-all hover:bg-[#FFF0EB] hover:border-[rgba(212,113,78,0.15)] hover:text-[#D4714E]" style={{ fontFamily: 'inherit' }} type="button">
+                        &ldquo;{chip}&rdquo;
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Data status line */}
+                <div className="flex items-center gap-1.5 px-6 pt-5 md:justify-center">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" style={{ boxShadow: '0 0 4px rgba(74,222,128,0.5)', animation: 'statusPulse 2s ease infinite' }} />
+                  <span className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#A8A49C]">Live federal data &middot; Census &middot; BLS &middot; SBA &middot; SEC</span>
+                </div>
+
+                {/* Chat input */}
+                <div className="mx-6 mt-5 md:max-w-[640px] md:mx-auto md:mt-6 mb-10">
+                  <div className="home-input-wrap bg-[#F7F7F7] relative overflow-visible" style={{ borderRadius: isMobile ? '20px' : '24px', border: '1.5px solid #E5E5E5' }}>
+                    <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder="Tell Yulia about your deal..." disabled={sending} />
+                  </div>
+                </div>
+
+                {/* ═══ BELOW-FOLD ═══ */}
+
+                {/* Divider */}
+                <div className="w-full h-2 bg-[#F7F7F7]" />
+
+                {/* How It Works */}
+                <section className="px-6 pt-7 md:pt-10 md:px-8">
+                  <div className="md:max-w-[960px] md:mx-auto">
+                    <div className="mb-5 md:mb-8 md:text-center">
+                      <span className="text-[12px] font-bold tracking-[0.08em] uppercase text-[#D4714E]">HOW IT WORKS</span>
+                      <h2 className="text-[26px] md:text-[36px] font-extrabold mt-2" style={{ letterSpacing: '-0.025em' }}>Five minutes. Five answers.</h2>
+                    </div>
+                    {/* Mobile: clean list */}
+                    <div className="md:hidden">
+                      {[
+                        { n: '01', title: 'Classifies your deal', body: 'SDE or EBITDA. SBA or conventional. Owner-operator or institutional. Yulia maps the right framework in seconds.' },
+                        { n: '02', title: 'Finds hidden value', body: 'Most owners miss $100K\u2013$500K in legitimate add-backs. Personal vehicles. Family phones. One-time legal fees. Found line by line.' },
+                        { n: '03', title: 'Benchmarks your market', body: 'Competitor counts from Census. Wage data from BLS. PE activity in your sector. All localized to your metro.' },
+                        { n: '04', title: 'Gives you a defensible number', body: 'Multi-methodology valuation backed by real comps, industry multiples, and local market conditions.' },
+                        { n: '05', title: 'Maps your next move', body: 'Optimize before listing? Find SBA buyers? Engage an advisor? A path forward matched to your deal.' },
+                      ].map((s, i) => (
+                        <div key={s.n} className={`flex gap-3.5 py-4 ${i > 0 ? 'border-t border-[#E5E5E5]' : ''}`}>
+                          <span className="text-[28px] font-extrabold text-[#D4714E] opacity-70 min-w-[36px] leading-none">{s.n}</span>
+                          <div>
+                            <h3 className="text-[16px] font-bold text-[#1A1A18] mb-1">{s.title}</h3>
+                            <p className="text-[14px] font-normal text-[#6E6A63] m-0" style={{ lineHeight: 1.55 }}>{s.body}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Desktop: 3+2 card grid */}
+                    <div className="hidden md:block">
+                      <div className="grid grid-cols-3 gap-4">
+                        {[
+                          { n: '01', title: 'Classifies your deal', body: 'SDE or EBITDA. SBA or conventional. Owner-operator or institutional. Yulia maps the right framework in seconds.' },
+                          { n: '02', title: 'Finds hidden value', body: 'Most owners miss $100K\u2013$500K in legitimate add-backs. Personal vehicles. Family phones. One-time legal fees. Found line by line.' },
+                          { n: '03', title: 'Benchmarks your market', body: 'Competitor counts from Census. Wage data from BLS. PE activity in your sector. All localized to your metro.' },
+                        ].map(s => (
+                          <div key={s.n} className="bg-white border border-[#E5E5E5] rounded-2xl p-6">
+                            <span className="text-[32px] font-extrabold text-[#D4714E] opacity-70 leading-none block mb-3">{s.n}</span>
+                            <h3 className="text-[16px] font-bold mb-2">{s.title}</h3>
+                            <p className="text-[14px] text-[#6E6A63] m-0">{s.body}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        {[
+                          { n: '04', title: 'Gives you a defensible number', body: 'Multi-methodology valuation backed by real comps, industry multiples, and local market conditions.' },
+                          { n: '05', title: 'Maps your next move', body: 'Optimize before listing? Find SBA buyers? Engage an advisor? A path forward matched to your deal.' },
+                        ].map(s => (
+                          <div key={s.n} className="bg-white border border-[#E5E5E5] rounded-2xl p-6">
+                            <span className="text-[32px] font-extrabold text-[#D4714E] opacity-70 leading-none block mb-3">{s.n}</span>
+                            <h3 className="text-[16px] font-bold mb-2">{s.title}</h3>
+                            <p className="text-[14px] text-[#6E6A63] m-0">{s.body}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Divider */}
+                <div className="w-full h-2 bg-[#F7F7F7] mt-8 md:mt-10" />
+
+                {/* Conversation Preview */}
+                <section className="px-6 pt-7 md:pt-10 md:px-8">
+                  <div className="md:max-w-[680px] md:mx-auto">
+                    <div className="mb-5 md:mb-8 md:text-center">
+                      <span className="text-[12px] font-bold tracking-[0.08em] uppercase text-[#D4714E]">LIVE EXAMPLE</span>
+                      <h2 className="text-[24px] md:text-[36px] font-extrabold mt-2" style={{ letterSpacing: '-0.025em' }}>See Yulia work a real deal.</h2>
+                    </div>
+
+                    {/* User message */}
+                    <div className="flex justify-end mb-3.5">
+                      <div className="bg-[#FFF0EB] border border-[rgba(212,113,78,0.15)] p-3.5 ml-8 md:ml-0 md:max-w-[80%]" style={{ borderRadius: '20px 20px 4px 20px' }}>
+                        <p className="text-[15px] md:text-[16px] font-medium text-[#1A1A18] m-0" style={{ lineHeight: 1.55 }}>
+                          I&apos;m thinking about selling my commercial HVAC company. We&apos;re in Dallas-Fort Worth, about $4.2M in revenue and $780K in adjusted EBITDA last year.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Yulia response */}
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-[30px] h-[30px] rounded-full bg-[#1A1A18] text-white text-[12px] font-bold flex items-center justify-center shrink-0 mt-1">Y</div>
+                      <div className="bg-[#F7F7F7] p-3.5 flex-1" style={{ borderRadius: '20px 20px 20px 4px' }}>
+                        <p className="text-[15px] md:text-[16px] font-medium text-[#1A1A18] m-0 mb-3" style={{ lineHeight: 1.55 }}>
+                          Commercial HVAC in DFW &mdash; that&apos;s a strong combination right now. Your $780K EBITDA puts you in the institutional range. Let me run the numbers...
+                        </p>
+                        {/* Valuation card */}
+                        <div className="bg-white border border-[#E5E5E5] rounded-2xl p-4 mt-3.5">
+                          <div className="text-[11px] font-bold tracking-[0.06em] uppercase text-[#6E6A63]">Preliminary Enterprise Value</div>
+                          <div className="text-[32px] md:text-[36px] font-extrabold tracking-[-0.03em] text-[#1A1A18]">$3.7M &ndash; $4.8M</div>
+                          <div className="text-[12px] font-medium text-[#6E6A63]">EBITDA &times; Industry Multiple (4.8&ndash;6.2&times;) &middot; Census CBP &middot; BLS QCEW</div>
+                        </div>
+                        {/* Green insight */}
+                        <div className="mt-2 p-2.5" style={{ background: 'rgba(74,222,128,0.06)', borderLeft: '3px solid #22C55E', borderRadius: '0 10px 10px 0' }}>
+                          <p className="text-[13px] font-medium text-[#1A1A18] m-0" style={{ lineHeight: 1.5 }}>DFW has 847 HVAC businesses per Census data, but only ~12% are commercial-focused. 14 active PE roll-up platforms in Texas. You&apos;re in a seller&apos;s market.</p>
+                        </div>
+                        {/* Amber insight */}
+                        <div className="mt-2 p-2.5" style={{ background: 'rgba(234,179,8,0.06)', borderLeft: '3px solid #EAB308', borderRadius: '0 10px 10px 0' }}>
+                          <p className="text-[13px] font-medium text-[#1A1A18] m-0" style={{ lineHeight: 1.5 }}>Your 18.6% EBITDA margin is slightly below the 21% sector median. Optimization here could move your enterprise value $200K&ndash;$400K.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Divider */}
+                <div className="w-full h-2 bg-[#F7F7F7] mt-8 md:mt-10" />
+
+                {/* Audience */}
+                <section className="px-6 pt-7 md:pt-10 md:px-8">
+                  <div className="md:max-w-[960px] md:mx-auto">
+                    <h2 className="text-[26px] md:text-[36px] font-extrabold mb-5 md:mb-8 md:text-center" style={{ letterSpacing: '-0.025em' }}>Built for everyone in the deal.</h2>
+                    {/* Mobile: divider list */}
+                    <div className="md:hidden">
+                      {[
+                        { label: 'SELLING', quote: "I\u2019m selling my business.", body: "Yulia finds every add-back, calculates true adjusted earnings, and generates a valuation you can defend at the closing table." },
+                        { label: 'BUYING', quote: "I\u2019m buying a business.", body: "Models SBA financing against live rates, runs DSCR, and tells you if the asking price is justified \u2014 before the first call." },
+                        { label: 'ADVISING', quote: "I\u2019m a broker or advisor.", body: "Package listings in minutes. Pre-screen buyers. Generate CIMs. White-label everything under your brand." },
+                        { label: 'INVESTING', quote: "I run a search fund.", body: "Source targets against your thesis. Screen by fragmentation. Build conviction with localized comps and deal modeling." },
+                      ].map((a, i) => (
+                        <div key={a.label} className={`py-4 ${i > 0 ? 'border-t border-[#E5E5E5]' : ''}`}>
+                          <span className="text-[11px] font-bold tracking-[0.06em] uppercase text-[#D4714E] mb-1.5 block">{a.label}</span>
+                          <h3 className="text-[18px] font-bold text-[#1A1A18] mb-1.5">{a.quote}</h3>
+                          <p className="text-[14px] text-[#6E6A63] m-0" style={{ lineHeight: 1.55 }}>{a.body}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Desktop: 2x2 card grid */}
+                    <div className="hidden md:grid grid-cols-2 gap-4">
+                      {[
+                        { label: 'SELLING', quote: "I\u2019m selling my business.", body: "Yulia finds every add-back, calculates true adjusted earnings, and generates a valuation you can defend at the closing table." },
+                        { label: 'BUYING', quote: "I\u2019m buying a business.", body: "Models SBA financing against live rates, runs DSCR, and tells you if the asking price is justified \u2014 before the first call." },
+                        { label: 'ADVISING', quote: "I\u2019m a broker or advisor.", body: "Package listings in minutes. Pre-screen buyers. Generate CIMs. White-label everything under your brand." },
+                        { label: 'INVESTING', quote: "I run a search fund.", body: "Source targets against your thesis. Screen by fragmentation. Build conviction with localized comps and deal modeling." },
+                      ].map(a => (
+                        <div key={a.label} className="bg-[#F7F7F7] border border-[#E5E5E5] rounded-2xl p-6">
+                          <span className="text-[11px] font-bold tracking-[0.06em] uppercase text-[#D4714E] mb-1 block">{a.label}</span>
+                          <h3 className="text-[20px] font-bold mb-2">{a.quote}</h3>
+                          <p className="text-[15px] text-[#6E6A63] m-0">{a.body}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+
+                {/* Divider */}
+                <div className="w-full h-2 bg-[#F7F7F7] mt-8 md:mt-10" />
+
+                {/* Trust / Data Sources */}
+                <section className="px-6 pt-7 pb-6 md:pt-10 md:pb-8 md:px-8">
+                  <div className="md:max-w-[640px] md:mx-auto md:text-center">
+                    <h2 className="text-[22px] md:text-[28px] font-extrabold mb-3" style={{ letterSpacing: '-0.025em' }}>Every number is sourced.</h2>
+                    <p className="text-[15px] text-[#6E6A63] mb-4" style={{ lineHeight: 1.55 }}>Built on data from agencies required by law to collect it. The same sources that inform the Federal Reserve.</p>
+                    <div className="flex flex-wrap gap-2 md:justify-center">
+                      {['U.S. Census', 'BLS', 'Federal Reserve', 'SEC EDGAR', 'SBA'].map(s => (
+                        <span key={s} className="text-[12px] font-semibold text-[#6E6A63] bg-[#F7F7F7] rounded-full px-3 py-1.5">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+
+                {/* Footer */}
+                <footer className="bg-[#F7F7F7] py-6 md:py-8 text-center">
+                  <span className="text-[18px] font-extrabold">smb<span className="text-[#D4714E]">X</span>.ai</span>
+                  <p className="text-[12px] font-medium text-[#A8A49C] mt-1 m-0">Deal Intelligence Infrastructure</p>
+                </footer>
+              </>
+              ) : (
+              <>
               {/* Hero — viewport-height, centered, even gaps */}
               <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-6" style={{ gap: '7vh' }}>
                 {/* Headline group */}
@@ -621,289 +843,6 @@ export default function AppShell() {
                   </div>
                 </div>
               </div>
-
-              {/* ════ BELOW-FOLD SECTIONS ════ */}
-              {activeTab === 'home' && (
-                <div>
-                  {/* Section 1: The One-Liner */}
-                  <section className="px-6" style={{ paddingTop: '120px', paddingBottom: '120px' }}>
-                    <div className="max-w-4xl mx-auto text-center">
-                      <h2 className="text-[36px] md:text-[56px] font-extrabold" style={{ letterSpacing: '-0.04em' }}>
-                        The data is public. The intelligence is not.
-                      </h2>
-                    </div>
-                  </section>
-
-                  {/* Section 2: What Happens — 5 Steps */}
-                  <section className="px-6" style={{ paddingTop: '80px' }}>
-                    <div className="max-w-5xl mx-auto">
-                      <div className="text-center mb-16">
-                        <h2 className="text-[36px] md:text-[48px] font-extrabold" style={{ letterSpacing: '-0.04em' }}>
-                          Here&apos;s what Yulia does in the first five minutes.
-                        </h2>
-                      </div>
-                      <div className="grid md:grid-cols-3 gap-6">
-                        {[
-                          { step: '01', title: 'She classifies your deal.', body: 'Industry, location, revenue, deal size \u2014 Yulia maps your business to the right financial framework in seconds. SDE or EBITDA. SBA or conventional. Owner-operator or institutional.' },
-                          { step: '02', title: 'She finds your hidden value.', body: 'Most owners undervalue their business by $100K\u2013$500K in add-backs they never knew to claim. Personal vehicles. Family cell phones. One-time legal fees. Yulia identifies them line by line.' },
-                          { step: '03', title: 'She benchmarks your market.', body: 'How many competitors in your metro? What are they trading at? Which PE firms are actively acquiring in your sector? Yulia pulls live Census, BLS, and transaction data specific to your geography.' },
-                        ].map(s => (
-                          <div key={s.step} className="bg-[#F9FAFB] p-10" style={{ borderRadius: '48px', border: '1px solid #F3F4F6' }}>
-                            <span className="text-[48px] font-black text-[#D4714E] leading-none mb-4 block">{s.step}</span>
-                            <h3 className="text-[22px] font-extrabold mb-3">{s.title}</h3>
-                            <p className="text-[15px] font-medium text-[#6E6A63]" style={{ lineHeight: 1.6 }}>{s.body}</p>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="grid md:grid-cols-2 gap-6 mt-6">
-                        {[
-                          { step: '04', title: 'She gives you a defensible number.', body: 'Not a guess. A multi-methodology valuation backed by real comparable transactions, industry multiples, and local market conditions. Built to withstand buyer scrutiny and lender review.' },
-                          { step: '05', title: 'She tells you what to do next.', body: 'Optimize EBITDA before listing? Find SBA-qualified buyers? Engage an advisor? Yulia maps the path forward based on your specific deal, timeline, and goals.' },
-                        ].map(s => (
-                          <div key={s.step} className="bg-[#F9FAFB] p-10" style={{ borderRadius: '48px', border: '1px solid #F3F4F6' }}>
-                            <span className="text-[48px] font-black text-[#D4714E] leading-none mb-4 block">{s.step}</span>
-                            <h3 className="text-[22px] font-extrabold mb-3">{s.title}</h3>
-                            <p className="text-[15px] font-medium text-[#6E6A63]" style={{ lineHeight: 1.6 }}>{s.body}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* Section 3: Conversation Preview */}
-                  <section className="px-6" style={{ paddingTop: '160px' }}>
-                    <div className="max-w-4xl mx-auto">
-                      <div className="text-center mb-16">
-                        <h2 className="text-[36px] md:text-[48px] font-extrabold" style={{ letterSpacing: '-0.04em' }}>
-                          See it happen.
-                        </h2>
-                      </div>
-
-                      <div className="space-y-8">
-                        {/* User message */}
-                        <div className="flex justify-end">
-                          <div className="max-w-[80%] bg-gray-50 border border-gray-200 text-[#1A1A18]" style={{ borderRadius: '40px', borderTopRightRadius: '4px', padding: '28px 36px' }}>
-                            <p className="text-[18px] md:text-[22px] font-medium m-0" style={{ lineHeight: 1.6 }}>
-                              I&apos;m thinking about selling my commercial HVAC company. We&apos;re in Dallas-Fort Worth, about $4.2M in revenue and $780K in adjusted EBITDA last year.
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Yulia response */}
-                        <div className="flex justify-start gap-4">
-                          <div className="flex-shrink-0 w-14 h-14 rounded-full bg-[#D4714E] text-white flex items-center justify-center text-[20px] mt-1" style={{ boxShadow: '0 2px 8px rgba(212,113,78,0.2)' }}>
-                            ✦
-                          </div>
-                          <div className="max-w-[85%] bg-white border border-[#F3F4F6]" style={{ borderRadius: '40px', borderTopLeftRadius: '4px', padding: '28px 36px' }}>
-                            <p className="text-[18px] md:text-[22px] font-medium text-[#1A1A18] mb-6" style={{ lineHeight: 1.6 }}>
-                              Commercial HVAC in DFW &mdash; that&apos;s a strong combination right now. Let me run this through the methodology...
-                            </p>
-                            <p className="text-[16px] font-medium text-[#6E6A63] mb-6" style={{ lineHeight: 1.6 }}>
-                              Your $780K EBITDA puts you in the institutional range, which means we&apos;re working with EBITDA-based multiples rather than SDE. For commercial HVAC in the Dallas-Fort Worth MSA, current multiples are running 4.8&times;&ndash;6.2&times; based on comparable transactions and PE activity in the space.
-                            </p>
-
-                            {/* Valuation card */}
-                            <div className="bg-[#F9FAFB] border border-[#F3F4F6] p-8 mb-6" style={{ borderRadius: '24px' }}>
-                              <div className="text-[12px] font-bold uppercase text-[#6E6A63] mb-1" style={{ letterSpacing: '0.1em' }}>
-                                Preliminary Enterprise Value
-                              </div>
-                              <div className="text-[36px] font-black text-[#1A1A18] mb-2">$3.7M &ndash; $4.8M</div>
-                              <div className="text-[12px] font-medium text-[#9CA3AF]">EBITDA &times; Industry Multiple (4.8&ndash;6.2&times;)</div>
-                              <div className="text-[11px] font-medium text-[#9CA3AF] mt-1">Census CBP &middot; BLS QCEW &middot; PE Transaction Comps</div>
-                            </div>
-
-                            {/* Insights */}
-                            <div className="space-y-4">
-                              <div className="flex items-start gap-3 bg-green-50 p-5" style={{ borderRadius: '16px', border: '1px solid rgba(34,197,94,0.15)' }}>
-                                <span className="text-green-600 font-black text-[18px] mt-0.5">&#10003;</span>
-                                <p className="text-[16px] font-medium text-[#1A1A18] m-0" style={{ lineHeight: 1.6 }}>
-                                  DFW has 847 HVAC businesses per Census data, but only ~12% are commercial-focused. I&apos;m tracking 14 active PE roll-up platforms in Texas alone. You&apos;re in a seller&apos;s market.
-                                </p>
-                              </div>
-                              <div className="flex items-start gap-3 bg-amber-50 p-5" style={{ borderRadius: '16px', border: '1px solid rgba(245,158,11,0.15)' }}>
-                                <span className="text-amber-600 font-black text-[18px] mt-0.5">!</span>
-                                <p className="text-[16px] font-medium text-[#1A1A18] m-0" style={{ lineHeight: 1.6 }}>
-                                  Your 18.6% EBITDA margin is slightly below the 21% sector median. Optimization here before going to market could move your enterprise value $200K&ndash;$400K. Want me to identify the specific cost lines to target?
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* Section 4: Audience Grid */}
-                  <section className="px-6" style={{ paddingTop: '160px' }}>
-                    <div className="max-w-5xl mx-auto text-center mb-12">
-                      <h2 className="text-[36px] md:text-[48px] font-extrabold" style={{ letterSpacing: '-0.04em' }}>
-                        Built for everyone in the deal.
-                      </h2>
-                    </div>
-                    <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6">
-                      {[
-                        {
-                          title: "I\u2019m selling my business.",
-                          body: "This is probably the biggest financial decision you\u2019ll ever make. Yulia makes sure you don\u2019t leave money on the table.\n\nShe finds every add-back in your financials, calculates your true adjusted earnings, benchmarks your margins against the industry, and generates a valuation you can defend at the closing table. Then she helps you find the right buyers and the right advisor.\n\nWhether your business does $500K or $50M in revenue.",
-                          action: () => handleTabClick('sell'),
-                          actionText: 'Start your valuation \u2192',
-                        },
-                        {
-                          title: "I\u2019m buying a business.",
-                          body: "Stop flying blind on targets.\n\nYulia models SBA financing against live federal rates, runs debt service coverage ratios, analyzes competitive density in your target market, and tells you whether the asking price is justified \u2014 before you schedule the first call.\n\nFrom your first acquisition to your twentieth.",
-                          action: () => handleTabClick('buy'),
-                          actionText: 'Evaluate a target \u2192',
-                        },
-                        {
-                          title: "I\u2019m a broker or advisor.",
-                          body: "You close deals. Yulia does the analysis.\n\nPackage a new listing in minutes \u2014 not weeks. Pre-screen buyers for SBA eligibility. Generate institutional-quality valuations, CIMs, and market reports. White-label everything under your brand.\n\nThe deals you used to turn away? Now they\u2019re profitable.",
-                          action: () => handleTabClick('advisors'),
-                          actionText: 'See advisor tools \u2192',
-                        },
-                        {
-                          title: "I\u2019m an investor or search fund.",
-                          body: "Source targets against your thesis. Screen markets by fragmentation and density. Build conviction with localized comps, DSCR modeling, and competitive dynamics.\n\nThe analysis that takes your team 40 hours? Ready in minutes.",
-                          action: () => handleChipClick('Tell Yulia your acquisition thesis'),
-                          actionText: 'Define your thesis \u2192',
-                        },
-                      ].map(card => (
-                        <div key={card.title} className="bg-[#F9FAFB] p-10" style={{ borderRadius: '48px', border: '1px solid #F3F4F6' }}>
-                          <h3 className="text-[22px] font-extrabold mb-4">{card.title}</h3>
-                          <p className="text-[15px] font-medium text-[#6E6A63] mb-6 whitespace-pre-line" style={{ lineHeight: 1.7 }}>{card.body}</p>
-                          <button onClick={card.action} className="text-[#D4714E] text-[14px] font-bold bg-transparent border-none cursor-pointer hover:underline" style={{ fontFamily: 'inherit' }} type="button">
-                            {card.actionText}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-
-                  {/* Section 5: Seven Layers Engine */}
-                  <section className="px-6" style={{ paddingTop: '160px' }}>
-                    <div className="max-w-5xl mx-auto">
-                      <div className="text-center mb-6">
-                        <h2 className="text-[36px] md:text-[48px] font-extrabold mb-6" style={{ letterSpacing: '-0.04em' }}>
-                          Seven layers deep. Every time.
-                        </h2>
-                        <p className="text-[18px] md:text-[20px] font-medium text-[#6E6A63] max-w-3xl mx-auto" style={{ lineHeight: 1.65 }}>
-                          Every deal Yulia touches runs through the smbX.ai Engine &mdash; a seven-layer intelligence methodology built on live U.S. federal data.
-                        </p>
-                      </div>
-                      <div className="space-y-4 mt-12">
-                        {[
-                          { n: '1', title: 'Industry Structure', body: 'What sector is this business in? How is it classified? What are the standard financial metrics, risk factors, and value drivers for this specific NAICS code?' },
-                          { n: '2', title: 'Regional Economics', body: 'What does this market look like? Competitive density from Census. Wage benchmarks from BLS. Employment trends. Cost of living. Economic health of the MSA.' },
-                          { n: '3', title: 'Financial Normalization', body: 'What is this business actually earning? SDE for owner-operators. EBITDA for institutional deals. Add-back identification. Margin benchmarking. Trend analysis across multiple years.' },
-                          { n: '4', title: 'Buyer Landscape', body: 'Who buys businesses like this? Individual buyers via SBA? PE roll-up platforms? Strategic acquirers? Search fund operators? Yulia maps the buyer universe for your specific deal.' },
-                          { n: '5', title: 'Deal Architecture', body: 'How should this deal be structured? Seller financing vs. SBA vs. conventional. Asset sale vs. stock sale. Earnout modeling. Working capital targets. Sources & uses.' },
-                          { n: '6', title: 'Risk Assessment', body: 'What could kill this deal? Customer concentration. Owner dependency. Key person risk. Regulatory exposure. Litigation history. Yulia flags them before the buyer does.' },
-                          { n: '7', title: 'Forward Signals', body: 'Where is this market heading? Industry consolidation trends. PE activity. Regulatory changes. Demand signals. The factors that move your multiple up \u2014 or down.' },
-                        ].map(layer => (
-                          <div key={layer.n} className="flex gap-6 items-start bg-[#F9FAFB] p-8" style={{ borderRadius: '32px', border: '1px solid #F3F4F6' }}>
-                            <span className="text-[36px] font-black text-[#D4714E] leading-none shrink-0 w-10">{layer.n}</span>
-                            <div>
-                              <h3 className="text-[18px] font-extrabold mb-2">{layer.title}</h3>
-                              <p className="text-[14px] font-medium text-[#6E6A63] m-0" style={{ lineHeight: 1.6 }}>{layer.body}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* Section 6: Data Sources — Trust */}
-                  <section className="px-6" style={{ paddingTop: '160px' }}>
-                    <div className="max-w-4xl mx-auto text-center">
-                      <h2 className="text-[36px] md:text-[48px] font-extrabold mb-6" style={{ letterSpacing: '-0.04em' }}>
-                        Every number is sourced.
-                      </h2>
-                      <p className="text-[18px] md:text-[20px] font-medium text-[#6E6A63] max-w-3xl mx-auto mb-12" style={{ lineHeight: 1.65 }}>
-                        smbX.ai is built on data from agencies required by law to collect it. The same sources that inform the Federal Reserve and Wall Street research desks. Not estimates. Not predictions. Records.
-                      </p>
-                      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-                        {['U.S. Census Bureau', 'Bureau of Labor Statistics', 'Federal Reserve (FRED)', 'SEC EDGAR', 'SBA', 'IRS SOI'].map(s => (
-                          <span key={s} className="text-[11px] font-bold text-[#6E6A63]" style={{ letterSpacing: '0.05em' }}>{s}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* Section 7: Deliverables */}
-                  <section className="px-6" style={{ paddingTop: '160px' }}>
-                    <div className="max-w-5xl mx-auto">
-                      <div className="text-center mb-6">
-                        <h2 className="text-[36px] md:text-[48px] font-extrabold mb-6" style={{ letterSpacing: '-0.04em' }}>
-                          Not advice. Documents.
-                        </h2>
-                        <p className="text-[18px] md:text-[20px] font-medium text-[#6E6A63] max-w-3xl mx-auto" style={{ lineHeight: 1.65 }}>
-                          When your deal is ready, Yulia generates the same institutional-grade deliverables that advisory firms charge five figures to produce.
-                        </p>
-                      </div>
-                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-                        {[
-                          { title: 'Valuation Reports', body: 'Multi-methodology analysis with comparable transactions, industry benchmarks, and local market context. Defensible. Citable. Ready for lenders and buyers.' },
-                          { title: 'Market Intelligence', body: 'Competitive density. Regional economics. PE consolidation activity. Industry multiples. SBA lending volume. All localized to your specific market.' },
-                          { title: 'CIMs & Deal Books', body: '25+ page Confidential Information Memorandums \u2014 professionally formatted, data-backed, and ready to distribute to qualified buyers.' },
-                          { title: 'SBA & Financing Models', body: 'Debt service coverage ratios. Sources & uses tables. Cash-on-cash returns. Pre-qualification analysis using live federal interest rates.' },
-                          { title: 'Buyer Matching', body: 'Your business matched against active buyer theses on the platform. PE firms, search funds, SBA buyers, and strategic acquirers \u2014 filtered by industry, geography, and deal size.' },
-                          { title: 'Deal Room', body: 'One secure workspace where your attorney, CPA, broker, and prospective buyers review everything. Role-based access. Version history. Nothing falls through the cracks.' },
-                        ].map(card => (
-                          <div key={card.title} className="bg-[#F9FAFB] p-8" style={{ borderRadius: '32px', border: '1px solid #F3F4F6' }}>
-                            <h3 className="text-[18px] font-extrabold mb-3">{card.title}</h3>
-                            <p className="text-[14px] font-medium text-[#6E6A63]" style={{ lineHeight: 1.6 }}>{card.body}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* Section 8: Pricing — Simple */}
-                  <section className="px-6" style={{ paddingTop: '160px' }}>
-                    <div className="max-w-4xl mx-auto">
-                      <div className="text-center mb-12">
-                        <h2 className="text-[36px] md:text-[48px] font-extrabold mb-6" style={{ letterSpacing: '-0.04em' }}>
-                          Free to start. Pay when you&apos;re ready.
-                        </h2>
-                        <p className="text-[18px] md:text-[20px] font-medium text-[#6E6A63] max-w-3xl mx-auto" style={{ lineHeight: 1.65 }}>
-                          The conversation is free. Yulia&apos;s intelligence is free. Preliminary analysis, classification, and market overview &mdash; free. When your deal is ready for premium deliverables, you pay per document from your wallet. No subscriptions. No retainers. $1 in your wallet equals $1 of purchasing power.
-                        </p>
-                      </div>
-                      <div className="grid md:grid-cols-3 gap-6">
-                        {[
-                          { title: 'Market Intelligence Report', price: '$200' },
-                          { title: 'Full Valuation Analysis', price: '$350' },
-                          { title: 'Confidential Information Memo', price: '$700' },
-                        ].map(item => (
-                          <div key={item.title} className="bg-[#F9FAFB] p-8 text-center" style={{ borderRadius: '32px', border: '1px solid #F3F4F6' }}>
-                            <h3 className="text-[16px] font-extrabold mb-3">{item.title}</h3>
-                            <span className="text-[36px] font-black text-[#D4714E]">{item.price}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* Section 9: Closing CTA */}
-                  <section className="px-6" style={{ paddingTop: '160px' }}>
-                    <div className="max-w-4xl mx-auto text-center">
-                      <h2 className="text-[36px] md:text-[48px] font-extrabold mb-6" style={{ letterSpacing: '-0.04em' }}>
-                        Your deal is waiting.
-                      </h2>
-                      <p className="text-[18px] md:text-[20px] font-medium text-[#6E6A63]" style={{ lineHeight: 1.65 }}>
-                        No signup. No credit card. Just start talking.
-                      </p>
-                    </div>
-                  </section>
-
-                  {/* Footer */}
-                  <footer className="text-center py-24 mt-32">
-                    <p className="text-[12px] font-medium text-[#9CA3AF]" style={{ letterSpacing: '0.1em' }}>
-                      smbX.ai &mdash; Deal Intelligence Infrastructure
-                    </p>
-                  </footer>
-                </div>
-              )}
-
               {/* ════ SELL BELOW-FOLD ════ */}
               {activeTab === 'sell' && (
                 <div>
@@ -1158,6 +1097,8 @@ export default function AppShell() {
                     </p>
                   </footer>
                 </div>
+              )}
+              </>
               )}
             </div>
           )}
