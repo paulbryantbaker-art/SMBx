@@ -549,34 +549,34 @@ export default function AppShell() {
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
             <div key={activeTab} style={{ animation: morphing ? 'morphOut 0.45s ease forwards' : 'fadeIn 0.4s ease', pointerEvents: morphing ? 'none' as const : undefined }}>
-              {/* Hero — viewport-height centered */}
-              <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-6">
+              {/* Hero — fills viewport, content distributed with breathing room */}
+              <div className="min-h-[calc(100vh-80px)] flex flex-col items-center px-6" style={{ paddingTop: '10vh', paddingBottom: '6vh' }}>
                 <div className="w-full max-w-5xl text-center">
                   <div
-                    className="inline-block px-5 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] mb-6"
+                    className="inline-block px-5 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] mb-8"
                     style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em' }}
                   >
                     {page.overline}
                   </div>
                   <h1
-                    className="text-[36px] md:text-[64px] font-extrabold leading-[1.05] mb-6"
+                    className="text-[36px] md:text-[56px] font-extrabold leading-[1.08] mb-8"
                     style={{ letterSpacing: '-0.04em' }}
                   >
                     {page.h1Line1}<br />
                     <span className="text-[#D4714E]">{page.h1Line2}</span>
                   </h1>
-                  <p className="text-[18px] md:text-[22px] font-medium text-[#6E6A63] max-w-3xl mx-auto" style={{ lineHeight: 1.6 }}>
+                  <p className="text-[16px] md:text-[20px] font-medium text-[#6E6A63] max-w-3xl mx-auto" style={{ lineHeight: 1.65 }}>
                     {page.subtitle}
                   </p>
                 </div>
 
                 {/* Dock — inline in hero */}
-                <div className="w-full max-w-[860px] mt-12 mb-8">
+                <div className="w-full max-w-[860px]" style={{ marginTop: '48px', marginBottom: '40px' }}>
                   {dockCard}
                 </div>
 
                 {/* Suggestion chips */}
-                <div className="flex flex-wrap justify-center gap-3 max-w-3xl mb-5">
+                <div className="flex flex-wrap justify-center gap-3 max-w-3xl" style={{ marginBottom: '24px' }}>
                   {page.chips.map(chip => (
                     <button
                       key={chip}
@@ -597,6 +597,9 @@ export default function AppShell() {
                 >
                   {page.tagline}
                 </div>
+
+                {/* Bottom spacer — pushes content up from dead center */}
+                <div className="flex-1" />
               </div>
 
               {/* ════ HOME BELOW-FOLD SECTIONS ════ */}
