@@ -557,7 +557,7 @@ export default function AppShell() {
                 {/* ═══ HOME PAGE — Gemini × Uber layout ═══ */}
 
                 {/* Hero */}
-                <div className="pt-9 px-6 md:pt-12 md:px-8">
+                <div className="pt-9 px-6 md:pt-20 md:px-8">
                   <p className="text-[16px] md:text-[18px] font-medium text-[#6E6A63] mb-1 md:text-center">Meet Yulia</p>
                   <h1 className="text-[32px] md:text-[48px] font-extrabold leading-[1.12] md:leading-[1.1] md:text-center md:max-w-[720px] md:mx-auto" style={{ letterSpacing: '-0.03em' }}>
                     {page.h1Line1}
@@ -568,7 +568,7 @@ export default function AppShell() {
                 </div>
 
                 {/* Chips — mobile: full-width Gemini buttons, desktop: horizontal pills */}
-                <div className="px-6 pt-5 md:pt-6 md:px-8">
+                <div className="px-6 pt-5 md:pt-0 md:mt-8 md:px-8">
                   <div className="md:hidden flex flex-col gap-2.5">
                     {[
                       { text: page.chips[0], emoji: '\uD83D\uDCCA', bg: 'rgba(212,113,78,0.1)' },
@@ -591,14 +591,18 @@ export default function AppShell() {
                 </div>
 
                 {/* Data status line */}
-                <div className="flex items-center gap-1.5 px-6 pt-5 md:justify-center">
+                <div className="flex items-center gap-1.5 px-6 pt-5 md:pt-0 md:mt-5 md:justify-center">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" style={{ boxShadow: '0 0 4px rgba(74,222,128,0.5)', animation: 'statusPulse 2s ease infinite' }} />
                   <span className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#A8A49C]">Live federal data &middot; Census &middot; BLS &middot; SBA &middot; SEC</span>
                 </div>
 
                 {/* Chat input */}
-                <div className="mx-6 mt-5 md:max-w-[640px] md:mx-auto md:mt-6 mb-10">
-                  <div className="home-input-wrap bg-[#F7F7F7] relative overflow-visible" style={{ borderRadius: isMobile ? '20px' : '24px', border: '1.5px solid #E5E5E5' }}>
+                <div className="mx-6 mt-5 md:max-w-[640px] md:mx-auto md:mt-7 mb-10 md:mb-20">
+                  <div className="home-input-wrap bg-white shadow-2xl relative overflow-visible" style={{ borderRadius: isMobile ? '24px' : '40px', border: '2px solid #D1D5DB' }}>
+                    <div className="hidden md:flex items-center gap-2 px-6 pt-4 pb-0">
+                      <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                      <span className="text-[12px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>Federal Data Sync Active</span>
+                    </div>
                     <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder="Tell Yulia about your deal..." disabled={sending} />
                   </div>
                 </div>
@@ -609,7 +613,7 @@ export default function AppShell() {
                 <div className="w-full h-2 bg-[#F7F7F7]" />
 
                 {/* How It Works */}
-                <section className="px-6 pt-7 md:pt-10 md:px-8">
+                <section className="px-6 pt-7 md:pt-16 md:pb-16 md:px-8">
                   <div className="md:max-w-[960px] md:mx-auto">
                     <div className="mb-5 md:mb-8 md:text-center">
                       <span className="text-[12px] font-bold tracking-[0.08em] uppercase text-[#D4714E]">HOW IT WORKS</span>
@@ -665,10 +669,10 @@ export default function AppShell() {
                 </section>
 
                 {/* Divider */}
-                <div className="w-full h-2 bg-[#F7F7F7] mt-8 md:mt-10" />
+                <div className="w-full h-2 bg-[#F7F7F7] mt-8 md:mt-16" />
 
                 {/* Conversation Preview */}
-                <section className="px-6 pt-7 md:pt-10 md:px-8">
+                <section className="px-6 pt-7 md:pt-20 md:pb-16 md:px-8">
                   <div className="md:max-w-[680px] md:mx-auto">
                     <div className="mb-5 md:mb-8 md:text-center">
                       <span className="text-[12px] font-bold tracking-[0.08em] uppercase text-[#D4714E]">LIVE EXAMPLE</span>
@@ -711,10 +715,10 @@ export default function AppShell() {
                 </section>
 
                 {/* Divider */}
-                <div className="w-full h-2 bg-[#F7F7F7] mt-8 md:mt-10" />
+                <div className="w-full h-2 bg-[#F7F7F7] mt-8 md:mt-16" />
 
                 {/* Audience */}
-                <section className="px-6 pt-7 md:pt-10 md:px-8">
+                <section className="px-6 pt-7 md:pt-16 md:pb-16 md:px-8">
                   <div className="md:max-w-[960px] md:mx-auto">
                     <h2 className="text-[26px] md:text-[36px] font-extrabold mb-5 md:mb-8 md:text-center" style={{ letterSpacing: '-0.025em' }}>Built for everyone in the deal.</h2>
                     {/* Mobile: divider list */}
@@ -751,10 +755,10 @@ export default function AppShell() {
                 </section>
 
                 {/* Divider */}
-                <div className="w-full h-2 bg-[#F7F7F7] mt-8 md:mt-10" />
+                <div className="w-full h-2 bg-[#F7F7F7] mt-8 md:mt-16" />
 
                 {/* Trust / Data Sources */}
-                <section className="px-6 pt-7 pb-6 md:pt-10 md:pb-8 md:px-8">
+                <section className="px-6 pt-7 pb-6 md:pt-12 md:pb-12 md:px-8">
                   <div className="md:max-w-[640px] md:mx-auto md:text-center">
                     <h2 className="text-[22px] md:text-[28px] font-extrabold mb-3" style={{ letterSpacing: '-0.025em' }}>Every number is sourced.</h2>
                     <p className="text-[15px] text-[#6E6A63] mb-4" style={{ lineHeight: 1.55 }}>Built on data from agencies required by law to collect it. The same sources that inform the Federal Reserve.</p>

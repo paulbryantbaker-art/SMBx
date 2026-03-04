@@ -174,10 +174,10 @@ body {
 }
 
 /* Home chat input — focus border */
-.home-input-wrap { transition: border-color 0.15s; }
+.home-input-wrap { transition: border-color 0.15s, box-shadow 0.15s; }
 .home-input-wrap:focus-within {
-  border-color: #1A1A18 !important;
-  border-width: 2px !important;
+  border-color: #D4714E !important;
+  box-shadow: 0 4px 20px rgba(212,113,78,0.12), 0 2px 8px rgba(0,0,0,0.06) !important;
 }
 
 /* Status dot pulse */
