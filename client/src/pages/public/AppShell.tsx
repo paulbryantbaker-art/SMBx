@@ -185,10 +185,10 @@ const JOURNEY_COLORS: Record<string, string> = {
 export default function AppShell() {
   const [location, navigate] = useLocation();
   const { user, logout } = useAuth();
-  useAppHeight();
 
   // Core state
   const [viewState, setViewState] = useState<ViewState>(() => pathToViewState(location));
+  useAppHeight(viewState === 'chat');   // Only shrink viewport in chat mode; landing lets keyboard overlay naturally
   const [activeTab, setActiveTab] = useState<TabId>(() => pathToTab(location));
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
