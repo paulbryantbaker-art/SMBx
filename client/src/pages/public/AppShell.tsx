@@ -477,7 +477,7 @@ export default function AppShell() {
   /* ═══ RENDER ═══ */
 
   return (
-    <div id="app-root" className="flex bg-white font-sans overflow-hidden" style={{ height: '100dvh' }}>
+    <div id="app-root" className="flex bg-white font-sans overflow-hidden h-[100dvh]">
       {/* Desktop sidebar */}
       {!isMobile && sidebarContent(false)}
 
@@ -568,7 +568,7 @@ export default function AppShell() {
                 </div>
 
                 {/* Chips — mobile: full-width Gemini buttons, desktop: horizontal pills */}
-                <div className="px-6 pt-5 md:pt-0 md:mt-8 md:px-8">
+                <div className="px-6 pt-5 md:pt-0 md:mt-7 md:px-8">
                   <div className="md:hidden flex flex-col gap-2.5">
                     {[
                       { text: page.chips[0], emoji: '\uD83D\uDCCA', bg: 'rgba(212,113,78,0.1)' },
@@ -591,14 +591,14 @@ export default function AppShell() {
                 </div>
 
                 {/* Data status line */}
-                <div className="flex items-center gap-1.5 px-6 pt-5 md:pt-0 md:mt-5 md:justify-center">
+                <div className="flex items-center gap-1.5 px-6 pt-5 md:pt-0 md:mt-4 md:justify-center">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" style={{ boxShadow: '0 0 4px rgba(74,222,128,0.5)', animation: 'statusPulse 2s ease infinite' }} />
                   <span className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#A8A49C]">Live federal data &middot; Census &middot; BLS &middot; SBA &middot; SEC</span>
                 </div>
 
                 {/* Chat input */}
-                <div className="mx-6 mt-5 md:max-w-[640px] md:mx-auto md:mt-7 mb-10 md:mb-20">
-                  <div className="home-input-wrap bg-white shadow-2xl relative overflow-visible" style={{ borderRadius: isMobile ? '24px' : '40px', border: '2px solid #D1D5DB' }}>
+                <div className="mx-6 mt-5 md:max-w-[640px] md:mx-auto md:mt-6 mb-10 md:mb-20">
+                  <div className="home-input-wrap bg-white relative overflow-visible" style={{ borderRadius: isMobile ? '20px' : '24px', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)' }}>
                     <div className="hidden md:flex items-center gap-2 px-6 pt-4 pb-0">
                       <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
                       <span className="text-[12px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>Federal Data Sync Active</span>
@@ -673,7 +673,7 @@ export default function AppShell() {
 
                 {/* Conversation Preview */}
                 <section className="px-6 pt-7 md:pt-20 md:pb-16 md:px-8">
-                  <div className="md:max-w-[680px] md:mx-auto">
+                  <div className="md:max-w-[720px] md:mx-auto">
                     <div className="mb-5 md:mb-8 md:text-center">
                       <span className="text-[12px] font-bold tracking-[0.08em] uppercase text-[#D4714E]">LIVE EXAMPLE</span>
                       <h2 className="text-[24px] md:text-[36px] font-extrabold mt-2" style={{ letterSpacing: '-0.025em' }}>See Yulia work a real deal.</h2>
