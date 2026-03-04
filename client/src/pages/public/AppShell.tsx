@@ -518,30 +518,21 @@ export default function AppShell() {
                 </svg>
               </button>
             )}
+            <span className="w-[3px] h-5 bg-[#D4714E] rounded-full" />
             <span className="text-[10px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.2em' }}>
-              {page.overline}
+              M&amp;A OS / {activeTab === 'home' ? 'Home' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
             </span>
           </div>
           <div className="flex items-center gap-3">
             {!user && (
-              <>
-                <button
-                  onClick={() => navigate('/login')}
-                  className="text-[14px] font-semibold text-[#1A1A18] bg-transparent border-none cursor-pointer hover:text-[#D4714E] transition-colors px-3 py-2"
-                  style={{ fontFamily: 'inherit' }}
-                  type="button"
-                >
-                  Log in
-                </button>
-                <button
-                  onClick={() => navigate('/signup')}
-                  className="bg-[#1A1A18] text-white text-[14px] font-bold px-5 py-2.5 rounded-full border-none cursor-pointer hover:bg-[#333] transition-colors"
-                  style={{ fontFamily: 'inherit' }}
-                  type="button"
-                >
-                  Sign up
-                </button>
-              </>
+              <button
+                onClick={() => navigate('/login')}
+                className="bg-[#1A1A18] text-white text-[14px] font-bold px-5 py-2.5 rounded-full border-none cursor-pointer hover:bg-[#333] transition-colors"
+                style={{ fontFamily: 'inherit' }}
+                type="button"
+              >
+                Log in
+              </button>
             )}
             {user && (
               <span className="text-[13px] font-medium text-[#6E6A63]">{user.display_name || user.email}</span>
@@ -558,52 +549,54 @@ export default function AppShell() {
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
             <div key={activeTab} style={{ animation: morphing ? 'morphOut 0.45s ease forwards' : 'fadeIn 0.4s ease', pointerEvents: morphing ? 'none' as const : undefined }}>
-              {/* Hero */}
-              <section className="max-w-5xl mx-auto px-6 pt-20 md:pt-28 pb-12 text-center">
-                <div
-                  className="inline-block px-5 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] mb-10"
-                  style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em' }}
-                >
-                  {page.overline}
-                </div>
-                <h1
-                  className="text-[36px] md:text-[64px] font-extrabold leading-[1.05] mb-8"
-                  style={{ letterSpacing: '-0.04em' }}
-                >
-                  {page.h1Line1}<br />
-                  <span className="text-[#D4714E]">{page.h1Line2}</span>
-                </h1>
-                <p className="text-[18px] md:text-[22px] font-medium text-[#6E6A63] max-w-3xl mx-auto" style={{ lineHeight: 1.6 }}>
-                  {page.subtitle}
-                </p>
-              </section>
-
-              {/* Dock — inline in hero */}
-              <div className="max-w-[860px] mx-auto px-6 mt-2 mb-10">
-                {dockCard}
-              </div>
-
-              {/* Suggestion chips */}
-              <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto px-6 mb-4">
-                {page.chips.map(chip => (
-                  <button
-                    key={chip}
-                    onClick={() => handleChipClick(chip)}
-                    className="bg-white border border-[#F3F4F6] px-5 py-3 cursor-pointer hover:border-[#D4714E] hover:text-[#D4714E] transition-all text-[#6E6A63]"
-                    style={{ borderRadius: '12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'inherit' }}
-                    type="button"
+              {/* Hero — viewport-height centered */}
+              <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-6">
+                <div className="w-full max-w-5xl text-center">
+                  <div
+                    className="inline-block px-5 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] mb-6"
+                    style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em' }}
                   >
-                    &ldquo;{chip}&rdquo;
-                  </button>
-                ))}
-              </div>
+                    {page.overline}
+                  </div>
+                  <h1
+                    className="text-[36px] md:text-[64px] font-extrabold leading-[1.05] mb-6"
+                    style={{ letterSpacing: '-0.04em' }}
+                  >
+                    {page.h1Line1}<br />
+                    <span className="text-[#D4714E]">{page.h1Line2}</span>
+                  </h1>
+                  <p className="text-[18px] md:text-[22px] font-medium text-[#6E6A63] max-w-3xl mx-auto" style={{ lineHeight: 1.6 }}>
+                    {page.subtitle}
+                  </p>
+                </div>
 
-              {/* Tagline */}
-              <div
-                className="text-center text-[#9CA3AF] mb-16 px-6"
-                style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}
-              >
-                {page.tagline}
+                {/* Dock — inline in hero */}
+                <div className="w-full max-w-[860px] mt-12 mb-8">
+                  {dockCard}
+                </div>
+
+                {/* Suggestion chips */}
+                <div className="flex flex-wrap justify-center gap-3 max-w-3xl mb-5">
+                  {page.chips.map(chip => (
+                    <button
+                      key={chip}
+                      onClick={() => handleChipClick(chip)}
+                      className="bg-white border border-[#F3F4F6] px-5 py-3 cursor-pointer hover:border-[#D4714E] hover:text-[#D4714E] transition-all text-[#6E6A63]"
+                      style={{ borderRadius: '12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'inherit' }}
+                      type="button"
+                    >
+                      &ldquo;{chip}&rdquo;
+                    </button>
+                  ))}
+                </div>
+
+                {/* Tagline */}
+                <div
+                  className="text-center text-[#9CA3AF]"
+                  style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}
+                >
+                  {page.tagline}
+                </div>
               </div>
 
               {/* ════ HOME BELOW-FOLD SECTIONS ════ */}
