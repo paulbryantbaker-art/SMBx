@@ -564,7 +564,12 @@ export default function AppShell() {
                 {/* ═══ MOBILE HERO ═══ */}
                 <div className="md:hidden">
                   <div className="pt-9 px-6">
-                    <p className="text-[16px] font-medium text-[#6E6A63] mb-1">Meet Yulia</p>
+                    <div
+                      className="inline-block px-4 py-1.5 rounded-full bg-[#FFF0EB] text-[#D4714E] mb-4"
+                      style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em' }}
+                    >
+                      Meet Yulia, Your M&amp;A Agent!
+                    </div>
                     <h1 className="text-[32px] font-extrabold leading-[1.12]" style={{ letterSpacing: '-0.03em' }}>
                       We take <span className="text-[#D4714E]">the stress</span> out of buying and selling any business.
                     </h1>
@@ -610,7 +615,12 @@ export default function AppShell() {
                 <div className="hidden md:flex min-h-[calc(100vh-80px)] flex-col items-center justify-center px-6" style={{ gap: '7vh' }}>
                   {/* Headline group */}
                   <div className="w-full max-w-5xl text-center">
-                    <p className="text-[18px] font-medium text-[#6E6A63]" style={{ marginBottom: '12px' }}>Meet Yulia</p>
+                    <div
+                      className="inline-block px-5 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E]"
+                      style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '24px' }}
+                    >
+                      Meet Yulia, Your M&amp;A Agent!
+                    </div>
                     <h1
                       className="text-[56px] font-extrabold leading-[1.08]"
                       style={{ letterSpacing: '-0.04em', marginBottom: '20px' }}
