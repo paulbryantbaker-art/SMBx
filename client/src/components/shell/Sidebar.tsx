@@ -1,4 +1,5 @@
 import { useLocation } from 'wouter';
+import Logo from '../public/Logo';
 import type { User } from '../../hooks/useAuth';
 import type { Conversation } from '../../hooks/useAuthChat';
 
@@ -160,9 +161,7 @@ export default function Sidebar({
           className="bg-transparent border-none cursor-pointer p-0 text-left"
           type="button"
         >
-          <div className="font-bold text-xl tracking-tight text-[#1A1A18]">
-            smbx<span className="text-[#D4714E]">.ai</span>
-          </div>
+          <Logo linked={false} />
         </button>
       </div>
 
