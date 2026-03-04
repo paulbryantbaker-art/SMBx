@@ -316,52 +316,10 @@ export default function AppShell() {
 
   // Current page copy
   const page = PAGE_COPY[activeTab];
-  const dockPlaceholder = viewState === 'chat' ? 'Reply to Yulia...' : page.placeholder;
 
   // Conversations
   const deals = (authChat.conversations || []).filter(c => c.deal_id != null);
   const recent = (authChat.conversations || []).filter(c => c.deal_id == null);
-
-  /* ═══ DOCK CARD (shared between inline hero + bottom chat) ═══ */
-
-  const dockCard = (
-    <div
-      className="bg-white shadow-2xl transition-all relative overflow-visible"
-      style={{
-        borderRadius: isMobile ? '32px' : '40px',
-        border: '2px solid #D1D5DB',
-      }}
-    >
-      <div className="flex items-center gap-2 px-6 pt-4 pb-0">
-        {viewState === 'landing' ? (
-          <>
-            <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-            <span className="text-[12px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>
-              Federal Data Sync Active
-            </span>
-          </>
-        ) : (
-          <>
-            <span className="w-2 h-2 rounded-full bg-[#D4714E] shrink-0" />
-            <span className="text-[12px] font-black text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>
-              smb<span className="text-[#D4714E]">X</span>.ai <span className="text-[#D4714E]">Engine</span>
-              <span className="text-[#9CA3AF] font-medium mx-1.5">&middot;</span>
-              <span className="text-[#9CA3AF] font-medium normal-case" style={{ letterSpacing: 0 }}>
-                Proprietary M&amp;A Intelligence
-              </span>
-            </span>
-          </>
-        )}
-      </div>
-      <ChatDock
-        ref={dockRef}
-        onSend={handleSend}
-        variant="hero"
-        placeholder={dockPlaceholder}
-        disabled={sending}
-      />
-    </div>
-  );
 
   /* ═══ SIDEBAR JSX ═══ */
 
@@ -519,7 +477,7 @@ export default function AppShell() {
   /* ═══ RENDER ═══ */
 
   return (
-    <div id="app-root" className="flex bg-white font-sans overflow-hidden" style={{ height: '100dvh' }}>
+    <div id="app-root" className="fixed top-0 left-0 right-0 flex bg-white font-sans overflow-hidden" style={{ height: '100dvh' }}>
       {/* Desktop sidebar */}
       {!isMobile && sidebarContent(false)}
 
@@ -620,7 +578,24 @@ export default function AppShell() {
 
                 {/* Chat bar */}
                 <div className="w-full max-w-[860px]">
-                  {dockCard}
+                  <div
+                    className="bg-white shadow-2xl transition-all relative overflow-visible"
+                    style={{ borderRadius: isMobile ? '32px' : '40px', border: '2px solid #D1D5DB' }}
+                  >
+                    <div className="flex items-center gap-2 px-6 pt-4 pb-0">
+                      <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                      <span className="text-[12px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>
+                        Federal Data Sync Active
+                      </span>
+                    </div>
+                    <ChatDock
+                      ref={dockRef}
+                      onSend={handleSend}
+                      variant="hero"
+                      placeholder={page.placeholder}
+                      disabled={sending}
+                    />
+                  </div>
                 </div>
 
                 {/* Chips + tagline */}
@@ -1252,13 +1227,15 @@ export default function AppShell() {
           )}
         </div>
 
-        {/* ════ CHATDOCK — flex-shrink-0, iOS-safe ════ */}
+        {/* ════ CHATDOCK — compact dock variant for chat mode ════ */}
         {showDock && viewState === 'chat' && (
-          <div className="shrink-0 bg-white px-4 pt-2" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
-            <div className="max-w-[860px] mx-auto">
-              {dockCard}
-            </div>
-          </div>
+          <ChatDock
+            ref={dockRef}
+            onSend={handleSend}
+            variant="dock"
+            placeholder="Reply to Yulia..."
+            disabled={sending}
+          />
         )}
 
         {/* Deliverable viewer overlay */}
