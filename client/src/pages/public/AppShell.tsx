@@ -549,18 +549,18 @@ export default function AppShell() {
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
             <div key={activeTab} style={{ animation: morphing ? 'morphOut 0.45s ease forwards' : 'fadeIn 0.4s ease', pointerEvents: morphing ? 'none' as const : undefined }}>
-              {/* Hero — fills viewport, content distributed with breathing room */}
-              <div className="min-h-[calc(100vh-80px)] flex flex-col items-center px-6" style={{ paddingTop: '10vh', paddingBottom: '6vh' }}>
-                <div className="w-full max-w-5xl text-center">
+              {/* Hero — viewport-height, vertically centered */}
+              <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-6 py-12">
+                <div className="w-full max-w-5xl text-center" style={{ marginBottom: '48px' }}>
                   <div
-                    className="inline-block px-5 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E] mb-8"
-                    style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em' }}
+                    className="inline-block px-5 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E]"
+                    style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '28px' }}
                   >
                     {page.overline}
                   </div>
                   <h1
-                    className="text-[36px] md:text-[56px] font-extrabold leading-[1.08] mb-8"
-                    style={{ letterSpacing: '-0.04em' }}
+                    className="text-[36px] md:text-[56px] font-extrabold leading-[1.08]"
+                    style={{ letterSpacing: '-0.04em', marginBottom: '24px' }}
                   >
                     {page.h1Line1}<br />
                     <span className="text-[#D4714E]">{page.h1Line2}</span>
@@ -571,12 +571,12 @@ export default function AppShell() {
                 </div>
 
                 {/* Dock — inline in hero */}
-                <div className="w-full max-w-[860px]" style={{ marginTop: '48px', marginBottom: '40px' }}>
+                <div className="w-full max-w-[860px]" style={{ marginBottom: '36px' }}>
                   {dockCard}
                 </div>
 
                 {/* Suggestion chips */}
-                <div className="flex flex-wrap justify-center gap-3 max-w-3xl" style={{ marginBottom: '24px' }}>
+                <div className="flex flex-wrap justify-center gap-3 max-w-3xl" style={{ marginBottom: '20px' }}>
                   {page.chips.map(chip => (
                     <button
                       key={chip}
@@ -597,9 +597,6 @@ export default function AppShell() {
                 >
                   {page.tagline}
                 </div>
-
-                {/* Bottom spacer — pushes content up from dead center */}
-                <div className="flex-1" />
               </div>
 
               {/* ════ HOME BELOW-FOLD SECTIONS ════ */}
