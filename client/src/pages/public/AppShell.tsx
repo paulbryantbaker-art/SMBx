@@ -173,6 +173,7 @@ export default function AppShell() {
   const [activeTab, setActiveTab] = useState<TabId>(() => pathToTab(location));
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
+  const [morphing, setMorphing] = useState(false);
 
   // Chat hooks (always called for hook order)
   const anonChat = useAnonymousChat();
@@ -218,11 +219,18 @@ export default function AppShell() {
     if (viewState === 'chat') messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingText, viewState]);
 
-  // Send handler
+  // Send handler — morph from landing to chat
   const handleSend = useCallback((content: string) => {
     if (viewState === 'landing') {
-      setViewState('chat');
-      if (window.location.pathname !== '/chat') navigate('/chat');
+      setMorphing(true);
+      if (user) authChat.sendMessage(content);
+      else anonChat.sendMessage(content);
+      setTimeout(() => {
+        setViewState('chat');
+        setMorphing(false);
+        if (window.location.pathname !== '/chat') navigate('/chat');
+      }, 450);
+      return;
     }
     if (user) authChat.sendMessage(content);
     else anonChat.sendMessage(content);
@@ -287,6 +295,36 @@ export default function AppShell() {
   // Conversations
   const deals = (authChat.conversations || []).filter(c => c.deal_id != null);
   const recent = (authChat.conversations || []).filter(c => c.deal_id == null);
+
+  /* ═══ DOCK CARD (shared between inline hero + bottom chat) ═══ */
+
+  const dockCard = (
+    <div
+      className="bg-white shadow-2xl transition-all relative overflow-visible"
+      style={{
+        borderRadius: isMobile ? '32px' : '40px',
+        border: '2px solid #D1D5DB',
+      }}
+    >
+      <div className="flex items-center gap-2 px-6 pt-4 pb-0">
+        <span className="w-2 h-2 rounded-full bg-[#D4714E] shrink-0" />
+        <span className="text-[12px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>
+          smbx.ai Engine 7
+          <span className="text-[#9CA3AF] font-normal mx-1.5">|</span>
+          <span className="text-[#9CA3AF] font-medium normal-case" style={{ letterSpacing: 0 }}>
+            Proprietary M&amp;A Intelligence
+          </span>
+        </span>
+      </div>
+      <ChatDock
+        ref={dockRef}
+        onSend={handleSend}
+        variant="hero"
+        placeholder={dockPlaceholder}
+        disabled={sending}
+      />
+    </div>
+  );
 
   /* ═══ SIDEBAR JSX ═══ */
 
@@ -519,7 +557,7 @@ export default function AppShell() {
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
-            <div key={activeTab} style={{ animation: 'fadeIn 0.4s ease' }}>
+            <div key={activeTab} style={{ animation: morphing ? 'morphOut 0.45s ease forwards' : 'fadeIn 0.4s ease', pointerEvents: morphing ? 'none' as const : undefined }}>
               {/* Hero */}
               <section className="max-w-5xl mx-auto px-6 pt-20 md:pt-28 pb-12 text-center">
                 <div
@@ -539,6 +577,11 @@ export default function AppShell() {
                   {page.subtitle}
                 </p>
               </section>
+
+              {/* Dock — inline in hero */}
+              <div className="max-w-[860px] mx-auto px-6 mt-2 mb-10">
+                {dockCard}
+              </div>
 
               {/* Suggestion chips */}
               <div className="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto px-6 mb-4">
@@ -775,7 +818,7 @@ export default function AppShell() {
 
           {/* ════ CHAT MODE ════ */}
           {viewState === 'chat' && (
-            <>
+            <div style={{ animation: 'fadeIn 0.4s ease' }}>
               {user && authChat.activeDealId && (
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
               )}
@@ -811,7 +854,7 @@ export default function AppShell() {
               )}
 
               <div ref={messagesEndRef} />
-            </>
+            </div>
           )}
 
           {/* ════ TOOL VIEWS ════ */}
@@ -839,36 +882,10 @@ export default function AppShell() {
         </div>
 
         {/* ════ CHATDOCK — flex-shrink-0, iOS-safe ════ */}
-        {showDock && (
+        {showDock && viewState === 'chat' && (
           <div className="shrink-0 bg-white px-4 pt-2" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
             <div className="max-w-[860px] mx-auto">
-              <div
-                className="bg-white shadow-2xl transition-all relative overflow-visible"
-                style={{
-                  borderRadius: isMobile ? '32px' : '40px',
-                  border: '2px solid #D1D5DB',
-                }}
-              >
-                {/* Engine branding line */}
-                <div className="flex items-center gap-2 px-6 pt-4 pb-0">
-                  <span className="w-2 h-2 rounded-full bg-[#D4714E] shrink-0" />
-                  <span className="text-[12px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>
-                    smbx.ai Engine 7
-                    <span className="text-[#9CA3AF] font-normal mx-1.5">|</span>
-                    <span className="text-[#9CA3AF] font-medium normal-case" style={{ letterSpacing: 0 }}>
-                      Proprietary M&amp;A Intelligence
-                    </span>
-                  </span>
-                </div>
-
-                <ChatDock
-                  ref={dockRef}
-                  onSend={handleSend}
-                  variant="hero"
-                  placeholder={dockPlaceholder}
-                  disabled={sending}
-                />
-              </div>
+              {dockCard}
             </div>
           </div>
         )}
@@ -886,6 +903,10 @@ export default function AppShell() {
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes morphOut {
+          from { opacity: 1; transform: translateY(0); }
+          to { opacity: 0; transform: translateY(28px); }
         }
         @keyframes slideInLeft {
           from { transform: translateX(-100%); }
