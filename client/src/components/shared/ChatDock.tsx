@@ -213,7 +213,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               onChange={handleChange}
               onKeyDown={handleKey}
               placeholder={placeholder}
-              className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1A1A18] leading-[1.5] placeholder:text-[#A9A49C] lg:text-[18px]"
+              className="w-full bg-transparent border-none outline-none resize-none text-[20px] md:text-[24px] text-[#1A1A18] leading-[1.5] placeholder:text-[#9CA3AF] font-normal"
               style={{ fontFamily: 'inherit', minHeight: isHero ? '100px' : '52px', maxHeight: '200px', padding: '18px 22px 10px 22px' }}
               rows={isHero ? 3 : 1}
             />
@@ -238,8 +238,8 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             </button>
             <button
               onClick={send}
-              className={`w-9 h-9 rounded-full border-none bg-[#D4714E] text-white cursor-pointer flex items-center justify-center hover:bg-[#BE6342] active:scale-90 ${hasContent && !disabled ? 'opacity-100 scale-100' : 'opacity-0 scale-[.8] pointer-events-none'}`}
-              style={{ boxShadow: '0 2px 8px rgba(212,113,78,.3)', transition: 'all .2s' }}
+              className={`w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center active:scale-90 ${hasContent && !disabled ? 'bg-[#1A1A18] text-white hover:bg-[#333] opacity-100 scale-100' : 'bg-gray-100 text-gray-400 opacity-100 scale-100 pointer-events-none'}`}
+              style={{ transition: 'all .2s' }}
               type="button"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>

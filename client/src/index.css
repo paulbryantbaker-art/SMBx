@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --cream: #FAF9F7;
-  --fill: #F3F0EA;
+  --cream: #FFFFFF;
+  --fill: #F9FAFB;
   --white: #FFFFFF;
   --terra: #D4714E;
   --terra-hover: #BE6342;
@@ -13,12 +13,12 @@
   --text: #1A1A18;
   --text-mid: #3D3B37;
   --muted: #6E6A63;
-  --faint: #A9A49C;
-  --border: #DDD9D1;
-  --shadow-sm: 0 1px 3px rgba(26,26,24,.06);
-  --shadow-card: 0 1px 4px rgba(26,26,24,.05);
-  --shadow-md: 0 2px 8px rgba(26,26,24,.07), 0 1px 2px rgba(26,26,24,.04);
-  --shadow-lg: 0 4px 20px rgba(26,26,24,.08), 0 1px 3px rgba(26,26,24,.05);
+  --faint: #9CA3AF;
+  --border: #F3F4F6;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.04);
+  --shadow-card: 0 1px 4px rgba(0,0,0,.03);
+  --shadow-md: 0 2px 8px rgba(0,0,0,.06);
+  --shadow-lg: 0 4px 20px rgba(0,0,0,.08);
   --serif: 'Inter', system-ui, sans-serif;
   --sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
@@ -29,7 +29,7 @@ html {
 
 body {
   margin: 0;
-  background-color: #FAF9F7;
+  background-color: #FFFFFF;
   font-family: var(--sans);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -116,8 +116,8 @@ body {
   box-shadow: 0 1px 3px rgba(26,26,24,0.06);
 }
 .home-dock-card:focus-within {
-  border-color: rgba(212,113,78,0.35);
-  box-shadow: 0 1px 3px rgba(26,26,24,0.06), 0 0 0 3px rgba(212,113,78,0.10);
+  border-color: #1A1A18;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 /* Tool popup — drops UP from dock */
