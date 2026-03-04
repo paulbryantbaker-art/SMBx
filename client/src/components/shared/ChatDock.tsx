@@ -38,12 +38,14 @@ interface ChatDockProps {
   placeholder?: string;
   /** 'hero' = large textarea for landing page, 'dock' = compact for chat */
   variant?: 'hero' | 'dock';
+  /** Override initial textarea rows (default: hero=3, dock=1) */
+  rows?: number;
 }
 
 /* ═══ COMPONENT ═══ */
 
 const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
-  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock' },
+  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock', rows },
   ref,
 ) {
   const isHero = variant === 'hero';
@@ -214,8 +216,8 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               onKeyDown={handleKey}
               placeholder={placeholder}
               className="w-full bg-transparent border-none outline-none resize-none text-[20px] md:text-[24px] text-[#1A1A18] leading-[1.5] placeholder:text-[#9CA3AF] font-normal"
-              style={{ fontFamily: 'inherit', minHeight: isHero ? '100px' : '52px', maxHeight: '200px', padding: '18px 22px 10px 22px' }}
-              rows={isHero ? 3 : 1}
+              style={{ fontFamily: 'inherit', minHeight: (rows ?? (isHero ? 3 : 1)) > 1 ? '100px' : '44px', maxHeight: '200px', padding: '18px 22px 10px 22px' }}
+              rows={rows ?? (isHero ? 3 : 1)}
             />
           </div>
 

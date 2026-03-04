@@ -1227,15 +1227,25 @@ export default function AppShell() {
           )}
         </div>
 
-        {/* ════ CHATDOCK — compact dock variant for chat mode ════ */}
+        {/* ════ CHATDOCK — new-skin card, single-line, auto-expands ════ */}
         {showDock && viewState === 'chat' && (
-          <ChatDock
-            ref={dockRef}
-            onSend={handleSend}
-            variant="dock"
-            placeholder="Reply to Yulia..."
-            disabled={sending}
-          />
+          <div className="shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
+            <div className="max-w-[860px] mx-auto">
+              <div
+                className="bg-white shadow-lg relative overflow-visible"
+                style={{ borderRadius: '32px', border: '2px solid #D1D5DB' }}
+              >
+                <ChatDock
+                  ref={dockRef}
+                  onSend={handleSend}
+                  variant="hero"
+                  rows={1}
+                  placeholder="Reply to Yulia..."
+                  disabled={sending}
+                />
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Deliverable viewer overlay */}
