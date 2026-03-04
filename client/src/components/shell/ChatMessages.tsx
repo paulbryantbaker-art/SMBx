@@ -24,7 +24,10 @@ export default function ChatMessages({ messages, streamingText, sending, onBack 
           </svg>
           Exit Workspace
         </button>
-        <span className="text-[11px] font-bold uppercase tracking-widest text-[#D4714E]">Intelligence Engine Active</span>
+        <span className="text-[11px] font-bold uppercase tracking-widest">
+          smb<span className="text-[#D4714E]">X</span>.ai <span className="text-[#D4714E]">Engine</span>{' '}
+          <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />ACTIVE</span>
+        </span>
       </div>
 
       {/* Messages */}

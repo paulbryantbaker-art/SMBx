@@ -35,13 +35,13 @@ const PAGE_COPY: Record<TabId, {
     overline: '',
     h1Line1: 'What deal are we working on?',
     h1Line2: '',
-    subtitle: 'smbX.ai synthesizes live federal data — Census, BLS, SBA, SEC EDGAR — into deal intelligence that was previously available only to firms charging $25,000+ per engagement. Valuations, market analysis, SBA modeling, and full deal documents. For any deal size. In minutes.',
+    subtitle: "Tell Yulia your industry, location, and revenue — and watch. In minutes, she\u2019ll classify your deal, run a seven-layer analysis against live federal data, calculate your adjusted earnings, benchmark your market, model financing scenarios, and tell you exactly where you stand. Valuations. Market intelligence. SBA modeling. Full deal documents. Any deal size.",
     chips: [
       'Value my $2M revenue plumbing business in Phoenix',
       'Model SBA financing for a $1.5M acquisition target',
       "I'm a broker with 12 active listings — how can Yulia help?",
     ],
-    tagline: 'Institutional Intelligence · Any Deal Size · Every Number Is Sourced',
+    tagline: 'Seven Layers of Intelligence\u2122 · Live Federal Data · Any Deal Size',
     placeholder: 'Tell Yulia about your deal — industry, location, revenue...',
   },
   sell: {
@@ -336,8 +336,12 @@ export default function AppShell() {
         ) : (
           <>
             <span className="w-2 h-2 rounded-full bg-[#D4714E] shrink-0" />
-            <span className="text-[12px] font-medium text-[#9CA3AF] normal-case" style={{ letterSpacing: 0 }}>
-              Intelligence is sourced from live federal data.
+            <span className="text-[12px] font-black text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>
+              smb<span className="text-[#D4714E]">X</span>.ai <span className="text-[#D4714E]">Engine</span>
+              <span className="text-[#9CA3AF] font-medium mx-1.5">&middot;</span>
+              <span className="text-[#9CA3AF] font-medium normal-case" style={{ letterSpacing: 0 }}>
+                Proprietary M&amp;A Intelligence
+              </span>
             </span>
           </>
         )}
@@ -362,7 +366,7 @@ export default function AppShell() {
       {/* Logo */}
       <div className="px-6 pt-6 pb-2">
         <span className="text-[24px] font-black tracking-tight leading-none" style={{ letterSpacing: '-0.03em' }}>
-          smb<span className="text-[#D4714E]">x</span><span className="text-[#D4714E]">.ai</span>
+          smb<span className="text-[#D4714E]">X</span>.ai
         </span>
       </div>
 
@@ -544,10 +548,18 @@ export default function AppShell() {
                 </svg>
               </button>
             )}
-            <span className="w-[3px] h-5 bg-[#D4714E] rounded-full" />
-            <span className="text-[10px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.2em' }}>
-              M&amp;A OS / {activeTab === 'home' ? 'Home' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
-            </span>
+            {isMobile ? (
+              <span className="text-[22px] font-black tracking-tight leading-none" style={{ letterSpacing: '-0.03em' }}>
+                smb<span className="text-[#D4714E]">X</span>.ai
+              </span>
+            ) : (
+              <>
+                <span className="w-[3px] h-5 bg-[#D4714E] rounded-full" />
+                <span className="text-[10px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.2em' }}>
+                  M&amp;A OS / {activeTab === 'home' ? 'Home' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
+                </span>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-3">
             {!user && (
@@ -652,7 +664,7 @@ export default function AppShell() {
                           The data is public. The intelligence is not.
                         </h2>
                         <p className="text-[18px] md:text-[20px] font-medium text-[#6E6A63] max-w-3xl mx-auto" style={{ lineHeight: 1.65 }}>
-                          The same market data that powers Wall Street is technically available to anyone. What isn&apos;t available is someone who can synthesize all of it into a deal-specific analysis in minutes. That&apos;s what Yulia does — through the smbX.ai Engine.
+                          Census records, BLS wage data, SBA lending rates, SEC filings — it&apos;s all publicly available. What doesn&apos;t exist is someone who can synthesize all of it into a deal-specific analysis in minutes. That&apos;s what Yulia does. Through the smbX.ai Engine.
                         </p>
                       </div>
 
@@ -671,10 +683,10 @@ export default function AppShell() {
                             Seven Layers of Intelligence&trade;
                           </h3>
                           <p className="text-[18px] font-medium text-[#6E6A63] mb-8" style={{ lineHeight: 1.6 }}>
-                            Every deal Yulia touches is evaluated across seven dimensions: Industry Structure, Regional Economics, Financial Normalization, Buyer Landscape, Deal Architecture, Risk Assessment, and Forward Signals. Not a checklist — a methodology that adapts to the deal in front of you.
+                            Every deal Yulia touches is analyzed across seven dimensions: Industry Structure, Regional Economics, Financial Normalization, Buyer Landscape, Deal Architecture, Risk Assessment, and Forward Signals. She adapts her methodology, her metrics, and her deliverables to the deal in front of you — whether it&apos;s a $400K service business or a $400M platform acquisition.
                           </p>
                           <div className="flex flex-wrap gap-2">
-                            {['Add-back Discovery', 'Competitive Density', 'SBA 7(a) Modeling', 'Multiple Calibration'].map(tag => (
+                            {['Add-back Discovery', 'Competitive Density', 'SBA 7(a) Modeling', 'Multiple Calibration', 'DSCR Analysis', 'Market Fragmentation'].map(tag => (
                               <span key={tag} className="bg-white border border-[#F3F4F6] text-[#6E6A63] px-3 py-1.5" style={{ borderRadius: '12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                                 {tag}
                               </span>
@@ -689,7 +701,7 @@ export default function AppShell() {
                             Localized to your market
                           </h3>
                           <p className="text-[15px] font-medium text-[#6E6A63]" style={{ lineHeight: 1.6 }}>
-                            National averages hide what matters. A plumbing company in Phoenix and one in rural Pennsylvania are fundamentally different deals. Yulia delivers intelligence specific to your MSA — exact competitor counts from Census, regional wage benchmarks from BLS, and PE roll-up activity in your ZIP code.
+                            National averages hide what matters. Yulia delivers intelligence down to your MSA — exact competitor counts from Census, regional wage benchmarks from BLS, and PE consolidation activity in your geography. Your deal. Your market. Your data.
                           </p>
                         </div>
                       </div>
@@ -700,20 +712,20 @@ export default function AppShell() {
                         <div className="bg-[#F9FAFB] p-10 md:p-12 flex flex-col justify-between" style={{ borderRadius: '48px', border: '1px solid #F3F4F6' }}>
                           <span className="text-[48px] font-black text-[#D4714E] leading-none mb-4">02</span>
                           <h3 className="text-[22px] font-extrabold mb-3" style={{ letterSpacing: '-0.02em' }}>
-                            Calibrated to every deal size
+                            Adapts to every deal size
                           </h3>
                           <p className="text-[15px] font-medium text-[#6E6A63]" style={{ lineHeight: 1.6 }}>
-                            The right analysis for a $400K landscaping company is fundamentally different from a $40M manufacturing platform. Yulia adapts her methodology, metrics, vocabulary, and deliverables — from SDE-based owner-operator valuations to LBO modeling with sensitivity analysis.
+                            The right analysis for a $400K landscaping company is fundamentally different from a $40M manufacturing platform. Yulia knows when to use SDE vs. EBITDA, when to model SBA vs. conventional financing, and when to shift from owner-operator metrics to institutional methodology.
                           </p>
                         </div>
 
                         {/* Terra accent card */}
                         <div className="md:col-span-2 bg-[#D4714E] text-white p-10 md:p-12" style={{ borderRadius: '48px' }}>
                           <h3 className="text-[28px] md:text-[36px] font-extrabold mb-4" style={{ letterSpacing: '-0.03em' }}>
-                            Weeks of advisory work. Done in minutes.
+                            The analytical firepower of a full advisory team. In your pocket.
                           </h3>
                           <p className="text-[18px] font-medium text-orange-100" style={{ lineHeight: 1.6 }}>
-                            Defensible valuations. 25-page Confidential Information Memos. Localized market intelligence reports. SBA bankability models with live federal rates. The analytical infrastructure of a full-service advisory firm — available to anyone with a deal.
+                            Defensible valuations. 25-page CIMs. Localized market intelligence reports. SBA bankability models with live federal rates. Buyer qualification screening. Deal structuring. All generated from a conversation.
                           </p>
                         </div>
                       </div>
