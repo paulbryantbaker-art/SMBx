@@ -549,9 +549,10 @@ export default function AppShell() {
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
             <div key={activeTab} style={{ animation: morphing ? 'morphOut 0.45s ease forwards' : 'fadeIn 0.4s ease', pointerEvents: morphing ? 'none' as const : undefined }}>
-              {/* Hero — viewport-height, vertically centered */}
-              <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-6 py-12">
-                <div className="w-full max-w-5xl text-center" style={{ marginBottom: '48px' }}>
+              {/* Hero — viewport-height, elements distributed vertically */}
+              <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-between px-6" style={{ paddingTop: '8vh', paddingBottom: '5vh' }}>
+                {/* Top group: overline + headline + subtitle */}
+                <div className="w-full max-w-5xl text-center">
                   <div
                     className="inline-block px-5 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E]"
                     style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '28px' }}
@@ -570,32 +571,32 @@ export default function AppShell() {
                   </p>
                 </div>
 
-                {/* Dock — inline in hero */}
-                <div className="w-full max-w-[860px]" style={{ marginBottom: '36px' }}>
+                {/* Middle: Chat bar */}
+                <div className="w-full max-w-[860px]">
                   {dockCard}
                 </div>
 
-                {/* Suggestion chips */}
-                <div className="flex flex-wrap justify-center gap-3 max-w-3xl" style={{ marginBottom: '20px' }}>
-                  {page.chips.map(chip => (
-                    <button
-                      key={chip}
-                      onClick={() => handleChipClick(chip)}
-                      className="bg-white border border-[#F3F4F6] px-5 py-3 cursor-pointer hover:border-[#D4714E] hover:text-[#D4714E] transition-all text-[#6E6A63]"
-                      style={{ borderRadius: '12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'inherit' }}
-                      type="button"
-                    >
-                      &ldquo;{chip}&rdquo;
-                    </button>
-                  ))}
-                </div>
-
-                {/* Tagline */}
-                <div
-                  className="text-center text-[#9CA3AF]"
-                  style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}
-                >
-                  {page.tagline}
+                {/* Bottom group: chips + tagline */}
+                <div className="flex flex-col items-center">
+                  <div className="flex flex-wrap justify-center gap-3 max-w-3xl" style={{ marginBottom: '20px' }}>
+                    {page.chips.map(chip => (
+                      <button
+                        key={chip}
+                        onClick={() => handleChipClick(chip)}
+                        className="bg-white border border-[#F3F4F6] px-5 py-3 cursor-pointer hover:border-[#D4714E] hover:text-[#D4714E] transition-all text-[#6E6A63]"
+                        style={{ borderRadius: '12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'inherit' }}
+                        type="button"
+                      >
+                        &ldquo;{chip}&rdquo;
+                      </button>
+                    ))}
+                  </div>
+                  <div
+                    className="text-center text-[#9CA3AF]"
+                    style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}
+                  >
+                    {page.tagline}
+                  </div>
                 </div>
               </div>
 
