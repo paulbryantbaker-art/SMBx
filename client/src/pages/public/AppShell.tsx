@@ -547,7 +547,7 @@ export default function AppShell() {
         <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto min-h-0"
-          style={{ WebkitOverflowScrolling: 'touch' } as any}
+          style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' } as any}
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
@@ -1229,7 +1229,7 @@ export default function AppShell() {
 
         {/* ════ CHATDOCK — new-skin card, single-line, auto-expands ════ */}
         {showDock && viewState === 'chat' && (
-          <div className="shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
+          <div className="shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
             <div className="max-w-[860px] mx-auto">
               <div
                 className="bg-white shadow-lg relative overflow-visible"

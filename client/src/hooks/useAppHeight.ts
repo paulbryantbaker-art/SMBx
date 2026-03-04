@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 
 /**
- * In chat mode (enabled=true):  pins #app-root with position:fixed,
- * shrinks height to visualViewport.height, and offsets by offsetTop
- * so the dock sits above the iOS keyboard.
+ * Chat mode (enabled=true):  pins #app-root with position:fixed and
+ * shrinks height to visualViewport.height so the dock sits above the
+ * iOS keyboard.  Body scroll is locked to prevent page-level bouncing.
  *
- * On landing (enabled=false):  removes all inline styles so CSS 100dvh
+ * Landing (enabled=false):  removes all inline styles so CSS 100dvh
  * takes over and the keyboard simply overlays the page.
  */
 export function useAppHeight(enabled = true) {
@@ -20,44 +20,38 @@ export function useAppHeight(enabled = true) {
       app.style.removeProperty('left');
       app.style.removeProperty('right');
       app.style.removeProperty('bottom');
-      app.style.removeProperty('transform');
+      document.body.style.removeProperty('overflow');
       return;
     }
 
+    // Lock body scroll so iOS can't bounce the page behind the fixed container
+    document.body.style.overflow = 'hidden';
+
     const vv = window.visualViewport;
 
-    function onViewportChange() {
+    function onResize() {
       const el = document.getElementById('app-root');
       if (!el) return;
 
-      if (vv) {
-        el.style.position = 'fixed';
-        el.style.left = '0';
-        el.style.right = '0';
-        el.style.top = '0';
-        el.style.bottom = 'auto';
-        el.style.height = vv.height + 'px';
-        // offsetTop accounts for iOS scrolling the page when keyboard opens
-        el.style.transform = `translateY(${vv.offsetTop}px)`;
-      } else {
-        el.style.height = window.innerHeight + 'px';
-      }
+      // position:fixed keeps the container anchored to the layout viewport —
+      // no transform needed.  Just shrink height to the visible area.
+      el.style.position = 'fixed';
+      el.style.top = '0';
+      el.style.left = '0';
+      el.style.right = '0';
+      el.style.bottom = 'auto';
+      el.style.height = (vv ? vv.height : window.innerHeight) + 'px';
     }
 
-    if (vv) {
-      vv.addEventListener('resize', onViewportChange);
-      vv.addEventListener('scroll', onViewportChange);
-    }
-    window.addEventListener('resize', onViewportChange);
-    onViewportChange();
+    // Only listen to resize (keyboard open/close), NOT scroll
+    if (vv) vv.addEventListener('resize', onResize);
+    window.addEventListener('resize', onResize);
+    onResize();
 
     return () => {
-      if (vv) {
-        vv.removeEventListener('resize', onViewportChange);
-        vv.removeEventListener('scroll', onViewportChange);
-      }
-      window.removeEventListener('resize', onViewportChange);
-      // Clean up inline styles
+      if (vv) vv.removeEventListener('resize', onResize);
+      window.removeEventListener('resize', onResize);
+
       const el = document.getElementById('app-root');
       if (el) {
         el.style.removeProperty('height');
@@ -66,8 +60,8 @@ export function useAppHeight(enabled = true) {
         el.style.removeProperty('left');
         el.style.removeProperty('right');
         el.style.removeProperty('bottom');
-        el.style.removeProperty('transform');
       }
+      document.body.style.removeProperty('overflow');
     };
   }, [enabled]);
 }
