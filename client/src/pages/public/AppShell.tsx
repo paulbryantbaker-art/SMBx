@@ -549,19 +549,19 @@ export default function AppShell() {
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
             <div key={activeTab} style={{ animation: morphing ? 'morphOut 0.45s ease forwards' : 'fadeIn 0.4s ease', pointerEvents: morphing ? 'none' as const : undefined }}>
-              {/* Hero — viewport-height, elements distributed vertically */}
-              <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-between px-6" style={{ paddingTop: '8vh', paddingBottom: '5vh' }}>
-                {/* Top group: overline + headline + subtitle */}
+              {/* Hero — viewport-height, centered in middle 2/3, even gaps */}
+              <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-6" style={{ gap: '7vh' }}>
+                {/* Headline group */}
                 <div className="w-full max-w-5xl text-center">
                   <div
                     className="inline-block px-5 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E]"
-                    style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '28px' }}
+                    style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '24px' }}
                   >
                     {page.overline}
                   </div>
                   <h1
                     className="text-[36px] md:text-[56px] font-extrabold leading-[1.08]"
-                    style={{ letterSpacing: '-0.04em', marginBottom: '24px' }}
+                    style={{ letterSpacing: '-0.04em', marginBottom: '20px' }}
                   >
                     {page.h1Line1}<br />
                     <span className="text-[#D4714E]">{page.h1Line2}</span>
@@ -571,14 +571,14 @@ export default function AppShell() {
                   </p>
                 </div>
 
-                {/* Middle: Chat bar */}
+                {/* Chat bar */}
                 <div className="w-full max-w-[860px]">
                   {dockCard}
                 </div>
 
-                {/* Bottom group: chips + tagline */}
+                {/* Chips + tagline */}
                 <div className="flex flex-col items-center">
-                  <div className="flex flex-wrap justify-center gap-3 max-w-3xl" style={{ marginBottom: '20px' }}>
+                  <div className="flex flex-wrap justify-center gap-3 max-w-3xl" style={{ marginBottom: '16px' }}>
                     {page.chips.map(chip => (
                       <button
                         key={chip}
