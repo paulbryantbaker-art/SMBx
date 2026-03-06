@@ -101,6 +101,20 @@ stripeRouter.post('/checkout', async (req, res) => {
   if (!block) return res.status(400).json({ error: 'Invalid wallet block' });
 
   try {
+    // TEST_MODE bypass — skip Stripe, credit wallet directly
+    if (process.env.TEST_MODE === 'true') {
+      await getOrCreateWallet(userId);
+      await creditWallet(
+        userId,
+        block.totalCents,
+        `Wallet top-up: ${block.name} ($${(block.totalCents / 100).toFixed(2)}) [TEST]`,
+        `test_${Date.now()}`,
+      );
+      console.log(`[TEST_MODE] Wallet credited: user ${userId}, $${(block.totalCents / 100).toFixed(2)} (${block.id})`);
+      const appUrl = process.env.APP_URL || 'https://smbx.ai';
+      return res.json({ url: `${appUrl}?wallet=success&amount=${block.totalCents}`, test: true });
+    }
+
     const stripe = getStripe();
     const appUrl = process.env.APP_URL || 'https://smbx.ai';
 
