@@ -2,20 +2,24 @@ import { Router } from 'express';
 import postgres from 'postgres';
 import Anthropic from '@anthropic-ai/sdk';
 import { optionalAuth, requireAuth } from '../middleware/auth.js';
-import { buildSystemPrompt } from '../services/promptBuilder.js';
+import { buildSystemPrompt, buildDynamicAnonymousPrompt } from '../services/promptBuilder.js';
+import type { ConversationState } from '../services/promptBuilder.js';
 import { streamAgenticResponse } from '../services/aiService.js';
 import { checkAndAutoAdvance, getDeal, updateDealFields, updateDealFinancials, advanceGate } from '../services/dealService.js';
 import { extractFields } from '../services/fieldExtractor.js';
+import type { ExtractedFields } from '../services/fieldExtractor.js';
 import { checkGateReadiness } from '../services/gateReadinessService.js';
 import { generatePaywallPrompt } from '../services/paywallService.js';
 import { getBalance, debitWallet } from '../services/walletService.js';
-import { getLeagueMultiplier } from '../services/leagueClassifier.js';
+import { classifyLeague, getLeagueMultiplier } from '../services/leagueClassifier.js';
 import { getGateMenuItems } from '../services/menuCatalogService.js';
 import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
 import { processDeliverable } from '../services/deliverableProcessor.js';
 import { createNotification } from './notifications.js';
 import { MASTER_SYSTEM_PROMPT } from '../prompts/masterPrompt.js';
 import { buildAnonymousPrompt } from '../services/promptBuilder.js';
+import { getFirstGate } from '../../shared/gateRegistry.js';
+import { upsertCompanyProfile, upsertBuyerThesis, getBuyerDemandSignals } from '../services/knowledgeGraphService.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
 const sql = postgres(process.env.DATABASE_URL!, {
@@ -81,6 +85,20 @@ chatRouter.post('/message', async (req, res) => {
       VALUES (${convId}, 'user', ${message.trim()})
     `;
 
+    // Load conversation state (journey, gate, league, extracted data)
+    const [convRow] = await sql`
+      SELECT journey, current_gate, league, extracted_data, company_profile_id, thesis_id
+      FROM conversations WHERE id = ${convId}
+    `;
+    const convState: ConversationState = {
+      journey: convRow?.journey || null,
+      current_gate: convRow?.current_gate || null,
+      league: convRow?.league || null,
+      extracted_data: convRow?.extracted_data || null,
+      company_profile_id: convRow?.company_profile_id || null,
+      thesis_id: convRow?.thesis_id || null,
+    };
+
     // Load conversation history (last 50 messages)
     const history = await sql`
       SELECT role, content FROM messages
@@ -94,12 +112,28 @@ chatRouter.post('/message', async (req, res) => {
       content: m.content,
     }));
 
-    // Build rich system prompt with industry knowledge, capital structure, first-response formula
+    // Fetch buyer demand signals if this is a sell journey with industry data
+    let demandSignalText: string | undefined;
+    if (convState.journey === 'sell' && convState.extracted_data?.industry) {
+      try {
+        const signals = await getBuyerDemandSignals({
+          industry: convState.extracted_data.industry,
+          location_state: convState.extracted_data.location_state || null,
+          revenue_reported: convState.extracted_data.revenue || null,
+        });
+        if (signals) {
+          demandSignalText = signals.demandText;
+        }
+      } catch (_e) { /* non-critical */ }
+    }
+
+    // Build dynamic system prompt with intelligence layers
     const userMsgCount = apiMessages.filter(m => m.role === 'user').length;
-    const systemPrompt = buildAnonymousPrompt({
+    const systemPrompt = buildDynamicAnonymousPrompt(convState, {
       sourcePage: journeyContext || 'home',
       isFirstMessage: userMsgCount <= 1,
       messageCount: userMsgCount,
+      demandSignalText,
     });
 
     // SSE headers
@@ -143,6 +177,83 @@ chatRouter.post('/message', async (req, res) => {
     res.write(`data: ${JSON.stringify({ type: 'message_stop', conversationId: convId })}\n\n`);
     res.write('data: [DONE]\n\n');
     res.end();
+
+    // ─── Post-streaming hook (fire-and-forget) ───────────────
+    const effectiveSessionId = sessionId || `anon-${convId}`;
+    setImmediate(async () => {
+      try {
+        // 1. Extract fields from full conversation
+        const allMsgs = [...apiMessages.map(m => ({ role: m.role as string, content: m.content as string }))];
+        if (fullText) allMsgs.push({ role: 'assistant', content: fullText });
+
+        const fields = await extractFields(allMsgs);
+        if (!fields) return;
+
+        // 2. Determine journey from extraction or existing state
+        const journey = fields.journey_type || convState.journey || null;
+
+        // 3. Set gate if not already set
+        const currentGate = convState.current_gate || (journey ? getFirstGate(journey) : null);
+
+        // 4. Classify league (deterministic)
+        let league = convState.league;
+        if (journey && (fields.revenue || fields.sde || fields.ebitda || fields.capital_available)) {
+          const leagueInfo = classifyLeague({
+            journey: journey as 'sell' | 'buy' | 'raise' | 'pmi',
+            revenue: fields.revenue || (convState.extracted_data?.revenue as number | undefined) || null,
+            sde: fields.sde || (convState.extracted_data?.sde as number | undefined) || null,
+            ebitda: fields.ebitda || (convState.extracted_data?.ebitda as number | undefined) || null,
+            industry: fields.industry || (convState.extracted_data?.industry as string | undefined) || null,
+            capitalAvailable: fields.capital_available || (convState.extracted_data?.capital_available as number | undefined) || null,
+          });
+          if (leagueInfo) league = leagueInfo.league;
+        }
+
+        // 5. Merge extracted_data onto existing JSONB
+        const mergedData = { ...(convState.extracted_data || {}), ...fields };
+        // Remove journey_type from extracted_data — stored in its own column
+        delete (mergedData as any).journey_type;
+
+        // 6. UPDATE conversations with detected state
+        await sql`
+          UPDATE conversations SET
+            journey = ${journey},
+            current_gate = ${currentGate},
+            league = ${league},
+            extracted_data = ${JSON.stringify(mergedData)}::jsonb,
+            updated_at = NOW()
+          WHERE id = ${convId}
+        `;
+
+        // 7. Upsert company profile for sell-journey
+        if (journey === 'sell') {
+          await upsertCompanyProfile(convId!, effectiveSessionId, {
+            business_name: mergedData.business_name as string | undefined,
+            industry: mergedData.industry as string | undefined,
+            location: mergedData.location as string | undefined,
+            naics_code: mergedData.naics_code as string | undefined,
+            revenue: mergedData.revenue as number | undefined,
+            sde: mergedData.sde as number | undefined,
+            ebitda: mergedData.ebitda as number | undefined,
+            employee_count: mergedData.employee_count as number | undefined,
+          });
+        }
+
+        // 8. Upsert buyer thesis for buy-journey
+        if (journey === 'buy') {
+          await upsertBuyerThesis(convId!, effectiveSessionId, {
+            buyer_type: mergedData.buyer_type as string | undefined,
+            target_industry: mergedData.target_industry as string | undefined,
+            target_geography: mergedData.target_geography as string | undefined,
+            capital_available: mergedData.capital_available as number | undefined,
+            financing_approach: mergedData.financing_approach as string | undefined,
+            target_size_range: mergedData.target_size_range as string | undefined,
+          });
+        }
+      } catch (err: any) {
+        console.error('Post-stream intelligence hook error:', err.message);
+      }
+    });
   } catch (err: any) {
     console.error('Chat message error:', err.message, err.status, JSON.stringify(err.error || err.body || {}).substring(0, 500), err.stack);
 

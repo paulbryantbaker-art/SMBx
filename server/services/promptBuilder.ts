@@ -6,6 +6,15 @@ import { BRANCHING_LOGIC } from '../prompts/branchingLogic.js';
 import { isPaywallGate } from './gateReadinessService.js';
 import { generatePaywallPrompt } from './paywallService.js';
 
+export interface ConversationState {
+  journey: string | null;
+  current_gate: string | null;
+  league: string | null;
+  extracted_data: Record<string, any> | null;
+  company_profile_id: number | null;
+  thesis_id: number | null;
+}
+
 interface UserContext {
   id: number;
   email: string;
@@ -258,6 +267,59 @@ This is the user's FIRST message. Your response MUST follow this four-beat struc
    Example: "What's your annual take-home from the business? And is this a single location or do you have multiple?"
 
 DO NOT give a generic welcome. DO NOT say "I'd be happy to help." DO NOT ask them to describe their business if they already did. USE the information they gave you and build on it immediately.`);
+  }
+
+  return layers.join('\n\n');
+}
+
+/**
+ * Build an enhanced anonymous prompt that layers intelligence from the conversation state.
+ * Used instead of buildAnonymousPrompt() once we have journey/gate/league data.
+ */
+export function buildDynamicAnonymousPrompt(
+  convState: ConversationState,
+  opts: {
+    sourcePage?: string;
+    isFirstMessage?: boolean;
+    messageCount?: number;
+    demandSignalText?: string;
+  },
+): string {
+  // Start with the full base anonymous prompt
+  const base = buildAnonymousPrompt(opts);
+  const layers: string[] = [base];
+
+  // Layer: Conversation state header
+  if (convState.journey || convState.current_gate || convState.league) {
+    const stateLines: string[] = [];
+    if (convState.journey) stateLines.push(`Journey: ${convState.journey.toUpperCase()}`);
+    if (convState.current_gate) stateLines.push(`Current Gate: ${convState.current_gate}`);
+    if (convState.league) stateLines.push(`League: ${convState.league}`);
+    layers.push(`\n## CONVERSATION STATE\n${stateLines.join('\n')}`);
+  }
+
+  // Layer: League persona — adapt tone/vocabulary to deal size
+  if (convState.league && PERSONAS[convState.league]) {
+    layers.push(`\n## PERSONA — ${convState.league}\n${PERSONAS[convState.league]}`);
+  }
+
+  // Layer: Gate-specific prompt — what to focus on right now
+  if (convState.current_gate && GATE_PROMPTS[convState.current_gate]) {
+    layers.push(`\n## GATE CONTEXT\n${GATE_PROMPTS[convState.current_gate]}`);
+  }
+
+  // Layer: Buyer demand signals — for sell-journey conversations
+  if (opts.demandSignalText) {
+    layers.push(`\n## ${opts.demandSignalText}\nMention buyer demand naturally when relevant — e.g., "There are active buyers looking for businesses like yours in this market." Do NOT make it sound like a sales pitch. Weave it into your analysis as market context.`);
+  }
+
+  // Layer: Anonymous no-tools override — gate prompts reference tools that don't exist here
+  if (convState.current_gate) {
+    layers.push(`\n## ANONYMOUS MODE OVERRIDE
+You are in an anonymous conversation — the following tools referenced in gate prompts do NOT exist here:
+- update_deal_field, advance_gate, create_deal, check_gate_readiness
+Instead, just converse naturally. Extract information through conversation. Do not reference gates, tools, or deal objects to the user. Just be Yulia — the expert advisor having a conversation.
+Continue gathering the information the gate prompt describes, but through natural dialogue, not tool calls.`);
   }
 
   return layers.join('\n\n');
