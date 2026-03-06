@@ -21,10 +21,10 @@ const SESSION_KEY = 'smbx_anon_session';
 
 function getOrCreateSessionId(): string {
   try {
-    const existing = sessionStorage.getItem(SESSION_KEY);
+    const existing = localStorage.getItem(SESSION_KEY);
     if (existing) return existing;
     const id = crypto.randomUUID();
-    sessionStorage.setItem(SESSION_KEY, id);
+    localStorage.setItem(SESSION_KEY, id);
     return id;
   } catch {
     return crypto.randomUUID();

@@ -331,8 +331,52 @@ export default function AppShell() {
   // Conversations — unified across auth and anonymous
   const allConversations = user ? authChat.conversations : anonChat.conversations;
   const activeConvId = user ? authChat.activeConversationId : anonChat.activeConversationId;
-  const deals = (allConversations || []).filter(c => c.deal_id != null);
-  const recent = (allConversations || []).filter(c => c.deal_id == null);
+
+  // Group conversations by date
+  const groupByDate = (convos: typeof allConversations) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today.getTime() - 86400000);
+    const lastWeek = new Date(today.getTime() - 7 * 86400000);
+
+    const groups: { label: string; items: typeof convos }[] = [
+      { label: 'Today', items: [] },
+      { label: 'Yesterday', items: [] },
+      { label: 'Last 7 Days', items: [] },
+      { label: 'Older', items: [] },
+    ];
+
+    for (const c of convos || []) {
+      const d = new Date(c.updated_at);
+      if (d >= today) groups[0].items.push(c);
+      else if (d >= yesterday) groups[1].items.push(c);
+      else if (d >= lastWeek) groups[2].items.push(c);
+      else groups[3].items.push(c);
+    }
+
+    return groups.filter(g => g.items.length > 0);
+  };
+
+  const conversationGroups = groupByDate(allConversations);
+
+  // Session restore: auto-open most recent conversation on mount
+  const [restored, setRestored] = useState(false);
+  useEffect(() => {
+    if (restored) return;
+    setRestored(true);
+    // Only restore if we're on /chat or /chat/:id, or if there's no explicit landing page
+    const path = window.location.pathname;
+    if (path === '/chat' || path.startsWith('/chat/')) {
+      const convId = getInitialConversationId(path);
+      if (convId) return; // already handled by existing useEffect
+      // /chat with no ID: load most recent conversation
+      if (!user && allConversations.length > 0) {
+        const most = allConversations[0]; // sorted by updated_at DESC
+        anonChat.selectConversation(most.id);
+        setViewState('chat');
+      }
+    }
+  }, [restored, allConversations]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ═══ SIDEBAR JSX ═══ */
 
@@ -394,14 +438,14 @@ export default function AppShell() {
         </nav>
       </div>
 
-      {/* Conversations */}
+      {/* Conversations — grouped by date */}
       <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-4">
-        {deals.length > 0 && (
-          <div className="mb-3">
-            <div className="text-[10px] font-black uppercase text-[#D4714E] px-4 mb-2" style={{ letterSpacing: '0.25em' }}>
-              Active Deals
+        {conversationGroups.map(group => (
+          <div key={group.label} className="mb-3">
+            <div className="text-[10px] font-black uppercase text-[#6E6A63] px-4 mb-2" style={{ letterSpacing: '0.25em' }}>
+              {group.label}
             </div>
-            {deals.map(c => (
+            {group.items.map(c => (
               <button
                 key={c.id}
                 onClick={() => {
@@ -427,40 +471,7 @@ export default function AppShell() {
               </button>
             ))}
           </div>
-        )}
-
-        {recent.length > 0 && (
-          <div>
-            <div className="text-[10px] font-black uppercase text-[#6E6A63] px-4 mb-2" style={{ letterSpacing: '0.25em' }}>
-              Recent
-            </div>
-            {recent.map(c => (
-              <button
-                key={c.id}
-                onClick={() => {
-                  if (user) authChat.selectConversation(c.id);
-                  else anonChat.selectConversation(c.id);
-                  setViewState('chat');
-                  navigate(`/chat/${c.id}`);
-                  setIsMobileSidebarOpen(false);
-                }}
-                className={`flex items-center gap-3 w-full px-4 py-2 rounded-xl text-[13px] cursor-pointer border-none transition-all ${
-                  c.id === activeConvId && viewState === 'chat'
-                    ? 'bg-white shadow-sm font-medium text-[#1A1A18]'
-                    : 'bg-transparent text-[#6E6A63] hover:bg-white font-medium'
-                }`}
-                style={{ fontFamily: 'inherit' }}
-                type="button"
-              >
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: c.journey ? (JOURNEY_COLORS[c.journey] || '#6E6A63') : '#9CA3AF' }}
-                />
-                <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
-              </button>
-            ))}
-          </div>
-        )}
+        ))}
       </div>
 
       {/* Footer */}
