@@ -7,69 +7,68 @@ export interface AnonMessage {
   created_at: string;
 }
 
-interface UseAnonymousChatOptions {
-  /** Page context passed to Yulia (e.g. "sell", "buy") */
-  context?: string;
+export interface AnonConversation {
+  id: number;
+  title: string;
+  deal_id: number | null;
+  journey?: string | null;
+  current_gate?: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 const SESSION_KEY = 'smbx_anon_session';
 
-function getStoredSession(): string | null {
+function getOrCreateSessionId(): string {
   try {
-    return sessionStorage.getItem(SESSION_KEY);
+    const existing = sessionStorage.getItem(SESSION_KEY);
+    if (existing) return existing;
+    const id = crypto.randomUUID();
+    sessionStorage.setItem(SESSION_KEY, id);
+    return id;
   } catch {
-    return null;
+    return crypto.randomUUID();
   }
 }
 
-function storeSession(id: string) {
-  try {
-    sessionStorage.setItem(SESSION_KEY, id);
-  } catch {}
-}
-
-export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
+export function useAnonymousChat() {
   const [messages, setMessages] = useState<AnonMessage[]>([]);
+  const [conversations, setConversations] = useState<AnonConversation[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<number | null>(null);
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState('');
-  const [messagesRemaining, setMessagesRemaining] = useState(10);
-  const [limitReached, setLimitReached] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const sessionIdRef = useRef<string | null>(getStoredSession());
+  const sessionIdRef = useRef(getOrCreateSessionId());
   const abortRef = useRef<AbortController | null>(null);
 
-  const ensureSession = useCallback(async (): Promise<string | null> => {
-    if (sessionIdRef.current) return sessionIdRef.current;
+  // Kept for AppShell compat — no limits in unified flow
+  const limitReached = false;
+  const messagesRemaining: number | null = null;
 
+  const sessionHeaders = useCallback((): Record<string, string> => ({
+    'x-session-id': sessionIdRef.current,
+  }), []);
+
+  // Load conversations for sidebar
+  const loadConversations = useCallback(async () => {
     try {
-      const res = await fetch('/api/chat/anonymous', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ context }),
+      const res = await fetch('/api/chat/conversations', {
+        headers: sessionHeaders(),
       });
-
-      if (res.status === 429) {
-        setError('You\u2019ve reached the session limit. Sign up for unlimited access.');
-        return null;
-      }
-
-      if (!res.ok) return null;
-
-      const data = await res.json();
-      sessionIdRef.current = data.sessionId;
-      storeSession(data.sessionId);
-      setMessagesRemaining(data.messagesRemaining);
-      return data.sessionId;
+      if (res.ok) setConversations(await res.json());
     } catch {
-      setError('Failed to start session. Please try again.');
-      return null;
+      // ignore
     }
-  }, [context]);
+  }, [sessionHeaders]);
 
-  const sendMessage = useCallback(async (content: string) => {
+  useEffect(() => {
+    loadConversations();
+  }, [loadConversations]);
+
+  // Send message via POST /api/chat/message
+  const sendMessage = useCallback(async (content: string, journeyContext?: string) => {
     setError(null);
 
-    // Optimistic user message — show immediately
     const userMsg: AnonMessage = {
       id: Date.now(),
       role: 'user',
@@ -80,35 +79,35 @@ export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
     setSending(true);
     setStreamingText('');
 
-    const sessionId = await ensureSession();
-    if (!sessionId) {
-      setSending(false);
-      return;
-    }
-
     try {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const res = await fetch(`/api/chat/anonymous/${sessionId}/messages`, {
+      const res = await fetch('/api/chat/message', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...sessionHeaders(),
+        },
+        body: JSON.stringify({
+          message: content,
+          conversationId: activeConversationId,
+          journeyContext,
+        }),
         signal: controller.signal,
       });
-
-      if (res.status === 403) {
-        setLimitReached(true);
-        setSending(false);
-        return;
-      }
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: 'Request failed' }));
         throw new Error(err.error || 'Request failed');
       }
 
-      // Read SSE stream
+      // Capture conversation ID from header
+      const headerConvId = res.headers.get('X-Conversation-Id');
+      if (headerConvId) {
+        setActiveConversationId(parseInt(headerConvId, 10));
+      }
+
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let accumulated = '';
@@ -129,16 +128,15 @@ export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
             try {
               const parsed = JSON.parse(data);
 
-              if (parsed.type === 'done') {
-                if (typeof parsed.messagesRemaining === 'number') {
-                  setMessagesRemaining(parsed.messagesRemaining);
-                  if (parsed.messagesRemaining <= 0) setLimitReached(true);
+              if (parsed.type === 'text_delta') {
+                accumulated += parsed.text;
+                setStreamingText(accumulated);
+              } else if (parsed.type === 'message_stop') {
+                if (parsed.conversationId) {
+                  setActiveConversationId(parsed.conversationId);
                 }
               } else if (parsed.type === 'error') {
                 accumulated = parsed.error || 'Something went wrong.';
-              } else if (parsed.text) {
-                accumulated += parsed.text;
-                setStreamingText(accumulated);
               }
             } catch {
               // ignore partial chunk parse errors
@@ -147,7 +145,6 @@ export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
         }
       }
 
-      // Finalize assistant message
       setStreamingText('');
       if (accumulated) {
         setMessages(prev => [...prev, {
@@ -157,9 +154,11 @@ export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
           created_at: new Date().toISOString(),
         }]);
       }
+
+      loadConversations();
     } catch (err: any) {
       if (err.name !== 'AbortError') {
-        console.error('Anonymous chat error:', err);
+        console.error('Chat error:', err);
         setError('Something went wrong. Please try again.');
       }
     } finally {
@@ -167,7 +166,27 @@ export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
       setStreamingText('');
       abortRef.current = null;
     }
-  }, [ensureSession]);
+  }, [activeConversationId, sessionHeaders, loadConversations]);
+
+  // Select a conversation and load its messages
+  const selectConversation = useCallback(async (id: number) => {
+    setActiveConversationId(id);
+    try {
+      const res = await fetch(`/api/chat/conversations/${id}/messages`, {
+        headers: sessionHeaders(),
+      });
+      if (res.ok) setMessages(await res.json());
+    } catch {
+      // ignore
+    }
+  }, [sessionHeaders]);
+
+  // Start fresh conversation
+  const newConversation = useCallback(() => {
+    setActiveConversationId(null);
+    setMessages([]);
+    setError(null);
+  }, []);
 
   const getSessionId = useCallback(() => sessionIdRef.current, []);
 
@@ -177,79 +196,28 @@ export function useAnonymousChat({ context }: UseAnonymousChatOptions = {}) {
       abortRef.current = null;
     }
     setMessages([]);
+    setConversations([]);
+    setActiveConversationId(null);
     setSending(false);
     setStreamingText('');
-    setMessagesRemaining(20);
-    setLimitReached(false);
     setError(null);
-    sessionIdRef.current = null;
-    try { sessionStorage.removeItem(SESSION_KEY); } catch {}
   }, []);
-
-  const [sessionData, setSessionData] = useState<Record<string, any> | null>(null);
-  const [restored, setRestored] = useState(false);
-
-  // Restore session on mount if one exists
-  useEffect(() => {
-    const sid = getStoredSession();
-    if (!sid || restored) return;
-    setRestored(true);
-
-    (async () => {
-      try {
-        const res = await fetch(`/api/chat/anonymous/${sid}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.messages && data.messages.length > 0) {
-            setMessages(data.messages);
-            setMessagesRemaining(data.messagesRemaining);
-            setLimitReached(data.limitReached || false);
-            if (data.sessionData) setSessionData(data.sessionData);
-          }
-        } else if (res.status === 404) {
-          // Session expired, clear it
-          sessionIdRef.current = null;
-          try { sessionStorage.removeItem(SESSION_KEY); } catch {}
-        }
-      } catch {
-        // ignore restore errors
-      }
-    })();
-  }, [restored]);
-
-  // Poll for session data after each assistant message (extracted fields + scores)
-  const fetchSessionData = useCallback(async () => {
-    const sid = sessionIdRef.current;
-    if (!sid) return;
-    try {
-      const res = await fetch(`/api/chat/anonymous/${sid}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.sessionData) setSessionData(data.sessionData);
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  // Fetch after messages change (delayed to let extraction complete)
-  useEffect(() => {
-    if (messages.length >= 2) {
-      const timer = setTimeout(fetchSessionData, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [messages.length, fetchSessionData]);
 
   return {
     messages,
+    conversations,
+    activeConversationId,
     sending,
     streamingText,
     messagesRemaining,
     limitReached,
     error,
     sendMessage,
+    selectConversation,
+    newConversation,
     getSessionId,
-    sessionData,
+    sessionData: null as Record<string, any> | null,
     reset,
+    loadConversations,
   };
 }

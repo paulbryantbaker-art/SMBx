@@ -211,7 +211,10 @@ export default function AppShell() {
   // Set initial conversation ID from URL
   useEffect(() => {
     const convId = getInitialConversationId(window.location.pathname);
-    if (convId && user) authChat.selectConversation(convId);
+    if (convId) {
+      if (user) authChat.selectConversation(convId);
+      else anonChat.selectConversation(convId);
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Unified message interface
@@ -232,7 +235,10 @@ export default function AppShell() {
       setViewState(pathToViewState(path));
       setActiveTab(pathToTab(path));
       const convId = getInitialConversationId(path);
-      if (convId && user) authChat.selectConversation(convId);
+      if (convId) {
+        if (user) authChat.selectConversation(convId);
+        else anonChat.selectConversation(convId);
+      }
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
@@ -255,7 +261,7 @@ export default function AppShell() {
     if (viewState === 'landing') {
       setMorphing(true);
       if (user) authChat.sendMessage(content);
-      else anonChat.sendMessage(content);
+      else anonChat.sendMessage(content, activeTab);
       setTimeout(() => {
         setViewState('chat');
         setMorphing(false);
@@ -264,8 +270,8 @@ export default function AppShell() {
       return;
     }
     if (user) authChat.sendMessage(content);
-    else anonChat.sendMessage(content);
-  }, [viewState, user, authChat, anonChat, navigate]);
+    else anonChat.sendMessage(content, activeTab);
+  }, [viewState, user, authChat, anonChat, navigate, activeTab]);
 
   // Chip click
   const handleChipClick = useCallback((text: string) => {
@@ -322,9 +328,11 @@ export default function AppShell() {
   // Current page copy
   const page = PAGE_COPY[activeTab];
 
-  // Conversations
-  const deals = (authChat.conversations || []).filter(c => c.deal_id != null);
-  const recent = (authChat.conversations || []).filter(c => c.deal_id == null);
+  // Conversations — unified across auth and anonymous
+  const allConversations = user ? authChat.conversations : anonChat.conversations;
+  const activeConvId = user ? authChat.activeConversationId : anonChat.activeConversationId;
+  const deals = (allConversations || []).filter(c => c.deal_id != null);
+  const recent = (allConversations || []).filter(c => c.deal_id == null);
 
   /* ═══ SIDEBAR JSX ═══ */
 
@@ -344,8 +352,10 @@ export default function AppShell() {
       <div className="px-4 pt-4 pb-4">
         <button
           onClick={() => {
-            if (user) { authChat.newConversation(); setViewState('chat'); navigate('/chat'); }
-            else { setViewState('chat'); navigate('/chat'); }
+            if (user) { authChat.newConversation(); }
+            else { anonChat.newConversation(); }
+            setViewState('chat');
+            navigate('/chat');
             setIsMobileSidebarOpen(false);
           }}
           className="w-full bg-[#1A1A18] text-white font-bold text-[14px] px-4 py-3 rounded-xl cursor-pointer border-none hover:bg-[#333] transition-colors"
@@ -386,7 +396,7 @@ export default function AppShell() {
 
       {/* Conversations */}
       <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-4">
-        {user && deals.length > 0 && (
+        {deals.length > 0 && (
           <div className="mb-3">
             <div className="text-[10px] font-black uppercase text-[#D4714E] px-4 mb-2" style={{ letterSpacing: '0.25em' }}>
               Active Deals
@@ -395,13 +405,14 @@ export default function AppShell() {
               <button
                 key={c.id}
                 onClick={() => {
-                  authChat.selectConversation(c.id);
+                  if (user) authChat.selectConversation(c.id);
+                  else anonChat.selectConversation(c.id);
                   setViewState('chat');
                   navigate(`/chat/${c.id}`);
                   setIsMobileSidebarOpen(false);
                 }}
                 className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-[13px] cursor-pointer border-none transition-all ${
-                  c.id === authChat.activeConversationId && viewState === 'chat'
+                  c.id === activeConvId && viewState === 'chat'
                     ? 'bg-white shadow-sm font-semibold text-[#1A1A18]'
                     : 'bg-transparent text-[#6E6A63] hover:bg-white font-medium'
                 }`}
@@ -418,7 +429,7 @@ export default function AppShell() {
           </div>
         )}
 
-        {user && recent.length > 0 && (
+        {recent.length > 0 && (
           <div>
             <div className="text-[10px] font-black uppercase text-[#6E6A63] px-4 mb-2" style={{ letterSpacing: '0.25em' }}>
               Recent
@@ -427,13 +438,14 @@ export default function AppShell() {
               <button
                 key={c.id}
                 onClick={() => {
-                  authChat.selectConversation(c.id);
+                  if (user) authChat.selectConversation(c.id);
+                  else anonChat.selectConversation(c.id);
                   setViewState('chat');
                   navigate(`/chat/${c.id}`);
                   setIsMobileSidebarOpen(false);
                 }}
                 className={`flex items-center gap-3 w-full px-4 py-2 rounded-xl text-[13px] cursor-pointer border-none transition-all ${
-                  c.id === authChat.activeConversationId && viewState === 'chat'
+                  c.id === activeConvId && viewState === 'chat'
                     ? 'bg-white shadow-sm font-medium text-[#1A1A18]'
                     : 'bg-transparent text-[#6E6A63] hover:bg-white font-medium'
                 }`}
@@ -591,23 +603,9 @@ export default function AppShell() {
                       ))}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 px-6 pt-5">
+                  <div className="flex items-center gap-1.5 px-6 pt-5 mb-4">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" style={{ boxShadow: '0 0 4px rgba(74,222,128,0.5)', animation: 'statusPulse 2s ease infinite' }} />
                     <span className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#A8A49C]">Live federal data &middot; Census &middot; BLS &middot; SBA &middot; SEC</span>
-                  </div>
-                  <div className="mx-6 mt-5 mb-10">
-                    <div
-                      className="bg-white shadow-2xl transition-all relative overflow-visible"
-                      style={{ borderRadius: '32px', border: '2px solid #D1D5DB' }}
-                    >
-                      <div className="flex items-center gap-2 px-6 pt-4 pb-0">
-                        <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                        <span className="text-[12px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>
-                          Federal Data Sync Active
-                        </span>
-                      </div>
-                      <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder="Tell Yulia about your deal..." disabled={sending} />
-                    </div>
                   </div>
                 </div>
 
@@ -712,23 +710,9 @@ export default function AppShell() {
                     })}
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 px-6 pt-5">
+                <div className="flex items-center gap-1.5 px-6 pt-5 mb-4">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" style={{ boxShadow: '0 0 4px rgba(74,222,128,0.5)', animation: 'statusPulse 2s ease infinite' }} />
                   <span className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#A8A49C]">{page.tagline}</span>
-                </div>
-                <div className="mx-6 mt-5 mb-10">
-                  <div
-                    className="bg-white shadow-2xl transition-all relative overflow-visible"
-                    style={{ borderRadius: '32px', border: '2px solid #D1D5DB' }}
-                  >
-                    <div className="flex items-center gap-2 px-6 pt-4 pb-0">
-                      <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                      <span className="text-[12px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>
-                        Federal Data Sync Active
-                      </span>
-                    </div>
-                    <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder={page.placeholder} disabled={sending} />
-                  </div>
                 </div>
               </div>
 
@@ -874,6 +858,38 @@ export default function AppShell() {
             </div>
           )}
         </div>
+
+        {/* ════ MOBILE LANDING DOCK — pinned at bottom, outside scroll ════ */}
+        {showDock && viewState === 'landing' && isMobile && (
+          <div
+            className="shrink-0 md:hidden px-4 pt-3"
+            style={{
+              paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
+              touchAction: 'manipulation',
+            }}
+          >
+            <div
+              className="bg-white shadow-2xl relative overflow-visible"
+              style={{ borderRadius: '28px', border: '2px solid #D1D5DB' }}
+            >
+              <div className="flex items-center gap-2 px-5 pt-3 pb-0">
+                <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                <span className="text-[11px] font-black uppercase text-[#6E6A63]"
+                  style={{ letterSpacing: '0.08em' }}>
+                  Federal Data Sync Active
+                </span>
+              </div>
+              <ChatDock
+                ref={dockRef}
+                onSend={handleSend}
+                variant="hero"
+                rows={1}
+                placeholder={page.placeholder}
+                disabled={sending}
+              />
+            </div>
+          </div>
+        )}
 
         {/* ════ CHATDOCK — new-skin card, single-line, auto-expands ════ */}
         {showDock && viewState === 'chat' && (
