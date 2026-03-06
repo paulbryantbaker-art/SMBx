@@ -163,23 +163,15 @@ async function createValuationNotification(userId: number, change: ValuationChan
   const message = `Your estimated business value ${direction}: ${formatCents(change.previousLow)}–${formatCents(change.previousHigh)} → ${formatCents(change.newLow)}–${formatCents(change.newHigh)} (${arrow}${change.changePercent}%). ${change.reason}`;
 
   await sql`
-    INSERT INTO notifications (user_id, type, title, message, metadata, created_at)
+    INSERT INTO notifications (user_id, type, title, body, action_url, created_at)
     VALUES (
       ${userId},
       'valuation_change',
       ${'Your business value estimate ' + direction},
       ${message},
-      ${JSON.stringify({
-        profileId: change.profileId,
-        previousLow: change.previousLow,
-        previousHigh: change.previousHigh,
-        newLow: change.newLow,
-        newHigh: change.newHigh,
-        changePercent: change.changePercent,
-      })}::jsonb,
+      '/seller',
       NOW()
     )
-    ON CONFLICT DO NOTHING
   `;
 }
 
