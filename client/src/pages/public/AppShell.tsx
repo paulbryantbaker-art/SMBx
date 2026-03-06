@@ -494,7 +494,16 @@ export default function AppShell() {
   /* ═══ RENDER ═══ */
 
   return (
-    <div id="app-root" className="flex bg-white font-sans overflow-hidden h-[100dvh]">
+    <div
+      id="app-root"
+      className="flex bg-white font-sans"
+      style={{
+        height: 'var(--app-height, 100vh)',
+        ...(viewState === 'chat'
+          ? { position: 'fixed' as const, top: 0, left: 0, right: 0 }
+          : { overflow: 'hidden' }),
+      }}
+    >
       {/* Desktop sidebar */}
       {!isMobile && sidebarContent(false)}
 
@@ -519,27 +528,54 @@ export default function AppShell() {
           style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #F3F4F6' }}
         >
           <div className="flex items-center gap-3">
-            {isMobile && (
-              <button
-                onClick={() => setIsMobileSidebarOpen(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center bg-transparent border-none cursor-pointer text-[#6E6A63] hover:bg-gray-50"
-                type="button"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
-                </svg>
-              </button>
-            )}
-            {isMobile ? (
-              <span className="text-[22px] font-black tracking-tight leading-none" style={{ letterSpacing: '-0.03em' }}>
-                smb<span className="text-[#D4714E]">X</span>.ai
-              </span>
+            {viewState === 'chat' ? (
+              /* ── Chat mode: back arrow + Yulia ── */
+              <div className="flex items-center gap-3" style={{ animation: 'fadeIn 0.3s ease' }}>
+                <button
+                  onClick={handleBack}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center bg-transparent border-none cursor-pointer text-[#6E6A63] hover:bg-gray-50"
+                  type="button"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 12H5" /><polyline points="12 19 5 12 12 5" />
+                  </svg>
+                </button>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-[#D4714E] text-white flex items-center justify-center text-[13px] font-bold" style={{ boxShadow: '0 2px 6px rgba(212,113,78,0.2)' }}>
+                    Y
+                  </div>
+                  <div className="leading-tight">
+                    <span className="text-[15px] font-bold text-[#1A1A18] block">Yulia</span>
+                    <span className="text-[11px] font-medium text-[#6E6A63]">M&amp;A Advisor</span>
+                  </div>
+                </div>
+              </div>
             ) : (
+              /* ── Landing mode: hamburger + logo / breadcrumb ── */
               <>
-                <span className="w-[3px] h-5 bg-[#D4714E] rounded-full" />
-                <span className="text-[10px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.2em' }}>
-                  M&amp;A OS / {activeTab === 'home' ? 'Home' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
-                </span>
+                {isMobile && (
+                  <button
+                    onClick={() => setIsMobileSidebarOpen(true)}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center bg-transparent border-none cursor-pointer text-[#6E6A63] hover:bg-gray-50"
+                    type="button"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+                    </svg>
+                  </button>
+                )}
+                {isMobile ? (
+                  <span className="text-[22px] font-black tracking-tight leading-none" style={{ letterSpacing: '-0.03em' }}>
+                    smb<span className="text-[#D4714E]">X</span>.ai
+                  </span>
+                ) : (
+                  <>
+                    <span className="w-[3px] h-5 bg-[#D4714E] rounded-full" />
+                    <span className="text-[10px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.2em' }}>
+                      M&amp;A OS / {activeTab === 'home' ? 'Home' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
+                    </span>
+                  </>
+                )}
               </>
             )}
           </div>
@@ -805,7 +841,6 @@ export default function AppShell() {
                 messages={messages}
                 streamingText={streamingText}
                 sending={sending}
-                onBack={handleBack}
               />
 
               {user && authChat.paywallData && authChat.activeDealId && (

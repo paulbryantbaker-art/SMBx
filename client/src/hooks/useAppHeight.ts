@@ -1,67 +1,42 @@
 import { useEffect } from 'react';
 
 /**
- * Chat mode (enabled=true):  pins #app-root with position:fixed and
- * shrinks height to visualViewport.height so the dock sits above the
- * iOS keyboard.  Body scroll is locked to prevent page-level bouncing.
+ * Sets --app-height CSS custom property on <html> to match the visual viewport.
+ * Components use `height: var(--app-height, 100vh)` instead of h-dvh.
  *
- * Landing (enabled=false):  removes all inline styles so CSS 100dvh
- * takes over and the keyboard simply overlays the page.
+ * Chat mode (enabled=true):  locks body scroll so iOS can't bounce behind.
+ * Landing (enabled=false):   body scroll unlocked, keyboard overlays naturally.
+ *
+ * The #app-root component is responsible for applying position:fixed in chat
+ * mode — this hook only provides the CSS var and body scroll lock.
  */
 export function useAppHeight(enabled = true) {
+  // Always keep --app-height updated (visual viewport height)
   useEffect(() => {
-    const app = document.getElementById('app-root');
-    if (!app) return;
-
-    if (!enabled) {
-      app.style.removeProperty('height');
-      app.style.removeProperty('position');
-      app.style.removeProperty('top');
-      app.style.removeProperty('left');
-      app.style.removeProperty('right');
-      app.style.removeProperty('bottom');
-      document.body.style.removeProperty('overflow');
-      return;
-    }
-
-    // Lock body scroll so iOS can't bounce the page behind the fixed container
-    document.body.style.overflow = 'hidden';
-
     const vv = window.visualViewport;
 
-    function onResize() {
-      const el = document.getElementById('app-root');
-      if (!el) return;
-
-      // position:fixed keeps the container anchored to the layout viewport —
-      // no transform needed.  Just shrink height to the visible area.
-      el.style.position = 'fixed';
-      el.style.top = '0';
-      el.style.left = '0';
-      el.style.right = '0';
-      el.style.bottom = 'auto';
-      el.style.height = (vv ? vv.height : window.innerHeight) + 'px';
+    function update() {
+      const h = vv ? vv.height : window.innerHeight;
+      document.documentElement.style.setProperty('--app-height', h + 'px');
     }
 
-    // Only listen to resize (keyboard open/close), NOT scroll
-    if (vv) vv.addEventListener('resize', onResize);
-    window.addEventListener('resize', onResize);
-    onResize();
+    if (vv) vv.addEventListener('resize', update);
+    window.addEventListener('resize', update);
+    update();
 
     return () => {
-      if (vv) vv.removeEventListener('resize', onResize);
-      window.removeEventListener('resize', onResize);
-
-      const el = document.getElementById('app-root');
-      if (el) {
-        el.style.removeProperty('height');
-        el.style.removeProperty('position');
-        el.style.removeProperty('top');
-        el.style.removeProperty('left');
-        el.style.removeProperty('right');
-        el.style.removeProperty('bottom');
-      }
-      document.body.style.removeProperty('overflow');
+      if (vv) vv.removeEventListener('resize', update);
+      window.removeEventListener('resize', update);
     };
+  }, []);
+
+  // Body scroll lock in chat mode only
+  useEffect(() => {
+    if (enabled) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.removeProperty('overflow');
+      };
+    }
   }, [enabled]);
 }
