@@ -14,6 +14,8 @@ import GateProgress from '../../components/chat/GateProgress';
 import PaywallCard from '../../components/chat/PaywallCard';
 import Canvas from '../../components/chat/Canvas';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
+import SellerDashboard from '../../components/chat/SellerDashboard';
+import BuyerPipeline from '../../components/chat/BuyerPipeline';
 import HomeBelow from '../../components/content/HomeBelow';
 import SellBelow from '../../components/content/SellBelow';
 import BuyBelow from '../../components/content/BuyBelow';
@@ -23,7 +25,7 @@ import PricingBelow from '../../components/content/PricingBelow';
 /* ═══ TYPES ═══ */
 
 export type TabId = 'home' | 'sell' | 'buy' | 'advisors' | 'pricing';
-export type ViewState = 'landing' | 'chat' | 'pipeline' | 'dataroom' | 'settings';
+export type ViewState = 'landing' | 'chat' | 'pipeline' | 'dataroom' | 'settings' | 'seller-dashboard' | 'buyer-pipeline';
 
 /* ═══ PAGE COPY ═══ */
 
@@ -167,6 +169,8 @@ function pathToViewState(path: string): ViewState {
   if (path === '/pipeline') return 'pipeline';
   if (path === '/dataroom') return 'dataroom';
   if (path === '/settings') return 'settings';
+  if (path === '/seller') return 'seller-dashboard';
+  if (path === '/buyer') return 'buyer-pipeline';
   return 'landing';
 }
 
@@ -366,7 +370,7 @@ export default function AppShell() {
 
   // Redirect unauth from tool views
   useEffect(() => {
-    if (['pipeline', 'dataroom', 'settings'].includes(viewState) && !user) navigate('/login');
+    if (['pipeline', 'dataroom', 'settings', 'seller-dashboard', 'buyer-pipeline'].includes(viewState) && !user) navigate('/login');
   }, [viewState, user, navigate]);
 
   // Show dock
@@ -523,6 +527,44 @@ export default function AppShell() {
 
       {/* Footer */}
       <div className="mt-auto border-t px-4 py-3 space-y-1" style={{ borderColor: '#F3F4F6' }}>
+        {user && (
+          <button
+            onClick={() => {
+              setViewState('seller-dashboard');
+              navigate('/seller');
+              setIsMobileSidebarOpen(false);
+            }}
+            className={`flex items-center gap-2 w-full text-left text-[11px] font-bold uppercase bg-transparent border-none cursor-pointer transition-colors py-1 ${
+              viewState === 'seller-dashboard' ? 'text-[#D4714E]' : 'text-[#6E6A63] hover:text-[#1A1A18]'
+            }`}
+            style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
+            type="button"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 3v18h18" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" />
+            </svg>
+            Seller
+          </button>
+        )}
+        {user && (
+          <button
+            onClick={() => {
+              setViewState('buyer-pipeline');
+              navigate('/buyer');
+              setIsMobileSidebarOpen(false);
+            }}
+            className={`flex items-center gap-2 w-full text-left text-[11px] font-bold uppercase bg-transparent border-none cursor-pointer transition-colors py-1 ${
+              viewState === 'buyer-pipeline' ? 'text-[#D4714E]' : 'text-[#6E6A63] hover:text-[#1A1A18]'
+            }`}
+            style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
+            type="button"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+            </svg>
+            Buyer
+          </button>
+        )}
         {user && (
           <button
             onClick={() => {
@@ -978,6 +1020,18 @@ export default function AppShell() {
           {viewState === 'dataroom' && user && (
             <div className="max-w-5xl mx-auto px-4 py-6">
               <DataRoom dealId={authChat.activeDealId} onViewDeliverable={(id) => setViewingDeliverable(id)} />
+            </div>
+          )}
+
+          {viewState === 'seller-dashboard' && user && (
+            <div className="max-w-5xl mx-auto px-4 py-6">
+              <SellerDashboard />
+            </div>
+          )}
+
+          {viewState === 'buyer-pipeline' && user && (
+            <div className="max-w-5xl mx-auto px-4 py-6">
+              <BuyerPipeline />
             </div>
           )}
 

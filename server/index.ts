@@ -22,6 +22,10 @@ import { flywheelRouter } from './routes/flywheel.js';
 import { searchRouter } from './routes/search.js';
 import { providerRouter } from './routes/providers.js';
 import { franchiseRouter } from './routes/franchise.js';
+import { sellerDashboardRouter } from './routes/sellerDashboard.js';
+import { buyerPipelineRouter } from './routes/buyerPipeline.js';
+import { discoveryRouter } from './routes/discovery.js';
+import { startWorker } from './workers/discoveryWorker.js';
 import rateLimit from 'express-rate-limit';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -218,6 +222,9 @@ app.use('/api', flywheelRouter);
 app.use('/api', searchRouter);
 app.use('/api', providerRouter);
 app.use('/api', franchiseRouter);
+app.use('/api', sellerDashboardRouter);
+app.use('/api', buyerPipelineRouter);
+app.use('/api', discoveryRouter);
 
 // ─── 4. JSON error handler for API routes ──────────────────
 app.use('/api', (err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -238,4 +245,6 @@ app.get('*', (_req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  // Start background worker (non-blocking)
+  startWorker().catch(err => console.warn('[worker] Init skipped:', err.message));
 });
