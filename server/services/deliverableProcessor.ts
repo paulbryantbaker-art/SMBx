@@ -300,6 +300,13 @@ export async function processDeliverable(data: DeliverableJobData): Promise<void
     `;
 
     console.log(`[deliverableProcessor] Deliverable ${deliverableId} complete (${generationTime}ms)`);
+
+    // Auto-file into data room folder
+    try {
+      await autoFileDeliverable(deliverableId, dealId, data.userId, deal.journey_type, deal.current_gate, deliverableType);
+    } catch (err: any) {
+      console.error(`[deliverableProcessor] Auto-file failed for ${deliverableId}:`, err.message);
+    }
   } catch (err: any) {
     console.error(`[deliverableProcessor] Deliverable ${deliverableId} failed:`, err.message);
     await sql`
@@ -310,6 +317,120 @@ export async function processDeliverable(data: DeliverableJobData): Promise<void
     `;
     throw err;
   }
+}
+
+// ─── Auto-filing: map deliverable types → folder name preferences ───
+
+const AUTO_FILE_MAP: Record<string, string[]> = {
+  // Financials
+  value_readiness_report: ['Financials'],
+  sde_analysis: ['Financials'],
+  sba_bankability_report: ['Financials', 'Thesis & Criteria'],
+  financial_model: ['Financials', 'Thesis & Criteria'],
+  sell_financial_model: ['Financials'],
+  working_capital_analysis: ['Financials'],
+  // Valuation
+  valuation_report: ['Valuation', 'Target Analysis'],
+  sell_valuation_report: ['Valuation'],
+  buy_valuation_model: ['Target Analysis', 'Valuation'],
+  // Marketing / Packaging
+  cim: ['Marketing'],
+  sell_cim_draft: ['Marketing'],
+  blind_teaser: ['Marketing'],
+  sell_blind_teaser: ['Marketing'],
+  // Deal structure
+  capital_structure_analysis: ['Deal Structure', 'Buyer Management'],
+  loi: ['Deal Structure', 'Buyer Management'],
+  buy_loi_draft: ['Deal Structure'],
+  // Due diligence
+  dd_package: ['Due Diligence'],
+  buy_dd_checklist: ['Due Diligence'],
+  // Research / thesis
+  buy_deal_screening_memo: ['Target Analysis', 'Thesis & Criteria'],
+  thesis_document: ['Thesis & Criteria'],
+  intelligence_report: ['Financials', 'Thesis & Criteria'],
+};
+
+const FOLDER_TEMPLATES: Record<string, { name: string; gate: string | null; sort: number }[]> = {
+  sell: [
+    { name: 'Financials', gate: null, sort: 0 },
+    { name: 'Valuation', gate: 'S2', sort: 1 },
+    { name: 'Marketing', gate: 'S3', sort: 2 },
+    { name: 'Buyer Management', gate: 'S4', sort: 3 },
+    { name: 'Closing', gate: 'S5', sort: 4 },
+  ],
+  buy: [
+    { name: 'Thesis & Criteria', gate: null, sort: 0 },
+    { name: 'Target Analysis', gate: 'B2', sort: 1 },
+    { name: 'Due Diligence', gate: 'B3', sort: 2 },
+    { name: 'Deal Structure', gate: 'B4', sort: 3 },
+    { name: 'Closing', gate: 'B5', sort: 4 },
+  ],
+  raise: [
+    { name: 'Financials', gate: null, sort: 0 },
+    { name: 'Investor Materials', gate: 'R2', sort: 1 },
+    { name: 'Outreach', gate: 'R3', sort: 2 },
+    { name: 'Term Sheets', gate: 'R4', sort: 3 },
+    { name: 'Closing', gate: 'R5', sort: 4 },
+  ],
+  pmi: [
+    { name: 'Acquisition Docs', gate: null, sort: 0 },
+    { name: 'Integration Plan', gate: 'PMI1', sort: 1 },
+    { name: 'Assessment', gate: 'PMI2', sort: 2 },
+    { name: 'Optimization', gate: 'PMI3', sort: 3 },
+  ],
+};
+
+async function autoFileDeliverable(
+  deliverableId: number, dealId: number, userId: number,
+  journeyType: string, currentGate: string, deliverableType: string,
+) {
+  const folderPrefs = AUTO_FILE_MAP[deliverableType];
+  if (!folderPrefs) return; // Unknown type — leave unfiled
+
+  // Ensure folders exist for this deal
+  const templates = FOLDER_TEMPLATES[journeyType] || FOLDER_TEMPLATES.sell;
+  const gateIndex = parseInt(currentGate.replace(/[A-Z]+/g, ''), 10) || 0;
+
+  for (const tmpl of templates) {
+    if (tmpl.gate) {
+      const folderGateIndex = parseInt(tmpl.gate.replace(/[A-Z]+/g, ''), 10) || 0;
+      if (gateIndex < folderGateIndex) continue;
+    }
+    await sql`
+      INSERT INTO data_room_folders (deal_id, name, gate, sort_order)
+      VALUES (${dealId}, ${tmpl.name}, ${tmpl.gate}, ${tmpl.sort})
+      ON CONFLICT (deal_id, name) DO NOTHING
+    `.catch(() => {});
+  }
+
+  // Find the target folder by preference order
+  const allFolders = await sql`
+    SELECT id, name FROM data_room_folders WHERE deal_id = ${dealId}
+  `;
+  let targetFolderId: number | null = null;
+  for (const pref of folderPrefs) {
+    const match = (allFolders as any[]).find(f => f.name === pref);
+    if (match) { targetFolderId = match.id; break; }
+  }
+  if (!targetFolderId) return; // No matching folder available yet
+
+  // Get deliverable name from menu item
+  const [menuItem] = await sql`
+    SELECT m.name FROM menu_items m
+    JOIN deliverables d ON d.menu_item_id = m.id
+    WHERE d.id = ${deliverableId}
+  `;
+  const docName = menuItem?.name || 'Deliverable';
+
+  // Insert data room document (skip if already filed)
+  await sql`
+    INSERT INTO data_room_documents (deal_id, folder_id, user_id, deliverable_id, name, file_type, status)
+    VALUES (${dealId}, ${targetFolderId}, ${userId}, ${deliverableId}, ${docName}, 'deliverable', 'draft')
+    ON CONFLICT DO NOTHING
+  `.catch(() => {});
+
+  console.log(`[deliverableProcessor] Auto-filed ${deliverableId} → folder ${targetFolderId}`);
 }
 
 function buildGenerationPrompt(deal: any, menuItem: any, deliverableType: string): string {

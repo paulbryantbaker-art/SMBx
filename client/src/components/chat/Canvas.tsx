@@ -9,6 +9,8 @@ interface CanvasProps {
   markdownContent?: string | null;
   /** Title shown in the toolbar */
   title?: string;
+  /** Deal ID for "Save to Data Room" (authenticated only) */
+  dealId?: number | null;
   onClose: () => void;
 }
 
@@ -33,10 +35,12 @@ const DELIVERABLE_LABELS: Record<string, string> = {
   sba_financing_model: 'SBA Financing Model',
 };
 
-export default function Canvas({ deliverableId, markdownContent, title, onClose }: CanvasProps) {
+export default function Canvas({ deliverableId, markdownContent, title, dealId, onClose }: CanvasProps) {
   const [data, setData] = useState<DeliverableData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filing, setFiling] = useState(false);
+  const [filed, setFiled] = useState(false);
 
   // Determine mode
   const isMarkdownMode = !!markdownContent;
@@ -74,6 +78,20 @@ export default function Canvas({ deliverableId, markdownContent, title, onClose 
     setError(null);
     fetchData();
   }, [fetchData, isMarkdownMode]);
+
+  const handleSaveToDataRoom = async () => {
+    if (!dealId || !deliverableId || filing || filed) return;
+    setFiling(true);
+    try {
+      const res = await fetch(`/api/deals/${dealId}/data-room/file`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ deliverableId }),
+      });
+      if (res.ok) setFiled(true);
+    } catch { /* ignore */ }
+    finally { setFiling(false); }
+  };
 
   const handleExport = () => {
     const printArea = document.getElementById('canvas-print-area');
@@ -126,6 +144,22 @@ export default function Canvas({ deliverableId, markdownContent, title, onClose 
           )}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
+          {showContent && dealId && deliverableId && !isMarkdownMode && (
+            <button
+              onClick={handleSaveToDataRoom}
+              disabled={filing || filed}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
+                filed
+                  ? 'bg-green-50 text-green-700'
+                  : 'bg-[#D4714E] text-white hover:bg-[#BE6342]'
+              } disabled:opacity-60`}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+              </svg>
+              {filed ? 'Saved' : filing ? 'Saving...' : 'Save to Data Room'}
+            </button>
+          )}
           {showContent && (
             <button
               onClick={handleExport}
