@@ -197,6 +197,7 @@ export default function AppShell() {
   const [activeTab, setActiveTab] = useState<TabId>(() => pathToTab(location));
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
+  const [canvasMarkdown, setCanvasMarkdown] = useState<{ content: string; title: string } | null>(null);
   const [morphing, setMorphing] = useState(false);
 
   // Chat hooks (always called for hook order)
@@ -310,6 +311,42 @@ export default function AppShell() {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
+
+  // Auto-open canvas when anonymous deliverable is detected
+  useEffect(() => {
+    if (!user && anonChat.pendingDeliverable) {
+      const msg = anonChat.pendingDeliverable;
+      const type = msg.metadata?.deliverableType as string;
+      const LABELS: Record<string, string> = {
+        value_readiness_report: 'Value Readiness Report',
+        thesis_document: 'Acquisition Thesis',
+        sde_analysis: 'SDE Analysis',
+      };
+      setCanvasMarkdown({ content: msg.content, title: LABELS[type] || 'Document' });
+      anonChat.setPendingDeliverable(null);
+    }
+  }, [user, anonChat.pendingDeliverable]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Handler: open deliverable from chat message click
+  const handleOpenDeliverable = useCallback((msg: { content: string; metadata?: Record<string, any> | null }) => {
+    const type = msg.metadata?.deliverableType as string | undefined;
+    const LABELS: Record<string, string> = {
+      value_readiness_report: 'Value Readiness Report',
+      thesis_document: 'Acquisition Thesis',
+      sde_analysis: 'SDE Analysis',
+      valuation_report: 'Valuation Report',
+      deal_screening_memo: 'Deal Screening Memo',
+      sba_financing_model: 'SBA Financing Model',
+    };
+    setCanvasMarkdown({ content: msg.content, title: LABELS[type || ''] || 'Document' });
+  }, []);
+
+  const closeCanvas = useCallback(() => {
+    setCanvasMarkdown(null);
+    setViewingDeliverable(null);
+  }, []);
+
+  const canvasOpen = canvasMarkdown !== null || viewingDeliverable !== null;
 
   // Signup prompt
   const showSignup = !user && (
@@ -607,6 +644,10 @@ export default function AppShell() {
           </div>
         </header>
 
+        {/* Main row: chat + canvas split */}
+        <div className="flex-1 flex min-h-0">
+        {/* Chat column */}
+        <div className="flex-1 flex flex-col min-w-0">
         {/* Scroll area */}
         <div
           ref={scrollRef}
@@ -852,6 +893,7 @@ export default function AppShell() {
                 messages={messages}
                 streamingText={streamingText}
                 sending={sending}
+                onOpenDeliverable={handleOpenDeliverable}
               />
 
               {user && authChat.paywallData && authChat.activeDealId && (
@@ -958,10 +1000,46 @@ export default function AppShell() {
           </div>
         )}
 
-        {/* Deliverable viewer overlay */}
-        {viewingDeliverable !== null && (
-          <div className="fixed inset-0 z-50 bg-white flex flex-col">
-            <Canvas deliverableId={viewingDeliverable} onClose={() => setViewingDeliverable(null)} />
+        </div>{/* end chat column */}
+
+        {/* ════ DESKTOP CANVAS PANEL — split view ════ */}
+        {canvasOpen && !isMobile && (
+          <div
+            className="shrink-0 flex flex-col border-l border-[#DDD9D1]"
+            style={{ width: 480, animation: 'slideInRight 0.25s ease' }}
+          >
+            {canvasMarkdown ? (
+              <Canvas
+                markdownContent={canvasMarkdown.content}
+                title={canvasMarkdown.title}
+                onClose={closeCanvas}
+              />
+            ) : viewingDeliverable !== null ? (
+              <Canvas
+                deliverableId={viewingDeliverable}
+                onClose={closeCanvas}
+              />
+            ) : null}
+          </div>
+        )}
+
+        </div>{/* end main row */}
+
+        {/* ════ MOBILE CANVAS OVERLAY ════ */}
+        {canvasOpen && isMobile && (
+          <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ animation: 'slideUpIn 0.3s ease' }}>
+            {canvasMarkdown ? (
+              <Canvas
+                markdownContent={canvasMarkdown.content}
+                title={canvasMarkdown.title}
+                onClose={closeCanvas}
+              />
+            ) : viewingDeliverable !== null ? (
+              <Canvas
+                deliverableId={viewingDeliverable}
+                onClose={closeCanvas}
+              />
+            ) : null}
           </div>
         )}
       </div>
@@ -979,6 +1057,14 @@ export default function AppShell() {
         @keyframes slideInLeft {
           from { transform: translateX(-100%); }
           to { transform: translateX(0); }
+        }
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideUpIn {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
         }
       `}</style>
     </div>

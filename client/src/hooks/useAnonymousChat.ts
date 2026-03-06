@@ -5,6 +5,7 @@ export interface AnonMessage {
   role: 'user' | 'assistant';
   content: string;
   created_at: string;
+  metadata?: Record<string, any> | null;
 }
 
 export interface AnonConversation {
@@ -38,8 +39,10 @@ export function useAnonymousChat() {
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [pendingDeliverable, setPendingDeliverable] = useState<AnonMessage | null>(null);
   const sessionIdRef = useRef(getOrCreateSessionId());
   const abortRef = useRef<AbortController | null>(null);
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Kept for AppShell compat — no limits in unified flow
   const limitReached = false;
@@ -156,6 +159,39 @@ export function useAnonymousChat() {
       }
 
       loadConversations();
+
+      // Poll for deliverable messages from the post-streaming hook
+      // The hook runs fire-and-forget after res.end(), typically 3-8 seconds
+      const convIdForPoll = headerConvId ? parseInt(headerConvId, 10) : activeConversationId;
+      if (convIdForPoll) {
+        if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+        const knownIds = new Set(messages.map(m => m.id));
+        knownIds.add(Date.now()); // user msg
+        knownIds.add(Date.now() + 1); // assistant msg
+
+        const pollForDeliverable = async (attempts: number) => {
+          if (attempts <= 0) return;
+          try {
+            const pollRes = await fetch(`/api/chat/conversations/${convIdForPoll}/messages`, {
+              headers: sessionHeaders(),
+            });
+            if (pollRes.ok) {
+              const allMsgs: AnonMessage[] = await pollRes.json();
+              const deliverable = allMsgs.find(
+                m => m.metadata?.type === 'deliverable' && !knownIds.has(m.id),
+              );
+              if (deliverable) {
+                setMessages(allMsgs);
+                setPendingDeliverable(deliverable);
+                return;
+              }
+            }
+          } catch { /* ignore */ }
+          pollTimerRef.current = setTimeout(() => pollForDeliverable(attempts - 1), 4000);
+        };
+
+        pollTimerRef.current = setTimeout(() => pollForDeliverable(3), 5000);
+      }
     } catch (err: any) {
       if (err.name !== 'AbortError') {
         console.error('Chat error:', err);
@@ -195,12 +231,17 @@ export function useAnonymousChat() {
       abortRef.current.abort();
       abortRef.current = null;
     }
+    if (pollTimerRef.current) {
+      clearTimeout(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
     setMessages([]);
     setConversations([]);
     setActiveConversationId(null);
     setSending(false);
     setStreamingText('');
     setError(null);
+    setPendingDeliverable(null);
   }, []);
 
   return {
@@ -212,6 +253,8 @@ export function useAnonymousChat() {
     messagesRemaining,
     limitReached,
     error,
+    pendingDeliverable,
+    setPendingDeliverable,
     sendMessage,
     selectConversation,
     newConversation,
