@@ -312,6 +312,16 @@ export default function AppShell() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  // Offline detection
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  useEffect(() => {
+    const goOffline = () => setIsOffline(true);
+    const goOnline = () => setIsOffline(false);
+    window.addEventListener('offline', goOffline);
+    window.addEventListener('online', goOnline);
+    return () => { window.removeEventListener('offline', goOffline); window.removeEventListener('online', goOnline); };
+  }, []);
+
   // Auto-open canvas when anonymous deliverable is detected
   useEffect(() => {
     if (!user && anonChat.pendingDeliverable) {
@@ -589,6 +599,13 @@ export default function AppShell() {
 
       {/* Main canvas */}
       <div className="flex-1 flex flex-col min-w-0 h-full">
+        {/* Offline banner */}
+        {isOffline && (
+          <div className="shrink-0 bg-yellow-50 border-b border-yellow-200 px-4 py-2 flex items-center justify-center gap-2 z-30">
+            <span className="w-2 h-2 rounded-full bg-yellow-500" />
+            <span className="text-xs font-semibold text-yellow-800">You appear to be offline. Messages will send when you reconnect.</span>
+          </div>
+        )}
         {/* Header — 80px, backdrop-blur */}
         <header
           className="flex-shrink-0 flex items-center justify-between h-20 px-6 z-20"
@@ -912,6 +929,11 @@ export default function AppShell() {
                 messages={messages}
                 streamingText={streamingText}
                 sending={sending}
+                error={user ? null : anonChat.error}
+                onRetry={!user ? () => {
+                  const last = anonChat.messages.filter(m => m.role === 'user').pop();
+                  if (last) anonChat.sendMessage(last.content);
+                } : undefined}
                 onOpenDeliverable={handleOpenDeliverable}
               />
 

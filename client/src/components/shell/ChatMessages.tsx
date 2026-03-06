@@ -6,7 +6,16 @@ interface ChatMessagesProps {
   messages: AnonMessage[];
   streamingText: string;
   sending: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   onOpenDeliverable?: (message: AnonMessage) => void;
+}
+
+function formatTimestamp(iso: string): string {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  } catch { return ''; }
 }
 
 const DELIVERABLE_ICONS: Record<string, string> = {
@@ -18,7 +27,7 @@ const DELIVERABLE_ICONS: Record<string, string> = {
   sba_financing_model: '\u{1F3E6}',
 };
 
-export default function ChatMessages({ messages, streamingText, sending, onOpenDeliverable }: ChatMessagesProps) {
+export default function ChatMessages({ messages, streamingText, sending, error, onRetry, onOpenDeliverable }: ChatMessagesProps) {
   return (
     <div className="max-w-3xl mx-auto w-full px-4 pt-4 pb-32">
       {/* Messages */}
@@ -85,10 +94,10 @@ export default function ChatMessages({ messages, streamingText, sending, onOpenD
               <div
                 className={`max-w-[80%] ${
                   m.role === 'user'
-                    ? 'bg-gray-50 border border-gray-200 rounded-[40px] rounded-tr-sm text-[#1A1A18]'
+                    ? 'bg-[#FFF0EB] rounded-[40px] rounded-tr-sm text-[#1A1A18]'
                     : 'bg-white border border-[#F3F4F6] rounded-[40px] rounded-tl-sm text-[#1A1A18]'
                 }`}
-                style={{ padding: '28px 36px' }}
+                style={{ padding: '28px 36px', ...(m.role === 'user' ? { border: '1px solid rgba(212,113,78,0.18)' } : {}) }}
               >
                 {m.role === 'user' ? (
                   <p className="text-[18px] md:text-[22px] font-medium leading-[1.6] m-0 whitespace-pre-wrap">{m.content}</p>
@@ -98,6 +107,11 @@ export default function ChatMessages({ messages, streamingText, sending, onOpenD
                   </div>
                 )}
               </div>
+              {m.created_at && (
+                <p className={`text-[10px] text-[#A9A49C] mt-1 m-0 ${m.role === 'user' ? 'text-right' : 'ml-[72px]'}`}>
+                  {formatTimestamp(m.created_at)}
+                </p>
+              )}
             </div>
           );
         })}
@@ -129,6 +143,27 @@ export default function ChatMessages({ messages, streamingText, sending, onOpenD
                 <span className="w-3 h-3 rounded-full bg-[#D4714E]" style={{ animation: 'dotPulse 1.4s ease infinite 0.15s' }} />
                 <span className="w-3 h-3 rounded-full bg-[#D4714E]" style={{ animation: 'dotPulse 1.4s ease infinite 0.3s' }} />
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error with retry */}
+        {error && !sending && (
+          <div className="flex justify-start gap-4">
+            <div className="flex-shrink-0 w-14 h-14 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-[20px] mt-1">
+              !
+            </div>
+            <div className="max-w-[80%] bg-red-50 border border-red-200 rounded-2xl" style={{ padding: '16px 24px' }}>
+              <p className="text-sm text-red-700 m-0 mb-2">{error}</p>
+              {onRetry && (
+                <button
+                  onClick={onRetry}
+                  className="text-sm font-semibold text-[#D4714E] bg-transparent border-0 cursor-pointer hover:underline p-0"
+                  type="button"
+                >
+                  Try again
+                </button>
+              )}
             </div>
           </div>
         )}
