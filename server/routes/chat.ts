@@ -20,6 +20,10 @@ import { MASTER_SYSTEM_PROMPT } from '../prompts/masterPrompt.js';
 import { buildAnonymousPrompt } from '../services/promptBuilder.js';
 import { getFirstGate } from '../../shared/gateRegistry.js';
 import { upsertCompanyProfile, upsertBuyerThesis, getBuyerDemandSignals } from '../services/knowledgeGraphService.js';
+import { checkAnonymousGateAdvancement, advanceAnonymousGate } from '../services/gateService.js';
+import { generateValueReadinessReport } from '../services/generators/valueReadinessReport.js';
+import { generateThesisDocument } from '../services/generators/thesisDocument.js';
+import { generateSdeAnalysis } from '../services/generators/sdeAnalysis.js';
 import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 
 const sql = postgres(process.env.DATABASE_URL!, {
@@ -249,6 +253,88 @@ chatRouter.post('/message', async (req, res) => {
             financing_approach: mergedData.financing_approach as string | undefined,
             target_size_range: mergedData.target_size_range as string | undefined,
           });
+        }
+
+        // 9. Check gate advancement and generate free deliverables
+        const advancement = checkAnonymousGateAdvancement(currentGate, mergedData, journey, league);
+        if (advancement.shouldAdvance && advancement.nextGate) {
+          console.log(`[gate] Advancing conv ${convId}: ${currentGate} → ${advancement.nextGate} (deliverable: ${advancement.completionDeliverable})`);
+
+          let deliverableContent: string | null = null;
+
+          // Generate completion deliverable
+          if (advancement.completionDeliverable === 'value_readiness_report') {
+            try {
+              deliverableContent = await generateValueReadinessReport({
+                business_name: mergedData.business_name as string | undefined,
+                industry: mergedData.industry as string | undefined,
+                location: mergedData.location as string | undefined,
+                revenue: mergedData.revenue as number | undefined,
+                owner_compensation: mergedData.owner_compensation as number | undefined,
+                owner_salary: mergedData.owner_salary as number | undefined,
+                sde: mergedData.sde as number | undefined,
+                ebitda: mergedData.ebitda as number | undefined,
+                employee_count: mergedData.employee_count as number | undefined,
+                years_in_business: mergedData.years_in_business as number | undefined,
+                exit_motivation: mergedData.exit_motivation as string | undefined,
+                timeline_preference: mergedData.timeline_preference as string | undefined,
+                league: league || 'L1',
+                naics_code: mergedData.naics_code as string | undefined,
+                location_state: mergedData.location_state as string | undefined,
+              });
+            } catch (e: any) {
+              console.error('Value Readiness Report generation error:', e.message);
+            }
+          } else if (advancement.completionDeliverable === 'thesis_document') {
+            try {
+              deliverableContent = await generateThesisDocument({
+                buyer_type: mergedData.buyer_type as string | undefined,
+                target_industry: mergedData.target_industry as string | undefined,
+                target_geography: mergedData.target_geography as string | undefined,
+                capital_available: mergedData.capital_available as number | undefined,
+                financing_approach: mergedData.financing_approach as string | undefined,
+                target_size_range: mergedData.target_size_range as string | undefined,
+                league: league || 'L1',
+                prefers_sba: !!(mergedData.financing_approach as string)?.toLowerCase()?.includes('sba'),
+                session_id: effectiveSessionId,
+              });
+            } catch (e: any) {
+              console.error('Thesis Document generation error:', e.message);
+            }
+          } else if (advancement.completionDeliverable === 'sde_analysis') {
+            try {
+              deliverableContent = generateSdeAnalysis({
+                business_name: mergedData.business_name as string | undefined,
+                industry: mergedData.industry as string | undefined,
+                location: mergedData.location as string | undefined,
+                revenue: mergedData.revenue as number | undefined,
+                owner_compensation: mergedData.owner_compensation as number | undefined,
+                owner_salary: mergedData.owner_salary as number | undefined,
+                sde: mergedData.sde as number | undefined,
+                ebitda: mergedData.ebitda as number | undefined,
+                net_income: mergedData.net_income as number | undefined,
+                league: league || 'L1',
+              });
+            } catch (e: any) {
+              console.error('SDE Analysis generation error:', e.message);
+            }
+          }
+
+          // Save deliverable as assistant message
+          if (deliverableContent) {
+            await sql`
+              INSERT INTO messages (conversation_id, role, content, metadata)
+              VALUES (
+                ${convId},
+                'assistant',
+                ${deliverableContent},
+                ${JSON.stringify({ type: 'deliverable', deliverableType: advancement.completionDeliverable, gate_from: currentGate, gate_to: advancement.nextGate })}::jsonb
+              )
+            `;
+          }
+
+          // Advance the gate
+          await advanceAnonymousGate(convId!, advancement.nextGate);
         }
       } catch (err: any) {
         console.error('Post-stream intelligence hook error:', err.message);
