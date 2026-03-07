@@ -2,12 +2,12 @@
  * Discovery Worker — pg-boss background jobs
  * Sessions 13-15: Discovery scanning, sale-readiness scoring, valuation refresh
  */
-import PgBoss from 'pg-boss';
+import { PgBoss } from 'pg-boss';
 import { runDiscoveryScan } from '../services/discoveryService.js';
 import { rescoreAllTargets } from '../services/saleReadinessService.js';
 import { refreshAllValuations } from '../services/valuationRefreshService.js';
 
-let boss: PgBoss | null = null;
+let boss: InstanceType<typeof PgBoss> | null = null;
 
 /**
  * Initialize pg-boss and register job handlers.
@@ -20,7 +20,7 @@ export async function startWorker(): Promise<void> {
   }
 
   try {
-    boss = new PgBoss({
+    boss = new (PgBoss as any)({
       connectionString: process.env.DATABASE_URL,
       ssl: { rejectUnauthorized: false },
     });
