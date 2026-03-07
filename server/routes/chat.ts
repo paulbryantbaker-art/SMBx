@@ -135,7 +135,7 @@ chatRouter.post('/message', async (req, res) => {
 
     // Build dynamic system prompt with intelligence layers
     const userMsgCount = apiMessages.filter(m => m.role === 'user').length;
-    const systemPrompt = buildDynamicAnonymousPrompt(convState, {
+    const systemPrompt = await buildDynamicAnonymousPrompt(convState, {
       sourcePage: journeyContext || 'home',
       isFirstMessage: userMsgCount <= 1,
       messageCount: userMsgCount,
@@ -697,7 +697,7 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
     }
 
     // Build system prompt
-    const systemPrompt = buildSystemPrompt(user as any, deal as any, convId);
+    const systemPrompt = await buildSystemPrompt(user as any, deal as any, convId);
 
     // Load conversation history (last 50 messages max)
     const history = await sql`

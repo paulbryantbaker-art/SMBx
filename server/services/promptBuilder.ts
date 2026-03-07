@@ -5,6 +5,7 @@ import { GATE_PROMPTS } from '../prompts/gatePrompts.js';
 import { BRANCHING_LOGIC } from '../prompts/branchingLogic.js';
 import { isPaywallGate } from './gateReadinessService.js';
 import { generatePaywallPrompt } from './paywallService.js';
+import { getKnowledgeForContext, formatKnowledgeForPrompt } from './knowledgeService.js';
 
 export interface ConversationState {
   journey: string | null;
@@ -276,7 +277,7 @@ DO NOT give a generic welcome. DO NOT say "I'd be happy to help." DO NOT ask the
  * Build an enhanced anonymous prompt that layers intelligence from the conversation state.
  * Used instead of buildAnonymousPrompt() once we have journey/gate/league data.
  */
-export function buildDynamicAnonymousPrompt(
+export async function buildDynamicAnonymousPrompt(
   convState: ConversationState,
   opts: {
     sourcePage?: string;
@@ -284,7 +285,7 @@ export function buildDynamicAnonymousPrompt(
     messageCount?: number;
     demandSignalText?: string;
   },
-): string {
+): Promise<string> {
   // Start with the full base anonymous prompt
   const base = buildAnonymousPrompt(opts);
   const layers: string[] = [base];
@@ -322,14 +323,27 @@ Instead, just converse naturally. Extract information through conversation. Do n
 Continue gathering the information the gate prompt describes, but through natural dialogue, not tool calls.`);
   }
 
+  // Layer: Deep knowledge injection based on gate/journey/industry
+  const naicsCode = convState.extracted_data?.naics_code || null;
+  const knowledgeCtx = await getKnowledgeForContext({
+    gate: convState.current_gate,
+    journey: convState.journey,
+    naicsCode,
+    league: convState.league,
+  });
+  const knowledgeText = formatKnowledgeForPrompt(knowledgeCtx);
+  if (knowledgeText) {
+    layers.push(knowledgeText);
+  }
+
   return layers.join('\n\n');
 }
 
-export function buildSystemPrompt(
+export async function buildSystemPrompt(
   user: UserContext,
   deal: DealContext | null,
   conversationId: number,
-): string {
+): Promise<string> {
   const layers: string[] = [];
 
   // Layer 1: ALWAYS — master prompt with agentic behavior
@@ -373,6 +387,20 @@ export function buildSystemPrompt(
         },
       });
       layers.push(paywallCtx.systemPromptAddition);
+    }
+
+    // Layer 3e: Deep knowledge injection based on deal context
+    // Extract NAICS code from deal industry or financials
+    const naicsCode = deal.financials?.naics_code || null;
+    const knowledgeCtx = await getKnowledgeForContext({
+      gate: deal.current_gate,
+      journey: deal.journey_type,
+      naicsCode,
+      league: deal.league || user.league,
+    });
+    const knowledgeText = formatKnowledgeForPrompt(knowledgeCtx);
+    if (knowledgeText) {
+      layers.push(knowledgeText);
     }
   }
 
