@@ -49,9 +49,12 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
               { title: 'Market Intelligence Report', price: '$200' },
               { title: 'Full Valuation Analysis', price: '$350' },
               { title: 'SBA Bankability Model', price: '$150' },
-              { title: 'Deal Structure Analysis', price: '$300' },
+              { title: 'Capital Structure Analysis', price: '$125' },
+              { title: 'Deal Screening Memo', price: '$100' },
+              { title: 'LOI Draft', price: '$125' },
               { title: 'Buyer/Seller Matching Report', price: '$250' },
               { title: 'Confidential Information Memo (CIM)', price: '$700' },
+              { title: 'Due Diligence Package', price: '$500' },
               { title: 'Post-Acquisition Value Creation Plan', price: '$400' },
             ].map(item => (
               <div key={item.title} className="flex items-center justify-between bg-[#F9FAFB] px-6 md:px-8 py-4" style={{ borderRadius: '16px', border: '1px solid #F3F4F6' }}>

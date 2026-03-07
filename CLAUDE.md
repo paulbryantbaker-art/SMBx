@@ -63,7 +63,7 @@ Associate ($25–$100): Full CIM drafts, buyer lists, financial models
 VP ($100–$500+): Deep research packages, full DD suites
 
 League Multipliers
-LeagueDeal SizeMultiplierL1< $500K1.0×L2$500K–$1M1.25×L3$1M–$5M2.0×L4$5M–$10M3.5×L5$10M–$50M6.0×L6$50M+10.0×
+LeagueDeal SizeMultiplierL1< $500K1.0×L2$500K–$1M1.25×L3$1M–$5M3.0×L4$5M–$10M5.0×L5$10M–$50M8.0×L6$50M+10.0×
 Price Formula
 Final Price = Base Price × League Multiplier × (1 + Wagyu Surcharge if applicable)
 Free vs Paid

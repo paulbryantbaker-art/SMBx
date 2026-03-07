@@ -19,3 +19,6 @@ ALTER TABLE deliverables ADD COLUMN IF NOT EXISTS share_token TEXT UNIQUE;
 -- Improvement actions extras
 ALTER TABLE improvement_actions ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
 ALTER TABLE improvement_actions ADD COLUMN IF NOT EXISTS deal_id UUID;
+
+-- Pricing adjustments: LOI base price $30 → $125
+UPDATE menu_items SET base_price_cents = 12500 WHERE slug = 'buy-loi-draft' AND base_price_cents = 3000;

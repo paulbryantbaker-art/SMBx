@@ -92,11 +92,11 @@ export function classifyLeague(params: {
     if (earningsValue >= 50_000_000) {
       league = { league: 'L6', metric: 'EBITDA', multipleMin: 10.0, multipleMax: null, multiplier: 10.0, label: '$50M+ EBITDA', rollUpOverride: false };
     } else if (earningsValue >= 10_000_000) {
-      league = { league: 'L5', metric: 'EBITDA', multipleMin: 8.0, multipleMax: 12.0, multiplier: 6.0, label: '$10M–$50M EBITDA', rollUpOverride: false };
+      league = { league: 'L5', metric: 'EBITDA', multipleMin: 8.0, multipleMax: 12.0, multiplier: 8.0, label: '$10M–$50M EBITDA', rollUpOverride: false };
     } else if (earningsValue >= 5_000_000) {
-      league = { league: 'L4', metric: 'EBITDA', multipleMin: 6.0, multipleMax: 8.0, multiplier: 3.5, label: '$5M–$10M EBITDA', rollUpOverride: false };
+      league = { league: 'L4', metric: 'EBITDA', multipleMin: 6.0, multipleMax: 8.0, multiplier: 5.0, label: '$5M–$10M EBITDA', rollUpOverride: false };
     } else if (earningsValue >= 2_000_000) {
-      league = { league: 'L3', metric: 'EBITDA', multipleMin: 4.0, multipleMax: 6.0, multiplier: 2.0, label: '$2M–$5M EBITDA', rollUpOverride: false };
+      league = { league: 'L3', metric: 'EBITDA', multipleMin: 4.0, multipleMax: 6.0, multiplier: 3.0, label: '$2M–$5M EBITDA', rollUpOverride: false };
     } else {
       // EBITDA provided but below L3 threshold — fall through to SDE-based
       league = classifySDE(earningsValue);
@@ -112,7 +112,7 @@ export function classifyLeague(params: {
       metric: 'EBITDA',
       multipleMin: 4.0,
       multipleMax: 6.0,
-      multiplier: 2.0,
+      multiplier: 3.0,
       label: '$2M–$5M EBITDA (Roll-Up Override)',
       rollUpOverride: true,
     };
@@ -144,9 +144,9 @@ function classifyBuyerLeague(
   if (!signal) return null;
 
   if (signal >= 10_000_000) {
-    return { league: 'L5', metric: 'EBITDA', multipleMin: 8.0, multipleMax: 12.0, multiplier: 6.0, label: '$10M+ capital', rollUpOverride: false };
+    return { league: 'L5', metric: 'EBITDA', multipleMin: 8.0, multipleMax: 12.0, multiplier: 8.0, label: '$10M+ capital', rollUpOverride: false };
   } else if (signal >= 2_000_000) {
-    return { league: 'L4', metric: 'EBITDA', multipleMin: 6.0, multipleMax: 8.0, multiplier: 3.5, label: '$2M–$10M capital', rollUpOverride: false };
+    return { league: 'L4', metric: 'EBITDA', multipleMin: 6.0, multipleMax: 8.0, multiplier: 5.0, label: '$2M–$10M capital', rollUpOverride: false };
   } else if (signal >= 500_000) {
     return { league: 'L2', metric: 'SDE', multipleMin: 3.0, multipleMax: 5.0, multiplier: 1.25, label: '$500K–$2M capital', rollUpOverride: false };
   } else {
@@ -159,9 +159,9 @@ export function getLeagueMultiplier(league: string): number {
   const multipliers: Record<string, number> = {
     L1: 1.0,
     L2: 1.25,
-    L3: 2.0,
-    L4: 3.5,
-    L5: 6.0,
+    L3: 3.0,
+    L4: 5.0,
+    L5: 8.0,
     L6: 10.0,
   };
   return multipliers[league] ?? 1.0;
