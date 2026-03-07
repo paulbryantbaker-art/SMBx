@@ -72,9 +72,9 @@ const PAGE_COPY: Record<TabId, {
     subtitle: 'Yulia evaluates every opportunity against real market data, helps you negotiate the right terms, and stays with you through close and 180 days of post-acquisition value creation.',
     chips: [
       'Can I finance a $2M dental practice with SBA?',
+      'I found a listing on BizBuySell \u2014 analyze it for me',
       'What should I look for in fragmented home services markets?',
-      'Evaluate a listing I found \u2014 should I pursue or pass?',
-      'What does post-acquisition integration look like?',
+      'Model a capital stack for a $1.5M acquisition',
     ],
     tagline: 'Thesis-to-Target \u00B7 DSCR Modeling \u00B7 Market Intelligence',
     placeholder: "Tell Yulia what you're looking for...",

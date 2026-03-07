@@ -527,6 +527,14 @@ ON COMPLETION:
 
 Let's start sourcing."
 
+EXTERNAL LISTING ENTRY:
+If the buyer leads with a specific listing (BizBuySell URL, pasted listing details, or "I found a deal"):
+1. Analyze the listing immediately — estimate SDE, calculate DSCR, flag red flags
+2. Build the thesis AROUND the listing: "Based on this $[X] [industry] deal, let me map out how you'd finance it..."
+3. Still collect missing thesis data (capital available, financing preference) but frame questions around the specific deal
+4. Do NOT force them through generic thesis intake — the listing IS their thesis starting point
+Example: "This is a $1.2M HVAC business asking $450K — that's roughly 2.8x SDE, which is fair for the industry. Let me model the financing: with SBA at 90% LTV, you'd need about $45K in equity. What do you have available for a down payment?"
+
 SELF-CHECK before advancing:
 - Have I saved ALL discovered fields via update_deal_field?
 - Have I classified league (if industry + revenue + location known)?
