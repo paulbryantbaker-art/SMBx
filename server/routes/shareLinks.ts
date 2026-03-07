@@ -1,10 +1,12 @@
 /**
  * Share Link Routes — CIM sharing with access levels (blind/teaser/full)
+ * + Bizestimate public endpoint
  */
 import { Router } from 'express';
 import crypto from 'crypto';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
+import { generateBizestimate } from '../services/generators/bizestimate.js';
 
 export const shareLinksRouter = Router();
 
@@ -196,6 +198,47 @@ shareLinksRouter.post('/shared/:token/sign-nda', async (req, res) => {
   } catch (err: any) {
     console.error('Sign NDA error:', err.message);
     return res.status(500).json({ error: 'Failed to sign NDA' });
+  }
+});
+
+// ─── Public Bizestimate (no auth — accessed via share token) ──
+
+shareLinksRouter.get('/biz/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const [profile] = await sql`
+      SELECT cp.name, cp.industry, cp.location_state, cp.city,
+             cp.revenue_reported, cp.sde_reported, cp.ebitda_reported,
+             cp.employee_count, cp.years_in_operation, cp.exit_type,
+             c.league
+      FROM company_profiles cp
+      LEFT JOIN conversations c ON c.company_profile_id = cp.id
+      WHERE cp.share_token = ${token}
+      ORDER BY c.updated_at DESC NULLS LAST
+      LIMIT 1
+    `;
+
+    if (!profile) return res.status(404).json({ error: 'Bizestimate not found' });
+
+    const location = [profile.city, profile.location_state].filter(Boolean).join(', ');
+    const markdown = generateBizestimate({
+      business_name: profile.name,
+      industry: profile.industry,
+      location: location || undefined,
+      revenue: profile.revenue_reported,
+      sde: profile.sde_reported,
+      ebitda: profile.ebitda_reported,
+      employee_count: profile.employee_count,
+      years_in_business: profile.years_in_operation,
+      league: profile.league || 'L1',
+      exit_type: profile.exit_type,
+    });
+
+    return res.json({ markdown, businessName: profile.name || 'Your Business' });
+  } catch (err: any) {
+    console.error('Bizestimate access error:', err.message);
+    return res.status(500).json({ error: 'Failed to load Bizestimate' });
   }
 });
 

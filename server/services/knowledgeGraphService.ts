@@ -3,6 +3,7 @@
  * from anonymous conversation data. Also queries buyer demand signals
  * to inject into seller conversations.
  */
+import crypto from 'crypto';
 import postgres from 'postgres';
 
 const sql = postgres(process.env.DATABASE_URL!, {
@@ -147,21 +148,22 @@ export async function upsertCompanyProfile(
         );
       }
     } else {
-      // INSERT new profile
+      // INSERT new profile with share token for Bizestimate
+      const shareToken = crypto.randomBytes(16).toString('hex');
       const [row] = await sql`
         INSERT INTO company_profiles (
           name, session_id, industry, industry_label, naics_code,
           location_state, city,
           revenue_reported, sde_reported, ebitda_reported, employee_count,
-          exit_type
+          exit_type, share_token
         ) VALUES (
           ${name}, ${sessionId}, ${data.industry || null}, ${data.industry_label || data.industry || null},
           ${data.naics_code || null}, ${state}, ${city},
           ${data.revenue || null}, ${data.sde || null}, ${data.ebitda || null},
           ${data.employee_count || null},
-          ${data.exit_type || null}
+          ${data.exit_type || null}, ${shareToken}
         )
-        RETURNING id
+        RETURNING id, share_token
       `;
       profileId = row.id;
     }

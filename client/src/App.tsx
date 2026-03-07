@@ -39,6 +39,7 @@ const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
 const Search = lazy(() => import('./pages/Search'));
 const DayPassView = lazy(() => import('./pages/public/DayPassView'));
+const BizestimatePage = lazy(() => import('./pages/public/BizestimatePage'));
 
 /** Check if a path should be handled by the unified AppShell */
 function isShellPath(path: string): boolean {
@@ -154,6 +155,13 @@ export default function App() {
         {(params) => (
           <Suspense fallback={<PageLoader />}>
             <DayPassView token={params.token} />
+          </Suspense>
+        )}
+      </Route>
+      <Route path="/biz/:token">
+        {(params) => (
+          <Suspense fallback={<PageLoader />}>
+            <BizestimatePage token={params.token} />
           </Suspense>
         )}
       </Route>
