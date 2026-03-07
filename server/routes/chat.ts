@@ -49,6 +49,18 @@ export const chatRouter = Router();
 // Auth is now optional — endpoints work with or without JWT
 chatRouter.use(optionalAuth);
 
+// ─── Advisor detection ───────────────────────────────────────
+const ADVISOR_PATTERNS = [
+  /\bmy\s+client/i, /\bour\s+client/i, /\bclient('s|s)?\b/i,
+  /\bi('m| am)\s+(a\s+)?(business\s+)?broker/i, /\bi('m| am)\s+(a\s+)?advisor/i,
+  /\bi('m| am)\s+(a\s+)?intermediary/i, /\bi('m| am)\s+(a\s+)?m&a\s+(advisor|professional)/i,
+  /\bon\s+behalf\s+of/i, /\brepresent(ing)?\s+(a|my|the)\s+(seller|buyer|owner|client)/i,
+  /\bI\s+have\s+a\s+(seller|buyer|deal)\b/i,
+];
+function detectAdvisor(message: string): boolean {
+  return ADVISOR_PATTERNS.some(p => p.test(message));
+}
+
 // ─── POST /message — Main SSE streaming endpoint ────────────
 
 chatRouter.post('/message', async (req, res) => {
@@ -133,6 +145,19 @@ chatRouter.post('/message', async (req, res) => {
       } catch (_e) { /* non-critical */ }
     }
 
+    // Check if session is flagged as advisor
+    let isAdvisor = false;
+    if (sessionId) {
+      try {
+        const [sess] = await sql`SELECT is_advisor FROM anonymous_sessions WHERE session_id = ${sessionId} LIMIT 1`;
+        isAdvisor = sess?.is_advisor === true;
+      } catch (_e) { /* non-critical */ }
+    }
+    // Also detect advisor from current message (for first-time detection before post-hook runs)
+    if (!isAdvisor && detectAdvisor(message)) {
+      isAdvisor = true;
+    }
+
     // Build dynamic system prompt with intelligence layers
     const userMsgCount = apiMessages.filter(m => m.role === 'user').length;
     const systemPrompt = await buildDynamicAnonymousPrompt(convState, {
@@ -140,6 +165,7 @@ chatRouter.post('/message', async (req, res) => {
       isFirstMessage: userMsgCount <= 1,
       messageCount: userMsgCount,
       demandSignalText,
+      isAdvisor,
     });
 
     // SSE headers
@@ -237,6 +263,17 @@ chatRouter.post('/message', async (req, res) => {
             updated_at = NOW()
           WHERE id = ${convId}
         `;
+
+        // 6b. Advisor detection — flag session if advisor phrases found
+        if (sessionId && detectAdvisor(message)) {
+          try {
+            await sql`
+              INSERT INTO anonymous_sessions (session_id, is_advisor)
+              VALUES (${sessionId}, true)
+              ON CONFLICT (session_id) DO UPDATE SET is_advisor = true
+            `;
+          } catch (_e) { /* non-critical */ }
+        }
 
         // 7. Upsert company profile for sell-journey
         if (journey === 'sell') {

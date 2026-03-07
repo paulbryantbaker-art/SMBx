@@ -284,6 +284,7 @@ export async function buildDynamicAnonymousPrompt(
     isFirstMessage?: boolean;
     messageCount?: number;
     demandSignalText?: string;
+    isAdvisor?: boolean;
   },
 ): Promise<string> {
   // Start with the full base anonymous prompt
@@ -312,6 +313,18 @@ export async function buildDynamicAnonymousPrompt(
   // Layer: Buyer demand signals — for sell-journey conversations
   if (opts.demandSignalText) {
     layers.push(`\n## ${opts.demandSignalText}\nMention buyer demand naturally when relevant — e.g., "There are active buyers looking for businesses like yours in this market." Do NOT make it sound like a sales pitch. Weave it into your analysis as market context.`);
+  }
+
+  // Layer: Advisor mode — broker/intermediary detected
+  if (opts.isAdvisor) {
+    layers.push(`\n## ADVISOR / BROKER MODE
+This user is a business broker, M&A advisor, or intermediary representing a client. Adapt accordingly:
+- Use professional M&A language — they know the terminology
+- Reference "your client" or "the seller/buyer" instead of "you" when discussing the business
+- Focus on work product they can share with their client: CIMs, valuations, deal memos
+- Their first 3 client journeys are complimentary — mention this naturally if relevant
+- Ask about their deal pipeline and how many active engagements they have
+- Show you understand their economics: faster deal throughput = more revenue for them`);
   }
 
   // Layer: Anonymous no-tools override — gate prompts reference tools that don't exist here
