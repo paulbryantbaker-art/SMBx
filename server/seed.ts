@@ -9,16 +9,12 @@ const db = drizzle(client);
 async function seed() {
   console.log('Seeding wallet blocks...');
   await db.insert(walletBlocks).values([
-    { name: 'Starter', priceCents: 5000, creditsCents: 5000, bonusPercent: 0, sortOrder: 1 },
-    { name: 'Builder', priceCents: 10000, creditsCents: 10500, bonusPercent: 5, sortOrder: 2 },
-    { name: 'Growth', priceCents: 20000, creditsCents: 22000, bonusPercent: 10, sortOrder: 3 },
-    { name: 'Professional', priceCents: 50000, creditsCents: 57500, bonusPercent: 15, sortOrder: 4 },
-    { name: 'Accelerator', priceCents: 100000, creditsCents: 120000, bonusPercent: 20, sortOrder: 5 },
-    { name: 'Enterprise Lite', priceCents: 250000, creditsCents: 312500, bonusPercent: 25, sortOrder: 6 },
-    { name: 'Enterprise', priceCents: 500000, creditsCents: 650000, bonusPercent: 30, sortOrder: 7 },
-    { name: 'Enterprise Plus', priceCents: 1000000, creditsCents: 1300000, bonusPercent: 30, sortOrder: 8 },
-    { name: 'Institutional', priceCents: 2500000, creditsCents: 3250000, bonusPercent: 30, sortOrder: 9 },
-    { name: 'Institutional Plus', priceCents: 5000000, creditsCents: 6500000, bonusPercent: 30, sortOrder: 10 },
+    { name: 'Exploratory', priceCents: 5000, creditsCents: 5000, bonusPercent: 0, sortOrder: 1 },
+    { name: 'Early Commit', priceCents: 10000, creditsCents: 10500, bonusPercent: 5, sortOrder: 2 },
+    { name: 'Active Deal', priceCents: 25000, creditsCents: 26500, bonusPercent: 6, sortOrder: 3 },
+    { name: 'Serious', priceCents: 50000, creditsCents: 54000, bonusPercent: 8, sortOrder: 4 },
+    { name: 'Full Journey', priceCents: 100000, creditsCents: 110000, bonusPercent: 10, sortOrder: 5 },
+    { name: 'Advisor', priceCents: 250000, creditsCents: 280000, bonusPercent: 12, sortOrder: 6 },
   ]);
 
   console.log('Seeding menu items...');

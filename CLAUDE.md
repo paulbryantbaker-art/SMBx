@@ -55,7 +55,7 @@ $1 in wallet = $1 of purchasing power (no credit conversion)
 Yulia contextually proposes value-added services (optimization plans, transaction readiness) as natural upsells during the journey
 
 Wallet Top-Up Blocks
-BlockPriceBonusTotalDiscountStarter$50$0$500%Builder$100$5$1055%Momentum$250$25$27510%Accelerator$500$75$57515%Professional$1,000$200$1,20020%Scale$2,500$625$3,12525%Enterprise Lite$5,000$1,500$6,50030%Enterprise$10,000$3,000$13,00030%Enterprise Plus$25,000$7,500$32,50030%Institutional$50,000$15,000$65,00030%
+BlockPriceBonusTotalExploratoryStarter$50—$50Early Commit$100+$5$105Active Deal$250+$15$265Serious$500+$40$540Full Journey$1,000+$100$1,100Advisor$2,500+$300$2,800
 Menu Tiers (Base Prices — before league multiplier)
 
 Analyst ($5–$25): Quick valuations, market snapshots, comparable pulls

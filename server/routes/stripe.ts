@@ -17,16 +17,12 @@ export const stripeRouter = Router();
 
 // Wallet blocks: amount user pays → total they receive (includes bonus)
 const WALLET_BLOCKS = [
-  { id: 'starter', name: 'Starter', priceCents: 5000, bonusCents: 0, totalCents: 5000, discount: '0%' },
-  { id: 'builder', name: 'Builder', priceCents: 10000, bonusCents: 500, totalCents: 10500, discount: '5%' },
-  { id: 'momentum', name: 'Momentum', priceCents: 25000, bonusCents: 2500, totalCents: 27500, discount: '10%' },
-  { id: 'accelerator', name: 'Accelerator', priceCents: 50000, bonusCents: 7500, totalCents: 57500, discount: '15%' },
-  { id: 'professional', name: 'Professional', priceCents: 100000, bonusCents: 20000, totalCents: 120000, discount: '20%' },
-  { id: 'scale', name: 'Scale', priceCents: 250000, bonusCents: 62500, totalCents: 312500, discount: '25%' },
-  { id: 'enterprise-lite', name: 'Enterprise Lite', priceCents: 500000, bonusCents: 150000, totalCents: 650000, discount: '30%' },
-  { id: 'enterprise', name: 'Enterprise', priceCents: 1000000, bonusCents: 300000, totalCents: 1300000, discount: '30%' },
-  { id: 'enterprise-plus', name: 'Enterprise Plus', priceCents: 2500000, bonusCents: 750000, totalCents: 3250000, discount: '30%' },
-  { id: 'institutional', name: 'Institutional', priceCents: 5000000, bonusCents: 1500000, totalCents: 6500000, discount: '30%' },
+  { id: 'starter', name: 'Exploratory', priceCents: 5000, bonusCents: 0, totalCents: 5000, discount: '0%' },
+  { id: 'builder', name: 'Early Commit', priceCents: 10000, bonusCents: 500, totalCents: 10500, discount: '5%' },
+  { id: 'momentum', name: 'Active Deal', priceCents: 25000, bonusCents: 1500, totalCents: 26500, discount: '6%' },
+  { id: 'accelerator', name: 'Serious', priceCents: 50000, bonusCents: 4000, totalCents: 54000, discount: '8%' },
+  { id: 'professional', name: 'Full Journey', priceCents: 100000, bonusCents: 10000, totalCents: 110000, discount: '10%' },
+  { id: 'scale', name: 'Advisor', priceCents: 250000, bonusCents: 30000, totalCents: 280000, discount: '12%' },
 ];
 
 function getStripe(): Stripe {

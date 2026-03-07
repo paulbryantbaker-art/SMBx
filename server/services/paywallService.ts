@@ -197,14 +197,10 @@ IF THEY DECLINE:
  * Format wallet top-up options for display.
  */
 export const WALLET_BLOCKS = [
-  { name: 'Starter', price: 5000, bonus: 0, total: 5000, discount: '0%' },
-  { name: 'Builder', price: 10000, bonus: 500, total: 10500, discount: '5%' },
-  { name: 'Momentum', price: 25000, bonus: 2500, total: 27500, discount: '10%' },
-  { name: 'Accelerator', price: 50000, bonus: 7500, total: 57500, discount: '15%' },
-  { name: 'Professional', price: 100000, bonus: 20000, total: 120000, discount: '20%' },
-  { name: 'Scale', price: 250000, bonus: 62500, total: 312500, discount: '25%' },
-  { name: 'Enterprise Lite', price: 500000, bonus: 150000, total: 650000, discount: '30%' },
-  { name: 'Enterprise', price: 1000000, bonus: 300000, total: 1300000, discount: '30%' },
-  { name: 'Enterprise Plus', price: 2500000, bonus: 750000, total: 3250000, discount: '30%' },
-  { name: 'Institutional', price: 5000000, bonus: 1500000, total: 6500000, discount: '30%' },
+  { name: 'Exploratory', price: 5000, bonus: 0, total: 5000, discount: '0%' },
+  { name: 'Early Commit', price: 10000, bonus: 500, total: 10500, discount: '5%' },
+  { name: 'Active Deal', price: 25000, bonus: 1500, total: 26500, discount: '6%' },
+  { name: 'Serious', price: 50000, bonus: 4000, total: 54000, discount: '8%' },
+  { name: 'Full Journey', price: 100000, bonus: 10000, total: 110000, discount: '10%' },
+  { name: 'Advisor', price: 250000, bonus: 30000, total: 280000, discount: '12%' },
 ];
