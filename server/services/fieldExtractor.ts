@@ -17,6 +17,7 @@ function getClient(): Anthropic {
 
 export interface ExtractedFields {
   journey_type?: 'sell' | 'buy' | 'raise' | 'pmi';
+  exit_type?: 'full_exit' | 'partner_buyout' | 'capital_raise' | 'esop' | 'majority_sale' | 'structured' | 'unknown';
   industry?: string;
   location?: string;
   business_name?: string;
@@ -58,6 +59,7 @@ Return ONLY a JSON object with fields you found. Use null for fields not mention
 
 Fields to extract:
 - journey_type: "sell", "buy", "raise", or "pmi" (detect from conversation intent)
+- exit_type: detect how the seller wants to exit. Values: "full_exit" (sell 100% and walk away), "partner_buyout" (one partner buying out another), "capital_raise" (bringing in investors, not selling), "esop" (employee buyout/ESOP), "majority_sale" (sell majority but retain equity), "structured" (partial/complex/asset transfer), "unknown" (not yet clear). Only set for sell journeys.
 - industry: business industry/sector (e.g. "HVAC", "Dental Practice", "IT Services")
 - location: city/state/region mentioned
 - business_name: name of the business if mentioned

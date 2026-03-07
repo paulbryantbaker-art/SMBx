@@ -324,3 +324,79 @@ function extractState(address: string): string | null {
   const match = address.match(statePattern);
   return match ? match[1] : null;
 }
+
+// ─── Conviction Check ────────────────────────────────────────
+
+export interface ConvictionCheck {
+  checks: Array<{ label: string; pass: boolean | null; reason: string | null }>;
+  verdict: 'pursue' | 'pass' | 'investigate';
+}
+
+/**
+ * Compute a quick conviction check for a discovery target.
+ * Returns structured go/no-go assessment per target.
+ */
+export function computeConvictionCheck(
+  profile: any,
+  thesis: any,
+): ConvictionCheck {
+  const checks: Array<{ label: string; pass: boolean | null; reason: string | null }> = [];
+
+  // 1. Industry match
+  const thesisIndustries: string[] = thesis.industries || [];
+  const profileIndustry = (profile.industry || '').toLowerCase();
+  const profileNaics = profile.naics_code || '';
+  let industryMatch = false;
+  for (const ind of thesisIndustries) {
+    const indLower = String(ind).toLowerCase();
+    if (profileIndustry.includes(indLower) || indLower.includes(profileIndustry)) {
+      industryMatch = true;
+      break;
+    }
+    if (profileNaics && profileNaics.startsWith(String(ind).substring(0, 4))) {
+      industryMatch = true;
+      break;
+    }
+  }
+  checks.push({
+    label: 'Industry matches your criteria',
+    pass: thesisIndustries.length === 0 ? null : industryMatch,
+    reason: industryMatch ? null : thesisIndustries.length === 0 ? 'No industry criteria set' : 'Outside your target industries',
+  });
+
+  // 2. SBA financeable
+  const revenue = profile.revenue_reported || profile.revenue_estimated_high || 0;
+  const sde = profile.sde_reported || 0;
+  const equityAvailable = thesis.equity_available || 0;
+
+  if (revenue > 0 && equityAvailable > 0) {
+    const estimatedDealValue = sde > 0 ? sde * 3 : revenue * 0.15;
+    const loanAmount = estimatedDealValue * 0.9;
+    const annualDebtService = loanAmount * 0.13; // approx SBA rate + amortization
+    const dscr = sde > 0 ? sde / annualDebtService : null;
+
+    const sbaOk = dscr ? dscr >= 1.25 : null;
+    checks.push({
+      label: 'SBA financeable at estimated price',
+      pass: sbaOk,
+      reason: sbaOk === false ? `Est. DSCR ${dscr?.toFixed(2)} below 1.25x minimum`
+             : sbaOk === null ? 'Insufficient data to estimate'
+             : `Est. DSCR ${dscr?.toFixed(2)}`,
+    });
+  }
+
+  // 3. Revenue diversification (unknown until DD)
+  checks.push({
+    label: 'Revenue appears diversified',
+    pass: null,
+    reason: 'Verify customer concentration in due diligence',
+  });
+
+  // Verdict
+  const hardFails = checks.filter(c => c.pass === false).length;
+  const verdict: 'pursue' | 'pass' | 'investigate' = hardFails >= 2 ? 'pass'
+    : hardFails === 1 ? 'investigate'
+    : 'pursue';
+
+  return { checks, verdict };
+}

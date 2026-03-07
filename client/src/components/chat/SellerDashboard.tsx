@@ -33,6 +33,11 @@ interface DashboardData {
     valuationHigh: number | null;
     valuationUpdatedAt: string | null;
   };
+  timeline?: {
+    journeyPhase: string;
+    estimatedMonths: number;
+    exitType: string | null;
+  };
 }
 
 const DIFFICULTY_COLORS: Record<string, string> = {
@@ -46,6 +51,7 @@ const STATUS_ICONS: Record<string, string> = {
   in_progress: '\u25D4',   // ◔
   complete: '\u2713',       // ✓
 };
+
 
 function formatDollars(cents: number): string {
   return '$' + (cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 });
@@ -99,7 +105,20 @@ export default function SellerDashboard() {
     );
   }
 
-  const { deal, stats, actions = [] } = data;
+  const { deal, stats, actions = [], timeline } = data;
+  const PHASES = [
+    { key: 'assessing', label: 'Assessing' },
+    { key: 'optimizing', label: 'Optimizing' },
+    { key: 'ready', label: 'Market Ready' },
+    { key: 'in_market', label: 'In Market' },
+    { key: 'under_loi', label: 'Under LOI' },
+    { key: 'closed', label: 'Closed' },
+  ];
+  const currentPhase = timeline?.journeyPhase || 'assessing';
+  const currentPhaseIndex = PHASES.findIndex(p => p.key === currentPhase);
+  const pendingHardActions = (actions as ImprovementAction[]).filter(
+    a => a.status !== 'complete' && a.difficulty === 'hard'
+  ).length;
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -113,6 +132,58 @@ export default function SellerDashboard() {
           )}
         </p>
       </div>
+
+      {/* Journey Phase Indicator */}
+      {timeline && (
+        <div className="bg-white rounded-2xl p-6 mb-6" style={{ border: '1px solid #EBE7DF' }}>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#6E6A63] mb-4">Your Exit Journey</p>
+          <div className="flex items-center gap-0">
+            {PHASES.map((phase, i) => {
+              const isActive = i === currentPhaseIndex;
+              const isPast = i < currentPhaseIndex;
+              return (
+                <div key={phase.key} className="flex-1 flex flex-col items-center relative">
+                  {/* Connector line */}
+                  {i > 0 && (
+                    <div
+                      className={`absolute top-2.5 right-1/2 w-full h-0.5 ${isPast ? 'bg-[#D4714E]' : 'bg-[#EBE7DF]'}`}
+                      style={{ zIndex: 0 }}
+                    />
+                  )}
+                  {/* Dot */}
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center relative z-10 ${
+                      isActive ? 'border-[#D4714E] bg-[#D4714E]'
+                      : isPast ? 'border-[#D4714E] bg-white'
+                      : 'border-[#DDD9D1] bg-white'
+                    }`}
+                  >
+                    {isPast && <span className="text-[9px] text-[#D4714E] font-bold">{'\u2713'}</span>}
+                    {isActive && <span className="w-2 h-2 bg-white rounded-full" />}
+                  </div>
+                  {/* Label */}
+                  <span className={`text-[9px] mt-1.5 text-center leading-tight ${
+                    isActive ? 'font-bold text-[#D4714E]' : isPast ? 'text-[#6E6A63]' : 'text-[#A9A49C]'
+                  }`}>
+                    {phase.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          {/* Timeline estimate */}
+          <div className="mt-4 pt-3 border-t border-[#F3F0EA]">
+            <p className="text-sm text-[#3D3B37]">
+              Estimated time to market-ready: <span className="font-semibold">~{timeline.estimatedMonths} months</span>
+            </p>
+            {pendingHardActions > 0 && (
+              <p className="text-xs text-[#6E6A63] mt-1">
+                Complete your {pendingHardActions} remaining high-impact action{pendingHardActions > 1 ? 's' : ''} to accelerate your timeline.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Valuation Range */}
       {stats?.valuationLow && stats?.valuationHigh && (

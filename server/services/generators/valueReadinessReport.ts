@@ -25,6 +25,7 @@ export interface VRRInput {
   league: string;
   naics_code?: string;
   location_state?: string;
+  exit_type?: string;
 }
 
 function centsToDisplay(cents: number | undefined | null): string {
@@ -48,7 +49,7 @@ export async function generateValueReadinessReport(input: VRRInput): Promise<str
     business_name, industry, location, revenue, league,
     owner_compensation, owner_salary, sde, ebitda,
     employee_count, years_in_business, exit_motivation,
-    timeline_preference, location_state,
+    timeline_preference, location_state, exit_type,
   } = input;
 
   const ownerComp = owner_compensation || owner_salary || 0;
@@ -156,7 +157,7 @@ This is a preliminary range. Your actual number will be higher or lower based on
 - Business systems and processes
 
 ---
-
+${buildExitPathSection(exit_type)}
 ${aiContent}
 ${demandSection}
 
@@ -258,3 +259,99 @@ End with:
 - No fluff — every sentence should deliver value
 - Output ONLY the two markdown sections, no preamble`;
 }
+
+// ─── Exit Path Section ──────────────────────────────────────
+
+const EXIT_PATH_DATA: Record<string, {
+  label: string;
+  buyer_universe: string;
+  typical_structure: string;
+  timeline: string;
+  pricing: string;
+  dd_focus: string;
+  negotiation_insight: string;
+}> = {
+  full_exit: {
+    label: 'Full Sale (100% Exit)',
+    buyer_universe: 'Individual buyers (SBA-financed), search fund operators, PE add-on acquirers, strategic acquirers — depending on your deal size',
+    typical_structure: 'Asset sale (most common for SMBs) or stock sale. Seller note of 10-15% is common.',
+    timeline: '6-12 months to close from the time you go to market',
+    pricing: 'Individual/SBA buyers: 2.5-3.5x SDE. PE add-on: 4-6x EBITDA. Strategic: 5-10x EBITDA if synergies exist.',
+    dd_focus: 'Owner dependency, customer concentration, revenue quality, transferability of key relationships',
+    negotiation_insight: 'Price is only half the negotiation. Terms — seller note amount, transition period, non-compete scope — often matter as much as the headline number.',
+  },
+  capital_raise: {
+    label: 'Capital Raise (Growth Investment)',
+    buyer_universe: 'Growth equity funds, family offices, PE firms taking minority positions, angel syndicates for smaller raises',
+    typical_structure: 'Preferred equity or convertible notes. Board seat common above $2M raise. Pro-rata rights, information rights standard.',
+    timeline: '4-8 months from first pitch to close',
+    pricing: 'Valuation driven by revenue multiple (SaaS: 3-6x ARR; services: 1-2x revenue; product: 2-4x revenue) adjusted for growth rate',
+    dd_focus: 'Growth trajectory, unit economics, management team depth, market size, path to profitability',
+    negotiation_insight: 'Valuation is less important than liquidation preferences and control provisions. A high valuation with a 2x participating preferred can net you less than a lower valuation with clean terms.',
+  },
+  esop: {
+    label: 'Employee Buyout (ESOP)',
+    buyer_universe: 'ESOP trustee (represents the employees). Transaction financed via SBA ESOP loan or seller financing.',
+    typical_structure: 'Company borrows to buy shares. Seller receives cash + possible seller note. Owner often stays 1-3 years post-close.',
+    timeline: '12-18 months minimum due to ESOP formation and IRS qualification requirements',
+    pricing: 'Fair market value determined by independent appraiser — typically in line with strategic sale value',
+    dd_focus: "Company's ability to service ESOP loan from cash flow. Employee census. Qualified plan compliance.",
+    negotiation_insight: "The 'buyer' is a trustee with a fiduciary duty to employees — they cannot overpay. Price is non-negotiable in the traditional sense. Structure and financing terms are where deals get done.",
+  },
+  partner_buyout: {
+    label: 'Partner Buyout',
+    buyer_universe: 'Your existing partner(s) or key employees',
+    typical_structure: 'Installment sale (seller-financed) or SBA 7(a) loan taken by buying partner. Buy-sell agreement terms usually govern.',
+    timeline: '3-6 months if buy-sell agreement exists; 6-12 months if not',
+    pricing: 'Governed by existing buy-sell agreement formula, or negotiated independently. Appraisal often required.',
+    dd_focus: 'Existing partnership agreement terms, any right of first refusal provisions, tax implications of buyout structure',
+    negotiation_insight: 'This is a relationship negotiation first, financial negotiation second. Preserving the working relationship (especially if you\'re staying on) matters more than squeezing the last dollar.',
+  },
+  majority_sale: {
+    label: 'Majority Sale (Retain Minority Equity)',
+    buyer_universe: 'PE platform companies, search fund operators, family offices who want an operating partner',
+    typical_structure: "Seller rolls 20-40% equity into the new entity. Cash at close + equity upside in the 'second bite.'",
+    timeline: '9-18 months',
+    pricing: 'Initial close: 4-6x EBITDA. Second bite (PE exit in 4-7 years): potential 2-3x on rolled equity',
+    dd_focus: "Owner's role post-close, management team depth, EBITDA quality, add-on acquisition potential",
+    negotiation_insight: "The rolled equity terms matter as much as the day-one price. What's the liquidation waterfall? What's the target hold period? A 20% roll at the right structure can double your total proceeds.",
+  },
+  structured: {
+    label: 'Structured / Partial Transaction',
+    buyer_universe: 'Strategic acquirers, asset buyers, or hybrid structures — depends on what\'s being sold',
+    typical_structure: 'Asset sale of specific business lines, earnout components, IP licensing combined with sale, or phased acquisition',
+    timeline: 'Highly variable — 6-24 months depending on complexity',
+    pricing: "Negotiated based on what's being transferred and what's retained",
+    dd_focus: 'Asset vs. liability allocation, IP ownership, customer contract transferability, employee assignment',
+    negotiation_insight: "Define exactly what's being sold before pricing it. Ambiguity in scope is the #1 source of deal disputes in structured transactions.",
+  },
+};
+
+function buildExitPathSection(exitType?: string): string {
+  if (!exitType || exitType === 'unknown') return '';
+  const data = EXIT_PATH_DATA[exitType];
+  if (!data) return '';
+
+  return `
+### Your Exit Path
+
+Based on your goals, here's what your transaction looks like:
+
+**Exit type:** ${data.label}
+**Likely buyer universe:** ${data.buyer_universe}
+**Typical deal structure:** ${data.typical_structure}
+**Realistic timeline:** ${data.timeline}
+
+**What buyers in this category pay:**
+${data.pricing}
+
+**What they'll scrutinize most:**
+${data.dd_focus}
+
+**One negotiation reality for this exit type:**
+${data.negotiation_insight}
+
+---
+`;
+}
+

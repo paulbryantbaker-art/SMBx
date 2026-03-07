@@ -91,16 +91,18 @@ chatRouter.post('/message', async (req, res) => {
 
     // Load conversation state (journey, gate, league, extracted data)
     const [convRow] = await sql`
-      SELECT journey, current_gate, league, extracted_data, company_profile_id, thesis_id
+      SELECT journey, current_gate, league, extracted_data, company_profile_id, thesis_id, exit_type, pmi_phase
       FROM conversations WHERE id = ${convId}
     `;
-    const convState: ConversationState = {
+    const convState: any = {
       journey: convRow?.journey || null,
       current_gate: convRow?.current_gate || null,
       league: convRow?.league || null,
       extracted_data: convRow?.extracted_data || null,
       company_profile_id: convRow?.company_profile_id || null,
       thesis_id: convRow?.thesis_id || null,
+      exit_type: convRow?.exit_type || null,
+      pmi_phase: convRow?.pmi_phase || null,
     };
 
     // Load conversation history (last 50 messages)
@@ -215,8 +217,13 @@ chatRouter.post('/message', async (req, res) => {
 
         // 5. Merge extracted_data onto existing JSONB
         const mergedData = { ...(convState.extracted_data || {}), ...fields };
-        // Remove journey_type from extracted_data — stored in its own column
+        // Remove journey_type and exit_type from extracted_data — stored in own columns
         delete (mergedData as any).journey_type;
+        const exitType = fields.exit_type || convState.exit_type || null;
+        delete (mergedData as any).exit_type;
+
+        // 5b. PMI phase tracking
+        const pmiPhase = journey === 'pmi' ? (convState.pmi_phase || 'stabilize') : convState.pmi_phase || null;
 
         // 6. UPDATE conversations with detected state
         await sql`
@@ -224,6 +231,8 @@ chatRouter.post('/message', async (req, res) => {
             journey = ${journey},
             current_gate = ${currentGate},
             league = ${league},
+            exit_type = ${exitType},
+            pmi_phase = ${pmiPhase},
             extracted_data = ${JSON.stringify(mergedData)}::jsonb,
             updated_at = NOW()
           WHERE id = ${convId}
@@ -240,6 +249,7 @@ chatRouter.post('/message', async (req, res) => {
             sde: mergedData.sde as number | undefined,
             ebitda: mergedData.ebitda as number | undefined,
             employee_count: mergedData.employee_count as number | undefined,
+            exit_type: exitType || undefined,
           });
         }
 
@@ -281,6 +291,7 @@ chatRouter.post('/message', async (req, res) => {
                 league: league || 'L1',
                 naics_code: mergedData.naics_code as string | undefined,
                 location_state: mergedData.location_state as string | undefined,
+                exit_type: exitType || undefined,
               });
             } catch (e: any) {
               console.error('Value Readiness Report generation error:', e.message);

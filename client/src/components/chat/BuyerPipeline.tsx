@@ -5,6 +5,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { authHeaders } from '../../hooks/useAuth';
 
+interface ConvictionCheck {
+  checks: Array<{ label: string; pass: boolean | null; reason: string | null }>;
+  verdict: 'pursue' | 'pass' | 'investigate';
+}
+
 interface Target {
   id: number;
   company_name: string;
@@ -21,6 +26,7 @@ interface Target {
   source: string;
   source_url: string | null;
   sale_readiness_signals: any[] | null;
+  conviction_check: ConvictionCheck | null;
 }
 
 interface PipelineData {
@@ -180,6 +186,33 @@ export default function BuyerPipeline() {
                         <span className="font-semibold text-[#D4714E]">Score: {target.thesis_fit_score}/100</span>
                       )}
                     </div>
+                    {/* Conviction Check */}
+                    {target.conviction_check && (
+                      <div className="mt-2 pt-2 border-t border-[#F3F0EA]">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6A63] mb-1">Quick Conviction</p>
+                        <div className="space-y-0.5">
+                          {target.conviction_check.checks.map((check, i) => (
+                            <div key={i} className="flex items-center gap-1.5 text-[11px]">
+                              <span className={check.pass === true ? 'text-green-600' : check.pass === false ? 'text-red-500' : 'text-yellow-500'}>
+                                {check.pass === true ? '+' : check.pass === false ? '\u2013' : '?'}
+                              </span>
+                              <span className="text-[#3D3B37]">
+                                {check.label}{check.reason ? ` \u2014 ${check.reason}` : ''}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                        <p className={`text-[10px] font-semibold mt-1 ${
+                          target.conviction_check.verdict === 'pursue' ? 'text-green-600'
+                          : target.conviction_check.verdict === 'investigate' ? 'text-yellow-600'
+                          : 'text-red-500'
+                        }`}>
+                          {target.conviction_check.verdict === 'pursue' ? 'Worth a Screening Memo'
+                           : target.conviction_check.verdict === 'investigate' ? 'One concern to resolve first'
+                           : 'Likely not a fit'}
+                        </p>
+                      </div>
+                    )}
                     <div className="flex items-center gap-1.5 mt-2 text-[10px] text-[#A9A49C]">
                       <span>Source: {target.source}</span>
                       {target.source_url && (

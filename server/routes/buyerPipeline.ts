@@ -5,6 +5,7 @@
 import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
+import { computeConvictionCheck } from '../services/discoveryService.js';
 
 export const buyerPipelineRouter = Router();
 buyerPipelineRouter.use(requireAuth);
@@ -61,16 +62,22 @@ buyerPipelineRouter.get('/buyer/pipeline', async (req, res) => {
         dt.overall_score DESC NULLS LAST
     `.catch(() => []);
 
+    // Compute conviction checks for each target
+    const targetsWithConviction = (targets as any[]).map(t => {
+      const conviction = t.conviction_check || computeConvictionCheck(t, thesis);
+      return { ...t, conviction_check: conviction };
+    });
+
     return res.json({
       hasThesis: true,
       thesis,
       deal,
-      targets,
-      matchCount: targets.length,
+      targets: targetsWithConviction,
+      matchCount: targetsWithConviction.length,
       stats: {
-        pursuing: (targets as any[]).filter(t => t.buyer_status === 'pursuing').length,
-        reviewing: (targets as any[]).filter(t => t.buyer_status === 'reviewing').length,
-        flagged: (targets as any[]).filter(t => t.buyer_status === 'flagged').length,
+        pursuing: targetsWithConviction.filter(t => t.buyer_status === 'pursuing').length,
+        reviewing: targetsWithConviction.filter(t => t.buyer_status === 'reviewing').length,
+        flagged: targetsWithConviction.filter(t => t.buyer_status === 'flagged').length,
       },
     });
   } catch (err: any) {

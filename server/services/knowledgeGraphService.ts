@@ -22,6 +22,7 @@ export interface CompanyProfileData {
   sde?: number;            // cents
   ebitda?: number;         // cents
   employee_count?: number;
+  exit_type?: string;
 }
 
 export interface BuyerThesisData {
@@ -128,6 +129,7 @@ export async function upsertCompanyProfile(
       if (data.sde) updates.sde_reported = data.sde;
       if (data.ebitda) updates.ebitda_reported = data.ebitda;
       if (data.employee_count) updates.employee_count = data.employee_count;
+      if (data.exit_type) updates.exit_type = data.exit_type;
 
       if (Object.keys(updates).length > 0) {
         // Build dynamic update — postgres-js doesn't support dynamic column names,
@@ -150,12 +152,14 @@ export async function upsertCompanyProfile(
         INSERT INTO company_profiles (
           name, session_id, industry, industry_label, naics_code,
           location_state, city,
-          revenue_reported, sde_reported, ebitda_reported, employee_count
+          revenue_reported, sde_reported, ebitda_reported, employee_count,
+          exit_type
         ) VALUES (
           ${name}, ${sessionId}, ${data.industry || null}, ${data.industry_label || data.industry || null},
           ${data.naics_code || null}, ${state}, ${city},
           ${data.revenue || null}, ${data.sde || null}, ${data.ebitda || null},
-          ${data.employee_count || null}
+          ${data.employee_count || null},
+          ${data.exit_type || null}
         )
         RETURNING id
       `;
@@ -311,4 +315,58 @@ export async function getBuyerDemandSignals(profile: {
     console.error('getBuyerDemandSignals error:', err.message);
     return null;
   }
+}
+
+// ─── Timeline Estimation ────────────────────────────────────
+
+export interface ImprovementAction {
+  status: string;
+  difficulty: string | null;
+  timeline_days: number | null;
+}
+
+/**
+ * Estimate months until seller is ready to go to market.
+ * Based on value readiness score, pending actions, and exit type.
+ */
+export function estimateMonthsToReady(
+  valueReadinessScore: number,
+  pendingActions: ImprovementAction[],
+  exitType: string | null,
+): number {
+  // Base estimate from score
+  let months = valueReadinessScore >= 80 ? 2
+    : valueReadinessScore >= 60 ? 5
+    : valueReadinessScore >= 40 ? 9
+    : 14;
+
+  // Adjust for pending action timelines
+  const highImpactPending = pendingActions
+    .filter(a => a.status !== 'complete' && a.difficulty === 'hard')
+    .reduce((max, a) => Math.max(max, (a.timeline_days ?? 90) / 30), 0);
+
+  months = Math.max(months, highImpactPending);
+
+  // Exit type minimums
+  if (exitType === 'esop') months = Math.max(months, 12);
+  if (exitType === 'capital_raise') months = Math.max(months, 4);
+  if (exitType === 'partner_buyout') months = Math.max(months, 2);
+
+  return Math.round(months);
+}
+
+/**
+ * Determine the seller's journey phase based on gate and readiness.
+ */
+export function getJourneyPhase(
+  currentGate: string | null,
+  valueReadinessScore: number | null,
+): string {
+  if (!currentGate) return 'assessing';
+  const gate = currentGate.toUpperCase();
+  if (gate === 'S5' || gate === 'CLOSED') return 'closed';
+  if (gate === 'S4') return 'in_market';
+  if (gate === 'S3') return 'ready';
+  if ((valueReadinessScore || 0) >= 60) return 'optimizing';
+  return 'assessing';
 }

@@ -5,6 +5,7 @@
 import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
+import { estimateMonthsToReady, getJourneyPhase } from '../services/knowledgeGraphService.js';
 
 export const sellerDashboardRouter = Router();
 sellerDashboardRouter.use(requireAuth);
@@ -50,6 +51,20 @@ sellerDashboardRouter.get('/seller/dashboard', async (req, res) => {
     const completedActions = (actions as any[]).filter(a => a.status === 'complete');
     const totalImpact = completedActions.reduce((sum: number, a: any) => sum + (a.valuation_impact_cents || 0), 0);
 
+    // Calculate journey phase and timeline
+    const readinessScore = profile?.sale_readiness_score || 0;
+    const exitType = profile?.exit_type || deal?.exit_type || null;
+    const journeyPhase = getJourneyPhase(deal.current_gate, readinessScore);
+    const estimatedMonths = estimateMonthsToReady(
+      readinessScore,
+      (actions as any[]).map((a: any) => ({
+        status: a.status,
+        difficulty: a.difficulty,
+        timeline_days: a.timeline_days,
+      })),
+      exitType,
+    );
+
     return res.json({
       hasDeal: true,
       deal,
@@ -63,6 +78,11 @@ sellerDashboardRouter.get('/seller/dashboard', async (req, res) => {
         valuationLow: profile?.valuation_low || null,
         valuationHigh: profile?.valuation_high || null,
         valuationUpdatedAt: profile?.valuation_updated_at || null,
+      },
+      timeline: {
+        journeyPhase,
+        estimatedMonths,
+        exitType,
       },
     });
   } catch (err: any) {
