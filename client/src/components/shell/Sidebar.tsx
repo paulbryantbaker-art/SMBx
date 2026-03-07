@@ -151,7 +151,7 @@ export default function Sidebar({
 
   return (
     <div
-      className="flex flex-col h-full bg-[#F8F9FA] border-r border-gray-200 select-none"
+      className="flex flex-col h-full bg-[#F5F5F0] border-r border-[#E8E5DE] select-none"
       style={{ width: isMobile ? 280 : 256 }}
     >
       {/* 1. BRAND HEADER */}

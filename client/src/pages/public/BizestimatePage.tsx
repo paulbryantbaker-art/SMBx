@@ -33,7 +33,7 @@ export default function BizestimatePage({ token }: BizestimatePageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F5F5F0] flex items-center justify-center">
+      <div className="min-h-dvh bg-[#F5F5F0] flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-[#D4714E] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
       </div>
     );
@@ -41,7 +41,7 @@ export default function BizestimatePage({ token }: BizestimatePageProps) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#F5F5F0] flex items-center justify-center">
+      <div className="min-h-dvh bg-[#F5F5F0] flex items-center justify-center">
         <div className="bg-white rounded-2xl shadow-md p-8 max-w-md text-center">
           <p className="text-lg font-semibold text-[#1A1A18] mb-2">Bizestimate Not Found</p>
           <p className="text-sm text-[#6E6A63]">{error}</p>
@@ -51,7 +51,7 @@ export default function BizestimatePage({ token }: BizestimatePageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5F0]">
+    <div className="min-h-dvh bg-[#F5F5F0]">
       {/* Header */}
       <header className="bg-white border-b border-[#EBEBEB] px-4 py-3">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
