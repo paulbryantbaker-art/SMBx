@@ -436,8 +436,8 @@ export default function AppShell() {
 
   const sidebarContent = (mobile: boolean) => (
     <aside
-      className="flex flex-col h-full bg-[#F9FAFB] select-none"
-      style={{ width: mobile ? 288 : 288, borderRight: '1px solid #F3F4F6' }}
+      className="flex flex-col h-full bg-[#F5F5F0] select-none"
+      style={{ width: mobile ? 288 : 288, borderRight: '1px solid #E8E5DE' }}
     >
       {/* Logo */}
       <div className="px-6 pt-6 pb-2">
@@ -653,8 +653,8 @@ export default function AppShell() {
         )}
         {/* Header — 80px, backdrop-blur */}
         <header
-          className="flex-shrink-0 flex items-center justify-between h-20 px-6 z-20"
-          style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #F3F4F6' }}
+          className="flex-shrink-0 flex items-center justify-between h-14 px-6 z-20"
+          style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #EBEBEB' }}
         >
           <div className="flex items-center gap-3">
             {viewState === 'chat' ? (
@@ -779,7 +779,7 @@ export default function AppShell() {
                 </div>
 
                 {/* ═══ DESKTOP HERO — matches Sell/Buy page layout ═══ */}
-                <div className="hidden md:flex min-h-[calc(100vh-80px)] flex-col items-center justify-center px-6" style={{ gap: '7vh' }}>
+                <div className="hidden md:flex min-h-[calc(100vh-56px)] flex-col items-center justify-center px-6" style={{ gap: '7vh' }}>
                   {/* Headline group */}
                   <div className="w-full max-w-5xl text-center">
                     <div
@@ -802,15 +802,9 @@ export default function AppShell() {
                   {/* Chat bar — same card as Sell/Buy pages */}
                   <div className="w-full max-w-[860px]">
                     <div
-                      className="home-input-wrap bg-white shadow-2xl transition-all relative overflow-visible"
-                      style={{ borderRadius: '40px', border: '2px solid #D1D5DB' }}
+                      className="home-input-wrap bg-white shadow-lg transition-all relative overflow-visible"
+                      style={{ borderRadius: '28px', border: '1px solid rgba(0,0,0,0.1)' }}
                     >
-                      <div className="flex items-center gap-2 px-6 pt-4 pb-0">
-                        <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                        <span className="text-[12px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>
-                          Federal Data Sync Active
-                        </span>
-                      </div>
                       <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder="Tell Yulia about your deal..." disabled={sending} />
                     </div>
                   </div>
@@ -886,7 +880,7 @@ export default function AppShell() {
               </div>
 
               {/* ═══ JOURNEY DESKTOP HERO ═══ */}
-              <div className="hidden md:flex min-h-[calc(100vh-80px)] flex-col items-center justify-center px-6" style={{ gap: '7vh' }}>
+              <div className="hidden md:flex min-h-[calc(100vh-56px)] flex-col items-center justify-center px-6" style={{ gap: '7vh' }}>
                 {/* Headline group */}
                 <div className="w-full max-w-5xl text-center">
                   {page.overline && (
@@ -912,15 +906,9 @@ export default function AppShell() {
                 {/* Chat bar */}
                 <div className="w-full max-w-[860px]">
                   <div
-                    className="bg-white shadow-2xl transition-all relative overflow-visible"
-                    style={{ borderRadius: '40px', border: '2px solid #D1D5DB' }}
+                    className="bg-white shadow-lg transition-all relative overflow-visible"
+                    style={{ borderRadius: '28px', border: '1px solid rgba(0,0,0,0.1)' }}
                   >
-                    <div className="flex items-center gap-2 px-6 pt-4 pb-0">
-                      <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                      <span className="text-[12px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.08em' }}>
-                        Federal Data Sync Active
-                      </span>
-                    </div>
                     <ChatDock
                       ref={dockRef}
                       onSend={handleSend}
@@ -1055,16 +1043,9 @@ export default function AppShell() {
             }}
           >
             <div
-              className="bg-white shadow-2xl relative overflow-visible"
-              style={{ borderRadius: '28px', border: '2px solid #D1D5DB' }}
+              className="bg-white shadow-lg relative overflow-visible"
+              style={{ borderRadius: '24px', border: '1px solid rgba(0,0,0,0.1)' }}
             >
-              <div className="flex items-center gap-2 px-5 pt-3 pb-0">
-                <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                <span className="text-[11px] font-black uppercase text-[#6E6A63]"
-                  style={{ letterSpacing: '0.08em' }}>
-                  Federal Data Sync Active
-                </span>
-              </div>
               <ChatDock
                 ref={dockRef}
                 onSend={handleSend}
@@ -1082,8 +1063,8 @@ export default function AppShell() {
           <div className="shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
             <div className="max-w-[860px] mx-auto">
               <div
-                className="bg-white shadow-lg relative overflow-visible"
-                style={{ borderRadius: '32px', border: '2px solid #D1D5DB' }}
+                className="bg-white shadow-sm relative overflow-visible"
+                style={{ borderRadius: '24px', border: '1px solid rgba(0,0,0,0.1)' }}
               >
                 <ChatDock
                   ref={dockRef}

@@ -215,18 +215,18 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               onChange={handleChange}
               onKeyDown={handleKey}
               placeholder={placeholder}
-              className="w-full bg-transparent border-none outline-none resize-none text-[20px] md:text-[24px] text-[#1A1A18] leading-[1.5] placeholder:text-[#9CA3AF] font-normal"
-              style={{ fontFamily: 'inherit', minHeight: (rows ?? (isHero ? 3 : 1)) > 1 ? '100px' : '44px', maxHeight: '200px', padding: '18px 22px 10px 22px' }}
+              className="w-full bg-transparent border-none outline-none resize-none text-[15px] md:text-[16px] text-[#1A1A18] leading-[1.5] placeholder:text-[#9CA3AF] font-normal"
+              style={{ fontFamily: 'inherit', minHeight: (rows ?? (isHero ? 3 : 1)) > 1 ? '100px' : '40px', maxHeight: '200px', padding: '14px 18px 8px 18px' }}
               rows={rows ?? (isHero ? 3 : 1)}
             />
           </div>
 
           {/* Toolbar row */}
-          <div className="flex items-center justify-between px-4 pb-3.5 pt-0">
+          <div className="flex items-center justify-between px-3 pb-3 pt-0">
             <button
               ref={plusRef}
               onClick={() => setToolsOpen(prev => !prev)}
-              className="w-9 h-9 rounded-full border-none bg-[#F3F0EA] text-[#8C877D] cursor-pointer flex items-center justify-center hover:bg-[#EBE7DF] active:scale-90"
+              className="w-8 h-8 rounded-full border-none bg-[#F0F0F0] text-[#8C877D] cursor-pointer flex items-center justify-center hover:bg-[#E5E5E5] active:scale-90"
               style={{ transition: 'all .2s' }}
               type="button"
             >
@@ -240,7 +240,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             </button>
             <button
               onClick={send}
-              className={`w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center active:scale-90 ${hasContent && !disabled ? 'bg-[#1A1A18] text-white hover:bg-[#333] opacity-100 scale-100' : 'bg-gray-100 text-gray-400 opacity-100 scale-100 pointer-events-none'}`}
+              className={`w-8 h-8 rounded-full border-none cursor-pointer flex items-center justify-center active:scale-90 ${hasContent && !disabled ? 'bg-[#1A1A18] text-white hover:bg-[#333] opacity-100 scale-100' : 'bg-gray-100 text-gray-400 opacity-100 scale-100 pointer-events-none'}`}
               style={{ transition: 'all .2s' }}
               type="button"
             >
