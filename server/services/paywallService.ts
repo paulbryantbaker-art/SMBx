@@ -7,6 +7,7 @@
  */
 import { getLeagueMultiplier } from './leagueClassifier.js';
 import { getPaywallBasePrice } from './gateReadinessService.js';
+import { sql } from '../db.js';
 
 export interface PaywallContext {
   gate: string;
@@ -196,6 +197,44 @@ IF THEY DECLINE:
 /**
  * Format wallet top-up options for display.
  */
+export const BASE_PRICES: Record<string, number> = {
+  'business-valuation': 35000,
+  'full-cim': 70000,
+  'sba-bankability': 20000,
+  'deal-screening-memo': 15000,
+  'market-intelligence': 20000,
+  'loi-draft': 12500,
+  'qoe-lite': 50000,
+  'financial-model': 30000,
+  'sector-analysis': 15000,
+  'working-capital-analysis': 15000,
+};
+
+export async function getDeliverablePrice(
+  slug: string,
+  league: string,
+  userId: number | null
+): Promise<number> {
+  // Advisor trial: first 3 client journeys free
+  if (userId) {
+    const [user] = await sql`SELECT is_advisor FROM users WHERE id = ${userId}`;
+    if (user?.is_advisor) {
+      const [count] = await sql`
+        SELECT count(DISTINCT deal_id) as cnt
+        FROM conversations WHERE user_id = ${userId} AND deal_id IS NOT NULL
+      `;
+      if (parseInt(count.cnt) <= 3) return 0;
+    }
+  }
+  const base = BASE_PRICES[slug] || 20000;
+  const multiplier = getLeagueMultiplier(league);
+  return Math.round(base * multiplier);
+}
+
+export function isTestMode(): boolean {
+  return process.env.TEST_MODE === 'true';
+}
+
 export const WALLET_BLOCKS = [
   { name: 'Exploratory', price: 5000, bonus: 0, total: 5000, discount: '0%' },
   { name: 'Early Commit', price: 10000, bonus: 500, total: 10500, discount: '5%' },

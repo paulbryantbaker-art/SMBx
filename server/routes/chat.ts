@@ -77,6 +77,20 @@ chatRouter.post('/message', async (req, res) => {
 
     // Create conversation if none provided
     if (!convId) {
+      // Anonymous users: max 3 new conversations per day
+      if (!userId && sessionId) {
+        const [{ count }] = await sql`
+          SELECT count(*) FROM conversations
+          WHERE session_id = ${sessionId}
+          AND created_at > now() - interval '24 hours'
+        `;
+        if (parseInt(count) >= 3) {
+          res.writeHead(429, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Daily conversation limit reached. Create a free account for unlimited conversations.' }));
+          return;
+        }
+      }
+
       const shortTitle = message.trim().substring(0, 60) + (message.trim().length > 60 ? '...' : '');
       const [conv] = await sql`
         INSERT INTO conversations (user_id, title, session_id)
@@ -167,6 +181,27 @@ chatRouter.post('/message', async (req, res) => {
       demandSignalText,
       isAdvisor,
     });
+
+    // Anonymous users: 20 messages per conversation
+    if (!userId && convId) {
+      const [{ count }] = await sql`
+        SELECT count(*) FROM messages WHERE conversation_id = ${convId}
+      `;
+      if (parseInt(count) >= 40) { // 40 = 20 user + 20 assistant
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Conversation-Id', String(convId));
+        res.write(`data: ${JSON.stringify({
+          type: 'text_delta',
+          text: "You've been getting great value from our conversation. Create a free account to continue unlimited access and save your deal progress."
+        })}\n\n`);
+        res.write(`data: ${JSON.stringify({ type: 'message_stop', conversationId: convId })}\n\n`);
+        res.write('data: [DONE]\n\n');
+        res.end();
+        return;
+      }
+    }
 
     // SSE headers
     res.setHeader('Content-Type', 'text/event-stream');
