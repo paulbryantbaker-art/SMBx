@@ -27,17 +27,17 @@ const FREE_ITEMS = [
 ];
 
 const SELL_DELIVERABLES = [
-  { title: 'Market Intelligence Report', price: 'TBD', desc: 'Comprehensive analysis of your industry, competitive landscape, buyer activity, and market conditions \u2014 localized to your metro. The foundation of a well-positioned listing.' },
-  { title: 'Full Valuation Analysis', price: 'TBD', desc: 'Multi-methodology valuation with defensible logic, comparable transaction data, and specific recommendations for maximizing your sale price. Built to withstand buyer scrutiny.' },
-  { title: 'Confidential Information Memorandum (CIM)', price: 'TBD', desc: 'A professional deal book presenting your business to potential buyers \u2014 financial summary, growth narrative, market position, and investment thesis.' },
-  { title: 'Deal Structuring & Negotiation Intelligence', price: 'TBD', desc: 'Offer evaluation, deal structure optimization, financing analysis, and negotiation strategy through close.' },
+  { title: 'Business Valuation Report', price: '350', desc: 'Multi-methodology valuation with defensible logic, comparable transaction data, and specific recommendations for maximizing your sale price. Built to withstand buyer scrutiny.' },
+  { title: 'Market Intelligence Report', price: '200', desc: 'Comprehensive analysis of your industry, competitive landscape, buyer activity, and market conditions \u2014 localized to your metro. The foundation of a well-positioned listing.' },
+  { title: 'Confidential Information Memorandum (CIM)', price: '700', desc: 'A professional deal book presenting your business to potential buyers \u2014 financial summary, growth narrative, market position, and investment thesis.' },
+  { title: 'LOI Draft', price: '125', desc: 'Letter of Intent preparation with recommended terms, negotiation strategy, and deal structure optimization through close.' },
 ];
 
 const BUY_DELIVERABLES = [
-  { title: 'Market & Competitive Intelligence', price: 'TBD', desc: 'Industry mapping, competitive density analysis, consolidation trends, and target identification for your acquisition thesis.' },
-  { title: 'Target Financial Analysis', price: 'TBD', desc: 'Deep financial modeling \u2014 DSCR, ROI projections, risk-adjusted returns, and SBA financing scenarios for a specific acquisition target.' },
-  { title: 'Due Diligence Intelligence', price: 'TBD', desc: 'Pre-diligence risk assessment, red flag identification, and data room preparation guidance before you engage outside professionals.' },
-  { title: 'Deal Structuring', price: 'TBD', desc: 'Sources & uses, financing optimization, seller note modeling, earnout scenarios, and offer construction.' },
+  { title: 'Deal Screening Memo', price: '150', desc: 'Rapid target evaluation \u2014 financial scoring, thesis fit analysis, red flag identification, and pursue/pass recommendation.' },
+  { title: 'Financial Model', price: '300', desc: 'Deep financial modeling \u2014 DSCR, ROI projections, risk-adjusted returns, and SBA financing scenarios for a specific acquisition target.' },
+  { title: 'QoE Lite', price: '500', desc: 'Pre-diligence quality of earnings analysis, red flag identification, and data room preparation guidance before you engage outside professionals.' },
+  { title: 'Working Capital Analysis', price: '150', desc: 'Working capital peg calculation, seasonal adjustment modeling, and closing adjustment framework.' },
 ];
 
 const FAQS = [
@@ -366,7 +366,7 @@ export default function Pricing() {
         <div className="price-topbar-logo">
           <a href="/">
             <span style={{ color: T.text }}>smb</span>
-            <span style={{ color: T.terra }}>x</span>
+            <span style={{ color: T.terra }}>X</span>
             <span style={{ color: T.text }}>.ai</span>
           </a>
         </div>
@@ -404,6 +404,9 @@ export default function Pricing() {
         <h2 className="price-heading">Start here. It&apos;s on us.</h2>
         <p className="price-body" style={{ marginBottom: 28 }}>
           Every deal starts with a conversation &mdash; and the first analysis is always free. No credit card. No signup wall. Just tell Yulia about your deal.
+        </p>
+        <p className="price-body" style={{ fontSize: 13, color: T.faint, marginBottom: 28 }}>
+          Prices shown are base rates. Prices scale with deal complexity (league multiplier).
         </p>
         <div className="price-free-grid">
           {FREE_ITEMS.map((item, i) => (
@@ -463,9 +466,38 @@ export default function Pricing() {
           <p className="price-body" style={{ marginBottom: 16 }}>
             smbX.ai uses a wallet system. Add funds when you&apos;re ready for a premium deliverable &mdash; Yulia will let you know exactly what it costs before you commit. No recurring charges, no contracts, no hidden fees.
           </p>
-          <p className="price-body" style={{ marginBottom: 0 }}>
+          <p className="price-body" style={{ marginBottom: 24 }}>
             Your wallet balance carries forward across deals. If you&apos;re an advisor running multiple engagements, your funds work across all of them.
           </p>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+              <thead>
+                <tr style={{ borderBottom: `2px solid ${T.border}` }}>
+                  <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 600, color: T.text }}>Block</th>
+                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: T.text }}>Price</th>
+                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: T.text }}>Bonus</th>
+                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: T.text }}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { name: 'Exploratory', price: '$50', bonus: '\u2014', total: '$50' },
+                  { name: 'Early Commit', price: '$100', bonus: '+$5', total: '$105' },
+                  { name: 'Active Deal', price: '$250', bonus: '+$15', total: '$265' },
+                  { name: 'Serious', price: '$500', bonus: '+$40', total: '$540' },
+                  { name: 'Full Journey', price: '$1,000', bonus: '+$100', total: '$1,100' },
+                  { name: 'Advisor', price: '$2,500', bonus: '+$300', total: '$2,800' },
+                ].map((row, i) => (
+                  <tr key={i} style={{ borderBottom: `1px solid ${T.border}` }}>
+                    <td style={{ padding: '10px 12px', fontWeight: 500, color: T.text }}>{row.name}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', color: T.sub }}>{row.price}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', color: T.terra, fontWeight: 600 }}>{row.bonus}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 600, color: T.text }}>{row.total}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -513,7 +545,7 @@ export default function Pricing() {
       <footer className="price-footer">
         <div className="price-footer-logo">
           <span style={{ color: T.text }}>smb</span>
-          <span style={{ color: T.terra }}>x</span>
+          <span style={{ color: T.terra }}>X</span>
           <span style={{ color: T.text }}>.ai</span>
         </div>
         <div className="price-footer-links">

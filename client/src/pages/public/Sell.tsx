@@ -286,7 +286,7 @@ export default function Sell() {
         <div className="sell-topbar-logo">
           <a href="/">
             <span style={{ color: T.text }}>smb</span>
-            <span style={{ color: T.terra }}>x</span>
+            <span style={{ color: T.terra }}>X</span>
             <span style={{ color: T.text }}>.ai</span>
           </a>
         </div>
@@ -419,7 +419,7 @@ export default function Sell() {
       <footer className="sell-footer">
         <div className="sell-footer-logo">
           <span style={{ color: T.text }}>smb</span>
-          <span style={{ color: T.terra }}>x</span>
+          <span style={{ color: T.terra }}>X</span>
           <span style={{ color: T.text }}>.ai</span>
         </div>
         <div className="sell-footer-links">

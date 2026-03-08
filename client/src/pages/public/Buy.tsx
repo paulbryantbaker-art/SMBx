@@ -286,7 +286,7 @@ export default function Buy() {
         <div className="buy-topbar-logo">
           <a href="/">
             <span style={{ color: T.text }}>smb</span>
-            <span style={{ color: T.terra }}>x</span>
+            <span style={{ color: T.terra }}>X</span>
             <span style={{ color: T.text }}>.ai</span>
           </a>
         </div>
@@ -419,7 +419,7 @@ export default function Buy() {
       <footer className="buy-footer">
         <div className="buy-footer-logo">
           <span style={{ color: T.text }}>smb</span>
-          <span style={{ color: T.terra }}>x</span>
+          <span style={{ color: T.terra }}>X</span>
           <span style={{ color: T.text }}>.ai</span>
         </div>
         <div className="buy-footer-links">

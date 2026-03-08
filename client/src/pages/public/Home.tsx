@@ -679,7 +679,7 @@ export default function Home() {
               style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}
             >
               <span style={{ color: T.text }}>smb</span>
-              <span style={{ color: T.terra }}>x</span>
+              <span style={{ color: T.terra }}>X</span>
               <span style={{ color: T.text }}>.ai</span>
             </a>
             {phase === 'chat' && (
@@ -891,7 +891,7 @@ export default function Home() {
             <footer className="home-footer">
               <div className="home-footer-logo">
                 <span style={{ color: T.text }}>smb</span>
-                <span style={{ color: T.terra }}>x</span>
+                <span style={{ color: T.terra }}>X</span>
                 <span style={{ color: T.text }}>.ai</span>
               </div>
               <div className="home-footer-links">

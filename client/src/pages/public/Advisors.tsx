@@ -289,7 +289,7 @@ export default function Advisors() {
         <div className="adv-topbar-logo">
           <a href="/">
             <span style={{ color: T.text }}>smb</span>
-            <span style={{ color: T.terra }}>x</span>
+            <span style={{ color: T.terra }}>X</span>
             <span style={{ color: T.text }}>.ai</span>
           </a>
         </div>
@@ -501,7 +501,7 @@ export default function Advisors() {
       <footer className="adv-footer">
         <div className="adv-footer-logo">
           <span style={{ color: T.text }}>smb</span>
-          <span style={{ color: T.terra }}>x</span>
+          <span style={{ color: T.terra }}>X</span>
           <span style={{ color: T.text }}>.ai</span>
         </div>
         <div className="adv-footer-links">
