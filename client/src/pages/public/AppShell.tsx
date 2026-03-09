@@ -899,6 +899,7 @@ export default function AppShell() {
                       ref={dockRef}
                       onSend={handleSend}
                       variant="hero"
+                      rows={1}
                       placeholder={page.placeholder}
                       disabled={sending}
                     />
