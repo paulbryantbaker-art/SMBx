@@ -699,13 +699,23 @@ export default function AppShell() {
                   </button>
                 )}
                 {isMobile ? (
-                  <span className="text-[22px] font-black tracking-tight leading-none" style={{ letterSpacing: '-0.03em' }}>
+                  <button
+                    onClick={() => handleTabClick('home')}
+                    className="bg-transparent border-none cursor-pointer p-0 text-[22px] font-black tracking-tight leading-none"
+                    style={{ letterSpacing: '-0.03em', fontFamily: 'inherit' }}
+                    type="button"
+                  >
                     smb<span className="text-[#D4714E]">X</span>.ai
-                  </span>
+                  </button>
                 ) : (
-                  <span className="text-[15px] font-semibold text-[#1A1A18]">
+                  <button
+                    onClick={() => handleTabClick('home')}
+                    className="bg-transparent border-none cursor-pointer p-0 text-[15px] font-semibold text-[#1A1A18]"
+                    style={{ fontFamily: 'inherit' }}
+                    type="button"
+                  >
                     {activeTab === 'home' ? 'Home' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
-                  </span>
+                  </button>
                 )}
               </>
             )}
