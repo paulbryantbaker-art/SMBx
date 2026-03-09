@@ -786,22 +786,23 @@ export default function AppShell() {
                 </div>
 
                 {/* ═══ DESKTOP HERO — matches Sell/Buy page layout ═══ */}
-                <div className="hidden md:flex min-h-[calc(100vh-56px)] flex-col items-center justify-center px-6" style={{ gap: '7vh' }}>
+                <div className="hidden md:flex min-h-[calc(100vh-56px)] flex-col items-center justify-center px-6" style={{ gap: '9vh' }}>
                   {/* Headline group */}
                   <div className="w-full max-w-5xl text-center">
                     <div
-                      className="inline-block px-5 py-2 rounded-full bg-[#F6F6F6] text-[#D4714E]"
-                      style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '24px' }}
+                      className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#F6F6F6] text-[#D4714E] border border-[#E8E8E8]"
+                      style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '28px' }}
                     >
-                      Meet Yulia, Your M&amp;A Agent!
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>
+                      Chat-first M&amp;A intelligence
                     </div>
                     <h1
-                      className="text-[56px] font-extrabold leading-[1.08]"
-                      style={{ letterSpacing: '-0.04em', marginBottom: '20px' }}
+                      className="text-[64px] font-black leading-[1.06]"
+                      style={{ letterSpacing: '-0.035em', marginBottom: '24px' }}
                     >
                       We take <span className="text-[#D4714E]">the stress</span> out of buying and selling any business.
                     </h1>
-                    <p className="text-[20px] font-medium text-[#6E6A63] max-w-3xl mx-auto" style={{ lineHeight: 1.65 }}>
+                    <p className="text-[20px] font-normal text-[#6E6A63] max-w-[640px] mx-auto" style={{ lineHeight: 1.7 }}>
                       {page.subtitle}
                     </p>
                   </div>
@@ -810,21 +811,21 @@ export default function AppShell() {
                   <div className="w-full max-w-[860px]">
                     <div
                       className="home-input-wrap bg-[#F6F6F6] transition-all relative overflow-visible"
-                      style={{ borderRadius: '28px', border: '2px solid #E8E8E8', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
+                      style={{ borderRadius: '32px', border: '1px solid #E8E8E8', boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.02)' }}
                     >
                       <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder="Tell Yulia about your deal..." disabled={sending} />
                     </div>
                   </div>
 
                   {/* Chips + data status */}
-                  <div className="flex flex-col items-center">
-                    <div className="flex flex-wrap justify-center gap-3 max-w-3xl" style={{ marginBottom: '16px' }}>
+                  <div className="flex flex-col items-center" style={{ gap: '14px' }}>
+                    <div className="flex flex-wrap justify-center gap-2.5 max-w-3xl">
                       {page.chips.map(chip => (
                         <button
                           key={chip}
                           onClick={() => handleChipClick(chip)}
                           className="bg-white border border-[#E8E8E8] px-5 py-2.5 cursor-pointer hover:border-[#D4714E] hover:text-[#D4714E] transition-all text-[#6E6A63]"
-                          style={{ borderRadius: '100px', fontSize: '13px', fontWeight: 500, fontFamily: 'inherit' }}
+                          style={{ borderRadius: '100px', fontSize: '14px', fontWeight: 500, fontFamily: 'inherit' }}
                           type="button"
                         >
                           {chip}
@@ -835,7 +836,7 @@ export default function AppShell() {
                       <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" style={{ boxShadow: '0 0 4px rgba(74,222,128,0.5)', animation: 'statusPulse 2s ease infinite' }} />
                       <span className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#A8A49C]">LIVE FEDERAL DATA &middot; CENSUS &middot; BLS &middot; SBA &middot; SEC</span>
                     </div>
-                    <div className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#C8C8C8] mt-2">
+                    <div className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#C8C8C8]">
                       POWERED BY SMBX.AI ENGINE
                     </div>
                   </div>
@@ -881,25 +882,26 @@ export default function AppShell() {
               </div>
 
               {/* ═══ JOURNEY DESKTOP HERO ═══ */}
-              <div className="hidden md:flex min-h-[calc(100vh-56px)] flex-col items-center justify-center px-6" style={{ gap: '7vh' }}>
+              <div className="hidden md:flex min-h-[calc(100vh-56px)] flex-col items-center justify-center px-6" style={{ gap: '9vh' }}>
                 {/* Headline group */}
                 <div className="w-full max-w-5xl text-center">
                   {page.overline && (
                     <div
-                      className="inline-block px-5 py-2 rounded-full bg-[#F6F6F6] text-[#D4714E]"
-                      style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '24px' }}
+                      className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#F6F6F6] text-[#D4714E] border border-[#E8E8E8]"
+                      style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '28px' }}
                     >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>
                       {page.overline}
                     </div>
                   )}
                   <h1
-                    className="text-[56px] font-extrabold leading-[1.08]"
-                    style={{ letterSpacing: '-0.04em', marginBottom: '20px' }}
+                    className="text-[64px] font-black leading-[1.06]"
+                    style={{ letterSpacing: '-0.035em', marginBottom: '24px' }}
                   >
                     {page.h1Line1}
                     {page.h1Line2 && (<><br /><span className="text-[#D4714E]">{page.h1Line2}</span></>)}
                   </h1>
-                  <p className="text-[20px] font-medium text-[#6E6A63] max-w-3xl mx-auto" style={{ lineHeight: 1.65 }}>
+                  <p className="text-[20px] font-normal text-[#6E6A63] max-w-[640px] mx-auto" style={{ lineHeight: 1.7 }}>
                     {page.subtitle}
                   </p>
                 </div>
@@ -907,8 +909,8 @@ export default function AppShell() {
                 {/* Chat bar */}
                 <div className="w-full max-w-[860px]">
                   <div
-                    className="bg-[#F6F6F6] transition-all relative overflow-visible"
-                    style={{ borderRadius: '28px', border: '2px solid #E8E8E8', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
+                    className="home-input-wrap bg-[#F6F6F6] transition-all relative overflow-visible"
+                    style={{ borderRadius: '32px', border: '1px solid #E8E8E8', boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.02)' }}
                   >
                     <ChatDock
                       ref={dockRef}
@@ -922,14 +924,14 @@ export default function AppShell() {
                 </div>
 
                 {/* Chips + tagline */}
-                <div className="flex flex-col items-center">
-                  <div className="flex flex-wrap justify-center gap-3 max-w-3xl" style={{ marginBottom: '16px' }}>
+                <div className="flex flex-col items-center" style={{ gap: '14px' }}>
+                  <div className="flex flex-wrap justify-center gap-2.5 max-w-3xl">
                     {page.chips.map(chip => (
                       <button
                         key={chip}
                         onClick={() => handleChipClick(chip)}
                         className="bg-white border border-[#E8E8E8] px-5 py-2.5 cursor-pointer hover:border-[#D4714E] hover:text-[#D4714E] transition-all text-[#6E6A63]"
-                        style={{ borderRadius: '100px', fontSize: '13px', fontWeight: 500, fontFamily: 'inherit' }}
+                        style={{ borderRadius: '100px', fontSize: '14px', fontWeight: 500, fontFamily: 'inherit' }}
                         type="button"
                       >
                         {chip}
