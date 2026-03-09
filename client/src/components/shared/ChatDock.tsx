@@ -179,7 +179,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
                 </div>
               </button>
             ))}
-            <div className="mx-4 my-1 border-t border-[#EBE7DF]" />
+            <div className="mx-4 my-1 border-t border-[#E8E8E8]" />
             <div className="px-4 pt-2 pb-1">
               <span className="text-[12px] font-semibold tracking-wide uppercase text-[#A9A49C]">Tools</span>
             </div>
@@ -208,14 +208,14 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           )}
 
           {/* Textarea */}
-          <div className={isHero ? '' : 'mx-3 mt-2'} style={isHero ? undefined : { background: '#FAF9F7', borderRadius: '24px' }}>
+          <div className={isHero ? '' : 'mx-3 mt-2'} style={isHero ? undefined : { background: '#F6F6F6', borderRadius: '24px' }}>
             <textarea
               ref={inputRef}
               value={value}
               onChange={handleChange}
               onKeyDown={handleKey}
               placeholder={placeholder}
-              className="w-full bg-transparent border-none outline-none resize-none text-[15px] md:text-[16px] text-[#1A1A18] leading-[1.5] placeholder:text-[#9CA3AF] font-normal"
+              className="w-full bg-transparent border-none outline-none resize-none text-[15px] md:text-[17px] text-[#1A1A18] leading-[1.5] placeholder:text-[#9CA3AF] font-normal"
               style={{ fontFamily: 'inherit', minHeight: (rows ?? (isHero ? 3 : 1)) > 1 ? '100px' : '40px', maxHeight: '200px', padding: '14px 18px 8px 18px' }}
               rows={rows ?? (isHero ? 3 : 1)}
             />
@@ -226,7 +226,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             <button
               ref={plusRef}
               onClick={() => setToolsOpen(prev => !prev)}
-              className="w-8 h-8 rounded-full border-none bg-[#F0F0F0] text-[#8C877D] cursor-pointer flex items-center justify-center hover:bg-[#E5E5E5] active:scale-90"
+              className="w-8 h-8 rounded-full border-none bg-[#E8E8E8] text-[#8C877D] cursor-pointer flex items-center justify-center hover:bg-[#DCDCDC] active:scale-90"
               style={{ transition: 'all .2s' }}
               type="button"
             >

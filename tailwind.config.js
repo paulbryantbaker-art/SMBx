@@ -4,17 +4,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        cream: {
-          DEFAULT: '#FAF8F4',
-          deep: '#F3F0EA',
-          dark: '#F0EDE6',
-          hover: '#E8E4DC',
-        },
+        ink: '#1A1A18',
         terra: {
           DEFAULT: '#D4714E',
           hover: '#BE6342',
           soft: '#FFF0EB',
           glow: 'rgba(212, 113, 78, 0.12)',
+        },
+        stone: '#E8E8E8',
+        surface: '#F6F6F6',
+        cream: {
+          DEFAULT: '#FAF8F4',
+          deep: '#F3F0EA',
+          dark: '#F0EDE6',
+          hover: '#E8E4DC',
         },
         border: '#DDD9D1',
         text: {

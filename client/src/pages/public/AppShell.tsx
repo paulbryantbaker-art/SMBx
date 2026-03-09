@@ -436,8 +436,8 @@ export default function AppShell() {
 
   const sidebarContent = (mobile: boolean) => (
     <aside
-      className="flex flex-col h-full bg-[#F5F5F0] select-none"
-      style={{ width: mobile ? 288 : 288, borderRight: '1px solid #E8E5DE' }}
+      className="flex flex-col h-full bg-white select-none"
+      style={{ width: mobile ? 280 : 220, borderRight: '1px solid #E8E8E8' }}
     >
       {/* Logo */}
       <div className="px-6 pt-6 pb-2">
@@ -478,8 +478,8 @@ export default function AppShell() {
                 onClick={() => handleTabClick(item.id)}
                 className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl text-[14px] cursor-pointer border-none transition-all ${
                   isActive
-                    ? 'bg-white shadow-sm text-[#1A1A18] font-bold'
-                    : 'bg-transparent text-[#6E6A63] hover:bg-white font-medium'
+                    ? 'bg-[#F6F6F6] text-[#1A1A18] font-bold'
+                    : 'bg-transparent text-[#6E6A63] hover:bg-[#F6F6F6] font-medium'
                 }`}
                 style={{ fontFamily: 'inherit' }}
                 type="button"
@@ -511,8 +511,8 @@ export default function AppShell() {
                 }}
                 className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-[13px] cursor-pointer border-none transition-all ${
                   c.id === activeConvId && viewState === 'chat'
-                    ? 'bg-white shadow-sm font-semibold text-[#1A1A18]'
-                    : 'bg-transparent text-[#6E6A63] hover:bg-white font-medium'
+                    ? 'bg-[#F6F6F6] font-semibold text-[#1A1A18]'
+                    : 'bg-transparent text-[#6E6A63] hover:bg-[#F6F6F6] font-medium'
                 }`}
                 style={{ fontFamily: 'inherit' }}
                 type="button"
@@ -529,7 +529,7 @@ export default function AppShell() {
       </div>
 
       {/* Footer */}
-      <div className="mt-auto border-t px-4 py-3 space-y-1" style={{ borderColor: '#F3F4F6' }}>
+      <div className="mt-auto border-t px-4 py-3 space-y-1" style={{ borderColor: '#E8E8E8' }}>
         {user && (
           <button
             onClick={() => {
@@ -651,10 +651,10 @@ export default function AppShell() {
             <span className="text-xs font-semibold text-yellow-800">You appear to be offline. Messages will send when you reconnect.</span>
           </div>
         )}
-        {/* Header — 80px, backdrop-blur */}
+        {/* Header — 56px, stone border */}
         <header
-          className="flex-shrink-0 flex items-center justify-between h-14 px-6 z-20"
-          style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #EBEBEB' }}
+          className="flex-shrink-0 flex items-center justify-between h-14 px-6 z-20 bg-white"
+          style={{ borderBottom: '1px solid #E8E8E8' }}
         >
           <div className="flex items-center gap-3">
             {viewState === 'chat' ? (
@@ -698,12 +698,9 @@ export default function AppShell() {
                     smb<span className="text-[#D4714E]">X</span>.ai
                   </span>
                 ) : (
-                  <>
-                    <span className="w-[3px] h-5 bg-[#D4714E] rounded-full" />
-                    <span className="text-[10px] font-black uppercase text-[#6E6A63]" style={{ letterSpacing: '0.2em' }}>
-                      M&amp;A OS / {activeTab === 'home' ? 'Home' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
-                    </span>
-                  </>
+                  <span className="text-[15px] font-semibold text-[#1A1A18]">
+                    {activeTab === 'home' ? 'Home' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
+                  </span>
                 )}
               </>
             )}
@@ -716,7 +713,7 @@ export default function AppShell() {
                 style={{ fontFamily: 'inherit' }}
                 type="button"
               >
-                Log in
+                Get Started
               </button>
             )}
             {user && (
@@ -746,7 +743,7 @@ export default function AppShell() {
                 <div className="md:hidden">
                   <div className="pt-9 px-6">
                     <div
-                      className="inline-block px-4 py-1.5 rounded-full bg-[#FFF0EB] text-[#D4714E] mb-4"
+                      className="inline-block px-4 py-1.5 rounded-full bg-[#F6F6F6] text-[#D4714E] mb-4"
                       style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em' }}
                     >
                       Meet Yulia, Your M&amp;A Agent!
@@ -760,14 +757,9 @@ export default function AppShell() {
                   </div>
                   <div className="px-6 pt-5">
                     <div className="flex flex-col gap-2.5">
-                      {[
-                        { text: page.chips[0], emoji: '\uD83D\uDCCA', bg: 'rgba(212,113,78,0.1)' },
-                        { text: page.chips[1], emoji: '\uD83C\uDFE6', bg: 'rgba(74,144,226,0.1)' },
-                        { text: page.chips[2], emoji: '\uD83E\uDD1D', bg: 'rgba(74,222,128,0.1)' },
-                      ].map(chip => (
-                        <button key={chip.text} onClick={() => handleChipClick(chip.text)} className="flex items-center gap-2.5 w-full text-left text-[15px] font-medium text-[#1A1A18] bg-[#F7F7F7] border border-[#E5E5E5] rounded-2xl cursor-pointer transition-colors hover:bg-[#F0F0F0]" style={{ padding: '14px 16px', fontFamily: 'inherit' }} type="button">
-                          <span className="w-7 h-7 rounded-full flex items-center justify-center text-[14px] shrink-0" style={{ background: chip.bg }}>{chip.emoji}</span>
-                          {chip.text}
+                      {page.chips.map(chip => (
+                        <button key={chip} onClick={() => handleChipClick(chip)} className="w-full text-left text-[15px] font-medium text-[#1A1A18] bg-[#F6F6F6] border border-[#E8E8E8] cursor-pointer transition-colors hover:bg-[#F0F0F0]" style={{ padding: '14px 16px', fontFamily: 'inherit', borderRadius: '16px' }} type="button">
+                          {chip}
                         </button>
                       ))}
                     </div>
@@ -783,7 +775,7 @@ export default function AppShell() {
                   {/* Headline group */}
                   <div className="w-full max-w-5xl text-center">
                     <div
-                      className="inline-block px-5 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E]"
+                      className="inline-block px-5 py-2 rounded-full bg-[#F6F6F6] text-[#D4714E]"
                       style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '24px' }}
                     >
                       Meet Yulia, Your M&amp;A Agent!
@@ -802,8 +794,8 @@ export default function AppShell() {
                   {/* Chat bar — same card as Sell/Buy pages */}
                   <div className="w-full max-w-[860px]">
                     <div
-                      className="home-input-wrap bg-white shadow-lg transition-all relative overflow-visible"
-                      style={{ borderRadius: '28px', border: '1px solid rgba(0,0,0,0.1)' }}
+                      className="home-input-wrap bg-[#F6F6F6] transition-all relative overflow-visible"
+                      style={{ borderRadius: '28px', border: '2px solid #E8E8E8', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
                     >
                       <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder="Tell Yulia about your deal..." disabled={sending} />
                     </div>
@@ -816,17 +808,20 @@ export default function AppShell() {
                         <button
                           key={chip}
                           onClick={() => handleChipClick(chip)}
-                          className="bg-white border border-[#F3F4F6] px-5 py-3 cursor-pointer hover:border-[#D4714E] hover:text-[#D4714E] transition-all text-[#6E6A63]"
-                          style={{ borderRadius: '12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'inherit' }}
+                          className="bg-white border border-[#E8E8E8] px-5 py-2.5 cursor-pointer hover:border-[#D4714E] hover:text-[#D4714E] transition-all text-[#6E6A63]"
+                          style={{ borderRadius: '100px', fontSize: '13px', fontWeight: 500, fontFamily: 'inherit' }}
                           type="button"
                         >
-                          &ldquo;{chip}&rdquo;
+                          {chip}
                         </button>
                       ))}
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#4ADE80]" style={{ boxShadow: '0 0 4px rgba(74,222,128,0.5)', animation: 'statusPulse 2s ease infinite' }} />
-                      <span className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#A8A49C]">Live federal data &middot; Census &middot; BLS &middot; SBA &middot; SEC</span>
+                      <span className="text-[11px] font-semibold tracking-[0.06em] uppercase text-[#A8A49C]">LIVE FEDERAL DATA &middot; CENSUS &middot; BLS &middot; SBA &middot; SEC</span>
+                    </div>
+                    <div className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#C8C8C8] mt-2">
+                      POWERED BY SMBX.AI ENGINE
                     </div>
                   </div>
                 </div>
@@ -841,7 +836,7 @@ export default function AppShell() {
                 <div className="pt-9 px-6">
                   {page.overline && (
                     <div
-                      className="inline-block px-4 py-1.5 rounded-full bg-[#FFF0EB] text-[#D4714E] mb-4"
+                      className="inline-block px-4 py-1.5 rounded-full bg-[#F6F6F6] text-[#D4714E] mb-4"
                       style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em' }}
                     >
                       {page.overline}
@@ -857,20 +852,11 @@ export default function AppShell() {
                 </div>
                 <div className="px-6 pt-5">
                   <div className="flex flex-col gap-2.5">
-                    {page.chips.map((chip, i) => {
-                      const chipStyles = [
-                        { emoji: '\uD83D\uDCCA', bg: 'rgba(212,113,78,0.1)' },
-                        { emoji: '\uD83C\uDFE6', bg: 'rgba(74,144,226,0.1)' },
-                        { emoji: '\uD83E\uDD1D', bg: 'rgba(74,222,128,0.1)' },
-                      ];
-                      const style = chipStyles[i] || chipStyles[0];
-                      return (
-                        <button key={chip} onClick={() => handleChipClick(chip)} className="flex items-center gap-2.5 w-full text-left text-[15px] font-medium text-[#1A1A18] bg-[#F7F7F7] border border-[#E5E5E5] rounded-2xl cursor-pointer transition-colors hover:bg-[#F0F0F0]" style={{ padding: '14px 16px', fontFamily: 'inherit' }} type="button">
-                          <span className="w-7 h-7 rounded-full flex items-center justify-center text-[14px] shrink-0" style={{ background: style.bg }}>{style.emoji}</span>
-                          {chip}
-                        </button>
-                      );
-                    })}
+                    {page.chips.map(chip => (
+                      <button key={chip} onClick={() => handleChipClick(chip)} className="w-full text-left text-[15px] font-medium text-[#1A1A18] bg-[#F6F6F6] border border-[#E8E8E8] cursor-pointer transition-colors hover:bg-[#F0F0F0]" style={{ padding: '14px 16px', fontFamily: 'inherit', borderRadius: '16px' }} type="button">
+                        {chip}
+                      </button>
+                    ))}
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 px-6 pt-5 mb-4">
@@ -885,7 +871,7 @@ export default function AppShell() {
                 <div className="w-full max-w-5xl text-center">
                   {page.overline && (
                     <div
-                      className="inline-block px-5 py-2 rounded-full bg-[#FFF0EB] text-[#D4714E]"
+                      className="inline-block px-5 py-2 rounded-full bg-[#F6F6F6] text-[#D4714E]"
                       style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '24px' }}
                     >
                       {page.overline}
@@ -906,8 +892,8 @@ export default function AppShell() {
                 {/* Chat bar */}
                 <div className="w-full max-w-[860px]">
                   <div
-                    className="bg-white shadow-lg transition-all relative overflow-visible"
-                    style={{ borderRadius: '28px', border: '1px solid rgba(0,0,0,0.1)' }}
+                    className="bg-[#F6F6F6] transition-all relative overflow-visible"
+                    style={{ borderRadius: '28px', border: '2px solid #E8E8E8', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
                   >
                     <ChatDock
                       ref={dockRef}
@@ -926,11 +912,11 @@ export default function AppShell() {
                       <button
                         key={chip}
                         onClick={() => handleChipClick(chip)}
-                        className="bg-white border border-[#F3F4F6] px-5 py-3 cursor-pointer hover:border-[#D4714E] hover:text-[#D4714E] transition-all text-[#6E6A63]"
-                        style={{ borderRadius: '12px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'inherit' }}
+                        className="bg-white border border-[#E8E8E8] px-5 py-2.5 cursor-pointer hover:border-[#D4714E] hover:text-[#D4714E] transition-all text-[#6E6A63]"
+                        style={{ borderRadius: '100px', fontSize: '13px', fontWeight: 500, fontFamily: 'inherit' }}
                         type="button"
                       >
-                        &ldquo;{chip}&rdquo;
+                        {chip}
                       </button>
                     ))}
                   </div>
@@ -1043,8 +1029,8 @@ export default function AppShell() {
             }}
           >
             <div
-              className="bg-white shadow-lg relative overflow-visible"
-              style={{ borderRadius: '24px', border: '1px solid rgba(0,0,0,0.1)' }}
+              className="bg-[#F6F6F6] relative overflow-visible"
+              style={{ borderRadius: '24px', border: '2px solid #E8E8E8', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
             >
               <ChatDock
                 ref={dockRef}
@@ -1063,8 +1049,8 @@ export default function AppShell() {
           <div className="shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
             <div className="max-w-[860px] mx-auto">
               <div
-                className="bg-white shadow-sm relative overflow-visible"
-                style={{ borderRadius: '24px', border: '1px solid rgba(0,0,0,0.1)' }}
+                className="bg-[#F6F6F6] relative overflow-visible"
+                style={{ borderRadius: '24px', border: '2px solid #E8E8E8' }}
               >
                 <ChatDock
                   ref={dockRef}
@@ -1084,7 +1070,7 @@ export default function AppShell() {
         {/* ════ DESKTOP CANVAS PANEL — split view ════ */}
         {canvasOpen && !isMobile && (
           <div
-            className="shrink-0 flex flex-col border-l border-[#DDD9D1]"
+            className="shrink-0 flex flex-col border-l border-[#E8E8E8]"
             style={{ width: 480, animation: 'slideInRight 0.25s ease' }}
           >
             {canvasMarkdown ? (
