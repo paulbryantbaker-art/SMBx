@@ -1,155 +1,144 @@
-import {
-  pgTable,
-  serial,
-  varchar,
-  text,
-  integer,
-  boolean,
-  timestamp,
-  jsonb,
-} from 'drizzle-orm/pg-core';
-
 // ─── Users & Auth ───────────────────────────────────────────
 
-export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  email: varchar('email', { length: 255 }).notNull().unique(),
-  password: varchar('password', { length: 255 }), // nullable for Google OAuth
-  displayName: varchar('display_name', { length: 255 }),
-  googleId: varchar('google_id', { length: 255 }).unique(),
-  league: varchar('league', { length: 10 }), // L1-L6
-  role: varchar('role', { length: 50 }).default('user'), // user, admin, broker
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+export interface User {
+  id: number;
+  email: string;
+  password: string | null;
+  display_name: string | null;
+  google_id: string | null;
+  league: string | null;
+  role: string;
+  created_at: Date;
+  updated_at: Date;
+}
 
 // ─── Wallets ────────────────────────────────────────────────
 
-export const wallets = pgTable('wallets', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull().unique(),
-  balanceCents: integer('balance_cents').default(0).notNull(),
-  autoRefillEnabled: boolean('auto_refill_enabled').default(false),
-  autoRefillThresholdCents: integer('auto_refill_threshold_cents').default(5000),
-  autoRefillAmountCents: integer('auto_refill_amount_cents').default(25000),
-  createdAt: timestamp('created_at').defaultNow(),
-});
+export interface Wallet {
+  id: number;
+  user_id: number;
+  balance_cents: number;
+  auto_refill_enabled: boolean;
+  auto_refill_threshold_cents: number;
+  auto_refill_amount_cents: number;
+  created_at: Date;
+}
 
-export const walletTransactions = pgTable('wallet_transactions', {
-  id: serial('id').primaryKey(),
-  walletId: integer('wallet_id').references(() => wallets.id).notNull(),
-  amountCents: integer('amount_cents').notNull(),
-  type: varchar('type', { length: 20 }).notNull(), // credit, debit
-  description: text('description'),
-  stripePaymentIntentId: varchar('stripe_payment_intent_id', { length: 255 }),
-  menuItemId: varchar('menu_item_id', { length: 100 }),
-  balanceAfterCents: integer('balance_after_cents').notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
-});
+export interface WalletTransaction {
+  id: number;
+  wallet_id: number;
+  amount_cents: number;
+  type: string;
+  description: string | null;
+  stripe_payment_intent_id: string | null;
+  menu_item_id: string | null;
+  balance_after_cents: number;
+  created_at: Date;
+}
 
-export const walletBlocks = pgTable('wallet_blocks', {
-  id: serial('id').primaryKey(),
-  name: varchar('name', { length: 100 }).notNull(),
-  priceCents: integer('price_cents').notNull(),
-  creditsCents: integer('credits_cents').notNull(),
-  bonusPercent: integer('bonus_percent').default(0),
-  sortOrder: integer('sort_order').default(0),
-});
+export interface WalletBlock {
+  id: number;
+  name: string;
+  price_cents: number;
+  credits_cents: number;
+  bonus_percent: number;
+  sort_order: number;
+}
 
 // ─── Conversations & Messages ───────────────────────────────
 
-export const conversations = pgTable('conversations', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id),
-  dealId: integer('deal_id'),
-  title: varchar('title', { length: 255 }).default('New conversation'),
-  isArchived: boolean('is_archived').default(false),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+export interface Conversation {
+  id: number;
+  user_id: number | null;
+  deal_id: number | null;
+  title: string;
+  is_archived: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
 
-export const messages = pgTable('messages', {
-  id: serial('id').primaryKey(),
-  conversationId: integer('conversation_id').references(() => conversations.id).notNull(),
-  role: varchar('role', { length: 20 }).notNull(), // user, assistant, system
-  content: text('content').notNull(),
-  metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at').defaultNow(),
-});
+export interface Message {
+  id: number;
+  conversation_id: number;
+  role: string;
+  content: string;
+  metadata: unknown;
+  created_at: Date;
+}
 
 // ─── Deals ──────────────────────────────────────────────────
 
-export const deals = pgTable('deals', {
-  id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull(),
-  journeyType: varchar('journey_type', { length: 20 }).notNull(), // sell, buy, raise, pmi
-  currentGate: varchar('current_gate', { length: 20 }).default('S0'),
-  league: varchar('league', { length: 10 }),
-  industry: varchar('industry', { length: 100 }),
-  location: varchar('location', { length: 255 }),
-  businessName: varchar('business_name', { length: 255 }),
-  revenue: integer('revenue'), // cents
-  sde: integer('sde'), // cents
-  ebitda: integer('ebitda'), // cents
-  askingPrice: integer('asking_price'), // cents
-  financials: jsonb('financials'),
-  status: varchar('status', { length: 20 }).default('active'), // active, closed, paused
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
+export interface Deal {
+  id: number;
+  user_id: number;
+  journey_type: string;
+  current_gate: string;
+  league: string | null;
+  industry: string | null;
+  location: string | null;
+  business_name: string | null;
+  revenue: number | null;
+  sde: number | null;
+  ebitda: number | null;
+  asking_price: number | null;
+  financials: unknown;
+  status: string;
+  created_at: Date;
+  updated_at: Date;
+}
 
 // ─── Menu Catalog ───────────────────────────────────────────
 
-export const menuItems = pgTable('menu_items', {
-  id: serial('id').primaryKey(),
-  name: varchar('name', { length: 255 }).notNull(),
-  description: text('description'),
-  tier: varchar('tier', { length: 20 }).notNull(), // analyst, associate, vp
-  basePriceCents: integer('base_price_cents').notNull(),
-  journeyType: varchar('journey_type', { length: 20 }),
-  gate: varchar('gate', { length: 20 }),
-  category: varchar('category', { length: 50 }),
-  isActive: boolean('is_active').default(true),
-  sortOrder: integer('sort_order').default(0),
-});
+export interface MenuItem {
+  id: number;
+  name: string;
+  description: string | null;
+  tier: string;
+  base_price_cents: number;
+  journey_type: string | null;
+  gate: string | null;
+  category: string | null;
+  is_active: boolean;
+  sort_order: number;
+}
 
-export const dealPackages = pgTable('deal_packages', {
-  id: serial('id').primaryKey(),
-  name: varchar('name', { length: 255 }).notNull(),
-  description: text('description'),
-  priceCents: integer('price_cents').notNull(),
-  discountPercent: integer('discount_percent').default(0),
-  journeyType: varchar('journey_type', { length: 20 }),
-  includedMenuItemIds: jsonb('included_menu_item_ids'),
-  isActive: boolean('is_active').default(true),
-});
+export interface DealPackage {
+  id: number;
+  name: string;
+  description: string | null;
+  price_cents: number;
+  discount_percent: number;
+  journey_type: string | null;
+  included_menu_item_ids: unknown;
+  is_active: boolean;
+}
 
 // ─── Anonymous Sessions ────────────────────────────────────
 
-export const anonymousSessions = pgTable('anonymous_sessions', {
-  id: serial('id').primaryKey(),
-  sessionId: varchar('session_id', { length: 36 }).notNull().unique(),
-  ip: varchar('ip', { length: 45 }).notNull(),
-  sourcePage: varchar('source_page', { length: 50 }),
-  messages: jsonb('messages').default([]),
-  messageCount: integer('message_count').default(0),
-  createdAt: timestamp('created_at').defaultNow(),
-  lastActiveAt: timestamp('last_active_at').defaultNow(),
-  expiresAt: timestamp('expires_at').notNull(),
-  convertedToUserId: integer('converted_to_user_id').references(() => users.id),
-});
+export interface AnonymousSession {
+  id: number;
+  session_id: string;
+  ip: string;
+  source_page: string | null;
+  messages: unknown;
+  message_count: number;
+  created_at: Date;
+  last_active_at: Date;
+  expires_at: Date;
+  converted_to_user_id: number | null;
+}
 
 // ─── Deliverables ───────────────────────────────────────────
 
-export const deliverables = pgTable('deliverables', {
-  id: serial('id').primaryKey(),
-  dealId: integer('deal_id').references(() => deals.id).notNull(),
-  userId: integer('user_id').references(() => users.id).notNull(),
-  menuItemId: integer('menu_item_id').references(() => menuItems.id),
-  type: varchar('type', { length: 50 }).notNull(),
-  status: varchar('status', { length: 20 }).default('pending'), // pending, generating, complete, error
-  content: jsonb('content'),
-  pricePaidCents: integer('price_paid_cents'),
-  createdAt: timestamp('created_at').defaultNow(),
-  completedAt: timestamp('completed_at'),
-});
+export interface Deliverable {
+  id: number;
+  deal_id: number;
+  user_id: number;
+  menu_item_id: number | null;
+  type: string;
+  status: string;
+  content: unknown;
+  price_paid_cents: number | null;
+  created_at: Date;
+  completed_at: Date | null;
+}

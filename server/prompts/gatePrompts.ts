@@ -1,5 +1,5 @@
 // Gate-specific prompts for all 4 journeys
-// Source: YULIA_PROMPTS_V2.md Sections 4-7 (verbatim)
+// Source: YULIA_PROMPTS_V3.md Sections 4-7 (verbatim)
 
 export const GATE_PROMPTS: Record<string, string> = {
   // ═══════════════════════════════════════════════════════════

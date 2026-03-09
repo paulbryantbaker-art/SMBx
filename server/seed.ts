@@ -1,53 +1,49 @@
 import 'dotenv/config';
 import postgres from 'postgres';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import { walletBlocks, menuItems } from '../shared/schema.js';
 
 const client = postgres(process.env.DATABASE_URL!);
-const db = drizzle(client);
 
 async function seed() {
   console.log('Seeding wallet blocks...');
-  await db.insert(walletBlocks).values([
-    { name: 'Exploratory', priceCents: 5000, creditsCents: 5000, bonusPercent: 0, sortOrder: 1 },
-    { name: 'Early Commit', priceCents: 10000, creditsCents: 10500, bonusPercent: 5, sortOrder: 2 },
-    { name: 'Active Deal', priceCents: 25000, creditsCents: 26500, bonusPercent: 6, sortOrder: 3 },
-    { name: 'Serious', priceCents: 50000, creditsCents: 54000, bonusPercent: 8, sortOrder: 4 },
-    { name: 'Full Journey', priceCents: 100000, creditsCents: 110000, bonusPercent: 10, sortOrder: 5 },
-    { name: 'Advisor', priceCents: 250000, creditsCents: 280000, bonusPercent: 12, sortOrder: 6 },
-  ]);
+  await client`
+    INSERT INTO wallet_blocks (name, price_cents, credits_cents, bonus_percent, sort_order) VALUES
+      ('Exploratory',   5000,   5000,  0, 1),
+      ('Early Commit', 10000,  10500,  5, 2),
+      ('Active Deal',  25000,  26500,  6, 3),
+      ('Serious',      50000,  54000,  8, 4),
+      ('Full Journey',100000, 110000, 10, 5),
+      ('Advisor',     250000, 280000, 12, 6)
+    ON CONFLICT DO NOTHING
+  `;
 
   console.log('Seeding menu items...');
-  await db.insert(menuItems).values([
-    // Analyst tier
-    { name: 'Financial Spread', tier: 'analyst', basePriceCents: 1000, journeyType: 'sell', gate: 'S1', category: 'financial', sortOrder: 1 },
-    { name: 'Add-Back Analysis', tier: 'analyst', basePriceCents: 1000, journeyType: 'sell', gate: 'S1', category: 'financial', sortOrder: 2 },
-    { name: 'Quick Valuation', tier: 'analyst', basePriceCents: 1500, journeyType: 'sell', gate: 'S2', category: 'valuation', sortOrder: 3 },
-    { name: 'Blind Teaser', tier: 'analyst', basePriceCents: 1500, journeyType: 'sell', gate: 'S3', category: 'packaging', sortOrder: 4 },
-    { name: 'Data Room Structure', tier: 'analyst', basePriceCents: 1000, journeyType: 'sell', gate: 'S3', category: 'packaging', sortOrder: 5 },
-    { name: 'Executive Summary', tier: 'analyst', basePriceCents: 1500, journeyType: 'sell', gate: 'S3', category: 'packaging', sortOrder: 6 },
-    { name: 'Deal Scoring', tier: 'analyst', basePriceCents: 1000, journeyType: 'buy', gate: 'B1', category: 'sourcing', sortOrder: 7 },
-    { name: 'DD Checklist', tier: 'analyst', basePriceCents: 1500, journeyType: 'buy', gate: 'B3', category: 'diligence', sortOrder: 8 },
-    { name: 'Outreach Strategy', tier: 'analyst', basePriceCents: 2000, journeyType: 'sell', gate: 'S4', category: 'matching', sortOrder: 9 },
-
-    // Associate tier
-    { name: 'Full Valuation Report', tier: 'associate', basePriceCents: 5000, journeyType: 'sell', gate: 'S2', category: 'valuation', sortOrder: 10 },
-    { name: 'CIM', tier: 'associate', basePriceCents: 7500, journeyType: 'sell', gate: 'S3', category: 'packaging', sortOrder: 11 },
-    { name: 'Buyer List', tier: 'associate', basePriceCents: 4000, journeyType: 'sell', gate: 'S4', category: 'matching', sortOrder: 12 },
-    { name: 'Acquisition Model', tier: 'associate', basePriceCents: 6000, journeyType: 'buy', gate: 'B2', category: 'valuation', sortOrder: 13 },
-    { name: 'Investor Materials Package', tier: 'associate', basePriceCents: 7500, journeyType: 'raise', gate: 'R2', category: 'packaging', sortOrder: 14 },
-    { name: 'Deal Structure Analysis', tier: 'associate', basePriceCents: 5000, journeyType: 'sell', gate: 'S5', category: 'closing', sortOrder: 15 },
-    { name: 'Working Capital Analysis', tier: 'associate', basePriceCents: 5000, journeyType: 'sell', gate: 'S5', category: 'closing', sortOrder: 16 },
-    { name: 'Closing Checklist', tier: 'associate', basePriceCents: 4000, journeyType: 'sell', gate: 'S5', category: 'closing', sortOrder: 17 },
-
-    // VP tier
-    { name: 'Institutional CIM', tier: 'vp', basePriceCents: 20000, journeyType: 'sell', gate: 'S3', category: 'packaging', sortOrder: 18 },
-    { name: 'LBO Model', tier: 'vp', basePriceCents: 25000, journeyType: 'buy', gate: 'B2', category: 'valuation', sortOrder: 19 },
-    { name: 'Funds Flow Statement', tier: 'vp', basePriceCents: 15000, journeyType: 'sell', gate: 'S5', category: 'closing', sortOrder: 20 },
-    { name: 'Full Pitch Deck', tier: 'vp', basePriceCents: 20000, journeyType: 'raise', gate: 'R2', category: 'packaging', sortOrder: 21 },
-    { name: 'Integration Plan', tier: 'vp', basePriceCents: 15000, journeyType: 'pmi', gate: 'PMI1', category: 'integration', sortOrder: 22 },
-    { name: 'Value Creation Plan', tier: 'vp', basePriceCents: 20000, journeyType: 'pmi', gate: 'PMI3', category: 'optimization', sortOrder: 23 },
-  ]);
+  await client`
+    INSERT INTO menu_items (name, tier, base_price_cents, journey_type, gate, category, sort_order) VALUES
+      ('Financial Spread',           'analyst',    1000, 'sell',  'S1',   'financial',    1),
+      ('Add-Back Analysis',          'analyst',    1000, 'sell',  'S1',   'financial',    2),
+      ('Quick Valuation',            'analyst',    1500, 'sell',  'S2',   'valuation',    3),
+      ('Blind Teaser',               'analyst',    1500, 'sell',  'S3',   'packaging',    4),
+      ('Data Room Structure',        'analyst',    1000, 'sell',  'S3',   'packaging',    5),
+      ('Executive Summary',          'analyst',    1500, 'sell',  'S3',   'packaging',    6),
+      ('Deal Scoring',               'analyst',    1000, 'buy',   'B1',   'sourcing',     7),
+      ('DD Checklist',               'analyst',    1500, 'buy',   'B3',   'diligence',    8),
+      ('Outreach Strategy',          'analyst',    2000, 'sell',  'S4',   'matching',     9),
+      ('Full Valuation Report',      'associate',  5000, 'sell',  'S2',   'valuation',   10),
+      ('CIM',                        'associate',  7500, 'sell',  'S3',   'packaging',   11),
+      ('Buyer List',                 'associate',  4000, 'sell',  'S4',   'matching',    12),
+      ('Acquisition Model',          'associate',  6000, 'buy',   'B2',   'valuation',   13),
+      ('Investor Materials Package', 'associate',  7500, 'raise', 'R2',   'packaging',   14),
+      ('Deal Structure Analysis',    'associate',  5000, 'sell',  'S5',   'closing',     15),
+      ('Working Capital Analysis',   'associate',  5000, 'sell',  'S5',   'closing',     16),
+      ('Closing Checklist',          'associate',  4000, 'sell',  'S5',   'closing',     17),
+      ('Institutional CIM',          'vp',        20000, 'sell',  'S3',   'packaging',   18),
+      ('LBO Model',                  'vp',        25000, 'buy',   'B2',   'valuation',   19),
+      ('Funds Flow Statement',       'vp',        15000, 'sell',  'S5',   'closing',     20),
+      ('Full Pitch Deck',            'vp',        20000, 'raise', 'R2',   'packaging',   21),
+      ('Integration Plan',           'vp',        15000, 'pmi',   'PMI1', 'integration', 22),
+      ('Value Creation Plan',        'vp',        20000, 'pmi',   'PMI3', 'optimization',23)
+    ON CONFLICT DO NOTHING
+  `;
 
   console.log('Seed complete.');
   await client.end();

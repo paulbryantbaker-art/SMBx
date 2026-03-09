@@ -1,4 +1,4 @@
-// League persona definitions — verbatim from YULIA_PROMPTS_V2.md Section 2
+// League persona definitions — verbatim from YULIA_PROMPTS_V3.md Section 2
 
 export const PERSONAS: Record<string, string> = {
   L1: `## YOUR PERSONA: The Coach (L1 — Deals under $500K SDE)

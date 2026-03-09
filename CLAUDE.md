@@ -7,7 +7,7 @@ Chat-first UX that mirrors claude.ai exactly — same layout, fonts, colors, sid
 Node.js + Express (ESM) backend
 React 19 + Vite 7 + Tailwind CSS v3 + Radix UI frontend
 wouter for client routing
-PostgreSQL via raw postgres-js (no ORM — Drizzle broke on Railway, bypassed entirely)
+PostgreSQL via raw postgres-js (no ORM)
 Claude API (primary), Google Gemini (secondary), OpenAI (tertiary)
 Stripe wallet payments — NO SUBSCRIPTIONS, NO TIERS
 JWT authentication (no sessions, no passport — sessions broke on Railway)
@@ -28,8 +28,6 @@ Chinese wall. Buyer data and seller data strictly isolated. No cross-deal data l
 Reference Documents
 
 METHODOLOGY_V17.md — Complete M&A methodology, 6 parts (~80 pages): Master rules, Exit (Sell), Raise, Buyer, Broker, PMI
-SMBX_COMPLETE_SPEC.md — Full build specification with all details
-YULIA_PROMPTS_V2.md — Agentic runtime: system prompts, gate scripts, conversation flows
 
 Design Tokens (Mirror claude.ai)
 css--bg-primary: #F5F5F0;        /* Warm cream canvas */
@@ -98,7 +96,7 @@ javascriptconst LEAGUE_MULTIPLE_RANGES = {
 Roll-Up Override
 Industries: veterinary, dental, HVAC, MSP, pest control. If revenue > $1.5M → force EBITDA metric regardless of league.
 Key File Map
-FilePurposeserver/db.tsPostgreSQL connection via postgres-js (raw SQL)server/index.tsExpress entry pointserver/routes.tsAll API endpointsserver/routes/auth.tsJWT auth routes (login, signup, verify)server/routes/chat.tsChat CRUD + message endpointsserver/ai.tsAI orchestration (routes tasks to Claude/Gemini/OpenAI)server/services/walletService.tsWallet CRUD, balance checks, auto-refillserver/services/menuCatalogService.tsMenu items, wallet blocks, deal packagesserver/services/leagueRouter.tsLeague detection + multiplier calculationserver/services/gateReadinessService.tsGate advancement logicserver/services/complexityPreflightService.tsWagyu Rule surcharge detectionserver/services/deliverableGenerationService.tsAI generation orchestrationshared/gateRegistry.ts22 gates across 4 journeysshared/constants.tsLeague ranges, multiples, safe harbor, fee constantsclient/src/App.tsxAll frontend routing (wouter)client/src/layouts/AppLayout.tsxSidebar + main area (Claude mirror)client/src/styles/DESIGN_SYSTEM.mdUI component specs and design tokens
+FilePurposeserver/db.tsPostgreSQL connection via postgres-js (raw SQL)server/index.tsExpress entry pointserver/routes.tsAll API endpointsserver/routes/auth.tsJWT auth routes (login, signup, verify)server/routes/chat.tsChat CRUD + message endpointsserver/ai.tsAI orchestration (routes tasks to Claude/Gemini/OpenAI)server/services/walletService.tsWallet CRUD, balance checks, auto-refillserver/services/menuCatalogService.tsMenu items, wallet blocks, deal packagesserver/services/leagueRouter.tsLeague detection + multiplier calculationserver/services/gateReadinessService.tsGate advancement logicserver/services/complexityPreflightService.tsWagyu Rule surcharge detectionserver/services/deliverableGenerationService.tsAI generation orchestrationshared/schema.tsPure TypeScript interfaces for all DB tablesshared/gateRegistry.ts22 gates across 4 journeysshared/constants.tsLeague ranges, multiples, safe harbor, fee constantsclient/src/App.tsxAll frontend routing (wouter)client/src/pages/public/AppShell.tsxUnified shell for all public pages (home, sell, buy, advisors, pricing)
 AI Orchestration
 TaskEngineConfigChat/ConversationClaude Sonnet 4.5Streaming, methodology contextFinancial ExtractionGemini 2.5 FlashJSON only, temp 0.0Market IntelligenceGemini 2.5 Pro + SearchSearch grounding enabledDocument ForensicsClaude with RAGGrounded only, temp 0.1Drafting (LOI/CIM)Claude Sonnet 4.5Template injectionQuick ValuationClaude Haiku 4.5Structured output
 Commands
@@ -106,7 +104,7 @@ bashnpm run dev          # Start dev server (Vite + Express)
 npm run build        # Build for production
 Database
 All queries use raw postgres-js — no ORM. Pattern:
-javascriptimport sql from '../db.ts';
+javascriptimport { sql } from '../db.js';
 const users = await sql`SELECT * FROM users WHERE id = ${userId}`;
 Schema changes: write raw SQL migrations in server/migrations/ and run them manually or on deploy.
 Environment Variables Required

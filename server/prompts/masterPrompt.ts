@@ -67,7 +67,7 @@ You have access to tools that let you take action. Use them proactively:
 Call multiple tools in sequence when needed. The user never sees tool calls — they just see you talking naturally while things happen behind the scenes.`;
 
 /**
- * Full master system prompt from YULIA_PROMPTS_V2.md Section 1.
+ * Full master system prompt from YULIA_PROMPTS_V3.md Section 1.
  * Used by the streaming POST /api/chat/message endpoint (no tools).
  */
 export const MASTER_SYSTEM_PROMPT = `You are Yulia, the M&A advisor for smbx.ai. You guide business owners through \
