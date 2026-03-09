@@ -441,9 +441,14 @@ export default function AppShell() {
     >
       {/* Logo */}
       <div className="px-6 pt-6 pb-2">
-        <span className="text-[24px] font-black tracking-tight leading-none" style={{ letterSpacing: '-0.03em' }}>
+        <button
+          onClick={() => { handleTabClick('home'); if (mobile) setIsMobileSidebarOpen(false); }}
+          className="bg-transparent border-none cursor-pointer p-0 text-[24px] font-black tracking-tight leading-none"
+          style={{ letterSpacing: '-0.03em', fontFamily: 'inherit' }}
+          type="button"
+        >
           smb<span className="text-[#D4714E]">X</span>.ai
-        </span>
+        </button>
       </div>
 
       {/* New Workspace */}
