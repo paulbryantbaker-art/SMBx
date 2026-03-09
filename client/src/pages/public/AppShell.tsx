@@ -718,7 +718,7 @@ export default function AppShell() {
                 style={{ fontFamily: 'inherit' }}
                 type="button"
               >
-                Get Started
+                Log in
               </button>
             )}
             {user && (
