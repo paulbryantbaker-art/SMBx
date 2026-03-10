@@ -469,23 +469,24 @@ export default function AppShell() {
         </button>
       </div>
 
-      {/* New Workspace */}
-      <div className="px-4 pt-4 pb-4">
-        <button
-          onClick={() => {
-            if (user) { authChat.newConversation(); }
-            else { anonChat.newConversation(); }
-            setViewState('chat');
-            navigate('/chat');
-            setIsMobileSidebarOpen(false);
-          }}
-          className="w-full text-white text-[14px] px-4 py-3 cursor-pointer border-none hover:opacity-90 transition-opacity"
-          style={{ fontFamily: 'inherit', fontWeight: 600, background: '#1A1A18', borderRadius: '100px' }}
-          type="button"
-        >
-          + New Workspace
-        </button>
-      </div>
+      {/* New Workspace — authenticated only */}
+      {user && (
+        <div className="px-4 pt-4 pb-4">
+          <button
+            onClick={() => {
+              authChat.newConversation();
+              setViewState('chat');
+              navigate('/chat');
+              setIsMobileSidebarOpen(false);
+            }}
+            className="w-full text-white text-[14px] px-4 py-3 cursor-pointer border-none hover:opacity-90 transition-opacity"
+            style={{ fontFamily: 'inherit', fontWeight: 600, background: '#1A1A18', borderRadius: '100px' }}
+            type="button"
+          >
+            + New Workspace
+          </button>
+        </div>
+      )}
 
       {/* Nav */}
       <div className="px-3">
