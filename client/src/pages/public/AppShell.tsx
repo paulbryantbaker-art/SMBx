@@ -781,7 +781,7 @@ export default function AppShell() {
                     </h1>
                   </div>
                   <div className="shrink-0 px-4" style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}>
-                    <div className="dock-depth-zone mx-auto" style={{ maxWidth: 660 }}>
+                    <div className="dock-depth-zone mx-auto">
                       <ChatDock
                         ref={dockRef}
                         onSend={handleSend}
@@ -802,8 +802,8 @@ export default function AppShell() {
                       {renderHeadline(page.headline, page.terraWord)}
                     </h1>
                   </div>
-                  <div className="shrink-0 px-7" style={{ paddingBottom: 28 }}>
-                    <div className="dock-depth-zone mx-auto" style={{ maxWidth: 660 }}>
+                  <div className="shrink-0 px-8" style={{ paddingBottom: 32 }}>
+                    <div className="dock-depth-zone max-w-4xl mx-auto">
                       <ChatDock
                         ref={dockRef}
                         onSend={handleSend}
@@ -852,16 +852,14 @@ export default function AppShell() {
                     ))}
                   </div>
                   {/* Input */}
-                  <div className="home-input-wrap bg-white relative overflow-visible" style={{ borderRadius: 22, border: '2px solid rgba(26,26,24,0.12)' }}>
-                    <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder={page.placeholder} disabled={sending} />
-                  </div>
+                  <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder={page.placeholder} disabled={sending} />
                 </div>
               </div>
 
               {/* ═══ SUB-PAGE DESKTOP HERO ═══ */}
               <div className="hidden md:block">
                 <div className="mx-6 mt-6" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '56px 52px' }}>
-                  <div style={{ maxWidth: 880, margin: '0 auto' }}>
+                  <div className="max-w-4xl mx-auto">
                     {page.overline && (
                       <div
                         className="inline-flex items-center gap-2 bg-white mb-6"
@@ -874,7 +872,7 @@ export default function AppShell() {
                     <h1 style={{ fontSize: '52px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.1, marginBottom: 20 }}>
                       {renderHeadline(page.headline, page.terraWord)}
                     </h1>
-                    <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, marginBottom: 32, maxWidth: 720 }}>
+                    <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, marginBottom: 32 }}>
                       {page.tagline}
                     </p>
                     {/* Chips */}
@@ -892,11 +890,7 @@ export default function AppShell() {
                       ))}
                     </div>
                     {/* Input */}
-                    <div style={{ maxWidth: 780 }}>
-                      <div className="home-input-wrap bg-white relative overflow-visible" style={{ borderRadius: 22, border: '2px solid rgba(26,26,24,0.12)' }}>
-                        <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder={page.placeholder} disabled={sending} />
-                      </div>
-                    </div>
+                    <ChatDock ref={dockRef} onSend={handleSend} variant="hero" rows={1} placeholder={page.placeholder} disabled={sending} />
                   </div>
                 </div>
               </div>

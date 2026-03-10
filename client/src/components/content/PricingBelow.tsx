@@ -7,7 +7,7 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
   return (
     <div>
       {/* ═══ Section 1: FREE ═══ */}
-      <section className="px-6" style={{ paddingTop: '100px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-4">
             These are free. Not &ldquo;free trial&rdquo; free. Free forever.
@@ -34,7 +34,7 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
       </section>
 
       {/* ═══ Section 2: TIER 1 ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>GO DEEPER WHEN YOU&apos;RE READY</span>
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-10">
@@ -63,7 +63,7 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
       </section>
 
       {/* ═══ Section 3: TIER 2 ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>PREPARE TO TRANSACT</span>
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-10">
@@ -89,7 +89,7 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
       </section>
 
       {/* ═══ Section 4: PROGRESSIVE REVEAL ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
           <div style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
             <p className="m-0">More analysis unlocks as your deal progresses.</p>
@@ -102,7 +102,7 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
       </section>
 
       {/* ═══ Section 5: WALLET ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-4">
             Fund your wallet. Spend as you go.
@@ -148,7 +148,7 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
       </section>
 
       {/* ═══ Section 6: WHY THIS PRICING WORKS ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-8">
             The right intelligence at the right stage.
@@ -165,7 +165,7 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
       </section>
 
       {/* ═══ Section 7: ADVISORS ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
           <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E', display: 'block', marginBottom: 16 }}>FOR ADVISORS AND BROKERS</span>
           <div className="space-y-4" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.6 }}>
@@ -176,7 +176,7 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
       </section>
 
       {/* ═══ Section 8: WHAT WE DON'T CHARGE FOR ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px', paddingBottom: '80px' }}>
+      <section className="px-6" style={{ paddingTop: '140px', paddingBottom: '80px' }}>
         <div className="max-w-4xl mx-auto">
           <div className="space-y-4">
             {[

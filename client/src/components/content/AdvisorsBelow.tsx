@@ -6,7 +6,7 @@ export default function AdvisorsBelow({ onChipClick }: AdvisorsBelowProps) {
   return (
     <div>
       {/* ═══ Section 1: THE OFFER ═══ */}
-      <section className="px-6" style={{ paddingTop: '100px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-8">
             Three deals. Completely free. Then decide.
@@ -21,7 +21,7 @@ export default function AdvisorsBelow({ onChipClick }: AdvisorsBelowProps) {
       </section>
 
       {/* ═══ Section 2: WHAT CHANGES FOR YOU ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-10">
             68 hours back. Every month.
@@ -44,7 +44,7 @@ export default function AdvisorsBelow({ onChipClick }: AdvisorsBelowProps) {
       </section>
 
       {/* ═══ Section 3: THE MATH ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-10 md:text-center">
             You know the bottleneck. Here&apos;s what changes.
@@ -75,7 +75,7 @@ export default function AdvisorsBelow({ onChipClick }: AdvisorsBelowProps) {
       </section>
 
       {/* ═══ Section 4: PARTNERSHIP ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px', paddingBottom: '80px' }}>
+      <section className="px-6" style={{ paddingTop: '140px', paddingBottom: '80px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-4">
             Shape the product. Grow with us.

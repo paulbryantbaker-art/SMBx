@@ -7,7 +7,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
   return (
     <div>
       {/* ═══ Section 1: YOUR BIZESTIMATE ═══ */}
-      <section className="px-6" style={{ paddingTop: '100px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-8">
             Your number. In 90 seconds. Free.
@@ -21,8 +21,8 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
       </section>
 
       {/* ═══ Section 2: YOUR OPTIONS ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
-        <div className="max-w-5xl mx-auto">
+      <section className="px-6" style={{ paddingTop: '140px' }}>
+        <div className="max-w-4xl mx-auto">
           <div className="md:text-center mb-10 md:mb-16">
             <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px]">
               &ldquo;Selling&rdquo; doesn&apos;t mean one thing.
@@ -79,7 +79,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
       </section>
 
       {/* ═══ Section 3: THE JOURNEY ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <div className="md:text-center mb-10 md:mb-16">
             <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px]">
@@ -146,7 +146,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
       </section>
 
       {/* ═══ Section 4: THE $400,000 MOST OWNERS MISS ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-8">
             The money hiding in your tax returns.
@@ -178,7 +178,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
       </section>
 
       {/* ═══ Section 5: NEGOTIATE LIKE A PRO ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-4">
             You do this once. The buyer&apos;s attorney does it fifty times.
@@ -204,7 +204,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
       </section>
 
       {/* ═══ Section 6: BROKER PARTNERSHIP ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px', paddingBottom: '80px' }}>
+      <section className="px-6" style={{ paddingTop: '140px', paddingBottom: '80px' }}>
         <div className="max-w-4xl mx-auto" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }} >
           <h3 style={{ fontSize: '26px', fontWeight: 600, letterSpacing: '-0.03em', marginBottom: 24 }} className="md:text-[36px]">
             Working with a broker? Even better.

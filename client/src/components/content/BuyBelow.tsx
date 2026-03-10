@@ -7,7 +7,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
   return (
     <div>
       {/* ═══ Section 1: BRING YOUR DEAL HERE ═══ */}
-      <section className="px-6" style={{ paddingTop: '100px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>ANY DEAL. ANY SOURCE.</span>
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
@@ -23,7 +23,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
       </section>
 
       {/* ═══ Section 2: PURSUE OR PASS ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <div className="md:text-center mb-10 md:mb-16">
             <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px]">
@@ -52,7 +52,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
       </section>
 
       {/* ═══ Section 3: YOUR FREE STARTING POINT ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-10">
             Before you pay anything, you get this.
@@ -78,7 +78,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
       </section>
 
       {/* ═══ Section 4: YOUR FULL JOURNEY ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <div className="md:text-center mb-10 md:mb-16">
             <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px]">
@@ -104,7 +104,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
       </section>
 
       {/* ═══ Section 5: NEGOTIATION ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-8">
             Buy smart. Not just fast.
@@ -126,7 +126,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
       </section>
 
       {/* ═══ Section 6: EVERY TYPE OF BUYER ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px', paddingBottom: '80px' }}>
+      <section className="px-6" style={{ paddingTop: '140px', paddingBottom: '80px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-10 md:text-center">
             First deal or fiftieth. Yulia adapts.
