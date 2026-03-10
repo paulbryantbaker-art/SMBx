@@ -44,6 +44,29 @@ function getAnthropicClient(): Anthropic {
   return anthropicClient;
 }
 
+// ─── Auto-migration: ensure conversations has all needed columns ──
+let _columnsEnsured = false;
+async function ensureConversationColumns() {
+  if (_columnsEnsured) return;
+  try {
+    await sql`ALTER TABLE conversations ADD COLUMN IF NOT EXISTS journey TEXT`;
+    await sql`ALTER TABLE conversations ADD COLUMN IF NOT EXISTS current_gate TEXT`;
+    await sql`ALTER TABLE conversations ADD COLUMN IF NOT EXISTS league TEXT`;
+    await sql`ALTER TABLE conversations ADD COLUMN IF NOT EXISTS extracted_data JSONB DEFAULT '{}'`;
+    await sql`ALTER TABLE conversations ADD COLUMN IF NOT EXISTS company_profile_id INTEGER`;
+    await sql`ALTER TABLE conversations ADD COLUMN IF NOT EXISTS thesis_id INTEGER`;
+    await sql`ALTER TABLE conversations ADD COLUMN IF NOT EXISTS exit_type TEXT`;
+    await sql`ALTER TABLE conversations ADD COLUMN IF NOT EXISTS pmi_phase TEXT`;
+    await sql`ALTER TABLE conversations ADD COLUMN IF NOT EXISTS deal_id INTEGER`;
+    await sql`ALTER TABLE conversations ADD COLUMN IF NOT EXISTS journey_context TEXT`;
+    _columnsEnsured = true;
+    console.log('✓ Conversation columns verified');
+  } catch (err: any) {
+    console.error('Column migration warning:', err.message);
+    _columnsEnsured = true; // Don't retry on every request
+  }
+}
+
 export const chatRouter = Router();
 
 // Auth is now optional — endpoints work with or without JWT
@@ -177,20 +200,14 @@ chatRouter.post('/message', async (req, res) => {
       VALUES (${convId}, 'user', ${message.trim()})
     `;
 
-    // Load conversation state (journey, gate, league, extracted data)
-    let convRow: any;
-    try {
-      [convRow] = await sql`
-        SELECT journey, current_gate, league, extracted_data, company_profile_id, thesis_id, exit_type, pmi_phase
-        FROM conversations WHERE id = ${convId}
-      `;
-    } catch (_colErr) {
-      // Fallback if newer columns don't exist yet
-      [convRow] = await sql`
-        SELECT journey, current_gate, league, extracted_data
-        FROM conversations WHERE id = ${convId}
-      `;
-    }
+    // Ensure critical columns exist (runs once per server start)
+    await ensureConversationColumns();
+
+    // Load conversation state
+    const [convRow] = await sql`
+      SELECT journey, current_gate, league, extracted_data, company_profile_id, thesis_id, exit_type, pmi_phase
+      FROM conversations WHERE id = ${convId}
+    `;
     const convState: any = {
       journey: convRow?.journey || null,
       current_gate: convRow?.current_gate || null,
