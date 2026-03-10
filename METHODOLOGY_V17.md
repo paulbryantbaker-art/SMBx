@@ -911,3 +911,787 @@ Yulia is presented as an expert advisor, not an AI chatbot:
 - Provides specific, actionable recommendations
 - Adapts tone to user's league (Coach for L1, Partner for L5)
 - Never says "As an AI..." or "I'm just a language model..."
+
+---
+
+## 9.0 TAX IMPLICATIONS ENGINE
+
+**Purpose:** Yulia models the tax consequences of deal structure decisions for both buyer and seller. She presents the landscape and the math. She ALWAYS defers final tax advice to a CPA/tax attorney. The EULA states this explicitly. But the analytical groundwork — modeling scenarios, showing math, flagging risks — is Yulia's job.
+
+**Framing rule:** Every tax analysis ends with: "Your CPA should confirm these numbers for your specific situation."
+
+### 9.1 Deal Structure Tax Modeling (Asset Sale vs. Stock Sale)
+
+This is the single highest-impact tax decision in any SMB deal. It's adversarial: what benefits the seller typically costs the buyer, and vice versa.
+
+#### 9.1.1 Seller — Asset Sale Tax Treatment
+
+In an asset sale, the purchase price is allocated across asset classes per IRC §1060. Each class has different tax treatment:
+
+| Asset Class | Examples | Seller Tax Treatment | Rate (Federal) |
+|-------------|----------|---------------------|----------------|
+| Class I | Cash, bank deposits | No gain (1:1 value) | 0% |
+| Class II | CDs, government securities | Ordinary income on gain | Up to 37% |
+| Class III | Accounts receivable | Ordinary income | Up to 37% |
+| Class IV | Inventory | Ordinary income | Up to 37% |
+| Class V — Tangible | Equipment, vehicles, furniture | §1245 depreciation recapture (ordinary) + §1231 gain (capital) | Recapture: up to 37%; §1231: 20% |
+| Class V — Intangible | Non-compete, customer lists | Ordinary income (non-compete); capital gains (customer lists, depending) | Varies |
+| Class VI | §197 intangibles (not goodwill) | Capital gains (if held >1 year) | 20% |
+| Class VII | Goodwill, going concern | Capital gains (long-term) | 20% |
+
+**Depreciation recapture (§1245):** When equipment that has been depreciated is sold for more than its depreciated basis, the gain up to the original cost is "recaptured" as ordinary income. Only gain ABOVE original cost gets capital gains treatment.
+
+**Net proceeds formula for sellers (asset sale):**
+```
+For each asset class:
+  Allocated Amount - Tax Basis = Gain
+  Gain × Applicable Tax Rate = Tax on that class
+  
+Total Tax = Sum of taxes across all classes + State tax
+Net Proceeds = Purchase Price - Total Federal Tax - State Tax - Transaction Costs
+```
+
+**Worked example — Seller asset sale ($2M total price):**
+```
+Allocation:
+  Inventory:        $100K → Ordinary income tax: $100K × 37% = $37,000
+  Equipment:        $200K → Basis $50K, Recapture $150K × 37% = $55,500
+  Customer list:    $150K → Capital gains: $150K × 20% = $30,000
+  Non-compete:      $100K → Ordinary income: $100K × 37% = $37,000
+  Goodwill:         $1.45M → Capital gains: $1.45M × 20% = $290,000
+  
+  Federal tax: $449,500
+  Net Investment Income Tax (3.8% on >$200K): ~$68,400
+  State tax (example CA 13.3%): ~$266,000
+  Total tax: ~$783,900
+  Net proceeds: $2,000,000 - $783,900 - $50,000 (transaction costs) = $1,166,100
+```
+
+#### 9.1.2 Seller — Stock Sale Tax Treatment
+
+In a stock sale, the entire gain is treated as capital gain (assuming long-term hold of >1 year):
+
+```
+Sale Price - Seller's Basis in Stock = Capital Gain
+Capital Gain × 20% (federal) + 3.8% (NIIT) + State Rate = Total Tax
+```
+
+**Same $2M example as stock sale (seller basis: $100K):**
+```
+Capital gain: $2,000,000 - $100,000 = $1,900,000
+Federal tax: $1,900,000 × 23.8% (20% + 3.8% NIIT) = $452,200
+State tax (CA): $1,900,000 × 13.3% = $252,700
+Total tax: $704,900
+Net proceeds: $2,000,000 - $704,900 - $50,000 = $1,245,100
+```
+
+**Difference: Seller keeps $79,000 more in a stock sale.** This gap widens significantly when more purchase price is allocated to ordinary income items (inventory, non-compete, receivables).
+
+#### 9.1.3 Buyer — Asset Sale Benefits
+
+- **Stepped-up basis** on all acquired assets
+- **Goodwill amortization:** 15-year straight-line under §197. On $1.45M goodwill = $96,667/year tax deduction
+- **Equipment depreciation restart:** Can take bonus depreciation (if available) or standard MACRS
+- **Tax shield calculation:** Present value of future deductions at buyer's marginal rate
+
+**Buyer NPV of asset sale tax shield ($2M deal, same allocation):**
+```
+Goodwill ($1.45M ÷ 15 years × 25% rate): $24,167/year for 15 years → NPV ≈ $245K
+Equipment ($200K, 5-year MACRS, 25% rate): NPV ≈ $42K
+Non-compete ($100K ÷ 15 years × 25%): $1,667/year → NPV ≈ $17K
+Total buyer tax shield NPV: ~$304K
+```
+
+#### 9.1.4 Buyer — Stock Sale Disadvantages
+
+- **No step-up.** Buyer inherits seller's existing basis in assets
+- **No fresh depreciation or amortization** (except what was already being taken)
+- **Inherited liabilities** — including unknown/contingent tax liabilities from prior periods
+- **Loss of tax shield:** The ~$304K NPV from above is forfeited
+
+#### 9.1.5 The Negotiation Dynamic
+
+The tax gap creates a negotiation point. Asset sales typically benefit buyers by more than they cost sellers (due to NPV of multi-year deductions vs. one-time tax hit). Common resolutions:
+
+1. **Price adjustment:** Buyer pays slightly more to compensate seller for higher tax burden
+2. **Allocation negotiation:** Both parties agree on allocation that minimizes combined tax (maximize goodwill, minimize ordinary income items)
+3. **§338(h)(10) election:** Treats a stock sale as an asset sale for tax purposes (see §9.2)
+4. **Installment sale:** Seller defers tax via seller financing (see §9.3)
+
+**Yulia's role:** Model both scenarios side-by-side. Show each party's net position. Quantify the gap. Let the parties negotiate from informed positions.
+
+### 9.2 Entity-Type Tax Treatment Matrix
+
+#### 9.2.1 C-Corporation — Double Taxation Trap
+
+**This is the most critical entity-type flag. Yulia must identify C-Corp status during S0 intake and immediately alert the user.**
+
+Asset sale of a C-Corp triggers TWO levels of tax:
+1. **Corporate level:** Corporation pays tax on gain from asset sale (21% federal corporate rate)
+2. **Shareholder level:** When remaining proceeds are distributed to shareholders, they pay capital gains tax on the distribution
+
+```
+$2M asset sale, C-Corp:
+  Corporate tax: ~$399K (21% on $1.9M gain)
+  Remaining: $1,601,000
+  Shareholder distribution tax: $1,601,000 × 23.8% = ~$381K
+  Total tax: ~$780K (effective rate: ~41%)
+  
+Compare to S-Corp asset sale (same deal):
+  Pass-through tax: ~$452K (23.8% on $1.9M)
+  Difference: C-Corp owner keeps ~$328K LESS
+```
+
+**Resolution options:**
+- Stock sale (avoids corporate-level tax — only shareholder capital gains)
+- §338(h)(10) election (technically stock sale, treated as asset sale for tax)
+- Convert to S-Corp (requires 5-year waiting period for built-in gains tax to expire)
+- QSBS exclusion if eligible (see §9.4)
+
+#### 9.2.2 S-Corporation
+
+- Pass-through: no entity-level tax (profits taxed once on K-1)
+- **Built-in gains tax:** If converted from C-Corp, gains on assets held at conversion date are subject to corporate-level tax for 5 years post-conversion
+- Shareholder basis = original investment + cumulative income - cumulative distributions
+- §338(h)(10) available: both parties can agree to treat stock sale as asset sale for tax
+- Officer compensation in year of sale: must be "reasonable" — IRS scrutinizes if owner takes low salary and high distributions
+
+#### 9.2.3 LLC / Partnership
+
+- **Single-member LLC:** Disregarded entity — taxed as sole proprietorship (Schedule C)
+- **Multi-member LLC:** Default partnership taxation
+- **§751 hot assets:** Partnership interests include "hot assets" (unrealized receivables, inventory) taxed as ordinary income even in what looks like a capital transaction
+- **§754 election:** Buyer can request the partnership make a §754 election, which allows inside basis step-up on assets — effectively achieving asset-sale tax treatment within a stock/interest sale
+- This is a powerful tool and Yulia should flag it when an LLC/partnership deal is identified
+
+#### 9.2.4 Sole Proprietorship
+
+- Only asset sales possible (no entity to sell "stock" of)
+- All gain flows through Schedule C and personal return
+- Self-employment tax (15.3%) applies to certain asset classes (non-compete income is subject to SE tax debate — flag for CPA)
+
+#### 9.2.5 Entity-Type Decision Tree (for Yulia during intake)
+
+```
+Identify entity type →
+  If C-Corp → IMMEDIATELY flag double taxation risk
+    → Recommend exploring stock sale or §338(h)(10)
+    → Check QSBS eligibility (§9.4)
+    → If conversion to S-Corp is an option and timeline allows, flag it
+    
+  If S-Corp → Check if converted from C-Corp in last 5 years
+    → If yes → flag built-in gains tax exposure
+    → Model asset sale vs stock sale vs §338(h)(10)
+    
+  If LLC/Partnership → Flag §751 hot assets
+    → Suggest §754 election discussion for interest sales
+    → Multi-member: flag guaranteed payment vs distribution optimization
+    
+  If Sole Prop → Asset sale only, straightforward
+    → Focus on allocation optimization
+```
+
+### 9.3 Installment Sale Modeling (IRC §453)
+
+Seller financing (seller notes) triggers installment sale treatment, spreading gain recognition across the payment period.
+
+#### 9.3.1 How It Works
+
+When a seller receives payments over time (rather than all cash at close), each payment is split into three components:
+1. **Return of basis:** Tax-free (seller getting their original investment back)
+2. **Capital gain portion:** Taxed at capital gains rate
+3. **Interest income:** Taxed as ordinary income
+
+**Gross profit ratio:** `(Selling Price - Adjusted Basis) / Selling Price`
+
+Each principal payment is taxed: `Payment × Gross Profit Ratio × Capital Gains Rate`
+
+#### 9.3.2 Worked Example
+
+```
+Sale price: $2,000,000
+Down payment: $500,000 (25%)
+Seller note: $1,500,000 at 6% over 5 years
+Seller's basis: $200,000
+
+Gross profit ratio: ($2M - $200K) / $2M = 90%
+
+Year 1 — Down payment:
+  Taxable gain: $500,000 × 90% = $450,000
+  Tax (23.8%): $107,100
+  
+Years 1-5 — Annual note payments (~$290K principal + interest):
+  Principal portion taxable: $290K × 90% = $261,000/year
+  Tax: $62,118/year
+  Interest income (~$90K→declining): taxed as ordinary income
+  
+COMPARE to lump sum:
+  All $1.8M gain recognized in Year 1
+  Tax: $428,400 due April 15 of Year 2
+  
+Installment benefit: Spreads ~$428K tax bill over 5 years
+  → Lower marginal rates each year (may stay below higher brackets)
+  → Time value of money: deferred tax = interest-free loan from IRS
+```
+
+#### 9.3.3 Important Rules
+
+- **Depreciation recapture is NOT eligible for installment treatment** — all §1245 recapture is recognized in Year 1 regardless of payment timing
+- **Electing out:** Seller can elect to recognize all gain in Year 1 (useful if they expect higher rates in future years or have offsetting losses)
+- **Related party sales:** Special rules restrict installment treatment if buyer is a related party who resells within 2 years
+- **Imputed interest:** If the stated interest rate on the seller note is below the Applicable Federal Rate (AFR), the IRS imputes interest — reducing the principal portion and increasing ordinary income portion
+- **Default risk:** If buyer defaults on the note, seller may have already paid tax on gain not yet received (can claim bad debt deduction)
+
+#### 9.3.4 Yulia's Installment Sale Analysis
+
+When a deal includes seller financing, Yulia should automatically:
+1. Calculate the gross profit ratio
+2. Model year-by-year tax obligations under installment vs. lump sum
+3. Flag depreciation recapture (recognized in Year 1 regardless)
+4. Note the AFR comparison for imputed interest risk
+5. Present the NPV comparison: installment deferral benefit vs. risk of default
+6. Recommend: "Discuss with your CPA whether installment treatment or electing out is better for your tax situation."
+
+### 9.4 QSBS Eligibility Screening (IRC §1202)
+
+Qualified Small Business Stock exclusion can eliminate up to $10M in federal capital gains tax. This is the single largest potential tax benefit for qualifying sellers.
+
+#### 9.4.1 Qualification Requirements
+
+ALL of the following must be true:
+1. **C-Corporation** — must be a domestic C-Corp (not S-Corp, LLC, or partnership)
+2. **Original issuance** — stock must have been acquired at original issuance (not purchased on secondary market)
+3. **Active business** — corporation must use at least 80% of assets in an active qualified trade or business
+4. **Gross assets test** — aggregate gross assets never exceeded $50M at the time of stock issuance and immediately after
+5. **Holding period** — stock held for more than 5 years
+6. **Excluded industries:** Professional services (health, law, engineering, accounting, consulting, financial services, brokerage, actuarial), banking/insurance/financing/leasing, farming, mining/oil/gas extraction, hospitality (hotels/motels/restaurants)
+
+#### 9.4.2 Exclusion Amount
+
+- **100% exclusion** for stock acquired after September 27, 2010 (verify current law — this has been extended multiple times)
+- Maximum exclusion: Greater of $10M or 10× adjusted basis in the stock
+- **Per-taxpayer, per-corporation:** Each shareholder gets their own $10M exclusion
+- Married filing jointly: each spouse can claim $10M if they each hold qualifying stock
+
+#### 9.4.3 State Conformity (CRITICAL — varies widely)
+
+| State | Conforms to §1202? | Notes |
+|-------|-------------------|-------|
+| California | Partial (60% exclusion) | Does NOT provide full exclusion — significant state tax still applies |
+| New York | No | Full state tax on QSBS gain |
+| Texas | N/A | No state income tax |
+| Florida | N/A | No state income tax |
+| Pennsylvania | Yes | Full exclusion |
+| Massachusetts | No | Full state tax |
+| Illinois | No | Full state tax |
+
+**Yulia must flag state conformity** when QSBS eligibility is identified. A seller in CA with $10M QSBS gain still owes ~$1.33M in state tax despite the federal exclusion.
+
+#### 9.4.4 Yulia's QSBS Screening
+
+During S0 intake, when entity type = C-Corp:
+1. Ask: "How long have you held the stock?" (need >5 years)
+2. Ask: "What was the total gross assets of the corporation when you received your stock?" (need <$50M)
+3. Check industry against excluded list
+4. If potentially eligible: "You may qualify for the QSBS exclusion under IRC §1202, which could exclude up to $10M in capital gains from federal tax. This is a significant potential benefit — I strongly recommend discussing this with your CPA before structuring the sale. The structure of the deal (stock sale required, not asset sale) matters for QSBS."
+
+### 9.5 Purchase Price Allocation Framework (IRC §1060)
+
+Both buyer and seller must file Form 8594 (Asset Acquisition Statement) with matching allocation. The allocation is negotiable and has direct tax consequences for both parties.
+
+#### 9.5.1 Residual Method
+
+Assets are allocated in order of class priority. Each class is filled up to fair market value before excess flows to the next class:
+
+```
+Class I:   Cash → typically at face value, no gain/loss
+Class II:  Actively traded securities → at FMV
+Class III: Accounts receivable → at face value (check for collectibility discount)
+Class IV:  Inventory → at FMV (usually close to cost)
+Class V:   All other tangible + intangible assets → at appraised FMV
+Class VI:  §197 intangibles (except goodwill) → at appraised FMV
+Class VII: Goodwill and going concern → RESIDUAL (whatever is left)
+```
+
+#### 9.5.2 Negotiation Dynamics
+
+| Asset Category | Seller Preference | Buyer Preference | Why |
+|---------------|-------------------|------------------|-----|
+| Goodwill (VII) | MAXIMIZE | Moderate (15yr amort) | Seller: capital gains. Buyer: 15-year write-off is slow |
+| Equipment (V) | Minimize | MAXIMIZE | Seller: depreciation recapture. Buyer: fast depreciation |
+| Non-compete (VI) | MINIMIZE | MAXIMIZE | Seller: ordinary income. Buyer: 15-year amortizable |
+| Inventory (IV) | Minimize | Prefer (cost basis) | Seller: ordinary income. Buyer: immediate COGS |
+| Receivables (III) | Minimize | Minimize | Both: ordinary income treatment |
+
+#### 9.5.3 Yulia's Allocation Tool
+
+Given purchase price and identified assets, Yulia generates:
+1. Default allocation using residual method and estimated FMVs
+2. Side-by-side tax impact for seller and buyer under different scenarios
+3. "Negotiation room" analysis: where allocation shifts benefit one party without proportionally hurting the other
+4. Flag: "Both parties must agree on allocation and file consistent Form 8594s. Your attorneys should negotiate this as part of the APA."
+
+### 9.6 State Tax Overlay
+
+#### 9.6.1 Key State Rates
+
+| State | Income Tax Rate | Capital Gains Treatment | Notes |
+|-------|----------------|------------------------|-------|
+| Texas | 0% | N/A | No income tax. Franchise tax exists but doesn't apply to sale proceeds. |
+| Florida | 0% | N/A | No individual income tax. C-Corp has 5.5% corporate rate. |
+| California | Up to 13.3% | Taxed as ordinary income | No preferential rate. Highest state tax. |
+| New York | Up to 10.9% | Taxed as ordinary income | Plus NYC tax if applicable (up to 3.876%) |
+| Illinois | 4.95% flat | Taxed as ordinary income | Flat rate regardless of amount |
+| Pennsylvania | 3.07% flat | Taxed as ordinary income | Low flat rate |
+| Washington | 0% (income) | 7% capital gains tax | New as of 2022 — applies to gains >$250K |
+| Nevada | 0% | N/A | No income tax |
+| Georgia | Up to 5.49% | Taxed as ordinary income | Rate declining under recent legislation |
+| North Carolina | 4.5% flat | Taxed as ordinary income | Declining schedule toward 0% |
+
+#### 9.6.2 Multi-State Apportionment
+
+If the business operates in multiple states, sale proceeds may be apportioned across states based on the business's activity in each. Factors typically include: sales/revenue, payroll, and property in each state.
+
+**Yulia flags multi-state issues when:** Business reports revenue or employees in more than one state during intake.
+
+### 9.7 Pre-Sale Tax Optimization
+
+Strategies sellers should implement BEFORE the sale. Yulia proactively surfaces these during S0-S1 when timeline allows (6+ months to sale).
+
+| Strategy | When | Impact | Complexity |
+|----------|------|--------|------------|
+| Entity conversion (C→S-Corp) | 5+ years before sale | Eliminates double taxation | High — requires 5-year BIG waiting period |
+| Maximize goodwill allocation (pre-negotiation) | During deal structuring | Shifts income from ordinary to capital | Medium — requires appraisal support |
+| Installment sale structuring | During deal terms | Defers gain across payment period | Low — just structure the seller note correctly |
+| Opportunity Zone reinvestment | Within 180 days post-close | Defers + reduces capital gains | High — must invest in qualified OZ fund |
+| Charitable giving (CRT, DAF) | Before closing | Reduces taxable gain + generates deduction | High — requires estate planning attorney |
+| Harvest losses | Year of sale | Offsets gains dollar-for-dollar | Low — sell losing investments in same tax year |
+| Prepay deductible expenses | Year of sale | Increases basis, reduces gain | Low — accelerate planned expenses |
+| QSBS planning (for C-Corps) | 5+ years before sale | Up to $10M exclusion | Medium — must maintain eligibility |
+
+### 9.8 Earnout Tax Treatment
+
+#### 9.8.1 Key Distinction: Purchase Price vs. Compensation
+
+If earnout payments are tied to the seller's continued employment → IRS may recharacterize as compensation (ordinary income + payroll taxes). If tied purely to business performance metrics → treated as additional purchase price (capital gains eligible).
+
+**Red flags for compensation recharacterization:**
+- Earnout requires seller to remain employed
+- Earnout is disproportionate to the purchase price
+- Earnout metrics are primarily tied to seller's individual performance (not business performance)
+- Seller is the only employee whose continued service triggers payment
+
+**Safe harbor approach:** Separate the earnout from any employment/consulting agreement. Make earnout metrics based on business revenue/EBITDA, not individual performance.
+
+#### 9.8.2 Installment Treatment for Earnouts
+
+Contingent earnout payments can qualify for installment sale treatment, but the mechanics are complex:
+- **Stated maximum:** If earnout has a cap, use cap as selling price for gross profit ratio
+- **No stated maximum:** Must use alternative methods (may need to recognize gain as payments received)
+- Each payment split into basis recovery + gain + imputed interest
+
+#### 9.8.3 Escrow/Holdback Tax Treatment
+
+Escrow funds held for indemnification are generally not taxed until released to seller. If escrow is used to satisfy indemnification claims, seller may be able to reduce their recognized gain.
+
+### 9.9 SBA Financing Tax Implications
+
+#### 9.9.1 Buyer's After-Tax Cost
+
+Interest on SBA 7(a) acquisition loans is deductible (subject to §163(j) business interest limitation for larger businesses). This reduces the effective cost of acquisition.
+
+```
+Example: $1.5M SBA loan at 11% (Prime + 2.75%)
+  Annual interest (Year 1): ~$165,000
+  Tax deduction at 25% marginal rate: $41,250 annual tax savings
+  Effective interest rate after tax: ~8.25%
+```
+
+#### 9.9.2 Goodwill Amortization Benefit
+
+Buyer can amortize acquired goodwill over 15 years (§197). Combined with SBA interest deduction:
+
+```
+$1.45M goodwill / 15 years = $96,667/year deduction
+Tax savings: $96,667 × 25% = $24,167/year for 15 years
+NPV of goodwill tax shield: ~$245,000
+```
+
+**Yulia models the total after-tax cost of acquisition:** Purchase price - NPV of all tax shields (depreciation + amortization + interest deduction) = True economic cost to buyer.
+
+---
+
+## 10.0 LEGAL FRAMEWORKS ENGINE
+
+**Purpose:** Yulia understands the legal framework of M&A transactions well enough to prepare users for what's coming, generate comprehensive term sheets, flag risks, and ensure productive conversations with attorneys. She NEVER drafts actual legal documents or provides specific legal advice.
+
+**Framing rule:** Every legal analysis ends with: "Your M&A attorney will draft the actual documents. This prepares you for what to expect and what to negotiate."
+
+### 10.1 Asset Purchase Agreement (APA) Framework
+
+The APA is the central legal document in most SMB acquisitions (asset sales). Yulia must understand every component to: prepare users, generate term sheets, flag unusual terms, and explain sections in plain English.
+
+#### 10.1.1 APA Sections Overview
+
+| Section | What It Covers | Why It Matters |
+|---------|---------------|----------------|
+| **Purchased Assets** | Exactly what buyer is acquiring | Prevents post-closing disputes about what was "included" |
+| **Excluded Assets** | What seller keeps | Protects seller's personal property and non-business assets |
+| **Assumed Liabilities** | What debts/obligations buyer takes on | Defines buyer's risk exposure from pre-closing obligations |
+| **Excluded Liabilities** | What seller retains responsibility for | Protects buyer from unknown pre-closing claims |
+| **Purchase Price** | Total consideration + structure + allocation | The economics of the deal — tied directly to tax treatment (§9.5) |
+| **Reps & Warranties** | Seller's statements about the business | Primary risk allocation mechanism — see §10.2 |
+| **Pre-Closing Covenants** | How seller must operate until close | Prevents seller from degrading the business between signing and closing |
+| **Closing Conditions** | What must happen before close occurs | Gives buyer (and seller) exit ramps if conditions aren't met |
+| **Post-Closing Covenants** | Non-compete, transition, consulting | Protects buyer's investment after ownership transfers |
+| **Indemnification** | How losses from breached reps are recovered | The enforcement mechanism for reps & warranties — see §10.3 |
+
+#### 10.1.2 League-Specific Complexity
+
+| Component | L1 ($300K-$1M) | L2-L3 ($1M-$10M) | L4-L5 ($10M+) |
+|-----------|----------------|-------------------|----------------|
+| Total pages | 15-30 | 30-60 | 60-150+ |
+| Reps & warranties | 8-12 standard | 15-25 detailed | 25-40+ with schedules |
+| Indemnification | Simple basket + cap | Basket, cap, escrow | Complex with R&W insurance |
+| Working capital | Fixed or none | Peg with true-up | Locked box or completion accounts |
+| Schedules/exhibits | 3-5 | 8-15 | 15-30+ |
+| Closing conditions | 3-5 standard | 8-12 | 12-20+ with regulatory |
+
+#### 10.1.3 Yulia's Term Sheet Generator
+
+When a deal reaches LOI stage, Yulia generates a comprehensive term sheet covering every APA section with recommended terms based on league, industry, and deal structure. This term sheet is what the user brings to their attorney, who converts it into the actual APA.
+
+### 10.2 Representations and Warranties
+
+Reps and warranties are the seller's factual statements about the business. They're the primary mechanism for risk allocation. If a rep turns out false, the buyer has indemnification rights.
+
+#### 10.2.1 Standard Rep Categories
+
+| Category | What Seller Represents | Why Buyer Cares | Typical Negotiation |
+|----------|----------------------|-----------------|---------------------|
+| **Organization & Authority** | Seller has legal authority to sell | If seller can't legally sell, deal is void | Rarely contested — fundamental rep |
+| **Financial Statements** | Provided financials are accurate and complete | Buyer relied on these for valuation | Seller wants "materially accurate"; buyer wants "accurate in all respects" |
+| **No Undisclosed Liabilities** | No hidden debts or obligations | Protects against surprises post-close | Most contested rep — seller uses disclosure schedules |
+| **Absence of Changes** | No material adverse changes since financials | Business hasn't degraded between signing/close | Definition of "material" is heavily negotiated |
+| **Tax Matters** | All taxes filed and paid, no pending audits | Buyer doesn't want inherited tax problems | Long survival period (statute of limitations) |
+| **Tangible Property** | Equipment/assets in good working condition | Buyer needs assets that work | "Ordinary wear and tear" qualifier standard |
+| **IP Ownership** | Seller owns all IP used in business | Avoids infringement claims against buyer | Critical for tech/brand-dependent businesses |
+| **Contracts** | All material contracts disclosed, assignable | Buyer needs these to continue operations | Key contracts often have assignment restrictions |
+| **Employees** | Employee info accurate, no pending claims | Protects against employment lawsuits | Immigration/classification issues flagged here |
+| **Environmental** | Compliance with environmental laws | Contamination liability is unlimited | Critical for manufacturing, auto, fuel, food |
+| **Litigation** | No pending or threatened lawsuits | Litigation = risk | Seller uses "to seller's knowledge" qualifier |
+| **Permits & Licenses** | All required permits current and transferable | Business can't operate without them | Industry-dependent — see §10.6 |
+| **Customer & Supplier Relationships** | No known loss of key relationships | Revenue concentration risk | Buyer wants disclosure of top 10 customers |
+
+#### 10.2.2 Knowledge Qualifiers
+
+Sellers negotiate to limit reps using knowledge qualifiers:
+- **"To Seller's knowledge"** — only what seller actually knows (narrow)
+- **"To Seller's knowledge after reasonable inquiry"** — what seller knows + should have known with reasonable effort (broader)
+- **Constructive knowledge** — what a reasonable person in seller's position would know (broadest)
+
+**Yulia flags:** When reviewing LOI/APA terms, Yulia identifies which reps have knowledge qualifiers and explains the practical difference to the user.
+
+#### 10.2.3 Industry-Specific Reps
+
+| Industry | Additional Reps Needed | Why |
+|----------|----------------------|-----|
+| Healthcare | HIPAA compliance, medical licenses, payer contracts, Stark/Anti-Kickback | Regulatory exposure is massive |
+| Food service | Health permits, liquor license, food safety certifications | Can't operate without them |
+| Construction | Contractor licensing, bonding, warranty obligations, safety record | Licensing is often personal (not transferable) |
+| Tech/SaaS | IP ownership, data privacy, open source compliance, customer data | IP is the primary asset |
+| Childcare | State licensing, background checks, staff/child ratios | Heavily regulated, license tied to operator |
+| Auto repair | Environmental (oil, solvents), warranty obligations, manufacturer relations | Contamination liability |
+| Manufacturing | Environmental, product liability, supply chain contracts, OSHA | Multiple regulatory dimensions |
+
+### 10.3 Indemnification and Escrow Structures
+
+#### 10.3.1 Indemnification Components
+
+| Component | What It Is | Typical L1-L3 Range | Typical L4-L5 Range |
+|-----------|-----------|---------------------|---------------------|
+| **Basket (deductible)** | Losses must exceed this before claims | 0.5%-1.5% of purchase price | 0.5%-1.0% |
+| **Cap** | Maximum total indemnification | 10%-25% of purchase price (general) | 10%-20% (general); 100% (fundamental) |
+| **Escrow holdback** | Cash held in escrow for claims | 5%-15% of purchase price | 10%-15% |
+| **Escrow duration** | How long escrow is held | 12-18 months | 12-24 months |
+| **Survival periods** | How long reps survive post-close | 12-24 months (general) | 18-24 months (general); 3-6 years (tax) |
+
+**Basket types:**
+- **Tipping basket:** Once exceeded, buyer recovers from $0 (seller-unfavorable)
+- **True deductible:** Buyer absorbs basket amount, recovers only excess (seller-favorable)
+
+**Cap exceptions** (typically uncapped or capped at 100%):
+- Fraud: always uncapped
+- Fundamental reps (authority, ownership, taxes): higher or no cap
+- Environmental: often separate, higher cap
+
+#### 10.3.2 Rep & Warranty Insurance (RWI)
+
+Available for deals typically $3M+ (increasingly down-market). Buyer purchases insurance policy that covers rep & warranty breaches.
+
+- **Cost:** 2-4% of policy limits (single premium at closing)
+- **Effect:** Seller accepts lower escrow; buyer gets more protection; deal closes smoother
+- **Retention (deductible):** Typically 1% of enterprise value
+- **Exclusions:** Known issues, environmental, forward-looking projections
+
+**Yulia flags RWI as an option when:** Deal size >$3M AND negotiation is stuck on indemnification terms.
+
+#### 10.3.3 Yulia's Escrow Impact Model
+
+For any deal with escrow, Yulia calculates:
+```
+Purchase Price: $X
+Less: Escrow Holdback (Y%): -$Z
+= Cash at Close: $X - $Z
+
+If no claims during escrow period:
+  Escrow released: +$Z (12-18 months later)
+  Total received: $X (but time value lost)
+
+If claims filed:
+  Escrow reduced by claim amount
+  Potential total received: $X - claims
+```
+
+This flows directly into the Funds Flow Statement (closing deliverable).
+
+### 10.4 Non-Compete and Non-Solicitation by State
+
+#### 10.4.1 Enforceability Matrix (Top M&A States)
+
+| State | Non-Compete Enforceable? | Key Rules | Non-Solicitation? |
+|-------|-------------------------|-----------|-------------------|
+| **California** | Generally NO | Narrow exceptions only (sale of business is one — but still scrutinized) | Yes (limited) |
+| **Texas** | Yes with limits | Must be ancillary to enforceable agreement, reasonable scope/time/geography | Yes |
+| **Florida** | Yes (strong) | Presumes valid if reasonable; 6-month to 2-year typical | Yes |
+| **New York** | Yes with limits | Must protect legitimate business interest; courts blue-pencil | Yes |
+| **Illinois** | Conditional | Requires adequate consideration; 2-year employment minimum (for employees) | Yes |
+| **Georgia** | Yes | Revised statute (2011) strengthened enforcement | Yes |
+| **Pennsylvania** | Yes | Must be reasonable in scope; courts may modify | Yes |
+| **Ohio** | Yes | Reasonableness test; courts can blue-pencil | Yes |
+| **Washington** | Restricted | $100K+ compensation threshold; cannot exceed 18 months | Yes |
+| **Colorado** | Restricted | Generally void unless for sale of business or protecting trade secrets | Yes |
+
+**Critical note on sale-of-business exception:** Even in states that generally restrict non-competes (CA, CO, WA), there is typically an exception for the sale of a business or its goodwill. The seller of a business can agree to a non-compete as part of the sale. However, the scope must still be reasonable.
+
+#### 10.4.2 Standard Terms by League
+
+| Term | L1 | L2-L3 | L4-L5 |
+|------|-----|-------|-------|
+| Duration | 2-3 years | 3-5 years | 5+ years (negotiated) |
+| Geographic scope | 25-50 mile radius or county | State or region | National or industry-wide |
+| Activity scope | Same industry, same services | Broader competitive definition | Carefully defined competitive activities |
+| Non-solicitation | Employees + customers, 2-3 years | 3-5 years | 5+ years |
+
+#### 10.4.3 Tax Interaction
+
+Payments allocated to non-compete agreements are ordinary income to seller and §197 amortizable (15 years) by buyer. See §9.5 for allocation negotiation dynamics.
+
+### 10.5 Lease Assignment and Real Property
+
+#### 10.5.1 The Hidden Deal-Killer
+
+If the business depends on a specific location, failure to secure lease assignment can kill the deal. Yulia flags this during intake whenever a physical location is identified.
+
+**Key lease DD items:**
+- Is the lease assignable? (Most require landlord consent)
+- How much term remains? (Buyer wants 5+ years or renewal options)
+- What's the current rent vs. market rate?
+- Are there personal guarantees? (Do they transfer?)
+- CAM charges and escalation clauses?
+- Exclusivity clauses (retail)?
+- Demolition/relocation provisions?
+- Environmental responsibility clauses?
+
+#### 10.5.2 Common Landlord Demands
+
+When notified of assignment, landlords typically want:
+1. Increased rent (to market rate)
+2. Personal guarantee from buyer
+3. Increased security deposit
+4. Lease extension
+5. Approval of buyer's financials
+
+**Timing:** Approach landlord AFTER LOI signing, BEFORE APA execution. This gives both parties a realistic picture before committing to the deal.
+
+#### 10.5.3 Sale-Leaseback Structures
+
+When seller owns both the business AND the real estate:
+- Option 1: Sell both together (higher total price, more complex)
+- Option 2: Sell business, retain RE, lease to buyer (seller becomes landlord — ongoing income)
+- Option 3: Sell business + RE to different buyers
+
+Sale-leaseback benefits seller (ongoing income stream, RE appreciation) and simplifies buyer's financing (doesn't need to finance RE). Fair market rent must be established.
+
+### 10.6 Regulatory and Licensing Transfers
+
+#### 10.6.1 High-Regulatory Industries
+
+| Industry | Key Licenses | Transferable? | Typical Timeline |
+|----------|-------------|---------------|-----------------|
+| Healthcare (medical/dental) | State medical licenses, DEA, Medicare/Medicaid enrollment | New application required | 3-6 months |
+| Childcare | State operating license, fire marshal, health dept | New application (often) | 2-4 months |
+| Construction | Contractor license (often personal) | New application by buyer | 1-3 months |
+| Food service | Health permit, liquor license | Health: reapply. Liquor: varies by state | Health: 2-4 weeks. Liquor: 1-6 months |
+| Insurance agency | Carrier appointments | Re-appointment required | 1-3 months per carrier |
+| Pest control | Pesticide applicator license | New license for buyer's operator | 1-3 months |
+| Transportation | DOT authority, MC number | Transfer possible with FMCSA | 2-4 weeks |
+| Franchise | Franchisor approval | Consent required | 2-6 months |
+
+#### 10.6.2 Franchise Transfer Specifics
+
+Franchise agreements almost always include:
+- **Transfer fee:** $5K-$50K (check FDD for exact amount)
+- **Franchisor right of first refusal** (can buy the business themselves)
+- **Buyer qualification:** must meet training, net worth, experience requirements
+- **Franchise term:** may not transfer full remaining term
+- **Franchisor can block the sale** if buyer doesn't meet criteria
+
+**Yulia flags franchise status during S0 intake.** If franchise: "This is a franchise transfer, which means the franchisor must approve the buyer. This adds 2-6 months and the franchisor can impose conditions. Let's factor this into the timeline."
+
+#### 10.6.3 Interim Operating Arrangements
+
+When licenses can't transfer immediately, common solutions:
+- Seller operates under their license during transition (management agreement)
+- Buyer applies for new license while deal is pending
+- Closing contingent on license issuance
+- Partial closing (business assets transfer, operations continue under seller's license)
+
+### 10.7 Employment Law in M&A
+
+#### 10.7.1 Asset Sale vs. Stock Sale — Employee Impact
+
+| Factor | Asset Sale | Stock Sale |
+|--------|-----------|------------|
+| Employee status | Terminated by seller, rehired by buyer | Automatically transferred |
+| Selectivity | Buyer can choose which employees to hire | All employees come with entity |
+| Prior liabilities | Stay with seller | Transfer to buyer |
+| Benefits continuity | COBRA from seller; new benefits from buyer | Benefits continue uninterrupted |
+| PTO/vacation | Typically seller's liability | Transfers with entity |
+| Employment agreements | Must be renegotiated | Continue as-is |
+| Non-competes (employee) | May not survive (check state law) | Continue as-is |
+| Workers' comp modifier | Fresh start for buyer | History transfers |
+
+#### 10.7.2 WARN Act
+
+If the business has 100+ employees and the asset sale results in "mass layoffs" (even temporary termination-and-rehire), the Worker Adjustment and Retraining Notification Act may require 60 days' notice. Yulia flags this when employee count exceeds 100.
+
+#### 10.7.3 Key Employee Retention
+
+Critical for deal value preservation. Strategies:
+- **Stay bonus:** Cash payment contingent on remaining through transition (typically 3-12 months post-close)
+- **New employment agreement:** Salary increase, title promotion, equity participation
+- **Earnout participation:** Key employees share in earnout payments tied to performance
+- **Timing of disclosure:** Telling key employees too early creates flight risk; too late creates trust issues. Typical: after LOI but before DD.
+
+### 10.8 Intellectual Property Assessment
+
+#### 10.8.1 IP Categories in SMB Deals
+
+| IP Type | Common in | Transfer Mechanism | Risk Level |
+|---------|-----------|-------------------|------------|
+| Trade name / DBA | All businesses | Assignment (file with state) | Low |
+| Trademarks | Brand-dependent | USPTO assignment | Medium |
+| Domain names | All businesses | Registrar transfer | Low |
+| Customer lists | Service businesses | Included in asset purchase | Medium |
+| Proprietary processes | Manufacturing, tech | Trade secret protection | High |
+| Software (custom) | Tech, SaaS | Assignment (check contractor agreements) | High |
+| Social media accounts | Consumer businesses | Platform ToS may restrict | Medium |
+| Phone numbers | Service businesses (contractors, medical) | Carrier transfer | Low (but valuable) |
+
+#### 10.8.2 Common IP Pitfalls
+
+- **Contractor-developed software without IP assignment:** If the business hired contractors to build software/websites without a proper work-for-hire or IP assignment agreement, the contractor may own the IP
+- **Open source components:** Software may include open source under GPL or similar licenses that impose obligations on the buyer
+- **Customer data:** Privacy laws (CCPA, state privacy laws) may restrict what customer data can be "sold" — vs. transferred as part of a going concern
+- **Trade secrets without protection:** If proprietary processes aren't documented with NDA/trade-secret protections, they may not be protectable
+
+### 10.9 Working Capital Mechanisms
+
+#### 10.9.1 Three Common Approaches
+
+**1. Fixed price (no adjustment):** Most common in L1 deals. Simple but risky — seller could strip cash/inventory between signing and closing. Mitigated by pre-closing covenants requiring ordinary-course operations.
+
+**2. Working capital peg with true-up:** Standard for L2-L4. Steps:
+```
+1. Calculate "target" working capital (usually trailing 12-month average)
+2. At closing: estimate current working capital
+3. Close based on estimate
+4. Within 60-90 days post-close: measure actual working capital
+5. If actual > target → buyer pays difference to seller
+6. If actual < target → seller pays difference to buyer (or deducted from escrow)
+```
+
+**3. Locked box:** Increasingly common in L4-L5. Working capital "locked" at a specific date. Purchase price set based on that date's balance sheet. Seller gives "no leakage" covenant — no unusual distributions or payments between lock date and closing.
+
+#### 10.9.2 Yulia's Working Capital Analysis
+
+During S1/B1 financial review, Yulia:
+1. Calculates trailing 12-month average working capital
+2. Identifies seasonal patterns that affect the peg
+3. Flags unusual items (receivables from related parties, aged inventory)
+4. Recommends mechanism based on league
+5. Models the range of true-up outcomes
+
+### 10.10 LOI-to-APA Negotiation Guide
+
+#### 10.10.1 Timeline
+
+```
+LOI Signed (Day 0)
+  ↓ Attorney engagement (Days 1-7)
+  ↓ Due diligence (Days 7-60, varies by league)
+  ↓ First APA draft from buyer's attorney (Days 30-45)
+  ↓ Seller attorney review + comments (Days 45-55)
+  ↓ Negotiation rounds, 2-5 rounds typical (Days 55-75)
+  ↓ Final APA execution (Days 75-90)
+  ↓ Pre-closing conditions satisfied (Days 90-100)
+  ↓ Closing (Day 100+)
+```
+
+L1 deals: Compress to 30-60 days total
+L4-L5 deals: Expand to 90-180 days total
+
+#### 10.10.2 Top 10 Negotiation Points (by frequency)
+
+1. **Rep & warranty scope and language** — most time spent here
+2. **Indemnification basket, cap, and escrow** — most dollar impact
+3. **Non-compete terms** — emotional for sellers
+4. **Working capital mechanism and target** — technical and often contentious
+5. **Earnout definitions and measurement** — if applicable
+6. **Transition obligations** — how long seller stays, at what cost
+7. **Closing conditions** — what can kill the deal
+8. **Employee matters** — who gets hired, at what terms
+9. **Lease assignment** — landlord consent as closing condition
+10. **Purchase price allocation** — tax impact for both sides (§9.5)
+
+#### 10.10.3 Yulia's Negotiation Coaching
+
+**For sellers:**
+- Don't negotiate against yourself — let buyer draft first
+- Focus energy on the 3-4 items that actually affect your net proceeds
+- Reps & warranty survival periods directly impact your risk exposure — fight for shorter
+- Escrow amount directly reduces your cash at closing — negotiate down
+
+**For buyers:**
+- Control the pen (your attorney should draft the APA)
+- Broader reps with longer survival = more protection
+- Higher escrow = more leverage for post-closing claims
+- Working capital peg is where hidden value lives — scrutinize methodology
+
+### 10.11 Bulk Sales Compliance
+
+Most states have repealed Article 6 of the UCC (bulk sales laws). However, some states retain requirements.
+
+**States with bulk sales laws still in effect (verify current status):**
+- California (limited applicability)
+- Maryland
+- New Jersey (for certain transactions)
+- A few others — Yulia should flag "Check with your attorney whether bulk sales notice is required in [state]" for any state where status is uncertain
+
+**When applicable:**
+- Notice must be sent to seller's creditors before closing
+- Waiting period (typically 10-45 days)
+- Failure to comply: creditors can potentially void the sale
+
+**Yulia's approach:** When state is identified, flag bulk sales as a checklist item: "Your attorney should confirm whether bulk sales notice is required in [state]. If so, it needs to be sent [X] days before closing."
