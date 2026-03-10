@@ -255,7 +255,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               onKeyDown={handleKey}
               placeholder={showRotating ? '' : placeholder}
               className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1A1A18] leading-[1.5] font-normal"
-              style={{ fontFamily: 'inherit', minHeight: (rows ?? (isHero ? 3 : 1)) > 1 ? '100px' : '44px', maxHeight: '200px', padding: '14px 18px 8px 18px', color: 'rgba(26,26,24,1)' }}
+              style={{ fontFamily: 'inherit', minHeight: (rows ?? (isHero ? 3 : 1)) > 1 ? '100px' : '56px', maxHeight: '200px', padding: '16px 18px 10px 18px', color: 'rgba(26,26,24,1)' }}
               rows={rows ?? (isHero ? 3 : 1)}
             />
             <style>{`.home-dock-card textarea::placeholder { color: rgba(26,26,24,0.55); }`}</style>
