@@ -76,7 +76,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
         setRpIndex(prev => (prev + 1) % rotatingPlaceholders.length);
         setRpAnim('enter');
       }, 350);
-    }, 5000);
+    }, 3000);
     return () => clearInterval(interval);
   }, [rotatingPlaceholders]);
 

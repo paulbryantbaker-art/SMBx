@@ -24,14 +24,18 @@ import PricingBelow from '../../components/content/PricingBelow';
 
 /* ═══ ROTATING PLACEHOLDER TEXTS (home page) ═══ */
 const ROTATING_PLACEHOLDERS = [
-  'I want to sell my pest control business...',
-  'Is this $2M listing worth pursuing?',
-  "What's my cleaning company worth?",
-  'Can this deal get SBA financing?',
-  'Help me find add-backs on my P&L...',
-  "I'm a broker with a new listing...",
-  'What should I offer for this HVAC company?',
-  'Walk me through selling my business...',
+  "Hi, I\u2019m Yulia, your M&A agent. Tell me about your deal...",
+  'I want to sell my landscaping company \u2014 about $400K revenue...',
+  'Is this $2M dental practice listing worth pursuing?',
+  'I own a $6M HVAC company in Dallas. What\u2019s it worth?',
+  'Can a $1.2M cleaning business get SBA financing?',
+  'Help me find add-backs on my P&L \u2014 I know I\u2019m missing some...',
+  'I\u2019m a broker with a $15M manufacturing listing...',
+  'We\u2019re acquiring a $35M logistics platform \u2014 model the EBITDA...',
+  'What should I offer for this $800K auto repair shop?',
+  'Walk me through selling my $50M+ SaaS company...',
+  'I just closed on a pest control business \u2014 what\u2019s my 90-day plan?',
+  'My partner wants out of our $3M restaurant group...',
 ];
 
 /* ═══ TYPES ═══ */
