@@ -57,8 +57,8 @@ interface PageCopy {
 const PAGE_COPY: Record<TabId, PageCopy> = {
   home: {
     overline: '',
-    headline: 'What deal are you working on?',
-    terraWord: 'deal',
+    headline: 'Hello, I can help you buy or sell any size business.',
+    terraWord: 'any size business.',
     tagline: '',
     chips: [],
     placeholder: 'Tell Yulia about your deal...',
