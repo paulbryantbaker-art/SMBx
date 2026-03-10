@@ -218,7 +218,7 @@ export default function AppShell() {
 
   // Core state
   const [viewState, setViewState] = useState<ViewState>(() => pathToViewState(location));
-  useAppHeight(viewState === 'chat');   // Only shrink viewport in chat mode; landing lets keyboard overlay naturally
+  useAppHeight(true);   // Always track visual viewport + lock body scroll (inner divs handle scrolling)
   const [activeTab, setActiveTab] = useState<TabId>(() => pathToTab(location));
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
@@ -692,9 +692,11 @@ export default function AppShell() {
       className="flex bg-white font-sans"
       style={{
         height: 'var(--app-height, 100vh)',
-        ...(viewState === 'chat'
-          ? { position: 'fixed' as const, top: 0, left: 0, right: 0, transform: 'translateY(var(--app-offset, 0px))' }
-          : { overflow: 'hidden' }),
+        position: 'fixed' as const,
+        top: 0,
+        left: 0,
+        right: 0,
+        transform: 'translateY(var(--app-offset, 0px))',
       }}
     >
       {/* Desktop sidebar */}
