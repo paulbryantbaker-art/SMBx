@@ -454,8 +454,8 @@ export default function AppShell() {
 
   const sidebarContent = (mobile: boolean) => (
     <aside
-      className="flex flex-col h-full bg-white select-none"
-      style={{ width: mobile ? 280 : 220, borderRight: '1px solid rgba(26,26,24,0.06)' }}
+      className="flex flex-col h-full select-none"
+      style={{ width: mobile ? 280 : 220, background: '#F5F5F3', borderRight: '1px solid rgba(26,26,24,0.06)' }}
     >
       {/* Logo */}
       <div className="px-5 pt-5 pb-2">
@@ -502,7 +502,7 @@ export default function AppShell() {
                   fontSize: '15px',
                   fontWeight: isActive ? 600 : 500,
                   color: isActive ? '#1A1A18' : 'rgba(26,26,24,0.45)',
-                  background: isActive ? '#F5F5F3' : 'transparent',
+                  background: isActive ? '#FFFFFF' : 'transparent',
                   borderRadius: '100px',
                 }}
                 type="button"
@@ -537,7 +537,7 @@ export default function AppShell() {
                   fontFamily: 'inherit',
                   fontWeight: c.id === activeConvId && viewState === 'chat' ? 600 : 500,
                   color: c.id === activeConvId && viewState === 'chat' ? '#1A1A18' : 'rgba(26,26,24,0.45)',
-                  background: c.id === activeConvId && viewState === 'chat' ? '#F5F5F3' : 'transparent',
+                  background: c.id === activeConvId && viewState === 'chat' ? '#FFFFFF' : 'transparent',
                   borderRadius: '12px',
                 }}
                 type="button"
@@ -796,7 +796,7 @@ export default function AppShell() {
                 {/* DESKTOP HOME */}
                 <div className="hidden md:flex flex-col h-full">
                   <div className="flex-1 flex items-center justify-center px-6">
-                    <h1 style={{ fontSize: '48px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, textAlign: 'center', maxWidth: 600 }}>
+                    <h1 style={{ fontSize: '48px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, textAlign: 'center' }}>
                       {renderHeadline(page.headline, page.terraWord)}
                     </h1>
                   </div>
