@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { useState, useRef, useCallback, useEffect, useImperativeHandle, forwardRef, useMemo } from 'react';
 
 /* ═══ TOOL ITEMS ═══ */
 
@@ -22,6 +22,16 @@ const TOOLS: ToolItem[] = [
   { group: 'tool', label: 'Post-acquisition help', desc: '100-day plan, integration, synergy tracking', fill: "I just acquired a business and need help with ", icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> },
 ];
 
+/* ═══ Fisher-Yates shuffle ═══ */
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 /* ═══ PUBLIC HANDLE ═══ */
 
 export interface ChatDockHandle {
@@ -40,16 +50,16 @@ interface ChatDockProps {
   variant?: 'hero' | 'dock';
   /** Override initial textarea rows (default: hero=3, dock=1) */
   rows?: number;
-  /** Rotating placeholder texts — cycles with slide animation (home page) */
-  rotatingPlaceholders?: string[];
-  /** Static prefix shown before the rotating part (e.g. "Hi, I'm Yulia, tell me about ") */
-  rotatingPlaceholderPrefix?: string;
+  /** Typewriter hint pool — typed out character-by-character (home page) */
+  typewriterHints?: string[];
+  /** Static prefix typed before each hint (e.g. "Hello, I'm Yulia, your M&A agent. ") */
+  typewriterPrefix?: string;
 }
 
 /* ═══ COMPONENT ═══ */
 
 const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
-  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock', rows, rotatingPlaceholders, rotatingPlaceholderPrefix },
+  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock', rows, typewriterHints, typewriterPrefix = '' },
   ref,
 ) {
   const isHero = variant === 'hero';
@@ -65,22 +75,122 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
 
   const hasContent = value.trim().length > 0;
 
-  /* Rotating placeholder state */
-  const [rpIndex, setRpIndex] = useState(0);
-  const [rpAnim, setRpAnim] = useState<'enter' | 'exit'>('enter');
-  const showRotating = rotatingPlaceholders && rotatingPlaceholders.length > 0 && !hasContent && !value;
+  /* ═══ TYPEWRITER STATE ═══ */
+  const [twText, setTwText] = useState('');
+  const [twActive, setTwActive] = useState(true); // whether typewriter is running (paused on focus)
+  const twTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const twIndexRef = useRef(0); // current hint index
+  const twCharRef = useRef(0); // current char position in the full string
+  const twPhaseRef = useRef<'typing' | 'holding' | 'clearing'>('typing');
+  const twMirrorRef = useRef<HTMLDivElement>(null); // hidden mirror for auto-resize
 
+  // Shuffle hints once on mount
+  const shuffledHints = useMemo(() => {
+    if (!typewriterHints || typewriterHints.length === 0) return [];
+    return shuffle(typewriterHints);
+  }, [typewriterHints]);
+
+  // Track the shuffled order, reshuffle when exhausted
+  const twOrderRef = useRef<string[]>(shuffledHints);
   useEffect(() => {
-    if (!rotatingPlaceholders || rotatingPlaceholders.length <= 1) return;
-    const interval = setInterval(() => {
-      setRpAnim('exit');
-      setTimeout(() => {
-        setRpIndex(prev => (prev + 1) % rotatingPlaceholders.length);
-        setRpAnim('enter');
-      }, 350);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [rotatingPlaceholders]);
+    twOrderRef.current = shuffledHints;
+  }, [shuffledHints]);
+
+  const hasTypewriter = shuffledHints.length > 0;
+  const showTypewriter = hasTypewriter && !hasContent && !value && twActive;
+
+  // Get the full string for current hint
+  const getFullString = useCallback((hintIdx: number) => {
+    const hints = twOrderRef.current;
+    if (hints.length === 0) return '';
+    return typewriterPrefix + hints[hintIdx % hints.length];
+  }, [typewriterPrefix]);
+
+  // Typewriter tick
+  const tick = useCallback(() => {
+    if (!hasTypewriter) return;
+
+    const phase = twPhaseRef.current;
+    const fullStr = getFullString(twIndexRef.current);
+
+    if (phase === 'typing') {
+      twCharRef.current++;
+      const displayed = fullStr.slice(0, twCharRef.current);
+      setTwText(displayed);
+
+      if (twCharRef.current >= fullStr.length) {
+        // Done typing — hold for 2.5s
+        twPhaseRef.current = 'holding';
+        twTimerRef.current = setTimeout(tick, 2500);
+      } else {
+        twTimerRef.current = setTimeout(tick, 28);
+      }
+    } else if (phase === 'holding') {
+      // Clear and move to next hint
+      twPhaseRef.current = 'clearing';
+      setTwText('');
+      twCharRef.current = 0;
+
+      // Advance to next hint, reshuffle if exhausted
+      twIndexRef.current++;
+      if (twIndexRef.current >= twOrderRef.current.length) {
+        twOrderRef.current = shuffle(twOrderRef.current);
+        twIndexRef.current = 0;
+      }
+
+      // Small pause before starting next hint
+      twTimerRef.current = setTimeout(() => {
+        twPhaseRef.current = 'typing';
+        tick();
+      }, 200);
+    }
+  }, [hasTypewriter, getFullString]);
+
+  // Start/stop typewriter
+  useEffect(() => {
+    if (!hasTypewriter) return;
+    if (showTypewriter) {
+      // Resume typing
+      if (twPhaseRef.current === 'clearing') {
+        twPhaseRef.current = 'typing';
+      }
+      twTimerRef.current = setTimeout(tick, twPhaseRef.current === 'typing' ? 28 : 200);
+    }
+    return () => {
+      if (twTimerRef.current) clearTimeout(twTimerRef.current);
+    };
+  }, [showTypewriter, hasTypewriter, tick]);
+
+  // Auto-resize the textarea based on typewriter mirror content
+  useEffect(() => {
+    if (!showTypewriter || !twMirrorRef.current || !inputRef.current) return;
+    const mirrorH = twMirrorRef.current.scrollHeight;
+    const minH = (rows ?? (isHero ? 3 : 1)) > 1 ? 100 : 56;
+    inputRef.current.style.height = Math.max(mirrorH, minH) + 'px';
+  }, [twText, showTypewriter, rows, isHero]);
+
+  // When typewriter stops (user focused), reset textarea height
+  useEffect(() => {
+    if (!showTypewriter && inputRef.current && !hasContent) {
+      inputRef.current.style.height = 'auto';
+    }
+  }, [showTypewriter, hasContent]);
+
+  /* Focus/blur handlers for typewriter pause/resume */
+  const handleFocus = useCallback(() => {
+    setTwActive(false);
+    setTwText('');
+    if (twTimerRef.current) clearTimeout(twTimerRef.current);
+  }, []);
+
+  const handleBlur = useCallback(() => {
+    if (!value.trim()) {
+      // Resume typewriter — start fresh from current hint
+      twCharRef.current = 0;
+      twPhaseRef.current = 'typing';
+      setTwActive(true);
+    }
+  }, [value]);
 
   /* Imperative handle for parent */
   useImperativeHandle(ref, () => ({
@@ -108,6 +218,8 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
   const fillInput = useCallback((text: string) => {
     setValue(text);
     setToolsOpen(false);
+    setTwActive(false);
+    setTwText('');
     requestAnimationFrame(() => {
       if (inputRef.current) {
         inputRef.current.style.height = 'auto';
@@ -228,24 +340,49 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             </div>
           )}
 
-          {/* Textarea + rotating placeholder */}
+          {/* Textarea + typewriter overlay */}
           <div className={isHero ? 'relative' : 'mx-3 mt-2 relative'} style={isHero ? undefined : { background: '#F5F5F3', borderRadius: '18px' }}>
-            {/* Rotating placeholder overlay */}
-            {showRotating && rotatingPlaceholders && (
+            {/* Typewriter overlay */}
+            {showTypewriter && twText && (
               <div
                 className="absolute pointer-events-none select-none"
-                style={{ top: '14px', left: '18px', right: '18px', fontSize: '17px', color: 'rgba(26,26,24,0.55)', fontFamily: 'inherit', lineHeight: 1.5, overflow: 'hidden' }}
+                style={{ top: '16px', left: '18px', right: '18px', fontSize: '17px', color: 'rgba(26,26,24,0.55)', fontFamily: 'inherit', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
               >
-                {rotatingPlaceholderPrefix && (
-                  <span>{rotatingPlaceholderPrefix}</span>
-                )}
+                {twText}
                 <span
-                  key={rpIndex}
-                  className={rpAnim === 'enter' ? 'placeholder-enter' : 'placeholder-exit'}
-                  style={{ display: rotatingPlaceholderPrefix ? 'inline' : 'block' }}
-                >
-                  {rotatingPlaceholders[rpIndex]}
-                </span>
+                  style={{
+                    display: 'inline-block',
+                    width: 2,
+                    height: '1.1em',
+                    background: 'rgba(26,26,24,0.35)',
+                    marginLeft: 1,
+                    verticalAlign: 'text-bottom',
+                    animation: 'twBlink 1s step-end infinite',
+                  }}
+                />
+              </div>
+            )}
+            {/* Hidden mirror div for auto-resize measurement */}
+            {showTypewriter && (
+              <div
+                ref={twMirrorRef}
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  visibility: 'hidden',
+                  fontSize: '17px',
+                  fontFamily: 'inherit',
+                  lineHeight: 1.5,
+                  padding: '16px 18px 10px 18px',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  pointerEvents: 'none',
+                }}
+              >
+                {twText || '\u00A0'}
               </div>
             )}
             <textarea
@@ -253,12 +390,17 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               value={value}
               onChange={handleChange}
               onKeyDown={handleKey}
-              placeholder={showRotating ? '' : placeholder}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              placeholder={showTypewriter ? '' : placeholder}
               className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1A1A18] leading-[1.5] font-normal"
               style={{ fontFamily: 'inherit', minHeight: (rows ?? (isHero ? 3 : 1)) > 1 ? '100px' : '56px', maxHeight: '200px', padding: '16px 18px 10px 18px', color: 'rgba(26,26,24,1)' }}
               rows={rows ?? (isHero ? 3 : 1)}
             />
-            <style>{`.home-dock-card textarea::placeholder { color: rgba(26,26,24,0.55); }`}</style>
+            <style>{`
+              .home-dock-card textarea::placeholder { color: rgba(26,26,24,0.55); }
+              @keyframes twBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+            `}</style>
           </div>
 
           {/* Toolbar row */}

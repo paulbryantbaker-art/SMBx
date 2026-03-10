@@ -22,23 +22,78 @@ import HowItWorksBelow from '../../components/content/HowItWorksBelow';
 import AdvisorsBelow from '../../components/content/AdvisorsBelow';
 import PricingBelow from '../../components/content/PricingBelow';
 
-/* ═══ ROTATING PLACEHOLDER TEXTS (home page) ═══ */
-const ROTATING_PREFIX = "Hi, I\u2019m Yulia, your M&A agent. Tell me about ";
-const ROTATING_PLACEHOLDERS = [
-  'selling your $350K cleaning service...',
-  'buying that $800K auto repair shop...',
-  'raising $600K to acquire a laundromat...',
-  'selling your $2M dental practice...',
-  'a $1.5M HVAC company you want to buy...',
-  'raising capital for a $3M veterinary roll-up...',
-  'your $6M manufacturing company exit...',
-  'acquiring a $4M pest control platform...',
-  'raising $8M for a home services buyout...',
-  'selling your $15M logistics company...',
-  'a $25M MSP acquisition you\u2019re structuring...',
-  'raising $40M for a healthcare roll-up...',
-  'your $75M SaaS company going to market...',
-  'a $120M industrial platform buyout...',
+/* ═══ TYPEWRITER HINT POOL (home page) ═══ */
+const TYPEWRITER_PREFIX = "Hello, I'm Yulia, your M&A agent. ";
+const TYPEWRITER_HINTS = [
+  // L1 — SMB Sellers
+  "I want to sell my landscaping company \u2014 about $400K revenue in Austin...",
+  "What's my cleaning business worth? We do $600K a year in Phoenix...",
+  "My partner wants out of our auto repair shop. What are our options?",
+  "I'm thinking about selling my daycare center in Atlanta...",
+  "How do I prepare my pest control business for sale?",
+  "What add-backs am I missing on a $900K revenue restaurant?",
+  // L1-L2 — SMB Buyers
+  "I found a laundromat on BizBuySell for $285K \u2014 is that fair?",
+  "Can I get SBA financing for a $500K plumbing company?",
+  "Looking for my first acquisition \u2014 home services under $800K...",
+  "Is $350K a good price for a pool cleaning route doing $180K SDE?",
+  "I want to buy a franchise \u2014 what should I watch out for?",
+  // L2 — Lower middle market
+  "We own a $2M revenue HVAC company in Dallas. What's our exit look like?",
+  "I'm evaluating a dental practice \u2014 $1.8M revenue, $650K SDE...",
+  "What's a fair multiple for a $3M revenue MSP with 70% recurring?",
+  "Help me value a veterinary practice with two locations...",
+  "Can I finance a $2.5M acquisition with 10% down through SBA?",
+  "I want to sell my insurance agency \u2014 1,200 policies, $1.4M revenue...",
+  // L3 — Core middle market
+  "We're doing $5M EBITDA in commercial roofing. What are we worth?",
+  "Looking at a $12M revenue manufacturing company \u2014 should I pursue?",
+  "I need to raise $3M to expand my healthcare staffing company...",
+  "What's the right structure for acquiring a $4M EBITDA logistics firm?",
+  "Model SBA vs. conventional financing on a $6M deal...",
+  "Our PE sponsor wants to know our portfolio company's standalone value...",
+  // L4 — Upper middle market
+  "We have a $8M EBITDA specialty chemicals business. Exploring a sale...",
+  "Evaluating a platform acquisition at 7.2x EBITDA \u2014 is that market?",
+  "I'm a search fund operator. Help me build a thesis for B2B services...",
+  "What does a $15M revenue SaaS company trade at with 85% gross margins?",
+  "Help me model a management buyout \u2014 I'm the COO, owners want to retire...",
+  // L5 — Large middle market
+  "We're divesting a $25M EBITDA division. Walk me through the process...",
+  "Our fund is acquiring a $40M revenue platform. Model the roll-up math...",
+  "What's the arbitrage spread on a 6x entry / 9x exit over 5 years?",
+  "I need a recapitalization analysis \u2014 $18M EBITDA, want to take chips off...",
+  "Help me structure a minority growth equity raise \u2014 $50M pre-money...",
+  // L6 — Large cap
+  "We're evaluating a $200M cross-border acquisition in industrial automation...",
+  "Model the synergy assumptions on a $500M strategic merger...",
+  "Our board needs a fairness opinion framework for a $150M take-private...",
+  // Capital raise (all sizes)
+  "I need $500K to open a second location. How much equity should I give up?",
+  "We want to raise $2M in growth capital without losing control...",
+  "Walk me through ESOP conversion for my $4M EBITDA company...",
+  "What's a fair valuation for a Series A if we're doing $3M ARR?",
+  // Post-acquisition / Integration
+  "I just closed on a plumbing company. What's my 90-day plan?",
+  "Help me build a post-merger integration plan for two HVAC companies...",
+  "I acquired a dental practice 60 days ago. Employee retention is shaky...",
+  // Tax & legal specific
+  "Asset sale vs stock sale \u2014 what's the tax difference on a $2M deal?",
+  "I'm a C-Corp. How bad is the double taxation if I sell?",
+  "Do I qualify for the QSBS exclusion? I've held my stock for 7 years...",
+  "Walk me through purchase price allocation on a $5M acquisition...",
+  "What's the non-compete enforceability situation in California?",
+  "Model installment sale tax deferral on a $3M deal with seller financing...",
+  // Advisor/broker
+  "I'm a broker. Help me package a new listing \u2014 $1.2M cleaning company...",
+  "I need to pre-screen a buyer for SBA eligibility...",
+  "Generate a CIM for my client's HVAC business...",
+  "Help me map the competitive landscape for dental acquisitions in Texas...",
+  // Specific deal analysis
+  "Here's a BizBuySell listing \u2014 $1.4M asking, $420K SDE. Worth pursuing?",
+  "My broker sent me a teaser \u2014 waste management, $7M revenue, Midwest...",
+  "Analyze this: moving company, $2.1M revenue, $380K SDE, Sacramento...",
+  "Is $4.5M fair for an electrical contractor doing $1.2M EBITDA in Florida?",
 ];
 
 /* ═══ TYPES ═══ */
@@ -870,8 +925,8 @@ export default function AppShell() {
                       rows={1}
                       placeholder={page.placeholder}
                       disabled={sending}
-                      rotatingPlaceholders={ROTATING_PLACEHOLDERS}
-                      rotatingPlaceholderPrefix={ROTATING_PREFIX}
+                      typewriterHints={TYPEWRITER_HINTS}
+                      typewriterPrefix={TYPEWRITER_PREFIX}
                     />
                   </div>
                 </div>
