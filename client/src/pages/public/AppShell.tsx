@@ -25,18 +25,20 @@ import PricingBelow from '../../components/content/PricingBelow';
 /* ═══ ROTATING PLACEHOLDER TEXTS (home page) ═══ */
 const ROTATING_PREFIX = "Hi, I\u2019m Yulia, your M&A agent. Tell me about ";
 const ROTATING_PLACEHOLDERS = [
-  'your deal...',
-  'your $400K landscaping company...',
-  'that $2M dental practice listing...',
-  'your $6M HVAC company in Dallas...',
-  'whether a $1.2M deal qualifies for SBA...',
-  'the add-backs hiding in your P&L...',
-  'your $15M manufacturing listing...',
-  'the $35M logistics platform you\u2019re acquiring...',
-  'that $800K auto repair shop you found...',
-  'selling your $50M+ SaaS company...',
-  'your 90-day plan after closing...',
-  'your partner wanting out of the business...',
+  'selling your $350K cleaning service...',
+  'buying that $800K auto repair shop...',
+  'raising $600K to acquire a laundromat...',
+  'selling your $2M dental practice...',
+  'a $1.5M HVAC company you want to buy...',
+  'raising capital for a $3M veterinary roll-up...',
+  'your $6M manufacturing company exit...',
+  'acquiring a $4M pest control platform...',
+  'raising $8M for a home services buyout...',
+  'selling your $15M logistics company...',
+  'a $25M MSP acquisition you\u2019re structuring...',
+  'raising $40M for a healthcare roll-up...',
+  'your $75M SaaS company going to market...',
+  'a $120M industrial platform buyout...',
 ];
 
 /* ═══ TYPES ═══ */
