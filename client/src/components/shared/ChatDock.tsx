@@ -183,7 +183,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
       />
 
       <div className={isHero ? '' : 'max-w-[860px] mx-auto pb-3 pt-2 lg:pb-4'}>
-        <div className="home-dock-card relative" style={isHero ? { background: '#fff', borderRadius: 24, border: 'none', boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06), 0 16px 40px rgba(0,0,0,0.06)' } : undefined}>
+        <div className="home-dock-card relative" style={isHero ? { background: '#fff', borderRadius: 26, border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 1px 2px rgba(0,0,0,0.03), 0 4px 8px rgba(0,0,0,0.04), 0 12px 28px rgba(0,0,0,0.08), 0 28px 56px rgba(0,0,0,0.06)' } : undefined}>
           {/* Tool popup */}
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
             <div className="px-4 pt-3 pb-2">
