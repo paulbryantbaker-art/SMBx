@@ -404,14 +404,14 @@ export default function AppShell() {
   const allConversations = user ? authChat.conversations : anonChat.conversations;
   const activeConvId = user ? authChat.activeConversationId : anonChat.activeConversationId;
 
-  // Group conversations by date
+  // Group conversations by date (fallback)
   const groupByDate = (convos: typeof allConversations) => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const yesterday = new Date(today.getTime() - 86400000);
     const lastWeek = new Date(today.getTime() - 7 * 86400000);
 
-    const groups: { label: string; items: typeof convos }[] = [
+    const groups: { label: string; items: typeof convos; journey?: string | null }[] = [
       { label: 'Today', items: [] },
       { label: 'Yesterday', items: [] },
       { label: 'Last 7 Days', items: [] },
@@ -429,7 +429,42 @@ export default function AppShell() {
     return groups.filter(g => g.items.length > 0);
   };
 
-  const conversationGroups = groupByDate(allConversations);
+  // Smart grouping: by deal when 2+ distinct deals, otherwise by date
+  const groupConversations = (convos: typeof allConversations) => {
+    const distinctDeals = new Set((convos || []).map(c => c.deal_id).filter(Boolean));
+    if (distinctDeals.size < 2) return { mode: 'date' as const, groups: groupByDate(convos) };
+
+    const dealGroups = new Map<string, { label: string; journey: string | null; items: typeof convos }>();
+    const general: typeof convos = [];
+
+    for (const c of convos || []) {
+      if (!c.deal_id) {
+        general.push(c);
+        continue;
+      }
+      const key = String(c.deal_id);
+      if (!dealGroups.has(key)) {
+        const journeyLabel = c.journey ? c.journey.charAt(0).toUpperCase() + c.journey.slice(1) : null;
+        const label = c.business_name || (journeyLabel && c.industry ? `${journeyLabel} — ${c.industry}` : null) || 'Deal';
+        dealGroups.set(key, { label, journey: c.journey || null, items: [] });
+      }
+      dealGroups.get(key)!.items.push(c);
+    }
+
+    // Sort groups by most recent updated_at DESC
+    const sorted = [...dealGroups.values()].sort((a, b) => {
+      const aMax = Math.max(...a.items.map(i => new Date(i.updated_at).getTime()));
+      const bMax = Math.max(...b.items.map(i => new Date(i.updated_at).getTime()));
+      return bMax - aMax;
+    });
+
+    const groups = sorted.map(g => ({ label: g.label, journey: g.journey, items: g.items }));
+    if (general.length > 0) groups.push({ label: 'General', journey: null, items: general });
+
+    return { mode: 'deal' as const, groups };
+  };
+
+  const { mode: groupMode, groups: conversationGroups } = groupConversations(allConversations);
 
   // Session restore: auto-open most recent conversation on mount
   const [restored, setRestored] = useState(false);
@@ -516,11 +551,17 @@ export default function AppShell() {
         </nav>
       </div>
 
-      {/* Conversations — grouped by date */}
+      {/* Conversations — grouped by deal or date */}
       <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-4">
         {conversationGroups.map(group => (
           <div key={group.label} className="mb-3">
-            <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(26,26,24,0.35)' }}>
+            <div className="flex items-center gap-2 px-4 mb-2" style={{ fontSize: '10px', fontWeight: groupMode === 'deal' ? 800 : 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(26,26,24,0.35)' }}>
+              {groupMode === 'deal' && group.journey && (
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: JOURNEY_COLORS[group.journey] || 'rgba(26,26,24,0.3)' }}
+                />
+              )}
               {group.label}
             </div>
             {group.items.map(c => (
@@ -543,10 +584,12 @@ export default function AppShell() {
                 }}
                 type="button"
               >
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: c.journey ? (JOURNEY_COLORS[c.journey] || 'rgba(26,26,24,0.3)') : 'rgba(26,26,24,0.2)' }}
-                />
+                {groupMode === 'date' && (
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: c.journey ? (JOURNEY_COLORS[c.journey] || 'rgba(26,26,24,0.3)') : 'rgba(26,26,24,0.2)' }}
+                  />
+                )}
                 <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
               </button>
             ))}

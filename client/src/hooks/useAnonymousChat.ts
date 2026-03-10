@@ -14,6 +14,8 @@ export interface AnonConversation {
   deal_id: number | null;
   journey?: string | null;
   current_gate?: string | null;
+  business_name?: string | null;
+  industry?: string | null;
   created_at: string;
   updated_at: string;
 }

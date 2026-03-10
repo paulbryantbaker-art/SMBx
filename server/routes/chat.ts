@@ -487,7 +487,7 @@ chatRouter.get('/conversations', async (req, res) => {
     if (userId) {
       convos = await sql`
         SELECT c.id, c.title, c.deal_id, c.is_archived, c.created_at, c.updated_at,
-               d.journey_type as journey, d.current_gate
+               d.journey_type as journey, d.current_gate, d.business_name, d.industry
         FROM conversations c
         LEFT JOIN deals d ON c.deal_id = d.id
         WHERE c.user_id = ${userId} AND c.is_archived = false
@@ -496,7 +496,7 @@ chatRouter.get('/conversations', async (req, res) => {
     } else if (sessionId) {
       convos = await sql`
         SELECT c.id, c.title, c.deal_id, c.is_archived, c.created_at, c.updated_at,
-               d.journey_type as journey, d.current_gate
+               d.journey_type as journey, d.current_gate, d.business_name, d.industry
         FROM conversations c
         LEFT JOIN deals d ON c.deal_id = d.id
         WHERE c.session_id = ${sessionId} AND c.is_archived = false
