@@ -537,13 +537,14 @@ export default function AppShell() {
                   fontFamily: 'inherit',
                   fontSize: '15px',
                   fontWeight: isActive ? 600 : 500,
-                  color: isActive ? '#1A1A18' : 'rgba(26,26,24,0.45)',
+                  color: isActive ? '#1A1A18' : 'rgba(26,26,24,0.65)',
                   background: isActive ? '#FFFFFF' : 'transparent',
                   borderRadius: '100px',
+                  border: isActive ? '1px solid rgba(26,26,24,0.1)' : '1px solid transparent',
                 }}
                 type="button"
               >
-                <span style={{ color: isActive ? '#D4714E' : 'rgba(26,26,24,0.3)' }}>{item.icon}</span>
+                <span style={{ color: isActive ? '#D4714E' : 'rgba(26,26,24,0.45)' }}>{item.icon}</span>
                 {item.label}
               </button>
             );
@@ -555,7 +556,7 @@ export default function AppShell() {
       <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-4">
         {conversationGroups.map(group => (
           <div key={group.label} className="mb-3">
-            <div className="flex items-center gap-2 px-4 mb-2" style={{ fontSize: '10px', fontWeight: groupMode === 'deal' ? 800 : 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(26,26,24,0.35)' }}>
+            <div className="flex items-center gap-2 px-4 mb-2" style={{ fontSize: '10px', fontWeight: groupMode === 'deal' ? 800 : 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#D4714E' }}>
               {groupMode === 'deal' && group.journey && (
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
@@ -574,13 +575,14 @@ export default function AppShell() {
                   navigate(`/chat/${c.id}`);
                   setIsMobileSidebarOpen(false);
                 }}
-                className="flex items-center gap-3 w-full px-4 py-2.5 text-[13px] cursor-pointer border-none transition-all"
+                className="flex items-center gap-3 w-full px-4 py-2.5 text-[13px] cursor-pointer transition-all"
                 style={{
                   fontFamily: 'inherit',
                   fontWeight: c.id === activeConvId && viewState === 'chat' ? 600 : 500,
-                  color: c.id === activeConvId && viewState === 'chat' ? '#1A1A18' : 'rgba(26,26,24,0.45)',
+                  color: c.id === activeConvId && viewState === 'chat' ? '#1A1A18' : 'rgba(26,26,24,0.65)',
                   background: c.id === activeConvId && viewState === 'chat' ? '#FFFFFF' : 'transparent',
                   borderRadius: '12px',
+                  border: c.id === activeConvId && viewState === 'chat' ? '1px solid rgba(26,26,24,0.1)' : '1px solid transparent',
                 }}
                 type="button"
               >
@@ -748,7 +750,7 @@ export default function AppShell() {
                   <button
                     onClick={() => setIsMobileSidebarOpen(true)}
                     className="w-10 h-10 flex items-center justify-center bg-transparent border-none cursor-pointer"
-                    style={{ borderRadius: 12, color: 'rgba(26,26,24,0.45)' }}
+                    style={{ borderRadius: 12, color: 'rgba(26,26,24,0.7)' }}
                     type="button"
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
