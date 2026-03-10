@@ -84,68 +84,6 @@ function detectAdvisor(message: string): boolean {
   return ADVISOR_PATTERNS.some(p => p.test(message));
 }
 
-// ─── Debug: diagnose chat message failures ──────────────────
-chatRouter.get('/debug-message', async (req, res) => {
-  const steps: Record<string, any> = {};
-  try {
-    // Step 1: Create test conversation
-    const [conv] = await sql`
-      INSERT INTO conversations (title, session_id)
-      VALUES ('__debug_test__', 'debug')
-      RETURNING id
-    `;
-    steps.createConv = { ok: true, id: conv.id };
-
-    // Step 2: Try full column SELECT
-    try {
-      const [r] = await sql`
-        SELECT journey, current_gate, league, extracted_data, company_profile_id, thesis_id, exit_type, pmi_phase
-        FROM conversations WHERE id = ${conv.id}
-      `;
-      steps.fullSelect = { ok: true };
-    } catch (e: any) {
-      steps.fullSelect = { ok: false, error: e.message };
-    }
-
-    // Step 3: Try minimal SELECT
-    try {
-      const [r] = await sql`
-        SELECT journey, current_gate, league, extracted_data
-        FROM conversations WHERE id = ${conv.id}
-      `;
-      steps.minimalSelect = { ok: true };
-    } catch (e: any) {
-      steps.minimalSelect = { ok: false, error: e.message };
-    }
-
-    // Step 4: Try buildDynamicAnonymousPrompt
-    try {
-      const prompt = await buildDynamicAnonymousPrompt({ journey: null, current_gate: null, league: null, extracted_data: null, company_profile_id: null, thesis_id: null }, { sourcePage: 'home', isFirstMessage: true, messageCount: 1 });
-      steps.buildPrompt = { ok: true, length: prompt.length };
-    } catch (e: any) {
-      steps.buildPrompt = { ok: false, error: e.message, stack: e.stack?.substring(0, 300) };
-    }
-
-    // Step 5: Try Anthropic
-    try {
-      const anthropic = getAnthropicClient();
-      const r = await anthropic.messages.create({
-        model: STREAMING_MODEL, max_tokens: 50,
-        messages: [{ role: 'user', content: 'Say hi in 5 words' }],
-      });
-      steps.anthropic = { ok: true, text: (r.content[0] as any)?.text?.substring(0, 100) };
-    } catch (e: any) {
-      steps.anthropic = { ok: false, error: e.message, status: e.status };
-    }
-
-    // Cleanup
-    await sql`DELETE FROM conversations WHERE id = ${conv.id}`;
-    res.json(steps);
-  } catch (e: any) {
-    res.json({ ...steps, topError: e.message, stack: e.stack?.substring(0, 500) });
-  }
-});
-
 // ─── POST /message — Main SSE streaming endpoint ────────────
 
 chatRouter.post('/message', async (req, res) => {
