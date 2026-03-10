@@ -216,3 +216,48 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+
+/* ═══ RANGE SLIDER (for interactive calculators) ═══ */
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 999px;
+  background: #EAE6DF;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #D4714E;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(212, 113, 78, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #D4714E;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(212, 113, 78, 0.35);
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 8px;
+  border-radius: 999px;
+  background: #EAE6DF;
+}
