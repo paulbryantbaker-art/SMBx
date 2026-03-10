@@ -7,15 +7,15 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
   return (
     <div>
       {/* ═══ Section 1: BRING YOUR DEAL HERE ═══ */}
-      <section className="px-6" style={{ paddingTop: '120px' }}>
+      <section className="px-6" style={{ paddingTop: '100px' }}>
         <div className="max-w-4xl mx-auto">
-          <span className="text-[12px] font-bold tracking-[0.08em] uppercase text-[#D4714E]">ANY DEAL. ANY SOURCE.</span>
-          <h2 className="text-[36px] md:text-[48px] font-extrabold mt-3 mb-8" style={{ letterSpacing: '-0.04em' }}>
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>ANY DEAL. ANY SOURCE.</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
             Found a deal? Bring it. Yulia does the rest.
           </h2>
-          <div className="text-[18px] md:text-[20px] font-medium text-[#6E6A63] max-w-3xl space-y-6" style={{ lineHeight: 1.65 }}>
+          <div className="max-w-3xl space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
             <p className="m-0">Paste a BizBuySell listing. Describe something your broker sent you. Tell Yulia about a business you heard is for sale. She doesn&apos;t care where you found it.</p>
-            <p className="m-0 text-[#1A1A18] font-bold">She cares whether it&apos;s worth your time.</p>
+            <p className="m-0" style={{ color: '#1A1A18', fontWeight: 600 }}>She cares whether it&apos;s worth your time.</p>
             <p className="m-0">Within minutes, Yulia validates the financials against federal benchmarks, models SBA financing at live rates, maps the competitive landscape in that metro, flags the risks &mdash; and gives you a clear answer: pursue or pass.</p>
             <p className="m-0">Every listing site in the world just became your top-of-funnel. smbX.ai is where you analyze them.</p>
           </div>
@@ -23,88 +23,70 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
       </section>
 
       {/* ═══ Section 2: PURSUE OR PASS ═══ */}
-      <section className="px-6" style={{ paddingTop: '160px' }}>
+      <section className="px-6" style={{ paddingTop: '120px' }}>
         <div className="max-w-4xl mx-auto">
           <div className="md:text-center mb-10 md:mb-16">
-            <h2 className="text-[36px] md:text-[48px] font-extrabold mt-3" style={{ letterSpacing: '-0.04em' }}>
+            <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px]">
               The most expensive mistake is 3 months on the wrong deal.
             </h2>
-            <p className="text-[18px] md:text-[20px] font-medium text-[#6E6A63] mt-4 max-w-3xl md:mx-auto" style={{ lineHeight: 1.65 }}>
+            <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', marginTop: 16, lineHeight: 1.65 }} className="max-w-3xl md:mx-auto">
               Yulia gets you to a clear answer &mdash; fast:
             </p>
           </div>
 
           <div className="space-y-10 md:space-y-12">
-            <div>
-              <h3 className="text-[18px] font-extrabold text-[#1A1A18] mb-2">FINANCIALS</h3>
-              <p className="text-[16px] md:text-[18px] font-medium text-[#6E6A63] m-0" style={{ lineHeight: 1.65 }}>
-                Seller claims $600K SDE. Census data says businesses this size in this industry average $1.2M in receipts. That implies 50% margins &mdash; realistic? Yulia checks.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-[18px] font-extrabold text-[#1A1A18] mb-2">FINANCING</h3>
-              <p className="text-[16px] md:text-[18px] font-medium text-[#6E6A63] m-0" style={{ lineHeight: 1.65 }}>
-                $1.8M asking, 10% down, live SBA rate: monthly P&amp;I is $14,200. DSCR is 1.87 &mdash; above the 1.25 threshold. Bankable. You know before you spend a dime.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-[18px] font-extrabold text-[#1A1A18] mb-2">MARKET</h3>
-              <p className="text-[16px] md:text-[18px] font-medium text-[#6E6A63] m-0" style={{ lineHeight: 1.65 }}>
-                847 competitors in the metro. PE firms rolling up the sector. BLS wages growing 4% annually. Good market to buy into &mdash; or buying at the top?
-              </p>
-            </div>
-            <div>
-              <h3 className="text-[18px] font-extrabold text-[#1A1A18] mb-2">RISKS</h3>
-              <p className="text-[16px] md:text-[18px] font-medium text-[#6E6A63] m-0" style={{ lineHeight: 1.65 }}>
-                Customer concentration. Owner dependency. Key person. Declining revenue. Yulia flags them before the seller&apos;s broker does.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-[18px] font-extrabold text-[#1A1A18] mb-2">VERDICT</h3>
-              <p className="text-[16px] md:text-[18px] font-medium text-[#6E6A63] m-0" style={{ lineHeight: 1.65 }}>
-                Pursue &mdash; with these conditions. Or pass &mdash; for these reasons. A real answer with real reasoning.
-              </p>
-            </div>
+            {[
+              { label: 'FINANCIALS', body: 'Seller claims $600K SDE. Census data says businesses this size in this industry average $1.2M in receipts. That implies 50% margins \u2014 realistic? Yulia checks.' },
+              { label: 'FINANCING', body: '$1.8M asking, 10% down, live SBA rate: monthly P&I is $14,200. DSCR is 1.87 \u2014 above the 1.25 threshold. Bankable. You know before you spend a dime.' },
+              { label: 'MARKET', body: '847 competitors in the metro. PE firms rolling up the sector. BLS wages growing 4% annually. Good market to buy into \u2014 or buying at the top?' },
+              { label: 'RISKS', body: 'Customer concentration. Owner dependency. Key person. Declining revenue. Yulia flags them before the seller\u2019s broker does.' },
+              { label: 'VERDICT', body: 'Pursue \u2014 with these conditions. Or pass \u2014 for these reasons. A real answer with real reasoning.' },
+            ].map(item => (
+              <div key={item.label}>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', marginBottom: 8 }}>{item.label}</h3>
+                <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.65 }}>{item.body}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ═══ Section 3: YOUR FREE STARTING POINT ═══ */}
-      <section className="px-6" style={{ paddingTop: '160px' }}>
+      <section className="px-6" style={{ paddingTop: '120px' }}>
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-[36px] md:text-[48px] font-extrabold mb-10" style={{ letterSpacing: '-0.04em' }}>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-10">
             Before you pay anything, you get this.
           </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-[#F9FAFB] p-8" style={{ borderRadius: '32px', border: '1px solid #F3F4F6' }}>
-              <h3 className="text-[18px] font-extrabold mb-3">INVESTMENT THESIS DOCUMENT</h3>
-              <p className="text-[15px] font-medium text-[#6E6A63] m-0" style={{ lineHeight: 1.6 }}>
+          <div className="grid md:grid-cols-2 gap-5">
+            <div style={{ background: '#F7F6F4', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: 12 }}>INVESTMENT THESIS DOCUMENT</h3>
+              <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>
                 Your acquisition blueprint &mdash; criteria, target profile, capital stack template, SBA eligibility analysis, and a market landscape overview. This is what search funds and PE firms build in-house. You get it from a conversation.
               </p>
             </div>
-            <div className="bg-[#F9FAFB] p-8" style={{ borderRadius: '32px', border: '1px solid #F3F4F6' }}>
-              <h3 className="text-[18px] font-extrabold mb-3">CAPITAL STACK TEMPLATE</h3>
-              <p className="text-[15px] font-medium text-[#6E6A63] m-0" style={{ lineHeight: 1.6 }}>
+            <div style={{ background: '#F7F6F4', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: 12 }}>CAPITAL STACK TEMPLATE</h3>
+              <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>
                 &ldquo;Here&apos;s how a $1.8M acquisition gets funded.&rdquo; SBA loan, equity contribution, seller note, monthly debt service. The math that tells you whether you can afford this.
               </p>
             </div>
           </div>
-          <p className="text-[16px] md:text-[18px] font-medium text-[#6E6A63] mt-6 md:text-center" style={{ lineHeight: 1.65 }}>
+          <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', marginTop: 24, lineHeight: 1.65 }} className="md:text-center">
             Both free. Both generated from your first conversation.
           </p>
         </div>
       </section>
 
       {/* ═══ Section 4: YOUR FULL JOURNEY ═══ */}
-      <section className="px-6" style={{ paddingTop: '160px' }}>
+      <section className="px-6" style={{ paddingTop: '120px' }}>
         <div className="max-w-4xl mx-auto">
           <div className="md:text-center mb-10 md:mb-16">
-            <h2 className="text-[36px] md:text-[48px] font-extrabold mt-3" style={{ letterSpacing: '-0.04em' }}>
+            <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px]">
               We don&apos;t stop at close. Neither should your intelligence.
             </h2>
           </div>
 
-          <div className="space-y-10 md:space-y-16">
+          <div className="space-y-10 md:space-y-14">
             {[
               { phase: 'PHASE 1 \u2014 DEFINE YOUR THESIS', body: 'What industry? What geography? What deal size? Yulia helps you build a clear acquisition thesis and maps the market landscape.' },
               { phase: 'PHASE 2 \u2014 EVALUATE & BUILD CONVICTION', body: 'Every target: financial validation, SBA modeling, market analysis, risk assessment. Pursue or pass \u2014 with data.' },
@@ -113,8 +95,8 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
               { phase: 'PHASE 5 \u2014 POST-ACQUISITION (180 DAYS)', body: 'Day 1\u201330: Stabilize. Retain. Preserve. Day 30\u201390: Optimize. Capture quick wins. Day 90\u2013180: Grow. Execute the thesis. A customized value creation plan for YOUR business, YOUR market, YOUR thesis.' },
             ].map(item => (
               <div key={item.phase}>
-                <span className="text-[12px] font-bold tracking-[0.08em] uppercase text-[#D4714E]">{item.phase}</span>
-                <p className="text-[16px] md:text-[18px] font-medium text-[#6E6A63] m-0 mt-3" style={{ lineHeight: 1.65 }}>{item.body}</p>
+                <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>{item.phase}</span>
+                <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: '12px 0 0', lineHeight: 1.65 }}>{item.body}</p>
               </div>
             ))}
           </div>
@@ -122,9 +104,9 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
       </section>
 
       {/* ═══ Section 5: NEGOTIATION ═══ */}
-      <section className="px-6" style={{ paddingTop: '160px' }}>
+      <section className="px-6" style={{ paddingTop: '120px' }}>
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-[36px] md:text-[48px] font-extrabold mb-8" style={{ letterSpacing: '-0.04em' }}>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-8">
             Buy smart. Not just fast.
           </h2>
           <div className="space-y-2 ml-1">
@@ -135,8 +117,8 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
               'Walk-away number \u2014 know yours, negotiate without emotion',
             ].map(item => (
               <div key={item} className="flex items-start gap-2.5">
-                <span className="text-[#D4714E] font-bold shrink-0 mt-0.5">&bull;</span>
-                <span className="text-[16px] md:text-[18px] font-medium text-[#6E6A63]" style={{ lineHeight: 1.6 }}>{item}</span>
+                <span style={{ color: '#D4714E', fontWeight: 600 }} className="shrink-0 mt-0.5">&bull;</span>
+                <span style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.6 }} className="md:text-[17px]">{item}</span>
               </div>
             ))}
           </div>
@@ -144,9 +126,9 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
       </section>
 
       {/* ═══ Section 6: EVERY TYPE OF BUYER ═══ */}
-      <section className="px-6" style={{ paddingTop: '160px' }}>
+      <section className="px-6" style={{ paddingTop: '120px', paddingBottom: '80px' }}>
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-[36px] md:text-[48px] font-extrabold mb-10 md:text-center" style={{ letterSpacing: '-0.04em' }}>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-10 md:text-center">
             First deal or fiftieth. Yulia adapts.
           </h2>
           <div className="space-y-0">
@@ -156,21 +138,14 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
               { label: 'PE PLATFORM', body: 'Screen at deal-team speed.' },
               { label: 'STRATEGIC', body: 'Synergies, structure, maximum value.' },
             ].map((b, i) => (
-              <div key={b.label} className={`py-4 ${i > 0 ? 'border-t border-[#E5E5E5]' : ''}`}>
-                <span className="text-[11px] font-bold tracking-[0.08em] uppercase text-[#D4714E] mb-1 block">{b.label}</span>
-                <p className="text-[16px] md:text-[18px] font-medium text-[#6E6A63] m-0" style={{ lineHeight: 1.6 }}>{b.body}</p>
+              <div key={b.label} style={{ padding: '16px 0', borderTop: i > 0 ? '1px solid rgba(26,26,24,0.06)' : undefined }}>
+                <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E', display: 'block', marginBottom: 4 }}>{b.label}</span>
+                <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{b.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
-
-      <footer className="text-center py-24 mt-32">
-        <span className="text-[18px] font-extrabold">smb<span className="text-[#D4714E]">X</span>.ai</span>
-        <p className="text-[12px] font-medium text-[#9CA3AF] mt-1 m-0" style={{ letterSpacing: '0.1em' }}>
-          Deal Intelligence Infrastructure
-        </p>
-      </footer>
     </div>
   );
 }

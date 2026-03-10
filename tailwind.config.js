@@ -7,12 +7,14 @@ export default {
         ink: '#1A1A18',
         terra: {
           DEFAULT: '#D4714E',
-          hover: '#BE6342',
+          hover: '#C0623F',
           soft: '#FFF0EB',
           glow: 'rgba(212, 113, 78, 0.12)',
         },
-        stone: '#E8E8E8',
-        surface: '#F6F6F6',
+        stone: '#E5E5E3',
+        surface: '#F5F5F3',
+        tint: '#F7F6F4',
+        // Backward-compat for authenticated components
         cream: {
           DEFAULT: '#FAF8F4',
           deep: '#F3F0EA',
@@ -34,7 +36,7 @@ export default {
         '4xl': '34px',
       },
       fontFamily: {
-        sans: ["'Inter'", 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       maxWidth: {
         site: '1200px',

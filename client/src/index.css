@@ -3,11 +3,16 @@
 @tailwind utilities;
 
 :root {
+  --ink: #1A1A18;
+  --terra: #D4714E;
+  --terra-hover: #C0623F;
+  --stone: #E5E5E3;
+  --surface: #F5F5F3;
+  --tint: #F7F6F4;
+  --white: #FFFFFF;
+  /* Backward-compat for authenticated components */
   --cream: #FFFFFF;
   --fill: #F5F5F0;
-  --white: #FFFFFF;
-  --terra: #D4714E;
-  --terra-hover: #BE6342;
   --terra-soft: #FFF0EB;
   --terra-glow: rgba(212,113,78,.12);
   --text: #1A1A18;
@@ -19,8 +24,8 @@
   --shadow-card: 0 1px 4px rgba(0,0,0,.03);
   --shadow-md: 0 2px 8px rgba(0,0,0,.06);
   --shadow-lg: 0 4px 20px rgba(0,0,0,.08);
-  --serif: 'Inter', system-ui, sans-serif;
   --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --serif: 'Inter', system-ui, sans-serif;
 }
 
 html {
@@ -31,48 +36,68 @@ body {
   margin: 0;
   background-color: #FFFFFF;
   font-family: var(--sans);
-  color: var(--text);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100%;
 }
 
-/* Animation keyframes */
-@keyframes dotPulse {
-  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-  40% { opacity: 1; transform: scale(1); }
-}
+/* ═══ ANIMATIONS ═══ */
 
-@keyframes logoBreathe {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
-}
-
-@keyframes tickerScroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-@keyframes morphFadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes morphFadeIn {
+@keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-.morph-fade-out {
-  animation: morphFadeOut 300ms ease forwards;
-  pointer-events: none;
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
-.morph-fade-in {
-  animation: morphFadeIn 300ms ease 100ms forwards;
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ═══ HOMEPAGE V12 ═══ */
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes morphOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-8px); }
+}
+
+@keyframes morphIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Rotating placeholder */
+@keyframes placeholderSlideOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-12px); }
+}
+
+@keyframes placeholderSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.placeholder-exit {
+  animation: placeholderSlideOut 350ms ease forwards;
+}
+
+.placeholder-enter {
+  animation: placeholderSlideIn 350ms ease forwards;
+}
+
+/* Legacy compat animations */
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
 
 @keyframes homeFadeUp {
   from { opacity: 0; transform: translateY(10px); }
@@ -89,14 +114,8 @@ body {
   40% { opacity: 1; transform: scale(1); }
 }
 
-
-/* Fade-up animation */
 .home-fade-up { animation: homeFadeUp 0.4s ease both; }
-
-/* Message slide-in */
 .home-msg-slide { animation: homeSlideIn 0.3s ease; }
-
-/* Typing dots */
 .home-typing-dot { animation: homeTypingDot 1.4s ease infinite; }
 .home-typing-dot:nth-child(2) { animation-delay: 0.15s; }
 .home-typing-dot:nth-child(3) { animation-delay: 0.3s; }
@@ -109,27 +128,38 @@ body {
 .home-yt ul, .home-yt ol { padding-left: 1.25em; margin: 8px 0; }
 .home-yt li { margin-bottom: 4px; }
 
+/* ═══ CHATDOCK ═══ */
+
 /* Dock card */
 .home-dock-card {
-  background: #fff; border: 1px solid rgba(26,26,24,0.08);
-  border-radius: 24px; overflow: visible; position: relative;
-  box-shadow: 0 1px 3px rgba(26,26,24,0.06);
+  background: #fff;
+  border: 2px solid rgba(26,26,24,0.12);
+  border-radius: 22px;
+  overflow: visible;
+  position: relative;
+  transition: border-color 200ms;
 }
 .home-dock-card:focus-within {
-  border-color: #1A1A18;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  border-color: rgba(26,26,24,0.18);
+}
+
+/* Tinted depth zone behind dock card (applied by parent) */
+.dock-depth-zone {
+  background: #F5F5F3;
+  border-radius: 28px;
+  padding: 12px;
 }
 
 /* Tool popup — drops UP from dock */
 .home-tools-popup {
   position: absolute; left: 0; right: 0; bottom: calc(100% + 10px);
-  background: #fff; border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(26,26,24,.10), 0 1px 4px rgba(26,26,24,.06);
+  background: #fff; border-radius: 24px;
+  box-shadow: 0 16px 48px rgba(26,26,24,.12), 0 4px 12px rgba(26,26,24,.06);
   padding: 4px 6px 8px;
   opacity: 0; transform: translateY(8px) scale(0.97);
   pointer-events: none; transition: all 0.2s; z-index: 10;
   max-height: 65vh; overflow-y: auto;
-  border: 1px solid rgba(221,217,209,.6);
+  border: 1px solid rgba(26,26,24,.08);
 }
 .home-tools-popup.open {
   opacity: 1; transform: translateY(0) scale(1); pointer-events: auto;
@@ -141,9 +171,17 @@ body {
   border-radius: 12px; border: none; background: transparent; width: 100%;
   font-family: inherit; cursor: pointer; transition: background 0.15s; text-align: left;
 }
-.home-tp-item:hover { background: #F3F0EA; }
-.home-tp-item:active { background: #EBE7DF; }
+.home-tp-item:hover { background: #F7F6F4; }
+.home-tp-item:active { background: #F0EFEC; }
 .home-tp-item svg { width: 20px; height: 20px; color: #D4714E; flex-shrink: 0; margin-top: 1px; }
+
+/* Home chat input — focus border */
+.home-input-wrap { transition: border-color 200ms; }
+.home-input-wrap:focus-within {
+  border-color: rgba(26,26,24,0.18) !important;
+}
+
+/* ═══ AUTHENTICATED COMPONENT STYLES ═══ */
 
 /* Gate stepper pulse */
 @keyframes gatePulse {
@@ -171,13 +209,6 @@ body {
 /* Spinner */
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-/* Home chat input — focus border */
-.home-input-wrap { transition: border-color 0.15s, box-shadow 0.15s; }
-.home-input-wrap:focus-within {
-  border-color: rgba(0,0,0,0.15) !important;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
 }
 
 /* Status dot pulse */

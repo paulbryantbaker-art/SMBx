@@ -40,12 +40,14 @@ interface ChatDockProps {
   variant?: 'hero' | 'dock';
   /** Override initial textarea rows (default: hero=3, dock=1) */
   rows?: number;
+  /** Rotating placeholder texts — cycles every 5s with slide animation (home page) */
+  rotatingPlaceholders?: string[];
 }
 
 /* ═══ COMPONENT ═══ */
 
 const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
-  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock', rows },
+  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock', rows, rotatingPlaceholders },
   ref,
 ) {
   const isHero = variant === 'hero';
@@ -60,6 +62,23 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const hasContent = value.trim().length > 0;
+
+  /* Rotating placeholder state */
+  const [rpIndex, setRpIndex] = useState(0);
+  const [rpAnim, setRpAnim] = useState<'enter' | 'exit'>('enter');
+  const showRotating = rotatingPlaceholders && rotatingPlaceholders.length > 0 && !hasContent && !value;
+
+  useEffect(() => {
+    if (!rotatingPlaceholders || rotatingPlaceholders.length <= 1) return;
+    const interval = setInterval(() => {
+      setRpAnim('exit');
+      setTimeout(() => {
+        setRpIndex(prev => (prev + 1) % rotatingPlaceholders.length);
+        setRpAnim('enter');
+      }, 350);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [rotatingPlaceholders]);
 
   /* Imperative handle for parent */
   useImperativeHandle(ref, () => ({
@@ -168,27 +187,27 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           {/* Tool popup */}
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
             <div className="px-4 pt-3 pb-2">
-              <span className="text-[12px] font-semibold tracking-wide uppercase text-[#A9A49C]">Start with Yulia</span>
+              <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(26,26,24,0.35)' }}>Start with Yulia</span>
             </div>
             {TOOLS.filter(t => t.group === 'journey').map(t => (
               <button key={t.label} className="home-tp-item" onClick={() => handleToolClick(t)} type="button">
                 {t.icon}
                 <div>
                   <div className="text-[15px] font-semibold text-[#1A1A18] leading-[1.3]">{t.label}</div>
-                  <div className="text-[13px] text-[#6E6A63] leading-[1.4] mt-0.5">{t.desc}</div>
+                  <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: 'rgba(26,26,24,0.45)' }}>{t.desc}</div>
                 </div>
               </button>
             ))}
-            <div className="mx-4 my-1 border-t border-[#E8E8E8]" />
+            <div className="mx-4 my-1" style={{ borderTop: '1px solid rgba(26,26,24,0.06)' }} />
             <div className="px-4 pt-2 pb-1">
-              <span className="text-[12px] font-semibold tracking-wide uppercase text-[#A9A49C]">Tools</span>
+              <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(26,26,24,0.35)' }}>Tools</span>
             </div>
             {TOOLS.filter(t => t.group === 'tool').map(t => (
               <button key={t.label} className="home-tp-item" onClick={() => handleToolClick(t)} type="button">
                 {t.icon}
                 <div>
                   <div className="text-[15px] font-semibold text-[#1A1A18] leading-[1.3]">{t.label}</div>
-                  <div className="text-[13px] text-[#6E6A63] leading-[1.4] mt-0.5">{t.desc}</div>
+                  <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: 'rgba(26,26,24,0.45)' }}>{t.desc}</div>
                 </div>
               </button>
             ))}
@@ -197,28 +216,44 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           {/* Attachment chips */}
           {attachment && (
             <div className="flex flex-wrap gap-2 px-4 pt-3 pb-0">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F3F0EA] rounded-lg max-w-[260px]">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F5F5F3] rounded-lg max-w-[260px]">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                 <span className="text-[13px] font-medium text-[#1A1A18] truncate">{attachment.name}</span>
-                <button onClick={() => setAttachment(null)} className="text-[#A9A49C] hover:text-[#1A1A18] bg-transparent border-none cursor-pointer p-0 ml-0.5 flex-shrink-0" type="button">
+                <button onClick={() => setAttachment(null)} className="hover:text-[#1A1A18] bg-transparent border-none cursor-pointer p-0 ml-0.5 flex-shrink-0" style={{ color: 'rgba(26,26,24,0.35)' }} type="button">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               </div>
             </div>
           )}
 
-          {/* Textarea */}
-          <div className={isHero ? '' : 'mx-3 mt-2'} style={isHero ? undefined : { background: '#F6F6F6', borderRadius: '24px' }}>
+          {/* Textarea + rotating placeholder */}
+          <div className={isHero ? 'relative' : 'mx-3 mt-2 relative'} style={isHero ? undefined : { background: '#F5F5F3', borderRadius: '18px' }}>
+            {/* Rotating placeholder overlay */}
+            {showRotating && rotatingPlaceholders && (
+              <div
+                className="absolute pointer-events-none select-none"
+                style={{ top: '14px', left: '18px', right: '18px', fontSize: '17px', color: 'rgba(26,26,24,0.5)', fontFamily: 'inherit', lineHeight: 1.5, overflow: 'hidden' }}
+              >
+                <span
+                  key={rpIndex}
+                  className={rpAnim === 'enter' ? 'placeholder-enter' : 'placeholder-exit'}
+                  style={{ display: 'block' }}
+                >
+                  {rotatingPlaceholders[rpIndex]}
+                </span>
+              </div>
+            )}
             <textarea
               ref={inputRef}
               value={value}
               onChange={handleChange}
               onKeyDown={handleKey}
-              placeholder={placeholder}
-              className="w-full bg-transparent border-none outline-none resize-none text-[15px] md:text-[17px] text-[#1A1A18] leading-[1.5] placeholder:text-[#9CA3AF] font-normal"
-              style={{ fontFamily: 'inherit', minHeight: (rows ?? (isHero ? 3 : 1)) > 1 ? '100px' : '40px', maxHeight: '200px', padding: '14px 18px 8px 18px' }}
+              placeholder={showRotating ? '' : placeholder}
+              className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1A1A18] leading-[1.5] font-normal"
+              style={{ fontFamily: 'inherit', minHeight: (rows ?? (isHero ? 3 : 1)) > 1 ? '100px' : '44px', maxHeight: '200px', padding: '14px 18px 8px 18px', color: 'rgba(26,26,24,1)' }}
               rows={rows ?? (isHero ? 3 : 1)}
             />
+            <style>{`.home-dock-card textarea::placeholder { color: rgba(26,26,24,0.4); }`}</style>
           </div>
 
           {/* Toolbar row */}
@@ -226,8 +261,8 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             <button
               ref={plusRef}
               onClick={() => setToolsOpen(prev => !prev)}
-              className="w-8 h-8 rounded-full border-none bg-[#E8E8E8] text-[#8C877D] cursor-pointer flex items-center justify-center hover:bg-[#DCDCDC] active:scale-90"
-              style={{ transition: 'all .2s' }}
+              className="flex items-center justify-center bg-white cursor-pointer hover:bg-[#F5F5F3] active:scale-95"
+              style={{ width: 38, height: 38, borderRadius: 12, border: '1.5px solid rgba(26,26,24,0.1)', transition: 'all .2s', color: 'rgba(26,26,24,0.4)' }}
               type="button"
             >
               {uploading ? (
@@ -240,11 +275,17 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             </button>
             <button
               onClick={send}
-              className={`w-8 h-8 rounded-full border-none cursor-pointer flex items-center justify-center active:scale-90 ${hasContent && !disabled ? 'bg-[#1A1A18] text-white hover:bg-[#333] opacity-100 scale-100' : 'bg-gray-100 text-gray-400 opacity-100 scale-100 pointer-events-none'}`}
-              style={{ transition: 'all .2s' }}
+              className="flex items-center justify-center border-none cursor-pointer active:scale-95"
+              style={{
+                width: 42, height: 42, borderRadius: 14,
+                background: hasContent && !disabled ? '#D4714E' : '#F5F5F3',
+                color: hasContent && !disabled ? '#fff' : 'rgba(26,26,24,0.25)',
+                transition: 'all .2s',
+                pointerEvents: hasContent && !disabled ? 'auto' : 'none',
+              }}
               type="button"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
             </button>
           </div>
         </div>
