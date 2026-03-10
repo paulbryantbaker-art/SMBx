@@ -40,14 +40,16 @@ interface ChatDockProps {
   variant?: 'hero' | 'dock';
   /** Override initial textarea rows (default: hero=3, dock=1) */
   rows?: number;
-  /** Rotating placeholder texts — cycles every 5s with slide animation (home page) */
+  /** Rotating placeholder texts — cycles with slide animation (home page) */
   rotatingPlaceholders?: string[];
+  /** Static prefix shown before the rotating part (e.g. "Hi, I'm Yulia, tell me about ") */
+  rotatingPlaceholderPrefix?: string;
 }
 
 /* ═══ COMPONENT ═══ */
 
 const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
-  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock', rows, rotatingPlaceholders },
+  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock', rows, rotatingPlaceholders, rotatingPlaceholderPrefix },
   ref,
 ) {
   const isHero = variant === 'hero';
@@ -76,7 +78,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
         setRpIndex(prev => (prev + 1) % rotatingPlaceholders.length);
         setRpAnim('enter');
       }, 350);
-    }, 3000);
+    }, 4000);
     return () => clearInterval(interval);
   }, [rotatingPlaceholders]);
 
@@ -234,10 +236,13 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
                 className="absolute pointer-events-none select-none"
                 style={{ top: '14px', left: '18px', right: '18px', fontSize: '17px', color: 'rgba(26,26,24,0.55)', fontFamily: 'inherit', lineHeight: 1.5, overflow: 'hidden' }}
               >
+                {rotatingPlaceholderPrefix && (
+                  <span>{rotatingPlaceholderPrefix}</span>
+                )}
                 <span
                   key={rpIndex}
                   className={rpAnim === 'enter' ? 'placeholder-enter' : 'placeholder-exit'}
-                  style={{ display: 'block' }}
+                  style={{ display: rotatingPlaceholderPrefix ? 'inline' : 'block' }}
                 >
                   {rotatingPlaceholders[rpIndex]}
                 </span>

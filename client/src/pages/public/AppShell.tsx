@@ -23,19 +23,20 @@ import AdvisorsBelow from '../../components/content/AdvisorsBelow';
 import PricingBelow from '../../components/content/PricingBelow';
 
 /* ═══ ROTATING PLACEHOLDER TEXTS (home page) ═══ */
+const ROTATING_PREFIX = "Hi, I\u2019m Yulia, your M&A agent. Tell me about ";
 const ROTATING_PLACEHOLDERS = [
-  "Hi, I\u2019m Yulia, your M&A agent. Tell me about your deal...",
-  'I want to sell my landscaping company \u2014 about $400K revenue...',
-  'Is this $2M dental practice listing worth pursuing?',
-  'I own a $6M HVAC company in Dallas. What\u2019s it worth?',
-  'Can a $1.2M cleaning business get SBA financing?',
-  'Help me find add-backs on my P&L \u2014 I know I\u2019m missing some...',
-  'I\u2019m a broker with a $15M manufacturing listing...',
-  'We\u2019re acquiring a $35M logistics platform \u2014 model the EBITDA...',
-  'What should I offer for this $800K auto repair shop?',
-  'Walk me through selling my $50M+ SaaS company...',
-  'I just closed on a pest control business \u2014 what\u2019s my 90-day plan?',
-  'My partner wants out of our $3M restaurant group...',
+  'your deal...',
+  'your $400K landscaping company...',
+  'that $2M dental practice listing...',
+  'your $6M HVAC company in Dallas...',
+  'whether a $1.2M deal qualifies for SBA...',
+  'the add-backs hiding in your P&L...',
+  'your $15M manufacturing listing...',
+  'the $35M logistics platform you\u2019re acquiring...',
+  'that $800K auto repair shop you found...',
+  'selling your $50M+ SaaS company...',
+  'your 90-day plan after closing...',
+  'your partner wanting out of the business...',
 ];
 
 /* ═══ TYPES ═══ */
@@ -865,6 +866,7 @@ export default function AppShell() {
                       placeholder={page.placeholder}
                       disabled={sending}
                       rotatingPlaceholders={ROTATING_PLACEHOLDERS}
+                      rotatingPlaceholderPrefix={ROTATING_PREFIX}
                     />
                   </div>
                 </div>
@@ -886,6 +888,7 @@ export default function AppShell() {
                         placeholder={page.placeholder}
                         disabled={sending}
                         rotatingPlaceholders={ROTATING_PLACEHOLDERS}
+                        rotatingPlaceholderPrefix={ROTATING_PREFIX}
                       />
                     </div>
                   </div>
