@@ -116,10 +116,19 @@ chatRouter.post('/message', async (req, res) => {
     `;
 
     // Load conversation state (journey, gate, league, extracted data)
-    const [convRow] = await sql`
-      SELECT journey, current_gate, league, extracted_data, company_profile_id, thesis_id, exit_type, pmi_phase
-      FROM conversations WHERE id = ${convId}
-    `;
+    let convRow: any;
+    try {
+      [convRow] = await sql`
+        SELECT journey, current_gate, league, extracted_data, company_profile_id, thesis_id, exit_type, pmi_phase
+        FROM conversations WHERE id = ${convId}
+      `;
+    } catch (_colErr) {
+      // Fallback if newer columns don't exist yet
+      [convRow] = await sql`
+        SELECT journey, current_gate, league, extracted_data
+        FROM conversations WHERE id = ${convId}
+      `;
+    }
     const convState: any = {
       journey: convRow?.journey || null,
       current_gate: convRow?.current_gate || null,
