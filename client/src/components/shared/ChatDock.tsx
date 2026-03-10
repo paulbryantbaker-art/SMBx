@@ -183,7 +183,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
       />
 
       <div className={isHero ? '' : 'max-w-[860px] mx-auto pb-3 pt-2 lg:pb-4'}>
-        <div className="home-dock-card relative" style={isHero ? { border: 'none', boxShadow: 'none', background: 'transparent', borderRadius: 0 } : undefined}>
+        <div className="home-dock-card relative" style={isHero ? { background: '#fff', borderRadius: 22, border: '1px solid rgba(26,26,24,0.08)', boxShadow: '0 2px 8px rgba(26,26,24,0.06), 0 0 0 1px rgba(26,26,24,0.04)' } : undefined}>
           {/* Tool popup */}
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
             <div className="px-4 pt-3 pb-2">
@@ -232,7 +232,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             {showRotating && rotatingPlaceholders && (
               <div
                 className="absolute pointer-events-none select-none"
-                style={{ top: '14px', left: '18px', right: '18px', fontSize: '17px', color: 'rgba(26,26,24,0.5)', fontFamily: 'inherit', lineHeight: 1.5, overflow: 'hidden' }}
+                style={{ top: '14px', left: '18px', right: '18px', fontSize: '17px', color: 'rgba(26,26,24,0.55)', fontFamily: 'inherit', lineHeight: 1.5, overflow: 'hidden' }}
               >
                 <span
                   key={rpIndex}
@@ -253,7 +253,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               style={{ fontFamily: 'inherit', minHeight: (rows ?? (isHero ? 3 : 1)) > 1 ? '100px' : '44px', maxHeight: '200px', padding: '14px 18px 8px 18px', color: 'rgba(26,26,24,1)' }}
               rows={rows ?? (isHero ? 3 : 1)}
             />
-            <style>{`.home-dock-card textarea::placeholder { color: rgba(26,26,24,0.4); }`}</style>
+            <style>{`.home-dock-card textarea::placeholder { color: rgba(26,26,24,0.55); }`}</style>
           </div>
 
           {/* Toolbar row */}
