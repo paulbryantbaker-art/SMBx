@@ -693,7 +693,7 @@ export default function AppShell() {
       style={{
         height: 'var(--app-height, 100vh)',
         ...(viewState === 'chat'
-          ? { position: 'fixed' as const, top: 0, left: 0, right: 0 }
+          ? { position: 'fixed' as const, top: 0, left: 0, right: 0, transform: 'translateY(var(--app-offset, 0px))' }
           : { overflow: 'hidden' }),
       }}
     >

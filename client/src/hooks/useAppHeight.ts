@@ -1,31 +1,38 @@
 import { useEffect } from 'react';
 
 /**
- * Sets --app-height CSS custom property on <html> to match the visual viewport.
- * Components use `height: var(--app-height, 100vh)` instead of h-dvh.
+ * Sets --app-height and --app-offset CSS custom properties on <html>.
+ * --app-height  = visualViewport.height (shrinks when iOS keyboard opens)
+ * --app-offset  = visualViewport.offsetTop (iOS scrolls the page when keyboard
+ *                 opens inside a fixed container — we compensate with translateY)
  *
  * Chat mode (enabled=true):  locks body scroll so iOS can't bounce behind.
  * Landing (enabled=false):   body scroll unlocked, keyboard overlays naturally.
- *
- * The #app-root component is responsible for applying position:fixed in chat
- * mode — this hook only provides the CSS var and body scroll lock.
  */
 export function useAppHeight(enabled = true) {
-  // Always keep --app-height updated (visual viewport height)
+  // Always keep --app-height and --app-offset updated
   useEffect(() => {
     const vv = window.visualViewport;
 
     function update() {
       const h = vv ? vv.height : window.innerHeight;
+      const offset = vv ? vv.offsetTop : 0;
       document.documentElement.style.setProperty('--app-height', h + 'px');
+      document.documentElement.style.setProperty('--app-offset', offset + 'px');
     }
 
-    if (vv) vv.addEventListener('resize', update);
+    if (vv) {
+      vv.addEventListener('resize', update);
+      vv.addEventListener('scroll', update);
+    }
     window.addEventListener('resize', update);
     update();
 
     return () => {
-      if (vv) vv.removeEventListener('resize', update);
+      if (vv) {
+        vv.removeEventListener('resize', update);
+        vv.removeEventListener('scroll', update);
+      }
       window.removeEventListener('resize', update);
     };
   }, []);
