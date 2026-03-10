@@ -5,10 +5,11 @@ interface SellBelowProps {
 export default function SellBelow({ onChipClick }: SellBelowProps) {
   return (
     <div>
-      {/* ═══ Section 1: THE MOMENT [Tinted] ═══ */}
+      {/* ═══ Block 1 — Memo: Starting point [Tinted] ═══ */}
       <section className="px-6" style={{ paddingTop: '140px' }}>
-        <div className="max-w-4xl mx-auto md:p-12" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
-          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-8">
+        <div className="max-w-4xl mx-auto" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>STARTING POINT</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
             It starts with one question.
           </h2>
           <div className="max-w-3xl space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
@@ -22,206 +23,297 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
         </div>
       </section>
 
-      {/* ═══ Section 2: THE MONEY YOU'RE MISSING ═══ */}
+      {/* ═══ Block 2 — Canvas: Add-back analysis ═══ */}
       <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
-          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-8">
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>ADD-BACK ANALYSIS &middot; EXAMPLE</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
             The $400,000 most owners leave on the table.
           </h2>
-          <div className="max-w-3xl space-y-6 mb-10" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
-            <p className="m-0">Your tax returns are optimized to minimize what you owe. That&apos;s smart &mdash; until you try to sell. Because the number a buyer pays is based on your earnings AFTER you add back all the personal expenses running through the business.</p>
-            <p className="m-0">Most owners miss $80K&ndash;$200K in add-backs. At a 3&times; multiple, that&apos;s $240K&ndash;$600K in enterprise value that vanishes because nobody identified it.</p>
-            <p className="m-0" style={{ color: '#1A1A18', fontWeight: 600 }}>Yulia scans your financials and flags every one:</p>
-          </div>
+          <p className="max-w-3xl mb-10" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
+            Your tax returns are optimized to minimize what you owe. That&apos;s smart &mdash; until you try to sell. Yulia scans your financials and flags every personal expense running through the business.
+          </p>
 
           <div className="max-w-2xl" style={{ background: '#F7F6F4', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '28px 32px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>EXAMPLE: A RESIDENTIAL CLEANING COMPANY &middot; PHOENIX, AZ</span>
+            <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)' }}>RESIDENTIAL CLEANING COMPANY &middot; PHOENIX, AZ</span>
             <div className="mt-4 space-y-1.5" style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', fontVariantNumeric: 'tabular-nums' }}>
               <div className="flex justify-between"><span>Reported SDE</span><span style={{ color: '#1A1A18', fontWeight: 600 }} className="shrink-0 ml-4">$320,000</span></div>
             </div>
-            <p style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(26,26,24,0.5)', margin: '16px 0 8px' }}>After Yulia&apos;s analysis:</p>
-            <div className="space-y-1.5" style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A18', fontVariantNumeric: 'tabular-nums' }}>
-              <div className="flex justify-between"><span>+ Personal vehicles</span><span style={{ color: '#D4714E' }} className="shrink-0 ml-4">$48,000</span></div>
-              <div className="flex justify-between"><span>+ Family cell phones</span><span style={{ color: '#D4714E' }} className="shrink-0 ml-4">$18,000</span></div>
-              <div className="flex justify-between"><span>+ One-time legal fee</span><span style={{ color: '#D4714E' }} className="shrink-0 ml-4">$12,000</span></div>
-              <div className="flex justify-between"><span>+ Above-market rent to own LLC</span><span style={{ color: '#D4714E' }} className="shrink-0 ml-4">$31,000</span></div>
-              <div className="flex justify-between"><span>+ Personal travel</span><span style={{ color: '#D4714E' }} className="shrink-0 ml-4">$15,000</span></div>
-              <div style={{ borderTop: '1px solid rgba(26,26,24,0.06)', marginTop: 12, paddingTop: 12 }} className="flex justify-between font-semibold">
-                <span>Adjusted SDE</span><span style={{ color: '#1A1A18' }}>$444,000</span>
+            <div className="mt-4 space-y-1.5" style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A18', fontVariantNumeric: 'tabular-nums' }}>
+              <div className="flex justify-between"><span>Personal vehicles</span><span style={{ color: '#D4714E' }} className="shrink-0 ml-4">+$48,000</span></div>
+              <div className="flex justify-between"><span>Family cell phones</span><span style={{ color: '#D4714E' }} className="shrink-0 ml-4">+$18,000</span></div>
+              <div className="flex justify-between"><span>One-time legal fee</span><span style={{ color: '#D4714E' }} className="shrink-0 ml-4">+$12,000</span></div>
+              <div className="flex justify-between"><span>Above-market rent to own LLC</span><span style={{ color: '#D4714E' }} className="shrink-0 ml-4">+$31,000</span></div>
+              <div className="flex justify-between"><span>Personal travel</span><span style={{ color: '#D4714E' }} className="shrink-0 ml-4">+$15,000</span></div>
+            </div>
+
+            <div style={{ borderTop: '2px solid rgba(26,26,24,0.12)', marginTop: 16, paddingTop: 16 }}>
+              <div className="flex justify-between" style={{ fontSize: '16px', fontWeight: 600, color: '#D4714E' }}>
+                <span>After Yulia&apos;s analysis</span><span className="shrink-0 ml-4">$444,000</span>
+              </div>
+              <div className="flex justify-between mt-2" style={{ fontSize: '16px', fontWeight: 600, color: '#D4714E' }}>
+                <span>At 3.2&times; multiple</span><span className="shrink-0 ml-4">$1.02M &rarr; $1.42M</span>
               </div>
             </div>
-            <div className="mt-4 p-3" style={{ background: 'rgba(74,222,128,0.06)', borderLeft: '3px solid #22C55E', borderRadius: '0 10px 10px 0' }}>
-              <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A18', margin: 0 }}>
-                At 3.2&times;: $1.02M &rarr; $1.42M. <strong>$400,000 this owner almost left on the table.</strong>
-              </p>
-            </div>
+
+            <p style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A18', margin: '20px 0 0', textAlign: 'center' }}>
+              $400,000 this owner almost left on the table.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* ═══ Section 3: YOUR OPTIONS ═══ */}
+      {/* ═══ Block 3 — Canvas: Exit options ═══ */}
       <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
-          <div className="md:text-center mb-10 md:mb-16">
-            <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px]">
-              &ldquo;Selling&rdquo; doesn&apos;t mean one thing.
-            </h2>
-          </div>
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>EXIT OPTIONS</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-10">
+            &ldquo;Selling&rdquo; doesn&apos;t mean one thing.
+          </h2>
 
-          {/* Mobile: stacked list */}
-          <div className="md:hidden space-y-0">
+          <div className="space-y-4">
             {[
-              { title: 'SELL EVERYTHING', body: 'Full exit. Hand over the keys. Yulia handles valuation, CIM, buyer targeting, deal structure, negotiation, close.' },
-              { title: 'BUY OUT A PARTNER', body: 'One of you wants out. You need a number both sides trust, financing that works, and a buyout agreement that protects everyone.' },
-              { title: 'RAISE CAPITAL', body: 'Grow without selling. Debt, equity, SBA expansion \u2014 Yulia models every scenario and prepares investor-ready materials.' },
-              { title: 'EMPLOYEE BUYOUT (ESOP)', body: 'Transition to employee ownership \u2014 with tax advantages a traditional sale doesn\u2019t offer.' },
-              { title: 'PARTIAL SALE', body: 'Sell majority to PE. Bring on a strategic partner. Recapitalize to take chips off the table while keeping upside.' },
-            ].map((c, i) => (
-              <div key={c.title} style={{ padding: '20px 0', borderTop: i > 0 ? '1px solid rgba(26,26,24,0.06)' : undefined }}>
-                <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>{c.title}</h3>
-                <p style={{ fontSize: '14px', color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.55 }}>{c.body}</p>
+              { icon: '\uD83D\uDD11', title: 'Sell Everything', body: 'Full exit. Hand over the keys. Yulia handles valuation, CIM, buyer targeting, deal structure, negotiation, close.' },
+              { icon: '\uD83E\uDD1D', title: 'Buy Out a Partner', body: 'One of you wants out. A number both sides trust, financing that works, a buyout agreement that protects everyone.' },
+              { icon: '\uD83D\uDCB0', title: 'Raise Capital', body: 'Grow without selling. Debt, equity, SBA expansion \u2014 Yulia models every scenario and prepares investor-ready materials.' },
+              { icon: '\uD83D\uDC65', title: 'Employee Buyout (ESOP)', body: 'Transition to employee ownership \u2014 with tax advantages a traditional sale doesn\u2019t offer.' },
+              { icon: '\uD83D\uDCCA', title: 'Partial Sale', body: 'Sell majority to PE. Bring on a strategic partner. Take chips off the table while keeping upside.' },
+            ].map(c => (
+              <div key={c.title} style={{ background: '#F7F6F4', borderRadius: 20, border: '1px solid rgba(26,26,24,0.05)', padding: '24px 28px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>
+                  <span style={{ marginRight: 8 }}>{c.icon}</span>{c.title}
+                </h3>
+                <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{c.body}</p>
               </div>
             ))}
           </div>
 
-          {/* Desktop: card grid */}
-          <div className="hidden md:block">
-            <div className="grid grid-cols-3 gap-5">
-              {[
-                { title: 'SELL EVERYTHING', body: 'Full exit. Hand over the keys. Yulia handles valuation, CIM, buyer targeting, deal structure, negotiation, close.' },
-                { title: 'BUY OUT A PARTNER', body: 'One of you wants out. You need a number both sides trust, financing that works, and a buyout agreement that protects everyone.' },
-                { title: 'RAISE CAPITAL', body: 'Grow without selling. Debt, equity, SBA expansion \u2014 Yulia models every scenario and prepares investor-ready materials.' },
-              ].map(c => (
-                <div key={c.title} style={{ background: '#F7F6F4', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
-                  <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: 12 }}>{c.title}</h3>
-                  <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{c.body}</p>
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-2 gap-5 mt-5">
-              {[
-                { title: 'EMPLOYEE BUYOUT (ESOP)', body: 'Transition to employee ownership \u2014 with tax advantages a traditional sale doesn\u2019t offer.' },
-                { title: 'PARTIAL SALE', body: 'Sell majority to PE. Bring on a strategic partner. Recapitalize to take chips off the table while keeping upside.' },
-              ].map(c => (
-                <div key={c.title} style={{ background: '#F7F6F4', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
-                  <h3 style={{ fontSize: '14px', fontWeight: 600, marginBottom: 12 }}>{c.title}</h3>
-                  <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{c.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', marginTop: 32, lineHeight: 1.65 }} className="md:text-center">
+          <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', marginTop: 24, lineHeight: 1.65 }}>
             Whatever your exit looks like, the process starts the same way: understanding exactly what you have and what it&apos;s worth.
           </p>
         </div>
       </section>
 
-      {/* ═══ Section 4: THE JOURNEY [Tinted] ═══ */}
+      {/* ═══ Block 4 — Canvas: Seller journey timeline [Tinted] ═══ */}
       <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
-          <div className="md:text-center mb-10 md:mb-16">
-            <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px]">
-              A premium exit is a process. Yulia manages it.
-            </h2>
-            <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', marginTop: 16, lineHeight: 1.65 }} className="max-w-3xl md:mx-auto">
-              Every month of preparation can move your sale price 5&ndash;15%. Here&apos;s how the journey works.
-            </p>
-          </div>
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>SELLER JOURNEY &middot; GUIDED PROCESS</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-4">
+            A premium exit is a process. Yulia manages it.
+          </h2>
+          <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', marginBottom: 32, lineHeight: 1.65 }}>
+            Every month of preparation can move your sale price 5&ndash;15%.
+          </p>
 
-          <div className="space-y-10 md:space-y-14">
-            <div>
-              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>PHASE 1 &mdash; UNDERSTAND (MONTH 1&ndash;2) &middot; FREE</span>
-              <h3 style={{ fontSize: '22px', fontWeight: 600, letterSpacing: '-0.02em', marginTop: 8, marginBottom: 16 }} className="md:text-[28px]">See your business through a buyer&apos;s eyes.</h3>
-              <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: '0 0 16px', lineHeight: 1.65 }}>
-                See your business through a buyer&apos;s eyes &mdash; before a buyer does. Yulia normalizes your financials, identifies add-backs, runs a preliminary valuation, benchmarks your margins against industry medians, and flags every risk that would surface in due diligence.
-              </p>
-              <p style={{ fontSize: '16px', fontWeight: 500, color: '#1A1A18', margin: '0 0 12px', lineHeight: 1.65 }}>
-                You receive: Bizestimate + Value Readiness Report + Preliminary SDE/EBITDA &mdash; all free.
-              </p>
-              <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.65 }}>
-                The Value Readiness Report alone &mdash; a 7-factor score with specific improvement actions and the dollar impact of each one &mdash; is worth $2&ndash;5K of consulting work.
-              </p>
-            </div>
-
-            <div>
-              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>PHASE 2 &mdash; OPTIMIZE (MONTH 3&ndash;12)</span>
-              <h3 style={{ fontSize: '22px', fontWeight: 600, letterSpacing: '-0.02em', marginTop: 8, marginBottom: 16 }} className="md:text-[28px]">Make it worth more before you sell it.</h3>
-              <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: '0 0 16px', lineHeight: 1.65 }}>
-                A $50K improvement in EBITDA at 5&times; adds $250,000 to your sale price. Yulia builds a prioritized plan:
-              </p>
-              <div className="space-y-2 ml-1">
-                {[
-                  'Revenue concentration above 20%? Diversify.',
-                  'Business can\u2019t run without you? Build management depth.',
-                  'Margins below industry median? She shows you exactly where.',
-                  'Books are messy? Clean up now, not during due diligence when it costs you leverage.',
-                ].map(item => (
-                  <div key={item} className="flex items-start gap-2.5">
-                    <span style={{ color: '#D4714E', fontWeight: 600 }} className="shrink-0 mt-0.5">&bull;</span>
-                    <span style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.55 }}>{item}</span>
-                  </div>
-                ))}
+          <div className="space-y-10">
+            {[
+              { phase: 'Phase 1 \u2014 Understand', timing: 'Month 1\u20132', badge: 'FREE', body: 'See your business through a buyer\u2019s eyes. Yulia normalizes your financials, identifies add-backs, runs a preliminary valuation, benchmarks margins, and flags risks that would surface in due diligence. You receive: Bizestimate + Value Readiness Report + Preliminary SDE/EBITDA \u2014 all free.' },
+              { phase: 'Phase 2 \u2014 Optimize', timing: 'Month 3\u201312', body: 'A $50K improvement in EBITDA at 5\u00D7 adds $250,000 to your sale price. Yulia builds a prioritized plan: revenue concentration, management depth, margins, and clean books. Every recommendation is quantified.' },
+              { phase: 'Phase 3 \u2014 Prepare', timing: 'Month 6\u201318', body: 'CIM. Financial exhibits. Teaser profile. Data room. Buyer targeting. Everything a qualified buyer needs \u2014 generated by Yulia from the intelligence she\u2019s already built.' },
+              { phase: 'Phase 4 \u2014 Negotiate & Close', timing: 'Month 12\u201324', body: 'LOI evaluation. Deal structure modeling. Earnout analysis. Working capital adjustments. Competitive process management. Real negotiation tactics \u2014 anchoring, concessions, competitive tension, earnout protection, structure as leverage.' },
+            ].map((p, i) => (
+              <div key={p.phase} className="flex gap-4">
+                <div className="flex flex-col items-center shrink-0">
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#D4714E', marginTop: 6 }} />
+                  {i < 3 && <div style={{ width: 2, background: 'rgba(212,113,78,0.2)', flex: 1, marginTop: 4 }} />}
+                </div>
+                <div className="pb-2">
+                  <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>
+                    {p.phase} &middot; {p.timing}
+                    {p.badge && <span style={{ marginLeft: 8, background: '#22C55E', color: '#fff', padding: '2px 8px', borderRadius: 100, fontSize: '10px', fontWeight: 700, letterSpacing: '0.05em' }}>{p.badge}</span>}
+                  </span>
+                  <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: '10px 0 0', lineHeight: 1.65 }}>{p.body}</p>
+                </div>
               </div>
-              <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: '16px 0 0', lineHeight: 1.65, fontStyle: 'italic' }}>
-                Every recommendation is quantified: &ldquo;This improvement is worth approximately $X at your current multiple.&rdquo;
-              </p>
-            </div>
-
-            <div>
-              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>PHASE 3 &mdash; PREPARE (MONTH 6&ndash;18)</span>
-              <h3 style={{ fontSize: '22px', fontWeight: 600, letterSpacing: '-0.02em', marginTop: 8, marginBottom: 16 }} className="md:text-[28px]">Package the deal.</h3>
-              <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: '0 0 16px', lineHeight: 1.65 }}>
-                CIM. Financial exhibits. Teaser profile. Data room. Buyer targeting. Everything a qualified buyer needs to make a decision &mdash; generated by Yulia from the intelligence she&apos;s already built over months of working with you.
-              </p>
-              <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.65 }}>
-                Buyer targeting maps the landscape: strategic acquirers, PE platforms active in your sector, SBA-qualified individuals, search funds with matching mandates. Not generic &mdash; localized to your market, industry, and deal.
-              </p>
-            </div>
-
-            <div>
-              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>PHASE 4 &mdash; NEGOTIATE &amp; CLOSE (MONTH 12&ndash;24)</span>
-              <h3 style={{ fontSize: '22px', fontWeight: 600, letterSpacing: '-0.02em', marginTop: 8, marginBottom: 16 }} className="md:text-[28px]">Get the deal done.</h3>
-              <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: '0 0 16px', lineHeight: 1.65 }}>
-                LOI evaluation. Deal structure modeling. Earnout analysis. Working capital adjustments. Competitive process management. And real negotiation tactics:
-              </p>
-              <div className="space-y-2 ml-1">
-                {[
-                  'Anchoring \u2014 how to frame your price so it sticks',
-                  'Concessions \u2014 trade what costs you least for what matters most to the buyer',
-                  'Competitive tension \u2014 create it, even with few buyers',
-                  'Earnout protection \u2014 flag terms designed to fail',
-                  'Structure as leverage \u2014 sometimes the structure IS the negotiation',
-                ].map(item => (
-                  <div key={item} className="flex items-start gap-2.5">
-                    <span style={{ color: '#D4714E', fontWeight: 600 }} className="shrink-0 mt-0.5">&bull;</span>
-                    <span style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.6 }} className="md:text-[17px]">{item}</span>
-                  </div>
-                ))}
-              </div>
-              <p style={{ fontSize: '16px', fontWeight: 500, color: '#1A1A18', margin: '16px 0 0', lineHeight: 1.65 }}>
-                The buyer&apos;s attorney does this fifty times a year. You do it once. Yulia levels that field.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ Section 5: BROKER PARTNERSHIP [Tinted] ═══ */}
+      {/* ═══ Block 5 — Canvas: Tax structure comparison ═══ */}
+      <section className="px-6" style={{ paddingTop: '140px' }}>
+        <div className="max-w-4xl mx-auto">
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>TAX STRUCTURE ANALYSIS</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
+            Asset sale vs. stock sale: what you actually keep.
+          </h2>
+          <p className="max-w-3xl mb-10" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
+            The deal structure you choose can swing your net proceeds by $100K+. Yulia models both scenarios side-by-side so you negotiate from an informed position.
+          </p>
+
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)', display: 'block', marginBottom: 16 }}>SAME $2M DEAL &mdash; TWO STRUCTURES, TWO OUTCOMES</span>
+
+          <div className="grid md:grid-cols-2 gap-5">
+            <div style={{ background: '#F7F6F4', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)', display: 'block', marginBottom: 16 }}>ASSET SALE</span>
+              <div className="space-y-3" style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.5, fontVariantNumeric: 'tabular-nums' }}>
+                <div className="flex justify-between"><span>Purchase price</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>$2,000,000</span></div>
+                <div className="flex justify-between"><span>Federal + NIIT tax</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>~$518K</span></div>
+                <div className="flex justify-between"><span>State tax (CA example)</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>~$266K</span></div>
+                <div style={{ borderTop: '1px solid rgba(26,26,24,0.08)', paddingTop: 12, marginTop: 8 }} className="flex justify-between">
+                  <span style={{ fontWeight: 600, color: '#1A1A18' }}>Net proceeds</span>
+                  <span style={{ fontWeight: 700, color: '#1A1A18', fontSize: '17px' }}>~$1,166,000</span>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ background: '#D4714E', borderRadius: 24, padding: '32px', color: '#fff' }}>
+              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: 16 }}>STOCK SALE</span>
+              <div className="space-y-3" style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, fontVariantNumeric: 'tabular-nums' }}>
+                <div className="flex justify-between"><span>Purchase price</span><span style={{ color: '#fff', fontWeight: 600 }}>$2,000,000</span></div>
+                <div className="flex justify-between"><span>Federal + NIIT tax</span><span style={{ color: '#fff', fontWeight: 600 }}>~$452K</span></div>
+                <div className="flex justify-between"><span>State tax (CA example)</span><span style={{ color: '#fff', fontWeight: 600 }}>~$253K</span></div>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: 12, marginTop: 8 }} className="flex justify-between">
+                  <span style={{ fontWeight: 600, color: '#fff' }}>Net proceeds</span>
+                  <span style={{ fontWeight: 700, color: '#fff', fontSize: '17px' }}>~$1,245,000</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', marginTop: 24, lineHeight: 1.65 }}>
+            The stock sale puts $79,000 more in this seller&apos;s pocket. But the buyer may push for an asset sale &mdash; they get a stepped-up basis worth ~$304K in tax shields. Yulia models the gap so both sides negotiate from real numbers, not assumptions.
+          </p>
+          <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.4)', marginTop: 8, fontStyle: 'italic' }}>
+            Your CPA should confirm these numbers for your specific situation.
+          </p>
+        </div>
+      </section>
+
+      {/* ═══ Block 6 — Canvas: Entity type flags [Tinted] ═══ */}
       <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
-          <h3 style={{ fontSize: '26px', fontWeight: 600, letterSpacing: '-0.03em', marginBottom: 24 }} className="md:text-[36px]">
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>ENTITY TYPE &middot; WHAT YULIA CHECKS</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-10">
+            Your entity type changes everything about the tax outcome.
+          </h2>
+
+          <div className="space-y-4">
+            {[
+              { icon: '\u26A0\uFE0F', title: 'C-Corporation \u2014 double taxation trap', body: 'Asset sales trigger TWO levels of tax: corporate level (21%) THEN shareholder level (up to 23.8%). Can cost $200K+ more than an S-Corp on the same deal. Yulia flags this immediately and explores alternatives: stock sale, \u00A7338(h)(10) election, or QSBS exclusion.' },
+              { icon: '\u2705', title: 'S-Corporation', body: 'Pass-through \u2014 no entity-level tax. But if you converted from a C-Corp in the last 5 years, built-in gains tax may apply. Yulia checks.' },
+              { icon: '\uD83D\uDCCB', title: 'LLC / Partnership', body: 'Watch for \u00A7751 \u201Chot assets\u201D \u2014 inventory and receivables get taxed as ordinary income even in what looks like a capital gains transaction. A \u00A7754 election can give buyers a basis step-up inside a partnership interest sale.' },
+              { icon: '\uD83D\uDCCE', title: 'Sole Proprietorship', body: 'Asset sale only. Straightforward, but allocation matters \u2014 non-compete income may trigger self-employment tax.' },
+            ].map(c => (
+              <div key={c.title} style={{ background: '#FFFFFF', borderRadius: 20, border: '1px solid rgba(26,26,24,0.05)', padding: '24px 28px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>
+                  <span style={{ marginRight: 8 }}>{c.icon}</span>{c.title}
+                </h3>
+                <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{c.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ Block 7 — Canvas: Pre-sale tax planning ═══ */}
+      <section className="px-6" style={{ paddingTop: '140px' }}>
+        <div className="max-w-4xl mx-auto">
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>PRE-SALE TAX PLANNING</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
+            What you do before the sale matters as much as the sale itself.
+          </h2>
+          <p className="max-w-3xl mb-10" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
+            If your timeline allows, these strategies can significantly improve your after-tax outcome:
+          </p>
+
+          <div className="space-y-0">
+            {[
+              'Entity conversion (C\u2192S-Corp) \u2014 eliminates double taxation, but requires a 5-year waiting period for built-in gains tax to expire',
+              'Installment sale structuring \u2014 seller financing spreads gain recognition over the payment period, potentially keeping you in lower brackets each year',
+              'QSBS screening (C-Corps only) \u2014 IRC \u00A71202 can exclude up to $10M in federal capital gains. Requires original issuance stock, 5+ year holding period, and <$50M gross assets',
+              'Purchase price allocation strategy \u2014 maximize goodwill (capital gains) and minimize ordinary income items before negotiation',
+              'Opportunity Zone reinvestment \u2014 within 180 days of close, reinvesting in a qualified OZ fund can defer and reduce capital gains',
+              'Harvest losses in the year of sale \u2014 sell losing investments to offset deal gains dollar-for-dollar',
+            ].map((item, i) => (
+              <div key={i} style={{ padding: '16px 0', borderTop: i > 0 ? '1px solid rgba(26,26,24,0.06)' : undefined }}>
+                <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.65 }}>{item}</p>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.4)', marginTop: 16, fontStyle: 'italic' }}>
+            Yulia models these scenarios with real numbers for your deal. Your CPA confirms the specifics.
+          </p>
+        </div>
+      </section>
+
+      {/* ═══ Block 8 — Canvas: Negotiation intelligence ═══ */}
+      <section className="px-6" style={{ paddingTop: '140px' }}>
+        <div className="max-w-4xl mx-auto">
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>NEGOTIATION INTELLIGENCE</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-4">
+            You do this once. The buyer&apos;s attorney does it fifty times.
+          </h2>
+          <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', marginBottom: 32, lineHeight: 1.65 }}>Yulia levels the field:</p>
+
+          <div className="space-y-0">
+            {[
+              'Anchoring \u2014 how to frame your price so it sticks',
+              'Concessions \u2014 trade what costs you least for what matters most to the buyer',
+              'Competitive tension \u2014 create it, even with few buyers',
+              'Earnout protection \u2014 flag terms designed to fail (and the tax trap: earnout payments tied to your continued employment get recharacterized as ordinary income)',
+              'Structure as leverage \u2014 sometimes the structure IS the negotiation',
+              'Purchase price allocation \u2014 the negotiation most sellers don\u2019t know about, worth tens of thousands in tax outcomes',
+            ].map((item, i) => (
+              <div key={i} style={{ padding: '16px 0', borderTop: i > 0 ? '1px solid rgba(26,26,24,0.06)' : undefined }}>
+                <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.65 }}>{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ Block 9 — Canvas: Legal preparation [Tinted] ═══ */}
+      <section className="px-6" style={{ paddingTop: '140px' }}>
+        <div className="max-w-4xl mx-auto" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>LEGAL PREPARATION</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
+            What&apos;s coming in the APA &mdash; and how to be ready for it.
+          </h2>
+          <p className="max-w-3xl mb-10" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
+            The Asset Purchase Agreement is 15&ndash;60 pages of terms that determine your risk after closing. Yulia explains every section in plain English before you see the actual document.
+          </p>
+
+          <div className="space-y-4">
+            {[
+              { icon: '\uD83D\uDCC4', title: 'Reps & warranties', body: 'Your factual statements about the business. If one turns out false, the buyer can claw back money through indemnification. Yulia identifies which reps matter most for your industry and flags the language traps \u2014 like the difference between \u201Cto Seller\u2019s knowledge\u201D and \u201Cto Seller\u2019s knowledge after reasonable inquiry.\u201D' },
+              { icon: '\uD83D\uDD12', title: 'Indemnification & escrow', body: 'Typically 5\u201315% of the purchase price is held in escrow for 12\u201318 months after closing to cover claims. That\u2019s cash you don\u2019t receive at close. Yulia models the escrow impact on your actual take-home and recommends negotiation targets for basket, cap, and escrow duration.' },
+              { icon: '\uD83D\uDCCB', title: 'Non-compete terms', body: 'Standard 2\u20135 years, but enforceability varies dramatically by state. California generally doesn\u2019t enforce non-competes \u2014 except for the sale of a business. Texas and Florida enforce broadly. Yulia checks your state and flags what\u2019s reasonable.' },
+              { icon: '\uD83C\uDFE2', title: 'Lease assignment', body: 'If the business depends on a location, the landlord must approve the transfer. They\u2019ll likely want higher rent, a personal guarantee from the buyer, or both. Yulia flags this early \u2014 it\u2019s a hidden deal-killer if handled too late.' },
+              { icon: '\uD83C\uDFE5', title: 'Regulatory & license transfers', body: 'Healthcare, childcare, construction, pest control, food service \u2014 many industries require new license applications from the buyer. Some take 3\u20136 months. Yulia checks your industry and builds the timeline.' },
+            ].map(c => (
+              <div key={c.title} style={{ background: '#FFFFFF', borderRadius: 20, border: '1px solid rgba(26,26,24,0.05)', padding: '24px 28px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>
+                  <span style={{ marginRight: 8 }}>{c.icon}</span>{c.title}
+                </h3>
+                <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{c.body}</p>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.4)', marginTop: 16, fontStyle: 'italic' }}>
+            Your M&amp;A attorney will draft the actual documents. Yulia prepares you for what to expect and what to negotiate.
+          </p>
+        </div>
+      </section>
+
+      {/* ═══ Block 10 — Memo: For advisors ═══ */}
+      <section className="px-6" style={{ paddingTop: '140px' }}>
+        <div className="max-w-4xl mx-auto">
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>FOR ADVISORS</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
             Working with a broker? Even better.
-          </h3>
-          <div className="space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.6 }}>
-            <p className="m-0">Bring your smbX.ai analysis to your first meeting. They get: normalized financials, defensible valuation, market intelligence, draft CIM &mdash; before the engagement letter.</p>
+          </h2>
+          <div className="max-w-3xl space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
+            <p className="m-0">Bring your smbX.ai analysis to your first meeting. They get: normalized financials, defensible valuation, market intelligence, draft CIM, tax structure comparison, and a term sheet framework &mdash; before the engagement letter.</p>
             <p className="m-0">Your broker focuses on relationships and negotiations. Yulia handles the data. Together, it&apos;s the best of both worlds &mdash; the human judgment of a seasoned advisor backed by institutional-grade intelligence.</p>
             <p className="m-0" style={{ color: '#1A1A18', fontWeight: 600 }}>The professionals you hire will thank you for it.</p>
           </div>
         </div>
       </section>
 
-      {/* ═══ Section 6: THE PAYOFF ═══ */}
+      {/* ═══ Block 11 — Memo: The payoff ═══ */}
       <section className="px-6" style={{ paddingTop: '140px', paddingBottom: '80px' }}>
         <div className="max-w-4xl mx-auto">
           <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-8">
@@ -229,11 +321,13 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
           </h2>
           <div className="max-w-3xl space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
             <p className="m-0">Not &ldquo;I hope I got a fair deal.&rdquo; Not &ldquo;I wonder if I left money on the table.&rdquo; Not &ldquo;I wish I&apos;d started this sooner.&rdquo;</p>
-            <p className="m-0">You know your number was real. You know your add-backs were captured. You know your CIM was institutional quality. You know the negotiation was prepared, not improvised.</p>
+            <p className="m-0">You know your number was real. You know your add-backs were captured. You know your CIM was institutional quality. You know the tax structure was modeled. You know the negotiation was prepared, not improvised.</p>
             <p className="m-0" style={{ color: '#1A1A18', fontWeight: 600 }}>That&apos;s what Yulia delivers: the confidence that comes from knowing &mdash; at every stage &mdash; that you made the right moves.</p>
           </div>
+
+          {/* Block 12 — Next Step */}
           <div className="mt-10">
-            <p style={{ fontSize: '16px', color: 'rgba(26,26,24,0.5)', marginBottom: 16 }}>Tell Yulia about your business and get a free valuation range in 90 seconds.</p>
+            <p style={{ fontSize: '16px', color: 'rgba(26,26,24,0.5)', marginBottom: 16 }}>Tell Yulia about your business &rarr; free valuation range in 90 seconds</p>
             <button
               onClick={() => onChipClick("I want to sell my business")}
               style={{ background: '#1A1A18', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
