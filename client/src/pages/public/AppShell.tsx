@@ -781,17 +781,15 @@ export default function AppShell() {
                     </h1>
                   </div>
                   <div className="shrink-0 px-4" style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}>
-                    <div className="dock-depth-zone mx-auto">
-                      <ChatDock
-                        ref={dockRef}
-                        onSend={handleSend}
-                        variant="hero"
-                        rows={1}
-                        placeholder={page.placeholder}
-                        disabled={sending}
-                        rotatingPlaceholders={ROTATING_PLACEHOLDERS}
-                      />
-                    </div>
+                    <ChatDock
+                      ref={dockRef}
+                      onSend={handleSend}
+                      variant="hero"
+                      rows={1}
+                      placeholder={page.placeholder}
+                      disabled={sending}
+                      rotatingPlaceholders={ROTATING_PLACEHOLDERS}
+                    />
                   </div>
                 </div>
 
@@ -803,7 +801,7 @@ export default function AppShell() {
                     </h1>
                   </div>
                   <div className="shrink-0 px-8" style={{ paddingBottom: 32 }}>
-                    <div className="dock-depth-zone max-w-4xl mx-auto">
+                    <div className="max-w-4xl mx-auto">
                       <ChatDock
                         ref={dockRef}
                         onSend={handleSend}
@@ -1003,16 +1001,14 @@ export default function AppShell() {
         {showDock && viewState === 'chat' && (
           <div className="shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
             <div className="max-w-[860px] mx-auto">
-              <div className="dock-depth-zone">
-                <ChatDock
-                  ref={dockRef}
-                  onSend={handleSend}
-                  variant="hero"
-                  rows={1}
-                  placeholder="Reply to Yulia..."
-                  disabled={sending}
-                />
-              </div>
+              <ChatDock
+                ref={dockRef}
+                onSend={handleSend}
+                variant="hero"
+                rows={1}
+                placeholder="Reply to Yulia..."
+                disabled={sending}
+              />
             </div>
           </div>
         )}
