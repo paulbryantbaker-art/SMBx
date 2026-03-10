@@ -43,7 +43,7 @@ const BizestimatePage = lazy(() => import('./pages/public/BizestimatePage'));
 
 /** Check if a path should be handled by the unified AppShell */
 function isShellPath(path: string): boolean {
-  const shellExact = ['/', '/sell', '/buy', '/advisors', '/pricing', '/pipeline', '/dataroom', '/settings', '/chat'];
+  const shellExact = ['/', '/sell', '/buy', '/how-it-works', '/advisors', '/pricing', '/pipeline', '/dataroom', '/settings', '/chat'];
   if (shellExact.includes(path)) return true;
   if (path.startsWith('/chat/')) return true;
   return false;

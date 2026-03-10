@@ -18,6 +18,7 @@ import SellerDashboard from '../../components/chat/SellerDashboard';
 import BuyerPipeline from '../../components/chat/BuyerPipeline';
 import SellBelow from '../../components/content/SellBelow';
 import BuyBelow from '../../components/content/BuyBelow';
+import HowItWorksBelow from '../../components/content/HowItWorksBelow';
 import AdvisorsBelow from '../../components/content/AdvisorsBelow';
 import PricingBelow from '../../components/content/PricingBelow';
 
@@ -35,7 +36,7 @@ const ROTATING_PLACEHOLDERS = [
 
 /* ═══ TYPES ═══ */
 
-export type TabId = 'home' | 'sell' | 'buy' | 'advisors' | 'pricing';
+export type TabId = 'home' | 'sell' | 'buy' | 'how-it-works' | 'advisors' | 'pricing';
 export type ViewState = 'landing' | 'chat' | 'pipeline' | 'dataroom' | 'settings' | 'seller-dashboard' | 'buyer-pipeline';
 
 /* ═══ PAGE COPY ═══ */
@@ -52,8 +53,8 @@ interface PageCopy {
 const PAGE_COPY: Record<TabId, PageCopy> = {
   home: {
     overline: '',
-    headline: 'Hello, I can help you buy or sell any size business.',
-    terraWord: 'any size business.',
+    headline: 'What deal are you working on?',
+    terraWord: 'deal',
     tagline: '',
     chips: [],
     placeholder: 'Tell Yulia about your deal...',
@@ -62,7 +63,7 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
     overline: 'Strengthen & Sell',
     headline: 'Your exit. Your way. Your timeline.',
     terraWord: 'timeline.',
-    tagline: 'Selling a business takes 6 to 24 months. Yulia is with you for every one of them \u2014 from your first valuation to the day the wire hits your account.',
+    tagline: 'Selling a business is the biggest financial event of most owners\u2019 lives. It takes 6 to 24 months. Every month of preparation can move your sale price 5\u201315%. Yulia is with you for every one of them.',
     chips: [
       "What's my business worth right now?",
       "What add-backs am I missing on my tax returns?",
@@ -75,7 +76,7 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
     overline: 'Search & Acquire',
     headline: 'Find it. Evaluate it. Close it. Grow it.',
     terraWord: 'Grow it.',
-    tagline: 'Bring any deal from anywhere \u2014 a BizBuySell listing, a broker\u2019s teaser, something you heard about. Yulia runs institutional analysis on it and tells you: pursue or pass.',
+    tagline: 'Bring any deal from anywhere \u2014 a BizBuySell listing, a broker\u2019s teaser, something you heard about at a conference. Yulia runs institutional analysis on it and tells you the one thing you need to know: pursue or pass.',
     chips: [
       "I found a listing \u2014 is the asking price justified?",
       'Can I finance a $2M dental practice with SBA?',
@@ -83,6 +84,19 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
       'I just closed \u2014 help me build a 90-day plan',
     ],
     placeholder: "Tell Yulia what you're looking for...",
+  },
+  'how-it-works': {
+    overline: 'Deal Intelligence',
+    headline: 'The data is public. The intelligence is not.',
+    terraWord: 'not.',
+    tagline: 'Every number Yulia gives you is traceable to authoritative federal data \u2014 the same sources that power the Federal Reserve and Wall Street research desks. The difference is what we do with it.',
+    chips: [
+      'How is this different from ChatGPT?',
+      'What data sources do you use?',
+      'Show me the methodology',
+      'What does a valuation look like?',
+    ],
+    placeholder: 'Ask how the intelligence works...',
   },
   advisors: {
     overline: 'For Deal Professionals',
@@ -156,6 +170,15 @@ const NAV_ITEMS: { id: TabId; label: string; icon: JSX.Element }[] = [
     ),
   },
   {
+    id: 'how-it-works' as TabId,
+    label: 'How It Works',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
+      </svg>
+    ),
+  },
+  {
     id: 'advisors',
     label: 'Advisors',
     icon: (
@@ -180,6 +203,7 @@ const NAV_ITEMS: { id: TabId; label: string; icon: JSX.Element }[] = [
 function pathToTab(path: string): TabId {
   if (path === '/sell') return 'sell';
   if (path === '/buy') return 'buy';
+  if (path === '/how-it-works') return 'how-it-works';
   if (path === '/advisors' || path === '/enterprise') return 'advisors';
   if (path === '/pricing') return 'pricing';
   return 'home';
@@ -308,7 +332,7 @@ export default function AppShell() {
   // Back to landing
   const handleBack = useCallback(() => {
     setViewState('landing');
-    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', advisors: '/advisors', pricing: '/pricing' };
+    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
     navigate(urlMap[activeTab]);
   }, [activeTab, navigate]);
 
@@ -317,7 +341,7 @@ export default function AppShell() {
     setActiveTab(tab);
     setViewState('landing');
     setIsMobileSidebarOpen(false);
-    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', advisors: '/advisors', pricing: '/pricing' };
+    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
     if (window.location.pathname !== urlMap[tab]) navigate(urlMap[tab]);
   }, [navigate]);
 
@@ -771,7 +795,7 @@ export default function AppShell() {
                   </button>
                 ) : (
                   <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(26,26,24,0.35)' }}>
-                    {activeTab === 'home' ? 'Chat' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
+                    {activeTab === 'home' ? 'Chat' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'how-it-works' ? 'How It Works' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
                   </span>
                 )}
               </>
@@ -940,6 +964,7 @@ export default function AppShell() {
               {/* ═══ BELOW-FOLD + FOOTER ═══ */}
               {activeTab === 'sell' && <SellBelow onChipClick={handleChipClick} />}
               {activeTab === 'buy' && <BuyBelow onChipClick={handleChipClick} />}
+              {activeTab === 'how-it-works' && <HowItWorksBelow onChipClick={handleChipClick} />}
               {activeTab === 'advisors' && <AdvisorsBelow onChipClick={handleChipClick} />}
               {activeTab === 'pricing' && <PricingBelow onChipClick={handleChipClick} />}
 
