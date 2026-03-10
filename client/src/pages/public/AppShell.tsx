@@ -947,8 +947,8 @@ export default function AppShell() {
                         rows={1}
                         placeholder={page.placeholder}
                         disabled={sending}
-                        rotatingPlaceholders={ROTATING_PLACEHOLDERS}
-                        rotatingPlaceholderPrefix={ROTATING_PREFIX}
+                        typewriterHints={TYPEWRITER_HINTS}
+                        typewriterPrefix={TYPEWRITER_PREFIX}
                       />
                     </div>
                   </div>
