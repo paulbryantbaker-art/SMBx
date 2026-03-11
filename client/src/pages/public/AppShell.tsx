@@ -579,7 +579,7 @@ export default function AppShell() {
   const sidebarContent = (mobile: boolean) => (
     <aside
       className="flex flex-col h-full select-none"
-      style={{ width: mobile ? 280 : 220, background: '#F5F5F3', borderRight: '1px solid rgba(26,26,24,0.06)' }}
+      style={{ width: mobile ? 280 : 220, background: '#FAFAFA', borderRight: '1px solid rgba(0,0,0,0.04)' }}
     >
       {/* Logo */}
       <div className="px-5 pt-5 pb-2">
@@ -958,7 +958,7 @@ export default function AppShell() {
               <>
               {/* ═══ SUB-PAGE MOBILE HERO ═══ */}
               <div className="md:hidden">
-                <div className="mx-4 mt-4" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '40px 24px' }}>
+                <div className="mx-4 mt-4" style={{ background: '#FAFAFA', borderRadius: 28, border: '1px solid rgba(0,0,0,0.04)', padding: '40px 24px' }}>
                   {page.overline && (
                     <div
                       className="inline-flex items-center gap-1.5 bg-white mb-5"
@@ -993,7 +993,7 @@ export default function AppShell() {
 
               {/* ═══ SUB-PAGE DESKTOP HERO ═══ */}
               <div className="hidden md:block">
-                <div className="mx-6 mt-6" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '56px 52px' }}>
+                <div className="mx-6 mt-6" style={{ background: '#FAFAFA', borderRadius: 28, border: '1px solid rgba(0,0,0,0.04)', padding: '56px 52px' }}>
                   <div className="max-w-4xl mx-auto">
                     {page.overline && (
                       <div

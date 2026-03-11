@@ -310,7 +310,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
         return (
           <>
             <DataRoom dealId={activeDealId} onViewDeliverable={(id) => { setViewingDeliverable(id); }} />
-            <div style={{ borderTop: '1px solid #DDD9D1' }}>
+            <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
               <ParticipantPanel dealId={activeDealId} />
             </div>
           </>
@@ -323,7 +323,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
   return (
     <div
       ref={containerRef}
-      className="flex h-dvh overflow-hidden bg-[#FAF9F7] font-sans"
+      className="flex h-dvh overflow-hidden bg-white font-sans"
     >
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
@@ -350,8 +350,8 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
       <div className="flex-1 flex flex-col min-w-0">
         {/* TOPBAR — single logo lives here */}
         <div
-          className="shrink-0 flex items-center justify-between bg-[#FAF9F7]"
-          style={{ padding: '10px 20px', borderBottom: '1px solid #DDD9D1' }}
+          className="shrink-0 flex items-center justify-between bg-white"
+          style={{ padding: '10px 20px', borderBottom: '1px solid rgba(0,0,0,0.06)' }}
         >
           <div className="flex items-center gap-2.5">
             {/* Mobile hamburger */}
@@ -404,14 +404,14 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
             ))}
 
             {/* Divider */}
-            <div className="hidden sm:block w-px h-5 bg-[#DDD9D1] mx-1.5" />
+            <div className="hidden sm:block w-px h-5 bg-[rgba(0,0,0,0.06)] mx-1.5" />
 
             <NotificationBell />
             <WalletBadge />
             <button
               onClick={() => toggleCanvas('settings')}
               className={`flex items-center justify-center w-8 h-8 rounded-full text-sm transition-colors cursor-pointer border-0 bg-transparent ${
-                canvas === 'settings' ? 'text-[#D4714E]' : 'text-[#6E6A63] hover:bg-[#F3F0EA] hover:text-[#1A1A18]'
+                canvas === 'settings' ? 'text-[#D4714E]' : 'text-[#6E6A63] hover:bg-[rgba(0,0,0,0.04)] hover:text-[#1A1A18]'
               }`}
               title="Settings"
             >
@@ -524,8 +524,8 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
               className="hidden md:flex flex-col"
               style={{
                 ...canvasStyle(),
-                borderLeft: canvasFS ? 'none' : '1px solid #DDD9D1',
-                background: '#FAF9F7',
+                borderLeft: canvasFS ? 'none' : '1px solid rgba(0,0,0,0.06)',
+                background: '#FFFFFF',
                 transition: canvasW ? 'none' : 'all 0.25s ease',
               }}
             >
@@ -552,7 +552,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
 
       {/* Mobile: Canvas panel as full-screen overlay */}
       {showCanvasPanel && (
-        <div className="fixed inset-0 z-50 md:hidden flex flex-col" style={{ background: '#FAF9F7' }}>
+        <div className="fixed inset-0 z-50 md:hidden flex flex-col" style={{ background: '#FFFFFF' }}>
           {showDeliverableCanvas ? (
             <Canvas
               deliverableId={viewingDeliverable!}

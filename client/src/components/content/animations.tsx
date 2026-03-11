@@ -364,7 +364,7 @@ export function InteractiveCalculator({
   };
 
   return (
-    <div className={className} style={{ background: '#F7F6F4', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '28px 32px' }}>
+    <div className={className} style={{ background: '#FAFAFA', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '28px 32px' }}>
       <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)' }}>INTERACTIVE ADD-BACK CALCULATOR</span>
       <p style={{ fontSize: '13px', color: 'rgba(26,26,24,0.4)', margin: '8px 0 16px' }}>Toggle add-backs to see how they impact valuation</p>
 
@@ -471,7 +471,7 @@ export function DSCRCalculator({ className }: { className?: string }) {
   const dscrColor = dscr >= 1.25 ? '#22C55E' : dscr >= 1.0 ? '#EAB308' : '#EF4444';
 
   return (
-    <div className={className} style={{ background: '#F7F6F4', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '28px 32px' }}>
+    <div className={className} style={{ background: '#FAFAFA', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '28px 32px' }}>
       <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)' }}>INTERACTIVE DSCR CALCULATOR</span>
       <p style={{ fontSize: '13px', color: 'rgba(26,26,24,0.4)', margin: '8px 0 20px' }}>Drag sliders to model SBA eligibility</p>
 
@@ -546,7 +546,7 @@ export function StatBar({
           animate={inView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.5, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
           style={{
-            background: '#F7F6F4',
+            background: '#FAFAFA',
             borderRadius: 16,
             border: '1px solid rgba(26,26,24,0.05)',
             padding: '16px 24px',
@@ -695,6 +695,210 @@ export function FloatingParticles({ count = 6 }: { count?: number }) {
             background: '#D4714E',
           }}
         />
+      ))}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   ZigZagSection — alternating 2-col layout
+   ═══════════════════════════════════════════════ */
+export function ZigZagSection({
+  items,
+  className,
+}: {
+  items: { icon: string; title: string; body: string }[];
+  className?: string;
+}) {
+  return (
+    <div className={className} style={{ display: 'flex', flexDirection: 'column', gap: 80 }}>
+      {items.map((item, i) => (
+        <ScrollReveal key={item.title} delay={i * 0.08}>
+          <div className={`grid md:grid-cols-2 gap-12 items-center ${i % 2 === 1 ? 'md:[direction:rtl]' : ''}`}>
+            <div className={i % 2 === 1 ? 'md:[direction:ltr]' : ''}>
+              <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#1A1A18', margin: '0 0 10px' }}>{item.title}</h3>
+              <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.65 }}>{item.body}</p>
+            </div>
+            <div className={`flex ${i % 2 === 1 ? 'md:justify-start md:[direction:ltr]' : 'md:justify-end'} justify-center`}>
+              <div style={{
+                width: 56, height: 56, borderRadius: '50%',
+                background: 'rgba(212,113,78,0.08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '24px', flexShrink: 0,
+              }}>
+                {item.icon}
+              </div>
+            </div>
+          </div>
+        </ScrollReveal>
+      ))}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   BentoGrid — asymmetric mosaic layout
+   ═══════════════════════════════════════════════ */
+export function BentoGrid({
+  items,
+  featuredIndex = 0,
+  className,
+}: {
+  items: { icon?: string; title: string; body: string }[];
+  featuredIndex?: number | number[];
+  className?: string;
+}) {
+  const featuredSet = new Set(Array.isArray(featuredIndex) ? featuredIndex : [featuredIndex]);
+  return (
+    <div className={className} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))', gap: 16 }}>
+      {items.map((item, i) => {
+        const featured = featuredSet.has(i);
+        return (
+          <ScrollReveal key={item.title} delay={i * 0.06}>
+            <div style={{
+              background: '#FAFAFA',
+              borderRadius: 20,
+              border: '1px solid rgba(0,0,0,0.04)',
+              padding: featured ? '32px 28px' : '24px 28px',
+              gridRow: featured ? 'span 2' : undefined,
+              height: '100%',
+            }}>
+              <h3 style={{ fontSize: featured ? '20px' : '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>
+                {item.icon && <span style={{ marginRight: 8 }}>{item.icon}</span>}{item.title}
+              </h3>
+              <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{item.body}</p>
+            </div>
+          </ScrollReveal>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   FeatureGrid — equal-height multi-column grid
+   ═══════════════════════════════════════════════ */
+export function FeatureGrid({
+  items,
+  columns = 2,
+  highlight,
+  className,
+}: {
+  items: { title: string; body: string; price?: string; badge?: string }[];
+  columns?: 2 | 3;
+  highlight?: boolean;
+  className?: string;
+}) {
+  return (
+    <div className={`grid gap-4 ${columns === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'} ${className || ''}`}>
+      {items.map((item, i) => (
+        <ScrollReveal key={item.title} delay={i * 0.06}>
+          <div style={{
+            background: '#FAFAFA',
+            borderRadius: 20,
+            border: '1px solid rgba(0,0,0,0.04)',
+            borderLeft: highlight ? '3px solid #D4714E' : undefined,
+            padding: '24px 28px',
+            height: '100%',
+          }}>
+            <div className="flex items-start justify-between gap-3">
+              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 6px' }}>
+                {item.title}
+                {item.badge && <PulseBadge color="#D4714E" style={{ marginLeft: 8 }}>{item.badge}</PulseBadge>}
+              </h3>
+              {item.price && <span style={{ fontSize: '20px', fontWeight: 700, color: '#D4714E', flexShrink: 0 }}>{item.price}</span>}
+            </div>
+            <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.55 }}>{item.body}</p>
+          </div>
+        </ScrollReveal>
+      ))}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   PullQuote — dramatic large text or number
+   ═══════════════════════════════════════════════ */
+export function PullQuote({
+  text,
+  number,
+  prefix,
+  suffix,
+  className,
+}: {
+  text?: string;
+  number?: number;
+  prefix?: string;
+  suffix?: string;
+  className?: string;
+}) {
+  return (
+    <div className={className} style={{ textAlign: 'center', padding: '48px 16px' }}>
+      {number !== undefined ? (
+        <AnimatedCounter
+          value={number}
+          prefix={prefix}
+          suffix={suffix}
+          style={{ fontSize: 56, fontWeight: 700, color: '#D4714E', lineHeight: 1 }}
+        />
+      ) : (
+        <p style={{ fontSize: 36, fontWeight: 300, color: '#1A1A18', lineHeight: 1.25, margin: 0 }}>{text}</p>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   FullBleedSection — clean section break
+   ═══════════════════════════════════════════════ */
+export function FullBleedSection({
+  children,
+  tinted = false,
+  className,
+}: {
+  children: ReactNode;
+  tinted?: boolean;
+  className?: string;
+}) {
+  return (
+    <section
+      className={className}
+      style={{ background: tinted ? '#FAFAFA' : '#FFFFFF', width: '100%' }}
+    >
+      <div className="max-w-4xl mx-auto px-6" style={{ paddingTop: 80, paddingBottom: 80 }}>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   NumberedList — 2-col numbered items
+   ═══════════════════════════════════════════════ */
+export function NumberedList({
+  items,
+  className,
+}: {
+  items: string[];
+  className?: string;
+}) {
+  return (
+    <div className={`grid md:grid-cols-2 gap-x-8 gap-y-4 ${className || ''}`}>
+      {items.map((item, i) => (
+        <ScrollReveal key={i} delay={i * 0.05}>
+          <div className="flex gap-4 items-start">
+            <span style={{
+              fontSize: '14px', fontWeight: 700, color: '#D4714E',
+              minWidth: 28, flexShrink: 0,
+              borderLeft: '2px solid rgba(212,113,78,0.2)',
+              paddingLeft: 10,
+              lineHeight: '1.65',
+            }}>
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.65 }}>{item}</p>
+          </div>
+        </ScrollReveal>
       ))}
     </div>
   );

@@ -4,12 +4,12 @@ import {
   StaggerItem,
   DSCRCalculator,
   AnimatedTimeline,
-  StatBar,
   BeforeAfterSlider,
   MagneticButton,
-  GlowingOrb,
-  FloatingParticles,
-  TiltCard,
+  ZigZagSection,
+  BentoGrid,
+  PullQuote,
+  FullBleedSection,
 } from './animations';
 
 interface BuyBelowProps {
@@ -19,28 +19,23 @@ interface BuyBelowProps {
 export default function BuyBelow({ onChipClick }: BuyBelowProps) {
   return (
     <div>
-      {/* ═══ Block 1 — Memo: Any deal, any source [Tinted] ═══ */}
-      <section className="px-6" style={{ paddingTop: '140px' }}>
+      {/* ═══ Block 1 — Any deal, any source [FullBleed tinted] ═══ */}
+      <FullBleedSection tinted className="mt-20">
         <ScrollReveal>
-          <div className="max-w-4xl mx-auto" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px', position: 'relative', overflow: 'hidden' }}>
-            <GlowingOrb size={260} top="-80px" right="-60px" />
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>ANY DEAL &middot; ANY SOURCE</span>
-              <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
-                The most expensive mistake is three months on the wrong deal.
-              </h2>
-              <div className="max-w-3xl space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
-                <p className="m-0">Every day spent evaluating the wrong deal is a day you&apos;re not closing the right one. And in a market where good businesses sell in weeks, speed to conviction is everything.</p>
-                <p className="m-0">Bring it to Yulia. Paste a BizBuySell listing. Describe something your broker sent you. Tell her about a business you heard is for sale.</p>
-                <p className="m-0">Within minutes: financial validation against federal benchmarks, SBA financing modeled at live rates, competitive landscape mapped for that metro, risks flagged &mdash; and a clear answer. Pursue or pass.</p>
-                <p className="m-0" style={{ color: '#1A1A18', fontWeight: 600 }}>Every listing site in the world just became your top-of-funnel. smbX.ai is where you analyze them.</p>
-              </div>
-            </div>
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>ANY DEAL &middot; ANY SOURCE</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
+            The most expensive mistake is three months on the wrong deal.
+          </h2>
+          <div className="max-w-3xl space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
+            <p className="m-0">Every day spent evaluating the wrong deal is a day you&apos;re not closing the right one. And in a market where good businesses sell in weeks, speed to conviction is everything.</p>
+            <p className="m-0">Bring it to Yulia. Paste a BizBuySell listing. Describe something your broker sent you. Tell her about a business you heard is for sale.</p>
+            <p className="m-0">Within minutes: financial validation against federal benchmarks, SBA financing modeled at live rates, competitive landscape mapped for that metro, risks flagged &mdash; and a clear answer. Pursue or pass.</p>
+            <p className="m-0" style={{ color: '#1A1A18', fontWeight: 600 }}>Every listing site in the world just became your top-of-funnel. smbX.ai is where you analyze them.</p>
           </div>
         </ScrollReveal>
-      </section>
+      </FullBleedSection>
 
-      {/* ═══ Block 2 — Canvas: Five dimensions ═══ */}
+      {/* ═══ Block 2 — Five dimensions [ZigZag] ═══ */}
       <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <ScrollReveal>
@@ -51,24 +46,13 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
             <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', marginBottom: 32, lineHeight: 1.65 }}>Yulia gets you to conviction &mdash; fast.</p>
           </ScrollReveal>
 
-          <StaggerContainer className="space-y-4">
-            {[
-              { icon: '\uD83D\uDCB0', title: 'Financials', body: 'Seller claims $600K SDE. Census data says that implies 50% margins \u2014 realistic? Yulia checks against federal benchmarks, not guesswork.' },
-              { icon: '\uD83C\uDFE6', title: 'Financing', body: '$1.8M asking, 10% down, live SBA rate: monthly P&I is $14,200. DSCR is 1.87 \u2014 above the 1.25 threshold. Bankable.' },
-              { icon: '\uD83D\uDDFA\uFE0F', title: 'Market', body: '847 competitors in the metro. PE firms rolling up the sector. BLS wages growing 4%. Good market \u2014 or buying at the top?' },
-              { icon: '\u26A0\uFE0F', title: 'Risks', body: 'Customer concentration. Owner dependency. Declining revenue. Yulia flags them before the seller\u2019s broker does.' },
-              { icon: '\u2705', title: 'Verdict', body: 'Pursue \u2014 with these conditions. Or pass \u2014 for these reasons. A real answer with real reasoning.' },
-            ].map(c => (
-              <StaggerItem key={c.title}>
-                <TiltCard style={{ background: '#F7F6F4', borderRadius: 20, border: '1px solid rgba(26,26,24,0.05)', padding: '24px 28px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>
-                    <span style={{ marginRight: 8 }}>{c.icon}</span>{c.title}
-                  </h3>
-                  <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{c.body}</p>
-                </TiltCard>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+          <ZigZagSection items={[
+            { icon: '\uD83D\uDCB0', title: 'Financials', body: 'Seller claims $600K SDE. Census data says that implies 50% margins \u2014 realistic? Yulia checks against federal benchmarks, not guesswork.' },
+            { icon: '\uD83C\uDFE6', title: 'Financing', body: '$1.8M asking, 10% down, live SBA rate: monthly P&I is $14,200. DSCR is 1.87 \u2014 above the 1.25 threshold. Bankable.' },
+            { icon: '\uD83D\uDDFA\uFE0F', title: 'Market', body: '847 competitors in the metro. PE firms rolling up the sector. BLS wages growing 4%. Good market \u2014 or buying at the top?' },
+            { icon: '\u26A0\uFE0F', title: 'Risks', body: 'Customer concentration. Owner dependency. Declining revenue. Yulia flags them before the seller\u2019s broker does.' },
+            { icon: '\u2705', title: 'Verdict', body: 'Pursue \u2014 with these conditions. Or pass \u2014 for these reasons. A real answer with real reasoning.' },
+          ]} />
         </div>
       </section>
 
@@ -83,33 +67,31 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
         </div>
       </section>
 
-      {/* ═══ Block 3 — Canvas: Free starting point [Tinted] ═══ */}
-      <section className="px-6" style={{ paddingTop: '140px' }}>
+      {/* ═══ Block 3 — Free starting point [Tinted] ═══ */}
+      <FullBleedSection tinted className="mt-20">
         <ScrollReveal>
-          <div className="max-w-4xl mx-auto" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>FREE STARTING POINT</span>
-            <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-10">
-              Before you pay anything, you get this.
-            </h2>
-            <div className="grid md:grid-cols-2 gap-5">
-              {[
-                { icon: '\uD83D\uDCCB', title: 'Investment Thesis Document', body: 'Your acquisition blueprint \u2014 criteria, capital stack template, SBA eligibility, market landscape. What search funds build in-house with full-time analysts.' },
-                { icon: '\uD83D\uDCCA', title: 'Capital Stack Template', body: '\u201CHere\u2019s how a $1.8M acquisition gets funded.\u201D SBA loan, equity, seller note, monthly debt service.' },
-              ].map(item => (
-                <ScrollReveal key={item.title} delay={0.1}>
-                  <div style={{ background: '#FFFFFF', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: 12 }}>{item.icon} {item.title}</h3>
-                    <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{item.body}</p>
-                  </div>
-                </ScrollReveal>
-              ))}
-            </div>
-            <p style={{ fontSize: '16px', fontWeight: 600, color: '#D4714E', marginTop: 24, lineHeight: 1.65 }} className="md:text-center">
-              Both free. Both generated from your first conversation.
-            </p>
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>FREE STARTING POINT</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-10">
+            Before you pay anything, you get this.
+          </h2>
+          <div className="grid md:grid-cols-2 gap-5">
+            {[
+              { icon: '\uD83D\uDCCB', title: 'Investment Thesis Document', body: 'Your acquisition blueprint \u2014 criteria, capital stack template, SBA eligibility, market landscape. What search funds build in-house with full-time analysts.' },
+              { icon: '\uD83D\uDCCA', title: 'Capital Stack Template', body: '\u201CHere\u2019s how a $1.8M acquisition gets funded.\u201D SBA loan, equity, seller note, monthly debt service.' },
+            ].map(item => (
+              <ScrollReveal key={item.title} delay={0.1}>
+                <div style={{ background: '#FFFFFF', borderRadius: 24, border: '1px solid rgba(0,0,0,0.04)', padding: '32px' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: 12 }}>{item.icon} {item.title}</h3>
+                  <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{item.body}</p>
+                </div>
+              </ScrollReveal>
+            ))}
           </div>
+          <p style={{ fontSize: '16px', fontWeight: 600, color: '#D4714E', marginTop: 24, lineHeight: 1.65 }} className="md:text-center">
+            Both free. Both generated from your first conversation.
+          </p>
         </ScrollReveal>
-      </section>
+      </FullBleedSection>
 
       {/* ═══ Block 4 — Before/After: Buyer tax benefits ═══ */}
       <section className="px-6" style={{ paddingTop: '140px' }}>
@@ -129,7 +111,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
               beforeLabel="STOCK SALE"
               afterLabel="ASSET SALE (BUYER-FAVORABLE)"
               beforeContent={
-                <div style={{ background: '#F7F6F4', padding: '32px', minHeight: 280 }}>
+                <div style={{ background: '#FAFAFA', padding: '32px', minHeight: 280 }}>
                   <div className="space-y-3" style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.5 }}>
                     <div className="flex justify-between"><span>Basis step-up</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>No</span></div>
                     <div className="flex justify-between"><span>Goodwill amortization</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>None</span></div>
@@ -164,46 +146,37 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
         </div>
       </section>
 
-      {/* ═══ Block 5 — Canvas: Legal due diligence [Tinted] ═══ */}
+      {/* ═══ Block 5 — Legal due diligence [BentoGrid] ═══ */}
       <section className="px-6" style={{ paddingTop: '140px' }}>
-        <ScrollReveal>
-          <div className="max-w-4xl mx-auto" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px', position: 'relative', overflow: 'hidden' }}>
-            <FloatingParticles count={4} />
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>LEGAL DUE DILIGENCE</span>
-              <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
-                What to verify before you sign.
-              </h2>
-              <p className="max-w-3xl mb-10" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
-                The APA protects you only if the reps and warranties are right. Yulia builds a due diligence checklist calibrated to the deal&apos;s industry, size, and structure.
-              </p>
+        <div className="max-w-4xl mx-auto">
+          <ScrollReveal>
+            <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>LEGAL DUE DILIGENCE</span>
+            <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
+              What to verify before you sign.
+            </h2>
+            <p className="max-w-3xl mb-10" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
+              The APA protects you only if the reps and warranties are right. Yulia builds a due diligence checklist calibrated to the deal&apos;s industry, size, and structure.
+            </p>
+          </ScrollReveal>
 
-              <StaggerContainer className="space-y-4">
-                {[
-                  { icon: '\uD83D\uDCC4', title: 'Reps & warranty review', body: 'The seller\u2019s factual statements about the business. Yulia identifies which reps are standard, which are missing, and which need broader language. Key focus: financial accuracy, no undisclosed liabilities, tax compliance, IP ownership, and material contracts.' },
-                  { icon: '\u26A0\uFE0F', title: 'Red flag scoring', body: 'Every DD finding gets scored: minor (proceed), major (negotiate price adjustment), or deal-breaker (walk away). Yulia calculates the dollar impact of each issue and recommends price adjustments.' },
-                  { icon: '\uD83C\uDFE2', title: 'Lease and location', body: 'Is the lease assignable? How much term remains? What will the landlord demand? If the business depends on the location, this is a potential deal-killer \u2014 Yulia flags it early.' },
-                  { icon: '\uD83C\uDFE5', title: 'Licenses and permits', body: 'Healthcare, childcare, construction, food service, pest control \u2014 many require new applications from you. Some take 3\u20136 months. Yulia checks the industry and builds the regulatory transfer timeline.' },
-                  { icon: '\uD83D\uDC65', title: 'Employee transition', body: 'In an asset sale, employees are terminated by the seller and rehired by you. You choose who to hire. But prior liabilities (WARN Act, benefits, PTO) need to be clearly allocated. In a stock sale, all employees \u2014 and all their baggage \u2014 come with the entity.' },
-                  { icon: '\uD83D\uDCCB', title: 'Working capital mechanism', body: 'Fixed price? Peg with true-up? Locked box? The working capital adjustment is where deals get renegotiated after the LOI. Yulia calculates the trailing 12-month average, flags seasonal patterns, and models the range of true-up outcomes.' },
-                ].map(c => (
-                  <StaggerItem key={c.title}>
-                    <div style={{ background: '#FFFFFF', borderRadius: 20, border: '1px solid rgba(26,26,24,0.05)', padding: '24px 28px' }}>
-                      <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>
-                        <span style={{ marginRight: 8 }}>{c.icon}</span>{c.title}
-                      </h3>
-                      <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{c.body}</p>
-                    </div>
-                  </StaggerItem>
-                ))}
-              </StaggerContainer>
+          <BentoGrid
+            featuredIndex={[0, 1]}
+            items={[
+              { icon: '\uD83D\uDCC4', title: 'Reps & warranty review', body: 'The seller\u2019s factual statements about the business. Yulia identifies which reps are standard, which are missing, and which need broader language. Key focus: financial accuracy, no undisclosed liabilities, tax compliance, IP ownership, and material contracts.' },
+              { icon: '\u26A0\uFE0F', title: 'Red flag scoring', body: 'Every DD finding gets scored: minor (proceed), major (negotiate price adjustment), or deal-breaker (walk away). Yulia calculates the dollar impact of each issue and recommends price adjustments.' },
+              { icon: '\uD83C\uDFE2', title: 'Lease and location', body: 'Is the lease assignable? How much term remains? What will the landlord demand? If the business depends on the location, this is a potential deal-killer \u2014 Yulia flags it early.' },
+              { icon: '\uD83C\uDFE5', title: 'Licenses and permits', body: 'Healthcare, childcare, construction, food service, pest control \u2014 many require new applications from you. Some take 3\u20136 months. Yulia checks the industry and builds the regulatory transfer timeline.' },
+              { icon: '\uD83D\uDC65', title: 'Employee transition', body: 'In an asset sale, employees are terminated by the seller and rehired by you. You choose who to hire. But prior liabilities (WARN Act, benefits, PTO) need to be clearly allocated.' },
+              { icon: '\uD83D\uDCCB', title: 'Working capital mechanism', body: 'Fixed price? Peg with true-up? Locked box? The working capital adjustment is where deals get renegotiated after the LOI. Yulia calculates the trailing 12-month average.' },
+            ]}
+          />
 
-              <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.4)', marginTop: 16, fontStyle: 'italic' }}>
-                Your M&amp;A attorney drafts the actual APA. Yulia ensures you know what to expect, what to negotiate, and what to walk away from.
-              </p>
-            </div>
-          </div>
-        </ScrollReveal>
+          <ScrollReveal delay={0.2}>
+            <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.4)', marginTop: 16, fontStyle: 'italic' }}>
+              Your M&amp;A attorney drafts the actual APA. Yulia ensures you know what to expect, what to negotiate, and what to walk away from.
+            </p>
+          </ScrollReveal>
+        </div>
       </section>
 
       {/* ═══ Block 6 — Animated Buyer Journey Timeline ═══ */}
@@ -242,7 +215,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
         </div>
       </section>
 
-      {/* ═══ Block 7 — Canvas: Buyer types ═══ */}
+      {/* ═══ Block 7 — Buyer types [2x2 grid, no TiltCard] ═══ */}
       <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <ScrollReveal>
@@ -259,31 +232,29 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
               { title: 'Strategic', body: 'Synergies, structure, max value. Integration planning from Day 1.' },
             ].map(b => (
               <StaggerItem key={b.title}>
-                <TiltCard style={{ background: '#F7F6F4', borderRadius: 20, border: '1px solid rgba(26,26,24,0.05)', padding: '24px 28px', height: '100%' }}>
+                <div style={{ background: '#FAFAFA', borderRadius: 20, border: '1px solid rgba(0,0,0,0.04)', padding: '24px 28px', height: '100%' }}>
                   <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 6px' }}>{b.title}</h3>
                   <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{b.body}</p>
-                </TiltCard>
+                </div>
               </StaggerItem>
             ))}
           </StaggerContainer>
         </div>
       </section>
 
-      {/* ═══ Block 8 — Memo: The payoff ═══ */}
+      {/* ═══ Block 8 — The payoff + PullQuote + CTA ═══ */}
       <section className="px-6" style={{ paddingTop: '140px', paddingBottom: '80px' }}>
         <div className="max-w-4xl mx-auto">
+          <PullQuote text="You own a business. And you know exactly what to do with it." />
+
           <ScrollReveal>
-            <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15 }} className="md:text-[48px] mb-8">
-              You own a business. And you know exactly what to do with it.
-            </h2>
-            <div className="max-w-3xl space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
+            <div className="max-w-3xl space-y-6 mx-auto" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
               <p className="m-0">Not &ldquo;I hope this works out.&rdquo; Not &ldquo;I think I paid the right price.&rdquo; Not &ldquo;Now what?&rdquo;</p>
               <p className="m-0">You have a plan. Specific to this business, this market, this thesis. Built from months of intelligence that Yulia gathered during the acquisition &mdash; carried forward into ownership.</p>
               <p className="m-0" style={{ color: '#1A1A18', fontWeight: 600 }}>That&apos;s the difference between buying a business and building wealth.</p>
             </div>
           </ScrollReveal>
 
-          {/* Block 9 — Next Step */}
           <ScrollReveal delay={0.2}>
             <div className="mt-10">
               <p style={{ fontSize: '16px', color: 'rgba(26,26,24,0.5)', marginBottom: 16 }}>Tell Yulia what you&apos;re looking for &rarr; free acquisition thesis</p>

@@ -45,11 +45,11 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
 
   return (
     <div
-      className="flex flex-col h-full bg-[#FAF9F7] overflow-hidden"
+      className="flex flex-col h-full bg-white overflow-hidden"
       style={{
         width: visible ? 260 : 0,
         minWidth: visible ? 260 : 0,
-        borderRight: visible ? '1px solid #DDD9D1' : 'none',
+        borderRight: visible ? '1px solid rgba(0,0,0,0.06)' : 'none',
         transition: 'width 0.25s ease, min-width 0.25s ease',
       }}
     >
@@ -57,7 +57,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
       <div className="flex items-center justify-end px-3.5 pt-3.5 pb-1.5" style={{ minWidth: 260 }}>
         <button
           onClick={onNew}
-          className="w-[34px] h-[34px] rounded-full bg-[#F3F0EA] border-none cursor-pointer flex items-center justify-center text-[#D4714E] hover:bg-[#FFF0EB] transition-colors"
+          className="w-[34px] h-[34px] rounded-full bg-[#F5F5F5] border-none cursor-pointer flex items-center justify-center text-[#D4714E] hover:bg-[#FFF0EB] transition-colors"
           type="button"
           aria-label="New chat"
         >
@@ -80,7 +80,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
                 key={c.id}
                 onClick={() => onSelect(c.id)}
                 className={`w-full text-left border-none cursor-pointer rounded-[10px] px-2 py-2 mb-0.5 transition-colors ${
-                  c.id === activeId ? 'bg-[#F3F0EA]' : 'bg-transparent hover:bg-[rgba(243,240,234,0.6)]'
+                  c.id === activeId ? 'bg-[#F5F5F5]' : 'bg-transparent hover:bg-[rgba(0,0,0,0.02)]'
                 }`}
                 type="button"
               >
@@ -123,7 +123,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
                 key={c.id}
                 onClick={() => onSelect(c.id)}
                 className={`w-full text-left border-none cursor-pointer rounded-[10px] px-2 py-1.5 mb-0.5 flex items-center gap-2 transition-colors ${
-                  c.id === activeId ? 'bg-[#F3F0EA]' : 'bg-transparent hover:bg-[rgba(243,240,234,0.6)]'
+                  c.id === activeId ? 'bg-[#F5F5F5]' : 'bg-transparent hover:bg-[rgba(0,0,0,0.02)]'
                 }`}
                 type="button"
               >
@@ -153,9 +153,9 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
 
       {/* Footer */}
       {!anonymous && userName && onSignOut && (
-        <div className="flex items-center justify-between px-3.5 py-2.5" style={{ borderTop: '1px solid #DDD9D1', minWidth: 260 }}>
+        <div className="flex items-center justify-between px-3.5 py-2.5" style={{ borderTop: '1px solid rgba(0,0,0,0.06)', minWidth: 260 }}>
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-[26px] h-[26px] rounded-full bg-[#F3F0EA] flex items-center justify-center shrink-0">
+            <div className="w-[26px] h-[26px] rounded-full bg-[#F5F5F5] flex items-center justify-center shrink-0">
               <span className="text-[11px] font-semibold text-[#3D3B37] font-sans">
                 {userName.charAt(0).toUpperCase()}
               </span>

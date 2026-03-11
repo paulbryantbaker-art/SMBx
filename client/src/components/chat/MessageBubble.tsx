@@ -27,11 +27,10 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
           <div
             className="px-[18px] py-3.5 text-base leading-[1.5] break-words"
             style={{
-              background: '#FFF0EB',
-              border: '1px solid rgba(212,113,78,0.18)',
+              background: '#FFF5F2',
+              border: '1px solid rgba(212,113,78,0.12)',
               color: '#1A1A18',
               borderRadius: '20px 20px 4px 20px',
-              boxShadow: '0 1px 3px rgba(26,26,24,0.06)',
               fontFamily: "'Inter', system-ui, sans-serif",
               overflowWrap: 'break-word',
             }}
@@ -61,8 +60,7 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
           className="bg-white px-4 py-3 text-base leading-[1.65] font-medium home-yt overflow-hidden"
           style={{
             borderRadius: '20px 20px 20px 4px',
-            border: '1px solid rgba(26,26,24,0.08)',
-            boxShadow: '0 1px 3px rgba(26,26,24,0.04)',
+            border: '1px solid rgba(26,26,24,0.05)',
             overflowWrap: 'break-word',
           }}
         >

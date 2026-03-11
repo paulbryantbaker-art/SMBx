@@ -1,14 +1,13 @@
 import {
   ScrollReveal,
-  StaggerContainer,
-  StaggerItem,
   StatBar,
   AnimatedTimeline,
   MagneticButton,
-  GlowingOrb,
-  FloatingParticles,
-  TiltCard,
   AnimatedCounter,
+  ZigZagSection,
+  BentoGrid,
+  PullQuote,
+  FullBleedSection,
 } from './animations';
 
 interface HowItWorksBelowProps {
@@ -18,28 +17,23 @@ interface HowItWorksBelowProps {
 export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
   return (
     <div>
-      {/* ═══ Block 1 — Memo: The problem [Tinted] ═══ */}
-      <section className="px-6" style={{ paddingTop: '140px' }}>
+      {/* ═══ Block 1 — The problem [FullBleed tinted + PullQuote] ═══ */}
+      <FullBleedSection tinted className="mt-20">
         <ScrollReveal>
-          <div className="max-w-4xl mx-auto" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px', position: 'relative', overflow: 'hidden' }}>
-            <GlowingOrb size={280} top="-100px" left="-80px" />
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>THE PROBLEM</span>
-              <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
-                Between $300K and $50M, nobody has good data.
-              </h2>
-              <div className="max-w-3xl space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
-                <p className="m-0">The largest institutions have Bloomberg, PitchBook, and armies of analysts. Fortune 500 deals have investment banks with $100M budgets.</p>
-                <p className="m-0">Business owners selling a $3M company have Google and gut instinct. Brokers managing 15 listings pull comps from memory. Buyers evaluating a listing check the asking price against... what, exactly?</p>
-                <p className="m-0">The data exists. It&apos;s in Census records, BLS reports, FRED economic series, SBA lending databases, SEC filings. But nobody has synthesized it into intelligence that&apos;s useful for making deal decisions.</p>
-                <p className="m-0" style={{ color: '#1A1A18', fontWeight: 600 }}>Until now.</p>
-              </div>
-            </div>
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>THE PROBLEM</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
+            Between $300K and $50M, nobody has good data.
+          </h2>
+          <div className="max-w-3xl space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
+            <p className="m-0">The largest institutions have Bloomberg, PitchBook, and armies of analysts. Fortune 500 deals have investment banks with $100M budgets.</p>
+            <p className="m-0">Business owners selling a $3M company have Google and gut instinct. Brokers managing 15 listings pull comps from memory. Buyers evaluating a listing check the asking price against... what, exactly?</p>
+            <p className="m-0">The data exists. It&apos;s in Census records, BLS reports, FRED economic series, SBA lending databases, SEC filings. But nobody has synthesized it into intelligence that&apos;s useful for making deal decisions.</p>
           </div>
         </ScrollReveal>
-      </section>
+        <PullQuote text="Until now." />
+      </FullBleedSection>
 
-      {/* ═══ Block 2 — Canvas: Sovereign data engine ═══ */}
+      {/* ═══ Block 2 — Sovereign data engine [ZigZag] ═══ */}
       <section className="px-6" style={{ paddingTop: '140px' }}>
         <div className="max-w-4xl mx-auto">
           <ScrollReveal>
@@ -52,24 +46,13 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
             </p>
           </ScrollReveal>
 
-          <StaggerContainer className="space-y-4">
-            {[
-              { icon: '\uD83D\uDCCA', title: 'U.S. Census Bureau', body: 'Business counts by industry, geography, and size class. When Yulia says \u201Cthere are 847 HVAC businesses in Dallas-Fort Worth,\u201D that\u2019s a Census number.' },
-              { icon: '\uD83D\uDCC8', title: 'Bureau of Labor Statistics', body: 'Wage benchmarks, employment trends, occupational data by region. When Yulia benchmarks your labor costs, she\u2019s using BLS data for your specific MSA.' },
-              { icon: '\uD83C\uDFE6', title: 'Federal Reserve (FRED)', body: 'Interest rates, economic indicators, lending conditions. When Yulia models SBA financing, she\u2019s using live Fed rates \u2014 not last quarter\u2019s.' },
-              { icon: '\uD83D\uDCCB', title: 'SEC EDGAR', body: 'Public company filings, comparable transactions, institutional activity. When Yulia identifies PE consolidation in your sector, she\u2019s tracking real filings.' },
-              { icon: '\uD83D\uDD12', title: 'SBA Lender Activity Reports', body: 'Loan approval rates, average deal sizes, lender preferences by region. When Yulia says a deal is \u201CSBA-bankable,\u201D she\u2019s checked the actual lending patterns.' },
-            ].map(c => (
-              <StaggerItem key={c.title}>
-                <TiltCard style={{ background: '#F7F6F4', borderRadius: 20, border: '1px solid rgba(26,26,24,0.05)', padding: '24px 28px' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>
-                    <span style={{ marginRight: 8 }}>{c.icon}</span>{c.title}
-                  </h3>
-                  <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{c.body}</p>
-                </TiltCard>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+          <ZigZagSection items={[
+            { icon: '\uD83D\uDCCA', title: 'U.S. Census Bureau', body: 'Business counts by industry, geography, and size class. When Yulia says \u201Cthere are 847 HVAC businesses in Dallas-Fort Worth,\u201D that\u2019s a Census number.' },
+            { icon: '\uD83D\uDCC8', title: 'Bureau of Labor Statistics', body: 'Wage benchmarks, employment trends, occupational data by region. When Yulia benchmarks your labor costs, she\u2019s using BLS data for your specific MSA.' },
+            { icon: '\uD83C\uDFE6', title: 'Federal Reserve (FRED)', body: 'Interest rates, economic indicators, lending conditions. When Yulia models SBA financing, she\u2019s using live Fed rates \u2014 not last quarter\u2019s.' },
+            { icon: '\uD83D\uDCCB', title: 'SEC EDGAR', body: 'Public company filings, comparable transactions, institutional activity. When Yulia identifies PE consolidation in your sector, she\u2019s tracking real filings.' },
+            { icon: '\uD83D\uDD12', title: 'SBA Lender Activity Reports', body: 'Loan approval rates, average deal sizes, lender preferences by region. When Yulia says a deal is \u201CSBA-bankable,\u201D she\u2019s checked the actual lending patterns.' },
+          ]} />
 
           <ScrollReveal delay={0.3}>
             <p className="max-w-3xl mt-10" style={{ fontSize: '17px', fontWeight: 500, color: '#1A1A18', lineHeight: 1.65 }}>
@@ -105,7 +88,7 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
               ].map((item, i) => (
                 <ScrollReveal key={item.num} delay={i * 0.08}>
                   <div className="flex gap-4" style={{ paddingLeft: 12 }}>
-                    <span style={{ fontSize: '28px', fontWeight: 700, color: '#D4714E', lineHeight: 1, minWidth: 28, textAlign: 'center', marginLeft: -8 }} className="shrink-0 mt-0.5">{item.num}</span>
+                    <span style={{ fontSize: '48px', fontWeight: 700, color: '#D4714E', lineHeight: 1, minWidth: 40, textAlign: 'center', marginLeft: -8 }} className="shrink-0 mt-0.5">{item.num}</span>
                     <div>
                       <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#1A1A18', margin: '0 0 6px' }}>{item.title}</h3>
                       <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.65 }}>{item.body}</p>
@@ -118,27 +101,22 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
         </div>
       </section>
 
-      {/* ═══ Block 4 — Memo: Adaptive intelligence [Tinted] ═══ */}
-      <section className="px-6" style={{ paddingTop: '140px' }}>
+      {/* ═══ Block 4 — Adaptive intelligence [FullBleed tinted] ═══ */}
+      <FullBleedSection tinted className="mt-20">
         <ScrollReveal>
-          <div className="max-w-4xl mx-auto" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px', position: 'relative', overflow: 'hidden' }}>
-            <FloatingParticles count={5} />
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>ADAPTIVE INTELLIGENCE</span>
-              <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
-                A $400K landscaping company and a $40M manufacturing platform are fundamentally different deals.
-              </h2>
-              <div className="max-w-3xl space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
-                <p className="m-0">Yulia doesn&apos;t give the same advice to every business. She classifies your deal by complexity and adapts everything &mdash; her vocabulary, methodology, financial metrics, deliverable depth, and the questions she asks.</p>
-                <p className="m-0">An owner-operated pest control company gets SDE-based coaching, step-by-step guidance, and SBA-focused analysis.</p>
-                <p className="m-0">A $20M EBITDA manufacturing platform gets institutional metrics, arbitrage modeling, covenant analysis, and board-level deliverables.</p>
-                <p className="m-0" style={{ color: '#1A1A18', fontWeight: 600 }}>Same methodology. Same data sources. Same rigor. Calibrated to the deal in front of you.</p>
-                <p className="m-0">That&apos;s why the platform serves every deal size &mdash; from $300K to $300M. Not because it&apos;s generic. Because it adapts.</p>
-              </div>
-            </div>
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>ADAPTIVE INTELLIGENCE</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
+            A $400K landscaping company and a $40M manufacturing platform are fundamentally different deals.
+          </h2>
+          <div className="max-w-3xl space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
+            <p className="m-0">Yulia doesn&apos;t give the same advice to every business. She classifies your deal by complexity and adapts everything &mdash; her vocabulary, methodology, financial metrics, deliverable depth, and the questions she asks.</p>
+            <p className="m-0">An owner-operated pest control company gets SDE-based coaching, step-by-step guidance, and SBA-focused analysis.</p>
+            <p className="m-0">A $20M EBITDA manufacturing platform gets institutional metrics, arbitrage modeling, covenant analysis, and board-level deliverables.</p>
+            <p className="m-0" style={{ color: '#1A1A18', fontWeight: 600 }}>Same methodology. Same data sources. Same rigor. Calibrated to the deal in front of you.</p>
+            <p className="m-0">That&apos;s why the platform serves every deal size &mdash; from $300K to $300M. Not because it&apos;s generic. Because it adapts.</p>
           </div>
         </ScrollReveal>
-      </section>
+      </FullBleedSection>
 
       {/* ═══ Stat bar — deal range ═══ */}
       <section className="px-6" style={{ paddingTop: '80px' }}>
@@ -152,28 +130,26 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
         </div>
       </section>
 
-      {/* ═══ Block 5 — Memo: Localized intelligence ═══ */}
-      <section className="px-6" style={{ paddingTop: '140px' }}>
+      {/* ═══ Block 5 — Localized intelligence [FullBleed white] ═══ */}
+      <FullBleedSection className="mt-10">
+        <ScrollReveal>
+          <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>LOCALIZED INTELLIGENCE</span>
+          <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
+            National averages are noise. Your market is signal.
+          </h2>
+          <div className="max-w-3xl space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
+            <p className="m-0">A plumbing company in Phoenix and a plumbing company in rural Pennsylvania are fundamentally different deals. Different competitive density. Different wage structures. Different buyer pools. Different SBA lending patterns. Different growth trajectories.</p>
+            <p className="m-0">Yulia delivers intelligence specific to your MSA &mdash; not your state, not your region, your metropolitan statistical area. The same geographic precision that institutional investors use, available to every dealmaker.</p>
+            <p className="m-0">When Yulia tells you there are 14 active PE platforms acquiring HVAC companies in Texas, she&apos;s not estimating. When she says your EBITDA margin of 18.6% is below the 21% industry median for your MSA, she&apos;s not guessing. When she models SBA financing at today&apos;s rate with your regional lender&apos;s average approval metrics, she&apos;s not approximating.</p>
+            <p className="m-0" style={{ color: '#1A1A18', fontWeight: 600 }}>Every number. Sourced. Traceable. Defensible.</p>
+          </div>
+        </ScrollReveal>
+      </FullBleedSection>
+
+      {/* ═══ Block 6 — Tax & Legal Intelligence [BentoGrid] ═══ */}
+      <section className="px-6" style={{ paddingTop: '80px' }}>
         <div className="max-w-4xl mx-auto">
           <ScrollReveal>
-            <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>LOCALIZED INTELLIGENCE</span>
-            <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
-              National averages are noise. Your market is signal.
-            </h2>
-            <div className="max-w-3xl space-y-6" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
-              <p className="m-0">A plumbing company in Phoenix and a plumbing company in rural Pennsylvania are fundamentally different deals. Different competitive density. Different wage structures. Different buyer pools. Different SBA lending patterns. Different growth trajectories.</p>
-              <p className="m-0">Yulia delivers intelligence specific to your MSA &mdash; not your state, not your region, your metropolitan statistical area. The same geographic precision that institutional investors use, available to every dealmaker.</p>
-              <p className="m-0">When Yulia tells you there are 14 active PE platforms acquiring HVAC companies in Texas, she&apos;s not estimating. When she says your EBITDA margin of 18.6% is below the 21% industry median for your MSA, she&apos;s not guessing. When she models SBA financing at today&apos;s rate with your regional lender&apos;s average approval metrics, she&apos;s not approximating.</p>
-              <p className="m-0" style={{ color: '#1A1A18', fontWeight: 600 }}>Every number. Sourced. Traceable. Defensible.</p>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
-
-      {/* ═══ Block 6 — Canvas: Tax & Legal Intelligence [Tinted] ═══ */}
-      <section className="px-6" style={{ paddingTop: '140px' }}>
-        <ScrollReveal>
-          <div className="max-w-4xl mx-auto" style={{ background: '#F7F6F4', borderRadius: 28, border: '1px solid rgba(26,26,24,0.05)', padding: '32px' }}>
             <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D4714E' }}>TAX &amp; LEGAL INTELLIGENCE</span>
             <h2 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 }} className="md:text-[48px] mb-8">
               The decisions that move the number most aren&apos;t financial &mdash; they&apos;re structural.
@@ -181,36 +157,30 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
             <p className="max-w-3xl mb-10" style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65 }}>
               Deal structure, entity type, state of residence, and asset allocation can swing net proceeds by $100K&ndash;$500K on a single deal. Yulia models the tax and legal landscape so you &mdash; and your CPA and attorney &mdash; can make informed decisions.
             </p>
+          </ScrollReveal>
 
-            <StaggerContainer className="space-y-4">
-              {[
-                { icon: '\uD83D\uDCB0', title: 'Deal structure tax modeling', body: 'Asset sale vs. stock sale. Side-by-side net proceeds for both parties. Depreciation recapture, capital gains, ordinary income allocation \u2014 modeled with real numbers for the specific deal.' },
-                { icon: '\u26A0\uFE0F', title: 'Entity type flags', body: 'C-Corp double taxation trap. S-Corp built-in gains exposure. LLC hot asset rules. Sole proprietorship limitations. Yulia identifies entity-specific risks during intake and flags them immediately.' },
-                { icon: '\uD83D\uDCCB', title: 'Purchase price allocation', body: 'Both buyer and seller file Form 8594 with matching allocation. How the purchase price is split across asset classes directly determines the tax bill. Yulia generates scenarios showing the impact of different allocations.' },
-                { icon: '\uD83C\uDFE6', title: 'Installment sale modeling', body: 'When the deal includes seller financing, Yulia calculates year-by-year tax obligations \u2014 installment vs. lump sum \u2014 including depreciation recapture, imputed interest, and NPV comparison.' },
-                { icon: '\uD83D\uDD12', title: 'QSBS screening', body: 'For qualifying C-Corp sellers, IRC \u00A71202 can exclude up to $10M in federal capital gains. Yulia checks the five eligibility requirements and flags state conformity issues (California only partially conforms).' },
-                { icon: '\uD83D\uDCC4', title: 'APA preparation', body: 'Reps & warranties, indemnification, escrow, non-compete, working capital, lease assignment \u2014 Yulia explains every component in plain English and generates term sheets your attorney can convert to legal documents.' },
-                { icon: '\uD83C\uDFE5', title: 'Regulatory transfer mapping', body: 'Healthcare, childcare, construction, food service, franchise \u2014 many industries require new license applications that take 1\u20136 months. Yulia checks the industry and builds the transfer timeline into the deal schedule.' },
-              ].map(c => (
-                <StaggerItem key={c.title}>
-                  <div style={{ background: '#FFFFFF', borderRadius: 20, border: '1px solid rgba(26,26,24,0.05)', padding: '24px 28px' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>
-                      <span style={{ marginRight: 8 }}>{c.icon}</span>{c.title}
-                    </h3>
-                    <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{c.body}</p>
-                  </div>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
+          <BentoGrid
+            featuredIndex={[0, 1]}
+            items={[
+              { icon: '\uD83D\uDCB0', title: 'Deal structure tax modeling', body: 'Asset sale vs. stock sale. Side-by-side net proceeds for both parties. Depreciation recapture, capital gains, ordinary income allocation \u2014 modeled with real numbers for the specific deal.' },
+              { icon: '\u26A0\uFE0F', title: 'Entity type flags', body: 'C-Corp double taxation trap. S-Corp built-in gains exposure. LLC hot asset rules. Sole proprietorship limitations. Yulia identifies entity-specific risks during intake and flags them immediately.' },
+              { icon: '\uD83D\uDCCB', title: 'Purchase price allocation', body: 'Both buyer and seller file Form 8594 with matching allocation. How the purchase price is split across asset classes directly determines the tax bill. Yulia generates scenarios showing the impact of different allocations.' },
+              { icon: '\uD83C\uDFE6', title: 'Installment sale modeling', body: 'When the deal includes seller financing, Yulia calculates year-by-year tax obligations \u2014 installment vs. lump sum \u2014 including depreciation recapture, imputed interest, and NPV comparison.' },
+              { icon: '\uD83D\uDD12', title: 'QSBS screening', body: 'For qualifying C-Corp sellers, IRC \u00A71202 can exclude up to $10M in federal capital gains. Yulia checks the five eligibility requirements and flags state conformity issues (California only partially conforms).' },
+              { icon: '\uD83D\uDCC4', title: 'APA preparation', body: 'Reps & warranties, indemnification, escrow, non-compete, working capital, lease assignment \u2014 Yulia explains every component in plain English and generates term sheets your attorney can convert to legal documents.' },
+              { icon: '\uD83C\uDFE5', title: 'Regulatory transfer mapping', body: 'Healthcare, childcare, construction, food service, franchise \u2014 many industries require new license applications that take 1\u20136 months. Yulia checks the industry and builds the transfer timeline into the deal schedule.' },
+            ]}
+          />
 
+          <ScrollReveal delay={0.2}>
             <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.4)', marginTop: 16, fontStyle: 'italic' }}>
               Yulia models the landscape and the math. Your CPA confirms the tax specifics. Your attorney drafts the legal documents. Everyone informed, everyone aligned.
             </p>
-          </div>
-        </ScrollReveal>
+          </ScrollReveal>
+        </div>
       </section>
 
-      {/* ═══ Block 7 — Canvas: Live example ═══ */}
+      {/* ═══ Block 7 — Live example + CTA ═══ */}
       <section className="px-6" style={{ paddingTop: '140px', paddingBottom: '80px' }}>
         <div className="max-w-4xl mx-auto">
           <ScrollReveal>
@@ -221,7 +191,7 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
           </ScrollReveal>
 
           <ScrollReveal delay={0.15}>
-            <div className="max-w-3xl mb-10" style={{ background: '#F7F6F4', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '28px 32px' }}>
+            <div className="max-w-3xl mb-10" style={{ background: '#FAFAFA', borderRadius: 24, border: '1px solid rgba(0,0,0,0.04)', padding: '28px 32px' }}>
               <div className="space-y-6">
                 <div>
                   <span style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(26,26,24,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>USER</span>
@@ -247,7 +217,6 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
             </div>
           </ScrollReveal>
 
-          {/* Block 8 — Next Step */}
           <ScrollReveal delay={0.3}>
             <div className="mt-10">
               <p style={{ fontSize: '16px', color: 'rgba(26,26,24,0.5)', marginBottom: 16 }}>Tell Yulia about your deal and watch the intelligence unfold</p>

@@ -297,7 +297,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
       />
 
       <div className={isHero ? '' : 'max-w-[860px] mx-auto pb-3 pt-2 lg:pb-4'}>
-        <div className="home-dock-card relative" style={isHero ? { background: '#fff', borderRadius: 26, border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 1px 2px rgba(0,0,0,0.03), 0 4px 8px rgba(0,0,0,0.04), 0 12px 28px rgba(0,0,0,0.08), 0 28px 56px rgba(0,0,0,0.06)' } : undefined}>
+        <div className="home-dock-card relative" style={isHero ? { background: '#fff', borderRadius: 9999, border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 1px 6px rgba(0,0,0,0.04)' } : undefined}>
           {/* Tool popup */}
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
             <div className="px-4 pt-3 pb-2">
@@ -330,7 +330,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           {/* Attachment chips */}
           {attachment && (
             <div className="flex flex-wrap gap-2 px-4 pt-3 pb-0">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F5F5F3] rounded-lg max-w-[260px]">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F5F5F5] rounded-lg max-w-[260px]">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4714E" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                 <span className="text-[13px] font-medium text-[#1A1A18] truncate">{attachment.name}</span>
                 <button onClick={() => setAttachment(null)} className="hover:text-[#1A1A18] bg-transparent border-none cursor-pointer p-0 ml-0.5 flex-shrink-0" style={{ color: 'rgba(26,26,24,0.35)' }} type="button">
@@ -341,7 +341,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           )}
 
           {/* Textarea + typewriter overlay */}
-          <div className={isHero ? 'relative' : 'mx-3 mt-2 relative'} style={isHero ? undefined : { background: '#F5F5F3', borderRadius: '18px' }}>
+          <div className={isHero ? 'relative' : 'mx-3 mt-2 relative'} style={isHero ? undefined : { background: '#FAFAFA', borderRadius: '24px' }}>
             {/* Typewriter overlay */}
             {showTypewriter && twText && (
               <div
@@ -408,7 +408,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             <button
               ref={plusRef}
               onClick={() => setToolsOpen(prev => !prev)}
-              className="flex items-center justify-center bg-white cursor-pointer hover:bg-[#F5F5F3] active:scale-95"
+              className="flex items-center justify-center bg-white cursor-pointer hover:bg-[#F5F5F5] active:scale-95"
               style={{ width: 38, height: 38, borderRadius: 12, border: '1.5px solid rgba(26,26,24,0.1)', transition: 'all .2s', color: 'rgba(26,26,24,0.4)' }}
               type="button"
             >
@@ -425,7 +425,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               className="flex items-center justify-center border-none cursor-pointer active:scale-95"
               style={{
                 width: 42, height: 42, borderRadius: 14,
-                background: hasContent && !disabled ? '#D4714E' : '#F5F5F3',
+                background: hasContent && !disabled ? '#D4714E' : '#F5F5F5',
                 color: hasContent && !disabled ? '#fff' : 'rgba(26,26,24,0.25)',
                 transition: 'all .2s',
                 pointerEvents: hasContent && !disabled ? 'auto' : 'none',
