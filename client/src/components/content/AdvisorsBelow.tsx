@@ -14,7 +14,7 @@ const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
 const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#D4714E' };
 const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 };
 const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, margin: 0 };
-const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid #DDD9D1', padding: '24px 28px' };
+const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid #C5C0B6', padding: '24px 28px' };
 
 export default function AdvisorsBelow({ onChipClick }: AdvisorsBelowProps) {
   return (
@@ -83,7 +83,7 @@ export default function AdvisorsBelow({ onChipClick }: AdvisorsBelowProps) {
               beforeLabel="WITHOUT YULIA"
               afterLabel="WITH YULIA"
               beforeContent={
-                <div style={{ background: '#F5F3EF', padding: '32px', minHeight: 220 }}>
+                <div style={{ background: '#EDEAE4', padding: '32px', minHeight: 220 }}>
                   <div className="space-y-3" style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.5 }}>
                     <div className="flex justify-between"><span>Hours on data/docs</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>~80 hrs/mo</span></div>
                     <div className="flex justify-between"><span>Deals turned away</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>3&ndash;4/mo</span></div>

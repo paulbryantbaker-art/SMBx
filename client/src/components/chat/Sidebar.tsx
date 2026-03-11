@@ -49,8 +49,8 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
       style={{
         width: visible ? 260 : 0,
         minWidth: visible ? 260 : 0,
-        background: '#EDEAE5',
-        borderRight: visible ? '1px solid #DDD9D1' : 'none',
+        background: '#D8D3CA',
+        borderRight: visible ? '1px solid #C5C0B6' : 'none',
         transition: 'width 0.25s ease, min-width 0.25s ease',
       }}
     >
@@ -157,7 +157,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
 
       {/* Footer */}
       {!anonymous && userName && onSignOut && (
-        <div className="flex items-center justify-between px-3.5 py-2.5" style={{ borderTop: '1px solid #DDD9D1', minWidth: 260 }}>
+        <div className="flex items-center justify-between px-3.5 py-2.5" style={{ borderTop: '1px solid #C5C0B6', minWidth: 260 }}>
           <div className="flex items-center gap-2 min-w-0">
             <div className="w-[26px] h-[26px] rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.5)' }}>
               <span className="text-[11px] font-semibold text-[#3D3B37] font-sans">

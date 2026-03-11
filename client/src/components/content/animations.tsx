@@ -446,7 +446,7 @@ export function InteractiveCalculator({
   };
 
   return (
-    <div className={className} style={{ background: '#FFFFFF', borderRadius: 16, border: '1px solid #DDD9D1', padding: '28px 32px' }}>
+    <div className={className} style={{ background: '#FFFFFF', borderRadius: 16, border: '1px solid #C5C0B6', padding: '28px 32px' }}>
       <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)' }}>INTERACTIVE ADD-BACK CALCULATOR</span>
       <p style={{ fontSize: '13px', color: 'rgba(26,26,24,0.4)', margin: '8px 0 16px' }}>Toggle add-backs to see how they impact valuation</p>
 
@@ -553,7 +553,7 @@ export function DSCRCalculator({ className }: { className?: string }) {
   const dscrColor = dscr >= 1.25 ? '#22C55E' : dscr >= 1.0 ? '#EAB308' : '#EF4444';
 
   return (
-    <div className={className} style={{ background: '#FFFFFF', borderRadius: 16, border: '1px solid #DDD9D1', padding: '28px 32px' }}>
+    <div className={className} style={{ background: '#FFFFFF', borderRadius: 16, border: '1px solid #C5C0B6', padding: '28px 32px' }}>
       <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)' }}>INTERACTIVE DSCR CALCULATOR</span>
       <p style={{ fontSize: '13px', color: 'rgba(26,26,24,0.4)', margin: '8px 0 20px' }}>Drag sliders to model SBA eligibility</p>
 
@@ -630,7 +630,7 @@ export function StatBar({
           style={{
             background: '#FFFFFF',
             borderRadius: 16,
-            border: '1px solid #DDD9D1',
+            border: '1px solid #C5C0B6',
             padding: '16px 24px',
             flex: '1 1 140px',
             textAlign: 'center',
