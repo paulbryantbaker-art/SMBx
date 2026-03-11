@@ -297,7 +297,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
       />
 
       <div className={isHero ? '' : 'max-w-[860px] mx-auto pb-3 pt-2 lg:pb-4'}>
-        <div className="home-dock-card relative" style={isHero ? { background: '#fff', borderRadius: 9999, border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 1px 6px rgba(0,0,0,0.04)' } : undefined}>
+        <div className="home-dock-card relative" style={isHero ? { background: '#fff', borderRadius: 20, border: '2px solid #DDD9D1', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' } : undefined}>
           {/* Tool popup */}
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
             <div className="px-4 pt-3 pb-2">
@@ -341,7 +341,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           )}
 
           {/* Textarea + typewriter overlay */}
-          <div className={isHero ? 'relative' : 'mx-3 mt-2 relative'} style={isHero ? undefined : { background: '#FAFAFA', borderRadius: '24px' }}>
+          <div className={isHero ? 'relative' : 'mx-3 mt-2 relative'} style={isHero ? undefined : { background: '#F5F5F3', borderRadius: '24px' }}>
             {/* Typewriter overlay */}
             {showTypewriter && twText && (
               <div
@@ -409,7 +409,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               ref={plusRef}
               onClick={() => setToolsOpen(prev => !prev)}
               className="flex items-center justify-center bg-white cursor-pointer hover:bg-[#F5F5F5] active:scale-95"
-              style={{ width: 38, height: 38, borderRadius: 12, border: '1.5px solid rgba(26,26,24,0.1)', transition: 'all .2s', color: 'rgba(26,26,24,0.4)' }}
+              style={{ width: 38, height: 38, borderRadius: 12, border: '1.5px solid #DDD9D1', transition: 'all .2s', color: 'rgba(26,26,24,0.4)' }}
               type="button"
             >
               {uploading ? (
@@ -425,7 +425,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               className="flex items-center justify-center border-none cursor-pointer active:scale-95"
               style={{
                 width: 42, height: 42, borderRadius: 14,
-                background: hasContent && !disabled ? '#D4714E' : '#F5F5F5',
+                background: hasContent && !disabled ? '#D4714E' : '#EDEAE5',
                 color: hasContent && !disabled ? '#fff' : 'rgba(26,26,24,0.25)',
                 transition: 'all .2s',
                 pointerEvents: hasContent && !disabled ? 'auto' : 'none',

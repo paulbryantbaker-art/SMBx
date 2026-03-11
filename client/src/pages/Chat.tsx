@@ -323,7 +323,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
   return (
     <div
       ref={containerRef}
-      className="flex h-dvh overflow-hidden bg-white font-sans"
+      className="flex h-dvh overflow-hidden bg-[#F5F3EF] font-sans"
     >
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
@@ -350,8 +350,8 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
       <div className="flex-1 flex flex-col min-w-0">
         {/* TOPBAR — single logo lives here */}
         <div
-          className="shrink-0 flex items-center justify-between bg-white"
-          style={{ padding: '10px 20px', borderBottom: '1px solid rgba(0,0,0,0.06)' }}
+          className="shrink-0 flex items-center justify-between bg-[#F5F3EF]"
+          style={{ padding: '10px 20px', borderBottom: '1px solid #DDD9D1' }}
         >
           <div className="flex items-center gap-2.5">
             {/* Mobile hamburger */}
@@ -524,7 +524,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
               className="hidden md:flex flex-col"
               style={{
                 ...canvasStyle(),
-                borderLeft: canvasFS ? 'none' : '1px solid rgba(0,0,0,0.06)',
+                borderLeft: canvasFS ? 'none' : '1px solid #DDD9D1',
                 background: '#FFFFFF',
                 transition: canvasW ? 'none' : 'all 0.25s ease',
               }}

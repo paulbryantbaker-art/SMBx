@@ -579,7 +579,7 @@ export default function AppShell() {
   const sidebarContent = (mobile: boolean) => (
     <aside
       className="flex flex-col h-full select-none"
-      style={{ width: mobile ? 280 : 220, background: '#FAFAFA', borderRight: '1px solid rgba(0,0,0,0.04)' }}
+      style={{ width: mobile ? 280 : 220, background: '#EDEAE5', borderRight: '1px solid #DDD9D1' }}
     >
       {/* Logo */}
       <div className="px-5 pt-5 pb-2">
@@ -627,9 +627,9 @@ export default function AppShell() {
                   fontSize: '15px',
                   fontWeight: isActive ? 600 : 500,
                   color: isActive ? '#1A1A18' : 'rgba(26,26,24,0.65)',
-                  background: isActive ? '#FFFFFF' : 'transparent',
+                  background: isActive ? 'rgba(255,255,255,0.55)' : 'transparent',
                   borderRadius: '100px',
-                  border: isActive ? '1px solid rgba(26,26,24,0.1)' : '1px solid transparent',
+                  border: isActive ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
                 }}
                 type="button"
               >
@@ -669,9 +669,9 @@ export default function AppShell() {
                   fontFamily: 'inherit',
                   fontWeight: c.id === activeConvId && viewState === 'chat' ? 600 : 500,
                   color: c.id === activeConvId && viewState === 'chat' ? '#1A1A18' : 'rgba(26,26,24,0.65)',
-                  background: c.id === activeConvId && viewState === 'chat' ? '#FFFFFF' : 'transparent',
+                  background: c.id === activeConvId && viewState === 'chat' ? 'rgba(255,255,255,0.55)' : 'transparent',
                   borderRadius: '12px',
-                  border: c.id === activeConvId && viewState === 'chat' ? '1px solid rgba(26,26,24,0.1)' : '1px solid transparent',
+                  border: c.id === activeConvId && viewState === 'chat' ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
                 }}
                 type="button"
               >
@@ -689,7 +689,7 @@ export default function AppShell() {
       </div>
 
       {/* Footer */}
-      <div className="mt-auto px-4 py-3 space-y-1" style={{ borderTop: '1px solid rgba(26,26,24,0.06)' }}>
+      <div className="mt-auto px-4 py-3 space-y-1" style={{ borderTop: '1px solid #DDD9D1' }}>
         {user && (
           <button
             onClick={() => {
@@ -778,7 +778,7 @@ export default function AppShell() {
   return (
     <div
       id="app-root"
-      className="flex bg-white font-sans"
+      className="flex bg-[#F5F3EF] font-sans"
       style={{
         height: 'var(--app-height, 100vh)',
         position: 'fixed' as const,
@@ -815,8 +815,8 @@ export default function AppShell() {
         )}
         {/* Header — 56px */}
         <header
-          className="flex-shrink-0 flex items-center justify-between h-14 px-6 z-20 bg-white"
-          style={{ borderBottom: '1px solid rgba(26,26,24,0.06)' }}
+          className="flex-shrink-0 flex items-center justify-between h-14 px-6 z-20 bg-[#F5F3EF]"
+          style={{ borderBottom: '1px solid #DDD9D1' }}
         >
           <div className="flex items-center gap-3">
             {viewState === 'chat' ? (
@@ -958,7 +958,7 @@ export default function AppShell() {
               <>
               {/* ═══ SUB-PAGE MOBILE HERO ═══ */}
               <div className="md:hidden">
-                <div className="mx-4 mt-4" style={{ background: '#FAFAFA', borderRadius: 28, border: '1px solid rgba(0,0,0,0.04)', padding: '40px 24px' }}>
+                <div className="mx-4 mt-4" style={{ background: '#EDEAE5', borderRadius: 28, border: '1px solid #DDD9D1', padding: '40px 24px' }}>
                   {page.overline && (
                     <div
                       className="inline-flex items-center gap-1.5 bg-white mb-5"
@@ -993,7 +993,7 @@ export default function AppShell() {
 
               {/* ═══ SUB-PAGE DESKTOP HERO ═══ */}
               <div className="hidden md:block">
-                <div className="mx-6 mt-6" style={{ background: '#FAFAFA', borderRadius: 28, border: '1px solid rgba(0,0,0,0.04)', padding: '56px 52px' }}>
+                <div className="mx-6 mt-6" style={{ background: '#EDEAE5', borderRadius: 28, border: '1px solid #DDD9D1', padding: '56px 52px' }}>
                   <div className="max-w-4xl mx-auto">
                     {page.overline && (
                       <div
@@ -1155,7 +1155,7 @@ export default function AppShell() {
         {canvasOpen && !isMobile && (
           <div
             className="shrink-0 flex flex-col"
-            style={{ borderLeft: '1px solid rgba(26,26,24,0.06)', width: 480, animation: 'slideInRight 0.25s ease' }}
+            style={{ borderLeft: '1px solid #DDD9D1', width: 480, animation: 'slideInRight 0.25s ease' }}
           >
             {canvasMarkdown ? (
               <Canvas

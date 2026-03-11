@@ -6,8 +6,90 @@ import {
   useTransform,
   useMotionValue,
   useSpring,
-  AnimatePresence,
 } from 'framer-motion';
+
+/* ═══════════════════════════════════════════════
+   useReveal — lightweight IntersectionObserver hook
+   ═══════════════════════════════════════════════ */
+export function useReveal(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+}
+
+/* ═══════════════════════════════════════════════
+   RevealSection — wrapper using useReveal
+   ═══════════════════════════════════════════════ */
+export function RevealSection({
+  children,
+  className,
+  style,
+  threshold = 0.15,
+}: {
+  children: ReactNode;
+  className?: string;
+  style?: CSSProperties;
+  threshold?: number;
+}) {
+  const { ref, visible } = useReveal(threshold);
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        ...style,
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'translateY(0)' : 'translateY(24px)',
+        transition: 'opacity 0.7s ease-out, transform 0.7s ease-out',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   RevealList — staggered reveal for list items
+   ═══════════════════════════════════════════════ */
+export function RevealList({
+  children,
+  className,
+  style,
+  staggerMs = 50,
+}: {
+  children: ReactNode[];
+  className?: string;
+  style?: CSSProperties;
+  staggerMs?: number;
+}) {
+  const { ref, visible } = useReveal(0.1);
+  return (
+    <div ref={ref} className={className} style={style}>
+      {children.map((child, i) => (
+        <div
+          key={i}
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? 'translateY(0)' : 'translateY(24px)',
+            transition: `opacity 0.7s ease-out ${i * staggerMs}ms, transform 0.7s ease-out ${i * staggerMs}ms`,
+          }}
+        >
+          {child}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 /* ═══════════════════════════════════════════════
    ScrollReveal — fade-up when scrolled into view
@@ -364,7 +446,7 @@ export function InteractiveCalculator({
   };
 
   return (
-    <div className={className} style={{ background: '#FAFAFA', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '28px 32px' }}>
+    <div className={className} style={{ background: '#FFFFFF', borderRadius: 16, border: '1px solid #DDD9D1', padding: '28px 32px' }}>
       <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)' }}>INTERACTIVE ADD-BACK CALCULATOR</span>
       <p style={{ fontSize: '13px', color: 'rgba(26,26,24,0.4)', margin: '8px 0 16px' }}>Toggle add-backs to see how they impact valuation</p>
 
@@ -471,7 +553,7 @@ export function DSCRCalculator({ className }: { className?: string }) {
   const dscrColor = dscr >= 1.25 ? '#22C55E' : dscr >= 1.0 ? '#EAB308' : '#EF4444';
 
   return (
-    <div className={className} style={{ background: '#FAFAFA', borderRadius: 24, border: '1px solid rgba(26,26,24,0.05)', padding: '28px 32px' }}>
+    <div className={className} style={{ background: '#FFFFFF', borderRadius: 16, border: '1px solid #DDD9D1', padding: '28px 32px' }}>
       <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)' }}>INTERACTIVE DSCR CALCULATOR</span>
       <p style={{ fontSize: '13px', color: 'rgba(26,26,24,0.4)', margin: '8px 0 20px' }}>Drag sliders to model SBA eligibility</p>
 
@@ -546,9 +628,9 @@ export function StatBar({
           animate={inView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.5, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
           style={{
-            background: '#FAFAFA',
+            background: '#FFFFFF',
             borderRadius: 16,
-            border: '1px solid rgba(26,26,24,0.05)',
+            border: '1px solid #DDD9D1',
             padding: '16px 24px',
             flex: '1 1 140px',
             textAlign: 'center',
