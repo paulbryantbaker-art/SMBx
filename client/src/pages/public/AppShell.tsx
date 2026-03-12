@@ -115,17 +115,17 @@ interface PageCopy {
 const PAGE_COPY: Record<TabId, PageCopy> = {
   home: {
     overline: '',
-    headline: 'Hello, I can help you buy or sell any size business.',
-    terraWord: 'any size business.',
-    tagline: '',
+    headline: 'The complete M&A process, automated.',
+    terraWord: 'automated.',
+    tagline: 'ChatGPT for M&A. $49/month. Everything included.',
     chips: [],
     placeholder: 'Tell Yulia about your deal...',
   },
   sell: {
     overline: 'Strengthen & Sell',
-    headline: 'Your exit. Your way. Your timeline.',
-    terraWord: 'timeline.',
-    tagline: 'Selling a business is the biggest financial event of most owners\u2019 lives. It takes 6 to 24 months. Every month of preparation can move your sale price 5\u201315%. Yulia is with you for every one of them.',
+    headline: 'Your exit. Professionally managed.',
+    terraWord: 'managed.',
+    tagline: 'From first valuation to signed closing docs \u2014 Yulia runs the complete sell-side process. $49/month.',
     chips: [
       "What's my business worth right now?",
       "What add-backs am I missing?",
@@ -137,9 +137,9 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
   },
   buy: {
     overline: 'Search & Acquire',
-    headline: 'Find it. Evaluate it. Close it. Grow it.',
-    terraWord: 'Grow it.',
-    tagline: 'Bring any deal from anywhere \u2014 a BizBuySell listing, a broker\u2019s teaser, something you heard about. Yulia runs institutional analysis and tells you: pursue or pass.',
+    headline: 'Find it. Model it. Close it.',
+    terraWord: 'Close it.',
+    tagline: 'The complete buy-side process \u2014 thesis to close to integration. $49/month.',
     chips: [
       "I found a listing \u2014 is the asking price justified?",
       'Can I finance a $2M dental practice with SBA?',
@@ -165,9 +165,9 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
   },
   advisors: {
     overline: 'For Deal Professionals',
-    headline: 'Your first 3 client journeys are free.',
-    terraWord: 'free.',
-    tagline: 'Run a full deal through the platform \u2014 valuation, CIM, market intelligence, buyer qualification \u2014 without committing a dollar. See what takes 30 minutes instead of 12 hours.',
+    headline: 'Your expertise closes deals. Now close more.',
+    terraWord: 'more.',
+    tagline: '$49/month per seat. Every deliverable included. See what takes 30 minutes instead of 12 hours.',
     chips: [
       'Package a new listing for my client',
       'Pre-screen a buyer for SBA eligibility',
@@ -178,12 +178,12 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
   },
   pricing: {
     overline: 'Pricing',
-    headline: 'Start free. Go deeper when you\u2019re ready.',
-    terraWord: 'ready.',
-    tagline: 'Everything you need to understand your deal is free. When you\u2019re ready for premium deliverables, you pay per document \u2014 the right intelligence at the right stage of your deal.',
+    headline: 'Simple pricing for serious dealmakers.',
+    terraWord: 'dealmakers.',
+    tagline: 'One price. Every deliverable. Every journey. $49/month. No meter running.',
     chips: [
-      "What's free?",
-      'How does the wallet work?',
+      "What's included?",
+      'How is this different from ChatGPT?',
       'See full pricing',
       'Start a free analysis',
     ],

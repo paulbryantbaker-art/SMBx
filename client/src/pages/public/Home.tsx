@@ -715,8 +715,8 @@ export default function Home() {
           <div className="home-scroll">
             {/* ── SECTION 0: HERO ── */}
             <section className="home-hero">
-              <h1 className="home-greeting">{getGreeting()}.</h1>
-              <p className="home-greeting-sub">Tell me about your deal.</p>
+              <h1 className="home-greeting">The complete M&amp;A process, automated.</h1>
+              <p className="home-greeting-sub">ChatGPT for M&amp;A. $49/month. Everything included.</p>
 
               <div className="home-hero-dock">
                 <ChatDock ref={heroDockRef} onSend={handleHeroSend} variant="hero" />
@@ -876,7 +876,7 @@ export default function Home() {
             {/* ── SECTION 7: FINAL CTA ── */}
             <div className="home-final-cta">
               <h2 className="home-cta-heading">Your next deal starts with a conversation.</h2>
-              <p className="home-cta-sub">No retainer. No meeting. Just intelligence.</p>
+              <p className="home-cta-sub">One price. Every deliverable. Every journey. $49/month.</p>
               <button className="home-cta-btn" onClick={scrollToChat}>
                 Talk to Yulia
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

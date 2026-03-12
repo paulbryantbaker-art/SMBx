@@ -44,9 +44,9 @@ export default function Terms() {
           <div>
             <h2 className="font-sans text-xl font-bold text-[#1A1A18] mb-3 m-0">Payments</h2>
             <p className="m-0">
-              smbx.ai uses a pay-as-you-go wallet model. Credits are purchased in advance and
-              consumed as you use paid features. Credits do not expire. Refunds are available
-              if our work product does not meet professional standards.
+              smbx.ai offers a subscription service at $49/month. Your subscription includes access to
+              all deliverables and features. You may cancel anytime with no cancellation fees.
+              Refunds are available if our work product does not meet professional standards.
             </p>
           </div>
 
