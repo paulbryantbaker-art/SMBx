@@ -15,15 +15,15 @@ const T = {
 };
 
 const SELL_CHIPS = [
-  { label: 'What\u2019s my business actually worth?', message: 'What\u2019s my business actually worth? I want to understand what it might be worth in today\u2019s market.' },
-  { label: 'Find the add-backs I\u2019m missing', message: 'Find the add-backs I\u2019m missing. I want to make sure my financials reflect the true earnings of my business.' },
-  { label: 'Walk me through a 12-month exit plan', message: 'Walk me through a 12-month exit plan. I want to understand the full process from start to close.' },
-  { label: 'What would a buyer pay for my [industry] company?', message: 'What would a buyer pay for my company? I want to understand what it might be worth in today\u2019s market.' },
+  { label: 'What would a buyer pay for my business?', message: 'What would a buyer pay for my business? I want to understand what it might be worth in today\u2019s market.' },
+  { label: 'Walk me through selling my company', message: 'Walk me through selling my company. I want to understand the full process from start to close.' },
+  { label: 'What are the add-backs I should be claiming?', message: 'What are the add-backs I should be claiming? I want to make sure my financials reflect the true earnings of my business.' },
+  { label: 'How long will it take to sell?', message: 'How long will it take to sell my business? I want to understand the realistic timeline and what affects it.' },
 ];
 
 const JOURNEY_STAGES = [
-  { title: 'Understand your number', desc: 'Preliminary valuation range based on your financials, industry multiples, and regional market data.' },
-  { title: 'Know your market', desc: 'Competitive landscape, buyer demand, and how businesses like yours are trading in your metro.' },
+  { title: 'Understand your number', desc: 'Preliminary valuation range based on your financials, industry multiples, and regional market data.', free: true },
+  { title: 'Know your market', desc: 'Competitive landscape, buyer demand, and how businesses like yours are trading in your metro.', free: true },
   { title: 'Prepare your story', desc: 'Financial normalization, add-back identification, and the narrative that maximizes your sale price.' },
   { title: 'Find your buyer', desc: 'Buyer qualification, SBA pre-screening, and matching to the right type of acquirer for your business.' },
   { title: 'Close with confidence', desc: 'Deal structuring, negotiation intelligence, and diligence preparation to get from LOI to close.' },
@@ -306,9 +306,9 @@ export default function Sell() {
 
       {/* ═══ HERO ═══ */}
       <section className="sell-hero">
-        <h1>Your exit. Professionally managed.</h1>
+        <h1>Know your number before you negotiate.</h1>
         <p className="sell-hero-sub">
-          From first valuation to signed closing docs &mdash; Yulia runs the complete sell-side process. $49/month.
+          Most business owners have never seen a real valuation of their company. smbX.ai gives you the market intelligence, financial analysis, and deal preparation that used to require a $15K engagement &mdash; starting with a conversation.
         </p>
         <button className="sell-btn-primary" onClick={startSell}>
           Start with your valuation
@@ -330,34 +330,34 @@ export default function Sell() {
         </div>
       </section>
 
-      {/* ═══ SECTION 1: FEATURE CALLOUTS ═══ */}
+      {/* ═══ SECTION 1: WHAT YULIA ANALYZES ═══ */}
       <hr className="sell-divider" />
       <section className="sell-section">
-        <p className="sell-overline">What Yulia does for sellers</p>
+        <p className="sell-overline">What Yulia analyzes for sellers</p>
         <h2 className="sell-heading">The intelligence behind your asking price.</h2>
         <div className="sell-analyze">
           <div className="sell-analyze-card">
-            <h3>The add-back discovery</h3>
+            <h3>Valuation &amp; multiples</h3>
             <p>
-              Yulia works through every owner expense, one-time item, and non-cash charge. Most sellers find $50K&ndash;$400K in hidden value before the first buyer conversation.
+              Industry-specific multiples calibrated to your deal size, geography, and business characteristics. Not a generic calculator &mdash; a methodology that accounts for what buyers in your market are actually paying.
             </p>
           </div>
           <div className="sell-analyze-card">
-            <h3>The Living CIM</h3>
+            <h3>Add-back identification</h3>
             <p>
-              Your Confidential Information Memorandum updates automatically as your financials improve. Buyers get tiered access &mdash; blind profile, teaser, or full. Every view is tracked.
+              Most owners leave money on the table. Yulia identifies discretionary expenses, one-time costs, owner benefits, and normalization adjustments that increase your effective earnings &mdash; and your sale price.
             </p>
           </div>
           <div className="sell-analyze-card">
-            <h3>Tax structure intelligence</h3>
+            <h3>Market intelligence</h3>
             <p>
-              Stock vs. asset sale. &sect;453 installment math. C-Corp double-tax exposure. Yulia surfaces the tax implications before you sign anything &mdash; not after.
+              How many competitors operate in your metro. What the buyer demand looks like. Whether PE firms are consolidating your industry. The context that determines whether it&apos;s a seller&apos;s market or a buyer&apos;s market for your specific business.
             </p>
           </div>
           <div className="sell-analyze-card">
-            <h3>Negotiation intelligence</h3>
+            <h3>Deal readiness</h3>
             <p>
-              Working capital peg traps. Earnout trigger language. Reps and warranties exposure. Yulia flags the terms that move your net proceeds before you accept the LOI.
+              SBA bankability modeling, buyer qualification analysis, and deal structure recommendations. Know which buyers can actually close &mdash; and which deal structures maximize your net proceeds.
             </p>
           </div>
         </div>
@@ -368,7 +368,7 @@ export default function Sell() {
       <section className="sell-section">
         <h2 className="sell-heading">Your selling journey with smbX.ai</h2>
         <p className="sell-body" style={{ marginBottom: 32 }}>
-          From first question to close, Yulia walks with you through every stage. Everything included at $49/month.
+          From first question to close, Yulia walks with you through every stage. The first two steps are free &mdash; no account required.
         </p>
         <div className="sell-timeline">
           {JOURNEY_STAGES.map((stage, i) => (
@@ -378,7 +378,10 @@ export default function Sell() {
                 <div className="sell-timeline-line" />
               </div>
               <div className="sell-timeline-content">
-                <h3>{stage.title}</h3>
+                <h3>
+                  {stage.title}
+                  {stage.free && <span className="sell-free-badge">Free</span>}
+                </h3>
                 <p>{stage.desc}</p>
               </div>
             </div>
@@ -403,7 +406,7 @@ export default function Sell() {
       {/* ═══ FINAL CTA ═══ */}
       <div className="sell-final-cta">
         <h2 className="sell-cta-heading">Your business has a number. Let&apos;s find it.</h2>
-        <p className="sell-cta-sub">$49/month. Everything included. No per-deliverable charges.</p>
+        <p className="sell-cta-sub">No retainer. No commitment. Just intelligence.</p>
         <button className="sell-btn-primary" onClick={startSell}>
           Talk to Yulia about selling
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

@@ -25,15 +25,15 @@ export default function AdvisorsBelow({ onChipClick }: AdvisorsBelowProps) {
           <RevealSection>
             <span style={labelStyle}>THE OFFER</span>
             <h2 style={h2Style} className="md:text-[48px]">
-              $49/month per seat. Everything included.
+              Three deals. Completely free. Then decide.
             </h2>
           </RevealSection>
 
           <RevealSection style={{ marginTop: 32 }}>
             <div className="space-y-6" style={bodyStyle}>
-              <p>We don&apos;t ask you to subscribe to something you haven&apos;t tried. Start with a 7-day free trial. No credit card required.</p>
-              <p>Run complete client journeys through smbX.ai &mdash; valuations, CIMs, market reports, buyer qualification, the whole thing. White-label everything. Your clients see your deliverables, your brand, your expertise.</p>
-              <p>A 5-person advisory firm pays $245/month total. No per-firm licensing. No seat minimums.</p>
+              <p>We don&apos;t ask you to subscribe to something you haven&apos;t tried. We don&apos;t demo it in a sales call. We don&apos;t send you a deck. We let you use it.</p>
+              <p>Run three complete client journeys through smbX.ai &mdash; valuations, CIMs, market reports, buyer qualification, the whole thing &mdash; free. White-label everything. Your clients see your deliverables, your brand, your expertise.</p>
+              <p>After three journeys, it works like everyone else&apos;s wallet: fund as you go, spend per deliverable. No per-seat licensing. No monthly minimum.</p>
               <p style={{ color: '#1A1A18', fontWeight: 600 }}>An advisor who sees Yulia generate a CIM in 30 minutes vs. 3 weeks doesn&apos;t need a sales pitch.</p>
             </div>
           </RevealSection>
@@ -153,7 +153,7 @@ export default function AdvisorsBelow({ onChipClick }: AdvisorsBelowProps) {
 
           <RevealSection>
             <div className="text-center">
-              <p style={{ fontSize: '16px', color: 'rgba(26,26,24,0.5)', marginBottom: 16 }}>Tell Yulia about the deal you&apos;re working on &rarr; 7-day free trial</p>
+              <p style={{ fontSize: '16px', color: 'rgba(26,26,24,0.5)', marginBottom: 16 }}>Tell Yulia about the deal you&apos;re working on &rarr; 3 free journeys</p>
               <MagneticButton
                 onClick={() => onChipClick("I'm an advisor \u2014 tell me about partnerships")}
                 style={{ background: '#1A1A18', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}

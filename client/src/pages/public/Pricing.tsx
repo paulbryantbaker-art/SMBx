@@ -17,43 +17,49 @@ const T = {
 
 /* ═══ DATA ═══ */
 
-const CHECKLIST = [
-  'Unlimited Yulia conversations',
-  'All 4 journeys: Sell, Buy, Raise, Integrate',
-  'Business valuation with full methodology',
-  'Living CIM \u2014 updates as your financials improve',
-  'SBA financing model (automatic for eligible deals)',
-  'LOI drafting with negotiation intelligence',
-  'Due diligence checklist, stage-appropriate',
-  'Quality of Earnings analysis',
-  'Financial model with acquisition returns',
-  'Tax structure intelligence (stock vs. asset, \u00A7453, C-Corp)',
-  'Deal data room with auto-filing and versioning',
-  '180-day PMI plan on deal close',
-  'Bizestimate \u2014 living valuation range, always free',
-  'Multi-party deal room (attorney, CPA, lender access)',
+const FREE_ITEMS = [
+  { title: 'Unlimited conversation with Yulia', desc: 'Ask anything about your deal, your market, or the M&A process. Yulia\u2019s advisory conversation has no limits.' },
+  { title: 'Business classification', desc: 'Yulia identifies your league, deal size range, and the appropriate analytical framework for your specific situation.' },
+  { title: 'Preliminary valuation range', desc: 'An initial estimate based on industry multiples, your financial profile, and current market conditions. Sourced and methodical.' },
+  { title: 'Market overview', desc: 'Industry dynamics, competitive landscape, and regional context for your deal.' },
+  { title: 'Add-back identification', desc: 'Common adjustments that increase your business\u2019s actual earnings \u2014 the value most owners don\u2019t know they have.' },
+  { title: 'SBA pre-qualification check', desc: 'Whether your deal qualifies for SBA financing and what that means for your buyer pool.' },
+];
+
+const SELL_DELIVERABLES = [
+  { title: 'Business Valuation Report', price: '350', desc: 'Multi-methodology valuation with defensible logic, comparable transaction data, and specific recommendations for maximizing your sale price. Built to withstand buyer scrutiny.' },
+  { title: 'Market Intelligence Report', price: '200', desc: 'Comprehensive analysis of your industry, competitive landscape, buyer activity, and market conditions \u2014 localized to your metro. The foundation of a well-positioned listing.' },
+  { title: 'Confidential Information Memorandum (CIM)', price: '700', desc: 'A professional deal book presenting your business to potential buyers \u2014 financial summary, growth narrative, market position, and investment thesis.' },
+  { title: 'LOI Draft', price: '125', desc: 'Letter of Intent preparation with recommended terms, negotiation strategy, and deal structure optimization through close.' },
+];
+
+const BUY_DELIVERABLES = [
+  { title: 'Deal Screening Memo', price: '150', desc: 'Rapid target evaluation \u2014 financial scoring, thesis fit analysis, red flag identification, and pursue/pass recommendation.' },
+  { title: 'Financial Model', price: '300', desc: 'Deep financial modeling \u2014 DSCR, ROI projections, risk-adjusted returns, and SBA financing scenarios for a specific acquisition target.' },
+  { title: 'QoE Lite', price: '500', desc: 'Pre-diligence quality of earnings analysis, red flag identification, and data room preparation guidance before you engage outside professionals.' },
+  { title: 'Working Capital Analysis', price: '150', desc: 'Working capital peg calculation, seasonal adjustment modeling, and closing adjustment framework.' },
 ];
 
 const FAQS = [
   {
-    q: 'Is the Bizestimate really free?',
-    a: 'Yes. Always. It\u2019s how you know what your business is worth before you spend anything.',
-  },
-  {
-    q: 'What happened to per-deliverable pricing?',
-    a: 'Gone. Every deliverable Yulia can generate is included in your $49/month. You get the valuation, the CIM, the LOI, the SBA model \u2014 all of it.',
+    q: 'Is the free analysis really free?',
+    a: 'Yes. The conversation and foundational analysis are genuinely free \u2014 no credit card, no trial period, no bait-and-switch. We built it this way because the underlying data comes from public sources. What you pay for is the personalized synthesis \u2014 intelligence tailored to your specific deal, market, and situation.',
   },
   {
     q: 'How is this different from ChatGPT?',
-    a: 'ChatGPT knows about deals. Yulia knows your deal. She remembers your financials, your stage, what you\u2019ve discussed, and what comes next. She runs a 22-gate structured process \u2014 not a chat window. And she generates documents you can hand to a bank or attorney, not text you have to format yourself.',
+    a: 'ChatGPT is a general-purpose language model. smbX.ai is a purpose-built deal intelligence platform. Yulia follows a structured seven-layer methodology, synthesizes data from authoritative government sources (Census, BLS, FRED, SEC EDGAR), and delivers traceable analysis calibrated to your specific deal. The difference is the difference between a search engine and a research department.',
   },
   {
     q: 'What if I\u2019m working with a broker or advisor?',
-    a: 'Even better. Walk into every advisor conversation with your valuation done, your add-backs identified, your CIM drafted. Your advisor focuses on what advisors do best. Yulia handles the prep work.',
+    a: 'Great \u2014 they should be using smbX.ai too. Our intelligence complements advisory relationships. Share your analysis with your advisor to accelerate the engagement, or invite them directly into the platform. Many brokers use smbX.ai to package deals and generate client-ready deliverables.',
   },
   {
-    q: 'Can I cancel anytime?',
-    a: 'Yes. No contracts. No cancellation fees. Your deal data is yours \u2014 export anytime.',
+    q: 'Can I use smbX.ai deliverables with my clients?',
+    a: 'Yes. All deliverables can be white-labeled with your firm\u2019s branding. The analysis is yours to use however it serves your practice and your clients.',
+  },
+  {
+    q: 'What if I just want to explore?',
+    a: 'That\u2019s exactly how most people start. Tell Yulia about a deal \u2014 real or hypothetical \u2014 and see what the intelligence looks like. You\u2019ll know within five minutes whether this is useful for you.',
   },
 ];
 
@@ -97,6 +103,11 @@ export default function Pricing() {
         .price-divider {
           max-width: 960px; margin: 0 auto;
           border: none; border-top: 1px solid ${T.border};
+        }
+
+        .price-overline {
+          font-size: 11px; font-weight: 600; text-transform: uppercase;
+          letter-spacing: 0.12em; color: ${T.terra}; margin: 0 0 12px;
         }
 
         .price-heading {
@@ -147,77 +158,121 @@ export default function Pricing() {
         /* ── Hero ── */
         .price-hero {
           max-width: 960px; margin: 0 auto; width: 100%;
-          padding: 80px 32px 60px; text-align: center;
+          padding: 80px 32px 60px;
         }
         @media (max-width: 768px) { .price-hero { padding: 48px 20px 40px; } }
 
         .price-hero h1 {
           font-size: 40px; font-weight: 700; letter-spacing: -0.03em;
-          color: ${T.text}; margin: 0 0 16px; line-height: 1.15;
+          color: ${T.text}; margin: 0 0 24px; line-height: 1.15;
+          max-width: 640px;
         }
         @media (max-width: 768px) { .price-hero h1 { font-size: 30px; } }
 
         .price-hero-sub {
           font-size: 18px; line-height: 1.6; color: ${T.sub};
-          margin: 0 auto; max-width: 600px;
+          margin: 0 0 28px; max-width: 640px;
         }
         @media (max-width: 768px) { .price-hero-sub { font-size: 16px; } }
 
-        /* ── Pricing card ── */
-        .price-card {
-          max-width: 560px; margin: 0 auto;
-          background: #FFFFFF; border-radius: 20px;
+        .price-callout {
+          display: inline-block;
+          background: ${T.terraSoft}; border-left: 3px solid ${T.terra};
+          padding: 16px 20px; border-radius: 0 12px 12px 0;
+          font-size: 16px; font-weight: 600; color: ${T.text};
+          line-height: 1.5; max-width: 600px;
+        }
+        @media (max-width: 768px) { .price-callout { font-size: 15px; padding: 14px 16px; } }
+
+        /* ── Free cards ── */
+        .price-free-grid {
+          display: grid; grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+        }
+        @media (max-width: 640px) { .price-free-grid { grid-template-columns: 1fr; } }
+
+        .price-free-card {
+          background: #FFFFFF; border-radius: 16px;
           border: 1px solid rgba(26,26,24,0.08);
-          padding: 48px 40px;
-          box-shadow: 0 4px 24px rgba(26,26,24,0.10);
+          padding: 24px; box-shadow: 0 2px 8px rgba(26,26,24,0.07);
         }
-        @media (max-width: 768px) { .price-card { padding: 36px 24px; border-radius: 16px; } }
-
-        .price-amount {
-          font-size: 56px; font-weight: 800; letter-spacing: -0.04em;
-          color: ${T.text}; margin: 0; line-height: 1;
+        .price-free-card h3 {
+          font-size: 15px; font-weight: 700; color: ${T.text};
+          margin: 0 0 8px; display: flex; align-items: center; gap: 8px;
         }
-        .price-amount-period {
-          font-size: 20px; font-weight: 500; color: ${T.muted};
+        .price-free-badge {
+          font-size: 10px; font-weight: 700; text-transform: uppercase;
+          letter-spacing: 0.08em; color: ${T.terra};
+          background: ${T.terraSoft}; padding: 2px 7px;
+          border-radius: 5px;
         }
-        @media (max-width: 768px) { .price-amount { font-size: 44px; } }
-
-        .price-card-sub {
-          font-size: 16px; color: ${T.sub}; margin: 8px 0 32px;
+        .price-free-card p {
+          font-size: 14px; line-height: 1.65; color: ${T.sub}; margin: 0;
         }
 
-        .price-checklist {
-          list-style: none; padding: 0; margin: 0 0 32px;
-          display: flex; flex-direction: column; gap: 12px;
-        }
-        .price-checklist li {
-          display: flex; align-items: flex-start; gap: 10px;
-          font-size: 15px; line-height: 1.5; color: ${T.sub};
-        }
-        .price-check {
-          flex-shrink: 0; margin-top: 2px;
-          color: ${T.terra}; font-weight: 700; font-size: 16px;
+        /* ── Premium deliverables ── */
+        .price-journey-label {
+          font-size: 13px; font-weight: 700; text-transform: uppercase;
+          letter-spacing: 0.1em; color: ${T.terra};
+          margin: 0 0 16px; padding-bottom: 8px;
+          border-bottom: 2px solid ${T.terraSoft};
         }
 
-        .price-card-trial {
-          font-size: 13px; color: ${T.muted}; margin: 16px 0 0;
-          text-align: center;
+        .price-deliverables {
+          display: flex; flex-direction: column; gap: 16px;
+          margin-bottom: 40px;
+        }
+        .price-deliverables:last-child { margin-bottom: 0; }
+
+        .price-deliverable {
+          background: #FFFFFF; border-radius: 16px;
+          border: 1px solid rgba(26,26,24,0.08);
+          padding: 24px; box-shadow: 0 2px 8px rgba(26,26,24,0.07);
+          display: flex; flex-direction: column; gap: 8px;
+        }
+        .price-deliverable-header {
+          display: flex; justify-content: space-between; align-items: baseline;
+          flex-wrap: wrap; gap: 8px;
+        }
+        .price-deliverable h3 {
+          font-size: 16px; font-weight: 700; color: ${T.text};
+          margin: 0; letter-spacing: -0.01em;
+        }
+        .price-deliverable-price {
+          font-size: 15px; font-weight: 700; color: ${T.terra};
+          white-space: nowrap;
+        }
+        .price-deliverable p {
+          font-size: 14px; line-height: 1.65; color: ${T.sub}; margin: 0;
         }
 
-        /* ── Comparison callout ── */
-        .price-comparison {
-          max-width: 720px; margin: 0 auto;
-        }
-
-        /* ── Team callout ── */
-        .price-team {
+        /* ── Wallet ── */
+        .price-wallet {
           background: #FFFFFF; border-radius: 20px;
           border: 1px solid rgba(26,26,24,0.08);
           padding: 36px 32px;
           box-shadow: 0 2px 12px rgba(26,26,24,0.08);
           max-width: 720px;
         }
-        @media (max-width: 768px) { .price-team { padding: 28px 20px; border-radius: 16px; } }
+        @media (max-width: 768px) { .price-wallet { padding: 28px 20px; border-radius: 16px; } }
+
+        /* ── Advisor teaser ── */
+        .price-advisor-box {
+          background: #FFFFFF; border-radius: 20px;
+          border: 1px solid rgba(26,26,24,0.08);
+          padding: 36px 32px;
+          box-shadow: 0 2px 12px rgba(26,26,24,0.08);
+          max-width: 720px;
+        }
+        @media (max-width: 768px) { .price-advisor-box { padding: 28px 20px; border-radius: 16px; } }
+
+        .price-advisor-link {
+          display: inline-flex; align-items: center; gap: 6px;
+          font-size: 15px; font-weight: 600; color: ${T.terra};
+          text-decoration: none; margin-top: 8px;
+          transition: color 0.15s;
+        }
+        .price-advisor-link:hover { color: ${T.terraHover}; }
 
         /* ── FAQ ── */
         .price-faq-list {
@@ -259,7 +314,6 @@ export default function Pricing() {
           cursor: pointer; font-family: inherit;
           box-shadow: 0 2px 8px rgba(212,113,78,0.3);
           transition: all 0.15s; text-decoration: none;
-          width: 100%; justify-content: center;
         }
         .price-btn-primary:hover { background: ${T.terraHover}; }
 
@@ -279,16 +333,6 @@ export default function Pricing() {
         .price-cta-sub {
           font-size: 16px; color: ${T.muted}; margin: 0 0 28px;
         }
-        .price-cta-btn {
-          display: inline-flex; align-items: center; gap: 8px;
-          padding: 14px 32px; border-radius: 12px;
-          background: ${T.terra}; color: #fff;
-          font-size: 15px; font-weight: 600; border: none;
-          cursor: pointer; font-family: inherit;
-          box-shadow: 0 2px 8px rgba(212,113,78,0.3);
-          transition: all 0.15s;
-        }
-        .price-cta-btn:hover { background: ${T.terraHover}; }
 
         /* ── Footer ── */
         .price-footer {
@@ -342,62 +386,139 @@ export default function Pricing() {
 
       {/* ═══ HERO ═══ */}
       <section className="price-hero">
-        <h1>Simple pricing for serious dealmakers.</h1>
+        <h1>If you could Google it, it should be free.</h1>
         <p className="price-hero-sub">
-          One price. Every deliverable. Every journey. No meter running.
+          The conversation with Yulia is always free. Foundational analysis &mdash; classification, preliminary valuation, market overview &mdash; is free because the underlying data comes from authoritative public sources.
         </p>
+        <p className="price-hero-sub" style={{ marginBottom: 32 }}>
+          What you invest in is personalized intelligence: contextualized to your deal, localized to your market, and built to help you make decisions with confidence.
+        </p>
+        <div className="price-callout">
+          Free: what the data says. Premium: what the data means for your deal.
+        </div>
       </section>
 
-      {/* ═══ PRICING CARD ═══ */}
-      <section className="price-section" style={{ paddingTop: 0 }}>
-        <div className="price-card">
-          <p className="price-amount">
-            $49 <span className="price-amount-period">/ month</span>
+      {/* ═══ SECTION 1: WHAT'S FREE ═══ */}
+      <hr className="price-divider" />
+      <section className="price-section">
+        <h2 className="price-heading">Start here. It&apos;s on us.</h2>
+        <p className="price-body" style={{ marginBottom: 28 }}>
+          Every deal starts with a conversation &mdash; and the first analysis is always free. No credit card. No signup wall. Just tell Yulia about your deal.
+        </p>
+        <p className="price-body" style={{ fontSize: 13, color: T.faint, marginBottom: 28 }}>
+          Prices shown are base rates. Prices scale with deal complexity (league multiplier).
+        </p>
+        <div className="price-free-grid">
+          {FREE_ITEMS.map((item, i) => (
+            <div key={i} className="price-free-card">
+              <h3>
+                {item.title}
+                <span className="price-free-badge">Free</span>
+              </h3>
+              <p>{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ SECTION 2: PREMIUM INTELLIGENCE ═══ */}
+      <hr className="price-divider" />
+      <section className="price-section">
+        <h2 className="price-heading">Go deeper when your deal is ready.</h2>
+        <p className="price-body" style={{ marginBottom: 32 }}>
+          Premium deliverables are generated when you need them &mdash; no subscriptions, no retainers. Your investment grows with your deal, one step at a time.
+        </p>
+
+        {/* Sell journey */}
+        <div className="price-journey-label">Sell Journey</div>
+        <div className="price-deliverables">
+          {SELL_DELIVERABLES.map((d, i) => (
+            <div key={i} className="price-deliverable">
+              <div className="price-deliverable-header">
+                <h3>{d.title}</h3>
+                <span className="price-deliverable-price">${d.price}</span>
+              </div>
+              <p>{d.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Buy journey */}
+        <div className="price-journey-label">Buy Journey</div>
+        <div className="price-deliverables">
+          {BUY_DELIVERABLES.map((d, i) => (
+            <div key={i} className="price-deliverable">
+              <div className="price-deliverable-header">
+                <h3>{d.title}</h3>
+                <span className="price-deliverable-price">${d.price}</span>
+              </div>
+              <p>{d.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ SECTION 3: WALLET ═══ */}
+      <hr className="price-divider" />
+      <section className="price-section">
+        <div className="price-wallet">
+          <h2 className="price-heading" style={{ marginBottom: 16 }}>Pay as you go. No subscriptions. No surprises.</h2>
+          <p className="price-body" style={{ marginBottom: 16 }}>
+            smbX.ai uses a wallet system. Add funds when you&apos;re ready for a premium deliverable &mdash; Yulia will let you know exactly what it costs before you commit. No recurring charges, no contracts, no hidden fees.
           </p>
-          <p className="price-card-sub">Everything included.</p>
+          <p className="price-body" style={{ marginBottom: 24 }}>
+            Your wallet balance carries forward across deals. If you&apos;re an advisor running multiple engagements, your funds work across all of them.
+          </p>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+              <thead>
+                <tr style={{ borderBottom: `2px solid ${T.border}` }}>
+                  <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 600, color: T.text }}>Block</th>
+                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: T.text }}>Price</th>
+                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: T.text }}>Bonus</th>
+                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: T.text }}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { name: 'Exploratory', price: '$50', bonus: '\u2014', total: '$50' },
+                  { name: 'Early Commit', price: '$100', bonus: '+$5', total: '$105' },
+                  { name: 'Active Deal', price: '$250', bonus: '+$15', total: '$265' },
+                  { name: 'Serious', price: '$500', bonus: '+$40', total: '$540' },
+                  { name: 'Full Journey', price: '$1,000', bonus: '+$100', total: '$1,100' },
+                  { name: 'Advisor', price: '$2,500', bonus: '+$300', total: '$2,800' },
+                ].map((row, i) => (
+                  <tr key={i} style={{ borderBottom: `1px solid ${T.border}` }}>
+                    <td style={{ padding: '10px 12px', fontWeight: 500, color: T.text }}>{row.name}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', color: T.sub }}>{row.price}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', color: T.terra, fontWeight: 600 }}>{row.bonus}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 600, color: T.text }}>{row.total}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-          <ul className="price-checklist">
-            {CHECKLIST.map((item, i) => (
-              <li key={i}>
-                <span className="price-check">{'\u2713'}</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-
-          <button className="price-btn-primary" onClick={talkToYulia}>
-            Start for free
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      {/* ═══ SECTION 4: ADVISOR PRICING ═══ */}
+      <hr className="price-divider" />
+      <section className="price-section">
+        <div className="price-advisor-box">
+          <h2 className="price-heading" style={{ marginBottom: 16 }}>Advisor and team pricing</h2>
+          <p className="price-body" style={{ marginBottom: 0 }}>
+            Running multiple engagements? Working with a team? We&apos;re building advisor-specific pricing that reflects how professionals actually use the platform &mdash; including volume considerations, white-label options, and multi-user access.
+          </p>
+          <a href="/advisors" className="price-advisor-link">
+            Talk to us about advisor pricing
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
             </svg>
-          </button>
-          <p className="price-card-trial">7-day free trial. No credit card required.</p>
+          </a>
         </div>
       </section>
 
-      {/* ═══ COMPARISON CALLOUT ═══ */}
-      <hr className="price-divider" />
-      <section className="price-section">
-        <div className="price-comparison">
-          <h2 className="price-heading">ChatGPT will tell you what a CIM is. Yulia will write yours.</h2>
-          <p className="price-body">
-            General AI can explain M&amp;A concepts. Yulia runs the process &mdash; with your numbers, at your stage, with your specific deal in memory. The methodology, the deliverables, the sequence. $49/month is what that&apos;s worth.
-          </p>
-        </div>
-      </section>
-
-      {/* ═══ TEAM CALLOUT ═══ */}
-      <hr className="price-divider" />
-      <section className="price-section">
-        <div className="price-team">
-          <h2 className="price-heading" style={{ marginBottom: 16 }}>Working with a team?</h2>
-          <p className="price-body" style={{ marginBottom: 0 }}>
-            $49/month per person. An advisory firm with 5 advisors pays $245/month total. No per-firm licensing. No seat minimums.
-          </p>
-        </div>
-      </section>
-
-      {/* ═══ FAQ ═══ */}
+      {/* ═══ SECTION 5: FAQ ═══ */}
       <hr className="price-divider" />
       <section className="price-section">
         <h2 className="price-heading">Common questions</h2>
@@ -408,11 +529,11 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* ═══ FINAL CTA ═══ */}
+      {/* ═══ SECTION 6: FINAL CTA ═══ */}
       <div className="price-final-cta">
         <h2 className="price-cta-heading">Start free. Go deeper when you&apos;re ready.</h2>
-        <p className="price-cta-sub">7-day free trial. No credit card required.</p>
-        <button className="price-cta-btn" onClick={talkToYulia}>
+        <p className="price-cta-sub">No credit card. No signup. Just intelligence.</p>
+        <button className="price-btn-primary" onClick={talkToYulia}>
           Talk to Yulia
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />

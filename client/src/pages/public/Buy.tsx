@@ -15,15 +15,15 @@ const T = {
 };
 
 const BUY_CHIPS = [
-  { label: 'Is this $2M listing worth pursuing?', message: 'I\u2019m looking at a $2M listing. Help me analyze whether it\u2019s worth pursuing.' },
-  { label: 'What would SBA financing look like on this deal?', message: 'What would SBA financing look like on this deal? Help me understand what\u2019s feasible.' },
-  { label: 'Model the returns on a $3M HVAC acquisition', message: 'Help me model the returns on a $3M HVAC acquisition. I want to see the numbers.' },
-  { label: 'Walk me through due diligence on a service business', message: 'Walk me through due diligence on a service business. I want to understand the full process.' },
+  { label: 'Find acquisition targets in my industry', message: 'Help me find acquisition targets in my industry. I\u2019m looking at potential businesses to buy.' },
+  { label: 'Analyze a business I\u2019m considering', message: 'I\u2019m looking at a specific business to buy. Help me analyze whether it\u2019s a good deal.' },
+  { label: 'Can I finance this with an SBA loan?', message: 'Can I finance this acquisition with an SBA loan? Help me understand what\u2019s feasible.' },
+  { label: 'What should I offer?', message: 'I\u2019m preparing an offer for a business. Help me understand what the right price and structure looks like.' },
 ];
 
 const JOURNEY_STAGES = [
-  { title: 'Screen the market', desc: 'Industry landscape, competitive density, and where the opportunities are in your target sector and geography.' },
-  { title: 'Evaluate the target', desc: 'Financial analysis, valuation benchmarking, and red-flag identification for the specific business you\u2019re considering.' },
+  { title: 'Screen the market', desc: 'Industry landscape, competitive density, and where the opportunities are in your target sector and geography.', free: true },
+  { title: 'Evaluate the target', desc: 'Financial analysis, valuation benchmarking, and red-flag identification for the specific business you\u2019re considering.', free: true },
   { title: 'Model the deal', desc: 'SBA financing feasibility, debt service coverage, cash-on-cash returns, and multiple deal structures compared side-by-side.' },
   { title: 'Build conviction', desc: 'Market intelligence report, competitive positioning, and forward signals that confirm (or challenge) your investment thesis.' },
   { title: 'Close with confidence', desc: 'LOI preparation, negotiation intelligence, and diligence framework tailored to your deal.' },
@@ -306,9 +306,9 @@ export default function Buy() {
 
       {/* ═══ HERO ═══ */}
       <section className="buy-hero">
-        <h1>Find it. Model it. Close it.</h1>
+        <h1>Find the right deal. Know it&apos;s the right deal.</h1>
         <p className="buy-hero-sub">
-          The complete buy-side process &mdash; thesis to close to integration. $49/month.
+          Whether you&apos;re a first-time buyer or a seasoned acquirer, the hardest part isn&apos;t finding a business &mdash; it&apos;s knowing whether the numbers work. smbX.ai gives you the market intelligence, financial modeling, and deal analysis to buy with conviction.
         </p>
         <button className="buy-btn-primary" onClick={startBuy}>
           Start evaluating opportunities
@@ -330,34 +330,34 @@ export default function Buy() {
         </div>
       </section>
 
-      {/* ═══ SECTION 1: FEATURE CALLOUTS ═══ */}
+      {/* ═══ SECTION 1: WHAT YULIA ANALYZES ═══ */}
       <hr className="buy-divider" />
       <section className="buy-section">
-        <p className="buy-overline">What Yulia does for buyers</p>
+        <p className="buy-overline">What Yulia analyzes for buyers</p>
         <h2 className="buy-heading">The intelligence behind your offer.</h2>
         <div className="buy-analyze">
           <div className="buy-analyze-card">
-            <h3>Speed to conviction</h3>
+            <h3>Market intelligence</h3>
             <p>
-              Yulia builds the financial model, runs the DSCR, and scores the deal against your thesis in the first conversation. Pursue or pass &mdash; with a reason.
+              Industry landscape, competitive density, growth trends, and consolidation activity in your target sector and geography. Know exactly what you&apos;re buying into before you write a check.
             </p>
           </div>
           <div className="buy-analyze-card">
-            <h3>SBA model, automatic</h3>
+            <h3>Financial modeling</h3>
             <p>
-              For any deal under $5M, Yulia runs the SBA 7(a) model automatically &mdash; max loan amount, required equity injection, DSCR projection, lender risk score. Before you make an offer.
+              SBA financing feasibility, debt service coverage ratios, cash-on-cash return projections, and multiple deal structures modeled side-by-side. See which structures work &mdash; and which don&apos;t &mdash; before you negotiate.
             </p>
           </div>
           <div className="buy-analyze-card">
-            <h3>The Deal File</h3>
+            <h3>Target evaluation</h3>
             <p>
-              Your LOI, financial model, DD checklist, QoE findings, and closing documents &mdash; all generated at the right stage, all organized in your deal data room. The complete paper trail, ready for your attorney Monday morning.
+              Valuation benchmarking against comparable transactions, financial normalization, add-back verification, and red-flag identification. The analysis that tells you whether the asking price is justified.
             </p>
           </div>
           <div className="buy-analyze-card">
-            <h3>Negotiation intelligence</h3>
+            <h3>Deal structuring</h3>
             <p>
-              Yulia tells you which LOI terms are standard, which are aggressive, and which are traps. Working capital pegs. Earnout triggers. Indemnification caps. Know before you sign.
+              Earnout modeling, seller financing scenarios, equity roll structures, and negotiation intelligence. Understand the levers that get a deal done &mdash; and what to push for.
             </p>
           </div>
         </div>
@@ -368,7 +368,7 @@ export default function Buy() {
       <section className="buy-section">
         <h2 className="buy-heading">Your buying journey with smbX.ai</h2>
         <p className="buy-body" style={{ marginBottom: 32 }}>
-          From market screening to close, Yulia gives you the intelligence to move with confidence. Everything included at $49/month.
+          From market screening to close, Yulia gives you the intelligence to move with confidence. The first two steps are free &mdash; no account required.
         </p>
         <div className="buy-timeline">
           {JOURNEY_STAGES.map((stage, i) => (
@@ -378,7 +378,10 @@ export default function Buy() {
                 <div className="buy-timeline-line" />
               </div>
               <div className="buy-timeline-content">
-                <h3>{stage.title}</h3>
+                <h3>
+                  {stage.title}
+                  {stage.free && <span className="buy-free-badge">Free</span>}
+                </h3>
                 <p>{stage.desc}</p>
               </div>
             </div>
@@ -403,7 +406,7 @@ export default function Buy() {
       {/* ═══ FINAL CTA ═══ */}
       <div className="buy-final-cta">
         <h2 className="buy-cta-heading">Your next acquisition starts with a conversation.</h2>
-        <p className="buy-cta-sub">$49/month. Everything included. No per-deliverable charges.</p>
+        <p className="buy-cta-sub">No retainer. No commitment. Just intelligence.</p>
         <button className="buy-btn-primary" onClick={startBuy}>
           Talk to Yulia about buying
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
