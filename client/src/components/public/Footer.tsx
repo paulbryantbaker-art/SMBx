@@ -52,7 +52,7 @@ export default function Footer() {
                   <li key={l.label}>
                     <Link
                       href={l.href}
-                      className="text-sm text-[#4A4843] hover:text-[#D4714E] no-underline transition-colors"
+                      className="text-sm text-[#4A4843] hover:text-[#C96B4F] no-underline transition-colors"
                     >
                       {l.label}
                     </Link>
@@ -63,7 +63,7 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="border-t border-[#E0DCD4] mt-8 pt-6">
+        <div className="border-t border-[#F0EEEA] mt-8 pt-6">
           <p className="text-[13px] text-[#7A766E] m-0">
             &copy; {new Date().getFullYear()} smbx.ai. All rights reserved.
           </p>

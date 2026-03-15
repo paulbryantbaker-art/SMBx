@@ -16,34 +16,9 @@ async function seed() {
     ON CONFLICT DO NOTHING
   `;
 
-  console.log('Seeding menu items...');
-  await client`
-    INSERT INTO menu_items (name, tier, base_price_cents, journey_type, gate, category, sort_order) VALUES
-      ('Financial Spread',           'analyst',    1000, 'sell',  'S1',   'financial',    1),
-      ('Add-Back Analysis',          'analyst',    1000, 'sell',  'S1',   'financial',    2),
-      ('Quick Valuation',            'analyst',    1500, 'sell',  'S2',   'valuation',    3),
-      ('Blind Teaser',               'analyst',    1500, 'sell',  'S3',   'packaging',    4),
-      ('Data Room Structure',        'analyst',    1000, 'sell',  'S3',   'packaging',    5),
-      ('Executive Summary',          'analyst',    1500, 'sell',  'S3',   'packaging',    6),
-      ('Deal Scoring',               'analyst',    1000, 'buy',   'B1',   'sourcing',     7),
-      ('DD Checklist',               'analyst',    1500, 'buy',   'B3',   'diligence',    8),
-      ('Outreach Strategy',          'analyst',    2000, 'sell',  'S4',   'matching',     9),
-      ('Full Valuation Report',      'associate',  5000, 'sell',  'S2',   'valuation',   10),
-      ('CIM',                        'associate',  7500, 'sell',  'S3',   'packaging',   11),
-      ('Buyer List',                 'associate',  4000, 'sell',  'S4',   'matching',    12),
-      ('Acquisition Model',          'associate',  6000, 'buy',   'B2',   'valuation',   13),
-      ('Investor Materials Package', 'associate',  7500, 'raise', 'R2',   'packaging',   14),
-      ('Deal Structure Analysis',    'associate',  5000, 'sell',  'S5',   'closing',     15),
-      ('Working Capital Analysis',   'associate',  5000, 'sell',  'S5',   'closing',     16),
-      ('Closing Checklist',          'associate',  4000, 'sell',  'S5',   'closing',     17),
-      ('Institutional CIM',          'vp',        20000, 'sell',  'S3',   'packaging',   18),
-      ('LBO Model',                  'vp',        25000, 'buy',   'B2',   'valuation',   19),
-      ('Funds Flow Statement',       'vp',        15000, 'sell',  'S5',   'closing',     20),
-      ('Full Pitch Deck',            'vp',        20000, 'raise', 'R2',   'packaging',   21),
-      ('Integration Plan',           'vp',        15000, 'pmi',   'PMI1', 'integration', 22),
-      ('Value Creation Plan',        'vp',        20000, 'pmi',   'PMI3', 'optimization',23)
-    ON CONFLICT DO NOTHING
-  `;
+  // Menu items are seeded via migration 006_menu_items_and_wallets.sql (91 items).
+  // No need to duplicate here — the migration is the source of truth.
+  console.log('Menu items handled by migration 006 (91 items).');
 
   console.log('Seed complete.');
   await client.end();

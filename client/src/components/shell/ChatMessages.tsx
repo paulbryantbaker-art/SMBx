@@ -6,6 +6,7 @@ interface ChatMessagesProps {
   messages: AnonMessage[];
   streamingText: string;
   sending: boolean;
+  activeTool?: string | null;
   error?: string | null;
   onRetry?: () => void;
   onOpenDeliverable?: (message: AnonMessage) => void;
@@ -27,7 +28,7 @@ const DELIVERABLE_ICONS: Record<string, string> = {
   sba_financing_model: '\u{1F3E6}',
 };
 
-export default function ChatMessages({ messages, streamingText, sending, error, onRetry, onOpenDeliverable }: ChatMessagesProps) {
+export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable }: ChatMessagesProps) {
   return (
     <div className="max-w-3xl mx-auto w-full px-4 pt-4 pb-32">
       {/* Messages */}
@@ -41,7 +42,7 @@ export default function ChatMessages({ messages, streamingText, sending, error, 
             return (
               <div key={m.id || i} className="flex justify-start gap-3">
                 {/* Yulia avatar */}
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#D4714E] text-white flex items-center justify-center text-[13px] mt-0.5">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#C96B4F] text-white flex items-center justify-center text-[13px] mt-0.5">
                   ✦
                 </div>
 
@@ -49,7 +50,7 @@ export default function ChatMessages({ messages, streamingText, sending, error, 
                 <div className="max-w-[80%]">
                   <button
                     onClick={() => onOpenDeliverable?.(m)}
-                    className="w-full text-left bg-white border-2 border-[#D4714E]/20 rounded-2xl cursor-pointer hover:border-[#D4714E]/40 hover:shadow-md transition-all group"
+                    className="w-full text-left bg-white border-2 border-[#C96B4F]/20 rounded-2xl cursor-pointer hover:border-[#C96B4F]/40 hover:shadow-md transition-all group"
                     style={{ padding: '16px 20px' }}
                     type="button"
                   >
@@ -65,7 +66,7 @@ export default function ChatMessages({ messages, streamingText, sending, error, 
                           {getDeliverableDescription(deliverableType)}
                         </p>
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#D4714E] text-white text-xs font-semibold group-hover:bg-[#BE6342] transition-colors">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#C96B4F] text-white text-xs font-semibold group-hover:bg-[#BE6342] transition-colors">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" />
                             </svg>
@@ -85,7 +86,7 @@ export default function ChatMessages({ messages, streamingText, sending, error, 
             <div key={m.id || i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start gap-3'}`}>
               {/* Yulia avatar */}
               {m.role === 'assistant' && (
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#D4714E] text-white flex items-center justify-center text-[13px] mt-0.5">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#C96B4F] text-white flex items-center justify-center text-[13px] mt-0.5">
                   ✦
                 </div>
               )}
@@ -119,30 +120,33 @@ export default function ChatMessages({ messages, streamingText, sending, error, 
         {/* Streaming message */}
         {streamingText && (
           <div className="flex justify-start gap-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#D4714E] text-white flex items-center justify-center text-[13px] mt-0.5">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#C96B4F] text-white flex items-center justify-center text-[13px] mt-0.5">
               ✦
             </div>
             <div className="max-w-[80%] bg-white border border-[#EBEBEB] rounded-2xl" style={{ padding: '16px 20px' }}>
               <div className="text-[15px] md:text-[16px] font-medium leading-[1.65] prose prose-base max-w-none [&_p]:m-0 [&_p]:mb-3 [&_p:last-child]:mb-0">
                 <Markdown>{streamingText}</Markdown>
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#D4714E] animate-pulse ml-1 align-middle" />
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#C96B4F] animate-pulse ml-1 align-middle" />
               </div>
             </div>
           </div>
         )}
 
-        {/* Typing indicator — 3 terra dots */}
+        {/* Typing / tool activity indicator */}
         {sending && !streamingText && (
           <div className="flex justify-start gap-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#D4714E] text-white flex items-center justify-center text-[13px] mt-0.5">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#C96B4F] text-white flex items-center justify-center text-[13px] mt-0.5">
               ✦
             </div>
-            <div className="bg-white border border-[#EBEBEB] rounded-2xl flex items-center" style={{ padding: '16px 20px' }}>
+            <div className="bg-white border border-[#EBEBEB] rounded-2xl flex items-center gap-3" style={{ padding: '16px 20px' }}>
               <div className="flex gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#D4714E]" style={{ animation: 'dotPulse 1.4s ease infinite' }} />
-                <span className="w-2 h-2 rounded-full bg-[#D4714E]" style={{ animation: 'dotPulse 1.4s ease infinite 0.15s' }} />
-                <span className="w-2 h-2 rounded-full bg-[#D4714E]" style={{ animation: 'dotPulse 1.4s ease infinite 0.3s' }} />
+                <span className="w-2 h-2 rounded-full bg-[#C96B4F]" style={{ animation: 'dotPulse 1.4s ease infinite' }} />
+                <span className="w-2 h-2 rounded-full bg-[#C96B4F]" style={{ animation: 'dotPulse 1.4s ease infinite 0.15s' }} />
+                <span className="w-2 h-2 rounded-full bg-[#C96B4F]" style={{ animation: 'dotPulse 1.4s ease infinite 0.3s' }} />
               </div>
+              {activeTool && (
+                <span className="text-[13px] text-[#9B9891] font-medium">{activeTool}...</span>
+              )}
             </div>
           </div>
         )}
@@ -158,7 +162,7 @@ export default function ChatMessages({ messages, streamingText, sending, error, 
               {onRetry && (
                 <button
                   onClick={onRetry}
-                  className="text-sm font-semibold text-[#D4714E] bg-transparent border-0 cursor-pointer hover:underline p-0"
+                  className="text-sm font-semibold text-[#C96B4F] bg-transparent border-0 cursor-pointer hover:underline p-0"
                   type="button"
                 >
                   Try again

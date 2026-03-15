@@ -116,6 +116,7 @@ export function useAnonymousChat() {
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let accumulated = '';
+      let sseBuffer = '';
 
       if (reader) {
         while (true) {
@@ -123,7 +124,10 @@ export function useAnonymousChat() {
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
+          sseBuffer += chunk;
+          const lines = sseBuffer.split('\n');
+          // Keep the last (possibly incomplete) line in the buffer
+          sseBuffer = lines.pop() || '';
 
           for (const line of lines) {
             if (!line.startsWith('data: ')) continue;
@@ -144,8 +148,22 @@ export function useAnonymousChat() {
                 accumulated = parsed.error || 'Something went wrong.';
               }
             } catch {
-              // ignore partial chunk parse errors
+              // ignore malformed JSON
             }
+          }
+        }
+
+        // Flush remaining buffer after stream ends
+        if (sseBuffer.startsWith('data: ')) {
+          const data = sseBuffer.slice(6).trim();
+          if (data && data !== '[DONE]') {
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.type === 'text_delta') {
+                accumulated += parsed.text;
+                setStreamingText(accumulated);
+              }
+            } catch { /* ignore */ }
           }
         }
       }

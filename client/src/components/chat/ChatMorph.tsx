@@ -50,7 +50,7 @@ export default function ChatMorph({ children }: Props) {
           <div className="shrink-0 flex items-center px-4 py-2 md:hidden">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors"
+              className="flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#C96B4F] transition-colors"
               type="button"
               aria-label="Open sidebar"
             >

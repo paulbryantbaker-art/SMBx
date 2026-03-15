@@ -30,7 +30,7 @@ export default function InlineSignup({ onRegister, onNavigateLogin, className = 
   return (
     <div className={`flex items-start gap-2.5 ${className}`}>
       <YuliaAvatar size={28} className="mt-0.5" />
-      <div className="max-w-[380px] bg-white border border-[#E0DCD4] rounded-2xl rounded-bl-md p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      <div className="max-w-[380px] bg-white border border-[#F0EEEA] rounded-2xl rounded-bl-md p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <p className="text-[15px] font-sans text-[#1A1A18] leading-relaxed m-0 mb-4">
           Create your free account to continue. I&apos;ll keep everything from our conversation.
         </p>
@@ -45,27 +45,27 @@ export default function InlineSignup({ onRegister, onNavigateLogin, className = 
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name"
-            className="w-full px-3 py-2 text-[14px] border border-[#E0DCD4] rounded-lg outline-none bg-white text-[#1A1A18] focus:border-[#D4714E] font-sans"
+            className="w-full px-3 py-2 text-[14px] border border-[#F0EEEA] rounded-lg outline-none bg-white text-[#1A1A18] focus:border-[#C96B4F] font-sans"
           />
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
-            className="w-full px-3 py-2 text-[14px] border border-[#E0DCD4] rounded-lg outline-none bg-white text-[#1A1A18] focus:border-[#D4714E] font-sans"
+            className="w-full px-3 py-2 text-[14px] border border-[#F0EEEA] rounded-lg outline-none bg-white text-[#1A1A18] focus:border-[#C96B4F] font-sans"
           />
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="w-full px-3 py-2 text-[14px] border border-[#E0DCD4] rounded-lg outline-none bg-white text-[#1A1A18] focus:border-[#D4714E] font-sans"
+            className="w-full px-3 py-2 text-[14px] border border-[#F0EEEA] rounded-lg outline-none bg-white text-[#1A1A18] focus:border-[#C96B4F] font-sans"
           />
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-2.5 bg-[#D4714E] text-white border-none rounded-full text-[14px] font-semibold cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-50"
+            className="w-full py-2.5 bg-[#C96B4F] text-white border-none rounded-full text-[14px] font-semibold cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-50"
           >
             {submitting ? 'Creating account\u2026' : 'Create free account'}
           </button>
@@ -76,7 +76,7 @@ export default function InlineSignup({ onRegister, onNavigateLogin, className = 
           <button
             type="button"
             onClick={onNavigateLogin}
-            className="bg-transparent border-none text-[#D4714E] font-semibold cursor-pointer text-xs p-0"
+            className="bg-transparent border-none text-[#C96B4F] font-semibold cursor-pointer text-xs p-0"
           >
             Sign in
           </button>

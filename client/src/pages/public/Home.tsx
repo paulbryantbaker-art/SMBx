@@ -5,12 +5,13 @@ import { useAnonymousChat } from '../../hooks/useAnonymousChat';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
 import Sidebar from '../../components/chat/Sidebar';
+import { ScrollReveal, StaggerContainer, StaggerItem, ScrollProgressBar } from '../../components/content/animations';
 
 /* ═══ DESIGN TOKENS ═══ */
 
 const T = {
   bg: '#FAF9F7',
-  terra: '#D4714E',
+  terra: '#C96B4F',
   terraHover: '#BE6342',
   terraSoft: '#FFF0EB',
   text: '#1A1A18',
@@ -641,6 +642,8 @@ export default function Home() {
         }
       `}</style>
 
+      {phase === 'home' && <ScrollProgressBar />}
+
       {/* ═══ SIDEBAR BACKDROP ═══ */}
       <div
         className={`home-sidebar-backdrop${sidebarOpen ? ' open' : ''}`}
@@ -738,6 +741,7 @@ export default function Home() {
             <div className="home-below-fold">
             {/* ── SECTION 1: INTELLIGENCE STORY ── */}
             <hr className="home-section-divider" />
+            <ScrollReveal>
             <section className="home-section">
               <p className="home-overline">The smbX.ai methodology</p>
               <h2 className="home-section-heading">The data is public. The intelligence is not.</h2>
@@ -751,28 +755,32 @@ export default function Home() {
                 That&apos;s what Yulia does. Not generic answers &mdash; localized, industry-specific, deal-size-calibrated intelligence grounded in authoritative data. Every number is sourced. Every analysis shows its work.
               </p>
             </section>
+            </ScrollReveal>
 
             {/* ── SECTION 2: THREE PILLARS ── */}
             <hr className="home-section-divider" />
+            <ScrollReveal>
             <section className="home-section">
-              <div className="home-pillars">
-                <div className="home-pillar">
+              <StaggerContainer className="home-pillars">
+                <StaggerItem><div className="home-pillar card-hover">
                   <h3>Seven layers of analysis</h3>
                   <p>Every deal gets evaluated across seven dimensions: industry structure, regional economics, financial normalization, buyer landscape, deal architecture, risk factors, and forward signals. Not a checklist &mdash; a methodology built from real transaction experience.</p>
-                </div>
-                <div className="home-pillar">
+                </div></StaggerItem>
+                <StaggerItem><div className="home-pillar card-hover">
                   <h3>Localized to your market</h3>
                   <p>National averages hide what matters. A plumbing company in Phoenix and a plumbing company in rural Pennsylvania are fundamentally different deals. smbX.ai intelligence is specific to your metro, your industry, and your competitive environment.</p>
-                </div>
-                <div className="home-pillar">
+                </div></StaggerItem>
+                <StaggerItem><div className="home-pillar card-hover">
                   <h3>Calibrated to every deal size</h3>
                   <p>The right analysis for a $400K landscaping company is different from a $40M manufacturing platform. Different metrics, different buyers, different structures. Yulia adapts her methodology, vocabulary, and deliverables to the deal in front of her.</p>
-                </div>
-              </div>
+                </div></StaggerItem>
+              </StaggerContainer>
             </section>
+            </ScrollReveal>
 
             {/* ── SECTION 3: EXPERIENCE PREVIEW ── */}
             <hr className="home-section-divider" />
+            <ScrollReveal>
             <section className="home-section">
               <h2 className="home-section-heading" style={{ textAlign: 'center', marginBottom: 32 }}>See Yulia in action</h2>
               <div className="home-preview">
@@ -801,37 +809,41 @@ export default function Home() {
                 </div>
               </div>
             </section>
+            </ScrollReveal>
 
             {/* ── SECTION 4: PERSONA ROUTING ── */}
             <hr className="home-section-divider" />
+            <ScrollReveal>
             <section className="home-section">
               <h2 className="home-section-heading">Built for everyone in the deal.</h2>
-              <div className="home-personas">
-                <div className="home-persona">
+              <StaggerContainer className="home-personas">
+                <StaggerItem><div className="home-persona card-hover">
                   <h3>Selling, buying, or raising capital</h3>
                   <p>Whether you&apos;re a first-time seller who needs to understand the process or a serial acquirer evaluating your next target &mdash; start with the intelligence that makes every decision clearer.</p>
                   <button className="home-persona-cta" onClick={() => { scrollToChat(); }}>Tell Yulia about your deal &rarr;</button>
-                </div>
-                <div className="home-persona">
+                </div></StaggerItem>
+                <StaggerItem><div className="home-persona card-hover">
                   <h3>Brokers &amp; M&amp;A advisors</h3>
                   <p>Package listings faster. Qualify buyers instantly. Walk into every pitch with localized market intelligence that demonstrates your analytical depth.</p>
                   <button className="home-persona-cta" onClick={() => handleSuggestion("I'm a business broker. Show me how you can help me with my practice \u2014 valuations, CIMs, buyer matching, deal management.")}>See how advisors use smbX.ai &rarr;</button>
-                </div>
-                <div className="home-persona">
+                </div></StaggerItem>
+                <StaggerItem><div className="home-persona card-hover">
                   <h3>PE, family offices &amp; search funds</h3>
                   <p>Screen industries, model acquisitions, and build conviction at deal-flow speed. Analysis that takes your team hours, ready in minutes.</p>
                   <button className="home-persona-cta" onClick={() => handleSuggestion('I\u2019m evaluating acquisition targets for a PE platform. Help me screen industries and model deals.')}>Explore investor tools &rarr;</button>
-                </div>
-                <div className="home-persona">
+                </div></StaggerItem>
+                <StaggerItem><div className="home-persona card-hover">
                   <h3>Attorneys &amp; CPAs</h3>
                   <p>Walk into every engagement with the financials, market position, and competitive landscape already organized and analyzed. Less ramp-up. Better diligence.</p>
                   <button className="home-persona-cta" onClick={() => { scrollToChat(); }}>Start with Yulia &rarr;</button>
-                </div>
-              </div>
+                </div></StaggerItem>
+              </StaggerContainer>
             </section>
+            </ScrollReveal>
 
             {/* ── SECTION 5: HOW IT WORKS ── */}
             <hr className="home-section-divider" />
+            <ScrollReveal>
             <section className="home-section">
               <h2 className="home-section-heading">How it works</h2>
               <div className="home-steps">
@@ -849,9 +861,11 @@ export default function Home() {
                 </div>
               </div>
             </section>
+            </ScrollReveal>
 
             {/* ── SECTION 6: METHODOLOGY / TRUST ── */}
             <hr className="home-section-divider" />
+            <ScrollReveal>
             <section className="home-section">
               <h2 className="home-section-heading">Every insight is traceable. Every analysis is explainable.</h2>
               <p className="home-section-body">
@@ -872,18 +886,21 @@ export default function Home() {
                 ))}
               </div>
             </section>
+            </ScrollReveal>
 
             {/* ── SECTION 7: FINAL CTA ── */}
+            <ScrollReveal>
             <div className="home-final-cta">
               <h2 className="home-cta-heading">Your next deal starts with a conversation.</h2>
               <p className="home-cta-sub">No retainer. No meeting. Just intelligence.</p>
-              <button className="home-cta-btn" onClick={scrollToChat}>
+              <button className="home-cta-btn cta-glow" onClick={scrollToChat}>
                 Talk to Yulia
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
                 </svg>
               </button>
             </div>
+            </ScrollReveal>
 
             </div>{/* end home-below-fold */}
 

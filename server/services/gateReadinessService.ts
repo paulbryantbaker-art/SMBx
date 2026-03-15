@@ -205,7 +205,7 @@ const GATE_CHECKS: Record<string, GateChecker> = {
 };
 
 /** PAYWALL GATES — gates where user must pay before entering */
-export const PAYWALL_GATES = new Set(['S2', 'B2', 'R2']);
+export const PAYWALL_GATES = new Set(['S2', 'B2', 'R2', 'PMI1', 'PMI2', 'PMI3']);
 
 /** Check if advancing to a gate requires payment */
 export function isPaywallGate(gateId: string): boolean {
@@ -215,9 +215,12 @@ export function isPaywallGate(gateId: string): boolean {
 /** Get the base price for a paywall gate (in cents) */
 export function getPaywallBasePrice(gateId: string): number {
   const prices: Record<string, number> = {
-    S2: 1500,  // $15 base (Analyst tier)
-    B2: 1500,  // $15 base
-    R2: 5000,  // $50 base (Associate tier — more complex deliverable)
+    S2: 1500,   // $15 base (Analyst tier)
+    B2: 1500,   // $15 base
+    R2: 5000,   // $50 base (Associate tier — more complex deliverable)
+    PMI1: 2500,  // $25 base (Stabilization)
+    PMI2: 2500,  // $25 base (Assessment)
+    PMI3: 5000,  // $50 base (Optimization)
   };
   return prices[gateId] ?? 0;
 }

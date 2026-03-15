@@ -4,7 +4,7 @@
 import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
-import { hasDealAccess, getVisibleFolderIds } from '../services/dealAccessService.js';
+import { hasDealAccess, getVisibleFolderIds, logActivity } from '../services/dealAccessService.js';
 import { createNotification } from './notifications.js';
 
 export const dataRoomRouter = Router();
@@ -74,7 +74,7 @@ dataRoomRouter.get('/deals/:dealId/data-room', async (req, res) => {
     const access = await hasDealAccess(dealId, userId);
     if (!access) return res.status(404).json({ error: 'Deal not found' });
 
-    const [deal] = await sql`SELECT id, journey_type, current_gate FROM deals WHERE id = ${dealId}`;
+    const [deal] = await sql`SELECT id, journey_type, current_gate, business_name FROM deals WHERE id = ${dealId}`;
     if (!deal) return res.status(404).json({ error: 'Deal not found' });
 
     // Ensure folders exist
@@ -119,7 +119,25 @@ dataRoomRouter.get('/deals/:dealId/data-room', async (req, res) => {
       `;
     }
 
-    return res.json({ folders, documents, unfiledDeliverables });
+    // Check NDA status for non-owner participants
+    let ndaRequired = false;
+    let ndaSigned = true;
+    if (access.role !== 'owner') {
+      const [participant] = await sql`
+        SELECT require_nda, nda_signed_at FROM deal_participants
+        WHERE deal_id = ${dealId} AND user_id = ${userId} LIMIT 1
+      `.catch(() => [null]);
+      if (participant?.require_nda) {
+        ndaRequired = true;
+        ndaSigned = !!participant.nda_signed_at;
+      }
+    }
+
+    return res.json({
+      folders, documents, unfiledDeliverables,
+      ndaRequired, ndaSigned,
+      dealName: deal.business_name || undefined,
+    });
   } catch (err: any) {
     console.error('Data room error:', err.message);
     return res.status(500).json({ error: 'Failed to load data room' });
@@ -210,5 +228,98 @@ dataRoomRouter.patch('/data-room/documents/:docId', async (req, res) => {
   } catch (err: any) {
     console.error('Update document error:', err.message);
     return res.status(500).json({ error: 'Failed to update document' });
+  }
+});
+
+// ─── Document comments/annotations ──────────────────────────
+
+dataRoomRouter.get('/deliverables/:deliverableId/comments', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const deliverableId = parseInt(req.params.deliverableId, 10);
+
+    // Find deal for this deliverable
+    const [deliverable] = await sql`SELECT deal_id FROM deliverables WHERE id = ${deliverableId}`;
+    if (!deliverable) return res.status(404).json({ error: 'Deliverable not found' });
+
+    const access = await hasDealAccess(deliverable.deal_id, userId);
+    if (!access) return res.status(404).json({ error: 'Deliverable not found' });
+
+    const comments = await sql`
+      SELECT dc.id, dc.content, dc.section_ref, dc.resolved, dc.created_at,
+             u.display_name, u.email,
+             dp.role as participant_role
+      FROM deliverable_comments dc
+      JOIN users u ON u.id = dc.user_id
+      LEFT JOIN deal_participants dp ON dp.deal_id = ${deliverable.deal_id} AND dp.user_id = dc.user_id
+      WHERE dc.deliverable_id = ${deliverableId}
+      ORDER BY dc.created_at ASC
+    `;
+
+    return res.json(comments);
+  } catch (err: any) {
+    console.error('Get comments error:', err.message);
+    return res.status(500).json({ error: 'Failed to get comments' });
+  }
+});
+
+dataRoomRouter.post('/deliverables/:deliverableId/comments', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const deliverableId = parseInt(req.params.deliverableId, 10);
+    const { content, sectionRef } = req.body;
+
+    if (!content?.trim()) return res.status(400).json({ error: 'Comment content required' });
+
+    const [deliverable] = await sql`SELECT deal_id FROM deliverables WHERE id = ${deliverableId}`;
+    if (!deliverable) return res.status(404).json({ error: 'Deliverable not found' });
+
+    const access = await hasDealAccess(deliverable.deal_id, userId);
+    if (!access) return res.status(404).json({ error: 'Deliverable not found' });
+    if (access.access_level === 'read') return res.status(403).json({ error: 'Read-only access cannot comment' });
+
+    const [comment] = await sql`
+      INSERT INTO deliverable_comments (deliverable_id, user_id, content, section_ref)
+      VALUES (${deliverableId}, ${userId}, ${content.trim()}, ${sectionRef || null})
+      RETURNING id, content, section_ref, resolved, created_at
+    `;
+
+    await logActivity(deliverable.deal_id, userId, 'commented', 'deliverable', deliverableId, {
+      commentId: comment.id,
+      section: sectionRef,
+    });
+
+    return res.status(201).json(comment);
+  } catch (err: any) {
+    console.error('Post comment error:', err.message);
+    return res.status(500).json({ error: 'Failed to post comment' });
+  }
+});
+
+dataRoomRouter.patch('/deliverable-comments/:commentId/resolve', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const commentId = parseInt(req.params.commentId, 10);
+
+    const [comment] = await sql`
+      SELECT dc.id, dc.deliverable_id, d.deal_id
+      FROM deliverable_comments dc
+      JOIN deliverables d ON d.id = dc.deliverable_id
+      WHERE dc.id = ${commentId}
+    `;
+    if (!comment) return res.status(404).json({ error: 'Comment not found' });
+
+    const access = await hasDealAccess(comment.deal_id, userId);
+    if (!access || access.access_level === 'read') return res.status(403).json({ error: 'Cannot resolve this comment' });
+
+    const [updated] = await sql`
+      UPDATE deliverable_comments SET resolved = true WHERE id = ${commentId}
+      RETURNING id, resolved
+    `;
+
+    return res.json(updated);
+  } catch (err: any) {
+    console.error('Resolve comment error:', err.message);
+    return res.status(500).json({ error: 'Failed to resolve comment' });
   }
 });

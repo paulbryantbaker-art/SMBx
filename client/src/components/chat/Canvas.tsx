@@ -1,6 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Markdown from 'react-markdown';
 import { authHeaders } from '../../hooks/useAuth';
+import InteractiveModel from './InteractiveModel';
+import CanvasEditor from './CanvasEditor';
+import CommentsPanel from './CommentsPanel';
 
 interface CanvasProps {
   /** Fetch deliverable by ID from the API (authenticated mode) */
@@ -41,6 +44,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
   const [error, setError] = useState<string | null>(null);
   const [filing, setFiling] = useState(false);
   const [filed, setFiled] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   // Determine mode
   const isMarkdownMode = !!markdownContent;
@@ -93,7 +97,53 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
     finally { setFiling(false); }
   };
 
-  const handleExport = () => {
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exporting, setExporting] = useState<string | null>(null);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const exportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!exportOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) setExportOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [exportOpen]);
+
+  const handleExport = async (format: 'pdf' | 'docx' | 'xlsx') => {
+    setExportOpen(false);
+
+    // Server-side export for authenticated deliverables
+    if (deliverableId && !isMarkdownMode) {
+      setExporting(format);
+      try {
+        const res = await fetch(`/api/deliverables/${deliverableId}/export/${format}`, {
+          method: 'POST',
+          headers: authHeaders(),
+        });
+        if (!res.ok) {
+          console.error('Export failed:', res.status);
+          setExporting(null);
+          return;
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${displayTitle.replace(/[^a-zA-Z0-9_\- ]/g, '').replace(/\s+/g, '_').substring(0, 60)}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error('Export error:', err);
+      }
+      setExporting(null);
+      return;
+    }
+
+    // Fallback: browser print for anonymous/markdown mode
     const printArea = document.getElementById('canvas-print-area');
     if (!printArea) return;
     const w = window.open('', '_blank');
@@ -103,7 +153,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
       <style>
         body { font-family: 'Inter', system-ui, sans-serif; color: #1A1A18; padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.6; }
         h1, h2, h3 { font-weight: 700; margin-top: 1.5em; }
-        h1 { font-size: 24px; border-bottom: 2px solid #D4714E; padding-bottom: 8px; }
+        h1 { font-size: 24px; border-bottom: 2px solid #C96B4F; padding-bottom: 8px; }
         h2 { font-size: 18px; color: #3D3B37; }
         h3 { font-size: 15px; color: #6E6A63; }
         table { border-collapse: collapse; width: 100%; margin: 16px 0; }
@@ -131,7 +181,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
       {/* Toolbar */}
       <div className="shrink-0 flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid #DDD9D1' }}>
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-6 h-6 rounded bg-[#D4714E] text-white flex items-center justify-center shrink-0">
+          <div className="w-6 h-6 rounded bg-[#C96B4F] text-white flex items-center justify-center shrink-0">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" />
             </svg>
@@ -151,7 +201,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
                 filed
                   ? 'bg-green-50 text-green-700'
-                  : 'bg-[#D4714E] text-white hover:bg-[#BE6342]'
+                  : 'bg-[#C96B4F] text-white hover:bg-[#BE6342]'
               } disabled:opacity-60`}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -160,16 +210,62 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
               {filed ? 'Saved' : filing ? 'Saving...' : 'Save to Data Room'}
             </button>
           )}
-          {showContent && (
+          {showContent && !isMarkdownMode && data?.content?.markdown && deliverableId && (
             <button
-              onClick={handleExport}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F3F0EA] text-[#3D3B37] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
+              onClick={() => setEditMode(!editMode)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
+                editMode ? 'bg-[#C96B4F] text-white' : 'bg-[#F3F0EA] text-[#3D3B37] hover:bg-[#EBE7DF]'
+              }`}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
               </svg>
-              Export
+              {editMode ? 'View' : 'Edit'}
             </button>
+          )}
+          {showContent && deliverableId && !isMarkdownMode && (
+            <button
+              onClick={() => setCommentsOpen(!commentsOpen)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
+                commentsOpen ? 'bg-[#C96B4F] text-white' : 'bg-[#F3F0EA] text-[#3D3B37] hover:bg-[#EBE7DF]'
+              }`}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+              </svg>
+              Comments
+            </button>
+          )}
+          {showContent && (
+            <div className="relative" ref={exportRef}>
+              <button
+                onClick={() => deliverableId && !isMarkdownMode ? setExportOpen(!exportOpen) : handleExport('pdf')}
+                disabled={!!exporting}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F3F0EA] text-[#3D3B37] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors disabled:opacity-60"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                {exporting ? `Exporting ${exporting.toUpperCase()}...` : 'Export'}
+                {deliverableId && !isMarkdownMode && (
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6" /></svg>
+                )}
+              </button>
+              {exportOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg py-1 z-50 min-w-[120px]" style={{ border: '1px solid #DDD9D1' }}>
+                  {(['pdf', 'docx', 'xlsx'] as const).map(fmt => (
+                    <button
+                      key={fmt}
+                      onClick={() => handleExport(fmt)}
+                      className="w-full text-left px-3 py-2 text-xs font-medium text-[#3D3B37] bg-transparent border-0 cursor-pointer hover:bg-[#F3F0EA] transition-colors"
+                    >
+                      {fmt.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
           <button
             onClick={onClose}
@@ -183,34 +279,18 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
       </div>
 
       {/* Content */}
+      <div className="flex-1 flex min-h-0">
       <div className="flex-1 overflow-y-auto min-h-0">
-        {/* Markdown mode — direct render */}
+        {/* Markdown mode — direct render with section navigation */}
         {isMarkdownMode && (
-          <div id="canvas-print-area" className="px-6 py-5 max-w-[700px] mx-auto canvas-content">
-            <div className="canvas-md prose prose-sm max-w-none
-              [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-[#1A1A18] [&_h2]:mt-6 [&_h2]:mb-3
-              [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-[#3D3B37] [&_h3]:mt-4 [&_h3]:mb-2
-              [&_p]:text-sm [&_p]:text-[#3D3B37] [&_p]:leading-[1.7] [&_p]:mb-3
-              [&_table]:w-full [&_table]:text-sm [&_table]:border-collapse [&_table]:my-3
-              [&_th]:text-left [&_th]:px-3 [&_th]:py-2 [&_th]:text-xs [&_th]:font-semibold [&_th]:text-[#3D3B37] [&_th]:bg-[#F3F0EA] [&_th]:border [&_th]:border-[#DDD9D1]
-              [&_td]:px-3 [&_td]:py-2 [&_td]:text-[#1A1A18] [&_td]:border [&_td]:border-[#EBE7DF]
-              [&_hr]:border-0 [&_hr]:border-t [&_hr]:border-[#EBE7DF] [&_hr]:my-5
-              [&_strong]:font-bold [&_strong]:text-[#1A1A18]
-              [&_ul]:pl-5 [&_ul]:text-sm [&_ul]:text-[#3D3B37]
-              [&_ol]:pl-5 [&_ol]:text-sm [&_ol]:text-[#3D3B37]
-              [&_li]:mb-1
-              [&_em]:text-[#6E6A63]
-            ">
-              <Markdown>{markdownContent!}</Markdown>
-            </div>
-          </div>
+          <MarkdownCanvas content={markdownContent!} />
         )}
 
         {/* API mode — loading states */}
         {!isMarkdownMode && loading && (
           <div className="flex items-center justify-center p-12">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-[#C96B4F] border-t-transparent rounded-full animate-spin" />
               <p className="text-sm text-[#6E6A63]">Loading deliverable...</p>
             </div>
           </div>
@@ -219,7 +299,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
         {!isMarkdownMode && !loading && data?.status === 'generating' && (
           <div className="flex items-center justify-center p-12">
             <div className="flex flex-col items-center gap-3 text-center">
-              <div className="w-12 h-12 border-2 border-[#D4714E] border-t-transparent rounded-full animate-spin" />
+              <div className="w-12 h-12 border-2 border-[#C96B4F] border-t-transparent rounded-full animate-spin" />
               <p className="text-base font-semibold text-[#1A1A18]">Generating your {data.name}...</p>
               <p className="text-sm text-[#6E6A63] max-w-xs">This typically takes 30-60 seconds. The document will appear here when ready.</p>
             </div>
@@ -239,9 +319,20 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
         )}
 
         {!isMarkdownMode && !loading && data?.status === 'complete' && data.content && (
-          <div id="canvas-print-area" className="px-6 py-5 max-w-[700px] mx-auto canvas-content">
-            <CanvasContent content={data.content} name={data.name} />
-          </div>
+          data.content.markdown && deliverableId && editMode ? (
+            <CanvasEditor
+              deliverableId={deliverableId}
+              content={data.content.markdown}
+              onSave={(newMd) => {
+                setData(prev => prev ? { ...prev, content: { ...prev.content!, markdown: newMd } } : prev);
+                setEditMode(false);
+              }}
+            />
+          ) : (
+            <div id="canvas-print-area" className="px-6 py-5 max-w-[700px] mx-auto canvas-content">
+              <CanvasContent content={data.content} name={data.name} />
+            </div>
+          )
         )}
 
         {!isMarkdownMode && !loading && data?.status === 'failed' && (
@@ -263,12 +354,18 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
               </div>
               <p className="text-sm text-[#6E6A63]">{error || 'Deliverable not found.'}</p>
-              <button onClick={fetchData} className="text-sm font-semibold text-[#D4714E] bg-transparent border-0 cursor-pointer hover:underline">
+              <button onClick={fetchData} className="text-sm font-semibold text-[#C96B4F] bg-transparent border-0 cursor-pointer hover:underline">
                 Try again
               </button>
             </div>
           </div>
         )}
+      </div>
+
+      {/* Comments panel */}
+      {commentsOpen && deliverableId && !isMarkdownMode && (
+        <CommentsPanel deliverableId={deliverableId} onClose={() => setCommentsOpen(false)} />
+      )}
       </div>
     </div>
   );
@@ -277,6 +374,11 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
 export { DELIVERABLE_LABELS };
 
 function CanvasContent({ content, name }: { content: Record<string, any>; name: string }) {
+  // Interactive financial model
+  if (content.type === 'financial_model' && content.base_case && content.assumptions) {
+    return <InteractiveModel content={content as any} />;
+  }
+
   // If content has markdown field, render as markdown
   if (content.markdown) {
     return (
@@ -290,12 +392,12 @@ function CanvasContent({ content, name }: { content: Record<string, any>; name: 
   if (content.sections && Array.isArray(content.sections)) {
     return (
       <div className="space-y-6">
-        <h1 className="text-xl font-bold text-[#1A1A18] m-0 pb-2" style={{ borderBottom: '2px solid #D4714E' }}>
+        <h1 className="text-xl font-bold text-[#1A1A18] m-0 pb-2" style={{ borderBottom: '2px solid #C96B4F' }}>
           {name}
         </h1>
         {content.summary && (
           <div className="bg-[#FFF8F5] rounded-xl px-5 py-4" style={{ border: '1px solid rgba(212,113,78,.15)' }}>
-            <p className="text-sm font-semibold text-[#D4714E] m-0 mb-1">Summary</p>
+            <p className="text-sm font-semibold text-[#C96B4F] m-0 mb-1">Summary</p>
             <p className="text-sm text-[#3D3B37] leading-relaxed m-0">{content.summary}</p>
           </div>
         )}
@@ -329,7 +431,7 @@ function CanvasContent({ content, name }: { content: Record<string, any>; name: 
   // Key-value format
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-[#1A1A18] m-0 pb-2" style={{ borderBottom: '2px solid #D4714E' }}>
+      <h1 className="text-xl font-bold text-[#1A1A18] m-0 pb-2" style={{ borderBottom: '2px solid #C96B4F' }}>
         {name}
       </h1>
       {Object.entries(content).map(([key, value]) => {
@@ -357,6 +459,86 @@ function CanvasContent({ content, name }: { content: Record<string, any>; name: 
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function MarkdownCanvas({ content }: { content: string }) {
+  // Extract section headings for navigation
+  const sections = useMemo(() => {
+    const headings: { level: number; text: string; id: string }[] = [];
+    const lines = content.split('\n');
+    for (const line of lines) {
+      const match = line.match(/^(#{2,3})\s+(.+)/);
+      if (match) {
+        const text = match[2].replace(/\*\*/g, '').trim();
+        const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        headings.push({ level: match[1].length, text, id });
+      }
+    }
+    return headings;
+  }, [content]);
+
+  const showToc = sections.length >= 4;
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(`section-${id}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // Inject IDs into headings for scroll targeting
+  const processedContent = useMemo(() => {
+    if (!showToc) return content;
+    return content.replace(/^(#{2,3})\s+(.+)/gm, (match, hashes, text) => {
+      const cleanText = text.replace(/\*\*/g, '').trim();
+      const id = cleanText.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return `${hashes} <span id="section-${id}"></span>${text}`;
+    });
+  }, [content, showToc]);
+
+  return (
+    <div className="flex">
+      {/* Table of Contents sidebar */}
+      {showToc && (
+        <div className="hidden md:block w-48 shrink-0 p-4 pt-6 sticky top-0 self-start" style={{ borderRight: '1px solid #EBE7DF' }}>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#A9A49C] m-0 mb-3">Contents</p>
+          <nav className="space-y-1">
+            {sections.map((s, i) => (
+              <button
+                key={i}
+                onClick={() => scrollToSection(s.id)}
+                className={`block w-full text-left text-[12px] leading-tight bg-transparent border-0 cursor-pointer hover:text-[#C96B4F] transition-colors p-0 ${
+                  s.level === 3 ? 'pl-3 text-[#A9A49C]' : 'text-[#6E6A63] font-medium'
+                }`}
+                style={{ marginBottom: '6px' }}
+                type="button"
+              >
+                {s.text}
+              </button>
+            ))}
+          </nav>
+        </div>
+      )}
+
+      {/* Main content */}
+      <div id="canvas-print-area" className="flex-1 px-6 py-5 max-w-[700px] mx-auto canvas-content">
+        <div className="canvas-md prose prose-sm max-w-none
+          [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-[#1A1A18] [&_h2]:mt-6 [&_h2]:mb-3
+          [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-[#3D3B37] [&_h3]:mt-4 [&_h3]:mb-2
+          [&_p]:text-sm [&_p]:text-[#3D3B37] [&_p]:leading-[1.7] [&_p]:mb-3
+          [&_table]:w-full [&_table]:text-sm [&_table]:border-collapse [&_table]:my-3
+          [&_th]:text-left [&_th]:px-3 [&_th]:py-2 [&_th]:text-xs [&_th]:font-semibold [&_th]:text-[#3D3B37] [&_th]:bg-[#F3F0EA] [&_th]:border [&_th]:border-[#DDD9D1]
+          [&_td]:px-3 [&_td]:py-2 [&_td]:text-[#1A1A18] [&_td]:border [&_td]:border-[#EBE7DF]
+          [&_hr]:border-0 [&_hr]:border-t [&_hr]:border-[#EBE7DF] [&_hr]:my-5
+          [&_strong]:font-bold [&_strong]:text-[#1A1A18]
+          [&_ul]:pl-5 [&_ul]:text-sm [&_ul]:text-[#3D3B37]
+          [&_ol]:pl-5 [&_ol]:text-sm [&_ol]:text-[#3D3B37]
+          [&_li]:mb-1
+          [&_em]:text-[#6E6A63]
+        ">
+          <Markdown>{processedContent}</Markdown>
+        </div>
+      </div>
     </div>
   );
 }

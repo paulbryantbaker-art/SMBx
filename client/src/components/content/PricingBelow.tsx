@@ -11,10 +11,10 @@ interface PricingBelowProps {
 }
 
 const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
-const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#D4714E' };
+const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
 const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 };
 const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, margin: 0 };
-const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid #C5C0B6', padding: '24px 28px' };
+const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '24px 28px' };
 
 export default function PricingBelow({ onChipClick }: PricingBelowProps) {
   return (
@@ -38,13 +38,13 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
               { title: 'Value Readiness Report', body: '7-factor score with specific improvement actions and dollar-impact estimates. The kind of analysis that feels like $2\u20135K of consultant work.' },
               { title: 'Investment Thesis Document', body: 'Acquisition blueprint with criteria, SBA eligibility, capital stack template, and market landscape overview.' },
               { title: 'Preliminary SDE / EBITDA', body: 'The add-back math and adjusted earnings calculation \u2014 the foundation everything else is built on.' },
-              { title: 'Deal Structure Comparison', body: 'Asset sale vs. stock sale net-proceeds modeling. Entity-type flag. Preliminary tax landscape. The analysis that usually requires a $500/hour CPA conversation.' },
+              { title: 'Capital Stack Template', body: 'Exactly how a business at your target price would be financed: SBA loan, equity injection, seller note, monthly debt service. The financing picture before you talk to a lender.' },
             ].map(item => (
               <RevealSection key={item.title}>
                 <div style={cardStyle}>
                   <div className="flex items-start justify-between gap-3">
                     <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 6px' }}>{item.title}</h3>
-                    <PulseBadge color="#D4714E">Free</PulseBadge>
+                    <PulseBadge color="#C96B4F">Free</PulseBadge>
                   </div>
                   <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.body}</p>
                 </div>
@@ -79,13 +79,13 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
               { title: 'Deal Screening Memo', price: '$150', body: 'Pursue or pass? Financial validation, risk flags, tax structure check, and a clear recommendation.' },
               { title: 'Target Valuation', price: '$350', body: 'What should you actually pay? Comparable transactions, industry multiples, and the fair value range.' },
               { title: 'SBA Financing Model', price: '$200', body: 'Down payment, monthly payment, DSCR, cash-on-cash \u2014 modeled at live rates. Know if it\u2019s bankable.' },
-              { title: 'Reality Check', price: '$150', body: 'Quick-turn sanity check on any aspect of your deal \u2014 pricing, timing, structure, tax implications, risk.' },
+              { title: 'Sector Analysis', price: '$150', body: 'Industry structure, competitive dynamics, PE activity, growth signals \u2014 for any sector you\u2019re evaluating or operating in.' },
             ].map(item => (
               <RevealSection key={item.title}>
                 <div style={cardStyle}>
                   <div className="flex items-start justify-between gap-3">
                     <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 6px' }}>{item.title}</h3>
-                    <span style={{ fontSize: '20px', fontWeight: 700, color: '#D4714E', flexShrink: 0 }}>{item.price}</span>
+                    <span style={{ fontSize: '20px', fontWeight: 700, color: '#C96B4F', flexShrink: 0 }}>{item.price}</span>
                   </div>
                   <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.body}</p>
                 </div>
@@ -123,9 +123,9 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
                   <div className="flex items-start justify-between gap-3">
                     <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 6px' }}>
                       {item.title}
-                      {item.badge && <PulseBadge color="#D4714E" style={{ marginLeft: 8 }}>{item.badge}</PulseBadge>}
+                      {item.badge && <PulseBadge color="#C96B4F" style={{ marginLeft: 8 }}>{item.badge}</PulseBadge>}
                     </h3>
-                    <span style={{ fontSize: '20px', fontWeight: 700, color: '#D4714E', flexShrink: 0 }}>{item.price}</span>
+                    <span style={{ fontSize: '20px', fontWeight: 700, color: '#C96B4F', flexShrink: 0 }}>{item.price}</span>
                   </div>
                   <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.body}</p>
                 </div>
@@ -182,7 +182,7 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
                 <div style={cardStyle}>
                   <div className="flex items-start justify-between gap-3">
                     <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A18', margin: 0 }}>{item.title}</h3>
-                    {item.badge && <PulseBadge color="#D4714E">{item.badge}</PulseBadge>}
+                    {item.badge && <PulseBadge color="#C96B4F">{item.badge}</PulseBadge>}
                   </div>
                   <p style={{ ...bodyStyle, fontSize: '15px', marginTop: 6 }}>{item.body}</p>
                 </div>
@@ -260,7 +260,33 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
         </div>
       </section>
 
-      {/* ═══ Block 9 — CTA ═══ */}
+      {/* ═══ Block 9 — Common questions ═══ */}
+      <section style={{ paddingTop: 140 }}>
+        <div style={sectionStyle}>
+          <RevealSection>
+            <span style={labelStyle}>COMMON QUESTIONS</span>
+          </RevealSection>
+
+          <div className="space-y-4" style={{ marginTop: 32 }}>
+            {[
+              { q: 'Is the free analysis really free?', a: 'No catch. No credit card. No trial that auto-converts. The underlying data comes from sovereign federal sources and the intelligence layer takes seconds to generate. We earn your trust before we earn your business.' },
+              { q: 'How is this different from ChatGPT?', a: 'ChatGPT generates plausible text about M&A concepts. Yulia analyzes your specific deal against real federal data \u2014 Census, BLS, FRED, SEC EDGAR, SBA \u2014 with a structured methodology calibrated to your industry, geography, and deal size. Every number sourced. Every insight traceable.' },
+              { q: 'What if my deal is complex?', a: 'The platform adapts to deal complexity. Larger deals receive deeper analysis, institutional-grade deliverables, and more sophisticated financial modeling \u2014 the methodology is the same but the depth scales with the deal.' },
+              { q: 'Can I use this with my broker or advisor?', a: 'Absolutely. Most professionals appreciate clients who arrive prepared. Bring your smbX.ai analysis to your first meeting. Your advisor focuses on relationships and negotiation. Yulia handles the data and the documents.' },
+              { q: 'How do prices scale for larger deals?', a: 'Prices shown are base rates. Analysis for larger, more complex deals scales proportionally to reflect the deeper analytical work involved \u2014 Yulia tells you the exact cost before you commit to any purchase.' },
+            ].map(item => (
+              <RevealSection key={item.q}>
+                <div style={cardStyle}>
+                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>&ldquo;{item.q}&rdquo;</h3>
+                  <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.a}</p>
+                </div>
+              </RevealSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ Block 10 — CTA ═══ */}
       <section style={{ paddingTop: 60, paddingBottom: 80 }}>
         <div style={sectionStyle}>
           <RevealSection>

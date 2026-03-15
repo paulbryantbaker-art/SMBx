@@ -70,7 +70,7 @@ export default function Privacy() {
             <h2 className="font-sans text-xl font-bold text-[#1A1A18] mb-3 m-0">Contact</h2>
             <p className="m-0">
               Questions about this policy? Email us at{' '}
-              <a href="mailto:hello@smbx.ai" className="text-[#D4714E] underline">hello@smbx.ai</a>.
+              <a href="mailto:hello@smbx.ai" className="text-[#C96B4F] underline">hello@smbx.ai</a>.
             </p>
           </div>
         </div>

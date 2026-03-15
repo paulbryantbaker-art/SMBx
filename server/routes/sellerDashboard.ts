@@ -6,6 +6,7 @@ import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { estimateMonthsToReady, getJourneyPhase } from '../services/knowledgeGraphService.js';
+import { generateOptimizationPlan, saveOptimizationPlan, createOptimizationMilestone, getOptimizationTimeline, checkReEngagement } from '../services/optimizationPlanService.js';
 
 export const sellerDashboardRouter = Router();
 sellerDashboardRouter.use(requireAuth);
@@ -190,5 +191,90 @@ sellerDashboardRouter.post('/seller/actions/seed', async (req, res) => {
   } catch (err: any) {
     console.error('Seed actions error:', err.message);
     return res.status(500).json({ error: 'Failed to seed actions' });
+  }
+});
+
+// ─── Generate optimization plan ──────────────────────
+sellerDashboardRouter.post('/seller/optimization-plan', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+
+    // Get active sell deal
+    const [deal] = await sql`
+      SELECT d.*, d.financials FROM deals d
+      WHERE d.user_id = ${userId} AND d.journey_type = 'sell' AND d.status = 'active'
+      ORDER BY d.updated_at DESC LIMIT 1
+    `;
+    if (!deal) return res.status(404).json({ error: 'No active sell deal found' });
+
+    // Get company profile
+    const [profile] = await sql`
+      SELECT * FROM company_profiles WHERE deal_id = ${deal.id} LIMIT 1
+    `;
+    if (!profile) return res.status(400).json({ error: 'Company profile required. Complete intake first.' });
+
+    // Generate plan
+    const plan = await generateOptimizationPlan({
+      dealId: deal.id,
+      userId,
+      business_name: deal.business_name,
+      industry: deal.industry,
+      naics_code: deal.naics_code,
+      revenue: deal.revenue,
+      sde: deal.sde,
+      ebitda: deal.ebitda,
+      owner_salary: deal.financials?.owner_salary,
+      employee_count: deal.employee_count,
+      years_in_business: deal.financials?.years_in_business,
+      gross_margin: deal.financials?.gross_margin,
+      growth_rate: deal.financials?.growth_rate,
+      league: deal.league || 'L1',
+      exit_type: deal.exit_type,
+      financials: deal.financials,
+    });
+
+    // Save actions to DB
+    const actionIds = await saveOptimizationPlan(profile.id, plan);
+
+    // Create milestone
+    await createOptimizationMilestone(deal.id, {
+      milestone_type: 'plan_created',
+      description: `Optimization plan created with ${plan.actions.length} improvement actions`,
+      valuation_snapshot_low: plan.currentValuationLow,
+      valuation_snapshot_high: plan.currentValuationHigh,
+      actions_completed: 0,
+      actions_total: plan.actions.length,
+    });
+
+    return res.json({
+      plan,
+      actionIds,
+      message: `Generated ${plan.actions.length} improvement actions`,
+    });
+  } catch (err: any) {
+    console.error('Generate optimization plan error:', err.message);
+    return res.status(500).json({ error: 'Failed to generate optimization plan' });
+  }
+});
+
+// ─── Get optimization timeline ───────────────────────
+sellerDashboardRouter.get('/seller/optimization-timeline', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+
+    const [deal] = await sql`
+      SELECT id FROM deals
+      WHERE user_id = ${userId} AND journey_type = 'sell'
+      ORDER BY updated_at DESC LIMIT 1
+    `;
+    if (!deal) return res.json({ milestones: [] });
+
+    const milestones = await getOptimizationTimeline(deal.id);
+    const reEngagement = await checkReEngagement(deal.id);
+
+    return res.json({ milestones, reEngagement });
+  } catch (err: any) {
+    console.error('Get optimization timeline error:', err.message);
+    return res.status(500).json({ error: 'Failed to load timeline' });
   }
 });

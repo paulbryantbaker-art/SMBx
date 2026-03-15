@@ -50,7 +50,7 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
       <div className="max-w-[80%] min-w-0">
         {showAvatar && (
           <div
-            className="w-8 h-8 rounded-full bg-[#D4714E] text-white text-xs font-bold flex items-center justify-center mb-2 shrink-0 font-sans"
+            className="w-8 h-8 rounded-full bg-[#C96B4F] text-white text-xs font-bold flex items-center justify-center mb-2 shrink-0 font-sans"
             style={{ boxShadow: '0 2px 6px rgba(212,113,78,.2)' }}
           >
             Y

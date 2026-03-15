@@ -27,7 +27,7 @@ interface HomeSidebarProps {
 }
 
 const JOURNEY_LABELS: Record<string, { label: string; color: string }> = {
-  sell: { label: 'SELL', color: '#D4714E' },
+  sell: { label: 'SELL', color: '#C96B4F' },
   buy: { label: 'BUY', color: '#4E8BD4' },
   raise: { label: 'RAISE', color: '#6B9E4E' },
   pmi: { label: 'PMI', color: '#9E6B4E' },
@@ -61,9 +61,9 @@ function GateStepper({ journeyType, currentGate }: { journeyType: string; curren
                 <div
                   className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
                     isCompleted
-                      ? 'bg-[#D4714E] text-white'
+                      ? 'bg-[#C96B4F] text-white'
                       : isActive
-                        ? 'border-2 border-[#D4714E] text-[#D4714E]'
+                        ? 'border-2 border-[#C96B4F] text-[#C96B4F]'
                         : 'border border-[#CCC8C0] text-[#A9A49C]'
                   }`}
                   style={isActive ? { animation: 'gatePulse 2s ease infinite' } : undefined}
@@ -76,13 +76,13 @@ function GateStepper({ journeyType, currentGate }: { journeyType: string; curren
                     gate.id.replace(/[A-Z]+/, '')
                   )}
                 </div>
-                <span className={`text-[8px] mt-0.5 leading-tight text-center whitespace-nowrap ${isActive ? 'text-[#D4714E] font-semibold' : 'text-[#A9A49C]'}`}>
+                <span className={`text-[8px] mt-0.5 leading-tight text-center whitespace-nowrap ${isActive ? 'text-[#C96B4F] font-semibold' : 'text-[#A9A49C]'}`}>
                   {gate.name}
                 </span>
               </div>
               {/* Connector line */}
               {i < gates.length - 1 && (
-                <div className={`flex-1 h-px mx-0.5 mt-[-10px] ${isCompleted ? 'bg-[#D4714E]' : 'bg-[#DDD9D1]'}`} />
+                <div className={`flex-1 h-px mx-0.5 mt-[-10px] ${isCompleted ? 'bg-[#C96B4F]' : 'bg-[#DDD9D1]'}`} />
               )}
             </div>
           );
@@ -156,7 +156,7 @@ export default function HomeSidebar({
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
           <span className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1A1A18]">
-            smb<span className="text-[#D4714E]">x</span>.ai
+            smb<span className="text-[#C96B4F]">x</span>.ai
           </span>
           <button
             onClick={onClose}
@@ -203,7 +203,7 @@ export default function HomeSidebar({
             {sessionData?.seven_factor_composite !== undefined && (
               <div className="flex items-center gap-1.5 mt-1.5">
                 <span className="text-[11px] text-[#6E6A63]">Quality Score:</span>
-                <span className="text-sm font-bold text-[#D4714E]">{sessionData.seven_factor_composite}/70</span>
+                <span className="text-sm font-bold text-[#C96B4F]">{sessionData.seven_factor_composite}/70</span>
               </div>
             )}
 
@@ -251,7 +251,7 @@ export default function HomeSidebar({
         {/* Footer */}
         <div className="border-t border-[#DDD9D1] px-4 py-3">
           <p className="text-[11px] text-[#A9A49C] m-0">
-            Free preview · <a href="/signup" className="text-[#D4714E] font-semibold no-underline hover:underline">Sign up</a> for full access
+            Free preview · <a href="/signup" className="text-[#C96B4F] font-semibold no-underline hover:underline">Sign up</a> for full access
           </p>
         </div>
       </div>

@@ -99,18 +99,18 @@ export default function WalletBadge() {
               <button
                 onClick={() => setTab('topup')}
                 className={`flex-1 py-2 text-xs font-semibold border-0 cursor-pointer transition-colors ${
-                  tab === 'topup' ? 'text-[#D4714E] bg-[rgba(212,113,78,.05)] border-b-2 border-[#D4714E]' : 'text-[#6E6A63] bg-transparent hover:text-[#3D3B37]'
+                  tab === 'topup' ? 'text-[#C96B4F] bg-[rgba(212,113,78,.05)] border-b-2 border-[#C96B4F]' : 'text-[#6E6A63] bg-transparent hover:text-[#3D3B37]'
                 }`}
-                style={tab === 'topup' ? { borderBottom: '2px solid #D4714E' } : undefined}
+                style={tab === 'topup' ? { borderBottom: '2px solid #C96B4F' } : undefined}
               >
                 Add Funds
               </button>
               <button
                 onClick={() => { setTab('history'); loadTransactions(); }}
                 className={`flex-1 py-2 text-xs font-semibold border-0 cursor-pointer transition-colors ${
-                  tab === 'history' ? 'text-[#D4714E] bg-[rgba(212,113,78,.05)]' : 'text-[#6E6A63] bg-transparent hover:text-[#3D3B37]'
+                  tab === 'history' ? 'text-[#C96B4F] bg-[rgba(212,113,78,.05)]' : 'text-[#6E6A63] bg-transparent hover:text-[#3D3B37]'
                 }`}
-                style={tab === 'history' ? { borderBottom: '2px solid #D4714E' } : undefined}
+                style={tab === 'history' ? { borderBottom: '2px solid #C96B4F' } : undefined}
               >
                 History
               </button>

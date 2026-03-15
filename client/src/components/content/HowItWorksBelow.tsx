@@ -12,10 +12,10 @@ interface HowItWorksBelowProps {
 }
 
 const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
-const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#D4714E' };
+const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
 const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 };
 const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, margin: 0 };
-const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid #C5C0B6', padding: '28px 32px' };
+const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' };
 
 export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
   return (
@@ -107,7 +107,7 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
                 ].map((item, i) => (
                   <ScrollReveal key={item.num} delay={i * 0.08}>
                     <div className="flex gap-4" style={{ paddingLeft: 12 }}>
-                      <span style={{ fontSize: '48px', fontWeight: 700, color: '#D4714E', lineHeight: 1, minWidth: 40, textAlign: 'center', marginLeft: -8 }} className="shrink-0 mt-0.5">{item.num}</span>
+                      <span style={{ fontSize: '48px', fontWeight: 700, color: '#C96B4F', lineHeight: 1, minWidth: 40, textAlign: 'center', marginLeft: -8 }} className="shrink-0 mt-0.5">{item.num}</span>
                       <div>
                         <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#1A1A18', margin: '0 0 6px' }}>{item.title}</h3>
                         <p style={{ ...bodyStyle, fontSize: '16px' }}>{item.body}</p>
@@ -222,7 +222,7 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
           <RevealSection>
             <span style={labelStyle}>LIVE EXAMPLE</span>
             <h2 style={h2Style} className="md:text-[48px]">
-              This took <AnimatedCounter value={47} style={{ color: '#D4714E' }} /> seconds.
+              This took <AnimatedCounter value={47} style={{ color: '#C96B4F' }} /> seconds.
             </h2>
           </RevealSection>
 
@@ -234,7 +234,7 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
                   <p style={{ fontSize: '15px', color: '#1A1A18', margin: '6px 0 0', lineHeight: 1.6 }}>I&apos;m thinking about selling my commercial HVAC company. We&apos;re in Dallas-Fort Worth, about $4.2M in revenue and $780K in adjusted EBITDA last year.</p>
                 </div>
                 <div>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#D4714E', textTransform: 'uppercase', letterSpacing: '0.08em' }}>YULIA</span>
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#C96B4F', textTransform: 'uppercase', letterSpacing: '0.08em' }}>YULIA</span>
                   <div className="mt-1.5 space-y-3" style={{ fontSize: '15px', color: 'rgba(26,26,24,0.65)', lineHeight: 1.6 }}>
                     <p className="m-0">Commercial HVAC in DFW &mdash; that&apos;s a strong combination right now. Let me run this through the methodology.</p>
                     <p className="m-0">Your $780K EBITDA puts you in the L3 range, which means we&apos;re looking at EBITDA-based multiples rather than SDE. For commercial HVAC in the Dallas-Fort Worth MSA, current multiples are running <strong>4.8&times;&ndash;6.2&times;</strong> based on recent comparable transactions and PE activity in the space.</p>

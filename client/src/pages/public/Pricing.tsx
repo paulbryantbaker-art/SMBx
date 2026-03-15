@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { ScrollReveal, StaggerContainer, StaggerItem, ScrollProgressBar } from '../../components/content/animations';
 
 /* ═══ DESIGN TOKENS ═══ */
 
 const T = {
   bg: '#FAF9F7',
-  terra: '#D4714E',
+  terra: '#C96B4F',
   terraHover: '#BE6342',
   terraSoft: '#FFF0EB',
   text: '#1A1A18',
@@ -67,6 +68,15 @@ const FAQS = [
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setHeight(contentRef.current.scrollHeight);
+    }
+  }, [open]);
+
   return (
     <div className="price-faq-item">
       <button className="price-faq-q" onClick={() => setOpen(v => !v)} aria-expanded={open}>
@@ -74,12 +84,18 @@ function FaqItem({ q, a }: { q: string; a: string }) {
         <svg
           width="18" height="18" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-          style={{ transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'rotate(0)' }}
+          style={{ transition: 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)', transform: open ? 'rotate(180deg)' : 'rotate(0)' }}
         >
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
-      {open && <div className="price-faq-a">{a}</div>}
+      <div
+        ref={contentRef}
+        className={`faq-answer ${open ? 'open' : 'closed'}`}
+        style={{ maxHeight: open ? height : 0 }}
+      >
+        <div className="price-faq-a">{a}</div>
+      </div>
     </div>
   );
 }
@@ -93,6 +109,7 @@ export default function Pricing() {
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", WebkitFontSmoothing: 'antialiased', background: T.bg, minHeight: '100dvh' }}>
+      <ScrollProgressBar />
       <style>{`
         .price-section {
           max-width: 960px; margin: 0 auto; width: 100%;
@@ -385,7 +402,7 @@ export default function Pricing() {
       </header>
 
       {/* ═══ HERO ═══ */}
-      <section className="price-hero">
+      <section className="price-hero hero-entrance">
         <h1>If you could Google it, it should be free.</h1>
         <p className="price-hero-sub">
           The conversation with Yulia is always free. Foundational analysis &mdash; classification, preliminary valuation, market overview &mdash; is free because the underlying data comes from authoritative public sources.
@@ -400,29 +417,34 @@ export default function Pricing() {
 
       {/* ═══ SECTION 1: WHAT'S FREE ═══ */}
       <hr className="price-divider" />
-      <section className="price-section">
-        <h2 className="price-heading">Start here. It&apos;s on us.</h2>
-        <p className="price-body" style={{ marginBottom: 28 }}>
-          Every deal starts with a conversation &mdash; and the first analysis is always free. No credit card. No signup wall. Just tell Yulia about your deal.
-        </p>
-        <p className="price-body" style={{ fontSize: 13, color: T.faint, marginBottom: 28 }}>
-          Prices shown are base rates. Prices scale with deal complexity (league multiplier).
-        </p>
-        <div className="price-free-grid">
-          {FREE_ITEMS.map((item, i) => (
-            <div key={i} className="price-free-card">
-              <h3>
-                {item.title}
-                <span className="price-free-badge">Free</span>
-              </h3>
-              <p>{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <ScrollReveal>
+        <section className="price-section">
+          <h2 className="price-heading">Start here. It&apos;s on us.</h2>
+          <p className="price-body" style={{ marginBottom: 28 }}>
+            Every deal starts with a conversation &mdash; and the first analysis is always free. No credit card. No signup wall. Just tell Yulia about your deal.
+          </p>
+          <p className="price-body" style={{ fontSize: 13, color: T.faint, marginBottom: 28 }}>
+            Prices shown are base rates. Prices scale with deal complexity (league multiplier).
+          </p>
+          <StaggerContainer className="price-free-grid">
+            {FREE_ITEMS.map((item, i) => (
+              <StaggerItem key={i}>
+                <div className="price-free-card card-hover">
+                  <h3>
+                    {item.title}
+                    <span className="price-free-badge">Free</span>
+                  </h3>
+                  <p>{item.desc}</p>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 2: PREMIUM INTELLIGENCE ═══ */}
       <hr className="price-divider" />
+      <ScrollReveal>
       <section className="price-section">
         <h2 className="price-heading">Go deeper when your deal is ready.</h2>
         <p className="price-body" style={{ marginBottom: 32 }}>
@@ -457,9 +479,11 @@ export default function Pricing() {
           ))}
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 3: WALLET ═══ */}
       <hr className="price-divider" />
+      <ScrollReveal>
       <section className="price-section">
         <div className="price-wallet">
           <h2 className="price-heading" style={{ marginBottom: 16 }}>Pay as you go. No subscriptions. No surprises.</h2>
@@ -500,9 +524,11 @@ export default function Pricing() {
           </div>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 4: ADVISOR PRICING ═══ */}
       <hr className="price-divider" />
+      <ScrollReveal>
       <section className="price-section">
         <div className="price-advisor-box">
           <h2 className="price-heading" style={{ marginBottom: 16 }}>Advisor and team pricing</h2>
@@ -517,9 +543,11 @@ export default function Pricing() {
           </a>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 5: FAQ ═══ */}
       <hr className="price-divider" />
+      <ScrollReveal>
       <section className="price-section">
         <h2 className="price-heading">Common questions</h2>
         <div className="price-faq-list">
@@ -528,18 +556,21 @@ export default function Pricing() {
           ))}
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 6: FINAL CTA ═══ */}
+      <ScrollReveal>
       <div className="price-final-cta">
         <h2 className="price-cta-heading">Start free. Go deeper when you&apos;re ready.</h2>
         <p className="price-cta-sub">No credit card. No signup. Just intelligence.</p>
-        <button className="price-btn-primary" onClick={talkToYulia}>
+        <button className="price-btn-primary cta-glow" onClick={talkToYulia}>
           Talk to Yulia
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
           </svg>
         </button>
       </div>
+      </ScrollReveal>
 
       {/* ═══ FOOTER ═══ */}
       <footer className="price-footer">

@@ -239,22 +239,31 @@ chatRouter.post('/message', async (req, res) => {
     const anthropic = getAnthropicClient();
     let fullText = '';
 
-    const stream = await anthropic.messages.create({
-      model: STREAMING_MODEL,
-      max_tokens: 4096,
-      system: systemPrompt,
-      messages: apiMessages,
-      stream: true,
-    });
+    try {
+      const stream = await anthropic.messages.create({
+        model: STREAMING_MODEL,
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: apiMessages,
+        stream: true,
+      });
 
-    for await (const event of stream) {
-      if (
-        event.type === 'content_block_delta' &&
-        event.delta.type === 'text_delta'
-      ) {
-        fullText += event.delta.text;
-        res.write(`data: ${JSON.stringify({ type: 'text_delta', text: event.delta.text })}\n\n`);
+      for await (const event of stream) {
+        if (
+          event.type === 'content_block_delta' &&
+          event.delta.type === 'text_delta'
+        ) {
+          fullText += event.delta.text;
+          res.write(`data: ${JSON.stringify({ type: 'text_delta', text: event.delta.text })}\n\n`);
+        }
       }
+    } catch (streamErr: any) {
+      console.error('Anthropic streaming error:', streamErr.message, streamErr.status);
+      const userMessage = streamErr.status === 429
+        ? 'I\'m experiencing high demand right now. Please try again in a moment.'
+        : 'I ran into a temporary issue. Please try again.';
+      res.write(`data: ${JSON.stringify({ type: 'text_delta', text: userMessage })}\n\n`);
+      fullText = userMessage;
     }
 
     // Save assistant response

@@ -74,6 +74,9 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
   const [error, setError] = useState<string | null>(null);
   const [filingId, setFilingId] = useState<number | null>(null);
 
+  // Search
+  const [searchQuery, setSearchQuery] = useState('');
+
   // Share links
   const [shareLinks, setShareLinks] = useState<ShareLink[]>([]);
   const [showSharePanel, setShowSharePanel] = useState(false);
@@ -142,8 +145,12 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
     finally { setFilingId(null); }
   };
 
+  const filteredDocuments = searchQuery.trim()
+    ? documents.filter(d => d.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : documents;
+
   const getDocsForFolder = (folderId: number) =>
-    documents.filter(d => d.folder_id === folderId);
+    filteredDocuments.filter(d => d.folder_id === folderId);
 
   // Load share links
   const loadShareLinks = useCallback(async () => {
@@ -222,7 +229,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
     return (
       <div className="p-6 text-center">
         <p className="text-sm text-red-600 m-0 mb-2">{error}</p>
-        <button onClick={fetchDataRoom} className="text-sm font-semibold text-[#D4714E] bg-transparent border-0 cursor-pointer hover:underline">
+        <button onClick={fetchDataRoom} className="text-sm font-semibold text-[#C96B4F] bg-transparent border-0 cursor-pointer hover:underline">
           Try again
         </button>
       </div>
@@ -247,6 +254,37 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
 
   return (
     <div className="py-2">
+      {/* Search */}
+      {documents.length >= 3 && (
+        <div className="px-3 pb-2 mb-1" style={{ borderBottom: '1px solid #EBE7DF' }}>
+          <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#F3F0EA]">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A9A49C" strokeWidth="2" className="shrink-0">
+              <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+            </svg>
+            <input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search documents..."
+              className="flex-1 text-xs bg-transparent border-0 outline-none text-[#1A1A18]"
+              style={{ fontFamily: 'inherit' }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="w-4 h-4 rounded-full hover:bg-[#DDD9D1] flex items-center justify-center bg-transparent border-0 cursor-pointer"
+              >
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#6E6A63" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <p className="text-[10px] text-[#A9A49C] mt-1 ml-1 m-0">
+              {filteredDocuments.length} result{filteredDocuments.length !== 1 ? 's' : ''}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Folder tree */}
       {folders.map(folder => {
         const folderDocs = getDocsForFolder(folder.id);
@@ -265,7 +303,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
               >
                 <path d="M9 18l6-6-6-6" />
               </svg>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill={isExpanded ? '#D4714E' : '#A9A49C'} stroke="none" className="shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill={isExpanded ? '#C96B4F' : '#A9A49C'} stroke="none" className="shrink-0">
                 <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
               </svg>
               <span className="text-[13px] font-medium text-[#1A1A18] truncate">{folder.name}</span>
@@ -314,7 +352,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
         <button
           onClick={() => setShowSharePanel(!showSharePanel)}
           className={`w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[12px] font-medium border-0 cursor-pointer transition-colors ${
-            showSharePanel ? 'bg-[#D4714E] text-white' : 'bg-[#F3F0EA] text-[#6E6A63] hover:bg-[#EBE7DF]'
+            showSharePanel ? 'bg-[#C96B4F] text-white' : 'bg-[#F3F0EA] text-[#6E6A63] hover:bg-[#EBE7DF]'
           }`}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -335,7 +373,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
                   key={level}
                   onClick={() => setShareAccess(level)}
                   className={`flex-1 py-1 rounded text-[10px] font-medium border-0 cursor-pointer transition-colors ${
-                    shareAccess === level ? 'bg-[#D4714E] text-white' : 'bg-white text-[#6E6A63]'
+                    shareAccess === level ? 'bg-[#C96B4F] text-white' : 'bg-white text-[#6E6A63]'
                   }`}
                 >
                   {level.charAt(0).toUpperCase() + level.slice(1)}
@@ -354,7 +392,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
             <button
               onClick={createShareLink}
               disabled={creatingLink}
-              className="w-full py-1.5 rounded-lg text-[11px] font-semibold bg-[#D4714E] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-50"
+              className="w-full py-1.5 rounded-lg text-[11px] font-semibold bg-[#C96B4F] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-50"
             >
               {creatingLink ? 'Creating...' : 'Create Link'}
             </button>
@@ -416,7 +454,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
                       isReady ? 'cursor-pointer' : 'cursor-default'
                     }`}
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isReady ? '#D4714E' : '#A9A49C'} strokeWidth="1.5" className="shrink-0">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isReady ? '#C96B4F' : '#A9A49C'} strokeWidth="1.5" className="shrink-0">
                       <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                       <path d="M14 2v6h6" />
                     </svg>
@@ -436,7 +474,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
                         key={f.id}
                         onClick={() => fileDeliverable(d.id, f.id)}
                         disabled={isFiling}
-                        className="text-[10px] px-2 py-0.5 rounded-full bg-[#F3F0EA] text-[#6E6A63] border-0 cursor-pointer hover:bg-[#EBE7DF] hover:text-[#D4714E] transition-colors disabled:opacity-50"
+                        className="text-[10px] px-2 py-0.5 rounded-full bg-[#F3F0EA] text-[#6E6A63] border-0 cursor-pointer hover:bg-[#EBE7DF] hover:text-[#C96B4F] transition-colors disabled:opacity-50"
                       >
                         {f.name}
                       </button>

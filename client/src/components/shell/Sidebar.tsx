@@ -24,7 +24,7 @@ interface SidebarProps {
 }
 
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#D4714E',
+  sell: '#C96B4F',
   buy: '#4E8FD4',
   raise: '#6B8F4E',
   pmi: '#8F6BD4',
@@ -173,7 +173,7 @@ export default function Sidebar({
           style={{ fontFamily: 'inherit' }}
           type="button"
         >
-          <svg className="w-4 h-4 text-[#D4714E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <svg className="w-4 h-4 text-[#C96B4F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
           New Workspace
@@ -200,7 +200,7 @@ export default function Sidebar({
                   style={{ fontFamily: 'inherit' }}
                   type="button"
                 >
-                  <span className={isActive ? 'text-[#D4714E]' : 'text-[#A9A49C]'}>{item.icon}</span>
+                  <span className={isActive ? 'text-[#C96B4F]' : 'text-[#A9A49C]'}>{item.icon}</span>
                   {item.label}
                 </button>
               );

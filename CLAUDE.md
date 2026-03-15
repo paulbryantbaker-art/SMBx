@@ -1,130 +1,158 @@
-# CLAUDE.md — smbX.ai Repository Reference
-## Updated: March 13, 2026
+CLAUDE.md — smbx.ai
+What This Is
+AI-powered M&A platform for SMB through mega-cap deals. Users talk to Yulia (AI advisor) who guides them through buying, selling, or raising capital for businesses. Chat-first experience — users talk to Yulia, not dashboards.
+Core Architecture
 
-## Stack
-- **Frontend:** React 19 + Vite 7 + Tailwind CSS v3 (NOT v4 — native bindings break on Railway)
-- **Backend:** Express + PostgreSQL with raw postgres-js (NOT Drizzle — breaks on Railway)
-- **AI:** Anthropic API (Claude) for Yulia, SSE streaming
-- **Payments:** Stripe (one-time charges via wallet blocks, NOT subscriptions at launch)
-- **Deployment:** Railway
-- **Auth:** JWT (deferred to Phase 6 — no auth walls at launch)
-- **Fonts:** Inter (primary), Caveat (handwritten accents) — loaded in index.html
+Chat-first UX that mirrors claude.ai exactly — same layout, fonts, colors, sidebar, mobile behavior
+Node.js + Express (ESM) backend
+React 19 + Vite 7 + Tailwind CSS v3 + Radix UI frontend
+wouter for client routing
+PostgreSQL via raw postgres-js (no ORM)
+Claude API (primary), Google Gemini (secondary), OpenAI (tertiary)
+Stripe wallet payments — NO SUBSCRIPTIONS, NO TIERS
+JWT authentication (no sessions, no passport — sessions broke on Railway)
+Railway deployment (GitHub push → auto-deploy)
 
-## Critical Technical Constraints
-- **Chat morph:** Use `AppPhase` state machine (`'landing' | 'chat'`) with CSS animations. NEVER `useNavigate()` — causes remount, kills the smooth fade.
-- **iOS Safari:** `overflow-hidden` must NEVER be applied to `position:fixed` chat containers (swallows touch scroll events). Use `--app-height` from `visualViewport.height`. NEVER use `h-dvh` or `100dvh` (does NOT shrink for iOS keyboard).
-- **Layout dimensions:** Must use CSS classes, not inline styles (hooks can call `removeProperty` on inline styles).
-- **Database:** Pure postgres-js throughout. `db.ts`, `seed.ts`, `shared/schema.ts` all use raw SQL / plain TS interfaces. No ORM.
-- **Tailwind:** v3 only. v4 native bindings break on Railway.
+Critical Rules — Read These First
 
-## Commands
-```bash
-npm run dev          # Start dev server (frontend + backend)
-npm run build        # Production build
-npm run db:seed      # Seed database
-npm run db:migrate   # Run migrations
-```
+NO SUBSCRIPTIONS. Pure wallet + menu pricing. Users top up wallet with real dollars via Stripe, spend dollars on deliverables. $1 in wallet = $1 purchasing power. No separate "credit" unit. League multipliers adjust price by deal size.
+Gate-by-gate pricing. Users pay small amounts progressively as they advance through gates — NOT one big lump sum per journey. Each gate unlock is a manageable price point that keeps users moving forward.
+Mirror claude.ai UI exactly. Same layout, serif fonts (ui-serif/Georgia stack), warm cream background (#F5F5F0), terra cotta accent (#C96B4F), collapsible left sidebar with chat history, centered chat at max-w-3xl, rounded-2xl composer with subtle shadow.
+Mobile browser first. Design for mobile, then adapt to desktop. Sidebar hidden on mobile, slides in from left. Composer sticks above keyboard.
+Yulia never says "As an AI." She is an expert M&A advisor. Adapts persona by league: Coach (L1), Guide (L2), Analyst (L3), Associate (L4), Partner (L5), Macro (L6).
+Financial data: zero hallucination. Extract exactly from documents, never invent numbers. Add-backs require user verification.
+League determines everything. L1-L6 controls: financial metric (SDE vs EBITDA), multiple ranges, deliverable pricing, Yulia persona, document complexity.
+All money stored in cents (integers). Never use floating point for financial values.
+Chinese wall. Buyer data and seller data strictly isolated. No cross-deal data leakage.
 
-## Authoritative Documents (in repo)
+Reference Documents
+
+METHODOLOGY_V17.md — Complete M&A methodology, 6 parts (~80 pages): Master rules, Exit (Sell), Raise, Buyer, Broker, PMI
+
+Design Tokens (Mirror claude.ai)
+css--bg-primary: #F5F5F0;        /* Warm cream canvas */
+--bg-secondary: #FFFFFF;       /* White composer/cards */
+--bg-sidebar: #EDEDEA;         /* Sidebar background */
+--text-primary: #1A1A18;       /* Near-black body */
+--text-secondary: #6B6B65;     /* Muted/meta */
+--accent-primary: #C96B4F;     /* Terra cotta brand */
+--shadow-composer: 0 0.25rem 1.25rem rgba(0,0,0,0.035);
+--font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', serif;
+/* Dark mode */
+--bg-primary-dark: #2B2A27;
+--bg-secondary-dark: #1F1E1B;
+--text-primary-dark: #EEEEEE;
+Pricing Model — Pure Wallet + Menu
+How It Works
+
+User signs up free → free gates hook them in (S0-S1, B0-B1, R0-R1, PMI0)
+First paywall hits at gate 2 (valuation / investor materials)
+User tops up wallet with real dollars via Stripe
+Each gate advancement has a clear, small price — users pay as they progress
+$1 in wallet = $1 of purchasing power (no credit conversion)
+Yulia contextually proposes value-added services (optimization plans, transaction readiness) as natural upsells during the journey
+
+Wallet Top-Up Blocks
+BlockPriceBonusTotalExploratoryStarter$50—$50Early Commit$100+$5$105Active Deal$250+$15$265Serious$500+$40$540Full Journey$1,000+$100$1,100Advisor$2,500+$300$2,800
+Menu Tiers (Base Prices — before league multiplier)
+
+Analyst ($5–$25): Quick valuations, market snapshots, comparable pulls
+Associate ($25–$100): Full CIM drafts, buyer lists, financial models
+VP ($100–$500+): Deep research packages, full DD suites
+
+League Multipliers
+LeagueDeal SizeMultiplierL1< $500K1.0×L2$500K–$1M1.25×L3$1M–$5M3.0×L4$5M–$10M5.0×L5$10M–$50M8.0×L6$50M+10.0×
+Price Formula
+Final Price = Base Price × League Multiplier × (1 + Wagyu Surcharge if applicable)
+Free vs Paid
+
+Free gates: S0-S1, B0-B1, R0-R1, PMI0 (intake, basic financials)
+First paywall: S2 (Valuation), B2 (Target Valuation), R2 (Investor Materials)
+
+Four Journeys × Six Gates
+SELL (S0–S5)
+S0 Intake (free) → S1 Financials (free) → S2 Valuation (PAYWALL) → S3 Packaging → S4 Market Matching → S5 Closing
+BUY (B0–B5)
+B0 Thesis (free) → B1 Sourcing (free) → B2 Valuation (PAYWALL) → B3 Due Diligence → B4 Structuring → B5 Closing
+RAISE (R0–R5)
+R0 Intake (free) → R1 Financial Package (free) → R2 Investor Materials (PAYWALL) → R3 Outreach → R4 Terms → R5 Closing
+PMI (PMI0–PMI3)
+PMI0 Day 0 (free) → PMI1 Stabilization → PMI2 Assessment → PMI3 Optimization
+Math Engine — Exact Formulas (AI must not invent)
+SDE = Net_Income + Owner_Salary + D&A + Interest + One_Time + Verified_Addbacks
+EBITDA = Net_Income + D&A + Interest + Taxes + Verified_Addbacks - Non_Recurring
+DSCR = EBITDA / Annual_Debt_Service (SBA ≥ 1.25, Conventional ≥ 1.50)
+Valuation = (SDE or EBITDA) × (Base_Multiple + Growth_Premium + Margin_Premium)
+Transaction_Fee = MAX(deal_value × 0.5%, $2,000)
+League Multiple Ranges
+javascriptconst LEAGUE_MULTIPLE_RANGES = {
+  L1: { metric: 'SDE', min: 2.0, max: 3.5 },
+  L2: { metric: 'SDE', min: 3.0, max: 5.0 },
+  L3: { metric: 'EBITDA', min: 4.0, max: 6.0 },
+  L4: { metric: 'EBITDA', min: 6.0, max: 8.0 },
+  L5: { metric: 'EBITDA', min: 8.0, max: 12.0 },
+  L6: { metric: 'EBITDA', min: 10.0, max: null },
+};
+Roll-Up Override
+Industries: veterinary, dental, HVAC, MSP, pest control. If revenue > $1.5M → force EBITDA metric regardless of league.
+Key File Map
 | File | Purpose |
 |------|---------|
-| `METHODOLOGY_V17.md` | Core methodology, league governance, calculation rules |
-| `YULIA_PROMPTS_V3.md` | Runtime AI spec — system prompts, gate prompts, deliverable schemas, industry data |
-| `SMBX_DESIGN_SYSTEM.md` | Visual design reference (Guber v5.2) |
+| server/db.ts | PostgreSQL connection via postgres-js (raw SQL) |
+| server/index.ts | Express entry point |
+| server/routes/chat.ts | Chat CRUD + SSE streaming endpoints |
+| server/routes/auth.ts | JWT auth routes (login, signup, verify, Google OAuth) |
+| server/routes/stripe.ts | Stripe checkout + webhooks |
+| server/routes/wallet.ts | Wallet balance + transaction history |
+| server/routes/export.ts | PDF/DOCX/XLSX export endpoints (pdfkit, docx, exceljs) |
+| server/routes/dataRoom.ts | Folder/document management + deliverable comments |
+| server/routes/collaboration.ts | Deal invites, RBAC, NDA, day passes |
+| server/routes/deliverables.ts | Deliverable CRUD, content editing, AI revision |
+| server/services/aiService.ts | AI orchestration + agentic loop |
+| server/services/walletService.ts | Wallet CRUD, balance checks |
+| server/services/menuCatalogService.ts | Menu items, wallet blocks, deal packages |
+| server/services/leagueClassifier.ts | League detection + multiplier calculation |
+| server/services/gateReadinessService.ts | Gate advancement logic |
+| server/services/dealAccessService.ts | RBAC: hasDealAccess, folder visibility, activity logging |
+| server/services/complexityPreflightService.ts | Wagyu Rule surcharge detection (8 factors, 50% cap) |
+| server/services/deliverableProcessor.ts | AI generation dispatch + category routing + auto-filing |
+| server/services/modelRouter.ts | Tier-based Claude model routing (Opus/Sonnet/Haiku) |
+| server/services/optimizationPlanService.ts | Seller value optimization engine + milestones |
+| server/services/exportService.ts | PDF/DOCX/XLSX generation with watermarking |
+| server/services/documentExtractor.ts | PDF/XLSX/CSV extraction via Claude Vision |
+| server/services/emailService.ts | Transactional emails via Resend (welcome, gate, deliverable) |
+| server/services/tools.ts | 10 agentic tools for authenticated chat |
+| server/services/promptBuilder.ts | Dynamic prompt assembly with gate/league/knowledge layers |
+| server/prompts/gatePrompts.ts | Gate-specific prompts for all 4 journeys (S0-S5, B0-B5, R0-R5, PMI0-PMI3) |
+| server/services/generators/ | 23 specialized generators (valuation, CIM, LOI, LBO, etc.) |
+| client/src/pages/public/AppShell.tsx | Unified shell for all public pages |
+| client/src/components/chat/Canvas.tsx | Document viewer with export, edit, comments |
+| client/src/components/chat/InteractiveModel.tsx | Financial model with sliders, scenarios, sensitivity |
+| client/src/components/chat/DataRoom.tsx | Data room UI with folders, search, share links |
+| client/src/components/chat/CommentsPanel.tsx | Deliverable commenting with resolve workflow |
+| client/src/components/chat/NDAModal.tsx | NDA acceptance modal for deal participants |
+AI Orchestration (Anthropic Only)
 
-**NOT in repo but authoritative (in Claude.ai project):**
-- `SMBX_FINAL_BUILD_PLAN.md` — The definitive build plan. Supersedes all prior build plans.
-- `SMBX_PRICING_CATALOG_v2` — Launch pricing: wallet model, 10 visible items, league multipliers
-- `SMBX_DEAL_INTELLIGENCE_NARRATIVE.md` — Copy/messaging foundation
-- `smbX.ai Market Strategy Playbook` — Competitive positioning, GTM strategy
+| Task | Engine | Config |
+|------|--------|--------|
+| Chat/Conversation | Claude Sonnet 4.6 | Streaming, methodology context |
+| Agentic Loop | Claude Sonnet 4.6 | 10-tool toolbelt, 10-round safety limit |
+| Document Extraction | Claude Sonnet 4.6 | Vision (page-by-image), JSON output |
+| Deliverable Generation | Tier-routed (Opus/Sonnet/Haiku) | 23 generators + 9 category generators + model routing |
+| CIM Generation | Claude Opus 4.6 | High-quality long-form document |
+| Optimization Plans | Claude Sonnet 4.6 | Structured JSON output |
 
-## Build Plan Summary (Phase 1 = current priority)
-
-### PHASE 1: THE FRONT DOOR
-User types → Yulia responds → page morphs into tool → conversation works.
-1. AI backend: Anthropic API + SSE streaming, `POST /api/chat/message`
-2. System prompt: `server/prompts/masterPrompt.ts` (from YULIA_PROMPTS_V3 Section 1)
-3. Dynamic prompt assembly: `server/prompts/buildSystemPrompt.ts` (journey context, league, gate injection)
-4. Chat morph: `AppPhase` state machine with CSS fade animations
-5. `ChatDock.tsx`: ONE shared component for all pages (public landing + chat view)
-6. Topbar morph: nav links fade out, "Yulia" subtitle + back arrow appear
-7. Message persistence: conversations + messages tables
-8. iOS keyboard: `useAppHeight` hook with `--app-height` CSS var
-
-### PHASE 2: GATES + FREE VALUE
-Gate engine, journey/league/exit-type detection, free deliverable generators.
-
-### PHASE 3: WALLET + PAYMENTS
-Stripe Checkout, 6 wallet blocks, paywall cards in chat, TEST_MODE bypass.
-
-### PHASE 4: CANVAS + DELIVERABLES
-3-panel layout, all deliverable generators, export to PDF/DOCX.
-
-### PHASE 5: INTELLIGENCE LAYER
-Sovereign data (Census, BLS, FRED, SBA), living documents, negotiation intelligence.
-
-### PHASE 6: AUTH + POLISH
-JWT auth, anonymous→auth migration, mobile responsive, analytics.
-
-## Pricing (Launch — Wallet Only)
-```typescript
-// League Multipliers
-const LEAGUE_MULTIPLIERS = { L1: 1.0, L2: 1.5, L3: 3.0, L4: 5.0, L5: 8.0, L6: 10.0 };
-
-// Base Prices (cents) — 10 visible items
-const BASE_PRICES = {
-  "business-valuation": 35000,       // $350
-  "full-cim": 70000,                 // $700
-  "sba-bankability": 20000,          // $200
-  "deal-screening-memo": 15000,      // $150
-  "market-intelligence": 20000,      // $200
-  "loi-draft": 12500,                // $125
-  "qoe-lite": 50000,                 // $500
-  "financial-model": 30000,          // $300
-  "sector-analysis": 15000,          // $150
-  "working-capital-analysis": 15000  // $150
-};
-
-// Wallet Blocks: $50, $100+$5, $250★+$15, $500+$40, $1000+$100, $2500+$300
-// TEST_MODE=true bypasses Stripe charges for development
-```
-
-## Design System Quick Reference
-- **Logo:** `smbX.ai` — only the X in terra cotta (#D4714E), everything else primary text color
-- **User bubbles:** bg #FFF0EB, text #1A1A18, border 1px solid rgba(212,113,78,0.18)
-- **3-panel workspace:** sidebar (#EDEAE5), chat (#F5F3EF), canvas (#FFFFFF)
-- **60/30/10 rule:** Terra is functional only (active states, send button), not decorative
-- **Desktop hero:** `min-h-[calc(100vh-80px)]`, max-w-[860px] chat card, shadow-2xl, 40px radius, text-[56px] headline
-
-## Key Rules for Yulia
-- Yulia is an expert human M&A advisor. Never "As an AI."
-- 4-Beat First Response: Classify → Estimate → Insight → Question. Always start with a real number.
-- Wallet uses dollars, not credits. $1 = $1. Never say "credits."
-- Advisors/brokers are CUSTOMERS. Never position against them.
-- Free deliverables auto-generate when data is ready. Don't ask permission.
-- Paid deliverables: explain value first, then price. Compare to human advisory cost.
-
-## File Structure (target)
-```
-server/
-├── routes/chat.ts                 # Chat API endpoints
-├── prompts/
-│   ├── masterPrompt.ts            # Full Yulia system prompt (V3 Section 1)
-│   └── buildSystemPrompt.ts       # Dynamic prompt assembly
-├── services/
-│   ├── paywallService.ts          # Pricing catalog + league multipliers
-│   ├── gateService.ts             # Gate progression + completion triggers
-│   ├── walletService.ts           # Wallet operations
-│   └── deliverableService.ts      # Deliverable generation orchestration
-└── migrations/
-
-client/src/
-├── components/
-│   ├── ChatDock.tsx               # ONE shared chat input (public + chat view)
-│   └── Canvas.tsx                 # Deliverable viewer/editor
-├── hooks/
-│   ├── useChat.ts                 # Chat state, SSE streaming
-│   └── useAppHeight.ts            # iOS keyboard fix
-├── pages/public/                  # All public pages
-└── App.tsx                        # AppPhase state machine
-```
+Generators (server/services/generators/): valuationReport, sbaBankability, capitalStructure, cimGenerator, loiGenerator, financialModel, blindTeaser, ddPackage, workingCapital, dealScreeningMemo, intelligenceReport, fundsFlowStatement, closingChecklist, taxImpactAnalysis, pitchDeckGenerator, integrationPlanGenerator, executiveSummary, dealScoring, outreachStrategy, buyerList, lboModel, valueCreationPlan, dataRoomStructure
+Commands
+bashnpm run dev          # Start dev server (Vite + Express)
+npm run build        # Build for production
+Database
+All queries use raw postgres-js — no ORM. Pattern:
+javascriptimport { sql } from '../db.js';
+const users = await sql`SELECT * FROM users WHERE id = ${userId}`;
+Schema changes: write raw SQL migrations in server/migrations/ and run them manually or on deploy.
+Environment Variables Required
+DATABASE_URL, ANTHROPIC_API_KEY, GOOGLE_AI_API_KEY, OPENAI_API_KEY,
+GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
+STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET,
+JWT_SECRET, NODE_ENV, PORT, APP_URL

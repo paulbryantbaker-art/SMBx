@@ -49,7 +49,7 @@ export default function ResizeHandle({ onDrag }: ResizeHandleProps) {
           width: 3,
           height: 40,
           borderRadius: 2,
-          background: dragging ? '#D4714E' : hovered ? 'rgba(212,113,78,0.4)' : '#DDD9D1',
+          background: dragging ? '#C96B4F' : hovered ? 'rgba(212,113,78,0.4)' : '#DDD9D1',
           transition: 'all 0.15s',
         }}
       />

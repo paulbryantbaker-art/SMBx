@@ -21,12 +21,26 @@ export interface Conversation {
   updated_at: string;
 }
 
+// Human-readable tool names for UX
+const TOOL_LABELS: Record<string, string> = {
+  create_deal: 'Creating your deal',
+  update_deal_field: 'Updating deal info',
+  classify_league: 'Classifying deal size',
+  get_deal_context: 'Loading deal context',
+  advance_gate: 'Advancing to next stage',
+  generate_free_deliverable: 'Generating report',
+  recommend_providers: 'Finding service providers',
+  analyze_buyer_demand: 'Analyzing buyer demand',
+  match_franchises: 'Matching franchises',
+};
+
 export function useAuthChat(user: User | null) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<number | null>(null);
   const [messages, setMessages] = useState<AuthMessage[]>([]);
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState('');
+  const [activeTool, setActiveTool] = useState<string | null>(null);
   const [activeDealId, setActiveDealId] = useState<number | null>(null);
   const [currentGate, setCurrentGate] = useState<string | undefined>();
   const [paywallData, setPaywallData] = useState<any | null>(null);
@@ -126,6 +140,7 @@ export function useAuthChat(user: User | null) {
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let accumulated = '';
+      let sseBuffer = '';
 
       if (reader) {
         while (true) {
@@ -133,7 +148,10 @@ export function useAuthChat(user: User | null) {
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
+          sseBuffer += chunk;
+          const lines = sseBuffer.split('\n');
+          // Keep the last (possibly incomplete) line in the buffer
+          sseBuffer = lines.pop() || '';
 
           for (const line of lines) {
             if (!line.startsWith('data: ')) continue;
@@ -144,8 +162,13 @@ export function useAuthChat(user: User | null) {
               const parsed = JSON.parse(data);
 
               if (parsed.type === 'text_delta') {
+                setActiveTool(null);
                 accumulated += parsed.text;
                 setStreamingText(accumulated);
+              } else if (parsed.type === 'tool_start') {
+                setActiveTool(TOOL_LABELS[parsed.tool] || 'Working');
+              } else if (parsed.type === 'tool_done') {
+                setActiveTool(null);
               } else if (parsed.type === 'done') {
                 if (parsed.dealId) setActiveDealId(parsed.dealId);
                 if (parsed.conversationId) setActiveConversationId(parsed.conversationId);
@@ -158,8 +181,22 @@ export function useAuthChat(user: User | null) {
                 accumulated = parsed.error || 'Something went wrong.';
               }
             } catch {
-              // ignore partial chunk parse errors
+              // ignore malformed JSON
             }
+          }
+        }
+
+        // Flush remaining buffer after stream ends
+        if (sseBuffer.startsWith('data: ')) {
+          const data = sseBuffer.slice(6).trim();
+          if (data && data !== '[DONE]') {
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.type === 'text_delta') {
+                accumulated += parsed.text;
+                setStreamingText(accumulated);
+              }
+            } catch { /* ignore */ }
           }
         }
       }
@@ -188,6 +225,7 @@ export function useAuthChat(user: User | null) {
     } finally {
       setSending(false);
       setStreamingText('');
+      setActiveTool(null);
       abortRef.current = null;
     }
   }, [user, activeConversationId, createConversation, loadConversations]);
@@ -213,6 +251,7 @@ export function useAuthChat(user: User | null) {
     messages,
     sending,
     streamingText,
+    activeTool,
     activeDealId,
     currentGate,
     paywallData,

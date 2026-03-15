@@ -65,7 +65,7 @@ export async function sendInvitationEmail(invitation: {
           ${invitation.inviterName || 'Someone'} has invited you to join
           <strong>${invitation.dealName || 'a deal'}</strong> as a <strong>${roleName}</strong>.
         </p>
-        <a href="${acceptUrl}" style="display: inline-block; background: #D4714E; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+        <a href="${acceptUrl}" style="display: inline-block; background: #C96B4F; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
           Accept Invitation
         </a>
         <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
@@ -100,7 +100,7 @@ export async function sendDayPassEmail(dayPass: {
         <p style="color: #6E6A63; line-height: 1.6;">
           Your 48-hour access window starts when you click the button below.
         </p>
-        <a href="${passUrl}" style="display: inline-block; background: #D4714E; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+        <a href="${passUrl}" style="display: inline-block; background: #C96B4F; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
           Activate Day Pass
         </a>
         <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
@@ -130,7 +130,7 @@ export async function sendThesisMatchAlert(userId: number, matchCount: number): 
         <p style="color: #6E6A63; line-height: 1.6;">
           We found <strong>${matchCount}</strong> new listing${matchCount > 1 ? 's' : ''} that match your buy thesis criteria.
         </p>
-        <a href="${BASE_URL}/chat" style="display: inline-block; background: #D4714E; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+        <a href="${BASE_URL}/chat" style="display: inline-block; background: #C96B4F; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
           View Matches
         </a>
         <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
@@ -157,9 +157,98 @@ export async function sendDocumentNotification(userId: number, dealName: string,
         <p style="color: #6E6A63; line-height: 1.6;">
           A new document "<strong>${docName}</strong>" has been added to <strong>${dealName}</strong>.
         </p>
-        <a href="${BASE_URL}/chat" style="display: inline-block; background: #D4714E; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+        <a href="${BASE_URL}/chat" style="display: inline-block; background: #C96B4F; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
           View in SMBx
         </a>
+      </div>
+    `,
+  });
+}
+
+/**
+ * Send welcome email after signup.
+ */
+export async function sendWelcomeEmail(email: string, displayName?: string): Promise<boolean> {
+  return sendEmail({
+    to: email,
+    subject: 'Welcome to SMBx — Your M&A advisor is ready',
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #1A1A18; font-size: 20px;">Welcome to SMBx</h2>
+        <p style="color: #6E6A63; line-height: 1.6;">
+          Hi ${displayName || 'there'},
+        </p>
+        <p style="color: #6E6A63; line-height: 1.6;">
+          I'm Yulia, your AI M&A advisor. Whether you're buying, selling, or raising capital, I'll guide you through every step — from initial valuation to closing.
+        </p>
+        <p style="color: #6E6A63; line-height: 1.6;">
+          Start by telling me about your deal. Upload financials, and I'll generate your first deliverable for free.
+        </p>
+        <a href="${BASE_URL}/chat" style="display: inline-block; background: #C96B4F; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+          Start a Conversation
+        </a>
+        <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
+          Free gates include intake, financial analysis, and your first valuation snapshot. No credit card required.
+        </p>
+      </div>
+    `,
+  });
+}
+
+/**
+ * Send gate advancement notification.
+ */
+export async function sendGateAdvancementEmail(userId: number, gateName: string, journeyType: string, dealName?: string): Promise<boolean> {
+  const [user] = await sql`SELECT email, display_name FROM users WHERE id = ${userId}`.catch(() => [null]);
+  if (!user?.email) return false;
+
+  const journey = journeyType.charAt(0).toUpperCase() + journeyType.slice(1);
+
+  return sendEmail({
+    to: user.email,
+    subject: `${journey} journey advanced to ${gateName} — SMBx`,
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #1A1A18; font-size: 20px;">New gate unlocked</h2>
+        <p style="color: #6E6A63; line-height: 1.6;">
+          Hi ${user.display_name || 'there'},
+        </p>
+        <p style="color: #6E6A63; line-height: 1.6;">
+          Your ${journey.toLowerCase()} journey${dealName ? ` for <strong>${dealName}</strong>` : ''} has advanced to <strong>${gateName}</strong>. New deliverables and tools are now available.
+        </p>
+        <a href="${BASE_URL}/chat" style="display: inline-block; background: #C96B4F; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+          Continue Your Journey
+        </a>
+      </div>
+    `,
+  });
+}
+
+/**
+ * Send deliverable ready notification.
+ */
+export async function sendDeliverableReadyEmail(userId: number, deliverableName: string, dealName?: string): Promise<boolean> {
+  const [user] = await sql`SELECT email, display_name FROM users WHERE id = ${userId}`.catch(() => [null]);
+  if (!user?.email) return false;
+
+  return sendEmail({
+    to: user.email,
+    subject: `Your ${deliverableName} is ready — SMBx`,
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #1A1A18; font-size: 20px;">Deliverable ready</h2>
+        <p style="color: #6E6A63; line-height: 1.6;">
+          Hi ${user.display_name || 'there'},
+        </p>
+        <p style="color: #6E6A63; line-height: 1.6;">
+          Your <strong>${deliverableName}</strong>${dealName ? ` for <strong>${dealName}</strong>` : ''} has been generated and is ready for review.
+        </p>
+        <a href="${BASE_URL}/chat" style="display: inline-block; background: #C96B4F; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+          View Deliverable
+        </a>
+        <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
+          You can export to PDF, DOCX, or XLSX from the canvas view.
+        </p>
       </div>
     `,
   });

@@ -1,10 +1,11 @@
 import { useLocation } from 'wouter';
+import { ScrollReveal, StaggerContainer, StaggerItem, ScrollProgressBar, ConversationTyping } from '../../components/content/animations';
 
 /* ═══ DESIGN TOKENS ═══ */
 
 const T = {
   bg: '#FAF9F7',
-  terra: '#D4714E',
+  terra: '#C96B4F',
   terraHover: '#BE6342',
   terraSoft: '#FFF0EB',
   text: '#1A1A18',
@@ -26,6 +27,7 @@ export default function Advisors() {
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", WebkitFontSmoothing: 'antialiased', background: T.bg, minHeight: '100dvh' }}>
+      <ScrollProgressBar />
       <style>{`
         .adv-section {
           max-width: 960px; margin: 0 auto; width: 100%;
@@ -308,13 +310,13 @@ export default function Advisors() {
       </header>
 
       {/* ═══ HERO ═══ */}
-      <section className="adv-hero">
+      <section className="adv-hero hero-entrance">
         <h1>Your expertise closes deals. Now close more of them.</h1>
         <p className="adv-hero-sub">
           smbX.ai gives M&amp;A advisors, business brokers, and deal professionals the intelligence infrastructure to serve more clients, package better deals, and move through engagements faster.
         </p>
         <div className="adv-hero-ctas">
-          <button className="adv-btn-primary" onClick={talkToYulia}>
+          <button className="adv-btn-primary cta-glow" onClick={talkToYulia}>
             Start a conversation with Yulia
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
@@ -331,6 +333,7 @@ export default function Advisors() {
 
       {/* ═══ SECTION 1: THE ADVISOR'S PROBLEM ═══ */}
       <hr className="adv-divider" />
+      <ScrollReveal>
       <section className="adv-section">
         <p className="adv-overline">The reality of running a practice</p>
         <h2 className="adv-heading">Great advisors are limited by the same thing: hours in the day.</h2>
@@ -344,41 +347,45 @@ export default function Advisors() {
           smbX.ai handles the intelligence work so you can focus on the advisory work.
         </p>
       </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 2: USE CASE CARDS ═══ */}
       <hr className="adv-divider" />
+      <ScrollReveal>
       <section className="adv-section" id="advisor-use-cases">
         <h2 className="adv-heading">Intelligence on demand for every engagement.</h2>
-        <div className="adv-cards">
-          <div className="adv-card">
+        <StaggerContainer className="adv-cards">
+          <StaggerItem><div className="adv-card card-hover">
             <h3>Package a new listing</h3>
             <p>
               A new seller engagement used to mean days of manual research before you could have an informed conversation about price. With smbX.ai, tell Yulia about the business and get instant market intelligence &mdash; industry multiples, competitive landscape, regional economics, preliminary valuation range, and add-back identification. All sourced. All defensible.
             </p>
-          </div>
-          <div className="adv-card">
+          </div></StaggerItem>
+          <StaggerItem><div className="adv-card card-hover">
             <h3>Qualify buyers in minutes</h3>
             <p>
               Yulia can pre-screen buyer financials against SBA lending requirements, model debt service coverage ratios, and assess financing feasibility before you schedule a single call. Know which buyers can actually close &mdash; and which structures work for the deal at hand.
             </p>
-          </div>
-          <div className="adv-card">
+          </div></StaggerItem>
+          <StaggerItem><div className="adv-card card-hover">
             <h3>Win the pitch</h3>
             <p>
               When you&apos;re competing for a listing, the advisor who shows up with localized market intelligence, industry-specific benchmarks, and a clear methodology wins the engagement. Yulia gives you that preparation in the time it takes to describe the opportunity.
             </p>
-          </div>
-          <div className="adv-card">
+          </div></StaggerItem>
+          <StaggerItem><div className="adv-card card-hover">
             <h3>Make smaller deals profitable</h3>
             <p>
               There are deals in the $500K&ndash;$2M range that your expertise could close &mdash; but they don&apos;t justify 40 hours of manual prep. smbX.ai changes the economics. The intelligence infrastructure that makes a $10M engagement great makes a $1M engagement viable.
             </p>
-          </div>
-        </div>
+          </div></StaggerItem>
+        </StaggerContainer>
       </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 3: WHITE-LABEL ═══ */}
       <hr className="adv-divider" />
+      <ScrollReveal>
       <section className="adv-section">
         <div className="adv-highlight">
           <h2 className="adv-heading" style={{ marginBottom: 16 }}>Present smbX.ai intelligence under your brand.</h2>
@@ -390,9 +397,11 @@ export default function Advisors() {
           </p>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 4: METHODOLOGY ═══ */}
       <hr className="adv-divider" />
+      <ScrollReveal>
       <section className="adv-section">
         <h2 className="adv-heading">Intelligence you can stake your reputation on.</h2>
         <p className="adv-body">
@@ -413,9 +422,11 @@ export default function Advisors() {
           ))}
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 5: CONVERSATION PREVIEW ═══ */}
       <hr className="adv-divider" />
+      <ScrollReveal>
       <section className="adv-section">
         <h2 className="adv-heading" style={{ textAlign: 'center', marginBottom: 32 }}>
           See how a broker uses Yulia to prepare a new listing.
@@ -446,9 +457,11 @@ export default function Advisors() {
           </div>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 6: GETTING STARTED ═══ */}
       <hr className="adv-divider" />
+      <ScrollReveal>
       <section className="adv-section">
         <h2 className="adv-heading">Start using smbX.ai in your next engagement.</h2>
         <div className="adv-steps">
@@ -466,9 +479,11 @@ export default function Advisors() {
           </div>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 7: PARTNERSHIP ═══ */}
       <hr className="adv-divider" />
+      <ScrollReveal>
       <section className="adv-section">
         <h2 className="adv-heading">Built with advisors. Growing with advisors.</h2>
         <p className="adv-body">
@@ -484,8 +499,10 @@ export default function Advisors() {
           </svg>
         </a>
       </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 8: FINAL CTA ═══ */}
+      <ScrollReveal>
       <div className="adv-final-cta">
         <h2 className="adv-cta-heading">Your next listing starts with a conversation.</h2>
         <p className="adv-cta-sub">Same intelligence. Your brand. Every engagement.</p>
@@ -496,6 +513,7 @@ export default function Advisors() {
           </svg>
         </button>
       </div>
+      </ScrollReveal>
 
       {/* ═══ FOOTER ═══ */}
       <footer className="adv-footer">

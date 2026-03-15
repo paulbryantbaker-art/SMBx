@@ -4,22 +4,22 @@
 
 :root {
   --ink: #1A1A18;
-  --terra: #D4714E;
-  --terra-hover: #C0623F;
-  --stone: #C5C0B6;
-  --surface: #EDEAE4;
-  --tint: #D8D3CA;
+  --terra: #C96B4F;
+  --terra-hover: #B55E44;
+  --stone: rgba(0,0,0,0.08);
+  --surface: #FAF9F7;
+  --tint: #F0EEEA;
   --white: #FFFFFF;
   /* Backward-compat for authenticated components */
-  --cream: #EDEAE4;
+  --cream: #FAF9F7;
   --fill: #FFFFFF;
   --terra-soft: #FFF0EB;
-  --terra-glow: rgba(212,113,78,.12);
+  --terra-glow: rgba(201,107,79,.12);
   --text: #1A1A18;
   --text-mid: #3D3B37;
   --muted: #6E6A63;
   --faint: #9CA3AF;
-  --border: #C5C0B6;
+  --border: rgba(0,0,0,0.08);
   --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
   --shadow-card: 0 1px 4px rgba(0,0,0,.06);
   --shadow-md: 0 2px 10px rgba(0,0,0,.08);
@@ -34,7 +34,7 @@ html {
 
 body {
   margin: 0;
-  background-color: #EDEAE4;
+  background-color: #FAF9F7;
   font-family: var(--sans);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
@@ -133,7 +133,7 @@ body {
 /* Dock card */
 .home-dock-card {
   background: #FFFFFF;
-  border: 2px solid #C5C0B6;
+  border: 2px solid rgba(0,0,0,0.06);
   border-radius: 20px;
   overflow: visible;
   position: relative;
@@ -145,7 +145,7 @@ body {
 
 /* Tinted depth zone behind dock card (applied by parent) */
 .dock-depth-zone {
-  background: #D8D3CA;
+  background: #F0EEEA;
   border-radius: 24px;
   padding: 12px;
 }
@@ -171,9 +171,9 @@ body {
   border-radius: 12px; border: none; background: transparent; width: 100%;
   font-family: inherit; cursor: pointer; transition: background 0.15s; text-align: left;
 }
-.home-tp-item:hover { background: #EDEAE4; }
-.home-tp-item:active { background: #D8D3CA; }
-.home-tp-item svg { width: 20px; height: 20px; color: #D4714E; flex-shrink: 0; margin-top: 1px; }
+.home-tp-item:hover { background: #F0EEEA; }
+.home-tp-item:active { background: #E8E5E0; }
+.home-tp-item svg { width: 20px; height: 20px; color: #C96B4F; flex-shrink: 0; margin-top: 1px; }
 
 /* Home chat input — focus border */
 .home-input-wrap { transition: border-color 200ms; }
@@ -185,12 +185,12 @@ body {
 
 /* Gate stepper pulse */
 @keyframes gatePulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(212,113,78,.3); }
-  50% { box-shadow: 0 0 0 4px rgba(212,113,78,.1); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201,107,79,.3); }
+  50% { box-shadow: 0 0 0 4px rgba(201,107,79,.1); }
 }
 
 /* Canvas content styles */
-.canvas-md h1 { font-size: 20px; font-weight: 700; color: #1A1A18; margin: 1.5em 0 0.5em; padding-bottom: 6px; border-bottom: 2px solid #D4714E; }
+.canvas-md h1 { font-size: 20px; font-weight: 700; color: #1A1A18; margin: 1.5em 0 0.5em; padding-bottom: 6px; border-bottom: 2px solid #C96B4F; }
 .canvas-md h2 { font-size: 16px; font-weight: 700; color: #3D3B37; margin: 1.2em 0 0.4em; }
 .canvas-md h3 { font-size: 14px; font-weight: 600; color: #6E6A63; margin: 1em 0 0.3em; }
 .canvas-md p { font-size: 14px; line-height: 1.7; color: #3D3B37; margin: 0.6em 0; }
@@ -200,7 +200,7 @@ body {
 .canvas-md table { border-collapse: collapse; width: 100%; margin: 12px 0; border: 1px solid #DDD9D1; border-radius: 8px; overflow: hidden; }
 .canvas-md th { background: #F3F0EA; text-align: left; padding: 8px 12px; font-size: 12px; font-weight: 600; color: #3D3B37; border-bottom: 1px solid #DDD9D1; }
 .canvas-md td { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid #EBE7DF; }
-.canvas-md blockquote { border-left: 3px solid #D4714E; margin: 1em 0; padding: 0.5em 1em; background: #FFF8F5; border-radius: 0 8px 8px 0; }
+.canvas-md blockquote { border-left: 3px solid #C96B4F; margin: 1em 0; padding: 0.5em 1em; background: #FFF8F5; border-radius: 0 8px 8px 0; }
 .canvas-md code { background: #F3F0EA; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
 .canvas-md pre { background: #F3F0EA; padding: 16px; border-radius: 8px; overflow-x: auto; }
 .canvas-md pre code { background: none; padding: 0; }
@@ -235,7 +235,7 @@ input[type="range"]::-webkit-slider-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #D4714E;
+  background: #C96B4F;
   border: 3px solid #fff;
   box-shadow: 0 2px 8px rgba(212, 113, 78, 0.35);
   cursor: pointer;
@@ -250,7 +250,7 @@ input[type="range"]::-moz-range-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #D4714E;
+  background: #C96B4F;
   border: 3px solid #fff;
   box-shadow: 0 2px 8px rgba(212, 113, 78, 0.35);
   cursor: pointer;
@@ -260,4 +260,274 @@ input[type="range"]::-moz-range-track {
   height: 8px;
   border-radius: 999px;
   background: #EAE6DF;
+}
+
+/* ═══ MOBILE OPTIMIZATIONS ═══ */
+
+/* Momentum scrolling for table overflow on iOS */
+.canvas-md table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure tables render correctly inside overflow wrapper */
+.canvas-md table thead,
+.canvas-md table tbody,
+.canvas-md table tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+@media (max-width: 640px) {
+  /* Tighter padding on small screens */
+  .canvas-content { padding-left: 16px !important; padding-right: 16px !important; }
+
+  /* Smaller canvas headings on mobile */
+  .canvas-md h1 { font-size: 18px; }
+  .canvas-md h2 { font-size: 15px; }
+  .canvas-md h3 { font-size: 13px; }
+  .canvas-md p, .canvas-md ul, .canvas-md ol { font-size: 13px; }
+  .canvas-md th { font-size: 11px; padding: 6px 8px; }
+  .canvas-md td { font-size: 12px; padding: 6px 8px; }
+
+  /* Ensure table layout doesn't break on small screens */
+  .canvas-md table thead,
+  .canvas-md table tbody,
+  .canvas-md table tr {
+    display: revert;
+    width: revert;
+    table-layout: auto;
+  }
+
+  /* Range slider thumb - larger on touch */
+  input[type="range"]::-webkit-slider-thumb {
+    width: 28px;
+    height: 28px;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Prevent horizontal overflow */
+#root {
+  overflow-x: hidden;
+}
+
+/* ═══ PREMIUM MICRO-INTERACTIONS ═══ */
+
+/* Smooth transitions for all interactive elements */
+a, button, [role="button"] {
+  transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease,
+              box-shadow 200ms ease, transform 150ms ease, opacity 200ms ease;
+}
+
+/* Subtle lift on clickable cards and interactive surfaces */
+.hover-lift {
+  transition: transform 250ms ease, box-shadow 250ms ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+.hover-lift:active {
+  transform: translateY(0);
+}
+
+/* Button press feedback */
+button:active:not(:disabled), [role="button"]:active {
+  transform: scale(0.97);
+}
+
+/* Dock card focus glow */
+.home-dock-card:focus-within {
+  box-shadow: 0 0 0 3px rgba(201,107,79,0.08), 0 1px 8px rgba(0,0,0,0.06);
+}
+
+/* Sidebar nav item hover */
+.nav-item-hover {
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.nav-item-hover:hover {
+  background-color: rgba(26,26,24,0.04);
+}
+
+/* Chip/pill button hover */
+.chip-hover {
+  transition: all 200ms ease;
+}
+.chip-hover:hover {
+  border-color: rgba(26,26,24,0.15) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  transform: translateY(-1px);
+}
+.chip-hover:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Terra cotta accent button glow on hover */
+.terra-btn:hover {
+  box-shadow: 0 2px 12px rgba(201,107,79,0.25);
+}
+.terra-btn:active {
+  box-shadow: 0 1px 4px rgba(201,107,79,0.15);
+}
+
+/* Conversation list item hover */
+.conv-item-hover {
+  transition: background-color 150ms ease;
+  border-radius: 8px;
+}
+.conv-item-hover:hover {
+  background-color: rgba(26,26,24,0.04);
+}
+
+/* Smooth image/content lazy-load fade-in */
+.fade-in-on-load {
+  opacity: 0;
+  animation: fadeInSmooth 0.5s ease forwards;
+}
+@keyframes fadeInSmooth {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Send button pulse when input has content */
+.send-ready {
+  animation: sendPulse 2s ease infinite;
+}
+@keyframes sendPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201,107,79,0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(201,107,79,0); }
+}
+
+/* Smooth scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(26,26,24,0.12);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(26,26,24,0.22);
+}
+
+/* ═══ PREMIUM PAGE ANIMATIONS ═══ */
+
+/* Hero entrance — children fade up in sequence */
+.hero-entrance > * {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: heroReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.hero-entrance > *:nth-child(1) { animation-delay: 0.1s; }
+.hero-entrance > *:nth-child(2) { animation-delay: 0.25s; }
+.hero-entrance > *:nth-child(3) { animation-delay: 0.4s; }
+.hero-entrance > *:nth-child(4) { animation-delay: 0.55s; }
+.hero-entrance > *:nth-child(5) { animation-delay: 0.7s; }
+.hero-entrance > *:nth-child(6) { animation-delay: 0.85s; }
+
+@keyframes heroReveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Card hover — subtle lift with shadow deepening */
+.card-hover {
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 300ms ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(26,26,24,0.10);
+  border-color: rgba(26,26,24,0.12);
+}
+.card-hover:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26,26,24,0.08);
+}
+
+/* Terra CTA button glow on hover */
+.cta-glow {
+  transition: all 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cta-glow:hover {
+  box-shadow: 0 4px 20px rgba(201,107,79,0.35);
+  transform: translateY(-1px);
+}
+.cta-glow:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(201,107,79,0.25);
+}
+
+/* FAQ accordion smooth expand/collapse */
+.faq-answer {
+  overflow: hidden;
+  transition: max-height 350ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 250ms ease;
+}
+.faq-answer.open {
+  opacity: 1;
+}
+.faq-answer.closed {
+  max-height: 0 !important;
+  opacity: 0;
+}
+
+/* Scroll progress bar */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: #C96B4F;
+  z-index: 100;
+  transform-origin: left;
+  will-change: transform;
+}
+
+/* Conversation typing animation */
+.conv-typing-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #A9A49C;
+  animation: convTypingPulse 1.4s ease infinite;
+}
+.conv-typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.conv-typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes convTypingPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+/* Timeline dot entrance */
+.timeline-dot-enter {
+  animation: timelineDotPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+  transform: scale(0);
+}
+@keyframes timelineDotPop {
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ═══ PRINT STYLES ═══ */
+@media print {
+  body { background: white !important; }
+  .canvas-content { max-width: 100% !important; padding: 0 !important; }
+  .canvas-content table { page-break-inside: avoid; }
+  .canvas-content h2, .canvas-content h3 { page-break-after: avoid; }
+  /* Hide non-content elements */
+  nav, button, [class*="sidebar"], [class*="Sidebar"] { display: none !important; }
 }

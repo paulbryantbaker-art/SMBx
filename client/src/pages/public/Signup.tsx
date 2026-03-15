@@ -38,7 +38,7 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
         <button
           type="button"
           onClick={onGoogleLogin}
-          className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-white border border-[#E0DCD4] rounded-xl text-[15px] text-[#1A1A18] font-medium cursor-pointer transition-colors hover:border-[#1A1A18]"
+          className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-white border border-[#F0EEEA] rounded-xl text-[15px] text-[#1A1A18] font-medium cursor-pointer transition-colors hover:border-[#1A1A18]"
         >
           <svg width="18" height="18" viewBox="0 0 18 18">
             <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
@@ -50,9 +50,9 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
         </button>
 
         <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-[#E0DCD4]" />
+          <div className="flex-1 h-px bg-[#F0EEEA]" />
           <span className="text-[13px] text-[#7A766E] whitespace-nowrap">or continue with email</span>
-          <div className="flex-1 h-px bg-[#E0DCD4]" />
+          <div className="flex-1 h-px bg-[#F0EEEA]" />
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
@@ -66,7 +66,7 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Your name"
-            className="w-full px-3.5 py-2.5 text-[15px] border border-[#E0DCD4] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#D4714E]"
+            className="w-full px-3.5 py-2.5 text-[15px] border border-[#F0EEEA] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#C96B4F]"
           />
 
           <label className="block text-sm font-medium text-[#1A1A18] mb-1.5">Email</label>
@@ -75,7 +75,7 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full px-3.5 py-2.5 text-[15px] border border-[#E0DCD4] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#D4714E]"
+            className="w-full px-3.5 py-2.5 text-[15px] border border-[#F0EEEA] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#C96B4F]"
           />
 
           <label className="block text-sm font-medium text-[#1A1A18] mb-1.5">Password</label>
@@ -84,13 +84,13 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Create a password"
-            className="w-full px-3.5 py-2.5 text-[15px] border border-[#E0DCD4] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#D4714E]"
+            className="w-full px-3.5 py-2.5 text-[15px] border border-[#F0EEEA] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#C96B4F]"
           />
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 bg-[#D4714E] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#BE6342] transition-colors disabled:opacity-50"
+            className="w-full py-3 bg-[#C96B4F] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#BE6342] transition-colors disabled:opacity-50"
           >
             {submitting ? 'Creating account...' : 'Create account'}
           </button>
@@ -101,7 +101,7 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
           <button
             type="button"
             onClick={onNavigateLogin}
-            className="bg-transparent border-none text-[#D4714E] font-semibold cursor-pointer text-sm p-0"
+            className="bg-transparent border-none text-[#C96B4F] font-semibold cursor-pointer text-sm p-0"
           >
             Sign in
           </button>

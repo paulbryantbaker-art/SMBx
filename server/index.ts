@@ -25,6 +25,8 @@ import { franchiseRouter } from './routes/franchise.js';
 import { sellerDashboardRouter } from './routes/sellerDashboard.js';
 import { buyerPipelineRouter } from './routes/buyerPipeline.js';
 import { discoveryRouter } from './routes/discovery.js';
+import { walletRouter } from './routes/wallet.js';
+import { exportRouter } from './routes/export.js';
 import { startWorker } from './workers/discoveryWorker.js';
 import rateLimit from 'express-rate-limit';
 import type { Request, Response, NextFunction } from 'express';
@@ -225,6 +227,8 @@ app.use('/api', franchiseRouter);
 app.use('/api', sellerDashboardRouter);
 app.use('/api', buyerPipelineRouter);
 app.use('/api', discoveryRouter);
+app.use('/api', walletRouter);
+app.use('/api', exportRouter);
 
 // ─── 4. JSON error handler for API routes ──────────────────
 app.use('/api', (err: any, _req: Request, res: Response, _next: NextFunction) => {

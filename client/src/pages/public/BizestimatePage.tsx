@@ -34,7 +34,7 @@ export default function BizestimatePage({ token }: BizestimatePageProps) {
   if (loading) {
     return (
       <div className="min-h-dvh bg-[#F5F5F0] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#D4714E] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
+        <div className="w-6 h-6 border-2 border-[#C96B4F] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
       </div>
     );
   }
@@ -56,12 +56,12 @@ export default function BizestimatePage({ token }: BizestimatePageProps) {
       <header className="bg-white border-b border-[#EBEBEB] px-4 py-3">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-[#D4714E] font-bold text-lg">smbX</span>
+            <span className="text-[#C96B4F] font-bold text-lg">smbX</span>
             <span className="text-xs text-[#6E6A63]">Bizestimate</span>
           </div>
           <a
             href="/"
-            className="text-sm font-medium text-[#D4714E] hover:underline no-underline"
+            className="text-sm font-medium text-[#C96B4F] hover:underline no-underline"
           >
             Get yours free
           </a>

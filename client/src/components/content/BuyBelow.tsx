@@ -14,10 +14,10 @@ interface BuyBelowProps {
 }
 
 const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
-const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#D4714E' };
+const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
 const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 };
 const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, margin: 0 };
-const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid #C5C0B6', padding: '28px 32px' };
+const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' };
 
 export default function BuyBelow({ onChipClick }: BuyBelowProps) {
   return (
@@ -105,7 +105,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
           </div>
 
           <RevealSection style={{ marginTop: 24 }}>
-            <p style={{ fontSize: '16px', fontWeight: 600, color: '#D4714E', lineHeight: 1.65 }}>
+            <p style={{ fontSize: '16px', fontWeight: 600, color: '#C96B4F', lineHeight: 1.65 }}>
               Both free. Both generated from your first conversation.
             </p>
           </RevealSection>
@@ -130,7 +130,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
               beforeLabel="STOCK SALE"
               afterLabel="ASSET SALE (BUYER-FAVORABLE)"
               beforeContent={
-                <div style={{ background: '#EDEAE4', padding: '32px', minHeight: 280 }}>
+                <div style={{ background: '#FAF9F7', padding: '32px', minHeight: 280 }}>
                   <div className="space-y-3" style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.5 }}>
                     <div className="flex justify-between"><span>Basis step-up</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>No</span></div>
                     <div className="flex justify-between"><span>Goodwill amortization</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>None</span></div>
@@ -141,7 +141,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
                 </div>
               }
               afterContent={
-                <div style={{ background: '#D4714E', padding: '32px', minHeight: 280 }}>
+                <div style={{ background: '#C96B4F', padding: '32px', minHeight: 280 }}>
                   <div className="space-y-3" style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
                     <div className="flex justify-between"><span>Basis step-up</span><span style={{ color: '#fff', fontWeight: 600 }}>Yes</span></div>
                     <div className="flex justify-between"><span>Goodwill amortization</span><span style={{ color: '#fff', fontWeight: 600 }}>~$97K/yr</span></div>
@@ -227,7 +227,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
                   <ScrollReveal key={p.phase} delay={i * 0.1}>
                     <div className="flex gap-4" style={{ paddingLeft: 12 }}>
                       <div className="flex flex-col items-center shrink-0" style={{ marginLeft: -8 }}>
-                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#D4714E', marginTop: 6, boxShadow: '0 0 0 4px rgba(212,113,78,0.15)' }} />
+                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#C96B4F', marginTop: 6, boxShadow: '0 0 0 4px rgba(212,113,78,0.15)' }} />
                       </div>
                       <div className="pb-2">
                         <span style={labelStyle}>{p.phase}</span>

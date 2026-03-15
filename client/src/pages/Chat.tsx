@@ -323,7 +323,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
   return (
     <div
       ref={containerRef}
-      className="flex h-dvh overflow-hidden bg-[#EDEAE4] font-sans"
+      className="flex h-dvh overflow-hidden bg-[#FAF9F7] font-sans"
     >
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
@@ -350,14 +350,14 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
       <div className="flex-1 flex flex-col min-w-0">
         {/* TOPBAR — single logo lives here */}
         <div
-          className="shrink-0 flex items-center justify-between bg-[#EDEAE4]"
-          style={{ padding: '10px 20px', borderBottom: '1px solid #C5C0B6' }}
+          className="shrink-0 flex items-center justify-between bg-[#FAF9F7]"
+          style={{ padding: '10px 20px', borderBottom: '1px solid rgba(0,0,0,0.06)' }}
         >
           <div className="flex items-center gap-2.5">
             {/* Mobile hamburger */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="flex items-center justify-center w-[34px] h-[34px] rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#D4714E] transition-colors md:hidden"
+              className="flex items-center justify-center w-[34px] h-[34px] rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(212,113,78,.08)] hover:text-[#C96B4F] transition-colors md:hidden"
               type="button"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -378,7 +378,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
               </button>
             )}
             <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1A1A18] font-sans">
-              smb<span className="text-[#D4714E]">x</span>.ai
+              smb<span className="text-[#C96B4F]">x</span>.ai
             </div>
           </div>
 
@@ -389,14 +389,14 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
                 key={n.key}
                 onClick={() => toggleCanvas(n.key)}
                 className={`hidden sm:block px-3.5 py-[7px] rounded-lg bg-transparent border-none cursor-pointer text-sm font-semibold tracking-[-0.01em] transition-colors relative ${
-                  canvas === n.key ? 'text-[#D4714E]' : 'text-[#3D3B37] hover:text-[#D4714E]'
+                  canvas === n.key ? 'text-[#C96B4F]' : 'text-[#3D3B37] hover:text-[#C96B4F]'
                 }`}
               >
                 {n.label}
                 {/* Active dot indicator */}
                 {canvas === n.key && (
                   <span
-                    className="absolute left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#D4714E]"
+                    className="absolute left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#C96B4F]"
                     style={{ bottom: 2 }}
                   />
                 )}
@@ -411,7 +411,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
             <button
               onClick={() => toggleCanvas('settings')}
               className={`flex items-center justify-center w-8 h-8 rounded-full text-sm transition-colors cursor-pointer border-0 bg-transparent ${
-                canvas === 'settings' ? 'text-[#D4714E]' : 'text-[#6E6A63] hover:bg-[rgba(0,0,0,0.04)] hover:text-[#1A1A18]'
+                canvas === 'settings' ? 'text-[#C96B4F]' : 'text-[#6E6A63] hover:bg-[rgba(0,0,0,0.04)] hover:text-[#1A1A18]'
               }`}
               title="Settings"
             >
@@ -436,7 +436,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
                   {showWelcome && (
                     <div className="py-12 px-2">
                       <h2 className="text-[26px] font-extrabold tracking-[-0.03em] text-[#1A1A18] font-sans m-0 mb-2 text-center">
-                        smb<span className="text-[#D4714E]">x</span>.ai
+                        smb<span className="text-[#C96B4F]">x</span>.ai
                       </h2>
                       <p className="text-base text-[#6E6A63] font-sans m-0 mb-8 text-center max-w-md mx-auto leading-relaxed">
                         I'm Yulia, your M&A advisor. I handle the entire process — from first conversation to closing. What are we working on?
@@ -524,7 +524,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
               className="hidden md:flex flex-col"
               style={{
                 ...canvasStyle(),
-                borderLeft: canvasFS ? 'none' : '1px solid #C5C0B6',
+                borderLeft: canvasFS ? 'none' : '1px solid rgba(0,0,0,0.06)',
                 background: '#FFFFFF',
                 transition: canvasW ? 'none' : 'all 0.25s ease',
               }}

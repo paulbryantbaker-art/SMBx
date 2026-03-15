@@ -5,6 +5,8 @@ import { getLeagueMultiplier } from './leagueClassifier.js';
 import { generateProviderRecommendation, findProviders, trackReferral } from './providerMatchingService.js';
 import { matchFranchises } from './franchiseMatchingService.js';
 import { matchBuyersForSeller } from './buyerSourcingService.js';
+import { generateOptimizationPlan, saveOptimizationPlan, createOptimizationMilestone } from './optimizationPlanService.js';
+import { sendGateAdvancementEmail } from './emailService.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
@@ -126,6 +128,17 @@ export const TOOL_DEFINITIONS: Tool[] = [
       required: [],
     },
   },
+  {
+    name: 'generate_optimization_plan',
+    description: 'Generate a value optimization plan for a seller. Creates personalized improvement actions with timeline and dollar impact estimates. Call this when a seller asks about increasing their business value, preparing for sale, or when they reach S1 with financial data.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'The deal ID for the sell journey' },
+      },
+      required: ['dealId'],
+    },
+  },
 ];
 
 // ─── Tool Execution ────────────────────────────────────────
@@ -162,6 +175,8 @@ export async function executeTool(
         return await analyzeBuyerDemandTool(input, userId);
       case 'match_franchises':
         return await matchFranchiseTool(input);
+      case 'generate_optimization_plan':
+        return await generateOptimizationPlanTool(input, userId);
       default:
         return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
@@ -357,6 +372,9 @@ async function advanceGate(input: Record<string, any>, userId: number): Promise<
     WHERE deal_id = ${dealId} AND gate = ${toGate}
   `.catch(() => {});
 
+  // Notify user via email (fire-and-forget)
+  sendGateAdvancementEmail(userId, toGate, deal.journey_type || 'sell', deal.business_name).catch(() => {});
+
   return JSON.stringify({ success: true, newGate: toGate });
 }
 
@@ -512,5 +530,67 @@ async function matchFranchiseTool(input: Record<string, any>): Promise<string> {
     success: true,
     count: results.length,
     franchises: results,
+  });
+}
+
+async function generateOptimizationPlanTool(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealId } = input;
+  const [deal] = await sql`
+    SELECT d.*, d.financials FROM deals d
+    WHERE d.id = ${dealId} AND d.user_id = ${userId} AND d.journey_type = 'sell'
+  `;
+  if (!deal) return JSON.stringify({ error: 'Sell deal not found' });
+
+  // Get company profile
+  const [profile] = await sql`
+    SELECT * FROM company_profiles WHERE deal_id = ${dealId} LIMIT 1
+  `;
+
+  const plan = await generateOptimizationPlan({
+    dealId: deal.id,
+    userId,
+    business_name: deal.business_name,
+    industry: deal.industry,
+    naics_code: deal.naics_code,
+    revenue: deal.revenue,
+    sde: deal.sde,
+    ebitda: deal.ebitda,
+    owner_salary: deal.financials?.owner_salary,
+    employee_count: deal.employee_count,
+    years_in_business: deal.financials?.years_in_business,
+    gross_margin: deal.financials?.gross_margin,
+    growth_rate: deal.financials?.growth_rate,
+    league: deal.league || 'L1',
+    exit_type: deal.exit_type,
+    financials: deal.financials,
+  });
+
+  // Save to DB if profile exists
+  if (profile) {
+    await saveOptimizationPlan(profile.id, plan);
+    await createOptimizationMilestone(deal.id, {
+      milestone_type: 'plan_created',
+      description: `Generated ${plan.actions.length} improvement actions`,
+      valuation_snapshot_low: plan.currentValuationLow,
+      valuation_snapshot_high: plan.currentValuationHigh,
+      actions_completed: 0,
+      actions_total: plan.actions.length,
+    });
+  }
+
+  return JSON.stringify({
+    success: true,
+    summary: plan.summary,
+    actionCount: plan.actions.length,
+    currentValuation: `$${(plan.currentValuationLow / 100).toLocaleString()} – $${(plan.currentValuationHigh / 100).toLocaleString()}`,
+    potentialValuation: `$${(plan.potentialValuationLow / 100).toLocaleString()} – $${(plan.potentialValuationHigh / 100).toLocaleString()}`,
+    totalPotentialImpact: `$${(plan.totalPotentialImpact / 100).toLocaleString()}`,
+    estimatedMonths: plan.estimatedMonthsToReady,
+    topActions: plan.actions.slice(0, 3).map(a => ({
+      title: a.title,
+      impact: a.valuation_impact_cents ? `$${(a.valuation_impact_cents / 100).toLocaleString()}` : 'Qualitative',
+      difficulty: a.difficulty,
+      timeline: `${a.timeline_days} days`,
+    })),
   });
 }

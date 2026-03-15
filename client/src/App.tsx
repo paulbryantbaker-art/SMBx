@@ -40,10 +40,12 @@ const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
 const Search = lazy(() => import('./pages/Search'));
 const DayPassView = lazy(() => import('./pages/public/DayPassView'));
 const BizestimatePage = lazy(() => import('./pages/public/BizestimatePage'));
+const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/public/ResetPassword'));
 
 /** Check if a path should be handled by the unified AppShell */
 function isShellPath(path: string): boolean {
-  const shellExact = ['/', '/sell', '/buy', '/how-it-works', '/advisors', '/pricing', '/pipeline', '/dataroom', '/settings', '/chat'];
+  const shellExact = ['/', '/sell', '/buy', '/raise', '/integrate', '/how-it-works', '/advisors', '/pricing', '/pipeline', '/dataroom', '/settings', '/chat', '/wallet'];
   if (shellExact.includes(path)) return true;
   if (path.startsWith('/chat/')) return true;
   return false;
@@ -175,6 +177,7 @@ export default function App() {
             onLogin={handleLoginSuccess}
             onGoogleLogin={handleGoogleLogin}
             onNavigateSignup={() => navigate('/signup')}
+            onNavigateForgot={() => navigate('/forgot-password')}
           />
         )}
       </Route>
@@ -187,6 +190,22 @@ export default function App() {
             onGoogleLogin={handleGoogleLogin}
             onNavigateLogin={() => navigate('/login')}
           />
+        )}
+      </Route>
+      <Route path="/forgot-password">
+        {user ? (
+          <Redirect to="/chat" />
+        ) : (
+          <Suspense fallback={<PageLoader />}>
+            <ForgotPassword onNavigateLogin={() => navigate('/login')} />
+          </Suspense>
+        )}
+      </Route>
+      <Route path="/reset-password/:token">
+        {(params) => (
+          <Suspense fallback={<PageLoader />}>
+            <ResetPassword token={params.token} onNavigateLogin={() => navigate('/login')} />
+          </Suspense>
         )}
       </Route>
 

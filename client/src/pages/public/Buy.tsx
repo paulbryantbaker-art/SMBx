@@ -1,10 +1,11 @@
 import { useLocation } from 'wouter';
+import { ScrollReveal, StaggerContainer, StaggerItem, ScrollProgressBar } from '../../components/content/animations';
 
 /* ═══ DESIGN TOKENS ═══ */
 
 const T = {
   bg: '#FAF9F7',
-  terra: '#D4714E',
+  terra: '#C96B4F',
   terraHover: '#BE6342',
   terraSoft: '#FFF0EB',
   text: '#1A1A18',
@@ -38,6 +39,7 @@ export default function Buy() {
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", WebkitFontSmoothing: 'antialiased', background: T.bg, minHeight: '100dvh' }}>
+      <ScrollProgressBar />
       <style>{`
         .buy-section {
           max-width: 960px; margin: 0 auto; width: 100%;
@@ -305,12 +307,12 @@ export default function Buy() {
       </header>
 
       {/* ═══ HERO ═══ */}
-      <section className="buy-hero">
+      <section className="buy-hero hero-entrance">
         <h1>Find the right deal. Know it&apos;s the right deal.</h1>
         <p className="buy-hero-sub">
           Whether you&apos;re a first-time buyer or a seasoned acquirer, the hardest part isn&apos;t finding a business &mdash; it&apos;s knowing whether the numbers work. smbX.ai gives you the market intelligence, financial modeling, and deal analysis to buy with conviction.
         </p>
-        <button className="buy-btn-primary" onClick={startBuy}>
+        <button className="buy-btn-primary cta-glow" onClick={startBuy}>
           Start evaluating opportunities
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
@@ -332,39 +334,50 @@ export default function Buy() {
 
       {/* ═══ SECTION 1: WHAT YULIA ANALYZES ═══ */}
       <hr className="buy-divider" />
-      <section className="buy-section">
-        <p className="buy-overline">What Yulia analyzes for buyers</p>
-        <h2 className="buy-heading">The intelligence behind your offer.</h2>
-        <div className="buy-analyze">
-          <div className="buy-analyze-card">
-            <h3>Market intelligence</h3>
-            <p>
-              Industry landscape, competitive density, growth trends, and consolidation activity in your target sector and geography. Know exactly what you&apos;re buying into before you write a check.
-            </p>
-          </div>
-          <div className="buy-analyze-card">
-            <h3>Financial modeling</h3>
-            <p>
-              SBA financing feasibility, debt service coverage ratios, cash-on-cash return projections, and multiple deal structures modeled side-by-side. See which structures work &mdash; and which don&apos;t &mdash; before you negotiate.
-            </p>
-          </div>
-          <div className="buy-analyze-card">
-            <h3>Target evaluation</h3>
-            <p>
-              Valuation benchmarking against comparable transactions, financial normalization, add-back verification, and red-flag identification. The analysis that tells you whether the asking price is justified.
-            </p>
-          </div>
-          <div className="buy-analyze-card">
-            <h3>Deal structuring</h3>
-            <p>
-              Earnout modeling, seller financing scenarios, equity roll structures, and negotiation intelligence. Understand the levers that get a deal done &mdash; and what to push for.
-            </p>
-          </div>
-        </div>
-      </section>
+      <ScrollReveal>
+        <section className="buy-section">
+          <p className="buy-overline">What Yulia analyzes for buyers</p>
+          <h2 className="buy-heading">The intelligence behind your offer.</h2>
+          <StaggerContainer className="buy-analyze">
+            <StaggerItem>
+              <div className="buy-analyze-card card-hover">
+                <h3>Market intelligence</h3>
+                <p>
+                  Industry landscape, competitive density, growth trends, and consolidation activity in your target sector and geography. Know exactly what you&apos;re buying into before you write a check.
+                </p>
+              </div>
+            </StaggerItem>
+            <StaggerItem>
+              <div className="buy-analyze-card card-hover">
+                <h3>Financial modeling</h3>
+                <p>
+                  SBA financing feasibility, debt service coverage ratios, cash-on-cash return projections, and multiple deal structures modeled side-by-side. See which structures work &mdash; and which don&apos;t &mdash; before you negotiate.
+                </p>
+              </div>
+            </StaggerItem>
+            <StaggerItem>
+              <div className="buy-analyze-card card-hover">
+                <h3>Target evaluation</h3>
+                <p>
+                  Valuation benchmarking against comparable transactions, financial normalization, add-back verification, and red-flag identification. The analysis that tells you whether the asking price is justified.
+                </p>
+              </div>
+            </StaggerItem>
+            <StaggerItem>
+              <div className="buy-analyze-card card-hover">
+                <h3>Deal structuring</h3>
+                <p>
+                  Earnout modeling, seller financing scenarios, equity roll structures, and negotiation intelligence. Understand the levers that get a deal done &mdash; and what to push for.
+                </p>
+              </div>
+            </StaggerItem>
+          </StaggerContainer>
+        </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 2: THE BUY JOURNEY ═══ */}
       <hr className="buy-divider" />
+      <ScrollReveal>
       <section className="buy-section">
         <h2 className="buy-heading">Your buying journey with smbX.ai</h2>
         <p className="buy-body" style={{ marginBottom: 32 }}>
@@ -388,9 +401,11 @@ export default function Buy() {
           ))}
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 3: PE / SEARCH FUNDS ═══ */}
       <hr className="buy-divider" />
+      <ScrollReveal>
       <section className="buy-section">
         <div className="buy-highlight">
           <h2 className="buy-heading" style={{ marginBottom: 16 }}>For search funds &amp; PE professionals</h2>
@@ -402,18 +417,21 @@ export default function Buy() {
           </p>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ═══ FINAL CTA ═══ */}
+      <ScrollReveal>
       <div className="buy-final-cta">
         <h2 className="buy-cta-heading">Your next acquisition starts with a conversation.</h2>
         <p className="buy-cta-sub">No retainer. No commitment. Just intelligence.</p>
-        <button className="buy-btn-primary" onClick={startBuy}>
+        <button className="buy-btn-primary cta-glow" onClick={startBuy}>
           Talk to Yulia about buying
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
           </svg>
         </button>
       </div>
+      </ScrollReveal>
 
       {/* ═══ FOOTER ═══ */}
       <footer className="buy-footer">

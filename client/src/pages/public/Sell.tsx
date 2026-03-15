@@ -1,10 +1,11 @@
 import { useLocation } from 'wouter';
+import { ScrollReveal, StaggerContainer, StaggerItem, ScrollProgressBar } from '../../components/content/animations';
 
 /* ═══ DESIGN TOKENS ═══ */
 
 const T = {
   bg: '#FAF9F7',
-  terra: '#D4714E',
+  terra: '#C96B4F',
   terraHover: '#BE6342',
   terraSoft: '#FFF0EB',
   text: '#1A1A18',
@@ -38,6 +39,7 @@ export default function Sell() {
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", WebkitFontSmoothing: 'antialiased', background: T.bg, minHeight: '100dvh' }}>
+      <ScrollProgressBar />
       <style>{`
         .sell-section {
           max-width: 960px; margin: 0 auto; width: 100%;
@@ -305,12 +307,12 @@ export default function Sell() {
       </header>
 
       {/* ═══ HERO ═══ */}
-      <section className="sell-hero">
+      <section className="sell-hero hero-entrance">
         <h1>Know your number before you negotiate.</h1>
         <p className="sell-hero-sub">
           Most business owners have never seen a real valuation of their company. smbX.ai gives you the market intelligence, financial analysis, and deal preparation that used to require a $15K engagement &mdash; starting with a conversation.
         </p>
-        <button className="sell-btn-primary" onClick={startSell}>
+        <button className="sell-btn-primary cta-glow" onClick={startSell}>
           Start with your valuation
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
@@ -332,39 +334,50 @@ export default function Sell() {
 
       {/* ═══ SECTION 1: WHAT YULIA ANALYZES ═══ */}
       <hr className="sell-divider" />
-      <section className="sell-section">
-        <p className="sell-overline">What Yulia analyzes for sellers</p>
-        <h2 className="sell-heading">The intelligence behind your asking price.</h2>
-        <div className="sell-analyze">
-          <div className="sell-analyze-card">
-            <h3>Valuation &amp; multiples</h3>
-            <p>
-              Industry-specific multiples calibrated to your deal size, geography, and business characteristics. Not a generic calculator &mdash; a methodology that accounts for what buyers in your market are actually paying.
-            </p>
-          </div>
-          <div className="sell-analyze-card">
-            <h3>Add-back identification</h3>
-            <p>
-              Most owners leave money on the table. Yulia identifies discretionary expenses, one-time costs, owner benefits, and normalization adjustments that increase your effective earnings &mdash; and your sale price.
-            </p>
-          </div>
-          <div className="sell-analyze-card">
-            <h3>Market intelligence</h3>
-            <p>
-              How many competitors operate in your metro. What the buyer demand looks like. Whether PE firms are consolidating your industry. The context that determines whether it&apos;s a seller&apos;s market or a buyer&apos;s market for your specific business.
-            </p>
-          </div>
-          <div className="sell-analyze-card">
-            <h3>Deal readiness</h3>
-            <p>
-              SBA bankability modeling, buyer qualification analysis, and deal structure recommendations. Know which buyers can actually close &mdash; and which deal structures maximize your net proceeds.
-            </p>
-          </div>
-        </div>
-      </section>
+      <ScrollReveal>
+        <section className="sell-section">
+          <p className="sell-overline">What Yulia analyzes for sellers</p>
+          <h2 className="sell-heading">The intelligence behind your asking price.</h2>
+          <StaggerContainer className="sell-analyze">
+            <StaggerItem>
+              <div className="sell-analyze-card card-hover">
+                <h3>Valuation &amp; multiples</h3>
+                <p>
+                  Industry-specific multiples calibrated to your deal size, geography, and business characteristics. Not a generic calculator &mdash; a methodology that accounts for what buyers in your market are actually paying.
+                </p>
+              </div>
+            </StaggerItem>
+            <StaggerItem>
+              <div className="sell-analyze-card card-hover">
+                <h3>Add-back identification</h3>
+                <p>
+                  Most owners leave money on the table. Yulia identifies discretionary expenses, one-time costs, owner benefits, and normalization adjustments that increase your effective earnings &mdash; and your sale price.
+                </p>
+              </div>
+            </StaggerItem>
+            <StaggerItem>
+              <div className="sell-analyze-card card-hover">
+                <h3>Market intelligence</h3>
+                <p>
+                  How many competitors operate in your metro. What the buyer demand looks like. Whether PE firms are consolidating your industry. The context that determines whether it&apos;s a seller&apos;s market or a buyer&apos;s market for your specific business.
+                </p>
+              </div>
+            </StaggerItem>
+            <StaggerItem>
+              <div className="sell-analyze-card card-hover">
+                <h3>Deal readiness</h3>
+                <p>
+                  SBA bankability modeling, buyer qualification analysis, and deal structure recommendations. Know which buyers can actually close &mdash; and which deal structures maximize your net proceeds.
+                </p>
+              </div>
+            </StaggerItem>
+          </StaggerContainer>
+        </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 2: THE SELL JOURNEY ═══ */}
       <hr className="sell-divider" />
+      <ScrollReveal>
       <section className="sell-section">
         <h2 className="sell-heading">Your selling journey with smbX.ai</h2>
         <p className="sell-body" style={{ marginBottom: 32 }}>
@@ -388,9 +401,11 @@ export default function Sell() {
           ))}
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ═══ SECTION 3: ADVISOR COMPLEMENT ═══ */}
       <hr className="sell-divider" />
+      <ScrollReveal>
       <section className="sell-section">
         <div className="sell-highlight">
           <h2 className="sell-heading" style={{ marginBottom: 16 }}>Working with an advisor? Even better.</h2>
@@ -402,18 +417,21 @@ export default function Sell() {
           </p>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ═══ FINAL CTA ═══ */}
+      <ScrollReveal>
       <div className="sell-final-cta">
         <h2 className="sell-cta-heading">Your business has a number. Let&apos;s find it.</h2>
         <p className="sell-cta-sub">No retainer. No commitment. Just intelligence.</p>
-        <button className="sell-btn-primary" onClick={startSell}>
+        <button className="sell-btn-primary cta-glow" onClick={startSell}>
           Talk to Yulia about selling
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 12h14" /><path d="M12 5l7 7-7 7" />
           </svg>
         </button>
       </div>
+      </ScrollReveal>
 
       {/* ═══ FOOTER ═══ */}
       <footer className="sell-footer">

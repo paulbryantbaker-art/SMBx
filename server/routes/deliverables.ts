@@ -7,6 +7,7 @@ import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
 import { processDeliverable } from '../services/deliverableProcessor.js';
 import { getBalance, debitWallet } from '../services/walletService.js';
 import { getLeagueMultiplier } from '../services/leagueClassifier.js';
+import { applyWagyuSurcharge } from '../services/complexityPreflightService.js';
 import { hasDealAccess } from '../services/dealAccessService.js';
 
 export const deliverablesRouter = Router();
@@ -94,10 +95,20 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
     const [menuItem] = await sql`SELECT * FROM menu_items WHERE slug = ${menuItemSlug} AND active = true`;
     if (!menuItem) return res.status(404).json({ error: 'Menu item not found' });
 
-    // Calculate price with league multiplier
+    // Calculate price with league multiplier + Wagyu surcharge
     const league = deal.league || 'L1';
     const multiplier = getLeagueMultiplier(league);
-    const finalPrice = Math.round(menuItem.base_price_cents * multiplier);
+    const priceAfterMultiplier = Math.round(menuItem.base_price_cents * multiplier);
+    const { finalPrice } = applyWagyuSurcharge(priceAfterMultiplier, {
+      industry: deal.industry,
+      entity_count: deal.financials?.entity_count,
+      has_real_estate: deal.financials?.has_real_estate,
+      is_franchise: deal.financials?.is_franchise,
+      is_cross_border: deal.financials?.is_cross_border,
+      employee_count: deal.financials?.employee_count,
+      has_ip: deal.financials?.has_ip,
+      exit_type: deal.financials?.exit_type,
+    });
 
     // Check wallet balance (skip for free items)
     if (finalPrice > 0) {
@@ -154,6 +165,88 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
   }
 });
 
+// ─── Update deliverable content (inline editing) ─────────
+
+deliverablesRouter.patch('/deliverables/:id/content', async (req, res) => {
+  const userId = (req as any).userId;
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+  const deliverableId = parseInt(req.params.id);
+  const { markdown } = req.body;
+  if (typeof markdown !== 'string') return res.status(400).json({ error: 'markdown field required' });
+
+  try {
+    const [deliverable] = await sql`
+      SELECT d.id, d.deal_id, d.content FROM deliverables d WHERE d.id = ${deliverableId}
+    `;
+    if (!deliverable) return res.status(404).json({ error: 'Deliverable not found' });
+
+    const access = await hasDealAccess(deliverable.deal_id, userId);
+    if (!access || access.access_level === 'read') {
+      return res.status(403).json({ error: 'Cannot edit this deliverable' });
+    }
+
+    // Update content — preserve other fields, replace markdown
+    const existing = typeof deliverable.content === 'string'
+      ? JSON.parse(deliverable.content)
+      : deliverable.content || {};
+    const updated = { ...existing, markdown };
+
+    await sql`
+      UPDATE deliverables SET content = ${JSON.stringify(updated)}, updated_at = NOW()
+      WHERE id = ${deliverableId}
+    `;
+
+    return res.json({ ok: true });
+  } catch (err: any) {
+    console.error('Update content error:', err.message);
+    return res.status(500).json({ error: 'Failed to update content' });
+  }
+});
+
+// ─── AI-assisted revision ────────────────────────────────────
+
+deliverablesRouter.post('/deliverables/:id/revise', async (req, res) => {
+  const userId = (req as any).userId;
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+  const deliverableId = parseInt(req.params.id);
+  const { prompt, currentContent } = req.body;
+  if (!prompt || !currentContent) return res.status(400).json({ error: 'prompt and currentContent required' });
+
+  try {
+    const [deliverable] = await sql`
+      SELECT d.id, d.deal_id FROM deliverables d WHERE d.id = ${deliverableId}
+    `;
+    if (!deliverable) return res.status(404).json({ error: 'Deliverable not found' });
+
+    const access = await hasDealAccess(deliverable.deal_id, userId);
+    if (!access || access.access_level === 'read') {
+      return res.status(403).json({ error: 'Cannot revise this deliverable' });
+    }
+
+    const { default: Anthropic } = await import('@anthropic-ai/sdk');
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 8000,
+      system: 'You are an expert M&A advisor revising a document. Return ONLY the revised markdown — no explanations, no preamble. Preserve all sections and structure unless the user asks to change them.',
+      messages: [{
+        role: 'user',
+        content: `Revise this document based on the following instruction:\n\nInstruction: ${prompt}\n\nCurrent document:\n\n${currentContent}`,
+      }],
+    });
+
+    const revised = response.content[0]?.type === 'text' ? response.content[0].text : '';
+
+    return res.json({ revised });
+  } catch (err: any) {
+    console.error('Revision error:', err.message);
+    return res.status(500).json({ error: 'Failed to revise content' });
+  }
+});
+
 // ─── List available menu items for a deal ──────────────────
 
 deliverablesRouter.get('/deals/:dealId/menu', async (req, res) => {
@@ -178,13 +271,29 @@ deliverablesRouter.get('/deals/:dealId/menu', async (req, res) => {
       ORDER BY gate ASC NULLS LAST, tier ASC, base_price_cents ASC
     `;
 
-    // Add final pricing
-    const priced = (items as any[]).map(item => ({
-      ...item,
-      final_price_cents: Math.round(item.base_price_cents * multiplier),
-      final_price_display: `$${(Math.round(item.base_price_cents * multiplier) / 100).toFixed(2)}`,
-      league_multiplier: multiplier,
-    }));
+    // Add final pricing (with Wagyu surcharge if applicable)
+    const dealContext = {
+      industry: deal.industry,
+      entity_count: deal.financials?.entity_count,
+      has_real_estate: deal.financials?.has_real_estate,
+      is_franchise: deal.financials?.is_franchise,
+      is_cross_border: deal.financials?.is_cross_border,
+      employee_count: deal.financials?.employee_count,
+      has_ip: deal.financials?.has_ip,
+      exit_type: deal.financials?.exit_type,
+    };
+    const priced = (items as any[]).map(item => {
+      const afterMultiplier = Math.round(item.base_price_cents * multiplier);
+      const { finalPrice: itemFinal, complexity } = applyWagyuSurcharge(afterMultiplier, dealContext);
+      return {
+        ...item,
+        final_price_cents: itemFinal,
+        final_price_display: `$${(itemFinal / 100).toFixed(2)}`,
+        league_multiplier: multiplier,
+        wagyu_surcharge: complexity.totalSurcharge,
+        complexity_label: complexity.label,
+      };
+    });
 
     return res.json(priced);
   } catch (err: any) {

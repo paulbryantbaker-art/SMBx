@@ -7,6 +7,7 @@
  */
 import { getLeagueMultiplier } from './leagueClassifier.js';
 import { getPaywallBasePrice } from './gateReadinessService.js';
+import { assessComplexity } from './complexityPreflightService.js';
 import { sql } from '../db.js';
 
 export interface PaywallContext {
@@ -40,7 +41,11 @@ export interface PaywallPrompt {
 export function generatePaywallPrompt(ctx: PaywallContext): PaywallPrompt {
   const basePriceCents = getPaywallBasePrice(ctx.gate);
   const multiplier = getLeagueMultiplier(ctx.league);
-  const priceCents = Math.round(basePriceCents * multiplier);
+  const priceBeforeWagyu = Math.round(basePriceCents * multiplier);
+
+  // Apply Wagyu surcharge for complex deals
+  const complexity = assessComplexity(ctx.dealData);
+  const priceCents = Math.round(priceBeforeWagyu * (1 + complexity.totalSurcharge));
   const priceDisplay = `$${(priceCents / 100).toFixed(2)}`;
 
   const generator = PAYWALL_GENERATORS[ctx.gate];
@@ -213,7 +218,8 @@ export const BASE_PRICES: Record<string, number> = {
 export async function getDeliverablePrice(
   slug: string,
   league: string,
-  userId: number | null
+  userId: number | null,
+  dealContext?: { industry?: string | null; has_real_estate?: boolean | null; is_franchise?: boolean | null; entity_count?: number | null; employee_count?: number | null; exit_type?: string | null },
 ): Promise<number> {
   // Advisor trial: first 3 client journeys free
   if (userId) {
@@ -228,7 +234,15 @@ export async function getDeliverablePrice(
   }
   const base = BASE_PRICES[slug] || 20000;
   const multiplier = getLeagueMultiplier(league);
-  return Math.round(base * multiplier);
+  const priceBeforeWagyu = Math.round(base * multiplier);
+
+  // Apply Wagyu surcharge if deal context available
+  if (dealContext) {
+    const complexity = assessComplexity(dealContext);
+    return Math.round(priceBeforeWagyu * (1 + complexity.totalSurcharge));
+  }
+
+  return priceBeforeWagyu;
 }
 
 export function isTestMode(): boolean {

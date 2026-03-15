@@ -39,78 +39,106 @@ export async function streamAgenticResponse(
   let fullText = '';
   let round = 0;
 
-  while (round < MAX_TOOL_ROUNDS) {
-    round++;
+  try {
+    while (round < MAX_TOOL_ROUNDS) {
+      round++;
 
-    // Call Claude (non-streaming for tool use rounds, streaming for final response)
-    const response = await anthropic.messages.create({
-      model: MODEL,
-      max_tokens: 4096,
-      system: ctx.systemPrompt,
-      messages,
-      tools: TOOL_DEFINITIONS,
-    });
+      // Call Claude (non-streaming for tool use rounds, streaming for final response)
+      const response = await anthropic.messages.create({
+        model: MODEL,
+        max_tokens: 4096,
+        system: ctx.systemPrompt,
+        messages,
+        tools: TOOL_DEFINITIONS,
+      });
 
-    // Check if Claude wants to use tools
-    const toolUseBlocks = response.content.filter(b => b.type === 'tool_use');
-    const textBlocks = response.content.filter(b => b.type === 'text');
+      // Check if Claude wants to use tools
+      const toolUseBlocks = response.content.filter(b => b.type === 'tool_use');
+      const textBlocks = response.content.filter(b => b.type === 'text');
 
-    // Collect any text from this response
-    for (const block of textBlocks) {
-      if (block.type === 'text' && block.text) {
-        fullText += block.text;
-      }
-    }
-
-    // If no tool calls, we're done — stream the text
-    if (toolUseBlocks.length === 0 || response.stop_reason === 'end_turn') {
-      // Stream the accumulated text to client
-      if (fullText) {
-        streamText(res, fullText);
-      }
-      break;
-    }
-
-    // Execute tool calls
-    const toolResults: ContentBlockParam[] = [];
-    for (const block of toolUseBlocks) {
-      if (block.type === 'tool_use') {
-        if (process.env.NODE_ENV !== 'production') {
-          console.log(`Tool call: ${block.name}(${JSON.stringify(block.input).substring(0, 200)})`);
+      // Collect any text from this response
+      for (const block of textBlocks) {
+        if (block.type === 'text' && block.text) {
+          fullText += block.text;
         }
-        const result = await executeTool(
-          block.name,
-          block.input as Record<string, any>,
-          ctx.userId,
-          ctx.conversationId,
-        );
-        if (process.env.NODE_ENV !== 'production') {
-          console.log(`Tool result: ${result.substring(0, 200)}`);
-        }
-        toolResults.push({
-          type: 'tool_result' as const,
-          tool_use_id: block.id,
-          content: result,
-        });
       }
+
+      // If no tool calls, we're done — stream the text
+      if (toolUseBlocks.length === 0 || response.stop_reason === 'end_turn') {
+        // Stream the accumulated text to client
+        if (fullText) {
+          streamText(res, fullText);
+        }
+        break;
+      }
+
+      // Execute tool calls
+      const toolResults: ContentBlockParam[] = [];
+      for (const block of toolUseBlocks) {
+        if (block.type === 'tool_use') {
+          // Send tool activity indicator to client
+          res.write(`data: ${JSON.stringify({ type: 'tool_start', tool: block.name })}\n\n`);
+
+          if (process.env.NODE_ENV !== 'production') {
+            console.log(`Tool call: ${block.name}(${JSON.stringify(block.input).substring(0, 200)})`);
+          }
+
+          try {
+            const result = await executeTool(
+              block.name,
+              block.input as Record<string, any>,
+              ctx.userId,
+              ctx.conversationId,
+            );
+            if (process.env.NODE_ENV !== 'production') {
+              console.log(`Tool result: ${result.substring(0, 200)}`);
+            }
+
+            res.write(`data: ${JSON.stringify({ type: 'tool_done', tool: block.name })}\n\n`);
+
+            toolResults.push({
+              type: 'tool_result' as const,
+              tool_use_id: block.id,
+              content: result,
+            });
+          } catch (toolErr: any) {
+            console.error(`Tool execution error (${block.name}):`, toolErr.message);
+            res.write(`data: ${JSON.stringify({ type: 'tool_done', tool: block.name })}\n\n`);
+            toolResults.push({
+              type: 'tool_result' as const,
+              tool_use_id: block.id,
+              content: `Error: ${toolErr.message}`,
+              is_error: true,
+            } as any);
+          }
+        }
+      }
+
+      // Add assistant response and tool results to message history for next round
+      messages = [
+        ...messages,
+        { role: 'assistant' as const, content: response.content },
+        { role: 'user' as const, content: toolResults as any },
+      ];
+
+      // If Claude also produced text alongside tool calls, hold it for now
+      // (the final round after all tools will produce the complete text)
+      if ((response.stop_reason as string) === 'end_turn') {
+        if (fullText) streamText(res, fullText);
+        break;
+      }
+
+      // Reset fullText — we only want the final response after all tools
+      fullText = '';
     }
-
-    // Add assistant response and tool results to message history for next round
-    messages = [
-      ...messages,
-      { role: 'assistant' as const, content: response.content },
-      { role: 'user' as const, content: toolResults as any },
-    ];
-
-    // If Claude also produced text alongside tool calls, hold it for now
-    // (the final round after all tools will produce the complete text)
-    if ((response.stop_reason as string) === 'end_turn') {
-      if (fullText) streamText(res, fullText);
-      break;
-    }
-
-    // Reset fullText — we only want the final response after all tools
-    fullText = '';
+  } catch (err: any) {
+    console.error('Agentic streaming error:', err.message, err.status);
+    const userMessage = err.status === 429
+      ? 'I\'m experiencing high demand right now. Please try again in a moment.'
+      : 'I ran into a temporary issue. Let me try that again.';
+    // Stream error message to user so they see something instead of a hang
+    streamText(res, fullText ? `${fullText}\n\n${userMessage}` : userMessage);
+    fullText = fullText ? `${fullText}\n\n${userMessage}` : userMessage;
   }
 
   return fullText;
@@ -181,6 +209,31 @@ export async function callClaude(
   const response = await anthropic.messages.create({
     model: MODEL,
     max_tokens: 4096,
+    system: systemPrompt,
+    messages,
+  });
+
+  return response.content
+    .filter(b => b.type === 'text')
+    .map(b => (b as any).text)
+    .join('');
+}
+
+/**
+ * Non-streaming call with explicit model selection.
+ * Used by the deliverable processor for tier-based model routing.
+ */
+export async function callClaudeWithModel(
+  modelId: string,
+  systemPrompt: string,
+  messages: MessageParam[],
+  maxTokens: number = 4096,
+): Promise<string> {
+  const anthropic = getClient();
+
+  const response = await anthropic.messages.create({
+    model: modelId,
+    max_tokens: maxTokens,
     system: systemPrompt,
     messages,
   });

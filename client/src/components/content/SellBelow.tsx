@@ -14,10 +14,10 @@ interface SellBelowProps {
 }
 
 const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
-const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#D4714E' };
+const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
 const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 };
 const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, margin: 0 };
-const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid #C5C0B6', padding: '28px 32px' };
+const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' };
 
 export default function SellBelow({ onChipClick }: SellBelowProps) {
   return (
@@ -146,7 +146,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
                   <ScrollReveal key={p.phase} delay={i * 0.1}>
                     <div className="flex gap-4" style={{ paddingLeft: 12 }}>
                       <div className="flex flex-col items-center shrink-0" style={{ marginLeft: -8 }}>
-                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#D4714E', marginTop: 6, boxShadow: '0 0 0 4px rgba(212,113,78,0.15)' }} />
+                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#C96B4F', marginTop: 6, boxShadow: '0 0 0 4px rgba(212,113,78,0.15)' }} />
                       </div>
                       <div className="pb-2">
                         <span style={labelStyle}>
@@ -183,7 +183,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
               beforeLabel="ASSET SALE"
               afterLabel="STOCK SALE"
               beforeContent={
-                <div style={{ background: '#EDEAE4', padding: '32px', minHeight: 260 }}>
+                <div style={{ background: '#FAF9F7', padding: '32px', minHeight: 260 }}>
                   <div className="space-y-3" style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.5, fontVariantNumeric: 'tabular-nums' }}>
                     <div className="flex justify-between"><span>Purchase price</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>$2,000,000</span></div>
                     <div className="flex justify-between"><span>Federal + NIIT tax</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>~$518K</span></div>
@@ -196,7 +196,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
                 </div>
               }
               afterContent={
-                <div style={{ background: '#D4714E', padding: '32px', minHeight: 260 }}>
+                <div style={{ background: '#C96B4F', padding: '32px', minHeight: 260 }}>
                   <div className="space-y-3" style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, fontVariantNumeric: 'tabular-nums' }}>
                     <div className="flex justify-between"><span>Purchase price</span><span style={{ color: '#fff', fontWeight: 600 }}>$2,000,000</span></div>
                     <div className="flex justify-between"><span>Federal + NIIT tax</span><span style={{ color: '#fff', fontWeight: 600 }}>~$452K</span></div>
@@ -311,7 +311,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
             ].map((item, i) => (
               <RevealSection key={i}>
                 <div className="flex gap-4 items-start">
-                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#D4714E', minWidth: 28, flexShrink: 0, borderLeft: '2px solid rgba(212,113,78,0.2)', paddingLeft: 10, lineHeight: '1.65' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#C96B4F', minWidth: 28, flexShrink: 0, borderLeft: '2px solid rgba(212,113,78,0.2)', paddingLeft: 10, lineHeight: '1.65' }}>
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <p style={bodyStyle}>{item}</p>
@@ -380,7 +380,43 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
         </div>
       </section>
 
-      {/* ═══ Block 11 — The payoff + CTA ═══ */}
+      {/* ═══ Block 11 — Built for your deal ═══ */}
+      <section style={{ paddingTop: 140 }}>
+        <div style={sectionStyle}>
+          <RevealSection>
+            <span style={labelStyle}>LEAGUE-ADAPTIVE</span>
+            <h2 style={h2Style} className="md:text-[48px]">
+              First sale or fifth. Yulia adapts.
+            </h2>
+          </RevealSection>
+
+          <div className="space-y-4" style={{ marginTop: 40 }}>
+            {[
+              { league: 'Owner-Operated', range: '$300K\u2013$2M SDE', body: 'Step-by-step guidance through every phase. SDE-based analysis because that\u2019s what SBA lenders and individual buyers use. Clear language without jargon \u2014 because this is probably your first time selling and you shouldn\u2019t need a finance degree to understand your own deal.' },
+              { league: 'Established Business', range: '$2M\u2013$10M EBITDA', body: 'Institutional-quality analysis. EBITDA-based metrics because that\u2019s what PE firms use. Competitive process design. A CIM that reads like it was written by a boutique advisory firm. PE buyer mapping \u2014 which platforms are actively acquiring in your sector.' },
+              { league: 'Institutional', range: '$10M+ EBITDA', body: 'Board-level deliverables. DCF modeling with sensitivity analysis. Arbitrage spread calculations. Covenant analysis for leveraged structures. Three-statement financial models. The analytical depth PE buyers and strategic acquirers expect.' },
+            ].map(item => (
+              <RevealSection key={item.league}>
+                <div style={cardStyle}>
+                  <div className="flex items-center gap-2" style={{ marginBottom: 8 }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: 0 }}>{item.league}</h3>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#C96B4F', background: 'rgba(201,107,79,0.08)', padding: '2px 8px', borderRadius: 6 }}>{item.range}</span>
+                  </div>
+                  <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.body}</p>
+                </div>
+              </RevealSection>
+            ))}
+          </div>
+
+          <RevealSection style={{ marginTop: 16 }}>
+            <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.4)', fontStyle: 'italic' }}>
+              Same methodology. Same Seven Layers of Intelligence. Calibrated to the deal in front of you.
+            </p>
+          </RevealSection>
+        </div>
+      </section>
+
+      {/* ═══ Block 12 — The payoff + CTA ═══ */}
       <section style={{ paddingTop: 100, paddingBottom: 80 }}>
         <div style={sectionStyle}>
           <RevealSection>
