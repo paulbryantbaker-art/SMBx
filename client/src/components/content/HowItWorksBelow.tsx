@@ -1,10 +1,12 @@
 import {
   RevealSection,
   ScrollReveal,
-  StatBar,
   AnimatedTimeline,
   MagneticButton,
   AnimatedCounter,
+  ExpandableCard,
+  SideBySideCard,
+  ConversationPreview,
 } from './animations';
 
 interface HowItWorksBelowProps {
@@ -15,16 +17,15 @@ const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
 const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
 const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 };
 const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, margin: 0 };
-const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' };
 
 export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
   return (
     <div className="px-6">
-      {/* ═══ Block 1 — The problem ═══ */}
+      {/* ═══ 1. THE INFORMATION DESERT ═══ */}
       <section style={{ paddingTop: 120 }}>
         <div style={sectionStyle}>
           <RevealSection>
-            <span style={labelStyle}>THE PROBLEM</span>
+            <span style={labelStyle}>THE INFORMATION DESERT</span>
             <h2 style={h2Style} className="md:text-[48px]">
               Between $300K and $50M, nobody has good data.
             </h2>
@@ -33,8 +34,9 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
           <RevealSection style={{ marginTop: 32 }}>
             <div className="space-y-6" style={bodyStyle}>
               <p>The largest institutions have Bloomberg, PitchBook, and armies of analysts. Fortune 500 deals have investment banks with $100M budgets.</p>
-              <p>Business owners selling a $3M company have Google and gut instinct. Brokers managing 15 listings pull comps from memory. Buyers evaluating a listing check the asking price against... what, exactly?</p>
-              <p>The data exists. It&apos;s in Census records, BLS reports, FRED economic series, SBA lending databases, SEC filings. But nobody has synthesized it into intelligence that&apos;s useful for making deal decisions.</p>
+              <p>Business owners selling a $3M company have Google and gut instinct. Brokers managing 15 listings pull comps from memory. Buyers evaluating a listing check the asking price against&hellip; what, exactly?</p>
+              <p>The data exists. It&apos;s in Census records, BLS reports, FRED economic series, SBA lending databases, SEC filings. But nobody has synthesized it into intelligence useful for making deal decisions.</p>
+              <p style={{ color: '#1A1A18', fontWeight: 600 }}>A business owner spends $24,000 per year on professional advisors who don&apos;t have access to the data that would make their advice twice as good.</p>
             </div>
           </RevealSection>
 
@@ -44,44 +46,8 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
         </div>
       </section>
 
-      {/* ═══ Block 2 — Sovereign data engine ═══ */}
+      {/* ═══ 2. SEVEN LAYERS OF INTELLIGENCE ═══ */}
       <section style={{ paddingTop: 100 }}>
-        <div style={sectionStyle}>
-          <RevealSection>
-            <span style={labelStyle}>SOVEREIGN DATA ENGINE</span>
-            <h2 style={h2Style} className="md:text-[48px]">
-              Every number is sourced. Every insight is traceable.
-            </h2>
-            <p style={{ ...bodyStyle, marginTop: 20 }}>
-              This isn&apos;t AI-generated estimates. This is federal data that agencies are required by law to collect:
-            </p>
-          </RevealSection>
-
-          <div className="space-y-10" style={{ marginTop: 40 }}>
-            {[
-              { title: 'U.S. Census Bureau', body: 'Business counts by industry, geography, and size class. When Yulia says \u201Cthere are 847 HVAC businesses in Dallas-Fort Worth,\u201D that\u2019s a Census number.' },
-              { title: 'Bureau of Labor Statistics', body: 'Wage benchmarks, employment trends, occupational data by region. When Yulia benchmarks your labor costs, she\u2019s using BLS data for your specific MSA.' },
-              { title: 'Federal Reserve (FRED)', body: 'Interest rates, economic indicators, lending conditions. When Yulia models SBA financing, she\u2019s using live Fed rates \u2014 not last quarter\u2019s.' },
-              { title: 'SEC EDGAR', body: 'Public company filings, comparable transactions, institutional activity. When Yulia identifies PE consolidation in your sector, she\u2019s tracking real filings.' },
-              { title: 'SBA Lender Activity Reports', body: 'Loan approval rates, average deal sizes, lender preferences by region. When Yulia says a deal is \u201CSBA-bankable,\u201D she\u2019s checked the actual lending patterns.' },
-            ].map(item => (
-              <RevealSection key={item.title}>
-                <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>{item.title}</h3>
-                <p style={bodyStyle}>{item.body}</p>
-              </RevealSection>
-            ))}
-          </div>
-
-          <RevealSection style={{ marginTop: 40 }}>
-            <p style={{ ...bodyStyle, fontWeight: 500, color: '#1A1A18' }}>
-              The difference between asking ChatGPT about your business and asking Yulia is the difference between reading a Wikipedia article about surgery and consulting a specialist with your chart in front of them.
-            </p>
-          </RevealSection>
-        </div>
-      </section>
-
-      {/* ═══ Block 3 — Seven Layers of Intelligence ═══ */}
-      <section style={{ paddingTop: 140 }}>
         <div style={sectionStyle}>
           <RevealSection>
             <span style={labelStyle}>METHODOLOGY</span>
@@ -89,135 +55,91 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
               Seven Layers of Intelligence&trade;
             </h2>
             <p style={{ ...bodyStyle, marginTop: 20 }}>
-              Not a checklist. A methodology. Every deal Yulia touches is analyzed through seven dimensions &mdash; each one drawing from different data sources, each one revealing something the others miss.
+              Not a checklist. A methodology. Every deal is analyzed through seven dimensions &mdash; each drawing from different data sources, each revealing something the others miss.
             </p>
           </RevealSection>
 
-          <div style={{ marginTop: 40 }}>
-            <AnimatedTimeline>
-              <div className="space-y-10">
-                {[
-                  { num: '1', title: 'Industry Structure', body: 'Competitive density. Fragmentation vs. consolidation. NAICS-level benchmarking. Who\u2019s in your market and how your business compares.' },
-                  { num: '2', title: 'Regional Economics', body: 'MSA-level wage data. Cost of living. Business formation rates. Demographic trends. The local reality that national averages completely miss.' },
-                  { num: '3', title: 'Financial Normalization', body: 'SDE or EBITDA calculation. Add-back discovery. Trend analysis. Margin benchmarking against industry medians. The forensic work that separates real value from reported numbers.' },
-                  { num: '4', title: 'Buyer Landscape', body: 'Who\u2019s buying in this space right now? PE platforms, strategic acquirers, SBA-qualified individuals, search funds. Mapped to your specific sector and geography.' },
-                  { num: '5', title: 'Deal Architecture', body: 'Structure optimization. Asset sale vs. stock sale tax modeling. Financing scenarios. Earnout design. Working capital adjustment. The engineering of how the deal actually gets done.' },
-                  { num: '6', title: 'Risk Assessment', body: 'Customer concentration. Owner dependency. Key person risk. Regulatory exposure. Legal transfer requirements. Revenue sustainability. Every risk identified before it becomes a surprise in diligence.' },
-                  { num: '7', title: 'Forward Signals', body: 'Industry growth projections. Wage inflation impact. Regulatory changes on the horizon. Technology disruption indicators. Where the market is going, not just where it\u2019s been.' },
-                ].map((item, i) => (
-                  <ScrollReveal key={item.num} delay={i * 0.08}>
-                    <div className="flex gap-4" style={{ paddingLeft: 12 }}>
-                      <span style={{ fontSize: '48px', fontWeight: 700, color: '#C96B4F', lineHeight: 1, minWidth: 40, textAlign: 'center', marginLeft: -8 }} className="shrink-0 mt-0.5">{item.num}</span>
-                      <div>
-                        <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#1A1A18', margin: '0 0 6px' }}>{item.title}</h3>
-                        <p style={{ ...bodyStyle, fontSize: '16px' }}>{item.body}</p>
-                      </div>
-                    </div>
-                  </ScrollReveal>
-                ))}
-              </div>
-            </AnimatedTimeline>
+          <div className="space-y-3" style={{ marginTop: 40 }}>
+            {[
+              { num: '1', title: 'Industry Structure', preview: 'Competitive density, fragmentation, NAICS benchmarking.', detail: 'Census business counts by industry, geography, and size class. When Yulia says "847 HVAC businesses in Dallas-Fort Worth," that\u2019s a Census number.' },
+              { num: '2', title: 'Regional Economics', preview: 'MSA-level wage data, cost of living, formation rates.', detail: 'BLS wage benchmarks, employment trends, demographic data \u2014 for your specific metropolitan area, not a national average.' },
+              { num: '3', title: 'Financial Normalization', preview: 'SDE/EBITDA, add-backs, margin benchmarking.', detail: 'The forensic work that separates real value from reported numbers. Trend analysis and margin comparison against industry medians.' },
+              { num: '4', title: 'Buyer Landscape', preview: 'PE platforms, strategics, SBA buyers, search funds.', detail: 'Who\u2019s buying in this space right now? Mapped to your specific sector and geography using SEC EDGAR filings and market activity.' },
+              { num: '5', title: 'Deal Architecture', preview: 'Structure optimization, financing, earnout design.', detail: 'Asset vs. stock sale modeling. SBA feasibility at live Fed rates. Working capital adjustment. The engineering of how the deal gets done.' },
+              { num: '6', title: 'Risk Assessment', preview: 'Concentration, dependency, regulatory exposure.', detail: 'Customer concentration. Owner dependency. Key person risk. Revenue sustainability. Every risk identified before it becomes a surprise in diligence.' },
+              { num: '7', title: 'Forward Signals', preview: 'Growth projections, wage inflation, disruption indicators.', detail: 'Where the market is going, not just where it\u2019s been. Industry projections, regulatory changes, technology disruption \u2014 the context that frames the deal\u2019s future value.' },
+            ].map(item => (
+              <RevealSection key={item.num}>
+                <ExpandableCard title={`${item.num}. ${item.title}`} preview={item.preview}>
+                  <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.detail}</p>
+                </ExpandableCard>
+              </RevealSection>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ Block 4 — Adaptive intelligence ═══ */}
+      {/* ═══ 3. LEAGUE-ADAPTIVE INTELLIGENCE ═══ */}
       <section style={{ paddingTop: 140 }}>
         <div style={sectionStyle}>
           <RevealSection>
-            <span style={labelStyle}>ADAPTIVE INTELLIGENCE</span>
+            <span style={labelStyle}>LEAGUE-ADAPTIVE</span>
             <h2 style={h2Style} className="md:text-[48px]">
-              A $400K landscaping company and a $40M manufacturing platform are fundamentally different deals.
+              A $400K landscaping company and a $40M platform are different deals.
             </h2>
+            <p style={{ ...bodyStyle, marginTop: 20 }}>
+              Yulia classifies your deal by complexity and adapts everything &mdash; vocabulary, metrics, deliverable depth, and the questions she asks.
+            </p>
           </RevealSection>
 
-          <RevealSection style={{ marginTop: 32 }}>
-            <div className="space-y-6" style={bodyStyle}>
-              <p>Yulia doesn&apos;t give the same advice to every business. She classifies your deal by complexity and adapts everything &mdash; her vocabulary, methodology, financial metrics, deliverable depth, and the questions she asks.</p>
-              <p>An owner-operated pest control company gets SDE-based coaching, step-by-step guidance, and SBA-focused analysis.</p>
-              <p>A $20M EBITDA manufacturing platform gets institutional metrics, arbitrage modeling, covenant analysis, and board-level deliverables.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>Same methodology. Same data sources. Same rigor. Calibrated to the deal in front of you.</p>
-              <p>That&apos;s why the platform serves every deal size &mdash; from $300K to $300M. Not because it&apos;s generic. Because it adapts.</p>
-            </div>
+          <RevealSection style={{ marginTop: 40 }}>
+            <SideBySideCard
+              leftLabel="OWNER-OPERATED ($300K\u2013$2M)"
+              rightLabel="INSTITUTIONAL ($10M+)"
+              leftItems={[
+                { label: 'Metric', value: 'SDE' },
+                { label: 'Multiples', value: '2.0\u20133.5\u00D7' },
+                { label: 'Financing', value: 'SBA 7(a)' },
+                { label: 'Persona', value: 'Coach' },
+              ]}
+              rightItems={[
+                { label: 'Metric', value: 'EBITDA' },
+                { label: 'Multiples', value: '8.0\u201312.0\u00D7' },
+                { label: 'Financing', value: 'Leveraged' },
+                { label: 'Persona', value: 'Partner' },
+              ]}
+            />
+          </RevealSection>
+
+          <RevealSection style={{ marginTop: 24 }}>
+            <p style={{ fontSize: '15px', fontWeight: 500, color: '#1A1A18', lineHeight: 1.65 }}>
+              Same methodology. Same Seven Layers. Same rigor. Calibrated to the deal in front of you. That&apos;s why the platform serves every deal size &mdash; not because it&apos;s generic, because it adapts.
+            </p>
           </RevealSection>
         </div>
       </section>
 
-      {/* ═══ Stat bar ═══ */}
-      <section style={{ paddingTop: 80 }}>
-        <div className="max-w-4xl mx-auto">
-          <StatBar stats={[
-            { label: 'Minimum deal size', value: 300, prefix: '$', suffix: 'K' },
-            { label: 'Maximum deal size', value: 300, prefix: '$', suffix: 'M' },
-            { label: 'Methodology layers', value: 7 },
-            { label: 'Federal data sources', value: 5 },
-          ]} />
-        </div>
-      </section>
-
-      {/* ═══ Block 5 — Localized intelligence ═══ */}
-      <section style={{ paddingTop: 100 }}>
+      {/* ═══ 4. LOCALIZED INTELLIGENCE ═══ */}
+      <section style={{ paddingTop: 140 }}>
         <div style={sectionStyle}>
           <RevealSection>
             <span style={labelStyle}>LOCALIZED INTELLIGENCE</span>
             <h2 style={h2Style} className="md:text-[48px]">
-              National averages are noise. Your market is signal.
+              Your market. Not the national average.
             </h2>
           </RevealSection>
 
           <RevealSection style={{ marginTop: 32 }}>
             <div className="space-y-6" style={bodyStyle}>
-              <p>A plumbing company in Phoenix and a plumbing company in rural Pennsylvania are fundamentally different deals. Different competitive density. Different wage structures. Different buyer pools. Different SBA lending patterns. Different growth trajectories.</p>
-              <p>Yulia delivers intelligence specific to your MSA &mdash; not your state, not your region, your metropolitan statistical area. The same geographic precision that institutional investors use, available to every dealmaker.</p>
-              <p>When Yulia tells you there are 14 active PE platforms acquiring HVAC companies in Texas, she&apos;s not estimating. When she says your EBITDA margin of 18.6% is below the 21% industry median for your MSA, she&apos;s not guessing. When she models SBA financing at today&apos;s rate with your regional lender&apos;s average approval metrics, she&apos;s not approximating.</p>
+              <p>When Yulia tells you there are 14 active PE platforms acquiring HVAC companies in Texas, she&apos;s not estimating. When she says your EBITDA margin is below the industry median for your MSA, she&apos;s not guessing. When she models SBA financing at today&apos;s rate with your regional lender&apos;s patterns, she&apos;s not approximating.</p>
               <p style={{ color: '#1A1A18', fontWeight: 600 }}>Every number. Sourced. Traceable. Defensible.</p>
             </div>
           </RevealSection>
         </div>
       </section>
 
-      {/* ═══ Block 6 — Tax & Legal Intelligence ═══ */}
-      <section style={{ paddingTop: 120 }}>
-        <div style={sectionStyle}>
-          <RevealSection>
-            <span style={labelStyle}>TAX &amp; LEGAL INTELLIGENCE</span>
-            <h2 style={h2Style} className="md:text-[48px]">
-              The decisions that move the number most aren&apos;t financial &mdash; they&apos;re structural.
-            </h2>
-            <p style={{ ...bodyStyle, marginTop: 20 }}>
-              Deal structure, entity type, state of residence, and asset allocation can swing net proceeds by $100K&ndash;$500K on a single deal. Yulia models the tax and legal landscape so you &mdash; and your CPA and attorney &mdash; can make informed decisions.
-            </p>
-          </RevealSection>
-
-          <div className="space-y-4" style={{ marginTop: 40 }}>
-            {[
-              { title: 'Deal structure tax modeling', body: 'Asset sale vs. stock sale. Side-by-side net proceeds for both parties. Depreciation recapture, capital gains, ordinary income allocation \u2014 modeled with real numbers for the specific deal.' },
-              { title: 'Entity type flags', body: 'C-Corp double taxation trap. S-Corp built-in gains exposure. LLC hot asset rules. Sole proprietorship limitations. Yulia identifies entity-specific risks during intake and flags them immediately.' },
-              { title: 'Purchase price allocation', body: 'Both buyer and seller file Form 8594 with matching allocation. How the purchase price is split across asset classes directly determines the tax bill. Yulia generates scenarios showing the impact of different allocations.' },
-              { title: 'Installment sale modeling', body: 'When the deal includes seller financing, Yulia calculates year-by-year tax obligations \u2014 installment vs. lump sum \u2014 including depreciation recapture, imputed interest, and NPV comparison.' },
-              { title: 'QSBS screening', body: 'For qualifying C-Corp sellers, IRC \u00A71202 can exclude up to $10M in federal capital gains. Yulia checks the five eligibility requirements and flags state conformity issues (California only partially conforms).' },
-              { title: 'APA preparation', body: 'Reps & warranties, indemnification, escrow, non-compete, working capital, lease assignment \u2014 Yulia explains every component in plain English and generates term sheets your attorney can convert to legal documents.' },
-              { title: 'Regulatory transfer mapping', body: 'Healthcare, childcare, construction, food service, franchise \u2014 many industries require new license applications that take 1\u20136 months. Yulia checks the industry and builds the transfer timeline into the deal schedule.' },
-            ].map(item => (
-              <RevealSection key={item.title}>
-                <div style={cardStyle}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>{item.title}</h3>
-                  <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.body}</p>
-                </div>
-              </RevealSection>
-            ))}
-          </div>
-
-          <RevealSection style={{ marginTop: 16 }}>
-            <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.4)', fontStyle: 'italic' }}>
-              Yulia models the landscape and the math. Your CPA confirms the tax specifics. Your attorney drafts the legal documents. Everyone informed, everyone aligned.
-            </p>
-          </RevealSection>
-        </div>
-      </section>
-
-      {/* ═══ Block 7 — Live example + CTA ═══ */}
-      <section style={{ paddingTop: 140, paddingBottom: 80 }}>
+      {/* ═══ 5. CONVERSATION PREVIEW ═══ */}
+      <section style={{ paddingTop: 140 }}>
         <div style={sectionStyle}>
           <RevealSection>
             <span style={labelStyle}>LIVE EXAMPLE</span>
@@ -227,29 +149,40 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
           </RevealSection>
 
           <RevealSection style={{ marginTop: 40 }}>
-            <div style={cardStyle}>
-              <div className="space-y-6">
-                <div>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(26,26,24,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>USER</span>
-                  <p style={{ fontSize: '15px', color: '#1A1A18', margin: '6px 0 0', lineHeight: 1.6 }}>I&apos;m thinking about selling my commercial HVAC company. We&apos;re in Dallas-Fort Worth, about $4.2M in revenue and $780K in adjusted EBITDA last year.</p>
-                </div>
-                <div>
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#C96B4F', textTransform: 'uppercase', letterSpacing: '0.08em' }}>YULIA</span>
-                  <div className="mt-1.5 space-y-3" style={{ fontSize: '15px', color: 'rgba(26,26,24,0.65)', lineHeight: 1.6 }}>
-                    <p className="m-0">Commercial HVAC in DFW &mdash; that&apos;s a strong combination right now. Let me run this through the methodology.</p>
-                    <p className="m-0">Your $780K EBITDA puts you in the L3 range, which means we&apos;re looking at EBITDA-based multiples rather than SDE. For commercial HVAC in the Dallas-Fort Worth MSA, current multiples are running <strong>4.8&times;&ndash;6.2&times;</strong> based on recent comparable transactions and PE activity in the space.</p>
-                    <p className="m-0">That gives you a preliminary enterprise value range of <strong>$3.74M&ndash;$4.84M</strong>.</p>
-                    <p className="m-0">A few things that could push you toward the top of that range: DFW has 847 HVAC businesses per Census data, but commercial-focused operations are only about 12% of that. PE firms are actively consolidating HVAC &mdash; I&apos;m tracking 14 active platforms in Texas alone. Your EBITDA margin of 18.6% is solid but slightly below the 21% industry median, which means there&apos;s room to optimize before going to market.</p>
-                    <p className="m-0" style={{ color: '#1A1A18', fontWeight: 500 }}>What&apos;s your total owner compensation &mdash; salary, benefits, and any personal expenses running through the business?</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ConversationPreview
+              messages={[
+                { role: 'user', text: "I'm thinking about selling my commercial HVAC company. We're in Dallas-Fort Worth, about $4.2M revenue and $780K EBITDA." },
+                { role: 'ai', text: "Commercial HVAC in DFW \u2014 strong combination. Your $780K EBITDA puts you in L3 range: EBITDA-based multiples of 4.8\u00D7\u20136.2\u00D7. Preliminary enterprise value: $3.74M\u2013$4.84M. DFW has 847 HVAC businesses (Census), but only ~12% commercial-focused. 14 active PE platforms in Texas. Your 18.6% EBITDA margin is solid but below the 21% median \u2014 optimization opportunity." },
+                { role: 'user', text: "What would it take to get to the top of that range?" },
+                { role: 'ai', text: "Three moves: (1) Close the margin gap \u2014 21% vs your 18.6% adds ~$100K EBITDA. At 5.5\u00D7, that's $550K in enterprise value. (2) Reduce owner dependency \u2014 document the 3-4 client relationships only you manage. (3) Lock in the recurring maintenance contracts \u2014 PE buyers pay premium multiples for recurring revenue. I can build your optimization plan with specific timelines." },
+              ]}
+            />
+          </RevealSection>
+
+          <RevealSection style={{ marginTop: 24 }}>
+            <p style={bodyStyle}>
+              Real business, real market, real federal data &mdash; in under a minute. Not a template. Analysis specific to your industry, geography, and financials.
+            </p>
+          </RevealSection>
+        </div>
+      </section>
+
+      {/* ═══ 6. THE CHATGPT QUESTION ═══ */}
+      <section style={{ paddingTop: 140, paddingBottom: 80 }}>
+        <div style={sectionStyle}>
+          <RevealSection>
+            <span style={labelStyle}>THE CHATGPT QUESTION</span>
+            <h2 style={h2Style} className="md:text-[48px]">
+              &ldquo;Can&apos;t I just use ChatGPT?&rdquo;
+            </h2>
           </RevealSection>
 
           <RevealSection style={{ marginTop: 32 }}>
             <div className="space-y-6" style={bodyStyle}>
-              <p>That&apos;s deal intelligence for a real business, in a real market, with real federal data &mdash; in under a minute. Not a template. Not a generic report. Analysis specific to your industry, your geography, your financials, and your deal complexity.</p>
+              <p>ChatGPT generates plausible text about M&amp;A concepts. It can explain what SDE means and list common add-backs.</p>
+              <p>Yulia analyzes <em>your</em> deal against real federal data \u2014 Census, BLS, FRED, SEC EDGAR, SBA \u2014 with a structured methodology calibrated to your industry, geography, and deal size. Every number sourced. Every insight traceable.</p>
+              <p>The difference is the difference between reading a Wikipedia article about surgery and consulting a specialist with your chart in front of them.</p>
+              <p style={{ color: '#1A1A18', fontWeight: 600 }}>One gives you information. The other gives you intelligence.</p>
             </div>
           </RevealSection>
 

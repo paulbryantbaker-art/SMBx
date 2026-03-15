@@ -28,77 +28,38 @@ import AdvisorsBelow from '../../components/content/AdvisorsBelow';
 import PricingBelow from '../../components/content/PricingBelow';
 
 /* ═══ TYPEWRITER HINT POOL (home page) ═══ */
-const TYPEWRITER_PREFIX = "Hello, I'm Yulia, your M&A agent. ";
+const TYPEWRITER_PREFIX = "Hello, I'm Yulia. ";
 const TYPEWRITER_HINTS = [
-  // L1 — SMB Sellers
-  "I want to sell my landscaping company \u2014 about $400K revenue in Austin...",
-  "What's my cleaning business worth? We do $600K a year in Phoenix...",
-  "My partner wants out of our auto repair shop. What are our options?",
-  "I'm thinking about selling my daycare center in Atlanta...",
-  "How do I prepare my pest control business for sale?",
-  "What add-backs am I missing on a $900K revenue restaurant?",
-  // L1-L2 — SMB Buyers
-  "I found a laundromat on BizBuySell for $285K \u2014 is that fair?",
-  "Can I get SBA financing for a $500K plumbing company?",
-  "Looking for my first acquisition \u2014 home services under $800K...",
-  "Is $350K a good price for a pool cleaning route doing $180K SDE?",
-  "I want to buy a franchise \u2014 what should I watch out for?",
-  // L2 — Lower middle market
-  "We own a $2M revenue HVAC company in Dallas. What's our exit look like?",
-  "I'm evaluating a dental practice \u2014 $1.8M revenue, $650K SDE...",
-  "What's a fair multiple for a $3M revenue MSP with 70% recurring?",
-  "Help me value a veterinary practice with two locations...",
-  "Can I finance a $2.5M acquisition with 10% down through SBA?",
-  "I want to sell my insurance agency \u2014 1,200 policies, $1.4M revenue...",
-  // L3 — Core middle market
-  "We're doing $5M EBITDA in commercial roofing. What are we worth?",
-  "Looking at a $12M revenue manufacturing company \u2014 should I pursue?",
-  "I need to raise $3M to expand my healthcare staffing company...",
-  "What's the right structure for acquiring a $4M EBITDA logistics firm?",
-  "Model SBA vs. conventional financing on a $6M deal...",
-  "Our PE sponsor wants to know our portfolio company's standalone value...",
-  // L4 — Upper middle market
-  "We have a $8M EBITDA specialty chemicals business. Exploring a sale...",
-  "Evaluating a platform acquisition at 7.2x EBITDA \u2014 is that market?",
-  "I'm a search fund operator. Help me build a thesis for B2B services...",
-  "What does a $15M revenue SaaS company trade at with 85% gross margins?",
-  "Help me model a management buyout \u2014 I'm the COO, owners want to retire...",
-  // L5 — Large middle market
-  "We're divesting a $25M EBITDA division. Walk me through the process...",
-  "Our fund is acquiring a $40M revenue platform. Model the roll-up math...",
-  "What's the arbitrage spread on a 6x entry / 9x exit over 5 years?",
-  "I need a recapitalization analysis \u2014 $18M EBITDA, want to take chips off...",
-  "Help me structure a minority growth equity raise \u2014 $50M pre-money...",
-  // L6 — Large cap
-  "We're evaluating a $200M cross-border acquisition in industrial automation...",
-  "Model the synergy assumptions on a $500M strategic merger...",
-  "Our board needs a fairness opinion framework for a $150M take-private...",
-  // Capital raise (all sizes)
-  "I need $500K to open a second location. How much equity should I give up?",
-  "We want to raise $2M in growth capital without losing control...",
-  "Walk me through ESOP conversion for my $4M EBITDA company...",
-  "What's a fair valuation for a Series A if we're doing $3M ARR?",
-  // Post-acquisition / Integration
-  "I just closed on a plumbing company. What's my 90-day plan?",
-  "Help me build a post-merger integration plan for two HVAC companies...",
-  "I acquired a dental practice 60 days ago. Employee retention is shaky...",
-  // Tax & legal specific
-  "Asset sale vs stock sale \u2014 what's the tax difference on a $2M deal?",
-  "I'm a C-Corp. How bad is the double taxation if I sell?",
-  "Do I qualify for the QSBS exclusion? I've held my stock for 7 years...",
-  "Walk me through purchase price allocation on a $5M acquisition...",
-  "What's the non-compete enforceability situation in California?",
-  "Model installment sale tax deferral on a $3M deal with seller financing...",
-  // Advisor/broker
-  "I'm a broker. Help me package a new listing \u2014 $1.2M cleaning company...",
-  "I need to pre-screen a buyer for SBA eligibility...",
-  "Generate a CIM for my client's HVAC business...",
-  "Help me map the competitive landscape for dental acquisitions in Texas...",
-  // Specific deal analysis
-  "Here's a BizBuySell listing \u2014 $1.4M asking, $420K SDE. Worth pursuing?",
-  "My broker sent me a teaser \u2014 waste management, $7M revenue, Midwest...",
-  "Analyze this: moving company, $2.1M revenue, $380K SDE, Sacramento...",
-  "Is $4.5M fair for an electrical contractor doing $1.2M EBITDA in Florida?",
+  // Sellers — the first question
+  "What's my business worth?",
+  "I want to sell my landscaping company in Austin...",
+  "What add-backs am I missing on $600K revenue?",
+  "Asset sale vs stock sale \u2014 what do I actually keep?",
+  "How do I prepare my HVAC company for sale?",
+  "My partner wants out. What are our options?",
+  // Buyers — speed to conviction
+  "I found a listing for $285K \u2014 is that fair?",
+  "Can I finance a $1.8M deal with SBA?",
+  "Screen this deal: $2.1M revenue, $380K SDE...",
+  "What's the DSCR on this acquisition?",
+  "Looking for my first deal \u2014 home services under $800K...",
+  // Middle market
+  "We're doing $5M EBITDA in commercial roofing...",
+  "Evaluating a platform acquisition at 7.2x...",
+  "Model SBA vs. conventional on a $6M deal...",
+  // Capital raise
+  "I need $500K for a second location...",
+  "Model the dilution on a $2M equity raise...",
+  "Walk me through ESOP conversion...",
+  // Integration
+  "I just closed \u2014 what's my 90-day plan?",
+  "Employee retention is my top concern...",
+  // Tax & structure
+  "I'm a C-Corp. How bad is double taxation?",
+  "Walk me through purchase price allocation...",
+  // Advisors
+  "I'm a broker. Help me package a new listing...",
+  "Generate a CIM from raw financials...",
 ];
 
 /* ═══ TYPES ═══ */
@@ -120,45 +81,45 @@ interface PageCopy {
 const PAGE_COPY: Record<TabId, PageCopy> = {
   home: {
     overline: '',
-    headline: 'Hello, I can help you buy or sell any size business.',
-    terraWord: 'any size business.',
+    headline: '[PAUL TO WRITE]',
+    terraWord: '',
     tagline: '',
     chips: [],
     placeholder: 'Tell Yulia about your deal...',
   },
   sell: {
     overline: 'Strengthen & Sell',
-    headline: 'Your exit. Your way. Your timeline.',
-    terraWord: 'timeline.',
-    tagline: 'Selling a business is the biggest financial event of most owners\u2019 lives. It takes 6 to 24 months. Every month of preparation can move your sale price 5\u201315%. Yulia is with you for every one of them.',
+    headline: '[PAUL TO WRITE]',
+    terraWord: '',
+    tagline: 'Every owner asks the same first question. Yulia answers it in 90 seconds \u2014 with real data, not guesswork.',
     chips: [
-      "What's my business worth right now?",
+      "What's my business worth?",
       "What add-backs am I missing?",
-      "My partner wants out \u2014 options?",
+      "Asset sale vs stock sale \u2014 what's the difference?",
       'Walk me through a 12-month exit plan',
-      "Asset sale vs stock sale \u2014 what's the tax difference?",
+      "Generate my free Bizestimate",
     ],
     placeholder: 'Tell Yulia about your business...',
   },
   buy: {
     overline: 'Search & Acquire',
-    headline: 'Find it. Evaluate it. Close it. Grow it.',
-    terraWord: 'Grow it.',
-    tagline: 'Bring any deal from anywhere \u2014 a BizBuySell listing, a broker\u2019s teaser, something you heard about. Yulia runs institutional analysis and tells you: pursue or pass.',
+    headline: '[PAUL TO WRITE]',
+    terraWord: '',
+    tagline: 'Paste a listing. Describe a deal. Yulia tells you: pursue or pass \u2014 with the data to back it up.',
     chips: [
-      "I found a listing \u2014 is the asking price justified?",
-      'Can I finance a $2M dental practice with SBA?',
-      'What to look for in home services?',
-      "Asset sale or stock sale \u2014 which is better for me?",
-      'I just closed \u2014 90-day plan',
+      "I found a listing \u2014 is the price fair?",
+      'Can I finance this with SBA?',
+      'Screen this deal in 5 minutes',
+      "What's the DSCR on a $1.8M acquisition?",
+      'Build my acquisition thesis',
     ],
     placeholder: "Tell Yulia what you're looking for...",
   },
   raise: {
     overline: 'Raise Capital',
-    headline: 'Fund your growth. Keep your company.',
-    terraWord: 'company.',
-    tagline: 'Debt, equity, SBA, revenue-based financing \u2014 Yulia models every capital structure side-by-side so you see what you keep, what you give up, and how each affects your exit.',
+    headline: '[PAUL TO WRITE]',
+    terraWord: '',
+    tagline: 'Debt, equity, SBA, revenue-based financing \u2014 Yulia models every structure so you see what you keep and what you give up.',
     chips: [
       'I need $500K for a second location',
       'Equity vs. debt \u2014 which fits?',
@@ -169,12 +130,12 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
   },
   integrate: {
     overline: 'Post-Acquisition',
-    headline: 'You closed the deal. Now build the value.',
-    terraWord: 'value.',
-    tagline: 'The first 100 days determine whether the acquisition creates the value you modeled. Yulia\u2019s integration plan is built from months of deal intelligence \u2014 not a generic template.',
+    headline: '[PAUL TO WRITE]',
+    terraWord: '',
+    tagline: 'The first 100 days determine everything. Yulia\u2019s plan is built from your deal intelligence \u2014 not a template.',
     chips: [
       'I just closed \u2014 give me a 90-day plan',
-      'Employee retention is my top concern',
+      'Employee retention strategy',
       'What should I NOT change in month one?',
       'Build my value creation roadmap',
     ],
@@ -184,13 +145,12 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
     overline: 'Deal Intelligence',
     headline: 'The data is public. The intelligence is not.',
     terraWord: 'not.',
-    tagline: 'Every number Yulia gives you is traceable to authoritative federal data \u2014 the same sources that power the Federal Reserve and Wall Street research desks. The difference is what we do with it.',
+    tagline: 'Every number is traceable to authoritative federal data \u2014 Census, BLS, FRED, SEC EDGAR, SBA. The difference is what we do with it.',
     chips: [
       'How is this different from ChatGPT?',
       'What data sources do you use?',
-      'Show me the methodology',
+      'Show me the Seven Layers',
       'What does a valuation look like?',
-      'How do you handle tax and legal?',
     ],
     placeholder: 'Ask how the intelligence works...',
   },
@@ -198,7 +158,7 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
     overline: 'For Deal Professionals',
     headline: 'Your first 3 client journeys are free.',
     terraWord: 'free.',
-    tagline: 'Run a full deal through the platform \u2014 valuation, CIM, market intelligence, buyer qualification \u2014 without committing a dollar. See what takes 30 minutes instead of 12 hours.',
+    tagline: 'Run a full deal through the platform \u2014 valuation, CIM, market intelligence, buyer qualification \u2014 without committing a dollar.',
     chips: [
       'Package a new listing for my client',
       'Pre-screen a buyer for SBA eligibility',
@@ -209,13 +169,13 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
   },
   pricing: {
     overline: 'Pricing',
-    headline: 'Start free. Go deeper when you\u2019re ready.',
-    terraWord: 'ready.',
-    tagline: 'Everything you need to understand your deal is free. When you\u2019re ready for premium deliverables, you pay per document \u2014 the right intelligence at the right stage of your deal.',
+    headline: 'Start free. Stay because it works.',
+    terraWord: 'works.',
+    tagline: 'One conversation with Yulia surfaces the right plan for your deal. No sales calls. No commitment.',
     chips: [
-      "What's free?",
-      'How does the wallet work?',
-      'See full pricing',
+      "What's included free?",
+      'Compare plans',
+      'How does Discovery work?',
       'Start a free analysis',
     ],
     placeholder: 'Ask about pricing...',

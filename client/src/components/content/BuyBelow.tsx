@@ -1,12 +1,14 @@
 import {
   RevealSection,
   ScrollReveal,
-  StaggerContainer,
-  StaggerItem,
   DSCRCalculator,
   AnimatedTimeline,
-  BeforeAfterSlider,
   MagneticButton,
+  SideBySideCard,
+  DataCard,
+  ExpandableCard,
+  StaggerContainer,
+  StaggerItem,
 } from './animations';
 
 interface BuyBelowProps {
@@ -22,11 +24,11 @@ const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid 
 export default function BuyBelow({ onChipClick }: BuyBelowProps) {
   return (
     <div className="px-6">
-      {/* ═══ Block 1 — Any deal, any source ═══ */}
+      {/* ═══ 1. SPEED TO CONVICTION ═══ */}
       <section style={{ paddingTop: 120 }}>
         <div style={sectionStyle}>
           <RevealSection>
-            <span style={labelStyle}>ANY DEAL &middot; ANY SOURCE</span>
+            <span style={labelStyle}>SPEED TO CONVICTION</span>
             <h2 style={h2Style} className="md:text-[48px]">
               The most expensive mistake is three months on the wrong deal.
             </h2>
@@ -34,181 +36,139 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
 
           <RevealSection style={{ marginTop: 32 }}>
             <div className="space-y-6" style={bodyStyle}>
-              <p>Every day spent evaluating the wrong deal is a day you&apos;re not closing the right one. And in a market where good businesses sell in weeks, speed to conviction is everything.</p>
-              <p>Bring it to Yulia. Paste a BizBuySell listing. Describe something your broker sent you. Tell her about a business you heard is for sale.</p>
-              <p>Within minutes: financial validation against federal benchmarks, SBA financing modeled at live rates, competitive landscape mapped for that metro, risks flagged &mdash; and a clear answer. Pursue or pass.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>Every listing site in the world just became your top-of-funnel. smbX.ai is where you analyze them.</p>
+              <p>Every day on the wrong deal is a day you&apos;re not closing the right one. In a market where good businesses sell in weeks, speed to conviction is everything.</p>
+              <p>Paste a BizBuySell listing. Describe a deal your broker sent. Tell Yulia about a business you heard is for sale.</p>
+              <p>Within minutes: financial validation against federal benchmarks, SBA financing modeled at live rates, competitive landscape mapped, risks flagged &mdash; and a clear answer.</p>
+              <p style={{ color: '#1A1A18', fontWeight: 600 }}>Pursue or pass. With the data to back it up. Free.</p>
             </div>
           </RevealSection>
         </div>
       </section>
 
-      {/* ═══ Block 2 — Five dimensions ═══ */}
+      {/* ═══ 2. THE SBA EQUATION ═══ */}
       <section style={{ paddingTop: 140 }}>
         <div style={sectionStyle}>
           <RevealSection>
-            <span style={labelStyle}>DEAL EVALUATION &middot; FIVE DIMENSIONS</span>
+            <span style={labelStyle}>THE SBA EQUATION</span>
             <h2 style={h2Style} className="md:text-[48px]">
-              Five dimensions. One answer.
-            </h2>
-            <p style={{ ...bodyStyle, marginTop: 16 }}>Yulia gets you to conviction &mdash; fast.</p>
-          </RevealSection>
-
-          <div className="space-y-10" style={{ marginTop: 40 }}>
-            {[
-              { title: 'Financials', body: 'Seller claims $600K SDE. Census data says that implies 50% margins \u2014 realistic? Yulia checks against federal benchmarks, not guesswork.' },
-              { title: 'Financing', body: '$1.8M asking, 10% down, live SBA rate: monthly P&I is $14,200. DSCR is 1.87 \u2014 above the 1.25 threshold. Bankable.' },
-              { title: 'Market', body: '847 competitors in the metro. PE firms rolling up the sector. BLS wages growing 4%. Good market \u2014 or buying at the top?' },
-              { title: 'Risks', body: 'Customer concentration. Owner dependency. Declining revenue. Yulia flags them before the seller\u2019s broker does.' },
-              { title: 'Verdict', body: 'Pursue \u2014 with these conditions. Or pass \u2014 for these reasons. A real answer with real reasoning.' },
-            ].map(item => (
-              <RevealSection key={item.title}>
-                <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>{item.title}</h3>
-                <p style={bodyStyle}>{item.body}</p>
-              </RevealSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ Interactive DSCR Calculator ═══ */}
-      <section style={{ paddingTop: 100 }}>
-        <div style={sectionStyle}>
-          <RevealSection>
-            <DSCRCalculator />
-          </RevealSection>
-        </div>
-      </section>
-
-      {/* ═══ Block 3 — Free starting point ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={sectionStyle}>
-          <RevealSection>
-            <span style={labelStyle}>FREE STARTING POINT</span>
-            <h2 style={h2Style} className="md:text-[48px]">
-              Before you pay anything, you get this.
-            </h2>
-          </RevealSection>
-
-          <div className="space-y-4" style={{ marginTop: 40 }}>
-            {[
-              { title: 'Investment Thesis Document', body: 'Your acquisition blueprint \u2014 criteria, capital stack template, SBA eligibility, market landscape. What search funds build in-house with full-time analysts.' },
-              { title: 'Capital Stack Template', body: '\u201CHere\u2019s how a $1.8M acquisition gets funded.\u201D SBA loan, equity, seller note, monthly debt service.' },
-            ].map(item => (
-              <RevealSection key={item.title}>
-                <div style={cardStyle}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 12px' }}>{item.title}</h3>
-                  <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.body}</p>
-                </div>
-              </RevealSection>
-            ))}
-          </div>
-
-          <RevealSection style={{ marginTop: 24 }}>
-            <p style={{ fontSize: '16px', fontWeight: 600, color: '#C96B4F', lineHeight: 1.65 }}>
-              Both free. Both generated from your first conversation.
-            </p>
-          </RevealSection>
-        </div>
-      </section>
-
-      {/* ═══ Block 4 — Before/After: Buyer tax benefits ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={sectionStyle}>
-          <RevealSection>
-            <span style={labelStyle}>TAX STRUCTURE &middot; BUYER PERSPECTIVE</span>
-            <h2 style={h2Style} className="md:text-[48px]">
-              The deal structure determines your true cost of ownership.
+              Know if it&apos;s bankable before you make the call.
             </h2>
             <p style={{ ...bodyStyle, marginTop: 20 }}>
-              Asset sales and stock sales aren&apos;t just different for the seller. The structure directly affects your tax deductions &mdash; and your real return on investment.
+              SBA 7(a) loans finance most small business acquisitions. Yulia models the full equation at live rates so you know the real monthly payment before you talk to a lender.
             </p>
           </RevealSection>
 
           <RevealSection style={{ marginTop: 40 }}>
-            <BeforeAfterSlider
-              beforeLabel="STOCK SALE"
-              afterLabel="ASSET SALE (BUYER-FAVORABLE)"
-              beforeContent={
-                <div style={{ background: '#FAF9F7', padding: '32px', minHeight: 280 }}>
-                  <div className="space-y-3" style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.5 }}>
-                    <div className="flex justify-between"><span>Basis step-up</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>No</span></div>
-                    <div className="flex justify-between"><span>Goodwill amortization</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>None</span></div>
-                    <div className="flex justify-between"><span>Equipment depreciation</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>Seller&apos;s schedule</span></div>
-                    <div className="flex justify-between"><span>NPV of tax shields</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>~$0</span></div>
-                    <div className="flex justify-between"><span>Inherited liabilities</span><span style={{ color: '#1A1A18', fontWeight: 600 }}>ALL</span></div>
-                  </div>
-                </div>
-              }
-              afterContent={
-                <div style={{ background: '#C96B4F', padding: '32px', minHeight: 280 }}>
-                  <div className="space-y-3" style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
-                    <div className="flex justify-between"><span>Basis step-up</span><span style={{ color: '#fff', fontWeight: 600 }}>Yes</span></div>
-                    <div className="flex justify-between"><span>Goodwill amortization</span><span style={{ color: '#fff', fontWeight: 600 }}>~$97K/yr</span></div>
-                    <div className="flex justify-between"><span>Equipment depreciation</span><span style={{ color: '#fff', fontWeight: 600 }}>Fresh</span></div>
-                    <div className="flex justify-between"><span>NPV of tax shields</span><span style={{ color: '#fff', fontWeight: 600 }}>~$304,000</span></div>
-                    <div className="flex justify-between"><span>Inherited liabilities</span><span style={{ color: '#fff', fontWeight: 600 }}>Only agreed</span></div>
-                  </div>
-                </div>
-              }
+            <DSCRCalculator />
+          </RevealSection>
+
+          <RevealSection style={{ marginTop: 24 }}>
+            <DataCard
+              label="SBA 7(a) \u2014 KEY THRESHOLDS"
+              rows={[
+                { label: 'Minimum DSCR', value: '1.25\u00D7', highlight: true },
+                { label: 'Max loan amount', value: '$5,000,000' },
+                { label: 'Typical down payment', value: '10\u201320%' },
+                { label: 'Term (with real estate)', value: '25 years' },
+                { label: 'Term (without)', value: '10 years' },
+              ]}
+            />
+          </RevealSection>
+        </div>
+      </section>
+
+      {/* ═══ 3. THE MARKET MAP ═══ */}
+      <section style={{ paddingTop: 140 }}>
+        <div style={sectionStyle}>
+          <RevealSection>
+            <span style={labelStyle}>THE MARKET MAP</span>
+            <h2 style={h2Style} className="md:text-[48px]">
+              National averages are noise. Your market is signal.
+            </h2>
+          </RevealSection>
+
+          <RevealSection style={{ marginTop: 32 }}>
+            <div className="space-y-6" style={bodyStyle}>
+              <p>A plumbing company in Phoenix and a plumbing company in rural Pennsylvania are fundamentally different deals. Different competitive density, wage structures, buyer pools, and SBA lending patterns.</p>
+              <p>Yulia delivers intelligence specific to your MSA &mdash; not your state, not your region, your metropolitan statistical area. The same geographic precision that institutional investors use.</p>
+              <p style={{ color: '#1A1A18', fontWeight: 600 }}>Every number. Sourced. Traceable. Included in your plan.</p>
+            </div>
+          </RevealSection>
+        </div>
+      </section>
+
+      {/* ═══ 4. BUYER TAX ADVANTAGE ═══ */}
+      <section style={{ paddingTop: 140 }}>
+        <div style={sectionStyle}>
+          <RevealSection>
+            <span style={labelStyle}>BUYER TAX ADVANTAGE</span>
+            <h2 style={h2Style} className="md:text-[48px]">
+              The deal structure determines your true cost of ownership.
+            </h2>
+            <p style={{ ...bodyStyle, marginTop: 20 }}>
+              Asset sales aren&apos;t just different for the seller. The structure directly affects your tax deductions &mdash; and your real return.
+            </p>
+          </RevealSection>
+
+          <RevealSection style={{ marginTop: 40 }}>
+            <SideBySideCard
+              leftLabel="STOCK SALE"
+              rightLabel="ASSET SALE (BUYER-FAVORABLE)"
+              leftItems={[
+                { label: 'Basis step-up', value: 'No' },
+                { label: 'Goodwill amortization', value: 'None' },
+                { label: 'Equipment depreciation', value: "Seller's schedule" },
+                { label: 'NPV of tax shields', value: '~$0' },
+              ]}
+              rightItems={[
+                { label: 'Basis step-up', value: 'Yes' },
+                { label: 'Goodwill amortization', value: '~$97K/yr' },
+                { label: 'Equipment depreciation', value: 'Fresh' },
+                { label: 'NPV of tax shields', value: '~$304,000' },
+              ]}
             />
           </RevealSection>
 
           <RevealSection style={{ marginTop: 24 }}>
-            <p style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', lineHeight: 1.65 }}>
-              On a $2M deal, the asset sale tax shield is worth ~$304K to the buyer in present value. That&apos;s why buyers push for asset sales &mdash; and why sellers resist (they pay more tax). Yulia models both sides so you negotiate from the real numbers.
-            </p>
-            <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.4)', marginTop: 8, fontStyle: 'italic' }}>
-              Your CPA should confirm the deduction schedule for your specific situation.
+            <p style={{ fontSize: '15px', fontWeight: 500, color: '#1A1A18', lineHeight: 1.65 }}>
+              On a $2M deal, the asset sale tax shield is worth ~$304K in present value. That&apos;s why buyers push for asset sales. Yulia models both sides so you negotiate from real numbers.
             </p>
           </RevealSection>
         </div>
       </section>
 
-      {/* ═══ Block 5 — Legal due diligence ═══ */}
+      {/* ═══ 5. NEGOTIATION INTELLIGENCE ═══ */}
       <section style={{ paddingTop: 140 }}>
         <div style={sectionStyle}>
           <RevealSection>
-            <span style={labelStyle}>LEGAL DUE DILIGENCE</span>
+            <span style={labelStyle}>NEGOTIATION INTELLIGENCE</span>
             <h2 style={h2Style} className="md:text-[48px]">
-              What to verify before you sign.
+              The seller&apos;s broker does this fifty times a year.
             </h2>
-            <p style={{ ...bodyStyle, marginTop: 20 }}>
-              The APA protects you only if the reps and warranties are right. Yulia builds a due diligence checklist calibrated to the deal&apos;s industry, size, and structure.
-            </p>
           </RevealSection>
 
-          <div className="space-y-4" style={{ marginTop: 40 }}>
+          <div className="space-y-3" style={{ marginTop: 40 }}>
             {[
-              { title: 'Reps & warranty review', body: 'The seller\u2019s factual statements about the business. Yulia identifies which reps are standard, which are missing, and which need broader language. Key focus: financial accuracy, no undisclosed liabilities, tax compliance, IP ownership, and material contracts.' },
-              { title: 'Red flag scoring', body: 'Every DD finding gets scored: minor (proceed), major (negotiate price adjustment), or deal-breaker (walk away). Yulia calculates the dollar impact of each issue and recommends price adjustments.' },
-              { title: 'Lease and location', body: 'Is the lease assignable? How much term remains? What will the landlord demand? If the business depends on the location, this is a potential deal-killer \u2014 Yulia flags it early.' },
-              { title: 'Licenses and permits', body: 'Healthcare, childcare, construction, food service, pest control \u2014 many require new applications from you. Some take 3\u20136 months. Yulia checks the industry and builds the regulatory transfer timeline.' },
-              { title: 'Employee transition', body: 'In an asset sale, employees are terminated by the seller and rehired by you. You choose who to hire. But prior liabilities (WARN Act, benefits, PTO) need to be clearly allocated.' },
-              { title: 'Working capital mechanism', body: 'Fixed price? Peg with true-up? Locked box? The working capital adjustment is where deals get renegotiated after the LOI. Yulia calculates the trailing 12-month average.' },
+              { title: 'First Offer Strategy', preview: 'Where to anchor and why.', detail: 'Your first offer sets the negotiation range. Yulia calculates the optimal starting point based on the deal\u2019s financials, comparable transactions, and the seller\u2019s likely reservation price.' },
+              { title: 'Seller Financing Leverage', preview: 'Turn the capital stack into a negotiation tool.', detail: 'When SBA won\u2019t cover the full deal, a seller note bridges the gap. Yulia models how much seller financing to request and how to structure it as leverage: lower price, or seller note.' },
+              { title: 'Purchase Price Allocation', preview: 'The negotiation most buyers don\u2019t know about.', detail: 'How the price is split across asset classes determines your tax bill for years. Maximizing goodwill (15-year amortization) vs. equipment (5\u20137 year depreciation) can be worth tens of thousands.' },
+              { title: 'Working Capital Mechanism', preview: 'Where deals get renegotiated after the LOI.', detail: 'Fixed price? Peg with true-up? Locked box? Yulia calculates the trailing 12-month average and recommends the right mechanism for your deal.' },
             ].map(item => (
               <RevealSection key={item.title}>
-                <div style={cardStyle}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>{item.title}</h3>
-                  <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.body}</p>
-                </div>
+                <ExpandableCard title={item.title} preview={item.preview}>
+                  <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.detail}</p>
+                </ExpandableCard>
               </RevealSection>
             ))}
           </div>
-
-          <RevealSection style={{ marginTop: 16 }}>
-            <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.4)', fontStyle: 'italic' }}>
-              Your M&amp;A attorney drafts the actual APA. Yulia ensures you know what to expect, what to negotiate, and what to walk away from.
-            </p>
-          </RevealSection>
         </div>
       </section>
 
-      {/* ═══ Block 6 — Animated Buyer Journey Timeline ═══ */}
+      {/* ═══ 6. THE FULL JOURNEY ═══ */}
       <section style={{ paddingTop: 140 }}>
         <div style={sectionStyle}>
           <RevealSection>
-            <span style={labelStyle}>BUYER JOURNEY &middot; GUIDED PROCESS</span>
+            <span style={labelStyle}>THE FULL JOURNEY</span>
             <h2 style={h2Style} className="md:text-[48px]">
               From thesis to close &mdash; and 180 days beyond.
             </h2>
@@ -218,11 +178,11 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
             <AnimatedTimeline>
               <div className="space-y-10">
                 {[
-                  { phase: 'Phase 1 \u2014 Define Your Thesis', body: 'What industry? Geography? Deal size? Yulia maps the market landscape.' },
+                  { phase: 'Phase 1 \u2014 Define Your Thesis', body: 'What industry? Geography? Deal size? Yulia maps the market landscape and builds your acquisition criteria.' },
                   { phase: 'Phase 2 \u2014 Evaluate & Build Conviction', body: 'Financial validation, SBA modeling, market analysis, risk assessment. Pursue or pass \u2014 with data.' },
-                  { phase: 'Phase 3 \u2014 Negotiate & Win', body: 'First offer strategy. Seller financing leverage. Purchase price allocation negotiation. Your walk-away number. Real tactics.' },
-                  { phase: 'Phase 4 \u2014 Due Diligence & Close', body: 'Organized deal room. DD checklist by industry. Red flag scoring. Price adjustment calculations. Working capital true-up modeling. Everyone in one workspace.' },
-                  { phase: 'Phase 5 \u2014 Post-Acquisition \u00B7 180 Days', body: 'Day 1\u201330: Stabilize. Retain. Preserve. Day 30\u201390: Optimize. Quick wins. Day 90\u2013180: Grow. Execute the thesis. A customized plan for YOUR business.' },
+                  { phase: 'Phase 3 \u2014 Negotiate & Win', body: 'First offer strategy. Seller financing leverage. Purchase price allocation. Walk-away number. Real tactics.' },
+                  { phase: 'Phase 4 \u2014 Due Diligence & Close', body: 'Organized deal room. DD checklist by industry. Red flag scoring. Price adjustments. Working capital true-up.' },
+                  { phase: 'Phase 5 \u2014 Post-Acquisition \u00B7 180 Days', body: 'Day 1\u201330: Stabilize and retain. Day 30\u201390: Optimize and find quick wins. Day 90\u2013180: Execute the thesis.' },
                 ].map((p, i) => (
                   <ScrollReveal key={p.phase} delay={i * 0.1}>
                     <div className="flex gap-4" style={{ paddingLeft: 12 }}>
@@ -242,35 +202,34 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
         </div>
       </section>
 
-      {/* ═══ Block 7 — Buyer types ═══ */}
+      {/* ═══ 7. EVERY TYPE OF BUYER ═══ */}
       <section style={{ paddingTop: 140 }}>
         <div style={sectionStyle}>
           <RevealSection>
-            <span style={labelStyle}>BUYER TYPES</span>
+            <span style={labelStyle}>EVERY TYPE OF BUYER</span>
             <h2 style={h2Style} className="md:text-[48px]">
               First deal or fiftieth. Yulia adapts.
             </h2>
           </RevealSection>
 
-          <StaggerContainer className="space-y-4" style={{ marginTop: 40 }}>
+          <div className="space-y-3" style={{ marginTop: 40 }}>
             {[
-              { title: 'First-Time SBA Buyer', body: 'No jargon. Your pace. Tax and legal explained in plain English.' },
-              { title: 'Search Fund', body: 'Thesis to close. Pipeline velocity. LOI-to-APA coaching.' },
-              { title: 'PE Platform', body: 'Screen at deal-team speed. Arbitrage modeling. Covenant analysis.' },
-              { title: 'Strategic', body: 'Synergies, structure, max value. Integration planning from Day 1.' },
-            ].map(b => (
-              <StaggerItem key={b.title}>
-                <div style={cardStyle}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 6px' }}>{b.title}</h3>
-                  <p style={{ ...bodyStyle, fontSize: '15px' }}>{b.body}</p>
-                </div>
-              </StaggerItem>
+              { title: 'First-Time SBA Buyer', preview: 'No jargon. Your pace.', detail: 'SDE-based analysis, step-by-step guidance, SBA-focused financing. Tax and legal explained in plain English because this is probably your first deal.' },
+              { title: 'Search Fund', preview: 'Thesis to close. Pipeline velocity.', detail: 'Investment thesis refinement, deal screening at speed, LOI-to-APA coaching. The analytical support a traditional search fund charges $100K+ for.' },
+              { title: 'PE Platform', preview: 'Screen at deal-team speed.', detail: 'EBITDA-based metrics, arbitrage modeling, covenant analysis, add-on evaluation. Institutional depth for institutional buyers.' },
+              { title: 'Strategic Acquirer', preview: 'Synergies, structure, max value.', detail: 'Synergy quantification, integration planning from Day 1, competitive process analysis. The strategic rationale that justifies paying a premium.' },
+            ].map(item => (
+              <RevealSection key={item.title}>
+                <ExpandableCard title={item.title} preview={item.preview}>
+                  <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.detail}</p>
+                </ExpandableCard>
+              </RevealSection>
             ))}
-          </StaggerContainer>
+          </div>
         </div>
       </section>
 
-      {/* ═══ Block 8 — The payoff + CTA ═══ */}
+      {/* ═══ 8. THE PAYOFF + CTA ═══ */}
       <section style={{ paddingTop: 100, paddingBottom: 80 }}>
         <div style={sectionStyle}>
           <RevealSection>
@@ -279,8 +238,8 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
 
           <RevealSection>
             <div className="space-y-6" style={bodyStyle}>
-              <p>Not &ldquo;I hope this works out.&rdquo; Not &ldquo;I think I paid the right price.&rdquo; Not &ldquo;Now what?&rdquo;</p>
-              <p>You have a plan. Specific to this business, this market, this thesis. Built from months of intelligence that Yulia gathered during the acquisition &mdash; carried forward into ownership.</p>
+              <p>Not &ldquo;I hope this works out.&rdquo; Not &ldquo;I think I paid the right price.&rdquo;</p>
+              <p>You have a plan. Specific to this business, this market, this thesis. Built from months of intelligence that Yulia gathered during the acquisition.</p>
               <p style={{ color: '#1A1A18', fontWeight: 600 }}>That&apos;s the difference between buying a business and building wealth.</p>
             </div>
           </RevealSection>

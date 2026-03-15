@@ -1033,6 +1033,230 @@ export function FullBleedSection({
 }
 
 /* ═══════════════════════════════════════════════
+   DataCard — structured financial data display
+   ═══════════════════════════════════════════════ */
+export function DataCard({
+  label,
+  rows,
+  footer,
+  className,
+}: {
+  label?: string;
+  rows: { label: string; value: string; highlight?: boolean }[];
+  footer?: { label: string; value: string };
+  className?: string;
+}) {
+  return (
+    <div className={className} style={{ background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' }}>
+      {label && <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)', display: 'block', marginBottom: 16 }}>{label}</span>}
+      <div style={{ fontSize: '14px', fontVariantNumeric: 'tabular-nums' }}>
+        {rows.map((r) => (
+          <div key={r.label} className="flex justify-between" style={{ padding: '8px 0', borderBottom: '1px solid rgba(0,0,0,0.04)', color: r.highlight ? '#C96B4F' : 'rgba(26,26,24,0.5)' }}>
+            <span>{r.label}</span>
+            <span style={{ fontWeight: 600, color: r.highlight ? '#C96B4F' : '#1A1A18' }}>{r.value}</span>
+          </div>
+        ))}
+      </div>
+      {footer && (
+        <div className="flex justify-between" style={{ marginTop: 12, paddingTop: 12, borderTop: '2px solid rgba(26,26,24,0.12)', fontSize: '16px', fontWeight: 700, color: '#C96B4F' }}>
+          <span>{footer.label}</span>
+          <span>{footer.value}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   ExpandableCard — click-to-expand section
+   ═══════════════════════════════════════════════ */
+export function ExpandableCard({
+  title,
+  preview,
+  children,
+  className,
+}: {
+  title: string;
+  preview?: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div
+      className={className}
+      style={{ background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', overflow: 'hidden', cursor: 'pointer' }}
+      onClick={() => setOpen(o => !o)}
+    >
+      <div style={{ padding: '20px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+        <div style={{ flex: 1 }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: 0 }}>{title}</h3>
+          {preview && !open && <p style={{ fontSize: '14px', color: 'rgba(26,26,24,0.45)', margin: '4px 0 0', lineHeight: 1.5 }}>{preview}</p>}
+        </div>
+        <motion.span
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+          style={{ flexShrink: 0, color: '#C96B4F', fontSize: '18px', lineHeight: 1 }}
+        >
+          &#9662;
+        </motion.span>
+      </div>
+      <motion.div
+        initial={false}
+        animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        style={{ overflow: 'hidden' }}
+      >
+        <div style={{ padding: '0 28px 20px' }} onClick={e => e.stopPropagation()}>
+          {children}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   DealPreview — example deal output card
+   ═══════════════════════════════════════════════ */
+export function DealPreview({
+  title,
+  metrics,
+  cta,
+  className,
+}: {
+  title: string;
+  metrics: { label: string; value: string }[];
+  cta?: string;
+  className?: string;
+}) {
+  return (
+    <div className={className} style={{ background: 'linear-gradient(135deg, #1A1A18 0%, #2B2A27 100%)', borderRadius: 16, padding: '28px 32px', color: '#fff' }}>
+      <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#C96B4F' }}>{title}</span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, marginTop: 20 }}>
+        {metrics.map(m => (
+          <div key={m.label} style={{ flex: '1 1 120px' }}>
+            <div style={{ fontSize: '24px', fontWeight: 700, color: '#fff', lineHeight: 1.1 }}>{m.value}</div>
+            <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>{m.label}</div>
+          </div>
+        ))}
+      </div>
+      {cta && <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', marginTop: 16, marginBottom: 0, fontStyle: 'italic' }}>{cta}</p>}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   SideBySideCard — comparison visual
+   ═══════════════════════════════════════════════ */
+export function SideBySideCard({
+  leftLabel,
+  rightLabel,
+  leftItems,
+  rightItems,
+  className,
+}: {
+  leftLabel: string;
+  rightLabel: string;
+  leftItems: { label: string; value: string }[];
+  rightItems: { label: string; value: string }[];
+  className?: string;
+}) {
+  return (
+    <div className={className} style={{ display: 'flex', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.06)' }}>
+      <div style={{ flex: 1, padding: '24px', background: '#FAF9F7' }}>
+        <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)', display: 'block', marginBottom: 16 }}>{leftLabel}</span>
+        <div style={{ fontSize: '14px', fontVariantNumeric: 'tabular-nums' }}>
+          {leftItems.map(r => (
+            <div key={r.label} className="flex justify-between" style={{ padding: '6px 0', color: 'rgba(26,26,24,0.5)' }}>
+              <span>{r.label}</span>
+              <span style={{ fontWeight: 600, color: '#1A1A18' }}>{r.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ flex: 1, padding: '24px', background: '#C96B4F' }}>
+        <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 16 }}>{rightLabel}</span>
+        <div style={{ fontSize: '14px', fontVariantNumeric: 'tabular-nums' }}>
+          {rightItems.map(r => (
+            <div key={r.label} className="flex justify-between" style={{ padding: '6px 0', color: 'rgba(255,255,255,0.7)' }}>
+              <span>{r.label}</span>
+              <span style={{ fontWeight: 600, color: '#fff' }}>{r.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
+   ConversationPreview — styled chat bubble sequence
+   ═══════════════════════════════════════════════ */
+export function ConversationPreview({
+  messages,
+  className,
+}: {
+  messages: { role: 'user' | 'ai'; text: string }[];
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-60px' });
+  const [visibleCount, setVisibleCount] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    let i = 0;
+    const show = () => {
+      if (i >= messages.length) return;
+      i++;
+      setVisibleCount(i);
+      setTimeout(show, messages[i - 1]?.role === 'ai' ? 1200 : 600);
+    };
+    setTimeout(show, 400);
+  }, [inView, messages]);
+
+  return (
+    <div ref={ref} className={className} style={{ background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {messages.slice(0, visibleCount).map((msg, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            style={{
+              alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+              maxWidth: '85%',
+              padding: '12px 16px',
+              borderRadius: 14,
+              fontSize: '14px',
+              lineHeight: 1.55,
+              ...(msg.role === 'user'
+                ? { background: '#1A1A18', color: '#fff' }
+                : { background: '#F5F5F0', color: '#1A1A18' }),
+            }}
+          >
+            {msg.role === 'ai' && <span style={{ fontSize: '11px', fontWeight: 600, color: '#C96B4F', display: 'block', marginBottom: 4 }}>YULIA</span>}
+            {msg.text}
+          </motion.div>
+        ))}
+        {inView && visibleCount < messages.length && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{ alignSelf: 'flex-start', display: 'flex', gap: 4, padding: '8px 0' }}
+          >
+            <span className="conv-typing-dot" />
+            <span className="conv-typing-dot" />
+            <span className="conv-typing-dot" />
+          </motion.div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════
    NumberedList — 2-col numbered items
    ═══════════════════════════════════════════════ */
 export function NumberedList({
