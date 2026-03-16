@@ -734,8 +734,31 @@ export default function AppShell() {
         </nav>
       </div>
 
+      {/* Journey pages — subtle links */}
+      <div className="px-4 mt-5 mb-2">
+        <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.25)', marginBottom: 8 }}>Explore</div>
+        <div className="flex flex-wrap gap-1.5">
+          {(['sell', 'buy', 'raise', 'integrate', 'how-it-works', 'advisors', 'pricing'] as TabId[]).map(tab => (
+            <button
+              key={tab}
+              onClick={() => { handleTabClick(tab); if (mobile) setIsMobileSidebarOpen(false); }}
+              className="bg-transparent border-none cursor-pointer transition-colors hover:text-[#0D0D0D]"
+              style={{
+                fontFamily: 'inherit', fontSize: '12px', fontWeight: activeTab === tab && viewState === 'landing' ? 600 : 400,
+                color: activeTab === tab && viewState === 'landing' ? '#0D0D0D' : 'rgba(0,0,0,0.3)',
+                padding: '3px 8px', borderRadius: 6,
+                background: activeTab === tab && viewState === 'landing' ? 'rgba(0,0,0,0.04)' : 'transparent',
+              }}
+              type="button"
+            >
+              {tab === 'how-it-works' ? 'How It Works' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Conversations — grouped by deal or date */}
-      <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-4">
+      <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-2">
         {conversationGroups.map(group => (
           <div key={group.label} className="mb-3">
             <div className="flex items-center gap-2 px-4 mb-2" style={{ fontSize: '10px', fontWeight: groupMode === 'deal' ? 800 : 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#C96B4F' }}>
