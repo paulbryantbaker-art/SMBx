@@ -640,7 +640,7 @@ export default function AppShell() {
           style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontWeight: 700, color: '#0D0D0D' }}
           type="button"
         >
-          smbx<span style={{ color: '#C96B4F' }}>.</span>ai
+          smb<span style={{ color: '#C96B4F' }}>x</span><span style={{ color: '#0D0D0D' }}>.</span>ai
         </button>
       </div>
 
@@ -703,7 +703,7 @@ export default function AppShell() {
 
       {/* ─── Explore — prominent for visitors, compact for auth users ─── */}
       <div className="px-3 mt-4">
-        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.25)' }}>Explore</div>
+        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C96B4F' }}>Explore</div>
         <nav className="space-y-0.5">
           {([
             { id: 'sell' as TabId, label: 'Sell a Business', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" /><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" /></svg> },
@@ -741,7 +741,7 @@ export default function AppShell() {
       {/* Workspace nav — authenticated only */}
       {user && (
         <div className="px-3 mt-3">
-          <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.25)' }}>Workspace</div>
+          <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C96B4F' }}>Workspace</div>
           <nav className="space-y-0.5">
             {([
               { id: 'chat' as ViewState, label: 'Home', route: '/chat', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> },
@@ -938,7 +938,7 @@ export default function AppShell() {
                     style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontSize: '20px', fontWeight: 700, color: '#0D0D0D' }}
                     type="button"
                   >
-                    smbx<span style={{ color: '#C96B4F' }}>.</span>ai
+                    smb<span style={{ color: '#C96B4F' }}>x</span><span style={{ color: '#0D0D0D' }}>.</span>ai
                   </button>
                 ) : (
                   <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(0,0,0,0.35)' }}>
@@ -1002,7 +1002,7 @@ export default function AppShell() {
                       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                       style={{ fontSize: '24px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D' }}
                     >
-                      smbx<span style={{ color: '#C96B4F' }}>.</span>ai
+                      smb<span style={{ color: '#C96B4F' }}>x</span><span style={{ color: '#0D0D0D' }}>.</span>ai
                     </motion.div>
                     {/* Hero chat bar */}
                     <motion.div
@@ -1032,7 +1032,7 @@ export default function AppShell() {
                       {['Prepare to sell', 'Prepare to buy', 'Raise capital', 'Advise a deal'].map(chip => (
                         <button
                           key={chip}
-                          onClick={() => handleSuggestion(chip === 'Prepare to sell' ? "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." : chip === 'Prepare to buy' ? "I'm looking to acquire a business. Help me evaluate opportunities." : chip === 'Raise capital' ? "I need to raise capital for my business. Walk me through the options." : "I'm an M&A advisor. Show me how you can help with my practice.")}
+                          onClick={() => handleChipClick(chip === 'Prepare to sell' ? "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." : chip === 'Prepare to buy' ? "I'm looking to acquire a business. Help me evaluate opportunities." : chip === 'Raise capital' ? "I need to raise capital for my business. Walk me through the options." : "I'm an M&A advisor. Show me how you can help with my practice.")}
                           className="bg-transparent cursor-pointer transition-all chip-hover"
                           style={{ borderRadius: 100, fontSize: '13px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.45)', border: '1px solid rgba(0,0,0,0.1)', padding: '8px 16px' }}
                           type="button"
@@ -1054,7 +1054,7 @@ export default function AppShell() {
                       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                       style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', marginBottom: 40 }}
                     >
-                      smbx<span style={{ color: '#C96B4F' }}>.</span>ai
+                      smb<span style={{ color: '#C96B4F' }}>x</span><span style={{ color: '#0D0D0D' }}>.</span>ai
                     </motion.div>
                     {/* Hero chat bar — 660px wide, multi-layered shadow */}
                     <motion.div
@@ -1085,7 +1085,7 @@ export default function AppShell() {
                       {['Prepare to sell', 'Prepare to buy', 'Raise capital', 'Advise a deal'].map(chip => (
                         <button
                           key={chip}
-                          onClick={() => handleSuggestion(chip === 'Prepare to sell' ? "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." : chip === 'Prepare to buy' ? "I'm looking to acquire a business. Help me evaluate opportunities." : chip === 'Raise capital' ? "I need to raise capital for my business. Walk me through the options." : "I'm an M&A advisor. Show me how you can help with my practice.")}
+                          onClick={() => handleChipClick(chip === 'Prepare to sell' ? "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." : chip === 'Prepare to buy' ? "I'm looking to acquire a business. Help me evaluate opportunities." : chip === 'Raise capital' ? "I need to raise capital for my business. Walk me through the options." : "I'm an M&A advisor. Show me how you can help with my practice.")}
                           className="bg-transparent cursor-pointer transition-all chip-hover"
                           style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.45)', border: '1px solid rgba(0,0,0,0.1)', padding: '9px 20px' }}
                           type="button"
@@ -1183,7 +1183,7 @@ export default function AppShell() {
               {/* Footer */}
               <footer className="px-6 py-12 text-center" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                 <div style={{ fontSize: '18px', fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.03em', marginBottom: 8 }}>
-                  smbx<span style={{ color: '#C96B4F' }}>.</span>ai
+                  smb<span style={{ color: '#C96B4F' }}>x</span><span style={{ color: '#0D0D0D' }}>.</span>ai
                 </div>
                 <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', marginBottom: 16 }}>Deal intelligence for every dealmaker.</p>
                 <div className="flex justify-center gap-6" style={{ fontSize: '13px', color: 'rgba(0,0,0,0.35)' }}>
