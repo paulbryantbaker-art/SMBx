@@ -15,8 +15,8 @@ interface RaiseBelowProps {
 
 const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
 const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
-const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 };
-const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, margin: 0 };
+const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, marginTop: 12 };
+const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, margin: 0 };
 const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' };
 
 export default function RaiseBelow({ onChipClick }: RaiseBelowProps) {
@@ -35,8 +35,8 @@ export default function RaiseBelow({ onChipClick }: RaiseBelowProps) {
           <RevealSection style={{ marginTop: 32 }}>
             <div className="space-y-6" style={bodyStyle}>
               <p>Your business is working. You can see the next phase clearly &mdash; a second location, a new market, a strategic acquisition.</p>
-              <p>But the capital landscape is more confusing than it should be. A $2M raise at $10M pre-money gives up 17%. The same raise at $15M pre-money gives up 12%. Over a five-year trajectory ending in a $50M exit, that 5% difference is <strong style={{ color: '#1A1A18' }}>$2.5M in your pocket</strong>.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>Yulia models every structure so you negotiate from knowledge, not hope.</p>
+              <p>But the capital landscape is more confusing than it should be. A $2M raise at $10M pre-money gives up 17%. The same raise at $15M pre-money gives up 12%. Over a five-year trajectory ending in a $50M exit, that 5% difference is <strong style={{ color: '#0D0D0D' }}>$2.5M in your pocket</strong>.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>Yulia models every structure so you negotiate from knowledge, not hope.</p>
             </div>
           </RevealSection>
 
@@ -81,7 +81,7 @@ export default function RaiseBelow({ onChipClick }: RaiseBelowProps) {
                 <StaggerItem key={item.title}>
                   <div style={cardStyle}>
                     <div className="flex items-center gap-2" style={{ marginBottom: 8 }}>
-                      <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: 0 }}>{item.title}</h3>
+                      <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#0D0D0D', margin: 0 }}>{item.title}</h3>
                       {item.badge && <PulseBadge>{item.badge}</PulseBadge>}
                     </div>
                     <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.body}</p>
@@ -97,21 +97,21 @@ export default function RaiseBelow({ onChipClick }: RaiseBelowProps) {
       <section style={{ paddingTop: 100, paddingBottom: 80 }}>
         <div style={sectionStyle}>
           <RevealSection>
-            <p style={{ fontSize: 36, fontWeight: 300, color: '#1A1A18', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>Growth funded. Control preserved.</p>
+            <p style={{ fontSize: 36, fontWeight: 300, color: '#0D0D0D', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>Growth funded. Control preserved.</p>
           </RevealSection>
 
           <RevealSection>
             <div className="space-y-6" style={bodyStyle}>
               <p>You raised capital on your terms. You know what you gave up, what you kept, and why.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>The investors respected the preparation because it made their decision easy.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>The investors respected the preparation because it made their decision easy.</p>
             </div>
           </RevealSection>
 
           <RevealSection style={{ marginTop: 40 }}>
-            <p style={{ fontSize: '16px', color: 'rgba(26,26,24,0.5)', marginBottom: 16 }}>Tell Yulia about your raise &rarr; free capital strategy in minutes</p>
+            <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.5)', marginBottom: 16 }}>Tell Yulia about your raise &rarr; free capital strategy in minutes</p>
             <MagneticButton
               onClick={() => onChipClick("I need to raise capital for my business")}
-              style={{ background: '#1A1A18', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ background: '#0D0D0D', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               Message Yulia &rarr;
             </MagneticButton>

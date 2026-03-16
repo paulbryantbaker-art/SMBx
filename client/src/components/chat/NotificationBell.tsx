@@ -96,7 +96,7 @@ export default function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => { setOpen(!open); if (!open) fetchNotifications(); }}
-        className="relative flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-0 cursor-pointer text-[#6E6A63] hover:bg-[#F3F0EA] transition-colors"
+        className="relative flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-0 cursor-pointer text-[#6E6A63] hover:bg-[#F5F5F5] transition-colors"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" />
@@ -112,7 +112,7 @@ export default function NotificationBell() {
         <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-border overflow-hidden z-50" style={{ maxHeight: '24rem' }}>
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
-            <span className="text-sm font-semibold text-[#1A1A18]">Notifications</span>
+            <span className="text-sm font-semibold text-[#0D0D0D]">Notifications</span>
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
@@ -137,15 +137,15 @@ export default function NotificationBell() {
                   className={`w-full text-left px-4 py-3 border-0 cursor-pointer transition-colors ${
                     n.read_at ? 'bg-white hover:bg-[#FAFAF8]' : 'bg-[#FFF8F5] hover:bg-[#FFF3ED]'
                   }`}
-                  style={{ borderBottom: '1px solid #F3F0EA' }}
+                  style={{ borderBottom: '1px solid #F5F5F5' }}
                 >
                   <div className="flex items-start gap-2.5">
                     <div
                       className="w-2 h-2 rounded-full shrink-0 mt-1.5"
-                      style={{ backgroundColor: n.read_at ? '#DDD9D1' : (TYPE_ICONS[n.type] || '#6E6A63') }}
+                      style={{ backgroundColor: n.read_at ? 'rgba(0,0,0,0.08)' : (TYPE_ICONS[n.type] || '#6E6A63') }}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className={`text-[13px] m-0 leading-snug ${n.read_at ? 'text-[#6E6A63]' : 'text-[#1A1A18] font-medium'}`}>
+                      <p className={`text-[13px] m-0 leading-snug ${n.read_at ? 'text-[#6E6A63]' : 'text-[#0D0D0D] font-medium'}`}>
                         {n.title}
                       </p>
                       {n.body && (

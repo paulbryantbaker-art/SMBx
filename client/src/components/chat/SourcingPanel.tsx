@@ -138,10 +138,10 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
 
       {/* New Thesis Form */}
       {showNewThesis && (
-        <div className="bg-[#FAF9F7] rounded-2xl border border-[#C96B4F] p-4 mb-5">
+        <div className="bg-[#FAFAFA] rounded-2xl border border-[#C96B4F] p-4 mb-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-[#1A1A18] m-0">Create Buy Thesis</h3>
-            <button onClick={() => setShowNewThesis(false)} className="w-6 h-6 rounded-full hover:bg-[#F3F0EA] flex items-center justify-center cursor-pointer border-0 bg-transparent">
+            <h3 className="text-sm font-semibold text-[#0D0D0D] m-0">Create Buy Thesis</h3>
+            <button onClick={() => setShowNewThesis(false)} className="w-6 h-6 rounded-full hover:bg-[#F5F5F5] flex items-center justify-center cursor-pointer border-0 bg-transparent">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
           </div>
@@ -153,7 +153,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                 value={newThesis.name}
                 onChange={e => setNewThesis(p => ({ ...p, name: e.target.value }))}
                 placeholder="e.g. DFW HVAC Roll-up"
-                className="w-full px-3 py-1.5 rounded-lg border border-[#DDD9D1] text-sm bg-white text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -164,7 +164,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                   value={newThesis.industry}
                   onChange={e => setNewThesis(p => ({ ...p, industry: e.target.value }))}
                   placeholder="HVAC"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[#DDD9D1] text-sm bg-white text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                 />
               </div>
               <div>
@@ -174,7 +174,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                   value={newThesis.geography}
                   onChange={e => setNewThesis(p => ({ ...p, geography: e.target.value }))}
                   placeholder="DFW"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[#DDD9D1] text-sm bg-white text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                 />
               </div>
               <div>
@@ -183,7 +183,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                   type="number"
                   value={newThesis.minRevenue}
                   onChange={e => setNewThesis(p => ({ ...p, minRevenue: e.target.value }))}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[#DDD9D1] text-sm bg-white text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                 />
               </div>
               <div>
@@ -192,7 +192,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                   type="number"
                   value={newThesis.maxRevenue}
                   onChange={e => setNewThesis(p => ({ ...p, maxRevenue: e.target.value }))}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[#DDD9D1] text-sm bg-white text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                 />
               </div>
             </div>
@@ -200,7 +200,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setShowNewThesis(false)}
-              className="px-3 py-1.5 rounded-xl text-xs font-medium bg-transparent text-[#6E6A63] border border-[#DDD9D1] cursor-pointer hover:bg-[#F3F0EA] transition-colors"
+              className="px-3 py-1.5 rounded-xl text-xs font-medium bg-transparent text-[#6E6A63] border border-[rgba(0,0,0,0.08)] cursor-pointer hover:bg-[#F5F5F5] transition-colors"
             >
               Cancel
             </button>
@@ -218,11 +218,11 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
       {loading && (
         <div className="space-y-3">
           {[1, 2].map(i => (
-            <div key={i} className="animate-pulse bg-[#FAF9F7] rounded-2xl p-4">
+            <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-2xl p-4">
               <div className="h-4 bg-[#EBE7DF] rounded w-1/3 mb-2" />
               <div className="flex gap-3">
-                <div className="h-3 bg-[#F3F0EA] rounded w-1/4" />
-                <div className="h-3 bg-[#F3F0EA] rounded w-1/4" />
+                <div className="h-3 bg-[#F5F5F5] rounded w-1/4" />
+                <div className="h-3 bg-[#F5F5F5] rounded w-1/4" />
               </div>
             </div>
           ))}
@@ -231,12 +231,12 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
 
       {!loading && theses.length === 0 && !showNewThesis && (
         <div className="text-center py-10">
-          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#F3F0EA] flex items-center justify-center">
+          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#F5F5F5] flex items-center justify-center">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A9A49C" strokeWidth="1.5">
               <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
             </svg>
           </div>
-          <p className="text-base font-semibold text-[#1A1A18] m-0 mb-1">No buy theses yet</p>
+          <p className="text-base font-semibold text-[#0D0D0D] m-0 mb-1">No buy theses yet</p>
           <p className="text-xs text-[#6E6A63] m-0 mb-3">Define what you're looking for and we'll find matches.</p>
           <button
             onClick={() => setShowNewThesis(true)}
@@ -258,13 +258,13 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                 onClick={() => setSelectedThesis(selectedThesis === t.id ? null : t.id)}
                 className={`w-full text-left rounded-xl p-3 border transition-all cursor-pointer ${
                   selectedThesis === t.id
-                    ? 'bg-[#FAF9F7] border-[#C96B4F]'
-                    : 'bg-[#FAF9F7] border-transparent hover:border-[#C96B4F]'
+                    ? 'bg-[#FAFAFA] border-[#C96B4F]'
+                    : 'bg-[#FAFAFA] border-transparent hover:border-[#C96B4F]'
                 }`}
               >
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full ${
-                    t.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-[#F3F0EA] text-[#A9A49C]'
+                    t.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-[#F5F5F5] text-[#A9A49C]'
                   }`}>
                     {t.status}
                   </span>
@@ -274,7 +274,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                     </span>
                   )}
                 </div>
-                <h3 className="text-sm font-semibold text-[#1A1A18] m-0 truncate">{t.name}</h3>
+                <h3 className="text-sm font-semibold text-[#0D0D0D] m-0 truncate">{t.name}</h3>
                 <div className="text-[10px] text-[#6E6A63] mt-0.5">
                   {[t.industry, t.geography, (t.min_revenue || t.max_revenue) ? `${formatCurrency(t.min_revenue)}–${formatCurrency(t.max_revenue)}` : null]
                     .filter(Boolean).join(' · ')}
@@ -291,12 +291,12 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
               {matchesLoading && (
                 <div className="space-y-2">
                   {[1,2].map(i => (
-                    <div key={i} className="animate-pulse bg-[#FAF9F7] rounded-xl p-3">
+                    <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-xl p-3">
                       <div className="flex gap-2 mb-1.5">
                         <div className="w-10 h-10 bg-[#EBE7DF] rounded-lg" />
                         <div className="flex-1">
                           <div className="h-3 bg-[#EBE7DF] rounded w-1/2 mb-1.5" />
-                          <div className="h-2.5 bg-[#F3F0EA] rounded w-1/3" />
+                          <div className="h-2.5 bg-[#F5F5F5] rounded w-1/3" />
                         </div>
                       </div>
                     </div>
@@ -305,8 +305,8 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
               )}
 
               {!matchesLoading && matches.length === 0 && (
-                <div className="text-center py-6 bg-[#FAF9F7] rounded-xl">
-                  <p className="text-sm font-semibold text-[#1A1A18] m-0 mb-0.5">No matches yet</p>
+                <div className="text-center py-6 bg-[#FAFAFA] rounded-xl">
+                  <p className="text-sm font-semibold text-[#0D0D0D] m-0 mb-0.5">No matches yet</p>
                   <p className="text-xs text-[#6E6A63] m-0">Matches appear as opportunities are scored.</p>
                 </div>
               )}
@@ -314,21 +314,21 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
               {!matchesLoading && matches.length > 0 && (
                 <div className="space-y-2">
                   {matches.map(m => (
-                    <div key={m.id} className="bg-[#FAF9F7] rounded-xl p-3">
+                    <div key={m.id} className="bg-[#FAFAFA] rounded-xl p-3">
                       <div className="flex items-start gap-2.5">
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${scoreColor(m.score)}`}>
                           {m.score}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-0.5">
-                            <h4 className="text-sm font-semibold text-[#1A1A18] m-0 truncate">
+                            <h4 className="text-sm font-semibold text-[#0D0D0D] m-0 truncate">
                               {m.business_name || 'Unnamed'}
                             </h4>
                             <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full shrink-0 ${
                               m.status === 'new' ? 'bg-blue-100 text-blue-700' :
                               m.status === 'reviewing' ? 'bg-yellow-100 text-yellow-700' :
                               m.status === 'pursuing' ? 'bg-green-100 text-green-700' :
-                              'bg-[#F3F0EA] text-[#A9A49C]'
+                              'bg-[#F5F5F5] text-[#A9A49C]'
                             }`}>
                               {m.status}
                             </span>
@@ -351,7 +351,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                             {m.status !== 'passed' && (
                               <button
                                 onClick={() => updateMatchStatus(m.id, 'passed')}
-                                className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-[#F3F0EA] text-[#6E6A63] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
+                                className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-[#F5F5F5] text-[#6E6A63] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
                               >
                                 Pass
                               </button>

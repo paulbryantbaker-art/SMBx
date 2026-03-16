@@ -104,7 +104,7 @@ export default function BuyerPipeline() {
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#FFF0EB] flex items-center justify-center text-2xl">
           {'\u{1F3AF}'}
         </div>
-        <h2 className="text-lg font-bold text-[#1A1A18] mb-2">No Acquisition Thesis Yet</h2>
+        <h2 className="text-lg font-bold text-[#0D0D0D] mb-2">No Acquisition Thesis Yet</h2>
         <p className="text-sm text-[#6E6A63]">Tell Yulia what you're looking to buy and she'll build your thesis and start matching opportunities.</p>
       </div>
     );
@@ -118,7 +118,7 @@ export default function BuyerPipeline() {
       <div className="bg-white rounded-2xl p-6 mb-6" style={{ border: '1px solid #EBE7DF' }}>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-xl font-bold text-[#1A1A18] m-0 mb-1">Your Acquisition Thesis</h1>
+            <h1 className="text-xl font-bold text-[#0D0D0D] m-0 mb-1">Your Acquisition Thesis</h1>
             <p className="text-sm text-[#6E6A63] m-0">
               {thesis.industries?.length ? (Array.isArray(thesis.industries) ? thesis.industries.join(', ') : thesis.industries) : 'Any industry'}
               {' \u00B7 '}
@@ -149,7 +149,7 @@ export default function BuyerPipeline() {
       )}
 
       {/* Targets */}
-      <h2 className="text-lg font-bold text-[#1A1A18] mb-3">Opportunities</h2>
+      <h2 className="text-lg font-bold text-[#0D0D0D] mb-3">Opportunities</h2>
       {targets.length === 0 ? (
         <div className="bg-white rounded-xl p-6 text-center" style={{ border: '1px solid #EBE7DF' }}>
           <p className="text-sm text-[#6E6A63]">No matches yet. Yulia will scan for opportunities matching your thesis.</p>
@@ -166,7 +166,7 @@ export default function BuyerPipeline() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-sm font-bold text-[#1A1A18] m-0 truncate">{target.company_name}</h3>
+                      <h3 className="text-sm font-bold text-[#0D0D0D] m-0 truncate">{target.company_name}</h3>
                       <span className={`text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full border ${statusInfo.bg} ${statusInfo.text}`}>
                         {statusInfo.label}
                       </span>
@@ -188,7 +188,7 @@ export default function BuyerPipeline() {
                     </div>
                     {/* Conviction Check */}
                     {target.conviction_check && (
-                      <div className="mt-2 pt-2 border-t border-[#F3F0EA]">
+                      <div className="mt-2 pt-2 border-t border-[#F5F5F5]">
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-[#6E6A63] mb-1">Quick Conviction</p>
                         <div className="space-y-0.5">
                           {target.conviction_check.checks.map((check, i) => (
@@ -237,7 +237,7 @@ export default function BuyerPipeline() {
                       <button
                         onClick={() => updateTarget(target.id, 'reviewing')}
                         disabled={updatingId === target.id}
-                        className="text-[11px] font-semibold px-3 py-1.5 rounded-lg bg-[#F3F0EA] text-[#3D3B37] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors disabled:opacity-50"
+                        className="text-[11px] font-semibold px-3 py-1.5 rounded-lg bg-[#F5F5F5] text-[#3D3B37] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors disabled:opacity-50"
                         type="button"
                       >
                         Review

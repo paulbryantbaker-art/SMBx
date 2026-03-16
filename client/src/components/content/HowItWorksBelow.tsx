@@ -15,8 +15,8 @@ interface HowItWorksBelowProps {
 
 const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
 const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
-const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 };
-const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, margin: 0 };
+const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, marginTop: 12 };
+const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, margin: 0 };
 
 export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
   return (
@@ -36,12 +36,12 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
               <p>The largest institutions have Bloomberg, PitchBook, and armies of analysts. Fortune 500 deals have investment banks with $100M budgets.</p>
               <p>Business owners selling a $3M company have Google and gut instinct. Brokers managing 15 listings pull comps from memory. Buyers evaluating a listing check the asking price against&hellip; what, exactly?</p>
               <p>The data exists. It&apos;s in Census records, BLS reports, FRED economic series, SBA lending databases, SEC filings. But nobody has synthesized it into intelligence useful for making deal decisions.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>A business owner spends $24,000 per year on professional advisors who don&apos;t have access to the data that would make their advice twice as good.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>A business owner spends $24,000 per year on professional advisors who don&apos;t have access to the data that would make their advice twice as good.</p>
             </div>
           </RevealSection>
 
           <RevealSection style={{ marginTop: 16 }}>
-            <p style={{ fontSize: 36, fontWeight: 300, color: '#1A1A18', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>Until now.</p>
+            <p style={{ fontSize: 36, fontWeight: 300, color: '#0D0D0D', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>Until now.</p>
           </RevealSection>
         </div>
       </section>
@@ -112,7 +112,7 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
           </RevealSection>
 
           <RevealSection style={{ marginTop: 24 }}>
-            <p style={{ fontSize: '15px', fontWeight: 500, color: '#1A1A18', lineHeight: 1.65 }}>
+            <p style={{ fontSize: '15px', fontWeight: 500, color: '#0D0D0D', lineHeight: 1.65 }}>
               Same methodology. Same Seven Layers. Same rigor. Calibrated to the deal in front of you. That&apos;s why the platform serves every deal size &mdash; not because it&apos;s generic, because it adapts.
             </p>
           </RevealSection>
@@ -132,7 +132,7 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
           <RevealSection style={{ marginTop: 32 }}>
             <div className="space-y-6" style={bodyStyle}>
               <p>When Yulia tells you there are 14 active PE platforms acquiring HVAC companies in Texas, she&apos;s not estimating. When she says your EBITDA margin is below the industry median for your MSA, she&apos;s not guessing. When she models SBA financing at today&apos;s rate with your regional lender&apos;s patterns, she&apos;s not approximating.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>Every number. Sourced. Traceable. Defensible.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>Every number. Sourced. Traceable. Defensible.</p>
             </div>
           </RevealSection>
         </div>
@@ -182,15 +182,15 @@ export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
               <p>ChatGPT generates plausible text about M&amp;A concepts. It can explain what SDE means and list common add-backs.</p>
               <p>Yulia analyzes <em>your</em> deal against real federal data \u2014 Census, BLS, FRED, SEC EDGAR, SBA \u2014 with a structured methodology calibrated to your industry, geography, and deal size. Every number sourced. Every insight traceable.</p>
               <p>The difference is the difference between reading a Wikipedia article about surgery and consulting a specialist with your chart in front of them.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>One gives you information. The other gives you intelligence.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>One gives you information. The other gives you intelligence.</p>
             </div>
           </RevealSection>
 
           <RevealSection style={{ marginTop: 40 }}>
-            <p style={{ fontSize: '16px', color: 'rgba(26,26,24,0.5)', marginBottom: 16 }}>Tell Yulia about your deal and watch the intelligence unfold</p>
+            <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.5)', marginBottom: 16 }}>Tell Yulia about your deal and watch the intelligence unfold</p>
             <MagneticButton
               onClick={() => onChipClick("Tell me about your deal intelligence")}
-              style={{ background: '#1A1A18', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ background: '#0D0D0D', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               Start a conversation &rarr;
             </MagneticButton>

@@ -4,15 +4,15 @@ import { ScrollReveal, StaggerContainer, StaggerItem, ScrollProgressBar } from '
 /* ═══ DESIGN TOKENS ═══ */
 
 const T = {
-  bg: '#FAF9F7',
+  bg: '#FAFAFA',
   terra: '#C96B4F',
   terraHover: '#BE6342',
   terraSoft: '#FFF0EB',
-  text: '#1A1A18',
+  text: '#0D0D0D',
   sub: '#44403C',
   muted: '#6E6A63',
   faint: '#A9A49C',
-  border: '#DDD9D1',
+  border: 'rgba(0,0,0,0.08)',
 };
 
 const SELL_CHIPS = [
@@ -75,7 +75,7 @@ export default function Sell() {
           padding-top: env(safe-area-inset-top, 0px);
           display: flex; align-items: center; gap: 16px;
           background: ${T.bg};
-          border-bottom: 1px solid rgba(26,26,24,0.06);
+          border-bottom: 1px solid rgba(0,0,0,0.06);
           position: sticky; top: 0; z-index: 50;
         }
 
@@ -91,7 +91,7 @@ export default function Sell() {
           text-decoration: none; transition: color 0.15s;
           padding: 6px 10px; border-radius: 8px;
         }
-        .sell-topbar-link:hover { color: ${T.text}; background: rgba(26,26,24,0.03); }
+        .sell-topbar-link:hover { color: ${T.text}; background: rgba(0,0,0,0.03); }
         .sell-topbar-link.active { color: ${T.terra}; font-weight: 600; }
 
         .sell-topbar-btn {
@@ -100,7 +100,7 @@ export default function Sell() {
           display: flex; align-items: center; justify-content: center;
           color: ${T.muted}; transition: background 0.15s;
         }
-        .sell-topbar-btn:hover { background: rgba(26,26,24,0.04); }
+        .sell-topbar-btn:hover { background: rgba(0,0,0,0.04); }
 
         /* ── Hero ── */
         .sell-hero {
@@ -142,16 +142,16 @@ export default function Sell() {
 
         .sell-chip {
           padding: 14px 16px; border-radius: 14px;
-          border: 1px solid rgba(26,26,24,0.07);
+          border: 1px solid rgba(0,0,0,0.07);
           background: #FFFFFF; cursor: pointer;
           font-size: 14px; font-weight: 500; color: ${T.sub};
           font-family: 'Inter', system-ui, sans-serif;
           text-align: left; transition: all 0.15s;
-          box-shadow: 0 1px 3px rgba(26,26,24,0.03);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.03);
         }
         .sell-chip:hover {
           border-color: rgba(212,113,78,0.25);
-          box-shadow: 0 2px 8px rgba(26,26,24,0.06);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
           color: ${T.text};
         }
         .sell-chip:active { transform: scale(0.98); }
@@ -171,8 +171,8 @@ export default function Sell() {
 
         .sell-analyze-card {
           background: #FFFFFF; border-radius: 16px;
-          border: 1px solid rgba(26,26,24,0.08);
-          padding: 28px; box-shadow: 0 2px 8px rgba(26,26,24,0.07);
+          border: 1px solid rgba(0,0,0,0.08);
+          padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
         }
         .sell-analyze-card h3 {
           font-size: 16px; font-weight: 700; color: ${T.text};
@@ -232,9 +232,9 @@ export default function Sell() {
         /* ── Advisor complement ── */
         .sell-highlight {
           background: #FFFFFF; border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.08);
+          border: 1px solid rgba(0,0,0,0.08);
           padding: 36px 32px;
-          box-shadow: 0 2px 12px rgba(26,26,24,0.08);
+          box-shadow: 0 2px 12px rgba(0,0,0,0.08);
           max-width: 720px;
         }
         @media (max-width: 768px) { .sell-highlight { padding: 28px 20px; border-radius: 16px; } }

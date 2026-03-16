@@ -323,7 +323,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
   return (
     <div
       ref={containerRef}
-      className="flex h-dvh overflow-hidden bg-[#FAF9F7] font-sans"
+      className="flex h-dvh overflow-hidden bg-[#FAFAFA] font-sans"
     >
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
@@ -350,7 +350,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
       <div className="flex-1 flex flex-col min-w-0">
         {/* TOPBAR — single logo lives here */}
         <div
-          className="shrink-0 flex items-center justify-between bg-[#FAF9F7]"
+          className="shrink-0 flex items-center justify-between bg-[#FAFAFA]"
           style={{ padding: '10px 20px', borderBottom: '1px solid rgba(0,0,0,0.06)' }}
         >
           <div className="flex items-center gap-2.5">
@@ -377,7 +377,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
                 </svg>
               </button>
             )}
-            <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1A1A18] font-sans">
+            <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D] font-sans">
               smb<span className="text-[#C96B4F]">x</span>.ai
             </div>
           </div>
@@ -411,7 +411,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
             <button
               onClick={() => toggleCanvas('settings')}
               className={`flex items-center justify-center w-8 h-8 rounded-full text-sm transition-colors cursor-pointer border-0 bg-transparent ${
-                canvas === 'settings' ? 'text-[#C96B4F]' : 'text-[#6E6A63] hover:bg-[rgba(0,0,0,0.04)] hover:text-[#1A1A18]'
+                canvas === 'settings' ? 'text-[#C96B4F]' : 'text-[#6E6A63] hover:bg-[rgba(0,0,0,0.04)] hover:text-[#0D0D0D]'
               }`}
               title="Settings"
             >
@@ -435,7 +435,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
                 <div className="max-w-[860px] w-full mx-auto px-4 space-y-4">
                   {showWelcome && (
                     <div className="py-12 px-2">
-                      <h2 className="text-[26px] font-extrabold tracking-[-0.03em] text-[#1A1A18] font-sans m-0 mb-2 text-center">
+                      <h2 className="text-[26px] font-extrabold tracking-[-0.03em] text-[#0D0D0D] font-sans m-0 mb-2 text-center">
                         smb<span className="text-[#C96B4F]">x</span>.ai
                       </h2>
                       <p className="text-base text-[#6E6A63] font-sans m-0 mb-8 text-center max-w-md mx-auto leading-relaxed">
@@ -447,11 +447,11 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
                             key={card.id}
                             onClick={() => handleSend(card.prompt)}
                             className="text-left bg-white rounded-[20px] p-7 border-none cursor-pointer transition-all duration-200 hover:-translate-y-px"
-                            style={{ boxShadow: '0 1px 4px rgba(26,26,24,.05)' }}
-                            onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 2px 8px rgba(26,26,24,.07), 0 1px 2px rgba(26,26,24,.04)')}
-                            onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 1px 4px rgba(26,26,24,.05)')}
+                            style={{ boxShadow: '0 1px 4px rgba(0,0,0,.05)' }}
+                            onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)')}
+                            onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,.05)')}
                           >
-                            <p className="text-[19px] font-bold text-[#1A1A18] font-sans m-0 mb-1">
+                            <p className="text-[19px] font-bold text-[#0D0D0D] font-sans m-0 mb-1">
                               {card.title}
                             </p>
                             <p className="text-[15px] text-[#3D3B37] font-sans m-0 leading-[1.55]">

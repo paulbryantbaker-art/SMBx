@@ -49,7 +49,7 @@ export default function GateProgress({ dealId, currentGate }: GateProgressProps)
         return (
           <div key={g.gate} className="flex items-center gap-1 shrink-0">
             {i > 0 && (
-              <div className={`w-4 h-px ${isCompleted || isActive ? 'bg-[#C96B4F]' : 'bg-[#DDD9D1]'}`} />
+              <div className={`w-4 h-px ${isCompleted || isActive ? 'bg-[#C96B4F]' : 'bg-[rgba(0,0,0,0.08)]'}`} />
             )}
             <div className="flex items-center gap-1">
               <div
@@ -58,7 +58,7 @@ export default function GateProgress({ dealId, currentGate }: GateProgressProps)
                     ? 'bg-[#C96B4F] text-white'
                     : isActive
                     ? 'bg-white text-[#C96B4F] border-2 border-[#C96B4F]'
-                    : 'bg-[#F3F0EA] text-[#A9A49C]'
+                    : 'bg-[#F5F5F5] text-[#A9A49C]'
                 }`}
                 style={isActive ? { animation: 'gatePulse 2s ease-in-out infinite' } : undefined}
               >

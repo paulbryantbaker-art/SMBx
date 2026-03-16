@@ -125,9 +125,9 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
   ];
 
   return (
-    <div className="min-h-dvh bg-[#FAF9F7]">
+    <div className="min-h-dvh bg-[#FAFAFA]">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 bg-[#FAF9F7]" style={{ borderBottom: '1px solid #DDD9D1' }}>
+      <div className="flex items-center justify-between px-6 py-4 bg-[#FAFAFA]" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/chat')}
@@ -136,7 +136,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Chat
           </button>
-          <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1A1A18]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+          <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
             smb<span className="text-[#C96B4F]">x</span>.ai
           </div>
         </div>
@@ -150,7 +150,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
 
       <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-extrabold text-[#1A1A18] m-0" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+          <h1 className="text-2xl font-extrabold text-[#0D0D0D] m-0" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
             Market Intelligence
           </h1>
           <p className="text-sm text-[#6E6A63] m-0 mt-1">Government data + AI synthesis</p>
@@ -173,7 +173,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
               {fredData.slice(0, 8).map(ind => (
                 <div key={ind.series_id} className="bg-white rounded-xl p-4 border border-border">
                   <p className="text-[11px] text-[#A9A49C] m-0 mb-1 truncate">{ind.name}</p>
-                  <p className="text-lg font-bold text-[#1A1A18] m-0">
+                  <p className="text-lg font-bold text-[#0D0D0D] m-0">
                     {ind.value !== null ? `${ind.value}${ind.units === 'percent' ? '%' : ''}` : '—'}
                   </p>
                   {ind.date && <p className="text-[10px] text-[#A9A49C] m-0 mt-1">{ind.date}</p>}
@@ -190,7 +190,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border-0 cursor-pointer transition-colors ${
-                tab === t.id ? 'bg-white text-[#1A1A18] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#1A1A18]'
+                tab === t.id ? 'bg-white text-[#0D0D0D] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#0D0D0D]'
               }`}
             >
               {t.label}
@@ -209,7 +209,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
         {tab === 'overview' && (
           <div>
             <div className="bg-white rounded-2xl border border-border p-5 mb-6">
-              <h3 className="text-base font-semibold text-[#1A1A18] m-0 mb-4">Look Up a Market</h3>
+              <h3 className="text-base font-semibold text-[#0D0D0D] m-0 mb-4">Look Up a Market</h3>
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1">
                   <label className="block text-xs font-medium text-[#6E6A63] mb-1">NAICS Code</label>
@@ -218,7 +218,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={naicsCode}
                     onChange={e => setNaicsCode(e.target.value)}
                     placeholder="e.g. 561710 (Pest Control)"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                   />
                 </div>
                 <div className="flex-1">
@@ -228,7 +228,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={geography}
                     onChange={e => setGeography(e.target.value)}
                     placeholder="e.g. Texas, Dallas County"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                   />
                 </div>
                 <div className="flex items-end">
@@ -247,24 +247,24 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
               <div className="space-y-4">
                 {overview.cbpData && (
                   <div className="bg-white rounded-2xl border border-border p-5">
-                    <h3 className="text-sm font-semibold text-[#1A1A18] m-0 mb-3">Census Business Patterns</h3>
+                    <h3 className="text-sm font-semibold text-[#0D0D0D] m-0 mb-3">Census Business Patterns</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       {overview.cbpData.totalEstablishments !== undefined && (
                         <div>
                           <p className="text-[11px] text-[#A9A49C] m-0 mb-0.5">Total Establishments</p>
-                          <p className="text-lg font-bold text-[#1A1A18] m-0">{Number(overview.cbpData.totalEstablishments).toLocaleString()}</p>
+                          <p className="text-lg font-bold text-[#0D0D0D] m-0">{Number(overview.cbpData.totalEstablishments).toLocaleString()}</p>
                         </div>
                       )}
                       {overview.cbpData.totalEmployment !== undefined && (
                         <div>
                           <p className="text-[11px] text-[#A9A49C] m-0 mb-0.5">Total Employment</p>
-                          <p className="text-lg font-bold text-[#1A1A18] m-0">{Number(overview.cbpData.totalEmployment).toLocaleString()}</p>
+                          <p className="text-lg font-bold text-[#0D0D0D] m-0">{Number(overview.cbpData.totalEmployment).toLocaleString()}</p>
                         </div>
                       )}
                       {overview.cbpData.totalPayroll !== undefined && (
                         <div>
                           <p className="text-[11px] text-[#A9A49C] m-0 mb-0.5">Total Annual Payroll</p>
-                          <p className="text-lg font-bold text-[#1A1A18] m-0">${Number(overview.cbpData.totalPayroll).toLocaleString()}</p>
+                          <p className="text-lg font-bold text-[#0D0D0D] m-0">${Number(overview.cbpData.totalPayroll).toLocaleString()}</p>
                         </div>
                       )}
                     </div>
@@ -275,7 +275,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                           {overview.cbpData.sizeBreakdown.map((sz: any, i: number) => (
                             <div key={i} className="flex items-center gap-2">
                               <span className="text-xs text-[#6E6A63] w-32 shrink-0">{sz.label}</span>
-                              <div className="flex-1 h-2 bg-[#F3F0EA] rounded-full overflow-hidden">
+                              <div className="flex-1 h-2 bg-[#F5F5F5] rounded-full overflow-hidden">
                                 <div className="h-full bg-[#C96B4F] rounded-full" style={{ width: `${sz.pct || 0}%` }} />
                               </div>
                               <span className="text-xs text-[#6E6A63] w-16 text-right">{sz.count?.toLocaleString()}</span>
@@ -289,7 +289,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
 
                 {overview.sbaAnalysis && (
                   <div className="bg-white rounded-2xl border border-border p-5">
-                    <h3 className="text-sm font-semibold text-[#1A1A18] m-0 mb-3">SBA Bankability</h3>
+                    <h3 className="text-sm font-semibold text-[#0D0D0D] m-0 mb-3">SBA Bankability</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-[11px] text-[#A9A49C] m-0 mb-0.5">DSCR</p>
@@ -311,12 +311,12 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
 
             {!overview && !loading && (
               <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F3F0EA] flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F5F5F5] flex items-center justify-center">
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A9A49C" strokeWidth="1.5">
                     <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                   </svg>
                 </div>
-                <p className="text-base font-semibold text-[#1A1A18] m-0 mb-1">Enter a NAICS code to explore</p>
+                <p className="text-base font-semibold text-[#0D0D0D] m-0 mb-1">Enter a NAICS code to explore</p>
                 <p className="text-sm text-[#6E6A63] m-0">Get Census business patterns, SBA bankability, and economic indicators for any industry.</p>
               </div>
             )}
@@ -331,18 +331,18 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                 {[1,2,3].map(i => (
                   <div key={i} className="animate-pulse bg-white rounded-2xl p-5 border border-border">
                     <div className="h-4 bg-[#EBE7DF] rounded w-1/3 mb-2" />
-                    <div className="h-3 bg-[#F3F0EA] rounded w-2/3" />
+                    <div className="h-3 bg-[#F5F5F5] rounded w-2/3" />
                   </div>
                 ))}
               </div>
             ) : reports.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F3F0EA] flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F5F5F5] flex items-center justify-center">
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A9A49C" strokeWidth="1.5">
                     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" />
                   </svg>
                 </div>
-                <p className="text-base font-semibold text-[#1A1A18] m-0 mb-1">No reports yet</p>
+                <p className="text-base font-semibold text-[#0D0D0D] m-0 mb-1">No reports yet</p>
                 <p className="text-sm text-[#6E6A63] m-0">Generate a market overview to create your first intelligence report.</p>
               </div>
             ) : (
@@ -359,7 +359,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                         {r.status}
                       </span>
                     </div>
-                    <h3 className="text-base font-semibold text-[#1A1A18] m-0">{r.title}</h3>
+                    <h3 className="text-base font-semibold text-[#0D0D0D] m-0">{r.title}</h3>
                     <div className="flex items-center gap-3 mt-2 text-[12px] text-[#6E6A63]">
                       {r.naics_code && <span>NAICS: {r.naics_code}</span>}
                       {r.geography && <span>{r.geography}</span>}
@@ -376,7 +376,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
         {tab === 'sba' && (
           <div>
             <div className="bg-white rounded-2xl border border-border p-5 mb-6">
-              <h3 className="text-base font-semibold text-[#1A1A18] m-0 mb-4">SBA Loan Calculator</h3>
+              <h3 className="text-base font-semibold text-[#0D0D0D] m-0 mb-4">SBA Loan Calculator</h3>
               <p className="text-sm text-[#6E6A63] m-0 mb-4">Check if a deal qualifies for SBA 7(a) financing. Uses live FRED prime rate data.</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                 <div>
@@ -386,7 +386,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={sbaInputs.purchasePrice}
                     onChange={e => setSbaInputs(p => ({ ...p, purchasePrice: e.target.value }))}
                     placeholder="1,000,000"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                   />
                 </div>
                 <div>
@@ -396,7 +396,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={sbaInputs.annualDebtService}
                     onChange={e => setSbaInputs(p => ({ ...p, annualDebtService: e.target.value }))}
                     placeholder="120,000"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                   />
                 </div>
                 <div>
@@ -406,7 +406,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={sbaInputs.ebitda}
                     onChange={e => setSbaInputs(p => ({ ...p, ebitda: e.target.value }))}
                     placeholder="250,000"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                   />
                 </div>
               </div>
@@ -421,7 +421,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
 
             {sbaResult && (
               <div className="bg-white rounded-2xl border border-border p-5">
-                <h3 className="text-sm font-semibold text-[#1A1A18] m-0 mb-4">SBA Analysis Results</h3>
+                <h3 className="text-sm font-semibold text-[#0D0D0D] m-0 mb-4">SBA Analysis Results</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
                   <div>
                     <p className="text-[11px] text-[#A9A49C] m-0 mb-0.5">DSCR</p>
@@ -439,20 +439,20 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                   {sbaResult.primeRate !== undefined && (
                     <div>
                       <p className="text-[11px] text-[#A9A49C] m-0 mb-0.5">Prime Rate</p>
-                      <p className="text-xl font-bold text-[#1A1A18] m-0">{sbaResult.primeRate}%</p>
+                      <p className="text-xl font-bold text-[#0D0D0D] m-0">{sbaResult.primeRate}%</p>
                       <p className="text-[10px] text-[#A9A49C] m-0">Live from FRED</p>
                     </div>
                   )}
                   {sbaResult.estimatedRate !== undefined && (
                     <div>
                       <p className="text-[11px] text-[#A9A49C] m-0 mb-0.5">Est. Rate</p>
-                      <p className="text-xl font-bold text-[#1A1A18] m-0">{sbaResult.estimatedRate}%</p>
+                      <p className="text-xl font-bold text-[#0D0D0D] m-0">{sbaResult.estimatedRate}%</p>
                       <p className="text-[10px] text-[#A9A49C] m-0">Prime + 2.75%</p>
                     </div>
                   )}
                 </div>
                 {sbaResult.notes && (
-                  <p className="text-sm text-[#6E6A63] m-0 p-3 bg-[#FAF9F7] rounded-lg">{sbaResult.notes}</p>
+                  <p className="text-sm text-[#6E6A63] m-0 p-3 bg-[#FAFAFA] rounded-lg">{sbaResult.notes}</p>
                 )}
               </div>
             )}

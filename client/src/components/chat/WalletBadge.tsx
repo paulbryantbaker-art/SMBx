@@ -142,7 +142,7 @@ export default function WalletBadge() {
                   {transactions.map((tx: any) => (
                     <div key={tx.id} className="px-4 py-2.5 flex items-center justify-between">
                       <div className="min-w-0">
-                        <p className="text-[13px] font-medium text-[#1A1A18] m-0 truncate">{tx.description}</p>
+                        <p className="text-[13px] font-medium text-[#0D0D0D] m-0 truncate">{tx.description}</p>
                         <p className="text-[11px] text-[#A9A49C] m-0 mt-0.5">
                           {new Date(tx.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                         </p>

@@ -98,9 +98,9 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
   };
 
   return (
-    <div className="min-h-dvh bg-[#FAF9F7]">
+    <div className="min-h-dvh bg-[#FAFAFA]">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 bg-[#FAF9F7]" style={{ borderBottom: '1px solid #DDD9D1' }}>
+      <div className="flex items-center justify-between px-6 py-4 bg-[#FAFAFA]" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/chat')}
@@ -109,7 +109,7 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Chat
           </button>
-          <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1A1A18]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+          <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
             smb<span className="text-[#C96B4F]">x</span>.ai
           </div>
         </div>
@@ -127,7 +127,7 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
       <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-extrabold text-[#1A1A18] m-0" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <h1 className="text-2xl font-extrabold text-[#0D0D0D] m-0" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
               Pipeline
             </h1>
             <p className="text-sm text-[#6E6A63] m-0 mt-1">
@@ -150,10 +150,10 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
                   <div className="w-16 h-5 bg-[#EBE7DF] rounded-full" />
                   <div className="h-5 bg-[#EBE7DF] rounded" style={{ width: '40%' }} />
                 </div>
-                <div className="h-2 bg-[#F3F0EA] rounded-full mb-3" />
+                <div className="h-2 bg-[#F5F5F5] rounded-full mb-3" />
                 <div className="flex gap-4">
-                  <div className="h-4 bg-[#F3F0EA] rounded" style={{ width: '25%' }} />
-                  <div className="h-4 bg-[#F3F0EA] rounded" style={{ width: '20%' }} />
+                  <div className="h-4 bg-[#F5F5F5] rounded" style={{ width: '25%' }} />
+                  <div className="h-4 bg-[#F5F5F5] rounded" style={{ width: '20%' }} />
                 </div>
               </div>
             ))}
@@ -162,12 +162,12 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
 
         {!loading && deals.length === 0 && (
           <div className="text-center py-16">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F3F0EA] flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F5F5F5] flex items-center justify-center">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A9A49C" strokeWidth="1.5">
                 <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
               </svg>
             </div>
-            <p className="text-lg font-semibold text-[#1A1A18] m-0 mb-1">No deals yet</p>
+            <p className="text-lg font-semibold text-[#0D0D0D] m-0 mb-1">No deals yet</p>
             <p className="text-sm text-[#6E6A63] m-0 mb-4">Start a conversation with Yulia to begin your first deal.</p>
             <button
               onClick={() => navigate('/chat')}
@@ -197,11 +197,11 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
                   <span className={`text-[10px] font-bold uppercase px-2.5 py-1 rounded-full ${journey.color}`}>
                     {journey.label}
                   </span>
-                  <span className="text-base font-semibold text-[#1A1A18] truncate">
+                  <span className="text-base font-semibold text-[#0D0D0D] truncate">
                     {deal.business_name || `${journey.label} Deal`}
                   </span>
                   {deal.league && (
-                    <span className="text-[10px] font-semibold text-[#A9A49C] bg-[#F3F0EA] px-2 py-0.5 rounded-full ml-auto shrink-0">
+                    <span className="text-[10px] font-semibold text-[#A9A49C] bg-[#F5F5F5] px-2 py-0.5 rounded-full ml-auto shrink-0">
                       {deal.league}
                     </span>
                   )}
@@ -242,7 +242,7 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
                 </div>
 
                 {/* Bottom stats */}
-                <div className="flex items-center gap-4 mt-2 pt-2 text-[11px] text-[#A9A49C]" style={{ borderTop: '1px solid #F3F0EA' }}>
+                <div className="flex items-center gap-4 mt-2 pt-2 text-[11px] text-[#A9A49C]" style={{ borderTop: '1px solid #F5F5F5' }}>
                   <span>{deal.deliverable_count} deliverable{Number(deal.deliverable_count) !== 1 ? 's' : ''}</span>
                   <span>{deal.document_count} document{Number(deal.document_count) !== 1 ? 's' : ''}</span>
                 </div>

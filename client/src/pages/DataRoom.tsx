@@ -125,7 +125,7 @@ export default function DataRoom({ dealId }: { dealId: number }) {
     <div className="flex h-full bg-[#FAF9F6]">
       {/* Folder sidebar */}
       <div className="w-56 shrink-0 bg-white border-r border-[#EBE7DF] p-4">
-        <h2 className="text-sm font-bold text-[#1A1A18] mb-4 flex items-center gap-2">
+        <h2 className="text-sm font-bold text-[#0D0D0D] mb-4 flex items-center gap-2">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C96B4F" strokeWidth="2">
             <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
           </svg>
@@ -141,7 +141,7 @@ export default function DataRoom({ dealId }: { dealId: number }) {
                 className={`w-full text-left px-3 py-2 rounded-lg text-[13px] font-medium border-0 cursor-pointer transition-colors flex items-center justify-between ${
                   selectedFolder === folder.id
                     ? 'bg-[#FFF0EB] text-[#C96B4F]'
-                    : 'bg-transparent text-[#3D3B37] hover:bg-[#F3F0EA]'
+                    : 'bg-transparent text-[#3D3B37] hover:bg-[#F5F5F5]'
                 }`}
                 type="button"
               >
@@ -160,7 +160,7 @@ export default function DataRoom({ dealId }: { dealId: number }) {
       {/* Document grid */}
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-base font-bold text-[#1A1A18] m-0">{selectedFolderName}</h3>
+          <h3 className="text-base font-bold text-[#0D0D0D] m-0">{selectedFolderName}</h3>
           {selectedFolder && (
             <label className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#C96B4F] text-white cursor-pointer hover:bg-[#BE6342] transition-colors">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -187,7 +187,7 @@ export default function DataRoom({ dealId }: { dealId: number }) {
             className="min-h-[200px]"
           >
             {folderDocs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-[#DDD9D1] rounded-xl text-center">
+              <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-[rgba(0,0,0,0.08)] rounded-xl text-center">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="1.5" className="mb-3">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
@@ -201,11 +201,11 @@ export default function DataRoom({ dealId }: { dealId: number }) {
                     key={doc.id}
                     className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-[#EBE7DF] hover:border-[#C96B4F]/30 hover:shadow-sm transition-all cursor-pointer"
                   >
-                    <div className="w-9 h-9 rounded-lg bg-[#F3F0EA] flex items-center justify-center text-base shrink-0">
+                    <div className="w-9 h-9 rounded-lg bg-[#F5F5F5] flex items-center justify-center text-base shrink-0">
                       {FILE_ICONS[doc.type] || FILE_ICONS.default}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-[#1A1A18] m-0 truncate">{doc.name}</p>
+                      <p className="text-sm font-semibold text-[#0D0D0D] m-0 truncate">{doc.name}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-[11px] text-[#A9A49C]">
                           {new Date(doc.created_at).toLocaleDateString()}

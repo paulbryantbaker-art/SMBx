@@ -57,7 +57,7 @@ export default function PublicChatInput({
           placeholder={placeholder}
           rows={2}
           disabled={disabled}
-          className="w-full border-none outline-none resize-none bg-transparent font-sans text-base text-[#1A1A18] placeholder-[#B5B1AA] leading-[1.5] px-5 pt-4 pb-2 disabled:opacity-50"
+          className="w-full border-none outline-none resize-none bg-transparent font-sans text-base text-[#0D0D0D] placeholder-[#B5B1AA] leading-[1.5] px-5 pt-4 pb-2 disabled:opacity-50"
         />
         <div className="flex justify-between items-center px-3 pb-2 pt-1">
           <span className="text-xs text-[#7A766E]">Free to start &middot; No credit card</span>
@@ -82,7 +82,7 @@ export default function PublicChatInput({
               key={prompt}
               onClick={() => handleSuggestion(prompt)}
               disabled={disabled}
-              className="bg-white border border-[#F0EEEA] rounded-full px-[18px] py-2.5 text-[13px] font-medium text-[#4A4843] font-sans cursor-pointer transition-all duration-200 hover:border-[#C96B4F] hover:text-[#C96B4F] hover:bg-[#FFF0EB] disabled:opacity-50 disabled:cursor-default"
+              className="bg-white border border-[#FAFAFA] rounded-full px-[18px] py-2.5 text-[13px] font-medium text-[#4A4843] font-sans cursor-pointer transition-all duration-200 hover:border-[#C96B4F] hover:text-[#C96B4F] hover:bg-[#FFF0EB] disabled:opacity-50 disabled:cursor-default"
             >
               &ldquo;{prompt}&rdquo;
             </button>

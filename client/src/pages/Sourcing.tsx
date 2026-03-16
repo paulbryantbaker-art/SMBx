@@ -199,9 +199,9 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
   };
 
   return (
-    <div className="min-h-dvh bg-[#FAF9F7]">
+    <div className="min-h-dvh bg-[#FAFAFA]">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 bg-[#FAF9F7]" style={{ borderBottom: '1px solid #DDD9D1' }}>
+      <div className="flex items-center justify-between px-6 py-4 bg-[#FAFAFA]" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/chat')}
@@ -210,7 +210,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Chat
           </button>
-          <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1A1A18]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+          <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
             smb<span className="text-[#C96B4F]">x</span>.ai
           </div>
         </div>
@@ -225,7 +225,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
       <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-extrabold text-[#1A1A18] m-0" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <h1 className="text-2xl font-extrabold text-[#0D0D0D] m-0" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
               Deal Sourcing
             </h1>
             <p className="text-sm text-[#6E6A63] m-0 mt-1">
@@ -259,7 +259,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                     <button
                       key={d.id}
                       onClick={() => loadBuyerDemand(d.id)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F3F0EA] text-[#1A1A18] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#F5F5F5] text-[#0D0D0D] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
                     >
                       {d.business_name || d.name || `Deal #${d.id}`}
                     </button>
@@ -280,18 +280,18 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                         {buyerDemand.matchingThesesCount} active buyer{buyerDemand.matchingThesesCount !== 1 ? 's' : ''} match your criteria
                       </span>
                     </div>
-                    <p className="text-sm text-[#1A1A18] m-0">{buyerDemand.summary}</p>
+                    <p className="text-sm text-[#0D0D0D] m-0">{buyerDemand.summary}</p>
                     {buyerDemand.buyerTypes?.length > 0 && (
                       <div>
                         <h4 className="text-xs font-semibold text-[#6E6A63] uppercase tracking-wider m-0 mb-2">Likely Buyer Types</h4>
                         <div className="space-y-2">
                           {buyerDemand.buyerTypes.map((bt: any, idx: number) => (
                             <div key={idx} className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-[#F3F0EA] flex items-center justify-center text-xs font-bold text-[#1A1A18]">
+                              <div className="w-10 h-10 rounded-lg bg-[#F5F5F5] flex items-center justify-center text-xs font-bold text-[#0D0D0D]">
                                 {bt.likelihood}%
                               </div>
                               <div className="flex-1">
-                                <p className="text-sm font-medium text-[#1A1A18] m-0 capitalize">{bt.type.replace(/_/g, ' ')}</p>
+                                <p className="text-sm font-medium text-[#0D0D0D] m-0 capitalize">{bt.type.replace(/_/g, ' ')}</p>
                                 <p className="text-[11px] text-[#6E6A63] m-0">{bt.description}</p>
                               </div>
                             </div>
@@ -313,8 +313,8 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
         {showNewThesis && (
           <div className="bg-white rounded-2xl border border-[#C96B4F] p-5 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold text-[#1A1A18] m-0">Create Buy Thesis</h3>
-              <button onClick={() => setShowNewThesis(false)} className="w-7 h-7 rounded-full hover:bg-[#F3F0EA] flex items-center justify-center cursor-pointer border-0 bg-transparent">
+              <h3 className="text-base font-semibold text-[#0D0D0D] m-0">Create Buy Thesis</h3>
+              <button onClick={() => setShowNewThesis(false)} className="w-7 h-7 rounded-full hover:bg-[#F5F5F5] flex items-center justify-center cursor-pointer border-0 bg-transparent">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
@@ -326,7 +326,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.name}
                   onChange={e => setNewThesis(p => ({ ...p, name: e.target.value }))}
                   placeholder="e.g. DFW HVAC Roll-up"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                 />
               </div>
               <div>
@@ -336,7 +336,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.industry}
                   onChange={e => setNewThesis(p => ({ ...p, industry: e.target.value }))}
                   placeholder="e.g. HVAC, Pest Control"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                 />
               </div>
               <div>
@@ -346,7 +346,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.geography}
                   onChange={e => setNewThesis(p => ({ ...p, geography: e.target.value }))}
                   placeholder="e.g. Dallas-Fort Worth"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                 />
               </div>
               <div>
@@ -356,7 +356,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.minRevenue}
                   onChange={e => setNewThesis(p => ({ ...p, minRevenue: e.target.value }))}
                   placeholder="500000"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                 />
               </div>
               <div>
@@ -366,7 +366,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.maxRevenue}
                   onChange={e => setNewThesis(p => ({ ...p, maxRevenue: e.target.value }))}
                   placeholder="2000000"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                 />
               </div>
               <div>
@@ -376,7 +376,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.minPrice}
                   onChange={e => setNewThesis(p => ({ ...p, minPrice: e.target.value }))}
                   placeholder="300000"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                 />
               </div>
               <div>
@@ -386,14 +386,14 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.maxPrice}
                   onChange={e => setNewThesis(p => ({ ...p, maxPrice: e.target.value }))}
                   placeholder="1500000"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAF9F7] text-[#1A1A18] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
                 />
               </div>
             </div>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowNewThesis(false)}
-                className="px-4 py-2 rounded-xl text-sm font-medium bg-transparent text-[#6E6A63] border border-border cursor-pointer hover:bg-[#F3F0EA] transition-colors"
+                className="px-4 py-2 rounded-xl text-sm font-medium bg-transparent text-[#6E6A63] border border-border cursor-pointer hover:bg-[#F5F5F5] transition-colors"
               >
                 Cancel
               </button>
@@ -415,8 +415,8 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
               <div key={i} className="animate-pulse bg-white rounded-2xl p-5 border border-border">
                 <div className="h-5 bg-[#EBE7DF] rounded w-1/3 mb-3" />
                 <div className="flex gap-4">
-                  <div className="h-4 bg-[#F3F0EA] rounded w-1/4" />
-                  <div className="h-4 bg-[#F3F0EA] rounded w-1/4" />
+                  <div className="h-4 bg-[#F5F5F5] rounded w-1/4" />
+                  <div className="h-4 bg-[#F5F5F5] rounded w-1/4" />
                 </div>
               </div>
             ))}
@@ -426,12 +426,12 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
         {/* Empty state */}
         {!loading && theses.length === 0 && !showNewThesis && (
           <div className="text-center py-16">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F3F0EA] flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F5F5F5] flex items-center justify-center">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A9A49C" strokeWidth="1.5">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
               </svg>
             </div>
-            <p className="text-lg font-semibold text-[#1A1A18] m-0 mb-1">No buy theses yet</p>
+            <p className="text-lg font-semibold text-[#0D0D0D] m-0 mb-1">No buy theses yet</p>
             <p className="text-sm text-[#6E6A63] m-0 mb-4">Define what you're looking for and we'll find matches.</p>
             <button
               onClick={() => setShowNewThesis(true)}
@@ -459,7 +459,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                      t.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-[#F3F0EA] text-[#A9A49C]'
+                      t.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-[#F5F5F5] text-[#A9A49C]'
                     }`}>
                       {t.status}
                     </span>
@@ -469,7 +469,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                       </span>
                     )}
                   </div>
-                  <h3 className="text-sm font-semibold text-[#1A1A18] m-0 mb-1 truncate">{t.name}</h3>
+                  <h3 className="text-sm font-semibold text-[#0D0D0D] m-0 mb-1 truncate">{t.name}</h3>
                   <div className="text-[11px] text-[#6E6A63] space-y-0.5">
                     {t.industry && <p className="m-0">{t.industry}</p>}
                     {t.geography && <p className="m-0">{t.geography}</p>}
@@ -493,11 +493,11 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                 <>
                   {/* Scan button + tabs */}
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex gap-1 bg-[#F3F0EA] rounded-xl p-1">
+                    <div className="flex gap-1 bg-[#F5F5F5] rounded-xl p-1">
                       <button
                         onClick={() => setActiveTab('matches')}
                         className={`px-4 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
-                          activeTab === 'matches' ? 'bg-white text-[#1A1A18] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#1A1A18]'
+                          activeTab === 'matches' ? 'bg-white text-[#0D0D0D] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#0D0D0D]'
                         }`}
                       >
                         Matches ({matches.length})
@@ -509,7 +509,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                           if (thesis?.naics_code && marketOpps.length === 0) loadMarketOpportunities(thesis.naics_code);
                         }}
                         className={`px-4 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
-                          activeTab === 'market' ? 'bg-white text-[#1A1A18] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#1A1A18]'
+                          activeTab === 'market' ? 'bg-white text-[#0D0D0D] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#0D0D0D]'
                         }`}
                       >
                         Market Opportunities
@@ -518,7 +518,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                     <button
                       onClick={() => scanThesis(selectedThesis)}
                       disabled={scanning}
-                      className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#1A1A18] text-white border-0 cursor-pointer hover:bg-[#3A3630] transition-colors disabled:opacity-50"
+                      className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#0D0D0D] text-white border-0 cursor-pointer hover:bg-[#3A3630] transition-colors disabled:opacity-50"
                     >
                       {scanning ? 'Scanning...' : 'Scan Now'}
                     </button>
@@ -545,7 +545,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                         <div className="w-12 h-12 bg-[#EBE7DF] rounded-xl" />
                         <div className="flex-1">
                           <div className="h-4 bg-[#EBE7DF] rounded w-1/2 mb-2" />
-                          <div className="h-3 bg-[#F3F0EA] rounded w-1/3" />
+                          <div className="h-3 bg-[#F5F5F5] rounded w-1/3" />
                         </div>
                       </div>
                     </div>
@@ -555,7 +555,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
 
               {selectedThesis && activeTab === 'matches' && !matchesLoading && matches.length === 0 && (
                 <div className="text-center py-12 bg-white rounded-2xl border border-border">
-                  <p className="text-base font-semibold text-[#1A1A18] m-0 mb-1">No matches yet</p>
+                  <p className="text-base font-semibold text-[#0D0D0D] m-0 mb-1">No matches yet</p>
                   <p className="text-sm text-[#6E6A63] m-0 mb-3">Click "Scan Now" to search the listing database for matches.</p>
                 </div>
               )}
@@ -571,14 +571,14 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">
-                            <h4 className="text-sm font-semibold text-[#1A1A18] m-0 truncate">
+                            <h4 className="text-sm font-semibold text-[#0D0D0D] m-0 truncate">
                               {m.business_name || 'Unnamed Opportunity'}
                             </h4>
                             <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0 ${
                               m.status === 'new' ? 'bg-blue-100 text-blue-700' :
                               m.status === 'reviewing' ? 'bg-yellow-100 text-yellow-700' :
                               m.status === 'pursuing' ? 'bg-green-100 text-green-700' :
-                              'bg-[#F3F0EA] text-[#A9A49C]'
+                              'bg-[#F5F5F5] text-[#A9A49C]'
                             }`}>
                               {m.status}
                             </span>
@@ -593,7 +593,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                           {m.score_breakdown && (
                             <div className="flex gap-2 mb-2">
                               {Object.entries(m.score_breakdown).map(([key, val]) => (
-                                <span key={key} className="text-[10px] text-[#A9A49C] bg-[#F3F0EA] px-2 py-0.5 rounded-full">
+                                <span key={key} className="text-[10px] text-[#A9A49C] bg-[#F5F5F5] px-2 py-0.5 rounded-full">
                                   {key}: {String(val)}
                                 </span>
                               ))}
@@ -612,7 +612,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                             {m.status !== 'passed' && (
                               <button
                                 onClick={() => updateMatchStatus(m.id, 'passed')}
-                                className="text-[11px] font-medium px-3 py-1 rounded-full bg-[#F3F0EA] text-[#6E6A63] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
+                                className="text-[11px] font-medium px-3 py-1 rounded-full bg-[#F5F5F5] text-[#6E6A63] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
                               >
                                 Pass
                               </button>
@@ -641,7 +641,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   {[1,2,3].map(i => (
                     <div key={i} className="animate-pulse bg-white rounded-2xl p-5 border border-border">
                       <div className="h-4 bg-[#EBE7DF] rounded w-1/3 mb-3" />
-                      <div className="h-3 bg-[#F3F0EA] rounded w-2/3" />
+                      <div className="h-3 bg-[#F5F5F5] rounded w-2/3" />
                     </div>
                   ))}
                 </div>
@@ -649,7 +649,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
 
               {selectedThesis && activeTab === 'market' && !marketLoading && marketOpps.length === 0 && (
                 <div className="text-center py-12 bg-white rounded-2xl border border-border">
-                  <p className="text-base font-semibold text-[#1A1A18] m-0 mb-1">No market data available</p>
+                  <p className="text-base font-semibold text-[#0D0D0D] m-0 mb-1">No market data available</p>
                   <p className="text-sm text-[#6E6A63] m-0">Add a NAICS code to your thesis to see underserved market opportunities.</p>
                 </div>
               )}
@@ -663,7 +663,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                           {opp.opportunityScore}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-semibold text-[#1A1A18] m-0 mb-1">
+                          <h4 className="text-sm font-semibold text-[#0D0D0D] m-0 mb-1">
                             State: {opp.stateCode}
                           </h4>
                           <p className="text-xs text-[#6E6A63] m-0 mb-2">{opp.reasoning}</p>

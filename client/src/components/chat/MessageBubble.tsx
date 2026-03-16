@@ -29,7 +29,7 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
             style={{
               background: '#FFF5F2',
               border: '1px solid rgba(212,113,78,0.15)',
-              color: '#1A1A18',
+              color: '#0D0D0D',
               borderRadius: '20px 20px 4px 20px',
               fontFamily: "'Inter', system-ui, sans-serif",
               overflowWrap: 'break-word',
@@ -60,7 +60,7 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
           className="bg-white px-4 py-3 text-base leading-[1.65] font-medium home-yt overflow-hidden"
           style={{
             borderRadius: '20px 20px 20px 4px',
-            border: '1px solid rgba(26,26,24,0.08)',
+            border: '1px solid rgba(0,0,0,0.08)',
             overflowWrap: 'break-word',
           }}
         >

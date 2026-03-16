@@ -2,9 +2,9 @@ import YuliaAvatar from './YuliaAvatar';
 
 export default function ConversationPreview() {
   return (
-    <div className="bg-white border border-[#F0EEEA] rounded-[20px] overflow-hidden shadow-[0_16px_64px_rgba(0,0,0,0.04)]">
+    <div className="bg-white border border-[#FAFAFA] rounded-[20px] overflow-hidden shadow-[0_16px_64px_rgba(0,0,0,0.04)]">
       {/* Header */}
-      <div className="flex items-center gap-3 px-7 py-5 border-b border-[#F0EEEA] bg-[#FAF9F7]">
+      <div className="flex items-center gap-3 px-7 py-5 border-b border-[#FAFAFA] bg-[#FAFAFA]">
         <YuliaAvatar size={32} />
         <span className="font-semibold text-sm">Yulia &middot; AI Deal Advisor</span>
       </div>
@@ -13,7 +13,7 @@ export default function ConversationPreview() {
       <div className="px-7 py-7 flex flex-col gap-5">
         {/* User message */}
         <div className="flex justify-end">
-          <div className="max-w-[75%] bg-[#1A1A18] text-white rounded-2xl rounded-br-[4px] px-[18px] py-[14px]">
+          <div className="max-w-[75%] bg-[#0D0D0D] text-white rounded-2xl rounded-br-[4px] px-[18px] py-[14px]">
             <p className="text-sm leading-[1.55] m-0">
               I want to sell my HVAC business in Dallas. Revenue is about $3.2M, I take home around $640K.
             </p>
@@ -23,7 +23,7 @@ export default function ConversationPreview() {
         {/* Yulia message with insight */}
         <div className="flex items-start gap-3">
           <YuliaAvatar size={32} className="mt-0.5" />
-          <div className="max-w-[75%] bg-[#FAF9F7] border border-[#F0EEEA] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
+          <div className="max-w-[75%] bg-[#FAFAFA] border border-[#FAFAFA] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
             <p className="text-sm leading-[1.55] m-0">
               Great &mdash; let me work with those numbers. Based on your revenue and owner compensation, I&apos;m calculating an adjusted EBITDA of approximately <span className="text-[#C96B4F] font-semibold">$780K</span> after typical add-backs for owner-operated HVAC businesses.
             </p>
@@ -42,7 +42,7 @@ export default function ConversationPreview() {
 
         {/* User reply */}
         <div className="flex justify-end">
-          <div className="max-w-[75%] bg-[#1A1A18] text-white rounded-2xl rounded-br-[4px] px-[18px] py-[14px]">
+          <div className="max-w-[75%] bg-[#0D0D0D] text-white rounded-2xl rounded-br-[4px] px-[18px] py-[14px]">
             <p className="text-sm leading-[1.55] m-0">
               That&apos;s way more than I expected. What do we do next?
             </p>
@@ -52,7 +52,7 @@ export default function ConversationPreview() {
         {/* Yulia follow-up */}
         <div className="flex items-start gap-3">
           <YuliaAvatar size={32} className="mt-0.5" />
-          <div className="max-w-[75%] bg-[#FAF9F7] border border-[#F0EEEA] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
+          <div className="max-w-[75%] bg-[#FAFAFA] border border-[#FAFAFA] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
             <p className="text-sm leading-[1.55] m-0">
               Let&apos;s build your financial package and identify your best buyers. I&apos;ll walk you through every step &mdash; or if you&apos;re working with a broker, invite them in and I&apos;ll produce the work product they need to get you to market faster.
             </p>

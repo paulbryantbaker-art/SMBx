@@ -88,9 +88,9 @@ export default function Settings({ user, onLogout }: SettingsProps) {
   ];
 
   return (
-    <div className="min-h-dvh bg-[#FAF9F7]">
+    <div className="min-h-dvh bg-[#FAFAFA]">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-4 bg-[#FAF9F7]" style={{ borderBottom: '1px solid #DDD9D1' }}>
+      <div className="flex items-center justify-between px-6 py-4 bg-[#FAFAFA]" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/chat')}
@@ -99,7 +99,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Chat
           </button>
-          <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1A1A18]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+          <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
             smb<span className="text-[#C96B4F]">x</span>.ai
           </div>
         </div>
@@ -112,7 +112,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
       </div>
 
       <div className="max-w-3xl mx-auto px-6 py-8">
-        <h1 className="text-2xl font-extrabold text-[#1A1A18] m-0 mb-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <h1 className="text-2xl font-extrabold text-[#0D0D0D] m-0 mb-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
           Settings
         </h1>
 
@@ -123,7 +123,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border-0 cursor-pointer transition-colors ${
-                tab === t.id ? 'bg-white text-[#1A1A18] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#1A1A18]'
+                tab === t.id ? 'bg-white text-[#0D0D0D] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#0D0D0D]'
               }`}
             >
               {t.label}
@@ -135,21 +135,21 @@ export default function Settings({ user, onLogout }: SettingsProps) {
         {tab === 'account' && (
           <div className="space-y-4">
             <div className="bg-white rounded-2xl border border-border p-5">
-              <h3 className="text-base font-semibold text-[#1A1A18] m-0 mb-4">Profile</h3>
+              <h3 className="text-base font-semibold text-[#0D0D0D] m-0 mb-4">Profile</h3>
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs font-medium text-[#6E6A63] mb-1">Name</label>
-                  <p className="text-sm text-[#1A1A18] m-0 px-3 py-2 bg-[#FAF9F7] rounded-lg border border-border">{user.display_name || '—'}</p>
+                  <p className="text-sm text-[#0D0D0D] m-0 px-3 py-2 bg-[#FAFAFA] rounded-lg border border-border">{user.display_name || '—'}</p>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[#6E6A63] mb-1">Email</label>
-                  <p className="text-sm text-[#1A1A18] m-0 px-3 py-2 bg-[#FAF9F7] rounded-lg border border-border">{user.email}</p>
+                  <p className="text-sm text-[#0D0D0D] m-0 px-3 py-2 bg-[#FAFAFA] rounded-lg border border-border">{user.email}</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-2xl border border-border p-5">
-              <h3 className="text-base font-semibold text-[#1A1A18] m-0 mb-2">Account</h3>
+              <h3 className="text-base font-semibold text-[#0D0D0D] m-0 mb-2">Account</h3>
               <p className="text-sm text-[#6E6A63] m-0 mb-4">Member since {new Date(user.created_at || Date.now()).toLocaleDateString()}</p>
               <button
                 onClick={onLogout}
@@ -171,7 +171,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
                   key={d}
                   onClick={() => setUsageDays(d)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium border-0 cursor-pointer transition-colors ${
-                    usageDays === d ? 'bg-[#C96B4F] text-white' : 'bg-[#F3F0EA] text-[#6E6A63] hover:bg-[#EBE7DF]'
+                    usageDays === d ? 'bg-[#C96B4F] text-white' : 'bg-[#F5F5F5] text-[#6E6A63] hover:bg-[#EBE7DF]'
                   }`}
                 >
                   {d}d
@@ -193,13 +193,13 @@ export default function Settings({ user, onLogout }: SettingsProps) {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
                 <div className="bg-white rounded-xl p-4 border border-border">
                   <p className="text-[11px] text-[#A9A49C] m-0 mb-1">Tokens Used</p>
-                  <p className="text-lg font-bold text-[#1A1A18] m-0">
+                  <p className="text-lg font-bold text-[#0D0D0D] m-0">
                     {formatNumber((usageTotals?.total_input_tokens || 0) + (usageTotals?.total_output_tokens || 0))}
                   </p>
                 </div>
                 <div className="bg-white rounded-xl p-4 border border-border">
                   <p className="text-[11px] text-[#A9A49C] m-0 mb-1">Tool Calls</p>
-                  <p className="text-lg font-bold text-[#1A1A18] m-0">{formatNumber(usageTotals?.total_tool_calls || 0)}</p>
+                  <p className="text-lg font-bold text-[#0D0D0D] m-0">{formatNumber(usageTotals?.total_tool_calls || 0)}</p>
                 </div>
                 <div className="bg-white rounded-xl p-4 border border-border">
                   <p className="text-[11px] text-[#A9A49C] m-0 mb-1">Deliverables</p>
@@ -207,7 +207,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
                 </div>
                 <div className="bg-white rounded-xl p-4 border border-border">
                   <p className="text-[11px] text-[#A9A49C] m-0 mb-1">Intel Queries</p>
-                  <p className="text-lg font-bold text-[#1A1A18] m-0">{usageTotals?.total_queries || 0}</p>
+                  <p className="text-lg font-bold text-[#0D0D0D] m-0">{usageTotals?.total_queries || 0}</p>
                 </div>
               </div>
             )}
@@ -215,7 +215,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
             {/* Daily breakdown */}
             {!usageLoading && usageDaily.length > 0 && (
               <div className="bg-white rounded-2xl border border-border p-5">
-                <h3 className="text-sm font-semibold text-[#1A1A18] m-0 mb-3">Daily Activity</h3>
+                <h3 className="text-sm font-semibold text-[#0D0D0D] m-0 mb-3">Daily Activity</h3>
                 <div className="space-y-2">
                   {usageDaily.map(d => {
                     const totalTokens = (d.input_tokens || 0) + (d.output_tokens || 0);
@@ -224,7 +224,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
                     return (
                       <div key={d.date} className="flex items-center gap-3">
                         <span className="text-[11px] text-[#6E6A63] w-20 shrink-0">{new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                        <div className="flex-1 h-3 bg-[#F3F0EA] rounded-full overflow-hidden">
+                        <div className="flex-1 h-3 bg-[#F5F5F5] rounded-full overflow-hidden">
                           <div className="h-full bg-[#C96B4F] rounded-full transition-all" style={{ width: `${pct}%` }} />
                         </div>
                         <span className="text-[11px] text-[#A9A49C] w-16 text-right">{formatNumber(totalTokens)}</span>
@@ -264,7 +264,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
               </div>
             ) : benchmarks.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-2xl border border-border">
-                <p className="text-base font-semibold text-[#1A1A18] m-0 mb-1">No benchmarks yet</p>
+                <p className="text-base font-semibold text-[#0D0D0D] m-0 mb-1">No benchmarks yet</p>
                 <p className="text-sm text-[#6E6A63] m-0">Transaction benchmarks will appear here as deals close on the platform.</p>
               </div>
             ) : (
@@ -272,15 +272,15 @@ export default function Settings({ user, onLogout }: SettingsProps) {
                 {benchmarks.map((b, i) => (
                   <div key={i} className="bg-white rounded-2xl border border-border p-5">
                     <div className="flex items-center gap-2 mb-3">
-                      <h3 className="text-sm font-semibold text-[#1A1A18] m-0">{b.industry || b.naics_code}</h3>
-                      <span className="text-[10px] text-[#A9A49C] bg-[#F3F0EA] px-2 py-0.5 rounded-full">
+                      <h3 className="text-sm font-semibold text-[#0D0D0D] m-0">{b.industry || b.naics_code}</h3>
+                      <span className="text-[10px] text-[#A9A49C] bg-[#F5F5F5] px-2 py-0.5 rounded-full">
                         n={b.sample_size}
                       </span>
                     </div>
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <p className="text-[11px] text-[#A9A49C] m-0 mb-0.5">Avg Multiple</p>
-                        <p className="text-lg font-bold text-[#1A1A18] m-0">{b.avg_multiple}x</p>
+                        <p className="text-lg font-bold text-[#0D0D0D] m-0">{b.avg_multiple}x</p>
                       </div>
                       <div>
                         <p className="text-[11px] text-[#A9A49C] m-0 mb-0.5">Median Multiple</p>
@@ -288,7 +288,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
                       </div>
                       <div>
                         <p className="text-[11px] text-[#A9A49C] m-0 mb-0.5">Avg Days to Close</p>
-                        <p className="text-lg font-bold text-[#1A1A18] m-0">{b.avg_days_to_close}</p>
+                        <p className="text-lg font-bold text-[#0D0D0D] m-0">{b.avg_days_to_close}</p>
                       </div>
                     </div>
                   </div>

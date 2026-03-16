@@ -18,8 +18,8 @@ interface SellBelowProps {
 
 const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
 const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
-const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 };
-const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, margin: 0 };
+const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, marginTop: 12 };
+const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, margin: 0 };
 const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' };
 
 export default function SellBelow({ onChipClick }: SellBelowProps) {
@@ -40,7 +40,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
               <p>&ldquo;What is my business actually worth?&rdquo;</p>
               <p>The broker wants the listing. The CPA knows the taxes, not the market. Google returns articles from 2019. Nobody gives you a real number without an agenda.</p>
               <p>Yulia does. Tell her your industry, location, and revenue. She&apos;ll give you a valuation range built on live federal data &mdash; Census business counts, BLS wage benchmarks, SBA lending patterns, and real transaction multiples.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>Your Bizestimate is free. It updates quarterly. You can have one in 90 seconds.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>Your Bizestimate is free. It updates quarterly. You can have one in 90 seconds.</p>
             </div>
           </RevealSection>
 
@@ -84,7 +84,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
                 { label: 'Personal travel', amount: 15000, enabled: true },
               ]}
             />
-            <p style={{ fontSize: '13px', color: 'rgba(26,26,24,0.4)', marginTop: 12, fontStyle: 'italic', textAlign: 'center' }}>
+            <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.4)', marginTop: 12, fontStyle: 'italic', textAlign: 'center' }}>
               Toggle add-backs on/off to see the impact on your valuation
             </p>
           </RevealSection>
@@ -124,10 +124,10 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
           </RevealSection>
 
           <RevealSection style={{ marginTop: 24 }}>
-            <p style={{ fontSize: '15px', fontWeight: 500, color: '#1A1A18', lineHeight: 1.65 }}>
+            <p style={{ fontSize: '15px', fontWeight: 500, color: '#0D0D0D', lineHeight: 1.65 }}>
               The stock sale puts $79,000 more in this seller&apos;s pocket. But the buyer gets a stepped-up basis worth ~$304K in tax shields on an asset sale. Yulia models the gap for both sides.
             </p>
-            <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.4)', marginTop: 8, fontStyle: 'italic' }}>
+            <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(0,0,0,0.4)', marginTop: 8, fontStyle: 'italic' }}>
               Your CPA should confirm for your specific situation.
             </p>
           </RevealSection>
@@ -177,7 +177,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
             <div className="space-y-6" style={bodyStyle}>
               <p>A traditional CIM is a snapshot &mdash; frozen the day it was written. By the time buyers see it, the numbers are already stale.</p>
               <p>Yulia generates your CIM from live data. When your Q3 numbers come in, the CIM reflects them. When market multiples shift, the valuation updates. Version-controlled. Always ready to distribute.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>25+ pages of institutional-quality presentation, built from your actual financials. Included in your plan.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>25+ pages of institutional-quality presentation, built from your actual financials. Included in your plan.</p>
             </div>
           </RevealSection>
         </div>
@@ -251,7 +251,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
           </div>
 
           <RevealSection style={{ marginTop: 16 }}>
-            <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.4)', fontStyle: 'italic' }}>
+            <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(0,0,0,0.4)', fontStyle: 'italic' }}>
               Your M&amp;A attorney drafts the documents. Yulia prepares you for what to expect and what to negotiate.
             </p>
           </RevealSection>
@@ -272,7 +272,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
             <div className="space-y-6" style={bodyStyle}>
               <p>Bring your smbX.ai analysis to your first meeting. They get: normalized financials, defensible valuation, market intelligence, draft CIM, tax structure comparison, and a term sheet framework &mdash; before the engagement letter.</p>
               <p>Your broker focuses on relationships and negotiations. Yulia handles the data.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>The professionals you hire will thank you for it.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>The professionals you hire will thank you for it.</p>
             </div>
           </RevealSection>
         </div>
@@ -308,22 +308,22 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
       <section style={{ paddingTop: 100, paddingBottom: 80 }}>
         <div style={sectionStyle}>
           <RevealSection>
-            <p style={{ fontSize: 36, fontWeight: 300, color: '#1A1A18', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>The wire hits your account. And you know.</p>
+            <p style={{ fontSize: 36, fontWeight: 300, color: '#0D0D0D', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>The wire hits your account. And you know.</p>
           </RevealSection>
 
           <RevealSection>
             <div className="space-y-6" style={bodyStyle}>
               <p>Not &ldquo;I hope I got a fair deal.&rdquo; Not &ldquo;I wonder if I left money on the table.&rdquo;</p>
               <p>You know your number was real. You know your add-backs were captured. You know the tax structure was modeled. You know the negotiation was prepared, not improvised.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>That&apos;s what Yulia delivers: the confidence that comes from knowing you made the right moves.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>That&apos;s what Yulia delivers: the confidence that comes from knowing you made the right moves.</p>
             </div>
           </RevealSection>
 
           <RevealSection style={{ marginTop: 40 }}>
-            <p style={{ fontSize: '16px', color: 'rgba(26,26,24,0.5)', marginBottom: 16 }}>Tell Yulia about your business &rarr; free Bizestimate in 90 seconds</p>
+            <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.5)', marginBottom: 16 }}>Tell Yulia about your business &rarr; free Bizestimate in 90 seconds</p>
             <MagneticButton
               onClick={() => onChipClick("I want to sell my business")}
-              style={{ background: '#1A1A18', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ background: '#0D0D0D', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               Message Yulia &rarr;
             </MagneticButton>

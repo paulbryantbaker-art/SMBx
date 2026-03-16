@@ -610,17 +610,17 @@ export default function AppShell() {
   const sidebarContent = (mobile: boolean) => (
     <aside
       className="flex flex-col h-full select-none"
-      style={{ width: mobile ? 280 : 220, background: '#F0EEEA', borderRight: '1px solid rgba(0,0,0,0.06)' }}
+      style={{ width: mobile ? 280 : 220, background: '#FAFAFA', borderRight: '1px solid rgba(0,0,0,0.06)' }}
     >
       {/* Logo */}
       <div className="px-5 pt-5 pb-2">
         <button
           onClick={() => { handleTabClick('home'); if (mobile) setIsMobileSidebarOpen(false); }}
           className="bg-transparent border-none cursor-pointer p-0 text-[22px] leading-none"
-          style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontWeight: 700, color: '#1A1A18' }}
+          style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontWeight: 700, color: '#0D0D0D' }}
           type="button"
         >
-          smb<span style={{ color: '#C96B4F' }}>X</span>.ai
+          smbx<span style={{ color: '#C96B4F' }}>.</span>ai
         </button>
       </div>
 
@@ -635,7 +635,7 @@ export default function AppShell() {
               setIsMobileSidebarOpen(false);
             }}
             className="w-full text-white text-[14px] px-4 py-3 cursor-pointer border-none hover:opacity-90 transition-opacity"
-            style={{ fontFamily: 'inherit', fontWeight: 600, background: '#1A1A18', borderRadius: '100px' }}
+            style={{ fontFamily: 'inherit', fontWeight: 600, background: '#0D0D0D', borderRadius: '100px' }}
             type="button"
           >
             + New Workspace
@@ -657,14 +657,14 @@ export default function AppShell() {
                   fontFamily: 'inherit',
                   fontSize: '15px',
                   fontWeight: isActive ? 600 : 500,
-                  color: isActive ? '#1A1A18' : 'rgba(26,26,24,0.65)',
+                  color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
                   background: isActive ? 'rgba(255,255,255,0.55)' : 'transparent',
                   borderRadius: '100px',
                   border: isActive ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
                 }}
                 type="button"
               >
-                <span style={{ color: isActive ? '#C96B4F' : 'rgba(26,26,24,0.45)' }}>{item.icon}</span>
+                <span style={{ color: isActive ? '#C96B4F' : 'rgba(0,0,0,0.45)' }}>{item.icon}</span>
                 {item.label}
               </button>
             );
@@ -680,7 +680,7 @@ export default function AppShell() {
               {groupMode === 'deal' && group.journey && (
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: JOURNEY_COLORS[group.journey] || 'rgba(26,26,24,0.3)' }}
+                  style={{ backgroundColor: JOURNEY_COLORS[group.journey] || 'rgba(0,0,0,0.3)' }}
                 />
               )}
               {group.label}
@@ -699,7 +699,7 @@ export default function AppShell() {
                 style={{
                   fontFamily: 'inherit',
                   fontWeight: c.id === activeConvId && viewState === 'chat' ? 600 : 500,
-                  color: c.id === activeConvId && viewState === 'chat' ? '#1A1A18' : 'rgba(26,26,24,0.65)',
+                  color: c.id === activeConvId && viewState === 'chat' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
                   background: c.id === activeConvId && viewState === 'chat' ? 'rgba(255,255,255,0.55)' : 'transparent',
                   borderRadius: '12px',
                   border: c.id === activeConvId && viewState === 'chat' ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
@@ -709,7 +709,7 @@ export default function AppShell() {
                 {groupMode === 'date' && (
                   <span
                     className="w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: c.journey ? (JOURNEY_COLORS[c.journey] || 'rgba(26,26,24,0.3)') : 'rgba(26,26,24,0.2)' }}
+                    style={{ backgroundColor: c.journey ? (JOURNEY_COLORS[c.journey] || 'rgba(0,0,0,0.3)') : 'rgba(0,0,0,0.2)' }}
                   />
                 )}
                 <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
@@ -729,7 +729,7 @@ export default function AppShell() {
               setIsMobileSidebarOpen(false);
             }}
             className={`flex items-center gap-2 w-full text-left text-[11px] font-bold uppercase bg-transparent border-none cursor-pointer transition-colors py-1 ${
-              viewState === 'seller-dashboard' ? 'text-[#C96B4F]' : 'text-[#6E6A63] hover:text-[#1A1A18]'
+              viewState === 'seller-dashboard' ? 'text-[#C96B4F]' : 'text-[rgba(0,0,0,0.4)] hover:text-[#0D0D0D]'
             }`}
             style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
             type="button"
@@ -748,7 +748,7 @@ export default function AppShell() {
               setIsMobileSidebarOpen(false);
             }}
             className={`flex items-center gap-2 w-full text-left text-[11px] font-bold uppercase bg-transparent border-none cursor-pointer transition-colors py-1 ${
-              viewState === 'buyer-pipeline' ? 'text-[#C96B4F]' : 'text-[#6E6A63] hover:text-[#1A1A18]'
+              viewState === 'buyer-pipeline' ? 'text-[#C96B4F]' : 'text-[rgba(0,0,0,0.4)] hover:text-[#0D0D0D]'
             }`}
             style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
             type="button"
@@ -767,7 +767,7 @@ export default function AppShell() {
               setIsMobileSidebarOpen(false);
             }}
             className={`flex items-center gap-2 w-full text-left text-[11px] font-bold uppercase bg-transparent border-none cursor-pointer transition-colors py-1 ${
-              viewState === 'dataroom' ? 'text-[#C96B4F]' : 'text-[#6E6A63] hover:text-[#1A1A18]'
+              viewState === 'dataroom' ? 'text-[#C96B4F]' : 'text-[rgba(0,0,0,0.4)] hover:text-[#0D0D0D]'
             }`}
             style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
             type="button"
@@ -784,7 +784,7 @@ export default function AppShell() {
             else navigate('/login');
             setIsMobileSidebarOpen(false);
           }}
-          className="block w-full text-left text-[11px] font-bold uppercase text-[#6E6A63] bg-transparent border-none cursor-pointer hover:text-[#1A1A18] transition-colors py-1"
+          className="block w-full text-left text-[11px] font-bold uppercase text-[rgba(0,0,0,0.4)] bg-transparent border-none cursor-pointer hover:text-[#0D0D0D] transition-colors py-1"
           style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
           type="button"
         >
@@ -794,7 +794,7 @@ export default function AppShell() {
           <button
             onClick={() => { setViewState('wallet'); navigate('/wallet'); setIsMobileSidebarOpen(false); }}
             className={`block w-full text-left text-[11px] font-bold uppercase bg-transparent border-none cursor-pointer transition-colors py-1 nav-item-hover ${
-              viewState === 'wallet' ? 'text-[#C96B4F]' : 'text-[#6E6A63] hover:text-[#1A1A18]'
+              viewState === 'wallet' ? 'text-[#C96B4F]' : 'text-[rgba(0,0,0,0.4)] hover:text-[#0D0D0D]'
             }`}
             style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
             type="button"
@@ -805,7 +805,7 @@ export default function AppShell() {
         {user && (
           <button
             onClick={handleLogout}
-            className="block w-full text-left text-[11px] font-bold uppercase text-[#6E6A63] bg-transparent border-none cursor-pointer hover:text-[#C96B4F] transition-colors py-1"
+            className="block w-full text-left text-[11px] font-bold uppercase text-[rgba(0,0,0,0.4)] bg-transparent border-none cursor-pointer hover:text-[#C96B4F] transition-colors py-1"
             style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
             type="button"
           >
@@ -821,7 +821,7 @@ export default function AppShell() {
   return (
     <div
       id="app-root"
-      className="flex bg-[#F0EEEA] font-sans"
+      className="flex bg-[#FAFAFA] font-sans"
       style={{
         height: 'var(--app-height, 100vh)',
         position: 'fixed' as const,
@@ -858,7 +858,7 @@ export default function AppShell() {
         )}
         {/* Header — 56px */}
         <header
-          className="flex-shrink-0 flex items-center justify-between h-14 px-6 z-20 bg-[#F0EEEA]"
+          className="flex-shrink-0 flex items-center justify-between h-14 px-6 z-20 bg-[#FAFAFA]"
           style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}
         >
           <div className="flex items-center gap-3">
@@ -868,14 +868,14 @@ export default function AppShell() {
                 <button
                   onClick={handleBack}
                   className="w-10 h-10 flex items-center justify-center bg-transparent border-none cursor-pointer"
-                  style={{ borderRadius: 12, color: 'rgba(26,26,24,0.45)' }}
+                  style={{ borderRadius: 12, color: 'rgba(0,0,0,0.45)' }}
                   type="button"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M19 12H5" /><polyline points="12 19 5 12 12 5" />
                   </svg>
                 </button>
-                <span style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A18' }}>Chat with Yulia</span>
+                <span style={{ fontSize: '14px', fontWeight: 500, color: '#0D0D0D' }}>Chat with Yulia</span>
               </div>
             ) : (
               /* ── Landing mode: hamburger + logo / page label ── */
@@ -884,7 +884,7 @@ export default function AppShell() {
                   <button
                     onClick={() => setIsMobileSidebarOpen(true)}
                     className="w-10 h-10 flex items-center justify-center bg-transparent border-none cursor-pointer"
-                    style={{ borderRadius: 12, color: 'rgba(26,26,24,0.7)' }}
+                    style={{ borderRadius: 12, color: 'rgba(0,0,0,0.7)' }}
                     type="button"
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -896,13 +896,13 @@ export default function AppShell() {
                   <button
                     onClick={() => handleTabClick('home')}
                     className="bg-transparent border-none cursor-pointer p-0 leading-none"
-                    style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontSize: '20px', fontWeight: 700, color: '#1A1A18' }}
+                    style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontSize: '20px', fontWeight: 700, color: '#0D0D0D' }}
                     type="button"
                   >
-                    smb<span style={{ color: '#C96B4F' }}>X</span>.ai
+                    smbx<span style={{ color: '#C96B4F' }}>.</span>ai
                   </button>
                 ) : (
-                  <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(26,26,24,0.35)' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(0,0,0,0.35)' }}>
                     {activeTab === 'home' ? 'Chat' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'how-it-works' ? 'How It Works' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
                   </span>
                 )}
@@ -914,7 +914,7 @@ export default function AppShell() {
               <button
                 onClick={() => navigate('/login')}
                 className="text-white border-none cursor-pointer hover:opacity-90 transition-all"
-                style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 600, background: '#1A1A18', borderRadius: '100px', padding: '9px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
+                style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 600, background: '#0D0D0D', borderRadius: '100px', padding: '9px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
                 type="button"
               >
                 Start chatting
@@ -924,14 +924,14 @@ export default function AppShell() {
               <button
                 onClick={() => navigate('/login')}
                 className="bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
-                style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 600, color: 'rgba(26,26,24,0.55)' }}
+                style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 600, color: 'rgba(0,0,0,0.55)' }}
                 type="button"
               >
                 Sign in
               </button>
             )}
             {user && (
-              <span style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(26,26,24,0.45)' }}>{user.display_name || user.email}</span>
+              <span style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(0,0,0,0.45)' }}>{user.display_name || user.email}</span>
             )}
           </div>
         </header>
@@ -960,7 +960,7 @@ export default function AppShell() {
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '34px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, textAlign: 'center' }}
+                      style={{ fontSize: '34px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, textAlign: 'center' }}
                     >
                       {renderHeadline(page.headline, page.terraWord)}
                     </motion.h1>
@@ -992,7 +992,7 @@ export default function AppShell() {
                       initial={{ opacity: 0, y: 18 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '48px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, textAlign: 'center' }}
+                      style={{ fontSize: '48px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, textAlign: 'center' }}
                     >
                       {renderHeadline(page.headline, page.terraWord)}
                     </motion.h1>
@@ -1023,20 +1023,20 @@ export default function AppShell() {
               <>
               {/* ═══ SUB-PAGE MOBILE HERO ═══ */}
               <div className="md:hidden">
-                <div className="mx-4 mt-4" style={{ background: '#F0EEEA', borderRadius: 28, border: '1px solid rgba(0,0,0,0.06)', padding: '40px 24px' }}>
+                <div className="mx-4 mt-4" style={{ background: '#FAFAFA', borderRadius: 28, border: '1px solid rgba(0,0,0,0.06)', padding: '40px 24px' }}>
                   {page.overline && (
                     <div
                       className="inline-flex items-center gap-1.5 bg-white mb-5"
-                      style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(26,26,24,0.55)', borderRadius: 100, padding: '6px 14px', border: '1px solid rgba(26,26,24,0.08)' }}
+                      style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(0,0,0,0.55)', borderRadius: 100, padding: '6px 14px', border: '1px solid rgba(0,0,0,0.08)' }}
                     >
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C96B4F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>
                       {page.overline}
                     </div>
                   )}
-                  <h1 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.03em', color: '#1A1A18', lineHeight: 1.12, marginBottom: 16 }}>
+                  <h1 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.03em', color: '#0D0D0D', lineHeight: 1.12, marginBottom: 16 }}>
                     {renderHeadline(page.headline, page.terraWord)}
                   </h1>
-                  <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.6, marginBottom: 24 }}>
+                  <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.6, marginBottom: 24 }}>
                     {page.tagline}
                   </p>
                   {/* Chips */}
@@ -1046,7 +1046,7 @@ export default function AppShell() {
                         key={chip}
                         onClick={() => handleChipClick(chip)}
                         className="bg-white cursor-pointer transition-all chip-hover"
-                        style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(26,26,24,0.55)', border: '1px solid rgba(26,26,24,0.08)', padding: '8px 16px' }}
+                        style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.55)', border: '1px solid rgba(0,0,0,0.08)', padding: '8px 16px' }}
                         type="button"
                       >
                         {chip}
@@ -1058,21 +1058,21 @@ export default function AppShell() {
 
               {/* ═══ SUB-PAGE DESKTOP HERO ═══ */}
               <div className="hidden md:block">
-                <div className="mx-6 mt-6" style={{ background: '#F0EEEA', borderRadius: 28, border: '1px solid rgba(0,0,0,0.06)', padding: '56px 52px' }}>
+                <div className="mx-6 mt-6" style={{ background: '#FAFAFA', borderRadius: 28, border: '1px solid rgba(0,0,0,0.06)', padding: '56px 52px' }}>
                   <div className="max-w-4xl mx-auto">
                     {page.overline && (
                       <div
                         className="inline-flex items-center gap-2 bg-white mb-6"
-                        style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(26,26,24,0.55)', borderRadius: 100, padding: '7px 16px', border: '1px solid rgba(26,26,24,0.08)' }}
+                        style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(0,0,0,0.55)', borderRadius: 100, padding: '7px 16px', border: '1px solid rgba(0,0,0,0.08)' }}
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C96B4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>
                         {page.overline}
                       </div>
                     )}
-                    <h1 style={{ fontSize: '52px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.1, marginBottom: 20 }}>
+                    <h1 style={{ fontSize: '52px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.1, marginBottom: 20 }}>
                       {renderHeadline(page.headline, page.terraWord)}
                     </h1>
-                    <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, marginBottom: 32 }}>
+                    <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, marginBottom: 32 }}>
                       {page.tagline}
                     </p>
                     {/* Chips */}
@@ -1082,7 +1082,7 @@ export default function AppShell() {
                           key={chip}
                           onClick={() => handleChipClick(chip)}
                           className="bg-white cursor-pointer transition-all hover:text-[#C96B4F] chip-hover"
-                          style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(26,26,24,0.55)', border: '1px solid rgba(26,26,24,0.08)', padding: '9px 20px' }}
+                          style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.55)', border: '1px solid rgba(0,0,0,0.08)', padding: '9px 20px' }}
                           type="button"
                         >
                           {chip}
@@ -1103,12 +1103,12 @@ export default function AppShell() {
               {activeTab === 'pricing' && <PricingBelow onChipClick={handleChipClick} />}
 
               {/* Footer */}
-              <footer className="px-6 py-12 text-center" style={{ borderTop: '1px solid rgba(26,26,24,0.06)' }}>
-                <div style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A18', letterSpacing: '-0.03em', marginBottom: 8 }}>
-                  smb<span style={{ color: '#C96B4F' }}>X</span>.ai
+              <footer className="px-6 py-12 text-center" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.03em', marginBottom: 8 }}>
+                  smbx<span style={{ color: '#C96B4F' }}>.</span>ai
                 </div>
-                <p style={{ fontSize: '14px', color: 'rgba(26,26,24,0.45)', marginBottom: 16 }}>Deal intelligence for every dealmaker.</p>
-                <div className="flex justify-center gap-6" style={{ fontSize: '13px', color: 'rgba(26,26,24,0.35)' }}>
+                <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', marginBottom: 16 }}>Deal intelligence for every dealmaker.</p>
+                <div className="flex justify-center gap-6" style={{ fontSize: '13px', color: 'rgba(0,0,0,0.35)' }}>
                   <a href="/legal/privacy" className="hover:underline" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</a>
                   <a href="/legal/terms" className="hover:underline" style={{ color: 'inherit', textDecoration: 'none' }}>Terms</a>
                 </div>

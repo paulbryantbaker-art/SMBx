@@ -12,8 +12,8 @@ interface IntegrateBelowProps {
 
 const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
 const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
-const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 };
-const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, margin: 0 };
+const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, marginTop: 12 };
+const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, margin: 0 };
 const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' };
 
 export default function IntegrateBelow({ onChipClick }: IntegrateBelowProps) {
@@ -33,7 +33,7 @@ export default function IntegrateBelow({ onChipClick }: IntegrateBelowProps) {
             <div className="space-y-6" style={bodyStyle}>
               <p>You closed the deal. The employees are wondering what changes. The customers haven&apos;t been told. Move too fast and you lose the people who make the business work. Move too slow and the issues compound.</p>
               <p>70% of acquisitions fail to achieve their value thesis. Not because the thesis was wrong &mdash; because the execution was unstructured.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>Yulia carries everything she learned during months of analysis into a 180-day plan built for this specific business. Included in your plan.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>Yulia carries everything she learned during months of analysis into a 180-day plan built for this specific business. Included in your plan.</p>
             </div>
           </RevealSection>
         </div>
@@ -85,15 +85,15 @@ export default function IntegrateBelow({ onChipClick }: IntegrateBelowProps) {
       <section style={{ paddingTop: 80, paddingBottom: 80 }}>
         <div style={sectionStyle}>
           <RevealSection>
-            <p style={{ fontSize: 36, fontWeight: 300, color: '#1A1A18', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>You own a business. And you know exactly what to do with it.</p>
+            <p style={{ fontSize: 36, fontWeight: 300, color: '#0D0D0D', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>You own a business. And you know exactly what to do with it.</p>
           </RevealSection>
 
           <RevealSection>
             <div className="text-center">
-              <p style={{ fontSize: '16px', color: 'rgba(26,26,24,0.5)', marginBottom: 16 }}>Tell Yulia about your acquisition &rarr; integration plan in minutes</p>
+              <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.5)', marginBottom: 16 }}>Tell Yulia about your acquisition &rarr; integration plan in minutes</p>
               <MagneticButton
                 onClick={() => onChipClick("I just acquired a business and need an integration plan")}
-                style={{ background: '#1A1A18', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ background: '#0D0D0D', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Message Yulia &rarr;
               </MagneticButton>

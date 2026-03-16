@@ -82,7 +82,7 @@ function GateStepper({ journeyType, currentGate }: { journeyType: string; curren
               </div>
               {/* Connector line */}
               {i < gates.length - 1 && (
-                <div className={`flex-1 h-px mx-0.5 mt-[-10px] ${isCompleted ? 'bg-[#C96B4F]' : 'bg-[#DDD9D1]'}`} />
+                <div className={`flex-1 h-px mx-0.5 mt-[-10px] ${isCompleted ? 'bg-[#C96B4F]' : 'bg-[rgba(0,0,0,0.08)]'}`} />
               )}
             </div>
           );
@@ -149,13 +149,13 @@ export default function HomeSidebar({
 
       {/* Sidebar panel */}
       <div
-        className={`fixed top-0 left-0 h-full z-50 flex flex-col bg-[#FAF9F6] border-r border-[#DDD9D1] w-[280px] transition-transform duration-300 ${
+        className={`fixed top-0 left-0 h-full z-50 flex flex-col bg-[#FAF9F6] border-r border-[rgba(0,0,0,0.08)] w-[280px] transition-transform duration-300 ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <span className="text-[22px] font-extrabold tracking-[-0.03em] text-[#1A1A18]">
+          <span className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]">
             smb<span className="text-[#C96B4F]">x</span>.ai
           </span>
           <button
@@ -173,7 +173,7 @@ export default function HomeSidebar({
         <div className="px-3 py-2">
           <button
             onClick={() => { onNewConversation(); onClose(); }}
-            className="w-full flex items-center justify-center gap-2 h-10 px-4 rounded-lg border border-[#DDD9D1] bg-white text-sm font-semibold text-[#1A1A18] cursor-pointer hover:bg-[#F3F0EA] transition-colors"
+            className="w-full flex items-center justify-center gap-2 h-10 px-4 rounded-lg border border-[rgba(0,0,0,0.08)] bg-white text-sm font-semibold text-[#0D0D0D] cursor-pointer hover:bg-[#F5F5F5] transition-colors"
             type="button"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -185,7 +185,7 @@ export default function HomeSidebar({
 
         {/* Active Deal */}
         {hasDeal && (
-          <div className="mx-3 my-2 p-3 bg-white rounded-xl" style={{ boxShadow: '0 1px 3px rgba(26,26,24,.06)' }}>
+          <div className="mx-3 my-2 p-3 bg-white rounded-xl" style={{ boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>
             <div className="flex items-center gap-2 mb-1">
               {journeyInfo && (
                 <span
@@ -195,7 +195,7 @@ export default function HomeSidebar({
                   {journeyInfo.label}
                 </span>
               )}
-              <span className="text-sm font-semibold text-[#1A1A18] truncate">
+              <span className="text-sm font-semibold text-[#0D0D0D] truncate">
                 {dealName || 'New Deal'}
               </span>
             </div>
@@ -228,8 +228,8 @@ export default function HomeSidebar({
               key={c.sessionId}
               className={`w-full text-left px-3 py-2 rounded-lg border-none cursor-pointer transition-colors mb-0.5 ${
                 c.sessionId === currentSessionId
-                  ? 'bg-[#EBE7DF] text-[#1A1A18]'
-                  : 'bg-transparent text-[#4A4843] hover:bg-[#F3F0EA]'
+                  ? 'bg-[#EBE7DF] text-[#0D0D0D]'
+                  : 'bg-transparent text-[#4A4843] hover:bg-[#F5F5F5]'
               }`}
               style={{ fontFamily: 'inherit' }}
               type="button"
@@ -249,7 +249,7 @@ export default function HomeSidebar({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[#DDD9D1] px-4 py-3">
+        <div className="border-t border-[rgba(0,0,0,0.08)] px-4 py-3">
           <p className="text-[11px] text-[#A9A49C] m-0">
             Free preview · <a href="/signup" className="text-[#C96B4F] font-semibold no-underline hover:underline">Sign up</a> for full access
           </p>

@@ -10,8 +10,8 @@ interface AdvisorsBelowProps {
 
 const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
 const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
-const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 };
-const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, margin: 0 };
+const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, marginTop: 12 };
+const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, margin: 0 };
 const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '24px 28px' };
 
 export default function AdvisorsBelow({ onChipClick }: AdvisorsBelowProps) {
@@ -32,7 +32,7 @@ export default function AdvisorsBelow({ onChipClick }: AdvisorsBelowProps) {
               <p>The bottleneck in every advisory practice is the same: the analytical work that makes your expertise valuable takes too long to produce.</p>
               <p>CIMs that take days. Valuations that require manual comp searches. Market reports that involve hours of data assembly. Buyer qualification that could be done in seconds.</p>
               <p>Meanwhile, the $800K landscaping company and the $1.2M cleaning service get turned away because the economics don&apos;t work at current production costs.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>Run your first three client journeys free. Valuations, CIMs, market intelligence, buyer qualification &mdash; the whole thing. White-label everything. Then decide.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>Run your first three client journeys free. Valuations, CIMs, market intelligence, buyer qualification &mdash; the whole thing. White-label everything. Then decide.</p>
             </div>
           </RevealSection>
         </div>
@@ -80,15 +80,15 @@ export default function AdvisorsBelow({ onChipClick }: AdvisorsBelowProps) {
       <section style={{ paddingTop: 100, paddingBottom: 80 }}>
         <div style={sectionStyle}>
           <RevealSection>
-            <p style={{ fontSize: 36, fontWeight: 300, color: '#1A1A18', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>Your expertise. Yulia&apos;s engine. Their outcome.</p>
+            <p style={{ fontSize: 36, fontWeight: 300, color: '#0D0D0D', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>Your expertise. Yulia&apos;s engine. Their outcome.</p>
           </RevealSection>
 
           <RevealSection>
             <div className="text-center">
-              <p style={{ fontSize: '16px', color: 'rgba(26,26,24,0.5)', marginBottom: 16 }}>Tell Yulia about the deal you&apos;re working on &rarr; 3 free journeys</p>
+              <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.5)', marginBottom: 16 }}>Tell Yulia about the deal you&apos;re working on &rarr; 3 free journeys</p>
               <MagneticButton
                 onClick={() => onChipClick("I'm an advisor \u2014 tell me about partnerships")}
-                style={{ background: '#1A1A18', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ background: '#0D0D0D', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Message Yulia &rarr;
               </MagneticButton>

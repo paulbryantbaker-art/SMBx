@@ -111,15 +111,15 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
       {loading && (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="animate-pulse bg-[#FAF9F7] rounded-2xl p-4">
+            <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-2xl p-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-14 h-4 bg-[#EBE7DF] rounded-full" />
                 <div className="h-4 bg-[#EBE7DF] rounded" style={{ width: '40%' }} />
               </div>
-              <div className="h-1.5 bg-[#F3F0EA] rounded-full mb-2" />
+              <div className="h-1.5 bg-[#F5F5F5] rounded-full mb-2" />
               <div className="flex gap-3">
-                <div className="h-3 bg-[#F3F0EA] rounded" style={{ width: '25%' }} />
-                <div className="h-3 bg-[#F3F0EA] rounded" style={{ width: '20%' }} />
+                <div className="h-3 bg-[#F5F5F5] rounded" style={{ width: '25%' }} />
+                <div className="h-3 bg-[#F5F5F5] rounded" style={{ width: '20%' }} />
               </div>
             </div>
           ))}
@@ -128,12 +128,12 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
 
       {!loading && deals.length === 0 && (
         <div className="text-center py-12">
-          <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-[#F3F0EA] flex items-center justify-center">
+          <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-[#F5F5F5] flex items-center justify-center">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A9A49C" strokeWidth="1.5">
               <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
             </svg>
           </div>
-          <p className="text-base font-semibold text-[#1A1A18] m-0 mb-1">No deals yet</p>
+          <p className="text-base font-semibold text-[#0D0D0D] m-0 mb-1">No deals yet</p>
           <p className="text-sm text-[#6E6A63] m-0 mb-3">Start a conversation with Yulia to begin your first deal.</p>
           {onNewDeal && (
             <button
@@ -157,17 +157,17 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
             <button
               key={deal.id}
               onClick={() => deal.conversation_id && onOpenConversation?.(deal.conversation_id)}
-              className="w-full text-left bg-[#FAF9F7] rounded-2xl p-4 border border-transparent hover:border-[#C96B4F] transition-all cursor-pointer"
+              className="w-full text-left bg-[#FAFAFA] rounded-2xl p-4 border border-transparent hover:border-[#C96B4F] transition-all cursor-pointer"
             >
               <div className="flex items-center gap-2.5 mb-2.5">
                 <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${journey.color}`}>
                   {journey.label}
                 </span>
-                <span className="text-sm font-semibold text-[#1A1A18] truncate">
+                <span className="text-sm font-semibold text-[#0D0D0D] truncate">
                   {deal.business_name || `${journey.label} Deal`}
                 </span>
                 {deal.league && (
-                  <span className="text-[10px] font-semibold text-[#A9A49C] bg-[#F3F0EA] px-1.5 py-0.5 rounded-full ml-auto shrink-0">
+                  <span className="text-[10px] font-semibold text-[#A9A49C] bg-[#F5F5F5] px-1.5 py-0.5 rounded-full ml-auto shrink-0">
                     {deal.league}
                   </span>
                 )}
@@ -205,7 +205,7 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
                 <span className="ml-auto text-[#A9A49C]">{timeAgo(deal.updated_at)}</span>
               </div>
 
-              <div className="flex items-center gap-3 mt-1.5 pt-1.5 text-[10px] text-[#A9A49C]" style={{ borderTop: '1px solid #F3F0EA' }}>
+              <div className="flex items-center gap-3 mt-1.5 pt-1.5 text-[10px] text-[#A9A49C]" style={{ borderTop: '1px solid #F5F5F5' }}>
                 <span>{deal.deliverable_count} deliverable{Number(deal.deliverable_count) !== 1 ? 's' : ''}</span>
                 <span>{deal.document_count} document{Number(deal.document_count) !== 1 ? 's' : ''}</span>
               </div>

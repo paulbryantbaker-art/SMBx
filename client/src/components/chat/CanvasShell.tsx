@@ -11,14 +11,14 @@ interface CanvasShellProps {
 
 export default function CanvasShell({ title, subtitle, onClose, onFullscreen, isFullscreen, children }: CanvasShellProps) {
   return (
-    <div className="flex flex-col h-full" style={{ background: '#FAF9F7' }}>
+    <div className="flex flex-col h-full" style={{ background: '#FAFAFA' }}>
       {/* Header */}
       <div
         className="shrink-0 flex items-center justify-between"
-        style={{ padding: '12px 20px', borderBottom: '1px solid #DDD9D1' }}
+        style={{ padding: '12px 20px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}
       >
         <div className="min-w-0">
-          <h2 className="font-sans m-0 truncate" style={{ fontSize: 16, fontWeight: 800, color: '#1A1A18' }}>
+          <h2 className="font-sans m-0 truncate" style={{ fontSize: 16, fontWeight: 800, color: '#0D0D0D' }}>
             {title}
           </h2>
           {subtitle && (

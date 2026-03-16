@@ -94,7 +94,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium border-0 cursor-pointer transition-colors ${
-              tab === t.id ? 'bg-white text-[#1A1A18] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#1A1A18]'
+              tab === t.id ? 'bg-white text-[#0D0D0D] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#0D0D0D]'
             }`}
           >
             {t.label}
@@ -105,17 +105,17 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
       {/* Account Tab */}
       {tab === 'account' && (
         <div className="space-y-3">
-          <div className="bg-[#FAF9F7] rounded-2xl p-4">
-            <h3 className="text-sm font-semibold text-[#1A1A18] m-0 mb-3">Profile</h3>
+          <div className="bg-[#FAFAFA] rounded-2xl p-4">
+            <h3 className="text-sm font-semibold text-[#0D0D0D] m-0 mb-3">Profile</h3>
             <div className="space-y-2.5">
               <div>
                 <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Name</label>
-                <p className="text-sm text-[#1A1A18] m-0 px-3 py-1.5 bg-white rounded-lg border border-[#DDD9D1]">{user.display_name || '—'}</p>
+                <p className="text-sm text-[#0D0D0D] m-0 px-3 py-1.5 bg-white rounded-lg border border-[rgba(0,0,0,0.08)]">{user.display_name || '—'}</p>
               </div>
               <div>
                 <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Email</label>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm text-[#1A1A18] m-0 px-3 py-1.5 bg-white rounded-lg border border-[#DDD9D1] flex-1">{user.email}</p>
+                  <p className="text-sm text-[#0D0D0D] m-0 px-3 py-1.5 bg-white rounded-lg border border-[rgba(0,0,0,0.08)] flex-1">{user.email}</p>
                   {(user as any).email_verified ? (
                     <span className="text-[10px] font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-lg border border-green-200 whitespace-nowrap">Verified</span>
                   ) : verificationSent ? (
@@ -144,8 +144,8 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
             </div>
           </div>
 
-          <div className="bg-[#FAF9F7] rounded-2xl p-4">
-            <h3 className="text-sm font-semibold text-[#1A1A18] m-0 mb-1.5">Account</h3>
+          <div className="bg-[#FAFAFA] rounded-2xl p-4">
+            <h3 className="text-sm font-semibold text-[#0D0D0D] m-0 mb-1.5">Account</h3>
             <p className="text-xs text-[#6E6A63] m-0 mb-3">Member since {new Date(user.created_at || Date.now()).toLocaleDateString()}</p>
             <button
               onClick={onLogout}
@@ -166,7 +166,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
                 key={d}
                 onClick={() => setUsageDays(d)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium border-0 cursor-pointer transition-colors ${
-                  usageDays === d ? 'bg-[#C96B4F] text-white' : 'bg-[#F3F0EA] text-[#6E6A63] hover:bg-[#EBE7DF]'
+                  usageDays === d ? 'bg-[#C96B4F] text-white' : 'bg-[#F5F5F5] text-[#6E6A63] hover:bg-[#EBE7DF]'
                 }`}
               >
                 {d}d
@@ -177,7 +177,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
           {usageLoading ? (
             <div className="grid grid-cols-2 gap-2 mb-4">
               {[1,2,3,4].map(i => (
-                <div key={i} className="animate-pulse bg-[#FAF9F7] rounded-xl p-3">
+                <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-xl p-3">
                   <div className="h-2.5 bg-[#EBE7DF] rounded w-2/3 mb-1.5" />
                   <div className="h-5 bg-[#EBE7DF] rounded w-1/2" />
                 </div>
@@ -185,30 +185,30 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2 mb-4">
-              <div className="bg-[#FAF9F7] rounded-xl p-3">
+              <div className="bg-[#FAFAFA] rounded-xl p-3">
                 <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Tokens</p>
-                <p className="text-base font-bold text-[#1A1A18] m-0">
+                <p className="text-base font-bold text-[#0D0D0D] m-0">
                   {formatNumber((usageTotals?.total_input_tokens || 0) + (usageTotals?.total_output_tokens || 0))}
                 </p>
               </div>
-              <div className="bg-[#FAF9F7] rounded-xl p-3">
+              <div className="bg-[#FAFAFA] rounded-xl p-3">
                 <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Tool Calls</p>
-                <p className="text-base font-bold text-[#1A1A18] m-0">{formatNumber(usageTotals?.total_tool_calls || 0)}</p>
+                <p className="text-base font-bold text-[#0D0D0D] m-0">{formatNumber(usageTotals?.total_tool_calls || 0)}</p>
               </div>
-              <div className="bg-[#FAF9F7] rounded-xl p-3">
+              <div className="bg-[#FAFAFA] rounded-xl p-3">
                 <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Deliverables</p>
                 <p className="text-base font-bold text-[#C96B4F] m-0">{usageTotals?.total_deliverables || 0}</p>
               </div>
-              <div className="bg-[#FAF9F7] rounded-xl p-3">
+              <div className="bg-[#FAFAFA] rounded-xl p-3">
                 <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Queries</p>
-                <p className="text-base font-bold text-[#1A1A18] m-0">{usageTotals?.total_queries || 0}</p>
+                <p className="text-base font-bold text-[#0D0D0D] m-0">{usageTotals?.total_queries || 0}</p>
               </div>
             </div>
           )}
 
           {!usageLoading && usageDaily.length > 0 && (
-            <div className="bg-[#FAF9F7] rounded-2xl p-4">
-              <h3 className="text-xs font-semibold text-[#1A1A18] m-0 mb-2">Daily Activity</h3>
+            <div className="bg-[#FAFAFA] rounded-2xl p-4">
+              <h3 className="text-xs font-semibold text-[#0D0D0D] m-0 mb-2">Daily Activity</h3>
               <div className="space-y-1.5">
                 {usageDaily.map(d => {
                   const totalTokens = (d.input_tokens || 0) + (d.output_tokens || 0);
@@ -229,7 +229,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
           )}
 
           {!usageLoading && usageDaily.length === 0 && (
-            <div className="text-center py-6 bg-[#FAF9F7] rounded-xl">
+            <div className="text-center py-6 bg-[#FAFAFA] rounded-xl">
               <p className="text-xs text-[#6E6A63] m-0">No usage data for this period.</p>
             </div>
           )}
@@ -244,7 +244,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
           {benchLoading ? (
             <div className="space-y-2">
               {[1,2].map(i => (
-                <div key={i} className="animate-pulse bg-[#FAF9F7] rounded-2xl p-4">
+                <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-2xl p-4">
                   <div className="h-3 bg-[#EBE7DF] rounded w-1/3 mb-2" />
                   <div className="flex gap-4">
                     <div className="h-6 bg-[#EBE7DF] rounded w-14" />
@@ -254,22 +254,22 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
               ))}
             </div>
           ) : benchmarks.length === 0 ? (
-            <div className="text-center py-8 bg-[#FAF9F7] rounded-xl">
-              <p className="text-sm font-semibold text-[#1A1A18] m-0 mb-0.5">No benchmarks yet</p>
+            <div className="text-center py-8 bg-[#FAFAFA] rounded-xl">
+              <p className="text-sm font-semibold text-[#0D0D0D] m-0 mb-0.5">No benchmarks yet</p>
               <p className="text-xs text-[#6E6A63] m-0">Benchmarks appear as deals close.</p>
             </div>
           ) : (
             <div className="space-y-2">
               {benchmarks.map((b, i) => (
-                <div key={i} className="bg-[#FAF9F7] rounded-2xl p-4">
+                <div key={i} className="bg-[#FAFAFA] rounded-2xl p-4">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <h3 className="text-sm font-semibold text-[#1A1A18] m-0">{b.industry || b.naics_code}</h3>
+                    <h3 className="text-sm font-semibold text-[#0D0D0D] m-0">{b.industry || b.naics_code}</h3>
                     <span className="text-[9px] text-[#A9A49C] bg-white px-1.5 py-0.5 rounded-full">n={b.sample_size}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
                       <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Avg</p>
-                      <p className="text-base font-bold text-[#1A1A18] m-0">{b.avg_multiple}x</p>
+                      <p className="text-base font-bold text-[#0D0D0D] m-0">{b.avg_multiple}x</p>
                     </div>
                     <div>
                       <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Median</p>
@@ -277,7 +277,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
                     </div>
                     <div>
                       <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Days</p>
-                      <p className="text-base font-bold text-[#1A1A18] m-0">{b.avg_days_to_close}</p>
+                      <p className="text-base font-bold text-[#0D0D0D] m-0">{b.avg_days_to_close}</p>
                     </div>
                   </div>
                 </div>

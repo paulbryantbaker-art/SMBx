@@ -10,15 +10,15 @@ import { ScrollReveal, StaggerContainer, StaggerItem, ScrollProgressBar } from '
 /* ═══ DESIGN TOKENS ═══ */
 
 const T = {
-  bg: '#FAF9F7',
+  bg: '#FAFAFA',
   terra: '#C96B4F',
   terraHover: '#BE6342',
   terraSoft: '#FFF0EB',
-  text: '#1A1A18',
+  text: '#0D0D0D',
   sub: '#44403C',
   muted: '#6E6A63',
   faint: '#A9A49C',
-  border: '#DDD9D1',
+  border: 'rgba(0,0,0,0.08)',
 };
 
 /* ═══ SUGGESTIONS ═══ */
@@ -195,7 +195,7 @@ export default function Home() {
           padding-top: env(safe-area-inset-top, 0px);
           display: flex; align-items: center; gap: 16px;
           background: ${T.bg};
-          border-bottom: 1px solid rgba(26,26,24,0.06);
+          border-bottom: 1px solid rgba(0,0,0,0.06);
           transition: transform 0.3s ease, opacity 0.3s ease;
         }
         /* Mobile home only: slide topbar out without layout shift */
@@ -214,7 +214,7 @@ export default function Home() {
           display: flex; align-items: center; justify-content: center;
           color: ${T.muted}; transition: background 0.15s;
         }
-        .home-topbar-btn:hover { background: rgba(26,26,24,0.04); }
+        .home-topbar-btn:hover { background: rgba(0,0,0,0.04); }
 
         .home-topbar-logo {
           font-size: 18px; font-weight: 800; letter-spacing: -0.03em;
@@ -227,7 +227,7 @@ export default function Home() {
           text-decoration: none; transition: color 0.15s;
           padding: 6px 10px; border-radius: 8px;
         }
-        .home-topbar-link:hover { color: ${T.text}; background: rgba(26,26,24,0.03); }
+        .home-topbar-link:hover { color: ${T.text}; background: rgba(0,0,0,0.03); }
 
         /* ── Home state: scrollable page ── */
         .home-scroll {
@@ -270,13 +270,13 @@ export default function Home() {
         /* ── Dock card (shared for hero + chat) ── */
         .home-dock-card {
           border-radius: 20px !important;
-          border: 1px solid rgba(26,26,24,0.10) !important;
+          border: 1px solid rgba(0,0,0,0.10) !important;
           background: #FFFFFF !important;
-          box-shadow: 0 4px 16px rgba(26,26,24,0.08), 0 1px 3px rgba(26,26,24,0.06), 0 12px 40px rgba(26,26,24,0.04) !important;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.04) !important;
         }
         .home-dock-card:focus-within {
           border-color: rgba(212,113,78,0.35) !important;
-          box-shadow: 0 4px 16px rgba(26,26,24,0.10), 0 1px 3px rgba(26,26,24,0.06), 0 12px 40px rgba(26,26,24,0.06), 0 0 0 3px rgba(212,113,78,0.10) !important;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.06), 0 0 0 3px rgba(212,113,78,0.10) !important;
         }
         /* Compact textarea (hero variant defaults to tall) */
         .home-dock-card textarea {
@@ -302,16 +302,16 @@ export default function Home() {
 
         .home-suggestion {
           padding: 14px 16px; border-radius: 14px;
-          border: 1px solid rgba(26,26,24,0.07);
+          border: 1px solid rgba(0,0,0,0.07);
           background: #FFFFFF; cursor: pointer;
           font-size: 14px; font-weight: 500; color: ${T.sub};
           font-family: 'Inter', system-ui, sans-serif;
           text-align: left; transition: all 0.15s;
-          box-shadow: 0 1px 3px rgba(26,26,24,0.03);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.03);
         }
         .home-suggestion:hover {
           background: #FFFFFF; border-color: rgba(212,113,78,0.25);
-          box-shadow: 0 2px 8px rgba(26,26,24,0.06);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06);
           color: ${T.text};
         }
         .home-suggestion:active { transform: scale(0.98); }
@@ -367,8 +367,8 @@ export default function Home() {
 
         .home-pillar {
           background: #FFFFFF; border-radius: 16px;
-          border: 1px solid rgba(26,26,24,0.08);
-          padding: 24px; box-shadow: 0 2px 8px rgba(26,26,24,0.07);
+          border: 1px solid rgba(0,0,0,0.08);
+          padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
         }
         .home-pillar h3 {
           font-size: 16px; font-weight: 700; color: ${T.text};
@@ -382,8 +382,8 @@ export default function Home() {
         .home-preview {
           max-width: 720px; margin: 0 auto;
           background: #FFFFFF; border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.08);
-          box-shadow: 0 2px 12px rgba(26,26,24,0.08);
+          border: 1px solid rgba(0,0,0,0.08);
+          box-shadow: 0 2px 12px rgba(0,0,0,0.08);
           padding: 28px 24px;
         }
         @media (max-width: 768px) { .home-preview { padding: 20px 16px; border-radius: 16px; } }
@@ -422,7 +422,7 @@ export default function Home() {
 
         .home-preview-note {
           margin-top: 20px; padding-top: 16px;
-          border-top: 1px solid rgba(26,26,24,0.06);
+          border-top: 1px solid rgba(0,0,0,0.06);
           font-size: 13px; line-height: 1.6; color: ${T.muted};
           font-style: italic;
         }
@@ -436,12 +436,12 @@ export default function Home() {
 
         .home-persona {
           background: #FFFFFF; border-radius: 16px;
-          border: 1px solid rgba(26,26,24,0.08);
-          padding: 24px; box-shadow: 0 2px 8px rgba(26,26,24,0.07);
+          border: 1px solid rgba(0,0,0,0.08);
+          padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
           transition: all 0.15s;
         }
         .home-persona:hover {
-          box-shadow: 0 2px 8px rgba(26,26,24,0.07);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.07);
           transform: translateY(-1px);
         }
         .home-persona h3 {
@@ -574,7 +574,7 @@ export default function Home() {
           background: ${T.terraSoft}; color: ${T.text};
           border: 1px solid rgba(212,113,78,0.18);
           border-radius: 20px 20px 4px 20px;
-          box-shadow: 0 1px 3px rgba(26,26,24,0.06);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.06);
           font-size: 15px; line-height: 1.55; word-break: break-word;
         }
 
@@ -602,8 +602,8 @@ export default function Home() {
         .home-msg-ai-text strong { font-weight: 600; }
         .home-msg-ai-text ul, .home-msg-ai-text ol { margin: 0 0 12px; padding-left: 20px; }
         .home-msg-ai-text li { margin-bottom: 4px; }
-        .home-msg-ai-text code { background: #F3F0EA; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
-        .home-msg-ai-text pre { background: #F3F0EA; padding: 12px 16px; border-radius: 8px; overflow-x: auto; }
+        .home-msg-ai-text code { background: #F5F5F5; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+        .home-msg-ai-text pre { background: #F5F5F5; padding: 12px 16px; border-radius: 8px; overflow-x: auto; }
         .home-msg-ai-text pre code { background: none; padding: 0; }
 
         .home-streaming-dot {

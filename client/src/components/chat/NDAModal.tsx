@@ -41,7 +41,7 @@ export default function NDAModal({ dealId, dealName, inviterName, onAccept, onDe
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[#1A1A18] m-0">Non-Disclosure Agreement</h2>
+              <h2 className="text-lg font-bold text-[#0D0D0D] m-0">Non-Disclosure Agreement</h2>
               <p className="text-xs text-[#6E6A63] m-0 mt-0.5">Required before accessing deal materials</p>
             </div>
           </div>
@@ -49,46 +49,46 @@ export default function NDAModal({ dealId, dealName, inviterName, onAccept, onDe
 
         {/* NDA Content */}
         <div className="px-6 py-4 bg-[#FAFAF8] mx-6 rounded-lg max-h-[300px] overflow-y-auto text-[12px] leading-relaxed text-[#3D3B37]" style={{ border: '1px solid #EBE7DF' }}>
-          <p className="font-semibold text-[#1A1A18] mb-3">CONFIDENTIALITY AND NON-DISCLOSURE AGREEMENT</p>
+          <p className="font-semibold text-[#0D0D0D] mb-3">CONFIDENTIALITY AND NON-DISCLOSURE AGREEMENT</p>
 
           <p className="mb-3">
             By accessing the materials related to {dealName ? `"${dealName}"` : 'this deal'}
             {inviterName ? `, as shared by ${inviterName},` : ','} you agree to the following terms:
           </p>
 
-          <p className="font-semibold text-[#1A1A18] mb-1">1. Confidential Information</p>
+          <p className="font-semibold text-[#0D0D0D] mb-1">1. Confidential Information</p>
           <p className="mb-3">
             All financial data, business information, customer lists, trade secrets, and other materials
             provided through this data room constitute Confidential Information. This includes any analysis,
             notes, or summaries you create from such information.
           </p>
 
-          <p className="font-semibold text-[#1A1A18] mb-1">2. Non-Disclosure</p>
+          <p className="font-semibold text-[#0D0D0D] mb-1">2. Non-Disclosure</p>
           <p className="mb-3">
             You agree not to disclose, publish, or disseminate any Confidential Information to any third party
             without the prior written consent of the disclosing party. You will protect such information with
             the same degree of care you use for your own confidential information.
           </p>
 
-          <p className="font-semibold text-[#1A1A18] mb-1">3. Permitted Use</p>
+          <p className="font-semibold text-[#0D0D0D] mb-1">3. Permitted Use</p>
           <p className="mb-3">
             You may use the Confidential Information solely for the purpose of evaluating a potential
             transaction involving the business described in the shared materials. Any other use is prohibited.
           </p>
 
-          <p className="font-semibold text-[#1A1A18] mb-1">4. No Contact</p>
+          <p className="font-semibold text-[#0D0D0D] mb-1">4. No Contact</p>
           <p className="mb-3">
             You agree not to contact the business, its employees, customers, or vendors directly without
             prior written authorization from the disclosing party.
           </p>
 
-          <p className="font-semibold text-[#1A1A18] mb-1">5. Return of Materials</p>
+          <p className="font-semibold text-[#0D0D0D] mb-1">5. Return of Materials</p>
           <p className="mb-3">
             Upon request or upon termination of discussions, you will return or destroy all Confidential Information
             and any copies thereof.
           </p>
 
-          <p className="font-semibold text-[#1A1A18] mb-1">6. Term</p>
+          <p className="font-semibold text-[#0D0D0D] mb-1">6. Term</p>
           <p>
             This agreement remains in effect for a period of two (2) years from the date of acceptance.
           </p>
@@ -119,7 +119,7 @@ export default function NDAModal({ dealId, dealName, inviterName, onAccept, onDe
             </button>
             <button
               onClick={onDecline}
-              className="py-2.5 px-5 rounded-lg text-sm font-semibold text-[#6E6A63] bg-[#F3F0EA] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
+              className="py-2.5 px-5 rounded-lg text-sm font-semibold text-[#6E6A63] bg-[#F5F5F5] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
             >
               Decline
             </button>

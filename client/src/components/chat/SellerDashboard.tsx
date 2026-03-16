@@ -99,7 +99,7 @@ export default function SellerDashboard() {
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#FFF0EB] flex items-center justify-center text-2xl">
           {'\u{1F4CA}'}
         </div>
-        <h2 className="text-lg font-bold text-[#1A1A18] mb-2">No Seller Profile Yet</h2>
+        <h2 className="text-lg font-bold text-[#0D0D0D] mb-2">No Seller Profile Yet</h2>
         <p className="text-sm text-[#6E6A63]">Start a conversation with Yulia about selling your business to see your value tracker here.</p>
       </div>
     );
@@ -124,7 +124,7 @@ export default function SellerDashboard() {
     <div className="max-w-3xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#1A1A18] mb-1">Your Business Value Tracker</h1>
+        <h1 className="text-2xl font-bold text-[#0D0D0D] mb-1">Your Business Value Tracker</h1>
         <p className="text-sm text-[#6E6A63]">
           {deal.business_name || 'Your Business'} &middot; {deal.current_gate || 'Getting Started'}
           {stats?.valuationUpdatedAt && (
@@ -155,7 +155,7 @@ export default function SellerDashboard() {
                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center relative z-10 ${
                       isActive ? 'border-[#C96B4F] bg-[#C96B4F]'
                       : isPast ? 'border-[#C96B4F] bg-white'
-                      : 'border-[#DDD9D1] bg-white'
+                      : 'border-[rgba(0,0,0,0.08)] bg-white'
                     }`}
                   >
                     {isPast && <span className="text-[9px] text-[#C96B4F] font-bold">{'\u2713'}</span>}
@@ -172,7 +172,7 @@ export default function SellerDashboard() {
             })}
           </div>
           {/* Timeline estimate */}
-          <div className="mt-4 pt-3 border-t border-[#F3F0EA]">
+          <div className="mt-4 pt-3 border-t border-[#F5F5F5]">
             <p className="text-sm text-[#3D3B37]">
               Estimated time to market-ready: <span className="font-semibold">~{timeline.estimatedMonths} months</span>
             </p>
@@ -190,12 +190,12 @@ export default function SellerDashboard() {
         <div className="bg-white rounded-2xl p-6 mb-6" style={{ border: '1px solid #EBE7DF' }}>
           <p className="text-xs font-semibold uppercase tracking-wider text-[#6E6A63] mb-3">Estimated Value Range</p>
           <div className="flex items-end gap-2 mb-4">
-            <span className="text-3xl font-bold text-[#1A1A18]">{formatDollars(stats.valuationLow)}</span>
+            <span className="text-3xl font-bold text-[#0D0D0D]">{formatDollars(stats.valuationLow)}</span>
             <span className="text-lg text-[#6E6A63] mb-1">—</span>
             <span className="text-3xl font-bold text-[#C96B4F]">{formatDollars(stats.valuationHigh)}</span>
           </div>
           {/* Range bar */}
-          <div className="h-3 bg-[#F3F0EA] rounded-full overflow-hidden">
+          <div className="h-3 bg-[#F5F5F5] rounded-full overflow-hidden">
             <div
               className="h-full rounded-full"
               style={{
@@ -215,7 +215,7 @@ export default function SellerDashboard() {
       {/* Action Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-xl p-4 text-center" style={{ border: '1px solid #EBE7DF' }}>
-          <p className="text-2xl font-bold text-[#1A1A18]">{stats?.totalActions || 0}</p>
+          <p className="text-2xl font-bold text-[#0D0D0D]">{stats?.totalActions || 0}</p>
           <p className="text-xs text-[#6E6A63]">Total Actions</p>
         </div>
         <div className="bg-white rounded-xl p-4 text-center" style={{ border: '1px solid #EBE7DF' }}>
@@ -229,7 +229,7 @@ export default function SellerDashboard() {
       </div>
 
       {/* Improvement Actions */}
-      <h2 className="text-lg font-bold text-[#1A1A18] mb-3">Improvement Roadmap</h2>
+      <h2 className="text-lg font-bold text-[#0D0D0D] mb-3">Improvement Roadmap</h2>
       {actions.length === 0 ? (
         <div className="bg-white rounded-xl p-6 text-center" style={{ border: '1px solid #EBE7DF' }}>
           <p className="text-sm text-[#6E6A63]">Improvement actions will appear here after your Value Readiness Report is generated.</p>
@@ -254,7 +254,7 @@ export default function SellerDashboard() {
                   className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 cursor-pointer bg-transparent transition-colors ${
                     action.status === 'complete' ? 'border-green-500 text-green-500 bg-green-50'
                     : action.status === 'in_progress' ? 'border-[#C96B4F] text-[#C96B4F]'
-                    : 'border-[#DDD9D1] text-transparent hover:border-[#C96B4F]'
+                    : 'border-[rgba(0,0,0,0.08)] text-transparent hover:border-[#C96B4F]'
                   }`}
                   type="button"
                 >
@@ -262,7 +262,7 @@ export default function SellerDashboard() {
                 </button>
 
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-semibold m-0 ${action.status === 'complete' ? 'line-through text-[#A9A49C]' : 'text-[#1A1A18]'}`}>
+                  <p className={`text-sm font-semibold m-0 ${action.status === 'complete' ? 'line-through text-[#A9A49C]' : 'text-[#0D0D0D]'}`}>
                     {action.title}
                   </p>
                   {action.description && (

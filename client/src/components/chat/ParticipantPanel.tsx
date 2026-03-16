@@ -117,7 +117,7 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
       {/* Invite form */}
       {showInvite && (
         <div className="px-3 pb-3">
-          <div className="p-3 rounded-xl bg-[#FAF9F7] space-y-2">
+          <div className="p-3 rounded-xl bg-[#FAFAFA] space-y-2">
             <input
               type="email"
               placeholder="Email address"
@@ -144,7 +144,7 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
               </button>
               <button
                 onClick={() => { setShowInvite(false); setInviteError(null); }}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F3F0EA] text-[#3D3B37] border-0 cursor-pointer hover:bg-[#EBE7DF]"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F5F5F5] text-[#3D3B37] border-0 cursor-pointer hover:bg-[#EBE7DF]"
               >
                 Cancel
               </button>
@@ -161,7 +161,7 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
             {(owner.display_name || owner.email)?.[0]?.toUpperCase() || '?'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-medium text-[#1A1A18] m-0 truncate">{owner.display_name || owner.email}</p>
+            <p className="text-[12px] font-medium text-[#0D0D0D] m-0 truncate">{owner.display_name || owner.email}</p>
           </div>
           <span className={`text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded-full ${ROLE_LABELS.owner.color}`}>
             Owner
@@ -178,7 +178,7 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
               {(p.display_name || p.email)?.[0]?.toUpperCase() || '?'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium text-[#1A1A18] m-0 truncate">{p.display_name || p.email}</p>
+              <p className="text-[12px] font-medium text-[#0D0D0D] m-0 truncate">{p.display_name || p.email}</p>
             </div>
             <span className={`text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded-full ${roleInfo.color}`}>
               {roleInfo.label}
@@ -199,7 +199,7 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
           <p className="text-[10px] font-semibold uppercase tracking-wider text-[#A9A49C] px-3 mt-3 mb-1">Pending</p>
           {pendingInvitations.map(inv => (
             <div key={inv.id} className="flex items-center gap-2 px-3 py-1.5 opacity-60">
-              <div className="w-6 h-6 rounded-full bg-[#F3F0EA] text-[#A9A49C] flex items-center justify-center text-[10px] shrink-0">
+              <div className="w-6 h-6 rounded-full bg-[#F5F5F5] text-[#A9A49C] flex items-center justify-center text-[10px] shrink-0">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
               </div>
               <div className="flex-1 min-w-0">

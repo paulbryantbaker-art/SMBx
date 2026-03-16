@@ -79,21 +79,21 @@ export default function CommentsPanel({ deliverableId, onClose }: CommentsPanelP
   const displayed = showResolved ? comments : active;
 
   return (
-    <div className="flex flex-col h-full bg-white" style={{ borderLeft: '1px solid #DDD9D1', width: 320 }}>
+    <div className="flex flex-col h-full bg-white" style={{ borderLeft: '1px solid rgba(0,0,0,0.08)', width: 320 }}>
       {/* Header */}
-      <div className="shrink-0 flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid #DDD9D1' }}>
+      <div className="shrink-0 flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="flex items-center gap-2">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C96B4F" strokeWidth="2">
             <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
           </svg>
-          <span className="text-sm font-semibold text-[#1A1A18]">Comments</span>
+          <span className="text-sm font-semibold text-[#0D0D0D]">Comments</span>
           {active.length > 0 && (
             <span className="text-[10px] font-bold bg-[#C96B4F] text-white rounded-full w-5 h-5 flex items-center justify-center">
               {active.length}
             </span>
           )}
         </div>
-        <button onClick={onClose} className="w-6 h-6 rounded hover:bg-[#F3F0EA] flex items-center justify-center cursor-pointer border-0 bg-transparent">
+        <button onClick={onClose} className="w-6 h-6 rounded hover:bg-[#F5F5F5] flex items-center justify-center cursor-pointer border-0 bg-transparent">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
         </button>
       </div>
@@ -136,7 +136,7 @@ export default function CommentsPanel({ deliverableId, onClose }: CommentsPanelP
                 <div className="w-5 h-5 rounded-full bg-[#C96B4F] text-white flex items-center justify-center text-[9px] font-bold shrink-0">
                   {(comment.display_name || comment.email)[0].toUpperCase()}
                 </div>
-                <span className="text-[11px] font-semibold text-[#1A1A18]">
+                <span className="text-[11px] font-semibold text-[#0D0D0D]">
                   {comment.display_name || comment.email.split('@')[0]}
                 </span>
                 {comment.participant_role && (
@@ -179,8 +179,8 @@ export default function CommentsPanel({ deliverableId, onClose }: CommentsPanelP
       </div>
 
       {/* New comment input */}
-      <div className="shrink-0 p-3" style={{ borderTop: '1px solid #DDD9D1' }}>
-        <div className="rounded-lg overflow-hidden" style={{ border: '1px solid #DDD9D1' }}>
+      <div className="shrink-0 p-3" style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+        <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.08)' }}>
           <textarea
             ref={inputRef}
             value={newComment}
@@ -188,7 +188,7 @@ export default function CommentsPanel({ deliverableId, onClose }: CommentsPanelP
             onKeyDown={handleKeyDown}
             placeholder="Add a comment..."
             rows={2}
-            className="w-full px-3 py-2 text-[12px] text-[#1A1A18] bg-white border-0 outline-none resize-none"
+            className="w-full px-3 py-2 text-[12px] text-[#0D0D0D] bg-white border-0 outline-none resize-none"
             style={{ fontFamily: 'inherit' }}
           />
           <div className="flex items-center justify-between px-3 py-1.5 bg-[#FAFAF8]" style={{ borderTop: '1px solid #EBE7DF' }}>

@@ -479,7 +479,7 @@ export function BeforeAfterSlider({
       </div>
 
       {/* Labels */}
-      <span style={{ position: 'absolute', top: 12, left: 12, fontSize: 11, fontWeight: 700, color: '#fff', background: 'rgba(26,26,24,0.6)', padding: '3px 10px', borderRadius: 100, letterSpacing: '0.06em', textTransform: 'uppercase', zIndex: 3 }}>{beforeLabel}</span>
+      <span style={{ position: 'absolute', top: 12, left: 12, fontSize: 11, fontWeight: 700, color: '#fff', background: 'rgba(0,0,0,0.6)', padding: '3px 10px', borderRadius: 100, letterSpacing: '0.06em', textTransform: 'uppercase', zIndex: 3 }}>{beforeLabel}</span>
       <span style={{ position: 'absolute', top: 12, right: 12, fontSize: 11, fontWeight: 700, color: '#fff', background: '#C96B4F', padding: '3px 10px', borderRadius: 100, letterSpacing: '0.06em', textTransform: 'uppercase', zIndex: 3 }}>{afterLabel}</span>
     </div>
   );
@@ -525,13 +525,13 @@ export function InteractiveCalculator({
 
   return (
     <div className={className} style={{ background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' }}>
-      <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)' }}>INTERACTIVE ADD-BACK CALCULATOR</span>
-      <p style={{ fontSize: '13px', color: 'rgba(26,26,24,0.4)', margin: '8px 0 16px' }}>Toggle add-backs to see how they impact valuation</p>
+      <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.45)' }}>INTERACTIVE ADD-BACK CALCULATOR</span>
+      <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.4)', margin: '8px 0 16px' }}>Toggle add-backs to see how they impact valuation</p>
 
       <div style={{ fontSize: '14px', fontVariantNumeric: 'tabular-nums' }}>
-        <div className="flex justify-between" style={{ color: 'rgba(26,26,24,0.5)', marginBottom: 12 }}>
+        <div className="flex justify-between" style={{ color: 'rgba(0,0,0,0.5)', marginBottom: 12 }}>
           <span>Reported SDE</span>
-          <span style={{ color: '#1A1A18', fontWeight: 600 }}>${baseSDE.toLocaleString()}</span>
+          <span style={{ color: '#0D0D0D', fontWeight: 600 }}>${baseSDE.toLocaleString()}</span>
         </div>
 
         <div className="space-y-2">
@@ -553,8 +553,8 @@ export function InteractiveCalculator({
                 fontSize: '14px',
                 fontVariantNumeric: 'tabular-nums',
                 transition: 'all 0.2s',
-                background: item.enabled ? 'rgba(212,113,78,0.08)' : 'rgba(26,26,24,0.03)',
-                color: item.enabled ? '#1A1A18' : 'rgba(26,26,24,0.3)',
+                background: item.enabled ? 'rgba(212,113,78,0.08)' : 'rgba(0,0,0,0.03)',
+                color: item.enabled ? '#0D0D0D' : 'rgba(0,0,0,0.3)',
               }}
             >
               <span className="flex items-center gap-2">
@@ -565,7 +565,7 @@ export function InteractiveCalculator({
                   width: 20,
                   height: 20,
                   borderRadius: 6,
-                  border: item.enabled ? '2px solid #C96B4F' : '2px solid rgba(26,26,24,0.15)',
+                  border: item.enabled ? '2px solid #C96B4F' : '2px solid rgba(0,0,0,0.15)',
                   background: item.enabled ? '#C96B4F' : 'transparent',
                   transition: 'all 0.2s',
                   flexShrink: 0,
@@ -578,7 +578,7 @@ export function InteractiveCalculator({
                 </span>
                 {item.label}
               </span>
-              <span style={{ color: item.enabled ? '#C96B4F' : 'rgba(26,26,24,0.25)', fontWeight: 600, flexShrink: 0, marginLeft: 16 }}>
+              <span style={{ color: item.enabled ? '#C96B4F' : 'rgba(0,0,0,0.25)', fontWeight: 600, flexShrink: 0, marginLeft: 16 }}>
                 +${item.amount.toLocaleString()}
               </span>
             </button>
@@ -587,7 +587,7 @@ export function InteractiveCalculator({
 
         <motion.div
           layout
-          style={{ borderTop: '2px solid rgba(26,26,24,0.12)', marginTop: 16, paddingTop: 16 }}
+          style={{ borderTop: '2px solid rgba(0,0,0,0.12)', marginTop: 16, paddingTop: 16 }}
         >
           <div className="flex justify-between" style={{ fontSize: '16px', fontWeight: 600, color: '#C96B4F' }}>
             <span>Adjusted SDE</span>
@@ -632,28 +632,28 @@ export function DSCRCalculator({ className }: { className?: string }) {
 
   return (
     <div className={className} style={{ background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' }}>
-      <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)' }}>INTERACTIVE DSCR CALCULATOR</span>
-      <p style={{ fontSize: '13px', color: 'rgba(26,26,24,0.4)', margin: '8px 0 20px' }}>Drag sliders to model SBA eligibility</p>
+      <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.45)' }}>INTERACTIVE DSCR CALCULATOR</span>
+      <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.4)', margin: '8px 0 20px' }}>Drag sliders to model SBA eligibility</p>
 
       <div className="space-y-5">
         <div>
           <div className="flex justify-between mb-2" style={{ fontSize: '13px' }}>
-            <span style={{ color: 'rgba(26,26,24,0.5)' }}>Loan Amount</span>
-            <span style={{ fontWeight: 600, color: '#1A1A18' }}>${(loanAmt / 1000000).toFixed(2)}M</span>
+            <span style={{ color: 'rgba(0,0,0,0.5)' }}>Loan Amount</span>
+            <span style={{ fontWeight: 600, color: '#0D0D0D' }}>${(loanAmt / 1000000).toFixed(2)}M</span>
           </div>
           <input type="range" min={200000} max={5000000} step={50000} value={loanAmt} onChange={e => setLoanAmt(+e.target.value)} style={{ width: '100%' }} />
         </div>
         <div>
           <div className="flex justify-between mb-2" style={{ fontSize: '13px' }}>
-            <span style={{ color: 'rgba(26,26,24,0.5)' }}>Interest Rate</span>
-            <span style={{ fontWeight: 600, color: '#1A1A18' }}>{rate.toFixed(1)}%</span>
+            <span style={{ color: 'rgba(0,0,0,0.5)' }}>Interest Rate</span>
+            <span style={{ fontWeight: 600, color: '#0D0D0D' }}>{rate.toFixed(1)}%</span>
           </div>
           <input type="range" min={6} max={15} step={0.25} value={rate} onChange={e => setRate(+e.target.value)} style={{ width: '100%' }} />
         </div>
         <div>
           <div className="flex justify-between mb-2" style={{ fontSize: '13px' }}>
-            <span style={{ color: 'rgba(26,26,24,0.5)' }}>Annual EBITDA</span>
-            <span style={{ fontWeight: 600, color: '#1A1A18' }}>${(ebitda / 1000).toFixed(0)}K</span>
+            <span style={{ color: 'rgba(0,0,0,0.5)' }}>Annual EBITDA</span>
+            <span style={{ fontWeight: 600, color: '#0D0D0D' }}>${(ebitda / 1000).toFixed(0)}K</span>
           </div>
           <input type="range" min={100000} max={2000000} step={25000} value={ebitda} onChange={e => setEbitda(+e.target.value)} style={{ width: '100%' }} />
         </div>
@@ -661,9 +661,9 @@ export function DSCRCalculator({ className }: { className?: string }) {
 
       <motion.div
         layout
-        style={{ borderTop: '2px solid rgba(26,26,24,0.12)', marginTop: 20, paddingTop: 20, textAlign: 'center' }}
+        style={{ borderTop: '2px solid rgba(0,0,0,0.12)', marginTop: 20, paddingTop: 20, textAlign: 'center' }}
       >
-        <div style={{ fontSize: '13px', color: 'rgba(26,26,24,0.45)', marginBottom: 4 }}>DSCR</div>
+        <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)', marginBottom: 4 }}>DSCR</div>
         <motion.div
           key={dscr.toFixed(2)}
           initial={{ scale: 1.1, opacity: 0.7 }}
@@ -676,7 +676,7 @@ export function DSCRCalculator({ className }: { className?: string }) {
         <div style={{ fontSize: '13px', fontWeight: 600, color: dscrColor, marginTop: 4 }}>
           {dscr >= 1.25 ? 'SBA Eligible' : dscr >= 1.0 ? 'Borderline' : 'Below Threshold'}
         </div>
-        <div style={{ fontSize: '12px', color: 'rgba(26,26,24,0.4)', marginTop: 8 }}>
+        <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.4)', marginTop: 8 }}>
           Monthly P&I: ${Math.round(monthlyPayment).toLocaleString()} &middot; Annual: ${Math.round(annualDebt).toLocaleString()}
         </div>
       </motion.div>
@@ -717,7 +717,7 @@ export function StatBar({
           <div style={{ fontSize: '28px', fontWeight: 700, color: '#C96B4F', lineHeight: 1.1 }}>
             <AnimatedCounter value={s.value} prefix={s.prefix} suffix={s.suffix} />
           </div>
-          <div style={{ fontSize: '12px', color: 'rgba(26,26,24,0.45)', marginTop: 4, fontWeight: 500 }}>{s.label}</div>
+          <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.45)', marginTop: 4, fontWeight: 500 }}>{s.label}</div>
         </motion.div>
       ))}
     </div>
@@ -876,8 +876,8 @@ export function ZigZagSection({
         <ScrollReveal key={item.title} delay={i * 0.08}>
           <div className={`grid md:grid-cols-2 gap-12 items-center ${i % 2 === 1 ? 'md:[direction:rtl]' : ''}`}>
             <div className={i % 2 === 1 ? 'md:[direction:ltr]' : ''}>
-              <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#1A1A18', margin: '0 0 10px' }}>{item.title}</h3>
-              <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.65 }}>{item.body}</p>
+              <h3 style={{ fontSize: '20px', fontWeight: 600, color: '#0D0D0D', margin: '0 0 10px' }}>{item.title}</h3>
+              <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', margin: 0, lineHeight: 1.65 }}>{item.body}</p>
             </div>
             <div className={`flex ${i % 2 === 1 ? 'md:justify-start md:[direction:ltr]' : 'md:justify-end'} justify-center`}>
               <div style={{
@@ -923,10 +923,10 @@ export function BentoGrid({
               gridRow: featured ? 'span 2' : undefined,
               height: '100%',
             }}>
-              <h3 style={{ fontSize: featured ? '20px' : '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 8px' }}>
+              <h3 style={{ fontSize: featured ? '20px' : '16px', fontWeight: 600, color: '#0D0D0D', margin: '0 0 8px' }}>
                 {item.icon && <span style={{ marginRight: 8 }}>{item.icon}</span>}{item.title}
               </h3>
-              <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.6 }}>{item.body}</p>
+              <p style={{ fontSize: '15px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', margin: 0, lineHeight: 1.6 }}>{item.body}</p>
             </div>
           </ScrollReveal>
         );
@@ -962,13 +962,13 @@ export function FeatureGrid({
             height: '100%',
           }}>
             <div className="flex items-start justify-between gap-3">
-              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 6px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#0D0D0D', margin: '0 0 6px' }}>
                 {item.title}
                 {item.badge && <PulseBadge color="#C96B4F" style={{ marginLeft: 8 }}>{item.badge}</PulseBadge>}
               </h3>
               {item.price && <span style={{ fontSize: '20px', fontWeight: 700, color: '#C96B4F', flexShrink: 0 }}>{item.price}</span>}
             </div>
-            <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.55 }}>{item.body}</p>
+            <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', margin: 0, lineHeight: 1.55 }}>{item.body}</p>
           </div>
         </ScrollReveal>
       ))}
@@ -1002,7 +1002,7 @@ export function PullQuote({
           style={{ fontSize: 56, fontWeight: 700, color: '#C96B4F', lineHeight: 1 }}
         />
       ) : (
-        <p style={{ fontSize: 36, fontWeight: 300, color: '#1A1A18', lineHeight: 1.25, margin: 0 }}>{text}</p>
+        <p style={{ fontSize: 36, fontWeight: 300, color: '#0D0D0D', lineHeight: 1.25, margin: 0 }}>{text}</p>
       )}
     </div>
   );
@@ -1048,17 +1048,17 @@ export function DataCard({
 }) {
   return (
     <div className={className} style={{ background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' }}>
-      {label && <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)', display: 'block', marginBottom: 16 }}>{label}</span>}
+      {label && <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.45)', display: 'block', marginBottom: 16 }}>{label}</span>}
       <div style={{ fontSize: '14px', fontVariantNumeric: 'tabular-nums' }}>
         {rows.map((r) => (
-          <div key={r.label} className="flex justify-between" style={{ padding: '8px 0', borderBottom: '1px solid rgba(0,0,0,0.04)', color: r.highlight ? '#C96B4F' : 'rgba(26,26,24,0.5)' }}>
+          <div key={r.label} className="flex justify-between" style={{ padding: '8px 0', borderBottom: '1px solid rgba(0,0,0,0.04)', color: r.highlight ? '#C96B4F' : 'rgba(0,0,0,0.5)' }}>
             <span>{r.label}</span>
-            <span style={{ fontWeight: 600, color: r.highlight ? '#C96B4F' : '#1A1A18' }}>{r.value}</span>
+            <span style={{ fontWeight: 600, color: r.highlight ? '#C96B4F' : '#0D0D0D' }}>{r.value}</span>
           </div>
         ))}
       </div>
       {footer && (
-        <div className="flex justify-between" style={{ marginTop: 12, paddingTop: 12, borderTop: '2px solid rgba(26,26,24,0.12)', fontSize: '16px', fontWeight: 700, color: '#C96B4F' }}>
+        <div className="flex justify-between" style={{ marginTop: 12, paddingTop: 12, borderTop: '2px solid rgba(0,0,0,0.12)', fontSize: '16px', fontWeight: 700, color: '#C96B4F' }}>
           <span>{footer.label}</span>
           <span>{footer.value}</span>
         </div>
@@ -1090,8 +1090,8 @@ export function ExpandableCard({
     >
       <div style={{ padding: '20px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
         <div style={{ flex: 1 }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: 0 }}>{title}</h3>
-          {preview && !open && <p style={{ fontSize: '14px', color: 'rgba(26,26,24,0.45)', margin: '4px 0 0', lineHeight: 1.5 }}>{preview}</p>}
+          <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#0D0D0D', margin: 0 }}>{title}</h3>
+          {preview && !open && <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', margin: '4px 0 0', lineHeight: 1.5 }}>{preview}</p>}
         </div>
         <motion.span
           animate={{ rotate: open ? 180 : 0 }}
@@ -1130,7 +1130,7 @@ export function DealPreview({
   className?: string;
 }) {
   return (
-    <div className={className} style={{ background: 'linear-gradient(135deg, #1A1A18 0%, #2B2A27 100%)', borderRadius: 16, padding: '28px 32px', color: '#fff' }}>
+    <div className={className} style={{ background: 'linear-gradient(135deg, #0D0D0D 0%, #2B2A27 100%)', borderRadius: 16, padding: '28px 32px', color: '#fff' }}>
       <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#C96B4F' }}>{title}</span>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, marginTop: 20 }}>
         {metrics.map(m => (
@@ -1163,13 +1163,13 @@ export function SideBySideCard({
 }) {
   return (
     <div className={className} style={{ display: 'flex', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.06)' }}>
-      <div style={{ flex: 1, padding: '24px', background: '#FAF9F7' }}>
-        <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.45)', display: 'block', marginBottom: 16 }}>{leftLabel}</span>
+      <div style={{ flex: 1, padding: '24px', background: '#FAFAFA' }}>
+        <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.45)', display: 'block', marginBottom: 16 }}>{leftLabel}</span>
         <div style={{ fontSize: '14px', fontVariantNumeric: 'tabular-nums' }}>
           {leftItems.map(r => (
-            <div key={r.label} className="flex justify-between" style={{ padding: '6px 0', color: 'rgba(26,26,24,0.5)' }}>
+            <div key={r.label} className="flex justify-between" style={{ padding: '6px 0', color: 'rgba(0,0,0,0.5)' }}>
               <span>{r.label}</span>
-              <span style={{ fontWeight: 600, color: '#1A1A18' }}>{r.value}</span>
+              <span style={{ fontWeight: 600, color: '#0D0D0D' }}>{r.value}</span>
             </div>
           ))}
         </div>
@@ -1232,8 +1232,8 @@ export function ConversationPreview({
               fontSize: '14px',
               lineHeight: 1.55,
               ...(msg.role === 'user'
-                ? { background: '#1A1A18', color: '#fff' }
-                : { background: '#F5F5F0', color: '#1A1A18' }),
+                ? { background: '#0D0D0D', color: '#fff' }
+                : { background: '#FFFFFF', color: '#0D0D0D' }),
             }}
           >
             {msg.role === 'ai' && <span style={{ fontSize: '11px', fontWeight: 600, color: '#C96B4F', display: 'block', marginBottom: 4 }}>YULIA</span>}
@@ -1280,7 +1280,7 @@ export function NumberedList({
             }}>
               {String(i + 1).padStart(2, '0')}
             </span>
-            <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', margin: 0, lineHeight: 1.65 }}>{item}</p>
+            <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', margin: 0, lineHeight: 1.65 }}>{item}</p>
           </div>
         </ScrollReveal>
       ))}

@@ -15,8 +15,8 @@ interface PricingBelowProps {
 
 const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
 const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
-const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 };
-const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, margin: 0 };
+const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, marginTop: 12 };
+const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, margin: 0 };
 const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '24px 28px' };
 
 export default function PricingBelow({ onChipClick }: PricingBelowProps) {
@@ -47,7 +47,7 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
               <RevealSection key={item.title}>
                 <div style={cardStyle}>
                   <div className="flex items-start justify-between gap-3">
-                    <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A18', margin: '0 0 6px' }}>{item.title}</h3>
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#0D0D0D', margin: '0 0 6px' }}>{item.title}</h3>
                     <PulseBadge color="#C96B4F">Free</PulseBadge>
                   </div>
                   <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.body}</p>
@@ -126,19 +126,19 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
                   borderLeft: tier.badge ? '3px solid #C96B4F' : undefined,
                 }}>
                   <div className="flex items-center gap-3" style={{ marginBottom: 12 }}>
-                    <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A18', margin: 0 }}>{tier.name}</h3>
+                    <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#0D0D0D', margin: 0 }}>{tier.name}</h3>
                     {tier.badge && <PulseBadge color="#C96B4F">{tier.badge}</PulseBadge>}
                   </div>
                   <div className="flex items-baseline gap-1" style={{ marginBottom: 12 }}>
                     <span style={{ fontSize: '36px', fontWeight: 700, color: '#C96B4F', lineHeight: 1 }}>{tier.price}</span>
-                    <span style={{ fontSize: '14px', color: 'rgba(26,26,24,0.4)' }}>{tier.period}</span>
+                    <span style={{ fontSize: '14px', color: 'rgba(0,0,0,0.4)' }}>{tier.period}</span>
                   </div>
-                  <p style={{ fontSize: '14px', color: 'rgba(26,26,24,0.45)', fontStyle: 'italic', margin: '0 0 16px' }}>{tier.note}</p>
+                  <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', fontStyle: 'italic', margin: '0 0 16px' }}>{tier.note}</p>
                   <div className="space-y-2">
                     {tier.items.map(item => (
                       <div key={item} className="flex items-start gap-2">
                         <span style={{ color: '#C96B4F', fontSize: '14px', lineHeight: '1.5', flexShrink: 0 }}>&#10003;</span>
-                        <span style={{ fontSize: '14px', color: 'rgba(26,26,24,0.6)', lineHeight: 1.5 }}>{item}</span>
+                        <span style={{ fontSize: '14px', color: 'rgba(0,0,0,0.6)', lineHeight: 1.5 }}>{item}</span>
                       </div>
                     ))}
                   </div>
@@ -221,15 +221,15 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
       <section style={{ paddingTop: 60, paddingBottom: 80 }}>
         <div style={sectionStyle}>
           <RevealSection>
-            <p style={{ fontSize: 36, fontWeight: 300, color: '#1A1A18', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>Intelligence you can afford. Results you can defend.</p>
+            <p style={{ fontSize: 36, fontWeight: 300, color: '#0D0D0D', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>Intelligence you can afford. Results you can defend.</p>
           </RevealSection>
 
           <RevealSection>
             <div className="text-center">
-              <p style={{ fontSize: '16px', color: 'rgba(26,26,24,0.5)', marginBottom: 16 }}>Start a free analysis &rarr; see what Yulia delivers before you pay anything</p>
+              <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.5)', marginBottom: 16 }}>Start a free analysis &rarr; see what Yulia delivers before you pay anything</p>
               <MagneticButton
                 onClick={() => onChipClick("Start a free analysis")}
-                style={{ background: '#1A1A18', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ background: '#0D0D0D', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Start chatting &rarr;
               </MagneticButton>

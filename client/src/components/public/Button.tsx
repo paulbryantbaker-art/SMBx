@@ -20,7 +20,7 @@ const variants: Record<Variant, string> = {
   primary:
     `${base} bg-[#C96B4F] text-white border-none rounded-full text-[15px] font-semibold px-8 py-4 hover:bg-[#BE6342] hover:-translate-y-px`,
   secondary:
-    `${base} bg-transparent text-[#1A1A18] border-2 border-[#E8E4DC] rounded-full text-[15px] font-semibold px-7 py-3.5 hover:border-[#1A1A18]`,
+    `${base} bg-transparent text-[#0D0D0D] border-2 border-[#E8E4DC] rounded-full text-[15px] font-semibold px-7 py-3.5 hover:border-[#0D0D0D]`,
   nav:
     `${base} bg-[#C96B4F] text-white border-none rounded-full text-[13px] font-semibold py-2.5 px-[22px] hover:bg-[#BE6342]`,
   cardLink:

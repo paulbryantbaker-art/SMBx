@@ -17,8 +17,8 @@ interface BuyBelowProps {
 
 const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
 const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
-const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#1A1A18', lineHeight: 1.15, marginTop: 12 };
-const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(26,26,24,0.5)', lineHeight: 1.65, margin: 0 };
+const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, marginTop: 12 };
+const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, margin: 0 };
 const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' };
 
 export default function BuyBelow({ onChipClick }: BuyBelowProps) {
@@ -39,7 +39,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
               <p>Every day on the wrong deal is a day you&apos;re not closing the right one. In a market where good businesses sell in weeks, speed to conviction is everything.</p>
               <p>Paste a BizBuySell listing. Describe a deal your broker sent. Tell Yulia about a business you heard is for sale.</p>
               <p>Within minutes: financial validation against federal benchmarks, SBA financing modeled at live rates, competitive landscape mapped, risks flagged &mdash; and a clear answer.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>Pursue or pass. With the data to back it up. Free.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>Pursue or pass. With the data to back it up. Free.</p>
             </div>
           </RevealSection>
         </div>
@@ -91,7 +91,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
             <div className="space-y-6" style={bodyStyle}>
               <p>A plumbing company in Phoenix and a plumbing company in rural Pennsylvania are fundamentally different deals. Different competitive density, wage structures, buyer pools, and SBA lending patterns.</p>
               <p>Yulia delivers intelligence specific to your MSA &mdash; not your state, not your region, your metropolitan statistical area. The same geographic precision that institutional investors use.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>Every number. Sourced. Traceable. Included in your plan.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>Every number. Sourced. Traceable. Included in your plan.</p>
             </div>
           </RevealSection>
         </div>
@@ -130,7 +130,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
           </RevealSection>
 
           <RevealSection style={{ marginTop: 24 }}>
-            <p style={{ fontSize: '15px', fontWeight: 500, color: '#1A1A18', lineHeight: 1.65 }}>
+            <p style={{ fontSize: '15px', fontWeight: 500, color: '#0D0D0D', lineHeight: 1.65 }}>
               On a $2M deal, the asset sale tax shield is worth ~$304K in present value. That&apos;s why buyers push for asset sales. Yulia models both sides so you negotiate from real numbers.
             </p>
           </RevealSection>
@@ -233,22 +233,22 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
       <section style={{ paddingTop: 100, paddingBottom: 80 }}>
         <div style={sectionStyle}>
           <RevealSection>
-            <p style={{ fontSize: 36, fontWeight: 300, color: '#1A1A18', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>You own a business. And you know exactly what to do with it.</p>
+            <p style={{ fontSize: 36, fontWeight: 300, color: '#0D0D0D', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>You own a business. And you know exactly what to do with it.</p>
           </RevealSection>
 
           <RevealSection>
             <div className="space-y-6" style={bodyStyle}>
               <p>Not &ldquo;I hope this works out.&rdquo; Not &ldquo;I think I paid the right price.&rdquo;</p>
               <p>You have a plan. Specific to this business, this market, this thesis. Built from months of intelligence that Yulia gathered during the acquisition.</p>
-              <p style={{ color: '#1A1A18', fontWeight: 600 }}>That&apos;s the difference between buying a business and building wealth.</p>
+              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>That&apos;s the difference between buying a business and building wealth.</p>
             </div>
           </RevealSection>
 
           <RevealSection style={{ marginTop: 40 }}>
-            <p style={{ fontSize: '16px', color: 'rgba(26,26,24,0.5)', marginBottom: 16 }}>Tell Yulia what you&apos;re looking for &rarr; free acquisition thesis</p>
+            <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.5)', marginBottom: 16 }}>Tell Yulia what you&apos;re looking for &rarr; free acquisition thesis</p>
             <MagneticButton
               onClick={() => onChipClick("I'm looking to buy a business")}
-              style={{ background: '#1A1A18', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ background: '#0D0D0D', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
             >
               Message Yulia &rarr;
             </MagneticButton>

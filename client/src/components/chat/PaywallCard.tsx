@@ -74,7 +74,7 @@ export default function PaywallCard({ paywall, dealId, onUnlocked, onTopUp }: Pa
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
             </div>
             <div>
-              <p className="text-base font-semibold text-[#1A1A18] m-0">Purchased</p>
+              <p className="text-base font-semibold text-[#0D0D0D] m-0">Purchased</p>
               <p className="text-sm text-[#6E6A63] m-0">Advancing to {GATE_NAMES[paywall.gate] || paywall.gate}...</p>
             </div>
           </div>
@@ -94,7 +94,7 @@ export default function PaywallCard({ paywall, dealId, onUnlocked, onTopUp }: Pa
             </svg>
           </div>
           <div>
-            <p className="text-lg font-bold text-[#1A1A18] m-0">{GATE_NAMES[paywall.gate] || paywall.gate}</p>
+            <p className="text-lg font-bold text-[#0D0D0D] m-0">{GATE_NAMES[paywall.gate] || paywall.gate}</p>
             <p className="text-sm text-[#6E6A63] m-0 mt-0.5">{paywall.comparisonText}</p>
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function PaywallCard({ paywall, dealId, onUnlocked, onTopUp }: Pa
             {!paywall.sufficient && (
               <button
                 onClick={onTopUp}
-                className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#F3F0EA] text-[#3D3B37] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#F5F5F5] text-[#3D3B37] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
               >
                 Add Funds
               </button>

@@ -129,29 +129,29 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
 
   if (success) {
     return (
-      <div className="self-center w-full max-w-[95%] bg-white rounded-2xl px-6 py-8 text-center" style={{ boxShadow: '0 2px 8px rgba(26,26,24,.07), 0 1px 2px rgba(26,26,24,.04)', borderLeft: '3px solid #C96B4F' }}>
+      <div className="self-center w-full max-w-[95%] bg-white rounded-2xl px-6 py-8 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)', borderLeft: '3px solid #C96B4F' }}>
         <div className="w-10 h-10 rounded-full bg-[#C96B4F] text-white flex items-center justify-center mx-auto mb-3">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
         </div>
-        <p className="text-lg font-semibold text-[#1A1A18] m-0">You're all set</p>
+        <p className="text-lg font-semibold text-[#0D0D0D] m-0">You're all set</p>
         <p className="text-sm text-[#6E6A63] m-0 mt-1">Taking you to your workspace...</p>
       </div>
     );
   }
 
   return (
-    <div className="self-center w-full max-w-[95%] bg-white rounded-2xl px-6 py-6" style={{ boxShadow: '0 2px 8px rgba(26,26,24,.07), 0 1px 2px rgba(26,26,24,.04)', borderLeft: '3px solid #C96B4F' }}>
+    <div className="self-center w-full max-w-[95%] bg-white rounded-2xl px-6 py-6" style={{ boxShadow: '0 2px 8px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)', borderLeft: '3px solid #C96B4F' }}>
       {canDismiss && onDismiss && (
         <button
           onClick={onDismiss}
-          className="absolute top-3 right-3 text-[#A9A49C] hover:text-[#1A1A18] bg-transparent border-none cursor-pointer p-1"
+          className="absolute top-3 right-3 text-[#A9A49C] hover:text-[#0D0D0D] bg-transparent border-none cursor-pointer p-1"
           type="button"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
         </button>
       )}
 
-      <h3 className="text-lg font-semibold text-[#1A1A18] m-0 mb-1" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <h3 className="text-lg font-semibold text-[#0D0D0D] m-0 mb-1" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
         Save your progress and continue with Yulia
       </h3>
       <p className="text-[15px] text-[#3D3B37] m-0 mb-5 leading-relaxed">
@@ -166,7 +166,7 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
             value={name}
             onChange={e => setName(e.target.value)}
             required
-            className="w-full px-4 py-3 rounded-xl border border-[#DDD9D1] text-base text-[#1A1A18] outline-none transition-colors focus:border-[#C96B4F]"
+            className="w-full px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] text-base text-[#0D0D0D] outline-none transition-colors focus:border-[#C96B4F]"
             style={{ fontFamily: "'Inter', system-ui, sans-serif", boxShadow: 'inset 0 0 0 0 transparent' }}
           />
         )}
@@ -176,7 +176,7 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
-          className="w-full px-4 py-3 rounded-xl border border-[#DDD9D1] text-base text-[#1A1A18] outline-none transition-colors focus:border-[#C96B4F]"
+          className="w-full px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] text-base text-[#0D0D0D] outline-none transition-colors focus:border-[#C96B4F]"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         />
         <input
@@ -186,7 +186,7 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
           onChange={e => setPassword(e.target.value)}
           required
           minLength={6}
-          className="w-full px-4 py-3 rounded-xl border border-[#DDD9D1] text-base text-[#1A1A18] outline-none transition-colors focus:border-[#C96B4F]"
+          className="w-full px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] text-base text-[#0D0D0D] outline-none transition-colors focus:border-[#C96B4F]"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         />
 
@@ -206,16 +206,16 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
 
       {/* Divider */}
       <div className="flex items-center gap-3 my-4">
-        <div className="flex-1 h-px bg-[#DDD9D1]" />
+        <div className="flex-1 h-px bg-[rgba(0,0,0,0.08)]" />
         <span className="text-[13px] text-[#A9A49C]">or</span>
-        <div className="flex-1 h-px bg-[#DDD9D1]" />
+        <div className="flex-1 h-px bg-[rgba(0,0,0,0.08)]" />
       </div>
 
       {/* Google SSO */}
       <button
         onClick={handleGoogleSignup}
         disabled={loading}
-        className="w-full py-3 rounded-xl border border-[#DDD9D1] bg-white text-[#1A1A18] text-base font-medium cursor-pointer hover:bg-[#F3F0EA] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+        className="w-full py-3 rounded-xl border border-[rgba(0,0,0,0.08)] bg-white text-[#0D0D0D] text-base font-medium cursor-pointer hover:bg-[#F5F5F5] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
         style={{ fontFamily: "'Inter', system-ui, sans-serif", height: '48px' }}
         type="button"
       >

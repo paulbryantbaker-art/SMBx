@@ -103,7 +103,7 @@ export default function WalletPanel() {
       {/* Balance card */}
       <div className="bg-white rounded-2xl border border-[rgba(0,0,0,0.06)] p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
         <p className="text-xs font-medium uppercase tracking-wider text-[#6E6A63] mb-1">Wallet Balance</p>
-        <p className="text-4xl font-semibold text-[#1A1A18] tracking-tight">{fmtFull(balance)}</p>
+        <p className="text-4xl font-semibold text-[#0D0D0D] tracking-tight">{fmtFull(balance)}</p>
         <div className="flex gap-6 mt-4 pt-4 border-t border-[rgba(0,0,0,0.06)]">
           <div>
             <p className="text-xs text-[#9CA3AF]">Total Deposited</p>
@@ -118,7 +118,7 @@ export default function WalletPanel() {
 
       {/* Top-up blocks */}
       <div>
-        <h3 className="text-sm font-semibold text-[#1A1A18] mb-3">Add Funds</h3>
+        <h3 className="text-sm font-semibold text-[#0D0D0D] mb-3">Add Funds</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {blocks.map((block) => {
             const bonus = block.credits_cents - block.price_cents;
@@ -141,7 +141,7 @@ export default function WalletPanel() {
                   </span>
                 )}
                 <span className="text-xs text-[#9CA3AF] font-medium">{block.name}</span>
-                <span className="text-xl font-semibold text-[#1A1A18] mt-1">{fmt(block.price_cents)}</span>
+                <span className="text-xl font-semibold text-[#0D0D0D] mt-1">{fmt(block.price_cents)}</span>
                 {bonus > 0 && (
                   <span className="text-xs text-[#C96B4F] font-medium mt-1">
                     +{fmt(bonus)} bonus
@@ -160,7 +160,7 @@ export default function WalletPanel() {
 
       {/* Transaction history */}
       <div>
-        <h3 className="text-sm font-semibold text-[#1A1A18] mb-3">Recent Transactions</h3>
+        <h3 className="text-sm font-semibold text-[#0D0D0D] mb-3">Recent Transactions</h3>
         {transactions.length === 0 ? (
           <p className="text-sm text-[#9CA3AF] py-4">No transactions yet.</p>
         ) : (
@@ -168,12 +168,12 @@ export default function WalletPanel() {
             {transactions.slice(0, 20).map((tx) => (
               <div key={tx.id} className="flex items-center justify-between px-4 py-3">
                 <div>
-                  <p className="text-sm text-[#1A1A18]">{tx.description || tx.type}</p>
+                  <p className="text-sm text-[#0D0D0D]">{tx.description || tx.type}</p>
                   <p className="text-xs text-[#9CA3AF]">
                     {new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </p>
                 </div>
-                <span className={`text-sm font-medium ${tx.type === 'credit' ? 'text-emerald-600' : 'text-[#1A1A18]'}`}>
+                <span className={`text-sm font-medium ${tx.type === 'credit' ? 'text-emerald-600' : 'text-[#0D0D0D]'}`}>
                   {tx.type === 'credit' ? '+' : '-'}{fmtFull(Math.abs(tx.amount_cents))}
                 </span>
               </div>

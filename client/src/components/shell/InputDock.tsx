@@ -77,14 +77,14 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
     return (
       <div className="fixed bottom-6 md:bottom-10 left-0 right-0 px-4 z-50 pointer-events-none" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="max-w-[700px] mx-auto pointer-events-auto">
-          <div className="bg-white border border-[#EAE6DF] rounded-2xl flex flex-col overflow-hidden shadow-[0_4px_12px_rgba(212,113,78,0.04)] transition-all duration-300 focus-within:shadow-[0_8px_30px_rgba(212,113,78,0.12)] focus-within:border-[#C96B4F]/50 focus-within:ring-4 focus-within:ring-[#FFF0EB]">
+          <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-2xl flex flex-col overflow-hidden shadow-[0_4px_12px_rgba(212,113,78,0.04)] transition-all duration-300 focus-within:shadow-[0_8px_30px_rgba(212,113,78,0.12)] focus-within:border-[#C96B4F]/50 focus-within:ring-4 focus-within:ring-[#FFF0EB]">
             <textarea
               ref={textareaRef}
               value={value}
               onChange={handleChange}
               onKeyDown={handleKey}
               placeholder={placeholder}
-              className="w-full bg-transparent border-none focus:outline-none text-[16px] md:text-[18px] text-[#1A1A18] placeholder:text-[#A9A49C] p-5 resize-none min-h-[80px]"
+              className="w-full bg-transparent border-none focus:outline-none text-[16px] md:text-[18px] text-[#0D0D0D] placeholder:text-[#A9A49C] p-5 resize-none min-h-[80px]"
               style={{ fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", serif', maxHeight: '200px' }}
               rows={2}
             />
@@ -118,14 +118,14 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
       <div className="pointer-events-none absolute -top-16 left-0 right-0 h-16" style={{ background: 'linear-gradient(to bottom, transparent, white)' }} />
 
       <div className="max-w-3xl mx-auto px-4">
-        <div className="bg-white border border-[#EAE6DF] rounded-2xl flex flex-col overflow-hidden shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035)] transition-all duration-300 focus-within:shadow-[0_8px_30px_rgba(212,113,78,0.12)] focus-within:border-[#C96B4F]/50">
+        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-2xl flex flex-col overflow-hidden shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035)] transition-all duration-300 focus-within:shadow-[0_8px_30px_rgba(212,113,78,0.12)] focus-within:border-[#C96B4F]/50">
           <textarea
             ref={textareaRef}
             value={value}
             onChange={handleChange}
             onKeyDown={handleKey}
             placeholder={placeholder}
-            className="w-full bg-transparent border-none focus:outline-none text-[16px] md:text-[18px] text-[#1A1A18] placeholder:text-[#A9A49C] p-5 resize-none min-h-[80px]"
+            className="w-full bg-transparent border-none focus:outline-none text-[16px] md:text-[18px] text-[#0D0D0D] placeholder:text-[#A9A49C] p-5 resize-none min-h-[80px]"
             style={{ fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", serif', maxHeight: '200px' }}
             rows={2}
           />

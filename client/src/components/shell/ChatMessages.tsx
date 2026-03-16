@@ -59,7 +59,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
                         {DELIVERABLE_ICONS[deliverableType] || '\u{1F4C4}'}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[14px] font-bold text-[#1A1A18] m-0 mb-1">
+                        <p className="text-[14px] font-bold text-[#0D0D0D] m-0 mb-1">
                           {DELIVERABLE_LABELS[deliverableType] || 'Document Ready'}
                         </p>
                         <p className="text-[13px] text-[#6E6A63] m-0 mb-3 line-clamp-2">
@@ -95,8 +95,8 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
               <div
                 className={`max-w-[80%] ${
                   m.role === 'user'
-                    ? 'bg-[#FFF0EB] rounded-2xl text-[#1A1A18]'
-                    : 'bg-white border border-[#EBEBEB] rounded-2xl text-[#1A1A18]'
+                    ? 'bg-[#FFF0EB] rounded-2xl text-[#0D0D0D]'
+                    : 'bg-white border border-[#EBEBEB] rounded-2xl text-[#0D0D0D]'
                 }`}
                 style={{ padding: '16px 20px', ...(m.role === 'user' ? { border: '1px solid rgba(212,113,78,0.12)' } : {}) }}
               >

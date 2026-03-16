@@ -89,7 +89,7 @@ export default function CanvasEditor({ deliverableId, content, onSave }: CanvasE
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
               editing
                 ? 'bg-[#C96B4F] text-white'
-                : 'bg-[#F3F0EA] text-[#3D3B37] hover:bg-[#EBE7DF]'
+                : 'bg-[#F5F5F5] text-[#3D3B37] hover:bg-[#EBE7DF]'
             }`}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -109,7 +109,7 @@ export default function CanvasEditor({ deliverableId, content, onSave }: CanvasE
               </button>
               <button
                 onClick={handleCancel}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-transparent text-[#6E6A63] border-0 cursor-pointer hover:bg-[#F3F0EA] transition-colors"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-transparent text-[#6E6A63] border-0 cursor-pointer hover:bg-[#F5F5F5] transition-colors"
               >
                 Cancel
               </button>
@@ -130,7 +130,7 @@ export default function CanvasEditor({ deliverableId, content, onSave }: CanvasE
             onChange={e => setRevisionPrompt(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleRevision()}
             placeholder="Ask Yulia to revise... (e.g. 'make the financial projections more aggressive')"
-            className="flex-1 text-xs text-[#1A1A18] bg-transparent border-0 outline-none placeholder:text-[rgba(0,0,0,0.06)]"
+            className="flex-1 text-xs text-[#0D0D0D] bg-transparent border-0 outline-none placeholder:text-[rgba(0,0,0,0.06)]"
           />
           <button
             onClick={handleRevision}
@@ -149,21 +149,21 @@ export default function CanvasEditor({ deliverableId, content, onSave }: CanvasE
             ref={textareaRef}
             value={draft}
             onChange={e => setDraft(e.target.value)}
-            className="w-full h-full p-6 text-sm text-[#1A1A18] bg-white border-0 outline-none resize-none"
+            className="w-full h-full p-6 text-sm text-[#0D0D0D] bg-white border-0 outline-none resize-none"
             style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', lineHeight: 1.7, tabSize: 2 }}
             spellCheck
           />
         ) : (
           <div id="canvas-print-area" className="px-6 py-5 max-w-[700px] mx-auto canvas-content">
             <div className="canvas-md prose prose-sm max-w-none
-              [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-[#1A1A18] [&_h2]:mt-6 [&_h2]:mb-3
+              [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-[#0D0D0D] [&_h2]:mt-6 [&_h2]:mb-3
               [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-[#3D3B37] [&_h3]:mt-4 [&_h3]:mb-2
               [&_p]:text-sm [&_p]:text-[#3D3B37] [&_p]:leading-[1.7] [&_p]:mb-3
               [&_table]:w-full [&_table]:text-sm [&_table]:border-collapse [&_table]:my-3
-              [&_th]:text-left [&_th]:px-3 [&_th]:py-2 [&_th]:text-xs [&_th]:font-semibold [&_th]:text-[#3D3B37] [&_th]:bg-[#F3F0EA] [&_th]:border [&_th]:border-[#DDD9D1]
-              [&_td]:px-3 [&_td]:py-2 [&_td]:text-[#1A1A18] [&_td]:border [&_td]:border-[#EBE7DF]
+              [&_th]:text-left [&_th]:px-3 [&_th]:py-2 [&_th]:text-xs [&_th]:font-semibold [&_th]:text-[#3D3B37] [&_th]:bg-[#F5F5F5] [&_th]:border [&_th]:border-[rgba(0,0,0,0.08)]
+              [&_td]:px-3 [&_td]:py-2 [&_td]:text-[#0D0D0D] [&_td]:border [&_td]:border-[#EBE7DF]
               [&_hr]:border-0 [&_hr]:border-t [&_hr]:border-[#EBE7DF] [&_hr]:my-5
-              [&_strong]:font-bold [&_strong]:text-[#1A1A18]
+              [&_strong]:font-bold [&_strong]:text-[#0D0D0D]
               [&_ul]:pl-5 [&_ul]:text-sm [&_ul]:text-[#3D3B37]
               [&_ol]:pl-5 [&_ol]:text-sm [&_ol]:text-[#3D3B37]
               [&_li]:mb-1

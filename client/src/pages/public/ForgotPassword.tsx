@@ -34,7 +34,7 @@ export default function ForgotPassword({ onNavigateLogin }: ForgotPasswordProps)
   };
 
   return (
-    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#FAF9F7]">
+    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#FAFAFA]">
       <div className="w-full max-w-[400px] bg-white rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.06)]">
         <div className="text-center mb-7">
           <Logo linked={false} />
@@ -63,13 +63,13 @@ export default function ForgotPassword({ onNavigateLogin }: ForgotPasswordProps)
               <div className="bg-[#FEF2F2] text-[#B91C1C] px-3.5 py-2.5 rounded-xl text-sm mb-4">{error}</div>
             )}
 
-            <label className="block text-sm font-medium text-[#1A1A18] mb-1.5">Email</label>
+            <label className="block text-sm font-medium text-[#0D0D0D] mb-1.5">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-3.5 py-2.5 text-[15px] border border-[#F0EEEA] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#C96B4F]"
+              className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#C96B4F]"
               required
             />
 

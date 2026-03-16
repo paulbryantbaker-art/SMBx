@@ -30,8 +30,8 @@ export default function InlineSignup({ onRegister, onNavigateLogin, className = 
   return (
     <div className={`flex items-start gap-2.5 ${className}`}>
       <YuliaAvatar size={28} className="mt-0.5" />
-      <div className="max-w-[380px] bg-white border border-[#F0EEEA] rounded-2xl rounded-bl-md p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-        <p className="text-[15px] font-sans text-[#1A1A18] leading-relaxed m-0 mb-4">
+      <div className="max-w-[380px] bg-white border border-[#FAFAFA] rounded-2xl rounded-bl-md p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <p className="text-[15px] font-sans text-[#0D0D0D] leading-relaxed m-0 mb-4">
           Create your free account to continue. I&apos;ll keep everything from our conversation.
         </p>
 
@@ -45,21 +45,21 @@ export default function InlineSignup({ onRegister, onNavigateLogin, className = 
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name"
-            className="w-full px-3 py-2 text-[14px] border border-[#F0EEEA] rounded-lg outline-none bg-white text-[#1A1A18] focus:border-[#C96B4F] font-sans"
+            className="w-full px-3 py-2 text-[14px] border border-[#FAFAFA] rounded-lg outline-none bg-white text-[#0D0D0D] focus:border-[#C96B4F] font-sans"
           />
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
-            className="w-full px-3 py-2 text-[14px] border border-[#F0EEEA] rounded-lg outline-none bg-white text-[#1A1A18] focus:border-[#C96B4F] font-sans"
+            className="w-full px-3 py-2 text-[14px] border border-[#FAFAFA] rounded-lg outline-none bg-white text-[#0D0D0D] focus:border-[#C96B4F] font-sans"
           />
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="w-full px-3 py-2 text-[14px] border border-[#F0EEEA] rounded-lg outline-none bg-white text-[#1A1A18] focus:border-[#C96B4F] font-sans"
+            className="w-full px-3 py-2 text-[14px] border border-[#FAFAFA] rounded-lg outline-none bg-white text-[#0D0D0D] focus:border-[#C96B4F] font-sans"
           />
 
           <button

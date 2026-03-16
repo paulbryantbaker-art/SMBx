@@ -286,7 +286,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
   }, [toolsOpen]);
 
   return (
-    <div className={isHero ? '' : 'shrink-0 bg-white border-t border-[rgba(26,26,24,0.06)]'} style={isHero ? undefined : { padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+    <div className={isHero ? '' : 'shrink-0 bg-white border-t border-[rgba(0,0,0,0.06)]'} style={isHero ? undefined : { padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -301,27 +301,27 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           {/* Tool popup */}
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
             <div className="px-4 pt-3 pb-2">
-              <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(26,26,24,0.35)' }}>Start with Yulia</span>
+              <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(0,0,0,0.35)' }}>Start with Yulia</span>
             </div>
             {TOOLS.filter(t => t.group === 'journey').map(t => (
               <button key={t.label} className="home-tp-item" onClick={() => handleToolClick(t)} type="button">
                 {t.icon}
                 <div>
-                  <div className="text-[15px] font-semibold text-[#1A1A18] leading-[1.3]">{t.label}</div>
-                  <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: 'rgba(26,26,24,0.45)' }}>{t.desc}</div>
+                  <div className="text-[15px] font-semibold text-[#0D0D0D] leading-[1.3]">{t.label}</div>
+                  <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
                 </div>
               </button>
             ))}
-            <div className="mx-4 my-1" style={{ borderTop: '1px solid rgba(26,26,24,0.06)' }} />
+            <div className="mx-4 my-1" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }} />
             <div className="px-4 pt-2 pb-1">
-              <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(26,26,24,0.35)' }}>Tools</span>
+              <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(0,0,0,0.35)' }}>Tools</span>
             </div>
             {TOOLS.filter(t => t.group === 'tool').map(t => (
               <button key={t.label} className="home-tp-item" onClick={() => handleToolClick(t)} type="button">
                 {t.icon}
                 <div>
-                  <div className="text-[15px] font-semibold text-[#1A1A18] leading-[1.3]">{t.label}</div>
-                  <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: 'rgba(26,26,24,0.45)' }}>{t.desc}</div>
+                  <div className="text-[15px] font-semibold text-[#0D0D0D] leading-[1.3]">{t.label}</div>
+                  <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
                 </div>
               </button>
             ))}
@@ -332,8 +332,8 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             <div className="flex flex-wrap gap-2 px-4 pt-3 pb-0">
               <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F5F5F5] rounded-lg max-w-[260px]">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C96B4F" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-                <span className="text-[13px] font-medium text-[#1A1A18] truncate">{attachment.name}</span>
-                <button onClick={() => setAttachment(null)} className="hover:text-[#1A1A18] bg-transparent border-none cursor-pointer p-0 ml-0.5 flex-shrink-0" style={{ color: 'rgba(26,26,24,0.35)' }} type="button">
+                <span className="text-[13px] font-medium text-[#0D0D0D] truncate">{attachment.name}</span>
+                <button onClick={() => setAttachment(null)} className="hover:text-[#0D0D0D] bg-transparent border-none cursor-pointer p-0 ml-0.5 flex-shrink-0" style={{ color: 'rgba(0,0,0,0.35)' }} type="button">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               </div>
@@ -346,7 +346,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             {showTypewriter && twText && (
               <div
                 className="absolute pointer-events-none select-none"
-                style={{ top: '16px', left: '18px', right: '18px', fontSize: '17px', color: 'rgba(26,26,24,0.55)', fontFamily: 'inherit', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                style={{ top: '16px', left: '18px', right: '18px', fontSize: '17px', color: 'rgba(0,0,0,0.55)', fontFamily: 'inherit', lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
               >
                 {twText}
                 <span
@@ -354,7 +354,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
                     display: 'inline-block',
                     width: 2,
                     height: '1.1em',
-                    background: 'rgba(26,26,24,0.35)',
+                    background: 'rgba(0,0,0,0.35)',
                     marginLeft: 1,
                     verticalAlign: 'text-bottom',
                     animation: 'twBlink 1s step-end infinite',
@@ -393,12 +393,12 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               onFocus={handleFocus}
               onBlur={handleBlur}
               placeholder={showTypewriter ? '' : placeholder}
-              className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1A1A18] leading-[1.5] font-normal"
-              style={{ fontFamily: 'inherit', minHeight: (rows ?? (isHero ? 3 : 1)) > 1 ? '100px' : '56px', maxHeight: '200px', padding: '16px 18px 10px 18px', color: 'rgba(26,26,24,1)' }}
+              className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#0D0D0D] leading-[1.5] font-normal"
+              style={{ fontFamily: 'inherit', minHeight: (rows ?? (isHero ? 3 : 1)) > 1 ? '100px' : '56px', maxHeight: '200px', padding: '16px 18px 10px 18px', color: 'rgba(0,0,0,1)' }}
               rows={rows ?? (isHero ? 3 : 1)}
             />
             <style>{`
-              .home-dock-card textarea::placeholder { color: rgba(26,26,24,0.55); }
+              .home-dock-card textarea::placeholder { color: rgba(0,0,0,0.55); }
               @keyframes twBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
             `}</style>
           </div>
@@ -409,7 +409,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               ref={plusRef}
               onClick={() => setToolsOpen(prev => !prev)}
               className="flex items-center justify-center bg-white cursor-pointer hover:bg-[#F5F5F5] active:scale-95"
-              style={{ width: 38, height: 38, borderRadius: 12, border: '1.5px solid rgba(0,0,0,0.06)', transition: 'all .2s', color: 'rgba(26,26,24,0.4)' }}
+              style={{ width: 38, height: 38, borderRadius: 12, border: '1.5px solid rgba(0,0,0,0.06)', transition: 'all .2s', color: 'rgba(0,0,0,0.4)' }}
               type="button"
             >
               {uploading ? (
@@ -425,8 +425,8 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               className="flex items-center justify-center border-none cursor-pointer active:scale-95"
               style={{
                 width: 42, height: 42, borderRadius: 14,
-                background: hasContent && !disabled ? '#C96B4F' : '#F0EEEA',
-                color: hasContent && !disabled ? '#fff' : 'rgba(26,26,24,0.25)',
+                background: hasContent && !disabled ? '#C96B4F' : '#FAFAFA',
+                color: hasContent && !disabled ? '#fff' : 'rgba(0,0,0,0.25)',
                 transition: 'all .2s',
                 pointerEvents: hasContent && !disabled ? 'auto' : 'none',
               }}

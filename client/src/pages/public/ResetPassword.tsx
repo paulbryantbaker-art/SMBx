@@ -49,7 +49,7 @@ export default function ResetPassword({ token, onNavigateLogin }: ResetPasswordP
   };
 
   return (
-    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#FAF9F7]">
+    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#FAFAFA]">
       <div className="w-full max-w-[400px] bg-white rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.06)]">
         <div className="text-center mb-7">
           <Logo linked={false} />
@@ -77,24 +77,24 @@ export default function ResetPassword({ token, onNavigateLogin }: ResetPasswordP
               <div className="bg-[#FEF2F2] text-[#B91C1C] px-3.5 py-2.5 rounded-xl text-sm mb-4">{error}</div>
             )}
 
-            <label className="block text-sm font-medium text-[#1A1A18] mb-1.5">New password</label>
+            <label className="block text-sm font-medium text-[#0D0D0D] mb-1.5">New password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 8 characters"
-              className="w-full px-3.5 py-2.5 text-[15px] border border-[#F0EEEA] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#C96B4F]"
+              className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#C96B4F]"
               required
               minLength={8}
             />
 
-            <label className="block text-sm font-medium text-[#1A1A18] mb-1.5">Confirm password</label>
+            <label className="block text-sm font-medium text-[#0D0D0D] mb-1.5">Confirm password</label>
             <input
               type="password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               placeholder="Re-enter your password"
-              className="w-full px-3.5 py-2.5 text-[15px] border border-[#F0EEEA] rounded-xl outline-none mb-4 bg-white text-[#1A1A18] focus:border-[#C96B4F]"
+              className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#C96B4F]"
               required
               minLength={8}
             />

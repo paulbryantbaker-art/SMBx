@@ -38,7 +38,7 @@ export default function ChatView() {
               <div key={m.id} className="flex justify-end">
                 <div
                   className="max-w-[80%] px-[18px] py-[14px]"
-                  style={{ background: '#FFF0EB', border: '1px solid rgba(212,113,78,0.18)', color: '#1A1A18', borderRadius: '20px 20px 4px 20px', boxShadow: '0 1px 3px rgba(26,26,24,0.06)' }}
+                  style={{ background: '#FFF0EB', border: '1px solid rgba(212,113,78,0.18)', color: '#0D0D0D', borderRadius: '20px 20px 4px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
                 >
                   <p className="text-sm font-sans leading-[1.55] m-0 whitespace-pre-wrap">
                     {m.content}
@@ -52,9 +52,9 @@ export default function ChatView() {
               <YuliaAvatar size={32} className="mt-0.5" />
               <div
                 className="max-w-[80%] bg-white px-4 py-3"
-                style={{ borderRadius: '20px 20px 20px 4px', border: '1px solid rgba(26,26,24,0.08)', boxShadow: '0 1px 3px rgba(26,26,24,0.04)' }}
+                style={{ borderRadius: '20px 20px 20px 4px', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
               >
-                <div className="text-sm font-sans text-[#1A1A18] leading-[1.55] [&_p]:m-0 [&_p+p]:mt-2.5 [&_strong]:font-semibold [&_code]:bg-[rgba(0,0,0,0.04)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_ul]:mt-2 [&_ul]:pl-5 [&_ol]:mt-2 [&_ol]:pl-5 [&_li]:mt-1">
+                <div className="text-sm font-sans text-[#0D0D0D] leading-[1.55] [&_p]:m-0 [&_p+p]:mt-2.5 [&_strong]:font-semibold [&_code]:bg-[rgba(0,0,0,0.04)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_ul]:mt-2 [&_ul]:pl-5 [&_ol]:mt-2 [&_ol]:pl-5 [&_li]:mt-1">
                   <Markdown>{m.content}</Markdown>
                 </div>
               </div>
@@ -68,9 +68,9 @@ export default function ChatView() {
             <YuliaAvatar size={32} className="mt-0.5" />
             <div
               className="max-w-[80%] bg-white px-4 py-3"
-              style={{ borderRadius: '20px 20px 20px 4px', border: '1px solid rgba(26,26,24,0.08)', boxShadow: '0 1px 3px rgba(26,26,24,0.04)' }}
+              style={{ borderRadius: '20px 20px 20px 4px', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
             >
-              <div className="text-sm font-sans text-[#1A1A18] leading-[1.55] [&_p]:m-0 [&_p+p]:mt-2.5 [&_strong]:font-semibold">
+              <div className="text-sm font-sans text-[#0D0D0D] leading-[1.55] [&_p]:m-0 [&_p+p]:mt-2.5 [&_strong]:font-semibold">
                 <Markdown>{streamingContent}</Markdown>
               </div>
             </div>
@@ -81,7 +81,7 @@ export default function ChatView() {
         {isStreaming && !streamingContent && (
           <div className="flex items-start gap-3">
             <YuliaAvatar size={32} className="mt-0.5" />
-            <div className="bg-white px-4 py-3" style={{ borderRadius: '20px 20px 20px 4px', border: '1px solid rgba(26,26,24,0.08)', boxShadow: '0 1px 3px rgba(26,26,24,0.04)' }}>
+            <div className="bg-white px-4 py-3" style={{ borderRadius: '20px 20px 20px 4px', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
               <div className="flex gap-1.5 items-center h-5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#9B9891] animate-[dotPulse_1s_ease-in-out_infinite]" />
                 <span className="w-1.5 h-1.5 rounded-full bg-[#9B9891] animate-[dotPulse_1s_ease-in-out_infinite]" style={{ animationDelay: '150ms' }} />

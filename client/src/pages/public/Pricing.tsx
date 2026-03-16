@@ -5,15 +5,15 @@ import { ScrollReveal, StaggerContainer, StaggerItem, ScrollProgressBar } from '
 /* ═══ DESIGN TOKENS ═══ */
 
 const T = {
-  bg: '#FAF9F7',
+  bg: '#FAFAFA',
   terra: '#C96B4F',
   terraHover: '#BE6342',
   terraSoft: '#FFF0EB',
-  text: '#1A1A18',
+  text: '#0D0D0D',
   sub: '#44403C',
   muted: '#6E6A63',
   faint: '#A9A49C',
-  border: '#DDD9D1',
+  border: 'rgba(0,0,0,0.08)',
 };
 
 /* ═══ DATA ═══ */
@@ -145,7 +145,7 @@ export default function Pricing() {
           padding-top: env(safe-area-inset-top, 0px);
           display: flex; align-items: center; gap: 16px;
           background: ${T.bg};
-          border-bottom: 1px solid rgba(26,26,24,0.06);
+          border-bottom: 1px solid rgba(0,0,0,0.06);
           position: sticky; top: 0; z-index: 50;
         }
 
@@ -161,7 +161,7 @@ export default function Pricing() {
           text-decoration: none; transition: color 0.15s;
           padding: 6px 10px; border-radius: 8px;
         }
-        .price-topbar-link:hover { color: ${T.text}; background: rgba(26,26,24,0.03); }
+        .price-topbar-link:hover { color: ${T.text}; background: rgba(0,0,0,0.03); }
         .price-topbar-link.active { color: ${T.terra}; font-weight: 600; }
 
         .price-topbar-btn {
@@ -170,7 +170,7 @@ export default function Pricing() {
           display: flex; align-items: center; justify-content: center;
           color: ${T.muted}; transition: background 0.15s;
         }
-        .price-topbar-btn:hover { background: rgba(26,26,24,0.04); }
+        .price-topbar-btn:hover { background: rgba(0,0,0,0.04); }
 
         /* ── Hero ── */
         .price-hero {
@@ -210,8 +210,8 @@ export default function Pricing() {
 
         .price-free-card {
           background: #FFFFFF; border-radius: 16px;
-          border: 1px solid rgba(26,26,24,0.08);
-          padding: 24px; box-shadow: 0 2px 8px rgba(26,26,24,0.07);
+          border: 1px solid rgba(0,0,0,0.08);
+          padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
         }
         .price-free-card h3 {
           font-size: 15px; font-weight: 700; color: ${T.text};
@@ -243,8 +243,8 @@ export default function Pricing() {
 
         .price-deliverable {
           background: #FFFFFF; border-radius: 16px;
-          border: 1px solid rgba(26,26,24,0.08);
-          padding: 24px; box-shadow: 0 2px 8px rgba(26,26,24,0.07);
+          border: 1px solid rgba(0,0,0,0.08);
+          padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
           display: flex; flex-direction: column; gap: 8px;
         }
         .price-deliverable-header {
@@ -266,9 +266,9 @@ export default function Pricing() {
         /* ── Wallet ── */
         .price-wallet {
           background: #FFFFFF; border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.08);
+          border: 1px solid rgba(0,0,0,0.08);
           padding: 36px 32px;
-          box-shadow: 0 2px 12px rgba(26,26,24,0.08);
+          box-shadow: 0 2px 12px rgba(0,0,0,0.08);
           max-width: 720px;
         }
         @media (max-width: 768px) { .price-wallet { padding: 28px 20px; border-radius: 16px; } }
@@ -276,9 +276,9 @@ export default function Pricing() {
         /* ── Advisor teaser ── */
         .price-advisor-box {
           background: #FFFFFF; border-radius: 20px;
-          border: 1px solid rgba(26,26,24,0.08);
+          border: 1px solid rgba(0,0,0,0.08);
           padding: 36px 32px;
-          box-shadow: 0 2px 12px rgba(26,26,24,0.08);
+          box-shadow: 0 2px 12px rgba(0,0,0,0.08);
           max-width: 720px;
         }
         @media (max-width: 768px) { .price-advisor-box { padding: 28px 20px; border-radius: 16px; } }

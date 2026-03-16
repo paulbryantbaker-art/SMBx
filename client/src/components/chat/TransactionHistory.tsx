@@ -31,7 +31,7 @@ export default function TransactionHistory() {
       {transactions.map(tx => (
         <div key={tx.id} className="px-4 py-3 flex items-center justify-between">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-[#1A1A18] m-0 truncate">{tx.description}</p>
+            <p className="text-sm font-medium text-[#0D0D0D] m-0 truncate">{tx.description}</p>
             <p className="text-xs text-[#A9A49C] m-0 mt-0.5">
               {new Date(tx.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
             </p>
