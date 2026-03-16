@@ -200,13 +200,17 @@ function renderHeadline(text: string, terraWord: string) {
 const NAV_ITEMS: { id: TabId; label: string; icon: JSX.Element }[] = [
   {
     id: 'home',
-    label: 'Chat',
+    label: 'Home',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
       </svg>
     ),
   },
+];
+
+/* Journey pages — still accessible via URL but not in sidebar nav */
+const JOURNEY_NAV_ITEMS: { id: TabId; label: string; icon: JSX.Element }[] = [
   {
     id: 'sell',
     label: 'Sell',
@@ -610,7 +614,7 @@ export default function AppShell() {
   const sidebarContent = (mobile: boolean) => (
     <aside
       className="flex flex-col h-full select-none"
-      style={{ width: mobile ? 280 : 220, background: '#FAFAFA', borderRight: '1px solid rgba(0,0,0,0.06)' }}
+      style={{ width: mobile ? 280 : 240, background: '#FAFAFA', borderRight: '1px solid rgba(0,0,0,0.06)' }}
     >
       {/* Logo */}
       <div className="px-5 pt-5 pb-2">
@@ -643,11 +647,12 @@ export default function AppShell() {
         </div>
       )}
 
-      {/* Nav */}
+      {/* Nav — matching Paper design: Home, Pipeline, Data Room, Settings */}
       <div className="px-3">
         <nav className="space-y-0.5">
+          {/* Home */}
           {NAV_ITEMS.map(item => {
-            const isActive = activeTab === item.id && viewState === 'landing';
+            const isActive = (activeTab === item.id && viewState === 'landing') || (item.id === 'home' && viewState === 'chat');
             return (
               <button
                 key={item.id}
@@ -656,19 +661,76 @@ export default function AppShell() {
                 style={{
                   fontFamily: 'inherit',
                   fontSize: '15px',
-                  fontWeight: isActive ? 600 : 500,
+                  fontWeight: isActive ? 600 : 400,
                   color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
-                  background: isActive ? 'rgba(255,255,255,0.55)' : 'transparent',
-                  borderRadius: '100px',
-                  border: isActive ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
+                  background: isActive ? 'rgba(0,0,0,0.04)' : 'transparent',
+                  borderRadius: '10px',
+                  border: 'none',
                 }}
                 type="button"
               >
-                <span style={{ color: isActive ? '#C96B4F' : 'rgba(0,0,0,0.45)' }}>{item.icon}</span>
+                <span style={{ color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.3)' }}>{item.icon}</span>
                 {item.label}
               </button>
             );
           })}
+          {/* Pipeline */}
+          <button
+            onClick={() => { if (user) { setViewState('pipeline' as ViewState); navigate('/pipeline'); } else navigate('/login'); if (mobile) setIsMobileSidebarOpen(false); }}
+            className={`flex items-center gap-3 w-full px-4 py-2.5 cursor-pointer border-none transition-all nav-item-hover`}
+            style={{
+              fontFamily: 'inherit', fontSize: '15px', fontWeight: viewState === 'pipeline' ? 600 : 400,
+              color: viewState === 'pipeline' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
+              background: viewState === 'pipeline' ? 'rgba(0,0,0,0.04)' : 'transparent',
+              borderRadius: '10px', border: 'none',
+            }}
+            type="button"
+          >
+            <span style={{ color: viewState === 'pipeline' ? '#0D0D0D' : 'rgba(0,0,0,0.3)' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
+              </svg>
+            </span>
+            Pipeline
+          </button>
+          {/* Data Room */}
+          <button
+            onClick={() => { if (user) { setViewState('dataroom'); navigate('/dataroom'); } else navigate('/login'); if (mobile) setIsMobileSidebarOpen(false); }}
+            className={`flex items-center gap-3 w-full px-4 py-2.5 cursor-pointer border-none transition-all nav-item-hover`}
+            style={{
+              fontFamily: 'inherit', fontSize: '15px', fontWeight: viewState === 'dataroom' ? 600 : 400,
+              color: viewState === 'dataroom' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
+              background: viewState === 'dataroom' ? 'rgba(0,0,0,0.04)' : 'transparent',
+              borderRadius: '10px', border: 'none',
+            }}
+            type="button"
+          >
+            <span style={{ color: viewState === 'dataroom' ? '#0D0D0D' : 'rgba(0,0,0,0.3)' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+              </svg>
+            </span>
+            Data Room
+          </button>
+          {/* Settings */}
+          <button
+            onClick={() => { if (user) { setViewState('settings'); navigate('/settings'); } else navigate('/login'); if (mobile) setIsMobileSidebarOpen(false); }}
+            className={`flex items-center gap-3 w-full px-4 py-2.5 cursor-pointer border-none transition-all nav-item-hover`}
+            style={{
+              fontFamily: 'inherit', fontSize: '15px', fontWeight: viewState === 'settings' ? 600 : 400,
+              color: viewState === 'settings' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
+              background: viewState === 'settings' ? 'rgba(0,0,0,0.04)' : 'transparent',
+              borderRadius: '10px', border: 'none',
+            }}
+            type="button"
+          >
+            <span style={{ color: viewState === 'settings' ? '#0D0D0D' : 'rgba(0,0,0,0.3)' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+            </span>
+            Settings
+          </button>
         </nav>
       </div>
 
@@ -719,99 +781,27 @@ export default function AppShell() {
         ))}
       </div>
 
-      {/* Footer */}
-      <div className="mt-auto px-4 py-3 space-y-1" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-        {user && (
-          <button
-            onClick={() => {
-              setViewState('seller-dashboard');
-              navigate('/seller');
-              setIsMobileSidebarOpen(false);
-            }}
-            className={`flex items-center gap-2 w-full text-left text-[11px] font-bold uppercase bg-transparent border-none cursor-pointer transition-colors py-1 ${
-              viewState === 'seller-dashboard' ? 'text-[#C96B4F]' : 'text-[rgba(0,0,0,0.4)] hover:text-[#0D0D0D]'
-            }`}
-            style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
-            type="button"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 3v18h18" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" />
-            </svg>
-            Seller
-          </button>
-        )}
-        {user && (
-          <button
-            onClick={() => {
-              setViewState('buyer-pipeline');
-              navigate('/buyer');
-              setIsMobileSidebarOpen(false);
-            }}
-            className={`flex items-center gap-2 w-full text-left text-[11px] font-bold uppercase bg-transparent border-none cursor-pointer transition-colors py-1 ${
-              viewState === 'buyer-pipeline' ? 'text-[#C96B4F]' : 'text-[rgba(0,0,0,0.4)] hover:text-[#0D0D0D]'
-            }`}
-            style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
-            type="button"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-            </svg>
-            Buyer
-          </button>
-        )}
-        {user && (
-          <button
-            onClick={() => {
-              setViewState('dataroom');
-              navigate('/dataroom');
-              setIsMobileSidebarOpen(false);
-            }}
-            className={`flex items-center gap-2 w-full text-left text-[11px] font-bold uppercase bg-transparent border-none cursor-pointer transition-colors py-1 ${
-              viewState === 'dataroom' ? 'text-[#C96B4F]' : 'text-[rgba(0,0,0,0.4)] hover:text-[#0D0D0D]'
-            }`}
-            style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
-            type="button"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
-            </svg>
-            Documents
-          </button>
-        )}
+      {/* User Profile — bottom of sidebar (Paper design) */}
+      <div className="mt-auto px-5 py-4">
         <button
           onClick={() => {
             if (user) { setViewState('settings'); navigate('/settings'); }
             else navigate('/login');
             setIsMobileSidebarOpen(false);
           }}
-          className="block w-full text-left text-[11px] font-bold uppercase text-[rgba(0,0,0,0.4)] bg-transparent border-none cursor-pointer hover:text-[#0D0D0D] transition-colors py-1"
-          style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
+          className="flex items-center gap-3 w-full bg-transparent border-none cursor-pointer p-0 text-left"
           type="button"
         >
-          Account
+          <div
+            className="flex items-center justify-center rounded-full text-white text-[13px] font-bold"
+            style={{ width: 32, height: 32, background: '#0D0D0D', flexShrink: 0 }}
+          >
+            {user ? (user.display_name || user.email || '?').charAt(0).toUpperCase() : 'G'}
+          </div>
+          <span style={{ fontFamily: 'inherit', fontSize: '14px', fontWeight: 500, color: '#0D0D0D' }}>
+            {user ? (user.display_name || user.email || 'Account') : 'Sign in'}
+          </span>
         </button>
-        {user && (
-          <button
-            onClick={() => { setViewState('wallet'); navigate('/wallet'); setIsMobileSidebarOpen(false); }}
-            className={`block w-full text-left text-[11px] font-bold uppercase bg-transparent border-none cursor-pointer transition-colors py-1 nav-item-hover ${
-              viewState === 'wallet' ? 'text-[#C96B4F]' : 'text-[rgba(0,0,0,0.4)] hover:text-[#0D0D0D]'
-            }`}
-            style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
-            type="button"
-          >
-            Wallet
-          </button>
-        )}
-        {user && (
-          <button
-            onClick={handleLogout}
-            className="block w-full text-left text-[11px] font-bold uppercase text-[rgba(0,0,0,0.4)] bg-transparent border-none cursor-pointer hover:text-[#C96B4F] transition-colors py-1"
-            style={{ fontFamily: 'inherit', letterSpacing: '0.15em' }}
-            type="button"
-          >
-            Log out
-          </button>
-        )}
       </div>
     </aside>
   );
@@ -821,7 +811,7 @@ export default function AppShell() {
   return (
     <div
       id="app-root"
-      className="flex bg-[#FAFAFA] font-sans"
+      className="flex bg-white font-sans"
       style={{
         height: 'var(--app-height, 100vh)',
         position: 'fixed' as const,
@@ -951,72 +941,111 @@ export default function AppShell() {
             <div key={activeTab} style={{ animation: morphing ? 'morphOut 0.3s ease forwards' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, height: '100%' } : {}) }}>
               {activeTab === 'home' ? (
               <>
-                {/* ═══ HOME PAGE ═══ */}
+                {/* ═══ HOME PAGE — Paper Design: centered wordmark + hero chat bar + chips ═══ */}
 
                 {/* MOBILE HOME */}
                 <div className="flex flex-col h-full md:hidden">
-                  <div className="flex-1 flex items-center justify-center px-6">
-                    <motion.h1
-                      initial={{ opacity: 0, y: 16 }}
+                  <div className="flex-1 flex flex-col items-center justify-center px-5 gap-6">
+                    {/* Centered wordmark */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '34px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, textAlign: 'center' }}
+                      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ fontSize: '24px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D' }}
                     >
-                      {renderHeadline(page.headline, page.terraWord)}
-                    </motion.h1>
-                  </div>
-                  <motion.div
-                    className="shrink-0 px-4"
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}
-                  >
-                    <ChatDock
-                      ref={dockRef}
-                      onSend={handleSend}
-                      variant="hero"
-                      rows={1}
-                      placeholder={page.placeholder}
-                      disabled={sending}
-                      typewriterHints={TYPEWRITER_HINTS}
-                      typewriterPrefix={TYPEWRITER_PREFIX}
-                    />
-                  </motion.div>
-                </div>
-
-                {/* DESKTOP HOME */}
-                <div className="hidden md:flex flex-col h-full">
-                  <div className="flex-1 flex items-center justify-center px-6">
-                    <motion.h1
-                      initial={{ opacity: 0, y: 18 }}
+                      smbx<span style={{ color: '#C96B4F' }}>.</span>ai
+                    </motion.div>
+                    {/* Hero chat bar */}
+                    <motion.div
+                      className="w-full"
+                      initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '48px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, textAlign: 'center' }}
+                      transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
                     >
-                      {renderHeadline(page.headline, page.terraWord)}
-                    </motion.h1>
-                  </div>
-                  <motion.div
-                    className="shrink-0 px-8"
-                    initial={{ opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ paddingBottom: 32 }}
-                  >
-                    <div className="max-w-4xl mx-auto">
                       <ChatDock
                         ref={dockRef}
                         onSend={handleSend}
                         variant="hero"
-                        rows={1}
+                        rows={2}
                         placeholder={page.placeholder}
                         disabled={sending}
                         typewriterHints={TYPEWRITER_HINTS}
                         typewriterPrefix={TYPEWRITER_PREFIX}
                       />
-                    </div>
-                  </motion.div>
+                    </motion.div>
+                    {/* Suggestion chips */}
+                    <motion.div
+                      className="flex flex-wrap justify-center gap-2"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.35 }}
+                    >
+                      {['Prepare to sell', 'Prepare to buy', 'Raise capital', 'Advise a deal'].map(chip => (
+                        <button
+                          key={chip}
+                          onClick={() => handleSuggestion(chip === 'Prepare to sell' ? "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." : chip === 'Prepare to buy' ? "I'm looking to acquire a business. Help me evaluate opportunities." : chip === 'Raise capital' ? "I need to raise capital for my business. Walk me through the options." : "I'm an M&A advisor. Show me how you can help with my practice.")}
+                          className="bg-transparent cursor-pointer transition-all chip-hover"
+                          style={{ borderRadius: 100, fontSize: '13px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.45)', border: '1px solid rgba(0,0,0,0.1)', padding: '8px 16px' }}
+                          type="button"
+                        >
+                          {chip}
+                        </button>
+                      ))}
+                    </motion.div>
+                  </div>
+                </div>
+
+                {/* DESKTOP HOME */}
+                <div className="hidden md:flex flex-col h-full items-center justify-center">
+                  <div className="flex flex-col items-center" style={{ marginTop: '-60px' }}>
+                    {/* Centered wordmark */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 14 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', marginBottom: 40 }}
+                    >
+                      smbx<span style={{ color: '#C96B4F' }}>.</span>ai
+                    </motion.div>
+                    {/* Hero chat bar — 660px wide, multi-layered shadow */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ width: 660 }}
+                    >
+                      <ChatDock
+                        ref={dockRef}
+                        onSend={handleSend}
+                        variant="hero"
+                        rows={2}
+                        placeholder={page.placeholder}
+                        disabled={sending}
+                        typewriterHints={TYPEWRITER_HINTS}
+                        typewriterPrefix={TYPEWRITER_PREFIX}
+                      />
+                    </motion.div>
+                    {/* Suggestion chips */}
+                    <motion.div
+                      className="flex flex-wrap justify-center gap-3"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.4 }}
+                      style={{ marginTop: 24 }}
+                    >
+                      {['Prepare to sell', 'Prepare to buy', 'Raise capital', 'Advise a deal'].map(chip => (
+                        <button
+                          key={chip}
+                          onClick={() => handleSuggestion(chip === 'Prepare to sell' ? "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." : chip === 'Prepare to buy' ? "I'm looking to acquire a business. Help me evaluate opportunities." : chip === 'Raise capital' ? "I need to raise capital for my business. Walk me through the options." : "I'm an M&A advisor. Show me how you can help with my practice.")}
+                          className="bg-transparent cursor-pointer transition-all chip-hover"
+                          style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.45)', border: '1px solid rgba(0,0,0,0.1)', padding: '9px 20px' }}
+                          type="button"
+                        >
+                          {chip}
+                        </button>
+                      ))}
+                    </motion.div>
+                  </div>
                 </div>
               </>
               ) : (
