@@ -628,9 +628,9 @@ export default function AppShell() {
         </button>
       </div>
 
-      {/* New Workspace — authenticated only */}
-      {user && (
-        <div className="px-4 pt-4 pb-4">
+      {/* CTA — context-aware */}
+      <div className="px-4 pt-4 pb-4">
+        {user ? (
           <button
             onClick={() => {
               authChat.newConversation();
@@ -644,13 +644,21 @@ export default function AppShell() {
           >
             + New Workspace
           </button>
-        </div>
-      )}
+        ) : (
+          <button
+            onClick={() => { handleTabClick('home'); if (mobile) setIsMobileSidebarOpen(false); }}
+            className="w-full text-white text-[14px] px-4 py-3 cursor-pointer border-none hover:opacity-90 transition-opacity"
+            style={{ fontFamily: 'inherit', fontWeight: 600, background: '#0D0D0D', borderRadius: '100px' }}
+            type="button"
+          >
+            Start chatting
+          </button>
+        )}
+      </div>
 
-      {/* Nav — matching Paper design: Home, Pipeline, Data Room, Settings */}
+      {/* Nav — Home always visible */}
       <div className="px-3">
         <nav className="space-y-0.5">
-          {/* Home */}
           {NAV_ITEMS.map(item => {
             const isActive = (activeTab === item.id && viewState === 'landing') || (item.id === 'home' && viewState === 'chat');
             return (
@@ -674,88 +682,111 @@ export default function AppShell() {
               </button>
             );
           })}
-          {/* Pipeline */}
-          <button
-            onClick={() => { if (user) { setViewState('pipeline' as ViewState); navigate('/pipeline'); } else navigate('/login'); if (mobile) setIsMobileSidebarOpen(false); }}
-            className={`flex items-center gap-3 w-full px-4 py-2.5 cursor-pointer border-none transition-all nav-item-hover`}
-            style={{
-              fontFamily: 'inherit', fontSize: '15px', fontWeight: viewState === 'pipeline' ? 600 : 400,
-              color: viewState === 'pipeline' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
-              background: viewState === 'pipeline' ? 'rgba(0,0,0,0.04)' : 'transparent',
-              borderRadius: '10px', border: 'none',
-            }}
-            type="button"
-          >
-            <span style={{ color: viewState === 'pipeline' ? '#0D0D0D' : 'rgba(0,0,0,0.3)' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
-              </svg>
-            </span>
-            Pipeline
-          </button>
-          {/* Data Room */}
-          <button
-            onClick={() => { if (user) { setViewState('dataroom'); navigate('/dataroom'); } else navigate('/login'); if (mobile) setIsMobileSidebarOpen(false); }}
-            className={`flex items-center gap-3 w-full px-4 py-2.5 cursor-pointer border-none transition-all nav-item-hover`}
-            style={{
-              fontFamily: 'inherit', fontSize: '15px', fontWeight: viewState === 'dataroom' ? 600 : 400,
-              color: viewState === 'dataroom' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
-              background: viewState === 'dataroom' ? 'rgba(0,0,0,0.04)' : 'transparent',
-              borderRadius: '10px', border: 'none',
-            }}
-            type="button"
-          >
-            <span style={{ color: viewState === 'dataroom' ? '#0D0D0D' : 'rgba(0,0,0,0.3)' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
-              </svg>
-            </span>
-            Data Room
-          </button>
-          {/* Settings */}
-          <button
-            onClick={() => { if (user) { setViewState('settings'); navigate('/settings'); } else navigate('/login'); if (mobile) setIsMobileSidebarOpen(false); }}
-            className={`flex items-center gap-3 w-full px-4 py-2.5 cursor-pointer border-none transition-all nav-item-hover`}
-            style={{
-              fontFamily: 'inherit', fontSize: '15px', fontWeight: viewState === 'settings' ? 600 : 400,
-              color: viewState === 'settings' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
-              background: viewState === 'settings' ? 'rgba(0,0,0,0.04)' : 'transparent',
-              borderRadius: '10px', border: 'none',
-            }}
-            type="button"
-          >
-            <span style={{ color: viewState === 'settings' ? '#0D0D0D' : 'rgba(0,0,0,0.3)' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-              </svg>
-            </span>
-            Settings
-          </button>
         </nav>
       </div>
 
-      {/* Journey pages — subtle links */}
-      <div className="px-4 mt-5 mb-2">
-        <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.25)', marginBottom: 8 }}>Explore</div>
-        <div className="flex flex-wrap gap-1.5">
-          {(['sell', 'buy', 'raise', 'integrate', 'how-it-works', 'advisors', 'pricing'] as TabId[]).map(tab => (
+      {/* ─── Explore — prominent for visitors, compact for auth users ─── */}
+      <div className="px-3 mt-4">
+        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.25)' }}>Explore</div>
+        <nav className="space-y-0.5">
+          {([
+            { id: 'sell' as TabId, label: 'Sell a Business', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" /><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" /></svg> },
+            { id: 'buy' as TabId, label: 'Buy a Business', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg> },
+            { id: 'raise' as TabId, label: 'Raise Capital', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg> },
+            { id: 'how-it-works' as TabId, label: 'How It Works', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg> },
+            { id: 'advisors' as TabId, label: 'For Advisors', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg> },
+            { id: 'pricing' as TabId, label: 'Pricing', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> },
+          ]).map(item => {
+            const isActive = activeTab === item.id && viewState === 'landing';
+            return (
+              <button
+                key={item.id}
+                onClick={() => { handleTabClick(item.id); if (mobile) setIsMobileSidebarOpen(false); }}
+                className={`flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all ${!isActive ? 'nav-item-hover' : ''}`}
+                style={{
+                  fontFamily: 'inherit',
+                  fontSize: '14px',
+                  fontWeight: isActive ? 600 : 400,
+                  color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
+                  background: isActive ? 'rgba(0,0,0,0.04)' : 'transparent',
+                  borderRadius: '10px',
+                  border: 'none',
+                }}
+                type="button"
+              >
+                <span style={{ color: isActive ? '#C96B4F' : 'rgba(0,0,0,0.25)' }}>{item.icon}</span>
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Tools nav — authenticated only */}
+      {user && (
+        <div className="px-3 mt-3">
+          <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.25)' }}>Tools</div>
+          <nav className="space-y-0.5">
+            {/* Pipeline */}
             <button
-              key={tab}
-              onClick={() => { handleTabClick(tab); if (mobile) setIsMobileSidebarOpen(false); }}
-              className="bg-transparent border-none cursor-pointer transition-colors hover:text-[#0D0D0D]"
+              onClick={() => { setViewState('pipeline' as ViewState); navigate('/pipeline'); if (mobile) setIsMobileSidebarOpen(false); }}
+              className={`flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all nav-item-hover`}
               style={{
-                fontFamily: 'inherit', fontSize: '12px', fontWeight: activeTab === tab && viewState === 'landing' ? 600 : 400,
-                color: activeTab === tab && viewState === 'landing' ? '#0D0D0D' : 'rgba(0,0,0,0.3)',
-                padding: '3px 8px', borderRadius: 6,
-                background: activeTab === tab && viewState === 'landing' ? 'rgba(0,0,0,0.04)' : 'transparent',
+                fontFamily: 'inherit', fontSize: '14px', fontWeight: viewState === 'pipeline' ? 600 : 400,
+                color: viewState === 'pipeline' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
+                background: viewState === 'pipeline' ? 'rgba(0,0,0,0.04)' : 'transparent',
+                borderRadius: '10px', border: 'none',
               }}
               type="button"
             >
-              {tab === 'how-it-works' ? 'How It Works' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+              <span style={{ color: viewState === 'pipeline' ? '#0D0D0D' : 'rgba(0,0,0,0.25)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
+                </svg>
+              </span>
+              Pipeline
             </button>
-          ))}
+            {/* Data Room */}
+            <button
+              onClick={() => { setViewState('dataroom'); navigate('/dataroom'); if (mobile) setIsMobileSidebarOpen(false); }}
+              className={`flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all nav-item-hover`}
+              style={{
+                fontFamily: 'inherit', fontSize: '14px', fontWeight: viewState === 'dataroom' ? 600 : 400,
+                color: viewState === 'dataroom' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
+                background: viewState === 'dataroom' ? 'rgba(0,0,0,0.04)' : 'transparent',
+                borderRadius: '10px', border: 'none',
+              }}
+              type="button"
+            >
+              <span style={{ color: viewState === 'dataroom' ? '#0D0D0D' : 'rgba(0,0,0,0.25)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+                </svg>
+              </span>
+              Data Room
+            </button>
+            {/* Settings */}
+            <button
+              onClick={() => { setViewState('settings'); navigate('/settings'); if (mobile) setIsMobileSidebarOpen(false); }}
+              className={`flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all nav-item-hover`}
+              style={{
+                fontFamily: 'inherit', fontSize: '14px', fontWeight: viewState === 'settings' ? 600 : 400,
+                color: viewState === 'settings' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
+                background: viewState === 'settings' ? 'rgba(0,0,0,0.04)' : 'transparent',
+                borderRadius: '10px', border: 'none',
+              }}
+              type="button"
+            >
+              <span style={{ color: viewState === 'settings' ? '#0D0D0D' : 'rgba(0,0,0,0.25)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+              </span>
+              Settings
+            </button>
+          </nav>
         </div>
-      </div>
+      )}
 
       {/* Conversations — grouped by deal or date */}
       <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-2">
