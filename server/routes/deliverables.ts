@@ -12,6 +12,31 @@ import { hasDealAccess } from '../services/dealAccessService.js';
 
 export const deliverablesRouter = Router();
 
+// ─── List ALL deliverables across all user's deals ─────────
+
+deliverablesRouter.get('/deliverables/all', async (req, res) => {
+  const userId = (req as any).userId;
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const deliverables = await sql`
+      SELECT d.id, d.deal_id, d.status, d.created_at, d.completed_at,
+             m.slug, m.name, m.description, m.tier, m.journey, m.gate,
+             dl.business_name as deal_name, dl.journey_type, dl.league
+      FROM deliverables d
+      JOIN menu_items m ON m.id = d.menu_item_id
+      JOIN deals dl ON d.deal_id = dl.id
+      WHERE dl.user_id = ${userId}
+      ORDER BY d.updated_at DESC NULLS LAST, d.created_at DESC
+    `;
+
+    return res.json(deliverables);
+  } catch (err: any) {
+    console.error('List all deliverables error:', err.message);
+    return res.status(500).json({ error: 'Failed to list deliverables' });
+  }
+});
+
 // ─── List deliverables for a deal ──────────────────────────
 
 deliverablesRouter.get('/deals/:dealId/deliverables', async (req, res) => {

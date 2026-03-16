@@ -42,8 +42,10 @@ export function checkGateReadiness(
     checker(deal, missing);
   }
 
-  // Check if the NEXT gate is a paywall
-  const paywallRequired = nextGate ? !isGateFree(nextGate) : false;
+  // Check if the NEXT gate is a paywall (dev bypass available)
+  const paywallRequired = process.env.DEV_NO_PAYWALL === 'true'
+    ? false
+    : nextGate ? !isGateFree(nextGate) : false;
 
   return {
     ready: missing.length === 0,
@@ -209,6 +211,7 @@ export const PAYWALL_GATES = new Set(['S2', 'B2', 'R2', 'PMI1', 'PMI2', 'PMI3'])
 
 /** Check if advancing to a gate requires payment */
 export function isPaywallGate(gateId: string): boolean {
+  if (process.env.DEV_NO_PAYWALL === 'true') return false;
   return PAYWALL_GATES.has(gateId);
 }
 

@@ -18,6 +18,8 @@ import InlineSignupCard from '../../components/chat/InlineSignupCard';
 import SellerDashboard from '../../components/chat/SellerDashboard';
 import BuyerPipeline from '../../components/chat/BuyerPipeline';
 import WalletPanel from '../../components/chat/WalletPanel';
+import DocumentLibrary from '../../components/chat/DocumentLibrary';
+import AnalyticsView from '../../components/chat/AnalyticsView';
 import NDAModal from '../../components/chat/NDAModal';
 import SellBelow from '../../components/content/SellBelow';
 import BuyBelow from '../../components/content/BuyBelow';
@@ -65,7 +67,7 @@ const TYPEWRITER_HINTS = [
 /* ═══ TYPES ═══ */
 
 export type TabId = 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'how-it-works' | 'advisors' | 'pricing';
-export type ViewState = 'landing' | 'chat' | 'pipeline' | 'dataroom' | 'settings' | 'seller-dashboard' | 'buyer-pipeline' | 'wallet';
+export type ViewState = 'landing' | 'chat' | 'pipeline' | 'dataroom' | 'settings' | 'seller-dashboard' | 'buyer-pipeline' | 'wallet' | 'documents' | 'analytics';
 
 /* ═══ PAGE COPY ═══ */
 
@@ -297,6 +299,8 @@ function pathToViewState(path: string): ViewState {
   if (path === '/seller') return 'seller-dashboard';
   if (path === '/buyer') return 'buyer-pipeline';
   if (path === '/wallet') return 'wallet';
+  if (path === '/documents') return 'documents';
+  if (path === '/analytics') return 'analytics';
   return 'landing';
 }
 
@@ -330,6 +334,7 @@ export default function AppShell() {
   const [canvasMarkdown, setCanvasMarkdown] = useState<{ content: string; title: string } | null>(null);
   const [morphing, setMorphing] = useState(false);
   const [ndaRequired, setNdaRequired] = useState<{ dealId: number; dealName?: string } | null>(null);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
 
   // Chat hooks (always called for hook order)
   const anonChat = useAnonymousChat();
@@ -388,6 +393,17 @@ export default function AppShell() {
       scrollRef.current.scrollTop = 0;
     }
   }, [viewState, activeTab]);
+
+  // Fetch wallet balance for sidebar badge
+  useEffect(() => {
+    if (!user) return;
+    const token = localStorage.getItem('smbx_token');
+    if (!token) return;
+    fetch('/api/stripe/wallet', { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setWalletBalance(data.balance_cents ?? 0); })
+      .catch(() => {});
+  }, [user]);
 
   // Send handler — morph from landing to chat
   const handleSend = useCallback((content: string) => {
@@ -722,68 +738,40 @@ export default function AppShell() {
         </nav>
       </div>
 
-      {/* Tools nav — authenticated only */}
+      {/* Workspace nav — authenticated only */}
       {user && (
         <div className="px-3 mt-3">
-          <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.25)' }}>Tools</div>
+          <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(0,0,0,0.25)' }}>Workspace</div>
           <nav className="space-y-0.5">
-            {/* Pipeline */}
-            <button
-              onClick={() => { setViewState('pipeline' as ViewState); navigate('/pipeline'); if (mobile) setIsMobileSidebarOpen(false); }}
-              className={`flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all nav-item-hover`}
-              style={{
-                fontFamily: 'inherit', fontSize: '14px', fontWeight: viewState === 'pipeline' ? 600 : 400,
-                color: viewState === 'pipeline' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
-                background: viewState === 'pipeline' ? 'rgba(0,0,0,0.04)' : 'transparent',
-                borderRadius: '10px', border: 'none',
-              }}
-              type="button"
-            >
-              <span style={{ color: viewState === 'pipeline' ? '#0D0D0D' : 'rgba(0,0,0,0.25)' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" y1="21" x2="9" y2="9" />
-                </svg>
-              </span>
-              Pipeline
-            </button>
-            {/* Data Room */}
-            <button
-              onClick={() => { setViewState('dataroom'); navigate('/dataroom'); if (mobile) setIsMobileSidebarOpen(false); }}
-              className={`flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all nav-item-hover`}
-              style={{
-                fontFamily: 'inherit', fontSize: '14px', fontWeight: viewState === 'dataroom' ? 600 : 400,
-                color: viewState === 'dataroom' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
-                background: viewState === 'dataroom' ? 'rgba(0,0,0,0.04)' : 'transparent',
-                borderRadius: '10px', border: 'none',
-              }}
-              type="button"
-            >
-              <span style={{ color: viewState === 'dataroom' ? '#0D0D0D' : 'rgba(0,0,0,0.25)' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
-                </svg>
-              </span>
-              Data Room
-            </button>
-            {/* Settings */}
-            <button
-              onClick={() => { setViewState('settings'); navigate('/settings'); if (mobile) setIsMobileSidebarOpen(false); }}
-              className={`flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all nav-item-hover`}
-              style={{
-                fontFamily: 'inherit', fontSize: '14px', fontWeight: viewState === 'settings' ? 600 : 400,
-                color: viewState === 'settings' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
-                background: viewState === 'settings' ? 'rgba(0,0,0,0.04)' : 'transparent',
-                borderRadius: '10px', border: 'none',
-              }}
-              type="button"
-            >
-              <span style={{ color: viewState === 'settings' ? '#0D0D0D' : 'rgba(0,0,0,0.25)' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                </svg>
-              </span>
-              Settings
-            </button>
+            {([
+              { id: 'chat' as ViewState, label: 'Home', route: '/chat', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> },
+              { id: 'documents' as ViewState, label: 'Documents', route: '/documents', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg> },
+              { id: 'analytics' as ViewState, label: 'Analytics', route: '/analytics', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg> },
+              { id: 'settings' as ViewState, label: 'Settings', route: '/settings', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg> },
+            ]).map(item => {
+              const isActive = viewState === item.id || (item.id === 'chat' && viewState === 'landing');
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    if (item.id === 'chat') { handleTabClick('home'); }
+                    else { setViewState(item.id); navigate(item.route); }
+                    if (mobile) setIsMobileSidebarOpen(false);
+                  }}
+                  className={`flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all ${!isActive ? 'nav-item-hover' : ''}`}
+                  style={{
+                    fontFamily: 'inherit', fontSize: '14px', fontWeight: isActive ? 600 : 400,
+                    color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
+                    background: isActive ? 'rgba(0,0,0,0.04)' : 'transparent',
+                    borderRadius: '10px', border: 'none',
+                  }}
+                  type="button"
+                >
+                  <span style={{ color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.25)' }}>{item.icon}</span>
+                  {item.label}
+                </button>
+              );
+            })}
           </nav>
         </div>
       )}
@@ -835,7 +823,7 @@ export default function AppShell() {
         ))}
       </div>
 
-      {/* User Profile — bottom of sidebar (Paper design) */}
+      {/* User Profile + Wallet — bottom of sidebar */}
       <div className="mt-auto px-5 py-4">
         <button
           onClick={() => {
@@ -852,9 +840,16 @@ export default function AppShell() {
           >
             {user ? (user.display_name || user.email || '?').charAt(0).toUpperCase() : 'G'}
           </div>
-          <span style={{ fontFamily: 'inherit', fontSize: '14px', fontWeight: 500, color: '#0D0D0D' }}>
-            {user ? (user.display_name || user.email || 'Account') : 'Sign in'}
-          </span>
+          <div className="flex flex-col min-w-0 flex-1">
+            <span style={{ fontFamily: 'inherit', fontSize: '14px', fontWeight: 500, color: '#0D0D0D' }} className="truncate">
+              {user ? (user.display_name || user.email || 'Account') : 'Sign in'}
+            </span>
+            {user && walletBalance !== null && (
+              <span style={{ fontSize: '11px', fontWeight: 600, color: '#C96B4F' }}>
+                ${(walletBalance / 100).toFixed(2)}
+              </span>
+            )}
+          </div>
         </button>
       </div>
     </aside>
@@ -947,7 +942,7 @@ export default function AppShell() {
                   </button>
                 ) : (
                   <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(0,0,0,0.35)' }}>
-                    {activeTab === 'home' ? 'Chat' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'how-it-works' ? 'How It Works' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
+                    {viewState === 'documents' ? 'Documents' : viewState === 'analytics' ? 'Analytics' : viewState === 'settings' ? 'Settings' : viewState === 'pipeline' ? 'Pipeline' : viewState === 'dataroom' ? 'Data Room' : viewState === 'wallet' ? 'Wallet' : activeTab === 'home' ? 'Chat' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'how-it-works' ? 'How It Works' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
                   </span>
                 )}
               </>
@@ -1301,6 +1296,17 @@ export default function AppShell() {
             <div className="max-w-3xl mx-auto px-4 py-6">
               <WalletPanel />
             </div>
+          )}
+
+          {viewState === 'documents' && user && (
+            <DocumentLibrary onViewDeliverable={(id) => setViewingDeliverable(id)} />
+          )}
+
+          {viewState === 'analytics' && user && (
+            <AnalyticsView
+              onOpenConversation={(convId) => { authChat.selectConversation(convId); setViewState('chat'); navigate(`/chat/${convId}`); }}
+              onNewDeal={() => { authChat.newConversation(); setViewState('chat'); navigate('/chat'); }}
+            />
           )}
         </div>
 
