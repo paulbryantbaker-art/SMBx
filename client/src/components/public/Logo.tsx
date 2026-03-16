@@ -15,9 +15,9 @@ export default function Logo({ className = '', light = false, linked = true }: L
       className={`font-bold tracking-tight ${className}`}
       style={{ fontFamily: "var(--sans)", fontSize: '22px', letterSpacing: '-.03em' }}
     >
-      <span className={light ? 'text-white' : 'text-[#1A1A18]'}>smb</span>
-      <span className="text-[#C96B4F]">X</span>
-      <span className={light ? 'text-white' : 'text-[#1A1A18]'}>.ai</span>
+      <span className={light ? 'text-white' : 'text-[#0D0D0D]'}>smbx</span>
+      <span className="text-[#C96B4F]">.</span>
+      <span className={light ? 'text-white' : 'text-[#0D0D0D]'}>ai</span>
     </span>
   );
 

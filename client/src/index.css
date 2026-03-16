@@ -3,15 +3,15 @@
 @tailwind utilities;
 
 :root {
-  --ink: #1A1A18;
+  --ink: #0D0D0D;
   --terra: #C96B4F;
   --terra-hover: #B55E44;
-  --stone: rgba(0,0,0,0.08);
-  --surface: #FAF9F7;
-  --tint: #F0EEEA;
+  --stone: rgba(0,0,0,0.06);
+  --surface: #FAFAFA;
+  --tint: #FAFAFA;
   --white: #FFFFFF;
   /* Backward-compat for authenticated components */
-  --cream: #FAF9F7;
+  --cream: #FFFFFF;
   --fill: #FFFFFF;
   --terra-soft: #FFF0EB;
   --terra-glow: rgba(201,107,79,.12);
@@ -34,7 +34,7 @@ html {
 
 body {
   margin: 0;
-  background-color: #FAF9F7;
+  background-color: #FFFFFF;
   font-family: var(--sans);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;

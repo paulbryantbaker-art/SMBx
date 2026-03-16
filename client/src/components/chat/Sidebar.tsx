@@ -47,15 +47,15 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
     <div
       className="flex flex-col h-full overflow-hidden"
       style={{
-        width: visible ? 260 : 0,
-        minWidth: visible ? 260 : 0,
-        background: '#F0EEEA',
+        width: visible ? 240 : 0,
+        minWidth: visible ? 240 : 0,
+        background: '#FAFAFA',
         borderRight: visible ? '1px solid rgba(0,0,0,0.06)' : 'none',
         transition: 'width 0.25s ease, min-width 0.25s ease',
       }}
     >
       {/* Header — just new chat button */}
-      <div className="flex items-center justify-end px-3.5 pt-3.5 pb-1.5" style={{ minWidth: 260 }}>
+      <div className="flex items-center justify-end px-3.5 pt-3.5 pb-1.5" style={{ minWidth: 240 }}>
         <button
           onClick={onNew}
           className="w-[34px] h-[34px] rounded-full border-none cursor-pointer flex items-center justify-center text-[#C96B4F] hover:bg-[#FFF0EB] transition-colors"
@@ -70,7 +70,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
       </div>
 
       {/* Conversation list */}
-      <div className="flex-1 overflow-y-auto px-1.5 py-0.5" style={{ minWidth: 260 }}>
+      <div className="flex-1 overflow-y-auto px-1.5 py-0.5" style={{ minWidth: 240 }}>
         {/* Active Deals */}
         {deals.length > 0 && (
           <div>
@@ -95,7 +95,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
                     />
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-semibold text-[#1A1A18] font-sans m-0 truncate leading-snug">
+                    <p className="text-[13px] font-semibold text-[#0D0D0D] font-sans m-0 truncate leading-snug">
                       {c.title}
                     </p>
                     <div className="flex items-center gap-1 mt-0.5">
@@ -104,7 +104,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
                           {c.current_gate}
                         </span>
                       )}
-                      <span className="text-[11px] text-[#6E6A63] font-sans">
+                      <span className="text-[11px] text-[rgba(0,0,0,0.4)] font-sans">
                         {formatShortTime(c.updated_at)}
                       </span>
                     </div>
@@ -118,7 +118,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
         {/* Recent */}
         {recent.length > 0 && (
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#6E6A63] font-sans px-2 pt-2.5 pb-1 m-0">
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[rgba(0,0,0,0.4)] font-sans px-2 pt-2.5 pb-1 m-0">
               Recent
             </p>
             {recent.map(c => (
@@ -164,13 +164,13 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
                 {userName.charAt(0).toUpperCase()}
               </span>
             </div>
-            <span className="text-[12px] font-medium text-[#1A1A18] font-sans truncate">
+            <span className="text-[12px] font-medium text-[#0D0D0D] font-sans truncate">
               {userName}
             </span>
           </div>
           <button
             onClick={onSignOut}
-            className="text-[11px] font-medium text-[#6E6A63] bg-transparent border-none cursor-pointer hover:text-[#C96B4F] transition-colors px-0"
+            className="text-[11px] font-medium text-[rgba(0,0,0,0.4)] bg-transparent border-none cursor-pointer hover:text-[#C96B4F] transition-colors px-0"
             type="button"
           >
             Sign out
