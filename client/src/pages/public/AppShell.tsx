@@ -89,9 +89,9 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
   },
   sell: {
     overline: 'Strengthen & Sell',
-    headline: '[PAUL TO WRITE]',
-    terraWord: '',
-    tagline: 'Every owner asks the same first question. Yulia answers it in 90 seconds \u2014 with real data, not guesswork.',
+    headline: 'Exit on your terms.',
+    terraWord: 'terms.',
+    tagline: 'Know your number. Optimize the structure. Negotiate from data. Yulia prepares every dimension of your exit before you go to market.',
     chips: [
       "What's my business worth?",
       "What add-backs am I missing?",
@@ -103,8 +103,8 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
   },
   buy: {
     overline: 'Search & Acquire',
-    headline: '[PAUL TO WRITE]',
-    terraWord: '',
+    headline: 'Find the right deal. Know it\u2019s the right deal.',
+    terraWord: 'right deal.',
     tagline: 'Paste a listing. Describe a deal. Yulia tells you: pursue or pass \u2014 with the data to back it up.',
     chips: [
       "I found a listing \u2014 is the price fair?",
@@ -117,8 +117,8 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
   },
   raise: {
     overline: 'Raise Capital',
-    headline: '[PAUL TO WRITE]',
-    terraWord: '',
+    headline: 'The wrong capital costs more than the wrong price.',
+    terraWord: 'wrong price.',
     tagline: 'Debt, equity, SBA, revenue-based financing \u2014 Yulia models every structure so you see what you keep and what you give up.',
     chips: [
       'I need $500K for a second location',
@@ -130,8 +130,8 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
   },
   integrate: {
     overline: 'Post-Acquisition',
-    headline: '[PAUL TO WRITE]',
-    terraWord: '',
+    headline: 'The first 100 days determine everything.',
+    terraWord: 'everything.',
     tagline: 'The first 100 days determine everything. Yulia\u2019s plan is built from your deal intelligence \u2014 not a template.',
     chips: [
       'I just closed \u2014 give me a 90-day plan',
@@ -142,10 +142,10 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
     placeholder: 'Tell Yulia about your acquisition...',
   },
   'how-it-works': {
-    overline: 'Deal Intelligence',
-    headline: 'The data is public. The intelligence is not.',
-    terraWord: 'not.',
-    tagline: 'Every number is traceable to authoritative federal data \u2014 Census, BLS, FRED, SEC EDGAR, SBA. The difference is what we do with it.',
+    overline: 'HOW IT WORKS',
+    headline: 'The $24,000 problem.',
+    terraWord: '$24,000',
+    tagline: 'Bloomberg Terminal runs $24,000/year. PitchBook runs $24,000/year. Neither was built for your deal.',
     chips: [
       'How is this different from ChatGPT?',
       'What data sources do you use?',
@@ -155,10 +155,10 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
     placeholder: 'Ask how the intelligence works...',
   },
   advisors: {
-    overline: 'For Deal Professionals',
-    headline: 'Your first 3 client journeys are free.',
-    terraWord: 'free.',
-    tagline: 'Run a full deal through the platform \u2014 valuation, CIM, market intelligence, buyer qualification \u2014 without committing a dollar.',
+    overline: 'FOR ADVISORS & BROKERS',
+    headline: '12 listings. 480 hours.',
+    terraWord: '480 hours.',
+    tagline: 'The average M&A advisor spends 40 hours per listing on analytical work alone. That\u2019s 480 hours a year that could be spent closing deals instead of building spreadsheets.',
     chips: [
       'Package a new listing for my client',
       'Pre-screen a buyer for SBA eligibility',
@@ -415,7 +415,7 @@ export default function AppShell() {
   // Back to landing
   const handleBack = useCallback(() => {
     setViewState('landing');
-    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
+    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
     navigate(urlMap[activeTab]);
   }, [activeTab, navigate]);
 
@@ -424,7 +424,7 @@ export default function AppShell() {
     setActiveTab(tab);
     setViewState('landing');
     setIsMobileSidebarOpen(false);
-    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
+    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
     if (window.location.pathname !== urlMap[tab]) navigate(urlMap[tab]);
   }, [navigate]);
 

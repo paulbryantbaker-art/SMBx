@@ -1,10 +1,7 @@
-import { useState } from 'react';
 import {
   RevealSection,
-  StaggerContainer,
-  StaggerItem,
+  ScrollReveal,
   MagneticButton,
-  PulseBadge,
   ConversationPreview,
   ExpandableCard,
 } from './animations';
@@ -13,44 +10,168 @@ interface PricingBelowProps {
   onChipClick: (text: string) => void;
 }
 
-const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
-const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
-const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, marginTop: 12 };
-const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, margin: 0 };
-const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '24px 28px' };
+const narrowStyle = { maxWidth: 580, margin: '0 auto' } as const;
+const wideStyle = { maxWidth: 880, margin: '0 auto' } as const;
+const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' } as const;
+const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, marginTop: 12 } as const;
+const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, margin: 0 } as const;
+const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' } as const;
 
 export default function PricingBelow({ onChipClick }: PricingBelowProps) {
   return (
     <div className="px-6">
-      {/* ═══ Block 1 — Free forever ═══ */}
+      {/* ═══ 1. ALWAYS FREE — Grid ═══ */}
+      <section style={{ paddingTop: 100 }}>
+        <div style={wideStyle}>
+          <RevealSection style={{ textAlign: 'center' }}>
+            <span style={labelStyle}>ALWAYS FREE</span>
+          </RevealSection>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4" style={{ marginTop: 32 }}>
+            {[
+              { title: 'Bizestimate', body: 'Market value range. Census, BLS, SBA data. Shareable.' },
+              { title: 'Value Readiness', body: 'Seven-factor score with dollar impact of each improvement.' },
+              { title: 'Investment Thesis', body: 'Acquisition blueprint. Criteria, capital stack, SBA eligibility.' },
+              { title: 'SDE/EBITDA', body: 'Complete add-back identification. Adjusted earnings.' },
+            ].map((item, i) => (
+              <ScrollReveal key={item.title} delay={i * 0.06}>
+                <div style={{ ...cardStyle, height: '100%', padding: '20px 24px' }}>
+                  <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 6px' }}>{item.title}</h3>
+                  <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.5, margin: 0 }}>{item.body}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+
+          <RevealSection style={{ textAlign: 'center', marginTop: 20 }}>
+            <div style={{ ...cardStyle, display: 'inline-block', padding: '16px 24px', textAlign: 'center' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 4px' }}>Capital Stack</h3>
+              <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.4, margin: 0 }}>SBA loan, equity, seller note, monthly debt service.</p>
+            </div>
+          </RevealSection>
+
+          <RevealSection style={{ textAlign: 'center', marginTop: 24 }}>
+            <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.35)', margin: 0, fontStyle: 'italic' }}>
+              Not teasers. Complete analyses from a conversation.
+            </p>
+          </RevealSection>
+        </div>
+      </section>
+
+      {/* ═══ 2. YOUR DEAL DETERMINES YOUR PRICE — 3 Tier Cards ═══ */}
       <section style={{ paddingTop: 120 }}>
-        <div style={sectionStyle}>
-          <RevealSection>
-            <span style={labelStyle}>START FREE</span>
-            <h2 style={h2Style} className="md:text-[48px]">
-              Start free. Stay because it works.
+        <div style={wideStyle}>
+          <RevealSection style={{ textAlign: 'center' }}>
+            <h2 style={{ ...h2Style, textAlign: 'center' }} className="md:text-[42px]">
+              Your deal determines your price.
             </h2>
-            <p style={{ ...bodyStyle, marginTop: 20 }}>
-              Before Yulia ever mentions a plan, she&apos;s already delivered the foundational analysis for your deal. No credit card. No trial. Free forever.
+            <p style={{ ...bodyStyle, marginTop: 12, textAlign: 'center' }}>
+              You don&apos;t pick a plan. You tell Yulia about your deal.
             </p>
           </RevealSection>
 
-          <div className="space-y-4" style={{ marginTop: 40 }}>
+          <div className="flex flex-col md:flex-row gap-5" style={{ marginTop: 48 }}>
+            {/* $49 */}
+            <ScrollReveal delay={0} style={{ flex: 1 }}>
+              <div style={{ ...cardStyle, height: '100%', borderColor: 'rgba(0,0,0,0.08)' }}>
+                <p style={{ fontSize: '40px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 2px', letterSpacing: '-0.03em', lineHeight: 1 }}>$49</p>
+                <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.4)', margin: '0 0 16px' }}>/month</p>
+                <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.5)', lineHeight: 1.55, margin: '0 0 20px' }}>
+                  Owner-operated deals &mdash; clear process, trustworthy analysis, every step guided.
+                </p>
+                <div className="space-y-2">
+                  {['Full journeys (Sell, Buy, Raise, Integrate)', 'SDE normalization', 'SBA financing at live rates', 'Market intelligence by MSA', 'LOI drafting + negotiation intel', 'Deal data room'].map(t => (
+                    <p key={t} style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.5, margin: 0 }}>{t}</p>
+                  ))}
+                </div>
+                <p style={{ fontSize: '12px', color: 'rgba(0,0,0,0.3)', marginTop: 20, margin: '20px 0 0' }}>7-day free trial &middot; Cancel anytime</p>
+              </div>
+            </ScrollReveal>
+
+            {/* $199 — Featured */}
+            <ScrollReveal delay={0.08} style={{ flex: 1 }}>
+              <div style={{ borderRadius: 16, border: '2px solid #C96B4F', padding: '28px 32px', height: '100%', background: '#FFFFFF' }}>
+                <p style={{ fontSize: '40px', fontWeight: 700, color: '#C96B4F', margin: '0 0 2px', letterSpacing: '-0.03em', lineHeight: 1 }}>$199</p>
+                <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.4)', margin: '0 0 16px' }}>/month</p>
+                <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.5)', lineHeight: 1.55, margin: '0 0 20px' }}>
+                  Mid-market deals &mdash; institutional-quality analysis at a fraction of boutique advisory.
+                </p>
+                <p style={{ fontSize: '13px', fontWeight: 600, color: '#C96B4F', margin: '0 0 8px' }}>Everything in $49, plus:</p>
+                <div className="space-y-2">
+                  {['EBITDA normalization', 'Living CIM with auto-updates', 'Quality of Earnings analysis', 'Three-statement financial model', 'Tax structure analysis', 'PE buyer mapping'].map(t => (
+                    <p key={t} style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.5, margin: 0 }}>{t}</p>
+                  ))}
+                </div>
+                <p style={{ fontSize: '12px', color: 'rgba(0,0,0,0.3)', marginTop: 20, margin: '20px 0 0' }}>7-day free trial &middot; Cancel anytime</p>
+              </div>
+            </ScrollReveal>
+
+            {/* $499 */}
+            <ScrollReveal delay={0.16} style={{ flex: 1 }}>
+              <div style={{ ...cardStyle, height: '100%', borderColor: 'rgba(0,0,0,0.08)' }}>
+                <p style={{ fontSize: '40px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 2px', letterSpacing: '-0.03em', lineHeight: 1 }}>$499</p>
+                <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.4)', margin: '0 0 16px' }}>/month</p>
+                <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.5)', lineHeight: 1.55, margin: '0 0 20px' }}>
+                  Institutional transactions &mdash; board-level deliverables calibrated to PE expectations.
+                </p>
+                <p style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(0,0,0,0.5)', margin: '0 0 8px' }}>Everything in $199, plus:</p>
+                <div className="space-y-2">
+                  {['DCF modeling', 'IRR/MOIC projections', 'LBO scenarios', 'Cap table with waterfall', '180-day PMI auto-build', 'Covenant analysis'].map(t => (
+                    <p key={t} style={{ fontSize: '13px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.5, margin: 0 }}>{t}</p>
+                  ))}
+                </div>
+                <p style={{ fontSize: '12px', color: 'rgba(0,0,0,0.3)', marginTop: 20, margin: '20px 0 0' }}>7-day free trial &middot; Cancel anytime</p>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 3. DEAL REVEALS — Conversation Preview ═══ */}
+      <section style={{ paddingTop: 140 }}>
+        <div style={narrowStyle}>
+          <RevealSection style={{ textAlign: 'center' }}>
+            <h2 style={{ ...h2Style, textAlign: 'center' }} className="md:text-[42px]">
+              You don&apos;t pick a plan. Your deal reveals it.
+            </h2>
+          </RevealSection>
+
+          <RevealSection style={{ marginTop: 40 }}>
+            <ConversationPreview
+              messages={[
+                { role: 'user', text: "I want to sell my HVAC company in Dallas. About $4.2M revenue, $780K EBITDA." },
+                { role: 'ai', text: "Based on your financials, your plan includes full valuation, SBA model, market intelligence, CIM, buyer targeting, negotiation strategy, and closing preparation.\n$49/month." },
+              ]}
+            />
+          </RevealSection>
+
+          <RevealSection style={{ marginTop: 12, textAlign: 'center' }}>
+            <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.4)', margin: 0 }}>
+              But first &mdash; let&apos;s see what the business is worth.
+            </p>
+          </RevealSection>
+        </div>
+      </section>
+
+      {/* ═══ 4. QUESTIONS ═══ */}
+      <section style={{ paddingTop: 140 }}>
+        <div style={narrowStyle}>
+          <RevealSection style={{ textAlign: 'center' }}>
+            <h2 style={{ ...h2Style, textAlign: 'center' }}>Questions</h2>
+          </RevealSection>
+
+          <div className="space-y-0" style={{ marginTop: 32 }}>
             {[
-              { title: 'Bizestimate', body: 'Your business valuation range \u2014 updated quarterly. Shareable link for partners, CPAs, attorneys.' },
-              { title: 'Value Readiness Report', body: '7-factor score with specific improvement actions and dollar-impact estimates.' },
-              { title: 'Investment Thesis Document', body: 'Acquisition blueprint with criteria, SBA eligibility, capital stack template, and market landscape.' },
-              { title: 'Preliminary SDE / EBITDA', body: 'Add-back math and adjusted earnings calculation \u2014 the foundation everything else is built on.' },
-              { title: 'Capital Stack Template', body: 'Exactly how a business at your target price would be financed: SBA loan, equity injection, seller note, monthly debt service.' },
-              { title: 'Unlimited Conversation', body: 'Talk to Yulia about deal classification, SBA screening, process guidance, exit options, tax structure modeling, and more.' },
+              { q: '"Really free?"', a: 'No catch. No card. No auto-conversion. Sovereign data, synthesized in seconds.' },
+              { q: '"Why does pricing vary?"', a: 'A $500K landscaping company and a $15M manufacturer need fundamentally different analysis. The price reflects depth, not markup.' },
+              { q: '"Different from ChatGPT?"', a: 'ChatGPT knows about deals. Yulia knows yours. Every number sourced. Every analysis localized. Documents your bank or attorney can use.' },
+              { q: '"Working with a broker?"', a: 'Even better. Show up with the analysis done.' },
+              { q: '"Cancel?"', a: 'Anytime. No contracts. Your data is yours.' },
             ].map(item => (
-              <RevealSection key={item.title}>
-                <div style={cardStyle}>
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#0D0D0D', margin: '0 0 6px' }}>{item.title}</h3>
-                    <PulseBadge color="#C96B4F">Free</PulseBadge>
-                  </div>
-                  <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.body}</p>
+              <RevealSection key={item.q}>
+                <div style={{ padding: '20px 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 6px' }}>{item.q}</h3>
+                  <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.55, margin: 0 }}>{item.a}</p>
                 </div>
               </RevealSection>
             ))}
@@ -58,182 +179,31 @@ export default function PricingBelow({ onChipClick }: PricingBelowProps) {
         </div>
       </section>
 
-      {/* ═══ Block 2 — Three tiers ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={sectionStyle}>
+      {/* ═══ 5. FOR ADVISORS ═══ */}
+      <section style={{ paddingTop: 80 }}>
+        <div style={wideStyle}>
           <RevealSection>
-            <span style={labelStyle}>ONE CONVERSATION &middot; THE RIGHT PLAN</span>
-            <h2 style={h2Style} className="md:text-[48px]">
-              One conversation. The right plan for your deal.
-            </h2>
-            <p style={{ ...bodyStyle, marginTop: 20 }}>
-              Yulia learns about your deal during your free conversation. When you&apos;re ready for deeper analysis, she surfaces the plan that fits &mdash; no upsell, no sales call.
-            </p>
-          </RevealSection>
-
-          <StaggerContainer className="space-y-4" style={{ marginTop: 40 }}>
-            {[
-              {
-                name: 'Starter',
-                price: '$49',
-                period: '/month',
-                badge: null,
-                items: [
-                  'Business Valuation Report',
-                  'Market Intelligence Report',
-                  'Deal Screening Memo',
-                  'SBA Financing Model',
-                  'Sector Analysis',
-                ],
-                note: 'Know your position. Validate the deal.',
-              },
-              {
-                name: 'Professional',
-                price: '$199',
-                period: '/month',
-                badge: 'Most popular',
-                items: [
-                  'Everything in Starter, plus:',
-                  'Confidential Information Memo (CIM)',
-                  'Full Valuation Suite',
-                  'QoE Lite',
-                  'Tax Structure Analysis',
-                  'Term Sheet Generator',
-                  'Financial Model',
-                ],
-                note: 'Prepare to transact. Institutional-grade documents.',
-              },
-              {
-                name: 'Enterprise',
-                price: '$499',
-                period: '/month',
-                badge: null,
-                items: [
-                  'Everything in Professional, plus:',
-                  'Living CIM (auto-updates)',
-                  'LBO Model',
-                  'Due Diligence Package',
-                  'Negotiation Strategy',
-                  'Integration Plan',
-                  'Priority support',
-                ],
-                note: 'Close the deal. Full transaction support.',
-              },
-            ].map(tier => (
-              <StaggerItem key={tier.name}>
-                <div style={{
-                  ...cardStyle,
-                  borderLeft: tier.badge ? '3px solid #C96B4F' : undefined,
-                }}>
-                  <div className="flex items-center gap-3" style={{ marginBottom: 12 }}>
-                    <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#0D0D0D', margin: 0 }}>{tier.name}</h3>
-                    {tier.badge && <PulseBadge color="#C96B4F">{tier.badge}</PulseBadge>}
-                  </div>
-                  <div className="flex items-baseline gap-1" style={{ marginBottom: 12 }}>
-                    <span style={{ fontSize: '36px', fontWeight: 700, color: '#C96B4F', lineHeight: 1 }}>{tier.price}</span>
-                    <span style={{ fontSize: '14px', color: 'rgba(0,0,0,0.4)' }}>{tier.period}</span>
-                  </div>
-                  <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', fontStyle: 'italic', margin: '0 0 16px' }}>{tier.note}</p>
-                  <div className="space-y-2">
-                    {tier.items.map(item => (
-                      <div key={item} className="flex items-start gap-2">
-                        <span style={{ color: '#C96B4F', fontSize: '14px', lineHeight: '1.5', flexShrink: 0 }}>&#10003;</span>
-                        <span style={{ fontSize: '14px', color: 'rgba(0,0,0,0.6)', lineHeight: 1.5 }}>{item}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        </div>
-      </section>
-
-      {/* ═══ Block 3 — How Discovery Works ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={sectionStyle}>
-          <RevealSection>
-            <span style={labelStyle}>HOW DISCOVERY WORKS</span>
-            <h2 style={h2Style} className="md:text-[48px]">
-              One conversation surfaces the right plan.
-            </h2>
-            <p style={{ ...bodyStyle, marginTop: 20 }}>
-              Yulia doesn&apos;t show you a pricing page. She learns about your deal and suggests the plan that fits.
-            </p>
-          </RevealSection>
-
-          <RevealSection style={{ marginTop: 40 }}>
-            <ConversationPreview
-              messages={[
-                { role: 'user', text: "I want to sell my HVAC company in Dallas. About $4.2M revenue, $780K EBITDA." },
-                { role: 'ai', text: "Based on your financials and market, your Bizestimate range is $3.7M\u2013$4.8M. I\u2019ve generated your free Value Readiness Report \u2014 your biggest optimization opportunity is EBITDA margin improvement. When you\u2019re ready for the full valuation and CIM, the Starter plan covers both." },
-                { role: 'user', text: "What do I get on the Starter plan?" },
-                { role: 'ai', text: "Starter ($49/mo) includes your full Valuation Report, Market Intelligence, SBA Financing Model, and Deal Screening Memo. Everything you need to know your position before going to market." },
-              ]}
-            />
-          </RevealSection>
-        </div>
-      </section>
-
-      {/* ═══ Block 4 — For Advisors ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={sectionStyle}>
-          <RevealSection>
-            <div style={{ ...cardStyle, padding: '32px' }}>
-              <span style={{ ...labelStyle, display: 'block', marginBottom: 16 }}>FOR ADVISORS AND BROKERS</span>
-              <h3 style={{ fontSize: '26px', fontWeight: 600, letterSpacing: '-0.03em', marginBottom: 16 }} className="md:text-[36px]">
-                Your first 3 client journeys are free.
-              </h3>
-              <div className="space-y-4" style={bodyStyle}>
-                <p>White-label everything. Your clients see your deliverables, your brand, your expertise. Yulia generates the CIM, runs the valuation, models the tax structure.</p>
-                <p>After three journeys, pick the plan that fits your practice.</p>
-              </div>
+            <div style={{ background: '#FAFAFA', borderRadius: 16, padding: '40px', textAlign: 'center' }}>
+              <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 12px', letterSpacing: '-0.02em' }}>For advisors</h3>
+              <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.6, margin: 0, maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
+                First three client journeys free. After that, pricing follows the deal. White-labeled deliverables under your brand. No per-seat licensing.
+              </p>
             </div>
           </RevealSection>
         </div>
       </section>
 
-      {/* ═══ Block 5 — Common questions ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={sectionStyle}>
-          <RevealSection>
-            <span style={labelStyle}>COMMON QUESTIONS</span>
-          </RevealSection>
-
-          <div className="space-y-3" style={{ marginTop: 32 }}>
-            {[
-              { q: 'Is the free analysis really free?', a: 'No catch. No credit card. No trial that auto-converts. The free tier is free forever. You get your Bizestimate, Value Readiness Report, and unlimited conversation before we ever mention a plan.' },
-              { q: 'How is this different from ChatGPT?', a: 'ChatGPT generates plausible text about M&A concepts. Yulia analyzes your specific deal against real federal data \u2014 Census, BLS, FRED, SEC EDGAR, SBA \u2014 with a structured methodology calibrated to your industry, geography, and deal size.' },
-              { q: 'Can I switch plans?', a: 'Yes. Upgrade, downgrade, or cancel anytime. Your data and conversation history stay with you. If your deal closes, you can pause until the next one.' },
-              { q: 'What if my deal is complex?', a: 'The platform adapts to deal complexity. Larger deals receive deeper analysis and more sophisticated financial modeling \u2014 same methodology, scaled to the deal.' },
-              { q: 'Can I use this with my broker or advisor?', a: 'Absolutely. Most professionals appreciate clients who arrive prepared. Bring your smbX.ai analysis to your first meeting. Your advisor handles relationships and negotiation. Yulia handles the data.' },
-              { q: 'What happens when I cancel?', a: 'You keep access to all deliverables you\u2019ve generated. Your conversation history is preserved. You can resubscribe whenever you\u2019re ready for the next deal.' },
-            ].map(item => (
-              <ExpandableCard key={item.q} title={item.q}>
-                <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.a}</p>
-              </ExpandableCard>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ Block 6 — CTA ═══ */}
+      {/* ═══ 6. FINAL CTA ═══ */}
       <section style={{ paddingTop: 60, paddingBottom: 80 }}>
-        <div style={sectionStyle}>
-          <RevealSection>
-            <p style={{ fontSize: 36, fontWeight: 300, color: '#0D0D0D', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>Intelligence you can afford. Results you can defend.</p>
-          </RevealSection>
-
-          <RevealSection>
-            <div className="text-center">
-              <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.5)', marginBottom: 16 }}>Start a free analysis &rarr; see what Yulia delivers before you pay anything</p>
-              <MagneticButton
-                onClick={() => onChipClick("Start a free analysis")}
-                style={{ background: '#0D0D0D', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
-              >
-                Start chatting &rarr;
-              </MagneticButton>
-            </div>
+        <div style={narrowStyle}>
+          <RevealSection style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.5)', marginBottom: 16 }}>Start a free analysis &rarr; see what Yulia delivers before you pay anything</p>
+            <MagneticButton
+              onClick={() => onChipClick("Start a free analysis")}
+              style={{ background: '#0D0D0D', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              Start chatting
+            </MagneticButton>
           </RevealSection>
         </div>
       </section>
