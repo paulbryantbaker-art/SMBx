@@ -701,6 +701,43 @@ export default function AppShell() {
         </nav>
       </div>
 
+      {/* ─── Explore — journey page navigation ─── */}
+      <div className="px-3 mt-5">
+        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C96B4F' }}>Explore</div>
+        <nav className="space-y-0.5">
+          {([
+            { id: 'sell' as TabId, label: 'Sell a Business', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" /><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" /></svg> },
+            { id: 'buy' as TabId, label: 'Buy a Business', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg> },
+            { id: 'raise' as TabId, label: 'Raise Capital', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg> },
+            { id: 'how-it-works' as TabId, label: 'How It Works', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg> },
+            { id: 'advisors' as TabId, label: 'For Advisors', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg> },
+            { id: 'pricing' as TabId, label: 'Pricing', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> },
+          ]).map(item => {
+            const isActive = activeTab === item.id && viewState === 'landing';
+            return (
+              <button
+                key={item.id}
+                onClick={() => { handleTabClick(item.id); if (mobile) setIsMobileSidebarOpen(false); }}
+                className={`flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all ${!isActive ? 'nav-item-hover' : ''}`}
+                style={{
+                  fontFamily: 'inherit',
+                  fontSize: '14px',
+                  fontWeight: isActive ? 600 : 400,
+                  color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
+                  background: isActive ? 'rgba(0,0,0,0.04)' : 'transparent',
+                  borderRadius: '10px',
+                  border: 'none',
+                }}
+                type="button"
+              >
+                <span style={{ color: isActive ? '#C96B4F' : 'rgba(0,0,0,0.25)' }}>{item.icon}</span>
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
       {/* Conversations — Recent */}
       <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-4">
         <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C96B4F' }}>Recent</div>
@@ -908,13 +945,13 @@ export default function AppShell() {
 
                 {/* MOBILE HOME */}
                 <div className="flex flex-col h-full md:hidden">
-                  <div className="flex-1 flex flex-col items-center justify-center px-5 gap-5" style={{ position: 'relative' }}>
+                  <div className="flex-1 flex flex-col items-center justify-center px-5 gap-7" style={{ position: 'relative' }}>
                     {/* Heading */}
                     <motion.h1
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', textAlign: 'center', margin: 0, lineHeight: 1.15 }}
+                      style={{ fontFamily: "ui-serif, Georgia, Cambria, 'Times New Roman', serif", fontSize: '30px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', textAlign: 'center', margin: 0, lineHeight: 1.15 }}
                     >
                       How can we help today?
                     </motion.h1>
@@ -923,7 +960,7 @@ export default function AppShell() {
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '15px', color: 'rgba(0,0,0,0.4)', textAlign: 'center', margin: 0, lineHeight: 1.5 }}
+                      style={{ fontSize: '15px', color: 'rgba(0,0,0,0.4)', textAlign: 'center', margin: 0, lineHeight: 1.6 }}
                     >
                       Analyze markets, value companies, or prepare for your next transaction.
                     </motion.p>
@@ -987,7 +1024,7 @@ export default function AppShell() {
                       initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '36px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', textAlign: 'center', margin: '0 0 12px', lineHeight: 1.15 }}
+                      style={{ fontFamily: "ui-serif, Georgia, Cambria, 'Times New Roman', serif", fontSize: '38px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', textAlign: 'center', margin: '0 0 16px', lineHeight: 1.15 }}
                     >
                       How can we help today?
                     </motion.h1>
@@ -996,7 +1033,7 @@ export default function AppShell() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '17px', color: 'rgba(0,0,0,0.4)', textAlign: 'center', margin: '0 0 32px', lineHeight: 1.5 }}
+                      style={{ fontSize: '17px', color: 'rgba(0,0,0,0.4)', textAlign: 'center', margin: '0 0 40px', lineHeight: 1.6 }}
                     >
                       Analyze markets, value companies, or prepare for your next transaction.
                     </motion.p>
@@ -1019,7 +1056,7 @@ export default function AppShell() {
                       />
                     </motion.div>
                     {/* Suggestion chips — 3 chips with icons */}
-                    <div className="flex flex-wrap justify-center gap-3" style={{ marginTop: 20 }}>
+                    <div className="flex flex-wrap justify-center gap-3" style={{ marginTop: 28 }}>
                       {[
                         { label: 'Prepare to sell', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9 12l2 2 4-4" /></svg>, message: "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." },
                         { label: 'Raise capital', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>, message: "I need to raise capital for my business. Walk me through the options." },
@@ -1071,10 +1108,10 @@ export default function AppShell() {
                       {page.overline}
                     </div>
                   )}
-                  <h1 style={{ fontSize: '36px', fontWeight: 600, letterSpacing: '-0.03em', color: '#0D0D0D', lineHeight: 1.12, marginBottom: 16 }}>
+                  <h1 style={{ fontFamily: "ui-serif, Georgia, Cambria, 'Times New Roman', serif", fontSize: '36px', fontWeight: 600, letterSpacing: '-0.03em', color: '#0D0D0D', lineHeight: 1.12, marginBottom: 20 }}>
                     {renderHeadline(page.headline, page.terraWord)}
                   </h1>
-                  <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.6, marginBottom: 24 }}>
+                  <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.6, marginBottom: 28 }}>
                     {page.tagline}
                   </p>
                   <div className="flex flex-wrap gap-2 mb-5">
@@ -1106,10 +1143,10 @@ export default function AppShell() {
                         {page.overline}
                       </div>
                     )}
-                    <h1 style={{ fontSize: '52px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.1, marginBottom: 20 }}>
+                    <h1 style={{ fontFamily: "ui-serif, Georgia, Cambria, 'Times New Roman', serif", fontSize: '52px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.1, marginBottom: 24 }}>
                       {renderHeadline(page.headline, page.terraWord)}
                     </h1>
-                    <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, marginBottom: 32 }}>
+                    <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, marginBottom: 36 }}>
                       {page.tagline}
                     </p>
                     <div className="flex flex-wrap gap-2.5 mb-6">

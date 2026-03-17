@@ -35,24 +35,24 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
   return (
     <div>
       {/* ═══ HERO — Mixed typography ═══ */}
-      <section style={{ padding: '64px 32px 48px', maxWidth: 880, margin: '0 auto', textAlign: 'center' }}>
+      <section style={{ padding: '120px 32px 100px', maxWidth: 880, margin: '0 auto', textAlign: 'center' }}>
         <RevealSection>
-          <h1 style={{ margin: '0 0 20px', lineHeight: 1.1 }}>
-            <span style={{ fontFamily: "'Playfair Display', 'Georgia', serif", fontSize: '48px', fontWeight: 400, fontStyle: 'italic', color: '#0D0D0D', letterSpacing: '-0.02em', display: 'block' }}>
+          <h1 style={{ margin: '0 0 36px', lineHeight: 1.1 }}>
+            <span style={{ fontFamily: "'Playfair Display', 'Georgia', serif", fontSize: '52px', fontWeight: 400, fontStyle: 'italic', color: '#0D0D0D', letterSpacing: '-0.02em', display: 'block' }}>
               75% of business owners
             </span>
-            <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '40px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.02em', color: '#0D0D0D', display: 'block', marginTop: 4 }}>
+            <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '44px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.02em', color: '#0D0D0D', display: 'block', marginTop: 12 }}>
               regret selling within a year.
             </span>
           </h1>
-          <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.65, maxWidth: 560, margin: '0 auto 32px' }}>
+          <p style={{ fontSize: '17px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, maxWidth: 540, margin: '0 auto 48px' }}>
             We combine institutional-grade data with human empathy to ensure you exit on your terms, for your price, with zero regrets.
           </p>
-          <div className="flex items-center justify-center gap-3 flex-wrap">
+          <div className="flex items-center justify-center gap-4 flex-wrap">
             <button
               onClick={() => onChipClick("I want to understand what my business is worth. Can you walk me through a valuation?")}
               className="cursor-pointer hover:opacity-90 transition-opacity"
-              style={{ fontFamily: 'inherit', fontSize: '15px', fontWeight: 600, background: '#0D0D0D', color: '#fff', border: 'none', borderRadius: '10px', padding: '14px 28px' }}
+              style={{ fontFamily: 'inherit', fontSize: '15px', fontWeight: 600, background: '#0D0D0D', color: '#fff', border: 'none', borderRadius: '10px', padding: '16px 32px' }}
               type="button"
             >
               Start Valuation
@@ -60,7 +60,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
             <button
               onClick={() => onChipClick("I'm an advisor and want to see how smbX.ai can help with my sell-side practice.")}
               className="cursor-pointer hover:bg-[rgba(0,0,0,0.02)] transition-all"
-              style={{ fontFamily: 'inherit', fontSize: '15px', fontWeight: 600, background: 'transparent', color: '#0D0D0D', border: '1px solid rgba(0,0,0,0.15)', borderRadius: '10px', padding: '14px 28px' }}
+              style={{ fontFamily: 'inherit', fontSize: '15px', fontWeight: 600, background: 'transparent', color: '#0D0D0D', border: '1px solid rgba(0,0,0,0.15)', borderRadius: '10px', padding: '16px 32px' }}
               type="button"
             >
               Talk to an Advisor
@@ -70,23 +70,23 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
       </section>
 
       {/* ═══ BIZESTIMATE SECTION ═══ */}
-      <section style={{ padding: '64px 0', ...sectionStyle }}>
+      <section style={{ padding: '120px 0', ...sectionStyle }}>
         <RevealSection>
-          <h2 style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 6px', lineHeight: 1.2 }}>
+          <h2 style={{ fontFamily: "ui-serif, Georgia, Cambria, 'Times New Roman', serif", fontSize: '36px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 16px', lineHeight: 1.2 }}>
             What your business is actually worth
           </h2>
-          <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.4)', margin: '0 0 28px' }}>
+          <p style={{ fontSize: '17px', color: 'rgba(0,0,0,0.4)', margin: '0 0 48px', lineHeight: 1.6 }}>
             Real-time market data matched against your trailing 12-month performance.
           </p>
         </RevealSection>
 
         <ScrollReveal>
-          <div style={{ background: '#F8F8F6', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '32px', overflow: 'hidden' }}>
+          <div style={{ background: '#F8F8F6', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '40px', overflow: 'hidden' }}>
             {/* Stats row */}
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-6">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-8">
               <div>
                 <p style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(0,0,0,0.35)', margin: '0 0 8px' }}>Bizestimate Range</p>
-                <p style={{ fontSize: '40px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: 0, lineHeight: 1 }}>
+                <p style={{ fontSize: '40px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: 0, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
                   $4.2M — $4.8M
                 </p>
               </div>
@@ -98,7 +98,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
                 ].map(stat => (
                   <div key={stat.label}>
                     <p style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(0,0,0,0.35)', margin: '0 0 4px' }}>{stat.label}</p>
-                    <p style={{ fontSize: '20px', fontWeight: 700, color: '#0D0D0D', margin: 0 }}>{stat.value}</p>
+                    <p style={{ fontSize: '20px', fontWeight: 700, color: '#0D0D0D', margin: 0, fontVariantNumeric: 'tabular-nums' }}>{stat.value}</p>
                   </div>
                 ))}
               </div>
@@ -131,12 +131,12 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
       </section>
 
       {/* ═══ ADD-BACKS TABLE ═══ */}
-      <section style={{ padding: '48px 0', ...sectionStyle }}>
+      <section style={{ padding: '120px 0', ...sectionStyle }}>
         <RevealSection>
-          <h2 style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 6px', lineHeight: 1.2 }}>
+          <h2 style={{ fontFamily: "ui-serif, Georgia, Cambria, 'Times New Roman', serif", fontSize: '36px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 16px', lineHeight: 1.2 }}>
             The $400,000 hiding in your tax returns
           </h2>
-          <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.4)', margin: '0 0 28px' }}>
+          <p style={{ fontSize: '17px', color: 'rgba(0,0,0,0.4)', margin: '0 0 48px', lineHeight: 1.6 }}>
             Most accountants minimize taxes. We maximize value. Here is how we restate your earnings.
           </p>
         </RevealSection>
@@ -144,7 +144,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
         <ScrollReveal>
           <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, overflow: 'hidden' }}>
             {/* Header row */}
-            <div className="flex" style={{ background: '#F8F8F6', padding: '14px 24px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+            <div className="flex" style={{ background: '#F8F8F6', padding: '16px 28px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
               <span style={{ flex: 2, fontSize: '13px', fontWeight: 600, color: 'rgba(0,0,0,0.45)' }}>Category</span>
               <span style={{ flex: 1, fontSize: '13px', fontWeight: 600, color: 'rgba(0,0,0,0.45)' }}>Reported Profit</span>
               <span style={{ flex: 1, fontSize: '13px', fontWeight: 600, color: 'rgba(0,0,0,0.45)' }}>Adjusted SDE</span>
@@ -152,44 +152,45 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
             </div>
             {/* Data rows */}
             {ADDBACKS.map((row, i) => (
-              <div key={i} className="flex" style={{ padding: '16px 24px', borderBottom: i < ADDBACKS.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none', background: '#fff' }}>
+              <div key={i} className="flex" style={{ padding: '18px 28px', borderBottom: i < ADDBACKS.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none', background: '#fff' }}>
                 <span style={{ flex: 2, fontSize: '15px', fontWeight: 500, color: '#0D0D0D' }}>{row.category}</span>
-                <span style={{ flex: 1, fontSize: '15px', color: 'rgba(0,0,0,0.5)' }}>{row.reported}</span>
-                <span style={{ flex: 1, fontSize: '15px', fontWeight: 600, color: '#0D0D0D' }}>{row.adjusted}</span>
-                <span style={{ flex: 1, fontSize: '15px', fontWeight: 600, color: '#4CAF50', textAlign: 'right' }}>{row.added}</span>
+                <span style={{ flex: 1, fontSize: '15px', color: 'rgba(0,0,0,0.5)', fontVariantNumeric: 'tabular-nums' }}>{row.reported}</span>
+                <span style={{ flex: 1, fontSize: '15px', fontWeight: 600, color: '#0D0D0D', fontVariantNumeric: 'tabular-nums' }}>{row.adjusted}</span>
+                <span style={{ flex: 1, fontSize: '15px', fontWeight: 600, color: '#4CAF50', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{row.added}</span>
               </div>
             ))}
             {/* Total row */}
-            <div className="flex" style={{ padding: '18px 24px', borderTop: '2px solid rgba(0,0,0,0.08)', background: '#FAFAFA' }}>
+            <div className="flex" style={{ padding: '20px 28px', borderTop: '2px solid rgba(0,0,0,0.08)', background: '#FAFAFA' }}>
               <span style={{ flex: 2, fontSize: '16px', fontWeight: 700, color: '#0D0D0D' }}>Total Value Enhancement</span>
               <span style={{ flex: 1 }} />
               <span style={{ flex: 1 }} />
-              <span style={{ flex: 1, fontSize: '20px', fontWeight: 700, color: '#0D0D0D', textAlign: 'right' }}>$257,000</span>
+              <span style={{ flex: 1, fontSize: '20px', fontWeight: 700, color: '#0D0D0D', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>$257,000</span>
             </div>
           </div>
         </ScrollReveal>
       </section>
 
       {/* ═══ SIX WAYS OUT ═══ */}
-      <section style={{ padding: '64px 0', ...sectionStyle }}>
+      <section style={{ padding: '120px 0', ...sectionStyle }}>
         <RevealSection>
-          <h2 style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 6px', lineHeight: 1.2 }}>
+          <h2 style={{ fontFamily: "ui-serif, Georgia, Cambria, 'Times New Roman', serif", fontSize: '36px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 16px', lineHeight: 1.2 }}>
             Six ways out
           </h2>
-          <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.4)', margin: '0 0 28px' }}>
+          <p style={{ fontSize: '17px', color: 'rgba(0,0,0,0.4)', margin: '0 0 52px', lineHeight: 1.6 }}>
             The right exit depends on your legacy goals and liquidity needs.
           </p>
         </RevealSection>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Asymmetric 2-column layout — breaks the generic 3-equal-card grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {EXIT_TYPES.map((item, i) => (
-            <ScrollReveal key={item.title} delay={i * 0.05}>
-              <div style={{ background: '#fff', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', padding: '24px', height: '100%' }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: '#F4F4F2', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, color: 'rgba(0,0,0,0.5)' }}>
+            <ScrollReveal key={item.title} delay={i * 0.06}>
+              <div style={{ background: '#fff', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', padding: '28px 28px 32px', height: '100%' }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: '#F4F4F2', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, color: 'rgba(0,0,0,0.5)' }}>
                   {item.icon}
                 </div>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 8px' }}>{item.title}</h3>
-                <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.55, margin: 0 }}>{item.desc}</p>
+                <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 10px' }}>{item.title}</h3>
+                <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.6, margin: 0 }}>{item.desc}</p>
               </div>
             </ScrollReveal>
           ))}
@@ -197,12 +198,12 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
       </section>
 
       {/* ═══ THE COMPLETE PROCESS ═══ */}
-      <section style={{ padding: '64px 0', ...sectionStyle }}>
+      <section style={{ padding: '120px 0', ...sectionStyle }}>
         <RevealSection>
-          <h2 style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 6px', lineHeight: 1.2 }}>
+          <h2 style={{ fontFamily: "ui-serif, Georgia, Cambria, 'Times New Roman', serif", fontSize: '36px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 16px', lineHeight: 1.2 }}>
             The complete process
           </h2>
-          <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.4)', margin: '0 0 40px' }}>
+          <p style={{ fontSize: '17px', color: 'rgba(0,0,0,0.4)', margin: '0 0 56px', lineHeight: 1.6 }}>
             A rigorous, disciplined approach to your life&apos;s work.
           </p>
         </RevealSection>
@@ -210,13 +211,13 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
         <div className="flex flex-col gap-0">
           {PROCESS_STEPS.map((step, i) => (
             <ScrollReveal key={step.num} delay={i * 0.08}>
-              <div className="flex items-start gap-6 md:gap-10" style={{ padding: '28px 0', borderTop: i === 0 ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(0,0,0,0.06)' }}>
-                <span style={{ fontSize: '64px', fontWeight: 200, color: 'rgba(0,0,0,0.08)', lineHeight: 1, fontFamily: "'Inter', system-ui, sans-serif", flexShrink: 0, width: 60, textAlign: 'center' }}>
+              <div className="flex items-start gap-6 md:gap-10" style={{ padding: '36px 0', borderTop: i === 0 ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(0,0,0,0.06)' }}>
+                <span style={{ fontSize: '72px', fontWeight: 200, color: 'rgba(0,0,0,0.07)', lineHeight: 1, fontFamily: "ui-serif, Georgia, serif", flexShrink: 0, width: 60, textAlign: 'center' }}>
                   {step.num}
                 </span>
-                <div style={{ paddingTop: 8 }}>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 8px' }}>{step.title}</h3>
-                  <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.6, margin: 0, maxWidth: 500 }}>{step.desc}</p>
+                <div style={{ paddingTop: 10 }}>
+                  <h3 style={{ fontSize: '19px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 10px' }}>{step.title}</h3>
+                  <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.65, margin: 0, maxWidth: 520 }}>{step.desc}</p>
                 </div>
               </div>
             </ScrollReveal>
@@ -225,13 +226,13 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
       </section>
 
       {/* ═══ READY TO CHAT CTA ═══ */}
-      <section style={{ padding: '64px 0 48px', maxWidth: 640, margin: '0 auto', paddingLeft: 32, paddingRight: 32 }}>
+      <section style={{ padding: '140px 0 120px', maxWidth: 640, margin: '0 auto', paddingLeft: 32, paddingRight: 32 }}>
         <RevealSection>
-          <h2 style={{ fontSize: '36px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 24px', lineHeight: 1.15 }}>
+          <h2 style={{ fontFamily: "ui-serif, Georgia, Cambria, 'Times New Roman', serif", fontSize: '40px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 32px', lineHeight: 1.15 }}>
             Ready to chat?
           </h2>
-          <div style={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 12, padding: '20px', background: '#fff' }}>
-            <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.35)', margin: '0 0 16px' }}>
+          <div style={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 14, padding: '24px', background: '#fff' }}>
+            <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.35)', margin: '0 0 20px' }}>
               Tell us about your business or ask a question...
             </p>
             <div className="flex justify-center">
@@ -248,7 +249,7 @@ export default function SellBelow({ onChipClick }: SellBelowProps) {
         </RevealSection>
 
         {/* Trust footer */}
-        <div className="flex items-center justify-center gap-3 mt-6">
+        <div className="flex items-center justify-center gap-3 mt-10">
           <div className="flex gap-1">
             <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.08)', display: 'inline-block' }} />
             <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.12)', display: 'inline-block' }} />
