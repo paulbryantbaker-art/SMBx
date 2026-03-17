@@ -651,8 +651,8 @@ export default function AppShell() {
             }
             if (mobile) setIsMobileSidebarOpen(false);
           }}
-          className="w-full flex items-center justify-center gap-2 text-[14px] px-4 py-2.5 cursor-pointer hover:bg-[rgba(0,0,0,0.03)] transition-all"
-          style={{ fontFamily: 'inherit', fontWeight: 500, background: 'transparent', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.12)', color: '#0D0D0D' }}
+          className="w-full flex items-center justify-center gap-2 text-[14px] px-4 py-2.5 cursor-pointer hover:opacity-90 transition-all"
+          style={{ fontFamily: 'inherit', fontWeight: 500, background: '#0D0D0D', borderRadius: '10px', border: 'none', color: '#fff' }}
           type="button"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
@@ -946,6 +946,18 @@ export default function AppShell() {
                 {/* MOBILE HOME */}
                 <div className="flex flex-col h-full md:hidden">
                   <div className="flex-1 flex flex-col items-center justify-center px-5 gap-7" style={{ position: 'relative' }}>
+                    {/* Logo mark — animates toward sidebar on chat entry */}
+                    <motion.div
+                      initial={{ opacity: 0, y: -12, scale: 0.9 }}
+                      animate={morphing
+                        ? { opacity: 0, x: -120, y: -200, scale: 0.5, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } }
+                        : { opacity: 1, y: 0, x: 0, scale: 1, transition: { duration: 0.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] } }
+                      }
+                    >
+                      <span style={{ fontSize: '34px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D' }}>
+                        smb<span style={{ color: '#C96B4F' }}>X</span><span style={{ opacity: 0.6 }}>.ai</span>
+                      </span>
+                    </motion.div>
                     {/* Heading */}
                     <motion.h1
                       initial={{ opacity: 0, y: 12 }}
@@ -1019,6 +1031,19 @@ export default function AppShell() {
                 {/* DESKTOP HOME */}
                 <div className="hidden md:flex flex-col h-full items-center justify-center">
                   <div className="flex flex-col items-center" style={{ marginTop: '-40px', width: '100%', maxWidth: 640 }}>
+                    {/* Logo mark — animates toward sidebar on chat entry */}
+                    <motion.div
+                      initial={{ opacity: 0, y: -16, scale: 0.85 }}
+                      animate={morphing
+                        ? { opacity: 0, x: -280, y: -200, scale: 0.5, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
+                        : { opacity: 1, y: 0, x: 0, scale: 1, transition: { duration: 0.7, delay: 0.05, ease: [0.22, 1, 0.36, 1] } }
+                      }
+                      style={{ marginBottom: 28 }}
+                    >
+                      <span style={{ fontSize: '42px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D' }}>
+                        smb<span style={{ color: '#C96B4F' }}>X</span><span style={{ opacity: 0.6 }}>.ai</span>
+                      </span>
+                    </motion.div>
                     {/* Heading */}
                     <motion.h1
                       initial={{ opacity: 0, y: 14 }}

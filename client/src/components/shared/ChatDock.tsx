@@ -296,8 +296,77 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
         className="hidden"
       />
 
-      <div className={isHero ? '' : 'max-w-[860px] mx-auto pb-3 pt-2 lg:pb-4'}>
-        <div className="home-dock-card relative" style={isHero ? { background: '#fff', borderRadius: 20, border: '2px solid rgba(0,0,0,0.06)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' } : undefined}>
+      {isHero ? (
+        /* ═══ HERO — Single-row pill bar (Paper design) ═══ */
+        <div
+          className="home-dock-card"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            background: '#fff',
+            borderRadius: 100,
+            border: '1.5px solid rgba(0,0,0,0.08)',
+            boxShadow: '0 6px 32px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)',
+            padding: '6px 8px 6px 24px',
+            gap: 12,
+          }}
+        >
+          {/* Search icon */}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.25)" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+
+          {/* Input area with typewriter */}
+          <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
+            {showTypewriter && twText && (
+              <div
+                className="absolute pointer-events-none select-none"
+                style={{ top: 0, bottom: 0, left: 0, right: 0, display: 'flex', alignItems: 'center', fontSize: '17px', color: 'rgba(0,0,0,0.45)', fontFamily: 'inherit', lineHeight: 1.5, overflow: 'hidden' }}
+              >
+                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {twText}
+                  <span style={{ display: 'inline-block', width: 2, height: '1.1em', background: 'rgba(0,0,0,0.3)', marginLeft: 1, verticalAlign: 'text-bottom', animation: 'twBlink 1s step-end infinite' }} />
+                </span>
+              </div>
+            )}
+            <textarea
+              ref={inputRef}
+              value={value}
+              onChange={handleChange}
+              onKeyDown={handleKey}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              placeholder={showTypewriter ? '' : placeholder}
+              className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#0D0D0D] leading-[1.5] font-normal"
+              style={{ fontFamily: 'inherit', minHeight: '48px', maxHeight: '160px', padding: '12px 0', color: 'rgba(0,0,0,1)' }}
+              rows={1}
+            />
+          </div>
+
+          {/* Send — black idle, terra cotta active */}
+          <button
+            onClick={send}
+            className="flex items-center justify-center border-none cursor-pointer active:scale-95"
+            style={{
+              width: 46, height: 46, borderRadius: '50%',
+              background: hasContent && !disabled ? '#C96B4F' : '#0D0D0D',
+              color: '#fff',
+              transition: 'background .25s ease',
+              flexShrink: 0,
+            }}
+            type="button"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
+          </button>
+
+          <style>{`
+            .home-dock-card textarea::placeholder { color: rgba(0,0,0,0.45); }
+            @keyframes twBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+          `}</style>
+        </div>
+      ) : (
+      <div className="max-w-[860px] mx-auto pb-3 pt-2 lg:pb-4">
+        <div className="home-dock-card relative">
           {/* Tool popup */}
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`}>
             <div className="px-4 pt-3 pb-2">
@@ -437,6 +506,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 });
