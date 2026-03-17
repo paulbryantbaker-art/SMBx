@@ -216,6 +216,9 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+.status-pulse {
+  animation: statusPulse 2s ease-in-out infinite;
+}
 
 /* ═══ RANGE SLIDER (for interactive calculators) ═══ */
 

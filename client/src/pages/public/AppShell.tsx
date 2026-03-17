@@ -90,17 +90,11 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
     placeholder: 'Tell Yulia about your deal...',
   },
   sell: {
-    overline: 'Strengthen & Sell',
-    headline: 'Exit on your terms.',
-    terraWord: 'terms.',
-    tagline: 'Know your number. Optimize the structure. Negotiate from data. Yulia prepares every dimension of your exit before you go to market.',
-    chips: [
-      "What's my business worth?",
-      "What add-backs am I missing?",
-      "Asset sale vs stock sale \u2014 what's the difference?",
-      'Walk me through a 12-month exit plan',
-      "Generate my free Bizestimate",
-    ],
+    overline: '',
+    headline: '',
+    terraWord: '',
+    tagline: '',
+    chips: [],
     placeholder: 'Tell Yulia about your business...',
   },
   buy: {
@@ -630,7 +624,7 @@ export default function AppShell() {
   const sidebarContent = (mobile: boolean) => (
     <aside
       className="flex flex-col h-full select-none"
-      style={{ width: mobile ? 280 : 240, background: '#FAFAFA', borderRight: '1px solid rgba(0,0,0,0.06)' }}
+      style={{ width: mobile ? 280 : 256, background: '#FAFAFA', borderRight: '1px solid rgba(0,0,0,0.06)' }}
     >
       {/* Logo */}
       <div className="px-5 pt-5 pb-2">
@@ -640,47 +634,53 @@ export default function AppShell() {
           style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontWeight: 700, color: '#0D0D0D' }}
           type="button"
         >
-          smb<span style={{ color: '#C96B4F' }}>x</span><span style={{ color: '#0D0D0D' }}>.</span>ai
+          smb<span style={{ color: '#C96B4F' }}>X</span><span style={{ color: '#0D0D0D' }}>.ai</span>
         </button>
       </div>
 
-      {/* CTA — context-aware */}
-      <div className="px-4 pt-4 pb-4">
-        {user ? (
-          <button
-            onClick={() => {
+      {/* + New Chat button — outline style */}
+      <div className="px-4 pt-3 pb-3">
+        <button
+          onClick={() => {
+            if (user) {
               authChat.newConversation();
               setViewState('chat');
               navigate('/chat');
-              setIsMobileSidebarOpen(false);
-            }}
-            className="w-full text-white text-[14px] px-4 py-3 cursor-pointer border-none hover:opacity-90 transition-opacity"
-            style={{ fontFamily: 'inherit', fontWeight: 600, background: '#0D0D0D', borderRadius: '100px' }}
-            type="button"
-          >
-            + New Workspace
-          </button>
-        ) : (
-          <button
-            onClick={() => { handleTabClick('home'); if (mobile) setIsMobileSidebarOpen(false); }}
-            className="w-full text-white text-[14px] px-4 py-3 cursor-pointer border-none hover:opacity-90 transition-opacity"
-            style={{ fontFamily: 'inherit', fontWeight: 600, background: '#0D0D0D', borderRadius: '100px' }}
-            type="button"
-          >
-            Start chatting
-          </button>
-        )}
+            } else {
+              handleTabClick('home');
+            }
+            if (mobile) setIsMobileSidebarOpen(false);
+          }}
+          className="w-full flex items-center justify-center gap-2 text-[14px] px-4 py-2.5 cursor-pointer hover:bg-[rgba(0,0,0,0.03)] transition-all"
+          style={{ fontFamily: 'inherit', fontWeight: 500, background: 'transparent', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.12)', color: '#0D0D0D' }}
+          type="button"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+          New Chat
+        </button>
       </div>
 
-      {/* Nav — Home always visible */}
+      {/* Primary nav — Chat, Data Room, Analytics, Settings */}
       <div className="px-3">
         <nav className="space-y-0.5">
-          {NAV_ITEMS.map(item => {
-            const isActive = (activeTab === item.id && viewState === 'landing') || (item.id === 'home' && viewState === 'chat');
+          {([
+            { id: 'chat' as const, label: 'Chat', viewId: 'chat' as ViewState, route: '/', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg> },
+            { id: 'dataroom' as const, label: 'Data Room', viewId: 'documents' as ViewState, route: '/documents', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg> },
+            { id: 'analytics' as const, label: 'Analytics', viewId: 'analytics' as ViewState, route: '/analytics', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg> },
+            { id: 'settings' as const, label: 'Settings', viewId: 'settings' as ViewState, route: '/settings', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg> },
+          ]).map(item => {
+            const isActive = item.id === 'chat'
+              ? ((activeTab === 'home' && viewState === 'landing') || viewState === 'chat')
+              : viewState === item.viewId;
             return (
               <button
                 key={item.id}
-                onClick={() => handleTabClick(item.id)}
+                onClick={() => {
+                  if (item.id === 'chat') { handleTabClick('home'); }
+                  else if (user) { setViewState(item.viewId); navigate(item.route); }
+                  else navigate('/login');
+                  if (mobile) setIsMobileSidebarOpen(false);
+                }}
                 className={`flex items-center gap-3 w-full px-4 py-2.5 cursor-pointer border-none transition-all ${!isActive ? 'nav-item-hover' : ''}`}
                 style={{
                   fontFamily: 'inherit',
@@ -701,130 +701,44 @@ export default function AppShell() {
         </nav>
       </div>
 
-      {/* ─── Explore — prominent for visitors, compact for auth users ─── */}
-      <div className="px-3 mt-4">
-        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C96B4F' }}>Explore</div>
-        <nav className="space-y-0.5">
-          {([
-            { id: 'sell' as TabId, label: 'Sell a Business', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" /><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" /></svg> },
-            { id: 'buy' as TabId, label: 'Buy a Business', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg> },
-            { id: 'raise' as TabId, label: 'Raise Capital', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg> },
-            { id: 'how-it-works' as TabId, label: 'How It Works', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg> },
-            { id: 'advisors' as TabId, label: 'For Advisors', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg> },
-            { id: 'pricing' as TabId, label: 'Pricing', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> },
-          ]).map(item => {
-            const isActive = activeTab === item.id && viewState === 'landing';
-            return (
-              <button
-                key={item.id}
-                onClick={() => { handleTabClick(item.id); if (mobile) setIsMobileSidebarOpen(false); }}
-                className={`flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all ${!isActive ? 'nav-item-hover' : ''}`}
-                style={{
-                  fontFamily: 'inherit',
-                  fontSize: '14px',
-                  fontWeight: isActive ? 600 : 400,
-                  color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
-                  background: isActive ? 'rgba(0,0,0,0.04)' : 'transparent',
-                  borderRadius: '10px',
-                  border: 'none',
-                }}
-                type="button"
-              >
-                <span style={{ color: isActive ? '#C96B4F' : 'rgba(0,0,0,0.25)' }}>{item.icon}</span>
-                {item.label}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Workspace nav — authenticated only */}
-      {user && (
-        <div className="px-3 mt-3">
-          <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C96B4F' }}>Workspace</div>
-          <nav className="space-y-0.5">
-            {([
-              { id: 'chat' as ViewState, label: 'Home', route: '/chat', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> },
-              { id: 'documents' as ViewState, label: 'Documents', route: '/documents', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg> },
-              { id: 'analytics' as ViewState, label: 'Analytics', route: '/analytics', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg> },
-              { id: 'settings' as ViewState, label: 'Settings', route: '/settings', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg> },
-            ]).map(item => {
-              const isActive = viewState === item.id || (item.id === 'chat' && viewState === 'landing');
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    if (item.id === 'chat') { handleTabClick('home'); }
-                    else { setViewState(item.id); navigate(item.route); }
-                    if (mobile) setIsMobileSidebarOpen(false);
-                  }}
-                  className={`flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all ${!isActive ? 'nav-item-hover' : ''}`}
-                  style={{
-                    fontFamily: 'inherit', fontSize: '14px', fontWeight: isActive ? 600 : 400,
-                    color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
-                    background: isActive ? 'rgba(0,0,0,0.04)' : 'transparent',
-                    borderRadius: '10px', border: 'none',
-                  }}
-                  type="button"
-                >
-                  <span style={{ color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.25)' }}>{item.icon}</span>
-                  {item.label}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-      )}
-
-      {/* Conversations — grouped by deal or date */}
-      <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-2">
-        {conversationGroups.map(group => (
-          <div key={group.label} className="mb-3">
-            <div className="flex items-center gap-2 px-4 mb-2" style={{ fontSize: '10px', fontWeight: groupMode === 'deal' ? 800 : 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#C96B4F' }}>
-              {groupMode === 'deal' && group.journey && (
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: JOURNEY_COLORS[group.journey] || 'rgba(0,0,0,0.3)' }}
-                />
-              )}
-              {group.label}
-            </div>
-            {group.items.map(c => (
-              <button
-                key={c.id}
-                onClick={() => {
-                  if (user) authChat.selectConversation(c.id);
-                  else anonChat.selectConversation(c.id);
-                  setViewState('chat');
-                  navigate(`/chat/${c.id}`);
-                  setIsMobileSidebarOpen(false);
-                }}
-                className={`flex items-center gap-3 w-full px-4 py-2.5 text-[13px] cursor-pointer transition-all conv-item-hover`}
-                style={{
-                  fontFamily: 'inherit',
-                  fontWeight: c.id === activeConvId && viewState === 'chat' ? 600 : 500,
-                  color: c.id === activeConvId && viewState === 'chat' ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
-                  background: c.id === activeConvId && viewState === 'chat' ? 'rgba(255,255,255,0.55)' : 'transparent',
-                  borderRadius: '12px',
-                  border: c.id === activeConvId && viewState === 'chat' ? '1px solid rgba(0,0,0,0.06)' : '1px solid transparent',
-                }}
-                type="button"
-              >
-                {groupMode === 'date' && (
-                  <span
-                    className="w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: c.journey ? (JOURNEY_COLORS[c.journey] || 'rgba(0,0,0,0.3)') : 'rgba(0,0,0,0.2)' }}
-                  />
-                )}
-                <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
-              </button>
-            ))}
-          </div>
+      {/* Conversations — Recent */}
+      <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-4">
+        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C96B4F' }}>Recent</div>
+        {(allConversations || []).map(c => (
+          <button
+            key={c.id}
+            onClick={() => {
+              if (user) authChat.selectConversation(c.id);
+              else anonChat.selectConversation(c.id);
+              setViewState('chat');
+              navigate(`/chat/${c.id}`);
+              setIsMobileSidebarOpen(false);
+            }}
+            className={`flex items-center w-full px-4 py-2 text-[14px] cursor-pointer transition-all conv-item-hover`}
+            style={{
+              fontFamily: 'inherit',
+              fontWeight: c.id === activeConvId && viewState === 'chat' ? 600 : 400,
+              color: c.id === activeConvId && viewState === 'chat' ? '#0D0D0D' : 'rgba(0,0,0,0.45)',
+              background: c.id === activeConvId && viewState === 'chat' ? 'rgba(0,0,0,0.04)' : 'transparent',
+              borderRadius: '10px',
+              border: 'none',
+            }}
+            type="button"
+          >
+            <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
+          </button>
         ))}
       </div>
 
-      {/* User Profile + Wallet — bottom of sidebar */}
-      <div className="mt-auto px-5 py-4">
+      {/* Yulia status + User Profile — bottom of sidebar */}
+      <div className="mt-auto px-5 pb-4 pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+        {/* Yulia is online */}
+        <div className="flex items-center gap-2 mb-3 px-1">
+          <span className="w-[7px] h-[7px] rounded-full shrink-0 status-pulse" style={{ background: '#4CAF50' }} />
+          <span style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(0,0,0,0.5)' }}>Yulia is online</span>
+        </div>
+
+        {/* User profile */}
         <button
           onClick={() => {
             if (user) { setViewState('settings'); navigate('/settings'); }
@@ -835,18 +749,18 @@ export default function AppShell() {
           type="button"
         >
           <div
-            className="flex items-center justify-center rounded-full text-white text-[13px] font-bold"
+            className="flex items-center justify-center rounded-full text-white text-[12px] font-bold"
             style={{ width: 32, height: 32, background: '#0D0D0D', flexShrink: 0 }}
           >
             {user ? (user.display_name || user.email || '?').charAt(0).toUpperCase() : 'G'}
           </div>
           <div className="flex flex-col min-w-0 flex-1">
-            <span style={{ fontFamily: 'inherit', fontSize: '14px', fontWeight: 500, color: '#0D0D0D' }} className="truncate">
+            <span style={{ fontFamily: 'inherit', fontSize: '14px', fontWeight: 600, color: '#0D0D0D' }} className="truncate">
               {user ? (user.display_name || user.email || 'Account') : 'Sign in'}
             </span>
             {user && walletBalance !== null && (
-              <span style={{ fontSize: '11px', fontWeight: 600, color: '#C96B4F' }}>
-                ${(walletBalance / 100).toFixed(2)}
+              <span style={{ fontSize: '12px', fontWeight: 500, color: 'rgba(0,0,0,0.4)' }}>
+                ${(walletBalance / 100).toFixed(2)} balance
               </span>
             )}
           </div>
@@ -938,7 +852,7 @@ export default function AppShell() {
                     style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontSize: '20px', fontWeight: 700, color: '#0D0D0D' }}
                     type="button"
                   >
-                    smb<span style={{ color: '#C96B4F' }}>x</span><span style={{ color: '#0D0D0D' }}>.</span>ai
+                    smb<span style={{ color: '#C96B4F' }}>X</span><span style={{ color: '#0D0D0D' }}>.ai</span>
                   </button>
                 ) : (
                   <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(0,0,0,0.35)' }}>
@@ -994,16 +908,25 @@ export default function AppShell() {
 
                 {/* MOBILE HOME */}
                 <div className="flex flex-col h-full md:hidden">
-                  <div className="flex-1 flex flex-col items-center justify-center px-5 gap-6">
-                    {/* Centered wordmark */}
-                    <motion.div
+                  <div className="flex-1 flex flex-col items-center justify-center px-5 gap-5" style={{ position: 'relative' }}>
+                    {/* Heading */}
+                    <motion.h1
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '24px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D' }}
+                      style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', textAlign: 'center', margin: 0, lineHeight: 1.15 }}
                     >
-                      smb<span style={{ color: '#C96B4F' }}>x</span><span style={{ color: '#0D0D0D' }}>.</span>ai
-                    </motion.div>
+                      How can we help today?
+                    </motion.h1>
+                    {/* Subtitle */}
+                    <motion.p
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ fontSize: '15px', color: 'rgba(0,0,0,0.4)', textAlign: 'center', margin: 0, lineHeight: 1.5 }}
+                    >
+                      Analyze markets, value companies, or prepare for your next transaction.
+                    </motion.p>
                     {/* Hero chat bar */}
                     <motion.div
                       className="w-full"
@@ -1015,82 +938,124 @@ export default function AppShell() {
                         ref={dockRef}
                         onSend={handleSend}
                         variant="hero"
-                        rows={2}
-                        placeholder={page.placeholder}
+                        rows={1}
+                        placeholder="Ask smbx.ai anything..."
                         disabled={sending}
                         typewriterHints={TYPEWRITER_HINTS}
                         typewriterPrefix={TYPEWRITER_PREFIX}
                       />
                     </motion.div>
-                    {/* Suggestion chips — individual cascade */}
+                    {/* Suggestion chips — 3 with icons */}
                     <div className="flex flex-wrap justify-center gap-2">
-                      {['Prepare to sell', 'Prepare to buy', 'Raise capital', 'Advise a deal'].map((chip, i) => (
+                      {[
+                        { label: 'Prepare to sell', icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9 12l2 2 4-4" /></svg>, message: "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." },
+                        { label: 'Raise capital', icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>, message: "I need to raise capital for my business. Walk me through the options." },
+                        { label: 'Value my business', icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>, message: "What's my business worth? I want to understand what it might be worth in today's market." },
+                      ].map((chip, i) => (
                         <motion.button
-                          key={chip}
+                          key={chip.label}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.45, delay: 0.35 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                          onClick={() => handleChipClick(chip === 'Prepare to sell' ? "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." : chip === 'Prepare to buy' ? "I'm looking to acquire a business. Help me evaluate opportunities." : chip === 'Raise capital' ? "I need to raise capital for my business. Walk me through the options." : "I'm an M&A advisor. Show me how you can help with my practice.")}
-                          className="bg-transparent cursor-pointer transition-all chip-hover"
+                          onClick={() => handleChipClick(chip.message)}
+                          className="bg-transparent cursor-pointer transition-all chip-hover flex items-center gap-1.5"
                           style={{ borderRadius: 100, fontSize: '13px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.45)', border: '1px solid rgba(0,0,0,0.1)', padding: '8px 16px' }}
                           type="button"
                         >
-                          {chip}
+                          <span style={{ color: 'rgba(0,0,0,0.3)' }}>{chip.icon}</span>
+                          {chip.label}
                         </motion.button>
                       ))}
                     </div>
                   </div>
+                  {/* Security footer */}
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.8, delay: 0.6 }}
+                    style={{ textAlign: 'center', padding: '16px 20px', fontSize: '12px', color: 'rgba(0,0,0,0.25)', fontWeight: 400, margin: 0 }}
+                  >
+                    Secure, Encrypted, and Compliant M&A Intelligence
+                  </motion.p>
                 </div>
 
                 {/* DESKTOP HOME */}
                 <div className="hidden md:flex flex-col h-full items-center justify-center">
-                  <div className="flex flex-col items-center" style={{ marginTop: '-60px' }}>
-                    {/* Centered wordmark */}
-                    <motion.div
+                  <div className="flex flex-col items-center" style={{ marginTop: '-40px', width: '100%', maxWidth: 640 }}>
+                    {/* Heading */}
+                    <motion.h1
                       initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', marginBottom: 40 }}
+                      style={{ fontSize: '36px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', textAlign: 'center', margin: '0 0 12px', lineHeight: 1.15 }}
                     >
-                      smb<span style={{ color: '#C96B4F' }}>x</span><span style={{ color: '#0D0D0D' }}>.</span>ai
-                    </motion.div>
-                    {/* Hero chat bar — 660px wide, multi-layered shadow */}
+                      How can we help today?
+                    </motion.h1>
+                    {/* Subtitle */}
+                    <motion.p
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ fontSize: '17px', color: 'rgba(0,0,0,0.4)', textAlign: 'center', margin: '0 0 32px', lineHeight: 1.5 }}
+                    >
+                      Analyze markets, value companies, or prepare for your next transaction.
+                    </motion.p>
+                    {/* Hero chat bar — search style with icon */}
                     <motion.div
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ width: 660 }}
+                      style={{ width: '100%', maxWidth: 640 }}
                     >
                       <ChatDock
                         ref={dockRef}
                         onSend={handleSend}
                         variant="hero"
-                        rows={2}
-                        placeholder={page.placeholder}
+                        rows={1}
+                        placeholder="Ask smbx.ai anything..."
                         disabled={sending}
                         typewriterHints={TYPEWRITER_HINTS}
                         typewriterPrefix={TYPEWRITER_PREFIX}
                       />
                     </motion.div>
-                    {/* Suggestion chips — individual cascade */}
-                    <div className="flex flex-wrap justify-center gap-3" style={{ marginTop: 24 }}>
-                      {['Prepare to sell', 'Prepare to buy', 'Raise capital', 'Advise a deal'].map((chip, i) => (
+                    {/* Suggestion chips — 3 chips with icons */}
+                    <div className="flex flex-wrap justify-center gap-3" style={{ marginTop: 20 }}>
+                      {[
+                        { label: 'Prepare to sell', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9 12l2 2 4-4" /></svg>, message: "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." },
+                        { label: 'Raise capital', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>, message: "I need to raise capital for my business. Walk me through the options." },
+                        { label: 'Value my business', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>, message: "What's my business worth? I want to understand what it might be worth in today's market." },
+                      ].map((chip, i) => (
                         <motion.button
-                          key={chip}
+                          key={chip.label}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.45, delay: 0.4 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                          onClick={() => handleChipClick(chip === 'Prepare to sell' ? "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." : chip === 'Prepare to buy' ? "I'm looking to acquire a business. Help me evaluate opportunities." : chip === 'Raise capital' ? "I need to raise capital for my business. Walk me through the options." : "I'm an M&A advisor. Show me how you can help with my practice.")}
-                          className="bg-transparent cursor-pointer transition-all chip-hover"
-                          style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.45)', border: '1px solid rgba(0,0,0,0.1)', padding: '9px 20px' }}
+                          onClick={() => handleChipClick(chip.message)}
+                          className="bg-transparent cursor-pointer transition-all chip-hover flex items-center gap-2"
+                          style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.5)', border: '1px solid rgba(0,0,0,0.1)', padding: '10px 20px' }}
                           type="button"
                         >
-                          {chip}
+                          <span style={{ color: 'rgba(0,0,0,0.35)' }}>{chip.icon}</span>
+                          {chip.label}
                         </motion.button>
                       ))}
                     </div>
                   </div>
+                  {/* Security footer */}
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.8, delay: 0.7 }}
+                    style={{ position: 'absolute', bottom: 24, fontSize: '13px', color: 'rgba(0,0,0,0.3)', fontWeight: 400 }}
+                  >
+                    Secure, Encrypted, and Compliant M&A Intelligence
+                  </motion.p>
                 </div>
+              </>
+              ) : activeTab === 'sell' ? (
+              <>
+              {/* ═══ SELL PAGE — Full custom layout ═══ */}
+              <SellBelow onChipClick={handleChipClick} />
               </>
               ) : (
               <>
@@ -1112,7 +1077,6 @@ export default function AppShell() {
                   <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.6, marginBottom: 24 }}>
                     {page.tagline}
                   </p>
-                  {/* Chips — cascade entrance */}
                   <div className="flex flex-wrap gap-2 mb-5">
                     {page.chips.map((chip, i) => (
                       <button
@@ -1148,7 +1112,6 @@ export default function AppShell() {
                     <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, marginBottom: 32 }}>
                       {page.tagline}
                     </p>
-                    {/* Chips — cascade entrance */}
                     <div className="flex flex-wrap gap-2.5 mb-6">
                       {page.chips.map((chip, i) => (
                         <button
@@ -1167,7 +1130,6 @@ export default function AppShell() {
               </div>
 
               {/* ═══ BELOW-FOLD + FOOTER ═══ */}
-              {activeTab === 'sell' && <SellBelow onChipClick={handleChipClick} />}
               {activeTab === 'buy' && <BuyBelow onChipClick={handleChipClick} />}
               {activeTab === 'raise' && <RaiseBelow onChipClick={handleChipClick} />}
               {activeTab === 'integrate' && <IntegrateBelow onChipClick={handleChipClick} />}
@@ -1178,7 +1140,7 @@ export default function AppShell() {
               {/* Footer */}
               <footer className="px-6 py-12 text-center" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                 <div style={{ fontSize: '18px', fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.03em', marginBottom: 8 }}>
-                  smb<span style={{ color: '#C96B4F' }}>x</span><span style={{ color: '#0D0D0D' }}>.</span>ai
+                  smb<span style={{ color: '#C96B4F' }}>X</span><span style={{ color: '#0D0D0D' }}>.ai</span>
                 </div>
                 <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', marginBottom: 16 }}>Deal intelligence for every dealmaker.</p>
                 <div className="flex justify-center gap-6" style={{ fontSize: '13px', color: 'rgba(0,0,0,0.35)' }}>

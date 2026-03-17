@@ -1,335 +1,262 @@
 import {
   RevealSection,
   ScrollReveal,
-  InteractiveCalculator,
-  AnimatedTimeline,
-  MagneticButton,
-  PulseBadge,
-  AnimatedCounter,
-  DealPreview,
-  SideBySideCard,
-  ConversationPreview,
 } from './animations';
 
 interface SellBelowProps {
   onChipClick: (text: string) => void;
 }
 
-const narrowStyle = { maxWidth: 580, margin: '0 auto' } as const;
-const wideStyle = { maxWidth: 880, margin: '0 auto' } as const;
-const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' } as const;
-const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, marginTop: 12 } as const;
-const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, margin: 0 } as const;
-const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' } as const;
+const sectionStyle = { maxWidth: 880, margin: '0 auto', padding: '0 32px' } as const;
+
+const EXIT_TYPES = [
+  { title: 'Strategic Buyer', desc: 'Competitors or partners looking for synergy and scale. Often highest multiple.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg> },
+  { title: 'Financial Buyer', desc: 'PE firms or Search Funds focused on cash flow and operational stability.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg> },
+  { title: 'ESOP', desc: 'Sell to your employees. Significant tax advantages and legacy preservation.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg> },
+  { title: 'Management Buyout', desc: 'The internal transition. Reward the team that built the business with you.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg> },
+  { title: 'IPO / Direct Listing', desc: 'For high-growth scale-ups. Access public markets for maximum liquidity.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg> },
+  { title: 'Family Succession', desc: 'Passing the torch. Focus on continuity, values, and generational wealth.', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg> },
+];
+
+const PROCESS_STEPS = [
+  { num: '1', title: 'Understand', desc: 'We deep dive into your books, your culture, and your personal goals to build a defensible valuation and narrative.' },
+  { num: '2', title: 'Optimize', desc: 'Fixing leakage, restating financials, and documenting workflows to make the business "buyer-ready."' },
+  { num: '3', title: 'Prepare', desc: 'Drafting the CIM (Confidential Information Memorandum) and setting up the virtual data room for due diligence.' },
+  { num: '4', title: 'Negotiate & Close', desc: 'Vetting buyers, managing the bidding war, and ensuring the final contract protects your legacy.' },
+];
+
+const ADDBACKS = [
+  { category: 'Owner Compensation', reported: '$120,000', adjusted: '$250,000', added: '+$130,000' },
+  { category: 'One-time Equipment', reported: '$85,000', adjusted: '$0', added: '+$85,000' },
+  { category: 'Discretionary Travel/Auto', reported: '$42,000', adjusted: '$0', added: '+$42,000' },
+];
 
 export default function SellBelow({ onChipClick }: SellBelowProps) {
   return (
-    <div className="px-6">
-      {/* ═══ 1. THE 75% STAT ═══ */}
-      <section style={{ paddingTop: 100, textAlign: 'center' }}>
-        <div style={narrowStyle}>
-          <RevealSection>
-            <p style={{ fontSize: '96px', fontWeight: 700, color: '#0D0D0D', margin: 0, letterSpacing: '-0.04em', lineHeight: 1 }}>
-              <AnimatedCounter value={75} style={{ color: '#0D0D0D' }} />%
-            </p>
-            <p style={{ fontSize: '17px', color: 'rgba(0,0,0,0.45)', marginTop: 16, lineHeight: 1.6 }}>
-              of business owners regret selling within a year.
-            </p>
-          </RevealSection>
-
-          <RevealSection style={{ marginTop: 40 }}>
-            <div className="space-y-5" style={{ ...bodyStyle, textAlign: 'left' }}>
-              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>Not because the price was wrong.</p>
-              <p>The Exit Planning Institute found the same three regrets: They weren&apos;t financially prepared. They didn&apos;t have a plan for after. And the buyer dismantled what they&apos;d built.</p>
-              <p>Only 20&ndash;30% of businesses that go to market actually sell. Most fail because the owner wasn&apos;t ready &mdash; financially, operationally, or psychologically &mdash; for a process that takes 12 to 24 months.</p>
-            </div>
-          </RevealSection>
-        </div>
-      </section>
-
-      {/* ═══ 2. BIZESTIMATE — Split Layout ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={wideStyle}>
-          <div className="flex flex-col md:flex-row gap-12 md:items-start">
-            <div style={{ flex: 1 }}>
-              <RevealSection>
-                <h2 style={{ ...h2Style, marginTop: 0 }} className="md:text-[42px]">
-                  What your business is actually worth &mdash; right now
-                </h2>
-                <div className="space-y-5" style={{ ...bodyStyle, marginTop: 24 }}>
-                  <p>Tell Yulia your industry, location, and revenue. Within seconds, she&apos;ll give you a Bizestimate &mdash; a valuation range built on Census business counts, BLS wage data, SBA lending patterns, and real transaction multiples.</p>
-                  <p style={{ color: '#0D0D0D', fontWeight: 600 }}>Free, always. Because this is how trust starts.</p>
-                </div>
-              </RevealSection>
-            </div>
-
-            <ScrollReveal delay={0.1} style={{ flex: 0, minWidth: 300 }}>
-              <DealPreview
-                title="BIZESTIMATE \u2014 EXAMPLE"
-                metrics={[
-                  { label: 'Adjusted SDE', value: '$444K' },
-                  { label: 'Multiple range', value: '2.8\u20133.5\u00D7' },
-                  { label: 'Value range', value: '$1.08M\u2013$1.89M' },
-                  { label: 'Data sources', value: '5 federal' },
-                ]}
-                cta="Generated in 90 seconds from industry, location, and revenue"
-              />
-            </ScrollReveal>
+    <div>
+      {/* ═══ HERO — Mixed typography ═══ */}
+      <section style={{ padding: '64px 32px 48px', maxWidth: 880, margin: '0 auto', textAlign: 'center' }}>
+        <RevealSection>
+          <h1 style={{ margin: '0 0 20px', lineHeight: 1.1 }}>
+            <span style={{ fontFamily: "'Playfair Display', 'Georgia', serif", fontSize: '48px', fontWeight: 400, fontStyle: 'italic', color: '#0D0D0D', letterSpacing: '-0.02em', display: 'block' }}>
+              75% of business owners
+            </span>
+            <span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '40px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.02em', color: '#0D0D0D', display: 'block', marginTop: 4 }}>
+              regret selling within a year.
+            </span>
+          </h1>
+          <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.65, maxWidth: 560, margin: '0 auto 32px' }}>
+            We combine institutional-grade data with human empathy to ensure you exit on your terms, for your price, with zero regrets.
+          </p>
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <button
+              onClick={() => onChipClick("I want to understand what my business is worth. Can you walk me through a valuation?")}
+              className="cursor-pointer hover:opacity-90 transition-opacity"
+              style={{ fontFamily: 'inherit', fontSize: '15px', fontWeight: 600, background: '#0D0D0D', color: '#fff', border: 'none', borderRadius: '10px', padding: '14px 28px' }}
+              type="button"
+            >
+              Start Valuation
+            </button>
+            <button
+              onClick={() => onChipClick("I'm an advisor and want to see how smbX.ai can help with my sell-side practice.")}
+              className="cursor-pointer hover:bg-[rgba(0,0,0,0.02)] transition-all"
+              style={{ fontFamily: 'inherit', fontSize: '15px', fontWeight: 600, background: 'transparent', color: '#0D0D0D', border: '1px solid rgba(0,0,0,0.15)', borderRadius: '10px', padding: '14px 28px' }}
+              type="button"
+            >
+              Talk to an Advisor
+            </button>
           </div>
-        </div>
+        </RevealSection>
       </section>
 
-      {/* ═══ 3. THE HIDDEN MONEY — Add-backs ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={wideStyle}>
-          <RevealSection style={{ textAlign: 'center' }}>
-            <h2 style={{ ...h2Style, textAlign: 'center' }} className="md:text-[42px]">
-              The $400,000 hiding in your tax returns
-            </h2>
-            <p style={{ ...bodyStyle, marginTop: 16, textAlign: 'center', maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
-              Your CPA minimizes what you owe the IRS. The problem shows up the day you try to sell &mdash; because buyers pay based on Seller&apos;s Discretionary Earnings, not taxable income.
-            </p>
-          </RevealSection>
+      {/* ═══ BIZESTIMATE SECTION ═══ */}
+      <section style={{ padding: '64px 0', ...sectionStyle }}>
+        <RevealSection>
+          <h2 style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 6px', lineHeight: 1.2 }}>
+            What your business is actually worth
+          </h2>
+          <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.4)', margin: '0 0 28px' }}>
+            Real-time market data matched against your trailing 12-month performance.
+          </p>
+        </RevealSection>
 
-          <RevealSection style={{ marginTop: 40 }}>
-            <InteractiveCalculator
-              baseSDE={320000}
-              multiple={3.2}
-              items={[
-                { label: 'Personal vehicles', amount: 48000, enabled: true },
-                { label: 'Family cell phones', amount: 18000, enabled: true },
-                { label: 'One-time legal fee', amount: 12000, enabled: true },
-                { label: 'Above-market rent to own LLC', amount: 31000, enabled: true },
-                { label: 'Personal travel', amount: 15000, enabled: true },
-              ]}
-            />
-            <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.35)', marginTop: 12, fontStyle: 'italic', textAlign: 'center' }}>
-              Toggle add-backs on/off to see the impact on your valuation
-            </p>
-          </RevealSection>
-        </div>
-      </section>
+        <ScrollReveal>
+          <div style={{ background: '#F8F8F6', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '32px', overflow: 'hidden' }}>
+            {/* Stats row */}
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-6">
+              <div>
+                <p style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(0,0,0,0.35)', margin: '0 0 8px' }}>Bizestimate Range</p>
+                <p style={{ fontSize: '40px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: 0, lineHeight: 1 }}>
+                  $4.2M — $4.8M
+                </p>
+              </div>
+              <div className="flex gap-8">
+                {[
+                  { label: 'Revenue', value: '$2.1M' },
+                  { label: 'SDE', value: '$840K' },
+                  { label: 'Multiple', value: '5.4x' },
+                ].map(stat => (
+                  <div key={stat.label}>
+                    <p style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(0,0,0,0.35)', margin: '0 0 4px' }}>{stat.label}</p>
+                    <p style={{ fontSize: '20px', fontWeight: 700, color: '#0D0D0D', margin: 0 }}>{stat.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-      {/* ═══ 4. THE TAX BLINDSPOT — Structure ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={wideStyle}>
-          <RevealSection style={{ textAlign: 'center' }}>
-            <h2 style={{ ...h2Style, textAlign: 'center' }} className="md:text-[42px]">
-              The deal structure that costs more than the negotiation
-            </h2>
-            <p style={{ ...bodyStyle, marginTop: 16, textAlign: 'center', maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
-              A C Corp owner closed a $2.8M deal. Double-taxed cost her $200K+. Her attorney and CPA knew the risk. Neither raised it until the purchase agreement was drafted.
-            </p>
-          </RevealSection>
-
-          <RevealSection style={{ marginTop: 40 }}>
-            <SideBySideCard
-              leftLabel="ASSET SALE"
-              rightLabel="STOCK SALE"
-              leftItems={[
-                { label: 'Purchase price', value: '$2,000,000' },
-                { label: 'Federal + NIIT', value: '~$518K' },
-                { label: 'State tax (CA)', value: '~$266K' },
-                { label: 'Net to seller', value: '$1,166,000' },
-              ]}
-              rightItems={[
-                { label: 'Purchase price', value: '$2,000,000' },
-                { label: 'Federal + NIIT', value: '~$452K' },
-                { label: 'State tax (CA)', value: '~$253K' },
-                { label: 'Net to seller', value: '$1,245,000' },
-              ]}
-            />
-          </RevealSection>
-        </div>
-      </section>
-
-      {/* ═══ 5. SIX WAYS OUT — Card Grid ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={wideStyle}>
-          <RevealSection style={{ textAlign: 'center' }}>
-            <h2 style={{ ...h2Style, textAlign: 'center' }} className="md:text-[42px]">
-              Six ways out
-            </h2>
-            <p style={{ ...bodyStyle, marginTop: 8, textAlign: 'center' }}>And only one is right for you.</p>
-          </RevealSection>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4" style={{ marginTop: 40 }}>
-            {[
-              { title: 'Full Sale', body: '100% exit. Maximum price, 5-15% holdback. The complete exit process managed by Yulia.' },
-              { title: 'Partner Buyout', body: 'One partner exits. Fair value, financing that works, a buyout agreement that protects everyone.' },
-              { title: 'Capital Raise', body: 'Maybe you don\u2019t want to exit. Get $600K from your own business via SBA, equity, or seller installments.' },
-              { title: 'ESOP', body: 'Employee ownership. Section 1042 tax deferral. Yulia screens eligibility and models the structure.' },
-              { title: 'Majority Sale', body: 'Sell 51%+ to PE. Take chips off. Keep upside with equity rollover and earnout.' },
-              { title: 'Partial Sale', body: 'Sell a division, a location, or a book of business. Keep what matters.' },
-            ].map((item, i) => (
-              <ScrollReveal key={item.title} delay={i * 0.06}>
-                <div style={{ ...cardStyle, height: '100%' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 8px' }}>{item.title}</h3>
-                  <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.55, margin: 0 }}>{item.body}</p>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ 6. THE LIVING CIM ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={narrowStyle}>
-          <RevealSection style={{ textAlign: 'center' }}>
-            <h2 style={{ ...h2Style, textAlign: 'center' }} className="md:text-[42px]">
-              A CIM that never goes stale
-            </h2>
-            <p style={{ ...bodyStyle, marginTop: 16, textAlign: 'center' }}>
-              Yulia&apos;s Living CIM updates automatically when your financials change. Version-controlled. Tiered buyer access. Every time, market data current. Generated in 30 minutes from months of intelligence. Included in your plan.
-            </p>
-          </RevealSection>
-
-          <RevealSection style={{ marginTop: 40 }}>
-            <div className="flex justify-center gap-12">
-              {[
-                { value: 25, suffix: '+', label: 'pages' },
-                { value: 30, suffix: '', label: 'minutes' },
-                { value: 3, suffix: '', label: 'versions/quarter' },
-              ].map(stat => (
-                <div key={stat.label} style={{ textAlign: 'center' }}>
-                  <p style={{ fontSize: '40px', fontWeight: 700, color: '#0D0D0D', margin: 0, letterSpacing: '-0.03em' }}>
-                    <AnimatedCounter value={stat.value} />{stat.suffix}
-                  </p>
-                  <p style={{ fontSize: '13px', color: 'rgba(0,0,0,0.4)', margin: '4px 0 0' }}>{stat.label}</p>
+            {/* Timeline bars */}
+            <div className="flex items-end gap-3 justify-center" style={{ height: 160, paddingTop: 20 }}>
+              {[80, 96, 112, 136, 160, 120, 104].map((h, i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: 80,
+                    height: h,
+                    borderRadius: '6px 6px 0 0',
+                    background: i === 4 ? '#0D0D0D' : '#E8E8E4',
+                    position: 'relative',
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  {i === 4 && (
+                    <span style={{ position: 'absolute', top: -24, left: '50%', transform: 'translateX(-50%)', fontSize: '11px', fontWeight: 600, background: '#0D0D0D', color: '#fff', padding: '3px 10px', borderRadius: 6, whiteSpace: 'nowrap' }}>
+                      Current
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
-          </RevealSection>
-        </div>
-      </section>
-
-      {/* ═══ 7. THE PROCESS — 4-phase timeline ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={wideStyle}>
-          <RevealSection style={{ textAlign: 'center' }}>
-            <h2 style={{ ...h2Style, textAlign: 'center' }} className="md:text-[42px]">
-              The complete process
-            </h2>
-          </RevealSection>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-0 md:gap-0" style={{ marginTop: 48, borderTop: '2px solid rgba(0,0,0,0.06)' }}>
-            {[
-              { phase: 'UNDERSTAND', timing: 'Month 1\u20132', badge: 'FREE', body: 'Bizestimate, value readiness, SDE/EBITDA, preliminary valuation range. See your business through a buyer\u2019s eyes.' },
-              { phase: 'OPTIMIZE', timing: 'Month 3\u201312', body: 'A $50K improvement in EBITDA at 5\u00D7 adds $250K. Yulia builds a prioritized optimization plan: margins, revenue, management depth.' },
-              { phase: 'PREPARE', timing: 'Month 6\u201318', body: 'Living CIM. Financial exhibits. Blind teaser. Buyer targeting. Data room. Everything a qualified buyer needs.' },
-              { phase: 'NEGOTIATE & CLOSE', timing: 'Month 12\u201324', body: 'LOI evaluation. Deal structure modeling. Earnout analysis. Working capital. Real negotiation tactics.' },
-            ].map((p, i) => (
-              <ScrollReveal key={p.phase} delay={i * 0.08}>
-                <div style={{ padding: '24px 20px', borderRight: i < 3 ? '1px solid rgba(0,0,0,0.06)' : 'none', height: '100%' }}>
-                  <div className="flex items-center gap-2" style={{ marginBottom: 8 }}>
-                    <span style={{ ...labelStyle, margin: 0 }}>{p.phase}</span>
-                    {p.badge && <PulseBadge style={{ marginLeft: 4 }}>{p.badge}</PulseBadge>}
-                  </div>
-                  <p style={{ fontSize: '12px', color: 'rgba(0,0,0,0.35)', margin: '0 0 12px' }}>{p.timing}</p>
-                  <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.5)', lineHeight: 1.55, margin: 0 }}>{p.body}</p>
-                </div>
-              </ScrollReveal>
-            ))}
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
-      {/* ═══ 8. THREE DEAL-KILLERS ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={wideStyle}>
-          <RevealSection style={{ textAlign: 'center' }}>
-            <h2 style={{ ...h2Style, textAlign: 'center' }} className="md:text-[42px]">
-              Three things that kill more deals than price
-            </h2>
-          </RevealSection>
+      {/* ═══ ADD-BACKS TABLE ═══ */}
+      <section style={{ padding: '48px 0', ...sectionStyle }}>
+        <RevealSection>
+          <h2 style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 6px', lineHeight: 1.2 }}>
+            The $400,000 hiding in your tax returns
+          </h2>
+          <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.4)', margin: '0 0 28px' }}>
+            Most accountants minimize taxes. We maximize value. Here is how we restate your earnings.
+          </p>
+        </RevealSection>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4" style={{ marginTop: 40 }}>
-            {[
-              { num: '01', title: 'The lease.', body: 'Landlord consent is required for assignment. If the business depends on a location, a hostile or slow landlord can kill a deal in months.' },
-              { num: '02', title: 'The licenses.', body: 'Liquor, DOT, HIPAA, healthcare certifications. Transfer timelines range from 60 days to 6 months. Start early.' },
-              { num: '03', title: 'Reps and warranties.', body: 'Every representation is a guarantee. If it turns out false, the buyer can claw back money through indemnification. Know your exposure before signing.' },
-            ].map((item, i) => (
-              <ScrollReveal key={item.title} delay={i * 0.08}>
-                <div style={{ ...cardStyle, height: '100%' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(0,0,0,0.2)', display: 'block', marginBottom: 8 }}>{item.num}</span>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 10px' }}>{item.title}</h3>
-                  <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.55, margin: 0 }}>{item.body}</p>
-                </div>
-              </ScrollReveal>
+        <ScrollReveal>
+          <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, overflow: 'hidden' }}>
+            {/* Header row */}
+            <div className="flex" style={{ background: '#F8F8F6', padding: '14px 24px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+              <span style={{ flex: 2, fontSize: '13px', fontWeight: 600, color: 'rgba(0,0,0,0.45)' }}>Category</span>
+              <span style={{ flex: 1, fontSize: '13px', fontWeight: 600, color: 'rgba(0,0,0,0.45)' }}>Reported Profit</span>
+              <span style={{ flex: 1, fontSize: '13px', fontWeight: 600, color: 'rgba(0,0,0,0.45)' }}>Adjusted SDE</span>
+              <span style={{ flex: 1, fontSize: '13px', fontWeight: 600, color: 'rgba(0,0,0,0.45)', textAlign: 'right' }}>Added Value</span>
+            </div>
+            {/* Data rows */}
+            {ADDBACKS.map((row, i) => (
+              <div key={i} className="flex" style={{ padding: '16px 24px', borderBottom: i < ADDBACKS.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none', background: '#fff' }}>
+                <span style={{ flex: 2, fontSize: '15px', fontWeight: 500, color: '#0D0D0D' }}>{row.category}</span>
+                <span style={{ flex: 1, fontSize: '15px', color: 'rgba(0,0,0,0.5)' }}>{row.reported}</span>
+                <span style={{ flex: 1, fontSize: '15px', fontWeight: 600, color: '#0D0D0D' }}>{row.adjusted}</span>
+                <span style={{ flex: 1, fontSize: '15px', fontWeight: 600, color: '#4CAF50', textAlign: 'right' }}>{row.added}</span>
+              </div>
             ))}
+            {/* Total row */}
+            <div className="flex" style={{ padding: '18px 24px', borderTop: '2px solid rgba(0,0,0,0.08)', background: '#FAFAFA' }}>
+              <span style={{ flex: 2, fontSize: '16px', fontWeight: 700, color: '#0D0D0D' }}>Total Value Enhancement</span>
+              <span style={{ flex: 1 }} />
+              <span style={{ flex: 1 }} />
+              <span style={{ flex: 1, fontSize: '20px', fontWeight: 700, color: '#0D0D0D', textAlign: 'right' }}>$257,000</span>
+            </div>
           </div>
-        </div>
+        </ScrollReveal>
       </section>
 
-      {/* ═══ 9. BROKER PARTNERSHIP ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={narrowStyle}>
-          <RevealSection style={{ textAlign: 'center' }}>
-            <h2 style={{ ...h2Style, textAlign: 'center' }} className="md:text-[42px]">
-              Working with a broker? Even better.
-            </h2>
-            <p style={{ ...bodyStyle, marginTop: 20, textAlign: 'center' }}>
-              Show up to your first meeting with normalized financials, a defensible valuation, market intelligence, a draft CIM structure, and a Value Readiness Report. Your broker handles relationships. Yulia handles data.
-            </p>
-          </RevealSection>
-        </div>
-      </section>
+      {/* ═══ SIX WAYS OUT ═══ */}
+      <section style={{ padding: '64px 0', ...sectionStyle }}>
+        <RevealSection>
+          <h2 style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 6px', lineHeight: 1.2 }}>
+            Six ways out
+          </h2>
+          <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.4)', margin: '0 0 28px' }}>
+            The right exit depends on your legacy goals and liquidity needs.
+          </p>
+        </RevealSection>
 
-      {/* ═══ 10. YOUR DEAL, YOUR DEPTH — 3 League Cards ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={wideStyle}>
-          <RevealSection style={{ textAlign: 'center' }}>
-            <h2 style={{ ...h2Style, textAlign: 'center' }} className="md:text-[42px]">
-              Your deal, your depth
-            </h2>
-          </RevealSection>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4" style={{ marginTop: 40 }}>
-            {[
-              { label: '$300K\u2013$2M SDE', title: 'Owner-Operated', items: ['Step-by-step, SDE-focused, plain language', 'SBA financing at live rates', 'Matched to a process your first time'] },
-              { label: '$2M\u2013$10M EBITDA', title: 'Established', items: ['Institutional process. PE buyer mapping.', 'Working capital. Term sheet. EBITDA metrics.', 'CIM that reads like boutique advisory.'] },
-              { label: '$10M+ EBITDA', title: 'Institutional', items: ['Board-level deliverables. DCF modeling.', 'Covenant analysis, leverage scenarios.', 'Strategic acquirer identification.'] },
-            ].map((tier, i) => (
-              <ScrollReveal key={tier.title} delay={i * 0.08}>
-                <div style={{ ...cardStyle, height: '100%' }}>
-                  <span style={{ ...labelStyle, color: 'rgba(0,0,0,0.3)' }}>{tier.label}</span>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0D0D0D', margin: '10px 0 14px' }}>{tier.title}</h3>
-                  <div className="space-y-2">
-                    {tier.items.map(t => (
-                      <p key={t} style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.5, margin: 0 }}>{t}</p>
-                    ))}
-                  </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {EXIT_TYPES.map((item, i) => (
+            <ScrollReveal key={item.title} delay={i * 0.05}>
+              <div style={{ background: '#fff', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', padding: '24px', height: '100%' }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: '#F4F4F2', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, color: 'rgba(0,0,0,0.5)' }}>
+                  {item.icon}
                 </div>
-              </ScrollReveal>
-            ))}
-          </div>
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 8px' }}>{item.title}</h3>
+                <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.55, margin: 0 }}>{item.desc}</p>
+              </div>
+            </ScrollReveal>
+          ))}
         </div>
       </section>
 
-      {/* ═══ 11. THE WIRE HITS — CTA ═══ */}
-      <section style={{ paddingTop: 100, paddingBottom: 80 }}>
-        <div style={narrowStyle}>
-          <RevealSection style={{ textAlign: 'center' }}>
-            <h2 style={{ fontSize: '40px', fontWeight: 700, color: '#0D0D0D', lineHeight: 1.15, letterSpacing: '-0.035em', margin: 0 }} className="md:text-[48px]">
-              The wire hits.
-            </h2>
-            <p style={{ ...bodyStyle, marginTop: 20, textAlign: 'center' }}>
-              Not &ldquo;I hope I got a fair deal.&rdquo; You know your number was real. Your add-backs were captured. The structure was optimized. The CIM was institutional-quality.
-            </p>
-            <p style={{ fontSize: '15px', fontWeight: 600, color: '#0D0D0D', marginTop: 20 }}>
-              That&apos;s what preparation delivers. Not hope. Certainty.
-            </p>
-          </RevealSection>
+      {/* ═══ THE COMPLETE PROCESS ═══ */}
+      <section style={{ padding: '64px 0', ...sectionStyle }}>
+        <RevealSection>
+          <h2 style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 6px', lineHeight: 1.2 }}>
+            The complete process
+          </h2>
+          <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.4)', margin: '0 0 40px' }}>
+            A rigorous, disciplined approach to your life&apos;s work.
+          </p>
+        </RevealSection>
 
-          <RevealSection style={{ marginTop: 32, textAlign: 'center' }}>
-            <MagneticButton
-              onClick={() => onChipClick("I want to sell my business")}
-              style={{ background: '#0D0D0D', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
-            >
-              Tell Yulia about your business
-            </MagneticButton>
-          </RevealSection>
+        <div className="flex flex-col gap-0">
+          {PROCESS_STEPS.map((step, i) => (
+            <ScrollReveal key={step.num} delay={i * 0.08}>
+              <div className="flex items-start gap-6 md:gap-10" style={{ padding: '28px 0', borderTop: i === 0 ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(0,0,0,0.06)' }}>
+                <span style={{ fontSize: '64px', fontWeight: 200, color: 'rgba(0,0,0,0.08)', lineHeight: 1, fontFamily: "'Inter', system-ui, sans-serif", flexShrink: 0, width: 60, textAlign: 'center' }}>
+                  {step.num}
+                </span>
+                <div style={{ paddingTop: 8 }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0D0D0D', margin: '0 0 8px' }}>{step.title}</h3>
+                  <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.45)', lineHeight: 1.6, margin: 0, maxWidth: 500 }}>{step.desc}</p>
+                </div>
+              </div>
+            </ScrollReveal>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ READY TO CHAT CTA ═══ */}
+      <section style={{ padding: '64px 0 48px', maxWidth: 640, margin: '0 auto', paddingLeft: 32, paddingRight: 32 }}>
+        <RevealSection>
+          <h2 style={{ fontSize: '36px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', margin: '0 0 24px', lineHeight: 1.15 }}>
+            Ready to chat?
+          </h2>
+          <div style={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 12, padding: '20px', background: '#fff' }}>
+            <p style={{ fontSize: '15px', color: 'rgba(0,0,0,0.35)', margin: '0 0 16px' }}>
+              Tell us about your business or ask a question...
+            </p>
+            <div className="flex justify-center">
+              <button
+                onClick={() => onChipClick("I want to sell my business. Help me understand what it's worth and how to prepare.")}
+                className="cursor-pointer hover:opacity-90 transition-opacity"
+                style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', background: '#0D0D0D', color: '#fff', border: 'none', borderRadius: '8px', padding: '12px 24px' }}
+                type="button"
+              >
+                Send Message
+              </button>
+            </div>
+          </div>
+        </RevealSection>
+
+        {/* Trust footer */}
+        <div className="flex items-center justify-center gap-3 mt-6">
+          <div className="flex gap-1">
+            <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.08)', display: 'inline-block' }} />
+            <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.12)', display: 'inline-block' }} />
+            <span style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.06)', display: 'inline-block' }} />
+          </div>
+          <span style={{ fontSize: '13px', color: 'rgba(0,0,0,0.35)' }}>
+            Our deal team is online and ready to review your data.
+          </span>
         </div>
       </section>
     </div>
