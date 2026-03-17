@@ -635,7 +635,7 @@ export default function AppShell() {
           style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontWeight: 700, color: '#0D0D0D' }}
           type="button"
         >
-          smb<span style={{ color: '#C96B4F' }}>X</span><span style={{ color: '#0D0D0D' }}>.ai</span>
+          smb<span style={{ color: '#C96B4F', display: 'inline-block', transform: 'rotate(-8deg) scaleY(1.15) scaleX(1.1)', fontWeight: 900, fontSize: '25px', lineHeight: 1, verticalAlign: 'baseline', marginLeft: -1, marginRight: -1 }}>X</span><span style={{ color: '#0D0D0D' }}>.ai</span>
         </button>
       </div>
 
@@ -887,10 +887,10 @@ export default function AppShell() {
                   <button
                     onClick={() => handleTabClick('home')}
                     className="bg-transparent border-none cursor-pointer p-0 leading-none"
-                    style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontSize: '20px', fontWeight: 700, color: '#0D0D0D' }}
+                    style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontSize: '20px', fontWeight: 700, color: '#0D0D0D', opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: 'opacity 0.3s ease' }}
                     type="button"
                   >
-                    smb<span style={{ color: '#C96B4F' }}>X</span><span style={{ color: '#0D0D0D' }}>.ai</span>
+                    smb<span style={{ color: '#C96B4F', display: 'inline-block', transform: 'rotate(-8deg) scaleY(1.15) scaleX(1.1)', fontWeight: 900, fontSize: '23px', lineHeight: 1, verticalAlign: 'baseline', marginLeft: -1, marginRight: -1 }}>X</span><span style={{ color: '#0D0D0D' }}>.ai</span>
                   </button>
                 ) : (
                   <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(0,0,0,0.35)' }}>
@@ -956,7 +956,7 @@ export default function AppShell() {
                       }
                     >
                       <span style={{ fontSize: '34px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D' }}>
-                        smb<span style={{ color: '#C96B4F' }}>X</span><span style={{ opacity: 0.6 }}>.ai</span>
+                        smb<span style={{ color: '#C96B4F', display: 'inline-block', transform: 'rotate(-8deg) scaleY(1.15) scaleX(1.1)', fontWeight: 900, fontSize: '39px', lineHeight: 1, verticalAlign: 'baseline', marginLeft: -1, marginRight: -1 }}>X</span><span style={{ opacity: 0.6 }}>.ai</span>
                       </span>
                     </motion.div>
                     {/* Heading */}
@@ -1043,7 +1043,7 @@ export default function AppShell() {
                       style={{ marginBottom: 28 }}
                     >
                       <span style={{ fontSize: '42px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D' }}>
-                        smb<span style={{ color: '#C96B4F' }}>X</span><span style={{ opacity: 0.6 }}>.ai</span>
+                        smb<span style={{ color: '#C96B4F', display: 'inline-block', transform: 'rotate(-8deg) scaleY(1.15) scaleX(1.1)', fontWeight: 900, fontSize: '48px', lineHeight: 1, verticalAlign: 'baseline', marginLeft: -1, marginRight: -1 }}>X</span><span style={{ opacity: 0.6 }}>.ai</span>
                       </span>
                     </motion.div>
                     {/* Heading */}

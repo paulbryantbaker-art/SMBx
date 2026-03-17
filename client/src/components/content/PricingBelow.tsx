@@ -3,25 +3,25 @@ import { RevealSection, ScrollReveal } from './animations';
 /* ─── Inline SVG icons ─── */
 const CheckIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7.5 13.475L4.025 10L2.842 11.175L7.5 15.833L17.5 5.833L16.325 4.658L7.5 13.475Z" fill="#ec5b13" />
+    <path d="M7.5 13.475L4.025 10L2.842 11.175L7.5 15.833L17.5 5.833L16.325 4.658L7.5 13.475Z" fill="#000000" />
   </svg>
 );
 
 const TrendingUpIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M16 6L18.29 8.29L13.41 13.17L9.41 9.17L2 16.59L3.41 18L9.41 12L13.41 16L19.71 9.71L22 12V6H16Z" fill="#ec5b13" />
+    <path d="M16 6L18.29 8.29L13.41 13.17L9.41 9.17L2 16.59L3.41 18L9.41 12L13.41 16L19.71 9.71L22 12V6H16Z" fill="#000000" />
   </svg>
 );
 
 const CheckCircleIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#ec5b13" />
+    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#000000" />
   </svg>
 );
 
 const PublicIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z" fill="#ec5b13" />
+    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z" fill="#000000" />
   </svg>
 );
 
@@ -33,12 +33,11 @@ const PersonIcon = () => (
 
 const SmartToyIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M20 9V7C20 5.9 19.1 5 18 5H13V3.5C13 2.67 12.33 2 11.5 2C10.67 2 10 2.67 10 3.5V5H6C4.9 5 4 5.9 4 7V9C2.9 9 2 9.9 2 11V13C2 14.1 2.9 15 4 15V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V15C21.1 15 22 14.1 22 13V11C22 9.9 21.1 9 20 9ZM9.5 13.5C8.67 13.5 8 12.83 8 12C8 11.17 8.67 10.5 9.5 10.5C10.33 10.5 11 11.17 11 12C11 12.83 10.33 13.5 9.5 13.5ZM14.5 13.5C13.67 13.5 13 12.83 13 12C13 11.17 13.67 10.5 14.5 10.5C15.33 10.5 16 11.17 16 12C16 12.83 15.33 13.5 14.5 13.5Z" fill="#ec5b13" />
+    <path d="M20 9V7C20 5.9 19.1 5 18 5H13V3.5C13 2.67 12.33 2 11.5 2C10.67 2 10 2.67 10 3.5V5H6C4.9 5 4 5.9 4 7V9C2.9 9 2 9.9 2 11V13C2 14.1 2.9 15 4 15V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V15C21.1 15 22 14.1 22 13V11C22 9.9 21.1 9 20 9ZM9.5 13.5C8.67 13.5 8 12.83 8 12C8 11.17 8.67 10.5 9.5 10.5C10.33 10.5 11 11.17 11 12C11 12.83 10.33 13.5 9.5 13.5ZM14.5 13.5C13.67 13.5 13 12.83 13 12C13 11.17 13.67 10.5 14.5 10.5C15.33 10.5 16 11.17 16 12C16 12.83 15.33 13.5 14.5 13.5Z" fill="#000000" />
   </svg>
 );
 
 const FONT = "'Inter', system-ui, sans-serif";
-const ORANGE = '#ec5b13';
 
 export default function PricingBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
@@ -59,7 +58,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
             color: '#0f172a',
             fontFamily: FONT,
           }}>
-            Start free. <span style={{ color: ORANGE }}>Scale with precision.</span>
+            Start free. <span style={{ color: '#000000' }}>Scale with precision.</span>
           </h1>
           <p style={{
             maxWidth: 672,
@@ -85,14 +84,14 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
                 width: '100%',
                 maxWidth: 280,
                 borderRadius: 12,
-                backgroundColor: ORANGE,
+                backgroundColor: '#000000',
                 padding: '16px 32px',
                 fontSize: 18,
                 fontWeight: 700,
                 color: '#ffffff',
                 border: 'none',
                 cursor: 'pointer',
-                boxShadow: '0 20px 25px -5px rgba(236, 91, 19, 0.3)',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
                 fontFamily: FONT,
               }}
             >
@@ -147,7 +146,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
               <ScrollReveal key={card.title} delay={i * 0.08}>
                 <div style={{
                   borderRadius: 16,
-                  border: '1px solid #f1f5f9',
+                  border: '1px solid rgba(0,0,0,0.06)',
                   backgroundColor: 'rgba(248, 250, 252, 0.5)',
                   padding: 32,
                   height: '100%',
@@ -156,13 +155,13 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
                 }}
                   onMouseEnter={(e) => {
                     const el = e.currentTarget;
-                    el.style.borderColor = 'rgba(236, 91, 19, 0.5)';
+                    el.style.borderColor = 'rgba(0, 0, 0, 0.15)';
                     el.style.backgroundColor = '#ffffff';
-                    el.style.boxShadow = '0 25px 50px -12px rgba(236, 91, 19, 0.05)';
+                    el.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.06)';
                   }}
                   onMouseLeave={(e) => {
                     const el = e.currentTarget;
-                    el.style.borderColor = '#f1f5f9';
+                    el.style.borderColor = 'rgba(0,0,0,0.06)';
                     el.style.backgroundColor = 'rgba(248, 250, 252, 0.5)';
                     el.style.boxShadow = 'none';
                   }}
@@ -175,7 +174,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: 12,
-                    backgroundColor: 'rgba(236, 91, 19, 0.1)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.06)',
                   }}>
                     {card.icon}
                   </div>
@@ -237,7 +236,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
               display: 'flex',
               flexDirection: 'column',
               borderRadius: 24,
-              border: '1px solid #e2e8f0',
+              border: '1px solid rgba(0,0,0,0.06)',
               backgroundColor: '#ffffff',
               padding: 32,
               boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
@@ -284,25 +283,25 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
                   alignItems: 'center',
                   justifyContent: 'center',
                   borderRadius: 12,
-                  border: `1px solid ${ORANGE}`,
+                  border: '1px solid #000000',
                   backgroundColor: 'transparent',
                   padding: '12px 24px',
                   fontSize: 14,
                   fontWeight: 700,
-                  color: ORANGE,
+                  color: '#000000',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   fontFamily: FONT,
                 }}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget;
-                  el.style.backgroundColor = ORANGE;
+                  el.style.backgroundColor = '#000000';
                   el.style.color = '#ffffff';
                 }}
                 onMouseLeave={(e) => {
                   const el = e.currentTarget;
                   el.style.backgroundColor = 'transparent';
-                  el.style.color = ORANGE;
+                  el.style.color = '#000000';
                 }}
               >
                 Start Essential
@@ -338,10 +337,10 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
               display: 'flex',
               flexDirection: 'column',
               borderRadius: 24,
-              border: `2px solid ${ORANGE}`,
+              border: '2px solid #000000',
               backgroundColor: '#ffffff',
               padding: 32,
-              boxShadow: `0 25px 50px -12px rgba(236, 91, 19, 0.1)`,
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)',
               height: '100%',
             }}>
               <div style={{
@@ -350,7 +349,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
                 left: '50%',
                 transform: 'translateX(-50%)',
                 borderRadius: 9999,
-                backgroundColor: ORANGE,
+                backgroundColor: '#000000',
                 padding: '4px 16px',
                 fontSize: 12,
                 fontWeight: 700,
@@ -404,13 +403,13 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
                   justifyContent: 'center',
                   borderRadius: 12,
                   border: 'none',
-                  backgroundColor: ORANGE,
+                  backgroundColor: '#000000',
                   padding: '12px 24px',
                   fontSize: 14,
                   fontWeight: 700,
                   color: '#ffffff',
                   cursor: 'pointer',
-                  boxShadow: '0 10px 15px -3px rgba(236, 91, 19, 0.3)',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.15)',
                   transition: 'transform 0.2s ease',
                   fontFamily: FONT,
                 }}
@@ -454,7 +453,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
               display: 'flex',
               flexDirection: 'column',
               borderRadius: 24,
-              border: '1px solid #e2e8f0',
+              border: '1px solid rgba(0,0,0,0.06)',
               backgroundColor: '#ffffff',
               padding: 32,
               boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
@@ -603,7 +602,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderRadius: '50%',
-                    backgroundColor: ORANGE,
+                    backgroundColor: '#000000',
                   }}>
                     <PersonIcon />
                   </div>
@@ -626,13 +625,13 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
                   <div style={{
                     borderRadius: 16,
                     borderTopRightRadius: 0,
-                    backgroundColor: ORANGE,
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
                     padding: 16,
                     fontSize: 14,
                     fontWeight: 500,
                     lineHeight: 1.65,
                     color: '#ffffff',
-                    boxShadow: '0 20px 25px -5px rgba(236, 91, 19, 0.2)',
+                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
                     fontFamily: FONT,
                   }}>
                     "Based on current multiples in your niche, your Bizestimate is approximately $12.4M. To increase this to $15M+, we recommend focusing on reducing churn by 2%."
@@ -711,7 +710,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
             <ScrollReveal key={item.q} delay={i * 0.06}>
               <div style={{
                 borderRadius: 16,
-                border: '1px solid #e2e8f0',
+                border: '1px solid rgba(0,0,0,0.06)',
                 backgroundColor: '#ffffff',
                 padding: 24,
               }}>
@@ -741,7 +740,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
       </section>
 
       {/* ═══════════════════════════════════════════════════
-          6. FINAL CTA — Large orange rounded card
+          6. FINAL CTA — Large black rounded card
           ═══════════════════════════════════════════════════ */}
       <section style={{
         maxWidth: 1280,
@@ -751,11 +750,11 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
         <RevealSection>
           <div style={{
             borderRadius: 40,
-            backgroundColor: ORANGE,
+            backgroundColor: '#000000',
             padding: 'clamp(48px, 6vw, 96px)',
             textAlign: 'center',
             color: '#ffffff',
-            boxShadow: '0 25px 50px -12px rgba(236, 91, 19, 0.4)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             position: 'relative',
             overflow: 'hidden',
           }}>
@@ -763,7 +762,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
             <div style={{
               position: 'absolute',
               inset: 0,
-              opacity: 0.1,
+              opacity: 0.06,
               pointerEvents: 'none' as const,
             }}>
               <div style={{
@@ -803,7 +802,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
                 margin: '24px auto 0',
                 fontSize: 18,
                 fontWeight: 500,
-                color: 'rgba(255, 255, 255, 0.9)',
+                color: 'rgba(255, 255, 255, 0.7)',
                 lineHeight: 1.6,
                 fontFamily: FONT,
               }}>
@@ -822,7 +821,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
                     padding: '16px 40px',
                     fontSize: 18,
                     fontWeight: 700,
-                    color: ORANGE,
+                    color: '#000000',
                     border: 'none',
                     cursor: 'pointer',
                     boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',

@@ -311,7 +311,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             alignItems: 'center',
             background: '#fff',
             borderRadius: 100,
-            border: '1.5px solid rgba(0,0,0,0.08)',
+            border: '1.5px solid rgba(0,0,0,0.18)',
             boxShadow: '0 6px 32px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)',
             padding: '6px 8px 6px 24px',
             gap: 12,
