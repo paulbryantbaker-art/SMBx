@@ -964,19 +964,10 @@ export default function AppShell() {
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontFamily: "ui-serif, Georgia, Cambria, 'Times New Roman', serif", fontSize: '30px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', textAlign: 'center', margin: 0, lineHeight: 1.15 }}
+                      style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '36px', fontWeight: 800, letterSpacing: '-0.02em', color: '#0D0D0D', textAlign: 'center', margin: 0, lineHeight: 1.15 }}
                     >
-                      How can we help today?
+                      How can Yulia help{'\n'}you today?
                     </motion.h1>
-                    {/* Subtitle */}
-                    <motion.p
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '15px', color: 'rgba(0,0,0,0.4)', textAlign: 'center', margin: 0, lineHeight: 1.6 }}
-                    >
-                      Analyze markets, value companies, or prepare for your next transaction.
-                    </motion.p>
                     {/* Hero chat bar */}
                     <motion.div
                       className="w-full"
@@ -1052,19 +1043,10 @@ export default function AppShell() {
                       initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontFamily: "ui-serif, Georgia, Cambria, 'Times New Roman', serif", fontSize: '38px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D', textAlign: 'center', margin: '0 0 16px', lineHeight: 1.15 }}
+                      style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '60px', fontWeight: 800, letterSpacing: '-0.02em', color: '#0D0D0D', textAlign: 'center', margin: '0 0 48px', lineHeight: 1.1 }}
                     >
-                      How can we help today?
+                      How can Yulia help{' '}<br />you today?
                     </motion.h1>
-                    {/* Subtitle */}
-                    <motion.p
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '17px', color: 'rgba(0,0,0,0.4)', textAlign: 'center', margin: '0 0 40px', lineHeight: 1.6 }}
-                    >
-                      Analyze markets, value companies, or prepare for your next transaction.
-                    </motion.p>
                     {/* Hero chat bar — search style with icon */}
                     <motion.div
                       initial={{ opacity: 0, y: 16 }}
@@ -1086,11 +1068,12 @@ export default function AppShell() {
                       />
                     </motion.div>
                     {/* Suggestion chips — 3 chips with icons */}
-                    <div className="flex flex-wrap justify-center gap-3" style={{ marginTop: 28 }}>
+                    <div className="flex flex-wrap justify-center gap-3" style={{ marginTop: 32 }}>
                       {[
-                        { label: 'Prepare to sell', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9 12l2 2 4-4" /></svg>, message: "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." },
-                        { label: 'Raise capital', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>, message: "I need to raise capital for my business. Walk me through the options." },
-                        { label: 'Value my business', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>, message: "What's my business worth? I want to understand what it might be worth in today's market." },
+                        { label: 'Prepare to sell', message: "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." },
+                        { label: 'Find a buyer', message: "I'm looking to buy a business. Help me evaluate deals and find the right acquisition." },
+                        { label: 'Value my business', message: "What's my business worth? I want to understand what it might be worth in today's market." },
+                        { label: 'Review tax add-backs', message: "What add-backs am I missing? Help me identify hidden value in my tax returns." },
                       ].map((chip, i) => (
                         <motion.button
                           key={chip.label}
@@ -1098,11 +1081,10 @@ export default function AppShell() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.45, delay: 0.4 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                           onClick={() => handleChipClick(chip.message)}
-                          className="bg-transparent cursor-pointer transition-all chip-hover flex items-center gap-2"
-                          style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.5)', border: '1px solid rgba(0,0,0,0.1)', padding: '10px 20px' }}
+                          className="cursor-pointer transition-all chip-hover flex items-center"
+                          style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.6)', border: '1px solid #E5E5E5', padding: '10px 20px', background: '#fff' }}
                           type="button"
                         >
-                          <span style={{ color: 'rgba(0,0,0,0.35)' }}>{chip.icon}</span>
                           {chip.label}
                         </motion.button>
                       ))}
@@ -1138,7 +1120,7 @@ export default function AppShell() {
                       {page.overline}
                     </div>
                   )}
-                  <h1 style={{ fontFamily: "ui-serif, Georgia, Cambria, 'Times New Roman', serif", fontSize: '36px', fontWeight: 600, letterSpacing: '-0.03em', color: '#0D0D0D', lineHeight: 1.12, marginBottom: 20 }}>
+                  <h1 style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '36px', fontWeight: 800, letterSpacing: '-0.03em', color: '#0D0D0D', lineHeight: 1.12, marginBottom: 20 }}>
                     {renderHeadline(page.headline, page.terraWord)}
                   </h1>
                   <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.6, marginBottom: 28 }}>
@@ -1173,7 +1155,7 @@ export default function AppShell() {
                         {page.overline}
                       </div>
                     )}
-                    <h1 style={{ fontFamily: "ui-serif, Georgia, Cambria, 'Times New Roman', serif", fontSize: '52px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.1, marginBottom: 24 }}>
+                    <h1 style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '52px', fontWeight: 800, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.1, marginBottom: 24 }}>
                       {renderHeadline(page.headline, page.terraWord)}
                     </h1>
                     <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, marginBottom: 36 }}>

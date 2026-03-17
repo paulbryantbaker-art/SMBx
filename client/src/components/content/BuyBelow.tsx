@@ -15,9 +15,9 @@ interface BuyBelowProps {
 const narrowStyle = { maxWidth: 580, margin: '0 auto' } as const;
 const wideStyle = { maxWidth: 880, margin: '0 auto' } as const;
 const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' } as const;
-const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, marginTop: 12 } as const;
+const h2Style = { fontFamily: "'Inter', system-ui, sans-serif", fontSize: '36px', fontWeight: 800, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, marginTop: 12 } as const;
 const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, margin: 0 } as const;
-const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' } as const;
+const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '40px' } as const;
 
 export default function BuyBelow({ onChipClick }: BuyBelowProps) {
   return (
@@ -104,7 +104,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
       <section style={{ paddingTop: 140 }}>
         <div style={narrowStyle}>
           <RevealSection style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: '96px', fontWeight: 700, color: '#0D0D0D', margin: 0, letterSpacing: '-0.04em', lineHeight: 1 }}>
+            <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '96px', fontWeight: 800, color: '#0D0D0D', margin: 0, letterSpacing: '-0.04em', lineHeight: 1 }}>
               <AnimatedCounter value={847} />
             </p>
             <p style={{ fontSize: '17px', color: 'rgba(0,0,0,0.45)', marginTop: 12, lineHeight: 1.5 }}>
@@ -247,7 +247,7 @@ export default function BuyBelow({ onChipClick }: BuyBelowProps) {
       <section style={{ paddingTop: 100, paddingBottom: 80 }}>
         <div style={narrowStyle}>
           <RevealSection style={{ textAlign: 'center' }}>
-            <h2 style={{ fontSize: '40px', fontWeight: 700, color: '#0D0D0D', lineHeight: 1.15, letterSpacing: '-0.035em', margin: 0 }} className="md:text-[48px]">
+            <h2 style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '40px', fontWeight: 800, color: '#0D0D0D', lineHeight: 1.15, letterSpacing: '-0.035em', margin: 0 }} className="md:text-[48px]">
               You own a business now.
             </h2>
             <p style={{ ...bodyStyle, marginTop: 20, textAlign: 'center' }}>
