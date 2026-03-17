@@ -1022,25 +1022,23 @@ export default function AppShell() {
                         typewriterPrefix={TYPEWRITER_PREFIX}
                       />
                     </motion.div>
-                    {/* Suggestion chips */}
-                    <motion.div
-                      className="flex flex-wrap justify-center gap-2"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 0.35 }}
-                    >
-                      {['Prepare to sell', 'Prepare to buy', 'Raise capital', 'Advise a deal'].map(chip => (
-                        <button
+                    {/* Suggestion chips — individual cascade */}
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {['Prepare to sell', 'Prepare to buy', 'Raise capital', 'Advise a deal'].map((chip, i) => (
+                        <motion.button
                           key={chip}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.45, delay: 0.35 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                           onClick={() => handleChipClick(chip === 'Prepare to sell' ? "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." : chip === 'Prepare to buy' ? "I'm looking to acquire a business. Help me evaluate opportunities." : chip === 'Raise capital' ? "I need to raise capital for my business. Walk me through the options." : "I'm an M&A advisor. Show me how you can help with my practice.")}
                           className="bg-transparent cursor-pointer transition-all chip-hover"
                           style={{ borderRadius: 100, fontSize: '13px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.45)', border: '1px solid rgba(0,0,0,0.1)', padding: '8px 16px' }}
                           type="button"
                         >
                           {chip}
-                        </button>
+                        </motion.button>
                       ))}
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
 
@@ -1074,26 +1072,23 @@ export default function AppShell() {
                         typewriterPrefix={TYPEWRITER_PREFIX}
                       />
                     </motion.div>
-                    {/* Suggestion chips */}
-                    <motion.div
-                      className="flex flex-wrap justify-center gap-3"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 0.4 }}
-                      style={{ marginTop: 24 }}
-                    >
-                      {['Prepare to sell', 'Prepare to buy', 'Raise capital', 'Advise a deal'].map(chip => (
-                        <button
+                    {/* Suggestion chips — individual cascade */}
+                    <div className="flex flex-wrap justify-center gap-3" style={{ marginTop: 24 }}>
+                      {['Prepare to sell', 'Prepare to buy', 'Raise capital', 'Advise a deal'].map((chip, i) => (
+                        <motion.button
                           key={chip}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.45, delay: 0.4 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                           onClick={() => handleChipClick(chip === 'Prepare to sell' ? "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." : chip === 'Prepare to buy' ? "I'm looking to acquire a business. Help me evaluate opportunities." : chip === 'Raise capital' ? "I need to raise capital for my business. Walk me through the options." : "I'm an M&A advisor. Show me how you can help with my practice.")}
                           className="bg-transparent cursor-pointer transition-all chip-hover"
                           style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.45)', border: '1px solid rgba(0,0,0,0.1)', padding: '9px 20px' }}
                           type="button"
                         >
                           {chip}
-                        </button>
+                        </motion.button>
                       ))}
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
               </>
@@ -1117,14 +1112,14 @@ export default function AppShell() {
                   <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.6, marginBottom: 24 }}>
                     {page.tagline}
                   </p>
-                  {/* Chips */}
+                  {/* Chips — cascade entrance */}
                   <div className="flex flex-wrap gap-2 mb-5">
-                    {page.chips.map(chip => (
+                    {page.chips.map((chip, i) => (
                       <button
                         key={chip}
                         onClick={() => handleChipClick(chip)}
-                        className="bg-white cursor-pointer transition-all chip-hover"
-                        style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.55)', border: '1px solid rgba(0,0,0,0.08)', padding: '8px 16px' }}
+                        className="bg-white cursor-pointer transition-all chip-hover chip-cascade"
+                        style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.55)', border: '1px solid rgba(0,0,0,0.08)', padding: '8px 16px', animationDelay: `${0.3 + i * 0.07}s` }}
                         type="button"
                       >
                         {chip}
@@ -1153,14 +1148,14 @@ export default function AppShell() {
                     <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, marginBottom: 32 }}>
                       {page.tagline}
                     </p>
-                    {/* Chips */}
+                    {/* Chips — cascade entrance */}
                     <div className="flex flex-wrap gap-2.5 mb-6">
-                      {page.chips.map(chip => (
+                      {page.chips.map((chip, i) => (
                         <button
                           key={chip}
                           onClick={() => handleChipClick(chip)}
-                          className="bg-white cursor-pointer transition-all hover:text-[#C96B4F] chip-hover"
-                          style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.55)', border: '1px solid rgba(0,0,0,0.08)', padding: '9px 20px' }}
+                          className="bg-white cursor-pointer transition-all hover:text-[#C96B4F] chip-hover chip-cascade"
+                          style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.55)', border: '1px solid rgba(0,0,0,0.08)', padding: '9px 20px', animationDelay: `${0.3 + i * 0.07}s` }}
                           type="button"
                         >
                           {chip}

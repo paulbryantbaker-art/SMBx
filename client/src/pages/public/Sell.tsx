@@ -321,7 +321,7 @@ export default function Sell() {
 
         <div className="sell-chips">
           {SELL_CHIPS.map((c, i) => (
-            <button key={i} className="sell-chip" onClick={() => navigate('/?sell=1')}>
+            <button key={i} className="sell-chip chip-cascade" style={{ animationDelay: `${0.5 + i * 0.08}s` }} onClick={() => navigate('/?sell=1')}>
               {c.label}
             </button>
           ))}
@@ -385,9 +385,9 @@ export default function Sell() {
         </p>
         <div className="sell-timeline">
           {JOURNEY_STAGES.map((stage, i) => (
-            <div key={i} className="sell-timeline-item">
+            <div key={i} className="sell-timeline-item timeline-stagger" style={{ animationDelay: `${0.15 + i * 0.1}s` }}>
               <div className="sell-timeline-marker">
-                <div className="sell-timeline-dot" />
+                <div className="sell-timeline-dot timeline-dot-enter" style={{ animationDelay: `${0.2 + i * 0.1}s` }} />
                 <div className="sell-timeline-line" />
               </div>
               <div className="sell-timeline-content">
