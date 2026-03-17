@@ -54,12 +54,16 @@ interface ChatDockProps {
   typewriterHints?: string[];
   /** Static prefix typed before each hint (e.g. "Hello, I'm Yulia, your M&A agent. ") */
   typewriterPrefix?: string;
+  /** Called when hero textarea gains focus */
+  onInputFocus?: () => void;
+  /** Called when hero textarea loses focus — includes whether input has content */
+  onInputBlur?: (hasContent: boolean) => void;
 }
 
 /* ═══ COMPONENT ═══ */
 
 const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
-  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock', rows, typewriterHints, typewriterPrefix = '' },
+  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock', rows, typewriterHints, typewriterPrefix = '', onInputFocus, onInputBlur },
   ref,
 ) {
   const isHero = variant === 'hero';
@@ -181,7 +185,8 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
     setTwActive(false);
     setTwText('');
     if (twTimerRef.current) clearTimeout(twTimerRef.current);
-  }, []);
+    onInputFocus?.();
+  }, [onInputFocus]);
 
   const handleBlur = useCallback(() => {
     if (!value.trim()) {
@@ -190,7 +195,8 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
       twPhaseRef.current = 'typing';
       setTwActive(true);
     }
-  }, [value]);
+    onInputBlur?.(value.trim().length > 0);
+  }, [value, onInputBlur]);
 
   /* Imperative handle for parent */
   useImperativeHandle(ref, () => ({

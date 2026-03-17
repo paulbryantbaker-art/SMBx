@@ -327,6 +327,7 @@ export default function AppShell() {
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
   const [canvasMarkdown, setCanvasMarkdown] = useState<{ content: string; title: string } | null>(null);
   const [morphing, setMorphing] = useState(false);
+  const [heroFocused, setHeroFocused] = useState(false); // tracks when hero input is focused — controls logo position
   const [ndaRequired, setNdaRequired] = useState<{ dealId: number; dealName?: string } | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
 
@@ -626,8 +627,8 @@ export default function AppShell() {
       className="flex flex-col h-full select-none"
       style={{ width: mobile ? 280 : 256, background: '#FAFAFA', borderRight: '1px solid rgba(0,0,0,0.06)' }}
     >
-      {/* Logo */}
-      <div className="px-5 pt-5 pb-2">
+      {/* Logo — hidden when center logo is visible on home landing */}
+      <div className="px-5 pt-5 pb-2" style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: 'opacity 0.2s ease' }}>
         <button
           onClick={() => { handleTabClick('home'); if (mobile) setIsMobileSidebarOpen(false); }}
           className="bg-transparent border-none cursor-pointer p-0 text-[22px] leading-none"
@@ -946,12 +947,12 @@ export default function AppShell() {
                 {/* MOBILE HOME */}
                 <div className="flex flex-col h-full md:hidden">
                   <div className="flex-1 flex flex-col items-center justify-center px-5 gap-7" style={{ position: 'relative' }}>
-                    {/* Logo mark — animates toward sidebar on chat entry */}
+                    {/* Logo mark — flash-moves to sidebar when input focused */}
                     <motion.div
                       initial={{ opacity: 0, y: -12, scale: 0.9 }}
-                      animate={morphing
-                        ? { opacity: 0, x: -120, y: -200, scale: 0.5, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } }
-                        : { opacity: 1, y: 0, x: 0, scale: 1, transition: { duration: 0.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] } }
+                      animate={(heroFocused || morphing)
+                        ? { opacity: 0, scale: 0.5, transition: { duration: 0.25, ease: [0.4, 0, 1, 1] } }
+                        : { opacity: 1, y: 0, x: 0, scale: 1, transition: { duration: 0.5, delay: 0.05, ease: [0.22, 1, 0.36, 1] } }
                       }
                     >
                       <span style={{ fontSize: '34px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D' }}>
@@ -992,6 +993,8 @@ export default function AppShell() {
                         disabled={sending}
                         typewriterHints={TYPEWRITER_HINTS}
                         typewriterPrefix={TYPEWRITER_PREFIX}
+                        onInputFocus={() => setHeroFocused(true)}
+                        onInputBlur={(hasText) => { if (!hasText) setHeroFocused(false); }}
                       />
                     </motion.div>
                     {/* Suggestion chips — 3 with icons */}
@@ -1031,12 +1034,12 @@ export default function AppShell() {
                 {/* DESKTOP HOME */}
                 <div className="hidden md:flex flex-col h-full items-center justify-center">
                   <div className="flex flex-col items-center" style={{ marginTop: '-40px', width: '100%', maxWidth: 640 }}>
-                    {/* Logo mark — animates toward sidebar on chat entry */}
+                    {/* Logo mark — flash-moves to sidebar when input focused */}
                     <motion.div
                       initial={{ opacity: 0, y: -16, scale: 0.85 }}
-                      animate={morphing
-                        ? { opacity: 0, x: -280, y: -200, scale: 0.5, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
-                        : { opacity: 1, y: 0, x: 0, scale: 1, transition: { duration: 0.7, delay: 0.05, ease: [0.22, 1, 0.36, 1] } }
+                      animate={(heroFocused || morphing)
+                        ? { opacity: 0, scale: 0.5, transition: { duration: 0.25, ease: [0.4, 0, 1, 1] } }
+                        : { opacity: 1, y: 0, x: 0, scale: 1, transition: { duration: 0.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] } }
                       }
                       style={{ marginBottom: 28 }}
                     >
@@ -1078,6 +1081,8 @@ export default function AppShell() {
                         disabled={sending}
                         typewriterHints={TYPEWRITER_HINTS}
                         typewriterPrefix={TYPEWRITER_PREFIX}
+                        onInputFocus={() => setHeroFocused(true)}
+                        onInputBlur={(hasText) => { if (!hasText) setHeroFocused(false); }}
                       />
                     </motion.div>
                     {/* Suggestion chips — 3 chips with icons */}
