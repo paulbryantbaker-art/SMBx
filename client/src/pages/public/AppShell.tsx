@@ -1127,98 +1127,32 @@ export default function AppShell() {
               {/* ═══ BUY PAGE — Full custom layout ═══ */}
               <BuyBelow onChipClick={handleChipClick} />
               </>
-              ) : (
+              ) : activeTab === 'raise' ? (
               <>
-              {/* ═══ SUB-PAGE MOBILE HERO ═══ */}
-              <div className="md:hidden">
-                <div className="mx-4 mt-4" style={{ background: '#FAFAFA', borderRadius: 28, border: '1px solid rgba(0,0,0,0.06)', padding: '40px 24px' }}>
-                  {page.overline && (
-                    <div
-                      className="inline-flex items-center gap-1.5 bg-white mb-5"
-                      style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(0,0,0,0.55)', borderRadius: 100, padding: '6px 14px', border: '1px solid rgba(0,0,0,0.08)' }}
-                    >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C96B4F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>
-                      {page.overline}
-                    </div>
-                  )}
-                  <h1 style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '36px', fontWeight: 800, letterSpacing: '-0.03em', color: '#0D0D0D', lineHeight: 1.12, marginBottom: 20 }}>
-                    {renderHeadline(page.headline, page.terraWord)}
-                  </h1>
-                  <p style={{ fontSize: '16px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.6, marginBottom: 28 }}>
-                    {page.tagline}
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-5">
-                    {page.chips.map((chip, i) => (
-                      <button
-                        key={chip}
-                        onClick={() => handleChipClick(chip)}
-                        className="bg-white cursor-pointer transition-all chip-hover chip-cascade"
-                        style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.55)', border: '1px solid rgba(0,0,0,0.08)', padding: '8px 16px', animationDelay: `${0.3 + i * 0.07}s` }}
-                        type="button"
-                      >
-                        {chip}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* ═══ SUB-PAGE DESKTOP HERO ═══ */}
-              <div className="hidden md:block">
-                <div className="mx-6 mt-6" style={{ background: '#FAFAFA', borderRadius: 28, border: '1px solid rgba(0,0,0,0.06)', padding: '56px 52px' }}>
-                  <div className="max-w-4xl mx-auto">
-                    {page.overline && (
-                      <div
-                        className="inline-flex items-center gap-2 bg-white mb-6"
-                        style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(0,0,0,0.55)', borderRadius: 100, padding: '7px 16px', border: '1px solid rgba(0,0,0,0.08)' }}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C96B4F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>
-                        {page.overline}
-                      </div>
-                    )}
-                    <h1 style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '52px', fontWeight: 800, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.1, marginBottom: 24 }}>
-                      {renderHeadline(page.headline, page.terraWord)}
-                    </h1>
-                    <p style={{ fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, marginBottom: 36 }}>
-                      {page.tagline}
-                    </p>
-                    <div className="flex flex-wrap gap-2.5 mb-6">
-                      {page.chips.map((chip, i) => (
-                        <button
-                          key={chip}
-                          onClick={() => handleChipClick(chip)}
-                          className="bg-white cursor-pointer transition-all hover:text-[#C96B4F] chip-hover chip-cascade"
-                          style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.55)', border: '1px solid rgba(0,0,0,0.08)', padding: '9px 20px', animationDelay: `${0.3 + i * 0.07}s` }}
-                          type="button"
-                        >
-                          {chip}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* ═══ BELOW-FOLD + FOOTER ═══ */}
-              {activeTab === 'raise' && <RaiseBelow onChipClick={handleChipClick} />}
-              {activeTab === 'integrate' && <IntegrateBelow onChipClick={handleChipClick} />}
-              {activeTab === 'how-it-works' && <HowItWorksBelow onChipClick={handleChipClick} />}
-              {activeTab === 'advisors' && <AdvisorsBelow onChipClick={handleChipClick} />}
-              {activeTab === 'pricing' && <PricingBelow onChipClick={handleChipClick} />}
-
-              {/* Footer */}
-              <footer className="px-6 py-12 text-center" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-                <div style={{ fontSize: '18px', fontWeight: 700, color: '#0D0D0D', letterSpacing: '-0.03em', marginBottom: 8 }}>
-                  smb<span style={{ color: '#C96B4F' }}>X</span><span style={{ color: '#0D0D0D' }}>.ai</span>
-                </div>
-                <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.45)', marginBottom: 16 }}>Deal intelligence for every dealmaker.</p>
-                <div className="flex justify-center gap-6" style={{ fontSize: '13px', color: 'rgba(0,0,0,0.35)' }}>
-                  <a href="/legal/privacy" className="hover:underline" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy</a>
-                  <a href="/legal/terms" className="hover:underline" style={{ color: 'inherit', textDecoration: 'none' }}>Terms</a>
-                </div>
-              </footer>
+              {/* ═══ RAISE PAGE — Full custom layout ═══ */}
+              <RaiseBelow onChipClick={handleChipClick} />
               </>
-              )}
+              ) : activeTab === 'how-it-works' ? (
+              <>
+              {/* ═══ HOW IT WORKS PAGE — Full custom layout ═══ */}
+              <HowItWorksBelow onChipClick={handleChipClick} />
+              </>
+              ) : activeTab === 'integrate' ? (
+              <>
+              {/* ═══ INTEGRATE PAGE — Full custom layout ═══ */}
+              <IntegrateBelow onChipClick={handleChipClick} />
+              </>
+              ) : activeTab === 'advisors' ? (
+              <>
+              {/* ═══ ADVISORS PAGE — Full custom layout ═══ */}
+              <AdvisorsBelow onChipClick={handleChipClick} />
+              </>
+              ) : activeTab === 'pricing' ? (
+              <>
+              {/* ═══ PRICING PAGE — Full custom layout ═══ */}
+              <PricingBelow onChipClick={handleChipClick} />
+              </>
+              ) : null}
             </div>
           )}
 

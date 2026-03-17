@@ -1,120 +1,941 @@
-import {
-  RevealSection,
-  AnimatedTimeline,
-  ScrollReveal,
-  MagneticButton,
-  StaggerContainer,
-  StaggerItem,
-  PulseBadge,
-  ExpandableCard,
-} from './animations';
+import { RevealSection, ScrollReveal } from './animations';
 
-interface RaiseBelowProps {
-  onChipClick: (text: string) => void;
-}
-
-const sectionStyle = { maxWidth: 580, margin: '0 auto' } as const;
-const labelStyle = { fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#C96B4F' };
-const h2Style = { fontSize: '36px', fontWeight: 600, letterSpacing: '-0.035em', color: '#0D0D0D', lineHeight: 1.15, marginTop: 12 };
-const bodyStyle = { fontSize: '17px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', lineHeight: 1.65, margin: 0 };
-const cardStyle = { background: '#FFFFFF', borderRadius: 16, border: '1px solid rgba(0,0,0,0.06)', padding: '28px 32px' };
-
-export default function RaiseBelow({ onChipClick }: RaiseBelowProps) {
+export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
-    <div className="px-6">
-      {/* ═══ 1. THE CAPITAL DILEMMA ═══ */}
-      <section style={{ paddingTop: 120 }}>
-        <div style={sectionStyle}>
+    <div>
+      {/* ═══ 1. HERO — "The Cost of Capital" ═══ */}
+      <section
+        style={{
+          minHeight: '100vh',
+          backgroundColor: '#FFFFFF',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          paddingLeft: 48,
+          paddingRight: 48,
+        }}
+      >
+        <div style={{ maxWidth: 896, margin: '0 auto', width: '100%', paddingTop: 96, paddingBottom: 96 }}>
           <RevealSection>
-            <span style={labelStyle}>THE CAPITAL DILEMMA</span>
-            <h2 style={h2Style} className="md:text-[48px]">
-              The wrong capital costs more than the wrong price.
+            <span
+              style={{
+                fontSize: 14,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                color: '#9CA3AF',
+                marginBottom: 24,
+                display: 'block',
+                fontFamily: "'Inter', system-ui, sans-serif",
+              }}
+            >
+              The Cost of Capital
+            </span>
+          </RevealSection>
+
+          <RevealSection>
+            <h2
+              style={{
+                fontSize: 'clamp(48px, 6vw, 72px)',
+                fontWeight: 700,
+                letterSpacing: '-0.025em',
+                lineHeight: 1,
+                marginBottom: 48,
+                color: '#000000',
+                fontFamily: "'Inter', system-ui, sans-serif",
+              }}
+            >
+              A 5% difference in dilution today is a{' '}
+              <span style={{ color: '#9CA3AF', fontStyle: 'italic' }}>$2.5 million</span>{' '}
+              difference at exit.
             </h2>
           </RevealSection>
 
-          <RevealSection style={{ marginTop: 32 }}>
-            <div className="space-y-6" style={bodyStyle}>
-              <p>Your business is working. You can see the next phase clearly &mdash; a second location, a new market, a strategic acquisition.</p>
-              <p>But the capital landscape is more confusing than it should be. A $2M raise at $10M pre-money gives up 17%. The same raise at $15M pre-money gives up 12%. Over a five-year trajectory ending in a $50M exit, that 5% difference is <strong style={{ color: '#0D0D0D' }}>$2.5M in your pocket</strong>.</p>
-              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>Yulia models every structure so you negotiate from knowledge, not hope.</p>
-            </div>
+          <RevealSection>
+            <p
+              style={{
+                fontSize: 'clamp(20px, 2.5vw, 24px)',
+                color: '#4B5563',
+                lineHeight: 1.75,
+                maxWidth: 672,
+                fontFamily: "'Inter', system-ui, sans-serif",
+                margin: 0,
+              }}
+            >
+              Raising capital is the most expensive decision you'll ever make. We ensure you do it with surgical precision.
+            </p>
           </RevealSection>
+        </div>
+      </section>
 
-          <div className="space-y-3" style={{ marginTop: 40 }}>
-            {[
-              { title: 'Revenue-Based Financing', preview: 'No dilution. Payments flex with revenue.', detail: '1.3\u00D7\u20132.0\u00D7 repayment cap over 12\u201336 months. Right for businesses with strong recurring revenue and predictable cash flow. No equity given up.' },
-              { title: 'SBA Expansion Loan', preview: 'Government-backed rates. Keep 100% ownership.', detail: 'Up to $5M at 9.75\u201312.25%. 10\u201325 year terms. Collateral and personal guarantee required. The least expensive capital for qualifying businesses.' },
-              { title: 'Equity Round', preview: 'Trade ownership for capital plus expertise.', detail: 'Angel, VC, or strategic investor. Yulia models dilution across multiple future rounds so you understand the cumulative impact before you sign.' },
-              { title: 'Strategic Partnership', preview: 'Capital plus distribution and capabilities.', detail: 'Less dilutive than pure financial investors but comes with alignment constraints. Yulia evaluates the strategic fit and models the governance implications.' },
-              { title: 'Mezzanine Debt', preview: '$2M+ EBITDA businesses. Non-dilutive but expensive.', detail: '12\u201320% all-in rates, 5\u20137 year terms. Minimums usually $3M. Expensive but keeps your equity intact. Yulia models the cash flow impact.' },
-            ].map(item => (
-              <RevealSection key={item.title}>
-                <ExpandableCard title={item.title} preview={item.preview}>
-                  <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.detail}</p>
-                </ExpandableCard>
-              </RevealSection>
-            ))}
+      {/* ═══ 2. NARRATIVE — "The Founders' Trap" ═══ */}
+      <section style={{ paddingTop: 160, paddingBottom: 160, paddingLeft: 48, paddingRight: 48 }}>
+        <div
+          style={{ maxWidth: 1024, margin: '0 auto', width: '100%' }}
+          className="grid grid-cols-1 md:grid-cols-2"
+        >
+          <div style={{ paddingRight: 48 }}>
+            <RevealSection>
+              <h3
+                style={{
+                  fontSize: 30,
+                  fontWeight: 700,
+                  marginBottom: 32,
+                  color: '#000000',
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                }}
+              >
+                The Founders' Trap
+              </h3>
+            </RevealSection>
+
+            <RevealSection>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                <p
+                  style={{
+                    fontSize: 18,
+                    color: '#374151',
+                    lineHeight: 1.75,
+                    margin: 0,
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Most founders treat fundraising as a desperate search for cash. They accept complex term sheets, opaque liquidation preferences, and unnecessary dilution simply to keep the lights on.
+                </p>
+                <p
+                  style={{
+                    fontSize: 18,
+                    color: '#374151',
+                    lineHeight: 1.75,
+                    margin: 0,
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Complexity is the enemy of equity. Between participation rights and anti-dilution clauses, the "headline price" of your round often masks the true cost of your freedom.
+                </p>
+              </div>
+            </RevealSection>
+          </div>
+
+          <div style={{ position: 'relative' }}>
+            <ScrollReveal>
+              <img
+                alt="Professional Finance"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCggWTqfOxdFGLqptsSyXLcC8si137QouXBB4uWjBR1Ye3DFLGuqwWQXhDKBrCg4IkwpMZd0_I6tpzmZ4Ia_0Y02pr4_dT0W3cE8dZVQ1GCzUPwCKhhX3Wwiyf3UsrHmki88KL6BA7rkx8-JuE6PqDCuoFfq9x1pgOe3_FX8FviU7Ojun-YBnaQ9KMCXfirYYunGC5Gi4ahqLHfS3ORmwkxRV8u39_Ml7H3EegX7UdBzbGUElPC148pr2mVNuQGIFh95Vs-vZrfWNTB"
+                style={{
+                  borderRadius: 8,
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                  filter: 'grayscale(100%)',
+                  width: '100%',
+                  display: 'block',
+                }}
+              />
+            </ScrollReveal>
+
+            {/* Floating "Reality Check" card */}
+            <div
+              className="hidden lg:block"
+              style={{
+                position: 'absolute',
+                bottom: -40,
+                left: -40,
+                backgroundColor: '#FFFFFF',
+                padding: 32,
+                border: '1px solid rgba(0,0,0,0.06)',
+                maxWidth: 320,
+              }}
+            >
+              <p
+                style={{
+                  fontSize: 14,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '-0.025em',
+                  color: '#000000',
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                  margin: 0,
+                  marginBottom: 8,
+                }}
+              >
+                Reality Check
+              </p>
+              <p
+                style={{
+                  fontSize: 11,
+                  color: '#6B7280',
+                  fontStyle: 'italic',
+                  lineHeight: 1.4,
+                  margin: 0,
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                }}
+              >
+                "90% of first-time founders miscalculate their fully diluted cap table during their first institutional round."
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ═══ 2. THE MATERIALS THAT WIN ═══ */}
-      <section style={{ paddingTop: 140 }}>
-        <div style={sectionStyle}>
+      {/* ═══ 3. FINANCING OPTIONS — "Engineered Capital Paths" ═══ */}
+      <section
+        style={{
+          paddingTop: 160,
+          paddingBottom: 160,
+          paddingLeft: 48,
+          paddingRight: 48,
+          backgroundColor: '#FFFFFF',
+        }}
+      >
+        <div style={{ maxWidth: 1152, margin: '0 auto', width: '100%' }}>
           <RevealSection>
-            <span style={labelStyle}>THE MATERIALS THAT WIN</span>
-            <h2 style={h2Style} className="md:text-[48px]">
-              Investors see hundreds of pitches. Yours will be ready.
-            </h2>
-            <p style={{ ...bodyStyle, marginTop: 20 }}>
-              The businesses that raise capital quickly have one thing in common: their materials make the investor&apos;s decision easy. Yulia builds the complete package from your actual data. Included in your plan.
-            </p>
+            <div style={{ marginBottom: 80, textAlign: 'center' }}>
+              <h3
+                style={{
+                  fontSize: 36,
+                  fontWeight: 700,
+                  marginBottom: 16,
+                  color: '#000000',
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                }}
+              >
+                Engineered Capital Paths
+              </h3>
+              <p
+                style={{
+                  color: '#6B7280',
+                  maxWidth: 576,
+                  margin: '0 auto',
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontSize: 16,
+                }}
+              >
+                Don't default to equity. Choose the instrument that fits your current growth velocity.
+              </p>
+            </div>
           </RevealSection>
 
-          <StaggerContainer style={{ marginTop: 40 }}>
-            <div className="space-y-4">
-              {[
-                { title: 'Pitch Deck', badge: '12 slides', body: 'Problem, solution, market, traction, team, financials, ask \u2014 each slide built from your numbers and market data. Market sizing uses bottom-up methodology with Census data.' },
-                { title: 'Financial Model', badge: '3 statements', body: 'Income statement, balance sheet, cash flow. Every assumption documented and adjustable. Revenue projections tied to specific growth drivers.' },
-                { title: 'Cap Table Model', body: 'Pre- and post-money ownership. Dilution modeling across 2\u20133 future rounds. Liquidation waterfall \u2014 who gets paid what in a $10M vs $50M vs $200M exit.' },
-              ].map(item => (
-                <StaggerItem key={item.title}>
-                  <div style={cardStyle}>
-                    <div className="flex items-center gap-2" style={{ marginBottom: 8 }}>
-                      <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#0D0D0D', margin: 0 }}>{item.title}</h3>
-                      {item.badge && <PulseBadge>{item.badge}</PulseBadge>}
-                    </div>
-                    <p style={{ ...bodyStyle, fontSize: '15px' }}>{item.body}</p>
-                  </div>
-                </StaggerItem>
-              ))}
-            </div>
-          </StaggerContainer>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" style={{ gap: 24 }}>
+            {/* Card 1: Revenue-Based */}
+            <ScrollReveal>
+              <div
+                style={{
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  backgroundColor: '#FFFFFF',
+                  padding: 32,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)',
+                }}
+              >
+                <h4
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 700,
+                    marginBottom: 16,
+                    color: '#000000',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Revenue-Based
+                </h4>
+                <p
+                  style={{
+                    color: '#4B5563',
+                    marginBottom: 32,
+                    fontSize: 14,
+                    lineHeight: 1.75,
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Fast non-dilutive capital for high-margin SaaS or recurring revenue models. Repay as you grow.
+                </p>
+                <div
+                  className="flex"
+                  style={{
+                    marginTop: 'auto',
+                    paddingTop: 24,
+                    borderTop: '1px solid #F3F4F6',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      color: '#000000',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    Low Dilution
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      color: '#2563EB',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    6-12 Month Term
+                  </span>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Card 2: SBA Expansion */}
+            <ScrollReveal>
+              <div
+                style={{
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  backgroundColor: '#FFFFFF',
+                  padding: 32,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)',
+                }}
+              >
+                <h4
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 700,
+                    marginBottom: 16,
+                    color: '#000000',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  SBA Expansion
+                </h4>
+                <p
+                  style={{
+                    color: '#4B5563',
+                    marginBottom: 32,
+                    fontSize: 14,
+                    lineHeight: 1.75,
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Government-backed loans for established businesses moving into new territories or acquisitions.
+                </p>
+                <div
+                  className="flex"
+                  style={{
+                    marginTop: 'auto',
+                    paddingTop: 24,
+                    borderTop: '1px solid #F3F4F6',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      color: '#000000',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    Zero Dilution
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      color: '#16A34A',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    Fixed Rate
+                  </span>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Card 3: Equity — with warning box + border-2 border-black */}
+            <ScrollReveal>
+              <div
+                style={{
+                  border: '2px solid #000000',
+                  backgroundColor: '#F9F9F9',
+                  padding: 32,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)',
+                }}
+              >
+                <h4
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 700,
+                    marginBottom: 16,
+                    color: '#000000',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Equity (Series A/B)
+                </h4>
+                <p
+                  style={{
+                    color: '#4B5563',
+                    marginBottom: 16,
+                    fontSize: 14,
+                    lineHeight: 1.75,
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Institutional venture capital for aggressive scaling. Requires waterfall analysis to understand exit impact.
+                </p>
+                {/* Warning box */}
+                <div
+                  style={{
+                    backgroundColor: 'rgba(0,0,0,0.05)',
+                    padding: 12,
+                    borderRadius: 4,
+                    marginBottom: 16,
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: '#000000',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      marginBottom: 4,
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    Warning
+                  </p>
+                  <p
+                    style={{
+                      fontSize: 11,
+                      color: '#6B7280',
+                      fontStyle: 'italic',
+                      lineHeight: 1.4,
+                      margin: 0,
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    Note: 1x non-participating preferred is standard. Avoid 2x liquidation preferences.
+                  </p>
+                </div>
+                <div
+                  className="flex"
+                  style={{
+                    marginTop: 'auto',
+                    paddingTop: 24,
+                    borderTop: '1px solid #F3F4F6',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      color: '#000000',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    High Dilution
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      color: '#DC2626',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    Exit Focus
+                  </span>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Card 4: Strategic Partnership */}
+            <ScrollReveal>
+              <div
+                style={{
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  backgroundColor: '#FFFFFF',
+                  padding: 32,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)',
+                }}
+              >
+                <h4
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 700,
+                    marginBottom: 16,
+                    color: '#000000',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Strategic Partnership
+                </h4>
+                <p
+                  style={{
+                    color: '#4B5563',
+                    marginBottom: 32,
+                    fontSize: 14,
+                    lineHeight: 1.75,
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Capital combined with distribution. Lower valuation offset by immediate market access.
+                </p>
+                <div
+                  className="flex"
+                  style={{
+                    marginTop: 'auto',
+                    paddingTop: 24,
+                    borderTop: '1px solid #F3F4F6',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      color: '#000000',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    Moderate Dilution
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      color: '#9333EA',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    LTV Boost
+                  </span>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Card 5: Mezzanine Debt */}
+            <ScrollReveal>
+              <div
+                style={{
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  backgroundColor: '#FFFFFF',
+                  padding: 32,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)',
+                }}
+              >
+                <h4
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 700,
+                    marginBottom: 16,
+                    color: '#000000',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Mezzanine Debt
+                </h4>
+                <p
+                  style={{
+                    color: '#4B5563',
+                    marginBottom: 32,
+                    fontSize: 14,
+                    lineHeight: 1.75,
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Hybrid of debt and equity. Often used as a bridge to IPO or major exit event.
+                </p>
+                <div
+                  className="flex"
+                  style={{
+                    marginTop: 'auto',
+                    paddingTop: 24,
+                    borderTop: '1px solid #F3F4F6',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      color: '#000000',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    Warrant Based
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      color: '#EA580C',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    Bridge Tool
+                  </span>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Card 6: Custom Structure — dashed border */}
+            <ScrollReveal>
+              <div
+                style={{
+                  border: '1px dashed #D1D5DB',
+                  backgroundColor: '#F9FAFB',
+                  padding: 32,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)',
+                }}
+              >
+                <h4
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 700,
+                    marginBottom: 16,
+                    color: '#9CA3AF',
+                    fontStyle: 'italic',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Custom Structure
+                </h4>
+                <p
+                  style={{
+                    color: '#9CA3AF',
+                    marginBottom: 32,
+                    fontSize: 14,
+                    lineHeight: 1.75,
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Don't see your path? We engineer custom instruments for unique capital requirements.
+                </p>
+              </div>
+            </ScrollReveal>
+          </div>
         </div>
       </section>
 
-      {/* ═══ 3. THE PAYOFF + CTA ═══ */}
-      <section style={{ paddingTop: 100, paddingBottom: 80 }}>
-        <div style={sectionStyle}>
+      {/* ═══ 4. SIXTY SECONDS — Pitch deck readiness ═══ */}
+      <section style={{ paddingTop: 160, paddingBottom: 160, paddingLeft: 48, paddingRight: 48 }}>
+        <div style={{ maxWidth: 896, margin: '0 auto', width: '100%' }}>
           <RevealSection>
-            <p style={{ fontSize: 36, fontWeight: 300, color: '#0D0D0D', lineHeight: 1.25, margin: 0, textAlign: 'center', padding: '48px 0' }}>Growth funded. Control preserved.</p>
-          </RevealSection>
-
-          <RevealSection>
-            <div className="space-y-6" style={bodyStyle}>
-              <p>You raised capital on your terms. You know what you gave up, what you kept, and why.</p>
-              <p style={{ color: '#0D0D0D', fontWeight: 600 }}>The investors respected the preparation because it made their decision easy.</p>
-            </div>
-          </RevealSection>
-
-          <RevealSection style={{ marginTop: 40 }}>
-            <p style={{ fontSize: '16px', color: 'rgba(0,0,0,0.5)', marginBottom: 16 }}>Tell Yulia about your raise &rarr; free capital strategy in minutes</p>
-            <MagneticButton
-              onClick={() => onChipClick("I need to raise capital for my business")}
-              style={{ background: '#0D0D0D', color: '#fff', fontSize: '14px', fontWeight: 600, padding: '14px 32px', borderRadius: 100, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+            <h2
+              style={{
+                fontSize: 'clamp(36px, 5vw, 48px)',
+                fontWeight: 700,
+                marginBottom: 48,
+                color: '#000000',
+                fontFamily: "'Inter', system-ui, sans-serif",
+                letterSpacing: '-0.025em',
+              }}
             >
-              Message Yulia &rarr;
-            </MagneticButton>
+              Your pitch deck gets sixty seconds.
+            </h2>
+          </RevealSection>
+
+          <RevealSection>
+            <p
+              style={{
+                fontSize: 20,
+                color: '#4B5563',
+                marginBottom: 80,
+                lineHeight: 1.75,
+                fontFamily: "'Inter', system-ui, sans-serif",
+              }}
+            >
+              Investors don't read; they scan. We build the "Institutional Package" that answers every question before it's asked.
+            </p>
+          </RevealSection>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 48 }}>
+            {/* Item 01 */}
+            <ScrollReveal>
+              <div className="flex" style={{ alignItems: 'flex-start', gap: 48 }}>
+                <span
+                  style={{
+                    fontSize: 30,
+                    fontWeight: 700,
+                    color: '#E5E7EB',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    flexShrink: 0,
+                  }}
+                >
+                  01
+                </span>
+                <div
+                  style={{
+                    flex: 1,
+                    paddingBottom: 48,
+                    borderBottom: '1px solid #F3F4F6',
+                  }}
+                >
+                  <h5
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 700,
+                      marginBottom: 8,
+                      color: '#000000',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    The Deck
+                  </h5>
+                  <p
+                    style={{
+                      color: '#4B5563',
+                      margin: 0,
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontSize: 16,
+                    }}
+                  >
+                    12 slides. High-density data. Zero fluff. Visualizing the inevitable growth of your category.
+                  </p>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Item 02 */}
+            <ScrollReveal>
+              <div className="flex" style={{ alignItems: 'flex-start', gap: 48 }}>
+                <span
+                  style={{
+                    fontSize: 30,
+                    fontWeight: 700,
+                    color: '#E5E7EB',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    flexShrink: 0,
+                  }}
+                >
+                  02
+                </span>
+                <div
+                  style={{
+                    flex: 1,
+                    paddingBottom: 48,
+                    borderBottom: '1px solid #F3F4F6',
+                  }}
+                >
+                  <h5
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 700,
+                      marginBottom: 8,
+                      color: '#000000',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    The Model
+                  </h5>
+                  <p
+                    style={{
+                      color: '#4B5563',
+                      margin: 0,
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontSize: 16,
+                    }}
+                  >
+                    3-statement financial model with dynamic sensitivity analysis. Built to survive rigorous due diligence.
+                  </p>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Item 03 */}
+            <ScrollReveal>
+              <div className="flex" style={{ alignItems: 'flex-start', gap: 48 }}>
+                <span
+                  style={{
+                    fontSize: 30,
+                    fontWeight: 700,
+                    color: '#E5E7EB',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    flexShrink: 0,
+                  }}
+                >
+                  03
+                </span>
+                <div
+                  style={{
+                    flex: 1,
+                    paddingBottom: 48,
+                    borderBottom: '1px solid #F3F4F6',
+                  }}
+                >
+                  <h5
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 700,
+                      marginBottom: 8,
+                      color: '#000000',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    Cap Table & Use of Funds
+                  </h5>
+                  <p
+                    style={{
+                      color: '#4B5563',
+                      margin: 0,
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontSize: 16,
+                    }}
+                  >
+                    Clear visualization of where every dollar goes and exactly what it buys in terms of milestones.
+                  </p>
+                </div>
+              </div>
+            </ScrollReveal>
+
+            {/* Item 04 */}
+            <ScrollReveal>
+              <div className="flex" style={{ alignItems: 'flex-start', gap: 48 }}>
+                <span
+                  style={{
+                    fontSize: 30,
+                    fontWeight: 700,
+                    color: '#E5E7EB',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    flexShrink: 0,
+                  }}
+                >
+                  04
+                </span>
+                <div style={{ flex: 1 }}>
+                  <h5
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 700,
+                      marginBottom: 8,
+                      color: '#000000',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    Targeting List
+                  </h5>
+                  <p
+                    style={{
+                      color: '#4B5563',
+                      margin: 0,
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontSize: 16,
+                    }}
+                  >
+                    Curated list of 50+ investors who specialize in your specific stage, industry, and check size.
+                  </p>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 5. CTA — Black background section ═══ */}
+      <section
+        style={{
+          minHeight: '100vh',
+          backgroundColor: '#000000',
+          color: '#FFFFFF',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          paddingLeft: 48,
+          paddingRight: 48,
+        }}
+      >
+        <div style={{ maxWidth: 896, margin: '0 auto', width: '100%', textAlign: 'center', paddingTop: 96, paddingBottom: 96 }}>
+          <RevealSection>
+            <h2
+              style={{
+                fontSize: 'clamp(60px, 8vw, 96px)',
+                fontWeight: 700,
+                letterSpacing: '-0.05em',
+                marginBottom: 32,
+                lineHeight: 1,
+                fontFamily: "'Inter', system-ui, sans-serif",
+              }}
+            >
+              Growth funded.<br />On your terms.
+            </h2>
+          </RevealSection>
+
+          <RevealSection>
+            <p
+              style={{
+                fontSize: 20,
+                color: '#9CA3AF',
+                marginBottom: 48,
+                maxWidth: 672,
+                margin: '0 auto 48px auto',
+                fontFamily: "'Inter', system-ui, sans-serif",
+                lineHeight: 1.6,
+              }}
+            >
+              The window for your next round is narrowing. Start the architecture of your raise today.
+            </p>
+          </RevealSection>
+
+          <RevealSection>
+            <button
+              onClick={() => onChipClick("I need to raise capital for my business — help me evaluate my options")}
+              style={{
+                backgroundColor: '#FFFFFF',
+                color: '#000000',
+                fontSize: 14,
+                fontWeight: 700,
+                padding: '16px 40px',
+                borderRadius: 9999,
+                border: 'none',
+                cursor: 'pointer',
+                fontFamily: "'Inter', system-ui, sans-serif",
+                transition: 'opacity 0.2s',
+              }}
+              onMouseEnter={(e) => { (e.target as HTMLButtonElement).style.opacity = '0.85'; }}
+              onMouseLeave={(e) => { (e.target as HTMLButtonElement).style.opacity = '1'; }}
+            >
+              Initialize Raise
+            </button>
           </RevealSection>
         </div>
       </section>
