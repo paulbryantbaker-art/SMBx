@@ -964,10 +964,18 @@ export default function AppShell() {
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '36px', fontWeight: 800, letterSpacing: '-0.02em', color: '#0D0D0D', textAlign: 'center', margin: 0, lineHeight: 1.15 }}
+                      style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '36px', fontWeight: 900, letterSpacing: '-0.02em', color: '#0D0D0D', textAlign: 'center', margin: 0, lineHeight: 1.15 }}
                     >
-                      How can Yulia help{'\n'}you today?
+                      Good morning.
                     </motion.h1>
+                    <motion.p
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ fontSize: '16px', color: '#545454', fontWeight: 500, textAlign: 'center', margin: '0 0 12px', lineHeight: 1.5 }}
+                    >
+                      How can we help you grow your business today?
+                    </motion.p>
                     {/* Hero chat bar */}
                     <motion.div
                       className="w-full"
@@ -991,9 +999,10 @@ export default function AppShell() {
                     {/* Suggestion chips — 3 with icons */}
                     <div className="flex flex-wrap justify-center gap-2">
                       {[
-                        { label: 'Prepare to sell', icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9 12l2 2 4-4" /></svg>, message: "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." },
-                        { label: 'Raise capital', icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>, message: "I need to raise capital for my business. Walk me through the options." },
-                        { label: 'Value my business', icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>, message: "What's my business worth? I want to understand what it might be worth in today's market." },
+                        { label: 'Prepare to sell', icon: null, message: "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." },
+                        { label: 'Prepare to buy', icon: null, message: "I'm looking to buy a business. Help me evaluate deals and find the right acquisition." },
+                        { label: 'Raise capital', icon: null, message: "I need to raise capital for my business. Walk me through the options." },
+                        { label: 'Market research', icon: null, message: "I want to understand the market landscape for my industry." },
                       ].map((chip, i) => (
                         <motion.button
                           key={chip.label}
@@ -1001,11 +1010,10 @@ export default function AppShell() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.45, delay: 0.35 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                           onClick={() => handleChipClick(chip.message)}
-                          className="bg-transparent cursor-pointer transition-all chip-hover flex items-center gap-1.5"
-                          style={{ borderRadius: 100, fontSize: '13px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.45)', border: '1px solid rgba(0,0,0,0.1)', padding: '8px 16px' }}
+                          className="bg-white cursor-pointer transition-all chip-hover flex items-center gap-1.5"
+                          style={{ borderRadius: 100, fontSize: '14px', fontWeight: 600, fontFamily: 'inherit', color: '#000', border: '1px solid #EEEEEE', padding: '10px 20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
                           type="button"
                         >
-                          <span style={{ color: 'rgba(0,0,0,0.3)' }}>{chip.icon}</span>
                           {chip.label}
                         </motion.button>
                       ))}
@@ -1018,7 +1026,7 @@ export default function AppShell() {
                     transition={{ duration: 0.8, delay: 0.6 }}
                     style={{ textAlign: 'center', padding: '16px 20px', fontSize: '12px', color: 'rgba(0,0,0,0.25)', fontWeight: 400, margin: 0 }}
                   >
-                    Secure, Encrypted, and Compliant M&A Intelligence
+                    AI-Powered Business Intelligence
                   </motion.p>
                 </div>
 
@@ -1043,10 +1051,18 @@ export default function AppShell() {
                       initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '60px', fontWeight: 800, letterSpacing: '-0.02em', color: '#0D0D0D', textAlign: 'center', margin: '0 0 48px', lineHeight: 1.1 }}
+                      style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '60px', fontWeight: 900, letterSpacing: '-0.02em', color: '#0D0D0D', textAlign: 'center', margin: '0 0 20px', lineHeight: 1.1 }}
                     >
-                      How can Yulia help{' '}<br />you today?
+                      Good morning.
                     </motion.h1>
+                    <motion.p
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ fontSize: '20px', color: '#545454', fontWeight: 500, textAlign: 'center', margin: '0 0 40px', lineHeight: 1.5 }}
+                    >
+                      How can we help you grow your business today?
+                    </motion.p>
                     {/* Hero chat bar — search style with icon */}
                     <motion.div
                       initial={{ opacity: 0, y: 16 }}
@@ -1071,9 +1087,9 @@ export default function AppShell() {
                     <div className="flex flex-wrap justify-center gap-3" style={{ marginTop: 32 }}>
                       {[
                         { label: 'Prepare to sell', message: "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." },
-                        { label: 'Find a buyer', message: "I'm looking to buy a business. Help me evaluate deals and find the right acquisition." },
-                        { label: 'Value my business', message: "What's my business worth? I want to understand what it might be worth in today's market." },
-                        { label: 'Review tax add-backs', message: "What add-backs am I missing? Help me identify hidden value in my tax returns." },
+                        { label: 'Prepare to buy', message: "I'm looking to buy a business. Help me evaluate deals and find the right acquisition." },
+                        { label: 'Raise capital', message: "I need to raise capital for my business. Walk me through the options." },
+                        { label: 'Market research', message: "I want to understand the market landscape for my industry." },
                       ].map((chip, i) => (
                         <motion.button
                           key={chip.label}
@@ -1082,7 +1098,7 @@ export default function AppShell() {
                           transition={{ duration: 0.45, delay: 0.4 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                           onClick={() => handleChipClick(chip.message)}
                           className="cursor-pointer transition-all chip-hover flex items-center"
-                          style={{ borderRadius: 100, fontSize: '14px', fontWeight: 500, fontFamily: 'inherit', color: 'rgba(0,0,0,0.6)', border: '1px solid #E5E5E5', padding: '10px 20px', background: '#fff' }}
+                          style={{ borderRadius: 100, fontSize: '15px', fontWeight: 600, fontFamily: 'inherit', color: '#000', border: '1px solid #EEEEEE', padding: '12px 24px', background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
                           type="button"
                         >
                           {chip.label}
@@ -1097,7 +1113,7 @@ export default function AppShell() {
                     transition={{ duration: 0.8, delay: 0.7 }}
                     style={{ position: 'absolute', bottom: 24, fontSize: '13px', color: 'rgba(0,0,0,0.3)', fontWeight: 400 }}
                   >
-                    Secure, Encrypted, and Compliant M&A Intelligence
+                    AI-Powered Business Intelligence
                   </motion.p>
                 </div>
               </>
@@ -1105,6 +1121,11 @@ export default function AppShell() {
               <>
               {/* ═══ SELL PAGE — Full custom layout ═══ */}
               <SellBelow onChipClick={handleChipClick} />
+              </>
+              ) : activeTab === 'buy' ? (
+              <>
+              {/* ═══ BUY PAGE — Full custom layout ═══ */}
+              <BuyBelow onChipClick={handleChipClick} />
               </>
               ) : (
               <>
@@ -1179,7 +1200,6 @@ export default function AppShell() {
               </div>
 
               {/* ═══ BELOW-FOLD + FOOTER ═══ */}
-              {activeTab === 'buy' && <BuyBelow onChipClick={handleChipClick} />}
               {activeTab === 'raise' && <RaiseBelow onChipClick={handleChipClick} />}
               {activeTab === 'integrate' && <IntegrateBelow onChipClick={handleChipClick} />}
               {activeTab === 'how-it-works' && <HowItWorksBelow onChipClick={handleChipClick} />}
