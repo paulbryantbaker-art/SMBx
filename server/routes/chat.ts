@@ -263,7 +263,7 @@ chatRouter.post('/message', async (req, res) => {
         system: systemPrompt,
         messages: apiMessages,
         stream: true,
-      });
+      }, { signal: abortController.signal });
 
       for await (const event of stream) {
         if (clientDisconnected) break;
@@ -858,18 +858,45 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no'); // Disable proxy buffering (Railway/nginx)
     res.setHeader('X-User-Message-Id', String(userMsg.id));
+    res.flushHeaders(); // Send headers immediately
+
+    // Detect client disconnect
+    let clientDisconnected = false;
+    res.on('close', () => { clientDisconnected = true; });
+
+    // SSE heartbeat — keep connection alive through proxies (every 15s)
+    const heartbeat = setInterval(() => {
+      if (!clientDisconnected && !res.writableEnded) {
+        res.write(': heartbeat\n\n');
+      }
+    }, 15000);
 
     // Send user message confirmation
     res.write(`data: ${JSON.stringify({ type: 'user_message', message: userMsg })}\n\n`);
 
-    // Run agentic loop and stream response
-    const assistantText = await streamAgenticResponse(
-      { userId, conversationId: convId, systemPrompt, messages },
-      res,
-    );
+    let assistantText: string | undefined;
+    try {
+      // Run agentic loop and stream response
+      assistantText = await streamAgenticResponse(
+        { userId, conversationId: convId, systemPrompt, messages },
+        res,
+      );
+    } catch (agentErr: any) {
+      if (clientDisconnected) {
+        console.log(`[chat] Client disconnected during auth stream (conv ${convId})`);
+      } else {
+        console.error('Agentic streaming error:', agentErr.message);
+        if (!res.writableEnded) {
+          res.write(`data: ${JSON.stringify({ type: 'text_delta', text: 'I ran into a temporary issue. Please try again.' })}\n\n`);
+        }
+      }
+    } finally {
+      clearInterval(heartbeat);
+    }
 
-    // Save assistant message to DB
+    // Save assistant message to DB (even if client disconnected)
     if (assistantText) {
       const [assistantMsg] = await sql`
         INSERT INTO messages (conversation_id, role, content)
@@ -890,7 +917,9 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
       }
 
       // Send completion event
-      res.write(`data: ${JSON.stringify({ type: 'done', message: assistantMsg, dealId: deal?.id || null, conversationId: convId })}\n\n`);
+      if (!clientDisconnected && !res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ type: 'done', message: assistantMsg, dealId: deal?.id || null, conversationId: convId })}\n\n`);
+      }
 
       // Extract fields from conversation and update deal, then check gate advancement
       if (deal) {
@@ -936,7 +965,9 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
         try {
           const gateResult = await checkAndAutoAdvance(deal.id);
           if (gateResult) {
-            res.write(`data: ${JSON.stringify({ type: 'gate_advance', ...gateResult })}\n\n`);
+            if (!clientDisconnected && !res.writableEnded) {
+              res.write(`data: ${JSON.stringify({ type: 'gate_advance', ...gateResult })}\n\n`);
+            }
             createNotification({ userId, dealId: deal.id, type: 'gate_advance', title: `Gate complete: ${gateResult.gateName || gateResult.toGate}`, body: `Your deal has advanced to ${gateResult.toGate}`, actionUrl: '/chat' }).catch(() => {});
           } else {
             // Check if we're at a paywall — gate is ready but next gate requires payment
@@ -959,19 +990,21 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
                   },
                 });
                 const balance = await getBalance(userId);
-                res.write(`data: ${JSON.stringify({
-                  type: 'paywall',
-                  gate: readiness.nextGate,
-                  currentGate: freshDeal.current_gate,
-                  priceCents: paywall.priceCents,
-                  priceDisplay: paywall.priceDisplay,
-                  valueProps: paywall.valueProps,
-                  comparisonText: paywall.comparisonText,
-                  callToAction: paywall.callToAction,
-                  balanceCents: balance,
-                  balanceDisplay: `$${(balance / 100).toFixed(2)}`,
-                  sufficient: balance >= paywall.priceCents,
-                })}\n\n`);
+                if (!clientDisconnected && !res.writableEnded) {
+                  res.write(`data: ${JSON.stringify({
+                    type: 'paywall',
+                    gate: readiness.nextGate,
+                    currentGate: freshDeal.current_gate,
+                    priceCents: paywall.priceCents,
+                    priceDisplay: paywall.priceDisplay,
+                    valueProps: paywall.valueProps,
+                    comparisonText: paywall.comparisonText,
+                    callToAction: paywall.callToAction,
+                    balanceCents: balance,
+                    balanceDisplay: `$${(balance / 100).toFixed(2)}`,
+                    sufficient: balance >= paywall.priceCents,
+                  })}\n\n`);
+                }
               }
             }
           }
@@ -981,16 +1014,21 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
       }
     }
 
-    res.write('data: [DONE]\n\n');
-    res.end();
+    if (!clientDisconnected && !res.writableEnded) {
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
   } catch (err: any) {
+    if (clientDisconnected || res.writableEnded || res.destroyed) return;
     console.error('Chat error:', err.message, err.stack);
 
     // If headers already sent (SSE started), send error event
     if (res.headersSent) {
-      res.write(`data: ${JSON.stringify({ type: 'error', error: 'Something went wrong. Please try again.' })}\n\n`);
-      res.write('data: [DONE]\n\n');
-      res.end();
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ type: 'error', error: 'Something went wrong. Please try again.' })}\n\n`);
+        res.write('data: [DONE]\n\n');
+        res.end();
+      }
     } else {
       res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
