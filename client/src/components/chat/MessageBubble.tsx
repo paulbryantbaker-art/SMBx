@@ -22,22 +22,20 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
 
   if (isUser) {
     return (
-      <div className="flex justify-end">
-        <div className="max-w-[80%]">
-          <div
-            className="px-[18px] py-3.5 text-base leading-[1.5] break-words"
-            style={{
-              background: '#FFF5F2',
-              border: '1px solid rgba(212,113,78,0.15)',
-              color: '#0D0D0D',
-              borderRadius: '20px 20px 4px 20px',
-              fontFamily: "'Inter', system-ui, sans-serif",
-              overflowWrap: 'break-word',
-            }}
-          >
-            <p className="m-0 whitespace-pre-wrap">{message.content}</p>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ maxWidth: '85%' }}>
+          <div style={{
+            padding: '10px 16px',
+            background: '#F3F3F3',
+            color: '#000',
+            borderRadius: '18px 18px 4px 18px',
+            fontSize: 15, lineHeight: 1.55, fontWeight: 500,
+            fontFamily: "'Inter', system-ui, sans-serif",
+            overflowWrap: 'break-word' as const,
+          }}>
+            <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{message.content}</p>
           </div>
-          <p className="text-[13px] text-[#A9A49C] mt-1 mb-0 text-right font-sans">
+          <p style={{ fontSize: 10, color: '#999', margin: '4px 0 0', textAlign: 'right' }}>
             {formatTime(message.created_at)}
           </p>
         </div>
@@ -46,27 +44,30 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
   }
 
   return (
-    <div className="flex justify-start">
-      <div className="max-w-[80%] min-w-0">
-        {showAvatar && (
-          <div
-            className="w-8 h-8 rounded-full bg-[#C96B4F] text-white text-xs font-bold flex items-center justify-center mb-2 shrink-0 font-sans"
-            style={{ boxShadow: '0 2px 6px rgba(212,113,78,.2)' }}
-          >
-            Y
-          </div>
-        )}
+    <div style={{ display: 'flex', justifyContent: 'flex-start', gap: 10 }}>
+      {showAvatar && (
+        <div style={{
+          flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+          background: '#000', color: '#fff',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 12, fontWeight: 700, marginTop: 2,
+        }}>
+          Y
+        </div>
+      )}
+      <div style={{ flex: 1, minWidth: 0 }}>
         <div
-          className="bg-white px-4 py-3 text-base leading-[1.65] font-medium home-yt overflow-hidden"
+          className="home-yt [&_p]:m-0 [&_p]:mb-2 [&_p:last-child]:mb-0"
           style={{
-            borderRadius: '20px 20px 20px 4px',
-            border: '1px solid rgba(0,0,0,0.08)',
-            overflowWrap: 'break-word',
+            fontSize: 15, lineHeight: 1.6, fontWeight: 450,
+            color: '#1A1A1A',
+            fontFamily: "'Inter', system-ui, sans-serif",
+            overflowWrap: 'break-word' as const,
           }}
         >
           <Markdown>{message.content}</Markdown>
         </div>
-        <p className="text-[13px] text-[#A9A49C] mt-1 mb-0 text-left font-sans">
+        <p style={{ fontSize: 10, color: '#999', margin: '4px 0 0' }}>
           {formatTime(message.created_at)}
         </p>
       </div>

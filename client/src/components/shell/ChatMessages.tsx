@@ -30,49 +30,61 @@ const DELIVERABLE_ICONS: Record<string, string> = {
 
 export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable }: ChatMessagesProps) {
   return (
-    <div className="max-w-3xl mx-auto w-full px-4 pt-4 pb-32">
-      {/* Messages */}
-      <div className="space-y-6">
+    <div style={{ width: '100%', padding: '16px 16px 128px 16px', fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {messages.map((m, i) => {
-          // Check if this is a deliverable message
           const isDeliverable = m.metadata?.type === 'deliverable';
           const deliverableType = m.metadata?.deliverableType as string | undefined;
 
           if (isDeliverable && deliverableType) {
             return (
-              <div key={m.id || i} className="flex justify-start gap-3">
-                {/* Yulia avatar */}
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#C96B4F] text-white flex items-center justify-center text-[13px] mt-0.5">
-                  ✦
+              <div key={m.id || i} style={{ display: 'flex', justifyContent: 'flex-start', gap: '10px' }}>
+                <div style={{
+                  flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+                  background: '#000', color: '#fff',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 12, marginTop: 2,
+                }}>
+                  Y
                 </div>
-
-                {/* Deliverable card */}
-                <div className="max-w-[80%]">
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <button
                     onClick={() => onOpenDeliverable?.(m)}
-                    className="w-full text-left bg-white border-2 border-[#C96B4F]/20 rounded-2xl cursor-pointer hover:border-[#C96B4F]/40 hover:shadow-md transition-all group"
-                    style={{ padding: '16px 20px' }}
                     type="button"
+                    style={{
+                      width: '100%', textAlign: 'left', background: '#fff',
+                      border: '1.5px solid #E0E0E0', borderRadius: 12,
+                      padding: '14px 16px', cursor: 'pointer',
+                      transition: 'border-color 0.2s',
+                    }}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#FFF0EB] flex items-center justify-center text-lg shrink-0">
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 8, background: '#F5F5F5',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 16, flexShrink: 0,
+                      }}>
                         {DELIVERABLE_ICONS[deliverableType] || '\u{1F4C4}'}
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[14px] font-bold text-[#0D0D0D] m-0 mb-1">
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <p style={{ fontSize: 14, fontWeight: 700, color: '#000', margin: '0 0 4px 0' }}>
                           {DELIVERABLE_LABELS[deliverableType] || 'Document Ready'}
                         </p>
-                        <p className="text-[13px] text-[#6E6A63] m-0 mb-3 line-clamp-2">
+                        <p style={{ fontSize: 13, color: '#666', margin: '0 0 10px 0', lineHeight: 1.4 }}>
                           {getDeliverableDescription(deliverableType)}
                         </p>
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#C96B4F] text-white text-xs font-semibold group-hover:bg-[#BE6342] transition-colors">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                            padding: '5px 12px', borderRadius: 999, background: '#000',
+                            color: '#fff', fontSize: 12, fontWeight: 600,
+                          }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" />
                             </svg>
                             View Report
                           </span>
-                          <span className="text-[11px] font-semibold text-[#4ADE80] uppercase tracking-wide">Free</span>
+                          <span style={{ fontSize: 11, fontWeight: 600, color: '#22C55E', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Free</span>
                         </div>
                       </div>
                     </div>
@@ -82,88 +94,132 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
             );
           }
 
-          return (
-            <div key={m.id || i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start gap-3'}`}>
-              {/* Yulia avatar */}
-              {m.role === 'assistant' && (
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#C96B4F] text-white flex items-center justify-center text-[13px] mt-0.5">
-                  ✦
-                </div>
-              )}
-
-              {/* Bubble */}
-              <div
-                className={`max-w-[80%] ${
-                  m.role === 'user'
-                    ? 'bg-[#FFF0EB] rounded-2xl text-[#0D0D0D]'
-                    : 'bg-white border border-[#EBEBEB] rounded-2xl text-[#0D0D0D]'
-                }`}
-                style={{ padding: '16px 20px', ...(m.role === 'user' ? { border: '1px solid rgba(212,113,78,0.12)' } : {}) }}
-              >
-                {m.role === 'user' ? (
-                  <p className="text-[15px] md:text-[16px] font-medium leading-[1.65] m-0 whitespace-pre-wrap">{m.content}</p>
-                ) : (
-                  <div className="text-[15px] md:text-[16px] font-medium leading-[1.65] prose prose-base max-w-none [&_p]:m-0 [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:mt-2 [&_ol]:mt-2 [&_li]:mb-1 [&_strong]:font-bold">
-                    <Markdown>{m.content}</Markdown>
+          if (m.role === 'user') {
+            return (
+              <div key={m.id || i} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <div style={{ maxWidth: '85%' }}>
+                  <div style={{
+                    padding: '10px 16px',
+                    background: '#F3F3F3',
+                    color: '#000',
+                    borderRadius: '18px 18px 4px 18px',
+                    fontSize: 15, lineHeight: 1.55, fontWeight: 500,
+                  }}>
+                    <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{m.content}</p>
                   </div>
+                  {m.created_at && (
+                    <p style={{ fontSize: 10, color: '#999', margin: '4px 0 0', textAlign: 'right' }}>
+                      {formatTimestamp(m.created_at)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div key={m.id || i} style={{ display: 'flex', justifyContent: 'flex-start', gap: 10 }}>
+              <div style={{
+                flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+                background: '#000', color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 12, fontWeight: 700, marginTop: 2,
+              }}>
+                Y
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  className="[&_p]:m-0 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:mt-1 [&_ul]:mb-1 [&_ul]:pl-5 [&_ol]:mt-1 [&_ol]:mb-1 [&_ol]:pl-5 [&_li]:mb-0.5 [&_strong]:font-bold [&_code]:bg-[rgba(0,0,0,0.05)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-[13px]"
+                  style={{
+                    fontSize: 15, lineHeight: 1.6, fontWeight: 450,
+                    color: '#1A1A1A',
+                  }}
+                >
+                  <Markdown>{m.content}</Markdown>
+                </div>
+                {m.created_at && (
+                  <p style={{ fontSize: 10, color: '#999', margin: '4px 0 0' }}>
+                    {formatTimestamp(m.created_at)}
+                  </p>
                 )}
               </div>
-              {m.created_at && (
-                <p className={`text-[10px] text-[#A9A49C] mt-1 m-0 ${m.role === 'user' ? 'text-right' : 'ml-[44px]'}`}>
-                  {formatTimestamp(m.created_at)}
-                </p>
-              )}
             </div>
           );
         })}
 
         {/* Streaming message */}
         {streamingText && (
-          <div className="flex justify-start gap-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#C96B4F] text-white flex items-center justify-center text-[13px] mt-0.5">
-              ✦
+          <div style={{ display: 'flex', justifyContent: 'flex-start', gap: 10 }}>
+            <div style={{
+              flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+              background: '#000', color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 12, fontWeight: 700, marginTop: 2,
+            }}>
+              Y
             </div>
-            <div className="max-w-[80%] bg-white border border-[#EBEBEB] rounded-2xl" style={{ padding: '16px 20px' }}>
-              <div className="text-[15px] md:text-[16px] font-medium leading-[1.65] prose prose-base max-w-none [&_p]:m-0 [&_p]:mb-3 [&_p:last-child]:mb-0">
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                className="[&_p]:m-0 [&_p]:mb-2 [&_p:last-child]:mb-0"
+                style={{ fontSize: 15, lineHeight: 1.6, fontWeight: 450, color: '#1A1A1A' }}
+              >
                 <Markdown>{streamingText}</Markdown>
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#C96B4F] animate-pulse ml-1 align-middle" />
+                <span style={{
+                  display: 'inline-block', width: 6, height: 6, borderRadius: '50%',
+                  background: '#000', marginLeft: 4, verticalAlign: 'middle',
+                  animation: 'dotPulse 1.4s ease infinite',
+                }} />
               </div>
             </div>
           </div>
         )}
 
-        {/* Typing / tool activity indicator */}
+        {/* Typing indicator */}
         {sending && !streamingText && (
-          <div className="flex justify-start gap-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#C96B4F] text-white flex items-center justify-center text-[13px] mt-0.5">
-              ✦
+          <div style={{ display: 'flex', justifyContent: 'flex-start', gap: 10 }}>
+            <div style={{
+              flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+              background: '#000', color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 12, fontWeight: 700, marginTop: 2,
+            }}>
+              Y
             </div>
-            <div className="bg-white border border-[#EBEBEB] rounded-2xl flex items-center gap-3" style={{ padding: '16px 20px' }}>
-              <div className="flex gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#C96B4F]" style={{ animation: 'dotPulse 1.4s ease infinite' }} />
-                <span className="w-2 h-2 rounded-full bg-[#C96B4F]" style={{ animation: 'dotPulse 1.4s ease infinite 0.15s' }} />
-                <span className="w-2 h-2 rounded-full bg-[#C96B4F]" style={{ animation: 'dotPulse 1.4s ease infinite 0.3s' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0' }}>
+              <div style={{ display: 'flex', gap: 5 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#000', animation: 'dotPulse 1.4s ease infinite' }} />
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#000', animation: 'dotPulse 1.4s ease infinite 0.15s' }} />
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#000', animation: 'dotPulse 1.4s ease infinite 0.3s' }} />
               </div>
               {activeTool && (
-                <span className="text-[13px] text-[#9B9891] font-medium">{activeTool}...</span>
+                <span style={{ fontSize: 13, color: '#999', fontWeight: 500 }}>{activeTool}...</span>
               )}
             </div>
           </div>
         )}
 
-        {/* Error with retry */}
+        {/* Error */}
         {error && !sending && (
-          <div className="flex justify-start gap-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-[14px] mt-0.5">
+          <div style={{ display: 'flex', justifyContent: 'flex-start', gap: 10 }}>
+            <div style={{
+              flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+              background: '#FEE2E2', color: '#EF4444',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 13, fontWeight: 700, marginTop: 2,
+            }}>
               !
             </div>
-            <div className="max-w-[80%] bg-red-50 border border-red-200 rounded-2xl" style={{ padding: '12px 16px' }}>
-              <p className="text-sm text-red-700 m-0 mb-2">{error}</p>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 14, color: '#DC2626', margin: '0 0 6px' }}>{error}</p>
               {onRetry && (
                 <button
                   onClick={onRetry}
-                  className="text-sm font-semibold text-[#C96B4F] bg-transparent border-0 cursor-pointer hover:underline p-0"
                   type="button"
+                  style={{
+                    fontSize: 13, fontWeight: 600, color: '#000',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: 0, textDecoration: 'underline',
+                  }}
                 >
                   Try again
                 </button>

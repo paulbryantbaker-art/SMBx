@@ -1,5 +1,4 @@
 import Markdown from 'react-markdown';
-import YuliaAvatar from './YuliaAvatar';
 import type { AnonMessage } from '../../hooks/useAnonymousChat';
 
 interface Props {
@@ -11,24 +10,39 @@ export default function PublicChatMessage({ message }: Props) {
 
   if (isUser) {
     return (
-      <div className="flex justify-end">
-        <div
-          className="max-w-[80%] px-[18px] py-[14px]"
-          style={{ background: '#FFF0EB', border: '1px solid rgba(212,113,78,0.18)', color: '#0D0D0D', borderRadius: '20px 20px 4px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
-        >
-          <p className="text-sm font-sans leading-[1.55] m-0 whitespace-pre-wrap">
-            {message.content}
-          </p>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{
+          maxWidth: '85%', padding: '10px 16px',
+          background: '#F3F3F3', color: '#000',
+          borderRadius: '18px 18px 4px 18px',
+          fontSize: 15, lineHeight: 1.55, fontWeight: 500,
+          fontFamily: "'Inter', system-ui, sans-serif",
+        }}>
+          <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{message.content}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex items-start gap-3">
-      <YuliaAvatar size={32} className="mt-0.5" />
-      <div className="max-w-[80%] bg-white px-4 py-3" style={{ borderRadius: '20px 20px 20px 4px', border: '1px solid rgba(0,0,0,0.08)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-        <div className="text-sm font-sans text-[#0D0D0D] leading-[1.55] [&_p]:m-0 [&_p+p]:mt-2.5 [&_strong]:font-semibold [&_code]:bg-[rgba(0,0,0,0.04)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_ul]:mt-2 [&_ul]:pl-5 [&_ol]:mt-2 [&_ol]:pl-5 [&_li]:mt-1">
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+      <div style={{
+        flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+        background: '#000', color: '#fff',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 12, fontWeight: 700, marginTop: 2,
+      }}>
+        Y
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          className="[&_p]:m-0 [&_p+p]:mt-2 [&_strong]:font-semibold [&_code]:bg-[rgba(0,0,0,0.05)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-[13px] [&_ul]:mt-1 [&_ul]:pl-5 [&_ol]:mt-1 [&_ol]:pl-5 [&_li]:mt-0.5"
+          style={{
+            fontSize: 15, lineHeight: 1.6, fontWeight: 450,
+            color: '#1A1A1A',
+            fontFamily: "'Inter', system-ui, sans-serif",
+          }}
+        >
           <Markdown>{message.content}</Markdown>
         </div>
       </div>
