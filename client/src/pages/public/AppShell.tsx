@@ -1181,7 +1181,7 @@ export default function AppShell() {
               />
 
               {user && authChat.paywallData && authChat.activeDealId && (
-                <div className="max-w-3xl mx-auto px-4 mb-4">
+                <div className="px-4 mb-4">
                   <PaywallCard
                     paywall={authChat.paywallData}
                     dealId={authChat.activeDealId}
@@ -1198,7 +1198,7 @@ export default function AppShell() {
               )}
 
               {showSignup && (
-                <div className="max-w-md mx-auto px-4 mb-4">
+                <div className="px-4 mb-4" style={{ maxWidth: 480 }}>
                   <InlineSignupCard sessionId={anonChat.getSessionId()} canDismiss={!anonChat.limitReached} />
                 </div>
               )}
@@ -1273,40 +1273,63 @@ export default function AppShell() {
         {/* ════ CHATDOCK — chat mode, pinned at bottom ════ */}
         {showDock && viewState === 'chat' && (
           <div className="shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
-            <div className="max-w-[860px] mx-auto">
-              <ChatDock
-                ref={dockRef}
-                onSend={handleSend}
-                variant="hero"
-                rows={1}
-                placeholder="Reply to Yulia..."
-                disabled={sending}
-              />
-            </div>
+            <ChatDock
+              ref={dockRef}
+              onSend={handleSend}
+              variant="hero"
+              rows={1}
+              placeholder="Reply to Yulia..."
+              disabled={sending}
+            />
           </div>
         )}
 
         </div>{/* end chat column */}
 
-        {/* ════ DESKTOP CANVAS PANEL — split view ════ */}
-        {canvasOpen && !isMobile && (
+        {/* ════ DESKTOP CANVAS PANEL — always visible on desktop ════ */}
+        {!isMobile && viewState === 'chat' && (
           <div
             className="shrink-0 flex flex-col"
-            style={{ borderLeft: '1px solid rgba(0,0,0,0.06)', width: 480, animation: 'slideInRight 0.25s ease' }}
+            style={{
+              borderLeft: '1px solid rgba(0,0,0,0.06)',
+              width: canvasOpen ? 520 : 48,
+              transition: 'width 0.25s ease',
+              background: canvasOpen ? '#fff' : '#F5F5F5',
+              position: 'relative',
+            }}
           >
-            {canvasMarkdown ? (
-              <Canvas
-                markdownContent={canvasMarkdown.content}
-                title={canvasMarkdown.title}
-                onClose={closeCanvas}
-              />
-            ) : viewingDeliverable !== null ? (
-              <Canvas
-                deliverableId={viewingDeliverable}
-                dealId={user ? authChat.activeDealId : null}
-                onClose={closeCanvas}
-              />
-            ) : null}
+            {canvasOpen ? (
+              <>
+                {canvasMarkdown ? (
+                  <Canvas
+                    markdownContent={canvasMarkdown.content}
+                    title={canvasMarkdown.title}
+                    onClose={closeCanvas}
+                  />
+                ) : viewingDeliverable !== null ? (
+                  <Canvas
+                    deliverableId={viewingDeliverable}
+                    dealId={user ? authChat.activeDealId : null}
+                    onClose={closeCanvas}
+                  />
+                ) : null}
+              </>
+            ) : (
+              /* Collapsed empty state — greyed out rail */
+              <div style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                paddingTop: 16, gap: 8, height: '100%',
+              }}>
+                <div style={{
+                  writingMode: 'vertical-rl', textOrientation: 'mixed',
+                  fontSize: 10, fontWeight: 600, color: 'rgba(0,0,0,0.25)',
+                  textTransform: 'uppercase', letterSpacing: '0.1em',
+                  marginTop: 8,
+                }}>
+                  Canvas
+                </div>
+              </div>
+            )}
           </div>
         )}
 
