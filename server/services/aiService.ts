@@ -13,7 +13,11 @@ function getClient(): Anthropic {
     if (!process.env.ANTHROPIC_API_KEY) {
       throw new Error('ANTHROPIC_API_KEY is not set');
     }
-    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    client = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+      timeout: 60_000, // 60s timeout — fail fast rather than hang
+      maxRetries: 2,   // Auto-retry on 429/529
+    });
   }
   return client;
 }
@@ -77,7 +81,9 @@ export async function streamAgenticResponse(
       for (const block of toolUseBlocks) {
         if (block.type === 'tool_use') {
           // Send tool activity indicator to client
-          res.write(`data: ${JSON.stringify({ type: 'tool_start', tool: block.name })}\n\n`);
+          if (!res.writableEnded) {
+            res.write(`data: ${JSON.stringify({ type: 'tool_start', tool: block.name })}\n\n`);
+          }
 
           if (process.env.NODE_ENV !== 'production') {
             console.log(`Tool call: ${block.name}(${JSON.stringify(block.input).substring(0, 200)})`);
@@ -94,7 +100,9 @@ export async function streamAgenticResponse(
               console.log(`Tool result: ${result.substring(0, 200)}`);
             }
 
-            res.write(`data: ${JSON.stringify({ type: 'tool_done', tool: block.name })}\n\n`);
+            if (!res.writableEnded) {
+              res.write(`data: ${JSON.stringify({ type: 'tool_done', tool: block.name })}\n\n`);
+            }
 
             toolResults.push({
               type: 'tool_result' as const,
@@ -103,7 +111,9 @@ export async function streamAgenticResponse(
             });
           } catch (toolErr: any) {
             console.error(`Tool execution error (${block.name}):`, toolErr.message);
-            res.write(`data: ${JSON.stringify({ type: 'tool_done', tool: block.name })}\n\n`);
+            if (!res.writableEnded) {
+              res.write(`data: ${JSON.stringify({ type: 'tool_done', tool: block.name })}\n\n`);
+            }
             toolResults.push({
               type: 'tool_result' as const,
               tool_use_id: block.id,
@@ -156,13 +166,14 @@ function streamText(res: Response, text: string) {
     buffer += word;
     // Send every few words for smooth streaming
     if (buffer.length >= 10 || word.includes('\n')) {
+      if (res.writableEnded) return;
       res.write(`data: ${JSON.stringify({ type: 'text_delta', text: buffer })}\n\n`);
       buffer = '';
     }
   }
 
   // Flush remaining
-  if (buffer) {
+  if (buffer && !res.writableEnded) {
     res.write(`data: ${JSON.stringify({ type: 'text_delta', text: buffer })}\n\n`);
   }
 }

@@ -39,7 +39,11 @@ function getAnthropicClient(): Anthropic {
     if (!process.env.ANTHROPIC_API_KEY) {
       throw new Error('ANTHROPIC_API_KEY is not set');
     }
-    anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    anthropicClient = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+      timeout: 60_000, // 60s timeout — fail fast rather than hang
+      maxRetries: 2,   // Auto-retry on 429/529
+    });
   }
   return anthropicClient;
 }
@@ -95,6 +99,28 @@ chatRouter.post('/message', async (req, res) => {
     return res.status(400).json({ error: 'Message is required' });
   }
 
+  // ─── SSE headers FIRST — keep connection alive during DB setup ───
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no'); // Disable proxy buffering (Railway/nginx)
+  res.flushHeaders(); // Send headers immediately
+
+  // Detect client disconnect
+  let clientDisconnected = false;
+  const abortController = new AbortController();
+  res.on('close', () => {
+    clientDisconnected = true;
+    abortController.abort();
+  });
+
+  // SSE heartbeat — keep connection alive through proxies (every 15s)
+  const heartbeat = setInterval(() => {
+    if (!clientDisconnected && !res.writableEnded) {
+      res.write(': heartbeat\n\n');
+    }
+  }, 15000);
+
   try {
     let convId = conversationId ? parseInt(String(conversationId), 10) : null;
 
@@ -108,8 +134,12 @@ chatRouter.post('/message', async (req, res) => {
           AND created_at > now() - interval '24 hours'
         `;
         if (parseInt(count) >= 3) {
-          res.writeHead(429, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Daily conversation limit reached. Create a free account for unlimited conversations.' }));
+          clearInterval(heartbeat);
+          if (!res.writableEnded) {
+            res.write(`data: ${JSON.stringify({ type: 'error', error: 'Daily conversation limit reached. Create a free account for unlimited conversations.' })}\n\n`);
+            res.write('data: [DONE]\n\n');
+            res.end();
+          }
           return;
         }
       }
@@ -130,6 +160,11 @@ chatRouter.post('/message', async (req, res) => {
         const shortTitle = message.trim().substring(0, 60) + (message.trim().length > 60 ? '...' : '');
         await sql`UPDATE conversations SET title = ${shortTitle}, updated_at = NOW() WHERE id = ${convId}`;
       }
+    }
+
+    // Send conversation ID to client as soon as we have it
+    if (!res.writableEnded) {
+      res.setHeader('X-Conversation-Id', String(convId));
     }
 
     // Save user message
@@ -214,43 +249,19 @@ chatRouter.post('/message', async (req, res) => {
         SELECT count(*) FROM messages WHERE conversation_id = ${convId}
       `;
       if (parseInt(count) >= 40) { // 40 = 20 user + 20 assistant
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-        res.setHeader('X-Conversation-Id', String(convId));
-        res.write(`data: ${JSON.stringify({
-          type: 'text_delta',
-          text: "You've been getting great value from our conversation. Create a free account to continue unlimited access and save your deal progress."
-        })}\n\n`);
-        res.write(`data: ${JSON.stringify({ type: 'message_stop', conversationId: convId })}\n\n`);
-        res.write('data: [DONE]\n\n');
-        res.end();
+        clearInterval(heartbeat);
+        if (!res.writableEnded) {
+          res.write(`data: ${JSON.stringify({
+            type: 'text_delta',
+            text: "You've been getting great value from our conversation. Create a free account to continue unlimited access and save your deal progress."
+          })}\n\n`);
+          res.write(`data: ${JSON.stringify({ type: 'message_stop', conversationId: convId })}\n\n`);
+          res.write('data: [DONE]\n\n');
+          res.end();
+        }
         return;
       }
     }
-
-    // SSE headers
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no'); // Disable proxy buffering (Railway/nginx)
-    res.setHeader('X-Conversation-Id', String(convId));
-    res.flushHeaders(); // Send headers immediately
-
-    // Detect client disconnect
-    let clientDisconnected = false;
-    const abortController = new AbortController();
-    res.on('close', () => {
-      clientDisconnected = true;
-      abortController.abort();
-    });
-
-    // SSE heartbeat — keep connection alive through proxies (every 15s)
-    const heartbeat = setInterval(() => {
-      if (!clientDisconnected && !res.writableEnded) {
-        res.write(': heartbeat\n\n');
-      }
-    }, 15000);
 
     // Stream from Anthropic
     const anthropic = getAnthropicClient();
@@ -489,19 +500,18 @@ chatRouter.post('/message', async (req, res) => {
       }
     });
   } catch (err: any) {
+    clearInterval(heartbeat);
     // Don't log or respond if client already disconnected
-    if (res.writableEnded || res.destroyed) return;
+    if (clientDisconnected || res.writableEnded || res.destroyed) return;
 
     console.error('Chat message error:', err.message, err.status, JSON.stringify(err.error || err.body || {}).substring(0, 500), err.stack);
 
-    if (res.headersSent) {
-      if (!res.writableEnded) {
-        res.write(`data: ${JSON.stringify({ type: 'error', error: 'Something went wrong. Please try again.' })}\n\n`);
-        res.write('data: [DONE]\n\n');
-        res.end();
-      }
-    } else {
-      res.status(500).json({ error: 'Something went wrong. Please try again.' });
+    // Headers are always sent (SSE), so send error as SSE event
+    if (!res.writableEnded) {
+      res.write(`data: ${JSON.stringify({ type: 'text_delta', text: 'I ran into a temporary issue. Please try again.' })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'message_stop' })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
     }
   }
 });
