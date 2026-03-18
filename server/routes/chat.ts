@@ -233,7 +233,24 @@ chatRouter.post('/message', async (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no'); // Disable proxy buffering (Railway/nginx)
     res.setHeader('X-Conversation-Id', String(convId));
+    res.flushHeaders(); // Send headers immediately
+
+    // Detect client disconnect
+    let clientDisconnected = false;
+    const abortController = new AbortController();
+    res.on('close', () => {
+      clientDisconnected = true;
+      abortController.abort();
+    });
+
+    // SSE heartbeat — keep connection alive through proxies (every 15s)
+    const heartbeat = setInterval(() => {
+      if (!clientDisconnected && !res.writableEnded) {
+        res.write(': heartbeat\n\n');
+      }
+    }, 15000);
 
     // Stream from Anthropic
     const anthropic = getAnthropicClient();
@@ -249,24 +266,35 @@ chatRouter.post('/message', async (req, res) => {
       });
 
       for await (const event of stream) {
+        if (clientDisconnected) break;
         if (
           event.type === 'content_block_delta' &&
           event.delta.type === 'text_delta'
         ) {
           fullText += event.delta.text;
-          res.write(`data: ${JSON.stringify({ type: 'text_delta', text: event.delta.text })}\n\n`);
+          if (!res.writableEnded) {
+            res.write(`data: ${JSON.stringify({ type: 'text_delta', text: event.delta.text })}\n\n`);
+          }
         }
       }
     } catch (streamErr: any) {
-      console.error('Anthropic streaming error:', streamErr.message, streamErr.status);
-      const userMessage = streamErr.status === 429
-        ? 'I\'m experiencing high demand right now. Please try again in a moment.'
-        : 'I ran into a temporary issue. Please try again.';
-      res.write(`data: ${JSON.stringify({ type: 'text_delta', text: userMessage })}\n\n`);
-      fullText = userMessage;
+      if (clientDisconnected) {
+        console.log(`[chat] Client disconnected during stream (conv ${convId})`);
+      } else {
+        console.error('Anthropic streaming error:', streamErr.message, streamErr.status);
+        const userMessage = streamErr.status === 429
+          ? 'I\'m experiencing high demand right now. Please try again in a moment.'
+          : 'I ran into a temporary issue. Please try again.';
+        if (!res.writableEnded) {
+          res.write(`data: ${JSON.stringify({ type: 'text_delta', text: userMessage })}\n\n`);
+        }
+        fullText = userMessage;
+      }
+    } finally {
+      clearInterval(heartbeat);
     }
 
-    // Save assistant response
+    // Save assistant response (even if client disconnected — data shouldn't be lost)
     if (fullText) {
       await sql`
         INSERT INTO messages (conversation_id, role, content)
@@ -275,10 +303,12 @@ chatRouter.post('/message', async (req, res) => {
       await sql`UPDATE conversations SET updated_at = NOW() WHERE id = ${convId}`;
     }
 
-    // Signal completion
-    res.write(`data: ${JSON.stringify({ type: 'message_stop', conversationId: convId })}\n\n`);
-    res.write('data: [DONE]\n\n');
-    res.end();
+    // Signal completion (only if client still connected)
+    if (!clientDisconnected && !res.writableEnded) {
+      res.write(`data: ${JSON.stringify({ type: 'message_stop', conversationId: convId })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
 
     // ─── Post-streaming hook (fire-and-forget) ───────────────
     const effectiveSessionId = sessionId || `anon-${convId}`;
@@ -459,12 +489,17 @@ chatRouter.post('/message', async (req, res) => {
       }
     });
   } catch (err: any) {
+    // Don't log or respond if client already disconnected
+    if (res.writableEnded || res.destroyed) return;
+
     console.error('Chat message error:', err.message, err.status, JSON.stringify(err.error || err.body || {}).substring(0, 500), err.stack);
 
     if (res.headersSent) {
-      res.write(`data: ${JSON.stringify({ type: 'error', error: 'Something went wrong. Please try again.' })}\n\n`);
-      res.write('data: [DONE]\n\n');
-      res.end();
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ type: 'error', error: 'Something went wrong. Please try again.' })}\n\n`);
+        res.write('data: [DONE]\n\n');
+        res.end();
+      }
     } else {
       res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }

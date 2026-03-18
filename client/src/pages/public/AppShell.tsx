@@ -29,6 +29,14 @@ import HowItWorksBelow from '../../components/content/HowItWorksBelow';
 import AdvisorsBelow from '../../components/content/AdvisorsBelow';
 import PricingBelow from '../../components/content/PricingBelow';
 
+/* ═══ DYNAMIC GREETING (time-of-day) ═══ */
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning.';
+  if (hour < 17) return 'Good afternoon.';
+  return 'Good evening.';
+}
+
 /* ═══ TYPEWRITER HINT POOL (home page) ═══ */
 const TYPEWRITER_PREFIX = "Hello, I'm Yulia. ";
 const TYPEWRITER_HINTS = [
@@ -966,7 +974,7 @@ export default function AppShell() {
                       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                       style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '36px', fontWeight: 900, letterSpacing: '-0.02em', color: '#0D0D0D', textAlign: 'center', margin: 0, lineHeight: 1.15 }}
                     >
-                      Good morning.
+                      {getGreeting()}
                     </motion.h1>
                     <motion.p
                       initial={{ opacity: 0, y: 8 }}
@@ -1053,7 +1061,7 @@ export default function AppShell() {
                       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                       style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '60px', fontWeight: 900, letterSpacing: '-0.02em', color: '#0D0D0D', textAlign: 'center', margin: '0 0 20px', lineHeight: 1.1 }}
                     >
-                      Good morning.
+                      {getGreeting()}
                     </motion.h1>
                     <motion.p
                       initial={{ opacity: 0, y: 10 }}
