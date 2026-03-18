@@ -39,6 +39,37 @@ function getGreeting(): string {
   return 'Good night.';
 }
 
+/* ═══ INTERLOCKED X MARK — woven 3D logo mark ═══ */
+function LogoXMark({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
+  const [uid] = useState(() => `lx${Math.random().toString(36).slice(2, 6)}`);
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none"
+      style={{ display: 'inline-block', verticalAlign: 'baseline', marginBottom: size > 30 ? -4 : -2, ...style }}>
+      <defs>
+        <linearGradient id={`${uid}a`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#D4566E" />
+          <stop offset="50%" stopColor="#A02E44" />
+          <stop offset="100%" stopColor="#D4566E" />
+        </linearGradient>
+        <linearGradient id={`${uid}b`} x1="1" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#D4566E" />
+          <stop offset="50%" stopColor="#A02E44" />
+          <stop offset="100%" stopColor="#D4566E" />
+        </linearGradient>
+        <clipPath id={`${uid}c`}>
+          <rect x="0" y="19" width="40" height="21" />
+        </clipPath>
+      </defs>
+      {/* Layer 1: / bar (back — full) */}
+      <line x1="33" y1="7" x2="7" y2="33" stroke={`url(#${uid}b)`} strokeWidth="7.5" strokeLinecap="round" />
+      {/* Layer 2: \ bar (front at top — full, slightly longer) */}
+      <line x1="6" y1="4" x2="34" y2="36" stroke={`url(#${uid}a)`} strokeWidth="7.5" strokeLinecap="round" />
+      {/* Layer 3: / bar bottom half (weave — front at bottom) */}
+      <line x1="33" y1="7" x2="7" y2="33" stroke={`url(#${uid}b)`} strokeWidth="7.5" strokeLinecap="round" clipPath={`url(#${uid}c)`} />
+    </svg>
+  );
+}
+
 /* ═══ TYPEWRITER HINT POOL (home page) ═══ */
 const TYPEWRITER_PREFIX = "Hello, I'm Yulia. ";
 const TYPEWRITER_HINTS = [
@@ -340,6 +371,22 @@ export default function AppShell() {
   const [heroFocused, setHeroFocused] = useState(false); // tracks when hero input is focused — controls logo position
   const [ndaRequired, setNdaRequired] = useState<{ dealId: number; dealName?: string } | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [isIdle, setIsIdle] = useState(false); // tracks page inactivity for X bounce
+
+  // Idle detection — bounce X after 4s of no interaction
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    let idle = false;
+    const handleActivity = () => {
+      if (idle) { setIsIdle(false); idle = false; }
+      clearTimeout(timer);
+      timer = setTimeout(() => { idle = true; setIsIdle(true); }, 4000);
+    };
+    handleActivity();
+    const events = ['mousemove', 'scroll', 'keydown', 'touchstart', 'click'];
+    events.forEach(e => window.addEventListener(e, handleActivity, { passive: true }));
+    return () => { clearTimeout(timer); events.forEach(e => window.removeEventListener(e, handleActivity)); };
+  }, []);
 
   // Chat hooks (always called for hook order)
   const anonChat = useAnonymousChat();
@@ -645,7 +692,11 @@ export default function AppShell() {
           style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontWeight: 700, color: '#0D0D0D' }}
           type="button"
         >
-          smb<svg width="22" height="22" viewBox="0 0 24 24" fill="none" style={{ display: 'inline-block', verticalAlign: 'baseline', marginLeft: -1, marginRight: -1, marginBottom: -2, transform: 'rotate(-8deg)' }}><line x1="3" y1="3" x2="21" y2="21" stroke="#C96B4F" strokeWidth="3.5" strokeLinecap="round"/><line x1="18" y1="5" x2="6" y2="19" stroke="#C96B4F" strokeWidth="3.5" strokeLinecap="round"/></svg>.ai
+          {(activeTab === 'home' && viewState === 'landing') ? (
+            <LogoXMark size={26} />
+          ) : (
+            <>smb<LogoXMark size={22} style={{ marginLeft: -1, marginRight: -1 }} />.ai</>
+          )}
         </button>
       </div>
 
@@ -900,7 +951,7 @@ export default function AppShell() {
                     style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontSize: '20px', fontWeight: 700, color: '#0D0D0D', opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: 'opacity 0.3s ease' }}
                     type="button"
                   >
-                    smb<svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ display: 'inline-block', verticalAlign: 'baseline', marginLeft: -1, marginRight: -1, marginBottom: -2, transform: 'rotate(-8deg)' }}><line x1="3" y1="3" x2="21" y2="21" stroke="#C96B4F" strokeWidth="3.5" strokeLinecap="round"/><line x1="18" y1="5" x2="6" y2="19" stroke="#C96B4F" strokeWidth="3.5" strokeLinecap="round"/></svg>.ai
+                    smb<LogoXMark size={20} style={{ marginLeft: -1, marginRight: -1 }} />.ai
                   </button>
                 ) : (
                   <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(0,0,0,0.35)' }}>
@@ -969,7 +1020,7 @@ export default function AppShell() {
                       }
                     >
                       <span style={{ fontSize: '34px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D' }}>
-                        smb<svg width="32" height="32" viewBox="0 0 24 24" fill="none" style={{ display: 'inline-block', verticalAlign: 'baseline', marginLeft: -1, marginRight: -1, marginBottom: -3, transform: 'rotate(-8deg)' }}><line x1="3" y1="3" x2="21" y2="21" stroke="#C96B4F" strokeWidth="3.5" strokeLinecap="round"/><line x1="18" y1="5" x2="6" y2="19" stroke="#C96B4F" strokeWidth="3.5" strokeLinecap="round"/></svg>.ai
+                        smb<span style={{ display: 'inline-block', animation: isIdle && !heroFocused && !morphing ? 'xBounce 2s ease-in-out infinite' : 'none' }}><LogoXMark size={34} style={{ marginLeft: -1, marginRight: -1 }} /></span>.ai
                       </span>
                     </motion.div>
                     {/* Heading */}
@@ -1056,7 +1107,7 @@ export default function AppShell() {
                       style={{ marginBottom: 28 }}
                     >
                       <span style={{ fontSize: '42px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D' }}>
-                        smb<svg width="40" height="40" viewBox="0 0 24 24" fill="none" style={{ display: 'inline-block', verticalAlign: 'baseline', marginLeft: -1, marginRight: -1, marginBottom: -4, transform: 'rotate(-8deg)' }}><line x1="3" y1="3" x2="21" y2="21" stroke="#C96B4F" strokeWidth="3.5" strokeLinecap="round"/><line x1="18" y1="5" x2="6" y2="19" stroke="#C96B4F" strokeWidth="3.5" strokeLinecap="round"/></svg>.ai
+                        smb<span style={{ display: 'inline-block', animation: isIdle && !heroFocused && !morphing ? 'xBounce 2s ease-in-out infinite' : 'none' }}><LogoXMark size={44} style={{ marginLeft: -1, marginRight: -1 }} /></span>.ai
                       </span>
                     </motion.div>
                     {/* Heading */}
@@ -1390,6 +1441,13 @@ export default function AppShell() {
         @keyframes slideUpIn {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
+        }
+        @keyframes xBounce {
+          0%, 75%, 100% { transform: translateY(0); }
+          10% { transform: translateY(-6px); }
+          25% { transform: translateY(3px); }
+          40% { transform: translateY(-2px); }
+          55% { transform: translateY(1px); }
         }
       `}</style>
     </div>
