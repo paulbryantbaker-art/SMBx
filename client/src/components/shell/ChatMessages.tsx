@@ -10,6 +10,7 @@ interface ChatMessagesProps {
   error?: string | null;
   onRetry?: () => void;
   onOpenDeliverable?: (message: AnonMessage) => void;
+  desktop?: boolean;
 }
 
 function formatTimestamp(iso: string): string {
@@ -67,16 +68,32 @@ const PROSE_CLASSES = [
   '[&_a]:text-[#000] [&_a]:underline [&_a]:underline-offset-2',
 ].join(' ');
 
-export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable }: ChatMessagesProps) {
+export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, desktop }: ChatMessagesProps) {
+  /* Desktop label: tiny uppercase, muted — matches Stitch mockup */
+  const Label = ({ text }: { text: string }) => (
+    <p style={{
+      fontSize: 10, fontWeight: 700, color: '#94a3b8',
+      textTransform: 'uppercase', letterSpacing: '0.15em',
+      margin: '0 0 6px 0',
+    }}>{text}</p>
+  );
+
+  const textStyle: React.CSSProperties = {
+    fontSize: 14, lineHeight: 1.65, fontWeight: 400,
+    color: desktop ? '#1e293b' : '#1A1A1A',
+    userSelect: 'text', WebkitUserSelect: 'text', cursor: 'text',
+    textAlign: desktop ? 'justify' : undefined,
+  };
+
   return (
     <div style={{
       width: '100%',
-      padding: '12px 16px 128px 16px',
+      padding: desktop ? '24px 24px 128px 24px' : '12px 16px 128px 16px',
       fontFamily: "'Inter', system-ui, sans-serif",
       userSelect: 'text',
       WebkitUserSelect: 'text',
     } as React.CSSProperties}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: desktop ? 40 : 20 }}>
         {messages.map((m, i) => {
           const isDeliverable = m.metadata?.type === 'deliverable';
           const deliverableType = m.metadata?.deliverableType as string | undefined;
@@ -85,7 +102,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
           if (isDeliverable && deliverableType) {
             return (
               <div key={m.id || i}>
-                <YuliaLabel />
+                {desktop ? <Label text="Yulia AI" /> : <YuliaLabel />}
                 <button
                   onClick={() => onOpenDeliverable?.(m)}
                   type="button"
@@ -132,8 +149,20 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
             );
           }
 
-          /* ─── User message (black pill, right-aligned) ── */
+          /* ─── User message ─────────────────────────────── */
           if (m.role === 'user') {
+            /* Desktop: plain text with "You" label, no bubble */
+            if (desktop) {
+              return (
+                <div key={m.id || i}>
+                  <Label text="You" />
+                  <div className={PROSE_CLASSES} style={textStyle}>
+                    <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{m.content}</p>
+                  </div>
+                </div>
+              );
+            }
+            /* Mobile: black pill, right-aligned */
             return (
               <div key={m.id || i} style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <div style={{
@@ -149,20 +178,11 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
             );
           }
 
-          /* ─── Assistant message (label above, full-width) ── */
+          /* ─── Assistant message ─────────────────────────── */
           return (
             <div key={m.id || i}>
-              <YuliaLabel />
-              <div
-                className={PROSE_CLASSES}
-                style={{
-                  fontSize: 14, lineHeight: 1.65, fontWeight: 400,
-                  color: '#1A1A1A',
-                  userSelect: 'text',
-                  WebkitUserSelect: 'text',
-                  cursor: 'text',
-                } as React.CSSProperties}
-              >
+              {desktop ? <Label text="Yulia AI" /> : <YuliaLabel />}
+              <div className={PROSE_CLASSES} style={textStyle}>
                 <Markdown>{m.content}</Markdown>
               </div>
               {m.created_at && (
@@ -177,16 +197,8 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
         {/* ─── Streaming message ─────────────────────────── */}
         {streamingText && (
           <div>
-            <YuliaLabel />
-            <div
-              className={PROSE_CLASSES}
-              style={{
-                fontSize: 14, lineHeight: 1.65, fontWeight: 400,
-                color: '#1A1A1A',
-                userSelect: 'text',
-                WebkitUserSelect: 'text',
-              } as React.CSSProperties}
-            >
+            {desktop ? <Label text="Yulia AI" /> : <YuliaLabel />}
+            <div className={PROSE_CLASSES} style={textStyle}>
               <Markdown>{streamingText}</Markdown>
               <span style={{
                 display: 'inline-block', width: 5, height: 5, borderRadius: '50%',
@@ -200,7 +212,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
         {/* ─── Typing indicator ──────────────────────────── */}
         {sending && !streamingText && (
           <div>
-            <YuliaLabel />
+            {desktop ? <Label text="Yulia AI" /> : <YuliaLabel />}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
               <div style={{ display: 'flex', gap: 4 }}>
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#000', animation: 'dotPulse 1.4s ease infinite' }} />

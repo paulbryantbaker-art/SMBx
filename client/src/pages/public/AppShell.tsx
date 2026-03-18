@@ -939,8 +939,11 @@ export default function AppShell() {
 
         {/* Main row: chat + canvas split */}
         <div className="flex-1 flex min-h-0">
-        {/* Chat column */}
-        <div className="flex-1 flex flex-col min-w-0">
+        {/* Chat column — fixed width on desktop in chat mode, flex on landing/other */}
+        <div
+          className="flex flex-col min-w-0"
+          style={!isMobile && viewState === 'chat' ? { width: 520, flexShrink: 0 } : { flex: 1 }}
+        >
         {/* Scroll area */}
         <div
           ref={scrollRef}
@@ -1188,6 +1191,7 @@ export default function AppShell() {
                   if (last) anonChat.sendMessage(last.content);
                 } : undefined}
                 onOpenDeliverable={handleOpenDeliverable}
+                desktop={!isMobile}
               />
 
               {user && authChat.paywallData && authChat.activeDealId && (
