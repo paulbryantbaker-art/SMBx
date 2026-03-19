@@ -32,11 +32,11 @@ import PricingBelow from '../../components/content/PricingBelow';
 /* ═══ DYNAMIC GREETING (time-of-day) ═══ */
 function getGreeting(): string {
   const hour = new Date().getHours();
-  if (hour < 3) return 'Good night.';
-  if (hour < 12) return 'Good morning.';
-  if (hour < 17) return 'Good afternoon.';
-  if (hour < 20) return 'Good evening.';
-  return 'Good night.';
+  if (hour < 3) return 'Hi there, having a good night?';
+  if (hour < 12) return 'Hi there, having a good morning?';
+  if (hour < 17) return 'Hi there, having a good afternoon?';
+  if (hour < 20) return 'Hi there, having a good evening?';
+  return 'Hi there, having a good night?';
 }
 
 /* ═══ LOGO — transparent PNG with copper X ═══ */
@@ -968,49 +968,29 @@ export default function AppShell() {
               <>
                 {/* ═══ HOME PAGE — Paper Design: centered wordmark + hero chat bar + chips ═══ */}
 
-                {/* MOBILE HOME */}
+                {/* MOBILE HOME — Grok-style: logo + chat bar, centered */}
                 <div className="flex flex-col h-full md:hidden">
-                  <div className="flex-1 flex flex-col items-center justify-center px-5 gap-7" style={{ position: 'relative' }}>
-                    {/* Logo — video with blend, falls back to image */}
+                  <div className="flex-1 flex flex-col items-center justify-center px-5">
                     <motion.div
-                      initial={{ opacity: 0, y: -12, scale: 0.9 }}
-                      animate={(heroFocused || morphing)
-                        ? { opacity: 0, scale: 0.5, transition: { duration: 0.25, ease: [0.4, 0, 1, 1] } }
-                        : { opacity: 1, y: 0, x: 0, scale: 1, transition: { duration: 0.5, delay: 0.05, ease: [0.22, 1, 0.36, 1] } }
-                      }
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ marginBottom: 32 }}
                     >
-                      <LogoImg height={64} />
+                      <LogoImg height={48} />
                     </motion.div>
-                    {/* Heading */}
-                    <motion.h1
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '36px', fontWeight: 900, letterSpacing: '-0.02em', color: '#0D0D0D', textAlign: 'center', margin: 0, lineHeight: 1.15 }}
-                    >
-                      {getGreeting()}
-                    </motion.h1>
-                    <motion.p
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '16px', color: '#545454', fontWeight: 500, textAlign: 'center', margin: '0 0 12px', lineHeight: 1.5 }}
-                    >
-                      How can we help you grow your business today?
-                    </motion.p>
-                    {/* Hero chat bar */}
                     <motion.div
                       className="w-full"
-                      initial={{ opacity: 0, y: 14 }}
+                      initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
                     >
                       <ChatDock
                         ref={dockRef}
                         onSend={handleSend}
                         variant="hero"
                         rows={1}
-                        placeholder="Ask smbx.ai anything..."
+                        placeholder="What's on your mind?"
                         disabled={sending}
                         typewriterHints={TYPEWRITER_HINTS}
                         typewriterPrefix={TYPEWRITER_PREFIX}
@@ -1018,76 +998,24 @@ export default function AppShell() {
                         onInputBlur={(hasText) => { if (!hasText) setHeroFocused(false); }}
                       />
                     </motion.div>
-                    {/* Suggestion chips — 3 with icons */}
-                    <div className="flex flex-wrap justify-center gap-2">
-                      {[
-                        { label: 'Prepare to sell', icon: null, message: "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." },
-                        { label: 'Prepare to buy', icon: null, message: "I'm looking to buy a business. Help me evaluate deals and find the right acquisition." },
-                        { label: 'Raise capital', icon: null, message: "I need to raise capital for my business. Walk me through the options." },
-                        { label: 'Market research', icon: null, message: "I want to understand the market landscape for my industry." },
-                      ].map((chip, i) => (
-                        <motion.button
-                          key={chip.label}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.45, delay: 0.35 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                          onClick={() => handleChipClick(chip.message)}
-                          className="bg-white cursor-pointer transition-all chip-hover flex items-center gap-1.5"
-                          style={{ borderRadius: 100, fontSize: '14px', fontWeight: 600, fontFamily: 'inherit', color: '#000', border: '1px solid #EEEEEE', padding: '10px 20px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-                          type="button"
-                        >
-                          {chip.label}
-                        </motion.button>
-                      ))}
-                    </div>
                   </div>
-                  {/* Security footer */}
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 0.6 }}
-                    style={{ textAlign: 'center', padding: '16px 20px', fontSize: '12px', color: 'rgba(0,0,0,0.25)', fontWeight: 400, margin: 0 }}
-                  >
-                    AI-Powered Business Intelligence
-                  </motion.p>
                 </div>
 
-                {/* DESKTOP HOME */}
+                {/* DESKTOP HOME — Grok-style: logo + chat bar, centered */}
                 <div className="hidden md:flex flex-col h-full items-center justify-center">
-                  <div className="flex flex-col items-center" style={{ marginTop: '-180px', width: '100%', maxWidth: 640 }}>
-                    {/* Logo — video with blend, falls back to image */}
+                  <div className="flex flex-col items-center" style={{ marginTop: '-60px', width: '100%', maxWidth: 640 }}>
                     <motion.div
-                      initial={{ opacity: 0, y: -16, scale: 0.85 }}
-                      animate={(heroFocused || morphing)
-                        ? { opacity: 0, scale: 0.5, transition: { duration: 0.25, ease: [0.4, 0, 1, 1] } }
-                        : { opacity: 1, y: 0, x: 0, scale: 1, transition: { duration: 0.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] } }
-                      }
-                      style={{ marginBottom: 28 }}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                      style={{ marginBottom: 36 }}
                     >
                       <LogoImg height={56} />
                     </motion.div>
-                    {/* Heading */}
-                    <motion.h1
-                      initial={{ opacity: 0, y: 14 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif", fontSize: '60px', fontWeight: 900, letterSpacing: '-0.02em', color: '#0D0D0D', textAlign: 'center', margin: '0 0 20px', lineHeight: 1.1 }}
-                    >
-                      {getGreeting()}
-                    </motion.h1>
-                    <motion.p
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ fontSize: '20px', color: '#545454', fontWeight: 500, textAlign: 'center', margin: '0 0 40px', lineHeight: 1.5 }}
-                    >
-                      How can we help you grow your business today?
-                    </motion.p>
-                    {/* Hero chat bar — search style with icon */}
                     <motion.div
-                      initial={{ opacity: 0, y: 16 }}
+                      initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
                       style={{ width: '100%', maxWidth: 640 }}
                     >
                       <ChatDock
@@ -1095,7 +1023,7 @@ export default function AppShell() {
                         onSend={handleSend}
                         variant="hero"
                         rows={1}
-                        placeholder="Ask smbx.ai anything..."
+                        placeholder="What's on your mind?"
                         disabled={sending}
                         typewriterHints={TYPEWRITER_HINTS}
                         typewriterPrefix={TYPEWRITER_PREFIX}
@@ -1103,38 +1031,7 @@ export default function AppShell() {
                         onInputBlur={(hasText) => { if (!hasText) setHeroFocused(false); }}
                       />
                     </motion.div>
-                    {/* Suggestion chips — 3 chips with icons */}
-                    <div className="flex flex-wrap justify-center gap-3" style={{ marginTop: 32 }}>
-                      {[
-                        { label: 'Prepare to sell', message: "I'm thinking about selling my business. Help me understand what it's worth and what the process looks like." },
-                        { label: 'Prepare to buy', message: "I'm looking to buy a business. Help me evaluate deals and find the right acquisition." },
-                        { label: 'Raise capital', message: "I need to raise capital for my business. Walk me through the options." },
-                        { label: 'Market research', message: "I want to understand the market landscape for my industry." },
-                      ].map((chip, i) => (
-                        <motion.button
-                          key={chip.label}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.45, delay: 0.4 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                          onClick={() => handleChipClick(chip.message)}
-                          className="cursor-pointer transition-all chip-hover flex items-center"
-                          style={{ borderRadius: 100, fontSize: '15px', fontWeight: 600, fontFamily: 'inherit', color: '#000', border: '1px solid #EEEEEE', padding: '12px 24px', background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-                          type="button"
-                        >
-                          {chip.label}
-                        </motion.button>
-                      ))}
-                    </div>
                   </div>
-                  {/* Security footer */}
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 0.7 }}
-                    style={{ position: 'absolute', bottom: 24, fontSize: '13px', color: 'rgba(0,0,0,0.3)', fontWeight: 400 }}
-                  >
-                    AI-Powered Business Intelligence
-                  </motion.p>
                 </div>
               </>
               ) : activeTab === 'sell' ? (
