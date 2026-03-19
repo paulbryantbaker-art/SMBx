@@ -139,6 +139,29 @@ export const TOOL_DEFINITIONS: Tool[] = [
       required: ['dealId'],
     },
   },
+  {
+    name: 'list_user_deals',
+    description: 'List all deals for the current user. Call this when: the user asks about their deals, portfolio, or pipeline; when you need to understand what deals they have; when the user wants to switch to a different deal; or when you detect they may be a broker/advisor managing multiple clients. Returns summary of all active deals with journey type, gate, financials, and business name.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        journeyFilter: { type: 'string', enum: ['sell', 'buy', 'raise', 'pmi'], description: 'Optional filter by journey type' },
+        includeParticipant: { type: 'boolean', description: 'Include deals where user is a participant (not owner). Useful for advisors/brokers.' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'switch_deal_context',
+    description: 'Switch this conversation to a different deal. Call this when the user asks to work on a specific deal, or when they reference a deal by name or ID. This updates the conversation\'s deal_id so all subsequent tool calls operate on the new deal.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'The deal ID to switch to' },
+      },
+      required: ['dealId'],
+    },
+  },
 ];
 
 // ─── Tool Execution ────────────────────────────────────────
@@ -177,6 +200,10 @@ export async function executeTool(
         return await matchFranchiseTool(input);
       case 'generate_optimization_plan':
         return await generateOptimizationPlanTool(input, userId);
+      case 'list_user_deals':
+        return await listUserDeals(input, userId);
+      case 'switch_deal_context':
+        return await switchDealContext(input, userId, conversationId);
       default:
         return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
@@ -593,4 +620,102 @@ async function generateOptimizationPlanTool(input: Record<string, any>, userId: 
       timeline: `${a.timeline_days} days`,
     })),
   });
+}
+
+// ─── Portfolio Tools ──────────────────────────────────────
+
+async function listUserDeals(input: Record<string, any>, userId: number): Promise<string> {
+  const { journeyFilter, includeParticipant } = input;
+
+  // Get owned deals
+  let deals;
+  if (journeyFilter) {
+    deals = await sql`
+      SELECT id, journey_type, current_gate, league, business_name, industry, location,
+             revenue, sde, ebitda, asking_price, status, created_at, updated_at
+      FROM deals WHERE user_id = ${userId} AND status = 'active' AND journey_type = ${journeyFilter}
+      ORDER BY updated_at DESC
+    `;
+  } else {
+    deals = await sql`
+      SELECT id, journey_type, current_gate, league, business_name, industry, location,
+             revenue, sde, ebitda, asking_price, status, created_at, updated_at
+      FROM deals WHERE user_id = ${userId} AND status = 'active'
+      ORDER BY updated_at DESC
+    `;
+  }
+
+  // Optionally include deals where user is a participant (advisor/broker)
+  let participantDeals: any[] = [];
+  if (includeParticipant) {
+    participantDeals = await sql`
+      SELECT d.id, d.journey_type, d.current_gate, d.league, d.business_name, d.industry,
+             d.revenue, d.sde, d.ebitda, d.asking_price, d.status, d.updated_at,
+             dp.role as participant_role, dp.access_level
+      FROM deals d
+      JOIN deal_participants dp ON dp.deal_id = d.id
+      WHERE dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL AND d.status = 'active'
+      ORDER BY d.updated_at DESC
+    `;
+  }
+
+  const formatDeal = (d: any, role?: string) => ({
+    dealId: d.id,
+    journeyType: d.journey_type,
+    currentGate: d.current_gate,
+    league: d.league,
+    businessName: d.business_name || 'Unnamed',
+    industry: d.industry,
+    revenue: d.revenue ? `$${(d.revenue / 100).toLocaleString()}` : null,
+    sde: d.sde ? `$${(d.sde / 100).toLocaleString()}` : null,
+    ebitda: d.ebitda ? `$${(d.ebitda / 100).toLocaleString()}` : null,
+    askingPrice: d.asking_price ? `$${(d.asking_price / 100).toLocaleString()}` : null,
+    role: role || 'owner',
+    lastUpdated: d.updated_at,
+  });
+
+  const ownedFormatted = deals.map((d: any) => formatDeal(d));
+  const participantFormatted = participantDeals.map((d: any) => formatDeal(d, d.participant_role));
+
+  const totalDeals = ownedFormatted.length + participantFormatted.length;
+  const isMultiDeal = totalDeals > 1;
+
+  return JSON.stringify({
+    totalDeals,
+    isMultiDeal,
+    isAdvisorPattern: participantFormatted.length > 0 || totalDeals >= 3,
+    ownedDeals: ownedFormatted,
+    participantDeals: participantFormatted,
+    portfolioSummary: isMultiDeal ? {
+      totalPipelineValue: deals.reduce((sum: number, d: any) => sum + (d.asking_price || d.revenue || 0), 0) / 100,
+      journeyBreakdown: {
+        sell: deals.filter((d: any) => d.journey_type === 'sell').length,
+        buy: deals.filter((d: any) => d.journey_type === 'buy').length,
+        raise: deals.filter((d: any) => d.journey_type === 'raise').length,
+        pmi: deals.filter((d: any) => d.journey_type === 'pmi').length,
+      },
+    } : null,
+  });
+}
+
+async function switchDealContext(input: Record<string, any>, userId: number, conversationId: number): Promise<string> {
+  const { dealId } = input;
+
+  // Verify user has access (owner or participant)
+  const [owned] = await sql`SELECT id, business_name, journey_type, current_gate FROM deals WHERE id = ${dealId} AND user_id = ${userId} LIMIT 1`;
+  if (!owned) {
+    const [participant] = await sql`
+      SELECT d.id, d.business_name, d.journey_type, d.current_gate
+      FROM deals d JOIN deal_participants dp ON dp.deal_id = d.id
+      WHERE d.id = ${dealId} AND dp.user_id = ${userId} AND dp.accepted_at IS NOT NULL
+      LIMIT 1
+    `;
+    if (!participant) return JSON.stringify({ error: 'Deal not found or no access' });
+
+    await sql`UPDATE conversations SET deal_id = ${dealId} WHERE id = ${conversationId}`;
+    return JSON.stringify({ success: true, dealId, businessName: participant.business_name, journeyType: participant.journey_type, currentGate: participant.current_gate, role: 'participant' });
+  }
+
+  await sql`UPDATE conversations SET deal_id = ${dealId} WHERE id = ${conversationId}`;
+  return JSON.stringify({ success: true, dealId, businessName: owned.business_name, journeyType: owned.journey_type, currentGate: owned.current_gate, role: 'owner' });
 }

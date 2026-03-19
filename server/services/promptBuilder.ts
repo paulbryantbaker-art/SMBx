@@ -1,3 +1,4 @@
+import postgres from 'postgres';
 import { MASTER_PROMPT } from '../prompts/masterPrompt.js';
 import { PERSONAS } from '../prompts/personas.js';
 import { JOURNEY_DETECTION_PROMPT } from '../prompts/journeyDetection.js';
@@ -6,6 +7,8 @@ import { BRANCHING_LOGIC } from '../prompts/branchingLogic.js';
 import { isPaywallGate } from './gateReadinessService.js';
 import { generatePaywallPrompt } from './paywallService.js';
 import { getKnowledgeForContext, formatKnowledgeForPrompt } from './knowledgeService.js';
+
+const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
 export interface ConversationState {
   journey: string | null;
@@ -365,6 +368,26 @@ export async function buildSystemPrompt(
   // Layer 2: User context
   const userName = user.display_name || user.email.split('@')[0];
   layers.push(`\n## CURRENT USER\nName: ${userName}\nEmail: ${user.email}\nLeague: ${user.league || 'Not yet classified'}`);
+
+  // Layer 2b: Portfolio awareness — check if user has multiple deals
+  try {
+    const allDeals = await sql`
+      SELECT id, journey_type, current_gate, business_name, league, revenue, status
+      FROM deals WHERE user_id = ${user.id} AND status = 'active'
+      ORDER BY updated_at DESC
+    `;
+    const participantDeals = await sql`
+      SELECT d.id, d.journey_type, d.business_name, dp.role
+      FROM deals d JOIN deal_participants dp ON dp.deal_id = d.id
+      WHERE dp.user_id = ${user.id} AND dp.accepted_at IS NOT NULL AND d.status = 'active'
+    `;
+    const totalDeals = allDeals.length + participantDeals.length;
+    if (totalDeals > 1) {
+      const dealList = allDeals.map((d: any) => `  - [${d.id}] ${d.business_name || 'Unnamed'} (${d.journey_type.toUpperCase()} @ ${d.current_gate})`).join('\n');
+      const partList = participantDeals.map((d: any) => `  - [${d.id}] ${d.business_name || 'Unnamed'} (${d.journey_type.toUpperCase()}, role: ${d.role})`).join('\n');
+      layers.push(`\n## PORTFOLIO AWARENESS\nThis user has ${totalDeals} active deals. You have the list_user_deals and switch_deal_context tools — use them proactively.\n\nOwned deals:\n${dealList}${partList ? `\n\nParticipant deals:\n${partList}` : ''}\n\nIf the user appears to be managing multiple deals (broker, advisor, PE firm, family office), adapt your communication style to be more institutional and portfolio-oriented. Use the list_user_deals tool to provide cross-deal insights when relevant.`);
+    }
+  } catch { /* portfolio check is non-critical */ }
 
   // Layer 3: Journey detection or deal context
   if (!deal) {

@@ -331,6 +331,8 @@ export default function AppShell() {
   const [canvasMarkdown, setCanvasMarkdown] = useState<{ content: string; title: string } | null>(null);
   const [morphing, setMorphing] = useState(false);
   const [heroFocused, setHeroFocused] = useState(false); // tracks when hero input is focused — controls logo position
+  const [chatWidth, setChatWidth] = useState(520); // resizable chat column width
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop sidebar collapse
   const [ndaRequired, setNdaRequired] = useState<{ dealId: number; dealName?: string } | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   // Chat hooks (always called for hook order)
@@ -341,6 +343,28 @@ export default function AppShell() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const dockRef = useRef<ChatDockHandle>(null);
+
+  // Drag-to-resize chat/canvas split
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = chatWidth;
+    const onMove = (ev: MouseEvent) => {
+      const delta = ev.clientX - startX;
+      const newWidth = Math.min(Math.max(startWidth + delta, 320), window.innerWidth - 400);
+      setChatWidth(newWidth);
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }, [chatWidth]);
 
   // Set initial conversation ID from URL
   useEffect(() => {
@@ -503,6 +527,11 @@ export default function AppShell() {
 
   const canvasOpen = canvasMarkdown !== null || viewingDeliverable !== null;
 
+  // Auto-collapse sidebar when canvas opens
+  useEffect(() => {
+    if (canvasOpen && !isMobile) setSidebarCollapsed(true);
+  }, [canvasOpen, isMobile]);
+
   // Signup prompt
   const showSignup = !user && (
     anonChat.limitReached ||
@@ -629,8 +658,8 @@ export default function AppShell() {
       className="flex flex-col h-full select-none"
       style={{ width: mobile ? 280 : 256, background: '#FAFAFA', borderRight: '1px solid rgba(0,0,0,0.06)' }}
     >
-      {/* Logo — hidden when center logo is visible on home landing */}
-      <div className="px-5 pt-5 pb-2" style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: 'opacity 0.2s ease' }}>
+      {/* Logo — centered, hidden when center logo is visible on home landing */}
+      <div className="pt-5 pb-2 flex items-center justify-center" style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: 'opacity 0.2s ease' }}>
         <button
           onClick={() => { handleTabClick('home'); if (mobile) setIsMobileSidebarOpen(false); }}
           className="bg-transparent border-none cursor-pointer p-0 leading-none"
@@ -688,14 +717,14 @@ export default function AppShell() {
                   fontFamily: 'inherit',
                   fontSize: '15px',
                   fontWeight: isActive ? 600 : 400,
-                  color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
+                  color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.7)',
                   background: isActive ? 'rgba(0,0,0,0.04)' : 'transparent',
                   borderRadius: '10px',
                   border: 'none',
                 }}
                 type="button"
               >
-                <span style={{ color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.3)' }}>{item.icon}</span>
+                <span style={{ color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.5)' }}>{item.icon}</span>
                 {item.label}
               </button>
             );
@@ -725,14 +754,14 @@ export default function AppShell() {
                   fontFamily: 'inherit',
                   fontSize: '14px',
                   fontWeight: isActive ? 600 : 400,
-                  color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.4)',
+                  color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.7)',
                   background: isActive ? 'rgba(0,0,0,0.04)' : 'transparent',
                   borderRadius: '10px',
                   border: 'none',
                 }}
                 type="button"
               >
-                <span style={{ color: isActive ? '#C96B4F' : 'rgba(0,0,0,0.25)' }}>{item.icon}</span>
+                <span style={{ color: isActive ? '#C96B4F' : 'rgba(0,0,0,0.4)' }}>{item.icon}</span>
                 {item.label}
               </button>
             );
@@ -740,33 +769,136 @@ export default function AppShell() {
         </nav>
       </div>
 
-      {/* Conversations — Recent */}
-      <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-4">
-        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C96B4F' }}>Recent</div>
-        {(allConversations || []).map(c => (
+      {/* Cabinet — artifacts & analysis (logged-in only) */}
+      {user && (
+        <div className="px-3 mt-4">
+          <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C96B4F' }}>Cabinet</div>
           <button
-            key={c.id}
             onClick={() => {
-              if (user) authChat.selectConversation(c.id);
-              else anonChat.selectConversation(c.id);
-              setViewState('chat');
-              navigate(`/chat/${c.id}`);
-              setIsMobileSidebarOpen(false);
+              setViewState('documents');
+              navigate('/documents');
+              if (mobile) setIsMobileSidebarOpen(false);
             }}
-            className={`flex items-center w-full px-4 py-2 text-[14px] cursor-pointer transition-all conv-item-hover`}
-            style={{
-              fontFamily: 'inherit',
-              fontWeight: c.id === activeConvId && viewState === 'chat' ? 600 : 400,
-              color: c.id === activeConvId && viewState === 'chat' ? '#0D0D0D' : 'rgba(0,0,0,0.45)',
-              background: c.id === activeConvId && viewState === 'chat' ? 'rgba(0,0,0,0.04)' : 'transparent',
-              borderRadius: '10px',
-              border: 'none',
-            }}
+            className="flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all nav-item-hover"
+            style={{ fontFamily: 'inherit', fontSize: '14px', fontWeight: viewState === 'documents' ? 600 : 400, color: viewState === 'documents' ? '#0D0D0D' : 'rgba(0,0,0,0.7)', background: viewState === 'documents' ? 'rgba(0,0,0,0.04)' : 'transparent', borderRadius: '10px', border: 'none' }}
             type="button"
           >
-            <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
+            Artifacts & Analysis
           </button>
-        ))}
+        </div>
+      )}
+
+      {/* Conversations — Recent (grouped by deal when multi-deal) */}
+      <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-4">
+        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C96B4F' }}>Recent</div>
+        {(() => {
+          const convs = allConversations || [];
+          const uniqueDeals = new Set(convs.filter(c => c.deal_id).map(c => c.deal_id));
+          const isMultiDeal = uniqueDeals.size > 1;
+
+          if (!isMultiDeal) {
+            // Simple flat list
+            return convs.map(c => (
+              <button
+                key={c.id}
+                onClick={() => {
+                  if (user) authChat.selectConversation(c.id);
+                  else anonChat.selectConversation(c.id);
+                  setViewState('chat');
+                  navigate(`/chat/${c.id}`);
+                  setIsMobileSidebarOpen(false);
+                }}
+                className="flex items-center w-full px-4 py-2 text-[14px] cursor-pointer transition-all conv-item-hover"
+                style={{
+                  fontFamily: 'inherit',
+                  fontWeight: c.id === activeConvId && viewState === 'chat' ? 600 : 400,
+                  color: c.id === activeConvId && viewState === 'chat' ? '#0D0D0D' : 'rgba(0,0,0,0.65)',
+                  background: c.id === activeConvId && viewState === 'chat' ? 'rgba(0,0,0,0.04)' : 'transparent',
+                  borderRadius: '10px', border: 'none',
+                }}
+                type="button"
+              >
+                <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
+              </button>
+            ));
+          }
+
+          // Group by deal
+          const grouped: Record<string, typeof convs> = {};
+          const ungrouped: typeof convs = [];
+          for (const c of convs) {
+            const key = c.deal_id ? `${c.deal_id}` : null;
+            if (key) {
+              if (!grouped[key]) grouped[key] = [];
+              grouped[key].push(c);
+            } else {
+              ungrouped.push(c);
+            }
+          }
+
+          return (
+            <>
+              {Object.entries(grouped).map(([dealId, dealConvs]) => {
+                const sample = dealConvs[0];
+                const dealLabel = sample.business_name || sample.journey?.toUpperCase() || `Deal ${dealId}`;
+                return (
+                  <div key={dealId} style={{ marginBottom: 8 }}>
+                    <div className="px-4 py-1" style={{ fontSize: 11, fontWeight: 600, color: 'rgba(0,0,0,0.45)' }}>
+                      {dealLabel}
+                    </div>
+                    {dealConvs.map(c => (
+                      <button
+                        key={c.id}
+                        onClick={() => {
+                          if (user) authChat.selectConversation(c.id);
+                          else anonChat.selectConversation(c.id);
+                          setViewState('chat');
+                          navigate(`/chat/${c.id}`);
+                          setIsMobileSidebarOpen(false);
+                        }}
+                        className="flex items-center w-full px-4 py-1.5 text-[13px] cursor-pointer transition-all conv-item-hover"
+                        style={{
+                          fontFamily: 'inherit',
+                          fontWeight: c.id === activeConvId && viewState === 'chat' ? 600 : 400,
+                          color: c.id === activeConvId && viewState === 'chat' ? '#0D0D0D' : 'rgba(0,0,0,0.6)',
+                          background: c.id === activeConvId && viewState === 'chat' ? 'rgba(0,0,0,0.04)' : 'transparent',
+                          borderRadius: '10px', border: 'none', paddingLeft: 24,
+                        }}
+                        type="button"
+                      >
+                        <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                );
+              })}
+              {ungrouped.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => {
+                    if (user) authChat.selectConversation(c.id);
+                    else anonChat.selectConversation(c.id);
+                    setViewState('chat');
+                    navigate(`/chat/${c.id}`);
+                    setIsMobileSidebarOpen(false);
+                  }}
+                  className="flex items-center w-full px-4 py-2 text-[14px] cursor-pointer transition-all conv-item-hover"
+                  style={{
+                    fontFamily: 'inherit',
+                    fontWeight: c.id === activeConvId && viewState === 'chat' ? 600 : 400,
+                    color: c.id === activeConvId && viewState === 'chat' ? '#0D0D0D' : 'rgba(0,0,0,0.65)',
+                    background: c.id === activeConvId && viewState === 'chat' ? 'rgba(0,0,0,0.04)' : 'transparent',
+                    borderRadius: '10px', border: 'none',
+                  }}
+                  type="button"
+                >
+                  <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
+                </button>
+              ))}
+            </>
+          );
+        })()}
       </div>
 
       {/* Yulia status + User Profile — bottom of sidebar */}
@@ -823,8 +955,49 @@ export default function AppShell() {
         transform: 'translateY(var(--app-offset, 0px))',
       }}
     >
-      {/* Desktop sidebar */}
-      {!isMobile && sidebarContent(false)}
+      {/* Desktop sidebar — collapsible */}
+      {!isMobile && (
+        <div style={{ position: 'relative', width: sidebarCollapsed ? 0 : 256, overflow: 'hidden', transition: 'width 0.25s ease', flexShrink: 0 }}>
+          {sidebarContent(false)}
+          {/* Collapse/expand toggle */}
+          <button
+            onClick={() => setSidebarCollapsed(c => !c)}
+            className="bg-transparent border-none cursor-pointer hover:opacity-80"
+            style={{
+              position: 'absolute', top: 20, right: 8,
+              width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              borderRadius: 6, color: 'rgba(0,0,0,0.35)',
+            }}
+            type="button"
+            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {sidebarCollapsed
+                ? <><line x1="3" y1="12" x2="21" y2="12" /><polyline points="15 6 21 12 15 18" /></>
+                : <><line x1="21" y1="12" x2="3" y2="12" /><polyline points="9 18 3 12 9 6" /></>
+              }
+            </svg>
+          </button>
+        </div>
+      )}
+      {/* Sidebar expand button when collapsed */}
+      {!isMobile && sidebarCollapsed && (
+        <button
+          onClick={() => setSidebarCollapsed(false)}
+          className="bg-transparent border-none cursor-pointer hover:opacity-80"
+          style={{
+            position: 'absolute', top: 20, left: 12, zIndex: 20,
+            width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            borderRadius: 8, color: 'rgba(0,0,0,0.4)', background: 'rgba(0,0,0,0.04)',
+          }}
+          type="button"
+          title="Expand sidebar"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+      )}
 
       {/* Mobile sidebar overlay */}
       {isMobile && isMobileSidebarOpen && (
@@ -930,10 +1103,10 @@ export default function AppShell() {
 
         {/* Main row: chat + canvas split */}
         <div className="flex-1 flex min-h-0">
-        {/* Chat column — fixed width on desktop in chat mode, flex on landing/other */}
+        {/* Chat column — resizable on desktop in chat mode, flex on landing/other */}
         <div
           className="flex flex-col min-w-0"
-          style={!isMobile && viewState === 'chat' ? { width: 520, flexShrink: 0 } : { flex: 1 }}
+          style={!isMobile && viewState === 'chat' ? { width: chatWidth, flexShrink: 0 } : { flex: 1 }}
         >
         {/* Scroll area */}
         <div
@@ -951,14 +1124,32 @@ export default function AppShell() {
                 {/* MOBILE HOME — Grok-style: logo + chat bar, centered */}
                 <div className="flex flex-col h-full md:hidden">
                   <div className="flex-1 flex flex-col items-center justify-center px-5">
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ marginBottom: 32 }}
-                    >
-                      <LogoImg height={48} />
-                    </motion.div>
+                    <div style={{ position: 'relative', marginBottom: 32, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 180, width: '100%' }}>
+                      {/* Logo — fades out */}
+                      <motion.div
+                        animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
+                        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                        style={{ position: 'absolute' }}
+                      >
+                        <LogoImg height={48} />
+                      </motion.div>
+                      {/* Hero text — fades in */}
+                      <motion.div
+                        animate={{ opacity: heroFocused ? 1 : 0, y: heroFocused ? 0 : 12 }}
+                        transition={{ duration: 0.6, delay: heroFocused ? 0.15 : 0, ease: [0.4, 0, 0.2, 1] }}
+                        style={{ textAlign: 'center', width: '100%', pointerEvents: heroFocused ? 'auto' : 'none' }}
+                      >
+                        <h1
+                          className="text-5xl md:text-6xl lg:text-7xl"
+                          style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, color: '#000', letterSpacing: '-0.03em', lineHeight: 1.05, margin: '0 0 24px' }}
+                        >
+                          Chat with your deals!
+                        </h1>
+                        <p className="text-lg md:text-xl" style={{ fontFamily: "'Inter', system-ui, sans-serif", lineHeight: 1.7, color: '#545454', margin: 0, maxWidth: 560 }}>
+                          Yulia is a chat agent for all things M&A and she can guide you through the entire process of selling or buying a business, all by just chatting with your deals. No deal is too small or too complex.<br /><span style={{ fontWeight: 600 }}>Start now completely free!</span>
+                        </p>
+                      </motion.div>
+                    </div>
                     <motion.div
                       className="w-full"
                       initial={{ opacity: 0, y: 12 }}
@@ -983,15 +1174,33 @@ export default function AppShell() {
 
                 {/* DESKTOP HOME — Grok-style: logo + chat bar, centered */}
                 <div className="hidden md:flex flex-col h-full items-center justify-center">
-                  <div className="flex flex-col items-center" style={{ marginTop: '-60px', width: '100%', maxWidth: 640 }}>
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ marginBottom: 36 }}
-                    >
-                      <LogoImg height={56} />
-                    </motion.div>
+                  <div className="flex flex-col items-center" style={{ marginTop: '-60px', width: '100%', maxWidth: 780 }}>
+                    <div style={{ position: 'relative', marginBottom: 36, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200, width: '100%', maxWidth: 720 }}>
+                      {/* Logo — fades out */}
+                      <motion.div
+                        animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
+                        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                        style={{ position: 'absolute' }}
+                      >
+                        <LogoImg height={56} />
+                      </motion.div>
+                      {/* Hero text — fades in */}
+                      <motion.div
+                        animate={{ opacity: heroFocused ? 1 : 0, y: heroFocused ? 0 : 12 }}
+                        transition={{ duration: 0.6, delay: heroFocused ? 0.15 : 0, ease: [0.4, 0, 0.2, 1] }}
+                        style={{ textAlign: 'center', width: '100%', pointerEvents: heroFocused ? 'auto' : 'none' }}
+                      >
+                        <span
+                          className="text-5xl"
+                          style={{ display: 'block', fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, color: '#000', letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: 12 }}
+                        >
+                          Chat with your deals!
+                        </span>
+                        <span style={{ display: 'block', fontFamily: "'Inter', system-ui, sans-serif", fontSize: 15, lineHeight: 1.65, color: 'rgba(0,0,0,0.55)', letterSpacing: '-0.01em' }}>
+                          Yulia is a chat agent for all things M&A and she can guide you through the entire process of selling or buying a business, all by just chatting with your deals. No deal is too small or too complex.<br /><span style={{ fontWeight: 600 }}>Start now completely free!</span>
+                        </span>
+                      </motion.div>
+                    </div>
                     <motion.div
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -1075,6 +1284,10 @@ export default function AppShell() {
                   if (last) anonChat.sendMessage(last.content);
                 } : undefined}
                 onOpenDeliverable={handleOpenDeliverable}
+                onShortcutClick={(fill) => {
+                  dockRef.current?.clear();
+                  handleSend(fill);
+                }}
                 desktop={!isMobile}
               />
 
@@ -1184,15 +1397,37 @@ export default function AppShell() {
 
         </div>{/* end chat column */}
 
+        {/* ════ RESIZE HANDLE ════ */}
+        {!isMobile && viewState === 'chat' && (
+          <div
+            className="resize-handle"
+            onMouseDown={handleResizeStart}
+            style={{
+              width: 6,
+              cursor: 'col-resize',
+              background: 'transparent',
+              flexShrink: 0,
+              position: 'relative',
+              zIndex: 10,
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: 0, bottom: 0, left: 2,
+              width: 2, background: 'rgba(0,0,0,0.08)',
+              borderRadius: 1,
+              transition: 'background 0.15s ease',
+            }} />
+          </div>
+        )}
+
         {/* ════ DESKTOP CANVAS PANEL — always visible on desktop ════ */}
         {!isMobile && viewState === 'chat' && (
           <div
-            className="shrink-0 flex flex-col"
+            className="flex flex-col min-w-0"
             style={{
-              borderLeft: '1px solid rgba(0,0,0,0.06)',
-              width: canvasOpen ? 520 : 48,
-              transition: 'width 0.25s ease',
-              background: canvasOpen ? '#fff' : '#F5F5F5',
+              flex: 1,
+              background: canvasOpen ? '#fff' : '#EDEDEA',
               position: 'relative',
             }}
           >
@@ -1213,19 +1448,15 @@ export default function AppShell() {
                 ) : null}
               </>
             ) : (
-              /* Collapsed empty state — greyed out rail */
+              /* Empty state — logo + message */
               <div style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                paddingTop: 16, gap: 8, height: '100%',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                height: '100%', gap: 16, opacity: 0.4,
               }}>
-                <div style={{
-                  writingMode: 'vertical-rl', textOrientation: 'mixed',
-                  fontSize: 10, fontWeight: 600, color: 'rgba(0,0,0,0.25)',
-                  textTransform: 'uppercase', letterSpacing: '0.1em',
-                  marginTop: 8,
-                }}>
-                  Canvas
-                </div>
+                <LogoImg height={36} />
+                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 14, fontWeight: 500, color: '#0D0D0D', margin: 0 }}>
+                  Nothing to see here
+                </p>
               </div>
             )}
           </div>
@@ -1274,6 +1505,10 @@ export default function AppShell() {
         @keyframes slideUpIn {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
+        }
+        .resize-handle:hover > div,
+        .resize-handle:active > div {
+          background: rgba(0,0,0,0.2) !important;
         }
       `}</style>
     </div>

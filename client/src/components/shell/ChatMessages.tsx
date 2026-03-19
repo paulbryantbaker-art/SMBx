@@ -1,6 +1,18 @@
+import { useState } from 'react';
 import Markdown from 'react-markdown';
 import type { AnonMessage } from '../../hooks/useAnonymousChat';
 import { DELIVERABLE_LABELS } from '../chat/Canvas';
+
+/* ─── Shortcut tools for the empty-state help area ─── */
+const SHORTCUT_TOOLS = [
+  { group: 'journey', label: 'Sell my business', desc: 'Valuation, packaging, buyer matching', fill: 'I want to sell my business — ' },
+  { group: 'journey', label: 'Buy a business', desc: 'Thesis, sourcing, diligence, structuring', fill: 'I want to buy a business — ' },
+  { group: 'tool', label: 'Business valuation', desc: 'Multi-methodology estimate', fill: 'I need a business valuation — I own a ' },
+  { group: 'tool', label: 'SBA loan check', desc: 'Eligibility and DSCR analysis', fill: "Can this deal get SBA financing? I'm looking at a " },
+  { group: 'tool', label: 'Capital structure', desc: 'SBA, seller note, equity, mezzanine', fill: 'Help me figure out financing for a ' },
+  { group: 'tool', label: 'Search for a business', desc: 'Define criteria, evaluate opportunities', fill: "Help me find a business — I'm looking for " },
+  { group: 'tool', label: 'Post-acquisition help', desc: '100-day plan, integration, synergies', fill: "I just acquired a business and need help with " },
+] as const;
 
 interface ChatMessagesProps {
   messages: AnonMessage[];
@@ -10,6 +22,7 @@ interface ChatMessagesProps {
   error?: string | null;
   onRetry?: () => void;
   onOpenDeliverable?: (message: AnonMessage) => void;
+  onShortcutClick?: (fill: string) => void;
   desktop?: boolean;
 }
 
@@ -68,11 +81,13 @@ const PROSE_CLASSES = [
   '[&_a]:text-[#000] [&_a]:underline [&_a]:underline-offset-2',
 ].join(' ');
 
-export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, desktop }: ChatMessagesProps) {
+export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, onShortcutClick, desktop }: ChatMessagesProps) {
+  const [helpExpanded, setHelpExpanded] = useState(false);
+
   /* Desktop label: tiny uppercase, muted — matches Stitch mockup */
   const Label = ({ text }: { text: string }) => (
     <p style={{
-      fontSize: 10, fontWeight: 700, color: '#94a3b8',
+      fontSize: 10, fontWeight: 700, color: text === 'You' ? '#C96B4F' : '#94a3b8',
       textTransform: 'uppercase', letterSpacing: '0.15em',
       margin: '0 0 6px 0',
     }}>{text}</p>
@@ -85,6 +100,8 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
     textAlign: desktop ? 'justify' : undefined,
   };
 
+  const isEmpty = messages.length === 0 && !streamingText && !sending;
+
   return (
     <div style={{
       width: '100%',
@@ -93,6 +110,65 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
       userSelect: 'text',
       WebkitUserSelect: 'text',
     } as React.CSSProperties}>
+
+      {/* ─── Empty state: help area ─── */}
+      {isEmpty && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: desktop ? 300 : 200, gap: 16, padding: '40px 20px' }}>
+          <img src="/logo-smbx.png" alt="smbx.ai" draggable={false} style={{ height: 32, objectFit: 'contain', opacity: 0.3 }} />
+          <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.4)', textAlign: 'center', margin: 0, lineHeight: 1.6, maxWidth: 360 }}>
+            Drop any files here to upload, or just start typing to chat with Yulia.
+          </p>
+
+          {/* Expandable shortcuts */}
+          <button
+            onClick={() => setHelpExpanded(h => !h)}
+            className="bg-transparent border-none cursor-pointer"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 500, color: '#C96B4F', fontFamily: 'inherit', padding: '4px 8px', borderRadius: 8 }}
+            type="button"
+          >
+            Quick starts
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: helpExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}>
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+
+          {helpExpanded && (
+            <div style={{ width: '100%', maxWidth: 440, display: 'flex', flexDirection: 'column', gap: 4, animation: 'fadeIn 0.2s ease' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(0,0,0,0.3)', padding: '8px 12px 4px', marginTop: 4 }}>Journeys</div>
+              {SHORTCUT_TOOLS.filter(t => t.group === 'journey').map(tool => (
+                <button
+                  key={tool.label}
+                  onClick={() => onShortcutClick?.(tool.fill)}
+                  className="bg-transparent border-none cursor-pointer"
+                  style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '8px 12px', borderRadius: 10, fontFamily: 'inherit', textAlign: 'left', transition: 'background 0.15s' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.03)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  type="button"
+                >
+                  <span style={{ fontSize: 14, fontWeight: 500, color: '#0D0D0D' }}>{tool.label}</span>
+                  <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{tool.desc}</span>
+                </button>
+              ))}
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(0,0,0,0.3)', padding: '12px 12px 4px' }}>Tools</div>
+              {SHORTCUT_TOOLS.filter(t => t.group === 'tool').map(tool => (
+                <button
+                  key={tool.label}
+                  onClick={() => onShortcutClick?.(tool.fill)}
+                  className="bg-transparent border-none cursor-pointer"
+                  style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '8px 12px', borderRadius: 10, fontFamily: 'inherit', textAlign: 'left', transition: 'background 0.15s' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.03)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  type="button"
+                >
+                  <span style={{ fontSize: 14, fontWeight: 500, color: '#0D0D0D' }}>{tool.label}</span>
+                  <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{tool.desc}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: desktop ? 40 : 20 }}>
         {messages.map((m, i) => {
           const isDeliverable = m.metadata?.type === 'deliverable';
