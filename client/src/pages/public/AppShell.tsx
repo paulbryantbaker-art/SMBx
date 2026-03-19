@@ -52,39 +52,19 @@ function LogoImg({ height = 28, style, className }: { height?: number; style?: R
   );
 }
 
-/* ═══ TYPEWRITER HINT POOL (home page) ═══ */
-const TYPEWRITER_PREFIX = "Hello, I'm Yulia. ";
+/* ═══ TYPEWRITER HINT POOL (home page) — Yulia speaking ═══ */
+const TYPEWRITER_PREFIX = "";
 const TYPEWRITER_HINTS = [
-  // Sellers — the first question
-  "What's my business worth?",
-  "I want to sell my landscaping company in Austin...",
-  "What add-backs am I missing on $600K revenue?",
-  "Asset sale vs stock sale \u2014 what do I actually keep?",
-  "How do I prepare my HVAC company for sale?",
-  "My partner wants out. What are our options?",
-  // Buyers — speed to conviction
-  "I found a listing for $285K \u2014 is that fair?",
-  "Can I finance a $1.8M deal with SBA?",
-  "Screen this deal: $2.1M revenue, $380K SDE...",
-  "What's the DSCR on this acquisition?",
-  "Looking for my first deal \u2014 home services under $800K...",
-  // Middle market
-  "We're doing $5M EBITDA in commercial roofing...",
-  "Evaluating a platform acquisition at 7.2x...",
-  "Model SBA vs. conventional on a $6M deal...",
-  // Capital raise
-  "I need $500K for a second location...",
-  "Model the dilution on a $2M equity raise...",
-  "Walk me through ESOP conversion...",
-  // Integration
-  "I just closed \u2014 what's my 90-day plan?",
-  "Employee retention is my top concern...",
-  // Tax & structure
-  "I'm a C-Corp. How bad is double taxation?",
-  "Walk me through purchase price allocation...",
-  // Advisors
-  "I'm a broker. Help me package a new listing...",
-  "Generate a CIM from raw financials...",
+  "Hi, I'm Yulia. I can help you buy or sell any company by walking you through the complete process \u2014 documents, tax, and legal.",
+  "I'm Yulia. I can walk you through the complete M&A process, from valuation to closing day.",
+  "I'm Yulia. I can help you manage your deal portfolio and track every milestone across your transactions.",
+  "I'm Yulia. I work with businesses of all types and sizes \u2014 from Main Street shops to middle-market companies.",
+  "I'm Yulia. I can prepare your financials, build your CIM, and get your business ready for market.",
+  "I'm Yulia. I can screen acquisition targets, model the financing, and tell you if the deal makes sense.",
+  "I'm Yulia. I can help you raise capital \u2014 SBA loans, equity rounds, seller financing, or creative structures.",
+  "I'm Yulia. I can generate valuations, LOIs, due diligence packages, and closing checklists on demand.",
+  "I'm Yulia. I can analyze buyer demand in your market and identify who's actively looking to acquire.",
+  "I'm Yulia. I can model tax impact, purchase price allocation, and help you keep more of what you earn.",
 ];
 
 /* ═══ TYPES ═══ */

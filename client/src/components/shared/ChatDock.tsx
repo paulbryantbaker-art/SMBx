@@ -123,11 +123,11 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
       setTwText(displayed);
 
       if (twCharRef.current >= fullStr.length) {
-        // Done typing — hold for 2.5s
+        // Done typing — hold so user can read
         twPhaseRef.current = 'holding';
-        twTimerRef.current = setTimeout(tick, 2500);
+        twTimerRef.current = setTimeout(tick, 4500);
       } else {
-        twTimerRef.current = setTimeout(tick, 28);
+        twTimerRef.current = setTimeout(tick, 45);
       }
     } else if (phase === 'holding') {
       // Clear and move to next hint
