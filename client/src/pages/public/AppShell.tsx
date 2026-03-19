@@ -39,34 +39,16 @@ function getGreeting(): string {
   return 'Good night.';
 }
 
-/* ═══ INTERLOCKED X MARK — woven 3D logo mark ═══ */
-function LogoXMark({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
-  const [uid] = useState(() => `lx${Math.random().toString(36).slice(2, 6)}`);
+/* ═══ LOGO — transparent PNG with copper X ═══ */
+function LogoImg({ height = 28, style, className }: { height?: number; style?: React.CSSProperties; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" fill="none"
-      style={{ display: 'inline-block', verticalAlign: 'baseline', marginBottom: size > 30 ? -4 : -2, ...style }}>
-      <defs>
-        <linearGradient id={`${uid}a`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#D4566E" />
-          <stop offset="50%" stopColor="#A02E44" />
-          <stop offset="100%" stopColor="#D4566E" />
-        </linearGradient>
-        <linearGradient id={`${uid}b`} x1="1" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#D4566E" />
-          <stop offset="50%" stopColor="#A02E44" />
-          <stop offset="100%" stopColor="#D4566E" />
-        </linearGradient>
-        <clipPath id={`${uid}c`}>
-          <rect x="0" y="19" width="40" height="21" />
-        </clipPath>
-      </defs>
-      {/* Layer 1: / bar (back — full) */}
-      <line x1="33" y1="7" x2="7" y2="33" stroke={`url(#${uid}b)`} strokeWidth="7.5" strokeLinecap="round" />
-      {/* Layer 2: \ bar (front at top — full, slightly longer) */}
-      <line x1="6" y1="4" x2="34" y2="36" stroke={`url(#${uid}a)`} strokeWidth="7.5" strokeLinecap="round" />
-      {/* Layer 3: / bar bottom half (weave — front at bottom) */}
-      <line x1="33" y1="7" x2="7" y2="33" stroke={`url(#${uid}b)`} strokeWidth="7.5" strokeLinecap="round" clipPath={`url(#${uid}c)`} />
-    </svg>
+    <img
+      src="/logo-smbx.png"
+      alt="smbx.ai"
+      draggable={false}
+      className={className}
+      style={{ height, objectFit: 'contain', display: 'inline-block', ...style }}
+    />
   );
 }
 
@@ -371,23 +353,6 @@ export default function AppShell() {
   const [heroFocused, setHeroFocused] = useState(false); // tracks when hero input is focused — controls logo position
   const [ndaRequired, setNdaRequired] = useState<{ dealId: number; dealName?: string } | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
-  const [isIdle, setIsIdle] = useState(false); // tracks page inactivity for X bounce
-
-  // Idle detection — bounce X after 4s of no interaction
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-    let idle = false;
-    const handleActivity = () => {
-      if (idle) { setIsIdle(false); idle = false; }
-      clearTimeout(timer);
-      timer = setTimeout(() => { idle = true; setIsIdle(true); }, 4000);
-    };
-    handleActivity();
-    const events = ['mousemove', 'scroll', 'keydown', 'touchstart', 'click'];
-    events.forEach(e => window.addEventListener(e, handleActivity, { passive: true }));
-    return () => { clearTimeout(timer); events.forEach(e => window.removeEventListener(e, handleActivity)); };
-  }, []);
-
   // Chat hooks (always called for hook order)
   const anonChat = useAnonymousChat();
   const authChat = useAuthChat(user);
@@ -688,15 +653,10 @@ export default function AppShell() {
       <div className="px-5 pt-5 pb-2" style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: 'opacity 0.2s ease' }}>
         <button
           onClick={() => { handleTabClick('home'); if (mobile) setIsMobileSidebarOpen(false); }}
-          className="bg-transparent border-none cursor-pointer p-0 text-[22px] leading-none"
-          style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontWeight: 700, color: '#0D0D0D' }}
+          className="bg-transparent border-none cursor-pointer p-0 leading-none"
           type="button"
         >
-          {(activeTab === 'home' && viewState === 'landing') ? (
-            <LogoXMark size={26} />
-          ) : (
-            <>smb<LogoXMark size={22} style={{ marginLeft: -1, marginRight: -1 }} />.ai</>
-          )}
+          <LogoImg height={32} />
         </button>
       </div>
 
@@ -948,10 +908,10 @@ export default function AppShell() {
                   <button
                     onClick={() => handleTabClick('home')}
                     className="bg-transparent border-none cursor-pointer p-0 leading-none"
-                    style={{ letterSpacing: '-0.03em', fontFamily: 'inherit', fontSize: '20px', fontWeight: 700, color: '#0D0D0D', opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: 'opacity 0.3s ease' }}
+                    style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: 'opacity 0.3s ease' }}
                     type="button"
                   >
-                    smb<LogoXMark size={20} style={{ marginLeft: -1, marginRight: -1 }} />.ai
+                    <LogoImg height={22} />
                   </button>
                 ) : (
                   <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(0,0,0,0.35)' }}>
@@ -1011,7 +971,7 @@ export default function AppShell() {
                 {/* MOBILE HOME */}
                 <div className="flex flex-col h-full md:hidden">
                   <div className="flex-1 flex flex-col items-center justify-center px-5 gap-7" style={{ position: 'relative' }}>
-                    {/* Logo mark — flash-moves to sidebar when input focused */}
+                    {/* Logo — video with blend, falls back to image */}
                     <motion.div
                       initial={{ opacity: 0, y: -12, scale: 0.9 }}
                       animate={(heroFocused || morphing)
@@ -1019,9 +979,7 @@ export default function AppShell() {
                         : { opacity: 1, y: 0, x: 0, scale: 1, transition: { duration: 0.5, delay: 0.05, ease: [0.22, 1, 0.36, 1] } }
                       }
                     >
-                      <span style={{ fontSize: '34px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D' }}>
-                        smb<span style={{ display: 'inline-block', animation: isIdle && !heroFocused && !morphing ? 'xBounce 2s ease-in-out infinite' : 'none' }}><LogoXMark size={34} style={{ marginLeft: -1, marginRight: -1 }} /></span>.ai
-                      </span>
+                      <LogoImg height={64} />
                     </motion.div>
                     {/* Heading */}
                     <motion.h1
@@ -1096,8 +1054,8 @@ export default function AppShell() {
 
                 {/* DESKTOP HOME */}
                 <div className="hidden md:flex flex-col h-full items-center justify-center">
-                  <div className="flex flex-col items-center" style={{ marginTop: '-40px', width: '100%', maxWidth: 640 }}>
-                    {/* Logo mark — flash-moves to sidebar when input focused */}
+                  <div className="flex flex-col items-center" style={{ marginTop: '-180px', width: '100%', maxWidth: 640 }}>
+                    {/* Logo — video with blend, falls back to image */}
                     <motion.div
                       initial={{ opacity: 0, y: -16, scale: 0.85 }}
                       animate={(heroFocused || morphing)
@@ -1106,9 +1064,7 @@ export default function AppShell() {
                       }
                       style={{ marginBottom: 28 }}
                     >
-                      <span style={{ fontSize: '42px', fontWeight: 700, letterSpacing: '-0.03em', color: '#0D0D0D' }}>
-                        smb<span style={{ display: 'inline-block', animation: isIdle && !heroFocused && !morphing ? 'xBounce 2s ease-in-out infinite' : 'none' }}><LogoXMark size={44} style={{ marginLeft: -1, marginRight: -1 }} /></span>.ai
-                      </span>
+                      <LogoImg height={56} />
                     </motion.div>
                     {/* Heading */}
                     <motion.h1
@@ -1441,13 +1397,6 @@ export default function AppShell() {
         @keyframes slideUpIn {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
-        }
-        @keyframes xBounce {
-          0%, 75%, 100% { transform: translateY(0); }
-          10% { transform: translateY(-6px); }
-          25% { transform: translateY(3px); }
-          40% { transform: translateY(-2px); }
-          55% { transform: translateY(1px); }
         }
       `}</style>
     </div>
