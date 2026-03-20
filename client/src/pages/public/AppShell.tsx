@@ -429,17 +429,27 @@ export default function AppShell() {
     const sourceRef = isMobile ? mobileHeroLogoRef.current : heroLogoRef.current;
 
     if ((goingSidebar || goingCenter) && sourceRef && targetRef) {
-      const hero = sourceRef.getBoundingClientRect();
-      const side = targetRef.getBoundingClientRect();
-      const cx = hero.left + hero.width / 2;
-      const cy = hero.top + hero.height / 2;
-      const sx = side.left + side.width / 2;
-      const sy = side.top + side.height / 2;
+      const measure = () => {
+        const hero = sourceRef.getBoundingClientRect();
+        const side = targetRef.getBoundingClientRect();
+        const cx = hero.left + hero.width / 2;
+        const cy = hero.top + hero.height / 2;
+        const sx = side.left + side.width / 2;
+        const sy = side.top + side.height / 2;
 
-      if (goingSidebar) {
-        setFlyingLogo({ fromX: cx, fromY: cy, toX: sx, toY: sy, direction: 'to-sidebar' });
+        if (goingSidebar) {
+          setFlyingLogo({ fromX: cx, fromY: cy, toX: sx, toY: sy, direction: 'to-sidebar' });
+        } else {
+          setFlyingLogo({ fromX: sx, fromY: sy, toX: cx, toY: cy, direction: 'to-center' });
+        }
+      };
+
+      if (isMobile && goingCenter) {
+        // Delay measurement on mobile blur — keyboard is closing, layout shifts
+        const tid = setTimeout(measure, 200);
+        return () => clearTimeout(tid);
       } else {
-        setFlyingLogo({ fromX: sx, fromY: sy, toX: cx, toY: cy, direction: 'to-center' });
+        measure();
       }
     }
   }, [heroFocused, isMobile]);
@@ -505,9 +515,16 @@ export default function AppShell() {
     return () => window.removeEventListener('popstate', onPopState);
   }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-scroll on new messages
+  // Auto-scroll on new messages — instant on first entry, smooth after
+  const chatEnteredAt = useRef(0);
   useEffect(() => {
-    if (viewState === 'chat') messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (viewState === 'chat') chatEnteredAt.current = Date.now();
+  }, [viewState]);
+  useEffect(() => {
+    if (viewState === 'chat') {
+      const justEntered = Date.now() - chatEnteredAt.current < 400;
+      messagesEndRef.current?.scrollIntoView({ behavior: justEntered ? 'instant' as ScrollBehavior : 'smooth' });
+    }
   }, [messages, streamingText, viewState]);
 
   // Reset scroll to top when landing page renders or tab changes
@@ -1165,7 +1182,7 @@ export default function AppShell() {
                     ref={mobileHeaderLogoRef}
                     onClick={() => handleTabClick('home')}
                     className="bg-transparent border-none cursor-pointer p-0 leading-none"
-                    style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: heroFocused ? 'opacity 0.3s ease-out 0.5s' : 'opacity 0.15s ease 0s' }}
+                    style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: heroFocused ? 'opacity 0.3s ease-out 0.5s' : 'opacity 0.3s ease-out 0.35s' }}
                     type="button"
                   >
                     <LogoImg height={22} />
@@ -1220,7 +1237,7 @@ export default function AppShell() {
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
-            <div key={activeTab} style={{ animation: morphing ? 'morphOut 0.3s ease forwards' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, height: '100%' } : {}) }}>
+            <div key={activeTab} style={{ animation: morphing ? 'morphOut 0.3s ease forwards' : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, height: '100%' } : {}) }}>
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE — Paper Design: centered wordmark + hero chat bar + chips ═══ */}
@@ -1232,7 +1249,7 @@ export default function AppShell() {
                       ref={mobileHeroLogoRef}
                       style={{ marginBottom: 32, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                       animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
-                      transition={{ duration: 0.15, ease: 'easeOut' }}
+                      transition={{ duration: heroFocused ? 0.15 : 0.3, delay: heroFocused ? 0 : 0.65, ease: 'easeOut' }}
                     >
                       <LogoImg height={80} />
                     </motion.div>
@@ -1578,6 +1595,10 @@ export default function AppShell() {
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes fadeOnly {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
         @keyframes morphOut {
           from { opacity: 1; transform: translateY(0); }
           to { opacity: 0; transform: translateY(28px); }
@@ -1618,24 +1639,24 @@ export default function AppShell() {
         const sideRect = sideTarget?.getBoundingClientRect();
         if (!heroRect || !sideRect) return null;
 
-        // Letter positions at hero — spread across roughly where text sits in the video
+        // Letter positions at hero — spread across roughly where text sits in the logo
         const heroCenter = heroRect.left + heroRect.width / 2;
         const heroCY = heroRect.top + heroRect.height / 2;
-        // 48px font, 7 letters ≈ 250px wide at hero scale
-        const heroSpread = 250;
+        // Mobile: proportional to actual logo width; Desktop: 250px (48px font, 7 letters)
+        const heroSpread = isMobile ? heroRect.width * 0.6 : 250;
         const heroLetterW = heroSpread / letters.length;
         const heroStartX = heroCenter - heroSpread / 2;
 
-        // Letter positions at sidebar — converge to center of the sidebar logo
+        // Letter positions at sidebar/header — converge to center of the target logo
         const sideCenter = sideRect.left + sideRect.width / 2;
         const sideCY = sideRect.top + sideRect.height / 2;
-        // At sidebar scale (0.25), letters are tiny — spread just enough to not overlap
         const sideSpread = sideRect.width * 0.7;
         const sideLetterW = sideSpread / letters.length;
         const sideStartX = sideCenter - sideSpread / 2;
 
-        // Scale ratio: sidebar logo ~32px, hero font 48px
-        const sidebarScale = 0.25;
+        // Scale: ratio of target text size to 48px source
+        // Desktop sidebar ~32px logo → 0.25; Mobile header ~22px logo → 0.18
+        const sidebarScale = isMobile ? 0.18 : 0.25;
 
         const yJitter = [-80, 50, -110, 90, -60, 70, -40]; // random vertical arcs mid-flight
         const rotEnd = [15, -20, 25, -15, 10, -25, 12];
@@ -1648,9 +1669,9 @@ export default function AppShell() {
 
           const startX = toSidebar ? hx : sx;
           const endX = toSidebar ? sx : hx;
-          // Y corrections: sidebar logo is small/tight, hero video has padding in the frame
-          const sideYShift = 8;   // small nudge for sidebar
-          const heroYShift = 20;  // bigger nudge — text sits inside a padded video frame
+          // Y corrections: desktop video has padding in frame, mobile PNG is tight
+          const sideYShift = isMobile ? 2 : 8;
+          const heroYShift = isMobile ? 0 : 20;
           const startY = toSidebar ? heroCY - heroYShift : sideCY - sideYShift;
           const endY = toSidebar ? sideCY - sideYShift : heroCY - heroYShift;
           const startScale = toSidebar ? 1 : sidebarScale;
