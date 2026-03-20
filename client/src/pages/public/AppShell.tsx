@@ -1165,7 +1165,7 @@ export default function AppShell() {
                     ref={mobileHeaderLogoRef}
                     onClick={() => handleTabClick('home')}
                     className="bg-transparent border-none cursor-pointer p-0 leading-none"
-                    style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: 'opacity 0.3s ease' }}
+                    style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: heroFocused ? 'opacity 0.3s ease-out 0.5s' : 'opacity 0.15s ease 0s' }}
                     type="button"
                   >
                     <LogoImg height={22} />
@@ -1251,8 +1251,8 @@ export default function AppShell() {
                         disabled={sending}
                         typewriterHints={TYPEWRITER_HINTS}
                         typewriterPrefix={TYPEWRITER_PREFIX}
-                        onInputFocus={() => {}}
-                        onInputBlur={() => {}}
+                        onInputFocus={() => setHeroFocused(true)}
+                        onInputBlur={(hasText) => { if (!hasText) setHeroFocused(false); }}
                       />
                     </motion.div>
                   </div>
