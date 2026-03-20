@@ -100,15 +100,14 @@ function AnimatedLogo({ height = 56, style, className, stopped }: { height?: num
   }, []);
 
   return (
-    <div style={{ isolation: 'isolate', display: 'inline-block', lineHeight: 0 }} className={className}>
-      <video
-        ref={videoRef}
-        src="/logo-intro.mp4"
-        muted
-        playsInline
-        style={{ height, objectFit: 'contain', display: 'inline-block', mixBlendMode: 'multiply', filter: 'brightness(1.08) contrast(1.05)', ...style }}
-      />
-    </div>
+    <video
+      ref={videoRef}
+      src="/logo-intro.mp4"
+      muted
+      playsInline
+      className={className}
+      style={{ height, objectFit: 'contain', display: 'inline-block', filter: 'brightness(1.5) contrast(2)', ...style }}
+    />
   );
 }
 
@@ -1228,7 +1227,7 @@ export default function AppShell() {
                       animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
                       transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
-                      <AnimatedLogo height={140} stopped={heroFocused} style={{ filter: 'brightness(1.35) contrast(1.3)' }} />
+                      <AnimatedLogo height={140} stopped={heroFocused} />
                     </motion.div>
                     <motion.div
                       className="w-full"
