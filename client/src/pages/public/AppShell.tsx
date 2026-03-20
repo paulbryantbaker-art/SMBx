@@ -531,19 +531,26 @@ export default function AppShell() {
   // Send handler — morph from landing to chat
   const handleSend = useCallback((content: string) => {
     if (viewState === 'landing') {
-      setMorphing(true);
       if (user) authChat.sendMessage(content);
       else anonChat.sendMessage(content, activeTab);
-      setTimeout(() => {
+      if (isMobile) {
+        // Mobile: instant swap, no morphOut delay
         setViewState('chat');
-        setMorphing(false);
         if (window.location.pathname !== '/chat') navigate('/chat');
-      }, 300);
+      } else {
+        // Desktop: smooth morphOut transition
+        setMorphing(true);
+        setTimeout(() => {
+          setViewState('chat');
+          setMorphing(false);
+          if (window.location.pathname !== '/chat') navigate('/chat');
+        }, 300);
+      }
       return;
     }
     if (user) authChat.sendMessage(content);
     else anonChat.sendMessage(content, activeTab);
-  }, [viewState, user, authChat, anonChat, navigate, activeTab]);
+  }, [viewState, user, authChat, anonChat, navigate, activeTab, isMobile]);
 
   // Chip click
   const handleChipClick = useCallback((text: string) => {
@@ -1346,9 +1353,9 @@ export default function AppShell() {
           {/* ════ CHAT MODE ════ */}
           {viewState === 'chat' && (
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
             >
               {user && authChat.activeDealId && (
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
