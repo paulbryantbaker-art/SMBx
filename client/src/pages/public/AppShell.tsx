@@ -1244,15 +1244,7 @@ export default function AppShell() {
                         disabled={sending}
                         typewriterHints={TYPEWRITER_HINTS}
                         typewriterPrefix={TYPEWRITER_PREFIX}
-                        onInputFocus={() => {
-                          // On mobile: smooth transition to chat
-                          setMorphing(true);
-                          setTimeout(() => {
-                            setViewState('chat');
-                            setMorphing(false);
-                            if (window.location.pathname !== '/chat') navigate('/chat');
-                          }, 350);
-                        }}
+                        onInputFocus={() => {}}
                         onInputBlur={() => {}}
                       />
                     </motion.div>
