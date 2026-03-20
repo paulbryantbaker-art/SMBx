@@ -1227,7 +1227,7 @@ export default function AppShell() {
                       animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
                       transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
-                      <AnimatedLogo height={140} stopped={heroFocused} />
+                      <AnimatedLogo height={140} stopped={heroFocused} style={{ filter: 'brightness(1.35) contrast(1.3)' }} />
                     </motion.div>
                     <motion.div
                       className="w-full"
