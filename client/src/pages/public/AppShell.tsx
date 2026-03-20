@@ -1236,36 +1236,22 @@ export default function AppShell() {
               <>
                 {/* ═══ HOME PAGE — Paper Design: centered wordmark + hero chat bar + chips ═══ */}
 
-                {/* MOBILE HOME — logo + chat bar, tap to fly-and-chat */}
-                <div className="flex flex-col h-full md:hidden">
-                  <div className="flex-1 flex flex-col items-center justify-center px-5" style={{ marginTop: '-40px' }}>
-                    <motion.div
-                      ref={mobileHeroLogoRef}
-                      style={{ marginBottom: 32, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                      animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
-                      transition={{ duration: heroFocused ? 0.15 : 0.25, delay: heroFocused ? 0 : 0.1, ease: 'easeOut' }}
-                    >
-                      <LogoImg height={80} />
-                    </motion.div>
-                    <motion.div
-                      className="w-full"
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                      <ChatDock
-                        ref={dockRef}
-                        onSend={handleSend}
-                        variant="hero"
-                        rows={1}
-                        placeholder="What's on your mind?"
-                        disabled={sending}
-                        typewriterHints={TYPEWRITER_HINTS}
-                        typewriterPrefix={TYPEWRITER_PREFIX}
-                        onInputFocus={() => setHeroFocused(true)}
-                        onInputBlur={(hasText) => { if (!hasText) setHeroFocused(false); }}
-                      />
-                    </motion.div>
+                {/* MOBILE HOME — static logo + chat bar, no animations on focus */}
+                <div className="flex flex-col items-center px-5 md:hidden" style={{ paddingTop: '22vh' }}>
+                  <div ref={mobileHeroLogoRef} style={{ marginBottom: 32, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <LogoImg height={80} />
+                  </div>
+                  <div className="w-full">
+                    <ChatDock
+                      ref={dockRef}
+                      onSend={handleSend}
+                      variant="hero"
+                      rows={1}
+                      placeholder="What's on your mind?"
+                      disabled={sending}
+                      typewriterHints={TYPEWRITER_HINTS}
+                      typewriterPrefix={TYPEWRITER_PREFIX}
+                    />
                   </div>
                 </div>
 
