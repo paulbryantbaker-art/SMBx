@@ -100,14 +100,15 @@ function AnimatedLogo({ height = 56, style, className, stopped }: { height?: num
   }, []);
 
   return (
-    <video
-      ref={videoRef}
-      src="/logo-intro.mp4"
-      muted
-      playsInline
-      className={className}
-      style={{ height, objectFit: 'contain', display: 'inline-block', mixBlendMode: 'multiply', filter: 'brightness(1.08) contrast(1.05)', ...style }}
-    />
+    <div style={{ isolation: 'isolate', display: 'inline-block', lineHeight: 0 }} className={className}>
+      <video
+        ref={videoRef}
+        src="/logo-intro.mp4"
+        muted
+        playsInline
+        style={{ height, objectFit: 'contain', display: 'inline-block', mixBlendMode: 'multiply', filter: 'brightness(1.08) contrast(1.05)', ...style }}
+      />
+    </div>
   );
 }
 
