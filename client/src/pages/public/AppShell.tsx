@@ -1235,13 +1235,14 @@ export default function AppShell() {
                   <div className="flex-1 flex flex-col items-center justify-center px-5" style={{ marginTop: '-20px' }}>
                     <div style={{ position: 'relative', marginBottom: 28, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120, width: '100%' }}>
                       {/* Animated Logo — fades out on focus */}
+                      {/* isolation: isolate contains the video's GPU compositing layer */}
                       <motion.div
                         ref={mobileHeroLogoRef}
                         animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
                         transition={{ duration: 0.2, ease: 'easeOut' }}
-                        style={{ position: 'absolute' }}
+                        style={{ position: 'absolute', isolation: 'isolate' }}
                       >
-                        <AnimatedLogo height={80} style={{ mixBlendMode: 'normal' }} />
+                        <AnimatedLogo height={80} style={{ mixBlendMode: 'normal', filter: 'none' }} />
                       </motion.div>
                       {/* Hero text — fades in on focus */}
                       <motion.div
