@@ -1099,7 +1099,7 @@ export default function AppShell() {
       {isMobile && isMobileSidebarOpen && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/20 transition-opacity"
+            className="fixed inset-0 z-40 bg-black/5 transition-opacity"
             onClick={() => setIsMobileSidebarOpen(false)}
           />
           <div className="fixed inset-y-0 left-0 z-50 animate-[slideInLeft_0.25s_ease]">
