@@ -106,7 +106,7 @@ function AnimatedLogo({ height = 56, style, className, stopped }: { height?: num
       muted
       playsInline
       className={className}
-      style={{ height, objectFit: 'contain', display: 'inline-block', mixBlendMode: 'multiply', filter: 'brightness(1.35) contrast(1.3)', ...style }}
+      style={{ height, objectFit: 'contain', display: 'inline-block', mixBlendMode: 'multiply', filter: 'brightness(1.08) contrast(1.05)', ...style }}
     />
   );
 }
