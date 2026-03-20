@@ -480,10 +480,8 @@ export default function AppShell() {
 
   // Unified message interface
   const rawMessages = user ? authChat.messages : anonChat.messages;
-  // Always prepend Yulia's welcome message for anonymous users (visual continuity on transition)
-  const messages: AnonMessage[] = !user
-    ? [YULIA_WELCOME_MESSAGE, ...(rawMessages as AnonMessage[])]
-    : rawMessages.length === 0 ? [YULIA_WELCOME_MESSAGE] : rawMessages as AnonMessage[];
+  // Show Yulia's welcome message only when chat has no messages yet
+  const messages: AnonMessage[] = rawMessages.length === 0 ? [YULIA_WELCOME_MESSAGE] : rawMessages as AnonMessage[];
   const sending = user ? authChat.sending : anonChat.sending;
   const streamingText = user ? authChat.streamingText : anonChat.streamingText;
   const activeTool = user ? authChat.activeTool : null;
@@ -551,7 +549,7 @@ export default function AppShell() {
         setViewState('chat');
         setMorphing(false);
         if (window.location.pathname !== '/chat') navigate('/chat');
-      }, isMobile ? 150 : 300);
+      }, isMobile ? 200 : 300);
       return;
     }
     if (user) authChat.sendMessage(content);
@@ -1227,15 +1225,15 @@ export default function AppShell() {
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
-            <div key={activeTab} style={{ animation: morphing ? (isMobile ? 'fadeOut 0.15s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, height: '100%' } : {}) }}>
+            <div key={activeTab} style={{ animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, height: '100%' } : {}) }}>
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE — Paper Design: centered wordmark + hero chat bar + chips ═══ */}
 
                 {/* MOBILE HOME — mirrors desktop: centered video logo, hero text on focus, chat bar */}
                 <div className="flex flex-col h-full md:hidden">
-                  <div className="flex-1 flex flex-col items-center justify-center px-5" style={{ marginTop: '-80px' }}>
-                    <div style={{ position: 'relative', marginBottom: 64, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120, width: '100%' }}>
+                  <div className="flex-1 flex flex-col items-center justify-center px-5" style={{ marginTop: '-100px' }}>
+                    <div style={{ position: 'relative', marginBottom: 80, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120, width: '100%' }}>
                       {/* Logo — static PNG (video triggers iOS hardware overlay that tints page) */}
                       <motion.div
                         ref={mobileHeroLogoRef}
@@ -1372,9 +1370,9 @@ export default function AppShell() {
           {/* ════ CHAT MODE ════ */}
           {viewState === 'chat' && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: isMobile ? 0.15 : 0.25, ease: 'easeOut' }}
+              initial={{ opacity: 0, y: isMobile ? 30 : 0 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: isMobile ? 0.35 : 0.25, ease: [0.25, 0.1, 0.25, 1] }}
             >
               {user && authChat.activeDealId && (
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
