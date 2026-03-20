@@ -1170,7 +1170,7 @@ export default function AppShell() {
                     ref={mobileHeaderLogoRef}
                     onClick={() => handleTabClick('home')}
                     className="bg-transparent border-none cursor-pointer p-0 leading-none"
-                    style={{ opacity: (activeTab === 'home' && viewState === 'landing' && (!heroFocused || isMobile) && !morphing) ? 0 : 1, transition: heroFocused ? 'opacity 0.3s ease-out 0.5s' : 'opacity 0.2s ease-out 0s' }}
+                    style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: heroFocused ? 'opacity 0.3s ease-out 0.5s' : 'opacity 0.2s ease-out 0s' }}
                     type="button"
                   >
                     <LogoImg height={22} />
@@ -1232,8 +1232,8 @@ export default function AppShell() {
 
                 {/* MOBILE HOME — mirrors desktop: centered video logo, hero text on focus, chat bar */}
                 <div className="flex flex-col h-full md:hidden">
-                  <div className="flex-1 flex flex-col items-center justify-center px-5" style={{ marginTop: '-20px' }}>
-                    <div style={{ position: 'relative', marginBottom: 28, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120, width: '100%' }}>
+                  <div className="flex-1 flex flex-col items-center justify-center px-5" style={{ marginTop: '-60px' }}>
+                    <div style={{ position: 'relative', marginBottom: 48, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120, width: '100%' }}>
                       {/* Logo — static PNG (video triggers iOS hardware overlay that tints page) */}
                       <motion.div
                         ref={mobileHeroLogoRef}
