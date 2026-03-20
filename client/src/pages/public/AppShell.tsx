@@ -1234,15 +1234,14 @@ export default function AppShell() {
                 <div className="flex flex-col h-full md:hidden">
                   <div className="flex-1 flex flex-col items-center justify-center px-5" style={{ marginTop: '-20px' }}>
                     <div style={{ position: 'relative', marginBottom: 28, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120, width: '100%' }}>
-                      {/* Animated Logo — fades out on focus */}
-                      {/* isolation: isolate contains the video's GPU compositing layer */}
+                      {/* Logo — static PNG (video triggers iOS hardware overlay that tints page) */}
                       <motion.div
                         ref={mobileHeroLogoRef}
                         animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
                         transition={{ duration: 0.2, ease: 'easeOut' }}
-                        style={{ position: 'absolute', isolation: 'isolate' }}
+                        style={{ position: 'absolute' }}
                       >
-                        <AnimatedLogo height={80} style={{ mixBlendMode: 'normal', filter: 'none' }} />
+                        <LogoImg height={80} className="logo-intro" />
                       </motion.div>
                       {/* Hero text — fades in on focus */}
                       <motion.div
@@ -1599,6 +1598,13 @@ export default function AppShell() {
         @keyframes fadeOnly {
           from { opacity: 0; }
           to { opacity: 1; }
+        }
+        .logo-intro {
+          animation: logoReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        @keyframes logoReveal {
+          from { opacity: 0; transform: scale(0.92); }
+          to { opacity: 1; transform: scale(1); }
         }
         @keyframes morphOut {
           from { opacity: 1; transform: translateY(0); }
