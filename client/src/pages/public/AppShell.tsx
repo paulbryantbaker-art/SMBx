@@ -106,7 +106,7 @@ function AnimatedLogo({ height = 56, style, className, stopped }: { height?: num
       muted
       playsInline
       className={className}
-      style={{ height, objectFit: 'contain', display: 'inline-block', filter: 'brightness(1.5) contrast(2)', ...style }}
+      style={{ height, objectFit: 'contain', display: 'inline-block', mixBlendMode: 'multiply', filter: 'brightness(1.08) contrast(1.05)', ...style }}
     />
   );
 }
@@ -1227,7 +1227,7 @@ export default function AppShell() {
                       animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
                       transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
-                      <AnimatedLogo height={140} stopped={heroFocused} />
+                      <LogoImg height={140} />
                     </motion.div>
                     <motion.div
                       className="w-full"
