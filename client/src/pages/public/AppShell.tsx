@@ -543,19 +543,13 @@ export default function AppShell() {
     if (viewState === 'landing') {
       if (user) authChat.sendMessage(content);
       else anonChat.sendMessage(content, activeTab);
-      if (isMobile) {
-        // Mobile: instant swap, no morphOut delay
+      // Smooth fade-out then swap to chat
+      setMorphing(true);
+      setTimeout(() => {
         setViewState('chat');
+        setMorphing(false);
         if (window.location.pathname !== '/chat') navigate('/chat');
-      } else {
-        // Desktop: smooth morphOut transition
-        setMorphing(true);
-        setTimeout(() => {
-          setViewState('chat');
-          setMorphing(false);
-          if (window.location.pathname !== '/chat') navigate('/chat');
-        }, 300);
-      }
+      }, isMobile ? 150 : 300);
       return;
     }
     if (user) authChat.sendMessage(content);
@@ -1176,7 +1170,7 @@ export default function AppShell() {
                     ref={mobileHeaderLogoRef}
                     onClick={() => handleTabClick('home')}
                     className="bg-transparent border-none cursor-pointer p-0 leading-none"
-                    style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: heroFocused ? 'opacity 0.3s ease-out 0.5s' : 'opacity 0.2s ease-out 0s' }}
+                    style={{ opacity: (activeTab === 'home' && viewState === 'landing' && (!heroFocused || isMobile) && !morphing) ? 0 : 1, transition: heroFocused ? 'opacity 0.3s ease-out 0.5s' : 'opacity 0.2s ease-out 0s' }}
                     type="button"
                   >
                     <LogoImg height={22} />
@@ -1231,27 +1225,53 @@ export default function AppShell() {
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
-            <div key={activeTab} style={{ animation: morphing ? 'morphOut 0.3s ease forwards' : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, height: '100%' } : {}) }}>
+            <div key={activeTab} style={{ animation: morphing ? (isMobile ? 'fadeOut 0.15s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, height: '100%' } : {}) }}>
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE — Paper Design: centered wordmark + hero chat bar + chips ═══ */}
 
-                {/* MOBILE HOME — static logo + chat bar, no animations on focus */}
-                <div className="flex flex-col items-center px-5 md:hidden" style={{ paddingTop: '22vh' }}>
-                  <div ref={mobileHeroLogoRef} style={{ marginBottom: 32, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <LogoImg height={80} />
-                  </div>
-                  <div className="w-full">
-                    <ChatDock
-                      ref={dockRef}
-                      onSend={handleSend}
-                      variant="hero"
-                      rows={1}
-                      placeholder="What's on your mind?"
-                      disabled={sending}
-                      typewriterHints={TYPEWRITER_HINTS}
-                      typewriterPrefix={TYPEWRITER_PREFIX}
-                    />
+                {/* MOBILE HOME — mirrors desktop: centered video logo, hero text on focus, chat bar */}
+                <div className="flex flex-col h-full md:hidden">
+                  <div className="flex-1 flex flex-col items-center justify-center px-5" style={{ marginTop: '-20px' }}>
+                    <div style={{ position: 'relative', marginBottom: 28, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120, width: '100%' }}>
+                      {/* Animated Logo — fades out on focus */}
+                      <motion.div
+                        ref={mobileHeroLogoRef}
+                        animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        style={{ position: 'absolute' }}
+                      >
+                        <AnimatedLogo height={80} style={{ mixBlendMode: 'normal' }} />
+                      </motion.div>
+                      {/* Hero text — fades in on focus */}
+                      <motion.div
+                        animate={{ opacity: heroFocused ? 1 : 0, y: heroFocused ? 0 : 8 }}
+                        transition={{ duration: heroFocused ? 0.4 : 0.2, delay: heroFocused ? 0.15 : 0, ease: [0.4, 0, 0.2, 1] }}
+                        style={{ textAlign: 'center', width: '100%', pointerEvents: heroFocused ? 'auto' : 'none' }}
+                      >
+                        <span style={{ display: 'block', fontFamily: "'General Sans', 'Inter', system-ui, sans-serif", fontWeight: 700, color: '#000', fontSize: 28, letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: 8 }}>
+                          Chat with your deals!
+                        </span>
+                        <span style={{ display: 'block', fontFamily: "'General Sans', 'Inter', system-ui, sans-serif", fontSize: 14, lineHeight: 1.65, color: 'rgba(0,0,0,0.55)' }}>
+                          Yulia guides you through buying, selling, or raising capital — all by chatting.
+                          <br /><span style={{ fontWeight: 600 }}>Start now completely free!</span>
+                        </span>
+                      </motion.div>
+                    </div>
+                    <div className="w-full" style={{ maxWidth: 440 }}>
+                      <ChatDock
+                        ref={dockRef}
+                        onSend={handleSend}
+                        variant="hero"
+                        rows={1}
+                        placeholder="What's on your mind?"
+                        disabled={sending}
+                        typewriterHints={TYPEWRITER_HINTS}
+                        typewriterPrefix={TYPEWRITER_PREFIX}
+                        onInputFocus={() => setHeroFocused(true)}
+                        onInputBlur={(hasText) => { if (!hasText) setHeroFocused(false); }}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -1350,9 +1370,9 @@ export default function AppShell() {
           {/* ════ CHAT MODE ════ */}
           {viewState === 'chat' && (
             <motion.div
-              initial={{ opacity: isMobile ? 1 : 0 }}
+              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: isMobile ? 0 : 0.25, ease: 'easeOut' }}
+              transition={{ duration: isMobile ? 0.15 : 0.25, ease: 'easeOut' }}
             >
               {user && authChat.activeDealId && (
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
