@@ -1199,16 +1199,16 @@ export default function AppShell() {
         </header>
 
         {/* Main row: chat + canvas split */}
-        <div className="flex-1 flex min-h-0">
+        <div className="flex-1 flex min-h-0 bg-white">
         {/* Chat column — resizable on desktop in chat mode, flex on landing/other */}
         <div
-          className="flex flex-col min-w-0"
+          className="flex flex-col min-w-0 bg-white"
           style={!isMobile && viewState === 'chat' ? { width: chatWidth, flexShrink: 0 } : { flex: 1 }}
         >
-        {/* Scroll area */}
+        {/* Scroll area — bg-white required: -webkit-overflow-scrolling creates a separate compositing layer on mobile Safari */}
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto min-h-0"
+          className="flex-1 overflow-y-auto min-h-0 bg-white"
           style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' } as any}
         >
           {/* ════ LANDING MODE ════ */}
