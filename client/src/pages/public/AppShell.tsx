@@ -424,32 +424,25 @@ export default function AppShell() {
     const goingCenter = !heroFocused && prevHeroFocused.current;
     prevHeroFocused.current = heroFocused;
 
-    // On mobile, use the mobile header logo as the target; on desktop, use sidebar logo
+    // On mobile, skip fly-back — keyboard closing shifts the viewport,
+    // making coordinate measurement unreliable. Just crossfade the logos.
+    if (isMobile && goingCenter) return;
+
     const targetRef = isMobile ? mobileHeaderLogoRef.current : sidebarLogoRef.current;
     const sourceRef = isMobile ? mobileHeroLogoRef.current : heroLogoRef.current;
 
     if ((goingSidebar || goingCenter) && sourceRef && targetRef) {
-      const measure = () => {
-        const hero = sourceRef.getBoundingClientRect();
-        const side = targetRef.getBoundingClientRect();
-        const cx = hero.left + hero.width / 2;
-        const cy = hero.top + hero.height / 2;
-        const sx = side.left + side.width / 2;
-        const sy = side.top + side.height / 2;
+      const hero = sourceRef.getBoundingClientRect();
+      const side = targetRef.getBoundingClientRect();
+      const cx = hero.left + hero.width / 2;
+      const cy = hero.top + hero.height / 2;
+      const sx = side.left + side.width / 2;
+      const sy = side.top + side.height / 2;
 
-        if (goingSidebar) {
-          setFlyingLogo({ fromX: cx, fromY: cy, toX: sx, toY: sy, direction: 'to-sidebar' });
-        } else {
-          setFlyingLogo({ fromX: sx, fromY: sy, toX: cx, toY: cy, direction: 'to-center' });
-        }
-      };
-
-      if (isMobile && goingCenter) {
-        // Delay measurement on mobile blur — keyboard is closing, layout shifts
-        const tid = setTimeout(measure, 200);
-        return () => clearTimeout(tid);
+      if (goingSidebar) {
+        setFlyingLogo({ fromX: cx, fromY: cy, toX: sx, toY: sy, direction: 'to-sidebar' });
       } else {
-        measure();
+        setFlyingLogo({ fromX: sx, fromY: sy, toX: cx, toY: cy, direction: 'to-center' });
       }
     }
   }, [heroFocused, isMobile]);
@@ -577,6 +570,7 @@ export default function AppShell() {
 
   // Back to landing
   const handleBack = useCallback(() => {
+    setHeroFocused(false);
     setViewState('landing');
     const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
     navigate(urlMap[activeTab]);
@@ -1182,7 +1176,7 @@ export default function AppShell() {
                     ref={mobileHeaderLogoRef}
                     onClick={() => handleTabClick('home')}
                     className="bg-transparent border-none cursor-pointer p-0 leading-none"
-                    style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: heroFocused ? 'opacity 0.3s ease-out 0.5s' : 'opacity 0.3s ease-out 0.35s' }}
+                    style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: heroFocused ? 'opacity 0.3s ease-out 0.5s' : 'opacity 0.2s ease-out 0s' }}
                     type="button"
                   >
                     <LogoImg height={22} />
@@ -1249,7 +1243,7 @@ export default function AppShell() {
                       ref={mobileHeroLogoRef}
                       style={{ marginBottom: 32, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                       animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
-                      transition={{ duration: heroFocused ? 0.15 : 0.3, delay: heroFocused ? 0 : 0.65, ease: 'easeOut' }}
+                      transition={{ duration: heroFocused ? 0.15 : 0.25, delay: heroFocused ? 0 : 0.1, ease: 'easeOut' }}
                     >
                       <LogoImg height={80} />
                     </motion.div>
@@ -1370,9 +1364,9 @@ export default function AppShell() {
           {/* ════ CHAT MODE ════ */}
           {viewState === 'chat' && (
             <motion.div
-              initial={{ opacity: 0 }}
+              initial={{ opacity: isMobile ? 1 : 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
+              transition={{ duration: isMobile ? 0 : 0.25, ease: 'easeOut' }}
             >
               {user && authChat.activeDealId && (
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
