@@ -1119,7 +1119,7 @@ export default function AppShell() {
         )}
         {/* Header — 56px */}
         <header
-          className="flex-shrink-0 flex items-center justify-between h-14 px-6 z-20 bg-[#FAFAFA]"
+          className="flex-shrink-0 flex items-center justify-between h-14 px-6 z-20 bg-white"
           style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}
         >
           <div className="flex items-center gap-3">
