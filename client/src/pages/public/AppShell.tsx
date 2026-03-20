@@ -480,8 +480,10 @@ export default function AppShell() {
 
   // Unified message interface
   const rawMessages = user ? authChat.messages : anonChat.messages;
-  // Prepend Yulia's welcome message when chat has no messages yet
-  const messages: AnonMessage[] = rawMessages.length === 0 ? [YULIA_WELCOME_MESSAGE] : rawMessages as AnonMessage[];
+  // Always prepend Yulia's welcome message for anonymous users (visual continuity on transition)
+  const messages: AnonMessage[] = !user
+    ? [YULIA_WELCOME_MESSAGE, ...(rawMessages as AnonMessage[])]
+    : rawMessages.length === 0 ? [YULIA_WELCOME_MESSAGE] : rawMessages as AnonMessage[];
   const sending = user ? authChat.sending : anonChat.sending;
   const streamingText = user ? authChat.streamingText : anonChat.streamingText;
   const activeTool = user ? authChat.activeTool : null;
@@ -515,7 +517,7 @@ export default function AppShell() {
   }, [viewState]);
   useEffect(() => {
     if (viewState === 'chat') {
-      const justEntered = Date.now() - chatEnteredAt.current < 400;
+      const justEntered = Date.now() - chatEnteredAt.current < 1500;
       messagesEndRef.current?.scrollIntoView({ behavior: justEntered ? 'instant' as ScrollBehavior : 'smooth' });
     }
   }, [messages, streamingText, viewState]);
@@ -1232,8 +1234,8 @@ export default function AppShell() {
 
                 {/* MOBILE HOME — mirrors desktop: centered video logo, hero text on focus, chat bar */}
                 <div className="flex flex-col h-full md:hidden">
-                  <div className="flex-1 flex flex-col items-center justify-center px-5" style={{ marginTop: '-60px' }}>
-                    <div style={{ position: 'relative', marginBottom: 48, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120, width: '100%' }}>
+                  <div className="flex-1 flex flex-col items-center justify-center px-5" style={{ marginTop: '-80px' }}>
+                    <div style={{ position: 'relative', marginBottom: 64, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120, width: '100%' }}>
                       {/* Logo — static PNG (video triggers iOS hardware overlay that tints page) */}
                       <motion.div
                         ref={mobileHeroLogoRef}
@@ -1665,8 +1667,9 @@ export default function AppShell() {
         // Desktop sidebar ~32px logo → 0.25; Mobile header ~22px logo → 0.18
         const sidebarScale = isMobile ? 0.18 : 0.25;
 
-        const yJitter = [-80, 50, -110, 90, -60, 70, -40]; // random vertical arcs mid-flight
-        const rotEnd = [15, -20, 25, -15, 10, -25, 12];
+        // Mobile: gentler arcs for small screen; Desktop: full whimsy
+        const yJitter = isMobile ? [-35, 22, -45, 38, -25, 30, -18] : [-80, 50, -110, 90, -60, 70, -40];
+        const rotEnd = isMobile ? [8, -10, 12, -8, 5, -12, 6] : [15, -20, 25, -15, 10, -25, 12];
         const delays = [0, 0.03, 0.07, 0.11, 0.05, 0.09, 0.13];
 
         let completed = 0;
@@ -1705,15 +1708,15 @@ export default function AppShell() {
                 rotate: [0, rotEnd[i], 0],
               }}
               transition={{
-                duration: 0.6,
+                duration: isMobile ? 0.5 : 0.6,
                 delay: delays[i],
                 times: [0, 0.15, 1],
                 ease: 'linear',
-                left: { duration: 0.6, delay: delays[i], times: [0, 0.15, 1], ease: [0, 0, 0.5, 1] },
-                top: { duration: 0.6, delay: delays[i], times: [0, 0.15, 1], ease: [0, 0, 0.5, 1] },
-                scale: { duration: 0.6, delay: delays[i], times: [0, 0.15, 1], ease: [0, 0, 0.5, 1] },
-                rotate: { duration: 0.6, delay: delays[i], times: [0, 0.15, 1], ease: [0, 0, 0.5, 1] },
-                opacity: { duration: 0.2, delay: delays[i] + 0.3, ease: 'easeOut' },
+                left: { duration: isMobile ? 0.5 : 0.6, delay: delays[i], times: [0, 0.15, 1], ease: [0, 0, 0.5, 1] },
+                top: { duration: isMobile ? 0.5 : 0.6, delay: delays[i], times: [0, 0.15, 1], ease: [0, 0, 0.5, 1] },
+                scale: { duration: isMobile ? 0.5 : 0.6, delay: delays[i], times: [0, 0.15, 1], ease: [0, 0, 0.5, 1] },
+                rotate: { duration: isMobile ? 0.5 : 0.6, delay: delays[i], times: [0, 0.15, 1], ease: [0, 0, 0.5, 1] },
+                opacity: { duration: 0.2, delay: delays[i] + (isMobile ? 0.2 : 0.3), ease: 'easeOut' },
               }}
               onAnimationComplete={() => { completed++; if (completed >= letters.length) setFlyingLogo(null); }}
               style={{
