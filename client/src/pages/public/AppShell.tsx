@@ -1232,8 +1232,8 @@ export default function AppShell() {
 
                 {/* MOBILE HOME — mirrors desktop: centered video logo, hero text on focus, chat bar */}
                 <div className="flex flex-col h-full md:hidden">
-                  <div className="flex-1 flex flex-col items-center justify-center px-5" style={{ marginTop: '-100px' }}>
-                    <div style={{ position: 'relative', marginBottom: 80, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120, width: '100%' }}>
+                  <div className="flex-1 flex flex-col items-center px-5" style={{ paddingTop: '22vh', paddingBottom: '30vh' }}>
+                    <div style={{ position: 'relative', marginBottom: 100, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120, width: '100%' }}>
                       {/* Logo — static PNG (video triggers iOS hardware overlay that tints page) */}
                       <motion.div
                         ref={mobileHeroLogoRef}
@@ -1370,9 +1370,9 @@ export default function AppShell() {
           {/* ════ CHAT MODE ════ */}
           {viewState === 'chat' && (
             <motion.div
-              initial={{ opacity: 0, y: isMobile ? 30 : 0 }}
+              initial={{ opacity: 0, y: isMobile ? 200 : 0 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: isMobile ? 0.35 : 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+              transition={{ duration: isMobile ? 0.45 : 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
               {user && authChat.activeDealId && (
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
