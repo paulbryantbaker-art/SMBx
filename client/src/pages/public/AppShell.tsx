@@ -1136,7 +1136,7 @@ export default function AppShell() {
                     <path d="M19 12H5" /><polyline points="12 19 5 12 12 5" />
                   </svg>
                 </button>
-                <span style={{ fontSize: '14px', fontWeight: 500, color: '#0D0D0D' }}>Chat with Yulia</span>
+                <LogoImg height={20} />
               </div>
             ) : (
               /* ── Landing mode: hamburger + logo / page label ── */
@@ -1220,14 +1220,14 @@ export default function AppShell() {
 
                 {/* MOBILE HOME — logo + chat bar, tap to fly-and-chat */}
                 <div className="flex flex-col h-full md:hidden">
-                  <div className="flex-1 flex flex-col items-center justify-center px-5">
+                  <div className="flex-1 flex flex-col items-center justify-center px-5" style={{ marginTop: '-40px' }}>
                     <motion.div
                       ref={mobileHeroLogoRef}
                       style={{ marginBottom: 32, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                       animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
                       transition={{ duration: 0.15, ease: 'easeOut' }}
                     >
-                      <LogoImg height={140} />
+                      <LogoImg height={80} />
                     </motion.div>
                     <motion.div
                       className="w-full"
@@ -1245,15 +1245,15 @@ export default function AppShell() {
                         typewriterHints={TYPEWRITER_HINTS}
                         typewriterPrefix={TYPEWRITER_PREFIX}
                         onInputFocus={() => {
-                          setHeroFocused(true);
-                          // On mobile: fly letters then transition to chat
+                          // On mobile: smooth transition to chat
+                          setMorphing(true);
                           setTimeout(() => {
                             setViewState('chat');
-                            setHeroFocused(false);
+                            setMorphing(false);
                             if (window.location.pathname !== '/chat') navigate('/chat');
-                          }, 700);
+                          }, 350);
                         }}
-                        onInputBlur={(hasText) => { if (!hasText && viewState === 'landing') setHeroFocused(false); }}
+                        onInputBlur={() => {}}
                       />
                     </motion.div>
                   </div>
