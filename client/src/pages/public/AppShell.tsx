@@ -383,7 +383,7 @@ export default function AppShell() {
 
   // Core state
   const [viewState, setViewState] = useState<ViewState>(() => pathToViewState(location));
-  useAppHeight(true);   // Always track visual viewport + lock body scroll (inner divs handle scrolling)
+  const appOffset = useAppHeight(true);   // Always track visual viewport + lock body scroll (inner divs handle scrolling)
   const [activeTab, setActiveTab] = useState<TabId>(() => pathToTab(location));
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
@@ -1048,7 +1048,7 @@ export default function AppShell() {
         top: 0,
         left: 0,
         right: 0,
-        transform: 'translateY(var(--app-offset, 0px))',
+        ...(appOffset ? { transform: `translateY(${appOffset}px)` } : {}),
       }}
     >
       {/* Desktop sidebar — collapsible */}

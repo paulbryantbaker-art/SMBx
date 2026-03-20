@@ -1,16 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
- * Sets --app-height and --app-offset CSS custom properties on <html>.
- * --app-height  = visualViewport.height (shrinks when iOS keyboard opens)
- * --app-offset  = visualViewport.offsetTop (iOS scrolls the page when keyboard
- *                 opens inside a fixed container — we compensate with translateY)
- *
- * Chat mode (enabled=true):  locks body scroll so iOS can't bounce behind.
- * Landing (enabled=false):   body scroll unlocked, keyboard overlays naturally.
+ * Sets --app-height CSS custom property on <html>.
+ * Returns appOffset so the root div can conditionally apply transform
+ * (only when keyboard is open — avoids iOS GPU compositing color shift).
  */
 export function useAppHeight(enabled = true) {
-  // Always keep --app-height and --app-offset updated
+  const [appOffset, setAppOffset] = useState(0);
+
   useEffect(() => {
     const vv = window.visualViewport;
 
@@ -18,7 +15,7 @@ export function useAppHeight(enabled = true) {
       const h = vv ? vv.height : window.innerHeight;
       const offset = vv ? vv.offsetTop : 0;
       document.documentElement.style.setProperty('--app-height', h + 'px');
-      document.documentElement.style.setProperty('--app-offset', offset + 'px');
+      setAppOffset(offset);
     }
 
     if (vv) {
@@ -46,4 +43,6 @@ export function useAppHeight(enabled = true) {
       };
     }
   }, [enabled]);
+
+  return appOffset;
 }
