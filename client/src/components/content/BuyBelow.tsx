@@ -6,7 +6,7 @@ interface BuyBelowProps {
 
 export default function BuyBelow({ onChipClick }: BuyBelowProps) {
   return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div style={{ fontFamily: "'General Sans', 'Inter', system-ui, sans-serif" }}>
 
       {/* ═══ 1. HERO ═══ */}
       <RevealSection>

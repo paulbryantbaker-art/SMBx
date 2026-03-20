@@ -38,7 +38,7 @@ export default function Sell() {
   const startSell = () => navigate('/?sell=1');
 
   return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", WebkitFontSmoothing: 'antialiased', background: T.bg, minHeight: '100dvh' }}>
+    <div style={{ fontFamily: "'General Sans', 'Inter', system-ui, sans-serif", WebkitFontSmoothing: 'antialiased', background: T.bg, minHeight: '100dvh' }}>
       <ScrollProgressBar />
       <style>{`
         .sell-section {
@@ -145,7 +145,7 @@ export default function Sell() {
           border: 1px solid rgba(0,0,0,0.07);
           background: #FFFFFF; cursor: pointer;
           font-size: 14px; font-weight: 500; color: ${T.sub};
-          font-family: 'Inter', system-ui, sans-serif;
+          font-family: 'General Sans', 'Inter', system-ui, sans-serif;
           text-align: left; transition: all 0.15s;
           box-shadow: 0 1px 3px rgba(0,0,0,0.03);
         }

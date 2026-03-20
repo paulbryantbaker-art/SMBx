@@ -151,7 +151,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
     w.document.write(`
       <html><head><title>${displayTitle}</title>
       <style>
-        body { font-family: 'Inter', system-ui, sans-serif; color: #0D0D0D; padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.6; }
+        body { font-family: 'General Sans', 'Inter', system-ui, sans-serif; color: #0D0D0D; padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.6; }
         h1, h2, h3 { font-weight: 700; margin-top: 1.5em; }
         h1 { font-size: 24px; border-bottom: 2px solid #C96B4F; padding-bottom: 8px; }
         h2 { font-size: 18px; color: #3D3B37; }

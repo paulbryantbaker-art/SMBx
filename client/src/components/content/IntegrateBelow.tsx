@@ -5,7 +5,7 @@ interface IntegrateBelowProps {
   onChipClick: (text: string) => void;
 }
 
-const font = "'Inter', system-ui, sans-serif";
+const font = "'General Sans', 'Inter', system-ui, sans-serif";
 
 export default function IntegrateBelow({ onChipClick }: IntegrateBelowProps) {
   const [ctaValue, setCtaValue] = useState('');

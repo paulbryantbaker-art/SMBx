@@ -6,7 +6,7 @@ interface AdvisorsBelowProps {
 }
 
 const font: React.CSSProperties = {
-  fontFamily: "'Inter', system-ui, sans-serif",
+  fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
 };
 
 export default function AdvisorsBelow({ onChipClick }: AdvisorsBelowProps) {

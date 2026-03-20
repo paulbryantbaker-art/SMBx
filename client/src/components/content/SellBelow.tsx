@@ -118,7 +118,7 @@ const maxContainer = 'max-w-6xl mx-auto px-6 md:px-10';
 
 export default function SellBelow({ onChipClick }: SellBelowProps) {
   return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div style={{ fontFamily: "'General Sans', 'Inter', system-ui, sans-serif" }}>
 
       {/* ═══════════════════════════════════════════
           1. HERO — 2-col grid

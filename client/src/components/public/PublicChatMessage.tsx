@@ -29,7 +29,7 @@ export default function PublicChatMessage({ message }: Props) {
           padding: '10px 14px',
           borderRadius: '16px 16px 4px 16px',
           fontSize: 14, lineHeight: 1.5, fontWeight: 450,
-          fontFamily: "'Inter', system-ui, sans-serif",
+          fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
         }}>
           <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{message.content}</p>
         </div>
@@ -60,7 +60,7 @@ export default function PublicChatMessage({ message }: Props) {
         style={{
           fontSize: 14, lineHeight: 1.65, fontWeight: 400,
           color: '#1A1A1A',
-          fontFamily: "'Inter', system-ui, sans-serif",
+          fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
           userSelect: 'text',
           WebkitUserSelect: 'text',
           cursor: 'text',

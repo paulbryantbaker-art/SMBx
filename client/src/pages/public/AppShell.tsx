@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
-import { useAnonymousChat } from '../../hooks/useAnonymousChat';
+import { useAnonymousChat, type AnonMessage } from '../../hooks/useAnonymousChat';
 import { useAuthChat } from '../../hooks/useAuthChat';
 import { useAppHeight } from '../../hooks/useAppHeight';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
@@ -29,6 +29,18 @@ import HowItWorksBelow from '../../components/content/HowItWorksBelow';
 import AdvisorsBelow from '../../components/content/AdvisorsBelow';
 import PricingBelow from '../../components/content/PricingBelow';
 
+/* ═══ YULIA WELCOME MESSAGE — shown as first chat message ═══ */
+const YULIA_WELCOME_MESSAGE: AnonMessage = {
+  id: -1,
+  role: 'assistant',
+  content: `## Chat with your deals!
+
+Yulia is a chat agent for all things M&A and she can guide you through the entire process of selling or buying a business, all by just chatting with your deals. No deal is too small or too complex.
+
+**Start now completely free!**`,
+  created_at: new Date().toISOString(),
+};
+
 /* ═══ DYNAMIC GREETING (time-of-day) ═══ */
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -48,6 +60,53 @@ function LogoImg({ height = 28, style, className }: { height?: number; style?: R
       draggable={false}
       className={className}
       style={{ height, objectFit: 'contain', display: 'inline-block', ...style }}
+    />
+  );
+}
+
+/* ═══ ANIMATED LOGO — plays once, rests at final frame, re-cycles every 30s until interaction ═══ */
+function AnimatedLogo({ height = 56, style, className, stopped }: { height?: number; style?: React.CSSProperties; className?: string; stopped?: boolean }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasInteracted = useRef(false);
+
+  useEffect(() => {
+    if (stopped) hasInteracted.current = true;
+  }, [stopped]);
+
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid) return;
+
+    vid.play().catch(() => {});
+
+    const onEnded = () => {
+      vid.pause();
+      if (!hasInteracted.current) {
+        timerRef.current = setTimeout(() => {
+          if (!hasInteracted.current && vid) {
+            vid.currentTime = 0;
+            vid.play().catch(() => {});
+          }
+        }, 30000);
+      }
+    };
+
+    vid.addEventListener('ended', onEnded);
+    return () => {
+      vid.removeEventListener('ended', onEnded);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  return (
+    <video
+      ref={videoRef}
+      src="/logo-intro.mp4"
+      muted
+      playsInline
+      className={className}
+      style={{ height, objectFit: 'contain', display: 'inline-block', mixBlendMode: 'multiply', filter: 'brightness(1.35) contrast(1.3)', ...style }}
     />
   );
 }
@@ -335,6 +394,12 @@ export default function AppShell() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop sidebar collapse
   const [ndaRequired, setNdaRequired] = useState<{ dealId: number; dealName?: string } | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
   // Chat hooks (always called for hook order)
   const anonChat = useAnonymousChat();
   const authChat = useAuthChat(user);
@@ -343,6 +408,41 @@ export default function AppShell() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const dockRef = useRef<ChatDockHandle>(null);
+  const sidebarLogoRef = useRef<HTMLDivElement>(null);
+  const mobileHeaderLogoRef = useRef<HTMLButtonElement>(null);
+  const heroLogoRef = useRef<HTMLDivElement>(null);       // desktop hero logo
+  const mobileHeroLogoRef = useRef<HTMLDivElement>(null);  // mobile hero logo
+
+  // Flying logo state — letters fly between center and sidebar/header
+  const [flyingLogo, setFlyingLogo] = useState<{
+    fromX: number; fromY: number; toX: number; toY: number; direction: 'to-sidebar' | 'to-center';
+  } | null>(null);
+  const prevHeroFocused = useRef(false);
+
+  useEffect(() => {
+    const goingSidebar = heroFocused && !prevHeroFocused.current;
+    const goingCenter = !heroFocused && prevHeroFocused.current;
+    prevHeroFocused.current = heroFocused;
+
+    // On mobile, use the mobile header logo as the target; on desktop, use sidebar logo
+    const targetRef = isMobile ? mobileHeaderLogoRef.current : sidebarLogoRef.current;
+    const sourceRef = isMobile ? mobileHeroLogoRef.current : heroLogoRef.current;
+
+    if ((goingSidebar || goingCenter) && sourceRef && targetRef) {
+      const hero = sourceRef.getBoundingClientRect();
+      const side = targetRef.getBoundingClientRect();
+      const cx = hero.left + hero.width / 2;
+      const cy = hero.top + hero.height / 2;
+      const sx = side.left + side.width / 2;
+      const sy = side.top + side.height / 2;
+
+      if (goingSidebar) {
+        setFlyingLogo({ fromX: cx, fromY: cy, toX: sx, toY: sy, direction: 'to-sidebar' });
+      } else {
+        setFlyingLogo({ fromX: sx, fromY: sy, toX: cx, toY: cy, direction: 'to-center' });
+      }
+    }
+  }, [heroFocused, isMobile]);
 
   // Drag-to-resize chat/canvas split
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
@@ -376,7 +476,9 @@ export default function AppShell() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Unified message interface
-  const messages = user ? authChat.messages : anonChat.messages;
+  const rawMessages = user ? authChat.messages : anonChat.messages;
+  // Prepend Yulia's welcome message when chat has no messages yet
+  const messages: AnonMessage[] = rawMessages.length === 0 ? [YULIA_WELCOME_MESSAGE] : rawMessages as AnonMessage[];
   const sending = user ? authChat.sending : anonChat.sending;
   const streamingText = user ? authChat.streamingText : anonChat.streamingText;
   const activeTool = user ? authChat.activeTool : null;
@@ -473,13 +575,6 @@ export default function AppShell() {
     navigate('/');
   }, [logout, navigate]);
 
-  // Mobile detection
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
 
   // Offline detection
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
@@ -659,8 +754,9 @@ export default function AppShell() {
       style={{ width: mobile ? 280 : 256, background: '#FAFAFA', borderRight: '1px solid rgba(0,0,0,0.06)' }}
     >
       {/* Logo — centered, hidden when center logo is visible on home landing */}
-      <div className="pt-5 pb-2 flex items-center justify-center" style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: 'opacity 0.2s ease' }}>
+      <div className="pt-5 pb-2 flex items-center justify-center" style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: heroFocused ? 'opacity 0.3s ease-out 0.5s' : 'opacity 0.15s ease 0s' }}>
         <button
+          ref={!mobile ? sidebarLogoRef as any : undefined}
           onClick={() => { handleTabClick('home'); if (mobile) setIsMobileSidebarOpen(false); }}
           className="bg-transparent border-none cursor-pointer p-0 leading-none"
           type="button"
@@ -1059,6 +1155,7 @@ export default function AppShell() {
                 )}
                 {isMobile ? (
                   <button
+                    ref={mobileHeaderLogoRef}
                     onClick={() => handleTabClick('home')}
                     className="bg-transparent border-none cursor-pointer p-0 leading-none"
                     style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: 'opacity 0.3s ease' }}
@@ -1121,35 +1218,17 @@ export default function AppShell() {
               <>
                 {/* ═══ HOME PAGE — Paper Design: centered wordmark + hero chat bar + chips ═══ */}
 
-                {/* MOBILE HOME — Grok-style: logo + chat bar, centered */}
+                {/* MOBILE HOME — logo + chat bar, tap to fly-and-chat */}
                 <div className="flex flex-col h-full md:hidden">
                   <div className="flex-1 flex flex-col items-center justify-center px-5">
-                    <div style={{ position: 'relative', marginBottom: 32, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 180, width: '100%' }}>
-                      {/* Logo — fades out */}
-                      <motion.div
-                        animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
-                        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-                        style={{ position: 'absolute' }}
-                      >
-                        <LogoImg height={48} />
-                      </motion.div>
-                      {/* Hero text — fades in */}
-                      <motion.div
-                        animate={{ opacity: heroFocused ? 1 : 0, y: heroFocused ? 0 : 12 }}
-                        transition={{ duration: 0.6, delay: heroFocused ? 0.15 : 0, ease: [0.4, 0, 0.2, 1] }}
-                        style={{ textAlign: 'center', width: '100%', pointerEvents: heroFocused ? 'auto' : 'none' }}
-                      >
-                        <h1
-                          className="text-5xl md:text-6xl lg:text-7xl"
-                          style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, color: '#000', letterSpacing: '-0.03em', lineHeight: 1.05, margin: '0 0 24px' }}
-                        >
-                          Chat with your deals!
-                        </h1>
-                        <p className="text-lg md:text-xl" style={{ fontFamily: "'Inter', system-ui, sans-serif", lineHeight: 1.7, color: '#545454', margin: 0, maxWidth: 560 }}>
-                          Yulia is a chat agent for all things M&A and she can guide you through the entire process of selling or buying a business, all by just chatting with your deals. No deal is too small or too complex.<br /><span style={{ fontWeight: 600 }}>Start now completely free!</span>
-                        </p>
-                      </motion.div>
-                    </div>
+                    <motion.div
+                      ref={mobileHeroLogoRef}
+                      style={{ marginBottom: 32, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                      animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
+                      transition={{ duration: 0.15, ease: 'easeOut' }}
+                    >
+                      <AnimatedLogo height={140} stopped={heroFocused} />
+                    </motion.div>
                     <motion.div
                       className="w-full"
                       initial={{ opacity: 0, y: 12 }}
@@ -1165,8 +1244,16 @@ export default function AppShell() {
                         disabled={sending}
                         typewriterHints={TYPEWRITER_HINTS}
                         typewriterPrefix={TYPEWRITER_PREFIX}
-                        onInputFocus={() => setHeroFocused(true)}
-                        onInputBlur={(hasText) => { if (!hasText) setHeroFocused(false); }}
+                        onInputFocus={() => {
+                          setHeroFocused(true);
+                          // On mobile: fly letters then transition to chat
+                          setTimeout(() => {
+                            setViewState('chat');
+                            setHeroFocused(false);
+                            if (window.location.pathname !== '/chat') navigate('/chat');
+                          }, 700);
+                        }}
+                        onInputBlur={(hasText) => { if (!hasText && viewState === 'landing') setHeroFocused(false); }}
                       />
                     </motion.div>
                   </div>
@@ -1176,27 +1263,29 @@ export default function AppShell() {
                 <div className="hidden md:flex flex-col h-full items-center justify-center">
                   <div className="flex flex-col items-center" style={{ marginTop: '-60px', width: '100%', maxWidth: 780 }}>
                     <div style={{ position: 'relative', marginBottom: 36, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200, width: '100%', maxWidth: 720 }}>
-                      {/* Logo — fades out */}
+                      {/* Animated Logo — flies to sidebar on focus */}
                       <motion.div
+                        ref={heroLogoRef}
                         animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
-                        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                        transition={{ duration: heroFocused ? 0.15 : 0.3, delay: heroFocused ? 0 : 0.5, ease: 'easeOut' }}
                         style={{ position: 'absolute' }}
                       >
-                        <LogoImg height={56} />
+                        <AnimatedLogo height={160} stopped={heroFocused} />
                       </motion.div>
                       {/* Hero text — fades in */}
                       <motion.div
+                        initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: heroFocused ? 1 : 0, y: heroFocused ? 0 : 12 }}
-                        transition={{ duration: 0.6, delay: heroFocused ? 0.15 : 0, ease: [0.4, 0, 0.2, 1] }}
+                        transition={{ duration: heroFocused ? 0.5 : 0.25, delay: heroFocused ? 0.2 : 0, ease: [0.4, 0, 0.2, 1] }}
                         style={{ textAlign: 'center', width: '100%', pointerEvents: heroFocused ? 'auto' : 'none' }}
                       >
                         <span
                           className="text-5xl"
-                          style={{ display: 'block', fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, color: '#000', letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: 12 }}
+                          style={{ display: 'block', fontFamily: "'General Sans', 'Inter', system-ui, sans-serif", fontWeight: 700, color: '#000', letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: 12 }}
                         >
                           Chat with your deals!
                         </span>
-                        <span style={{ display: 'block', fontFamily: "'Inter', system-ui, sans-serif", fontSize: 15, lineHeight: 1.65, color: 'rgba(0,0,0,0.55)', letterSpacing: '-0.01em' }}>
+                        <span style={{ display: 'block', fontFamily: "'General Sans', 'Inter', system-ui, sans-serif", fontSize: 15, lineHeight: 1.65, color: 'rgba(0,0,0,0.55)', letterSpacing: '-0.01em' }}>
                           Yulia is a chat agent for all things M&A and she can guide you through the entire process of selling or buying a business, all by just chatting with your deals. No deal is too small or too complex.<br /><span style={{ fontWeight: 600 }}>Start now completely free!</span>
                         </span>
                       </motion.div>
@@ -1454,7 +1543,7 @@ export default function AppShell() {
                 height: '100%', gap: 16, opacity: 0.4,
               }}>
                 <LogoImg height={36} />
-                <p style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 14, fontWeight: 500, color: '#0D0D0D', margin: 0 }}>
+                <p style={{ fontFamily: "'General Sans', 'Inter', system-ui, sans-serif", fontSize: 14, fontWeight: 500, color: '#0D0D0D', margin: 0 }}>
                   Nothing to see here
                 </p>
               </div>
@@ -1511,6 +1600,112 @@ export default function AppShell() {
           background: rgba(0,0,0,0.2) !important;
         }
       `}</style>
+
+      {/* ═══ FLYING LETTERS — each letter flies whimsically between center and sidebar ═══ */}
+      {flyingLogo && (() => {
+        const letters = [
+          { ch: 's', color: '#1A1A18', weight: 700 },
+          { ch: 'm', color: '#1A1A18', weight: 700 },
+          { ch: 'b', color: '#1A1A18', weight: 700 },
+          { ch: 'x', color: '#C96B4F', weight: 800 },
+          { ch: '.', color: '#1A1A18', weight: 700 },
+          { ch: 'a', color: '#1A1A18', weight: 700 },
+          { ch: 'i', color: '#1A1A18', weight: 700 },
+        ];
+        const toSidebar = flyingLogo.direction === 'to-sidebar';
+        const heroSource = isMobile ? mobileHeroLogoRef.current : heroLogoRef.current;
+        const sideTarget = isMobile ? mobileHeaderLogoRef.current : sidebarLogoRef.current;
+        const heroRect = heroSource?.getBoundingClientRect();
+        const sideRect = sideTarget?.getBoundingClientRect();
+        if (!heroRect || !sideRect) return null;
+
+        // Letter positions at hero — spread across roughly where text sits in the video
+        const heroCenter = heroRect.left + heroRect.width / 2;
+        const heroCY = heroRect.top + heroRect.height / 2;
+        // 48px font, 7 letters ≈ 250px wide at hero scale
+        const heroSpread = 250;
+        const heroLetterW = heroSpread / letters.length;
+        const heroStartX = heroCenter - heroSpread / 2;
+
+        // Letter positions at sidebar — converge to center of the sidebar logo
+        const sideCenter = sideRect.left + sideRect.width / 2;
+        const sideCY = sideRect.top + sideRect.height / 2;
+        // At sidebar scale (0.25), letters are tiny — spread just enough to not overlap
+        const sideSpread = sideRect.width * 0.7;
+        const sideLetterW = sideSpread / letters.length;
+        const sideStartX = sideCenter - sideSpread / 2;
+
+        // Scale ratio: sidebar logo ~32px, hero font 48px
+        const sidebarScale = 0.25;
+
+        const yJitter = [-80, 50, -110, 90, -60, 70, -40]; // random vertical arcs mid-flight
+        const rotEnd = [15, -20, 25, -15, 10, -25, 12];
+        const delays = [0, 0.03, 0.07, 0.11, 0.05, 0.09, 0.13];
+
+        let completed = 0;
+        return letters.map((l, i) => {
+          const hx = heroStartX + i * heroLetterW + heroLetterW / 2;
+          const sx = sideStartX + i * sideLetterW + sideLetterW / 2;
+
+          const startX = toSidebar ? hx : sx;
+          const endX = toSidebar ? sx : hx;
+          // Y corrections: sidebar logo is small/tight, hero video has padding in the frame
+          const sideYShift = 8;   // small nudge for sidebar
+          const heroYShift = 20;  // bigger nudge — text sits inside a padded video frame
+          const startY = toSidebar ? heroCY - heroYShift : sideCY - sideYShift;
+          const endY = toSidebar ? sideCY - sideYShift : heroCY - heroYShift;
+          const startScale = toSidebar ? 1 : sidebarScale;
+          const endScale = toSidebar ? sidebarScale : 1;
+          // Arc peaks at 30% of the journey, then swoops down to target
+          const arcT = 0.3;
+          const midX = startX + (endX - startX) * arcT;
+          const midY = startY + (endY - startY) * arcT + yJitter[i];
+
+          return (
+            <motion.span
+              key={`${flyingLogo.direction}-${i}`}
+              initial={{
+                left: startX,
+                top: startY,
+                scale: startScale,
+                opacity: 1,
+                rotate: 0,
+              }}
+              animate={{
+                left: [startX, midX, endX],
+                top: [startY, midY, endY],
+                scale: [startScale, (startScale + endScale) * 0.6, endScale],
+                rotate: [0, rotEnd[i], 0],
+              }}
+              transition={{
+                duration: 0.6,
+                delay: delays[i],
+                times: [0, 0.15, 1],
+                ease: 'linear',
+                left: { duration: 0.6, delay: delays[i], times: [0, 0.15, 1], ease: [0, 0, 0.5, 1] },
+                top: { duration: 0.6, delay: delays[i], times: [0, 0.15, 1], ease: [0, 0, 0.5, 1] },
+                scale: { duration: 0.6, delay: delays[i], times: [0, 0.15, 1], ease: [0, 0, 0.5, 1] },
+                rotate: { duration: 0.6, delay: delays[i], times: [0, 0.15, 1], ease: [0, 0, 0.5, 1] },
+                opacity: { duration: 0.2, delay: delays[i] + 0.3, ease: 'easeOut' },
+              }}
+              onAnimationComplete={() => { completed++; if (completed >= letters.length) setFlyingLogo(null); }}
+              style={{
+                position: 'fixed',
+                zIndex: 9999,
+                pointerEvents: 'none',
+                fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
+                fontSize: 48,
+                fontWeight: l.weight,
+                color: l.color,
+                lineHeight: 1,
+                transform: 'translate(-50%, -50%)',
+              }}
+            >
+              {l.ch}
+            </motion.span>
+          );
+        });
+      })()}
     </div>
   );
 }

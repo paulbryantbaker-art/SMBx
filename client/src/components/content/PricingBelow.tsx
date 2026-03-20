@@ -37,7 +37,7 @@ const SmartToyIcon = () => (
   </svg>
 );
 
-const FONT = "'Inter', system-ui, sans-serif";
+const FONT = "'General Sans', 'Inter', system-ui, sans-serif";
 
 export default function PricingBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (

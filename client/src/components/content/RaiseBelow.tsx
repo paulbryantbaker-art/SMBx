@@ -26,7 +26,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                 color: '#9CA3AF',
                 marginBottom: 24,
                 display: 'block',
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
               }}
             >
               The Cost of Capital
@@ -42,7 +42,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                 lineHeight: 1,
                 marginBottom: 48,
                 color: '#000000',
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
               }}
             >
               A 5% difference in dilution today is a{' '}
@@ -58,7 +58,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                 color: '#4B5563',
                 lineHeight: 1.75,
                 maxWidth: 672,
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                 margin: 0,
               }}
             >
@@ -82,7 +82,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                   fontWeight: 700,
                   marginBottom: 32,
                   color: '#000000',
-                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                 }}
               >
                 The Founders' Trap
@@ -97,7 +97,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     color: '#374151',
                     lineHeight: 1.75,
                     margin: 0,
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   Most founders treat fundraising as a desperate search for cash. They accept complex term sheets, opaque liquidation preferences, and unnecessary dilution simply to keep the lights on.
@@ -108,7 +108,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     color: '#374151',
                     lineHeight: 1.75,
                     margin: 0,
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   Complexity is the enemy of equity. Between participation rights and anti-dilution clauses, the "headline price" of your round often masks the true cost of your freedom.
@@ -152,7 +152,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                   textTransform: 'uppercase',
                   letterSpacing: '-0.025em',
                   color: '#000000',
-                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   margin: 0,
                   marginBottom: 8,
                 }}
@@ -166,7 +166,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                   fontStyle: 'italic',
                   lineHeight: 1.4,
                   margin: 0,
-                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                 }}
               >
                 "90% of first-time founders miscalculate their fully diluted cap table during their first institutional round."
@@ -195,7 +195,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                   fontWeight: 700,
                   marginBottom: 16,
                   color: '#000000',
-                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                 }}
               >
                 Engineered Capital Paths
@@ -205,7 +205,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                   color: '#6B7280',
                   maxWidth: 576,
                   margin: '0 auto',
-                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   fontSize: 16,
                 }}
               >
@@ -234,7 +234,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     fontWeight: 700,
                     marginBottom: 16,
                     color: '#000000',
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   Revenue-Based
@@ -245,7 +245,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     marginBottom: 32,
                     fontSize: 14,
                     lineHeight: 1.75,
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   Fast non-dilutive capital for high-margin SaaS or recurring revenue models. Repay as you grow.
@@ -267,7 +267,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                       color: '#000000',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     Low Dilution
@@ -279,7 +279,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                       color: '#2563EB',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     6-12 Month Term
@@ -307,7 +307,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     fontWeight: 700,
                     marginBottom: 16,
                     color: '#000000',
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   SBA Expansion
@@ -318,7 +318,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     marginBottom: 32,
                     fontSize: 14,
                     lineHeight: 1.75,
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   Government-backed loans for established businesses moving into new territories or acquisitions.
@@ -340,7 +340,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                       color: '#000000',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     Zero Dilution
@@ -352,7 +352,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                       color: '#16A34A',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     Fixed Rate
@@ -380,7 +380,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     fontWeight: 700,
                     marginBottom: 16,
                     color: '#000000',
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   Equity (Series A/B)
@@ -391,7 +391,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     marginBottom: 16,
                     fontSize: 14,
                     lineHeight: 1.75,
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   Institutional venture capital for aggressive scaling. Requires waterfall analysis to understand exit impact.
@@ -413,7 +413,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                       marginBottom: 4,
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     Warning
@@ -425,7 +425,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       fontStyle: 'italic',
                       lineHeight: 1.4,
                       margin: 0,
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     Note: 1x non-participating preferred is standard. Avoid 2x liquidation preferences.
@@ -448,7 +448,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                       color: '#000000',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     High Dilution
@@ -460,7 +460,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                       color: '#DC2626',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     Exit Focus
@@ -488,7 +488,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     fontWeight: 700,
                     marginBottom: 16,
                     color: '#000000',
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   Strategic Partnership
@@ -499,7 +499,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     marginBottom: 32,
                     fontSize: 14,
                     lineHeight: 1.75,
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   Capital combined with distribution. Lower valuation offset by immediate market access.
@@ -521,7 +521,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                       color: '#000000',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     Moderate Dilution
@@ -533,7 +533,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                       color: '#9333EA',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     LTV Boost
@@ -561,7 +561,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     fontWeight: 700,
                     marginBottom: 16,
                     color: '#000000',
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   Mezzanine Debt
@@ -572,7 +572,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     marginBottom: 32,
                     fontSize: 14,
                     lineHeight: 1.75,
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   Hybrid of debt and equity. Often used as a bridge to IPO or major exit event.
@@ -594,7 +594,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                       color: '#000000',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     Warrant Based
@@ -606,7 +606,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                       color: '#EA580C',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     Bridge Tool
@@ -635,7 +635,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     marginBottom: 16,
                     color: '#9CA3AF',
                     fontStyle: 'italic',
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   Custom Structure
@@ -646,7 +646,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     marginBottom: 32,
                     fontSize: 14,
                     lineHeight: 1.75,
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                   }}
                 >
                   Don't see your path? We engineer custom instruments for unique capital requirements.
@@ -667,7 +667,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                 fontWeight: 700,
                 marginBottom: 48,
                 color: '#000000',
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                 letterSpacing: '-0.025em',
               }}
             >
@@ -682,7 +682,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                 color: '#4B5563',
                 marginBottom: 80,
                 lineHeight: 1.75,
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
               }}
             >
               Investors don't read; they scan. We build the "Institutional Package" that answers every question before it's asked.
@@ -698,7 +698,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     fontSize: 30,
                     fontWeight: 700,
                     color: '#E5E7EB',
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     flexShrink: 0,
                   }}
                 >
@@ -717,7 +717,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       fontWeight: 700,
                       marginBottom: 8,
                       color: '#000000',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     The Deck
@@ -726,7 +726,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     style={{
                       color: '#4B5563',
                       margin: 0,
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                       fontSize: 16,
                     }}
                   >
@@ -744,7 +744,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     fontSize: 30,
                     fontWeight: 700,
                     color: '#E5E7EB',
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     flexShrink: 0,
                   }}
                 >
@@ -763,7 +763,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       fontWeight: 700,
                       marginBottom: 8,
                       color: '#000000',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     The Model
@@ -772,7 +772,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     style={{
                       color: '#4B5563',
                       margin: 0,
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                       fontSize: 16,
                     }}
                   >
@@ -790,7 +790,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     fontSize: 30,
                     fontWeight: 700,
                     color: '#E5E7EB',
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     flexShrink: 0,
                   }}
                 >
@@ -809,7 +809,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       fontWeight: 700,
                       marginBottom: 8,
                       color: '#000000',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     Cap Table & Use of Funds
@@ -818,7 +818,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     style={{
                       color: '#4B5563',
                       margin: 0,
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                       fontSize: 16,
                     }}
                   >
@@ -836,7 +836,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     fontSize: 30,
                     fontWeight: 700,
                     color: '#E5E7EB',
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     flexShrink: 0,
                   }}
                 >
@@ -849,7 +849,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                       fontWeight: 700,
                       marginBottom: 8,
                       color: '#000000',
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                     }}
                   >
                     Targeting List
@@ -858,7 +858,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                     style={{
                       color: '#4B5563',
                       margin: 0,
-                      fontFamily: "'Inter', system-ui, sans-serif",
+                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                       fontSize: 16,
                     }}
                   >
@@ -893,7 +893,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                 letterSpacing: '-0.05em',
                 marginBottom: 32,
                 lineHeight: 1,
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
               }}
             >
               Growth funded.<br />On your terms.
@@ -908,7 +908,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                 marginBottom: 48,
                 maxWidth: 672,
                 margin: '0 auto 48px auto',
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                 lineHeight: 1.6,
               }}
             >
@@ -928,7 +928,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
                 borderRadius: 9999,
                 border: 'none',
                 cursor: 'pointer',
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
                 transition: 'opacity 0.2s',
               }}
               onMouseEnter={(e) => { (e.target as HTMLButtonElement).style.opacity = '0.85'; }}
