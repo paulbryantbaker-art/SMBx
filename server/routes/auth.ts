@@ -42,8 +42,6 @@ authRouter.post('/register', async (req, res) => {
       RETURNING id, email, display_name, google_id, league, role, created_at, updated_at
     `;
 
-    await sql`INSERT INTO wallets (user_id, balance_cents) VALUES (${user.id}, 0)`;
-
     // Fire-and-forget welcome email
     sendWelcomeEmail(emailLower, displayName).catch(() => {});
 
@@ -174,7 +172,6 @@ authRouter.post('/google', async (req, res) => {
         RETURNING id, email, display_name, google_id, league, role, created_at, updated_at
       `;
 
-      await sql`INSERT INTO wallets (user_id, balance_cents) VALUES (${user.id}, 0)`;
     }
 
     const token = signToken(user.id);

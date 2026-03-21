@@ -6,7 +6,7 @@ import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { fetchCBPData, fetchFREDData, calculateSBABankability, generateMarketOverview } from '../services/marketDataService.js';
 import { generateIntelligenceReport } from '../services/generators/intelligenceReport.js';
-import { debitWallet, getBalance } from '../services/walletService.js';
+import { isPlatformFeePaid } from '../services/platformFeeService.js';
 
 export const intelligenceRouter = Router();
 intelligenceRouter.use(requireAuth);
@@ -190,19 +190,17 @@ intelligenceRouter.post('/intelligence/reports/generate', async (req, res) => {
       }
     }
 
-    // Charge for report (2500 cents = $25)
-    const reportPrice = 2500;
-    const balance = await getBalance(userId);
-    if (balance < reportPrice) {
-      return res.status(402).json({
-        error: 'Insufficient wallet balance',
-        required: reportPrice,
-        balance,
-        requiredDisplay: `$${(reportPrice / 100).toFixed(2)}`,
-        balanceDisplay: `$${(balance / 100).toFixed(2)}`,
-      });
+    // Platform fee model: intelligence reports are included if deal fee is paid
+    if (dealId) {
+      const paid = await isPlatformFeePaid(parseInt(dealId as string));
+      if (!paid) {
+        return res.status(402).json({
+          error: 'Platform fee required',
+          message: 'Pay the platform fee for this deal to unlock intelligence reports.',
+        });
+      }
     }
-    await debitWallet(userId, reportPrice, `Intelligence Report: ${naicsCode} in ${stateCode}`);
+    const reportPrice = 0; // included in platform fee
 
     // Create report record
     const [reportRecord] = await sql`

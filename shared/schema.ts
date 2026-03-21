@@ -12,39 +12,6 @@ export interface User {
   updated_at: Date;
 }
 
-// ─── Wallets ────────────────────────────────────────────────
-
-export interface Wallet {
-  id: number;
-  user_id: number;
-  balance_cents: number;
-  auto_refill_enabled: boolean;
-  auto_refill_threshold_cents: number;
-  auto_refill_amount_cents: number;
-  created_at: Date;
-}
-
-export interface WalletTransaction {
-  id: number;
-  wallet_id: number;
-  amount_cents: number;
-  type: string;
-  description: string | null;
-  stripe_payment_intent_id: string | null;
-  menu_item_id: string | null;
-  balance_after_cents: number;
-  created_at: Date;
-}
-
-export interface WalletBlock {
-  id: number;
-  name: string;
-  price_cents: number;
-  credits_cents: number;
-  bonus_percent: number;
-  sort_order: number;
-}
-
 // ─── Conversations & Messages ───────────────────────────────
 
 export interface Conversation {

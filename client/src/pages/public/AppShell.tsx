@@ -129,7 +129,7 @@ const TYPEWRITER_HINTS = [
 /* ═══ TYPES ═══ */
 
 export type TabId = 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'how-it-works' | 'advisors' | 'pricing';
-export type ViewState = 'landing' | 'chat' | 'pipeline' | 'dataroom' | 'settings' | 'seller-dashboard' | 'buyer-pipeline' | 'wallet' | 'documents' | 'analytics';
+export type ViewState = 'landing' | 'chat' | 'pipeline' | 'dataroom' | 'settings' | 'seller-dashboard' | 'buyer-pipeline' | 'documents' | 'analytics';
 
 /* ═══ PAGE COPY ═══ */
 
@@ -354,7 +354,6 @@ function pathToViewState(path: string): ViewState {
   if (path === '/settings') return 'settings';
   if (path === '/seller') return 'seller-dashboard';
   if (path === '/buyer') return 'buyer-pipeline';
-  if (path === '/wallet') return 'wallet';
   if (path === '/documents') return 'documents';
   if (path === '/analytics') return 'analytics';
   return 'landing';
@@ -643,7 +642,7 @@ export default function AppShell() {
 
   // Redirect unauth from tool views
   useEffect(() => {
-    if (['pipeline', 'dataroom', 'settings', 'seller-dashboard', 'buyer-pipeline', 'wallet'].includes(viewState) && !user) navigate('/login');
+    if (['pipeline', 'dataroom', 'settings', 'seller-dashboard', 'buyer-pipeline'].includes(viewState) && !user) navigate('/login');
   }, [viewState, user, navigate]);
 
   // NDA check when entering data room
@@ -1169,7 +1168,7 @@ export default function AppShell() {
                   </button>
                 ) : (
                   <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(0,0,0,0.35)' }}>
-                    {viewState === 'documents' ? 'Documents' : viewState === 'analytics' ? 'Analytics' : viewState === 'settings' ? 'Settings' : viewState === 'pipeline' ? 'Pipeline' : viewState === 'dataroom' ? 'Data Room' : viewState === 'wallet' ? 'Wallet' : activeTab === 'home' ? 'Chat' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'how-it-works' ? 'How It Works' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
+                    {viewState === 'documents' ? 'Documents' : viewState === 'analytics' ? 'Analytics' : viewState === 'settings' ? 'Settings' : viewState === 'pipeline' ? 'Pipeline' : viewState === 'dataroom' ? 'Data Room' : activeTab === 'home' ? 'Chat' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'how-it-works' ? 'How It Works' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
                   </span>
                 )}
               </>

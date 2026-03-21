@@ -7,7 +7,7 @@ export const GATE_PROMPTS: Record<string, string> = {
   // ═══════════════════════════════════════════════════════════
   S0: `## CURRENT GATE: S0 — Intake & Classification
 OBJECTIVE: Classify the seller into the correct League and establish exit parameters.
-COST: FREE (no wallet deduction)
+COST: FREE
 
 YOUR TASK:
 Gather the following information through natural conversation. Do NOT present this as a form. Ask 2-3 questions at a time, respond to their answers, then ask the next batch.
@@ -104,7 +104,7 @@ SELF-CHECK before advancing:
 
   S1: `## CURRENT GATE: S1 — Financial Preflight
 OBJECTIVE: Ingest, verify, and normalize financial data for valuation.
-COST: FREE (no wallet deduction)
+COST: FREE
 
 YOUR TASK:
 Guide the user through financial document upload and data extraction. Calculate SDE (L1/L2) or Adjusted EBITDA (L3+).
@@ -246,9 +246,9 @@ This is a paid deliverable — it costs $[calculated price based on league]. Her
 
 Want me to generate your valuation?"
 
-IF USER ACCEPTS → Deduct wallet, generate deliverable
+IF USER ACCEPTS → Generate deliverable (included in platform fee)
 IF USER DECLINES → "No problem. If you change your mind, just say 'generate my valuation' and I'll get it done. In the meantime, I can answer general questions about valuation methodology."
-IF INSUFFICIENT FUNDS → Trigger wallet top-up flow
+IF PLATFORM FEE NOT PAID → Trigger platform fee payment flow
 
 VALUATION METHODOLOGY:
 

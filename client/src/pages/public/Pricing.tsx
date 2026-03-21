@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { ScrollReveal, StaggerContainer, StaggerItem, ScrollProgressBar } from '../../components/content/animations';
 
-/* ═══ DESIGN TOKENS ═══ */
+/* === DESIGN TOKENS === */
 
 const T = {
   bg: '#FAFAFA',
@@ -16,7 +16,7 @@ const T = {
   border: 'rgba(0,0,0,0.08)',
 };
 
-/* ═══ DATA ═══ */
+/* === DATA === */
 
 const FREE_ITEMS = [
   { title: 'Unlimited conversation with Yulia', desc: 'Ask anything about your deal, your market, or the M&A process. Yulia\u2019s advisory conversation has no limits.' },
@@ -27,18 +27,26 @@ const FREE_ITEMS = [
   { title: 'SBA pre-qualification check', desc: 'Whether your deal qualifies for SBA financing and what that means for your buyer pool.' },
 ];
 
-const SELL_DELIVERABLES = [
-  { title: 'Business Valuation Report', price: '350', desc: 'Multi-methodology valuation with defensible logic, comparable transaction data, and specific recommendations for maximizing your sale price. Built to withstand buyer scrutiny.' },
-  { title: 'Market Intelligence Report', price: '200', desc: 'Comprehensive analysis of your industry, competitive landscape, buyer activity, and market conditions \u2014 localized to your metro. The foundation of a well-positioned listing.' },
-  { title: 'Confidential Information Memorandum (CIM)', price: '700', desc: 'A professional deal book presenting your business to potential buyers \u2014 financial summary, growth narrative, market position, and investment thesis.' },
-  { title: 'LOI Draft', price: '125', desc: 'Letter of Intent preparation with recommended terms, negotiation strategy, and deal structure optimization through close.' },
+const PLATFORM_FEES = [
+  { league: 'L1', size: 'Under $500K', fee: '$999', metric: 'SDE' },
+  { league: 'L2', size: '$500K \u2013 $2M', fee: '$1,500', metric: 'SDE' },
+  { league: 'L3', size: '$2M \u2013 $5M', fee: '$5,000', metric: 'EBITDA' },
+  { league: 'L4', size: '$5M \u2013 $10M', fee: '$15,000', metric: 'EBITDA' },
+  { league: 'L5', size: '$10M \u2013 $50M', fee: '$25,000', metric: 'EBITDA' },
+  { league: 'L6', size: '$50M+', fee: '$50,000', metric: 'EBITDA' },
 ];
 
-const BUY_DELIVERABLES = [
-  { title: 'Deal Screening Memo', price: '150', desc: 'Rapid target evaluation \u2014 financial scoring, thesis fit analysis, red flag identification, and pursue/pass recommendation.' },
-  { title: 'Financial Model', price: '300', desc: 'Deep financial modeling \u2014 DSCR, ROI projections, risk-adjusted returns, and SBA financing scenarios for a specific acquisition target.' },
-  { title: 'QoE Lite', price: '500', desc: 'Pre-diligence quality of earnings analysis, red flag identification, and data room preparation guidance before you engage outside professionals.' },
-  { title: 'Working Capital Analysis', price: '150', desc: 'Working capital peg calculation, seasonal adjustment modeling, and closing adjustment framework.' },
+const INCLUDED_DELIVERABLES = [
+  'Business Valuation Report',
+  'Confidential Information Memorandum (CIM)',
+  'Market Intelligence Report',
+  'Financial Model & Sensitivity Analysis',
+  'Deal Screening Memo',
+  'LOI / Term Sheet Draft',
+  'Due Diligence Package',
+  'Working Capital Analysis',
+  'Capital Structure Analysis',
+  'Closing Checklist & Funds Flow',
 ];
 
 const FAQS = [
@@ -49,6 +57,10 @@ const FAQS = [
   {
     q: 'How is this different from ChatGPT?',
     a: 'ChatGPT is a general-purpose language model. smbX.ai is a purpose-built deal intelligence platform. Yulia follows a structured seven-layer methodology, synthesizes data from authoritative government sources (Census, BLS, FRED, SEC EDGAR), and delivers traceable analysis calibrated to your specific deal. The difference is the difference between a search engine and a research department.',
+  },
+  {
+    q: 'What\u2019s included in the one-time fee?',
+    a: 'Everything from valuation through closing. Once you pay the platform fee for your deal, every deliverable \u2014 valuation reports, CIMs, financial models, due diligence packages, LOI drafts, closing checklists \u2014 is included at no additional cost. One fee, one deal, everything through close.',
   },
   {
     q: 'What if I\u2019m working with a broker or advisor?',
@@ -64,7 +76,7 @@ const FAQS = [
   },
 ];
 
-/* ═══ FAQ ACCORDION ═══ */
+/* === FAQ ACCORDION === */
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
@@ -100,7 +112,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   );
 }
 
-/* ═══ COMPONENT ═══ */
+/* === COMPONENT === */
 
 export default function Pricing() {
   const [, navigate] = useLocation();
@@ -139,7 +151,7 @@ export default function Pricing() {
         }
         @media (max-width: 768px) { .price-body { font-size: 15px; } }
 
-        /* ── Topbar ── */
+        /* -- Topbar -- */
         .price-topbar {
           height: 56px; padding: 0 20px;
           padding-top: env(safe-area-inset-top, 0px);
@@ -172,7 +184,7 @@ export default function Pricing() {
         }
         .price-topbar-btn:hover { background: rgba(0,0,0,0.04); }
 
-        /* ── Hero ── */
+        /* -- Hero -- */
         .price-hero {
           max-width: 960px; margin: 0 auto; width: 100%;
           padding: 80px 32px 60px;
@@ -201,7 +213,7 @@ export default function Pricing() {
         }
         @media (max-width: 768px) { .price-callout { font-size: 15px; padding: 14px 16px; } }
 
-        /* ── Free cards ── */
+        /* -- Free cards -- */
         .price-free-grid {
           display: grid; grid-template-columns: repeat(2, 1fr);
           gap: 16px;
@@ -227,53 +239,29 @@ export default function Pricing() {
           font-size: 14px; line-height: 1.65; color: ${T.sub}; margin: 0;
         }
 
-        /* ── Premium deliverables ── */
-        .price-journey-label {
-          font-size: 13px; font-weight: 700; text-transform: uppercase;
-          letter-spacing: 0.1em; color: ${T.terra};
-          margin: 0 0 16px; padding-bottom: 8px;
-          border-bottom: 2px solid ${T.terraSoft};
-        }
-
-        .price-deliverables {
-          display: flex; flex-direction: column; gap: 16px;
-          margin-bottom: 40px;
-        }
-        .price-deliverables:last-child { margin-bottom: 0; }
-
-        .price-deliverable {
-          background: #FFFFFF; border-radius: 16px;
-          border: 1px solid rgba(0,0,0,0.08);
-          padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-          display: flex; flex-direction: column; gap: 8px;
-        }
-        .price-deliverable-header {
-          display: flex; justify-content: space-between; align-items: baseline;
-          flex-wrap: wrap; gap: 8px;
-        }
-        .price-deliverable h3 {
-          font-size: 16px; font-weight: 700; color: ${T.text};
-          margin: 0; letter-spacing: -0.01em;
-        }
-        .price-deliverable-price {
-          font-size: 15px; font-weight: 700; color: ${T.terra};
-          white-space: nowrap;
-        }
-        .price-deliverable p {
-          font-size: 14px; line-height: 1.65; color: ${T.sub}; margin: 0;
-        }
-
-        /* ── Wallet ── */
-        .price-wallet {
+        /* -- Platform fee table -- */
+        .price-fee-box {
           background: #FFFFFF; border-radius: 20px;
           border: 1px solid rgba(0,0,0,0.08);
           padding: 36px 32px;
           box-shadow: 0 2px 12px rgba(0,0,0,0.08);
           max-width: 720px;
         }
-        @media (max-width: 768px) { .price-wallet { padding: 28px 20px; border-radius: 16px; } }
+        @media (max-width: 768px) { .price-fee-box { padding: 28px 20px; border-radius: 16px; } }
 
-        /* ── Advisor teaser ── */
+        /* -- Included list -- */
+        .price-included-grid {
+          display: grid; grid-template-columns: repeat(2, 1fr);
+          gap: 8px 24px;
+        }
+        @media (max-width: 640px) { .price-included-grid { grid-template-columns: 1fr; } }
+
+        .price-included-item {
+          display: flex; align-items: center; gap: 8px;
+          font-size: 14px; color: ${T.sub}; padding: 6px 0;
+        }
+
+        /* -- Advisor teaser -- */
         .price-advisor-box {
           background: #FFFFFF; border-radius: 20px;
           border: 1px solid rgba(0,0,0,0.08);
@@ -291,7 +279,7 @@ export default function Pricing() {
         }
         .price-advisor-link:hover { color: ${T.terraHover}; }
 
-        /* ── FAQ ── */
+        /* -- FAQ -- */
         .price-faq-list {
           max-width: 720px;
           display: flex; flex-direction: column; gap: 0;
@@ -322,7 +310,7 @@ export default function Pricing() {
         }
         @media (max-width: 768px) { .price-faq-a { font-size: 14px; } }
 
-        /* ── CTA & buttons ── */
+        /* -- CTA & buttons -- */
         .price-btn-primary {
           display: inline-flex; align-items: center; gap: 8px;
           padding: 14px 28px; border-radius: 12px;
@@ -334,7 +322,7 @@ export default function Pricing() {
         }
         .price-btn-primary:hover { background: ${T.terraHover}; }
 
-        /* ── Final CTA ── */
+        /* -- Final CTA -- */
         .price-final-cta {
           text-align: center; max-width: 600px;
           margin: 0 auto; padding: 80px 32px;
@@ -351,7 +339,7 @@ export default function Pricing() {
           font-size: 16px; color: ${T.muted}; margin: 0 0 28px;
         }
 
-        /* ── Footer ── */
+        /* -- Footer -- */
         .price-footer {
           border-top: 1px solid ${T.border};
           padding: 40px 32px;
@@ -378,7 +366,7 @@ export default function Pricing() {
         }
       `}</style>
 
-      {/* ═══ TOPBAR ═══ */}
+      {/* === TOPBAR === */}
       <header className="price-topbar">
         <div className="price-topbar-logo">
           <a href="/">
@@ -401,30 +389,27 @@ export default function Pricing() {
         </button>
       </header>
 
-      {/* ═══ HERO ═══ */}
+      {/* === HERO === */}
       <section className="price-hero hero-entrance">
         <h1>If you could Google it, it should be free.</h1>
         <p className="price-hero-sub">
           The conversation with Yulia is always free. Foundational analysis &mdash; classification, preliminary valuation, market overview &mdash; is free because the underlying data comes from authoritative public sources.
         </p>
         <p className="price-hero-sub" style={{ marginBottom: 32 }}>
-          What you invest in is personalized intelligence: contextualized to your deal, localized to your market, and built to help you make decisions with confidence.
+          When your deal is ready to move, one platform fee unlocks everything through closing. No per-deliverable charges, no subscriptions, no surprises.
         </p>
         <div className="price-callout">
-          Free: what the data says. Premium: what the data means for your deal.
+          Free: what the data says. One fee: everything you need to close.
         </div>
       </section>
 
-      {/* ═══ SECTION 1: WHAT'S FREE ═══ */}
+      {/* === SECTION 1: WHAT'S FREE === */}
       <hr className="price-divider" />
       <ScrollReveal>
         <section className="price-section">
           <h2 className="price-heading">Start here. It&apos;s on us.</h2>
           <p className="price-body" style={{ marginBottom: 28 }}>
             Every deal starts with a conversation &mdash; and the first analysis is always free. No credit card. No signup wall. Just tell Yulia about your deal.
-          </p>
-          <p className="price-body" style={{ fontSize: 13, color: T.faint, marginBottom: 28 }}>
-            Prices shown are base rates. Prices scale with deal complexity (league multiplier).
           </p>
           <StaggerContainer className="price-free-grid">
             {FREE_ITEMS.map((item, i) => (
@@ -442,91 +427,59 @@ export default function Pricing() {
         </section>
       </ScrollReveal>
 
-      {/* ═══ SECTION 2: PREMIUM INTELLIGENCE ═══ */}
+      {/* === SECTION 2: PLATFORM FEE === */}
       <hr className="price-divider" />
       <ScrollReveal>
       <section className="price-section">
-        <h2 className="price-heading">Go deeper when your deal is ready.</h2>
+        <h2 className="price-heading">One fee. Everything through closing.</h2>
         <p className="price-body" style={{ marginBottom: 32 }}>
-          Premium deliverables are generated when you need them &mdash; no subscriptions, no retainers. Your investment grows with your deal, one step at a time.
+          When your deal is ready to move past valuation, a single platform fee unlocks every deliverable through close. No per-document charges. No metering. Your fee is determined by your deal&apos;s size &mdash; your league.
         </p>
 
-        {/* Sell journey */}
-        <div className="price-journey-label">Sell Journey</div>
-        <div className="price-deliverables">
-          {SELL_DELIVERABLES.map((d, i) => (
-            <div key={i} className="price-deliverable">
-              <div className="price-deliverable-header">
-                <h3>{d.title}</h3>
-                <span className="price-deliverable-price">${d.price}</span>
-              </div>
-              <p>{d.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Buy journey */}
-        <div className="price-journey-label">Buy Journey</div>
-        <div className="price-deliverables">
-          {BUY_DELIVERABLES.map((d, i) => (
-            <div key={i} className="price-deliverable">
-              <div className="price-deliverable-header">
-                <h3>{d.title}</h3>
-                <span className="price-deliverable-price">${d.price}</span>
-              </div>
-              <p>{d.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-      </ScrollReveal>
-
-      {/* ═══ SECTION 3: WALLET ═══ */}
-      <hr className="price-divider" />
-      <ScrollReveal>
-      <section className="price-section">
-        <div className="price-wallet">
-          <h2 className="price-heading" style={{ marginBottom: 16 }}>Pay as you go. No subscriptions. No surprises.</h2>
-          <p className="price-body" style={{ marginBottom: 16 }}>
-            smbX.ai uses a wallet system. Add funds when you&apos;re ready for a premium deliverable &mdash; Yulia will let you know exactly what it costs before you commit. No recurring charges, no contracts, no hidden fees.
-          </p>
-          <p className="price-body" style={{ marginBottom: 24 }}>
-            Your wallet balance carries forward across deals. If you&apos;re an advisor running multiple engagements, your funds work across all of them.
-          </p>
+        <div className="price-fee-box" style={{ marginBottom: 40 }}>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
               <thead>
                 <tr style={{ borderBottom: `2px solid ${T.border}` }}>
-                  <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 600, color: T.text }}>Block</th>
-                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: T.text }}>Price</th>
-                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: T.text }}>Bonus</th>
-                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: T.text }}>Total</th>
+                  <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 600, color: T.text }}>League</th>
+                  <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 600, color: T.text }}>Deal Size</th>
+                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: T.text }}>Platform Fee</th>
                 </tr>
               </thead>
               <tbody>
-                {[
-                  { name: 'Exploratory', price: '$50', bonus: '\u2014', total: '$50' },
-                  { name: 'Early Commit', price: '$100', bonus: '+$5', total: '$105' },
-                  { name: 'Active Deal', price: '$250', bonus: '+$15', total: '$265' },
-                  { name: 'Serious', price: '$500', bonus: '+$40', total: '$540' },
-                  { name: 'Full Journey', price: '$1,000', bonus: '+$100', total: '$1,100' },
-                  { name: 'Advisor', price: '$2,500', bonus: '+$300', total: '$2,800' },
-                ].map((row, i) => (
+                {PLATFORM_FEES.map((row, i) => (
                   <tr key={i} style={{ borderBottom: `1px solid ${T.border}` }}>
-                    <td style={{ padding: '10px 12px', fontWeight: 500, color: T.text }}>{row.name}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', color: T.sub }}>{row.price}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', color: T.terra, fontWeight: 600 }}>{row.bonus}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 600, color: T.text }}>{row.total}</td>
+                    <td style={{ padding: '10px 12px', fontWeight: 600, color: T.terra }}>{row.league}</td>
+                    <td style={{ padding: '10px 12px', color: T.sub }}>{row.size}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 700, color: T.text }}>{row.fee}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
+
+        <h3 style={{ fontSize: 18, fontWeight: 700, color: T.text, margin: '0 0 16px', letterSpacing: '-0.02em' }}>
+          Everything included
+        </h3>
+        <p className="price-body" style={{ marginBottom: 20 }}>
+          Once you pay the platform fee, every deliverable for your deal is generated at no additional cost:
+        </p>
+        <div className="price-included-grid" style={{ marginBottom: 16 }}>
+          {INCLUDED_DELIVERABLES.map((item, i) => (
+            <div key={i} className="price-included-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.terra} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
+        <p style={{ fontSize: 13, color: T.faint, margin: 0 }}>
+          Plus any additional deliverables added to the platform &mdash; included automatically.
+        </p>
       </section>
       </ScrollReveal>
 
-      {/* ═══ SECTION 4: ADVISOR PRICING ═══ */}
+      {/* === SECTION 3: ADVISOR PRICING === */}
       <hr className="price-divider" />
       <ScrollReveal>
       <section className="price-section">
@@ -545,7 +498,7 @@ export default function Pricing() {
       </section>
       </ScrollReveal>
 
-      {/* ═══ SECTION 5: FAQ ═══ */}
+      {/* === SECTION 4: FAQ === */}
       <hr className="price-divider" />
       <ScrollReveal>
       <section className="price-section">
@@ -558,7 +511,7 @@ export default function Pricing() {
       </section>
       </ScrollReveal>
 
-      {/* ═══ SECTION 6: FINAL CTA ═══ */}
+      {/* === SECTION 5: FINAL CTA === */}
       <ScrollReveal>
       <div className="price-final-cta">
         <h2 className="price-cta-heading">Start free. Go deeper when you&apos;re ready.</h2>
@@ -572,7 +525,7 @@ export default function Pricing() {
       </div>
       </ScrollReveal>
 
-      {/* ═══ FOOTER ═══ */}
+      {/* === FOOTER === */}
       <footer className="price-footer">
         <div className="price-footer-logo">
           <span style={{ color: T.text }}>smb</span>

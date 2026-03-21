@@ -4,7 +4,7 @@ import Sidebar, { type Conversation } from '../components/chat/Sidebar';
 import MessageBubble, { type Message } from '../components/chat/MessageBubble';
 import ChatDock from '../components/shared/ChatDock';
 import TypingIndicator from '../components/chat/TypingIndicator';
-import WalletBadge from '../components/chat/WalletBadge';
+
 import GateProgress from '../components/chat/GateProgress';
 import PaywallCard from '../components/chat/PaywallCard';
 import DataRoom from '../components/chat/DataRoom';
@@ -407,7 +407,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
             <div className="hidden sm:block w-px h-5 bg-[rgba(0,0,0,0.06)] mx-1.5" />
 
             <NotificationBell />
-            <WalletBadge />
+
             <button
               onClick={() => toggleCanvas('settings')}
               className={`flex items-center justify-center w-8 h-8 rounded-full text-sm transition-colors cursor-pointer border-0 bg-transparent ${
@@ -495,10 +495,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
                           setViewingDeliverable(deliverableId);
                         }
                       }}
-                      onTopUp={() => {
-                        const walletBtn = document.querySelector('[data-wallet-toggle]') as HTMLButtonElement;
-                        if (walletBtn) walletBtn.click();
-                      }}
+                      onTopUp={() => {}}
                     />
                   )}
 

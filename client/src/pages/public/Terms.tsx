@@ -44,8 +44,8 @@ export default function Terms() {
           <div>
             <h2 className="font-sans text-xl font-bold text-[#0D0D0D] mb-3 m-0">Payments</h2>
             <p className="m-0">
-              smbx.ai uses a pay-as-you-go wallet model. Credits are purchased in advance and
-              consumed as you use paid features. Credits do not expire. Refunds are available
+              smbx.ai uses a one-time platform fee model. A single fee per deal unlocks all
+              deliverables from valuation through closing. Refunds are available
               if our work product does not meet professional standards.
             </p>
           </div>
