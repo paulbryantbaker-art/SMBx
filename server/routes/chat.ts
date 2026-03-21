@@ -10,7 +10,7 @@ import { extractFields } from '../services/fieldExtractor.js';
 import type { ExtractedFields } from '../services/fieldExtractor.js';
 import { checkGateReadiness } from '../services/gateReadinessService.js';
 import { generatePaywallPrompt } from '../services/paywallService.js';
-import { getBalance, debitWallet } from '../services/walletService.js';
+import { createPlatformFeeCheckout, isPlatformFeePaid, getPlatformFee } from '../services/platformFeeService.js';
 import { classifyLeague, getLeagueMultiplier } from '../services/leagueClassifier.js';
 import { getGateMenuItems } from '../services/menuCatalogService.js';
 import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
@@ -701,7 +701,7 @@ chatRouter.post('/deals/:dealId/unlock-gate', requireAuth, async (req, res) => {
     if (!deal || deal.user_id !== userId) return res.status(404).json({ error: 'Deal not found' });
 
     // Verify this is a valid paywall transition
-    const readiness = checkGateReadiness(deal.current_gate, deal);
+    const readiness = await checkGateReadiness(deal.current_gate, deal);
     if (!readiness.ready) {
       return res.status(400).json({ error: 'Current gate not ready for advancement', missing: readiness.missing });
     }
@@ -709,83 +709,60 @@ chatRouter.post('/deals/:dealId/unlock-gate', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Invalid gate unlock request' });
     }
 
-    // Calculate price
-    const league = deal.league || 'L1';
-    const paywall = generatePaywallPrompt({
-      gate,
-      league,
-      journeyType: deal.journey_type,
-      dealData: {
-        industry: deal.industry || undefined,
-        revenue: deal.revenue || undefined,
-        sde: deal.sde || undefined,
-        ebitda: deal.ebitda || undefined,
-        business_name: deal.business_name || undefined,
-        asking_price: deal.asking_price || undefined,
-      },
-    });
+    // Platform fee model: redirect to Stripe checkout (or auto-pay in TEST_MODE)
+    const result = await createPlatformFeeCheckout(parseInt(req.params.dealId), userId);
 
-    // Check balance
-    const balance = await getBalance(userId);
-    if (balance < paywall.priceCents) {
-      return res.status(402).json({
-        error: 'Insufficient wallet balance',
-        required: paywall.priceCents,
-        requiredDisplay: paywall.priceDisplay,
-        balance,
-        balanceDisplay: `$${(balance / 100).toFixed(2)}`,
-        shortfall: paywall.priceCents - balance,
-        shortfallDisplay: `$${((paywall.priceCents - balance) / 100).toFixed(2)}`,
+    if (result.test) {
+      // TEST_MODE: platform fee auto-paid — advance gate immediately
+      const newGate = await advanceGate(dealId, deal.current_gate);
+
+      // Auto-trigger primary deliverable for the unlocked gate
+      let deliverableId: number | null = null;
+      try {
+        const gateItems = await getGateMenuItems(gate);
+        if (gateItems.length > 0) {
+          const primaryItem = gateItems[0];
+          const [deliverable] = await sql`
+            INSERT INTO deliverables (deal_id, user_id, menu_item_id, status, price_charged_cents)
+            VALUES (${dealId}, ${userId}, ${primaryItem.id}, 'queued', 0)
+            RETURNING id
+          `;
+          deliverableId = deliverable.id;
+          const jobData = {
+            deliverableId: deliverable.id,
+            dealId,
+            userId,
+            menuItemSlug: primaryItem.slug,
+            deliverableType: primaryItem.slug.replace(/-/g, '_'),
+          };
+          await enqueueDeliverableGeneration(jobData);
+
+          setImmediate(() => {
+            processDeliverable(jobData).catch(err =>
+              console.error('Inline gate deliverable generation error:', err.message),
+            );
+          });
+        }
+      } catch (e: any) {
+        console.error('Auto-trigger deliverable error:', e.message);
+      }
+
+      const fee = await getPlatformFee(dealId);
+      return res.json({
+        success: true,
+        fromGate: deal.current_gate,
+        toGate: newGate,
+        priceCharged: fee.feeCents,
+        priceDisplay: fee.feeDisplay,
+        deliverableId,
       });
     }
 
-    // Debit wallet
-    await debitWallet(userId, paywall.priceCents, `Gate unlock: ${gate} (${deal.journey_type})`);
-
-    // Advance gate
-    const newGate = await advanceGate(dealId, deal.current_gate);
-
-    // Auto-trigger primary deliverable for the unlocked gate
-    let deliverableId: number | null = null;
-    try {
-      const gateItems = await getGateMenuItems(gate);
-      if (gateItems.length > 0) {
-        const primaryItem = gateItems[0]; // First item is the primary deliverable
-        const [deliverable] = await sql`
-          INSERT INTO deliverables (deal_id, user_id, menu_item_id, status, price_charged_cents)
-          VALUES (${dealId}, ${userId}, ${primaryItem.id}, 'queued', 0)
-          RETURNING id
-        `;
-        deliverableId = deliverable.id;
-        const jobData = {
-          deliverableId: deliverable.id,
-          dealId,
-          userId,
-          menuItemSlug: primaryItem.slug,
-          deliverableType: primaryItem.slug.replace(/-/g, '_'),
-        };
-        await enqueueDeliverableGeneration(jobData);
-
-        // Inline fallback — idempotency guard prevents double-processing
-        setImmediate(() => {
-          processDeliverable(jobData).catch(err =>
-            console.error('Inline gate deliverable generation error:', err.message),
-          );
-        });
-      }
-    } catch (e: any) {
-      console.error('Auto-trigger deliverable error:', e.message);
-    }
-
+    // Real Stripe: return checkout URL for client redirect
     return res.json({
-      success: true,
-      fromGate: deal.current_gate,
-      toGate: newGate,
-      priceCharged: paywall.priceCents,
-      priceDisplay: paywall.priceDisplay,
-      newBalance: balance - paywall.priceCents,
-      newBalanceDisplay: `$${((balance - paywall.priceCents) / 100).toFixed(2)}`,
-      deliverableId,
+      success: false,
+      checkoutUrl: result.url,
+      message: 'Redirect to Stripe checkout to pay platform fee',
     });
   } catch (err: any) {
     console.error('Gate unlock error:', err.message);
@@ -980,16 +957,17 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
             }
             createNotification({ userId, dealId: deal.id, type: 'gate_advance', title: `Gate complete: ${gateResult.gateName || gateResult.toGate}`, body: `Your deal has advanced to ${gateResult.toGate}`, actionUrl: '/chat' }).catch(() => {});
           } else {
-            // Check if we're at a paywall — gate is ready but next gate requires payment
+            // Check if we're at a paywall — gate is ready but next gate requires platform fee
             const freshDeal = await getDeal(deal.id);
             if (freshDeal) {
-              const readiness = checkGateReadiness(freshDeal.current_gate, freshDeal);
+              const readiness = await checkGateReadiness(freshDeal.current_gate, freshDeal);
               if (readiness.ready && readiness.paywallRequired && readiness.nextGate) {
                 const league = freshDeal.league || user.league || 'L1';
-                const paywall = generatePaywallPrompt({
+                const paywall = await generatePaywallPrompt({
                   gate: readiness.nextGate,
                   league,
                   journeyType: freshDeal.journey_type,
+                  dealId: freshDeal.id,
                   dealData: {
                     industry: freshDeal.industry || undefined,
                     revenue: freshDeal.revenue || undefined,
@@ -999,7 +977,6 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
                     asking_price: freshDeal.asking_price || undefined,
                   },
                 });
-                const balance = await getBalance(userId);
                 if (!clientDisconnected && !res.writableEnded) {
                   res.write(`data: ${JSON.stringify({
                     type: 'paywall',
@@ -1010,9 +987,8 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
                     valueProps: paywall.valueProps,
                     comparisonText: paywall.comparisonText,
                     callToAction: paywall.callToAction,
-                    balanceCents: balance,
-                    balanceDisplay: `$${(balance / 100).toFixed(2)}`,
-                    sufficient: balance >= paywall.priceCents,
+                    whatYouGet: paywall.whatYouGet,
+                    dealId: freshDeal.id,
                   })}\n\n`);
                 }
               }

@@ -9,28 +9,28 @@ interface PaywallData {
   valueProps: string[];
   comparisonText: string;
   callToAction: string;
-  balanceCents: number;
-  balanceDisplay: string;
-  sufficient: boolean;
+  whatYouGet?: string[];
+  dealId: number;
 }
 
 interface PaywallCardProps {
   paywall: PaywallData;
   dealId: number;
   onUnlocked: (toGate: string, deliverableId?: number) => void;
-  onTopUp: () => void;
+  onTopUp?: () => void;  // kept for backward compat, unused in new model
 }
 
 const GATE_NAMES: Record<string, string> = {
-  S2: 'Valuation Report',
-  B2: 'Buyer\'s Valuation Model',
-  R2: 'Investor Materials Package',
+  S2: 'Deal Execution',
+  B2: 'Deal Execution',
+  R2: 'Capital Raise Execution',
 };
 
-export default function PaywallCard({ paywall, dealId, onUnlocked, onTopUp }: PaywallCardProps) {
+export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCardProps) {
   const [purchasing, setPurchasing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   const handlePurchase = async () => {
     setPurchasing(true);
@@ -43,21 +43,24 @@ export default function PaywallCard({ paywall, dealId, onUnlocked, onTopUp }: Pa
         body: JSON.stringify({ gate: paywall.gate }),
       });
 
-      if (res.status === 402) {
-        const data = await res.json();
-        setError(`Insufficient balance (${data.balanceDisplay}). You need ${data.shortfallDisplay} more.`);
-        return;
-      }
+      const data = await res.json();
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: 'Purchase failed' }));
-        setError(data.error || 'Purchase failed');
+        setError(data.error || 'Something went wrong');
         return;
       }
 
-      const data = await res.json();
-      setSuccess(true);
-      setTimeout(() => onUnlocked(data.toGate, data.deliverableId || undefined), 1500);
+      // If Stripe checkout URL returned, redirect
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+
+      // TEST_MODE: instant success
+      if (data.success) {
+        setSuccess(true);
+        setTimeout(() => onUnlocked(data.toGate, data.deliverableId || undefined), 1500);
+      }
     } catch {
       setError('Something went wrong. Please try again.');
     } finally {
@@ -74,8 +77,8 @@ export default function PaywallCard({ paywall, dealId, onUnlocked, onTopUp }: Pa
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
             </div>
             <div>
-              <p className="text-base font-semibold text-[#0D0D0D] m-0">Purchased</p>
-              <p className="text-sm text-[#6E6A63] m-0">Advancing to {GATE_NAMES[paywall.gate] || paywall.gate}...</p>
+              <p className="text-base font-semibold text-[#0D0D0D] m-0">Deal Execution Unlocked</p>
+              <p className="text-sm text-[#6E6A63] m-0">All deliverables through closing are now included.</p>
             </div>
           </div>
         </div>
@@ -94,8 +97,8 @@ export default function PaywallCard({ paywall, dealId, onUnlocked, onTopUp }: Pa
             </svg>
           </div>
           <div>
-            <p className="text-lg font-bold text-[#0D0D0D] m-0">{GATE_NAMES[paywall.gate] || paywall.gate}</p>
-            <p className="text-sm text-[#6E6A63] m-0 mt-0.5">{paywall.comparisonText}</p>
+            <p className="text-lg font-bold text-[#0D0D0D] m-0">{GATE_NAMES[paywall.gate] || 'Deal Execution'}</p>
+            <p className="text-sm text-[#6E6A63] m-0 mt-1">One-time platform fee — everything through closing included</p>
           </div>
         </div>
 
@@ -109,43 +112,50 @@ export default function PaywallCard({ paywall, dealId, onUnlocked, onTopUp }: Pa
           ))}
         </div>
 
+        {/* What's included toggle */}
+        {paywall.whatYouGet && paywall.whatYouGet.length > 0 && (
+          <div className="mb-4">
+            <button
+              onClick={() => setShowDetails(!showDetails)}
+              className="text-[13px] text-[#C96B4F] font-semibold bg-transparent border-0 cursor-pointer p-0 hover:opacity-80"
+            >
+              {showDetails ? 'Hide' : 'See'} everything included →
+            </button>
+            {showDetails && (
+              <div className="mt-2 pl-1 space-y-1.5">
+                {paywall.whatYouGet.map((item, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-[#C96B4F] text-xs mt-1 shrink-0">●</span>
+                    <span className="text-[13px] text-[#6E6A63] leading-[1.4]">{item}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Comparison */}
+        <p className="text-[13px] text-[#A9A49C] m-0 mb-4 italic">{paywall.comparisonText}</p>
+
         {/* Price + action */}
         <div className="flex items-center justify-between pt-3" style={{ borderTop: '1px solid #EBE7DF' }}>
           <div>
             <p className="text-2xl font-extrabold text-[#C96B4F] m-0">{paywall.priceDisplay}</p>
-            <p className="text-xs text-[#A9A49C] m-0 mt-0.5">Wallet: {paywall.balanceDisplay}</p>
+            <p className="text-xs text-[#A9A49C] m-0 mt-0.5">One-time fee</p>
           </div>
-          <div className="flex gap-2">
-            {!paywall.sufficient && (
-              <button
-                onClick={onTopUp}
-                className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#F5F5F5] text-[#3D3B37] border-0 cursor-pointer hover:bg-[#EBE7DF] transition-colors"
-              >
-                Add Funds
-              </button>
-            )}
-            <button
-              onClick={handlePurchase}
-              disabled={purchasing}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#C96B4F] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-60"
-            >
-              {purchasing ? 'Processing...' : 'Purchase'}
-            </button>
-          </div>
+          <button
+            onClick={handlePurchase}
+            disabled={purchasing}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#C96B4F] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-60"
+          >
+            {purchasing ? 'Processing...' : 'Proceed to Deal Execution'}
+          </button>
         </div>
 
         {/* Error */}
         {error && (
           <div className="mt-3 p-3 rounded-lg bg-red-50 text-sm text-red-700">
             {error}
-            {error.includes('Insufficient') && (
-              <button
-                onClick={onTopUp}
-                className="ml-2 text-[#C96B4F] font-semibold underline bg-transparent border-0 cursor-pointer p-0"
-              >
-                Top up wallet
-              </button>
-            )}
           </div>
         )}
       </div>

@@ -1,19 +1,19 @@
 /**
- * Paywall Service — Generates contextual paywall prompts when users
- * hit paid gates (S2, B2, R2). Includes value demonstration,
- * comparison pricing, and preview deliverables.
+ * Paywall Service — Generates platform fee prompts when users
+ * hit the paywall gate (S2/B2/R2).
  *
- * All prices in CENTS.
+ * NEW MODEL: One-time per-deal platform fee. No wallet, no per-deliverable pricing.
+ * Price determined by league via platform_fee_schedule table.
+ * All amounts in CENTS.
  */
-import { getLeagueMultiplier } from './leagueClassifier.js';
-import { getPaywallBasePrice } from './gateReadinessService.js';
-import { assessComplexity } from './complexityPreflightService.js';
 import { sql } from '../db.js';
+import { getAdvisoryCostComparison } from './platformFeeService.js';
 
 export interface PaywallContext {
   gate: string;
   league: string;
   journeyType: string;
+  dealId: number;
   dealData: {
     industry?: string;
     revenue?: number;       // cents
@@ -32,36 +32,72 @@ export interface PaywallPrompt {
   previewInsight: string;
   callToAction: string;
   systemPromptAddition: string;
+  whatYouGet: string[];     // everything included in the platform fee
 }
 
 /**
- * Generate a contextual paywall prompt based on deal data.
- * This is injected into Yulia's system prompt when approaching a paywall.
+ * Generate a platform fee paywall prompt based on deal data.
  */
-export function generatePaywallPrompt(ctx: PaywallContext): PaywallPrompt {
-  const basePriceCents = getPaywallBasePrice(ctx.gate);
-  const multiplier = getLeagueMultiplier(ctx.league);
-  const priceBeforeWagyu = Math.round(basePriceCents * multiplier);
-
-  // Apply Wagyu surcharge for complex deals
-  const complexity = assessComplexity(ctx.dealData);
-  const priceCents = Math.round(priceBeforeWagyu * (1 + complexity.totalSurcharge));
-  const priceDisplay = `$${(priceCents / 100).toFixed(2)}`;
+export async function generatePaywallPrompt(ctx: PaywallContext): Promise<PaywallPrompt> {
+  // Get platform fee from schedule
+  const [feeRow] = await sql`
+    SELECT fee_cents FROM platform_fee_schedule WHERE league = ${ctx.league}
+  `;
+  const priceCents = feeRow?.fee_cents || 99900; // fallback to L1
+  const priceDisplay = `$${(priceCents / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
   const generator = PAYWALL_GENERATORS[ctx.gate];
   if (!generator) {
+    const comparisonText = getAdvisoryCostComparison(ctx.league, ctx.journeyType);
     return {
       priceCents,
       priceDisplay,
-      valueProps: ['Detailed analysis tailored to your deal'],
-      comparisonText: 'A typical advisor would charge $5,000+ for this analysis.',
+      valueProps: ['Full deal execution platform access'],
+      comparisonText,
       previewInsight: '',
-      callToAction: `Ready to unlock? It's ${priceDisplay}.`,
-      systemPromptAddition: `The user is at a paywall gate (${ctx.gate}). Price: ${priceDisplay}. Present value before asking for payment.`,
+      callToAction: `Continue your deal for a one-time platform fee of ${priceDisplay}.`,
+      systemPromptAddition: buildPaywallSystemPrompt(ctx, priceCents, priceDisplay, '', comparisonText),
+      whatYouGet: getWhatYouGet(ctx.journeyType),
     };
   }
 
   return generator(ctx, priceCents, priceDisplay);
+}
+
+// ─── What's included in the platform fee ──────────────────
+
+function getWhatYouGet(journeyType: string): string[] {
+  if (journeyType === 'sell') {
+    return [
+      'Multi-methodology business valuation with defensible price range',
+      'Professional CIM (Confidential Information Memorandum)',
+      'Buyer list with targeted outreach strategy',
+      'Deal room with document management',
+      'LOI templates and negotiation support',
+      'Closing checklist and transaction coordination',
+      'Unlimited AI-guided support through closing',
+    ];
+  }
+  if (journeyType === 'buy') {
+    return [
+      'Buyer\'s valuation model with DSCR and cash-flow analysis',
+      'Due diligence package with checklists and red flags',
+      'SBA bankability assessment and financing models',
+      'Deal room access with secure document sharing',
+      'LOI drafting and deal structuring tools',
+      'Closing support with funds flow and checklists',
+      '180-day post-acquisition integration plan',
+    ];
+  }
+  // raise
+  return [
+    'Investor-ready pitch deck and executive summary',
+    'Financial model with 3-5 year projections',
+    'Investor list with outreach strategy',
+    'Data room setup with document checklist',
+    'Term sheet analysis and negotiation support',
+    'Closing coordination',
+  ];
 }
 
 // ─── Gate-specific paywall generators ───────────────────────
@@ -74,7 +110,6 @@ const PAYWALL_GENERATORS: Record<string, PaywallGenerator> = {
     const earningsDollars = earnings / 100;
     const metric = ctx.dealData.ebitda ? 'EBITDA' : 'SDE';
 
-    // Generate a preview insight based on available data
     let previewInsight = '';
     if (earningsDollars > 0 && ctx.dealData.industry) {
       const lowMultiple = ctx.league === 'L1' ? 2.0 : ctx.league === 'L2' ? 3.0 : 4.0;
@@ -84,8 +119,7 @@ const PAYWALL_GENERATORS: Record<string, PaywallGenerator> = {
       previewInsight = `Based on your ${metric} of $${earningsDollars.toLocaleString()} and ${ctx.dealData.industry} industry benchmarks, your preliminary range is $${lowVal.toLocaleString()} – $${highVal.toLocaleString()}. The full valuation will refine this with growth premiums, margin analysis, and risk adjustments.`;
     }
 
-    // Comparison pricing
-    const advisorCost = ctx.league === 'L1' || ctx.league === 'L2' ? '$3,000–$5,000' : '$10,000–$25,000';
+    const comparisonText = getAdvisoryCostComparison(ctx.league, 'sell');
 
     return {
       priceCents,
@@ -94,13 +128,13 @@ const PAYWALL_GENERATORS: Record<string, PaywallGenerator> = {
         'Multi-methodology valuation (market comps + financial analysis)',
         'Defensible price range (conservative / likely / optimistic)',
         'Industry-specific multiple analysis with growth premiums',
-        'Price gap analysis vs. your target',
         'Go/no-go recommendation with probability of sale score',
       ],
-      comparisonText: `A business broker or M&A advisor would charge ${advisorCost} for this analysis. You're getting institutional-quality work for ${priceDisplay}.`,
+      comparisonText: `A traditional advisor would charge ${comparisonText}. Your all-inclusive platform fee is ${priceDisplay} — covering everything from valuation through closing.`,
       previewInsight,
-      callToAction: `Your valuation analysis is ${priceDisplay}. Want me to generate it?`,
-      systemPromptAddition: buildPaywallSystemPrompt(ctx, priceCents, priceDisplay, previewInsight, advisorCost),
+      callToAction: `Ready to proceed? Your one-time platform fee is ${priceDisplay} — everything through closing is included.`,
+      systemPromptAddition: buildPaywallSystemPrompt(ctx, priceCents, priceDisplay, previewInsight, comparisonText),
+      whatYouGet: getWhatYouGet('sell'),
     };
   },
 
@@ -112,10 +146,10 @@ const PAYWALL_GENERATORS: Record<string, PaywallGenerator> = {
     if (earningsDollars > 0 && ctx.dealData.asking_price) {
       const askingDollars = ctx.dealData.asking_price / 100;
       const impliedMultiple = earningsDollars > 0 ? (askingDollars / earningsDollars).toFixed(1) : '?';
-      previewInsight = `The asking price of $${askingDollars.toLocaleString()} implies a ${impliedMultiple}x multiple. The full model will tell you if that's reasonable for the industry and whether the deal cash flows with your financing structure.`;
+      previewInsight = `The asking price of $${askingDollars.toLocaleString()} implies a ${impliedMultiple}x multiple. The full model will tell you if that's reasonable and whether the deal cash flows with your financing structure.`;
     }
 
-    const advisorCost = '$5,000–$15,000';
+    const comparisonText = getAdvisoryCostComparison(ctx.league, 'buy');
 
     return {
       priceCents,
@@ -124,13 +158,13 @@ const PAYWALL_GENERATORS: Record<string, PaywallGenerator> = {
         'Buyer\'s valuation model (what the business is worth TO YOU)',
         'DSCR analysis with your actual financing terms',
         'Cash-on-cash and IRR projections (Year 1 through Year 5)',
-        'Deal-breaker identification',
-        'LOI-ready terms recommendation',
+        'Due diligence checklists and deal-breaker identification',
       ],
-      comparisonText: `Hiring an analyst to build this model would cost ${advisorCost}. Yours is ${priceDisplay}.`,
+      comparisonText: `Hiring an advisor for this would cost ${comparisonText}. Your all-inclusive platform fee is ${priceDisplay} — covering everything from valuation through closing and 180-day PMI.`,
       previewInsight,
-      callToAction: `Your buyer's valuation model is ${priceDisplay}. Want me to build it?`,
-      systemPromptAddition: buildPaywallSystemPrompt(ctx, priceCents, priceDisplay, previewInsight, advisorCost),
+      callToAction: `Ready to proceed? Your one-time platform fee is ${priceDisplay} — everything through closing is included.`,
+      systemPromptAddition: buildPaywallSystemPrompt(ctx, priceCents, priceDisplay, previewInsight, comparisonText),
+      whatYouGet: getWhatYouGet('buy'),
     };
   },
 
@@ -138,25 +172,25 @@ const PAYWALL_GENERATORS: Record<string, PaywallGenerator> = {
     let previewInsight = '';
     if (ctx.dealData.revenue) {
       const revDollars = ctx.dealData.revenue / 100;
-      previewInsight = `At $${revDollars.toLocaleString()} in revenue, your investor materials need to tell a compelling growth story. The pitch deck will position your business for maximum valuation — including market sizing, competitive positioning, and a financial model investors will actually read.`;
+      previewInsight = `At $${revDollars.toLocaleString()} in revenue, your investor materials need to tell a compelling growth story. The pitch deck will position your business for maximum valuation.`;
     }
 
-    const advisorCost = '$15,000–$50,000';
+    const comparisonText = getAdvisoryCostComparison(ctx.league, 'raise');
 
     return {
       priceCents,
       priceDisplay,
       valueProps: [
         '10-15 slide pitch deck tailored to your raise',
-        'Executive summary for email outreach',
-        'Blind teaser for initial approaches',
+        'Executive summary and blind teaser for outreach',
         'Financial model with 3-5 year projections',
-        'Data room structure with document checklist',
+        'Investor list with outreach strategy',
       ],
-      comparisonText: `An investment bank would charge ${advisorCost} for these materials. Yours is ${priceDisplay}.`,
+      comparisonText: `An investment bank would charge ${comparisonText}. Your all-inclusive platform fee is ${priceDisplay}.`,
       previewInsight,
-      callToAction: `Your investor materials package is ${priceDisplay}. Want me to create it?`,
-      systemPromptAddition: buildPaywallSystemPrompt(ctx, priceCents, priceDisplay, previewInsight, advisorCost),
+      callToAction: `Ready to proceed? Your one-time platform fee is ${priceDisplay} — everything through closing is included.`,
+      systemPromptAddition: buildPaywallSystemPrompt(ctx, priceCents, priceDisplay, previewInsight, comparisonText),
+      whatYouGet: getWhatYouGet('raise'),
     };
   },
 };
@@ -169,91 +203,39 @@ function buildPaywallSystemPrompt(
   advisorCost: string,
 ): string {
   return `
-## PAYWALL — Gate ${ctx.gate}
-The user has completed the free gates and is ready for paid analysis.
+## PAYWALL — Platform Fee at Gate ${ctx.gate}
+The user has completed the free gates and is ready for the paid execution phase.
 
-PRICE: ${priceDisplay} (base $${(getPaywallBasePrice(ctx.gate) / 100).toFixed(2)} × ${ctx.league} multiplier ${getLeagueMultiplier(ctx.league)}x)
+PRICE: ${priceDisplay} (one-time platform fee for ${ctx.league} league)
+THIS IS A ONE-TIME FEE — everything from here through closing is included.
 
 YOUR APPROACH:
 1. SHOW VALUE FIRST — demonstrate you already understand their business deeply
 2. Give them a FREE preview insight so they know you're not bluffing:
    ${previewInsight || 'Reference their specific data and what the analysis will reveal.'}
-3. THEN present the price with comparison: "${advisorCost} from an advisor vs ${priceDisplay} from me"
-4. List what they get (bullet points)
+3. THEN present the platform fee with comparison: "${advisorCost} from a traditional advisor vs ${priceDisplay} all-inclusive"
+4. Emphasize: one payment, everything included through closing — no surprise charges
 5. Ask once. If they decline, respect it and continue helping with free guidance
 
 NEVER:
+- Mention "wallet" or "balance" or "credits" — this is a one-time platform fee
+- Quote per-deliverable prices — everything is included
 - Be pushy or repeat the offer
 - Make them feel bad for declining
 - Withhold useful free advice just because they haven't paid
-- Say "you need to pay" — say "this analysis costs ${priceDisplay}"
+- Mention the league label (L1, L2, etc.) to the user
 
 IF THEY ACCEPT:
-- Confirm: "Generating your [deliverable name]. This takes about 30 seconds."
-- The system will check wallet balance and deduct automatically
-- If insufficient funds, the system will prompt them to top up
+- Confirm: "Processing your platform fee. Once confirmed, I'll generate your [deliverable name]."
+- The system will redirect to Stripe checkout
+- After payment, all gates through closing are unlocked
 
 IF THEY DECLINE:
-- "No problem. I can still help you think through [topic] — I just can't generate the formal deliverable. What questions do you have?"
+- "No problem. I can still help you think through [topic] — I just can't generate formal deliverables or unlock the deal execution tools. What questions do you have?"
 - Continue providing valuable conversational guidance
 `;
-}
-
-/**
- * Format wallet top-up options for display.
- */
-export const BASE_PRICES: Record<string, number> = {
-  'business-valuation': 35000,
-  'full-cim': 70000,
-  'sba-bankability': 20000,
-  'deal-screening-memo': 15000,
-  'market-intelligence': 20000,
-  'loi-draft': 12500,
-  'qoe-lite': 50000,
-  'financial-model': 30000,
-  'sector-analysis': 15000,
-  'working-capital-analysis': 15000,
-};
-
-export async function getDeliverablePrice(
-  slug: string,
-  league: string,
-  userId: number | null,
-  dealContext?: { industry?: string | null; has_real_estate?: boolean | null; is_franchise?: boolean | null; entity_count?: number | null; employee_count?: number | null; exit_type?: string | null },
-): Promise<number> {
-  // Advisor trial: first 3 client journeys free
-  if (userId) {
-    const [user] = await sql`SELECT is_advisor FROM users WHERE id = ${userId}`;
-    if (user?.is_advisor) {
-      const [count] = await sql`
-        SELECT count(DISTINCT deal_id) as cnt
-        FROM conversations WHERE user_id = ${userId} AND deal_id IS NOT NULL
-      `;
-      if (parseInt(count.cnt) <= 3) return 0;
-    }
-  }
-  const base = BASE_PRICES[slug] || 20000;
-  const multiplier = getLeagueMultiplier(league);
-  const priceBeforeWagyu = Math.round(base * multiplier);
-
-  // Apply Wagyu surcharge if deal context available
-  if (dealContext) {
-    const complexity = assessComplexity(dealContext);
-    return Math.round(priceBeforeWagyu * (1 + complexity.totalSurcharge));
-  }
-
-  return priceBeforeWagyu;
 }
 
 export function isTestMode(): boolean {
   return process.env.TEST_MODE === 'true';
 }
-
-export const WALLET_BLOCKS = [
-  { name: 'Exploratory', price: 5000, bonus: 0, total: 5000, discount: '0%' },
-  { name: 'Early Commit', price: 10000, bonus: 500, total: 10500, discount: '5%' },
-  { name: 'Active Deal', price: 25000, bonus: 1500, total: 26500, discount: '6%' },
-  { name: 'Serious', price: 50000, bonus: 4000, total: 54000, discount: '8%' },
-  { name: 'Full Journey', price: 100000, bonus: 10000, total: 110000, discount: '10%' },
-  { name: 'Advisor', price: 250000, bonus: 30000, total: 280000, discount: '12%' },
-];

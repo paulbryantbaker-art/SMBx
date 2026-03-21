@@ -17,7 +17,7 @@ import Canvas from '../../components/chat/Canvas';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
 import SellerDashboard from '../../components/chat/SellerDashboard';
 import BuyerPipeline from '../../components/chat/BuyerPipeline';
-import WalletPanel from '../../components/chat/WalletPanel';
+// WalletPanel removed — platform fee model
 import DocumentLibrary from '../../components/chat/DocumentLibrary';
 import AnalyticsView from '../../components/chat/AnalyticsView';
 import NDAModal from '../../components/chat/NDAModal';
@@ -393,7 +393,7 @@ export default function AppShell() {
   const [chatWidth, setChatWidth] = useState(520); // resizable chat column width
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop sidebar collapse
   const [ndaRequired, setNdaRequired] = useState<{ dealId: number; dealName?: string } | null>(null);
-  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  // walletBalance removed — platform fee model
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -526,16 +526,7 @@ export default function AppShell() {
     }
   }, [viewState, activeTab]);
 
-  // Fetch wallet balance for sidebar badge
-  useEffect(() => {
-    if (!user) return;
-    const token = localStorage.getItem('smbx_token');
-    if (!token) return;
-    fetch('/api/stripe/wallet', { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data) setWalletBalance(data.balance_cents ?? 0); })
-      .catch(() => {});
-  }, [user]);
+  // Wallet balance fetch removed — platform fee model (no wallet)
 
   // Send handler — morph from landing to chat
   const handleSend = useCallback((content: string) => {
@@ -1042,11 +1033,7 @@ export default function AppShell() {
             <span style={{ fontFamily: 'inherit', fontSize: '14px', fontWeight: 600, color: '#0D0D0D' }} className="truncate">
               {user ? (user.display_name || user.email || 'Account') : 'Sign in'}
             </span>
-            {user && walletBalance !== null && (
-              <span style={{ fontSize: '12px', fontWeight: 500, color: 'rgba(0,0,0,0.4)' }}>
-                ${(walletBalance / 100).toFixed(2)} balance
-              </span>
-            )}
+            {/* Wallet balance removed — platform fee model */}
           </div>
         </button>
       </div>
@@ -1397,10 +1384,6 @@ export default function AppShell() {
                       authChat.setPaywallData(null);
                       if (deliverableId) setViewingDeliverable(deliverableId);
                     }}
-                    onTopUp={() => {
-                      const walletBtn = document.querySelector('[data-wallet-toggle]') as HTMLButtonElement;
-                      if (walletBtn) walletBtn.click();
-                    }}
                   />
                 </div>
               )}
@@ -1460,11 +1443,7 @@ export default function AppShell() {
             </div>
           )}
 
-          {viewState === 'wallet' && user && (
-            <div className="max-w-3xl mx-auto px-4 py-6">
-              <WalletPanel />
-            </div>
-          )}
+          {/* Wallet view removed — platform fee model (no wallet) */}
 
           {viewState === 'documents' && user && (
             <DocumentLibrary onViewDeliverable={(id) => setViewingDeliverable(id)} />

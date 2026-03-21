@@ -1,7 +1,7 @@
 import postgres from 'postgres';
 import type { Tool } from '@anthropic-ai/sdk/resources/messages';
-import { checkGateReadiness as checkReadiness, isPaywallGate, getPaywallBasePrice } from './gateReadinessService.js';
-import { getLeagueMultiplier } from './leagueClassifier.js';
+import { checkGateReadinessSync as checkReadiness, isPaywallGate } from './gateReadinessService.js';
+import { isPlatformFeePaid } from './platformFeeService.js';
 import { generateProviderRecommendation, findProviders, trackReferral } from './providerMatchingService.js';
 import { matchFranchises } from './franchiseMatchingService.js';
 import { matchBuyersForSeller } from './buyerSourcingService.js';
@@ -355,35 +355,17 @@ async function advanceGate(input: Record<string, any>, userId: number): Promise<
     });
   }
 
-  // Check paywall — if next gate requires payment, check wallet
+  // Check paywall — if next gate requires platform fee payment
   if (isPaywallGate(toGate)) {
-    const basePriceCents = getPaywallBasePrice(toGate);
-    const multiplier = getLeagueMultiplier(deal.league || 'L1');
-    const finalPriceCents = Math.round(basePriceCents * multiplier);
-
-    // Check wallet balance
-    const [wallet] = await sql`SELECT balance_cents FROM wallets WHERE user_id = ${userId} LIMIT 1`;
-    const balance = wallet?.balance_cents ?? 0;
-
-    if (balance < finalPriceCents) {
+    const paid = await isPlatformFeePaid(dealId);
+    if (!paid) {
       return JSON.stringify({
         ready: true,
         paywallRequired: true,
         gate: toGate,
-        priceCents: finalPriceCents,
-        priceDisplay: `$${(finalPriceCents / 100).toFixed(2)}`,
-        currentBalance: balance,
-        balanceDisplay: `$${(balance / 100).toFixed(2)}`,
-        message: `Gate ${toGate} requires $${(finalPriceCents / 100).toFixed(2)}. Current balance: $${(balance / 100).toFixed(2)}. Please top up your wallet to continue.`,
+        message: `Gate ${toGate} requires the platform fee. The user needs to pay before advancing.`,
       });
     }
-
-    // Deduct from wallet
-    await sql`UPDATE wallets SET balance_cents = balance_cents - ${finalPriceCents}, updated_at = NOW() WHERE user_id = ${userId}`;
-    await sql`
-      INSERT INTO wallet_transactions (user_id, type, amount_cents, description, deal_id)
-      VALUES (${userId}, 'debit', ${finalPriceCents}, ${`Gate unlock: ${toGate}`}, ${dealId})
-    `;
   }
 
   // Advance the gate

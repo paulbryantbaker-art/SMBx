@@ -1,155 +1,64 @@
 /**
- * Stripe Routes — Wallet top-up via Stripe Checkout.
+ * Stripe Routes — Platform fee payment via Stripe Checkout.
+ *
+ * NEW MODEL: One-time per-deal platform fee (replaces wallet top-ups).
  *
  * Flow:
- * 1. User selects a wallet block (e.g., "Builder $100")
- * 2. POST /api/stripe/checkout creates a Checkout Session
+ * 1. User hits S2/B2/R2 paywall gate
+ * 2. POST /api/stripe/platform-fee creates a Checkout Session
  * 3. User pays on Stripe's hosted page
- * 4. Stripe sends webhook → we credit the wallet
- * 5. User redirected back to the app
+ * 4. Stripe sends webhook → we mark deal.platform_fee_paid = true
+ * 5. User redirected back to the app, gate advances
  */
 import { Router } from 'express';
 import Stripe from 'stripe';
 import { sql } from '../db.js';
-import { creditWallet, getOrCreateWallet } from '../services/walletService.js';
+import { createPlatformFeeCheckout, markPlatformFeePaid, getPlatformFee } from '../services/platformFeeService.js';
 
 export const stripeRouter = Router();
-
-// Wallet blocks: amount user pays → total they receive (includes bonus)
-const WALLET_BLOCKS = [
-  { id: 'starter', name: 'Exploratory', priceCents: 5000, bonusCents: 0, totalCents: 5000, discount: '0%' },
-  { id: 'builder', name: 'Early Commit', priceCents: 10000, bonusCents: 500, totalCents: 10500, discount: '5%' },
-  { id: 'momentum', name: 'Active Deal', priceCents: 25000, bonusCents: 1500, totalCents: 26500, discount: '6%' },
-  { id: 'accelerator', name: 'Serious', priceCents: 50000, bonusCents: 4000, totalCents: 54000, discount: '8%' },
-  { id: 'professional', name: 'Full Journey', priceCents: 100000, bonusCents: 10000, totalCents: 110000, discount: '10%' },
-  { id: 'scale', name: 'Advisor', priceCents: 250000, bonusCents: 30000, totalCents: 280000, discount: '12%' },
-];
 
 function getStripe(): Stripe {
   if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY not set');
   return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
 
-// ─── Get wallet blocks (public) ─────────────────────────────
+// ─── Get platform fee for a deal ─────────────────────────────
 
-stripeRouter.get('/blocks', (_req, res) => {
-  res.json(WALLET_BLOCKS.map(b => ({
-    id: b.id,
-    name: b.name,
-    price: `$${(b.priceCents / 100).toFixed(0)}`,
-    priceCents: b.priceCents,
-    bonus: b.bonusCents > 0 ? `$${(b.bonusCents / 100).toFixed(0)}` : null,
-    total: `$${(b.totalCents / 100).toFixed(0)}`,
-    totalCents: b.totalCents,
-    discount: b.discount,
-  })));
-});
-
-// ─── Get wallet balance (authenticated) ─────────────────────
-
-stripeRouter.get('/wallet', async (req, res) => {
+stripeRouter.get('/platform-fee/:dealId', async (req, res) => {
   const userId = (req as any).userId;
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
+  const dealId = parseInt(req.params.dealId);
+  if (!dealId) return res.status(400).json({ error: 'Invalid deal ID' });
+
   try {
-    const wallet = await getOrCreateWallet(userId);
-    return res.json({
-      balance: wallet.balance_cents,
-      balanceDisplay: `$${(wallet.balance_cents / 100).toFixed(2)}`,
-      totalDeposited: wallet.total_deposited_cents,
-      totalSpent: wallet.total_spent_cents,
-    });
+    // Verify ownership
+    const [deal] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
+    if (!deal) return res.status(404).json({ error: 'Deal not found' });
+
+    const fee = await getPlatformFee(dealId);
+    return res.json(fee);
   } catch (err: any) {
-    console.error('Wallet fetch error:', err.message);
-    return res.status(500).json({ error: 'Failed to fetch wallet' });
+    console.error('Platform fee fetch error:', err.message);
+    return res.status(500).json({ error: 'Failed to fetch platform fee' });
   }
 });
 
-// ─── Get transaction history ─────────────────────────────────
+// ─── Create Checkout Session for platform fee ────────────────
 
-stripeRouter.get('/transactions', async (req, res) => {
+stripeRouter.post('/platform-fee', async (req, res) => {
   const userId = (req as any).userId;
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
-  try {
-    const transactions = await sql`
-      SELECT id, type, amount_cents, description, created_at
-      FROM wallet_transactions
-      WHERE user_id = ${userId}
-      ORDER BY created_at DESC
-      LIMIT 50
-    `;
-    return res.json(transactions);
-  } catch (err: any) {
-    console.error('Transaction history error:', err.message);
-    return res.status(500).json({ error: 'Failed to fetch transactions' });
-  }
-});
-
-// ─── Create Checkout Session ────────────────────────────────
-
-stripeRouter.post('/checkout', async (req, res) => {
-  const userId = (req as any).userId;
-  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-
-  const { blockId } = req.body;
-  const block = WALLET_BLOCKS.find(b => b.id === blockId);
-  if (!block) return res.status(400).json({ error: 'Invalid wallet block' });
+  const { dealId } = req.body;
+  if (!dealId) return res.status(400).json({ error: 'dealId required' });
 
   try {
-    // TEST_MODE bypass — skip Stripe, credit wallet directly
-    if (process.env.TEST_MODE === 'true') {
-      await getOrCreateWallet(userId);
-      await creditWallet(
-        userId,
-        block.totalCents,
-        `Wallet top-up: ${block.name} ($${(block.totalCents / 100).toFixed(2)}) [TEST]`,
-        `test_${Date.now()}`,
-      );
-      console.log(`[TEST_MODE] Wallet credited: user ${userId}, $${(block.totalCents / 100).toFixed(2)} (${block.id})`);
-      const appUrl = process.env.APP_URL || 'https://smbx.ai';
-      return res.json({ url: `${appUrl}?wallet=success&amount=${block.totalCents}`, test: true });
-    }
-
-    const stripe = getStripe();
-    const appUrl = process.env.APP_URL || 'https://smbx.ai';
-
-    // Get user email for Stripe
-    const [user] = await sql`SELECT email FROM users WHERE id = ${userId}`;
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: ['card'],
-      customer_email: user.email as string,
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: `smbx.ai Wallet — ${block.name}`,
-              description: block.bonusCents > 0
-                ? `$${(block.priceCents / 100).toFixed(0)} + $${(block.bonusCents / 100).toFixed(0)} bonus = $${(block.totalCents / 100).toFixed(0)} total`
-                : `$${(block.priceCents / 100).toFixed(0)} wallet credit`,
-            },
-            unit_amount: block.priceCents,
-          },
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        userId: String(userId),
-        blockId: block.id,
-        totalCents: String(block.totalCents),
-      },
-      success_url: `${appUrl}?wallet=success&amount=${block.totalCents}`,
-      cancel_url: `${appUrl}?wallet=cancelled`,
-    });
-
-    return res.json({ url: session.url, sessionId: session.id });
+    const result = await createPlatformFeeCheckout(parseInt(dealId), userId);
+    return res.json(result);
   } catch (err: any) {
-    console.error('Stripe checkout error:', err.message);
-    return res.status(500).json({ error: 'Failed to create checkout session' });
+    console.error('Platform fee checkout error:', err.message);
+    return res.status(500).json({ error: err.message || 'Failed to create checkout session' });
   }
 });
 
@@ -176,33 +85,37 @@ export async function handleStripeWebhook(req: any, res: any) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    const userId = parseInt(session.metadata?.userId || '0');
-    const blockId = session.metadata?.blockId || '';
-    const totalCents = parseInt(session.metadata?.totalCents || '0');
+    const type = session.metadata?.type;
 
-    if (userId && totalCents > 0) {
-      try {
-        // Check for duplicate webhook
-        const [existing] = await sql`
-          SELECT id FROM wallet_transactions
-          WHERE stripe_session_id = ${session.id} AND type = 'credit'
-        `;
+    if (type === 'platform_fee') {
+      const dealId = parseInt(session.metadata?.dealId || '0');
+      const paymentIntentId = session.payment_intent as string;
 
-        if (!existing) {
-          await creditWallet(
-            userId,
-            totalCents,
-            `Wallet top-up: ${blockId} ($${(totalCents / 100).toFixed(2)})`,
-            session.id,
-          );
-          console.log(`Wallet credited: user ${userId}, $${(totalCents / 100).toFixed(2)} (${blockId})`);
-        } else {
-          console.log(`Duplicate webhook ignored: session ${session.id}`);
+      if (dealId && paymentIntentId) {
+        try {
+          // Check for duplicate webhook
+          const [existing] = await sql`
+            SELECT id FROM deals
+            WHERE id = ${dealId} AND stripe_payment_intent_id = ${paymentIntentId}
+          `;
+
+          if (!existing) {
+            await markPlatformFeePaid(dealId, paymentIntentId);
+            console.log(`Platform fee paid: deal ${dealId}, PI ${paymentIntentId}`);
+          } else {
+            console.log(`Duplicate webhook ignored: deal ${dealId}`);
+          }
+        } catch (err: any) {
+          console.error('Platform fee webhook error:', err.message);
+          return res.status(500).send('Failed to process payment');
         }
-      } catch (err: any) {
-        console.error('Wallet credit error:', err.message);
-        return res.status(500).send('Failed to credit wallet');
       }
+    }
+
+    // Handle advisor subscription webhooks (future)
+    if (type === 'advisor_subscription') {
+      // TODO: Handle advisor subscription creation
+      console.log('Advisor subscription webhook received');
     }
   }
 

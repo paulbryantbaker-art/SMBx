@@ -13,6 +13,13 @@ export interface GateDef {
   requiredFields: string[];
 }
 
+/**
+ * Platform fee model: one-time payment at S2/B2/R2 gate.
+ * Gates before paywall are free. Gates after paywall are included in the platform fee.
+ * PMI gates are included (typically follows a completed buy deal).
+ * The `free` field marks gates that NEVER require payment.
+ * S2, B2, R2 are the only paywall gates — checked against deal.platform_fee_paid.
+ */
 const SELL_GATES: GateDef[] = [
   { id: 'S0', journey: 'sell', index: 0, name: 'Intake', free: true,
     requiredFields: ['business_name', 'industry', 'location', 'revenue'] },
@@ -20,11 +27,11 @@ const SELL_GATES: GateDef[] = [
     requiredFields: ['sde', 'owner_salary', 'net_income'] },
   { id: 'S2', journey: 'sell', index: 2, name: 'Valuation', free: false,
     requiredFields: ['valuation_range', 'multiple_range'] },
-  { id: 'S3', journey: 'sell', index: 3, name: 'Packaging', free: false,
+  { id: 'S3', journey: 'sell', index: 3, name: 'Packaging', free: true,
     requiredFields: ['cim_generated'] },
-  { id: 'S4', journey: 'sell', index: 4, name: 'Market Matching', free: false,
+  { id: 'S4', journey: 'sell', index: 4, name: 'Market Matching', free: true,
     requiredFields: ['buyer_list_generated'] },
-  { id: 'S5', journey: 'sell', index: 5, name: 'Closing', free: false,
+  { id: 'S5', journey: 'sell', index: 5, name: 'Closing', free: true,
     requiredFields: [] },
 ];
 
@@ -35,11 +42,11 @@ const BUY_GATES: GateDef[] = [
     requiredFields: ['target_criteria_set'] },
   { id: 'B2', journey: 'buy', index: 2, name: 'Valuation', free: false,
     requiredFields: ['target_valuation_range'] },
-  { id: 'B3', journey: 'buy', index: 3, name: 'Due Diligence', free: false,
+  { id: 'B3', journey: 'buy', index: 3, name: 'Due Diligence', free: true,
     requiredFields: ['dd_checklist_generated'] },
-  { id: 'B4', journey: 'buy', index: 4, name: 'Structuring', free: false,
+  { id: 'B4', journey: 'buy', index: 4, name: 'Structuring', free: true,
     requiredFields: ['deal_structure_modeled'] },
-  { id: 'B5', journey: 'buy', index: 5, name: 'Closing', free: false,
+  { id: 'B5', journey: 'buy', index: 5, name: 'Closing', free: true,
     requiredFields: [] },
 ];
 
@@ -50,22 +57,22 @@ const RAISE_GATES: GateDef[] = [
     requiredFields: ['financial_package_prepared'] },
   { id: 'R2', journey: 'raise', index: 2, name: 'Investor Materials', free: false,
     requiredFields: ['pitch_deck_generated'] },
-  { id: 'R3', journey: 'raise', index: 3, name: 'Outreach', free: false,
+  { id: 'R3', journey: 'raise', index: 3, name: 'Outreach', free: true,
     requiredFields: ['investor_list_generated'] },
-  { id: 'R4', journey: 'raise', index: 4, name: 'Terms', free: false,
+  { id: 'R4', journey: 'raise', index: 4, name: 'Terms', free: true,
     requiredFields: ['term_sheet_analyzed'] },
-  { id: 'R5', journey: 'raise', index: 5, name: 'Closing', free: false,
+  { id: 'R5', journey: 'raise', index: 5, name: 'Closing', free: true,
     requiredFields: [] },
 ];
 
 const PMI_GATES: GateDef[] = [
   { id: 'PMI0', journey: 'pmi', index: 0, name: 'Day Zero', free: true,
     requiredFields: ['acquisition_details', 'close_date'] },
-  { id: 'PMI1', journey: 'pmi', index: 1, name: 'Stabilization', free: false,
+  { id: 'PMI1', journey: 'pmi', index: 1, name: 'Stabilization', free: true,
     requiredFields: ['day_zero_checklist_complete'] },
-  { id: 'PMI2', journey: 'pmi', index: 2, name: 'Assessment', free: false,
+  { id: 'PMI2', journey: 'pmi', index: 2, name: 'Assessment', free: true,
     requiredFields: ['assessment_complete'] },
-  { id: 'PMI3', journey: 'pmi', index: 3, name: 'Optimization', free: false,
+  { id: 'PMI3', journey: 'pmi', index: 3, name: 'Optimization', free: true,
     requiredFields: [] },
 ];
 
