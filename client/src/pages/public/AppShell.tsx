@@ -1249,7 +1249,7 @@ export default function AppShell() {
                       fontSize: 15, lineHeight: 1.5, color: 'rgba(0,0,0,0.45)', fontWeight: 400,
                       letterSpacing: '-0.01em',
                     }}>
-                      Buy, sell, or raise capital — guided by Yulia, your M&A advisor.
+                      Buy, sell, or raise capital — guided by Yulia, your M&A agent.
                     </p>
                     {/* Chat pill */}
                     <div className="w-full" style={{ maxWidth: 400 }}>
