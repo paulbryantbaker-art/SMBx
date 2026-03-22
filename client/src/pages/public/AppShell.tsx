@@ -247,7 +247,7 @@ function renderHeadline(text: string, terraWord: string) {
   return (
     <>
       {text.substring(0, idx)}
-      <span style={{ color: '#C96B4F' }}>{terraWord}</span>
+      <span style={{ color: '#BA3C60' }}>{terraWord}</span>
       {text.substring(idx + terraWord.length)}
     </>
   );
@@ -368,7 +368,7 @@ function getInitialConversationId(path: string): number | null {
 }
 
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#C96B4F',
+  sell: '#BA3C60',
   buy: '#4E8FD4',
   raise: '#6B8F4E',
   pmi: '#8F6BD4',
@@ -837,7 +837,7 @@ export default function AppShell() {
 
       {/* ─── Explore — journey page navigation ─── */}
       <div className="px-3 mt-5">
-        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C96B4F' }}>Explore</div>
+        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#BA3C60' }}>Explore</div>
         <nav className="space-y-0.5">
           {([
             { id: 'sell' as TabId, label: 'Sell a Business', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" /><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" /></svg> },
@@ -864,7 +864,7 @@ export default function AppShell() {
                 }}
                 type="button"
               >
-                <span style={{ color: isActive ? '#C96B4F' : 'rgba(0,0,0,0.4)' }}>{item.icon}</span>
+                <span style={{ color: isActive ? '#BA3C60' : 'rgba(0,0,0,0.4)' }}>{item.icon}</span>
                 {item.label}
               </button>
             );
@@ -875,7 +875,7 @@ export default function AppShell() {
       {/* Cabinet — artifacts & analysis (logged-in only) */}
       {user && (
         <div className="px-3 mt-4">
-          <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C96B4F' }}>Cabinet</div>
+          <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#BA3C60' }}>Cabinet</div>
           <button
             onClick={() => {
               setViewState('documents');
@@ -894,7 +894,7 @@ export default function AppShell() {
 
       {/* Conversations — Recent (grouped by deal when multi-deal) */}
       <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-4">
-        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#C96B4F' }}>Recent</div>
+        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#BA3C60' }}>Recent</div>
         {(() => {
           const convs = allConversations || [];
           const uniqueDeals = new Set(convs.filter(c => c.deal_id).map(c => c.deal_id));
@@ -1604,7 +1604,7 @@ export default function AppShell() {
           { ch: 's', color: '#1A1A18', weight: 700 },
           { ch: 'm', color: '#1A1A18', weight: 700 },
           { ch: 'b', color: '#1A1A18', weight: 700 },
-          { ch: 'x', color: '#C96B4F', weight: 800 },
+          { ch: 'x', color: '#BA3C60', weight: 800 },
           { ch: '.', color: '#1A1A18', weight: 700 },
           { ch: 'a', color: '#1A1A18', weight: 700 },
           { ch: 'i', color: '#1A1A18', weight: 700 },

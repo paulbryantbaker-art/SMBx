@@ -13,11 +13,11 @@ interface Notification {
 }
 
 const TYPE_ICONS: Record<string, string> = {
-  gate_advance: '#C96B4F',
+  gate_advance: '#BA3C60',
   deliverable_ready: '#16a34a',
   invitation: '#2563eb',
   comment: '#7c3aed',
-  nudge: '#C96B4F',
+  nudge: '#BA3C60',
   system: '#6E6A63',
 };
 
@@ -102,7 +102,7 @@ export default function NotificationBell() {
           <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-[#C96B4F] text-white text-[9px] font-bold flex items-center justify-center">
+          <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-[#BA3C60] text-white text-[9px] font-bold flex items-center justify-center">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -116,7 +116,7 @@ export default function NotificationBell() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                className="text-[11px] font-semibold text-[#C96B4F] bg-transparent border-0 cursor-pointer hover:underline"
+                className="text-[11px] font-semibold text-[#BA3C60] bg-transparent border-0 cursor-pointer hover:underline"
               >
                 Mark all read
               </button>

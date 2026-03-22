@@ -17,7 +17,7 @@ const TIERS = [
 
 export default function AdvisorsBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
-    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#D4714E] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#BA3C60] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       {/* ═══ 1. HERO ═══ */}
       <section className="relative pt-32 pb-40 overflow-hidden">
@@ -38,7 +38,7 @@ export default function AdvisorsBelow({ onChipClick }: { onChipClick: (text: str
             </p>
           </ScrollReveal>
         </div>
-        <div className="absolute -right-20 top-20 w-[600px] h-[600px] bg-[#D4714E]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -right-20 top-20 w-[600px] h-[600px] bg-[#BA3C60]/5 rounded-full blur-3xl pointer-events-none" />
       </section>
 
       {/* ═══ 2. THE BANDWIDTH PROBLEM ═══ */}
@@ -74,7 +74,7 @@ export default function AdvisorsBelow({ onChipClick }: { onChipClick: (text: str
             <ScrollReveal delay={0.15}>
               <div className="bg-white p-10 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/30 space-y-8">
                 <div>
-                  <span className="font-mono text-5xl font-bold text-[#D4714E]">63h</span>
+                  <span className="font-mono text-5xl font-bold text-[#BA3C60]">63h</span>
                   <p className="font-sans uppercase tracking-widest text-xs mt-2 text-[#6B6B65]">Max Hours Per Listing</p>
                 </div>
                 <div className="h-px bg-[#DCC1B9]/30" />
@@ -84,7 +84,7 @@ export default function AdvisorsBelow({ onChipClick }: { onChipClick: (text: str
                 </div>
                 <div className="h-px bg-[#DCC1B9]/30" />
                 <div>
-                  <span className="font-mono text-4xl font-bold text-[#D4714E]">756h</span>
+                  <span className="font-mono text-4xl font-bold text-[#BA3C60]">756h</span>
                   <p className="font-sans uppercase tracking-widest text-xs mt-2 text-[#6B6B65]">Total Analytical Hours</p>
                 </div>
               </div>
@@ -97,7 +97,7 @@ export default function AdvisorsBelow({ onChipClick }: { onChipClick: (text: str
       <section className="py-32">
         <div className="max-w-[1200px] mx-auto px-6">
           <ScrollReveal>
-            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#BA3C60] mb-6 block">
               Capabilities
             </span>
           </ScrollReveal>
@@ -110,7 +110,7 @@ export default function AdvisorsBelow({ onChipClick }: { onChipClick: (text: str
             {CAPABILITIES.map((cap, i) => (
               <ScrollReveal key={cap.title} delay={i * 0.06}>
                 <div className="bg-white p-8 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20 h-full transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)]">
-                  <span className="material-symbols-outlined text-[#D4714E] text-3xl mb-6 block">{cap.icon}</span>
+                  <span className="material-symbols-outlined text-[#BA3C60] text-3xl mb-6 block">{cap.icon}</span>
                   <h3 className="font-bold text-[#1A1A18] text-lg mb-3">{cap.title}</h3>
                   <p className="text-[#6B6B65] leading-relaxed text-sm">{cap.body}</p>
                 </div>
@@ -125,7 +125,7 @@ export default function AdvisorsBelow({ onChipClick }: { onChipClick: (text: str
         <div className="max-w-[1200px] mx-auto px-6">
           <div className="max-w-3xl">
             <ScrollReveal>
-              <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+              <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#BA3C60] mb-6 block">
                 Network Effect
               </span>
             </ScrollReveal>
@@ -164,9 +164,9 @@ export default function AdvisorsBelow({ onChipClick }: { onChipClick: (text: str
           <div className="grid md:grid-cols-3 gap-8">
             {TIERS.map((tier, i) => (
               <ScrollReveal key={tier.title} delay={i * 0.06}>
-                <div className={`bg-white p-8 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-t-4 ${i === 1 ? 'border-[#D4714E]' : 'border-[#DCC1B9]/30'} h-full flex flex-col transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)]`}>
+                <div className={`bg-white p-8 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-t-4 ${i === 1 ? 'border-[#BA3C60]' : 'border-[#DCC1B9]/30'} h-full flex flex-col transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)]`}>
                   <h3 className="font-bold text-[#1A1A18] text-xl">{tier.title}</h3>
-                  <span className="font-mono text-3xl text-[#D4714E] font-bold mt-3">{tier.price}</span>
+                  <span className="font-mono text-3xl text-[#BA3C60] font-bold mt-3">{tier.price}</span>
                   <p className="mt-6 text-[#6B6B65] leading-relaxed text-sm flex-1">{tier.desc}</p>
                   <button
                     onClick={() => onChipClick(
@@ -176,7 +176,7 @@ export default function AdvisorsBelow({ onChipClick }: { onChipClick: (text: str
                     )}
                     className={`mt-8 w-full py-4 font-bold uppercase text-sm tracking-[0.1em] rounded-xl transition-all duration-300 ${
                       i === 1
-                        ? 'bg-[#1A1A18] text-white hover:bg-[#D4714E]'
+                        ? 'bg-[#1A1A18] text-white hover:bg-[#BA3C60]'
                         : 'bg-white text-[#1A1A18] border border-[#1A1A18] hover:bg-[#1A1A18] hover:text-white'
                     }`}
                   >
@@ -203,7 +203,7 @@ export default function AdvisorsBelow({ onChipClick }: { onChipClick: (text: str
       {/* ═══ 7. DARK CTA ═══ */}
       <section className="py-32 bg-[#1c1917] relative overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D4714E] rounded-full opacity-[0.15] blur-[80px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#BA3C60] rounded-full opacity-[0.15] blur-[80px]" />
         </div>
         <div className="max-w-[1200px] mx-auto px-6 relative z-10 text-center">
           <ScrollReveal>

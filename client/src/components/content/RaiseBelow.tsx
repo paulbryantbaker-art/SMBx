@@ -25,7 +25,7 @@ const TERM_CARDS = [
 
 export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
-    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#D4714E] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#BA3C60] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       {/* ═══ 1. HERO ═══ */}
       <section className="relative pt-32 pb-40 overflow-hidden">
@@ -46,7 +46,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
             </p>
           </ScrollReveal>
         </div>
-        <div className="absolute -right-20 top-20 w-[600px] h-[600px] bg-[#D4714E]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -right-20 top-20 w-[600px] h-[600px] bg-[#BA3C60]/5 rounded-full blur-3xl pointer-events-none" />
       </section>
 
       {/* ═══ 2. DILUTION MATH ═══ */}
@@ -74,7 +74,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
               <ScrollReveal delay={0.15}>
                 <div className="bg-white p-10 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/30 space-y-12">
                   <div>
-                    <span className="font-mono text-5xl font-bold text-[#D4714E]">5%</span>
+                    <span className="font-mono text-5xl font-bold text-[#BA3C60]">5%</span>
                     <p className="font-sans uppercase tracking-widest text-xs mt-2 text-[#6B6B65]">Dilution Gap</p>
                   </div>
                   <div className="h-px bg-[#DCC1B9]/30 w-full" />
@@ -114,7 +114,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
             {CAPITAL_OPTIONS.slice(0, 3).map((opt, i) => (
               <ScrollReveal key={opt.title} delay={i * 0.06}>
                 <div className="bg-white p-8 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20 transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)] h-full flex flex-col">
-                  <span className="font-mono text-[#D4714E] text-sm block mb-6">
+                  <span className="font-mono text-[#BA3C60] text-sm block mb-6">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <h3 className="font-bold text-[#1A1A18] text-xl mb-4">{opt.title}</h3>
@@ -126,14 +126,14 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
             <ScrollReveal delay={0.18}>
               <div className="bg-white p-8 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20 transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)] h-full flex flex-col md:col-span-1">
-                <span className="font-mono text-[#D4714E] text-sm block mb-6">04</span>
+                <span className="font-mono text-[#BA3C60] text-sm block mb-6">04</span>
                 <h3 className="font-bold text-[#1A1A18] text-xl mb-4">{CAPITAL_OPTIONS[3].title}</h3>
                 <p className="text-[#6B6B65] leading-relaxed text-base flex-1">{CAPITAL_OPTIONS[3].body}</p>
               </div>
             </ScrollReveal>
             <ScrollReveal delay={0.24}>
               <div className="bg-white p-8 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20 transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)] h-full flex flex-col md:col-span-2">
-                <span className="font-mono text-[#D4714E] text-sm block mb-6">05</span>
+                <span className="font-mono text-[#BA3C60] text-sm block mb-6">05</span>
                 <h3 className="font-bold text-[#1A1A18] text-xl mb-4">{CAPITAL_OPTIONS[4].title}</h3>
                 <p className="text-[#6B6B65] leading-relaxed text-base flex-1">{CAPITAL_OPTIONS[4].body}</p>
               </div>
@@ -167,20 +167,20 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
               <ScrollReveal delay={0.15}>
                 <div className="bg-[#1c1917] p-12 rounded-3xl shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-8">
-                    <span className="material-symbols-outlined text-[#D4714E] text-4xl">description</span>
+                    <span className="material-symbols-outlined text-[#BA3C60] text-4xl">description</span>
                   </div>
                   <h4 className="text-white font-bold text-2xl mb-8">The Complete Package</h4>
                   <ul className="space-y-5">
                     {PITCH_ITEMS.map((item) => (
                       <li key={item} className="flex items-center text-white/80 gap-4">
-                        <div className="w-6 h-6 rounded-full border border-[#D4714E] flex items-center justify-center shrink-0">
-                          <span className="material-symbols-outlined text-[14px] text-[#D4714E]" style={{ fontVariationSettings: "'FILL' 1" }}>check</span>
+                        <div className="w-6 h-6 rounded-full border border-[#BA3C60] flex items-center justify-center shrink-0">
+                          <span className="material-symbols-outlined text-[14px] text-[#BA3C60]" style={{ fontVariationSettings: "'FILL' 1" }}>check</span>
                         </div>
                         <span className="font-mono text-sm tracking-tight">{item}</span>
                       </li>
                     ))}
                   </ul>
-                  <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-[#D4714E]/20 rounded-full blur-3xl" />
+                  <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-[#BA3C60]/20 rounded-full blur-3xl" />
                 </div>
               </ScrollReveal>
             </div>
@@ -228,7 +228,7 @@ export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string
       {/* ═══ 7. DARK CTA ═══ */}
       <section className="py-32 bg-[#1c1917] relative overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D4714E] rounded-full opacity-[0.15] blur-[80px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#BA3C60] rounded-full opacity-[0.15] blur-[80px]" />
         </div>
         <div className="max-w-[1200px] mx-auto px-6 relative z-10 text-center">
           <ScrollReveal>

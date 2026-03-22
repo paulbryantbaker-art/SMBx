@@ -205,18 +205,18 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/chat')}
-            className="flex items-center gap-1.5 text-sm text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#C96B4F] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#BA3C60] transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Chat
           </button>
           <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]" style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
-            smb<span className="text-[#C96B4F]">x</span>.ai
+            smb<span className="text-[#BA3C60]">x</span>.ai
           </div>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-[#6E6A63]">{user.display_name || user.email}</span>
-          <button onClick={onLogout} className="text-sm text-[#A9A49C] bg-transparent border-0 cursor-pointer hover:text-[#C96B4F] transition-colors">
+          <button onClick={onLogout} className="text-sm text-[#A9A49C] bg-transparent border-0 cursor-pointer hover:text-[#BA3C60] transition-colors">
             Sign out
           </button>
         </div>
@@ -234,7 +234,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
           </div>
           <button
             onClick={() => setShowNewThesis(true)}
-            className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#C96B4F] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors"
+            className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#BA3C60] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors"
           >
             + New Thesis
           </button>
@@ -245,7 +245,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
           <div className="mb-6">
             <button
               onClick={() => setShowBuyerDemand(!showBuyerDemand)}
-              className="flex items-center gap-2 text-sm font-semibold text-[#C96B4F] bg-transparent border-0 cursor-pointer hover:underline mb-3"
+              className="flex items-center gap-2 text-sm font-semibold text-[#BA3C60] bg-transparent border-0 cursor-pointer hover:underline mb-3"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d={showBuyerDemand ? "M18 15l-6-6-6 6" : "M6 9l6 6 6-6"} />
@@ -311,7 +311,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
 
         {/* New Thesis Form */}
         {showNewThesis && (
-          <div className="bg-white rounded-2xl border border-[#C96B4F] p-5 mb-6">
+          <div className="bg-white rounded-2xl border border-[#BA3C60] p-5 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-semibold text-[#0D0D0D] m-0">Create Buy Thesis</h3>
               <button onClick={() => setShowNewThesis(false)} className="w-7 h-7 rounded-full hover:bg-[#F5F5F5] flex items-center justify-center cursor-pointer border-0 bg-transparent">
@@ -326,7 +326,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.name}
                   onChange={e => setNewThesis(p => ({ ...p, name: e.target.value }))}
                   placeholder="e.g. DFW HVAC Roll-up"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#BA3C60]"
                 />
               </div>
               <div>
@@ -336,7 +336,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.industry}
                   onChange={e => setNewThesis(p => ({ ...p, industry: e.target.value }))}
                   placeholder="e.g. HVAC, Pest Control"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#BA3C60]"
                 />
               </div>
               <div>
@@ -346,7 +346,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.geography}
                   onChange={e => setNewThesis(p => ({ ...p, geography: e.target.value }))}
                   placeholder="e.g. Dallas-Fort Worth"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#BA3C60]"
                 />
               </div>
               <div>
@@ -356,7 +356,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.minRevenue}
                   onChange={e => setNewThesis(p => ({ ...p, minRevenue: e.target.value }))}
                   placeholder="500000"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#BA3C60]"
                 />
               </div>
               <div>
@@ -366,7 +366,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.maxRevenue}
                   onChange={e => setNewThesis(p => ({ ...p, maxRevenue: e.target.value }))}
                   placeholder="2000000"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#BA3C60]"
                 />
               </div>
               <div>
@@ -376,7 +376,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.minPrice}
                   onChange={e => setNewThesis(p => ({ ...p, minPrice: e.target.value }))}
                   placeholder="300000"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#BA3C60]"
                 />
               </div>
               <div>
@@ -386,7 +386,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   value={newThesis.maxPrice}
                   onChange={e => setNewThesis(p => ({ ...p, maxPrice: e.target.value }))}
                   placeholder="1500000"
-                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#C96B4F]"
+                  className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#BA3C60]"
                 />
               </div>
             </div>
@@ -400,7 +400,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
               <button
                 onClick={createThesis}
                 disabled={saving || !newThesis.name.trim()}
-                className="px-5 py-2 rounded-xl text-sm font-semibold bg-[#C96B4F] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-2 rounded-xl text-sm font-semibold bg-[#BA3C60] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving ? 'Creating...' : 'Create Thesis'}
               </button>
@@ -435,7 +435,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
             <p className="text-sm text-[#6E6A63] m-0 mb-4">Define what you're looking for and we'll find matches.</p>
             <button
               onClick={() => setShowNewThesis(true)}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#C96B4F] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors"
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#BA3C60] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors"
             >
               Create your first thesis
             </button>
@@ -453,8 +453,8 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                   onClick={() => setSelectedThesis(t.id)}
                   className={`w-full text-left rounded-2xl p-4 border transition-all cursor-pointer ${
                     selectedThesis === t.id
-                      ? 'bg-white border-[#C96B4F] shadow-sm'
-                      : 'bg-white border-border hover:border-[#C96B4F]'
+                      ? 'bg-white border-[#BA3C60] shadow-sm'
+                      : 'bg-white border-border hover:border-[#BA3C60]'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
@@ -464,7 +464,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                       {t.status}
                     </span>
                     {t.match_count > 0 && (
-                      <span className="text-[10px] font-bold text-[#C96B4F] bg-[#C96B4F]/10 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-bold text-[#BA3C60] bg-[#BA3C60]/10 px-2 py-0.5 rounded-full">
                         {t.match_count} match{t.match_count !== 1 ? 'es' : ''}
                       </span>
                     )}
@@ -622,7 +622,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
                                 href={m.source_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[11px] font-medium text-[#C96B4F] hover:underline ml-auto"
+                                className="text-[11px] font-medium text-[#BA3C60] hover:underline ml-auto"
                               >
                                 View listing
                               </a>

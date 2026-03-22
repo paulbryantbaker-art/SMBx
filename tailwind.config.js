@@ -6,10 +6,10 @@ export default {
       colors: {
         ink: '#0D0D0D',
         terra: {
-          DEFAULT: '#D4714E',
-          hover: '#c2613f',
-          soft: '#FFF0EB',
-          glow: 'rgba(212, 113, 78, 0.12)',
+          DEFAULT: '#BA3C60',
+          hover: '#a33352',
+          soft: '#FDF0F3',
+          glow: 'rgba(186, 60, 96, 0.12)',
         },
         /* stone removed — was conflicting with Tailwind's built-in stone palette */
         surface: '#f9f9f9',

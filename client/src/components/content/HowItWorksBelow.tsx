@@ -26,7 +26,7 @@ const CONVO_MESSAGES = [
 
 export default function HowItWorksBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
-    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#D4714E] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#BA3C60] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       {/* ═══ 1. HERO ═══ */}
       <section className="relative pt-32 pb-40 overflow-hidden">
@@ -47,7 +47,7 @@ export default function HowItWorksBelow({ onChipClick }: { onChipClick: (text: s
             </p>
           </ScrollReveal>
         </div>
-        <div className="absolute -right-20 top-20 w-[600px] h-[600px] bg-[#D4714E]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -right-20 top-20 w-[600px] h-[600px] bg-[#BA3C60]/5 rounded-full blur-3xl pointer-events-none" />
       </section>
 
       {/* ═══ 2. THE INFORMATION DESERT ═══ */}
@@ -80,7 +80,7 @@ export default function HowItWorksBelow({ onChipClick }: { onChipClick: (text: s
           <div className="md:col-span-5 sticky top-32">
             <ScrollReveal delay={0.15}>
               <div className="bg-white p-10 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/30">
-                <span className="font-mono text-5xl font-bold text-[#D4714E] block mb-2">$27B</span>
+                <span className="font-mono text-5xl font-bold text-[#BA3C60] block mb-2">$27B</span>
                 <span className="font-sans uppercase tracking-widest text-xs font-bold text-[#6B6B65]">Bloomberg&apos;s Market Cap</span>
                 <p className="text-sm text-[#6B6B65] mt-4 leading-relaxed">Built not on proprietary data — on the synthesis of publicly available sovereign data.</p>
                 <div className="mt-8 h-px bg-[#DCC1B9]/30" />
@@ -98,7 +98,7 @@ export default function HowItWorksBelow({ onChipClick }: { onChipClick: (text: s
       <section className="py-32">
         <div className="max-w-[1200px] mx-auto px-6">
           <ScrollReveal>
-            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#BA3C60] mb-6 block">
               Sovereign Data
             </span>
           </ScrollReveal>
@@ -111,7 +111,7 @@ export default function HowItWorksBelow({ onChipClick }: { onChipClick: (text: s
             {DATA_SOURCES.map((src, i) => (
               <ScrollReveal key={src.source} delay={i * 0.06}>
                 <div className="bg-white p-8 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20 h-full transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)]">
-                  <span className="font-mono text-[#D4714E] text-sm block mb-6">
+                  <span className="font-mono text-[#BA3C60] text-sm block mb-6">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <h3 className="font-bold text-[#1A1A18] text-lg mb-3">{src.source}</h3>
@@ -128,7 +128,7 @@ export default function HowItWorksBelow({ onChipClick }: { onChipClick: (text: s
         <div className="max-w-[1200px] mx-auto px-6">
           <div className="max-w-3xl mb-24">
             <ScrollReveal>
-              <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+              <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#BA3C60] mb-6 block">
                 Seven Dimensions
               </span>
             </ScrollReveal>
@@ -148,7 +148,7 @@ export default function HowItWorksBelow({ onChipClick }: { onChipClick: (text: s
               <ScrollReveal key={layer.title} delay={i * 0.05}>
                 <div className="flex gap-8 py-8 border-t border-stone-800 first:border-t-0 items-start">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center font-mono text-sm font-bold shrink-0 ${
-                    i === 0 ? 'bg-[#D4714E] text-white' : 'border border-stone-700 text-stone-400'
+                    i === 0 ? 'bg-[#BA3C60] text-white' : 'border border-stone-700 text-stone-400'
                   }`}>
                     {String(i + 1).padStart(2, '0')}
                   </div>
@@ -199,7 +199,7 @@ export default function HowItWorksBelow({ onChipClick }: { onChipClick: (text: s
             <div className="md:w-1/2 w-full">
               <ScrollReveal delay={0.15}>
                 <div className="bg-white rounded-2xl p-10 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20">
-                  <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+                  <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#BA3C60] mb-6 block">
                     Adaptive Response
                   </span>
                   <pre className="font-mono text-[13px] leading-[1.8] text-[#6B6B65] bg-[#F5F3EF] rounded-xl p-6 whitespace-pre-wrap">{`CLEANING · PHOENIX · $380K SDE:
@@ -248,7 +248,7 @@ LBO scenarios..."`}</pre>
       <section className="py-32 bg-[#F5F3EF]">
         <div className="max-w-[1200px] mx-auto px-6">
           <ScrollReveal>
-            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#BA3C60] mb-6 block">
               Live Demo
             </span>
           </ScrollReveal>
@@ -294,22 +294,22 @@ LBO scenarios..."`}</pre>
             </div>
             <div className="bg-white p-12">
               <ScrollReveal delay={0.1}>
-                <h4 className="font-sans font-bold uppercase tracking-widest text-sm text-[#D4714E] mb-8">smbx.ai</h4>
+                <h4 className="font-sans font-bold uppercase tracking-widest text-sm text-[#BA3C60] mb-8">smbx.ai</h4>
                 <ul className="space-y-6">
                   <li className="flex items-start gap-4">
-                    <span className="material-symbols-outlined text-[#D4714E]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <span className="material-symbols-outlined text-[#BA3C60]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                     <span className="text-[#1A1A18]">Deterministic financial calculations backed by source docs.</span>
                   </li>
                   <li className="flex items-start gap-4">
-                    <span className="material-symbols-outlined text-[#D4714E]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <span className="material-symbols-outlined text-[#BA3C60]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                     <span className="text-[#1A1A18]">Live FRED data and current SBA parameters.</span>
                   </li>
                   <li className="flex items-start gap-4">
-                    <span className="material-symbols-outlined text-[#D4714E]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <span className="material-symbols-outlined text-[#BA3C60]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                     <span className="text-[#1A1A18]">Classifies the deal and adapts methodology, metrics, vocabulary.</span>
                   </li>
                   <li className="flex items-start gap-4">
-                    <span className="material-symbols-outlined text-[#D4714E]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <span className="material-symbols-outlined text-[#BA3C60]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                     <span className="text-[#1A1A18]">Builds your deal profile over weeks and months.</span>
                   </li>
                 </ul>
@@ -322,7 +322,7 @@ LBO scenarios..."`}</pre>
       {/* ═══ 9. DARK CTA ═══ */}
       <section className="py-32 bg-[#1c1917] relative overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D4714E] rounded-full opacity-[0.15] blur-[80px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#BA3C60] rounded-full opacity-[0.15] blur-[80px]" />
         </div>
         <div className="max-w-[1200px] mx-auto px-6 relative z-10 text-center">
           <ScrollReveal>

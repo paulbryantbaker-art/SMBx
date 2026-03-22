@@ -40,7 +40,7 @@ export default function ResizeHandle({ onDrag }: ResizeHandleProps) {
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 5,
-        background: dragging ? 'rgba(212,113,78,0.06)' : 'transparent',
+        background: dragging ? 'rgba(186,60,96,0.06)' : 'transparent',
         transition: 'background 0.15s',
       }}
     >
@@ -49,7 +49,7 @@ export default function ResizeHandle({ onDrag }: ResizeHandleProps) {
           width: 3,
           height: 40,
           borderRadius: 2,
-          background: dragging ? '#C96B4F' : hovered ? 'rgba(212,113,78,0.4)' : 'rgba(0,0,0,0.08)',
+          background: dragging ? '#BA3C60' : hovered ? 'rgba(186,60,96,0.4)' : 'rgba(0,0,0,0.08)',
           transition: 'all 0.15s',
         }}
       />

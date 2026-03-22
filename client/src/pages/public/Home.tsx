@@ -11,7 +11,7 @@ import { ScrollReveal, StaggerContainer, StaggerItem, ScrollProgressBar } from '
 
 const T = {
   bg: '#FAFAFA',
-  terra: '#C96B4F',
+  terra: '#BA3C60',
   terraHover: '#BE6342',
   terraSoft: '#FFF0EB',
   text: '#0D0D0D',
@@ -275,8 +275,8 @@ export default function Home() {
           box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.04) !important;
         }
         .home-dock-card:focus-within {
-          border-color: rgba(212,113,78,0.35) !important;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.06), 0 0 0 3px rgba(212,113,78,0.10) !important;
+          border-color: rgba(186,60,96,0.35) !important;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.06), 0 0 0 3px rgba(186,60,96,0.10) !important;
         }
         /* Compact textarea (hero variant defaults to tall) */
         .home-dock-card textarea {
@@ -310,7 +310,7 @@ export default function Home() {
           box-shadow: 0 1px 3px rgba(0,0,0,0.03);
         }
         .home-suggestion:hover {
-          background: #FFFFFF; border-color: rgba(212,113,78,0.25);
+          background: #FFFFFF; border-color: rgba(186,60,96,0.25);
           box-shadow: 0 2px 8px rgba(0,0,0,0.06);
           color: ${T.text};
         }
@@ -394,7 +394,7 @@ export default function Home() {
         .home-preview-user-bubble {
           max-width: 85%; padding: 12px 18px;
           background: ${T.terraSoft}; color: ${T.text};
-          border: 1px solid rgba(212,113,78,0.18);
+          border: 1px solid rgba(186,60,96,0.18);
           border-radius: 18px 18px 4px 18px;
           font-size: 14px; line-height: 1.55;
         }
@@ -515,7 +515,7 @@ export default function Home() {
           background: ${T.terra}; color: #fff;
           font-size: 15px; font-weight: 600; border: none;
           cursor: pointer; font-family: inherit;
-          box-shadow: 0 2px 8px rgba(212,113,78,0.3);
+          box-shadow: 0 2px 8px rgba(186,60,96,0.3);
           transition: all 0.15s;
         }
         .home-cta-btn:hover { background: ${T.terraHover}; }
@@ -572,7 +572,7 @@ export default function Home() {
         .home-msg-user-bubble {
           max-width: 80%; padding: 12px 18px;
           background: ${T.terraSoft}; color: ${T.text};
-          border: 1px solid rgba(212,113,78,0.18);
+          border: 1px solid rgba(186,60,96,0.18);
           border-radius: 20px 20px 4px 20px;
           box-shadow: 0 1px 3px rgba(0,0,0,0.06);
           font-size: 15px; line-height: 1.55; word-break: break-word;

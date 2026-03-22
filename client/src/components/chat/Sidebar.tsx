@@ -21,7 +21,7 @@ interface SidebarProps {
 }
 
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#C96B4F',
+  sell: '#BA3C60',
   buy: '#4E8FD4',
   raise: '#6B8F4E',
   pmi: '#8F6BD4',
@@ -58,7 +58,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
       <div className="flex items-center justify-end px-3.5 pt-3.5 pb-1.5" style={{ minWidth: 240 }}>
         <button
           onClick={onNew}
-          className="w-[34px] h-[34px] rounded-full border-none cursor-pointer flex items-center justify-center text-[#C96B4F] hover:bg-[#FFF0EB] transition-colors"
+          className="w-[34px] h-[34px] rounded-full border-none cursor-pointer flex items-center justify-center text-[#BA3C60] hover:bg-[#FFF0EB] transition-colors"
           style={{ background: 'rgba(255,255,255,0.5)' }}
           type="button"
           aria-label="New chat"
@@ -74,7 +74,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
         {/* Active Deals */}
         {deals.length > 0 && (
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#C96B4F] font-sans px-2 pt-2.5 pb-1 m-0">
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#BA3C60] font-sans px-2 pt-2.5 pb-1 m-0">
               Active Deals
             </p>
             {deals.map(c => (
@@ -100,7 +100,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
                     </p>
                     <div className="flex items-center gap-1 mt-0.5">
                       {c.current_gate && (
-                        <span className="text-[10px] font-bold text-[#C96B4F] bg-[#FFF0EB] px-[5px] py-[1px] rounded-[3px] font-sans">
+                        <span className="text-[10px] font-bold text-[#BA3C60] bg-[#FFF0EB] px-[5px] py-[1px] rounded-[3px] font-sans">
                           {c.current_gate}
                         </span>
                       )}
@@ -170,7 +170,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
           </div>
           <button
             onClick={onSignOut}
-            className="text-[11px] font-medium text-[rgba(0,0,0,0.4)] bg-transparent border-none cursor-pointer hover:text-[#C96B4F] transition-colors px-0"
+            className="text-[11px] font-medium text-[rgba(0,0,0,0.4)] bg-transparent border-none cursor-pointer hover:text-[#BA3C60] transition-colors px-0"
             type="button"
           >
             Sign out
@@ -181,7 +181,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
       {anonymous && (
         <div className="border-t border-border px-4 py-3 text-center">
           <span className="text-[13px] text-[#A9A49C]">
-            Free preview · <a href="/signup" className="text-[#C96B4F] no-underline hover:underline font-medium">Create account</a> for full access
+            Free preview · <a href="/signup" className="text-[#BA3C60] no-underline hover:underline font-medium">Create account</a> for full access
           </span>
         </div>
       )}

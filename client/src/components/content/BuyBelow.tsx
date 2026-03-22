@@ -41,14 +41,14 @@ const BUYER_TYPES = [
 
 export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
-    <div className="bg-[#fbf9f5] text-[#1b1c1a] selection:bg-[#D4714E]/20 selection:text-[#1b1c1a] font-body">
+    <div className="bg-[#fbf9f5] text-[#1b1c1a] selection:bg-[#BA3C60]/20 selection:text-[#1b1c1a] font-body">
 
       {/* ═══ 1. HERO ═══ */}
       <section className="py-24 md:py-32 max-w-[1200px] mx-auto px-8">
         <div className="grid grid-cols-12 gap-8 items-end">
           <div className="col-span-12 md:col-span-8">
             <ScrollReveal>
-              <span className="inline-block text-[#D4714E] font-bold uppercase tracking-[0.2em] text-xs mb-6">
+              <span className="inline-block text-[#BA3C60] font-bold uppercase tracking-[0.2em] text-xs mb-6">
                 Acquisition Intelligence
               </span>
             </ScrollReveal>
@@ -67,7 +67,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
             <ScrollReveal delay={0.25}>
               <button
                 onClick={() => onChipClick('I have a listing I want analyzed')}
-                className="w-full md:w-auto bg-[#D4714E] text-white px-8 py-4 rounded-md font-bold uppercase text-sm tracking-widest hover:-translate-y-0.5 transition-all duration-300 shadow-[0_4px_24px_rgba(212,113,78,0.15)]"
+                className="w-full md:w-auto bg-[#BA3C60] text-white px-8 py-4 rounded-md font-bold uppercase text-sm tracking-widest hover:-translate-y-0.5 transition-all duration-300 shadow-[0_4px_24px_rgba(186,60,96,0.15)]"
               >
                 Analyze a Listing
               </button>
@@ -100,7 +100,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
           <div className="col-span-12 md:col-span-4 bg-white p-12 rounded-2xl shadow-[0_4px_24px_rgba(27,28,26,0.06)] border border-[#dcc1b9]/20 self-center">
             <ScrollReveal delay={0.16}>
               <div className="text-center">
-                <div className="font-mono text-7xl text-[#D4714E] font-bold mb-2">40hrs</div>
+                <div className="font-mono text-7xl text-[#BA3C60] font-bold mb-2">40hrs</div>
                 <div className="text-xs font-black uppercase tracking-[0.2em] text-[#1b1c1a]">Wasted Per Bad Deal</div>
                 <div className="mt-8 pt-8 border-t border-[#dcc1b9]/30 text-sm text-[#55433c] italic">
                   &ldquo;The delta between a listing and reality often costs more than the down payment.&rdquo;
@@ -120,7 +120,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
               <ScrollReveal>
                 <div className="bg-white p-8 rounded-2xl shadow-[0_4px_24px_rgba(27,28,26,0.06)] space-y-6">
                   <div className="flex items-start gap-4">
-                    <div className="w-8 h-8 rounded-full bg-[#D4714E] flex items-center justify-center text-white text-[10px] font-bold shrink-0">YOU</div>
+                    <div className="w-8 h-8 rounded-full bg-[#BA3C60] flex items-center justify-center text-white text-[10px] font-bold shrink-0">YOU</div>
                     <div className="bg-[#f5f3ef] p-4 rounded-xl rounded-tl-none text-sm text-[#55433c] leading-relaxed">
                       Analyze this Austin Dental Practice. Listing says $1.2M EBITDA.
                     </div>
@@ -129,7 +129,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
                     <div className="w-8 h-8 rounded-full bg-stone-900 flex items-center justify-center text-white shrink-0">
                       <span className="material-symbols-outlined text-sm">bolt</span>
                     </div>
-                    <div className="bg-[#D4714E] text-white p-4 rounded-xl rounded-tr-none text-sm leading-relaxed">
+                    <div className="bg-[#BA3C60] text-white p-4 rounded-xl rounded-tr-none text-sm leading-relaxed">
                       Found $240k in owner add-backs that don&apos;t meet SBA SOP 50 10. Revised DSCR: 1.85x. Listing is overpriced by 18%.
                     </div>
                   </div>
@@ -146,13 +146,13 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
               </ScrollReveal>
               <ScrollReveal delay={0.12}>
                 <div className="bg-[#f5f3ef] p-10 rounded-2xl">
-                  <div className="font-mono text-xs text-[#D4714E] mb-4 tracking-widest font-bold">INTEL REPORT · V11.1</div>
+                  <div className="font-mono text-xs text-[#BA3C60] mb-4 tracking-widest font-bold">INTEL REPORT · V11.1</div>
                   <div className="font-mono text-xl mb-8 border-b border-[#dcc1b9]/30 pb-4 text-[#1b1c1a]">DENTAL PRACTICE · AUSTIN, TX</div>
                   <div className="grid grid-cols-2 gap-8">
                     {INTEL_METRICS.map((m) => (
                       <div key={m.label}>
                         <div className="text-[10px] uppercase font-bold tracking-widest text-[#55433c] mb-1">{m.label}</div>
-                        <div className={`font-mono text-3xl font-bold ${m.accent ? 'text-[#D4714E]' : 'text-[#1b1c1a]'}`}>{m.value}</div>
+                        <div className={`font-mono text-3xl font-bold ${m.accent ? 'text-[#BA3C60]' : 'text-[#1b1c1a]'}`}>{m.value}</div>
                       </div>
                     ))}
                   </div>
@@ -182,7 +182,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
           <div className="col-span-12 md:col-span-6">
             <ScrollReveal delay={0.12}>
               <div className="relative">
-                <div className="absolute -top-4 -left-4 bg-[#D4714E] text-white text-[10px] font-bold px-3 py-1 rounded-sm z-10 tracking-widest">SOP 50 10 8 COMPLIANCE</div>
+                <div className="absolute -top-4 -left-4 bg-[#BA3C60] text-white text-[10px] font-bold px-3 py-1 rounded-sm z-10 tracking-widest">SOP 50 10 8 COMPLIANCE</div>
                 <div className="bg-white p-12 rounded-2xl shadow-[0_4px_24px_rgba(27,28,26,0.06)] border border-[#dcc1b9]/10">
                   <div className="flex flex-col gap-6">
                     {[
@@ -193,7 +193,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
                     ].map(([label, value, accent], i) => (
                       <div key={i} className={`flex justify-between items-center py-4 ${i < 3 ? 'border-b border-[#dcc1b9]/20' : ''}`}>
                         <span className="text-xs font-black uppercase tracking-widest">{label as string}</span>
-                        <span className={`font-mono font-bold ${accent ? 'text-[#D4714E]' : 'text-[#1b1c1a]'}`}>{value as string}</span>
+                        <span className={`font-mono font-bold ${accent ? 'text-[#BA3C60]' : 'text-[#1b1c1a]'}`}>{value as string}</span>
                       </div>
                     ))}
                   </div>
@@ -226,10 +226,10 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
                 <div className="p-8 bg-white rounded-xl">
                   <div className="flex justify-between items-start mb-12">
                     <div>
-                      <div className="text-xs font-bold text-[#D4714E] uppercase tracking-widest mb-1">Local Intelligence</div>
+                      <div className="text-xs font-bold text-[#BA3C60] uppercase tracking-widest mb-1">Local Intelligence</div>
                       <div className="font-headline italic text-2xl">HVAC · Dallas-Fort Worth MSA</div>
                     </div>
-                    <span className="material-symbols-outlined text-[#D4714E]">location_on</span>
+                    <span className="material-symbols-outlined text-[#BA3C60]">location_on</span>
                   </div>
                   <div className="space-y-6">
                     {[
@@ -240,7 +240,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
                       <div key={label as string} className="flex items-center justify-between">
                         <span className="text-xs font-bold uppercase tracking-widest text-[#55433c]">{label as string}</span>
                         <div className="w-1/2 h-2 bg-[#eae8e4] rounded-full overflow-hidden">
-                          <div className={`h-full ${accent ? 'bg-[#D4714E]' : 'bg-[#5e5e5e]'}`} style={{ width: `${pct}%` }} />
+                          <div className={`h-full ${accent ? 'bg-[#BA3C60]' : 'bg-[#5e5e5e]'}`} style={{ width: `${pct}%` }} />
                         </div>
                       </div>
                     ))}
@@ -258,7 +258,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
           <div className="grid grid-cols-12 gap-12">
             <div className="col-span-12 md:col-span-5">
               <ScrollReveal>
-                <span className="text-[#D4714E] font-bold uppercase tracking-[0.2em] text-xs mb-6 inline-block">Asset Allocation</span>
+                <span className="text-[#BA3C60] font-bold uppercase tracking-[0.2em] text-xs mb-6 inline-block">Asset Allocation</span>
               </ScrollReveal>
               <ScrollReveal delay={0.08}>
                 <h2 className="text-4xl md:text-5xl font-headline italic leading-tight mb-8">
@@ -274,7 +274,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
             <div className="col-span-12 md:col-span-7">
               <ScrollReveal delay={0.16}>
                 <div className="bg-stone-800 p-10 rounded-2xl border border-stone-700">
-                  <div className="font-mono text-xs text-[#D4714E] mb-8 tracking-widest uppercase">5-Year Depreciation Shield Est. ($3M Acquisition)</div>
+                  <div className="font-mono text-xs text-[#BA3C60] mb-8 tracking-widest uppercase">5-Year Depreciation Shield Est. ($3M Acquisition)</div>
                   <div className="overflow-x-auto">
                     <table className="w-full font-mono text-sm">
                       <thead>
@@ -291,7 +291,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
                             <td className="py-4">{row.year}</td>
                             <td className="text-right">{row.amort}</td>
                             <td className="text-right">{row.shield}</td>
-                            <td className="text-right text-[#D4714E]">{row.impact}</td>
+                            <td className="text-right text-[#BA3C60]">{row.impact}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -317,7 +317,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
             {LOI_CARDS.map((card, i) => (
               <ScrollReveal key={card.title} delay={i * 0.06}>
                 <div className="bg-white p-10 rounded-2xl shadow-[0_4px_24px_rgba(27,28,26,0.06)] hover:-translate-y-1 transition-all duration-300 h-full">
-                  <div className="text-[#D4714E] mb-6">
+                  <div className="text-[#BA3C60] mb-6">
                     <span className="material-symbols-outlined text-4xl">{card.icon}</span>
                   </div>
                   <h3 className="text-sm font-black uppercase tracking-[0.15em] mb-4">{card.title}</h3>
@@ -331,7 +331,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
 
       {/* ═══ 8. ACQUISITION LIFECYCLE — Dark Timeline ═══ */}
       <section className="py-32 bg-stone-950 text-stone-100 overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#D4714E]/5 blur-[120px] rounded-full" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#BA3C60]/5 blur-[120px] rounded-full" />
         <div className="max-w-[1000px] mx-auto px-8 relative z-10">
           <ScrollReveal>
             <h2 className="text-sm font-black uppercase tracking-[0.2em] mb-20 text-center">Acquisition Lifecycle</h2>
@@ -340,7 +340,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
             {TIMELINE.map((step, i) => (
               <ScrollReveal key={step.num} delay={i * 0.08}>
                 <div className="flex gap-12 items-start">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full border-2 border-[#D4714E] flex items-center justify-center font-mono font-bold text-[#D4714E]">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full border-2 border-[#BA3C60] flex items-center justify-center font-mono font-bold text-[#BA3C60]">
                     {step.num}
                   </div>
                   <div>
@@ -361,7 +361,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
             {BUYER_TYPES.map((type, i) => (
               <ScrollReveal key={type.title} delay={i * 0.06}>
                 <div className="bg-[#fbf9f5] p-8 rounded-xl border border-[#dcc1b9]/20 h-full flex flex-col hover:-translate-y-1 transition-all duration-300">
-                  <h4 className="text-xs font-black uppercase tracking-widest text-[#D4714E] mb-4">{type.title}</h4>
+                  <h4 className="text-xs font-black uppercase tracking-widest text-[#BA3C60] mb-4">{type.title}</h4>
                   <p className="text-sm text-[#55433c] leading-relaxed">{type.body}</p>
                 </div>
               </ScrollReveal>
@@ -372,7 +372,7 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
 
       {/* ═══ 10. CTA — Light with blur orb ═══ */}
       <section className="py-32 bg-[#fbf9f5] relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D4714E]/10 blur-[120px] rounded-full" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#BA3C60]/10 blur-[120px] rounded-full" />
         <div className="max-w-[1200px] mx-auto px-8 relative z-10 text-center">
           <ScrollReveal>
             <h2 className="text-6xl md:text-7xl font-display italic mb-12 text-[#1b1c1a]">Find the right deal.</h2>
@@ -381,13 +381,13 @@ export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) 
             <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
               <button
                 onClick={() => onChipClick('I want to buy a business')}
-                className="bg-[#D4714E] text-white px-10 py-5 rounded-md font-bold uppercase text-sm tracking-widest shadow-[0_4px_24px_rgba(212,113,78,0.15)] hover:scale-[1.02] transition-all"
+                className="bg-[#BA3C60] text-white px-10 py-5 rounded-md font-bold uppercase text-sm tracking-widest shadow-[0_4px_24px_rgba(186,60,96,0.15)] hover:scale-[1.02] transition-all"
               >
                 Start Searching
               </button>
               <button
                 onClick={() => onChipClick('I have a listing I want analyzed')}
-                className="bg-transparent text-[#D4714E] px-10 py-5 rounded-md font-bold uppercase text-sm tracking-widest border border-[#D4714E]/20 hover:bg-[#D4714E]/5 transition-all"
+                className="bg-transparent text-[#BA3C60] px-10 py-5 rounded-md font-bold uppercase text-sm tracking-widest border border-[#BA3C60]/20 hover:bg-[#BA3C60]/5 transition-all"
               >
                 Analyze a Listing
               </button>

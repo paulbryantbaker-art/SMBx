@@ -87,7 +87,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
   /* Desktop label: tiny uppercase, muted — matches Stitch mockup */
   const Label = ({ text }: { text: string }) => (
     <p style={{
-      fontSize: 10, fontWeight: 700, color: text === 'You' ? '#C96B4F' : '#94a3b8',
+      fontSize: 10, fontWeight: 700, color: text === 'You' ? '#BA3C60' : '#94a3b8',
       textTransform: 'uppercase', letterSpacing: '0.15em',
       margin: '0 0 6px 0',
     }}>{text}</p>
@@ -123,7 +123,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
           <button
             onClick={() => setHelpExpanded(h => !h)}
             className="bg-transparent border-none cursor-pointer"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 500, color: '#C96B4F', fontFamily: 'inherit', padding: '4px 8px', borderRadius: 8 }}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 500, color: '#BA3C60', fontFamily: 'inherit', padding: '4px 8px', borderRadius: 8 }}
             type="button"
           >
             Quick starts

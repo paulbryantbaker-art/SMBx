@@ -46,7 +46,7 @@ export async function exportToPDF(
     doc.fontSize(22).fillColor('#1A1A18').font('Helvetica-Bold')
       .text(title);
     doc.moveDown(0.3);
-    doc.strokeColor('#C96B4F').lineWidth(2)
+    doc.strokeColor('#BA3C60').lineWidth(2)
       .moveTo(60, doc.y).lineTo(552, doc.y).stroke();
     doc.moveDown(1);
 
@@ -377,7 +377,7 @@ export async function exportLOIToPDF(
     doc.fontSize(18).fillColor('#1A1A18').font('Helvetica-Bold')
       .text(title, { align: 'center' });
     doc.moveDown(0.3);
-    doc.strokeColor('#C96B4F').lineWidth(1.5)
+    doc.strokeColor('#BA3C60').lineWidth(1.5)
       .moveTo(72, doc.y).lineTo(540, doc.y).stroke();
     doc.moveDown(1.5);
 

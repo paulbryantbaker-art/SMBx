@@ -6,7 +6,7 @@ import { ScrollReveal, StaggerContainer, StaggerItem, ScrollProgressBar } from '
 
 const T = {
   bg: '#FAFAFA',
-  terra: '#C96B4F',
+  terra: '#BA3C60',
   terraHover: '#BE6342',
   terraSoft: '#FFF0EB',
   text: '#0D0D0D',
@@ -317,7 +317,7 @@ export default function Pricing() {
           background: ${T.terra}; color: #fff;
           font-size: 15px; font-weight: 600; border: none;
           cursor: pointer; font-family: inherit;
-          box-shadow: 0 2px 8px rgba(212,113,78,0.3);
+          box-shadow: 0 2px 8px rgba(186,60,96,0.3);
           transition: all 0.15s; text-decoration: none;
         }
         .price-btn-primary:hover { background: ${T.terraHover}; }

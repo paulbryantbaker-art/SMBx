@@ -38,7 +38,7 @@ const CONVO_MESSAGES = [
 
 export default function PricingBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
-    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#D4714E] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#BA3C60] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       {/* ═══ 1. HERO ═══ */}
       <section className="relative pt-32 pb-40 overflow-hidden">
@@ -59,7 +59,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
             </p>
           </ScrollReveal>
         </div>
-        <div className="absolute -right-20 top-20 w-[600px] h-[600px] bg-[#D4714E]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -right-20 top-20 w-[600px] h-[600px] bg-[#BA3C60]/5 rounded-full blur-3xl pointer-events-none" />
       </section>
 
       {/* ═══ 2. FREE FOREVER ═══ */}
@@ -68,7 +68,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
           <div className="grid md:grid-cols-12 gap-16 items-start">
             <div className="md:col-span-7">
               <ScrollReveal>
-                <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+                <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#BA3C60] mb-6 block">
                   Free Forever
                 </span>
               </ScrollReveal>
@@ -86,8 +86,8 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
                 {FREE_DELIVERABLES.map((item, i) => (
                   <ScrollReveal key={i} delay={i * 0.04}>
                     <div className="flex items-start gap-4 py-4 border-t border-[#DCC1B9]/30 first:border-t-0">
-                      <div className="w-6 h-6 rounded-full border border-[#D4714E] flex items-center justify-center shrink-0 mt-0.5">
-                        <span className="material-symbols-outlined text-[14px] text-[#D4714E]" style={{ fontVariationSettings: "'FILL' 1" }}>check</span>
+                      <div className="w-6 h-6 rounded-full border border-[#BA3C60] flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="material-symbols-outlined text-[14px] text-[#BA3C60]" style={{ fontVariationSettings: "'FILL' 1" }}>check</span>
                       </div>
                       <span className="text-[#1A1A18] leading-relaxed">{item}</span>
                     </div>
@@ -98,7 +98,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
             <div className="md:col-span-5 sticky top-32">
               <ScrollReveal delay={0.15}>
                 <div className="bg-white p-10 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/30">
-                  <span className="font-mono text-6xl font-bold text-[#D4714E] block mb-2">$0</span>
+                  <span className="font-mono text-6xl font-bold text-[#BA3C60] block mb-2">$0</span>
                   <span className="font-sans uppercase tracking-widest text-xs font-bold text-[#6B6B65]">Complete Analysis</span>
                   <p className="text-sm text-[#6B6B65] mt-4 leading-relaxed">Seven deliverables. Real data. Sovereign sources. No credit card required.</p>
                   <div className="mt-8 bg-[#F5F3EF] p-4 rounded-lg">
@@ -138,10 +138,10 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
           <div className="grid md:grid-cols-2 gap-8">
             {TIERS.map((tier, i) => (
               <ScrollReveal key={tier.title} delay={i * 0.06}>
-                <div className={`bg-white rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-t-4 ${i === 0 ? 'border-[#D4714E]' : 'border-[#DCC1B9]/30'} h-full flex flex-col transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)]`}>
+                <div className={`bg-white rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-t-4 ${i === 0 ? 'border-[#BA3C60]' : 'border-[#DCC1B9]/30'} h-full flex flex-col transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)]`}>
                   <div className="flex items-baseline justify-between mb-4">
                     <h3 className="font-bold text-[#1A1A18] text-lg">{tier.title}</h3>
-                    <span className="font-mono text-3xl text-[#D4714E] font-bold">{tier.price}</span>
+                    <span className="font-mono text-3xl text-[#BA3C60] font-bold">{tier.price}</span>
                   </div>
                   <p className="text-xs text-[#6B6B65] uppercase tracking-wider">{tier.sde}</p>
                   <p className="text-sm text-[#6B6B65] mt-1 font-headline italic">{tier.desc}</p>
@@ -158,7 +158,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
               <div>
                 <div className="flex items-baseline gap-4 mb-2">
                   <h3 className="font-bold text-[#1A1A18] text-lg">Institutional</h3>
-                  <span className="font-headline italic text-2xl text-[#D4714E]">Custom</span>
+                  <span className="font-headline italic text-2xl text-[#BA3C60]">Custom</span>
                 </div>
                 <p className="text-xs text-[#6B6B65] uppercase tracking-wider">EBITDA $10M+</p>
                 <p className="mt-2 text-sm text-[#6B6B65]">Enterprise engagement. Dedicated support. API access.</p>
@@ -178,7 +178,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
       <section className="py-32 bg-[#F5F3EF]">
         <div className="max-w-[1200px] mx-auto px-6">
           <ScrollReveal>
-            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#BA3C60] mb-6 block">
               How It Works
             </span>
           </ScrollReveal>
@@ -227,7 +227,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
                   <div className="bg-white rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20">
                     <div className="flex items-baseline justify-between mb-2">
                       <h3 className="font-bold text-[#1A1A18] text-lg">{tier.title}</h3>
-                      <span className="text-[#D4714E] font-bold font-mono">{tier.price}</span>
+                      <span className="text-[#BA3C60] font-bold font-mono">{tier.price}</span>
                     </div>
                     <p className="text-sm text-[#6B6B65]">{tier.desc}</p>
                   </div>
@@ -251,7 +251,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
               <p className="text-lg text-[#6B6B65] leading-relaxed">Yulia generates analysis and documents. She doesn&apos;t practice law, prepare tax returns, or hold a broker&apos;s license. When your deal needs a licensed professional — and most do — she connects you to vetted M&amp;A attorneys, transaction CPAs, SBA lenders, and business appraisers.</p>
             </ScrollReveal>
             <ScrollReveal delay={0.12}>
-              <p className="text-lg text-[#1A1A18] leading-relaxed font-bold border-l-4 border-[#D4714E] pl-8 italic">
+              <p className="text-lg text-[#1A1A18] leading-relaxed font-bold border-l-4 border-[#BA3C60] pl-8 italic">
                 The platform handles the intelligence and the process. The professionals handle judgment, negotiation, and fiduciary responsibility. That&apos;s not a limitation. That&apos;s how deals should work.
               </p>
             </ScrollReveal>
@@ -283,7 +283,7 @@ export default function PricingBelow({ onChipClick }: { onChipClick: (text: stri
       {/* ═══ 8. DARK CTA ═══ */}
       <section className="py-32 bg-[#1c1917] relative overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D4714E] rounded-full opacity-[0.15] blur-[80px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#BA3C60] rounded-full opacity-[0.15] blur-[80px]" />
         </div>
         <div className="max-w-[1200px] mx-auto px-6 relative z-10 text-center">
           <ScrollReveal>

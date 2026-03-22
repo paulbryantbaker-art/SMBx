@@ -5,7 +5,7 @@ import { ScrollReveal, StaggerContainer, StaggerItem, ScrollProgressBar, Convers
 
 const T = {
   bg: '#FAFAFA',
-  terra: '#C96B4F',
+  terra: '#BA3C60',
   terraHover: '#BE6342',
   terraSoft: '#FFF0EB',
   text: '#0D0D0D',
@@ -120,7 +120,7 @@ export default function Advisors() {
           background: ${T.terra}; color: #fff;
           font-size: 15px; font-weight: 600; border: none;
           cursor: pointer; font-family: inherit;
-          box-shadow: 0 2px 8px rgba(212,113,78,0.3);
+          box-shadow: 0 2px 8px rgba(186,60,96,0.3);
           transition: all 0.15s; text-decoration: none;
         }
         .adv-btn-primary:hover { background: ${T.terraHover}; }
@@ -171,7 +171,7 @@ export default function Advisors() {
         .adv-preview-user-bubble {
           max-width: 85%; padding: 12px 18px;
           background: ${T.terraSoft}; color: ${T.text};
-          border: 1px solid rgba(212,113,78,0.18);
+          border: 1px solid rgba(186,60,96,0.18);
           border-radius: 18px 18px 4px 18px;
           font-size: 14px; line-height: 1.55;
         }

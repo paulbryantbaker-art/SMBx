@@ -5,7 +5,7 @@ import { ScrollReveal, StaggerContainer, StaggerItem, ScrollProgressBar } from '
 
 const T = {
   bg: '#FAFAFA',
-  terra: '#C96B4F',
+  terra: '#BA3C60',
   terraHover: '#BE6342',
   terraSoft: '#FFF0EB',
   text: '#0D0D0D',
@@ -128,7 +128,7 @@ export default function Sell() {
           background: ${T.terra}; color: #fff;
           font-size: 15px; font-weight: 600; border: none;
           cursor: pointer; font-family: inherit;
-          box-shadow: 0 2px 8px rgba(212,113,78,0.3);
+          box-shadow: 0 2px 8px rgba(186,60,96,0.3);
           transition: all 0.15s; text-decoration: none;
         }
         .sell-btn-primary:hover { background: ${T.terraHover}; }
@@ -150,7 +150,7 @@ export default function Sell() {
           box-shadow: 0 1px 3px rgba(0,0,0,0.03);
         }
         .sell-chip:hover {
-          border-color: rgba(212,113,78,0.25);
+          border-color: rgba(186,60,96,0.25);
           box-shadow: 0 2px 8px rgba(0,0,0,0.06);
           color: ${T.text};
         }

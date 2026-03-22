@@ -25,7 +25,7 @@ export default function ConversationPreview() {
           <YuliaAvatar size={32} className="mt-0.5" />
           <div className="max-w-[75%] bg-[#FAFAFA] border border-[#FAFAFA] rounded-2xl rounded-bl-[4px] px-[18px] py-[14px]">
             <p className="text-sm leading-[1.55] m-0">
-              Great &mdash; let me work with those numbers. Based on your revenue and owner compensation, I&apos;m calculating an adjusted EBITDA of approximately <span className="text-[#C96B4F] font-semibold">$780K</span> after typical add-backs for owner-operated HVAC businesses.
+              Great &mdash; let me work with those numbers. Based on your revenue and owner compensation, I&apos;m calculating an adjusted EBITDA of approximately <span className="text-[#BA3C60] font-semibold">$780K</span> after typical add-backs for owner-operated HVAC businesses.
             </p>
             <div className="mt-2.5 px-3.5 py-2.5 bg-[#FFF0EB] rounded-[10px]">
               <p className="text-[13px] text-[#BE6342] leading-[1.5] m-0">

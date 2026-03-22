@@ -26,13 +26,13 @@ const PHASES = [
 
 export default function IntegrateBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
-    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#D4714E] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#BA3C60] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       {/* ═══ 1. HERO ═══ */}
       <section className="relative pt-48 pb-32 overflow-hidden">
         <div className="max-w-[1200px] mx-auto px-6 relative z-10">
           <ScrollReveal>
-            <span className="font-sans uppercase tracking-[0.3em] text-xs font-semibold text-[#D4714E] mb-8 block">
+            <span className="font-sans uppercase tracking-[0.3em] text-xs font-semibold text-[#BA3C60] mb-8 block">
               Post-Close Intelligence
             </span>
           </ScrollReveal>
@@ -47,7 +47,7 @@ export default function IntegrateBelow({ onChipClick }: { onChipClick: (text: st
             </p>
           </ScrollReveal>
         </div>
-        <div className="absolute -right-20 top-40 w-96 h-96 bg-[#D4714E]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -right-20 top-40 w-96 h-96 bg-[#BA3C60]/5 rounded-full blur-3xl pointer-events-none" />
       </section>
 
       {/* ═══ 2. THE 70% PROBLEM ═══ */}
@@ -66,7 +66,7 @@ export default function IntegrateBelow({ onChipClick }: { onChipClick: (text: st
             </ScrollReveal>
             <ScrollReveal delay={0.16}>
               <div className="bg-white p-10 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20">
-                <span className="font-mono text-5xl font-bold text-[#D4714E] block mb-2">70%</span>
+                <span className="font-mono text-5xl font-bold text-[#BA3C60] block mb-2">70%</span>
                 <span className="font-sans uppercase tracking-widest text-xs font-bold text-[#6B6B65]">Acquisition Failure Rate</span>
               </div>
             </ScrollReveal>
@@ -101,7 +101,7 @@ export default function IntegrateBelow({ onChipClick }: { onChipClick: (text: st
         <div className="max-w-[1200px] mx-auto px-6">
           <div className="max-w-3xl mb-24">
             <ScrollReveal>
-              <span className="font-sans uppercase tracking-[0.3em] text-xs font-semibold text-[#D4714E] mb-6 block">
+              <span className="font-sans uppercase tracking-[0.3em] text-xs font-semibold text-[#BA3C60] mb-6 block">
                 The 180-Day Plan
               </span>
             </ScrollReveal>
@@ -121,7 +121,7 @@ export default function IntegrateBelow({ onChipClick }: { onChipClick: (text: st
               <ScrollReveal key={step.phase} delay={i * 0.08}>
                 <div className="space-y-8">
                   <div className={`w-16 h-16 rounded-full flex items-center justify-center font-mono text-xl font-bold ${
-                    step.filled ? 'bg-[#D4714E] text-white' : 'border border-stone-700 text-stone-400'
+                    step.filled ? 'bg-[#BA3C60] text-white' : 'border border-stone-700 text-stone-400'
                   }`}>
                     {step.num}
                   </div>
@@ -162,7 +162,7 @@ export default function IntegrateBelow({ onChipClick }: { onChipClick: (text: st
                 </p>
               </ScrollReveal>
               <ScrollReveal delay={0.12}>
-                <p className="text-lg text-[#1A1A18] leading-relaxed font-bold border-l-4 border-[#D4714E] pl-8 italic">
+                <p className="text-lg text-[#1A1A18] leading-relaxed font-bold border-l-4 border-[#BA3C60] pl-8 italic">
                   That&apos;s the difference between the 70% who fail to capture value and the 30% who do.
                 </p>
               </ScrollReveal>
@@ -171,7 +171,7 @@ export default function IntegrateBelow({ onChipClick }: { onChipClick: (text: st
           <div className="flex-1 w-full">
             <ScrollReveal delay={0.15}>
               <div className="relative group">
-                <div className="absolute inset-0 bg-[#D4714E]/10 rounded-2xl -rotate-3 scale-105 transition-transform group-hover:rotate-0" />
+                <div className="absolute inset-0 bg-[#BA3C60]/10 rounded-2xl -rotate-3 scale-105 transition-transform group-hover:rotate-0" />
                 <div className="relative z-10 w-full aspect-[4/5] bg-gradient-to-br from-stone-200 to-stone-300 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] flex items-center justify-center">
                   <span className="material-symbols-outlined text-stone-400 text-8xl">business_center</span>
                 </div>
@@ -183,7 +183,7 @@ export default function IntegrateBelow({ onChipClick }: { onChipClick: (text: st
 
       {/* ═══ 5. CTA ═══ */}
       <section className="py-48 bg-[#F5F3EF] relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D4714E]/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#BA3C60]/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="max-w-[1200px] mx-auto px-6 text-center relative z-10">
           <ScrollReveal>
             <h2 className="font-display italic font-bold text-[48px] md:text-[80px] text-[#1A1A18] mb-12">
