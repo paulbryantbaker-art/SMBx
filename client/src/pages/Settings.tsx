@@ -99,7 +99,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Chat
           </button>
-          <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]" style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+          <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
             smb<span className="text-[#BA3C60]">x</span>.ai
           </div>
         </div>
@@ -112,7 +112,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
       </div>
 
       <div className="max-w-3xl mx-auto px-6 py-8">
-        <h1 className="text-2xl font-extrabold text-[#0D0D0D] m-0 mb-6" style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+        <h1 className="text-2xl font-extrabold text-[#0D0D0D] m-0 mb-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
           Settings
         </h1>
 

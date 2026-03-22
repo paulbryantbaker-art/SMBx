@@ -131,7 +131,7 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
     <div className="min-h-dvh bg-[#FAFAFA]">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 bg-white" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-        <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]" style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+        <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
           smb<span className="text-[#BA3C60]">x</span>.ai
         </div>
         {accessLevel && (
@@ -175,7 +175,7 @@ export default function SharedDocument({ token }: SharedDocumentProps) {
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
             </div>
-            <h2 className="text-xl font-extrabold text-[#0D0D0D] m-0 mb-2" style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+            <h2 className="text-xl font-extrabold text-[#0D0D0D] m-0 mb-2" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
               Non-Disclosure Agreement Required
             </h2>
             <p className="text-sm text-[#6E6A63] m-0 mb-6">
