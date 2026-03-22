@@ -1,510 +1,359 @@
-import { useEffect } from 'react';
+import { ScrollReveal } from './animations';
 
-interface SellBelowProps {
-  onChipClick: (text: string) => void;
-}
+/* ── Data ── */
 
-export default function SellBelow({ onChipClick }: SellBelowProps) {
-  useEffect(() => {
-    // Load Inter font and Material Symbols if not already present
-    const fontId = 'stitch-sell-fonts';
-    if (!document.getElementById(fontId)) {
-      const link = document.createElement('link');
-      link.id = fontId;
-      link.rel = 'stylesheet';
-      link.href =
-        'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap';
-      document.head.appendChild(link);
-    }
-    const iconId = 'stitch-sell-icons';
-    if (!document.getElementById(iconId)) {
-      const link = document.createElement('link');
-      link.id = iconId;
-      link.rel = 'stylesheet';
-      link.href =
-        'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap';
-      document.head.appendChild(link);
-    }
-  }, []);
+const SIX_EXITS = [
+  { title: 'Full Sale', body: 'Clean exit. Maximize the number. Yulia runs the complete process. 6–18 months.' },
+  { title: 'Partner Buyout', body: "One of you wants out. The hard part isn't the valuation — it's the financing, the operating agreement, and keeping the personal relationship intact." },
+  { title: 'Capital Raise', body: "Maybe you don't need to sell at all. Debt, equity, SBA expansion — every scenario modeled with what you keep and what you give up." },
+  { title: 'ESOP', body: 'Employee ownership with real tax advantages. S-Corp sellers can defer gains under §1042 by reinvesting in qualified replacement property.' },
+  { title: 'Majority Sale', body: "Sell 51–80% to PE or a strategic buyer. Take significant cash off the table. Keep skin in the game for the second bite." },
+  { title: 'Partial Sale', body: 'Carve out a division. License IP. Sell-leaseback real estate. Creative structures that unlock value without a total exit.' },
+];
 
+const DEAL_SIZES = [
+  { title: 'Owner-Operated', range: '$300K–$2M SDE', mult: '3.0x–4.5x SDE', body: 'The focused exit. Clean financials for SBA-qualified buyers. Step-by-step, clear language.' },
+  { title: 'Established', range: '$2M–$10M EBITDA', mult: '5.0x–7.5x EBITDA', body: 'Strategic acquisitions. Optimized for private equity platform plays. 80% of deals over $5M attract three or more offers.', featured: true },
+  { title: 'Institutional', range: '$10M+ EBITDA', mult: '8.0x+ EBITDA', body: 'The sophisticated close. Board-level deliverables. DCF. Arbitrage modeling. Covenant analysis.' },
+];
+
+export default function SellBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
-    <div className="stitch-sell">
-      {/* Scoped style block for custom Stitch/Material Design 3 color utilities */}
-      <style>{`
-        .material-symbols-outlined {
-          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .editorial-shadow {
-          box-shadow: 0 10px 30px -10px rgba(26, 28, 28, 0.04);
-        }
-        .text-editorial-body {
-          line-height: 1.6;
-        }
-        .zig-zag-container > div:nth-child(even) {
-          flex-direction: row-reverse;
-        }
+    <div className="bg-[#fbf9f5] text-[#1b1c1a] selection:bg-[#D4714E]/20 selection:text-[#1b1c1a] font-body">
 
-        /* ── Scoped color utilities ── */
-        .stitch-sell .text-on-surface { color: #1a1c1c; }
-        .stitch-sell .bg-on-surface { background-color: #1a1c1c; }
-        .stitch-sell .border-on-surface { border-color: #1a1c1c; }
-
-        .stitch-sell .text-surface { color: #f9f9f9; }
-        .stitch-sell .bg-surface { background-color: #f9f9f9; }
-        .stitch-sell .border-surface { border-color: #f9f9f9; }
-
-        .stitch-sell .text-tertiary { color: #95432b; }
-        .stitch-sell .bg-tertiary { background-color: #95432b; }
-        .stitch-sell .border-tertiary { border-color: #95432b; }
-        .stitch-sell .border-tertiary\\/20 { border-color: rgba(149, 67, 43, 0.2); }
-        .stitch-sell .selection\\:bg-tertiary\\/20 ::selection { background-color: rgba(149, 67, 43, 0.2); }
-
-        .stitch-sell .text-on-surface-variant { color: #55433d; }
-        .stitch-sell .bg-on-surface-variant { background-color: #55433d; }
-
-        .stitch-sell .text-surface-container-lowest { color: #ffffff; }
-        .stitch-sell .bg-surface-container-lowest { background-color: #ffffff; }
-
-        .stitch-sell .text-surface-container-low { color: #f3f3f3; }
-        .stitch-sell .bg-surface-container-low { background-color: #f3f3f3; }
-
-        .stitch-sell .bg-surface-container { background-color: #eeeeee; }
-        .stitch-sell .bg-surface-container-high { background-color: #e8e8e8; }
-        .stitch-sell .bg-surface-container-highest { background-color: #e2e2e2; }
-
-        .stitch-sell .text-primary { color: #5c5c5c; }
-        .stitch-sell .bg-primary { background-color: #5c5c5c; }
-
-        .stitch-sell .text-error { color: #ba1a1a; }
-        .stitch-sell .bg-error { background-color: #ba1a1a; }
-
-        .stitch-sell .border-outline-variant { border-color: #dbc1ba; }
-        .stitch-sell .border-outline-variant\\/20 { border-color: rgba(219, 193, 186, 0.2); }
-        .stitch-sell .border-outline-variant\\/10 { border-color: rgba(219, 193, 186, 0.1); }
-        .stitch-sell .bg-outline-variant\\/30 { background-color: rgba(219, 193, 186, 0.3); }
-
-        .stitch-sell .text-inverse-surface { color: #2f3131; }
-        .stitch-sell .bg-inverse-surface { background-color: #2f3131; }
-
-        .stitch-sell .divide-outline-variant\\/10 > :not([hidden]) ~ :not([hidden]) {
-          border-color: rgba(219, 193, 186, 0.1);
-        }
-
-        /* Font families */
-        .stitch-sell .font-headline { font-family: 'Inter', sans-serif; }
-        .stitch-sell .font-body { font-family: 'Inter', sans-serif; }
-        .stitch-sell .font-label { font-family: 'Inter', sans-serif; }
-      `}</style>
-
-      {/* Hero Section */}
-      <section className="pt-60 pb-40 px-12 max-w-[1400px] mx-auto">
-        <div className="max-w-4xl">
-          <span className="text-tertiary font-label text-[11px] font-bold tracking-[0.2em] mb-8 block">
-            THE EXIT ADVISOR
-          </span>
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[1.05] text-on-surface mb-12">
-            75% of owners who sell their business profoundly regret it within a year.
-          </h1>
-          <p className="text-2xl text-on-surface-variant max-w-2xl text-editorial-body">
-            We architect exits that preserve legacy, maximize liquid wealth, and eliminate the
-            &quot;Seller&apos;s Remorse&quot; trap through editorial precision and AI-driven
-            valuation.
-          </p>
+      {/* ═══ 1. HERO ═══ */}
+      <section className="py-24 md:py-32 px-6">
+        <div className="max-w-[1200px] mx-auto">
+          <ScrollReveal>
+            <div className="inline-block px-3 py-1 mb-6 border border-[#D4714E]/20 rounded-full">
+              <span className="text-xs font-black uppercase tracking-widest text-[#D4714E]">Exit Architecture</span>
+            </div>
+          </ScrollReveal>
+          <ScrollReveal delay={0.1}>
+            <h1 className="font-display italic font-bold text-6xl md:text-[88px] leading-[1.1] text-[#1A1A18] mb-8 max-w-4xl">
+              Sell with clarity, not hope.
+            </h1>
+          </ScrollReveal>
+          <ScrollReveal delay={0.2}>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
+              <div className="md:col-start-5 md:col-span-8">
+                <p className="text-2xl text-[#55433c] leading-relaxed font-light">
+                  The difference between the 75% who regret selling and the 25% who don&apos;t is preparation. Yulia makes sure you&apos;re ready before you sit across the table from anyone.
+                </p>
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
-      {/* ValueLens Data Viz */}
-      <section className="my-[160px] px-12 max-w-[1400px] mx-auto">
-        <div className="bg-surface-container-lowest p-16 editorial-shadow rounded-xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div>
-              <h2 className="text-4xl font-bold tracking-tight mb-8">
-                The ValueLens&trade; Discovery
+      {/* ═══ 2. 75% REGRET EDITORIAL ═══ */}
+      <section className="py-24 bg-[#f5f3ef] px-6">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-12">
+          <div className="md:col-span-4">
+            <ScrollReveal>
+              <span className="text-xs font-black uppercase tracking-widest text-[#D4714E] block mb-4">EPI Research</span>
+              <h2 className="font-bold text-3xl md:text-4xl uppercase tracking-widest leading-tight text-[#1A1A18]">
+                75% of owners who sell profoundly regret it within a year.
               </h2>
-              <p className="text-lg text-on-surface-variant text-editorial-body mb-8">
-                Traditional valuation ignores the narrative power of your business. We look through a
-                multi-dimensional lens to find hidden equity that typical brokers miss.
+            </ScrollReveal>
+          </div>
+          <div className="md:col-span-7 md:col-start-6">
+            <ScrollReveal delay={0.12}>
+              <div className="space-y-8 text-lg leading-[1.8] text-[#55433c]">
+                <p>Most owners focus on the number. They think a big enough wire transfer cures every ill. It doesn&apos;t. Research from the Exit Planning Institute shows that the vast majority of sellers face deep regret shortly after the deal closes.</p>
+                <p>They weren&apos;t financially prepared. They left hundreds of thousands on the table — in add-backs they never identified, in tax structures they never modeled, in competitive processes they never ran. They accepted the first offer because they had no way to know if it was fair.</p>
+                <p>They didn&apos;t have a plan for after. Sixty percent had no idea what they were going to do the Monday morning after the wire hit. Their identity was the business. Without it, they were lost.</p>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 3. VALUELENS ═══ */}
+      <section className="py-24 px-6">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="order-2 lg:order-1">
+            <ScrollReveal>
+              <span className="text-xs font-black uppercase tracking-widest text-[#D4714E] block mb-4">ValueLens</span>
+              <h2 className="font-bold text-4xl uppercase tracking-widest text-[#1A1A18] mb-6">The question that sits unanswered for years.</h2>
+            </ScrollReveal>
+            <ScrollReveal delay={0.08}>
+              <div className="text-lg leading-relaxed text-[#55433c] space-y-6">
+                <p>Every owner has had the same moment. Sometimes it&apos;s at 2am. Sometimes it&apos;s when they hear a competitor sold for a number that doesn&apos;t seem possible. The question is always: <em className="text-[#1A1A18] font-medium not-italic">What is my business actually worth?</em></p>
+                <p>Yulia gives you that number in ninety seconds. Not a guess — a range built on Census business counts, BLS wage data, SBA lending activity, and transaction multiples from comparable deals.</p>
+                <p className="text-[#1A1A18] font-medium">It&apos;s free. It will always be free.</p>
+              </div>
+            </ScrollReveal>
+          </div>
+          <div className="order-1 lg:order-2">
+            <ScrollReveal delay={0.12}>
+              <div className="bg-white rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100">
+                <div className="flex items-center gap-2 mb-6">
+                  <span className="w-3 h-3 rounded-full bg-[#D4714E]" />
+                  <span className="font-mono text-xs uppercase tracking-tighter opacity-50">ValueLens Preview</span>
+                </div>
+                <pre className="bg-stone-50 p-6 rounded-lg font-mono text-sm leading-relaxed overflow-x-auto text-[#1A1A18]">{`RESIDENTIAL CLEANING · PHOENIX, AZ
+----------------------------------
+GROSS REVENUE:    $2,450,000
+SDE (ADJUSTED):   $680,000
+MARKET MULTIPLE:  3.2x - 3.8x
+
+EST. ENTERPRISE VALUE:
+$2,176,000 - $2,584,000
+
+*Based on 42 recent sector comps`}</pre>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 4. ADD-BACK DISCOVERY ═══ */}
+      <section className="py-24 px-6">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <ScrollReveal>
+            <div className="bg-white rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100">
+              <pre className="bg-stone-50 p-6 rounded-lg font-mono text-sm leading-relaxed overflow-x-auto text-[#1A1A18]">{`FORENSIC ADD-BACK ANALYSIS
+----------------------------------
+REPORTED NET:       $410,000
+
++ OWNER SALARY:     $150,000
++ HEALTH INS:       $18,000
++ AUTO EXPENSE:     $12,500
++ DISCRETIONARY:    $45,000
+
+TRUE SDE:           $635,500
+MISSING MULTIPLIER: 3.5x
+----------------------------------
+VALUE RECOVERED:    $789,250`}</pre>
+            </div>
+          </ScrollReveal>
+          <div>
+            <ScrollReveal delay={0.08}>
+              <span className="text-xs font-black uppercase tracking-widest text-[#D4714E] block mb-4">Financial Forensics</span>
+              <h2 className="font-bold text-4xl uppercase tracking-widest text-[#1A1A18] mb-6">The money your CPA doesn&apos;t know you&apos;re leaving on the table.</h2>
+            </ScrollReveal>
+            <ScrollReveal delay={0.12}>
+              <p className="text-lg leading-relaxed text-[#55433c]">
+                Your CPA&apos;s job is to minimize your tax liability. They want your profit to look small. But a buyer pays on earnings before personal expenses. Every dollar missed in your add-backs is multiplied against you in the final sale price.
               </p>
-              <div className="space-y-6">
-                <div className="flex items-center justify-between border-b border-outline-variant/20 pb-4">
-                  <span className="font-medium text-primary">Operational Efficiency</span>
-                  <span className="font-bold text-tertiary">92%</span>
-                </div>
-                <div className="flex items-center justify-between border-b border-outline-variant/20 pb-4">
-                  <span className="font-medium text-primary">Market Dominance</span>
-                  <span className="font-bold text-tertiary">78%</span>
-                </div>
-                <div className="flex items-center justify-between border-b border-outline-variant/20 pb-4">
-                  <span className="font-medium text-primary">Scalability Index</span>
-                  <span className="font-bold text-tertiary">84%</span>
-                </div>
-              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 5. TAX ARCHITECTURE ═══ */}
+      <section className="py-24 bg-[#f5f3ef] px-6">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-6">
+              <ScrollReveal>
+                <span className="text-xs font-black uppercase tracking-widest text-[#D4714E] block mb-4">Tax Architecture</span>
+                <h2 className="font-bold text-4xl uppercase tracking-widest text-[#1A1A18] mb-6">The deal structure that quietly costs more than any negotiation.</h2>
+              </ScrollReveal>
+              <ScrollReveal delay={0.08}>
+                <p className="text-lg leading-relaxed text-[#55433c] mb-8">
+                  A client in San Antonio closed a $2.4M deal. Beautiful number. Then the tax estimate came. She was a C-Corp. The buyer wanted an asset purchase. That meant double taxation. The difference was over $300,000. Yulia models every structure side-by-side before you sign anything.
+                </p>
+              </ScrollReveal>
             </div>
-            <div className="relative h-[400px] flex items-center justify-center">
-              {/* Abstract Data Visualization */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-surface-container-low to-transparent rounded-full border border-outline-variant/10" />
-              <div className="relative w-64 h-64 border-4 border-tertiary rounded-full flex items-center justify-center animate-pulse">
-                <span className="text-5xl font-black text-on-surface">14.2x</span>
-              </div>
-              <div className="absolute top-10 left-10 p-4 bg-surface rounded-lg shadow-sm border border-outline-variant/20">
-                <span className="block text-[10px] font-bold tracking-widest uppercase opacity-50">
-                  Sector Avg
-                </span>
-                <span className="text-xl font-bold">6.5x</span>
-              </div>
-              <div className="absolute bottom-10 right-10 p-4 bg-white rounded-lg shadow-xl border border-tertiary/20">
-                <span className="block text-[10px] font-bold tracking-widest uppercase text-tertiary">
-                  smbx Target
-                </span>
-                <span className="text-xl font-bold">14.2x</span>
-              </div>
+            <div className="lg:col-span-6">
+              <ScrollReveal delay={0.12}>
+                <div className="bg-white rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100">
+                  <div className="grid grid-cols-2 gap-4 font-mono text-xs">
+                    <div className="p-4 bg-stone-50 rounded-lg">
+                      <div className="font-bold text-[#D4714E] mb-2">ASSET SALE</div>
+                      <div className="space-y-1 opacity-70">
+                        <p>Double Taxation Risk</p>
+                        <p>Step-up for Buyer</p>
+                        <p>Ordinary Income Rates</p>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-[#1A1A18] text-white rounded-lg">
+                      <div className="font-bold text-[#ffb59c] mb-2">STOCK SALE</div>
+                      <div className="space-y-1 opacity-70">
+                        <p>Single Level Tax</p>
+                        <p>Capital Gains Treatment</p>
+                        <p>QSBS Eligibility (1202)</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ScrollReveal>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Zig-Zag Editorial: Narrative Flow */}
-      <section className="my-[160px] px-12 max-w-[1400px] mx-auto flex flex-col gap-40 zig-zag-container">
-        {/* Phase 1 */}
-        <div className="flex flex-col md:flex-row gap-20 items-center">
-          <div className="w-full md:w-1/2">
-            <img
-              className="w-full h-[600px] object-cover rounded-xl filter grayscale contrast-125"
-              alt="Minimalist architectural office space with natural lighting"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbWK5OD1yr638828cPTmc9-7p1zdBdHTMcXw_jvqcxKk21AVupeXsv9pvhGAgSc77HXHiAtQ3J_4fpLCK2ujNcYJqO_jML3jGoyFP_EyKrW_Stcrbzr74qV1x72V6XAJk3tKDzFfQEqsho9cbNNrlvGh7kSqY-uk2B0co1Ap7Z7BQyLkD7gxP6aZ96usCCnaFyAmyWcdatf5j_da1eL8ppHgVHRLjuRz3lr5KMj-mcADCktzMNHUAdWSktEa85Ye1KRyh0-6stk5k"
-            />
-          </div>
-          <div className="w-full md:w-1/2">
-            <span className="text-tertiary font-label text-[11px] font-bold tracking-[0.2em] mb-6 block">
-              01 / DISCOVERY
-            </span>
-            <h3 className="text-5xl font-bold tracking-tighter mb-8">Beyond the Balance Sheet.</h3>
-            <p className="text-xl text-on-surface-variant text-editorial-body">
-              Your business is more than numbers. It&apos;s a culture, a brand, and a set of
-              proprietary workflows. Our &quot;Editorial Architects&quot; interview your key leaders
-              to extract the intrinsic value that isn&apos;t reflected in your EBITDA.
-            </p>
-          </div>
-        </div>
-        {/* Phase 2 */}
-        <div className="flex flex-col md:flex-row gap-20 items-center">
-          <div className="w-full md:w-1/2">
-            <img
-              className="w-full h-[600px] object-cover rounded-xl filter grayscale contrast-125"
-              alt="Modern high-end glass office boardroom table"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2WMuVklRyLxyTy87FdmLlpgJ_uED-DGbcGY9dwAwGk3tTDr3-6S6dzPnH1g-ShhL7GTxcTGnHLnrYHekkyWYX_7WANsGcm4bPVnRyuok3LNxxDB2x_ooxe3lX4WXXUw76dwXqhxZQ5Df5lJeDvov9qnm_Kh_fxumCZpgJSXgK4dNcesKvvqL3BQYHu80dlu8_XLIcn77L48nI6oRkyPkTrbNmyqkhfzwPQd9lfp2F9dTt0695MlNMgyNkD8KMbRiJghbea43WSQs"
-            />
-          </div>
-          <div className="w-full md:w-1/2">
-            <span className="text-tertiary font-label text-[11px] font-bold tracking-[0.2em] mb-6 block">
-              02 / CURATION
-            </span>
-            <h3 className="text-5xl font-bold tracking-tighter mb-8">Strategic Positioning.</h3>
-            <p className="text-xl text-on-surface-variant text-editorial-body">
-              We don&apos;t just &quot;list&quot; your business; we curate an investment memorandum
-              that reads like a premium publication. We target strategic buyers who value your
-              synergy, not just your cash flow.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Add-Back Discovery Table */}
-      <section className="my-[160px] px-12 max-w-[1400px] mx-auto">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl font-black tracking-tight mb-4">Add-back Discovery</h2>
-          <p className="text-on-surface-variant">
-            Uncovering legitimate expenses that artificially depress your valuation.
-          </p>
-        </div>
-        <div className="overflow-hidden bg-surface-container-lowest editorial-shadow rounded-xl">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-on-surface text-surface-container-lowest">
-                <th className="py-6 px-8 font-bold text-sm tracking-widest uppercase">Category</th>
-                <th className="py-6 px-8 font-bold text-sm tracking-widest uppercase">
-                  Typical Adjustment
-                </th>
-                <th className="py-6 px-8 font-bold text-sm tracking-widest uppercase">
-                  smbx.ai Impact
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant/10">
-              <tr>
-                <td className="py-6 px-8 font-bold">Owner&apos;s Excess Salary</td>
-                <td className="py-6 px-8 text-on-surface-variant">$120,000</td>
-                <td className="py-6 px-8 text-tertiary font-bold">+$1.2M Exit Value</td>
-              </tr>
-              <tr>
-                <td className="py-6 px-8 font-bold">Non-recurring Legal Fees</td>
-                <td className="py-6 px-8 text-on-surface-variant">$45,000</td>
-                <td className="py-6 px-8 text-tertiary font-bold">+$450k Exit Value</td>
-              </tr>
-              <tr>
-                <td className="py-6 px-8 font-bold">Discretionary Travel/Perks</td>
-                <td className="py-6 px-8 text-on-surface-variant">$85,000</td>
-                <td className="py-6 px-8 text-tertiary font-bold">+$850k Exit Value</td>
-              </tr>
-              <tr className="bg-surface-container-low">
-                <td className="py-6 px-8 font-black">Total Equity Recaptured</td>
-                <td className="py-6 px-8" />
-                <td className="py-6 px-8 text-on-surface text-2xl font-black">+$2.5M</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Six Exit Types Grid */}
-      <section className="my-[160px] py-32 bg-surface-container-low">
-        <div className="px-12 max-w-[1400px] mx-auto">
-          <div className="mb-20 max-w-2xl">
-            <h2 className="text-5xl font-black tracking-tighter mb-6">Six Exit Types.</h2>
-            <p className="text-on-surface-variant text-lg">
-              Every founder has a different destination. We architect the path that matches your
-              personal &apos;Chapter Two&apos;.
-            </p>
-          </div>
+      {/* ═══ 6. EXIT PATHWAYS ═══ */}
+      <section className="py-24 px-6">
+        <div className="max-w-[1200px] mx-auto">
+          <ScrollReveal>
+            <span className="text-xs font-black uppercase tracking-widest text-[#D4714E] block mb-4">Exit Pathways</span>
+            <h2 className="font-bold text-4xl uppercase tracking-widest text-[#1A1A18] mb-12">&ldquo;Selling&rdquo; doesn&apos;t mean one thing.</h2>
+          </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Card 1 */}
-            <div className="bg-white p-10 rounded-none border-l-4 border-tertiary editorial-shadow hover:-translate-y-2 transition-transform duration-300">
-              <span
-                className="material-symbols-outlined text-tertiary mb-6"
-                style={{ fontSize: 32 }}
-              >
-                rocket_launch
-              </span>
-              <h4 className="text-xl font-bold mb-4">Strategic Buyout</h4>
-              <p className="text-on-surface-variant text-sm text-editorial-body">
-                Maximize exit value by selling to a competitor or market leader looking for your
-                specific IP.
-              </p>
-            </div>
-            {/* Card 2 */}
-            <div className="bg-white p-10 rounded-none border-l-4 border-on-surface editorial-shadow hover:-translate-y-2 transition-transform duration-300">
-              <span
-                className="material-symbols-outlined text-on-surface mb-6"
-                style={{ fontSize: 32 }}
-              >
-                groups
-              </span>
-              <h4 className="text-xl font-bold mb-4">ESOP Transition</h4>
-              <p className="text-on-surface-variant text-sm text-editorial-body">
-                Preserve your legacy by selling the company back to the employees who helped build
-                it.
-              </p>
-            </div>
-            {/* Card 3 */}
-            <div className="bg-white p-10 rounded-none border-l-4 border-on-surface editorial-shadow hover:-translate-y-2 transition-transform duration-300">
-              <span
-                className="material-symbols-outlined text-on-surface mb-6"
-                style={{ fontSize: 32 }}
-              >
-                account_balance
-              </span>
-              <h4 className="text-xl font-bold mb-4">Private Equity</h4>
-              <p className="text-on-surface-variant text-sm text-editorial-body">
-                Take some chips off the table while remaining as a minority shareholder for the
-                &quot;second bite.&quot;
-              </p>
-            </div>
-            {/* Card 4 */}
-            <div className="bg-white p-10 rounded-none border-l-4 border-on-surface editorial-shadow hover:-translate-y-2 transition-transform duration-300">
-              <span
-                className="material-symbols-outlined text-on-surface mb-6"
-                style={{ fontSize: 32 }}
-              >
-                family_restroom
-              </span>
-              <h4 className="text-xl font-bold mb-4">Family Succession</h4>
-              <p className="text-on-surface-variant text-sm text-editorial-body">
-                Structured transition to the next generation with tax-efficient wealth transfer.
-              </p>
-            </div>
-            {/* Card 5 */}
-            <div className="bg-white p-10 rounded-none border-l-4 border-on-surface editorial-shadow hover:-translate-y-2 transition-transform duration-300">
-              <span
-                className="material-symbols-outlined text-on-surface mb-6"
-                style={{ fontSize: 32 }}
-              >
-                merge
-              </span>
-              <h4 className="text-xl font-bold mb-4">M&amp;A Merger</h4>
-              <p className="text-on-surface-variant text-sm text-editorial-body">
-                Combine forces with a complementary entity to create a powerhouse and share future
-                upside.
-              </p>
-            </div>
-            {/* Card 6 */}
-            <div className="bg-white p-10 rounded-none border-l-4 border-on-surface editorial-shadow hover:-translate-y-2 transition-transform duration-300">
-              <span
-                className="material-symbols-outlined text-on-surface mb-6"
-                style={{ fontSize: 32 }}
-              >
-                speed
-              </span>
-              <h4 className="text-xl font-bold mb-4">Management Buyout</h4>
-              <p className="text-on-surface-variant text-sm text-editorial-body">
-                Empower your current management team to take the reins through seller financing
-                structures.
-              </p>
-            </div>
+            {SIX_EXITS.map((exit, i) => (
+              <ScrollReveal key={exit.title} delay={i * 0.06}>
+                <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-transform h-full">
+                  <h3 className="font-bold text-xl mb-4">{exit.title}</h3>
+                  <p className="text-[#55433c] text-sm leading-relaxed">{exit.body}</p>
+                </div>
+              </ScrollReveal>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Deal Structure Comparison */}
-      <section className="my-[160px] px-12 max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
-          <div className="bg-surface-container-low p-12 rounded-xl">
-            <h3 className="text-3xl font-bold mb-8">Standard Broker Deal</h3>
-            <ul className="space-y-6">
-              <li className="flex gap-4">
-                <span className="material-symbols-outlined text-error">close</span>
-                <span className="text-on-surface-variant">
-                  80% Cash / 20% Contingent Earn-out
-                </span>
-              </li>
-              <li className="flex gap-4">
-                <span className="material-symbols-outlined text-error">close</span>
-                <span className="text-on-surface-variant">
-                  24-month restrictive non-compete
-                </span>
-              </li>
-              <li className="flex gap-4">
-                <span className="material-symbols-outlined text-error">close</span>
-                <span className="text-on-surface-variant">
-                  Low visibility on buyer&apos;s operational intent
-                </span>
-              </li>
-            </ul>
+      {/* ═══ 7. LIVING CIM ═══ */}
+      <section className="py-24 px-6 overflow-hidden">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-5 order-2 lg:order-1">
+            <ScrollReveal>
+              <div className="relative">
+                <div className="bg-white p-4 shadow-[0_4px_24px_rgba(0,0,0,0.06)] rounded-xl transform -rotate-3 hover:rotate-0 transition-transform duration-500">
+                  <div className="w-full aspect-[4/5] bg-gradient-to-br from-stone-100 to-stone-200 rounded-lg flex items-center justify-center">
+                    <span className="material-symbols-outlined text-stone-400 text-8xl">description</span>
+                  </div>
+                  <div className="p-6 bg-stone-50 rounded-lg border-l-4 border-[#D4714E] mt-4">
+                    <p className="text-xs font-black tracking-widest uppercase mb-2">Confidential Information Memorandum</p>
+                    <p className="font-headline italic text-lg">Prepared for Project Legacy</p>
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
           </div>
-          <div className="bg-on-surface text-white p-12 rounded-xl border-4 border-tertiary">
-            <h3 className="text-3xl font-bold mb-8">smbx.ai Architected Deal</h3>
-            <ul className="space-y-6">
-              <li className="flex gap-4">
-                <span
-                  className="material-symbols-outlined text-tertiary"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  check_circle
-                </span>
-                <span>95% Guaranteed Liquidity at close</span>
-              </li>
-              <li className="flex gap-4">
-                <span
-                  className="material-symbols-outlined text-tertiary"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  check_circle
-                </span>
-                <span>Customized &quot;Advisory Role&quot; transition</span>
-              </li>
-              <li className="flex gap-4">
-                <span
-                  className="material-symbols-outlined text-tertiary"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  check_circle
-                </span>
-                <span>Protective covenants for existing employees</span>
-              </li>
-            </ul>
+          <div className="lg:col-span-6 lg:col-start-7 order-1 lg:order-2">
+            <ScrollReveal delay={0.08}>
+              <span className="text-xs font-black uppercase tracking-widest text-[#D4714E] block mb-4">Living CIM</span>
+              <h2 className="font-bold text-4xl uppercase tracking-widest text-[#1A1A18] mb-6">The document that sells your business — and why it can&apos;t be static.</h2>
+            </ScrollReveal>
+            <ScrollReveal delay={0.12}>
+              <p className="text-lg leading-relaxed text-[#55433c]">
+                A traditional CIM is frozen the day it&apos;s published. In a 12-month process, the business keeps moving. You have a strong quarter. You land a new contract. None of it matters because every buyer is reading a document that describes the business as it was, not as it is. Yulia&apos;s Living CIM updates automatically when your financials change — with version control, tiered buyer access, and every view tracked.
+              </p>
+            </ScrollReveal>
           </div>
         </div>
       </section>
 
-      {/* Four Phases Vertical Timeline */}
-      <section className="my-[160px] px-12 max-w-[1000px] mx-auto">
-        <div className="text-center mb-24">
-          <h2 className="text-5xl font-black tracking-tight">The Exit Roadmap</h2>
-        </div>
-        <div className="relative">
-          {/* Center Line */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-px bg-outline-variant/30 -translate-x-1/2 hidden md:block" />
-          <div className="space-y-32">
-            {/* Phase 1 */}
-            <div className="relative flex flex-col md:flex-row items-center gap-12">
-              <div className="w-full md:w-1/2 md:text-right">
-                <span className="text-tertiary font-bold tracking-widest text-sm uppercase">
-                  Phase 01
-                </span>
-                <h4 className="text-2xl font-bold mt-2">Audit &amp; Forensics</h4>
-                <p className="text-on-surface-variant mt-4 text-editorial-body">
-                  We perform a deep-tissue audit to fix red flags before buyers ever see them.
-                </p>
-              </div>
-              <div className="absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-on-surface border-4 border-surface hidden md:block" />
-              <div className="w-full md:w-1/2" />
-            </div>
-            {/* Phase 2 */}
-            <div className="relative flex flex-col md:flex-row items-center gap-12">
-              <div className="w-full md:w-1/2" />
-              <div className="absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-on-surface border-4 border-surface hidden md:block" />
-              <div className="w-full md:w-1/2">
-                <span className="text-tertiary font-bold tracking-widest text-sm uppercase">
-                  Phase 02
-                </span>
-                <h4 className="text-2xl font-bold mt-2">Narrative Packaging</h4>
-                <p className="text-on-surface-variant mt-4 text-editorial-body">
-                  Creating the &quot;Masterpiece&quot; Prospectus that justifies your premium
-                  multiple.
-                </p>
-              </div>
-            </div>
-            {/* Phase 3 */}
-            <div className="relative flex flex-col md:flex-row items-center gap-12">
-              <div className="w-full md:w-1/2 md:text-right">
-                <span className="text-tertiary font-bold tracking-widest text-sm uppercase">
-                  Phase 03
-                </span>
-                <h4 className="text-2xl font-bold mt-2">Auction Dynamics</h4>
-                <p className="text-on-surface-variant mt-4 text-editorial-body">
-                  Creating competitive tension among qualified strategic buyers.
-                </p>
-              </div>
-              <div className="absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-on-surface border-4 border-surface hidden md:block" />
-              <div className="w-full md:w-1/2" />
-            </div>
-            {/* Phase 4 */}
-            <div className="relative flex flex-col md:flex-row items-center gap-12">
-              <div className="w-full md:w-1/2" />
-              <div className="absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-on-surface border-4 border-surface hidden md:block" />
-              <div className="w-full md:w-1/2">
-                <span className="text-tertiary font-bold tracking-widest text-sm uppercase">
-                  Phase 04
-                </span>
-                <h4 className="text-2xl font-bold mt-2">Final Settlement</h4>
-                <p className="text-on-surface-variant mt-4 text-editorial-body">
-                  Closing the deal, wiring the funds, and executing the transition plan.
-                </p>
-              </div>
-            </div>
+      {/* ═══ 8. THE PROCESS ═══ */}
+      <section className="py-24 bg-[#f5f3ef] px-6">
+        <div className="max-w-[1200px] mx-auto">
+          <ScrollReveal>
+            <span className="text-xs font-black uppercase tracking-widest text-[#D4714E] block mb-4">The Process</span>
+            <h2 className="font-bold text-4xl uppercase tracking-widest text-[#1A1A18] mb-16">How it actually works.</h2>
+          </ScrollReveal>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[
+              { num: '01', title: 'Understand (Free)', body: 'Get your ValueLens number, initial add-back discovery, and Value Readiness Report.' },
+              { num: '02', title: 'Optimize', body: 'Correct the deal killers. Maximize add-backs. Improve the metrics that drive your multiple.' },
+              { num: '03', title: 'Prepare', body: 'Finalize your Living CIM, tax structure, data room, and buyer targeting.' },
+              { num: '04', title: 'Negotiate & Close', body: 'Sit at the table with total situational awareness. Every configuration modeled.' },
+            ].map((step, i) => (
+              <ScrollReveal key={step.num} delay={i * 0.08}>
+                <div>
+                  <div className="font-mono text-4xl font-bold opacity-10 mb-4">{step.num}</div>
+                  <h3 className="font-bold text-xl mb-2">{step.title}</h3>
+                  <p className="text-sm text-[#55433c]">{step.body}</p>
+                </div>
+              </ScrollReveal>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="mt-[200px] mb-20 px-12 max-w-[1400px] mx-auto">
-        <div className="bg-on-surface p-24 text-center rounded-none relative overflow-hidden">
-          {/* Decorative interlocked 'X' in Coral Red */}
-          <div className="absolute top-0 right-0 opacity-10 translate-x-1/3 -translate-y-1/3">
-            <span className="text-[400px] font-black leading-none text-tertiary select-none">
-              X
-            </span>
+      {/* ═══ 9. RISK INTELLIGENCE ═══ */}
+      <section className="py-24 px-6">
+        <div className="max-w-[1200px] mx-auto">
+          <ScrollReveal>
+            <span className="text-xs font-black uppercase tracking-widest text-[#D4714E] block mb-4">Risk Intelligence</span>
+            <h2 className="font-bold text-4xl uppercase tracking-widest text-[#1A1A18] mb-12">Three things kill more deals than price disagreements.</h2>
+          </ScrollReveal>
+          <div className="space-y-6">
+            {[
+              { icon: 'description', title: 'The Lease', body: "If the business depends on its location, the lease has to transfer. Landlord consent is required and is never guaranteed. Yulia flags lease risk the day you start." },
+              { icon: 'verified_user', title: 'The Licenses', body: "Liquor licenses in some states take 90+ days. Healthcare certifications take months. Contractor licenses may require the new owner to sit for an exam. Yulia identifies which transfer and how long each takes." },
+              { icon: 'gavel', title: 'Reps & Warranties', body: "Every representation is a contingent liability. Environmental for manufacturing. HIPAA for healthcare. Employment classification for contractors. Yulia generates industry-specific preparation." },
+            ].map((killer, i) => (
+              <ScrollReveal key={killer.title} delay={i * 0.08}>
+                <div className="bg-white p-8 rounded-2xl border border-gray-100 flex items-start gap-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300">
+                  <span className="material-symbols-outlined text-4xl text-[#D4714E]">{killer.icon}</span>
+                  <div>
+                    <h3 className="font-bold text-xl mb-1">{killer.title}</h3>
+                    <p className="text-[#55433c] leading-relaxed">{killer.body}</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
           </div>
-          <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-12 relative z-10">
-            Your legacy is worth more than a multiple.
-          </h2>
-          <button
-            onClick={() => onChipClick('Tell Yulia about your business')}
-            className="bg-tertiary text-white text-xl font-bold px-12 py-6 rounded-none hover:scale-105 transition-all relative z-10 cursor-pointer"
-          >
-            Tell Yulia about your business
-          </button>
         </div>
       </section>
+
+      {/* ═══ 10. FOR ADVISORS ═══ */}
+      <section className="py-24 bg-[#eae8e4] px-6">
+        <div className="max-w-[1200px] mx-auto text-center">
+          <ScrollReveal>
+            <span className="text-xs font-black uppercase tracking-widest text-[#D4714E] block mb-4">For Advisors</span>
+            <h2 className="font-bold text-4xl md:text-5xl uppercase tracking-widest text-[#1A1A18] max-w-2xl mx-auto">Working with a broker? Bring your homework.</h2>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ═══ 11. DEAL SIZE CARDS ═══ */}
+      <section className="py-24 px-6">
+        <div className="max-w-[1200px] mx-auto">
+          <ScrollReveal>
+            <span className="text-xs font-black uppercase tracking-widest text-[#D4714E] block mb-4">Every Deal Size</span>
+            <h2 className="font-bold text-4xl uppercase tracking-widest text-[#1A1A18] mb-12">First sale or fifth — Yulia speaks your language.</h2>
+          </ScrollReveal>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {DEAL_SIZES.map((size, i) => (
+              <ScrollReveal key={size.title} delay={i * 0.08}>
+                <div className={`bg-white p-10 rounded-2xl border border-gray-100 shadow-[0_4px_24px_rgba(0,0,0,0.06)] ${size.featured ? 'scale-105 border-[#D4714E]/20' : ''}`}>
+                  <h3 className="font-bold text-lg uppercase tracking-wider mb-2">{size.title}</h3>
+                  <p className="text-[#D4714E] font-mono text-xl font-bold mb-4">{size.range}</p>
+                  <p className="text-sm text-[#55433c]">{size.body}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 12. DARK CTA ═══ */}
+      <section className="bg-[#1A1A18] py-32 px-6 text-white overflow-hidden relative">
+        <div className="max-w-[1200px] mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-8">
+              <ScrollReveal>
+                <h2 className="font-display italic text-5xl md:text-7xl mb-8">The wire hits. And you know.</h2>
+              </ScrollReveal>
+              <ScrollReveal delay={0.08}>
+                <p className="text-xl md:text-2xl opacity-80 leading-relaxed mb-12 max-w-2xl">
+                  Not &ldquo;I hope I got a fair deal.&rdquo; The absolute certainty that you left nothing on the table and built something that continues to matter. Architect your exit.
+                </p>
+              </ScrollReveal>
+              <ScrollReveal delay={0.16}>
+                <button
+                  onClick={() => onChipClick('I want to sell my business')}
+                  className="bg-[#D4714E] text-white text-lg font-bold px-10 py-5 rounded-full hover:opacity-90 transition-opacity flex items-center gap-3"
+                >
+                  Tell Yulia about your business
+                  <span className="material-symbols-outlined">arrow_forward</span>
+                </button>
+              </ScrollReveal>
+            </div>
+          </div>
+        </div>
+        {/* SVG geometric pattern */}
+        <div className="absolute right-0 top-0 w-1/2 h-full opacity-10 pointer-events-none">
+          <svg className="w-full h-full" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,400 L400,0 M100,400 L400,100 M200,400 L400,200 M300,400 L400,300 M0,300 L300,0 M0,200 L200,0 M0,100 L100,0" fill="none" stroke="white" strokeWidth="1" />
+          </svg>
+        </div>
+      </section>
+
     </div>
   );
 }

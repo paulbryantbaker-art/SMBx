@@ -6,16 +6,16 @@ export default {
       colors: {
         ink: '#0D0D0D',
         terra: {
-          DEFAULT: '#C96B4F',
-          hover: '#B55E44',
+          DEFAULT: '#D4714E',
+          hover: '#c2613f',
           soft: '#FFF0EB',
-          glow: 'rgba(201, 107, 79, 0.12)',
+          glow: 'rgba(212, 113, 78, 0.12)',
         },
-        stone: 'rgba(0,0,0,0.06)',
-        surface: '#FAFAFA',
-        tint: '#FAFAFA',
+        /* stone removed — was conflicting with Tailwind's built-in stone palette */
+        surface: '#f9f9f9',
+        tint: '#f9f9f9',
         cream: {
-          DEFAULT: '#FAFAFA',
+          DEFAULT: '#F5F3EF',
           deep: '#F5F5F5',
           dark: '#EEEEEE',
           hover: '#E8E8E8',
@@ -82,10 +82,13 @@ export default {
         '4xl': '34px',
       },
       fontFamily: {
+        serif: ['PT Serif', 'Georgia', 'serif'],
+        display: ['Playfair Display', 'serif'],
+        headline: ['PT Serif', 'Georgia', 'serif'],
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
         label: ['Inter', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
       },
       maxWidth: {
         site: '1200px',

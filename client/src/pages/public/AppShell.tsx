@@ -1202,16 +1202,16 @@ export default function AppShell() {
         </header>
 
         {/* Main row: chat + canvas split */}
-        <div className="flex-1 flex min-h-0 bg-white">
+        <div className={`flex-1 flex min-h-0 ${viewState === 'landing' && activeTab !== 'home' ? 'bg-[#f9f9f9]' : 'bg-white'}`}>
         {/* Chat column — resizable on desktop in chat mode, flex on landing/other */}
         <div
-          className="flex flex-col min-w-0 bg-white"
+          className={`flex flex-col min-w-0 ${viewState === 'landing' && activeTab !== 'home' ? 'bg-[#f9f9f9]' : 'bg-white'}`}
           style={!isMobile && viewState === 'chat' ? { width: chatWidth, flexShrink: 0 } : { flex: 1 }}
         >
-        {/* Scroll area — bg-white required: -webkit-overflow-scrolling creates a separate compositing layer on mobile Safari */}
+        {/* Scroll area — opaque bg required: -webkit-overflow-scrolling creates a separate compositing layer on mobile Safari */}
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto min-h-0 bg-white"
+          className={`flex-1 overflow-y-auto min-h-0 ${viewState === 'landing' && activeTab !== 'home' ? 'bg-[#f9f9f9]' : 'bg-white'}`}
           style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' } as any}
         >
           {/* ════ LANDING MODE ════ */}
@@ -1231,7 +1231,7 @@ export default function AppShell() {
                     {/* Subtitle */}
                     <p style={{
                       textAlign: 'center', maxWidth: 300, marginBottom: 40,
-                      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
+                      fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                       fontSize: 15, lineHeight: 1.5, color: 'rgba(0,0,0,0.45)', fontWeight: 400,
                       letterSpacing: '-0.01em',
                     }}>
@@ -1275,11 +1275,11 @@ export default function AppShell() {
                       >
                         <span
                           className="text-5xl"
-                          style={{ display: 'block', fontFamily: "'General Sans', 'Inter', system-ui, sans-serif", fontWeight: 700, color: '#000', letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: 12 }}
+                          style={{ display: 'block', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 700, color: '#000', letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: 12 }}
                         >
                           Chat with your deals!
                         </span>
-                        <span style={{ display: 'block', fontFamily: "'General Sans', 'Inter', system-ui, sans-serif", fontSize: 15, lineHeight: 1.65, color: 'rgba(0,0,0,0.55)', letterSpacing: '-0.01em' }}>
+                        <span style={{ display: 'block', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontSize: 15, lineHeight: 1.65, color: 'rgba(0,0,0,0.55)', letterSpacing: '-0.01em' }}>
                           Yulia is a chat agent for all things M&A and she can guide you through the entire process of selling or buying a business, all by just chatting with your deals. No deal is too small or too complex.<br /><span style={{ fontWeight: 600 }}>Start now completely free!</span>
                         </span>
                       </motion.div>
@@ -1529,7 +1529,7 @@ export default function AppShell() {
                 height: '100%', gap: 16, opacity: 0.4,
               }}>
                 <LogoImg height={36} />
-                <p style={{ fontFamily: "'General Sans', 'Inter', system-ui, sans-serif", fontSize: 14, fontWeight: 500, color: '#0D0D0D', margin: 0 }}>
+                <p style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontSize: 14, fontWeight: 500, color: '#0D0D0D', margin: 0 }}>
                   Nothing to see here
                 </p>
               </div>
@@ -1687,7 +1687,7 @@ export default function AppShell() {
                 position: 'fixed',
                 zIndex: 9999,
                 pointerEvents: 'none',
-                fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
+                fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                 fontSize: 48,
                 fontWeight: l.weight,
                 color: l.color,

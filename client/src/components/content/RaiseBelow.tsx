@@ -1,196 +1,260 @@
-interface RaiseBelowProps {
-  onChipClick: (text: string) => void;
-}
+import { ScrollReveal } from './animations';
 
-export default function RaiseBelow({ onChipClick }: RaiseBelowProps) {
+const CAPITAL_OPTIONS = [
+  { title: 'Revenue-Based Financing', body: 'No dilution. Payments flex with revenue. 1.3×–2.0× repayment cap.' },
+  { title: 'SBA Expansion', body: 'Keep 100%. 9.75%–12.25%. Up to $5M.' },
+  { title: 'Equity', body: 'Dilution modeled through this round and two future rounds. Option pool impact. Liquidation waterfall.' },
+  { title: 'Strategic Partnership', body: 'Capital plus capabilities. Less dilutive, more governance complexity.' },
+  { title: 'Mezzanine', body: 'For businesses with $2M+ EBITDA. 12–20%. Non-dilutive financing for mature structures.' },
+];
+
+const PITCH_ITEMS = [
+  'Pitch Deck',
+  'Financial Model',
+  'Cap Table',
+  'Waterfall Analysis',
+  'Use of Funds',
+  'Investor Targeting',
+];
+
+const TERM_CARDS = [
+  { title: 'Liquidation Prefs', body: "Does the investor get their money back before you see a dollar? 1x? 2x?" },
+  { title: 'Anti-Dilution', body: 'Protecting investor ownership during down rounds at founder expense.' },
+  { title: 'Participation Rights', body: "Double-dipping during an exit. Knowing the difference is millions." },
+];
+
+export default function RaiseBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
-    <div className="stitch-raise font-body selection:bg-tertiary/20">
-      <style>{`
-        .stitch-raise {
-          --on-surface: #1a1c1c;
-          --surface: #f9f9f9;
-          --tertiary: #95432b;
-          --on-surface-variant: #55433d;
-          --surface-container-lowest: #ffffff;
-          --surface-container-low: #f3f3f3;
-          --surface-container: #eeeeee;
-          --outline-variant: #dbc1ba;
-          --primary: #5c5c5c;
-          --inverse-surface: #2f3131;
-          --on-tertiary: #ffffff;
-        }
-        .stitch-raise .editorial-line-height { line-height: 1.6; }
-        .stitch-raise .ghost-border { border: 1px solid rgba(219,193,186,0.2); }
-        .stitch-raise .custom-shadow { box-shadow: 0 4px 24px 0 rgba(26,28,28,0.04); }
-      `}</style>
+    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#D4714E] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-      {/* Hero Section */}
-      <section className="pt-48 pb-40 px-12 max-w-[1920px] mx-auto">
-        <div className="max-w-4xl">
-          <span className="inline-block px-3 py-1 bg-tertiary text-white text-[11px] font-bold tracking-[0.1em] uppercase mb-8">Capital Strategy</span>
-          <h1 className="text-[64px] font-black leading-[1.05] tracking-tighter text-on-surface mb-12">
-            A 5% difference in dilution today is a $2.5 million difference at exit
-          </h1>
-          <p className="text-xl text-on-surface-variant editorial-line-height max-w-2xl font-medium">
-            Securing capital isn&apos;t just about the check&mdash;it&apos;s about the architecture of your future equity. We help you navigate the complex terrain of debt, equity, and mezzanine financing with editorial precision.
-          </p>
-        </div>
-      </section>
-
-      {/* Financing Options Grid (Bento Style) */}
-      <section className="py-40 bg-surface-container-low">
-        <div className="px-12 max-w-[1920px] mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
-            <div className="max-w-2xl">
-              <h2 className="text-4xl font-black tracking-tighter mb-6 text-on-surface">The Financing Spectrum</h2>
-              <p className="text-on-surface-variant editorial-line-height">Five distinct pathways to fuel your growth. We analyze each through the lens of cost-of-capital and long-term control.</p>
-            </div>
-            <div className="text-tertiary font-black text-8xl opacity-10 leading-none select-none">RAISE</div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Revenue-based */}
-            <div className="bg-surface-container-lowest p-10 xl:p-12 custom-shadow ghost-border flex flex-col justify-between aspect-square group">
-              <div>
-                <span className="material-symbols-outlined text-tertiary mb-8 text-4xl">payments</span>
-                <h3 className="text-2xl font-black mb-4">Revenue-based</h3>
-                <p className="text-on-surface-variant editorial-line-height text-sm">Non-dilutive funding based on monthly recurring revenue. Perfect for scaling without giving up board seats.</p>
-              </div>
-              <div className="pt-8 border-t border-surface-container-low flex justify-between items-center">
-                <span className="text-[11px] font-bold tracking-widest text-on-surface uppercase">Low Dilution</span>
-                <span className="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span>
-              </div>
-            </div>
-            {/* SBA */}
-            <div className="bg-surface-container-lowest p-10 xl:p-12 custom-shadow ghost-border flex flex-col justify-between aspect-square group">
-              <div>
-                <span className="material-symbols-outlined text-tertiary mb-8 text-4xl">account_balance</span>
-                <h3 className="text-2xl font-black mb-4">SBA</h3>
-                <p className="text-on-surface-variant editorial-line-height text-sm">Government-backed loans offering competitive rates and longer terms for established businesses looking to expand.</p>
-              </div>
-              <div className="pt-8 border-t border-surface-container-low flex justify-between items-center">
-                <span className="text-[11px] font-bold tracking-widest text-on-surface uppercase">Fixed Rates</span>
-                <span className="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span>
-              </div>
-            </div>
-            {/* Equity */}
-            <div className="bg-surface-container-lowest p-10 xl:p-12 custom-shadow ghost-border flex flex-col justify-between aspect-square group">
-              <div>
-                <span className="material-symbols-outlined text-tertiary mb-8 text-4xl">pie_chart</span>
-                <h3 className="text-2xl font-black mb-4">Equity</h3>
-                <p className="text-on-surface-variant editorial-line-height text-sm">Venture capital and private equity partnerships. Trading ownership for high-velocity growth resources.</p>
-              </div>
-              <div className="pt-8 border-t border-surface-container-low flex justify-between items-center">
-                <span className="text-[11px] font-bold tracking-widest text-on-surface uppercase">High Velocity</span>
-                <span className="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span>
-              </div>
-            </div>
-            {/* Strategic */}
-            <div className="bg-surface-container-lowest p-10 xl:p-12 custom-shadow ghost-border flex flex-col justify-between aspect-square md:col-span-1 group">
-              <div>
-                <span className="material-symbols-outlined text-tertiary mb-8 text-4xl">handshake</span>
-                <h3 className="text-2xl font-black mb-4">Strategic</h3>
-                <p className="text-on-surface-variant editorial-line-height text-sm">Investment from industry leaders providing more than capital&mdash;distribution, expertise, and exit potential.</p>
-              </div>
-              <div className="pt-8 border-t border-surface-container-low flex justify-between items-center">
-                <span className="text-[11px] font-bold tracking-widest text-on-surface uppercase">Market Synergy</span>
-                <span className="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span>
-              </div>
-            </div>
-            {/* Mezzanine */}
-            <div className="bg-surface-container-lowest p-10 xl:p-12 custom-shadow ghost-border flex flex-col justify-between md:col-span-2 group">
-              <div className="flex flex-col md:flex-row gap-12 items-start">
-                <div className="flex-1">
-                  <span className="material-symbols-outlined text-tertiary mb-8 text-4xl">layers</span>
-                  <h3 className="text-3xl font-black mb-4">Mezzanine</h3>
-                  <p className="text-on-surface-variant editorial-line-height text-lg">The hybrid layer. Subordinated debt with equity kickers, bridging the gap between bank debt and pure equity for mature companies.</p>
-                </div>
-                <div className="w-full md:w-64 h-48 bg-surface overflow-hidden">
-                  <img
-                    className="w-full h-full object-cover grayscale opacity-50"
-                    alt="Abstract architectural lines and shadows"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuC--4t7_h8i7d4b-l61LwVTw5vKABsXqzpcgbH2-AAFHjWPfF_zkWNXltOal8fkqL-oSqd5sIGQyqZqf-VT0GtwaZ0iQKHy-5E5YiExr0Ma6UXLfJXm4docKzpfRwGEhu17mv6-kseUmtQYZIXypGuhsJGPeFdTCKIh0LFMWwbcJAnXt3jMGhLQOcu7YNzFNG3X5B_dOc1LHBAM-4s3-vDkiWZI_X5s-dxS-PthrYRWXxdhq0B0pVMZB1DoRGlEMCKo887X5OZtSv0"
-                  />
-                </div>
-              </div>
-              <div className="pt-8 mt-12 border-t border-surface-container-low flex justify-between items-center">
-                <span className="text-[11px] font-bold tracking-widest text-on-surface uppercase">Hybrid Capital</span>
-                <span className="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_forward</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Yulia's Deliverables Section */}
-      <section className="py-60 px-12 max-w-[1920px] mx-auto overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-24 items-start">
-          <div className="lg:col-span-5 sticky top-32">
-            <span className="text-tertiary font-black text-5xl mb-6 block leading-none">X</span>
-            <h2 className="text-5xl font-black tracking-tighter mb-8 text-on-surface">Yulia&apos;s Deliverables</h2>
-            <p className="text-xl text-on-surface-variant editorial-line-height mb-12">
-              Your raise is managed by Yulia, our AI-powered editorial architect. Every document produced is designed to meet the rigorous standards of Tier-1 institutional investors.
+      {/* ═══ 1. HERO ═══ */}
+      <section className="relative pt-32 pb-40 overflow-hidden">
+        <div className="max-w-[1200px] mx-auto px-6 relative z-10">
+          <ScrollReveal>
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#6B6B65] mb-6 block">
+              Capital Architecture
+            </span>
+          </ScrollReveal>
+          <ScrollReveal delay={0.1}>
+            <h1 className="font-display italic font-bold text-[48px] md:text-[72px] lg:text-[88px] leading-[0.95] tracking-tight text-[#1A1A18] mb-8">
+              Growth funded,<br />on your terms
+            </h1>
+          </ScrollReveal>
+          <ScrollReveal delay={0.2}>
+            <p className="max-w-2xl text-xl md:text-2xl text-[#6B6B65] leading-relaxed font-headline italic">
+              A 5% difference in dilution today is a $2.5 million difference at exit. Yulia models every structure so you know exactly what you&apos;re giving up.
             </p>
-            <button
-              onClick={() => onChipClick('Tell Yulia about your raise')}
-              className="px-10 py-5 bg-black text-white font-bold text-sm tracking-widest uppercase hover:bg-tertiary transition-colors cursor-pointer"
-            >
-              Tell Yulia about your raise
-            </button>
-          </div>
-          <div className="lg:col-span-7 space-y-px">
-            <div className="group border-b border-outline-variant/30 py-12 flex justify-between items-start transition-all hover:pl-4">
-              <div className="max-w-md">
-                <h4 className="text-2xl font-black mb-3">Pitch Deck</h4>
-                <p className="text-on-surface-variant text-sm editorial-line-height">A narrative-driven presentation that synthesizes your market opportunity into a compelling investor story.</p>
-              </div>
-              <span className="text-tertiary font-bold font-mono text-sm">01</span>
+          </ScrollReveal>
+        </div>
+        <div className="absolute -right-20 top-20 w-[600px] h-[600px] bg-[#D4714E]/5 rounded-full blur-3xl pointer-events-none" />
+      </section>
+
+      {/* ═══ 2. DILUTION MATH ═══ */}
+      <section className="py-32 bg-[#F5F3EF]">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-16 items-start">
+            <div className="md:col-span-8 space-y-8 text-lg leading-relaxed text-[#6B6B65]">
+              <ScrollReveal>
+                <p>I&apos;ve watched founders lose millions of dollars at exit because of decisions they made in their first term sheet — decisions they didn&apos;t fully understand at the time.</p>
+              </ScrollReveal>
+              <ScrollReveal delay={0.06}>
+                <p>A $2M raise at a $10M pre-money valuation gives up 17%. The same raise at $15M pre-money: 12%. That 5% gap, over a five-year trajectory ending at a $50M exit, is $2.5 million.</p>
+              </ScrollReveal>
+              <ScrollReveal delay={0.12}>
+                <p>The complicated part is everything else in the term sheet. Liquidation preferences — does the investor get their money back before you see a dollar, and is it 1× or 2×? Anti-dilution provisions — if you raise a down round, does the investor&apos;s ownership get protected at your expense? Board seats. Drag-along rights.</p>
+              </ScrollReveal>
+              <ScrollReveal delay={0.18}>
+                <p>These terms compound silently. They surface violently at exactly the moments that matter.</p>
+              </ScrollReveal>
+              <ScrollReveal delay={0.24}>
+                <p className="font-bold text-[#1A1A18]">Most founders negotiate their first term sheet against investors who&apos;ve drafted hundreds. The information asymmetry is staggering. Yulia levels it.</p>
+              </ScrollReveal>
             </div>
-            <div className="group border-b border-outline-variant/30 py-12 flex justify-between items-start transition-all hover:pl-4">
-              <div className="max-w-md">
-                <h4 className="text-2xl font-black mb-3">Financial Model</h4>
-                <p className="text-on-surface-variant text-sm editorial-line-height">Dynamic 3-statement models built for stress-testing and scenario analysis across multiple growth paths.</p>
-              </div>
-              <span className="text-tertiary font-bold font-mono text-sm">02</span>
-            </div>
-            <div className="group border-b border-outline-variant/30 py-12 flex justify-between items-start transition-all hover:pl-4">
-              <div className="max-w-md">
-                <h4 className="text-2xl font-black mb-3">Data Room Architecture</h4>
-                <p className="text-on-surface-variant text-sm editorial-line-height">A curated, logical repository for all due diligence materials, organized to minimize friction in the review process.</p>
-              </div>
-              <span className="text-tertiary font-bold font-mono text-sm">03</span>
-            </div>
-            <div className="group border-b border-outline-variant/30 py-12 flex justify-between items-start transition-all hover:pl-4">
-              <div className="max-w-md">
-                <h4 className="text-2xl font-black mb-3">Cap Table Analysis</h4>
-                <p className="text-on-surface-variant text-sm editorial-line-height">Precision modelling of dilution scenarios and exit waterfalls to protect founder interests.</p>
-              </div>
-              <span className="text-tertiary font-bold font-mono text-sm">04</span>
+            <div className="md:col-span-4 sticky top-32">
+              <ScrollReveal delay={0.15}>
+                <div className="bg-white p-10 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/30 space-y-12">
+                  <div>
+                    <span className="font-mono text-5xl font-bold text-[#D4714E]">5%</span>
+                    <p className="font-sans uppercase tracking-widest text-xs mt-2 text-[#6B6B65]">Dilution Gap</p>
+                  </div>
+                  <div className="h-px bg-[#DCC1B9]/30 w-full" />
+                  <div>
+                    <span className="font-mono text-4xl font-bold text-[#1A1A18]">$2.5M</span>
+                    <p className="font-sans uppercase tracking-widest text-xs mt-2 text-[#6B6B65]">Value at Exit</p>
+                  </div>
+                  <div className="bg-[#E2E2E2] p-4 rounded-lg">
+                    <pre className="font-mono text-[10px] text-[#55433C] leading-tight whitespace-pre">{`// SENSITIVITY_ANALYSIS
+{
+ "exit_valuation": 50000000,
+ "equity_delta": 0.05,
+ "founder_impact": -2500000
+}`}</pre>
+                  </div>
+                </div>
+              </ScrollReveal>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Signature Editorial CTA */}
-      <section className="mb-40 px-12 max-w-[1920px] mx-auto">
-        <div className="bg-on-surface py-32 px-12 md:px-24 flex flex-col items-center text-center relative overflow-hidden">
-          {/* Watermark Background */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5">
-            <span className="text-[400px] font-black text-white select-none">SMBX</span>
+      {/* ═══ 3. CAPITAL OPTIONS ═══ */}
+      <section className="py-32 bg-[#F9F9F9]">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <ScrollReveal>
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#6B6B65] mb-6 block">
+              Capital Structures
+            </span>
+          </ScrollReveal>
+          <ScrollReveal delay={0.08}>
+            <h2 className="font-headline italic text-5xl text-[#1A1A18] mb-20 max-w-2xl">
+              Every option modeled. Every trade-off visible.
+            </h2>
+          </ScrollReveal>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {CAPITAL_OPTIONS.slice(0, 3).map((opt, i) => (
+              <ScrollReveal key={opt.title} delay={i * 0.06}>
+                <div className="bg-white p-8 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20 transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)] h-full flex flex-col">
+                  <span className="font-mono text-[#D4714E] text-sm block mb-6">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <h3 className="font-bold text-[#1A1A18] text-xl mb-4">{opt.title}</h3>
+                  <p className="text-[#6B6B65] leading-relaxed text-base flex-1">{opt.body}</p>
+                </div>
+              </ScrollReveal>
+            ))}
           </div>
-          <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-12 relative z-10">Ready to secure your future?</h2>
-          <div className="flex flex-col md:flex-row gap-6 relative z-10">
-            <button
-              onClick={() => onChipClick('Tell Yulia about your raise')}
-              className="px-12 py-6 bg-tertiary text-white font-bold tracking-tight hover:opacity-90 transition-all text-lg cursor-pointer"
-            >
-              Tell Yulia about your raise
-            </button>
-            <button className="px-12 py-6 border border-white/30 text-white font-bold tracking-tight hover:bg-white/10 transition-all text-lg cursor-pointer">
-              View Methodology
-            </button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+            <ScrollReveal delay={0.18}>
+              <div className="bg-white p-8 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20 transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)] h-full flex flex-col md:col-span-1">
+                <span className="font-mono text-[#D4714E] text-sm block mb-6">04</span>
+                <h3 className="font-bold text-[#1A1A18] text-xl mb-4">{CAPITAL_OPTIONS[3].title}</h3>
+                <p className="text-[#6B6B65] leading-relaxed text-base flex-1">{CAPITAL_OPTIONS[3].body}</p>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={0.24}>
+              <div className="bg-white p-8 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20 transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)] h-full flex flex-col md:col-span-2">
+                <span className="font-mono text-[#D4714E] text-sm block mb-6">05</span>
+                <h3 className="font-bold text-[#1A1A18] text-xl mb-4">{CAPITAL_OPTIONS[4].title}</h3>
+                <p className="text-[#6B6B65] leading-relaxed text-base flex-1">{CAPITAL_OPTIONS[4].body}</p>
+              </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
+
+      {/* ═══ 4. PITCH DECK ═══ */}
+      <section className="py-32 bg-[#F5F3EF] overflow-hidden">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center gap-20">
+            <div className="md:w-1/2">
+              <ScrollReveal>
+                <h2 className="font-headline italic text-5xl text-[#1A1A18] mb-8 leading-tight">
+                  Your pitch deck gets sixty seconds before the next one
+                </h2>
+              </ScrollReveal>
+              <ScrollReveal delay={0.08}>
+                <p className="text-lg text-[#6B6B65] leading-relaxed mb-6">
+                  Investors see hundreds of pitches. The ones that get past the first minute have one thing in common: the materials make the investor&apos;s decision easy. Clear story. Defensible numbers. Specific ask. Assumptions documented.
+                </p>
+              </ScrollReveal>
+              <ScrollReveal delay={0.12}>
+                <p className="text-lg text-[#6B6B65] leading-relaxed">
+                  Yulia builds the complete package from your actual data. Pitch deck — 12 slides. Financial model — three-statement, sensitivity analysis. Cap table — through future rounds, with waterfall.
+                </p>
+              </ScrollReveal>
+            </div>
+            <div className="md:w-1/2 w-full">
+              <ScrollReveal delay={0.15}>
+                <div className="bg-[#1c1917] p-12 rounded-3xl shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-8">
+                    <span className="material-symbols-outlined text-[#D4714E] text-4xl">description</span>
+                  </div>
+                  <h4 className="text-white font-bold text-2xl mb-8">The Complete Package</h4>
+                  <ul className="space-y-5">
+                    {PITCH_ITEMS.map((item) => (
+                      <li key={item} className="flex items-center text-white/80 gap-4">
+                        <div className="w-6 h-6 rounded-full border border-[#D4714E] flex items-center justify-center shrink-0">
+                          <span className="material-symbols-outlined text-[14px] text-[#D4714E]" style={{ fontVariationSettings: "'FILL' 1" }}>check</span>
+                        </div>
+                        <span className="font-mono text-sm tracking-tight">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-[#D4714E]/20 rounded-full blur-3xl" />
+                </div>
+              </ScrollReveal>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 5. TERM SHEET ANALYSIS ═══ */}
+      <section className="py-32 bg-[#F9F9F9]">
+        <div className="max-w-[1200px] mx-auto px-6 text-center">
+          <ScrollReveal>
+            <h2 className="font-headline italic text-5xl text-[#1A1A18] mb-12 max-w-4xl mx-auto">
+              The terms that compound silently and surface violently
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.08}>
+            <div className="max-w-3xl mx-auto">
+              <p className="text-xl leading-relaxed text-[#6B6B65] mb-16">
+                Liquidation preferences, anti-dilution ratchets, and participation rights aren&apos;t just legal boilerplate. They determine who gets paid when things go well, and who gets protected when they don&apos;t. We analyze every clause to show you the long-term impact on your equity.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-left bg-[#F5F3EF] p-12 rounded-2xl border border-[#DCC1B9]/30">
+                {TERM_CARDS.map((card) => (
+                  <div key={card.title}>
+                    <h5 className="font-bold text-[#1A1A18] mb-3">{card.title}</h5>
+                    <p className="text-sm text-[#6B6B65]">{card.body}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ═══ 6. CLOSING EDITORIAL ═══ */}
+      <section className="py-24 text-center">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <ScrollReveal>
+            <p className="font-headline italic text-6xl md:text-7xl text-[#1A1A18]/20 select-none">
+              Growth funded. On your terms.
+            </p>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ═══ 7. DARK CTA ═══ */}
+      <section className="py-32 bg-[#1c1917] relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D4714E] rounded-full opacity-[0.15] blur-[80px]" />
+        </div>
+        <div className="max-w-[1200px] mx-auto px-6 relative z-10 text-center">
+          <ScrollReveal>
+            <h2 className="font-display italic font-bold text-white text-[48px] md:text-[72px] mb-12">
+              Architect your raise.
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.1}>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+              <button
+                onClick={() => onChipClick('I want to raise capital')}
+                className="bg-white text-[#0c0a09] px-10 py-5 rounded-3xl font-bold text-lg hover:scale-105 transition-transform"
+              >
+                Get Started Now
+              </button>
+              <button
+                onClick={() => onChipClick('I need help structuring a raise')}
+                className="bg-transparent border border-white/20 text-white px-10 py-5 rounded-3xl font-bold text-lg hover:bg-white/10 transition-colors"
+              >
+                Book Strategy Call
+              </button>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
     </div>
   );
 }

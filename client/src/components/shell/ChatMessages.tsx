@@ -106,7 +106,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
     <div style={{
       width: '100%',
       padding: desktop ? '24px 24px 128px 24px' : '12px 16px 128px 16px',
-      fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
+      fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
       userSelect: 'text',
       WebkitUserSelect: 'text',
     } as React.CSSProperties}>

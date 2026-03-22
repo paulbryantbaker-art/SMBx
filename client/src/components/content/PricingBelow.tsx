@@ -1,306 +1,315 @@
-interface PricingBelowProps {
-  onChipClick: (text: string) => void;
-}
+import { ScrollReveal, ConversationTyping } from './animations';
 
-export default function PricingBelow({ onChipClick }: PricingBelowProps) {
+const FREE_DELIVERABLES = [
+  'ValueLens — AI-estimated value range, updated quarterly',
+  'Value Readiness Report — seven-factor exit readiness score',
+  'Investment Thesis — acquisition blueprint with target criteria',
+  'Preliminary SDE/EBITDA — complete add-back identification',
+  'Capital Stack Template — SBA loan, equity, seller note, debt service',
+  'Deal Scoring — paste any listing URL for instant analysis',
+  'CIM — full AI-generated CIM at the owner-operated level',
+];
+
+const TIERS = [
+  { title: 'Owner-Operated', price: '$999', sde: 'SDE under $500K', desc: 'First-time seller or buyer. SBA-financed.', body: 'All free analysis, plus: full deal execution workspace, all remaining deliverables, deal room, NDA management, buyer/seller matching, DD coordination, closing support, 180-day PMI plan.', context: 'A business broker would charge $15K–$40K in commissions on a deal this size.' },
+  { title: 'Established', price: '$1,500', sde: 'SDE $500K–$2M', desc: 'Experienced operator or funded buyer.', body: 'Everything in Owner-Operated, plus: more sophisticated financial modeling, deeper market intelligence, expanded buyer/seller targeting.', context: 'Advisory retainers at this level start at $25K–$75K.' },
+  { title: 'Mid-Market', price: '$5,000', sde: 'EBITDA $2M–$5M', desc: 'Institutional buyer interest. PE attention.', body: 'Everything in Established, plus: institutional-quality Living CIM, EBITDA normalization, working capital analysis, QoE framework, full buyer outreach tools, multi-party deal room.', context: 'Investment bank retainers plus success fees at this level run $75K–$200K.' },
+  { title: 'Upper Mid-Market', price: '$15,000', sde: 'EBITDA $5M–$10M', desc: 'Board-level process. Multiple bidders.', body: 'Everything in Mid-Market, plus: three-statement modeling, DCF, advanced deal structuring, covenant analysis, institutional buyer mapping, competitive process management.', context: 'A full investment banking engagement at this level costs $150K–$400K.' },
+];
+
+const ADVISOR_TIERS = [
+  { title: 'Advisor Trial', price: 'Free', desc: 'First three client deals free. Full platform access. Real deals, real data, real deliverables. White-labeled under your brand.' },
+  { title: 'Advisor Pro', price: '$299/mo', desc: 'Unlimited client deals. All deliverables. Branded outputs. Client management dashboard.' },
+  { title: 'Advisor Enterprise', price: '$499/mo', desc: 'Everything in Pro, plus API access, white-label options, priority support, team seats.' },
+];
+
+const FAQS = [
+  { q: '"Really free?"', a: "No catch. No credit card. The data is sovereign — collected by federal agencies and published by law. The synthesis takes seconds. We earn trust before we earn revenue." },
+  { q: '"Why does pricing vary?"', a: "Because the analytical depth and deal coordination required for a $500K landscaping company and a $15M manufacturer are genuinely different. The fee reflects the complexity, not a markup on deal size." },
+  { q: '"How is this different from ChatGPT?"', a: "Yulia has your specific deal data, six sovereign data sources, a structured seven-layer methodology, and memory that compounds over months. ChatGPT knows about M&A. Yulia knows your deal." },
+  { q: '"Working with a broker?"', a: "Your broker will appreciate a client who arrives prepared. And if they want to use the platform for their practice, Advisor Trial is free." },
+  { q: '"Can I take my data with me?"', a: "Yes. Export anything, anytime. We don't hold your data hostage. We keep you because the platform is more valuable than the documents it produces." },
+];
+
+const CONVO_MESSAGES = [
+  { role: 'user' as const, text: 'I want to sell my pest control company in Phoenix. About $1.2M revenue.' },
+  { role: 'assistant' as const, text: "Let's start with the analysis — that's free. I'll build your ValueLens, identify add-backs, and score your exit readiness.\n\nWhen you're ready to move into deal execution — CIM, deal room, buyer process, DD, closing — the platform fee is $999. That covers everything through the wire.\n\nBut first — what's your approximate net income before you pay yourself?" },
+];
+
+export default function PricingBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
-    <div className="stitch-pricing">
-      <style>{`
-        .stitch-pricing {
-          --on-surface: #1a1c1c;
-          --surface: #f9f9f9;
-          --tertiary: #95432b;
-          --on-surface-variant: #55433d;
-          --surface-container-lowest: #ffffff;
-          --surface-container-low: #f3f3f3;
-          --surface-container: #eeeeee;
-          --outline-variant: #dbc1ba;
-          --on-surface-variant-60: rgba(85, 67, 61, 0.6);
-          --brand-accent: #C96B4F;
-          font-family: 'Inter', sans-serif;
-          -webkit-font-smoothing: antialiased;
-          color: var(--on-surface);
-        }
-        .stitch-pricing .editorial-margin {
-          margin-top: 160px;
-          margin-bottom: 160px;
-        }
-        .stitch-pricing .glass-nav {
-          backdrop-filter: blur(12px);
-          background-color: rgba(255, 255, 255, 0.8);
-        }
-        .stitch-pricing .ghost-border {
-          border: 1px solid rgba(219, 193, 186, 0.2);
-        }
-        @media (max-width: 767px) {
-          .stitch-pricing .editorial-margin {
-            margin-top: 80px;
-            margin-bottom: 80px;
-          }
-        }
-      `}</style>
+    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#D4714E] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-      <div className="max-w-[1440px] mx-auto px-6 md:px-12">
-        {/* Hero Section */}
-        <section className="editorial-margin max-w-4xl">
-          <span className="text-[11px] font-bold tracking-[0.2em] uppercase mb-6 block" style={{ color: 'var(--tertiary)' }}>
-            Pricing Architecture
-          </span>
-          <h1 className="text-[40px] md:text-[64px] font-extrabold leading-[1.1] tracking-tighter mb-12" style={{ color: 'var(--on-surface)' }}>
-            Start free. <br />Stay because it works.
-          </h1>
-          <p className="text-lg max-w-2xl leading-[1.6]" style={{ color: 'var(--on-surface-variant)' }}>
-            Our model is built on mutual success. We provide the infrastructure, the data architecture, and the editorial precision to close mid-market deals without the legacy overhead.
-          </p>
-        </section>
-
-        {/* Bento Grid: Free Deliverables */}
-        <section className="mb-40">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-2 p-8 md:p-12 rounded-xl ghost-border" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
-              <h2 className="text-2xl font-bold mb-8 tracking-tight">The Foundation (Always Free)</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12">
-                <div className="flex flex-col gap-3">
-                  <svg className="w-8 h-8" style={{ color: 'var(--tertiary)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 3v18h18" />
-                    <path d="M7 16l4-8 4 4 5-6" />
-                  </svg>
-                  <h3 className="font-bold">Valuation Benchmarking</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
-                    Access real-time EBITDA multiples and sectoral liquidity maps for the SMB landscape.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <svg className="w-8 h-8" style={{ color: 'var(--tertiary)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 20h9" />
-                    <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
-                  </svg>
-                  <h3 className="font-bold">Teaser Generation</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
-                    Generate high-impact, blind editorial teasers that capture institutional interest instantly.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <svg className="w-8 h-8" style={{ color: 'var(--tertiary)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M12 3v3m0 12v3m-9-9h3m12 0h3m-2.636-6.364l-2.121 2.121m-8.486 8.486l-2.121 2.121m0-12.728l2.121 2.121m8.486 8.486l2.121 2.121" />
-                  </svg>
-                  <h3 className="font-bold">Integration Audit</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
-                    One-click connection to Quickbooks or Xero for an automated preliminary data health check.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <svg className="w-8 h-8" style={{ color: 'var(--tertiary)' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 12l2 2 4-4" />
-                    <path d="M12 2a10 10 0 110 20 10 10 0 010-20z" />
-                  </svg>
-                  <h3 className="font-bold">Buyer Verification</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
-                    Pre-vetting of acquirers against proof-of-funds and past transactional integrity.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="p-8 md:p-12 flex flex-col justify-between rounded-xl" style={{ backgroundColor: 'var(--surface-container-low)' }}>
-              <div>
-                <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: 'var(--tertiary)' }}>
-                  Current State
-                </span>
-                <h3 className="text-3xl font-bold mt-4 mb-6 leading-tight">Zero upfront. Zero risk.</h3>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
-                  We believe in earning our seat at the table. Explore the platform, map your market, and prepare your deal room without spending a dime.
-                </p>
-              </div>
-              <button
-                onClick={() => onChipClick('See for yourself')}
-                className="w-full mt-12 bg-black text-white py-4 font-bold rounded-sm hover:opacity-90 transition-colors"
-                style={{ backgroundColor: 'var(--on-surface)' }}
-              >
-                Launch Free Project
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* Main Fee Structure Cards */}
-        <section className="mb-40">
-          <div className="mb-20">
-            <h2 className="text-[24px] font-bold tracking-tight">Transactional Tiers</h2>
-            <div className="h-[2px] w-20 mt-4" style={{ backgroundColor: 'var(--tertiary)' }} />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-t" style={{ borderColor: 'rgba(219, 193, 186, 0.2)' }}>
-            {/* Card 1: Owner-Operated */}
-            <div className="group py-16 px-8 flex flex-col hover:bg-white transition-colors" style={{ borderRight: '1px solid rgba(219, 193, 186, 0.2)' }}>
-              <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: 'var(--on-surface-variant-60)' }}>
-                Tier 01
-              </span>
-              <h3 className="text-4xl font-black mt-4 mb-2 tracking-tighter">Owner-Operated</h3>
-              <p className="text-sm mb-12" style={{ color: 'var(--on-surface-variant)' }}>
-                Businesses with $500k - $2M EBITDA
-              </p>
-              <div className="mb-12">
-                <div className="text-[48px] md:text-[64px] font-extrabold tracking-tighter leading-none mb-2">3.5%</div>
-                <p className="text-sm font-bold uppercase tracking-widest" style={{ color: 'var(--tertiary)' }}>
-                  Success Fee
-                </p>
-              </div>
-              <ul className="space-y-6 mb-16 text-sm flex-grow list-none p-0">
-                <li className="flex items-start gap-3">
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span>Direct-to-Buyer Narrative Architecture</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span>Standard Virtual Data Room (VDR)</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span>Automated Q&amp;A Management</span>
-                </li>
-              </ul>
-              <button
-                onClick={() => onChipClick('See for yourself')}
-                className="w-full border border-black py-4 font-bold text-sm hover:bg-black hover:text-white transition-all"
-              >
-                Select Tier
-              </button>
-            </div>
-
-            {/* Card 2: Established (Recommended) */}
-            <div className="group py-16 px-8 flex flex-col relative" style={{ backgroundColor: 'var(--surface-container-low)', borderRight: '1px solid rgba(219, 193, 186, 0.2)' }}>
-              <div
-                className="absolute top-0 right-0 text-white text-[10px] font-bold uppercase px-4 py-1 tracking-widest"
-                style={{ backgroundColor: 'var(--tertiary)' }}
-              >
-                Recommended
-              </div>
-              <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: 'var(--on-surface-variant-60)' }}>
-                Tier 02
-              </span>
-              <h3 className="text-4xl font-black mt-4 mb-2 tracking-tighter">Established</h3>
-              <p className="text-sm mb-12" style={{ color: 'var(--on-surface-variant)' }}>
-                Businesses with $2M - $10M EBITDA
-              </p>
-              <div className="mb-12">
-                <div className="text-[48px] md:text-[64px] font-extrabold tracking-tighter leading-none mb-2">2.5%</div>
-                <p className="text-sm font-bold uppercase tracking-widest" style={{ color: 'var(--tertiary)' }}>
-                  Success Fee
-                </p>
-              </div>
-              <ul className="space-y-6 mb-16 text-sm flex-grow list-none p-0">
-                <li className="flex items-start gap-3">
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span>Institutional Quality CIM Production</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span>Full Financial Normalization Support</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span>Targeted Private Equity Outreach</span>
-                </li>
-              </ul>
-              <button
-                onClick={() => onChipClick('See for yourself')}
-                className="w-full bg-black text-white py-4 font-bold text-sm hover:opacity-90 transition-all"
-              >
-                Select Tier
-              </button>
-            </div>
-
-            {/* Card 3: Mid-Market */}
-            <div className="group py-16 px-8 flex flex-col hover:bg-white transition-colors">
-              <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: 'var(--on-surface-variant-60)' }}>
-                Tier 03
-              </span>
-              <h3 className="text-4xl font-black mt-4 mb-2 tracking-tighter">Mid-Market</h3>
-              <p className="text-sm mb-12" style={{ color: 'var(--on-surface-variant)' }}>
-                Businesses with $10M+ EBITDA
-              </p>
-              <div className="mb-12">
-                <div className="text-[48px] md:text-[64px] font-extrabold tracking-tighter leading-none mb-2">1.8%</div>
-                <p className="text-sm font-bold uppercase tracking-widest" style={{ color: 'var(--tertiary)' }}>
-                  Success Fee
-                </p>
-              </div>
-              <ul className="space-y-6 mb-16 text-sm flex-grow list-none p-0">
-                <li className="flex items-start gap-3">
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span>White-Glove Transaction Advisory</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span>Global Strategic Buyer Access</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  <span>Custom Legal &amp; Tax Structuring</span>
-                </li>
-              </ul>
-              <button
-                onClick={() => onChipClick('See for yourself')}
-                className="w-full border border-black py-4 font-bold text-sm hover:bg-black hover:text-white transition-all"
-              >
-                Select Tier
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* Asymmetric Detail Section */}
-        <section className="mb-40 grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
-          <div className="md:col-span-7">
-            <div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl">
-              <img
-                className="w-full h-full object-cover grayscale"
-                alt="Architecture detail of a high-end modern building facade"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAZv2cIW-sLoKtRfiX8Kmmt7ARV8ZHZdCyeZIGzYexA95YzihlTxBzTn4rmp194pPjF_u4yph9F1mxK3uRKpfJx2ebjzN2Ji_wIyD5djOvQ7FUo0DaxL5Q0C27GtINl917nrafNVebTQYeOe223VVhwsnvrkYIXZI0PRMNNupsyqP6UY0F1Gp2_sVFSHVrF5i5u7irkgAh4kQn6Ojv7tmhuRVaMPlWoj6dfAMwFlejQhH8VfsNEjGm2keBExvjTiGY_iY-AbmegNk"
-              />
-              <div className="absolute inset-0 bg-black/10" />
-            </div>
-          </div>
-          <div className="md:col-span-5 md:pl-12">
-            <h2 className="text-4xl font-bold tracking-tight mb-8">Precision-Engineered Exits.</h2>
-            <p className="leading-[1.8] mb-8" style={{ color: 'var(--on-surface-variant)' }}>
-              Traditional investment banking fees are often opaque and misaligned. By leveraging AI to automate the heavy lifting of data normalization and teaser generation, we pass the efficiency directly to you. No retainers. No hidden costs.
+      {/* ═══ 1. HERO ═══ */}
+      <section className="relative pt-32 pb-40 overflow-hidden">
+        <div className="max-w-[1200px] mx-auto px-6 relative z-10">
+          <ScrollReveal>
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#6B6B65] mb-6 block">
+              Transparent Pricing
+            </span>
+          </ScrollReveal>
+          <ScrollReveal delay={0.1}>
+            <h1 className="font-display italic font-bold text-[48px] md:text-[72px] lg:text-[88px] leading-[0.95] tracking-tight text-[#1A1A18] max-w-5xl mb-8">
+              Start free. Stay because it works.
+            </h1>
+          </ScrollReveal>
+          <ScrollReveal delay={0.2}>
+            <p className="max-w-2xl text-xl md:text-2xl text-[#6B6B65] leading-relaxed font-headline italic">
+              Before you spend anything — before you create an account — Yulia delivers real analysis from a conversation.
             </p>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-4 py-4" style={{ borderBottom: '1px solid rgba(219, 193, 186, 0.2)' }}>
-                <span className="text-2xl font-bold" style={{ color: 'var(--tertiary)' }}>01</span>
-                <span className="font-medium">No engagement retainers</span>
-              </div>
-              <div className="flex items-center gap-4 py-4" style={{ borderBottom: '1px solid rgba(219, 193, 186, 0.2)' }}>
-                <span className="text-2xl font-bold" style={{ color: 'var(--tertiary)' }}>02</span>
-                <span className="font-medium">No marketing overhead fees</span>
-              </div>
-              <div className="flex items-center gap-4 py-4" style={{ borderBottom: '1px solid rgba(219, 193, 186, 0.2)' }}>
-                <span className="text-2xl font-bold" style={{ color: 'var(--tertiary)' }}>03</span>
-                <span className="font-medium">Direct alignment with exit value</span>
+          </ScrollReveal>
+        </div>
+        <div className="absolute -right-20 top-20 w-[600px] h-[600px] bg-[#D4714E]/5 rounded-full blur-3xl pointer-events-none" />
+      </section>
+
+      {/* ═══ 2. FREE FOREVER ═══ */}
+      <section className="py-32 bg-[#F5F3EF]">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="grid md:grid-cols-12 gap-16 items-start">
+            <div className="md:col-span-7">
+              <ScrollReveal>
+                <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+                  Free Forever
+                </span>
+              </ScrollReveal>
+              <ScrollReveal delay={0.08}>
+                <h2 className="font-headline italic text-5xl text-[#1A1A18] mb-8 leading-tight">
+                  These aren&apos;t previews. They&apos;re complete analyses.
+                </h2>
+              </ScrollReveal>
+              <ScrollReveal delay={0.12}>
+                <p className="text-lg text-[#6B6B65] leading-relaxed mb-10">
+                  Free forever. No credit card. No catch.
+                </p>
+              </ScrollReveal>
+              <div className="space-y-0">
+                {FREE_DELIVERABLES.map((item, i) => (
+                  <ScrollReveal key={i} delay={i * 0.04}>
+                    <div className="flex items-start gap-4 py-4 border-t border-[#DCC1B9]/30 first:border-t-0">
+                      <div className="w-6 h-6 rounded-full border border-[#D4714E] flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="material-symbols-outlined text-[14px] text-[#D4714E]" style={{ fontVariationSettings: "'FILL' 1" }}>check</span>
+                      </div>
+                      <span className="text-[#1A1A18] leading-relaxed">{item}</span>
+                    </div>
+                  </ScrollReveal>
+                ))}
               </div>
             </div>
+            <div className="md:col-span-5 sticky top-32">
+              <ScrollReveal delay={0.15}>
+                <div className="bg-white p-10 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/30">
+                  <span className="font-mono text-6xl font-bold text-[#D4714E] block mb-2">$0</span>
+                  <span className="font-sans uppercase tracking-widest text-xs font-bold text-[#6B6B65]">Complete Analysis</span>
+                  <p className="text-sm text-[#6B6B65] mt-4 leading-relaxed">Seven deliverables. Real data. Sovereign sources. No credit card required.</p>
+                  <div className="mt-8 bg-[#F5F3EF] p-4 rounded-lg">
+                    <pre className="font-mono text-[10px] text-[#55433C] leading-tight whitespace-pre">{`// VALUE_ANALYSIS
+{
+ "deliverables": 7,
+ "data_sources": 6,
+ "cost": 0,
+ "catch": null
+}`}</pre>
+                  </div>
+                </div>
+              </ScrollReveal>
+            </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
+
+      {/* ═══ 3. PLATFORM FEES ═══ */}
+      <section className="py-32">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <ScrollReveal>
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#6B6B65] mb-6 block">
+              Platform Fees
+            </span>
+          </ScrollReveal>
+          <ScrollReveal delay={0.08}>
+            <h2 className="font-headline italic text-5xl text-[#1A1A18] mb-8 max-w-3xl leading-tight">
+              When you&apos;re ready to execute, one fee covers everything.
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.12}>
+            <p className="text-lg text-[#6B6B65] leading-relaxed max-w-[620px] mb-16">
+              One decision. One checkout. Everything through closing.
+            </p>
+          </ScrollReveal>
+          <div className="grid md:grid-cols-2 gap-8">
+            {TIERS.map((tier, i) => (
+              <ScrollReveal key={tier.title} delay={i * 0.06}>
+                <div className={`bg-white rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border-t-4 ${i === 0 ? 'border-[#D4714E]' : 'border-[#DCC1B9]/30'} h-full flex flex-col transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)]`}>
+                  <div className="flex items-baseline justify-between mb-4">
+                    <h3 className="font-bold text-[#1A1A18] text-lg">{tier.title}</h3>
+                    <span className="font-mono text-3xl text-[#D4714E] font-bold">{tier.price}</span>
+                  </div>
+                  <p className="text-xs text-[#6B6B65] uppercase tracking-wider">{tier.sde}</p>
+                  <p className="text-sm text-[#6B6B65] mt-1 font-headline italic">{tier.desc}</p>
+                  <p className="mt-4 text-sm leading-relaxed text-[#6B6B65] flex-1">{tier.body}</p>
+                  <p className="mt-4 text-xs text-[#6B6B65]/60 pt-4 border-t border-[#DCC1B9]/20">
+                    For context: {tier.context}
+                  </p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+          <ScrollReveal delay={0.3}>
+            <div className="mt-8 bg-[#F5F3EF] rounded-2xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div>
+                <div className="flex items-baseline gap-4 mb-2">
+                  <h3 className="font-bold text-[#1A1A18] text-lg">Institutional</h3>
+                  <span className="font-headline italic text-2xl text-[#D4714E]">Custom</span>
+                </div>
+                <p className="text-xs text-[#6B6B65] uppercase tracking-wider">EBITDA $10M+</p>
+                <p className="mt-2 text-sm text-[#6B6B65]">Enterprise engagement. Dedicated support. API access.</p>
+              </div>
+              <button
+                onClick={() => onChipClick('Tell me about institutional pricing')}
+                className="shrink-0 border border-[#1A1A18] text-[#1A1A18] px-8 py-3 font-bold uppercase text-sm tracking-wider hover:bg-[#1A1A18] hover:text-white transition-all rounded-xl"
+              >
+                Contact Sales
+              </button>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ═══ 4. HOW IT SURFACES — Conversation ═══ */}
+      <section className="py-32 bg-[#F5F3EF]">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <ScrollReveal>
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+              How It Works
+            </span>
+          </ScrollReveal>
+          <ScrollReveal delay={0.08}>
+            <h2 className="font-headline italic text-5xl text-[#1A1A18] mb-12 max-w-3xl leading-tight">
+              You don&apos;t pick a plan. Your deal reveals the fee.
+            </h2>
+          </ScrollReveal>
+          <div className="max-w-[700px]">
+            <ScrollReveal delay={0.16}>
+              <ConversationTyping messages={CONVO_MESSAGES} />
+            </ScrollReveal>
+          </div>
+          <ScrollReveal delay={0.2}>
+            <p className="mt-8 text-lg text-[#6B6B65] leading-relaxed max-w-[620px]">
+              The free analysis is complete on its own. The platform fee surfaces only when you&apos;re ready to run the deal.
+            </p>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ═══ 5. FOR ADVISORS ═══ */}
+      <section className="py-32">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-start gap-20">
+            <div className="md:w-1/2">
+              <ScrollReveal>
+                <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#6B6B65] mb-6 block">
+                  For Advisors
+                </span>
+              </ScrollReveal>
+              <ScrollReveal delay={0.08}>
+                <h2 className="font-headline italic text-5xl text-[#1A1A18] mb-8 leading-tight">
+                  Your expertise multiplied.
+                </h2>
+              </ScrollReveal>
+              <ScrollReveal delay={0.12}>
+                <p className="text-lg text-[#6B6B65] leading-relaxed">
+                  Your clients pay their own platform fees. Your subscription covers your tools and branded outputs.
+                </p>
+              </ScrollReveal>
+            </div>
+            <div className="md:w-1/2 w-full space-y-4">
+              {ADVISOR_TIERS.map((tier, i) => (
+                <ScrollReveal key={tier.title} delay={0.1 + i * 0.06}>
+                  <div className="bg-white rounded-2xl p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20">
+                    <div className="flex items-baseline justify-between mb-2">
+                      <h3 className="font-bold text-[#1A1A18] text-lg">{tier.title}</h3>
+                      <span className="text-[#D4714E] font-bold font-mono">{tier.price}</span>
+                    </div>
+                    <p className="text-sm text-[#6B6B65]">{tier.desc}</p>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 6. HUMAN PROFESSIONALS ═══ */}
+      <section className="py-32 bg-[#F5F3EF]">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <ScrollReveal>
+            <h2 className="font-headline italic text-4xl md:text-5xl leading-tight text-[#1A1A18] max-w-3xl mb-8">
+              When you need a human, Yulia connects you.
+            </h2>
+          </ScrollReveal>
+          <div className="max-w-[620px] space-y-6">
+            <ScrollReveal delay={0.08}>
+              <p className="text-lg text-[#6B6B65] leading-relaxed">Yulia generates analysis and documents. She doesn&apos;t practice law, prepare tax returns, or hold a broker&apos;s license. When your deal needs a licensed professional — and most do — she connects you to vetted M&amp;A attorneys, transaction CPAs, SBA lenders, and business appraisers.</p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.12}>
+              <p className="text-lg text-[#1A1A18] leading-relaxed font-bold border-l-4 border-[#D4714E] pl-8 italic">
+                The platform handles the intelligence and the process. The professionals handle judgment, negotiation, and fiduciary responsibility. That&apos;s not a limitation. That&apos;s how deals should work.
+              </p>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 7. FAQ ═══ */}
+      <section className="py-32">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <ScrollReveal>
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#6B6B65] mb-6 block">
+              Questions
+            </span>
+          </ScrollReveal>
+          <div className="max-w-[620px] space-y-0">
+            {FAQS.map((faq, i) => (
+              <ScrollReveal key={i} delay={i * 0.06}>
+                <div className="py-8 border-t border-[#DCC1B9]/30 first:border-t-0">
+                  <h3 className="font-bold text-[#1A1A18] text-lg mb-3">{faq.q}</h3>
+                  <p className="text-[#6B6B65] leading-relaxed">{faq.a}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 8. DARK CTA ═══ */}
+      <section className="py-32 bg-[#1c1917] relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D4714E] rounded-full opacity-[0.15] blur-[80px]" />
+        </div>
+        <div className="max-w-[1200px] mx-auto px-6 relative z-10 text-center">
+          <ScrollReveal>
+            <h2 className="font-display italic font-bold text-white text-[48px] md:text-[72px] mb-12">
+              Start with clarity.
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.1}>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+              <button
+                onClick={() => onChipClick('Tell me about pricing')}
+                className="bg-white text-[#0c0a09] px-10 py-5 rounded-3xl font-bold text-lg hover:scale-105 transition-transform"
+              >
+                Start a conversation
+              </button>
+              <button
+                onClick={() => onChipClick('I want to talk to Yulia')}
+                className="bg-transparent border border-white/20 text-white px-10 py-5 rounded-3xl font-bold text-lg hover:bg-white/10 transition-colors"
+              >
+                Message Yulia
+              </button>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
     </div>
   );
 }

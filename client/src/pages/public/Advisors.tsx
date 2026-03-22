@@ -26,7 +26,7 @@ export default function Advisors() {
   };
 
   return (
-    <div style={{ fontFamily: "'General Sans', 'Inter', system-ui, sans-serif", WebkitFontSmoothing: 'antialiased', background: T.bg, minHeight: '100dvh' }}>
+    <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", WebkitFontSmoothing: 'antialiased', background: T.bg, minHeight: '100dvh' }}>
       <ScrollProgressBar />
       <style>{`
         .adv-section {

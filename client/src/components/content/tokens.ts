@@ -5,7 +5,7 @@
  */
 
 /* ─── Font ─── */
-export const font = "'Inter', system-ui, -apple-system, sans-serif";
+export const font = "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif";
 export const mono = "'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', ui-monospace, monospace";
 
 /* ─── Colors ─── */

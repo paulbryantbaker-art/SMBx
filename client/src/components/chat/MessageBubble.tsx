@@ -44,7 +44,7 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
           padding: '10px 14px',
           borderRadius: '16px 16px 4px 16px',
           fontSize: 14, lineHeight: 1.5, fontWeight: 450,
-          fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
           overflowWrap: 'break-word' as const,
         }}>
           <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{message.content}</p>
@@ -78,7 +78,7 @@ export default function MessageBubble({ message, showAvatar = true }: MessageBub
         style={{
           fontSize: 14, lineHeight: 1.65, fontWeight: 400,
           color: '#1A1A1A',
-          fontFamily: "'General Sans', 'Inter', system-ui, sans-serif",
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
           overflowWrap: 'break-word' as const,
           userSelect: 'text',
           WebkitUserSelect: 'text',

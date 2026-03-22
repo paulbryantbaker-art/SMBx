@@ -1,207 +1,206 @@
-interface IntegrateBelowProps {
-  onChipClick: (text: string) => void;
-}
+import { ScrollReveal } from './animations';
 
-export default function IntegrateBelow({ onChipClick }: IntegrateBelowProps) {
+const PHASES = [
+  {
+    num: '01',
+    phase: 'Stabilize',
+    period: 'Day 1–30',
+    filled: true,
+    body: "Day Zero: passwords, bank accounts, insurance, physical access — forty items most new owners forget. Meet every employee individually. Call the top twenty customers. Secure every vendor relationship. And the hardest discipline of all for a new owner: change nothing. The business works. Learn why before you change how.",
+  },
+  {
+    num: '02',
+    phase: 'Optimize',
+    period: 'Day 30–90',
+    filled: false,
+    body: "Now you've learned it from the inside. Capture the quick wins your DD identified. Install financial controls — many acquired businesses have surprisingly loose cash management. Fix the operational gaps. Start measuring the KPIs that actually matter for your thesis.",
+  },
+  {
+    num: '03',
+    phase: 'Grow',
+    period: 'Day 90–180',
+    filled: false,
+    body: "Execute the value creation plan. Track monthly: revenue vs. model, EBITDA vs. model, customer retention, employee retention. The scorecard that tells you whether reality is matching what you underwrote — and what to adjust when it isn't.",
+  },
+];
+
+export default function IntegrateBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
-    <div className="stitch-integrate">
-      <style>{`
-        .stitch-integrate {
-          --on-surface: #1a1c1c;
-          --surface: #f9f9f9;
-          --tertiary: #95432b;
-          --on-surface-variant: #55433d;
-          --surface-container-lowest: #ffffff;
-          --surface-container-low: #f3f3f3;
-          --surface-container: #eeeeee;
-          --surface-container-high: #e8e8e8;
-          --surface-container-highest: #e2e2e2;
-          --outline-variant: #dbc1ba;
-          color: var(--on-surface);
-          background-color: var(--surface);
-          font-family: 'Inter', sans-serif;
-        }
-        .stitch-integrate .ghost-border {
-          border: 1px solid rgba(219, 193, 186, 0.2);
-        }
-        .stitch-integrate .editorial-shadow {
-          box-shadow: 0 10px 24px -12px rgba(26, 28, 28, 0.04);
-        }
-        .stitch-integrate .text-tertiary {
-          color: var(--tertiary);
-        }
-        .stitch-integrate .text-on-surface {
-          color: var(--on-surface);
-        }
-        .stitch-integrate .text-on-surface-variant {
-          color: var(--on-surface-variant);
-        }
-        .stitch-integrate .bg-surface-container-low {
-          background-color: var(--surface-container-low);
-        }
-        .stitch-integrate .bg-surface-container-lowest {
-          background-color: var(--surface-container-lowest);
-        }
-        .stitch-integrate .bg-surface-container-highest {
-          background-color: var(--surface-container-highest);
-        }
-        .stitch-integrate .bg-surface-container {
-          background-color: var(--surface-container);
-        }
-        .stitch-integrate .border-surface-container {
-          border-color: var(--surface-container);
-        }
-        .stitch-integrate .bg-outline-variant {
-          background-color: var(--outline-variant);
-        }
-      `}</style>
+    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#D4714E] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-      {/* Hero Section: Editorial Architecture */}
-      <section className="max-w-[1440px] mx-auto px-12 pt-[150px] pb-[200px]">
-        <div className="max-w-4xl">
-          <span className="label-sm text-tertiary font-bold tracking-[0.05em] uppercase text-[11px] mb-6 block">
-            Integrate / The Post-Deal Engine
-          </span>
-          <h1 className="text-black text-[64px] font-extrabold leading-[1.1] tracking-tighter mb-12">
-            70% of acquisitions fail to deliver the returns that justified the price.
-          </h1>
-          <p className="text-on-surface-variant text-[16px] leading-[1.6] max-w-2xl">
-            Integration is where value is either realized or lost. SMBX.ai transforms the chaotic post-closing period into a structured architectural process through Yulia AI's 180-Day Execution Engine.
-          </p>
-          <div className="mt-12">
+      {/* ═══ 1. HERO ═══ */}
+      <section className="relative pt-48 pb-32 overflow-hidden">
+        <div className="max-w-[1200px] mx-auto px-6 relative z-10">
+          <ScrollReveal>
+            <span className="font-sans uppercase tracking-[0.3em] text-xs font-semibold text-[#D4714E] mb-8 block">
+              Post-Close Intelligence
+            </span>
+          </ScrollReveal>
+          <ScrollReveal delay={0.1}>
+            <h1 className="font-display italic font-bold text-[48px] md:text-[72px] lg:text-[88px] leading-[0.95] tracking-tight text-[#1A1A18] max-w-4xl mb-12">
+              The deal doesn&apos;t end at close
+            </h1>
+          </ScrollReveal>
+          <ScrollReveal delay={0.2}>
+            <p className="text-xl md:text-2xl text-[#6B6B65] max-w-2xl leading-relaxed">
+              70% of acquisitions fail to deliver the returns that justified the price. Not because the thesis was wrong. Because the execution was unstructured.
+            </p>
+          </ScrollReveal>
+        </div>
+        <div className="absolute -right-20 top-40 w-96 h-96 bg-[#D4714E]/5 rounded-full blur-3xl pointer-events-none" />
+      </section>
+
+      {/* ═══ 2. THE 70% PROBLEM ═══ */}
+      <section className="py-32 bg-[#F5F3EF]">
+        <div className="max-w-[1200px] mx-auto px-6 grid md:grid-cols-12 gap-16 items-start">
+          <div className="md:col-span-5">
+            <ScrollReveal>
+              <span className="font-sans uppercase tracking-[0.3em] text-xs font-semibold text-[#6B6B65] mb-6 block">
+                The Integration Gap
+              </span>
+            </ScrollReveal>
+            <ScrollReveal delay={0.08}>
+              <h2 className="font-headline italic text-4xl md:text-5xl leading-tight text-[#1A1A18] mb-8">
+                The intensity of the deal creates a natural letdown the day after close
+              </h2>
+            </ScrollReveal>
+            <ScrollReveal delay={0.16}>
+              <div className="bg-white p-10 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20">
+                <span className="font-mono text-5xl font-bold text-[#D4714E] block mb-2">70%</span>
+                <span className="font-sans uppercase tracking-widest text-xs font-bold text-[#6B6B65]">Acquisition Failure Rate</span>
+              </div>
+            </ScrollReveal>
+          </div>
+          <div className="md:col-span-7 space-y-6">
+            <ScrollReveal delay={0.1}>
+              <p className="text-lg text-[#6B6B65] leading-relaxed">
+                I&apos;ve seen it happen the same way every time. Months of evaluation, negotiation, diligence, financing, legal work — it creates its own gravity. And then it&apos;s done.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.14}>
+              <p className="text-lg text-[#6B6B65] leading-relaxed">
+                The DD findings that should be driving every decision for the next six months are scattered across email threads and shared folders. The financial model that justified the purchase price is a spreadsheet on someone&apos;s laptop.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.18}>
+              <p className="text-lg text-[#1A1A18] leading-relaxed font-medium">
+                Nobody has a plan for Monday morning.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.22}>
+              <p className="text-lg text-[#6B6B65] leading-relaxed">
+                The employees are watching. Some are updating their resumes. The customers haven&apos;t been told. The vendors are wondering if terms change under new ownership. And the new owner is improvising.
+              </p>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 3. 180-DAY PLAN — Dark Timeline ═══ */}
+      <section className="py-32 bg-[#1c1917] text-stone-100">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="max-w-3xl mb-24">
+            <ScrollReveal>
+              <span className="font-sans uppercase tracking-[0.3em] text-xs font-semibold text-[#D4714E] mb-6 block">
+                The 180-Day Plan
+              </span>
+            </ScrollReveal>
+            <ScrollReveal delay={0.08}>
+              <h2 className="font-headline italic text-5xl md:text-6xl leading-tight mb-8 text-white">
+                Your plan, built from your deal
+              </h2>
+            </ScrollReveal>
+            <ScrollReveal delay={0.12}>
+              <p className="text-xl text-stone-400 leading-relaxed">
+                When your deal closes on smbX.ai, Yulia doesn&apos;t stop. She carries forward everything — DD findings, risk flags, financial model, operational gaps, customer data — and builds a 180-day plan specific to this business, this deal, these findings.
+              </p>
+            </ScrollReveal>
+          </div>
+          <div className="grid md:grid-cols-3 gap-12">
+            {PHASES.map((step, i) => (
+              <ScrollReveal key={step.phase} delay={i * 0.08}>
+                <div className="space-y-8">
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center font-mono text-xl font-bold ${
+                    step.filled ? 'bg-[#D4714E] text-white' : 'border border-stone-700 text-stone-400'
+                  }`}>
+                    {step.num}
+                  </div>
+                  <div>
+                    <h3 className="font-headline italic text-3xl mb-4 text-white">
+                      {step.phase.toUpperCase()}{' '}
+                      <span className="text-stone-500 text-lg block not-italic font-mono mt-1">({step.period})</span>
+                    </h3>
+                    <p className="text-stone-400 leading-relaxed">{step.body}</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+          <ScrollReveal delay={0.3}>
+            <div className="mt-24 pt-12 border-t border-stone-800 text-center">
+              <p className="font-headline italic text-2xl text-stone-500">
+                Not a template downloaded from a blog. <span className="text-stone-300">Your plan, built from your deal.</span>
+              </p>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ═══ 4. CLOSING EDITORIAL ═══ */}
+      <section className="py-32 overflow-hidden">
+        <div className="max-w-[1200px] mx-auto px-6 flex flex-col md:flex-row gap-20 items-center">
+          <div className="flex-1">
+            <ScrollReveal>
+              <h2 className="font-headline italic text-4xl md:text-5xl leading-tight text-[#1A1A18] mb-10">
+                The first Monday after close doesn&apos;t have to be terrifying.
+              </h2>
+            </ScrollReveal>
+            <div className="space-y-8 max-w-xl">
+              <ScrollReveal delay={0.08}>
+                <p className="text-lg text-[#6B6B65] leading-relaxed">
+                  If you did the work, that Monday morning is the beginning of something. You have a plan built from months of intelligence. You know this business — the risks, the opportunities, the people — because you studied it from every angle before you committed.
+                </p>
+              </ScrollReveal>
+              <ScrollReveal delay={0.12}>
+                <p className="text-lg text-[#1A1A18] leading-relaxed font-bold border-l-4 border-[#D4714E] pl-8 italic">
+                  That&apos;s the difference between the 70% who fail to capture value and the 30% who do.
+                </p>
+              </ScrollReveal>
+            </div>
+          </div>
+          <div className="flex-1 w-full">
+            <ScrollReveal delay={0.15}>
+              <div className="relative group">
+                <div className="absolute inset-0 bg-[#D4714E]/10 rounded-2xl -rotate-3 scale-105 transition-transform group-hover:rotate-0" />
+                <div className="relative z-10 w-full aspect-[4/5] bg-gradient-to-br from-stone-200 to-stone-300 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] flex items-center justify-center">
+                  <span className="material-symbols-outlined text-stone-400 text-8xl">business_center</span>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 5. CTA ═══ */}
+      <section className="py-48 bg-[#F5F3EF] relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D4714E]/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="max-w-[1200px] mx-auto px-6 text-center relative z-10">
+          <ScrollReveal>
+            <h2 className="font-display italic font-bold text-[48px] md:text-[80px] text-[#1A1A18] mb-12">
+              Build from day one.
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.1}>
             <button
-              onClick={() => onChipClick('Tell Yulia about your acquisition')}
-              className="bg-black text-white px-10 py-5 font-bold tracking-tight hover:bg-[#C96B4F] transition-all"
+              onClick={() => onChipClick('I need help with integration')}
+              className="bg-[#974223] text-white px-12 py-6 rounded-lg font-sans uppercase tracking-[0.2em] text-sm font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
             >
               Tell Yulia about your acquisition
             </button>
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
-      {/* The Timeline: Rhythmic Zig-Zag */}
-      <section className="bg-surface-container-low py-[200px]">
-        <div className="max-w-[1200px] mx-auto px-12 relative">
-          <div className="absolute left-1/2 top-0 bottom-0 w-px bg-outline-variant opacity-20 hidden lg:block" />
-
-          {/* Phase 1: Stabilize */}
-          <div className="flex flex-col lg:flex-row items-center mb-[180px] group">
-            <div className="w-full lg:w-1/2 lg:pr-24 flex justify-end">
-              <div className="bg-surface-container-lowest p-11 rounded-xl ghost-border editorial-shadow max-w-md transition-transform duration-500 hover:-translate-y-2">
-                <span className="text-tertiary font-bold label-sm block mb-4">PHASE 01 (DAYS 1-60)</span>
-                <h3 className="text-black text-3xl font-bold mb-6 tracking-tight">Stabilize</h3>
-                <p className="text-on-surface-variant leading-relaxed">
-                  Immediate focus on culture, payroll continuity, and customer retention. Yulia AI audits all operational workflows to identify &ldquo;Day 1&rdquo; risks before they become liabilities.
-                </p>
-                <div className="mt-8 pt-8 border-t border-surface-container flex items-center gap-4">
-                  <span className="material-symbols-outlined text-tertiary" data-icon="verified_user">verified_user</span>
-                  <span className="text-sm font-medium">Risk Mitigation Framework</span>
-                </div>
-              </div>
-            </div>
-            <div className="hidden lg:flex w-16 h-16 bg-black rounded-full items-center justify-center text-white z-10 -ml-8">01</div>
-            <div className="w-full lg:w-1/2 lg:pl-24 mt-8 lg:mt-0">
-              <div className="w-full h-64 bg-surface-container-highest rounded-lg relative overflow-hidden">
-                <img
-                  className="w-full h-full object-cover grayscale opacity-80"
-                  alt="Abstract architectural lines showing stability and structure"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfbEi0zSkflWD-MkkqzgdFaav5E6IC0b4Snp_cqwMmTCWHk56iLyTfaFasNsMmfSiQr71T3u6m5WGvqdVde7bl_J6l1D5RSi-uWBoHCHTDLtvBE4dgArDj8RbF-JJkOqqg3O8YHBEQu5aRcQ5gIrrw2PmVTLCl74Pm4iBszA2hPuS0wxTaijBqe9DwTHfdF244zLIiURpxQQOoHjfpe9UYiUewIsUrguPbNCKrGv8Fy5DjW14azDgpnaYyf2KjloVsYHa0qAW793c"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Phase 2: Optimize */}
-          <div className="flex flex-col lg:flex-row-reverse items-center mb-[180px] group">
-            <div className="w-full lg:w-1/2 lg:pl-24">
-              <div className="bg-surface-container-lowest p-11 rounded-xl ghost-border editorial-shadow max-w-md transition-transform duration-500 hover:-translate-y-2">
-                <span className="text-tertiary font-bold label-sm block mb-4">PHASE 02 (DAYS 61-120)</span>
-                <h3 className="text-black text-3xl font-bold mb-6 tracking-tight">Optimize</h3>
-                <p className="text-on-surface-variant leading-relaxed">
-                  Tech-stack consolidation and cost-efficiency protocols. We remove redundancies and align the new asset&apos;s operations with your core platform&apos;s scaling architecture.
-                </p>
-                <div className="mt-8 pt-8 border-t border-surface-container flex items-center gap-4">
-                  <span className="material-symbols-outlined text-tertiary" data-icon="bolt">bolt</span>
-                  <span className="text-sm font-medium">Efficiency Engine Mapping</span>
-                </div>
-              </div>
-            </div>
-            <div className="hidden lg:flex w-16 h-16 bg-black rounded-full items-center justify-center text-white z-10 -mr-8">02</div>
-            <div className="w-full lg:w-1/2 lg:pr-24 mt-8 lg:mt-0 flex justify-end">
-              <div className="w-full h-64 bg-surface-container-highest rounded-lg relative overflow-hidden max-w-md">
-                <img
-                  className="w-full h-full object-cover grayscale opacity-80"
-                  alt="Abstract motion blur representing speed and optimization"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFdbpqgQi-yPBcs4ejLewcWuPecjurPiry5yMpJIZPJWIYu4NICrDrbjCGtOYWUA_5c1qzzurv_TUYNgPmZvwUprXddDpAhjSoe43F5HX7hLvCsO5rDhRhtYzAa5vhM9JYAIrExqoY_kczAS9GJ9bAgsNrb5wDAO05ZtLhXVTQ4QUtuy2kfjRgZzfabGewo1ZhzT3xj_XSBZUw4rMVc9uCW8qmbozJ5lRB8jULS1TdZvcK1RpthalQx0lawYx0n6Tu64hiLKTBdeE"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Phase 3: Grow */}
-          <div className="flex flex-col lg:flex-row items-center group">
-            <div className="w-full lg:w-1/2 lg:pr-24 flex justify-end">
-              <div className="bg-surface-container-lowest p-11 rounded-xl ghost-border editorial-shadow max-w-md transition-transform duration-500 hover:-translate-y-2">
-                <span className="text-tertiary font-bold label-sm block mb-4">PHASE 03 (DAYS 121-180)</span>
-                <h3 className="text-black text-3xl font-bold mb-6 tracking-tight">Grow</h3>
-                <p className="text-on-surface-variant leading-relaxed">
-                  Shifting from defense to offense. Implementation of cross-selling strategies and expansion playbooks. The asset is now fully integrated and ready for accelerated output.
-                </p>
-                <div className="mt-8 pt-8 border-t border-surface-container flex items-center gap-4">
-                  <span className="material-symbols-outlined text-tertiary" data-icon="trending_up">trending_up</span>
-                  <span className="text-sm font-medium">Scale Multiplier Active</span>
-                </div>
-              </div>
-            </div>
-            <div className="hidden lg:flex w-16 h-16 bg-black rounded-full items-center justify-center text-white z-10 -ml-8">03</div>
-            <div className="w-full lg:w-1/2 lg:pl-24 mt-8 lg:mt-0">
-              <div className="w-full h-64 bg-surface-container-highest rounded-lg relative overflow-hidden">
-                <img
-                  className="w-full h-full object-cover grayscale opacity-80"
-                  alt="Abstract upward architectural perspective representing growth"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5lyjRcVUeS9s1OBq8dhZnIOB3SxemWA5Aj-G9CYtcd3bSTuX4MiVgSRb_hg209T2SpEV3okKVPnl-JTgDkHr8tgDE8fB-2SV-N4hXypRlPskIDaJ63TfcZmQVnP8HvDtwPaBE7a1rpMQQuCkfpEbO6guGzyU9XVTfJbHXBcn14EDM3vFd_cNmECiUCRijcVtEHswjV9l-Igsuv2ZGwBRGQDOavlseQAZzTqwRMWea37pwt4mDQKIte31pMpaGOXQen_f7J0OACqw"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Quote/Editorial Block */}
-      <section className="max-w-[1440px] mx-auto px-12 py-[200px]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-24 items-start">
-          <div>
-            <h2 className="text-black text-[40px] font-bold tracking-tighter leading-tight mb-8">The smbx.ai Standard</h2>
-            <p className="text-on-surface-variant text-lg leading-loose mb-8">
-              Traditional M&amp;A firms hand you a report and leave. We provide the editorial architect &mdash; Yulia AI &mdash; who stays through the entire 180-day journey, ensuring every brick of the integration is laid with precision.
-            </p>
-            <div className="p-8 border-l-4 border-[#C96B4F] bg-surface-container-low">
-              <p className="italic text-on-surface text-xl">&ldquo;Integration is not a checklist; it&apos;s a narrative transformation.&rdquo;</p>
-            </div>
-          </div>
-          <div className="aspect-square bg-surface-container-highest relative">
-            <img
-              className="w-full h-full object-cover grayscale"
-              alt="Minimalist designer office with high-end furniture"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxbn022IUjJRQHvmv9AR581Wd_ytdrKwKqO3GLryjBa2VLjYycziHchUtc7v2jiks6-IDkjFc3UqHMvnWXCTA3YXzMAQPOT__Ay5SnanRnK2mbtvEx5qzIpR6i5ahqxPkFye39Q2LpU9NMowv6NcEoZpc8umyfrHgwT1MCEZtuNCT8tMGYwVeadU90Wi-x7YvHLjatkZTY1uve9xpb4pSNQAgE8gWQEsto91GAC_DANDvH3qycZ87PLtvd-DbqSz0FMT5oTMfrc2Q"
-            />
-            <div className="absolute inset-0 bg-black/10" />
-          </div>
-        </div>
-      </section>
-
-      {/* Bottom CTA */}
-      <section className="bg-black py-[120px] text-white">
-        <div className="max-w-[1440px] mx-auto px-12 text-center">
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-12">Ready to secure the returns?</h2>
-          <button
-            onClick={() => onChipClick('Tell Yulia about your acquisition')}
-            className="bg-[#C96B4F] text-white px-12 py-6 text-xl font-bold hover:bg-white hover:text-black transition-all"
-          >
-            Tell Yulia about your acquisition
-          </button>
-        </div>
-      </section>
     </div>
   );
 }

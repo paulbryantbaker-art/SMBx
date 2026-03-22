@@ -1,255 +1,354 @@
-interface HowItWorksBelowProps {
-  onChipClick: (text: string) => void;
-}
+import { ScrollReveal, ConversationTyping } from './animations';
 
-export default function HowItWorksBelow({ onChipClick }: HowItWorksBelowProps) {
+const DATA_SOURCES = [
+  { source: 'Census Bureau', body: "Business counts by 6-digit NAICS, MSA, and size class. When Yulia says \"847 HVAC businesses in DFW,\" that's verifiable at data.census.gov." },
+  { source: 'BLS', body: "Wage benchmarks and employment trends by metro. When she benchmarks your labor costs, it's your MSA — not a national average hiding a 40% variation between markets." },
+  { source: 'FRED', body: "Live rates. SBA financing modeled at today's Prime, updated with every Fed decision." },
+  { source: 'SEC EDGAR', body: "Public filings, comparable transactions, PE activity. When she identifies fourteen platforms acquiring HVAC in Texas, that's tracked from real filings." },
+  { source: 'SBA Lender Activity', body: 'Approval rates, deal sizes, lender preferences by region and industry.' },
+  { source: 'IRS SOI', body: 'Industry profitability and deduction patterns. Where the add-back intelligence comes from.' },
+];
+
+const SEVEN_LAYERS = [
+  { title: 'Industry Structure', body: "Competitive density. Fragmentation vs. consolidation. Who dominates. Who's being acquired." },
+  { title: 'Regional Economics', body: 'MSA-level wages, cost of living, business formation, demographics. The local reality national data hides.' },
+  { title: 'Financial Normalization', body: 'SDE or EBITDA done properly. Add-backs from IRS benchmarks. Margin benchmarking against your metro.' },
+  { title: 'Buyer Landscape', body: "PE platforms, strategic acquirers, SBA individuals, search funds — who's buying in your space right now." },
+  { title: 'Deal Architecture', body: 'Structure optimization. SBA bankability. Tax modeling. Earnout design. Purchase price allocation.' },
+  { title: 'Risk Assessment', body: 'Customer concentration, owner dependency, key person, regulatory exposure, revenue sustainability.' },
+  { title: 'Forward Signals', body: 'Growth projections, wage inflation, rate impacts, regulatory changes, technology disruption. Where the market is heading.' },
+];
+
+const CONVO_MESSAGES = [
+  { role: 'user' as const, text: 'Thinking about selling my HVAC company. $4.2M revenue, $780K EBITDA. DFW area.' },
+  { role: 'assistant' as const, text: 'HVAC in DFW — strong market right now.\n\n$780K EBITDA → current multiples 4.8×–6.2×.\nPreliminary value: $3.74M–$4.84M.\n\n847 HVAC businesses in DFW (Census). Commercial-focused: ~12%. 14 active PE platforms in Texas.\n\nYour margin at 18.6% is below the 21% industry median for DFW. That gap represents ~$101K in potential EBITDA improvement — worth $485K–$626K in additional enterprise value.\n\n[Census 238220 · BLS OES DFW · SBA Q3 2025]' },
+];
+
+export default function HowItWorksBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
-    <div className="stitch-howitworks">
-      <style>{`
-        .stitch-howitworks {
-          --on-surface: #1a1c1c;
-          --surface: #f9f9f9;
-          --tertiary: #95432b;
-          --on-surface-variant: #55433d;
-          --surface-container-lowest: #ffffff;
-          --surface-container-low: #f3f3f3;
-          --surface-container: #eeeeee;
-          --outline-variant: #dbc1ba;
-          --primary-container: #747474;
-          --error: #ba1a1a;
-          font-family: 'Inter', sans-serif;
-          background-color: #F9F9F9;
-          color: #1A1C1C;
-        }
-        .stitch-howitworks .editorial-spacing {
-          margin-top: 160px;
-          margin-bottom: 160px;
-        }
-        .stitch-howitworks .ghost-border {
-          border: 1px solid rgba(219, 193, 186, 0.2);
-        }
-        .stitch-howitworks .tertiary-accent {
-          color: #C96B4F;
-        }
-        .stitch-howitworks .material-symbols-outlined {
-          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-      `}</style>
+    <div className="bg-[#F9F9F9] text-[#1A1A18] selection:bg-[#D4714E] selection:text-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-      <main className="pt-32">
-        {/* Hero Section */}
-        <section className="px-12 max-w-[1920px] mx-auto editorial-spacing">
-          <div className="max-w-4xl">
-            <span
-              className="label-sm uppercase tracking-widest font-bold text-[11px] mb-6 block"
-              style={{ color: '#C96B4F' }}
-            >
-              THE ARCHITECT OF M&A
+      {/* ═══ 1. HERO ═══ */}
+      <section className="relative pt-32 pb-40 overflow-hidden">
+        <div className="max-w-[1200px] mx-auto px-6 relative z-10">
+          <ScrollReveal>
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#6B6B65] mb-6 block">
+              The Intelligence Engine
             </span>
-            <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-12" style={{ color: 'var(--on-surface)' }}>
-              Bloomberg charges $24,000 a year. <br />
-              <span style={{ color: 'var(--primary-container)' }}>You have Google.</span>
+          </ScrollReveal>
+          <ScrollReveal delay={0.1}>
+            <h1 className="font-display italic font-bold text-[48px] md:text-[72px] lg:text-[88px] leading-[0.95] tracking-tight text-[#1A1A18] max-w-5xl mb-8">
+              Bloomberg charges $24,000 a year. You have Google.
             </h1>
-            <p className="text-xl md:text-2xl leading-relaxed max-w-2xl" style={{ color: 'var(--on-surface-variant)' }}>
-              We turn the open web into a high-octane terminal for M&A. Professional intelligence shouldn't be gated by a subscription that costs more than a car.
+          </ScrollReveal>
+          <ScrollReveal delay={0.2}>
+            <p className="max-w-2xl text-xl md:text-2xl text-[#6B6B65] leading-relaxed font-headline italic">
+              The raw data Bloomberg synthesizes is publicly available. Nobody has built that synthesis for deal decisions between $300K and $50M. Until now.
             </p>
-          </div>
-        </section>
+          </ScrollReveal>
+        </div>
+        <div className="absolute -right-20 top-20 w-[600px] h-[600px] bg-[#D4714E]/5 rounded-full blur-3xl pointer-events-none" />
+      </section>
 
-        {/* Trust Logos */}
-        <section className="px-12 max-w-[1920px] mx-auto mb-40">
-          <div className="border-t border-b py-12" style={{ borderColor: 'rgba(219, 193, 186, 0.2)' }}>
-            <div className="flex flex-wrap justify-between items-center gap-12 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-              <div className="flex items-center gap-2 font-black text-xl tracking-tighter">CENSUS BUREAU</div>
-              <div className="flex items-center gap-2 font-black text-xl tracking-tighter">BLS</div>
-              <div className="flex items-center gap-2 font-black text-xl tracking-tighter">FRED</div>
-              <div className="flex items-center gap-2 font-black text-xl tracking-tighter">SEC EDGAR</div>
-              <div className="flex items-center gap-2 font-black text-xl tracking-tighter">SBA</div>
-              <div className="flex items-center gap-2 font-black text-xl tracking-tighter">IRS SOI</div>
-            </div>
+      {/* ═══ 2. THE INFORMATION DESERT ═══ */}
+      <section className="py-32 bg-[#F5F3EF]">
+        <div className="max-w-[1200px] mx-auto px-6 grid md:grid-cols-12 gap-16 items-start">
+          <div className="md:col-span-7 space-y-6">
+            <ScrollReveal>
+              <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#6B6B65] mb-6 block">
+                The Problem
+              </span>
+            </ScrollReveal>
+            <ScrollReveal delay={0.06}>
+              <h2 className="font-headline italic text-4xl md:text-5xl leading-tight text-[#1A1A18] mb-8">
+                That&apos;s the information desert in M&amp;A.
+              </h2>
+            </ScrollReveal>
+            <ScrollReveal delay={0.1}>
+              <p className="text-lg text-[#6B6B65] leading-relaxed">The largest financial institutions have Bloomberg terminals, PitchBook seats, Capital IQ teams, and armies of analysts who transform raw data into deal decisions.</p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.14}>
+              <p className="text-lg text-[#6B6B65] leading-relaxed">Business owners selling a $3M company? Brokers managing fifteen listings? Search fund operators evaluating two hundred targets? They have Google, gut instinct, and whatever the broker remembers from last year&apos;s deals.</p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.18}>
+              <p className="text-lg text-[#6B6B65] leading-relaxed">Here&apos;s the irony: the raw data Bloomberg synthesizes is publicly available. Census Bureau business counts. BLS wage benchmarks. Federal Reserve rates. SEC filings. SBA lending reports. IRS profitability benchmarks.</p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.22}>
+              <p className="text-lg text-[#1A1A18] leading-relaxed font-bold">Sovereign data. Collected by agencies required by law to publish it. Bloomberg built a $27 billion business not on proprietary data — on the synthesis.</p>
+            </ScrollReveal>
           </div>
-        </section>
+          <div className="md:col-span-5 sticky top-32">
+            <ScrollReveal delay={0.15}>
+              <div className="bg-white p-10 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/30">
+                <span className="font-mono text-5xl font-bold text-[#D4714E] block mb-2">$27B</span>
+                <span className="font-sans uppercase tracking-widest text-xs font-bold text-[#6B6B65]">Bloomberg&apos;s Market Cap</span>
+                <p className="text-sm text-[#6B6B65] mt-4 leading-relaxed">Built not on proprietary data — on the synthesis of publicly available sovereign data.</p>
+                <div className="mt-8 h-px bg-[#DCC1B9]/30" />
+                <div className="mt-8">
+                  <span className="font-mono text-4xl font-bold text-[#1A1A18]">$0</span>
+                  <p className="font-sans uppercase tracking-widest text-xs mt-2 text-[#6B6B65]">Cost of Raw Data</p>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
 
-        {/* Seven Dimensions Section */}
-        <section className="px-12 max-w-[1920px] mx-auto editorial-spacing">
-          <div className="mb-20">
-            <h2 className="text-4xl font-black tracking-tighter mb-4">The Seven Dimensions.</h2>
-            <p className="max-w-xl text-lg leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
-              smbx.ai analyzes every deal through a rigid architectural framework, ensuring no blind spots in your acquisition strategy.
-            </p>
+      {/* ═══ 3. SIX DATA SOURCES ═══ */}
+      <section className="py-32">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <ScrollReveal>
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+              Sovereign Data
+            </span>
+          </ScrollReveal>
+          <ScrollReveal delay={0.08}>
+            <h2 className="font-headline italic text-5xl text-[#1A1A18] mb-20 max-w-2xl">
+              Six federal sources. One synthesis.
+            </h2>
+          </ScrollReveal>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {DATA_SOURCES.map((src, i) => (
+              <ScrollReveal key={src.source} delay={i * 0.06}>
+                <div className="bg-white p-8 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20 h-full transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)]">
+                  <span className="font-mono text-[#D4714E] text-sm block mb-6">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <h3 className="font-bold text-[#1A1A18] text-lg mb-3">{src.source}</h3>
+                  <p className="text-[#6B6B65] leading-relaxed text-sm">{src.body}</p>
+                </div>
+              </ScrollReveal>
+            ))}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {/* Card 1 */}
-            <div className="ghost-border rounded-xl flex flex-col justify-between min-h-[300px] hover:shadow-2xl transition-all duration-500" style={{ backgroundColor: 'var(--surface-container-lowest)', padding: 40 }}>
-              <div className="mb-6" style={{ color: '#C96B4F' }}>
-                <span className="material-symbols-outlined text-4xl" data-icon="analytics">analytics</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-3 tracking-tight">Market Saturation</h3>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
-                  Real-time mapping of competitors and regional density using localized business registries.
-                </p>
-              </div>
-            </div>
-            {/* Card 2 */}
-            <div className="ghost-border rounded-xl flex flex-col justify-between min-h-[300px] hover:shadow-2xl transition-all duration-500" style={{ backgroundColor: 'var(--surface-container-lowest)', padding: 40 }}>
-              <div className="mb-6" style={{ color: '#C96B4F' }}>
-                <span className="material-symbols-outlined text-4xl" data-icon="account_balance">account_balance</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-3 tracking-tight">Financial Benchmarking</h3>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
-                  Comparison against IRS SOI data to validate margins and EBITDA multiples in specific sectors.
-                </p>
-              </div>
-            </div>
-            {/* Card 3 */}
-            <div className="ghost-border rounded-xl flex flex-col justify-between min-h-[300px] hover:shadow-2xl transition-all duration-500" style={{ backgroundColor: 'var(--surface-container-lowest)', padding: 40 }}>
-              <div className="mb-6" style={{ color: '#C96B4F' }}>
-                <span className="material-symbols-outlined text-4xl" data-icon="group">group</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-3 tracking-tight">Labor Dynamics</h3>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
-                  Analysis of BLS wage data and regional talent availability to project future scaling costs.
-                </p>
-              </div>
-            </div>
-            {/* Card 4 */}
-            <div className="ghost-border rounded-xl flex flex-col justify-between min-h-[300px] hover:shadow-2xl transition-all duration-500" style={{ backgroundColor: 'var(--surface-container-lowest)', padding: 40 }}>
-              <div className="mb-6" style={{ color: '#C96B4F' }}>
-                <span className="material-symbols-outlined text-4xl" data-icon="gavel">gavel</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-3 tracking-tight">Regulatory Audit</h3>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
-                  Automated sweeps of SEC filings and local permit data to identify hidden liabilities.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Conversation Block Comparison */}
-        <section className="py-32 editorial-spacing" style={{ backgroundColor: 'var(--surface-container-low)' }}>
-          <div className="px-12 max-w-[1920px] mx-auto">
-            <div className="mb-20 text-center">
-              <h2 className="text-5xl font-black tracking-tighter mb-4">Context-Aware Analysis.</h2>
-              <p className="text-lg" style={{ color: 'var(--on-surface-variant)' }}>
-                We don't just process data; we understand industries.
+      {/* ═══ 4. SEVEN LAYERS ═══ */}
+      <section className="py-32 bg-[#1c1917] text-stone-100">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="max-w-3xl mb-24">
+            <ScrollReveal>
+              <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+                Seven Dimensions
+              </span>
+            </ScrollReveal>
+            <ScrollReveal delay={0.08}>
+              <h2 className="font-headline italic text-5xl md:text-6xl leading-tight mb-8 text-white">
+                A real deal analysis isn&apos;t one thing. It&apos;s seven.
+              </h2>
+            </ScrollReveal>
+            <ScrollReveal delay={0.12}>
+              <p className="text-xl text-stone-400 leading-relaxed">
+                A deal is seven dimensions that talk to each other. Your competitive density affects your multiple. Your regional wages affect your margins. Change one and everything downstream shifts.
+              </p>
+            </ScrollReveal>
+          </div>
+          <div className="space-y-0">
+            {SEVEN_LAYERS.map((layer, i) => (
+              <ScrollReveal key={layer.title} delay={i * 0.05}>
+                <div className="flex gap-8 py-8 border-t border-stone-800 first:border-t-0 items-start">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-mono text-sm font-bold shrink-0 ${
+                    i === 0 ? 'bg-[#D4714E] text-white' : 'border border-stone-700 text-stone-400'
+                  }`}>
+                    {String(i + 1).padStart(2, '0')}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white text-lg mb-2">{layer.title}</h3>
+                    <p className="text-stone-400 leading-relaxed">{layer.body}</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+          <ScrollReveal delay={0.4}>
+            <div className="mt-16 pt-8 border-t border-stone-800">
+              <p className="font-headline italic text-2xl text-stone-500">
+                When Yulia generates a value estimate, <span className="text-stone-300">all seven layers informed it.</span>
               </p>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Landscaping Chat */}
-              <div className="p-12 rounded-2xl shadow-sm" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
-                <span
-                  className="label-sm font-bold mb-8 block tracking-widest uppercase"
-                  style={{ color: '#C96B4F' }}
-                >
-                  VERTICAL: LANDSCAPING
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* ═══ 5. LEAGUE ADAPTATION ═══ */}
+      <section className="py-32 bg-[#F5F3EF]">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-start gap-20">
+            <div className="md:w-1/2">
+              <ScrollReveal>
+                <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#6B6B65] mb-6 block">
+                  Adaptive Depth
                 </span>
-                <div className="space-y-8">
-                  <div>
-                    <span className="label-sm font-medium mb-2 block" style={{ color: '#C96B4F' }}>USER</span>
-                    <p className="text-xl font-medium">Evaluate the seasonality of this lawn care firm.</p>
-                  </div>
-                  <div className="pl-6" style={{ borderLeft: '2px solid rgba(201, 107, 79, 0.2)' }}>
-                    <span className="label-sm font-medium mb-2 block" style={{ color: '#C96B4F' }}>YULIA AI</span>
-                    <p className="leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
-                      Analyzing USDA weather patterns for Zone 7. Given the 15% snow removal revenue, I've adjusted the EBITDA multiple to reflect counter-cyclical resilience.
-                    </p>
-                  </div>
+              </ScrollReveal>
+              <ScrollReveal delay={0.08}>
+                <h2 className="font-headline italic text-5xl text-[#1A1A18] mb-8 leading-tight">
+                  The same question, answered two completely different ways
+                </h2>
+              </ScrollReveal>
+              <ScrollReveal delay={0.12}>
+                <p className="text-lg text-[#6B6B65] leading-relaxed mb-6">
+                  A $400K landscaping company and a $40M manufacturing platform both ask &ldquo;what&apos;s my business worth?&rdquo; If they get the same answer, the answer is wrong for both of them.
+                </p>
+              </ScrollReveal>
+              <ScrollReveal delay={0.16}>
+                <p className="text-lg text-[#1A1A18] leading-relaxed font-bold">
+                  The deal determines the depth. You never select it.
+                </p>
+              </ScrollReveal>
+            </div>
+            <div className="md:w-1/2 w-full">
+              <ScrollReveal delay={0.15}>
+                <div className="bg-white rounded-2xl p-10 shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-[#DCC1B9]/20">
+                  <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+                    Adaptive Response
+                  </span>
+                  <pre className="font-mono text-[13px] leading-[1.8] text-[#6B6B65] bg-[#F5F3EF] rounded-xl p-6 whitespace-pre-wrap">{`CLEANING · PHOENIX · $380K SDE:
+"3.0×–3.5× SDE. Range: $1.14M–$1.33M.
+SBA financing at this price..."
+
+MANUFACTURING · $12M EBITDA:
+"8.5×–11.0× EBITDA. Enterprise value:
+$102M–$132M. Three PE platforms active.
+LBO scenarios..."`}</pre>
                 </div>
-              </div>
-              {/* Manufacturing Chat */}
-              <div className="p-12 rounded-2xl shadow-sm" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
-                <span
-                  className="label-sm font-bold mb-8 block tracking-widest uppercase"
-                  style={{ color: '#C96B4F' }}
-                >
-                  VERTICAL: MANUFACTURING
-                </span>
-                <div className="space-y-8">
-                  <div>
-                    <span className="label-sm font-medium mb-2 block" style={{ color: '#C96B4F' }}>USER</span>
-                    <p className="text-xl font-medium">What's the supply chain risk for this CNC shop?</p>
-                  </div>
-                  <div className="pl-6" style={{ borderLeft: '2px solid rgba(201, 107, 79, 0.2)' }}>
-                    <span className="label-sm font-medium mb-2 block" style={{ color: '#C96B4F' }}>YULIA AI</span>
-                    <p className="leading-relaxed" style={{ color: 'var(--on-surface-variant)' }}>
-                      Cross-referencing global titanium prices via FRED. The firm's reliance on a single Tier-2 supplier in Germany creates a 22% volatility risk in gross margins.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              </ScrollReveal>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ChatGPT vs smbx.ai Side-by-Side */}
-        <section className="px-12 max-w-[1920px] mx-auto editorial-spacing">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-4xl font-black tracking-tighter mb-16 text-center">What does this do that ChatGPT can't?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-px overflow-hidden rounded-2xl ghost-border" style={{ backgroundColor: 'rgba(219, 193, 186, 0.3)' }}>
-              <div className="p-12" style={{ backgroundColor: 'var(--surface-container-lowest)' }}>
-                <h4 className="text-stone-400 font-bold uppercase tracking-widest text-xs mb-8">Standard LLM</h4>
-                <ul className="space-y-6">
-                  <li className="flex items-start gap-4">
-                    <span className="material-symbols-outlined" data-icon="close" style={{ color: 'var(--error)' }}>close</span>
-                    <span style={{ color: 'var(--on-surface-variant)' }}>Generalizes business advice based on training data.</span>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <span className="material-symbols-outlined" data-icon="close" style={{ color: 'var(--error)' }}>close</span>
-                    <span style={{ color: 'var(--on-surface-variant)' }}>Hallucinates financial multiples and local regulations.</span>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <span className="material-symbols-outlined" data-icon="close" style={{ color: 'var(--error)' }}>close</span>
-                    <span style={{ color: 'var(--on-surface-variant)' }}>Limited to a 2023 knowledge cutoff.</span>
-                  </li>
-                </ul>
-              </div>
-              <div className="bg-white p-12">
-                <h4 className="font-bold uppercase tracking-widest text-xs mb-8" style={{ color: '#C96B4F' }}>smbx.ai</h4>
-                <ul className="space-y-6">
-                  <li className="flex items-start gap-4">
-                    <span className="material-symbols-outlined" data-icon="check_circle" style={{ color: '#C96B4F' }}>check_circle</span>
-                    <span className="font-bold">Hard-coded integration with Federal &amp; State databases.</span>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <span className="material-symbols-outlined" data-icon="check_circle" style={{ color: '#C96B4F' }}>check_circle</span>
-                    <span className="font-bold">Verifiable, real-time citation for every EBITDA multiple.</span>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <span className="material-symbols-outlined" data-icon="check_circle" style={{ color: '#C96B4F' }}>check_circle</span>
-                    <span className="font-bold">Live web-scraping of competitor pricing and permit history.</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Final CTA */}
-        <section className="px-12 max-w-[1920px] mx-auto editorial-spacing text-center">
-          <div className="max-w-3xl mx-auto py-24 bg-black text-white rounded-3xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-20 opacity-10 pointer-events-none">
-              <span className="text-[300px] font-black tracking-tighter">X</span>
-            </div>
-            <h2 className="text-5xl md:text-6xl font-black tracking-tighter mb-10 relative z-10">
-              Stop guessing. <br />Start architecting.
+      {/* ═══ 6. MSA LOCALIZATION ═══ */}
+      <section className="py-32">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <ScrollReveal>
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#6B6B65] mb-6 block">
+              Localized Intelligence
+            </span>
+          </ScrollReveal>
+          <ScrollReveal delay={0.08}>
+            <h2 className="font-headline italic text-4xl md:text-5xl leading-tight text-[#1A1A18] max-w-3xl mb-8">
+              National averages are meaningless in M&amp;A
             </h2>
-            <button
-              onClick={() => onChipClick('See for yourself')}
-              className="text-white px-10 py-5 text-lg font-bold transition-all relative z-10"
-              style={{ backgroundColor: '#C96B4F' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#b45b40'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#C96B4F'; }}
-            >
-              See for yourself
-            </button>
+          </ScrollReveal>
+          <div className="max-w-[620px] space-y-6">
+            <ScrollReveal delay={0.12}>
+              <p className="text-lg text-[#6B6B65] leading-relaxed">A plumbing company in Phoenix and one in rural Pennsylvania: different competitive density, different wages, different buyer pools, different SBA lending, different growth trajectories.</p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.16}>
+              <p className="text-lg text-[#6B6B65] leading-relaxed">The Upper Peninsula of Michigan: 25–40% valuation discount compared to Metro Detroit. Same business. Different market.</p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.2}>
+              <p className="text-lg text-[#1A1A18] leading-relaxed font-bold">Every number Yulia generates is localized to the MSA. Not the state. The metropolitan statistical area. Because an estimate built on national data gives you the wrong number — and in M&amp;A, the wrong number costs real money.</p>
+            </ScrollReveal>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
+
+      {/* ═══ 7. CONVERSATION DEMO ═══ */}
+      <section className="py-32 bg-[#F5F3EF]">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <ScrollReveal>
+            <span className="font-sans font-black text-xs uppercase tracking-[0.3em] text-[#D4714E] mb-6 block">
+              Live Demo
+            </span>
+          </ScrollReveal>
+          <ScrollReveal delay={0.08}>
+            <h2 className="font-headline italic text-5xl text-[#1A1A18] mb-12 max-w-2xl">
+              This took forty-seven seconds.
+            </h2>
+          </ScrollReveal>
+          <div className="max-w-[700px]">
+            <ScrollReveal delay={0.16}>
+              <ConversationTyping messages={CONVO_MESSAGES} />
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 8. VS CHATGPT ═══ */}
+      <section className="py-32">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-px bg-[#DCC1B9]/20 overflow-hidden rounded-2xl border border-[#DCC1B9]/20">
+            <div className="bg-white p-12">
+              <ScrollReveal>
+                <h4 className="font-sans font-bold uppercase tracking-widest text-sm text-[#6B6B65] mb-8">Generalist LLMs</h4>
+                <ul className="space-y-6">
+                  <li className="flex items-start gap-4 text-[#6B6B65]/60">
+                    <span className="material-symbols-outlined text-red-500">close</span>
+                    <span>Hallucinates financial data when it lacks context.</span>
+                  </li>
+                  <li className="flex items-start gap-4 text-[#6B6B65]/60">
+                    <span className="material-symbols-outlined text-red-500">close</span>
+                    <span>Cannot model SBA financing at today&apos;s rates.</span>
+                  </li>
+                  <li className="flex items-start gap-4 text-[#6B6B65]/60">
+                    <span className="material-symbols-outlined text-red-500">close</span>
+                    <span>Gives the same answer to a $400K company and a $40M manufacturer.</span>
+                  </li>
+                  <li className="flex items-start gap-4 text-[#6B6B65]/60">
+                    <span className="material-symbols-outlined text-red-500">close</span>
+                    <span>Won&apos;t remember your conversation tomorrow.</span>
+                  </li>
+                </ul>
+              </ScrollReveal>
+            </div>
+            <div className="bg-white p-12">
+              <ScrollReveal delay={0.1}>
+                <h4 className="font-sans font-bold uppercase tracking-widest text-sm text-[#D4714E] mb-8">smbx.ai</h4>
+                <ul className="space-y-6">
+                  <li className="flex items-start gap-4">
+                    <span className="material-symbols-outlined text-[#D4714E]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <span className="text-[#1A1A18]">Deterministic financial calculations backed by source docs.</span>
+                  </li>
+                  <li className="flex items-start gap-4">
+                    <span className="material-symbols-outlined text-[#D4714E]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <span className="text-[#1A1A18]">Live FRED data and current SBA parameters.</span>
+                  </li>
+                  <li className="flex items-start gap-4">
+                    <span className="material-symbols-outlined text-[#D4714E]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <span className="text-[#1A1A18]">Classifies the deal and adapts methodology, metrics, vocabulary.</span>
+                  </li>
+                  <li className="flex items-start gap-4">
+                    <span className="material-symbols-outlined text-[#D4714E]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <span className="text-[#1A1A18]">Builds your deal profile over weeks and months.</span>
+                  </li>
+                </ul>
+              </ScrollReveal>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 9. DARK CTA ═══ */}
+      <section className="py-32 bg-[#1c1917] relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D4714E] rounded-full opacity-[0.15] blur-[80px]" />
+        </div>
+        <div className="max-w-[1200px] mx-auto px-6 relative z-10 text-center">
+          <ScrollReveal>
+            <h2 className="font-display italic font-bold text-white text-[48px] md:text-[72px] mb-12">
+              See for yourself.
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.1}>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+              <button
+                onClick={() => onChipClick('How does SMBx work?')}
+                className="bg-white text-[#0c0a09] px-10 py-5 rounded-3xl font-bold text-lg hover:scale-105 transition-transform"
+              >
+                See for yourself
+              </button>
+              <button
+                onClick={() => onChipClick('I want to talk to Yulia')}
+                className="bg-transparent border border-white/20 text-white px-10 py-5 rounded-3xl font-bold text-lg hover:bg-white/10 transition-colors"
+              >
+                Message Yulia
+              </button>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
     </div>
   );
 }

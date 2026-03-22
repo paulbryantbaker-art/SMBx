@@ -1,447 +1,401 @@
-interface BuyBelowProps {
-  onChipClick: (text: string) => void;
-}
+import { ScrollReveal } from './animations';
 
-export default function BuyBelow({ onChipClick }: BuyBelowProps) {
+/* ── Data used in rendered cards / tables ── */
+
+const INTEL_METRICS = [
+  { label: 'Adjusted DSCR', value: '1.85x', accent: true },
+  { label: 'SBA Eligibility', value: 'HIGH', accent: false },
+  { label: 'Risk Factor', value: 'LOW', accent: false },
+  { label: 'Valuation Score', value: '84/100', accent: false },
+];
+
+const TAX_ROWS = [
+  { year: '01', amort: '$200,000', shield: '$74,000', impact: '+$74,000' },
+  { year: '02', amort: '$200,000', shield: '$74,000', impact: '+$74,000' },
+  { year: '03', amort: '$200,000', shield: '$74,000', impact: '+$74,000' },
+  { year: '04', amort: '$200,000', shield: '$74,000', impact: '+$74,000' },
+  { year: '05', amort: '$200,000', shield: '$74,000', impact: '+$74,000' },
+];
+
+const LOI_CARDS = [
+  { title: 'Working Capital Peg', icon: 'balance', body: "This is the number that catches buyers off guard at closing. Set wrong, a working capital adjustment can shift $50K–$200K without changing the headline price. Yulia flags the methodology, the target, and models what happens when actuals differ from the peg." },
+  { title: 'Earnout Provisions', icon: 'trending_up', body: "In my experience, earnouts are the single most litigated provision in acquisition agreements. They're designed to look achievable and are frequently structured to favor the party that drafted them. Yulia dissects the trigger mechanics before you sign." },
+  { title: 'Indemnification Escrow', icon: 'security', body: "Typically 10–15% of the purchase price, locked up for 12–24 months. That's the buyer's insurance against your representations being wrong. Yulia benchmarks the cap, basket, and survival periods against market norms for your deal size." },
+  { title: 'Reps & Warranties', icon: 'description', body: "Every representation is a contingent liability. Environmental for manufacturing. HIPAA for healthcare. Employment classification for businesses that use contractors. Yulia identifies what's standard and what's overreach." },
+];
+
+const TIMELINE = [
+  { num: '01', title: 'Deal Sourcing & Intelligence', body: 'Scrubbing listings, normalizing financials, and identifying structural SBA eligibility. Every deal scored against your thesis before you spend a minute on it.' },
+  { num: '02', title: 'LOI Formulation', body: 'Structuring the offer with appropriate working capital pegs, indemnity escrows, and tax-optimized deal configurations.' },
+  { num: '03', title: 'Confidential Due Diligence', body: 'QofE, phase 1 environmental reports, deep forensic ledger analysis. Every finding scored: minor, major, deal-breaker.' },
+  { num: '04', title: 'Debt Syndication', body: 'Finalizing SBA or conventional financing packages with preferred lenders at live rates.' },
+  { num: '05', title: 'Closing & Integration', body: 'Final funds flow, title transfer, and the first 100 days of post-acquisition management.' },
+];
+
+const BUYER_TYPES = [
+  { title: 'First-Time SBA', body: "If this is your first acquisition, you deserve the same analytical quality that PE firms get. No jargon. Step-by-step, with Yulia explaining every decision point as you reach it." },
+  { title: 'Search Fund / ETA', body: "More than half of searchers never close a deal. The analytical work to build conviction takes longer than the timeline allows. Yulia scores every target against your thesis automatically." },
+  { title: 'PE Platform / Bolt-On', body: "$530 billion in dry powder aged 2+ years. The bottleneck isn't capital — it's deal-team bandwidth. Feed Yulia a CIM and get a deal screening report in forty minutes." },
+  { title: 'Strategic Acquirer', body: "The difference between real operational synergies and the aspirational kind. Integration complexity. Structure optimization. Value creation modeling that starts before close." },
+];
+
+export default function BuyBelow({ onChipClick }: { onChipClick: (text: string) => void }) {
   return (
-    <div className="stitch-buy">
-      <style>{`
-        .stitch-buy {
-          --on-surface: #1a1c1c;
-          --surface: #f9f9f9;
-          --tertiary: #95432b;
-          --on-surface-variant: #55433d;
-          --surface-container-lowest: #ffffff;
-          --surface-container-low: #f3f3f3;
-          --surface-container: #eeeeee;
-          --surface-container-high: #e8e8e8;
-          --surface-container-highest: #e2e2e2;
-          --outline-variant: #dbc1ba;
-          --primary: #5c5c5c;
-          --inverse-surface: #2f3131;
-          --error: #ba1a1a;
-          --primary-container: #747474;
+    <div className="bg-[#fbf9f5] text-[#1b1c1a] selection:bg-[#D4714E]/20 selection:text-[#1b1c1a] font-body">
 
-          color: var(--on-surface);
-          font-family: 'Inter', sans-serif;
-        }
-
-        .stitch-buy .bg-surface { background-color: var(--surface); }
-        .stitch-buy .bg-surface-container-lowest { background-color: var(--surface-container-lowest); }
-        .stitch-buy .bg-surface-container-low { background-color: var(--surface-container-low); }
-        .stitch-buy .bg-surface-container { background-color: var(--surface-container); }
-        .stitch-buy .bg-surface-container-high { background-color: var(--surface-container-high); }
-        .stitch-buy .bg-surface-container-highest { background-color: var(--surface-container-highest); }
-        .stitch-buy .bg-tertiary { background-color: var(--tertiary); }
-        .stitch-buy .bg-inverse-surface { background-color: var(--inverse-surface); }
-        .stitch-buy .bg-primary-container { background-color: var(--primary-container); }
-
-        .stitch-buy .text-on-surface { color: var(--on-surface); }
-        .stitch-buy .text-on-surface-variant { color: var(--on-surface-variant); }
-        .stitch-buy .text-tertiary { color: var(--tertiary); }
-        .stitch-buy .text-primary { color: var(--primary); }
-        .stitch-buy .text-error { color: var(--error); }
-        .stitch-buy .text-inverse-surface { color: var(--inverse-surface); }
-
-        .stitch-buy .border-outline-variant\\/10 { border-color: rgba(219, 193, 186, 0.1); }
-        .stitch-buy .border-outline-variant\\/20 { border-color: rgba(219, 193, 186, 0.2); }
-        .stitch-buy .border-outline-variant\\/30 { border-color: rgba(219, 193, 186, 0.3); }
-        .stitch-buy .border-outline-variant\\/5 { border-color: rgba(219, 193, 186, 0.05); }
-
-        .stitch-buy .hover\\:bg-tertiary:hover { background-color: var(--tertiary); }
-
-        .stitch-buy .selection\\:bg-tertiary\\/20 ::selection { background-color: rgba(149, 67, 43, 0.2); }
-
-        .stitch-buy .editorial-spacing { margin-top: 160px; margin-bottom: 160px; }
-
-        .stitch-buy .hero-mask {
-          background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #F9F9F9 100%);
-        }
-
-        .stitch-buy .font-headline { font-family: 'Inter', sans-serif; }
-        .stitch-buy .font-body { font-family: 'Inter', sans-serif; }
-        .stitch-buy .font-label { font-family: 'Inter', sans-serif; }
-      `}</style>
-
-      {/* Hero Section */}
-      <section className="px-12 max-w-7xl mx-auto editorial-spacing">
-        <div className="max-w-4xl">
-          <span className="font-label text-[11px] tracking-[0.2em] text-tertiary uppercase font-bold mb-8 block">
-            THE BUY JOURNEY
-          </span>
-          <h1 className="font-headline text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] text-on-surface mb-12">
-            The deal that looked perfect on paper<span className="text-tertiary">.</span>
-          </h1>
-          <p className="text-body-lg text-on-surface-variant max-w-2xl leading-relaxed text-xl">
-            Most acquisitions fail before the LOI is even signed. We provide the editorial precision and architectural data required to navigate the DFW HVAC market and beyond.
-          </p>
-        </div>
-      </section>
-
-      {/* SBA & Market Context Grid (Bento Style) */}
-      <section className="px-12 max-w-[1920px] mx-auto editorial-spacing">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-          {/* SBA Data Card */}
-          <div className="md:col-span-4 bg-surface-container-lowest p-10 rounded-xl border border-outline-variant/10 shadow-sm">
-            <div className="flex items-center gap-3 mb-8">
-              <span
-                className="material-symbols-outlined text-tertiary"
-                data-icon="account_balance"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                account_balance
+      {/* ═══ 1. HERO ═══ */}
+      <section className="py-24 md:py-32 max-w-[1200px] mx-auto px-8">
+        <div className="grid grid-cols-12 gap-8 items-end">
+          <div className="col-span-12 md:col-span-8">
+            <ScrollReveal>
+              <span className="inline-block text-[#D4714E] font-bold uppercase tracking-[0.2em] text-xs mb-6">
+                Acquisition Intelligence
               </span>
-              <h3 className="font-headline text-xl font-bold">SBA Check</h3>
-            </div>
-            <div className="space-y-6">
-              <div className="border-b border-outline-variant/20 pb-4">
-                <p className="text-[11px] font-label tracking-widest text-on-surface-variant uppercase mb-1">
-                  Pre-Approval Probability
-                </p>
-                <p className="text-3xl font-black">94.2%</p>
-              </div>
-              <div className="border-b border-outline-variant/20 pb-4">
-                <p className="text-[11px] font-label tracking-widest text-on-surface-variant uppercase mb-1">
-                  Debt Service Coverage
-                </p>
-                <p className="text-3xl font-black">1.85x</p>
-              </div>
-              <div className="pt-2">
-                <p className="text-sm text-on-surface-variant leading-relaxed">
-                  Based on current TTM EBITDA and 7(a) loan guidelines for Texas region.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* DFW HVAC Market Context */}
-          <div className="md:col-span-8 bg-surface-container-low p-10 rounded-xl">
-            <div className="flex justify-between items-end mb-12">
-              <div>
-                <span className="font-label text-[11px] tracking-widest text-tertiary uppercase font-bold mb-2 block">
-                  MARKET ARCHITECTURE
-                </span>
-                <h3 className="font-headline text-3xl font-bold">DFW HVAC Market Context</h3>
-              </div>
-              <div className="text-right hidden md:block">
-                <p className="text-sm font-bold">Q4 2024 Report</p>
-                <p className="text-xs text-on-surface-variant">Update: 2h ago</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="bg-surface-container-lowest p-6 rounded-lg border border-outline-variant/5">
-                <p className="text-xs font-label text-on-surface-variant uppercase tracking-tighter mb-4">
-                  Avg. Multiple
-                </p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-black">4.2x</span>
-                  <span className="text-green-600 text-xs font-bold">+0.3</span>
-                </div>
-              </div>
-              <div className="bg-surface-container-lowest p-6 rounded-lg border border-outline-variant/5">
-                <p className="text-xs font-label text-on-surface-variant uppercase tracking-tighter mb-4">
-                  Deal Velocity
-                </p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-black">18d</span>
-                  <span className="text-on-surface-variant text-xs font-bold">avg.</span>
-                </div>
-              </div>
-              <div className="bg-surface-container-lowest p-6 rounded-lg border border-outline-variant/5">
-                <p className="text-xs font-label text-on-surface-variant uppercase tracking-tighter mb-4">
-                  Inventory
-                </p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-black">142</span>
-                  <span className="text-tertiary text-xs font-bold">Low</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-8 overflow-hidden rounded-lg">
-              <img
-                className="w-full h-48 object-cover grayscale opacity-20 hover:grayscale-0 hover:opacity-100 transition-all duration-700"
-                alt="Abstract architectural map of Dallas Fort Worth metropolitan area"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkdUjAloi4WUNXjic1A-tcPPT8Ar1Wd5dEUqvA-rWgXrzOvSx-SGgkfbgySIu3c8b6Et3qhk3_L55_7SGyMUSrlJHQlZG6Ieynwa1UVyMd7C5NQFeJcY4bFd8qACOk-yjv2bqtRMwjjmydeXXUHf1gvE13DzWs7F4hW--Sqfi0ZxJRjlmowYGu_88ZwopQR-K8NgbSiFLczSgDWiK_3cyf86TZ0AeoY6zJxDI37dXmyXzZyzZY7w-AoZd9t3y2RnYmxhv1SMbl5oU"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Yulia AI Conversation Block */}
-      <section className="bg-surface-container-lowest py-32 border-y border-outline-variant/10">
-        <div className="max-w-4xl mx-auto px-12">
-          <div className="mb-20 text-center">
-            <span className="font-label text-[11px] tracking-[0.3em] text-tertiary uppercase font-bold mb-4 block">
-              THE DIALOGUE
-            </span>
-            <h2 className="text-4xl font-black tracking-tight">Narrative Intelligence</h2>
-          </div>
-          <div className="space-y-16">
-            <div>
-              <span className="font-label text-[11px] text-tertiary uppercase font-bold tracking-widest mb-2 block">
-                USER
-              </span>
-              <p className="text-2xl font-medium text-on-surface leading-tight">
-                &ldquo;Yulia, show me the risk profile for an HVAC firm in Dallas with $2M revenue and 15% net margins.&rdquo;
+            </ScrollReveal>
+            <ScrollReveal delay={0.1}>
+              <h1 className="font-display italic font-bold text-6xl md:text-[88px] leading-[0.95] text-[#1b1c1a] mb-8">
+                The deal that looked perfect on paper
+              </h1>
+            </ScrollReveal>
+            <ScrollReveal delay={0.2}>
+              <p className="text-2xl md:text-3xl font-headline italic text-[#55433c] max-w-2xl">
+                In this market, the most expensive mistake isn&apos;t overpaying. It&apos;s time. Good businesses receive multiple offers within thirty days. Get to the truth faster.
               </p>
-            </div>
-            <div className="pl-8 border-l-2 border-tertiary/20">
-              <span className="font-label text-[11px] text-tertiary uppercase font-bold tracking-widest mb-2 block">
-                YULIA AI
-              </span>
-              <div className="text-xl text-on-surface-variant leading-relaxed space-y-4">
-                <p>
-                  Analyzing 4,200 regional transactions. The 15% margin is slightly below the DFW median of 18.2% for firms of this scale. The primary risk factor is <strong>Customer Concentration</strong>; if more than 25% of revenue comes from new construction builders, the SBA pre-approval probability drops to 68%.
+            </ScrollReveal>
+          </div>
+          <div className="col-span-12 md:col-span-4 pb-4">
+            <ScrollReveal delay={0.25}>
+              <button
+                onClick={() => onChipClick('I have a listing I want analyzed')}
+                className="w-full md:w-auto bg-[#D4714E] text-white px-8 py-4 rounded-md font-bold uppercase text-sm tracking-widest hover:-translate-y-0.5 transition-all duration-300 shadow-[0_4px_24px_rgba(212,113,78,0.15)]"
+              >
+                Analyze a Listing
+              </button>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 2. PATTERN RECOGNITION ═══ */}
+      <section className="py-32 bg-[#f5f3ef]">
+        <div className="max-w-[1200px] mx-auto px-8 grid grid-cols-12 gap-12 items-start">
+          <div className="col-span-12 md:col-span-8">
+            <ScrollReveal>
+              <h2 className="text-sm font-black uppercase tracking-[0.15em] text-[#1b1c1a] mb-12">
+                Pattern Recognition
+              </h2>
+            </ScrollReveal>
+            <ScrollReveal delay={0.08}>
+              <div className="space-y-8">
+                <p className="text-3xl md:text-4xl font-headline italic leading-snug text-[#1b1c1a]">
+                  Three weeks. Forty hours. Several thousand in fees. On a deal that was never going to work.
                 </p>
-                <p>
-                  Would you like to see the{' '}
-                  <span className="text-on-surface font-bold underline decoration-tertiary decoration-2 underline-offset-4">
-                    Depreciation Shield
-                  </span>{' '}
-                  comparison for this asset class?
-                </p>
+                <div className="text-lg text-[#55433c] leading-relaxed max-w-xl space-y-6">
+                  <p>A buyer finds a listing. The revenue looks strong. The margins look healthy. The asking price seems reasonable. They get excited. They email the broker. They sign the NDA. They start spending time — and money — on diligence.</p>
+                  <p>Three weeks in, something surfaces. The SDE was inflated by $150K in add-backs the seller padded. Or the DSCR doesn&apos;t clear 1.25× at current SBA rates. Or there are 2,300 competitors in the MSA.</p>
+                </div>
               </div>
+            </ScrollReveal>
+          </div>
+          <div className="col-span-12 md:col-span-4 bg-white p-12 rounded-2xl shadow-[0_4px_24px_rgba(27,28,26,0.06)] border border-[#dcc1b9]/20 self-center">
+            <ScrollReveal delay={0.16}>
+              <div className="text-center">
+                <div className="font-mono text-7xl text-[#D4714E] font-bold mb-2">40hrs</div>
+                <div className="text-xs font-black uppercase tracking-[0.2em] text-[#1b1c1a]">Wasted Per Bad Deal</div>
+                <div className="mt-8 pt-8 border-t border-[#dcc1b9]/30 text-sm text-[#55433c] italic">
+                  &ldquo;The delta between a listing and reality often costs more than the down payment.&rdquo;
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 3. DEAL SCORING ═══ */}
+      <section className="py-32 bg-[#fbf9f5]">
+        <div className="max-w-[1200px] mx-auto px-8">
+          <div className="grid grid-cols-12 gap-16 items-center">
+            {/* Chat mockup */}
+            <div className="col-span-12 md:col-span-5 md:order-1">
+              <ScrollReveal>
+                <div className="bg-white p-8 rounded-2xl shadow-[0_4px_24px_rgba(27,28,26,0.06)] space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-[#D4714E] flex items-center justify-center text-white text-[10px] font-bold shrink-0">YOU</div>
+                    <div className="bg-[#f5f3ef] p-4 rounded-xl rounded-tl-none text-sm text-[#55433c] leading-relaxed">
+                      Analyze this Austin Dental Practice. Listing says $1.2M EBITDA.
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4 flex-row-reverse">
+                    <div className="w-8 h-8 rounded-full bg-stone-900 flex items-center justify-center text-white shrink-0">
+                      <span className="material-symbols-outlined text-sm">bolt</span>
+                    </div>
+                    <div className="bg-[#D4714E] text-white p-4 rounded-xl rounded-tr-none text-sm leading-relaxed">
+                      Found $240k in owner add-backs that don&apos;t meet SBA SOP 50 10. Revised DSCR: 1.85x. Listing is overpriced by 18%.
+                    </div>
+                  </div>
+                </div>
+              </ScrollReveal>
+            </div>
+
+            {/* Intel report */}
+            <div className="col-span-12 md:col-span-7 md:order-2">
+              <ScrollReveal delay={0.08}>
+                <h2 className="text-5xl md:text-6xl font-display italic text-[#1b1c1a] mb-8">
+                  Paste any listing.<br />Get the truth in seconds.
+                </h2>
+              </ScrollReveal>
+              <ScrollReveal delay={0.12}>
+                <div className="bg-[#f5f3ef] p-10 rounded-2xl">
+                  <div className="font-mono text-xs text-[#D4714E] mb-4 tracking-widest font-bold">INTEL REPORT · V11.1</div>
+                  <div className="font-mono text-xl mb-8 border-b border-[#dcc1b9]/30 pb-4 text-[#1b1c1a]">DENTAL PRACTICE · AUSTIN, TX</div>
+                  <div className="grid grid-cols-2 gap-8">
+                    {INTEL_METRICS.map((m) => (
+                      <div key={m.label}>
+                        <div className="text-[10px] uppercase font-bold tracking-widest text-[#55433c] mb-1">{m.label}</div>
+                        <div className={`font-mono text-3xl font-bold ${m.accent ? 'text-[#D4714E]' : 'text-[#1b1c1a]'}`}>{m.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </ScrollReveal>
             </div>
           </div>
-          <div className="mt-20">
-            <div className="relative group">
-              <input
-                className="w-full bg-surface-container-low border-b border-outline-variant/30 py-6 px-4 text-xl focus:outline-none focus:border-on-surface transition-all placeholder:text-stone-300"
-                placeholder="Tell Yulia what you're looking for..."
-                type="text"
-                readOnly
-                onClick={() => onChipClick("Tell Yulia what you're looking for")}
-              />
+        </div>
+      </section>
+
+      {/* ═══ 4. SBA RULES ═══ */}
+      <section className="py-32 bg-[#f5f3ef]">
+        <div className="max-w-[1200px] mx-auto px-8 grid grid-cols-12 gap-16 items-center">
+          <div className="col-span-12 md:col-span-6">
+            <ScrollReveal>
+              <h2 className="text-4xl md:text-5xl font-headline italic text-[#1b1c1a] mb-8 leading-tight">
+                The SBA rules changed in June 2025.
+              </h2>
+            </ScrollReveal>
+            <ScrollReveal delay={0.08}>
+              <div className="text-lg text-[#55433c] space-y-6 leading-relaxed">
+                <p>SOP 50 10 8 changed the game. Seller notes used as equity injection must now sit on full standby for the entire loan term. Equity injection is back to 10% minimum. Credit score floor rose to 165.</p>
+                <p>Yulia automatically maps every deal against the latest lending mandates, ensuring your LOI doesn&apos;t get rejected at the bank.</p>
+              </div>
+            </ScrollReveal>
+          </div>
+          <div className="col-span-12 md:col-span-6">
+            <ScrollReveal delay={0.12}>
+              <div className="relative">
+                <div className="absolute -top-4 -left-4 bg-[#D4714E] text-white text-[10px] font-bold px-3 py-1 rounded-sm z-10 tracking-widest">SOP 50 10 8 COMPLIANCE</div>
+                <div className="bg-white p-12 rounded-2xl shadow-[0_4px_24px_rgba(27,28,26,0.06)] border border-[#dcc1b9]/10">
+                  <div className="flex flex-col gap-6">
+                    {[
+                      ['Seller Equity Rollover', 'PERMITTED (10%)', true],
+                      ['Insurance Requirement', 'WAIVED < $500K', false],
+                      ['Debt Service Coverage', '1.15x MINIMUM', false],
+                      ['Working Capital Inclusion', 'YES', true],
+                    ].map(([label, value, accent], i) => (
+                      <div key={i} className={`flex justify-between items-center py-4 ${i < 3 ? 'border-b border-[#dcc1b9]/20' : ''}`}>
+                        <span className="text-xs font-black uppercase tracking-widest">{label as string}</span>
+                        <span className={`font-mono font-bold ${accent ? 'text-[#D4714E]' : 'text-[#1b1c1a]'}`}>{value as string}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 5. MARKET INTELLIGENCE ═══ */}
+      <section className="py-32 bg-[#fbf9f5]">
+        <div className="max-w-[1200px] mx-auto px-8 grid grid-cols-12 gap-16 items-center">
+          <div className="col-span-12 md:col-span-6 md:order-2">
+            <ScrollReveal>
+              <h2 className="text-4xl md:text-5xl font-headline italic text-[#1b1c1a] mb-8 leading-tight">
+                847 HVAC companies in Dallas. What does that mean?
+              </h2>
+            </ScrollReveal>
+            <ScrollReveal delay={0.08}>
+              <div className="text-lg text-[#55433c] space-y-6 leading-relaxed">
+                <p>That&apos;s a Census number. NAICS 238220 in the Dallas-Fort Worth MSA. But a number by itself doesn&apos;t tell you anything useful. Is 847 fragmented enough to consolidate? Are fourteen PE platforms actively acquiring HVAC in Texas?</p>
+                <p>We analyze hyper-local market density and labor availability for every zip code in the continental US.</p>
+              </div>
+            </ScrollReveal>
+          </div>
+          <div className="col-span-12 md:col-span-6 md:order-1">
+            <ScrollReveal delay={0.12}>
+              <div className="bg-[#f5f3ef] p-1 rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(27,28,26,0.06)]">
+                <div className="p-8 bg-white rounded-xl">
+                  <div className="flex justify-between items-start mb-12">
+                    <div>
+                      <div className="text-xs font-bold text-[#D4714E] uppercase tracking-widest mb-1">Local Intelligence</div>
+                      <div className="font-headline italic text-2xl">HVAC · Dallas-Fort Worth MSA</div>
+                    </div>
+                    <span className="material-symbols-outlined text-[#D4714E]">location_on</span>
+                  </div>
+                  <div className="space-y-6">
+                    {[
+                      ['Market Density', 82, true],
+                      ['Labor Availability', 45, false],
+                      ['Growth Velocity', 94, true],
+                    ].map(([label, pct, accent]) => (
+                      <div key={label as string} className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-widest text-[#55433c]">{label as string}</span>
+                        <div className="w-1/2 h-2 bg-[#eae8e4] rounded-full overflow-hidden">
+                          <div className={`h-full ${accent ? 'bg-[#D4714E]' : 'bg-[#5e5e5e]'}`} style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 6. TAX SHIELD — Dark ═══ */}
+      <section className="py-32 bg-stone-900 text-stone-100">
+        <div className="max-w-[1200px] mx-auto px-8">
+          <div className="grid grid-cols-12 gap-12">
+            <div className="col-span-12 md:col-span-5">
+              <ScrollReveal>
+                <span className="text-[#D4714E] font-bold uppercase tracking-[0.2em] text-xs mb-6 inline-block">Asset Allocation</span>
+              </ScrollReveal>
+              <ScrollReveal delay={0.08}>
+                <h2 className="text-4xl md:text-5xl font-headline italic leading-tight mb-8">
+                  The acquisition tax benefit that changes the return math.
+                </h2>
+              </ScrollReveal>
+              <ScrollReveal delay={0.12}>
+                <p className="text-stone-400 text-lg leading-relaxed">
+                  Under Section 197, intangible assets — including goodwill — are amortizable over 15 years. For an asset sale, this creates a significant non-cash expense that shields operating income, drastically increasing your after-tax cash flow.
+                </p>
+              </ScrollReveal>
+            </div>
+            <div className="col-span-12 md:col-span-7">
+              <ScrollReveal delay={0.16}>
+                <div className="bg-stone-800 p-10 rounded-2xl border border-stone-700">
+                  <div className="font-mono text-xs text-[#D4714E] mb-8 tracking-widest uppercase">5-Year Depreciation Shield Est. ($3M Acquisition)</div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full font-mono text-sm">
+                      <thead>
+                        <tr className="text-stone-500 border-b border-stone-700">
+                          <th className="text-left py-4 font-normal">YEAR</th>
+                          <th className="text-right py-4 font-normal">ASSET AMORT</th>
+                          <th className="text-right py-4 font-normal">TAX SHIELD</th>
+                          <th className="text-right py-4 font-normal">CASH IMPACT</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-stone-300">
+                        {TAX_ROWS.map((row, i) => (
+                          <tr key={row.year} className={i < TAX_ROWS.length - 1 ? 'border-b border-stone-700/50' : ''}>
+                            <td className="py-4">{row.year}</td>
+                            <td className="text-right">{row.amort}</td>
+                            <td className="text-right">{row.shield}</td>
+                            <td className="text-right text-[#D4714E]">{row.impact}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </ScrollReveal>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 7. LOI TERMS ═══ */}
+      <section className="py-32 bg-[#fbf9f5]">
+        <div className="max-w-[1200px] mx-auto px-8">
+          <ScrollReveal>
+            <div className="text-center mb-20">
+              <h2 className="text-5xl md:text-6xl font-display italic mb-6">The LOI is 3–5 pages.</h2>
+              <p className="text-[#55433c] max-w-xl mx-auto">Everyone focuses on the purchase price. The terms that actually determine your net outcome are on the pages nobody reads carefully enough.</p>
+            </div>
+          </ScrollReveal>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {LOI_CARDS.map((card, i) => (
+              <ScrollReveal key={card.title} delay={i * 0.06}>
+                <div className="bg-white p-10 rounded-2xl shadow-[0_4px_24px_rgba(27,28,26,0.06)] hover:-translate-y-1 transition-all duration-300 h-full">
+                  <div className="text-[#D4714E] mb-6">
+                    <span className="material-symbols-outlined text-4xl">{card.icon}</span>
+                  </div>
+                  <h3 className="text-sm font-black uppercase tracking-[0.15em] mb-4">{card.title}</h3>
+                  <p className="text-[#55433c] leading-relaxed">{card.body}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 8. ACQUISITION LIFECYCLE — Dark Timeline ═══ */}
+      <section className="py-32 bg-stone-950 text-stone-100 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#D4714E]/5 blur-[120px] rounded-full" />
+        <div className="max-w-[1000px] mx-auto px-8 relative z-10">
+          <ScrollReveal>
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] mb-20 text-center">Acquisition Lifecycle</h2>
+          </ScrollReveal>
+          <div className="space-y-16">
+            {TIMELINE.map((step, i) => (
+              <ScrollReveal key={step.num} delay={i * 0.08}>
+                <div className="flex gap-12 items-start">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full border-2 border-[#D4714E] flex items-center justify-center font-mono font-bold text-[#D4714E]">
+                    {step.num}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold uppercase mb-2 tracking-wide">{step.title}</h3>
+                    <p className="text-stone-400">{step.body}</p>
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 9. BUYER TYPES ═══ */}
+      <section className="py-32 bg-[#f5f3ef]">
+        <div className="max-w-[1200px] mx-auto px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {BUYER_TYPES.map((type, i) => (
+              <ScrollReveal key={type.title} delay={i * 0.06}>
+                <div className="bg-[#fbf9f5] p-8 rounded-xl border border-[#dcc1b9]/20 h-full flex flex-col hover:-translate-y-1 transition-all duration-300">
+                  <h4 className="text-xs font-black uppercase tracking-widest text-[#D4714E] mb-4">{type.title}</h4>
+                  <p className="text-sm text-[#55433c] leading-relaxed">{type.body}</p>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ 10. CTA — Light with blur orb ═══ */}
+      <section className="py-32 bg-[#fbf9f5] relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D4714E]/10 blur-[120px] rounded-full" />
+        <div className="max-w-[1200px] mx-auto px-8 relative z-10 text-center">
+          <ScrollReveal>
+            <h2 className="text-6xl md:text-7xl font-display italic mb-12 text-[#1b1c1a]">Find the right deal.</h2>
+          </ScrollReveal>
+          <ScrollReveal delay={0.1}>
+            <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
               <button
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-tertiary hover:scale-110 transition-transform"
-                onClick={() => onChipClick("Tell Yulia what you're looking for")}
+                onClick={() => onChipClick('I want to buy a business')}
+                className="bg-[#D4714E] text-white px-10 py-5 rounded-md font-bold uppercase text-sm tracking-widest shadow-[0_4px_24px_rgba(212,113,78,0.15)] hover:scale-[1.02] transition-all"
               >
-                <span
-                  className="material-symbols-outlined text-3xl"
-                  data-icon="arrow_forward"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  arrow_forward
-                </span>
+                Start Searching
+              </button>
+              <button
+                onClick={() => onChipClick('I have a listing I want analyzed')}
+                className="bg-transparent text-[#D4714E] px-10 py-5 rounded-md font-bold uppercase text-sm tracking-widest border border-[#D4714E]/20 hover:bg-[#D4714E]/5 transition-all"
+              >
+                Analyze a Listing
               </button>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
-      {/* Depreciation Shield Comparison */}
-      <section className="px-12 max-w-7xl mx-auto editorial-spacing">
-        <div className="flex flex-col md:flex-row gap-20 items-center">
-          <div className="flex-1">
-            <h2 className="font-headline text-5xl font-black tracking-tight mb-8">
-              Year-by-year Depreciation Shield
-            </h2>
-            <p className="text-on-surface-variant text-lg leading-relaxed mb-8">
-              We don&apos;t just calculate purchase price; we architect the tax efficiency of the entire holding period. Our proprietary shield model shows the cash flow impact of accelerated depreciation on fleet and equipment.
-            </p>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-1 bg-tertiary"></div>
-                <span className="text-sm font-bold">smbx.ai Optimized Strategy</span>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-1 bg-stone-300"></div>
-                <span className="text-sm text-stone-500">Traditional Accounting</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex-1 w-full">
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-outline-variant/10">
-              <div className="h-64 flex items-end gap-4">
-                <div className="flex-1 flex flex-col gap-2">
-                  <div className="bg-stone-100 h-24 w-full"></div>
-                  <div className="bg-tertiary h-48 w-full"></div>
-                  <span className="text-[10px] font-bold text-center mt-2">YR 1</span>
-                </div>
-                <div className="flex-1 flex flex-col gap-2">
-                  <div className="bg-stone-100 h-32 w-full"></div>
-                  <div className="bg-tertiary h-40 w-full"></div>
-                  <span className="text-[10px] font-bold text-center mt-2">YR 2</span>
-                </div>
-                <div className="flex-1 flex flex-col gap-2">
-                  <div className="bg-stone-100 h-28 w-full"></div>
-                  <div className="bg-tertiary h-32 w-full"></div>
-                  <span className="text-[10px] font-bold text-center mt-2">YR 3</span>
-                </div>
-                <div className="flex-1 flex flex-col gap-2">
-                  <div className="bg-stone-100 h-20 w-full"></div>
-                  <div className="bg-tertiary h-24 w-full"></div>
-                  <span className="text-[10px] font-bold text-center mt-2">YR 4</span>
-                </div>
-                <div className="flex-1 flex flex-col gap-2">
-                  <div className="bg-stone-100 h-16 w-full"></div>
-                  <div className="bg-tertiary h-16 w-full"></div>
-                  <span className="text-[10px] font-bold text-center mt-2">YR 5</span>
-                </div>
-              </div>
-              <div className="mt-8 pt-8 border-t border-stone-100 flex justify-between">
-                <div>
-                  <p className="text-[10px] font-label text-stone-400 uppercase tracking-widest">
-                    Total Shield
-                  </p>
-                  <p className="text-2xl font-black">$482,000</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-label text-stone-400 uppercase tracking-widest">
-                    Tax Delta
-                  </p>
-                  <p className="text-2xl font-black text-tertiary">+22%</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* LOI Terms Grid */}
-      <section className="bg-stone-900 py-32 text-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-12">
-          <div className="mb-20">
-            <span className="font-label text-[11px] tracking-[0.3em] text-tertiary uppercase font-bold mb-4 block">
-              THE ARCHITECTURE
-            </span>
-            <h2 className="text-5xl font-black tracking-tight">LOI Terms Structure</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
-            <div className="bg-white text-stone-900 p-10 hover:bg-tertiary hover:text-white transition-all duration-500 group">
-              <p className="text-[11px] font-label tracking-widest mb-12 uppercase group-hover:text-white/70">
-                Component 01
-              </p>
-              <h4 className="text-2xl font-bold mb-4 leading-tight">Working Capital Peg</h4>
-              <p className="text-sm leading-relaxed opacity-70">
-                Calculated based on a 12-month rolling average to ensure liquidity on day one.
-              </p>
-            </div>
-            <div className="bg-white text-stone-900 p-10 hover:bg-tertiary hover:text-white transition-all duration-500 group">
-              <p className="text-[11px] font-label tracking-widest mb-12 uppercase group-hover:text-white/70">
-                Component 02
-              </p>
-              <h4 className="text-2xl font-bold mb-4 leading-tight">Seller Note Terms</h4>
-              <p className="text-sm leading-relaxed opacity-70">
-                10% rollover with performance-based earnouts at months 12 and 24.
-              </p>
-            </div>
-            <div className="bg-white text-stone-900 p-10 hover:bg-tertiary hover:text-white transition-all duration-500 group">
-              <p className="text-[11px] font-label tracking-widest mb-12 uppercase group-hover:text-white/70">
-                Component 03
-              </p>
-              <h4 className="text-2xl font-bold mb-4 leading-tight">Non-Compete Radius</h4>
-              <p className="text-sm leading-relaxed opacity-70">
-                50-mile radius for 5 years covering all current and future service lines.
-              </p>
-            </div>
-            <div className="bg-white text-stone-900 p-10 hover:bg-tertiary hover:text-white transition-all duration-500 group">
-              <p className="text-[11px] font-label tracking-widest mb-12 uppercase group-hover:text-white/70">
-                Component 04
-              </p>
-              <h4 className="text-2xl font-bold mb-4 leading-tight">Asset vs Stock</h4>
-              <p className="text-sm leading-relaxed opacity-70">
-                Structured as an Asset Purchase Agreement for maximum step-up basis.
-              </p>
-            </div>
-            <div className="bg-white text-stone-900 p-10 hover:bg-tertiary hover:text-white transition-all duration-500 group">
-              <p className="text-[11px] font-label tracking-widest mb-12 uppercase group-hover:text-white/70">
-                Component 05
-              </p>
-              <h4 className="text-2xl font-bold mb-4 leading-tight">Exclusivity Period</h4>
-              <p className="text-sm leading-relaxed opacity-70">
-                60-day due diligence window with automatic 15-day extensions.
-              </p>
-            </div>
-            <div className="bg-white text-stone-900 p-10 hover:bg-tertiary hover:text-white transition-all duration-500 group">
-              <p className="text-[11px] font-label tracking-widest mb-12 uppercase group-hover:text-white/70">
-                Component 06
-              </p>
-              <h4 className="text-2xl font-bold mb-4 leading-tight">Escrow Holdback</h4>
-              <p className="text-sm leading-relaxed opacity-70">
-                15% of purchase price held for 18 months against indemnity claims.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Full Journey Timeline */}
-      <section className="px-12 max-w-7xl mx-auto editorial-spacing">
-        <div className="mb-20 text-center">
-          <span className="font-label text-[11px] tracking-[0.3em] text-tertiary uppercase font-bold mb-4 block">
-            THE ROADMAP
-          </span>
-          <h2 className="text-5xl font-black tracking-tight">The 5-Phase Acquisition Flow</h2>
-        </div>
-        <div className="relative">
-          {/* Progress Line */}
-          <div className="absolute top-1/2 left-0 w-full h-px bg-stone-200 -z-10 hidden md:block"></div>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-            <div className="bg-surface-container-low md:bg-transparent p-6 md:p-0">
-              <div className="w-12 h-12 bg-black text-white flex items-center justify-center font-bold mb-6 mx-auto md:mx-0">
-                01
-              </div>
-              <h5 className="font-bold text-lg mb-2">Curation</h5>
-              <p className="text-sm text-on-surface-variant">
-                Defining your architectural buy-box and target sourcing.
-              </p>
-            </div>
-            <div className="bg-surface-container-low md:bg-transparent p-6 md:p-0">
-              <div className="w-12 h-12 bg-stone-200 text-stone-500 flex items-center justify-center font-bold mb-6 mx-auto md:mx-0">
-                02
-              </div>
-              <h5 className="font-bold text-lg mb-2">Dialogue</h5>
-              <p className="text-sm text-on-surface-variant">
-                Confidential outreach and first-level narrative analysis.
-              </p>
-            </div>
-            <div className="bg-surface-container-low md:bg-transparent p-6 md:p-0">
-              <div className="w-12 h-12 bg-stone-200 text-stone-500 flex items-center justify-center font-bold mb-6 mx-auto md:mx-0">
-                03
-              </div>
-              <h5 className="font-bold text-lg mb-2">LOI Design</h5>
-              <p className="text-sm text-on-surface-variant">
-                Structuring terms that prioritize long-term asset value.
-              </p>
-            </div>
-            <div className="bg-surface-container-low md:bg-transparent p-6 md:p-0">
-              <div className="w-12 h-12 bg-stone-200 text-stone-500 flex items-center justify-center font-bold mb-6 mx-auto md:mx-0">
-                04
-              </div>
-              <h5 className="font-bold text-lg mb-2">Diligence</h5>
-              <p className="text-sm text-on-surface-variant">
-                Deep-dive technical, financial, and narrative auditing.
-              </p>
-            </div>
-            <div className="bg-surface-container-low md:bg-transparent p-6 md:p-0">
-              <div className="w-12 h-12 bg-stone-200 text-stone-500 flex items-center justify-center font-bold mb-6 mx-auto md:mx-0">
-                05
-              </div>
-              <h5 className="font-bold text-lg mb-2">Closing</h5>
-              <p className="text-sm text-on-surface-variant">
-                Final integration architecture and asset handoff.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="bg-tertiary py-40 text-white text-center">
-        <div className="max-w-4xl mx-auto px-12">
-          <h2 className="text-6xl md:text-8xl font-black tracking-tighter mb-12">
-            Build your legacy<span className="text-white/30">.</span>
-          </h2>
-          <button
-            className="bg-white text-stone-900 px-12 py-6 text-xl font-bold hover:scale-105 transition-transform"
-            onClick={() => onChipClick("Tell Yulia what you're looking for")}
-          >
-            Tell Yulia what you&apos;re looking for
-          </button>
-        </div>
-      </section>
     </div>
   );
 }
