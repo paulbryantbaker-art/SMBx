@@ -34,17 +34,44 @@ const TOOL_LABELS: Record<string, string> = {
   match_franchises: 'Matching franchises',
 };
 
+// Preserve chat state across Vite HMR remounts
+const _hmr = (import.meta.hot?.data ?? {}) as {
+  conversations?: Conversation[];
+  activeConversationId?: number | null;
+  messages?: AuthMessage[];
+  activeDealId?: number | null;
+  currentGate?: string;
+};
+
 export function useAuthChat(user: User | null) {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeConversationId, setActiveConversationId] = useState<number | null>(null);
-  const [messages, setMessages] = useState<AuthMessage[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>(_hmr.conversations ?? []);
+  const [activeConversationId, setActiveConversationId] = useState<number | null>(_hmr.activeConversationId ?? null);
+  const [messages, setMessages] = useState<AuthMessage[]>(_hmr.messages ?? []);
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState('');
   const [activeTool, setActiveTool] = useState<string | null>(null);
-  const [activeDealId, setActiveDealId] = useState<number | null>(null);
-  const [currentGate, setCurrentGate] = useState<string | undefined>();
+  const [activeDealId, setActiveDealId] = useState<number | null>(_hmr.activeDealId ?? null);
+  const [currentGate, setCurrentGate] = useState<string | undefined>(_hmr.currentGate);
   const [paywallData, setPaywallData] = useState<any | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Sync critical state to HMR data so it survives hot reloads
+  useEffect(() => {
+    if (import.meta.hot) {
+      import.meta.hot.data.conversations = conversations;
+      import.meta.hot.data.activeConversationId = activeConversationId;
+      import.meta.hot.data.messages = messages;
+      import.meta.hot.data.activeDealId = activeDealId;
+      import.meta.hot.data.currentGate = currentGate;
+    }
+  }, [conversations, activeConversationId, messages, activeDealId, currentGate]);
+
+  // Clean up in-flight requests on unmount
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   // Load conversation list
   const loadConversations = useCallback(async () => {

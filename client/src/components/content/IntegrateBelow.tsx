@@ -1,662 +1,206 @@
-import { useState } from 'react';
-import { RevealSection, ScrollReveal } from './animations';
-
 interface IntegrateBelowProps {
   onChipClick: (text: string) => void;
 }
 
-const font = "'General Sans', 'Inter', system-ui, sans-serif";
-
 export default function IntegrateBelow({ onChipClick }: IntegrateBelowProps) {
-  const [ctaValue, setCtaValue] = useState('');
-
   return (
-    <div style={{ fontFamily: font }}>
-      {/* ═══ HERO ═══ */}
-      <section
-        style={{
-          maxWidth: 1024,
-          margin: '0 auto',
-          paddingTop: 128,
-          paddingBottom: 192,
-          paddingLeft: 48,
-          paddingRight: 48,
-        }}
-      >
-        <div style={{ maxWidth: 768 }}>
-          <RevealSection>
-            <h1
-              style={{
-                fontFamily: font,
-                fontSize: '3.75rem',
-                fontWeight: 900,
-                letterSpacing: '-0.025em',
-                lineHeight: 1.1,
-                marginBottom: 48,
-                color: '#111111',
-              }}
-            >
-              70% of acquisitions fail to deliver the returns that justified the price
-            </h1>
-          </RevealSection>
-          <RevealSection>
-            <p
-              style={{
-                fontFamily: font,
-                fontSize: '1.5rem',
-                color: '#6b7280',
-                lineHeight: 1.625,
-                margin: 0,
-              }}
-            >
-              The failure isn't in the thesis. It's in the execution. Most SMB
-              acquisitions lose momentum in the first 100 days due to cultural
-              friction and operational drift.
-            </p>
-          </RevealSection>
-        </div>
-      </section>
+    <div className="stitch-integrate">
+      <style>{`
+        .stitch-integrate {
+          --on-surface: #1a1c1c;
+          --surface: #f9f9f9;
+          --tertiary: #95432b;
+          --on-surface-variant: #55433d;
+          --surface-container-lowest: #ffffff;
+          --surface-container-low: #f3f3f3;
+          --surface-container: #eeeeee;
+          --surface-container-high: #e8e8e8;
+          --surface-container-highest: #e2e2e2;
+          --outline-variant: #dbc1ba;
+          color: var(--on-surface);
+          background-color: var(--surface);
+          font-family: 'Inter', sans-serif;
+        }
+        .stitch-integrate .ghost-border {
+          border: 1px solid rgba(219, 193, 186, 0.2);
+        }
+        .stitch-integrate .editorial-shadow {
+          box-shadow: 0 10px 24px -12px rgba(26, 28, 28, 0.04);
+        }
+        .stitch-integrate .text-tertiary {
+          color: var(--tertiary);
+        }
+        .stitch-integrate .text-on-surface {
+          color: var(--on-surface);
+        }
+        .stitch-integrate .text-on-surface-variant {
+          color: var(--on-surface-variant);
+        }
+        .stitch-integrate .bg-surface-container-low {
+          background-color: var(--surface-container-low);
+        }
+        .stitch-integrate .bg-surface-container-lowest {
+          background-color: var(--surface-container-lowest);
+        }
+        .stitch-integrate .bg-surface-container-highest {
+          background-color: var(--surface-container-highest);
+        }
+        .stitch-integrate .bg-surface-container {
+          background-color: var(--surface-container);
+        }
+        .stitch-integrate .border-surface-container {
+          border-color: var(--surface-container);
+        }
+        .stitch-integrate .bg-outline-variant {
+          background-color: var(--outline-variant);
+        }
+      `}</style>
 
-      {/* ═══ NARRATIVE — The Execution Letdown ═══ */}
-      <section
-        style={{
-          backgroundColor: '#f9fafb',
-          paddingTop: 128,
-          paddingBottom: 128,
-          borderTop: '1px solid rgba(0,0,0,0.06)',
-          borderBottom: '1px solid rgba(0,0,0,0.06)',
-        }}
-      >
-        <div
-          className="grid grid-cols-1 md:grid-cols-2"
-          style={{
-            maxWidth: 1024,
-            margin: '0 auto',
-            paddingLeft: 48,
-            paddingRight: 48,
-            gap: 96,
-            alignItems: 'center',
-          }}
-        >
-          <RevealSection>
-            <div>
-              <h2
-                style={{
-                  fontFamily: font,
-                  fontSize: '2.25rem',
-                  fontWeight: 700,
-                  marginBottom: 32,
-                  color: '#111111',
-                }}
-              >
-                The Execution Letdown
-              </h2>
-              <p
-                style={{
-                  fontFamily: font,
-                  fontSize: '1.125rem',
-                  color: '#4b5563',
-                  marginBottom: 24,
-                  lineHeight: 1.625,
-                }}
-              >
-                Unstructured integration is the silent killer of deal value. When
-                leadership is fragmented and systems aren't synced, the very
-                synergies you paid for begin to evaporate.
-              </p>
-              <p
-                style={{
-                  fontFamily: font,
-                  fontSize: '1.125rem',
-                  color: '#4b5563',
-                  lineHeight: 1.625,
-                  margin: 0,
-                }}
-              >
-                We provide the framework to capture that value from Day 1,
-                transforming a chaotic transition into a systematic growth engine.
-              </p>
-            </div>
-          </RevealSection>
-          <ScrollReveal>
-            <div
-              style={{
-                border: '1px solid rgba(0,0,0,0.06)',
-                borderRadius: 16,
-                overflow: 'hidden',
-                backgroundColor: '#ffffff',
-                boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)',
-              }}
+      {/* Hero Section: Editorial Architecture */}
+      <section className="max-w-[1440px] mx-auto px-12 pt-[150px] pb-[200px]">
+        <div className="max-w-4xl">
+          <span className="label-sm text-tertiary font-bold tracking-[0.05em] uppercase text-[11px] mb-6 block">
+            Integrate / The Post-Deal Engine
+          </span>
+          <h1 className="text-black text-[64px] font-extrabold leading-[1.1] tracking-tighter mb-12">
+            70% of acquisitions fail to deliver the returns that justified the price.
+          </h1>
+          <p className="text-on-surface-variant text-[16px] leading-[1.6] max-w-2xl">
+            Integration is where value is either realized or lost. SMBX.ai transforms the chaotic post-closing period into a structured architectural process through Yulia AI's 180-Day Execution Engine.
+          </p>
+          <div className="mt-12">
+            <button
+              onClick={() => onChipClick('Tell Yulia about your acquisition')}
+              className="bg-black text-white px-10 py-5 font-bold tracking-tight hover:bg-[#C96B4F] transition-all"
             >
-              <img
-                alt="Professional team working"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDX6DI04gYzqLM0dmcapBGaJ8BI_QsZrvnSjUVspmMocEcXeGNP0Rm7ZGQ-79IEd-ObSbY0LY-Z_7CSUFnbQ5XGvUh5zKEJuXePhAo53ecEtzCVONHunkVdLEh45MWChwcObChQvBT_2yDARt2zZg4TFYQmd7X96zx4fr6UweX8xW1iireSzCNnmOW7qLAOQvsvG4XdSdfQdSdUe3SDDfErI-6LLS0ieYOhQuPGAFTw0exLGCJhD6Q_4XudJjFaAoFi9OBdwejcG0dU"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  display: 'block',
-                }}
-              />
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
-
-      {/* ═══ 180-DAY TIMELINE ═══ */}
-      <section
-        style={{
-          maxWidth: 1024,
-          margin: '0 auto',
-          paddingTop: 192,
-          paddingBottom: 192,
-          paddingLeft: 48,
-          paddingRight: 48,
-        }}
-      >
-        {/* Timeline heading */}
-        <RevealSection>
-          <div style={{ marginBottom: 96, textAlign: 'center' }}>
-            <h2
-              style={{
-                fontFamily: font,
-                fontSize: '3rem',
-                fontWeight: 900,
-                marginBottom: 24,
-                color: '#111111',
-              }}
-            >
-              The 180-Day Integration Roadmap
-            </h2>
-            <p
-              style={{
-                fontFamily: font,
-                fontSize: '1.25rem',
-                color: '#6b7280',
-                margin: 0,
-              }}
-            >
-              A disciplined approach to capturing value across three distinct
-              phases.
-            </p>
+              Tell Yulia about your acquisition
+            </button>
           </div>
-        </RevealSection>
+        </div>
+      </section>
 
-        {/* Phases */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 128 }}>
+      {/* The Timeline: Rhythmic Zig-Zag */}
+      <section className="bg-surface-container-low py-[200px]">
+        <div className="max-w-[1200px] mx-auto px-12 relative">
+          <div className="absolute left-1/2 top-0 bottom-0 w-px bg-outline-variant opacity-20 hidden lg:block" />
+
           {/* Phase 1: Stabilize */}
-          <ScrollReveal delay={0}>
-            <div
-              className="grid grid-cols-1 lg:grid-cols-12"
-              style={{ gap: 48, alignItems: 'start' }}
-            >
-              <div className="lg:col-span-4">
-                <span
-                  style={{
-                    fontFamily: font,
-                    fontSize: '0.875rem',
-                    fontWeight: 900,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.1em',
-                    color: '#9ca3af',
-                  }}
-                >
-                  Day 1 - 30
-                </span>
-                <h3
-                  style={{
-                    fontFamily: font,
-                    fontSize: '1.875rem',
-                    fontWeight: 700,
-                    marginTop: 8,
-                    color: '#111111',
-                  }}
-                >
-                  STABILIZE
-                </h3>
-              </div>
-              <div
-                className="lg:col-span-8"
-                style={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid rgba(0,0,0,0.06)',
-                  padding: 40,
-                  borderRadius: 16,
-                  boxShadow:
-                    '0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)',
-                }}
-              >
-                <ul
-                  style={{
-                    listStyle: 'none',
-                    margin: 0,
-                    padding: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 24,
-                  }}
-                >
-                  <li className="flex" style={{ gap: 16 }}>
-                    <span
-                      style={{
-                        fontFamily: font,
-                        color: '#111111',
-                        fontWeight: 700,
-                      }}
-                    >
-                      01
-                    </span>
-                    <p
-                      style={{
-                        fontFamily: font,
-                        color: '#4b5563',
-                        margin: 0,
-                        lineHeight: 1.625,
-                      }}
-                    >
-                      Immediate cultural assessment and "Keep/Stop/Start"
-                      feedback loops with key staff.
-                    </p>
-                  </li>
-                  <li className="flex" style={{ gap: 16 }}>
-                    <span
-                      style={{
-                        fontFamily: font,
-                        color: '#111111',
-                        fontWeight: 700,
-                      }}
-                    >
-                      02
-                    </span>
-                    <p
-                      style={{
-                        fontFamily: font,
-                        color: '#4b5563',
-                        margin: 0,
-                        lineHeight: 1.625,
-                      }}
-                    >
-                      Financial controls audit and transition of banking,
-                      payroll, and core compliance.
-                    </p>
-                  </li>
-                  <li className="flex" style={{ gap: 16 }}>
-                    <span
-                      style={{
-                        fontFamily: font,
-                        color: '#111111',
-                        fontWeight: 700,
-                      }}
-                    >
-                      03
-                    </span>
-                    <p
-                      style={{
-                        fontFamily: font,
-                        color: '#4b5563',
-                        margin: 0,
-                        lineHeight: 1.625,
-                      }}
-                    >
-                      Customer sentiment outreach to ensure retention during the
-                      ownership transition.
-                    </p>
-                  </li>
-                </ul>
+          <div className="flex flex-col lg:flex-row items-center mb-[180px] group">
+            <div className="w-full lg:w-1/2 lg:pr-24 flex justify-end">
+              <div className="bg-surface-container-lowest p-11 rounded-xl ghost-border editorial-shadow max-w-md transition-transform duration-500 hover:-translate-y-2">
+                <span className="text-tertiary font-bold label-sm block mb-4">PHASE 01 (DAYS 1-60)</span>
+                <h3 className="text-black text-3xl font-bold mb-6 tracking-tight">Stabilize</h3>
+                <p className="text-on-surface-variant leading-relaxed">
+                  Immediate focus on culture, payroll continuity, and customer retention. Yulia AI audits all operational workflows to identify &ldquo;Day 1&rdquo; risks before they become liabilities.
+                </p>
+                <div className="mt-8 pt-8 border-t border-surface-container flex items-center gap-4">
+                  <span className="material-symbols-outlined text-tertiary" data-icon="verified_user">verified_user</span>
+                  <span className="text-sm font-medium">Risk Mitigation Framework</span>
+                </div>
               </div>
             </div>
-          </ScrollReveal>
+            <div className="hidden lg:flex w-16 h-16 bg-black rounded-full items-center justify-center text-white z-10 -ml-8">01</div>
+            <div className="w-full lg:w-1/2 lg:pl-24 mt-8 lg:mt-0">
+              <div className="w-full h-64 bg-surface-container-highest rounded-lg relative overflow-hidden">
+                <img
+                  className="w-full h-full object-cover grayscale opacity-80"
+                  alt="Abstract architectural lines showing stability and structure"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfbEi0zSkflWD-MkkqzgdFaav5E6IC0b4Snp_cqwMmTCWHk56iLyTfaFasNsMmfSiQr71T3u6m5WGvqdVde7bl_J6l1D5RSi-uWBoHCHTDLtvBE4dgArDj8RbF-JJkOqqg3O8YHBEQu5aRcQ5gIrrw2PmVTLCl74Pm4iBszA2hPuS0wxTaijBqe9DwTHfdF244zLIiURpxQQOoHjfpe9UYiUewIsUrguPbNCKrGv8Fy5DjW14azDgpnaYyf2KjloVsYHa0qAW793c"
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Phase 2: Optimize */}
-          <ScrollReveal delay={0.1}>
-            <div
-              className="grid grid-cols-1 lg:grid-cols-12"
-              style={{ gap: 48, alignItems: 'start' }}
-            >
-              <div className="lg:col-span-4">
-                <span
-                  style={{
-                    fontFamily: font,
-                    fontSize: '0.875rem',
-                    fontWeight: 900,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.1em',
-                    color: '#9ca3af',
-                  }}
-                >
-                  Day 30 - 90
-                </span>
-                <h3
-                  style={{
-                    fontFamily: font,
-                    fontSize: '1.875rem',
-                    fontWeight: 700,
-                    marginTop: 8,
-                    color: '#111111',
-                  }}
-                >
-                  OPTIMIZE
-                </h3>
-              </div>
-              <div
-                className="lg:col-span-8"
-                style={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid rgba(0,0,0,0.06)',
-                  padding: 40,
-                  borderRadius: 16,
-                  boxShadow:
-                    '0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)',
-                }}
-              >
-                <ul
-                  style={{
-                    listStyle: 'none',
-                    margin: 0,
-                    padding: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 24,
-                  }}
-                >
-                  <li className="flex" style={{ gap: 16 }}>
-                    <span
-                      style={{
-                        fontFamily: font,
-                        color: '#111111',
-                        fontWeight: 700,
-                      }}
-                    >
-                      04
-                    </span>
-                    <p
-                      style={{
-                        fontFamily: font,
-                        color: '#4b5563',
-                        margin: 0,
-                        lineHeight: 1.625,
-                      }}
-                    >
-                      Workflow automation: Replacing legacy manual tasks with
-                      modern SaaS integrations.
-                    </p>
-                  </li>
-                  <li className="flex" style={{ gap: 16 }}>
-                    <span
-                      style={{
-                        fontFamily: font,
-                        color: '#111111',
-                        fontWeight: 700,
-                      }}
-                    >
-                      05
-                    </span>
-                    <p
-                      style={{
-                        fontFamily: font,
-                        color: '#4b5563',
-                        margin: 0,
-                        lineHeight: 1.625,
-                      }}
-                    >
-                      Supply chain renegotiation and vendor consolidation to
-                      improve immediate margins.
-                    </p>
-                  </li>
-                  <li className="flex" style={{ gap: 16 }}>
-                    <span
-                      style={{
-                        fontFamily: font,
-                        color: '#111111',
-                        fontWeight: 700,
-                      }}
-                    >
-                      06
-                    </span>
-                    <p
-                      style={{
-                        fontFamily: font,
-                        color: '#4b5563',
-                        margin: 0,
-                        lineHeight: 1.625,
-                      }}
-                    >
-                      Performance dashboard deployment for real-time visibility
-                      into unit economics.
-                    </p>
-                  </li>
-                </ul>
+          <div className="flex flex-col lg:flex-row-reverse items-center mb-[180px] group">
+            <div className="w-full lg:w-1/2 lg:pl-24">
+              <div className="bg-surface-container-lowest p-11 rounded-xl ghost-border editorial-shadow max-w-md transition-transform duration-500 hover:-translate-y-2">
+                <span className="text-tertiary font-bold label-sm block mb-4">PHASE 02 (DAYS 61-120)</span>
+                <h3 className="text-black text-3xl font-bold mb-6 tracking-tight">Optimize</h3>
+                <p className="text-on-surface-variant leading-relaxed">
+                  Tech-stack consolidation and cost-efficiency protocols. We remove redundancies and align the new asset&apos;s operations with your core platform&apos;s scaling architecture.
+                </p>
+                <div className="mt-8 pt-8 border-t border-surface-container flex items-center gap-4">
+                  <span className="material-symbols-outlined text-tertiary" data-icon="bolt">bolt</span>
+                  <span className="text-sm font-medium">Efficiency Engine Mapping</span>
+                </div>
               </div>
             </div>
-          </ScrollReveal>
+            <div className="hidden lg:flex w-16 h-16 bg-black rounded-full items-center justify-center text-white z-10 -mr-8">02</div>
+            <div className="w-full lg:w-1/2 lg:pr-24 mt-8 lg:mt-0 flex justify-end">
+              <div className="w-full h-64 bg-surface-container-highest rounded-lg relative overflow-hidden max-w-md">
+                <img
+                  className="w-full h-full object-cover grayscale opacity-80"
+                  alt="Abstract motion blur representing speed and optimization"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFdbpqgQi-yPBcs4ejLewcWuPecjurPiry5yMpJIZPJWIYu4NICrDrbjCGtOYWUA_5c1qzzurv_TUYNgPmZvwUprXddDpAhjSoe43F5HX7hLvCsO5rDhRhtYzAa5vhM9JYAIrExqoY_kczAS9GJ9bAgsNrb5wDAO05ZtLhXVTQ4QUtuy2kfjRgZzfabGewo1ZhzT3xj_XSBZUw4rMVc9uCW8qmbozJ5lRB8jULS1TdZvcK1RpthalQx0lawYx0n6Tu64hiLKTBdeE"
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Phase 3: Grow */}
-          <ScrollReveal delay={0.2}>
-            <div
-              className="grid grid-cols-1 lg:grid-cols-12"
-              style={{ gap: 48, alignItems: 'start' }}
-            >
-              <div className="lg:col-span-4">
-                <span
-                  style={{
-                    fontFamily: font,
-                    fontSize: '0.875rem',
-                    fontWeight: 900,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.1em',
-                    color: '#9ca3af',
-                  }}
-                >
-                  Day 90 - 180
-                </span>
-                <h3
-                  style={{
-                    fontFamily: font,
-                    fontSize: '1.875rem',
-                    fontWeight: 700,
-                    marginTop: 8,
-                    color: '#111111',
-                  }}
-                >
-                  GROW
-                </h3>
-              </div>
-              <div
-                className="lg:col-span-8"
-                style={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid rgba(0,0,0,0.06)',
-                  padding: 40,
-                  borderRadius: 16,
-                  boxShadow:
-                    '0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)',
-                }}
-              >
-                <ul
-                  style={{
-                    listStyle: 'none',
-                    margin: 0,
-                    padding: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 24,
-                  }}
-                >
-                  <li className="flex" style={{ gap: 16 }}>
-                    <span
-                      style={{
-                        fontFamily: font,
-                        color: '#111111',
-                        fontWeight: 700,
-                      }}
-                    >
-                      07
-                    </span>
-                    <p
-                      style={{
-                        fontFamily: font,
-                        color: '#4b5563',
-                        margin: 0,
-                        lineHeight: 1.625,
-                      }}
-                    >
-                      Cross-selling implementation and product expansion strategy
-                      activation.
-                    </p>
-                  </li>
-                  <li className="flex" style={{ gap: 16 }}>
-                    <span
-                      style={{
-                        fontFamily: font,
-                        color: '#111111',
-                        fontWeight: 700,
-                      }}
-                    >
-                      08
-                    </span>
-                    <p
-                      style={{
-                        fontFamily: font,
-                        color: '#4b5563',
-                        margin: 0,
-                        lineHeight: 1.625,
-                      }}
-                    >
-                      Scalable sales pipeline infrastructure and digital
-                      marketing ramp-up.
-                    </p>
-                  </li>
-                  <li className="flex" style={{ gap: 16 }}>
-                    <span
-                      style={{
-                        fontFamily: font,
-                        color: '#111111',
-                        fontWeight: 700,
-                      }}
-                    >
-                      09
-                    </span>
-                    <p
-                      style={{
-                        fontFamily: font,
-                        color: '#4b5563',
-                        margin: 0,
-                        lineHeight: 1.625,
-                      }}
-                    >
-                      Talent acquisition for key growth roles identified during
-                      stabilization.
-                    </p>
-                  </li>
-                </ul>
+          <div className="flex flex-col lg:flex-row items-center group">
+            <div className="w-full lg:w-1/2 lg:pr-24 flex justify-end">
+              <div className="bg-surface-container-lowest p-11 rounded-xl ghost-border editorial-shadow max-w-md transition-transform duration-500 hover:-translate-y-2">
+                <span className="text-tertiary font-bold label-sm block mb-4">PHASE 03 (DAYS 121-180)</span>
+                <h3 className="text-black text-3xl font-bold mb-6 tracking-tight">Grow</h3>
+                <p className="text-on-surface-variant leading-relaxed">
+                  Shifting from defense to offense. Implementation of cross-selling strategies and expansion playbooks. The asset is now fully integrated and ready for accelerated output.
+                </p>
+                <div className="mt-8 pt-8 border-t border-surface-container flex items-center gap-4">
+                  <span className="material-symbols-outlined text-tertiary" data-icon="trending_up">trending_up</span>
+                  <span className="text-sm font-medium">Scale Multiplier Active</span>
+                </div>
               </div>
             </div>
-          </ScrollReveal>
+            <div className="hidden lg:flex w-16 h-16 bg-black rounded-full items-center justify-center text-white z-10 -ml-8">03</div>
+            <div className="w-full lg:w-1/2 lg:pl-24 mt-8 lg:mt-0">
+              <div className="w-full h-64 bg-surface-container-highest rounded-lg relative overflow-hidden">
+                <img
+                  className="w-full h-full object-cover grayscale opacity-80"
+                  alt="Abstract upward architectural perspective representing growth"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5lyjRcVUeS9s1OBq8dhZnIOB3SxemWA5Aj-G9CYtcd3bSTuX4MiVgSRb_hg209T2SpEV3okKVPnl-JTgDkHr8tgDE8fB-2SV-N4hXypRlPskIDaJ63TfcZmQVnP8HvDtwPaBE7a1rpMQQuCkfpEbO6guGzyU9XVTfJbHXBcn14EDM3vFd_cNmECiUCRijcVtEHswjV9l-Igsuv2ZGwBRGQDOavlseQAZzTqwRMWea37pwt4mDQKIte31pMpaGOXQen_f7J0OACqw"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ═══ CTA ═══ */}
-      <section
-        style={{
-          maxWidth: 1024,
-          margin: '0 auto',
-          paddingBottom: 128,
-          paddingLeft: 48,
-          paddingRight: 48,
-        }}
-      >
-        <RevealSection>
-          <div
-            style={{
-              backgroundColor: '#f9fafb',
-              border: '1px solid rgba(0,0,0,0.06)',
-              padding: 48,
-              borderRadius: 24,
-              textAlign: 'center',
-            }}
-          >
-            <h2
-              style={{
-                fontFamily: font,
-                fontSize: '1.875rem',
-                fontWeight: 700,
-                marginBottom: 32,
-                color: '#111111',
-              }}
-            >
-              Ready to secure your integration?
-            </h2>
-            <div
-              style={{
-                maxWidth: 576,
-                margin: '0 auto',
-                position: 'relative',
-              }}
-            >
-              <input
-                type="text"
-                placeholder="Ask about our integration framework..."
-                value={ctaValue}
-                onChange={(e) => setCtaValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && ctaValue.trim()) {
-                    onChipClick(ctaValue.trim());
-                    setCtaValue('');
-                  }
-                }}
-                style={{
-                  fontFamily: font,
-                  width: '100%',
-                  paddingTop: 20,
-                  paddingBottom: 20,
-                  paddingLeft: 32,
-                  paddingRight: 120,
-                  borderRadius: 9999,
-                  border: '1px solid rgba(0,0,0,0.06)',
-                  boxShadow:
-                    '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)',
-                  fontSize: '1.125rem',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                  color: '#111111',
-                  backgroundColor: '#ffffff',
-                }}
-              />
-              <button
-                onClick={() => {
-                  const msg = ctaValue.trim() || 'I just acquired a business and need a 180-day integration plan';
-                  onChipClick(msg);
-                  setCtaValue('');
-                }}
-                style={{
-                  fontFamily: font,
-                  position: 'absolute',
-                  right: 8,
-                  top: 8,
-                  bottom: 8,
-                  paddingLeft: 24,
-                  paddingRight: 24,
-                  backgroundColor: '#111111',
-                  color: '#ffffff',
-                  borderRadius: 9999,
-                  fontWeight: 700,
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  transition: 'background-color 0.15s',
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = '#1f2937')
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = '#111111')
-                }
-              >
-                Send
-              </button>
+      {/* Quote/Editorial Block */}
+      <section className="max-w-[1440px] mx-auto px-12 py-[200px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-24 items-start">
+          <div>
+            <h2 className="text-black text-[40px] font-bold tracking-tighter leading-tight mb-8">The smbx.ai Standard</h2>
+            <p className="text-on-surface-variant text-lg leading-loose mb-8">
+              Traditional M&amp;A firms hand you a report and leave. We provide the editorial architect &mdash; Yulia AI &mdash; who stays through the entire 180-day journey, ensuring every brick of the integration is laid with precision.
+            </p>
+            <div className="p-8 border-l-4 border-[#C96B4F] bg-surface-container-low">
+              <p className="italic text-on-surface text-xl">&ldquo;Integration is not a checklist; it&apos;s a narrative transformation.&rdquo;</p>
             </div>
           </div>
-        </RevealSection>
+          <div className="aspect-square bg-surface-container-highest relative">
+            <img
+              className="w-full h-full object-cover grayscale"
+              alt="Minimalist designer office with high-end furniture"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxbn022IUjJRQHvmv9AR581Wd_ytdrKwKqO3GLryjBa2VLjYycziHchUtc7v2jiks6-IDkjFc3UqHMvnWXCTA3YXzMAQPOT__Ay5SnanRnK2mbtvEx5qzIpR6i5ahqxPkFye39Q2LpU9NMowv6NcEoZpc8umyfrHgwT1MCEZtuNCT8tMGYwVeadU90Wi-x7YvHLjatkZTY1uve9xpb4pSNQAgE8gWQEsto91GAC_DANDvH3qycZ87PLtvd-DbqSz0FMT5oTMfrc2Q"
+            />
+            <div className="absolute inset-0 bg-black/10" />
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom CTA */}
+      <section className="bg-black py-[120px] text-white">
+        <div className="max-w-[1440px] mx-auto px-12 text-center">
+          <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-12">Ready to secure the returns?</h2>
+          <button
+            onClick={() => onChipClick('Tell Yulia about your acquisition')}
+            className="bg-[#C96B4F] text-white px-12 py-6 text-xl font-bold hover:bg-white hover:text-black transition-all"
+          >
+            Tell Yulia about your acquisition
+          </button>
+        </div>
       </section>
     </div>
   );

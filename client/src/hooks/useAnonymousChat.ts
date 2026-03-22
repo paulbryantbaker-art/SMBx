@@ -34,10 +34,17 @@ function getOrCreateSessionId(): string {
   }
 }
 
+// Preserve chat state across Vite HMR remounts
+const _hmr = (import.meta.hot?.data ?? {}) as {
+  messages?: AnonMessage[];
+  conversations?: AnonConversation[];
+  activeConversationId?: number | null;
+};
+
 export function useAnonymousChat() {
-  const [messages, setMessages] = useState<AnonMessage[]>([]);
-  const [conversations, setConversations] = useState<AnonConversation[]>([]);
-  const [activeConversationId, setActiveConversationId] = useState<number | null>(null);
+  const [messages, setMessages] = useState<AnonMessage[]>(_hmr.messages ?? []);
+  const [conversations, setConversations] = useState<AnonConversation[]>(_hmr.conversations ?? []);
+  const [activeConversationId, setActiveConversationId] = useState<number | null>(_hmr.activeConversationId ?? null);
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +52,23 @@ export function useAnonymousChat() {
   const sessionIdRef = useRef(getOrCreateSessionId());
   const abortRef = useRef<AbortController | null>(null);
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync critical state to HMR data so it survives hot reloads
+  useEffect(() => {
+    if (import.meta.hot) {
+      import.meta.hot.data.messages = messages;
+      import.meta.hot.data.conversations = conversations;
+      import.meta.hot.data.activeConversationId = activeConversationId;
+    }
+  }, [messages, conversations, activeConversationId]);
+
+  // Clean up in-flight requests on unmount
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+    };
+  }, []);
 
   // Kept for AppShell compat — no limits in unified flow
   const limitReached = false;
