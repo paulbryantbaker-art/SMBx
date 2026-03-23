@@ -11,6 +11,7 @@
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" id="theme-color-light" />
     <meta name="theme-color" content="#1a1c1e" media="(prefers-color-scheme: dark)" id="theme-color-dark" />
     <meta name="supported-color-schemes" content="light dark" />
+    <meta name="color-scheme" content="light" />
     <script>
       // Sync dark mode before first paint — prevents flash and sets Safari chrome
       (function() {
@@ -18,16 +19,17 @@
         if (isDark) {
           document.documentElement.classList.add('dark');
           document.documentElement.style.colorScheme = 'dark';
-          // Override both theme-color metas to force Safari
           var metas = document.querySelectorAll('meta[name="theme-color"]');
           metas.forEach(function(m) { m.setAttribute('content', '#1a1c1e'); m.removeAttribute('media'); });
+          var cs = document.querySelector('meta[name="color-scheme"]');
+          if (cs) cs.setAttribute('content', 'dark');
         }
       })();
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>

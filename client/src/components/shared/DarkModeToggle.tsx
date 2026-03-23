@@ -22,7 +22,17 @@ export function useDarkMode() {
     fresh.name = 'theme-color';
     fresh.content = color;
     document.head.appendChild(fresh);
-    // Sync color-scheme for Safari tab bar + native controls
+    // Force body background (Safari reads this for bottom toolbar)
+    document.body.style.backgroundColor = color;
+    // Sync color-scheme meta (Safari reads this for system-level chrome)
+    let csMeta = document.querySelector('meta[name="color-scheme"]') as HTMLMetaElement;
+    if (!csMeta) {
+      csMeta = document.createElement('meta');
+      csMeta.name = 'color-scheme';
+      document.head.appendChild(csMeta);
+    }
+    csMeta.content = dark ? 'dark' : 'light';
+    // Sync color-scheme CSS property on root
     root.style.colorScheme = dark ? 'dark' : 'light';
   }, [dark]);
 

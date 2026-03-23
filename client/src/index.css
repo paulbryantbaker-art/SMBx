@@ -43,7 +43,7 @@
   --shadow-lg: 0 4px 24px rgba(0,0,0,.10);
   --sans: 'Inter', system-ui, -apple-system, sans-serif;
   --headline: 'Sora', 'Inter', system-ui, sans-serif;
-  --serif: 'Playfair Display', 'Georgia', serif;
+  --serif: 'Sora', sans-serif;
 }
 
 html, body, #root, #app-root {

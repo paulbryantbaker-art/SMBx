@@ -59,7 +59,7 @@ export default function DeliverableViewer({ deliverableId, onClose }: Deliverabl
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <div>
-            <h2 className="text-lg font-semibold text-text-primary font-[Georgia,ui-serif,serif] m-0">
+            <h2 className="text-lg font-semibold text-text-primary font-headline m-0">
               {data.name}
             </h2>
             {data.completed_at && (
@@ -104,7 +104,7 @@ function DeliverableContent({ content }: { content: Record<string, any> }) {
         )}
         {content.sections.map((section: any, i: number) => (
           <div key={i}>
-            <h3 className="text-base font-semibold text-text-primary font-[Georgia,ui-serif,serif] m-0 mb-2">
+            <h3 className="text-base font-semibold text-text-primary font-headline m-0 mb-2">
               {section.title}
             </h3>
             <div className="text-sm text-text-primary leading-relaxed whitespace-pre-wrap">

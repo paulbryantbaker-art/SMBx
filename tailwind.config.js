@@ -87,13 +87,13 @@ export default {
         '4xl': '34px',
       },
       fontFamily: {
-        headline: ['Sora', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['Sora', 'Inter', 'system-ui', 'sans-serif'],
+        headline: ['Sora', 'sans-serif'],
+        display: ['Sora', 'sans-serif'],
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
         label: ['Inter', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
-        serif: ['Playfair Display', 'Georgia', 'serif'],
+        handwritten: ['Caveat', 'cursive'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
       maxWidth: {
         site: '1200px',

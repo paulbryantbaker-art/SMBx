@@ -85,7 +85,7 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
               onKeyDown={handleKey}
               placeholder={placeholder}
               className="w-full bg-transparent border-none focus:outline-none text-[16px] md:text-[18px] text-[#0D0D0D] placeholder:text-[#A9A49C] p-5 resize-none min-h-[80px]"
-              style={{ fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", serif', maxHeight: '200px' }}
+              style={{ fontFamily: "'Inter', sans-serif", maxHeight: '200px' }}
               rows={2}
             />
             <div className="flex items-center justify-between px-5 pb-4 pt-1">
@@ -126,7 +126,7 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
             onKeyDown={handleKey}
             placeholder={placeholder}
             className="w-full bg-transparent border-none focus:outline-none text-[16px] md:text-[18px] text-[#0D0D0D] placeholder:text-[#A9A49C] p-5 resize-none min-h-[80px]"
-            style={{ fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", serif', maxHeight: '200px' }}
+            style={{ fontFamily: "'Inter', sans-serif", maxHeight: '200px' }}
             rows={2}
           />
           <div className="flex items-center justify-between px-5 pb-4 pt-1">
@@ -149,7 +149,7 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
           </div>
         </div>
 
-        <p className="text-center text-[12px] text-[#9CA3AF] mt-2.5 hidden sm:block" style={{ fontFamily: 'ui-serif, Georgia, Cambria, "Times New Roman", serif' }}>
+        <p className="text-center text-[12px] text-[#9CA3AF] mt-2.5 hidden sm:block" style={{ fontFamily: "'Inter', sans-serif" }}>
           Yulia is an AI advisor. Built on Census, BLS, FRED, and SEC EDGAR data.
         </p>
       </div>
