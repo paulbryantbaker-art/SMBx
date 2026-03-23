@@ -8,15 +8,21 @@
     <meta property="og:title" content="smbx.ai — AI Deal Advisory" />
     <meta property="og:description" content="AI deal advisory from valuation to close. Sell, buy, raise capital, or integrate. Start free." />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#ffffff" id="theme-color-meta" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" id="theme-color-light" />
+    <meta name="theme-color" content="#1a1c1e" media="(prefers-color-scheme: dark)" id="theme-color-dark" />
+    <meta name="supported-color-schemes" content="light dark" />
     <script>
-      // Sync theme-color + body before first paint to avoid flash
-      if (localStorage.getItem('smbx-dark') === '1') {
-        document.documentElement.classList.add('dark');
-        document.querySelector('#theme-color-meta').setAttribute('content', '#1a1c1e');
-      }
+      // Sync dark mode before first paint — prevents flash and sets Safari chrome
+      (function() {
+        var isDark = localStorage.getItem('smbx-dark') === '1';
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = 'dark';
+          // Override both theme-color metas to force Safari
+          var metas = document.querySelectorAll('meta[name="theme-color"]');
+          metas.forEach(function(m) { m.setAttribute('content', '#1a1c1e'); m.removeAttribute('media'); });
+        }
+      })();
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

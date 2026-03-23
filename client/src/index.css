@@ -50,17 +50,17 @@ html, body, #root, #app-root {
   background-color: #ffffff;
 }
 html.dark, html.dark body, html.dark #root, html.dark #app-root {
-  background-color: #1a1c1e;
+  background-color: #1a1c1e !important;
+  color-scheme: dark;
 }
 
 html {
   height: 100%;
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 body {
   margin: 0;
-  background-color: #ffffff;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;

@@ -15,10 +15,13 @@ export function useDarkMode() {
       root.classList.remove('dark');
       localStorage.setItem('smbx-dark', '0');
     }
-    // Sync Safari/mobile browser chrome color
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', dark ? '#1a1c1e' : '#ffffff');
-    // Sync color-scheme for native form controls
+    // Sync Safari/mobile browser chrome — force all theme-color metas
+    const color = dark ? '#1a1c1e' : '#ffffff';
+    document.querySelectorAll('meta[name="theme-color"]').forEach(m => {
+      m.setAttribute('content', color);
+      m.removeAttribute('media'); // remove media so Safari uses the value unconditionally
+    });
+    // Sync color-scheme for Safari tab bar + native controls
     root.style.colorScheme = dark ? 'dark' : 'light';
   }, [dark]);
 
