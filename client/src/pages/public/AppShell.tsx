@@ -925,8 +925,8 @@ export default function AppShell() {
             <span className="text-xs font-semibold text-yellow-800">You appear to be offline. Messages will send when you reconnect.</span>
           </div>
         )}
-        {/* Header — only shown in non-home views or chat mode */}
-        {(viewState !== 'landing' || activeTab !== 'home') && (
+        {/* Header — hidden on mobile (floating icons replace it), shown on desktop */}
+        {!isMobile && (viewState !== 'landing' || activeTab !== 'home') && (
         <header
           className={`flex-shrink-0 flex items-center justify-between h-14 px-6 z-20 ${dark ? 'border-b border-zinc-800/50' : 'border-b border-[#eeeef0]'}`}
           style={{ background: dark ? 'rgba(26,28,30,0.80)' : 'rgba(255,255,255,0.80)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
@@ -1006,18 +1006,18 @@ export default function AppShell() {
             <div key={activeTab} style={{ animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, height: '100%' } : {}) }}>
               {activeTab === 'home' ? (
               <>
-                {/* ═══ HOME PAGE — New Design: hero with gradient input + quick actions + trust bar ═══ */}
-                <main className="flex-1 flex flex-col items-center justify-center relative px-6">
+                {/* ═══ HOME PAGE — New Design ═══ */}
+                <main className="flex-1 flex flex-col relative">
                   {/* Background blur orbs */}
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className={`absolute -top-[10%] -left-[10%] w-[40%] h-[40%] blur-[120px] rounded-full ${dark ? 'bg-[#b0004a]/10' : 'bg-[#b0004a]/5'}`} />
                     <div className={`absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] blur-[120px] rounded-full ${dark ? 'bg-[#d81b60]/10' : 'bg-[#d81b60]/5'}`} />
                   </div>
 
-                  <div className="max-w-4xl w-full text-center space-y-12 relative z-10">
-                    {/* Logo + Hero text */}
-                    <div className="space-y-6">
-                      <LogoImg height={32} className="mx-auto mb-2" />
+                  {/* Center zone — hero text (vertically centered) */}
+                  <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
+                    <div className="max-w-4xl w-full text-center space-y-6">
+                      <LogoImg height={isMobile ? 22 : 32} className="mx-auto mb-2" />
                       <h1 className="font-headline text-3xl md:text-6xl lg:text-8xl font-extrabold leading-tight tracking-tighter">
                         What's the <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>deal?</span>
                       </h1>
@@ -1026,42 +1026,75 @@ export default function AppShell() {
                       </p>
                     </div>
 
-                    {/* Gradient-glow input */}
-                    <div className="w-full max-w-3xl mx-auto">
-                      <div className="relative group">
-                        <div className={`absolute -inset-1 bg-gradient-to-r from-[#b0004a] to-[#d81b60] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
-                        <div className={`relative rounded-full flex items-center p-2 pl-6 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
-                          <span className={`material-symbols-outlined mr-4 ${dark ? 'text-rose-500' : 'text-[#b0004a]'}`}>bolt</span>
-                          <input
-                            className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
-                            placeholder="Message Yulia..."
-                            type="text"
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
-                                handleSend((e.target as HTMLInputElement).value.trim());
-                                (e.target as HTMLInputElement).value = '';
-                              }
-                            }}
-                          />
-                          <button
-                            onClick={(e) => {
-                              const input = (e.currentTarget.parentElement?.querySelector('input') as HTMLInputElement);
-                              if (input?.value.trim()) { handleSend(input.value.trim()); input.value = ''; }
-                            }}
-                            className="bg-gradient-to-br from-[#b0004a] to-[#d81b60] text-white h-12 w-12 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform border-none cursor-pointer"
-                          >
-                            <span className="material-symbols-outlined">arrow_forward</span>
-                          </button>
-                        </div>
-                      </div>
+                    {/* Desktop: gradient-glow input + chips inline below hero */}
+                    {!isMobile && (
+                      <div className="max-w-4xl w-full text-center mt-12 relative z-10">
+                        <div className="w-full max-w-3xl mx-auto">
+                          <div className="relative group">
+                            <div className={`absolute -inset-1 bg-gradient-to-r from-[#b0004a] to-[#d81b60] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
+                            <div className={`relative rounded-full flex items-center p-2 pl-6 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
+                              <span className={`material-symbols-outlined mr-4 ${dark ? 'text-rose-500' : 'text-[#b0004a]'}`}>bolt</span>
+                              <input
+                                className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
+                                placeholder="Message Yulia..."
+                                type="text"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
+                                    handleSend((e.target as HTMLInputElement).value.trim());
+                                    (e.target as HTMLInputElement).value = '';
+                                  }
+                                }}
+                              />
+                              <button
+                                onClick={(e) => {
+                                  const input = (e.currentTarget.parentElement?.querySelector('input') as HTMLInputElement);
+                                  if (input?.value.trim()) { handleSend(input.value.trim()); input.value = ''; }
+                                }}
+                                className="bg-gradient-to-br from-[#b0004a] to-[#d81b60] text-white h-12 w-12 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform border-none cursor-pointer"
+                              >
+                                <span className="material-symbols-outlined">arrow_forward</span>
+                              </button>
+                            </div>
+                          </div>
 
-                      {/* Suggestion chips */}
-                      <div className="mt-6 flex flex-wrap justify-center gap-2 md:gap-3">
+                          {/* Desktop suggestion chips */}
+                          <div className="mt-6 flex flex-wrap justify-center gap-3">
+                            {['I want to sell my business', 'Looking to buy a business', 'Need to raise capital', 'Just closed — what now?'].map(chip => (
+                              <button
+                                key={chip}
+                                onClick={() => handleSend(chip)}
+                                className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-all border-none ${
+                                  dark
+                                    ? 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                                    : 'bg-white text-[#636467] shadow-sm hover:border-[#b0004a] hover:text-[#b0004a]'
+                                }`}
+                                style={{ border: dark ? '1px solid rgba(63,63,70,0.5)' : '1px solid #e3bdc3' }}
+                                type="button"
+                              >
+                                {chip}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Desktop trust line */}
+                        <p className={`text-xs font-medium mt-8 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
+                          Free analysis · No account required · Your data stays yours
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Mobile bottom zone: chips + ChatDock + micro-copy */}
+                  {isMobile && (
+                    <div className="shrink-0 px-4 pb-2 relative z-10">
+                      {/* Mobile chips */}
+                      <div className="flex flex-wrap justify-center gap-2 mb-5">
                         {['I want to sell my business', 'Looking to buy a business', 'Need to raise capital', 'Just closed — what now?'].map(chip => (
                           <button
                             key={chip}
                             onClick={() => handleSend(chip)}
-                            className={`px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm cursor-pointer transition-all border-none ${
+                            className={`px-3 py-1.5 rounded-full text-xs cursor-pointer transition-all border-none ${
                               dark
                                 ? 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
                                 : 'bg-white text-[#636467] shadow-sm hover:border-[#b0004a] hover:text-[#b0004a]'
@@ -1073,13 +1106,22 @@ export default function AppShell() {
                           </button>
                         ))}
                       </div>
+                      {/* ChatDock */}
+                      <div style={{ paddingBottom: 'max(4px, env(safe-area-inset-bottom))' }}>
+                        <ChatDock
+                          ref={dockRef}
+                          onSend={handleSend}
+                          variant="hero"
+                          rows={1}
+                          placeholder="Message Yulia..."
+                          disabled={sending}
+                        />
+                      </div>
+                      <p className={`text-[10px] font-medium text-center mt-2 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
+                        Free analysis · No account required · Your data stays yours
+                      </p>
                     </div>
-
-                    {/* Subtle trust line */}
-                    <p className={`text-xs font-medium mt-8 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
-                      Free analysis · No account required · Your data stays yours
-                    </p>
-                  </div>
+                  )}
                 </main>
               </>
               ) : activeTab === 'sell' ? (
@@ -1120,6 +1162,7 @@ export default function AppShell() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
+              style={isMobile ? { paddingTop: 48 } : undefined}
             >
               {user && authChat.activeDealId && (
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
@@ -1367,30 +1410,105 @@ export default function AppShell() {
         }
       `}</style>
 
-      {/* ═══ FLYING LETTERS — each letter flies whimsically between center and sidebar ═══ */}
-      {/* ═══ MOBILE BOTTOM BAR ═══ */}
+      {/* ═══ MOBILE SIDEBAR DRAWER ═══ */}
+      {isMobile && isMobileSidebarOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-[60] bg-black/40"
+            onClick={() => setIsMobileSidebarOpen(false)}
+            style={{ animation: 'fadeOnly 0.2s ease' }}
+          />
+          {/* Drawer */}
+          <nav
+            className={`fixed top-0 left-0 bottom-0 z-[61] w-64 flex flex-col py-12 px-6 ${dark ? 'bg-[#1a1c1e] border-r border-zinc-800' : 'bg-white border-r border-[#eeeef0] shadow-xl'}`}
+            style={{ animation: 'slideInLeft 0.25s ease' }}
+          >
+            <button
+              onClick={() => setIsMobileSidebarOpen(false)}
+              className={`absolute top-4 right-4 bg-transparent border-none cursor-pointer p-0 ${dark ? 'text-[#f0f0f3]/70' : 'text-[#1a1c1e]/70'}`}
+              type="button"
+              aria-label="Close menu"
+            >
+              <span className="material-symbols-outlined text-[24px]">close</span>
+            </button>
+            <LogoImg height={22} className="mb-8" />
+            <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-4 ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Explore</span>
+            {([
+              { id: 'home' as TabId, icon: 'home', label: 'Home' },
+              { id: 'sell' as TabId, icon: 'storefront', label: 'Sell' },
+              { id: 'buy' as TabId, icon: 'shopping_bag', label: 'Buy' },
+              { id: 'raise' as TabId, icon: 'trending_up', label: 'Raise' },
+              { id: 'integrate' as TabId, icon: 'merge', label: 'Integrate' },
+              { id: 'advisors' as TabId, icon: 'handshake', label: 'Advisors' },
+              { id: 'how-it-works' as TabId, icon: 'help_outline', label: 'How It Works' },
+              { id: 'pricing' as TabId, icon: 'sell', label: 'Pricing' },
+            ]).map(item => {
+              const isActive = activeTab === item.id && viewState === 'landing';
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleTabClick(item.id)}
+                  className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${
+                    isActive
+                      ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5')
+                      : (dark ? 'text-zinc-400 hover:text-white bg-transparent' : 'text-[#636467] hover:text-[#1a1c1e] bg-transparent')
+                  }`}
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                  {item.label}
+                </button>
+              );
+            })}
+            <div className="mt-auto flex flex-col gap-2">
+              <button
+                onClick={() => { setIsMobileSidebarOpen(false); handleNewChat(); }}
+                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5'}`}
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[20px]">add_comment</span>
+                New Chat
+              </button>
+              <button
+                onClick={() => { setIsMobileSidebarOpen(false); if (user) { setViewState('settings'); navigate('/settings'); } else navigate('/login'); }}
+                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 bg-transparent' : 'text-[#636467] bg-transparent'}`}
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[20px]">person</span>
+                {user ? 'Settings' : 'Sign In'}
+              </button>
+            </div>
+          </nav>
+        </>
+      )}
+
+      {/* ═══ MOBILE FLOATING HAMBURGER — top left ═══ */}
       {isMobile && viewState === 'landing' && (
-        <div className={`fixed bottom-0 left-0 right-0 p-4 flex justify-around z-40 ${
-          dark
-            ? 'bg-zinc-950/80 backdrop-blur-xl border-t border-zinc-800'
-            : 'bg-white/70 backdrop-blur-xl border-t border-[#eeeef0] shadow-lg'
-        }`}>
-          <button onClick={() => handleTabClick('home')} className="bg-transparent border-none cursor-pointer" type="button">
-            <span className={`material-symbols-outlined ${activeTab === 'home' ? (dark ? 'text-rose-500' : 'text-[#b0004a]') : (dark ? 'text-zinc-500' : 'text-[#636467]')}`} style={activeTab === 'home' ? { fontVariationSettings: "'FILL' 1" } : undefined}>home</span>
-          </button>
-          <button onClick={() => handleTabClick('buy')} className="bg-transparent border-none cursor-pointer" type="button">
-            <span className={`material-symbols-outlined ${activeTab === 'buy' ? (dark ? 'text-rose-500' : 'text-[#b0004a]') : (dark ? 'text-zinc-500' : 'text-[#636467]')}`}>search</span>
-          </button>
-          <button onClick={() => { handleNewChat(); }} className="bg-transparent border-none cursor-pointer" type="button">
-            <span className={`material-symbols-outlined ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>add_circle</span>
-          </button>
-          <button onClick={() => { setViewState('chat'); navigate('/chat'); }} className="bg-transparent border-none cursor-pointer" type="button">
-            <span className={`material-symbols-outlined ${viewState === 'chat' ? (dark ? 'text-rose-500' : 'text-[#b0004a]') : (dark ? 'text-zinc-500' : 'text-[#636467]')}`}>notifications</span>
-          </button>
-          <button onClick={() => { if (user) { setViewState('settings'); navigate('/settings'); } else navigate('/login'); }} className="bg-transparent border-none cursor-pointer" type="button">
-            <span className={`material-symbols-outlined ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>person</span>
-          </button>
-        </div>
+        <button
+          onClick={() => setIsMobileSidebarOpen(true)}
+          className={`fixed z-50 bg-transparent border-none cursor-pointer p-0 ${dark ? 'text-[#f0f0f3]/70' : 'text-[#1a1c1e]/70'}`}
+          style={{ top: 48, left: 20 }}
+          type="button"
+          aria-label="Open menu"
+        >
+          <span className="material-symbols-outlined text-[28px]">menu</span>
+        </button>
+      )
+
+      }
+
+      {/* ═══ MOBILE FLOATING BACK ARROW — top left in chat mode ═══ */}
+      {isMobile && viewState === 'chat' && (
+        <button
+          onClick={handleBack}
+          className={`fixed z-50 bg-transparent border-none cursor-pointer p-0 ${dark ? 'text-[#f0f0f3]/70' : 'text-[#1a1c1e]/70'}`}
+          style={{ top: 48, left: 20 }}
+          type="button"
+          aria-label="Back"
+        >
+          <span className="material-symbols-outlined text-[28px]">arrow_back</span>
+        </button>
       )}
 
       {/* Dark mode toggle */}
