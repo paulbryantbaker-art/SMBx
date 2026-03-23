@@ -8,7 +8,16 @@
     <meta property="og:title" content="smbx.ai — AI Deal Advisory" />
     <meta property="og:description" content="AI deal advisory from valuation to close. Sell, buy, raise capital, or integrate. Start free." />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#ffffff" id="theme-color-meta" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <script>
+      // Sync theme-color + body before first paint to avoid flash
+      if (localStorage.getItem('smbx-dark') === '1') {
+        document.documentElement.classList.add('dark');
+        document.querySelector('#theme-color-meta').setAttribute('content', '#1a1c1e');
+      }
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

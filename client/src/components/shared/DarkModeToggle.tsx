@@ -18,6 +18,8 @@ export function useDarkMode() {
     // Sync Safari/mobile browser chrome color
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', dark ? '#1a1c1e' : '#ffffff');
+    // Sync color-scheme for native form controls
+    root.style.colorScheme = dark ? 'dark' : 'light';
   }, [dark]);
 
   return [dark, setDark] as const;
