@@ -1504,7 +1504,7 @@ export default function AppShell() {
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
           className="fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#d81b60]"
-          style={{ top: 48, left: 20 }}
+          style={{ top: 16, left: 16 }}
           type="button"
           aria-label="Open menu"
         >
@@ -1517,7 +1517,7 @@ export default function AppShell() {
         <button
           onClick={handleBack}
           className="fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#d81b60]"
-          style={{ top: 48, left: 20 }}
+          style={{ top: 16, left: 16 }}
           type="button"
           aria-label="Back"
         >
