@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
@@ -22,13 +22,25 @@ import BuyerPipeline from '../../components/chat/BuyerPipeline';
 import DocumentLibrary from '../../components/chat/DocumentLibrary';
 import AnalyticsView from '../../components/chat/AnalyticsView';
 import NDAModal from '../../components/chat/NDAModal';
-import SellBelow from '../../components/content/SellBelow';
-import BuyBelow from '../../components/content/BuyBelow';
-import RaiseBelow from '../../components/content/RaiseBelow';
-import IntegrateBelow from '../../components/content/IntegrateBelow';
-import HowItWorksBelow from '../../components/content/HowItWorksBelow';
-import AdvisorsBelow from '../../components/content/AdvisorsBelow';
-import PricingBelow from '../../components/content/PricingBelow';
+const SellBelow = lazy(() => import('../../components/content/SellBelow'));
+const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
+const RaiseBelow = lazy(() => import('../../components/content/RaiseBelow'));
+const IntegrateBelow = lazy(() => import('../../components/content/IntegrateBelow'));
+const HowItWorksBelow = lazy(() => import('../../components/content/HowItWorksBelow'));
+const AdvisorsBelow = lazy(() => import('../../components/content/AdvisorsBelow'));
+const PricingBelow = lazy(() => import('../../components/content/PricingBelow'));
+
+/* Minimal skeleton for lazy Below pages */
+function BelowSkeleton() {
+  return (
+    <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto animate-pulse">
+      <div className="h-12 w-3/4 bg-current opacity-[0.06] rounded-lg mb-8" />
+      <div className="h-4 w-full bg-current opacity-[0.04] rounded mb-3" />
+      <div className="h-4 w-5/6 bg-current opacity-[0.04] rounded mb-3" />
+      <div className="h-4 w-2/3 bg-current opacity-[0.04] rounded" />
+    </div>
+  );
+}
 
 /* ═══ YULIA WELCOME MESSAGE — shown as first chat message ═══ */
 const YULIA_WELCOME_MESSAGE: AnonMessage = {
@@ -146,11 +158,16 @@ interface PageCopy {
 const PAGE_COPY: Record<TabId, PageCopy> = {
   home: {
     overline: '',
-    headline: '[PAUL TO WRITE]',
-    terraWord: '',
-    tagline: '',
-    chips: [],
-    placeholder: 'Tell Yulia about your deal...',
+    headline: "What's the deal?",
+    terraWord: 'deal?',
+    tagline: "Tell Yulia about your business. She'll tell you what it's worth.",
+    chips: [
+      'I want to sell my business',
+      'Looking to buy a business',
+      'Need to raise capital',
+      'Just closed — what now?',
+    ],
+    placeholder: 'Message Yulia...',
   },
   sell: {
     overline: '',
@@ -768,26 +785,17 @@ export default function AppShell() {
     <aside
       className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950 border-r border-zinc-800/50' : 'bg-white border-r border-[#eeeef0] shadow-sm'}`}
     >
-      {/* Logo */}
-      <div className="mb-8">
-        <button
-          ref={sidebarLogoRef as any}
-          onClick={() => handleTabClick('home')}
-          className="bg-transparent border-none cursor-pointer p-0 leading-none"
-          type="button"
-        >
-          <LogoImg height={32} />
-        </button>
-      </div>
-
-      {/* Deals section */}
-      <div className="flex flex-col items-center gap-1 w-full px-2">
-        <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Deals</span>
+      {/* Explore section */}
+      <div className="flex flex-col items-center gap-1 w-full px-2 mt-2" ref={sidebarLogoRef as any}>
+        <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Explore</span>
         {([
           { id: 'sell' as TabId, icon: 'storefront', label: 'Sell' },
           { id: 'buy' as TabId, icon: 'shopping_bag', label: 'Buy' },
           { id: 'raise' as TabId, icon: 'trending_up', label: 'Raise' },
           { id: 'integrate' as TabId, icon: 'merge', label: 'Integrate' },
+          { id: 'advisors' as TabId, icon: 'handshake', label: 'Advisors' },
+          { id: 'how-it-works' as TabId, icon: 'help_outline', label: 'How' },
+          { id: 'pricing' as TabId, icon: 'sell', label: 'Pricing' },
         ]).map(item => {
           const isActive = activeTab === item.id && viewState === 'landing';
           return (
@@ -812,7 +820,8 @@ export default function AppShell() {
       {/* Divider */}
       <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`} />
 
-      {/* Tools section */}
+      {/* Tools section — logged-in user features */}
+      {user && (
       <div className="flex flex-col items-center gap-1 w-full px-2">
         <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Tools</span>
         {([
@@ -824,10 +833,7 @@ export default function AppShell() {
           return (
             <button
               key={item.view}
-              onClick={() => {
-                if (user) { setViewState(item.view); navigate(item.route); }
-                else navigate('/login');
-              }}
+              onClick={() => { setViewState(item.view); navigate(item.route); }}
               className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                 isActive
                   ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5')
@@ -842,6 +848,7 @@ export default function AppShell() {
           );
         })}
       </div>
+      )}
 
       {/* Divider */}
       <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`} />
@@ -952,9 +959,13 @@ export default function AppShell() {
                   </button>
                 )}
                 {!isMobile && (
-                  <span className={`text-sm font-semibold font-headline ${dark ? 'text-zinc-400' : 'text-[#5d5e61]'}`}>
-                    {viewState === 'documents' ? 'Documents' : viewState === 'analytics' ? 'Analytics' : viewState === 'settings' ? 'Settings' : viewState === 'pipeline' ? 'Pipeline' : viewState === 'dataroom' ? 'Data Room' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'raise' ? 'Raise' : activeTab === 'integrate' ? 'Integrate' : activeTab === 'how-it-works' ? 'How It Works' : activeTab === 'advisors' ? 'Advisors' : activeTab === 'pricing' ? 'Pricing' : 'Chat'}
-                  </span>
+                  <button
+                    onClick={() => handleTabClick('home')}
+                    className="bg-transparent border-none cursor-pointer p-0 leading-none"
+                    type="button"
+                  >
+                    <LogoImg height={22} />
+                  </button>
                 )}
               </>
             )}
@@ -1004,13 +1015,14 @@ export default function AppShell() {
                   </div>
 
                   <div className="max-w-4xl w-full text-center space-y-12 relative z-10">
-                    {/* Hero text */}
-                    <div className="space-y-4">
-                      <h1 className="editorial-title text-5xl md:text-6xl lg:text-8xl font-extrabold leading-tight">
-                        The Architectural <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Ledger</span>
+                    {/* Logo + Hero text */}
+                    <div className="space-y-6">
+                      <LogoImg height={32} className="mx-auto mb-2" />
+                      <h1 className="font-headline text-3xl md:text-6xl lg:text-8xl font-extrabold leading-tight tracking-tighter">
+                        What's the <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>deal?</span>
                       </h1>
-                      <p className={`text-lg md:text-xl max-w-2xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                        Orchestrate private equity, debt financing, and business exits through a single, intelligence-first interface.
+                      <p className={`text-sm md:text-xl max-w-[280px] md:max-w-2xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                        Tell Yulia about your business. She'll tell you what it's worth.
                       </p>
                     </div>
 
@@ -1022,7 +1034,7 @@ export default function AppShell() {
                           <span className={`material-symbols-outlined mr-4 ${dark ? 'text-rose-500' : 'text-[#b0004a]'}`}>bolt</span>
                           <input
                             className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
-                            placeholder="Try 'How do I raise $5M in mezzanine debt?'"
+                            placeholder="Message Yulia..."
                             type="text"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
@@ -1043,17 +1055,16 @@ export default function AppShell() {
                         </div>
                       </div>
 
-                      {/* Quick actions */}
-                      <div className="mt-6 flex flex-wrap justify-center gap-3">
-                        <span className={`text-xs font-bold uppercase tracking-widest block w-full mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>QUICK ACTIONS</span>
-                        {['Analyze my Cap Table', 'Draft Letter of Intent', 'Valuation Multiples 2024'].map(chip => (
+                      {/* Suggestion chips */}
+                      <div className="mt-6 flex flex-wrap justify-center gap-2 md:gap-3">
+                        {['I want to sell my business', 'Looking to buy a business', 'Need to raise capital', 'Just closed — what now?'].map(chip => (
                           <button
                             key={chip}
                             onClick={() => handleSend(chip)}
-                            className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-all border-none ${
+                            className={`px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm cursor-pointer transition-all border-none ${
                               dark
-                                ? 'bg-zinc-800/50 border border-zinc-700/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
-                                : 'bg-white border border-[#e3bdc3] text-[#636467] shadow-sm hover:border-[#b0004a] hover:text-[#b0004a]'
+                                ? 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                                : 'bg-white text-[#636467] shadow-sm hover:border-[#b0004a] hover:text-[#b0004a]'
                             }`}
                             style={{ border: dark ? '1px solid rgba(63,63,70,0.5)' : '1px solid #e3bdc3' }}
                             type="button"
@@ -1064,58 +1075,41 @@ export default function AppShell() {
                       </div>
                     </div>
 
-                    {/* Trust bar */}
-                    <div className={`pt-12 grid grid-cols-2 md:grid-cols-4 gap-8 ${dark ? 'opacity-60 hover:opacity-80' : 'opacity-70'} transition-all duration-500`}>
-                      {[
-                        { icon: 'verified_user', label: 'SOC2 TYPE II' },
-                        { icon: 'account_balance', label: 'FINRA COMPLIANT' },
-                        { icon: 'security', label: 'AES-256 BANK GRADE' },
-                        { icon: 'stars', label: 'GDPR PROTECTED' },
-                      ].map(s => (
-                        <div key={s.label} className="flex items-center justify-center gap-2">
-                          <span className={`material-symbols-outlined ${dark ? 'text-rose-500' : 'text-[#b0004a]'}`} style={{ fontVariationSettings: "'FILL' 1" }}>{s.icon}</span>
-                          <span className={`font-bold tracking-tight text-xs uppercase ${dark ? 'text-zinc-400' : 'text-[#5a4044]'}`}>{s.label}</span>
-                        </div>
-                      ))}
-                    </div>
+                    {/* Subtle trust line */}
+                    <p className={`text-xs font-medium mt-8 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
+                      Free analysis · No account required · Your data stays yours
+                    </p>
                   </div>
                 </main>
               </>
               ) : activeTab === 'sell' ? (
-              <>
-              {/* ═══ SELL PAGE — Full custom layout ═══ */}
+              <Suspense fallback={<BelowSkeleton />}>
               <SellBelow />
-              </>
+              </Suspense>
               ) : activeTab === 'buy' ? (
-              <>
-              {/* ═══ BUY PAGE — Full custom layout ═══ */}
+              <Suspense fallback={<BelowSkeleton />}>
               <BuyBelow />
-              </>
+              </Suspense>
               ) : activeTab === 'raise' ? (
-              <>
-              {/* ═══ RAISE PAGE — Full custom layout ═══ */}
+              <Suspense fallback={<BelowSkeleton />}>
               <RaiseBelow />
-              </>
+              </Suspense>
               ) : activeTab === 'how-it-works' ? (
-              <>
-              {/* ═══ HOW IT WORKS PAGE — Full custom layout ═══ */}
+              <Suspense fallback={<BelowSkeleton />}>
               <HowItWorksBelow />
-              </>
+              </Suspense>
               ) : activeTab === 'integrate' ? (
-              <>
-              {/* ═══ INTEGRATE PAGE — Full custom layout ═══ */}
+              <Suspense fallback={<BelowSkeleton />}>
               <IntegrateBelow />
-              </>
+              </Suspense>
               ) : activeTab === 'advisors' ? (
-              <>
-              {/* ═══ ADVISORS PAGE — Full custom layout ═══ */}
+              <Suspense fallback={<BelowSkeleton />}>
               <AdvisorsBelow />
-              </>
+              </Suspense>
               ) : activeTab === 'pricing' ? (
-              <>
-              {/* ═══ PRICING PAGE — Full custom layout ═══ */}
+              <Suspense fallback={<BelowSkeleton />}>
               <PricingBelow />
-              </>
+              </Suspense>
               ) : null}
             </div>
           )}

@@ -24,7 +24,7 @@ export function DarkModeToggle({ dark, setDark }: { dark: boolean; setDark: (v: 
   return (
     <button
       onClick={() => setDark(!dark)}
-      className={`fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full shadow-lg shadow-black/20 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 border-none cursor-pointer ${
+      className={`fixed top-[72px] right-4 z-50 w-12 h-12 rounded-full shadow-lg shadow-black/20 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 border-none cursor-pointer ${
         dark
           ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
           : 'bg-[#2f3133] text-white hover:bg-[#1a1c1e]'
