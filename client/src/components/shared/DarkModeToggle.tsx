@@ -24,13 +24,11 @@ export function DarkModeToggle({ dark, setDark }: { dark: boolean; setDark: (v: 
   return (
     <button
       onClick={() => setDark(!dark)}
-      className={`fixed z-50 bg-transparent border-none cursor-pointer p-0 hover:scale-110 active:scale-95 transition-all duration-200 ${
-        dark ? 'text-[#f0f0f3]/70' : 'text-[#1a1c1e]/70'
-      }`}
+      className="fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 bg-[#1a1c1e] text-[#d81b60]"
       style={{ top: 48, right: 20 }}
       aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
-      <span className="material-symbols-outlined text-[28px]">
+      <span className="material-symbols-outlined text-[22px]">
         {dark ? 'light_mode' : 'dark_mode'}
       </span>
     </button>

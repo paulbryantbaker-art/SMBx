@@ -1085,11 +1085,11 @@ export default function AppShell() {
                     )}
                   </div>
 
-                  {/* Mobile bottom zone: chips + ChatDock + micro-copy */}
+                  {/* Mobile bottom zone: chips + gradient input + micro-copy */}
                   {isMobile && (
-                    <div className="shrink-0 px-4 pb-2 relative z-10">
+                    <div className="shrink-0 px-4 pb-2 relative z-10" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
                       {/* Mobile chips */}
-                      <div className="flex flex-wrap justify-center gap-2 mb-5">
+                      <div className="flex flex-wrap justify-center gap-2 mb-4">
                         {['I want to sell my business', 'Looking to buy a business', 'Need to raise capital', 'Just closed — what now?'].map(chip => (
                           <button
                             key={chip}
@@ -1106,18 +1106,34 @@ export default function AppShell() {
                           </button>
                         ))}
                       </div>
-                      {/* ChatDock */}
-                      <div style={{ paddingBottom: 'max(4px, env(safe-area-inset-bottom))' }}>
-                        <ChatDock
-                          ref={dockRef}
-                          onSend={handleSend}
-                          variant="hero"
-                          rows={1}
-                          placeholder="Message Yulia..."
-                          disabled={sending}
-                        />
+                      {/* Gradient-glow input (same as desktop) */}
+                      <div className="relative group">
+                        <div className={`absolute -inset-1 bg-gradient-to-r from-[#b0004a] to-[#d81b60] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
+                        <div className={`relative rounded-full flex items-center p-2 pl-5 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
+                          <span className={`material-symbols-outlined mr-3 ${dark ? 'text-rose-500' : 'text-[#b0004a]'}`}>bolt</span>
+                          <input
+                            className={`bg-transparent border-none focus:ring-0 flex-1 py-3 text-base outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
+                            placeholder="Message Yulia..."
+                            type="text"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
+                                handleSend((e.target as HTMLInputElement).value.trim());
+                                (e.target as HTMLInputElement).value = '';
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={(e) => {
+                              const input = (e.currentTarget.parentElement?.querySelector('input') as HTMLInputElement);
+                              if (input?.value.trim()) { handleSend(input.value.trim()); input.value = ''; }
+                            }}
+                            className="bg-gradient-to-br from-[#b0004a] to-[#d81b60] text-white h-10 w-10 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform border-none cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+                          </button>
+                        </div>
                       </div>
-                      <p className={`text-[10px] font-medium text-center mt-2 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
+                      <p className={`text-[10px] font-medium text-center mt-3 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
                         Free analysis · No account required · Your data stays yours
                       </p>
                     </div>
@@ -1487,27 +1503,25 @@ export default function AppShell() {
       {isMobile && viewState === 'landing' && (
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
-          className={`fixed z-50 bg-transparent border-none cursor-pointer p-0 ${dark ? 'text-[#f0f0f3]/70' : 'text-[#1a1c1e]/70'}`}
+          className="fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#d81b60]"
           style={{ top: 48, left: 20 }}
           type="button"
           aria-label="Open menu"
         >
-          <span className="material-symbols-outlined text-[28px]">menu</span>
+          <span className="material-symbols-outlined text-[22px]">menu</span>
         </button>
-      )
-
-      }
+      )}
 
       {/* ═══ MOBILE FLOATING BACK ARROW — top left in chat mode ═══ */}
       {isMobile && viewState === 'chat' && (
         <button
           onClick={handleBack}
-          className={`fixed z-50 bg-transparent border-none cursor-pointer p-0 ${dark ? 'text-[#f0f0f3]/70' : 'text-[#1a1c1e]/70'}`}
+          className="fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#d81b60]"
           style={{ top: 48, left: 20 }}
           type="button"
           aria-label="Back"
         >
-          <span className="material-symbols-outlined text-[28px]">arrow_back</span>
+          <span className="material-symbols-outlined text-[22px]">arrow_back</span>
         </button>
       )}
 
