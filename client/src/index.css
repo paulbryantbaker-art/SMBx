@@ -220,6 +220,72 @@ body {
 .home-tp-item:active { background: #E8E5E0; }
 .home-tp-item svg { width: 20px; height: 20px; color: #b0004a; flex-shrink: 0; margin-top: 1px; }
 
+/* Dock outer wrapper */
+.dock-outer {
+  background: #fff;
+  border-color: rgba(0,0,0,0.06);
+}
+.dark .dock-outer {
+  background: #1a1c1e;
+  border-color: rgba(255,255,255,0.06);
+}
+
+/* Hero pill variant — overrides inline styles removed from component */
+.dock-hero-pill {
+  background: #fff;
+  border: 1.5px solid rgba(0,0,0,0.18);
+  box-shadow: 0 6px 32px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+}
+.dark .dock-hero-pill {
+  background: #2f3133;
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: 0 6px 32px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+}
+.dock-hero-pill textarea {
+  color: #1a1c1e;
+}
+.dark .dock-hero-pill textarea {
+  color: #f0f0f3 !important;
+}
+.dock-hero-pill textarea::placeholder {
+  color: rgba(0,0,0,0.45);
+}
+.dark .dock-hero-pill textarea::placeholder {
+  color: rgba(255,255,255,0.4) !important;
+}
+
+/* ═══ CHATDOCK DARK MODE ═══ */
+.dark .home-dock-card {
+  background: #2f3133;
+  border-color: rgba(255,255,255,0.08);
+}
+.dark .home-dock-card:focus-within {
+  border-color: rgba(255,255,255,0.2);
+  box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.15), 0 1px 8px rgba(0,0,0,0.3);
+}
+.dark .home-dock-card textarea {
+  color: #f0f0f3 !important;
+}
+.dark .home-dock-card textarea::placeholder {
+  color: rgba(255,255,255,0.4) !important;
+}
+.dark .home-tools-popup {
+  background: #2f3133;
+  border-color: rgba(255,255,255,0.08);
+  box-shadow: 0 4px 24px rgba(0,0,0,.4);
+}
+.dark .home-tp-item:hover { background: rgba(255,255,255,0.06); }
+.dark .home-tp-item:active { background: rgba(255,255,255,0.1); }
+.dark .home-tp-item .text-\[15px\].font-semibold { color: #f0f0f3; }
+/* Dock textarea inner bg */
+.dock-textarea-bg { background: #F5F5F3; }
+.dark .dock-textarea-bg { background: rgba(255,255,255,0.06); }
+/* Dock plus button */
+.dock-plus-btn { background: #fff; }
+.dock-plus-btn:hover { background: #F5F5F5; }
+.dark .dock-plus-btn { background: rgba(255,255,255,0.08); }
+.dark .dock-plus-btn:hover { background: rgba(255,255,255,0.14); }
+
 /* Home chat input — focus border */
 .home-input-wrap { transition: border-color 200ms; }
 .home-input-wrap:focus-within {

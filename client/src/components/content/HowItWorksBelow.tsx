@@ -1,4 +1,4 @@
-import { useDarkMode, DarkModeToggle } from '../shared/DarkModeToggle';
+import { useDarkMode } from '../shared/DarkModeToggle';
 import { ScrollReveal, StaggerContainer, StaggerItem } from './animations';
 
 export default function HowItWorksBelow() {
@@ -217,7 +217,6 @@ export default function HowItWorksBelow() {
         </ScrollReveal>
 
       </div>
-      <DarkModeToggle dark={dark} setDark={setDark} />
     </div>
   );
 }

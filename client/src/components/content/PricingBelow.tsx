@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useDarkMode, DarkModeToggle } from '../shared/DarkModeToggle';
+import { useDarkMode } from '../shared/DarkModeToggle';
 import { ScrollReveal, StaggerContainer, StaggerItem } from './animations';
 
 export default function PricingBelow() {
@@ -345,7 +345,6 @@ export default function PricingBelow() {
         </ScrollReveal>
 
       </div>
-      <DarkModeToggle dark={dark} setDark={setDark} />
     </div>
   );
 }

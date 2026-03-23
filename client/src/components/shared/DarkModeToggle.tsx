@@ -15,6 +15,9 @@ export function useDarkMode() {
       root.classList.remove('dark');
       localStorage.setItem('smbx-dark', '0');
     }
+    // Sync Safari/mobile browser chrome color
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', dark ? '#1a1c1e' : '#ffffff');
   }, [dark]);
 
   return [dark, setDark] as const;

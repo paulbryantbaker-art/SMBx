@@ -292,7 +292,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
   }, [toolsOpen]);
 
   return (
-    <div className={isHero ? '' : 'shrink-0 bg-white border-t border-[rgba(0,0,0,0.06)]'} style={isHero ? undefined : { padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+    <div className={isHero ? '' : 'shrink-0 border-t dock-outer'} style={isHero ? undefined : { padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -305,14 +305,11 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
       {isHero ? (
         /* ═══ HERO — Single-row pill bar (Paper design) ═══ */
         <div
-          className="home-dock-card"
+          className="home-dock-card dock-hero-pill"
           style={{
             display: 'flex',
             alignItems: 'center',
-            background: '#fff',
             borderRadius: 100,
-            border: '1.5px solid rgba(0,0,0,0.18)',
-            boxShadow: '0 6px 32px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)',
             padding: '6px 8px 6px 24px',
             gap: 12,
           }}
@@ -416,7 +413,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           )}
 
           {/* Textarea + typewriter overlay */}
-          <div className={isHero ? 'relative' : 'mx-3 mt-2 relative'} style={isHero ? undefined : { background: '#F5F5F3', borderRadius: '24px' }}>
+          <div className={isHero ? 'relative' : 'mx-3 mt-2 relative dock-textarea-bg'} style={isHero ? undefined : { borderRadius: '24px' }}>
             {/* Typewriter overlay */}
             {showTypewriter && twText && (
               <div
@@ -483,7 +480,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             <button
               ref={plusRef}
               onClick={() => setToolsOpen(prev => !prev)}
-              className="flex items-center justify-center bg-white cursor-pointer hover:bg-[#F5F5F5] active:scale-95"
+              className="flex items-center justify-center dock-plus-btn cursor-pointer active:scale-95"
               style={{ width: 38, height: 38, borderRadius: 12, border: '1.5px solid rgba(0,0,0,0.06)', transition: 'all .2s', color: 'rgba(0,0,0,0.4)' }}
               type="button"
             >
