@@ -1017,11 +1017,11 @@ export default function AppShell() {
                   {/* Center zone — hero text (vertically centered) */}
                   <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
                     <div className="max-w-4xl w-full text-center space-y-6">
-                      <LogoImg height={isMobile ? 22 : 32} className="mx-auto mb-2" />
-                      <h1 className="font-headline text-3xl md:text-6xl lg:text-8xl font-extrabold leading-tight tracking-tighter">
+                      <LogoImg height={isMobile ? 32 : 32} className="mx-auto mb-2" />
+                      <h1 className="font-headline text-5xl md:text-6xl lg:text-8xl font-extrabold leading-tight tracking-tighter">
                         What's the <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>deal?</span>
                       </h1>
-                      <p className={`text-sm md:text-xl max-w-[280px] md:max-w-2xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                      <p className={`text-base md:text-xl max-w-[320px] md:max-w-2xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
                         Tell Yulia about your business. She'll tell you what it's worth.
                       </p>
                     </div>
