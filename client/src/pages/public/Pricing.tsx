@@ -120,7 +120,7 @@ export default function Pricing() {
   const talkToYulia = () => navigate('/');
 
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", WebkitFontSmoothing: 'antialiased', background: T.bg, minHeight: '100dvh' }}>
+    <div style={{ fontFamily: "'Sora', system-ui, sans-serif", WebkitFontSmoothing: 'antialiased', background: T.bg, minHeight: '100dvh' }}>
       <ScrollProgressBar />
       <style>{`
         .price-section {
@@ -298,7 +298,7 @@ export default function Pricing() {
           padding: 20px 0; border: none; background: transparent;
           cursor: pointer; text-align: left;
           font-size: 16px; font-weight: 600; color: ${T.text};
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Sora', system-ui, sans-serif;
           transition: color 0.15s;
         }
         .price-faq-q:hover { color: ${T.terra}; }

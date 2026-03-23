@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useAnonymousChat, type AnonMessage } from '../../hooks/useAnonymousChat';
 import { useAuthChat } from '../../hooks/useAuthChat';
 import { useAppHeight } from '../../hooks/useAppHeight';
+import { useDarkMode, DarkModeToggle } from '../../components/shared/DarkModeToggle';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
 import ChatMessages from '../../components/shell/ChatMessages';
 // Authenticated tool components
@@ -247,7 +248,7 @@ function renderHeadline(text: string, terraWord: string) {
   return (
     <>
       {text.substring(0, idx)}
-      <span style={{ color: '#BA3C60' }}>{terraWord}</span>
+      <span style={{ color: '#b0004a' }}>{terraWord}</span>
       {text.substring(idx + terraWord.length)}
     </>
   );
@@ -368,7 +369,7 @@ function getInitialConversationId(path: string): number | null {
 }
 
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#BA3C60',
+  sell: '#b0004a',
   buy: '#4E8FD4',
   raise: '#6B8F4E',
   pmi: '#8F6BD4',
@@ -379,6 +380,7 @@ const JOURNEY_COLORS: Record<string, string> = {
 export default function AppShell() {
   const [location, navigate] = useLocation();
   const { user, logout } = useAuth();
+  const [dark, setDark] = useDarkMode();
 
   // Core state
   const [viewState, setViewState] = useState<ViewState>(() => pathToViewState(location));
@@ -574,6 +576,13 @@ export default function AppShell() {
     if (window.location.pathname !== urlMap[tab]) navigate(urlMap[tab]);
   }, [navigate]);
 
+  // New chat
+  const handleNewChat = useCallback(() => {
+    if (user) authChat.newConversation();
+    setViewState('chat');
+    navigate('/chat');
+  }, [user, authChat, navigate]);
+
   // Logout
   const handleLogout = useCallback(() => {
     logout();
@@ -753,18 +762,17 @@ export default function AppShell() {
     }
   }, [restored, allConversations]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* ═══ SIDEBAR JSX ═══ */
+  /* ═══ SIDEBAR JSX — 80px icon rail (new design) ═══ */
 
-  const sidebarContent = (mobile: boolean) => (
+  const sidebarContent = (_mobile: boolean) => (
     <aside
-      className="flex flex-col h-full select-none"
-      style={{ width: mobile ? 280 : 256, background: '#FAFAFA', borderRight: '1px solid rgba(0,0,0,0.06)' }}
+      className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950 border-r border-zinc-800/50' : 'bg-white border-r border-[#eeeef0] shadow-sm'}`}
     >
-      {/* Logo — centered, hidden when center logo is visible on home landing */}
-      <div className="pt-5 pb-2 flex items-center justify-center" style={{ opacity: (activeTab === 'home' && viewState === 'landing' && !heroFocused && !morphing) ? 0 : 1, transition: heroFocused ? 'opacity 0.3s ease-out 0.5s' : 'opacity 0.15s ease 0s' }}>
+      {/* Logo */}
+      <div className="mb-8">
         <button
-          ref={!mobile ? sidebarLogoRef as any : undefined}
-          onClick={() => { handleTabClick('home'); if (mobile) setIsMobileSidebarOpen(false); }}
+          ref={sidebarLogoRef as any}
+          onClick={() => handleTabClick('home')}
           className="bg-transparent border-none cursor-pointer p-0 leading-none"
           type="button"
         >
@@ -772,268 +780,112 @@ export default function AppShell() {
         </button>
       </div>
 
-      {/* + New Chat button — outline style */}
-      <div className="px-4 pt-3 pb-3">
+      {/* Deals section */}
+      <div className="flex flex-col items-center gap-1 w-full px-2">
+        <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Deals</span>
+        {([
+          { id: 'sell' as TabId, icon: 'storefront', label: 'Sell' },
+          { id: 'buy' as TabId, icon: 'shopping_bag', label: 'Buy' },
+          { id: 'raise' as TabId, icon: 'trending_up', label: 'Raise' },
+          { id: 'integrate' as TabId, icon: 'merge', label: 'Integrate' },
+        ]).map(item => {
+          const isActive = activeTab === item.id && viewState === 'landing';
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleTabClick(item.id)}
+              className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
+                isActive
+                  ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5')
+                  : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#b0004a] hover:bg-[#b0004a]/5')
+              }`}
+              title={item.label}
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+              <span className="text-[9px] font-semibold">{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Divider */}
+      <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`} />
+
+      {/* Tools section */}
+      <div className="flex flex-col items-center gap-1 w-full px-2">
+        <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Tools</span>
+        {([
+          { view: 'documents' as ViewState, icon: 'folder_open', label: 'Library', route: '/documents' },
+          { view: 'dataroom' as ViewState, icon: 'lock', label: 'Data Rm', route: '/dataroom' },
+          { view: 'pipeline' as ViewState, icon: 'view_kanban', label: 'Pipeline', route: '/pipeline' },
+        ]).map(item => {
+          const isActive = viewState === item.view;
+          return (
+            <button
+              key={item.view}
+              onClick={() => {
+                if (user) { setViewState(item.view); navigate(item.route); }
+                else navigate('/login');
+              }}
+              className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
+                isActive
+                  ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5')
+                  : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#b0004a] hover:bg-[#b0004a]/5')
+              }`}
+              title={item.label}
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+              <span className="text-[9px] font-semibold">{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Divider */}
+      <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`} />
+
+      {/* Chats section */}
+      <div className="flex flex-col items-center gap-1 w-full px-2 flex-1 min-h-0">
+        <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Chats</span>
         <button
-          onClick={() => {
-            if (user) {
-              authChat.newConversation();
-              setViewState('chat');
-              navigate('/chat');
-            } else {
-              handleTabClick('home');
-            }
-            if (mobile) setIsMobileSidebarOpen(false);
-          }}
-          className="w-full flex items-center justify-center gap-2 text-[14px] px-4 py-2.5 cursor-pointer hover:opacity-90 transition-all"
-          style={{ fontFamily: 'inherit', fontWeight: 500, background: '#0D0D0D', borderRadius: '10px', border: 'none', color: '#fff' }}
+          onClick={() => { handleNewChat(); }}
+          className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5'}`}
+          title="New Chat"
           type="button"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-          New Chat
+          <span className="material-symbols-outlined text-[20px]">add_comment</span>
+          <span className="text-[9px] font-semibold">New</span>
+        </button>
+        <button
+          onClick={() => { setViewState('chat'); navigate('/chat'); }}
+          className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
+            viewState === 'chat'
+              ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5')
+              : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#b0004a] hover:bg-[#b0004a]/5')
+          }`}
+          title="Chat History"
+          type="button"
+        >
+          <span className="material-symbols-outlined text-[20px]">forum</span>
+          <span className="text-[9px] font-semibold">History</span>
         </button>
       </div>
 
-      {/* Primary nav — Chat, Data Room, Analytics, Settings */}
-      <div className="px-3">
-        <nav className="space-y-0.5">
-          {([
-            { id: 'chat' as const, label: 'Chat', viewId: 'chat' as ViewState, route: '/', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg> },
-            { id: 'dataroom' as const, label: 'Data Room', viewId: 'documents' as ViewState, route: '/documents', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg> },
-            { id: 'analytics' as const, label: 'Analytics', viewId: 'analytics' as ViewState, route: '/analytics', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg> },
-            { id: 'settings' as const, label: 'Settings', viewId: 'settings' as ViewState, route: '/settings', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg> },
-          ]).map(item => {
-            const isActive = item.id === 'chat'
-              ? ((activeTab === 'home' && viewState === 'landing') || viewState === 'chat')
-              : viewState === item.viewId;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  if (item.id === 'chat') { handleTabClick('home'); }
-                  else if (user) { setViewState(item.viewId); navigate(item.route); }
-                  else navigate('/login');
-                  if (mobile) setIsMobileSidebarOpen(false);
-                }}
-                className={`flex items-center gap-3 w-full px-4 py-2.5 cursor-pointer border-none transition-all ${!isActive ? 'nav-item-hover' : ''}`}
-                style={{
-                  fontFamily: 'inherit',
-                  fontSize: '15px',
-                  fontWeight: isActive ? 600 : 400,
-                  color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.7)',
-                  background: isActive ? 'rgba(0,0,0,0.04)' : 'transparent',
-                  borderRadius: '10px',
-                  border: 'none',
-                }}
-                type="button"
-              >
-                <span style={{ color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.5)' }}>{item.icon}</span>
-                {item.label}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* ─── Explore — journey page navigation ─── */}
-      <div className="px-3 mt-5">
-        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#BA3C60' }}>Explore</div>
-        <nav className="space-y-0.5">
-          {([
-            { id: 'sell' as TabId, label: 'Sell a Business', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" /><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" /></svg> },
-            { id: 'buy' as TabId, label: 'Buy a Business', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></svg> },
-            { id: 'raise' as TabId, label: 'Raise Capital', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg> },
-            { id: 'how-it-works' as TabId, label: 'How It Works', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg> },
-            { id: 'advisors' as TabId, label: 'For Advisors', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg> },
-            { id: 'pricing' as TabId, label: 'Pricing', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> },
-          ]).map(item => {
-            const isActive = activeTab === item.id && viewState === 'landing';
-            return (
-              <button
-                key={item.id}
-                onClick={() => { handleTabClick(item.id); if (mobile) setIsMobileSidebarOpen(false); }}
-                className={`flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all ${!isActive ? 'nav-item-hover' : ''}`}
-                style={{
-                  fontFamily: 'inherit',
-                  fontSize: '14px',
-                  fontWeight: isActive ? 600 : 400,
-                  color: isActive ? '#0D0D0D' : 'rgba(0,0,0,0.7)',
-                  background: isActive ? 'rgba(0,0,0,0.04)' : 'transparent',
-                  borderRadius: '10px',
-                  border: 'none',
-                }}
-                type="button"
-              >
-                <span style={{ color: isActive ? '#BA3C60' : 'rgba(0,0,0,0.4)' }}>{item.icon}</span>
-                {item.label}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Cabinet — artifacts & analysis (logged-in only) */}
-      {user && (
-        <div className="px-3 mt-4">
-          <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#BA3C60' }}>Cabinet</div>
-          <button
-            onClick={() => {
-              setViewState('documents');
-              navigate('/documents');
-              if (mobile) setIsMobileSidebarOpen(false);
-            }}
-            className="flex items-center gap-3 w-full px-4 py-2 cursor-pointer border-none transition-all nav-item-hover"
-            style={{ fontFamily: 'inherit', fontSize: '14px', fontWeight: viewState === 'documents' ? 600 : 400, color: viewState === 'documents' ? '#0D0D0D' : 'rgba(0,0,0,0.7)', background: viewState === 'documents' ? 'rgba(0,0,0,0.04)' : 'transparent', borderRadius: '10px', border: 'none' }}
-            type="button"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
-            Artifacts & Analysis
-          </button>
-        </div>
-      )}
-
-      {/* Conversations — Recent (grouped by deal when multi-deal) */}
-      <div className="flex-1 overflow-y-auto min-h-0 px-3 mt-4">
-        <div className="px-4 mb-2" style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#BA3C60' }}>Recent</div>
-        {(() => {
-          const convs = allConversations || [];
-          const uniqueDeals = new Set(convs.filter(c => c.deal_id).map(c => c.deal_id));
-          const isMultiDeal = uniqueDeals.size > 1;
-
-          if (!isMultiDeal) {
-            // Simple flat list
-            return convs.map(c => (
-              <button
-                key={c.id}
-                onClick={() => {
-                  if (user) authChat.selectConversation(c.id);
-                  else anonChat.selectConversation(c.id);
-                  setViewState('chat');
-                  navigate(`/chat/${c.id}`);
-                  setIsMobileSidebarOpen(false);
-                }}
-                className="flex items-center w-full px-4 py-2 text-[14px] cursor-pointer transition-all conv-item-hover"
-                style={{
-                  fontFamily: 'inherit',
-                  fontWeight: c.id === activeConvId && viewState === 'chat' ? 600 : 400,
-                  color: c.id === activeConvId && viewState === 'chat' ? '#0D0D0D' : 'rgba(0,0,0,0.65)',
-                  background: c.id === activeConvId && viewState === 'chat' ? 'rgba(0,0,0,0.04)' : 'transparent',
-                  borderRadius: '10px', border: 'none',
-                }}
-                type="button"
-              >
-                <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
-              </button>
-            ));
-          }
-
-          // Group by deal
-          const grouped: Record<string, typeof convs> = {};
-          const ungrouped: typeof convs = [];
-          for (const c of convs) {
-            const key = c.deal_id ? `${c.deal_id}` : null;
-            if (key) {
-              if (!grouped[key]) grouped[key] = [];
-              grouped[key].push(c);
-            } else {
-              ungrouped.push(c);
-            }
-          }
-
-          return (
-            <>
-              {Object.entries(grouped).map(([dealId, dealConvs]) => {
-                const sample = dealConvs[0];
-                const dealLabel = sample.business_name || sample.journey?.toUpperCase() || `Deal ${dealId}`;
-                return (
-                  <div key={dealId} style={{ marginBottom: 8 }}>
-                    <div className="px-4 py-1" style={{ fontSize: 11, fontWeight: 600, color: 'rgba(0,0,0,0.45)' }}>
-                      {dealLabel}
-                    </div>
-                    {dealConvs.map(c => (
-                      <button
-                        key={c.id}
-                        onClick={() => {
-                          if (user) authChat.selectConversation(c.id);
-                          else anonChat.selectConversation(c.id);
-                          setViewState('chat');
-                          navigate(`/chat/${c.id}`);
-                          setIsMobileSidebarOpen(false);
-                        }}
-                        className="flex items-center w-full px-4 py-1.5 text-[13px] cursor-pointer transition-all conv-item-hover"
-                        style={{
-                          fontFamily: 'inherit',
-                          fontWeight: c.id === activeConvId && viewState === 'chat' ? 600 : 400,
-                          color: c.id === activeConvId && viewState === 'chat' ? '#0D0D0D' : 'rgba(0,0,0,0.6)',
-                          background: c.id === activeConvId && viewState === 'chat' ? 'rgba(0,0,0,0.04)' : 'transparent',
-                          borderRadius: '10px', border: 'none', paddingLeft: 24,
-                        }}
-                        type="button"
-                      >
-                        <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
-                      </button>
-                    ))}
-                  </div>
-                );
-              })}
-              {ungrouped.map(c => (
-                <button
-                  key={c.id}
-                  onClick={() => {
-                    if (user) authChat.selectConversation(c.id);
-                    else anonChat.selectConversation(c.id);
-                    setViewState('chat');
-                    navigate(`/chat/${c.id}`);
-                    setIsMobileSidebarOpen(false);
-                  }}
-                  className="flex items-center w-full px-4 py-2 text-[14px] cursor-pointer transition-all conv-item-hover"
-                  style={{
-                    fontFamily: 'inherit',
-                    fontWeight: c.id === activeConvId && viewState === 'chat' ? 600 : 400,
-                    color: c.id === activeConvId && viewState === 'chat' ? '#0D0D0D' : 'rgba(0,0,0,0.65)',
-                    background: c.id === activeConvId && viewState === 'chat' ? 'rgba(0,0,0,0.04)' : 'transparent',
-                    borderRadius: '10px', border: 'none',
-                  }}
-                  type="button"
-                >
-                  <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
-                </button>
-              ))}
-            </>
-          );
-        })()}
-      </div>
-
-      {/* Yulia status + User Profile — bottom of sidebar */}
-      <div className="mt-auto px-5 pb-4 pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-        {/* Yulia is online */}
-        <div className="flex items-center gap-2 mb-3 px-1">
-          <span className="w-[7px] h-[7px] rounded-full shrink-0 status-pulse" style={{ background: '#4CAF50' }} />
-          <span style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(0,0,0,0.5)' }}>Yulia is online</span>
-        </div>
-
-        {/* User profile */}
+      {/* Bottom: Settings + Profile */}
+      <div className="flex flex-col items-center gap-3 mt-auto pt-4">
         <button
-          onClick={() => {
-            if (user) { setViewState('settings'); navigate('/settings'); }
-            else navigate('/login');
-            setIsMobileSidebarOpen(false);
-          }}
-          className="flex items-center gap-3 w-full bg-transparent border-none cursor-pointer p-0 text-left"
+          onClick={() => { if (user) { setViewState('settings'); navigate('/settings'); } else navigate('/login'); }}
+          className={`material-symbols-outlined transition-colors text-[22px] bg-transparent border-none cursor-pointer ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#b0004a]'}`}
+          type="button"
+        >settings</button>
+        <button
+          onClick={() => { if (user) { setViewState('settings'); navigate('/settings'); } else navigate('/login'); }}
+          className={`h-9 w-9 rounded-xl overflow-hidden flex items-center justify-center border-none cursor-pointer ${dark ? 'bg-zinc-800 border border-zinc-700' : 'bg-[#eeeef0] border border-[#e3bdc3]'}`}
           type="button"
         >
-          <div
-            className="flex items-center justify-center rounded-full text-white text-[12px] font-bold"
-            style={{ width: 32, height: 32, background: '#0D0D0D', flexShrink: 0 }}
-          >
-            {user ? (user.display_name || user.email || '?').charAt(0).toUpperCase() : 'G'}
-          </div>
-          <div className="flex flex-col min-w-0 flex-1">
-            <span style={{ fontFamily: 'inherit', fontSize: '14px', fontWeight: 600, color: '#0D0D0D' }} className="truncate">
-              {user ? (user.display_name || user.email || 'Account') : 'Sign in'}
-            </span>
-            {/* Wallet balance removed — platform fee model */}
-          </div>
+          <span className={`material-symbols-outlined text-[18px] ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>person</span>
         </button>
       </div>
     </aside>
@@ -1044,7 +896,7 @@ export default function AppShell() {
   return (
     <div
       id="app-root"
-      className="flex bg-white font-sans"
+      className={`flex font-sans ${dark ? 'bg-[#1a1c1e] text-[#f0f0f3]' : 'bg-white text-[#1a1c1e]'}`}
       style={{
         height: 'var(--app-height, 100vh)',
         position: 'fixed' as const,
@@ -1054,65 +906,11 @@ export default function AppShell() {
         ...(appOffset ? { transform: `translateY(${appOffset}px)` } : {}),
       }}
     >
-      {/* Desktop sidebar — collapsible */}
-      {!isMobile && (
-        <div style={{ position: 'relative', width: sidebarCollapsed ? 0 : 256, overflow: 'hidden', transition: 'width 0.25s ease', flexShrink: 0 }}>
-          {sidebarContent(false)}
-          {/* Collapse/expand toggle */}
-          <button
-            onClick={() => setSidebarCollapsed(c => !c)}
-            className="bg-transparent border-none cursor-pointer hover:opacity-80"
-            style={{
-              position: 'absolute', top: 20, right: 8,
-              width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              borderRadius: 6, color: 'rgba(0,0,0,0.35)',
-            }}
-            type="button"
-            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              {sidebarCollapsed
-                ? <><line x1="3" y1="12" x2="21" y2="12" /><polyline points="15 6 21 12 15 18" /></>
-                : <><line x1="21" y1="12" x2="3" y2="12" /><polyline points="9 18 3 12 9 6" /></>
-              }
-            </svg>
-          </button>
-        </div>
-      )}
-      {/* Sidebar expand button when collapsed */}
-      {!isMobile && sidebarCollapsed && (
-        <button
-          onClick={() => setSidebarCollapsed(false)}
-          className="bg-transparent border-none cursor-pointer hover:opacity-80"
-          style={{
-            position: 'absolute', top: 20, left: 12, zIndex: 20,
-            width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            borderRadius: 8, color: 'rgba(0,0,0,0.4)', background: 'rgba(0,0,0,0.04)',
-          }}
-          type="button"
-          title="Expand sidebar"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-        </button>
-      )}
+      {/* Desktop sidebar — fixed 80px icon rail */}
+      {sidebarContent(false)}
 
-      {/* Mobile sidebar overlay */}
-      {isMobile && isMobileSidebarOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40 transition-opacity"
-            onClick={() => setIsMobileSidebarOpen(false)}
-          />
-          <div className="fixed inset-y-0 left-0 z-50 animate-[slideInLeft_0.25s_ease]">
-            {sidebarContent(true)}
-          </div>
-        </>
-      )}
-
-      {/* Main canvas */}
-      <div className="flex-1 flex flex-col min-w-0 h-full bg-white">
+      {/* Main canvas — offset by 80px sidebar on desktop */}
+      <div className={`flex-1 flex flex-col min-w-0 h-full lg:ml-20 ${dark ? 'bg-[#1a1c1e]' : 'bg-white'}`}>
         {/* Offline banner */}
         {isOffline && (
           <div className="shrink-0 bg-yellow-50 border-b border-yellow-200 px-4 py-2 flex items-center justify-center gap-2 z-30">
@@ -1120,19 +918,19 @@ export default function AppShell() {
             <span className="text-xs font-semibold text-yellow-800">You appear to be offline. Messages will send when you reconnect.</span>
           </div>
         )}
-        {/* Header — 56px */}
+        {/* Header — only shown in non-home views or chat mode */}
+        {(viewState !== 'landing' || activeTab !== 'home') && (
         <header
-          className="flex-shrink-0 flex items-center justify-between h-14 px-6 z-20 bg-white"
-          style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}
+          className={`flex-shrink-0 flex items-center justify-between h-14 px-6 z-20 ${dark ? 'border-b border-zinc-800/50' : 'border-b border-[#eeeef0]'}`}
+          style={{ background: dark ? 'rgba(26,28,30,0.80)' : 'rgba(255,255,255,0.80)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
         >
           <div className="flex items-center gap-3">
             {viewState === 'chat' ? (
-              /* ── Chat mode: back arrow + "Chat with Yulia" ── */
               <div className="flex items-center gap-3" style={{ animation: 'fadeIn 0.3s ease' }}>
                 <button
                   onClick={handleBack}
-                  className="w-10 h-10 flex items-center justify-center bg-transparent border-none cursor-pointer"
-                  style={{ borderRadius: 12, color: 'rgba(0,0,0,0.45)' }}
+                  className={`w-10 h-10 flex items-center justify-center bg-transparent border-none cursor-pointer ${dark ? 'text-zinc-400' : 'text-[#5d5e61]'}`}
+                  style={{ borderRadius: 12 }}
                   type="button"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1142,76 +940,54 @@ export default function AppShell() {
                 <LogoImg height={20} />
               </div>
             ) : (
-              /* ── Landing mode: hamburger + logo / page label ── */
               <>
                 {isMobile && (
-                  <button
-                    onClick={() => setIsMobileSidebarOpen(true)}
-                    className="w-10 h-10 flex items-center justify-center bg-transparent border-none cursor-pointer"
-                    style={{ borderRadius: 12, color: 'rgba(0,0,0,0.7)' }}
-                    type="button"
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
-                    </svg>
-                  </button>
-                )}
-                {isMobile ? (
                   <button
                     ref={mobileHeaderLogoRef}
                     onClick={() => handleTabClick('home')}
                     className="bg-transparent border-none cursor-pointer p-0 leading-none"
-                    style={{ opacity: (activeTab === 'home' && viewState === 'landing') ? 0 : 1, transition: 'opacity 0.2s ease-out' }}
                     type="button"
                   >
                     <LogoImg height={22} />
                   </button>
-                ) : (
-                  <span style={{ fontSize: '14px', fontWeight: 500, color: 'rgba(0,0,0,0.35)' }}>
-                    {viewState === 'documents' ? 'Documents' : viewState === 'analytics' ? 'Analytics' : viewState === 'settings' ? 'Settings' : viewState === 'pipeline' ? 'Pipeline' : viewState === 'dataroom' ? 'Data Room' : activeTab === 'home' ? 'Chat' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'how-it-works' ? 'How It Works' : activeTab === 'advisors' ? 'Advisors' : 'Pricing'}
+                )}
+                {!isMobile && (
+                  <span className={`text-sm font-semibold font-headline ${dark ? 'text-zinc-400' : 'text-[#5d5e61]'}`}>
+                    {viewState === 'documents' ? 'Documents' : viewState === 'analytics' ? 'Analytics' : viewState === 'settings' ? 'Settings' : viewState === 'pipeline' ? 'Pipeline' : viewState === 'dataroom' ? 'Data Room' : activeTab === 'sell' ? 'Sell' : activeTab === 'buy' ? 'Buy' : activeTab === 'raise' ? 'Raise' : activeTab === 'integrate' ? 'Integrate' : activeTab === 'how-it-works' ? 'How It Works' : activeTab === 'advisors' ? 'Advisors' : activeTab === 'pricing' ? 'Pricing' : 'Chat'}
                   </span>
                 )}
               </>
             )}
           </div>
           <div className="flex items-center gap-3">
-            {!user && activeTab !== 'home' && viewState === 'landing' && (
+            {!user && (
               <button
                 onClick={() => navigate('/login')}
-                className="text-white border-none cursor-pointer hover:opacity-90 transition-all"
-                style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 600, background: '#0D0D0D', borderRadius: '100px', padding: '9px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
+                className="text-white border-none cursor-pointer hover:opacity-90 transition-all font-headline text-[13px] font-bold"
+                style={{ background: 'linear-gradient(135deg, #b0004a, #d81b60)', borderRadius: '100px', padding: '9px 20px' }}
                 type="button"
               >
                 Start chatting
               </button>
             )}
-            {!user && (activeTab === 'home' || viewState === 'chat') && (
-              <button
-                onClick={() => navigate('/login')}
-                className="bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
-                style={{ fontFamily: 'inherit', fontSize: '13px', fontWeight: 600, color: 'rgba(0,0,0,0.55)' }}
-                type="button"
-              >
-                Sign in
-              </button>
-            )}
             {user && (
-              <span style={{ fontSize: '13px', fontWeight: 500, color: 'rgba(0,0,0,0.45)' }}>{user.display_name || user.email}</span>
+              <span className={`text-[13px] font-semibold font-headline ${dark ? 'text-zinc-400' : 'text-[#5d5e61]'}`}>{user.display_name || user.email}</span>
             )}
           </div>
         </header>
+        )}
 
         {/* Main row: chat + canvas split */}
-        <div className={`flex-1 flex min-h-0 ${viewState === 'landing' && activeTab !== 'home' ? 'bg-[#f9f9f9]' : 'bg-white'}`}>
+        <div className={`flex-1 flex min-h-0 ${dark ? 'bg-[#1a1c1e]' : (viewState === 'landing' && activeTab !== 'home' ? 'bg-[#f9f9fc]' : 'bg-white')}`}>
         {/* Chat column — resizable on desktop in chat mode, flex on landing/other */}
         <div
-          className={`flex flex-col min-w-0 ${viewState === 'landing' && activeTab !== 'home' ? 'bg-[#f9f9f9]' : 'bg-white'}`}
+          className={`flex flex-col min-w-0 ${dark ? 'bg-[#1a1c1e]' : (viewState === 'landing' && activeTab !== 'home' ? 'bg-[#f9f9fc]' : 'bg-white')}`}
           style={!isMobile && viewState === 'chat' ? { width: chatWidth, flexShrink: 0 } : { flex: 1 }}
         >
-        {/* Scroll area — opaque bg required: -webkit-overflow-scrolling creates a separate compositing layer on mobile Safari */}
+        {/* Scroll area */}
         <div
           ref={scrollRef}
-          className={`flex-1 overflow-y-auto min-h-0 ${viewState === 'landing' && activeTab !== 'home' ? 'bg-[#f9f9f9]' : 'bg-white'}`}
+          className={`flex-1 overflow-y-auto min-h-0 ${dark ? 'bg-[#1a1c1e]' : (viewState === 'landing' && activeTab !== 'home' ? 'bg-[#f9f9fc]' : 'bg-white')}`}
           style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' } as any}
         >
           {/* ════ LANDING MODE ════ */}
@@ -1219,127 +995,126 @@ export default function AppShell() {
             <div key={activeTab} style={{ animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, height: '100%' } : {}) }}>
               {activeTab === 'home' ? (
               <>
-                {/* ═══ HOME PAGE — Paper Design: centered wordmark + hero chat bar + chips ═══ */}
+                {/* ═══ HOME PAGE — New Design: hero with gradient input + quick actions + trust bar ═══ */}
+                <main className="flex-1 flex flex-col items-center justify-center relative px-6">
+                  {/* Background blur orbs */}
+                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className={`absolute -top-[10%] -left-[10%] w-[40%] h-[40%] blur-[120px] rounded-full ${dark ? 'bg-[#b0004a]/10' : 'bg-[#b0004a]/5'}`} />
+                    <div className={`absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] blur-[120px] rounded-full ${dark ? 'bg-[#d81b60]/10' : 'bg-[#d81b60]/5'}`} />
+                  </div>
 
-                {/* MOBILE HOME — Grok-style: logo + subtitle + chat pill, centered */}
-                <div className="flex flex-col h-full md:hidden">
-                  <div className="flex-1 flex flex-col items-center justify-center px-6" style={{ gap: 0, paddingBottom: '12vh' }}>
-                    {/* Logo */}
-                    <div ref={mobileHeroLogoRef} style={{ marginBottom: 20 }}>
-                      <LogoImg height={72} className="logo-intro" />
+                  <div className="max-w-4xl w-full text-center space-y-12 relative z-10">
+                    {/* Hero text */}
+                    <div className="space-y-4">
+                      <h1 className="editorial-title text-5xl md:text-6xl lg:text-8xl font-extrabold leading-tight">
+                        The Architectural <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Ledger</span>
+                      </h1>
+                      <p className={`text-lg md:text-xl max-w-2xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                        Orchestrate private equity, debt financing, and business exits through a single, intelligence-first interface.
+                      </p>
                     </div>
-                    {/* Subtitle */}
-                    <p style={{
-                      textAlign: 'center', maxWidth: 300, marginBottom: 40,
-                      fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-                      fontSize: 15, lineHeight: 1.5, color: 'rgba(0,0,0,0.45)', fontWeight: 400,
-                      letterSpacing: '-0.01em',
-                    }}>
-                      Buy, sell, or raise capital — guided by Yulia, your M&A agent.
-                    </p>
-                    {/* Chat pill */}
-                    <div className="w-full" style={{ maxWidth: 400 }}>
-                      <ChatDock
-                        ref={dockRef}
-                        onSend={handleSend}
-                        variant="hero"
-                        rows={1}
-                        placeholder="What's on your mind?"
-                        disabled={sending}
-                        typewriterHints={TYPEWRITER_HINTS}
-                        typewriterPrefix={TYPEWRITER_PREFIX}
-                      />
+
+                    {/* Gradient-glow input */}
+                    <div className="w-full max-w-3xl mx-auto">
+                      <div className="relative group">
+                        <div className={`absolute -inset-1 bg-gradient-to-r from-[#b0004a] to-[#d81b60] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
+                        <div className={`relative rounded-full flex items-center p-2 pl-6 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
+                          <span className={`material-symbols-outlined mr-4 ${dark ? 'text-rose-500' : 'text-[#b0004a]'}`}>bolt</span>
+                          <input
+                            className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
+                            placeholder="Try 'How do I raise $5M in mezzanine debt?'"
+                            type="text"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
+                                handleSend((e.target as HTMLInputElement).value.trim());
+                                (e.target as HTMLInputElement).value = '';
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={(e) => {
+                              const input = (e.currentTarget.parentElement?.querySelector('input') as HTMLInputElement);
+                              if (input?.value.trim()) { handleSend(input.value.trim()); input.value = ''; }
+                            }}
+                            className="bg-gradient-to-br from-[#b0004a] to-[#d81b60] text-white h-12 w-12 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform border-none cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined">arrow_forward</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Quick actions */}
+                      <div className="mt-6 flex flex-wrap justify-center gap-3">
+                        <span className={`text-xs font-bold uppercase tracking-widest block w-full mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>QUICK ACTIONS</span>
+                        {['Analyze my Cap Table', 'Draft Letter of Intent', 'Valuation Multiples 2024'].map(chip => (
+                          <button
+                            key={chip}
+                            onClick={() => handleSend(chip)}
+                            className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-all border-none ${
+                              dark
+                                ? 'bg-zinc-800/50 border border-zinc-700/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                                : 'bg-white border border-[#e3bdc3] text-[#636467] shadow-sm hover:border-[#b0004a] hover:text-[#b0004a]'
+                            }`}
+                            style={{ border: dark ? '1px solid rgba(63,63,70,0.5)' : '1px solid #e3bdc3' }}
+                            type="button"
+                          >
+                            {chip}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Trust bar */}
+                    <div className={`pt-12 grid grid-cols-2 md:grid-cols-4 gap-8 ${dark ? 'opacity-60 hover:opacity-80' : 'opacity-70'} transition-all duration-500`}>
+                      {[
+                        { icon: 'verified_user', label: 'SOC2 TYPE II' },
+                        { icon: 'account_balance', label: 'FINRA COMPLIANT' },
+                        { icon: 'security', label: 'AES-256 BANK GRADE' },
+                        { icon: 'stars', label: 'GDPR PROTECTED' },
+                      ].map(s => (
+                        <div key={s.label} className="flex items-center justify-center gap-2">
+                          <span className={`material-symbols-outlined ${dark ? 'text-rose-500' : 'text-[#b0004a]'}`} style={{ fontVariationSettings: "'FILL' 1" }}>{s.icon}</span>
+                          <span className={`font-bold tracking-tight text-xs uppercase ${dark ? 'text-zinc-400' : 'text-[#5a4044]'}`}>{s.label}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
-
-                {/* DESKTOP HOME — Grok-style: logo + chat bar, centered */}
-                <div className="hidden md:flex flex-col h-full items-center justify-center">
-                  <div className="flex flex-col items-center" style={{ marginTop: '-60px', width: '100%', maxWidth: 780 }}>
-                    <div style={{ position: 'relative', marginBottom: 36, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200, width: '100%', maxWidth: 720 }}>
-                      {/* Animated Logo — flies to sidebar on focus */}
-                      <motion.div
-                        ref={heroLogoRef}
-                        animate={{ opacity: heroFocused ? 0 : 1, scale: heroFocused ? 0.95 : 1 }}
-                        transition={{ duration: heroFocused ? 0.15 : 0.3, delay: heroFocused ? 0 : 0.5, ease: 'easeOut' }}
-                        style={{ position: 'absolute' }}
-                      >
-                        <AnimatedLogo height={160} stopped={heroFocused} />
-                      </motion.div>
-                      {/* Hero text — fades in */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: heroFocused ? 1 : 0, y: heroFocused ? 0 : 12 }}
-                        transition={{ duration: heroFocused ? 0.5 : 0.25, delay: heroFocused ? 0.2 : 0, ease: [0.4, 0, 0.2, 1] }}
-                        style={{ textAlign: 'center', width: '100%', pointerEvents: heroFocused ? 'auto' : 'none' }}
-                      >
-                        <span
-                          className="text-5xl"
-                          style={{ display: 'block', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 700, color: '#000', letterSpacing: '-0.03em', lineHeight: 1.15, marginBottom: 12 }}
-                        >
-                          Chat with your deals!
-                        </span>
-                        <span style={{ display: 'block', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontSize: 15, lineHeight: 1.65, color: 'rgba(0,0,0,0.55)', letterSpacing: '-0.01em' }}>
-                          Yulia is a chat agent for all things M&A and she can guide you through the entire process of selling or buying a business, all by just chatting with your deals. No deal is too small or too complex.<br /><span style={{ fontWeight: 600 }}>Start now completely free!</span>
-                        </span>
-                      </motion.div>
-                    </div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ width: '100%', maxWidth: 640 }}
-                    >
-                      <ChatDock
-                        ref={dockRef}
-                        onSend={handleSend}
-                        variant="hero"
-                        rows={1}
-                        placeholder="What's on your mind?"
-                        disabled={sending}
-                        typewriterHints={TYPEWRITER_HINTS}
-                        typewriterPrefix={TYPEWRITER_PREFIX}
-                        onInputFocus={() => setHeroFocused(true)}
-                        onInputBlur={(hasText) => { if (!hasText) setHeroFocused(false); }}
-                      />
-                    </motion.div>
-                  </div>
-                </div>
+                </main>
               </>
               ) : activeTab === 'sell' ? (
               <>
               {/* ═══ SELL PAGE — Full custom layout ═══ */}
-              <SellBelow onChipClick={handleChipClick} />
+              <SellBelow />
               </>
               ) : activeTab === 'buy' ? (
               <>
               {/* ═══ BUY PAGE — Full custom layout ═══ */}
-              <BuyBelow onChipClick={handleChipClick} />
+              <BuyBelow />
               </>
               ) : activeTab === 'raise' ? (
               <>
               {/* ═══ RAISE PAGE — Full custom layout ═══ */}
-              <RaiseBelow onChipClick={handleChipClick} />
+              <RaiseBelow />
               </>
               ) : activeTab === 'how-it-works' ? (
               <>
               {/* ═══ HOW IT WORKS PAGE — Full custom layout ═══ */}
-              <HowItWorksBelow onChipClick={handleChipClick} />
+              <HowItWorksBelow />
               </>
               ) : activeTab === 'integrate' ? (
               <>
               {/* ═══ INTEGRATE PAGE — Full custom layout ═══ */}
-              <IntegrateBelow onChipClick={handleChipClick} />
+              <IntegrateBelow />
               </>
               ) : activeTab === 'advisors' ? (
               <>
               {/* ═══ ADVISORS PAGE — Full custom layout ═══ */}
-              <AdvisorsBelow onChipClick={handleChipClick} />
+              <AdvisorsBelow />
               </>
               ) : activeTab === 'pricing' ? (
               <>
               {/* ═══ PRICING PAGE — Full custom layout ═══ */}
-              <PricingBelow onChipClick={handleChipClick} />
+              <PricingBelow />
               </>
               ) : null}
             </div>
@@ -1529,7 +1304,7 @@ export default function AppShell() {
                 height: '100%', gap: 16, opacity: 0.4,
               }}>
                 <LogoImg height={36} />
-                <p style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontSize: 14, fontWeight: 500, color: '#0D0D0D', margin: 0 }}>
+                <p className="font-headline text-sm font-medium" style={{ color: dark ? '#f0f0f3' : '#1a1c1e', margin: 0 }}>
                   Nothing to see here
                 </p>
               </div>
@@ -1599,12 +1374,40 @@ export default function AppShell() {
       `}</style>
 
       {/* ═══ FLYING LETTERS — each letter flies whimsically between center and sidebar ═══ */}
+      {/* ═══ MOBILE BOTTOM BAR ═══ */}
+      {isMobile && viewState === 'landing' && (
+        <div className={`fixed bottom-0 left-0 right-0 p-4 flex justify-around z-40 ${
+          dark
+            ? 'bg-zinc-950/80 backdrop-blur-xl border-t border-zinc-800'
+            : 'bg-white/70 backdrop-blur-xl border-t border-[#eeeef0] shadow-lg'
+        }`}>
+          <button onClick={() => handleTabClick('home')} className="bg-transparent border-none cursor-pointer" type="button">
+            <span className={`material-symbols-outlined ${activeTab === 'home' ? (dark ? 'text-rose-500' : 'text-[#b0004a]') : (dark ? 'text-zinc-500' : 'text-[#636467]')}`} style={activeTab === 'home' ? { fontVariationSettings: "'FILL' 1" } : undefined}>home</span>
+          </button>
+          <button onClick={() => handleTabClick('buy')} className="bg-transparent border-none cursor-pointer" type="button">
+            <span className={`material-symbols-outlined ${activeTab === 'buy' ? (dark ? 'text-rose-500' : 'text-[#b0004a]') : (dark ? 'text-zinc-500' : 'text-[#636467]')}`}>search</span>
+          </button>
+          <button onClick={() => { handleNewChat(); }} className="bg-transparent border-none cursor-pointer" type="button">
+            <span className={`material-symbols-outlined ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>add_circle</span>
+          </button>
+          <button onClick={() => { setViewState('chat'); navigate('/chat'); }} className="bg-transparent border-none cursor-pointer" type="button">
+            <span className={`material-symbols-outlined ${viewState === 'chat' ? (dark ? 'text-rose-500' : 'text-[#b0004a]') : (dark ? 'text-zinc-500' : 'text-[#636467]')}`}>notifications</span>
+          </button>
+          <button onClick={() => { if (user) { setViewState('settings'); navigate('/settings'); } else navigate('/login'); }} className="bg-transparent border-none cursor-pointer" type="button">
+            <span className={`material-symbols-outlined ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>person</span>
+          </button>
+        </div>
+      )}
+
+      {/* Dark mode toggle */}
+      <DarkModeToggle dark={dark} setDark={setDark} />
+
       {flyingLogo && (() => {
         const letters = [
           { ch: 's', color: '#1A1A18', weight: 700 },
           { ch: 'm', color: '#1A1A18', weight: 700 },
           { ch: 'b', color: '#1A1A18', weight: 700 },
-          { ch: 'x', color: '#BA3C60', weight: 800 },
+          { ch: 'x', color: '#b0004a', weight: 800 },
           { ch: '.', color: '#1A1A18', weight: 700 },
           { ch: 'a', color: '#1A1A18', weight: 700 },
           { ch: 'i', color: '#1A1A18', weight: 700 },
@@ -1687,7 +1490,7 @@ export default function AppShell() {
                 position: 'fixed',
                 zIndex: 9999,
                 pointerEvents: 'none',
-                fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                fontFamily: "'Sora', sans-serif",
                 fontSize: 48,
                 fontWeight: l.weight,
                 color: l.color,

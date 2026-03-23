@@ -168,7 +168,7 @@ export default function Home() {
         @keyframes fadePulse { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
 
         .home-root {
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Sora', system-ui, sans-serif;
           -webkit-font-smoothing: antialiased;
           background: ${T.bg};
           display: flex; flex-direction: row;
@@ -218,7 +218,7 @@ export default function Home() {
 
         .home-topbar-logo {
           font-size: 18px; font-weight: 800; letter-spacing: -0.03em;
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Sora', system-ui, sans-serif;
           display: flex; align-items: center; gap: 6px;
         }
 
@@ -305,7 +305,7 @@ export default function Home() {
           border: 1px solid rgba(0,0,0,0.07);
           background: #FFFFFF; cursor: pointer;
           font-size: 14px; font-weight: 500; color: ${T.sub};
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Sora', system-ui, sans-serif;
           text-align: left; transition: all 0.15s;
           box-shadow: 0 1px 3px rgba(0,0,0,0.03);
         }

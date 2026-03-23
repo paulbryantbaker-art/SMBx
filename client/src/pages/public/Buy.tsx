@@ -38,7 +38,7 @@ export default function Buy() {
   const startBuy = () => navigate('/?buy=1');
 
   return (
-    <div style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", WebkitFontSmoothing: 'antialiased', background: T.bg, minHeight: '100dvh' }}>
+    <div style={{ fontFamily: "'Sora', system-ui, sans-serif", WebkitFontSmoothing: 'antialiased', background: T.bg, minHeight: '100dvh' }}>
       <ScrollProgressBar />
       <style>{`
         .buy-section {
@@ -145,7 +145,7 @@ export default function Buy() {
           border: 1px solid rgba(0,0,0,0.07);
           background: #FFFFFF; cursor: pointer;
           font-size: 14px; font-weight: 500; color: ${T.sub};
-          font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+          font-family: 'Sora', system-ui, sans-serif;
           text-align: left; transition: all 0.15s;
           box-shadow: 0 1px 3px rgba(0,0,0,0.03);
         }
