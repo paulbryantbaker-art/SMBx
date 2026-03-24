@@ -917,7 +917,7 @@ export default function AppShell() {
       {sidebarContent(false)}
 
       {/* Main canvas — offset by 80px sidebar on desktop */}
-      <div className={`flex-1 flex flex-col min-w-0 h-full lg:ml-20 ${viewState === 'landing' && activeTab === 'home' ? 'bg-transparent' : dark ? 'bg-[#1a1c1e]' : 'bg-white'}`}>
+      <div className="flex-1 flex flex-col min-w-0 h-full lg:ml-20 bg-transparent">
         {/* Offline banner */}
         {isOffline && (
           <div className="shrink-0 bg-yellow-50 border-b border-yellow-200 px-4 py-2 flex items-center justify-center gap-2 z-30">
@@ -989,16 +989,16 @@ export default function AppShell() {
         )}
 
         {/* Main row: chat + canvas split */}
-        <div className={`flex-1 flex min-h-0 ${viewState === 'landing' && activeTab === 'home' ? 'bg-transparent' : dark ? 'bg-[#1a1c1e]' : (viewState === 'landing' ? 'bg-[#f9f9fc]' : 'bg-white')}`}>
+        <div className="flex-1 flex min-h-0 bg-transparent">
         {/* Chat column — resizable on desktop in chat mode, flex on landing/other */}
         <div
-          className={`flex flex-col min-w-0 ${viewState === 'landing' && activeTab === 'home' ? 'bg-transparent' : dark ? 'bg-[#1a1c1e]' : (viewState === 'landing' ? 'bg-[#f9f9fc]' : 'bg-white')}`}
+          className={`flex flex-col min-w-0 ${viewState === 'chat' ? (dark ? 'bg-[#1a1c1e]' : 'bg-white') : 'bg-transparent'}`}
           style={!isMobile && viewState === 'chat' ? { width: chatWidth, flexShrink: 0 } : { flex: 1 }}
         >
         {/* Scroll area */}
         <div
           ref={scrollRef}
-          className={`flex-1 overflow-y-auto min-h-0 ${viewState === 'landing' && activeTab === 'home' ? 'bg-transparent' : dark ? 'bg-[#1a1c1e]' : (viewState === 'landing' ? 'bg-[#f9f9fc]' : 'bg-white')}`}
+          className="flex-1 overflow-y-auto min-h-0 bg-transparent"
           style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' } as any}
         >
           {/* ════ LANDING MODE ════ */}
