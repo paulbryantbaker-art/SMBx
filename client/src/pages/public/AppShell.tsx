@@ -1011,7 +1011,7 @@ export default function AppShell() {
 
                   {/* Desktop: single centered cluster */}
                   <div className="flex-1 flex flex-col items-center justify-center px-6">
-                    <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-6' : 'max-w-2xl space-y-5'}`} style={isMobile ? undefined : { marginTop: '-5vh' }}>
+                    <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-6' : 'max-w-2xl space-y-6'}`} style={isMobile ? undefined : { marginTop: '-5vh' }}>
                       {!isMobile && (
                         <>
                           <div className="mb-4 flex justify-center">
@@ -1033,7 +1033,7 @@ export default function AppShell() {
                       {/* Desktop: input + chips + micro-copy */}
                       {!isMobile && (
                         <>
-                          <div className="w-full max-w-3xl mx-auto pt-2">
+                          <div className="w-full max-w-3xl mx-auto mt-8">
                             <div className="relative group">
                               <div className={`absolute -inset-1 bg-gradient-to-r from-[#b0004a] to-[#d81b60] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
                               <div className={`relative rounded-full flex items-center p-2 pl-6 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
