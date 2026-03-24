@@ -1016,7 +1016,7 @@ export default function AppShell() {
 
                   {/* Center zone — hero text (vertically centered) */}
                   <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
-                    <div className="max-w-4xl w-full text-center space-y-6" style={isMobile ? undefined : { marginTop: '-5vh' }}>
+                    <div className="max-w-4xl w-full text-center space-y-6" style={isMobile ? undefined : { marginTop: '-10vh' }}>
                       {!isMobile && (
                         <>
                           <div className="mb-4 flex justify-center">
