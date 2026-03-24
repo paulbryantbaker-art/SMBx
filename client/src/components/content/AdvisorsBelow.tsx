@@ -117,10 +117,10 @@ export default function AdvisorsBelow() {
             <StaggerItem>
               <div className={`p-10 rounded-2xl flex flex-col h-full ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
                 <h3 className="text-2xl font-bold mb-2">Advisor Trial</h3>
-                <div className="text-4xl font-headline font-extrabold mb-2">$0<span className={`text-lg font-medium ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}> / 14 days</span></div>
-                <p className={`text-sm mb-8 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Test the platform with a single active mandate and full feature access.</p>
+                <div className="text-4xl font-headline font-extrabold mb-2">$0<span className={`text-lg font-medium ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}> / first 3 deals</span></div>
+                <p className={`text-sm mb-8 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Full platform access for your first three client engagements.</p>
                 <ul className="space-y-4 mb-12 flex-1">
-                  {['1 Active Mandate', 'Automated Data Ingestion', 'Core Deal Documents'].map((item) => (
+                  {['3 Client Engagements', 'Automated Data Ingestion', 'Core Deal Documents'].map((item) => (
                     <li key={item} className="flex items-center gap-3 text-sm font-medium">
                       <span className="material-symbols-outlined text-[#b0004a] text-lg">check_circle</span> {item}
                     </li>
@@ -134,7 +134,7 @@ export default function AdvisorsBelow() {
               <div className={`p-10 rounded-2xl flex flex-col h-full scale-105 shadow-2xl relative ${dark ? 'bg-gradient-to-br from-[#b0004a] to-[#d81b60] text-white' : 'bg-[#1a1c1e] text-white'}`}>
                 <div className="absolute top-0 right-10 -translate-y-1/2 bg-[#b0004a] text-white text-[10px] font-extrabold tracking-widest px-4 py-1 rounded-full uppercase">Most Popular</div>
                 <h3 className="text-2xl font-bold mb-2">Advisor Pro</h3>
-                <div className="text-4xl font-headline font-extrabold mb-2">$199<span className="text-lg font-medium text-gray-400"> / month</span></div>
+                <div className="text-4xl font-headline font-extrabold mb-2">$299<span className="text-lg font-medium text-gray-400"> / month</span></div>
                 <p className="text-sm text-gray-400 mb-8">Designed for independent advisors managing multiple active listings.</p>
                 <ul className="space-y-4 mb-12 flex-1">
                   {['Unlimited Active Mandates', 'Full Document Suite', 'Smart Buyer Matching', 'Custom Brand Styling'].map((item) => (

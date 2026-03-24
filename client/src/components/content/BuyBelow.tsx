@@ -24,7 +24,7 @@ export default function BuyBelow() {
             <ScrollReveal delay={0.15}>
               <div className={`space-y-8 editorial text-xl max-w-3xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
                 <p>Eighty percent of small businesses that sell never get formally listed. They change hands through whisper networks — a broker mentions it to three people, a CPA tips off a client, a landlord knows the tenant is tired.</p>
-                <p>If you're waiting for the right business to appear on BizBuySell, you're fishing in 20% of the pond. And that 20% is picked over. The good ones are under LOI within weeks. What's left has been sitting there for a reason.</p>
+                <p>If you're waiting for the right business to appear on a listing site, you're fishing in 20% of the pond. And that 20% is picked over. The good ones are under LOI within weeks. What's left has been sitting there for a reason.</p>
                 <p>The buyers who win — the ones who close at fair multiples on healthy businesses — do two things differently. They search systematically. And they underwrite before they fall in love.</p>
                 <p className={`font-bold text-2xl border-l-4 border-[#b0004a] px-6 italic ${dark ? 'text-white' : 'text-[#1a1c1e]'}`}>
                   Yulia does both. She maps markets, screens targets, models every deal structure, and tells you when the numbers don't work — before you've spent $30K on due diligence.
@@ -132,10 +132,10 @@ export default function BuyBelow() {
             <h2 className="text-5xl font-headline font-extrabold mb-12 tracking-tighter text-center">The market you can't see from a listing site</h2>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
               <div className={`lg:col-span-7 editorial text-lg space-y-6 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
-                <p>There are 33.2 million small businesses in the United States. In any given year, roughly 10% of owners are thinking about selling. That's 3.3 million potential deals — and fewer than 50,000 get formally listed.</p>
+                <p>In any given year, roughly 10% of business owners are thinking about selling. The vast majority of those deals never get formally listed. They change hands through networks, referrals, and conversations — not listing sites.</p>
                 <p>Yulia maps your target market at the MSA level. She pulls Census business counts by NAICS code, cross-references BLS employment data, overlays SBA lending volume, and identifies markets where the ratio of businesses to active listings is highest.</p>
                 <p className={`font-bold ${dark ? 'text-white' : 'text-[#1a1c1e]'}`}>Those gaps — markets with lots of businesses and few listings — are where proprietary deal flow lives.</p>
-                <p>She'll tell you exactly how many HVAC companies exist in Dallas-Fort Worth, how many employees they average, what they probably do in revenue based on BLS data, and which ones are in the demographic sweet spot for an exit — owners aged 55+ with no succession plan.</p>
+                <p>She'll tell you exactly how many businesses exist in your target market, what they average in employment and revenue, and where the competitive density creates opportunity.</p>
               </div>
               <div className="lg:col-span-5">
                 <div className={`rounded-2xl overflow-hidden shadow-sm ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
@@ -269,10 +269,10 @@ export default function BuyBelow() {
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {[
               { phase: '01', time: 'Week 1–2', title: 'THESIS', free: true, desc: "Define what you're buying, why, and the financial profile that makes it work. Yulia builds your acquisition criteria.", items: ['Buy Thesis', 'Target Profile', 'Market Mapping'], accent: false },
-              { phase: '02', time: 'Weeks 3–8', title: 'SOURCE', free: true, desc: 'Proprietary deal flow. Yulia identifies targets that match your thesis and screens them against real market data.', items: ['Deal Screening', 'Comp Analysis', 'Owner Outreach'], accent: false },
-              { phase: '03', time: 'Weeks 6–12', title: 'UNDERWRITE', free: false, desc: 'Full financial modeling. SBA bankability. Sensitivity analysis. Every scenario modeled before you make an offer.', items: ['SBA Analysis', 'Deal Modeling', 'Risk Assessment'], accent: false },
-              { phase: '04', time: 'Weeks 10–16', title: 'DILIGENCE', free: false, desc: 'QofE coordination. Customer concentration. Employee dependency. Technology risk. Yulia generates the DD checklist.', items: ['DD Checklist', 'Red Flag Scan', 'Working Capital'], accent: false },
-              { phase: '05', time: 'Weeks 14–24', title: 'CLOSE', free: false, desc: 'Purchase agreement review. Asset allocation optimization. Closing checklist. Transition planning from Day 0.', items: ['LOI Drafting', 'Tax Optimization', 'Closing Support'], accent: true },
+              { phase: '02', time: 'Weeks 3–8', title: 'SOURCE', free: true, desc: 'Proprietary deal flow. Yulia identifies targets that match your thesis and screens them against real market data.', items: ['Target identification', 'Market screening', 'Outreach strategy'], accent: false },
+              { phase: '03', time: 'Weeks 6–12', title: 'UNDERWRITE', free: false, desc: 'Full financial modeling. SBA bankability. Sensitivity analysis. Every scenario modeled before you make an offer.', items: ['Financial modeling', 'Lending qualification', 'Risk analysis'], accent: false },
+              { phase: '04', time: 'Weeks 10–16', title: 'DILIGENCE', free: false, desc: 'QofE coordination. Customer concentration. Employee dependency. Technology risk. Yulia generates the DD checklist.', items: ['Due diligence coordination', 'Issue identification', 'Working capital analysis'], accent: false },
+              { phase: '05', time: 'Weeks 14–24', title: 'CLOSE', free: false, desc: 'Purchase agreement review. Asset allocation optimization. Closing checklist. Transition planning from Day 0.', items: ['Offer strategy', 'Tax optimization', 'Closing logistics'], accent: true },
             ].map((p) => (
               <StaggerItem key={p.phase}>
                 <div
@@ -310,7 +310,7 @@ export default function BuyBelow() {
             {[
               { type: 'First-Time Buyer', icon: 'person', desc: "You've got capital and conviction but no deal experience. Yulia walks you through every step — SBA mechanics, LOI terms, DD scope — in plain language. No jargon until you ask for it.", highlight: false },
               { type: 'Search Funder', icon: 'search', desc: 'Your investors expect institutional process. Yulia generates the screening memos, financial models, and deal summaries your board needs — at the cadence they expect.', highlight: false },
-              { type: 'Serial Acquirer', icon: 'stacks', desc: "You know what you're doing. You need speed. Yulia screens 50 targets in the time it takes to read one CIM. She flags what matters and ignores what doesn't.", highlight: true },
+              { type: 'Serial Acquirer', icon: 'stacks', desc: "You know what you're doing. You need speed. Yulia screens 50 targets in the time it takes to read one deal package. She flags what matters and ignores what doesn't.", highlight: true },
               { type: 'PE Platform', icon: 'corporate_fare', desc: "Roll-up economics. Multiple arbitrage. Integration planning. Yulia models each add-on against the platform and shows you the blended multiple in real time.", highlight: false },
             ].map((card) => (
               <StaggerItem key={card.type}>

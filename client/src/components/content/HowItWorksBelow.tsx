@@ -20,10 +20,10 @@ export default function HowItWorksBelow() {
   ];
 
   const comparisonRows = [
-    { feature: 'Real-time SBA Data', llm: 'Outdated (training cutoff)', smbx: 'Live federal data feeds' },
+    { feature: 'Real-time regulatory data', llm: 'Outdated (training cutoff)', smbx: 'Live federal data feeds' },
     { feature: 'Financial Precision', llm: 'General estimations', smbx: 'Tax-code verified normalization' },
     { feature: 'Localized Benchmarks', llm: 'National averages', smbx: 'MSA-level Census + BLS data' },
-    { feature: 'Deal Structuring', llm: 'Generic advice', smbx: 'Model-ready SBA 7(a) structures' },
+    { feature: 'Deal Structuring', llm: 'Generic advice', smbx: 'Model-ready lending structures' },
   ];
 
   return (
@@ -57,7 +57,7 @@ export default function HowItWorksBelow() {
                 </StaggerItem>
               ))}
             </StaggerContainer>
-            <p className={`text-center mt-8 text-xs font-medium tracking-widest uppercase ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Sourcing from the bedrock of economic truth</p>
+            <p className={`text-center mt-8 text-xs font-medium tracking-widest uppercase ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Starting from sovereign data sources — expanding globally</p>
           </section>
         </ScrollReveal>
 

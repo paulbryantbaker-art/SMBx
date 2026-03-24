@@ -68,8 +68,8 @@ export default function PricingBelow() {
     { q: "What's included in the execution fee?", a: 'Everything for one deal — from market intelligence and financial modeling through professional deal documents, negotiation support, closing coordination, and your 180-day post-close integration plan. One payment, no additional charges, no surprises.' },
     { q: 'Why 0.1%?', a: "The analytical depth, document generation, and deal support scale with complexity. A flat percentage means everyone pays the same rate relative to their deal — and the $999 minimum ensures smaller businesses get the full platform." },
     { q: "What if I'm a broker or M&A advisor?", a: 'advisor' },
-    { q: 'Can I take my data with me?', a: 'Always. You own your data. Export your CIM, ValueLens, and financial models in standard formats at any time — even if you never pay the execution fee.' },
-    { q: 'What happens if a deal falls through?', a: "The platform fee covers one specific deal engagement. All your free-tier analysis and deliverables remain yours. For a new deal, you'd start a new conversation — free analysis again, new fee only if you execute." },
+    { q: 'Can I take my data with me?', a: 'Always. You own your data. Export your analysis, valuations, and financial models in standard formats at any time — even if you never pay the execution fee.' },
+    { q: 'What happens if a deal falls through?', a: "The platform fee covers one specific deal engagement. All your free-tier analysis remains yours. For a new deal, you'd start a new conversation — free analysis again, new fee only if you execute." },
   ];
 
   const journeyBtns = [
@@ -194,7 +194,7 @@ export default function PricingBelow() {
                     {/* Location */}
                     <div className="mb-4">
                       <label className="text-[10px] uppercase font-bold text-[#dadadc]/50 tracking-widest block mb-2">Location</label>
-                      <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Dallas, TX" className="w-full bg-[#1a1c1e] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-[#dadadc]/30 focus:border-[#b0004a]/50 transition-colors outline-none" />
+                      <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Dallas, TX or London, UK" className="w-full bg-[#1a1c1e] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-[#dadadc]/30 focus:border-[#b0004a]/50 transition-colors outline-none" />
                     </div>
 
                     {/* Revenue */}
@@ -298,7 +298,7 @@ export default function PricingBelow() {
               </div>
               <div className="flex gap-3 items-start">
                 <div className="w-8 h-8 rounded-full bg-[#b0004a] flex items-center justify-center text-white text-xs font-bold shrink-0">Y</div>
-                <div className="bg-white/10 p-5 rounded-2xl rounded-tl-none text-white text-sm leading-relaxed max-w-[85%]">To unlock the full execution platform — your deal room, professional CIM, legal templates, closing support, and your 180-day integration plan — the deal execution fee for your business is <span className="text-[#ffb2bf] font-bold">$999</span>. That's 0.1% of your SDE, and it covers everything for this deal through closing day. No subscriptions, no additional charges.</div>
+                <div className="bg-white/10 p-5 rounded-2xl rounded-tl-none text-white text-sm leading-relaxed max-w-[85%]">To unlock the full execution platform — your deal room, professional deal documents, legal templates, closing support, and your 180-day integration plan — the deal execution fee for your business is <span className="text-[#ffb2bf] font-bold">$999</span>. That's 0.1% of your SDE, and it covers everything for this deal through closing day. No subscriptions, no additional charges.</div>
               </div>
             </div>
           </ScrollReveal>

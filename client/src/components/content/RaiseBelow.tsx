@@ -159,7 +159,7 @@ export default function RaiseBelow() {
           </ScrollReveal>
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
-              { icon: 'style', title: '12-Slide Master Deck', desc: 'A tight, compelling narrative that answers the "Why Now" and "Why You" — following the Psychology of the Yes framework.' },
+              { icon: 'style', title: 'The deck that gets you the meeting', desc: 'A tight, compelling narrative that answers the two questions every investor asks first: "Why now?" and "Why you?"' },
               { icon: 'table_chart', title: 'Numbers investors believe', desc: 'Projections built on defensible assumptions, not hockey sticks. Stress-tested against the questions investors actually ask during diligence.' },
               { icon: 'account_tree', title: 'Know what you\'re giving up', desc: 'Live modeling of dilution at every exit scenario. See exactly what each term sheet costs you in ownership — before you sign.' },
               { icon: 'track_changes', title: 'Find the right capital', desc: 'Investors mapped to your specific sector, stage, and geography. Outreach strategy and meeting preparation built for the partners most likely to say yes.' },

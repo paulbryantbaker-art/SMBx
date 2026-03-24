@@ -295,10 +295,10 @@ export default function SellBelow() {
           </ScrollReveal>
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { phase: '01', time: 'Months 1–2', title: 'UNDERSTAND', free: true, desc: "See your business through a buyer's eyes. Financials normalized. Value Readiness Report scored on seven factors.", items: ['ValueLens Report', 'SDE/EBITDA Prelim', 'Industry Benchmarking'], accent: false },
-              { phase: '02', time: 'Months 3–12', title: 'OPTIMIZE', free: false, desc: 'Where real value gets created. $50K improvement in EBITDA at 5× = $250K more at closing.', items: ['Risk Mitigation', 'Margin Expansion', 'Clean Books Recon'], accent: false },
-              { phase: '03', time: 'Months 6–18', title: 'PREPARE', free: false, desc: 'Professional deal materials that present your business at its best. A secure data room organized for buyer diligence. Targeted outreach strategy mapped to active acquirers in your sector.', items: ['Data Room Setup', 'Buyer List Mapping', 'Vetted Data Access'], accent: false },
-              { phase: '04', time: 'Months 12–24', title: 'NEGOTIATE', free: false, desc: 'LOI evaluation. Tax structure optimization. Every deal configuration modeled — earnouts, seller financing, working capital pegs.', items: ['Deal Configuration', 'Competitive Tension', 'Closing Support'], accent: true },
+              { phase: '01', time: 'Months 1–2', title: 'UNDERSTAND', free: true, desc: "See your business through a buyer's eyes. Financials normalized. Value Readiness Report scored on seven factors.", items: ['Your real earnings', 'Your industry position', 'Your value range'], accent: false },
+              { phase: '02', time: 'Months 3–12', title: 'OPTIMIZE', free: false, desc: 'Where real value gets created. $50K improvement in EBITDA at 5× = $250K more at closing.', items: ['Margin improvement', 'Risk reduction', 'Financial clean-up'], accent: false },
+              { phase: '03', time: 'Months 6–18', title: 'PREPARE', free: false, desc: 'Professional deal materials that present your business at its best. A secure data room organized for buyer diligence. Targeted outreach strategy mapped to active acquirers in your sector.', items: ['Deal materials', 'Data room', 'Buyer outreach'], accent: false },
+              { phase: '04', time: 'Months 12–24', title: 'NEGOTIATE', free: false, desc: 'LOI evaluation. Tax structure optimization. Every deal configuration modeled — earnouts, seller financing, working capital pegs.', items: ['Offer analysis', 'Structure optimization', 'Closing coordination'], accent: true },
             ].map((p) => (
               <StaggerItem key={p.phase}>
                 <div
@@ -354,7 +354,7 @@ export default function SellBelow() {
             <h2 className="text-4xl font-headline font-extrabold mb-16 tracking-tight">First sale or fifth — Yulia speaks your language</h2>
             <StaggerContainer className="grid grid-cols-1 lg:grid-cols-3 gap-12 text-left">
               {[
-                { tier: 'Growth-Stage', range: '$1.5M–$5M Revenue', desc: "If this is your first time, you deserve institutional quality guidance. Step-by-step. SBA-focused. Clear language. No jargon until you're ready.", first: true },
+                { tier: 'Growth-Stage', range: '$1.5M–$5M Revenue', desc: "If this is your first time, you deserve institutional quality guidance. Step-by-step. Financing-focused. Clear language. No jargon until you're ready.", first: true },
                 { tier: 'Established', range: '$5M–$50M Revenue', desc: 'The "advisor desert." Too big for Main Street, too small for investment banks. PE firms are hunting you — you need institutional preparation to compete.', first: false },
                 { tier: 'Institutional', range: '$50M+ Revenue', desc: "Board-level analysis and documentation. The analytical depth your buyer's deal team expects — valuation methodology, scenario modeling, and covenant structures delivered at institutional speed.", first: false },
               ].map((t) => (
