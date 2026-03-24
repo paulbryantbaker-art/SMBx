@@ -1010,7 +1010,7 @@ export default function AppShell() {
                 <main className="flex-1 flex flex-col relative">
 
                   {/* Zone A: centered headline content (desktop) */}
-                  <div className="flex-1 flex flex-col items-center justify-end pb-16 px-6">
+                  <div className="flex-1 flex flex-col items-center justify-center pb-4 px-6">
                     <div className={`max-w-4xl w-full text-center ${isMobile ? 'space-y-6' : 'space-y-4'}`}>
                       {!isMobile && (
                         <>
@@ -1034,7 +1034,7 @@ export default function AppShell() {
 
                   {/* Zone B: bottom-anchored input + chips (desktop) */}
                   {!isMobile && (
-                    <div className="shrink-0 pb-8 px-6 flex flex-col items-center">
+                    <div className="shrink-0 pt-6 pb-8 px-6 flex flex-col items-center">
                       <div className="w-full max-w-3xl mx-auto">
                         <div className="relative group">
                           <div className={`absolute -inset-1 bg-gradient-to-r from-[#b0004a] to-[#d81b60] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
