@@ -718,8 +718,12 @@ export default function Home() {
           <div className="home-scroll">
             {/* ── SECTION 0: HERO ── */}
             <section className="home-hero">
-              <h1 className="home-greeting">{getGreeting()}.</h1>
-              <p className="home-greeting-sub">Tell me about your deal.</p>
+              <h1 className="home-greeting">
+                <span className="text-[#b0004a]">Selling</span> your business?{' '}
+                <span className="text-[#b0004a]">Buying</span> one?{' '}
+                <span className="text-[#b0004a]">Raising</span> capital?
+              </h1>
+              <p className="home-greeting-sub">Yulia handles the numbers, the documents, and the strategy — all by just talking to her.</p>
 
               <div className="home-hero-dock">
                 <ChatDock ref={heroDockRef} onSend={handleHeroSend} variant="hero" />
