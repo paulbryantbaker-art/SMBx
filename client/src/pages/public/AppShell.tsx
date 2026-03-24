@@ -1007,16 +1007,11 @@ export default function AppShell() {
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE — New Design ═══ */}
-                <main className="flex-1 flex flex-col relative" style={{ border: '2px solid red' }}>
-                  {/* Background blur orbs */}
-                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className={`absolute -top-[10%] -left-[10%] w-[40%] h-[40%] blur-[120px] rounded-full ${dark ? 'bg-[#b0004a]/10' : 'bg-[#b0004a]/5'}`} />
-                    <div className={`absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] blur-[120px] rounded-full ${dark ? 'bg-[#d81b60]/10' : 'bg-[#d81b60]/5'}`} />
-                  </div>
+                <main className="flex-1 flex flex-col relative">
 
-                  {/* Center zone — hero text (vertically centered) */}
-                  <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
-                    <div className="max-w-4xl w-full text-center space-y-6" style={isMobile ? undefined : { marginTop: '-10vh' }}>
+                  {/* Zone A: centered headline content (desktop) */}
+                  <div className="flex-1 flex flex-col items-center justify-center px-6">
+                    <div className={`max-w-4xl w-full text-center ${isMobile ? 'space-y-6' : 'space-y-4'}`}>
                       {!isMobile && (
                         <>
                           <div className="mb-4 flex justify-center">
@@ -1031,69 +1026,69 @@ export default function AppShell() {
                         <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Buying</span> one?{' '}
                         <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Raising</span> capital?
                       </h1>
-                      <p className={`text-base md:text-xl max-w-[320px] md:max-w-2xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                      <p className={`text-base md:text-xl md:max-w-xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
                         Yulia handles the numbers, the documents, and the strategy — all by just talking to her.
                       </p>
                     </div>
+                  </div>
 
-                    {/* Desktop: gradient-glow input + chips inline below hero */}
-                    {!isMobile && (
-                      <div className="max-w-4xl w-full text-center mt-12 relative z-10">
-                        <div className="w-full max-w-3xl mx-auto">
-                          <div className="relative group">
-                            <div className={`absolute -inset-1 bg-gradient-to-r from-[#b0004a] to-[#d81b60] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
-                            <div className={`relative rounded-full flex items-center p-2 pl-6 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
-                              <span className={`material-symbols-outlined mr-4 ${dark ? 'text-rose-500' : 'text-[#b0004a]'}`}>bolt</span>
-                              <input
-                                className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
-                                placeholder="Message Yulia..."
-                                type="text"
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
-                                    handleSend((e.target as HTMLInputElement).value.trim());
-                                    (e.target as HTMLInputElement).value = '';
-                                  }
-                                }}
-                              />
-                              <button
-                                onClick={(e) => {
-                                  const input = (e.currentTarget.parentElement?.querySelector('input') as HTMLInputElement);
-                                  if (input?.value.trim()) { handleSend(input.value.trim()); input.value = ''; }
-                                }}
-                                className="bg-gradient-to-br from-[#b0004a] to-[#d81b60] text-white h-12 w-12 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform border-none cursor-pointer"
-                              >
-                                <span className="material-symbols-outlined">arrow_forward</span>
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Desktop suggestion chips */}
-                          <div className="mt-6 flex flex-wrap justify-center gap-3">
-                            {['I want to sell my business', 'Looking to buy a business', 'Need to raise capital', 'Just closed — what now?'].map(chip => (
-                              <button
-                                key={chip}
-                                onClick={() => handleSend(chip)}
-                                className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-all border-none ${
-                                  dark
-                                    ? 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
-                                    : 'bg-white text-[#636467] shadow-sm hover:border-[#b0004a] hover:text-[#b0004a]'
-                                }`}
-                                style={{ border: dark ? '1px solid rgba(63,63,70,0.5)' : '1px solid #e3bdc3' }}
-                                type="button"
-                              >
-                                {chip}
-                              </button>
-                            ))}
+                  {/* Zone B: bottom-anchored input + chips (desktop) */}
+                  {!isMobile && (
+                    <div className="shrink-0 pb-8 px-6 flex flex-col items-center">
+                      <div className="w-full max-w-3xl mx-auto">
+                        <div className="relative group">
+                          <div className={`absolute -inset-1 bg-gradient-to-r from-[#b0004a] to-[#d81b60] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
+                          <div className={`relative rounded-full flex items-center p-2 pl-6 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
+                            <span className={`material-symbols-outlined mr-4 ${dark ? 'text-rose-500' : 'text-[#b0004a]'}`}>bolt</span>
+                            <input
+                              className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
+                              placeholder="Message Yulia..."
+                              type="text"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
+                                  handleSend((e.target as HTMLInputElement).value.trim());
+                                  (e.target as HTMLInputElement).value = '';
+                                }
+                              }}
+                            />
+                            <button
+                              onClick={(e) => {
+                                const input = (e.currentTarget.parentElement?.querySelector('input') as HTMLInputElement);
+                                if (input?.value.trim()) { handleSend(input.value.trim()); input.value = ''; }
+                              }}
+                              className="bg-gradient-to-br from-[#b0004a] to-[#d81b60] text-white h-12 w-12 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform border-none cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined">arrow_forward</span>
+                            </button>
                           </div>
                         </div>
 
-                        {/* Desktop trust line */}
-                        <p className={`text-xs font-medium mt-8 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
-                          Free analysis · No account required · Your data stays yours
-                        </p>
+                        {/* Desktop suggestion chips */}
+                        <div className="mt-6 flex flex-wrap justify-center gap-3">
+                          {['I want to sell my business', 'Looking to buy a business', 'Need to raise capital', 'Just closed — what now?'].map(chip => (
+                            <button
+                              key={chip}
+                              onClick={() => handleSend(chip)}
+                              className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-all border-none ${
+                                dark
+                                  ? 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                                  : 'bg-white text-[#636467] shadow-sm hover:border-[#b0004a] hover:text-[#b0004a]'
+                              }`}
+                              style={{ border: dark ? '1px solid rgba(63,63,70,0.5)' : '1px solid #e3bdc3' }}
+                              type="button"
+                            >
+                              {chip}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    )}
-                  </div>
+
+                      {/* Desktop trust line */}
+                      <p className={`text-xs font-medium mt-8 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
+                        Free analysis · No account required · Your data stays yours
+                      </p>
+                    </div>
+                  )}
 
                   {/* Mobile bottom zone: chips + gradient input + micro-copy */}
                   {isMobile && (
