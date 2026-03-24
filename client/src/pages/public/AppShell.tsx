@@ -8,7 +8,6 @@ import { useAppHeight } from '../../hooks/useAppHeight';
 import { useDarkMode, DarkModeToggle } from '../../components/shared/DarkModeToggle';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
 import ChatMessages from '../../components/shell/ChatMessages';
-import DotField from '../../components/shared/DotField';
 // Authenticated tool components
 import PipelinePanel from '../../components/chat/PipelinePanel';
 import DataRoom from '../../components/chat/DataRoom';
@@ -1008,8 +1007,7 @@ export default function AppShell() {
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE — New Design ═══ */}
-                <DotField dark={dark} />
-                <main className={`flex-1 flex flex-col relative ${dark ? 'bg-transparent' : 'bg-transparent'}`}>
+                <main className="flex-1 flex flex-col relative">
 
                   {/* Desktop: single centered cluster */}
                   <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
