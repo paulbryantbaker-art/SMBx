@@ -1011,7 +1011,7 @@ export default function AppShell() {
 
                   {/* Desktop: single centered cluster */}
                   <div className="flex-1 flex flex-col items-center justify-center px-6">
-                    <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-6' : 'max-w-2xl space-y-6'}`} style={isMobile ? undefined : { marginTop: '-5vh' }}>
+                    <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-6' : 'max-w-3xl space-y-6'}`} style={isMobile ? undefined : { marginTop: '-5vh' }}>
                       {!isMobile && (
                         <>
                           <div className="mb-4 flex justify-center">
@@ -1026,7 +1026,7 @@ export default function AppShell() {
                         <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Buying</span> one?{' '}
                         <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Raising</span> capital?
                       </h1>
-                      <p className={`text-base md:text-xl md:max-w-2xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                      <p className={`text-base md:text-xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
                         Yulia handles the numbers, the documents, and the strategy — all by just talking to her.
                       </p>
 
