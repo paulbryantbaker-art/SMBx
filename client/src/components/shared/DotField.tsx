@@ -10,17 +10,24 @@ export default function DotField({ dark = false }: DotFieldProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const parent = canvas.parentElement;
+    if (!parent) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const draw = () => {
       const dpr = window.devicePixelRatio || 1;
-      const w = canvas.offsetWidth;
-      const h = canvas.offsetHeight;
+      const rect = parent.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      if (w === 0 || h === 0) return;
+
       canvas.width = w * dpr;
       canvas.height = h * dpr;
-      ctx.scale(dpr, dpr);
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
 
       // Focal point: center-x, ~38% from top (behind hero)
@@ -58,7 +65,6 @@ export default function DotField({ dark = false }: DotFieldProps) {
           y -= dy * pull * 0.08;
 
           // Vertical density: dots below focal point get tighter spacing
-          // Above focal point: dots spread out
           const verticalFactor = (y - fy) / h;
           if (verticalFactor < 0) {
             // Above hero: push dots outward (sparser)
@@ -102,9 +108,10 @@ export default function DotField({ dark = false }: DotFieldProps) {
       ctx.globalAlpha = 1;
     };
 
-    draw();
+    // Draw after a frame so parent has layout
+    requestAnimationFrame(draw);
 
-    const onResize = () => draw();
+    const onResize = () => requestAnimationFrame(draw);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, [dark]);
@@ -113,7 +120,6 @@ export default function DotField({ dark = false }: DotFieldProps) {
     <canvas
       ref={canvasRef}
       className="absolute inset-0 pointer-events-none"
-      style={{ width: '100%', height: '100%' }}
     />
   );
 }
