@@ -15,13 +15,16 @@ export default function SellBelow() {
         {/* ═══ 1. HERO ═══ */}
         <section className="mb-32 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           <div className="lg:col-span-8">
-            <ScrollReveal y={40}>
+            <ScrollReveal>
+              <span className="inline-block px-3 py-1 bg-[#b0004a]/10 text-[#b0004a] text-[10px] font-extrabold uppercase tracking-[0.2em] mb-8 rounded-sm">Exit Strategy</span>
+            </ScrollReveal>
+            <ScrollReveal y={40} delay={0.1}>
               <h1 className="font-headline font-extrabold text-5xl md:text-7xl leading-tight mb-12 tracking-tighter">
                 75% of owners who sell their business{' '}
                 <span className="text-[#b0004a]">profoundly regret it</span> within a year.
               </h1>
             </ScrollReveal>
-            <ScrollReveal delay={0.15}>
+            <ScrollReveal delay={0.2}>
               <div className={`space-y-8 editorial text-xl max-w-3xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
                 <p>That number comes from the Exit Planning Institute. They've surveyed thousands of former owners. The regrets are almost always the same.</p>
                 <p>They weren't financially prepared. They left hundreds of thousands on the table — in add-backs they never identified, in tax structures they never modeled, in competitive processes they never ran. They accepted the first offer because they had no way to know if it was fair.</p>

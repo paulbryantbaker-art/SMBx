@@ -108,7 +108,7 @@ export default function PricingBelow() {
           <div className="lg:col-span-7">
             <ScrollReveal>
               <div className="flex gap-2 mb-10">
-                <span className="px-4 py-1.5 bg-[#b0004a]/5 text-[#b0004a] text-[11px] font-bold tracking-widest uppercase rounded-full border border-[#b0004a]/10">Pricing</span>
+                <span className="inline-block px-3 py-1 bg-[#b0004a]/10 text-[#b0004a] text-[10px] font-extrabold uppercase tracking-[0.2em] rounded-sm">Pricing</span>
               </div>
             </ScrollReveal>
             <ScrollReveal y={40} delay={0.1}>

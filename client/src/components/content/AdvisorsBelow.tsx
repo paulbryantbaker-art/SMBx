@@ -16,7 +16,7 @@ export default function AdvisorsBelow() {
         <section className="mb-24">
           <ScrollReveal>
             <div className="mb-8">
-              <span className="bg-[#b0004a] text-white px-4 py-1 rounded-full text-xs font-bold tracking-widest uppercase">[PAUL TO WRITE]</span>
+              <span className="inline-block px-3 py-1 bg-[#b0004a]/10 text-[#b0004a] text-[10px] font-extrabold uppercase tracking-[0.2em] rounded-sm">For Advisors</span>
             </div>
           </ScrollReveal>
           <ScrollReveal y={40} delay={0.1}>

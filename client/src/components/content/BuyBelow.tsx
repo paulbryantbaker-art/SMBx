@@ -15,13 +15,16 @@ export default function BuyBelow() {
         {/* ═══ 1. HERO ═══ */}
         <section className="mb-32 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           <div className="lg:col-span-8">
-            <ScrollReveal y={40}>
+            <ScrollReveal>
+              <span className="inline-block px-3 py-1 bg-[#b0004a]/10 text-[#b0004a] text-[10px] font-extrabold uppercase tracking-[0.2em] mb-8 rounded-sm">Acquisition Strategy</span>
+            </ScrollReveal>
+            <ScrollReveal y={40} delay={0.1}>
               <h1 className="font-headline font-extrabold text-5xl md:text-7xl leading-tight mb-12 tracking-tighter">
                 The best deals never hit the market.{' '}
                 <span className="text-[#b0004a]">You need to find them first.</span>
               </h1>
             </ScrollReveal>
-            <ScrollReveal delay={0.15}>
+            <ScrollReveal delay={0.2}>
               <div className={`space-y-8 editorial text-xl max-w-3xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
                 <p>Eighty percent of small businesses that sell never get formally listed. They change hands through whisper networks — a broker mentions it to three people, a CPA tips off a client, a landlord knows the tenant is tired.</p>
                 <p>If you're waiting for the right business to appear on a listing site, you're fishing in 20% of the pond. And that 20% is picked over. The good ones are under LOI within weeks. What's left has been sitting there for a reason.</p>

@@ -16,13 +16,16 @@ export default function RaiseBelow() {
         <section className="mb-24">
           <div className="flex flex-col lg:flex-row gap-16 items-start">
             <div className="lg:w-3/5">
-              <ScrollReveal y={40}>
+              <ScrollReveal>
+                <span className="inline-block px-3 py-1 bg-[#b0004a]/10 text-[#b0004a] text-[10px] font-extrabold uppercase tracking-[0.2em] mb-8 rounded-sm">Capital Strategy</span>
+              </ScrollReveal>
+              <ScrollReveal y={40} delay={0.1}>
                 <h1 className="font-headline font-extrabold text-5xl md:text-6xl tracking-tighter leading-tight mb-12">
                   A 5% difference in dilution today is a{' '}
                   <span className="text-[#b0004a]">$2.5 million</span> difference at exit.
                 </h1>
               </ScrollReveal>
-              <ScrollReveal delay={0.15}>
+              <ScrollReveal delay={0.2}>
                 <div className={`space-y-6 editorial text-lg ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
                   <p>Raising capital isn't just about the cash hitting your balance sheet. It's an architectural decision that defines the next decade of your life. We've seen founders celebrate a "great valuation" only to realize at exit that the liquidation preference wiped out their entire gains.</p>
                   <p>Complex term sheets are designed to protect the capital, not the creator. From participation rights that double-dip on your exit to anti-dilution clauses that penalize you for market shifts, the fine print is where your equity goes to die.</p>

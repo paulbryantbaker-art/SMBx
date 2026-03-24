@@ -23,8 +23,8 @@ export default function IntegrateBelow() {
           <div className="lg:col-span-8">
             <ScrollReveal>
               <div className="flex gap-2 mb-10">
-                <span className="px-4 py-1.5 bg-[#b0004a]/5 text-[#b0004a] text-[11px] font-bold tracking-widest uppercase rounded-full border border-[#b0004a]/10">Integrate</span>
-                <span className={`px-4 py-1.5 text-[11px] font-bold tracking-widest uppercase rounded-full ${dark ? 'bg-zinc-800 text-[#dadadc]/80' : 'bg-[#eeeef0] text-[#5d5e61]'}`}>Post-Acquisition</span>
+                <span className="inline-block px-3 py-1 bg-[#b0004a]/10 text-[#b0004a] text-[10px] font-extrabold uppercase tracking-[0.2em] rounded-sm">Integrate</span>
+                <span className={`inline-block px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-zinc-800 text-[#dadadc]/80' : 'bg-[#eeeef0] text-[#5d5e61]'}`}>Post-Acquisition</span>
               </div>
             </ScrollReveal>
             <ScrollReveal y={40} delay={0.1}>
