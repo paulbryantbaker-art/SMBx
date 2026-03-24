@@ -1021,7 +1021,7 @@ export default function AppShell() {
                         </>
                       )}
                       {isMobile && <LogoImg height={32} className="mx-auto mb-2" />}
-                      <h1 className="font-headline text-[50px] font-extrabold tracking-tighter leading-[1.05]">
+                      <h1 className={`font-headline font-extrabold tracking-tighter leading-[1.05] ${isMobile ? 'text-[28px]' : 'text-[50px]'}`}>
                         <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Selling</span> your business,<br/>
                         <span className={`italic underline decoration-[3px] underline-offset-[6px] ${dark ? 'decoration-[#d81b60]' : 'decoration-[#b0004a]'}`}>buying</span> one, or{' '}
                         <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>raising</span> capital?
