@@ -160,9 +160,9 @@ export default function RaiseBelow() {
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               { icon: 'style', title: '12-Slide Master Deck', desc: 'A tight, compelling narrative that answers the "Why Now" and "Why You" — following the Psychology of the Yes framework.' },
-              { icon: 'table_chart', title: 'Hardened Financial Model', desc: 'Three-year projections built on defensible unit economics. Built to withstand the most aggressive institutional due diligence.' },
-              { icon: 'account_tree', title: 'Dynamic Cap Table & Use of Funds', desc: 'Live modeling of what happens to your ownership in every exit scenario. Transparent tracking of dilution and precise allocation.' },
-              { icon: 'track_changes', title: 'Precision Investor Targeting', desc: 'Custom mapping of partners whose mandates align with your sector, stage, and geography. Curated, not scraped.' },
+              { icon: 'table_chart', title: 'Numbers investors believe', desc: 'Projections built on defensible assumptions, not hockey sticks. Stress-tested against the questions investors actually ask during diligence.' },
+              { icon: 'account_tree', title: 'Know what you\'re giving up', desc: 'Live modeling of dilution at every exit scenario. See exactly what each term sheet costs you in ownership — before you sign.' },
+              { icon: 'track_changes', title: 'Find the right capital', desc: 'Investors mapped to your specific sector, stage, and geography. Outreach strategy and meeting preparation built for the partners most likely to say yes.' },
             ].map((card) => (
               <StaggerItem key={card.title}>
                 <div className={`p-8 rounded-xl flex items-start gap-6 h-full ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>

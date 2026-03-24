@@ -43,9 +43,8 @@ export default function PricingBelow() {
   const bentoSmall = [
     { label: 'Preliminary', title: 'SDE / EBITDA', icon: 'calculate', span: 'col-span-6 md:col-span-3' },
     { label: 'Capital Stack', title: 'Template', icon: 'account_balance', span: 'col-span-6 md:col-span-3' },
-    { label: 'AI-Powered', title: 'Deal Scoring', icon: 'scoreboard', span: 'col-span-4' },
-    { label: 'Owner-Operated', title: 'CIM Builder', icon: 'description', span: 'col-span-4' },
-    { label: 'Unlimited', title: 'Yulia Q&A', icon: 'chat', span: 'col-span-4' },
+    { label: 'AI-Powered', title: 'Deal Scoring', icon: 'scoreboard', span: 'col-span-6' },
+    { label: 'Unlimited', title: 'Yulia Q&A', icon: 'chat', span: 'col-span-6' },
   ];
 
   const examples = [
@@ -56,17 +55,17 @@ export default function PricingBelow() {
   ];
 
   const included = [
-    { icon: 'query_stats', title: 'Deal & Market Intelligence', desc: 'Localized comps, buyer and seller landscape mapping, market density analysis, competitive positioning, and industry trend forecasting for your specific sector and geography.' },
-    { icon: 'calculate', title: 'Financial Analysis & Modeling', desc: 'Multi-methodology valuation, sensitivity and scenario modeling, capital stack optimization, SBA qualification analysis, and tax-aware deal structuring.' },
-    { icon: 'description', title: 'Deliverable Documents', desc: 'Professional CIM, deal memos, pitch decks, LOI templates, term sheets, legal frameworks, and data room organization — all generated from your deal data.' },
-    { icon: 'trending_up', title: 'Business Optimization', desc: 'Value driver identification, add-back analysis, operational gap remediation plans, KPI frameworks, and pre-market preparation strategy to maximize your multiple.' },
-    { icon: 'handshake', title: 'Deal Execution', desc: 'Secure deal room, negotiation strategy and tactics, due diligence checklists, closing coordination, escrow and wire guidance, and lender matching.' },
-    { icon: 'rocket_launch', title: 'Post-Close Integration', desc: 'Custom 180-day plan built from your DD findings, employee and vendor transition playbooks, customer communication strategy, and value creation scorecard.' },
+    { icon: 'query_stats', title: 'Know your market', desc: 'Understand exactly where your deal sits in the market — who\'s buying, what they\'re paying, and whether your timing is right. Yulia maps the competitive landscape so you negotiate from knowledge, not hope.' },
+    { icon: 'calculate', title: 'Know your numbers', desc: 'See the deal through a buyer\'s eyes and a lender\'s spreadsheet. Every financial model Yulia builds is stress-tested against real lending criteria, real tax scenarios, and real market benchmarks.' },
+    { icon: 'description', title: 'Professional documents that close deals', desc: 'The documents that move deals forward — prepared to the standard buyers, lenders, and attorneys expect. Not templates. Not fill-in-the-blank. Built from your actual deal data by an AI that understands M&A.' },
+    { icon: 'trending_up', title: 'Maximize your value before you go to market', desc: 'Most sellers leave $100K–$500K on the table because they go to market before they\'re ready. Yulia identifies exactly what\'s holding back your multiple and builds a remediation plan with dollar impact for each action.' },
+    { icon: 'handshake', title: 'Execute with confidence through closing day', desc: 'From the first LOI to the final wire transfer — deal room, negotiation tactics, due diligence coordination, legal frameworks, and closing logistics. Every step managed, every deadline tracked, every document in the right hands.' },
+    { icon: 'rocket_launch', title: 'The first 180 days after close', desc: 'The deal doesn\'t end at close — it starts. Employee transitions, customer retention, vendor relationships, operational assessment, and a growth roadmap built from what the due diligence actually revealed. Not generic. Yours.' },
   ];
 
   const faqs = [
     { q: 'Is the free analysis really free?', a: 'Yes. Engage with Yulia, upload documents, receive full analysis reports — no credit card, no expiration. You only pay when you choose to move into deal execution.' },
-    { q: "What's included in the execution fee?", a: 'Everything for one deal: professional CIM generation, deal room, legal template library, advanced financial modeling, closing support, and your 180-day post-close integration plan. No additional charges.' },
+    { q: "What's included in the execution fee?", a: 'Everything for one deal — from market intelligence and financial modeling through professional deal documents, negotiation support, closing coordination, and your 180-day post-close integration plan. One payment, no additional charges, no surprises.' },
     { q: 'Why 0.1%?', a: "The analytical depth, document generation, and deal support scale with complexity. A flat percentage means everyone pays the same rate relative to their deal — and the $999 minimum ensures smaller businesses get the full platform." },
     { q: "What if I'm a broker or M&A advisor?", a: 'advisor' },
     { q: 'Can I take my data with me?', a: 'Always. You own your data. Export your CIM, ValueLens, and financial models in standard formats at any time — even if you never pay the execution fee.' },

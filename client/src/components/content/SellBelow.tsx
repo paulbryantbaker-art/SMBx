@@ -247,8 +247,8 @@ export default function SellBelow() {
               <div className="space-y-8">
                 <span className="text-[#b0004a] font-bold tracking-widest uppercase text-sm">Institutional Standard</span>
                 <h2 className="text-4xl font-headline font-bold leading-tight">The document that sells your business — and why it can't be static</h2>
-                <p className="editorial text-lg text-white/80">A traditional CIM is frozen the day it's published. In a 12-month process, the business keeps moving. None of it matters because every buyer is reading a document that describes the business as it was, not as it is.</p>
-                <p className="editorial text-lg font-bold">Yulia's Living CIM updates automatically when your financials change.</p>
+                <p className="editorial text-lg text-white/80">A traditional deal book is frozen the day it's published. In a 12-month exit, your business keeps moving — new contracts, new hires, new quarters. Every buyer is reading a document that describes your business as it was, not as it is.</p>
+                <p className="editorial text-lg font-bold">Yulia's deal materials update automatically when your financials change. New quarter closes? Updated. Key hire? Reflected. The documents that represent your business to buyers are always current.</p>
                 <div className="flex flex-wrap gap-8 pt-4">
                   {[
                     { icon: 'update', text: 'Auto-Updating' },
@@ -297,7 +297,7 @@ export default function SellBelow() {
             {[
               { phase: '01', time: 'Months 1–2', title: 'UNDERSTAND', free: true, desc: "See your business through a buyer's eyes. Financials normalized. Value Readiness Report scored on seven factors.", items: ['ValueLens Report', 'SDE/EBITDA Prelim', 'Industry Benchmarking'], accent: false },
               { phase: '02', time: 'Months 3–12', title: 'OPTIMIZE', free: false, desc: 'Where real value gets created. $50K improvement in EBITDA at 5× = $250K more at closing.', items: ['Risk Mitigation', 'Margin Expansion', 'Clean Books Recon'], accent: false },
-              { phase: '03', time: 'Months 6–18', title: 'PREPARE', free: false, desc: 'Living CIM. Blind teaser. Data room organized by workstream. Buyer targeting mapped to active mandates.', items: ['Data Room Setup', 'Buyer List Mapping', 'Vetted Data Access'], accent: false },
+              { phase: '03', time: 'Months 6–18', title: 'PREPARE', free: false, desc: 'Professional deal materials that present your business at its best. A secure data room organized for buyer diligence. Targeted outreach strategy mapped to active acquirers in your sector.', items: ['Data Room Setup', 'Buyer List Mapping', 'Vetted Data Access'], accent: false },
               { phase: '04', time: 'Months 12–24', title: 'NEGOTIATE', free: false, desc: 'LOI evaluation. Tax structure optimization. Every deal configuration modeled — earnouts, seller financing, working capital pegs.', items: ['Deal Configuration', 'Competitive Tension', 'Closing Support'], accent: true },
             ].map((p) => (
               <StaggerItem key={p.phase}>
@@ -356,7 +356,7 @@ export default function SellBelow() {
               {[
                 { tier: 'Growth-Stage', range: '$1.5M–$5M Revenue', desc: "If this is your first time, you deserve institutional quality guidance. Step-by-step. SBA-focused. Clear language. No jargon until you're ready.", first: true },
                 { tier: 'Established', range: '$5M–$50M Revenue', desc: 'The "advisor desert." Too big for Main Street, too small for investment banks. PE firms are hunting you — you need institutional preparation to compete.', first: false },
-                { tier: 'Institutional', range: '$50M+ Revenue', desc: "Board-level deliverables. DCF. Arbitrage modeling. Covenant analysis. The analytical depth your buyer's deal team expects — delivered at their speed.", first: false },
+                { tier: 'Institutional', range: '$50M+ Revenue', desc: "Board-level analysis and documentation. The analytical depth your buyer's deal team expects — valuation methodology, scenario modeling, and covenant structures delivered at institutional speed.", first: false },
               ].map((t) => (
                 <StaggerItem key={t.tier}>
                   <div className={`space-y-4 ${!t.first ? (dark ? 'border-l border-zinc-800 pl-12' : 'border-l border-[#eeeef0] pl-12') : ''}`}>

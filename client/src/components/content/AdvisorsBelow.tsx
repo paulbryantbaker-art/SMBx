@@ -51,7 +51,7 @@ export default function AdvisorsBelow() {
           </ScrollReveal>
           <StaggerContainer className="lg:col-span-7 grid grid-cols-2 gap-6">
             {[
-              { icon: 'speed', title: 'CIMs in twenty minutes, not twenty hours', desc: "Upload raw financial data and let Yulia draft a 40-page Confidential Information Memorandum in your firm's specific voice and format." },
+              { icon: 'speed', title: 'Deal-ready documents in minutes, not weeks', desc: "Upload the financials and let Yulia produce the complete deal package — professional, institutional grade, in your firm's voice. The work that used to consume an analyst for a week, finished before your next meeting." },
               { icon: 'branding_watermark', title: 'White-labeled outputs', desc: "Every report, teaser, and data visualization is exported as your firm's property. Professional, institutional grade, and investor-ready." },
             ].map((card) => (
               <StaggerItem key={card.title}>
@@ -86,7 +86,7 @@ export default function AdvisorsBelow() {
                       <div className="w-full bg-[#5d5e61]/10 h-[90%] rounded-t-lg relative"><div className="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-bold">20 HRS</div></div>
                       <div className="w-full bg-[#b0004a] h-[8%] rounded-t-lg relative"><div className="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#b0004a]">20 MIN</div></div>
                     </div>
-                    <div className="text-center font-bold text-sm tracking-tight">CIM Generation Time</div>
+                    <div className="text-center font-bold text-sm tracking-tight">Deal Package Production</div>
                   </div>
                   <div className="space-y-6">
                     <div className={`flex justify-between items-center p-6 rounded-xl ${dark ? 'bg-zinc-800' : 'bg-[#f3f3f6]'}`}>
@@ -120,7 +120,7 @@ export default function AdvisorsBelow() {
                 <div className="text-4xl font-headline font-extrabold mb-2">$0<span className={`text-lg font-medium ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}> / 14 days</span></div>
                 <p className={`text-sm mb-8 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Test the platform with a single active mandate and full feature access.</p>
                 <ul className="space-y-4 mb-12 flex-1">
-                  {['1 Active Mandate', 'Automated Data Ingestion', 'Basic CIM Drafting'].map((item) => (
+                  {['1 Active Mandate', 'Automated Data Ingestion', 'Core Deal Documents'].map((item) => (
                     <li key={item} className="flex items-center gap-3 text-sm font-medium">
                       <span className="material-symbols-outlined text-[#b0004a] text-lg">check_circle</span> {item}
                     </li>
@@ -137,7 +137,7 @@ export default function AdvisorsBelow() {
                 <div className="text-4xl font-headline font-extrabold mb-2">$199<span className="text-lg font-medium text-gray-400"> / month</span></div>
                 <p className="text-sm text-gray-400 mb-8">Designed for independent advisors managing multiple active listings.</p>
                 <ul className="space-y-4 mb-12 flex-1">
-                  {['Unlimited Active Mandates', 'Full CIM Generation Suite', 'Smart Buyer Matching', 'Custom Brand Styling'].map((item) => (
+                  {['Unlimited Active Mandates', 'Full Document Suite', 'Smart Buyer Matching', 'Custom Brand Styling'].map((item) => (
                     <li key={item} className="flex items-center gap-3 text-sm font-medium">
                       <span className="material-symbols-outlined text-[#b0004a] text-lg">check_circle</span> {item}
                     </li>
