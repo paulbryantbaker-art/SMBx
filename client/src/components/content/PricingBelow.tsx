@@ -7,30 +7,64 @@ export default function PricingBelow() {
 
   // Calculator state
   const [journey, setJourney] = useState<'sell' | 'buy' | 'raise'>('sell');
-  const [industry, setIndustry] = useState('');
-  const [location, setLocation] = useState('');
-  const [revenue, setRevenue] = useState('');
-  const [sde, setSde] = useState('');
+  const [industry, setIndustry] = useState('services');
+  const [revenue, setRevenue] = useState(3200000);
+  const [sde, setSde] = useState(850000);
 
   const handleCTA = () => {
     window.location.href = '/chat';
   };
 
-  const parseNum = (s: string) => parseInt(s.replace(/[^0-9]/g, ''), 10) || 0;
-  const formatUSD = (n: number) => '$' + n.toLocaleString('en-US');
+  const MULTIPLES: Record<string, { low: number; mid: number; high: number; label: string }> = {
+    services: { low: 2.5, mid: 3.25, high: 4.0, label: 'Home Services' },
+    healthcare: { low: 3.5, mid: 4.5, high: 5.5, label: 'Healthcare' },
+    tech: { low: 4.0, mid: 6.0, high: 8.0, label: 'Tech / SaaS' },
+    manufacturing: { low: 3.0, mid: 4.0, high: 5.0, label: 'Manufacturing' },
+    food: { low: 2.0, mid: 2.5, high: 3.0, label: 'Food & Beverage' },
+    professional: { low: 2.0, mid: 2.75, high: 3.5, label: 'Professional Services' },
+    construction: { low: 2.5, mid: 3.25, high: 4.0, label: 'Construction / Trades' },
+    other: { low: 2.5, mid: 3.5, high: 4.5, label: 'General' },
+  };
 
-  const sdeNum = parseNum(sde);
-  const calculatedFee = sdeNum > 0 ? Math.max(999, Math.round(sdeNum * 0.001)) : null;
+  const industryOptions: { key: string; btn: string }[] = [
+    { key: 'services', btn: 'Home Services' },
+    { key: 'healthcare', btn: 'Healthcare' },
+    { key: 'tech', btn: 'Tech / SaaS' },
+    { key: 'manufacturing', btn: 'Manufacturing' },
+    { key: 'food', btn: 'Food & Bev' },
+    { key: 'professional', btn: 'Professional Svcs' },
+    { key: 'construction', btn: 'Construction' },
+    { key: 'other', btn: 'Other' },
+  ];
+
+  const fmtM = (n: number) => {
+    if (n >= 1_000_000_000) return '$' + (n / 1_000_000_000).toFixed(n % 1_000_000_000 === 0 ? 0 : 1) + 'B';
+    if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(n % 100_000 === 0 ? (n >= 10_000_000 ? 0 : 1) : 2).replace(/\.?0+$/, '') + 'M';
+    return '$' + (n / 1_000).toFixed(0) + 'K';
+  };
+  const fmtUSD = (n: number) => '$' + n.toLocaleString('en-US');
+
+  const mult = MULTIPLES[industry];
+  const basisType = sde >= 2_000_000 ? 'EBITDA' : 'SDE';
+  const vLow = Math.round(sde * mult.low);
+  const vMid = Math.round(sde * mult.mid);
+  const vHigh = Math.round(sde * mult.high);
+  const abLow = Math.round(sde * 0.05);
+  const abHigh = Math.round(sde * 0.15);
+  const abValLow = Math.round(abLow * mult.low);
+  const abValHigh = Math.round(abHigh * mult.high);
+  const rawFee = Math.round(sde * 0.001);
+  const fee = Math.max(999, rawFee);
+  const isMinFee = rawFee < 999;
+  const feePctOfVal = (fee / vMid) * 100;
+  const abMidVal = Math.round(((abLow + abHigh) / 2) * mult.mid);
+  const roiMult = Math.round(abMidVal / fee);
+  const revPct = ((revenue - 500_000) / (100_000_000 - 500_000)) * 100;
+  const sdePct = ((sde - 100_000) / (1_000_000_000 - 100_000)) * 100;
 
   const goToChat = () => {
-    const parts: string[] = [];
-    const journeyLabel = { sell: 'selling', buy: 'buying', raise: 'raising capital for' }[journey];
-    parts.push("I'm interested in " + journeyLabel);
-    if (industry) parts.push('a ' + industry + ' business');
-    if (location) parts.push('in ' + location);
-    if (revenue) parts.push('with about $' + revenue + ' in annual revenue');
-    if (sde) parts.push('and roughly $' + sde + ' in SDE');
-    const msg = parts.join(' ') + '.';
+    const jLabel = { sell: 'selling', buy: 'buying', raise: 'raising capital for' }[journey] as string;
+    const msg = `I'm interested in ${jLabel} a ${mult.label.toLowerCase()} business with about ${fmtM(revenue)} in revenue and ${fmtM(sde)} in ${basisType}.`;
     window.location.href = '/?prefill=' + encodeURIComponent(msg);
   };
 
@@ -45,13 +79,6 @@ export default function PricingBelow() {
     { label: 'Capital Stack', title: 'Template', icon: 'account_balance', span: 'col-span-6 md:col-span-3' },
     { label: 'AI-Powered', title: 'Deal Scoring', icon: 'scoreboard', span: 'col-span-6' },
     { label: 'Unlimited', title: 'Yulia Q&A', icon: 'chat', span: 'col-span-6' },
-  ];
-
-  const examples = [
-    { label: '$750K SDE', price: '$999', note: 'minimum applies' },
-    { label: '$2M SDE', price: '$2,000' },
-    { label: '$5M EBITDA', price: '$5,000' },
-    { label: '$20M EBITDA', price: '$20,000' },
   ];
 
   const included = [
@@ -70,12 +97,6 @@ export default function PricingBelow() {
     { q: "What if I'm a broker or M&A advisor?", a: 'advisor' },
     { q: 'Can I take my data with me?', a: 'Always. You own your data. Export your analysis, valuations, and financial models in standard formats at any time — even if you never pay the execution fee.' },
     { q: 'What happens if a deal falls through?', a: "The platform fee covers one specific deal engagement. All your free-tier analysis remains yours. For a new deal, you'd start a new conversation — free analysis again, new fee only if you execute." },
-  ];
-
-  const journeyBtns = [
-    { key: 'sell' as const, label: 'Selling' },
-    { key: 'buy' as const, label: 'Buying' },
-    { key: 'raise' as const, label: 'Raising' },
   ];
 
   return (
@@ -145,115 +166,164 @@ export default function PricingBelow() {
           </StaggerContainer>
         </section>
 
-        {/* ═══ 3. INTERACTIVE CALCULATOR + FORMULA ═══ */}
+        {/* ═══ 3. DEAL INTELLIGENCE CALCULATOR ═══ */}
         <section className="mb-32">
+          <style>{`
+            .smbx-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;outline:none;cursor:pointer}
+            .smbx-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #b0004a;box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:grab;transition:transform .15s}
+            .smbx-range::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.15)}
+            .smbx-range::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #b0004a;box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:grab}
+            .smbx-range::-moz-range-track{height:6px;border-radius:3px;background:rgba(255,255,255,0.1)}
+          `}</style>
           <ScrollReveal>
             <div className="mb-12">
-              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Phase Two</span>
-              <h2 className="font-headline text-4xl font-bold tracking-tight">Deal Execution and Automation Fees</h2>
+              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Deal Intelligence</span>
+              <h2 className="font-headline text-4xl font-bold tracking-tight">What's your deal worth?</h2>
+              <p className={`text-lg mt-3 max-w-2xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Slide to see a preliminary valuation range based on market multiples. Yulia sharpens this with local data, add-back analysis, and buyer landscape intelligence.</p>
             </div>
           </ScrollReveal>
 
           <ScrollReveal delay={0.1}>
             <div className={`rounded-3xl overflow-hidden ${dark ? 'bg-[#141517] border border-zinc-800' : 'bg-[#1a1c1e]'}`}>
-              {/* Top: Formula + Calculator */}
-              <div className="p-12 md:p-16 pb-0">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-                  {/* Left: Formula */}
-                  <div>
-                    <div className="text-6xl md:text-8xl font-black tracking-tighter leading-none text-white mb-2">0.1%</div>
-                    <div className="text-xl text-[#dadadc] font-medium mb-8">of your annual SDE or EBITDA</div>
-                    <div className="flex items-center gap-4 mb-8">
-                      <div className="bg-[#b0004a] px-5 py-2 rounded-xl font-bold text-sm text-white">$999 minimum</div>
-                      <span className="text-[#dadadc]/60 text-sm">One-time per deal</span>
-                    </div>
-                    <p className="text-[#dadadc]/60 text-sm leading-relaxed max-w-sm">The same rate for every business. Analytical depth and automation scale with deal complexity — you pay the same percentage regardless of size.</p>
-                  </div>
+              <div className="p-10 md:p-14">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
-                  {/* Right: Calculator */}
-                  <div className="bg-[#2f3133] rounded-2xl p-8 border border-white/10">
-                    <h3 className="text-white font-bold text-lg mb-6">Calculate your fee</h3>
+                  {/* LEFT: Inputs */}
+                  <div className="lg:col-span-5">
+                    <h3 className="text-white font-bold text-lg mb-8">Your deal profile</h3>
 
-                    {/* Journey selector */}
-                    <div className="flex gap-2 mb-6">
-                      {journeyBtns.map((j) => (
-                        <button
-                          key={j.key}
-                          onClick={() => setJourney(j.key)}
-                          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all border-none cursor-pointer ${journey === j.key ? 'bg-[#b0004a] text-white' : 'bg-white/5 text-[#dadadc] hover:bg-white/10'}`}
-                        >{j.label}</button>
-                      ))}
+                    {/* Journey */}
+                    <div className="mb-8">
+                      <label className="text-[10px] uppercase font-bold text-[#dadadc]/40 tracking-widest block mb-3">I'm looking to...</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {([['sell', 'Sell a business'], ['buy', 'Buy a business'], ['raise', 'Raise capital']] as const).map(([key, label]) => (
+                          <button key={key} onClick={() => setJourney(key)} className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border-none cursor-pointer ${journey === key ? 'bg-[#b0004a] text-white' : 'bg-white/5 text-[#dadadc] hover:bg-white/10'}`}>{label}</button>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Industry */}
-                    <div className="mb-4">
-                      <label className="text-[10px] uppercase font-bold text-[#dadadc]/50 tracking-widest block mb-2">Industry</label>
-                      <input type="text" value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="e.g. HVAC, dental, SaaS, manufacturing" className="w-full bg-[#1a1c1e] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-[#dadadc]/30 focus:border-[#b0004a]/50 transition-colors outline-none" />
-                    </div>
-
-                    {/* Location */}
-                    <div className="mb-4">
-                      <label className="text-[10px] uppercase font-bold text-[#dadadc]/50 tracking-widest block mb-2">Location</label>
-                      <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Dallas, TX or London, UK" className="w-full bg-[#1a1c1e] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-[#dadadc]/30 focus:border-[#b0004a]/50 transition-colors outline-none" />
-                    </div>
-
-                    {/* Revenue */}
-                    <div className="mb-4">
-                      <label className="text-[10px] uppercase font-bold text-[#dadadc]/50 tracking-widest block mb-2">Annual Revenue</label>
-                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#dadadc]/40 text-sm font-bold">$</span>
-                        <input type="text" value={revenue} onChange={(e) => setRevenue(e.target.value)} placeholder="3,200,000" className="w-full bg-[#1a1c1e] border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white text-sm placeholder-[#dadadc]/30 focus:border-[#b0004a]/50 transition-colors outline-none" />
+                    <div className="mb-8">
+                      <label className="text-[10px] uppercase font-bold text-[#dadadc]/40 tracking-widest block mb-3">Industry</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {industryOptions.map((ind) => (
+                          <button key={ind.key} onClick={() => setIndustry(ind.key)} className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${industry === ind.key ? 'bg-[#b0004a]/20 text-[#b0004a] border border-[#b0004a]/30' : 'bg-white/5 text-[#dadadc]/60 border border-white/10 hover:bg-white/10'}`}>{ind.btn}</button>
+                        ))}
                       </div>
                     </div>
 
-                    {/* SDE / EBITDA */}
-                    <div className="mb-6">
-                      <label className="text-[10px] uppercase font-bold text-[#dadadc]/50 tracking-widest block mb-2">SDE or EBITDA</label>
-                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#dadadc]/40 text-sm font-bold">$</span>
-                        <input type="text" value={sde} onChange={(e) => setSde(e.target.value)} placeholder="850,000" className="w-full bg-[#1a1c1e] border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white text-sm placeholder-[#dadadc]/30 focus:border-[#b0004a]/50 transition-colors outline-none" />
+                    {/* Revenue slider */}
+                    <div className="mb-8">
+                      <div className="flex justify-between items-baseline mb-3">
+                        <label className="text-[10px] uppercase font-bold text-[#dadadc]/40 tracking-widest">Annual Revenue</label>
+                        <span className="text-white font-bold text-lg">{fmtM(revenue)}</span>
                       </div>
+                      <input type="range" className="smbx-range" min={500000} max={100000000} step={100000} value={revenue} onChange={(e) => setRevenue(Number(e.target.value))} style={{ background: `linear-gradient(to right, #b0004a ${revPct}%, rgba(255,255,255,0.1) ${revPct}%)` }} />
+                      <div className="flex justify-between mt-2"><span className="text-[10px] text-[#dadadc]/25">$500K</span><span className="text-[10px] text-[#dadadc]/25">$100M</span></div>
                     </div>
 
-                    {/* Result */}
-                    {calculatedFee !== null && (
-                      <div className="bg-[#1a1c1e] rounded-xl p-5 border border-white/5 mb-6">
-                        <div className="flex justify-between items-baseline mb-1">
-                          <span className="text-xs text-[#dadadc]/50 uppercase font-bold">Your execution fee</span>
-                          <span className="text-xs text-[#dadadc]/40">0.1% of SDE</span>
+                    {/* SDE/EBITDA slider */}
+                    <div className="mb-4">
+                      <div className="flex justify-between items-baseline mb-3">
+                        <label className="text-[10px] uppercase font-bold text-[#dadadc]/40 tracking-widest">SDE or EBITDA</label>
+                        <span className="text-white font-bold text-lg">{fmtM(sde)}</span>
+                      </div>
+                      <input type="range" className="smbx-range" min={100000} max={1000000000} step={50000} value={sde} onChange={(e) => setSde(Number(e.target.value))} style={{ background: `linear-gradient(to right, #b0004a ${sdePct}%, rgba(255,255,255,0.1) ${sdePct}%)` }} />
+                      <div className="flex justify-between mt-2"><span className="text-[10px] text-[#dadadc]/25">$100K</span><span className="text-[10px] text-[#dadadc]/25">$1B</span></div>
+                    </div>
+                  </div>
+
+                  {/* RIGHT: Results */}
+                  <div className="lg:col-span-7">
+                    {/* Big valuation result */}
+                    <div className="bg-[#2f3133] rounded-2xl p-8 md:p-10 border border-white/10 mb-6" style={{ boxShadow: '0 0 60px rgba(176,0,74,0.15), 0 0 120px rgba(176,0,74,0.05)' }}>
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-8 h-8 rounded-full bg-[#b0004a] flex items-center justify-center"><span className="material-symbols-outlined text-white text-[16px]">monitoring</span></div>
+                        <div>
+                          <p className="text-[10px] text-[#dadadc]/40 uppercase font-bold tracking-widest">Preliminary Valuation Range</p>
+                          <p className="text-[10px] text-[#dadadc]/25">Based on {mult.label} multiples × {basisType}</p>
                         </div>
-                        <div className="text-4xl font-black text-white">{formatUSD(calculatedFee)}</div>
-                        <p className="text-xs text-[#dadadc]/40 mt-2">One-time. Everything included through closing + 180-day integration.</p>
                       </div>
-                    )}
+                      <div className="flex items-baseline gap-4 mb-6">
+                        <span className="text-5xl md:text-6xl font-black text-white">{fmtM(vLow)}</span>
+                        <span className="text-2xl text-[#dadadc]/30 font-bold">–</span>
+                        <span className="text-5xl md:text-6xl font-black text-[#b0004a]">{fmtM(vHigh)}</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 mb-6">
+                        <div className="bg-[#1a1c1e] rounded-xl p-4"><p className="text-[9px] text-[#dadadc]/30 uppercase font-bold mb-1">Low Multiple</p><p className="text-xl font-black text-white">{mult.low.toFixed(1)}x</p></div>
+                        <div className="bg-[#1a1c1e] rounded-xl p-4"><p className="text-[9px] text-[#dadadc]/30 uppercase font-bold mb-1">Mid Multiple</p><p className="text-xl font-black text-white">{mult.mid.toFixed(1)}x</p></div>
+                        <div className="bg-[#1a1c1e] rounded-xl p-4"><p className="text-[9px] text-[#dadadc]/30 uppercase font-bold mb-1">High Multiple</p><p className="text-xl font-black text-[#b0004a]">{mult.high.toFixed(1)}x</p></div>
+                      </div>
+                      <p className="text-[11px] text-[#dadadc]/30 leading-relaxed">This is a ballpark based on broad industry multiples. Yulia refines this with localized market data, add-back analysis, buyer landscape mapping, and risk-adjusted scoring specific to your business.</p>
+                    </div>
 
-                    {/* CTA */}
-                    <button onClick={goToChat} className="w-full bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white py-4 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 border-none cursor-pointer">
-                      Continue with Yulia <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                    </button>
-                    <p className="text-[10px] text-[#dadadc]/30 text-center mt-3">Your inputs carry over to the conversation</p>
+                    {/* What Yulia finds */}
+                    <div className="bg-[#2f3133] rounded-2xl p-6 border border-white/5 mb-6">
+                      <p className="text-[10px] text-[#dadadc]/40 uppercase font-bold tracking-widest mb-4">What Yulia typically uncovers</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="bg-[#1a1c1e] rounded-xl p-4 flex items-center gap-3">
+                          <span className="material-symbols-outlined text-[#b0004a] text-xl">search</span>
+                          <div><p className="text-[10px] text-[#dadadc]/30">Hidden add-backs</p><p className="text-sm font-bold text-white">{fmtM(abLow)} – {fmtM(abHigh)}</p></div>
+                        </div>
+                        <div className="bg-[#1a1c1e] rounded-xl p-4 flex items-center gap-3">
+                          <span className="material-symbols-outlined text-[#b0004a] text-xl">trending_up</span>
+                          <div><p className="text-[10px] text-[#dadadc]/30">Value impact of add-backs</p><p className="text-sm font-bold text-white">{fmtM(abValLow)} – {fmtM(abValHigh)}</p></div>
+                        </div>
+                        <div className="bg-[#1a1c1e] rounded-xl p-4 flex items-center gap-3">
+                          <span className="material-symbols-outlined text-[#b0004a] text-xl">speed</span>
+                          <div><p className="text-[10px] text-[#dadadc]/30">Optimization potential</p><p className="text-sm font-bold text-white">Identified in minutes</p></div>
+                        </div>
+                        <div className="bg-[#1a1c1e] rounded-xl p-4 flex items-center gap-3">
+                          <span className="material-symbols-outlined text-[#b0004a] text-xl">shield</span>
+                          <div><p className="text-[10px] text-[#dadadc]/30">Deal risk factors</p><p className="text-sm font-bold text-white">Flagged before you commit</p></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ROI / Cost section */}
+                    <div className="bg-[#2f3133] rounded-2xl p-6 border border-white/5">
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-[10px] text-[#dadadc]/40 uppercase font-bold tracking-widest">Your investment vs. return</p>
+                        <p className="text-[10px] text-[#dadadc]/25">0.1% of {basisType} · $999 min</p>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="flex-1">
+                          <div className="flex items-baseline gap-2 mb-1">
+                            <span className="text-2xl font-black text-white">{fmtUSD(fee)}</span>
+                            <span className="text-xs text-[#dadadc]/30">{isMinFee ? 'minimum fee' : 'execution fee'}</span>
+                          </div>
+                          <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                            <div className="bg-[#b0004a] h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(Math.max(feePctOfVal * 10, 1), 15)}%` }}></div>
+                          </div>
+                          <div className="flex justify-between mt-1">
+                            <span className="text-[9px] text-[#dadadc]/25">Fee: {feePctOfVal < 0.01 ? '<0.01%' : feePctOfVal.toFixed(2) + '%'} of estimated value</span>
+                            <span className="text-[9px] text-[#dadadc]/25">Estimated value →</span>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-[10px] text-[#dadadc]/30 mb-1">Typical add-back recovery alone</p>
+                          <p className="text-xl font-black text-[#b0004a]">{roiMult}× return</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Bottom: 4 example calculations */}
-              <div className="p-12 md:px-16 pt-12">
-                <div className="border-t border-white/10 pt-10">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                    {examples.map((ex) => (
-                      <div key={ex.label}>
-                        <div className="text-xs text-[#dadadc]/40 uppercase font-bold tracking-wider mb-2">{ex.label}</div>
-                        <div className="text-2xl font-black text-white">{ex.price}</div>
-                        {ex.note && <div className="text-[10px] text-[#dadadc]/30 mt-1">{ex.note}</div>}
-                      </div>
-                    ))}
-                  </div>
+              {/* CTA bar */}
+              <div className="bg-[#2f3133] border-t border-white/5 px-10 md:px-14 py-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div>
+                  <p className="text-white font-bold">Want the real number?</p>
+                  <p className="text-[#dadadc]/40 text-sm">Yulia sharpens this estimate with local market data, add-back discovery, and buyer intelligence — for free.</p>
                 </div>
+                <button onClick={goToChat} className="shrink-0 bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white px-8 py-4 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center gap-2 whitespace-nowrap border-none cursor-pointer">
+                  Get your real valuation <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </button>
               </div>
             </div>
           </ScrollReveal>
 
-          <p className={`text-sm mt-6 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>No subscriptions. No per-document charges. Yulia calculates your exact fee from your financials — you see it before you pay.</p>
+          <p className={`text-[11px] mt-4 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Estimates based on broad industry multiple ranges. Actual valuations depend on local market conditions, business-specific factors, and buyer demand. Yulia's analysis is significantly more precise.</p>
         </section>
 
         {/* ═══ 4. WHAT'S INCLUDED ═══ */}
