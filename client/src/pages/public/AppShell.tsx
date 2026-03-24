@@ -1008,11 +1008,11 @@ export default function AppShell() {
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE — New Design ═══ */}
-                <main className="flex-1 flex flex-col relative">
+                <main className={`flex-1 flex flex-col relative ${dark ? 'bg-[#1a1c1e]' : 'bg-[#f9f9fc]'}`}>
                   <DotField dark={dark} />
 
                   {/* Desktop: single centered cluster */}
-                  <div className="flex-1 flex flex-col items-center justify-center px-6">
+                  <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-6' : 'max-w-3xl space-y-6'}`} style={isMobile ? undefined : { marginTop: '-5vh' }}>
                       {!isMobile && (
                         <>

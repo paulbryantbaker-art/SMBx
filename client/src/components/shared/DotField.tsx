@@ -29,7 +29,7 @@ export default function DotField({ dark = false }: DotFieldProps) {
 
       // Base grid spacing
       const baseSpacing = 28;
-      const dotColor = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+      const dotColor = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)';
 
       // Generate dots on a grid, then warp them
       const cols = Math.ceil(w / baseSpacing) + 4;
