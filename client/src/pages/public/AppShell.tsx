@@ -1019,10 +1019,12 @@ export default function AppShell() {
                     <div className="max-w-4xl w-full text-center space-y-6">
                       <LogoImg height={isMobile ? 32 : 32} className="mx-auto mb-2" />
                       <h1 className="font-headline text-5xl md:text-6xl lg:text-8xl font-extrabold leading-tight tracking-tighter">
-                        What's the <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>deal?</span>
+                        <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Selling</span> your business?{' '}
+                        <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Buying</span> one?{' '}
+                        <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Raising</span> capital?
                       </h1>
                       <p className={`text-base md:text-xl max-w-[320px] md:max-w-2xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                        Tell Yulia about your business. She'll tell you what it's worth.
+                        Yulia handles the numbers, the documents, and the strategy — all by just talking to her.
                       </p>
                     </div>
 
