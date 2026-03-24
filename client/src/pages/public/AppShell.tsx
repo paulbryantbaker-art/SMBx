@@ -1007,7 +1007,7 @@ export default function AppShell() {
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE — New Design ═══ */}
-                <main className="flex-1 flex flex-col relative">
+                <main className="flex-1 flex flex-col relative" style={{ border: '2px solid red' }}>
                   {/* Background blur orbs */}
                   <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className={`absolute -top-[10%] -left-[10%] w-[40%] h-[40%] blur-[120px] rounded-full ${dark ? 'bg-[#b0004a]/10' : 'bg-[#b0004a]/5'}`} />
