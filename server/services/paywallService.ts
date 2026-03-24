@@ -1,19 +1,19 @@
 /**
- * Paywall Service — Generates platform fee prompts when users
+ * Paywall Service — Generates execution fee prompts when users
  * hit the paywall gate (S2/B2/R2).
  *
- * NEW MODEL: One-time per-deal platform fee. No wallet, no per-deliverable pricing.
- * Price determined by league via platform_fee_schedule table.
+ * NEW MODEL: 0.1% of SDE or EBITDA, $999 minimum.
+ * One-time payment per deal. No wallet, no per-deliverable pricing.
  * All amounts in CENTS.
  */
-import { sql } from '../db.js';
+import { calculateExecutionFee } from './dealExecutionFee.js';
 import { getAdvisoryCostComparison } from './platformFeeService.js';
 
 export interface PaywallContext {
   gate: string;
   league: string;
   journeyType: string;
-  dealId: number;
+  dealId?: number;
   dealData: {
     industry?: string;
     revenue?: number;       // cents
@@ -27,44 +27,48 @@ export interface PaywallContext {
 export interface PaywallPrompt {
   priceCents: number;
   priceDisplay: string;
+  basis: 'SDE' | 'EBITDA';
+  basisDisplay: string;
+  isMinimum: boolean;
   valueProps: string[];
   comparisonText: string;
   previewInsight: string;
   callToAction: string;
   systemPromptAddition: string;
-  whatYouGet: string[];     // everything included in the platform fee
+  whatYouGet: string[];
 }
 
 /**
- * Generate a platform fee paywall prompt based on deal data.
+ * Generate an execution fee paywall prompt based on deal financials.
  */
-export async function generatePaywallPrompt(ctx: PaywallContext): Promise<PaywallPrompt> {
-  // Get platform fee from schedule
-  const [feeRow] = await sql`
-    SELECT fee_cents FROM platform_fee_schedule WHERE league = ${ctx.league}
-  `;
-  const priceCents = feeRow?.fee_cents || 99900; // fallback to L1
-  const priceDisplay = `$${(priceCents / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+export function generatePaywallPrompt(ctx: PaywallContext): PaywallPrompt {
+  const fee = calculateExecutionFee({
+    sde: ctx.dealData.sde,
+    ebitda: ctx.dealData.ebitda,
+  });
 
   const generator = PAYWALL_GENERATORS[ctx.gate];
   if (!generator) {
     const comparisonText = getAdvisoryCostComparison(ctx.league, ctx.journeyType);
     return {
-      priceCents,
-      priceDisplay,
+      priceCents: fee.feeCents,
+      priceDisplay: fee.feeDisplay,
+      basis: fee.basis,
+      basisDisplay: fee.basisDisplay,
+      isMinimum: fee.isMinimum,
       valueProps: ['Full deal execution platform access'],
       comparisonText,
       previewInsight: '',
-      callToAction: `Continue your deal for a one-time platform fee of ${priceDisplay}.`,
-      systemPromptAddition: buildPaywallSystemPrompt(ctx, priceCents, priceDisplay, '', comparisonText),
+      callToAction: `Your deal execution fee is ${fee.feeDisplay} — 0.1% of your ${fee.basis}. One payment, everything included.`,
+      systemPromptAddition: buildPaywallSystemPrompt(ctx, fee),
       whatYouGet: getWhatYouGet(ctx.journeyType),
     };
   }
 
-  return generator(ctx, priceCents, priceDisplay);
+  return generator(ctx, fee);
 }
 
-// ─── What's included in the platform fee ──────────────────
+// ─── What's included in the execution fee ─────────────────
 
 function getWhatYouGet(journeyType: string): string[] {
   if (journeyType === 'sell') {
@@ -75,7 +79,7 @@ function getWhatYouGet(journeyType: string): string[] {
       'Deal room with document management',
       'LOI templates and negotiation support',
       'Closing checklist and transaction coordination',
-      'Unlimited AI-guided support through closing',
+      '180-day post-close integration plan',
     ];
   }
   if (journeyType === 'buy') {
@@ -102,13 +106,34 @@ function getWhatYouGet(journeyType: string): string[] {
 
 // ─── Gate-specific paywall generators ───────────────────────
 
-type PaywallGenerator = (ctx: PaywallContext, priceCents: number, priceDisplay: string) => PaywallPrompt;
+type PaywallGenerator = (ctx: PaywallContext, fee: ReturnType<typeof calculateExecutionFee>) => PaywallPrompt;
+
+function makeResult(
+  fee: ReturnType<typeof calculateExecutionFee>,
+  ctx: PaywallContext,
+  valueProps: string[],
+  comparisonText: string,
+  previewInsight: string,
+  journeyType: string,
+): PaywallPrompt {
+  return {
+    priceCents: fee.feeCents,
+    priceDisplay: fee.feeDisplay,
+    basis: fee.basis,
+    basisDisplay: fee.basisDisplay,
+    isMinimum: fee.isMinimum,
+    valueProps,
+    comparisonText,
+    previewInsight,
+    callToAction: `Your deal execution fee is ${fee.feeDisplay} — 0.1% of your ${fee.basis}. One payment, everything included through closing.`,
+    systemPromptAddition: buildPaywallSystemPrompt(ctx, fee),
+    whatYouGet: getWhatYouGet(journeyType),
+  };
+}
 
 const PAYWALL_GENERATORS: Record<string, PaywallGenerator> = {
-  S2: (ctx, priceCents, priceDisplay) => {
-    const earnings = ctx.dealData.sde || ctx.dealData.ebitda || 0;
-    const earningsDollars = earnings / 100;
-    const metric = ctx.dealData.ebitda ? 'EBITDA' : 'SDE';
+  S2: (ctx, fee) => {
+    const earningsDollars = fee.basisAmountCents / 100;
 
     let previewInsight = '';
     if (earningsDollars > 0 && ctx.dealData.industry) {
@@ -116,31 +141,21 @@ const PAYWALL_GENERATORS: Record<string, PaywallGenerator> = {
       const highMultiple = ctx.league === 'L1' ? 3.5 : ctx.league === 'L2' ? 5.0 : 6.0;
       const lowVal = Math.round(earningsDollars * lowMultiple);
       const highVal = Math.round(earningsDollars * highMultiple);
-      previewInsight = `Based on your ${metric} of $${earningsDollars.toLocaleString()} and ${ctx.dealData.industry} industry benchmarks, your preliminary range is $${lowVal.toLocaleString()} – $${highVal.toLocaleString()}. The full valuation will refine this with growth premiums, margin analysis, and risk adjustments.`;
+      previewInsight = `Based on your ${fee.basis} of ${fee.basisDisplay} and ${ctx.dealData.industry} industry benchmarks, your preliminary range is $${lowVal.toLocaleString()} – $${highVal.toLocaleString()}. The full valuation will refine this with growth premiums, margin analysis, and risk adjustments.`;
     }
 
-    const comparisonText = getAdvisoryCostComparison(ctx.league, 'sell');
+    const comparisonText = `A traditional advisor would charge ${getAdvisoryCostComparison(ctx.league, 'sell')}. Your all-inclusive execution fee is ${fee.feeDisplay} — 0.1% of your ${fee.basis}, covering everything through closing.`;
 
-    return {
-      priceCents,
-      priceDisplay,
-      valueProps: [
-        'Multi-methodology valuation (market comps + financial analysis)',
-        'Defensible price range (conservative / likely / optimistic)',
-        'Industry-specific multiple analysis with growth premiums',
-        'Go/no-go recommendation with probability of sale score',
-      ],
-      comparisonText: `A traditional advisor would charge ${comparisonText}. Your all-inclusive platform fee is ${priceDisplay} — covering everything from valuation through closing.`,
-      previewInsight,
-      callToAction: `Ready to proceed? Your one-time platform fee is ${priceDisplay} — everything through closing is included.`,
-      systemPromptAddition: buildPaywallSystemPrompt(ctx, priceCents, priceDisplay, previewInsight, comparisonText),
-      whatYouGet: getWhatYouGet('sell'),
-    };
+    return makeResult(fee, ctx, [
+      'Multi-methodology valuation (market comps + financial analysis)',
+      'Defensible price range (conservative / likely / optimistic)',
+      'Industry-specific multiple analysis with growth premiums',
+      'Go/no-go recommendation with probability of sale score',
+    ], comparisonText, previewInsight, 'sell');
   },
 
-  B2: (ctx, priceCents, priceDisplay) => {
-    const earnings = ctx.dealData.ebitda || ctx.dealData.sde || 0;
-    const earningsDollars = earnings / 100;
+  B2: (ctx, fee) => {
+    const earningsDollars = fee.basisAmountCents / 100;
 
     let previewInsight = '';
     if (earningsDollars > 0 && ctx.dealData.asking_price) {
@@ -149,86 +164,68 @@ const PAYWALL_GENERATORS: Record<string, PaywallGenerator> = {
       previewInsight = `The asking price of $${askingDollars.toLocaleString()} implies a ${impliedMultiple}x multiple. The full model will tell you if that's reasonable and whether the deal cash flows with your financing structure.`;
     }
 
-    const comparisonText = getAdvisoryCostComparison(ctx.league, 'buy');
+    const comparisonText = `Hiring an advisor would cost ${getAdvisoryCostComparison(ctx.league, 'buy')}. Your all-inclusive execution fee is ${fee.feeDisplay} — 0.1% of your ${fee.basis}, covering everything through closing and 180-day PMI.`;
 
-    return {
-      priceCents,
-      priceDisplay,
-      valueProps: [
-        'Buyer\'s valuation model (what the business is worth TO YOU)',
-        'DSCR analysis with your actual financing terms',
-        'Cash-on-cash and IRR projections (Year 1 through Year 5)',
-        'Due diligence checklists and deal-breaker identification',
-      ],
-      comparisonText: `Hiring an advisor for this would cost ${comparisonText}. Your all-inclusive platform fee is ${priceDisplay} — covering everything from valuation through closing and 180-day PMI.`,
-      previewInsight,
-      callToAction: `Ready to proceed? Your one-time platform fee is ${priceDisplay} — everything through closing is included.`,
-      systemPromptAddition: buildPaywallSystemPrompt(ctx, priceCents, priceDisplay, previewInsight, comparisonText),
-      whatYouGet: getWhatYouGet('buy'),
-    };
+    return makeResult(fee, ctx, [
+      'Buyer\'s valuation model (what the business is worth TO YOU)',
+      'DSCR analysis with your actual financing terms',
+      'Cash-on-cash and IRR projections (Year 1 through Year 5)',
+      'Due diligence checklists and deal-breaker identification',
+    ], comparisonText, previewInsight, 'buy');
   },
 
-  R2: (ctx, priceCents, priceDisplay) => {
+  R2: (ctx, fee) => {
     let previewInsight = '';
     if (ctx.dealData.revenue) {
       const revDollars = ctx.dealData.revenue / 100;
       previewInsight = `At $${revDollars.toLocaleString()} in revenue, your investor materials need to tell a compelling growth story. The pitch deck will position your business for maximum valuation.`;
     }
 
-    const comparisonText = getAdvisoryCostComparison(ctx.league, 'raise');
+    const comparisonText = `An investment bank would charge ${getAdvisoryCostComparison(ctx.league, 'raise')}. Your all-inclusive execution fee is ${fee.feeDisplay} — 0.1% of your ${fee.basis}.`;
 
-    return {
-      priceCents,
-      priceDisplay,
-      valueProps: [
-        '10-15 slide pitch deck tailored to your raise',
-        'Executive summary and blind teaser for outreach',
-        'Financial model with 3-5 year projections',
-        'Investor list with outreach strategy',
-      ],
-      comparisonText: `An investment bank would charge ${comparisonText}. Your all-inclusive platform fee is ${priceDisplay}.`,
-      previewInsight,
-      callToAction: `Ready to proceed? Your one-time platform fee is ${priceDisplay} — everything through closing is included.`,
-      systemPromptAddition: buildPaywallSystemPrompt(ctx, priceCents, priceDisplay, previewInsight, comparisonText),
-      whatYouGet: getWhatYouGet('raise'),
-    };
+    return makeResult(fee, ctx, [
+      '10-15 slide pitch deck tailored to your raise',
+      'Executive summary and blind teaser for outreach',
+      'Financial model with 3-5 year projections',
+      'Investor list with outreach strategy',
+    ], comparisonText, previewInsight, 'raise');
   },
 };
 
 function buildPaywallSystemPrompt(
   ctx: PaywallContext,
-  priceCents: number,
-  priceDisplay: string,
-  previewInsight: string,
-  advisorCost: string,
+  fee: ReturnType<typeof calculateExecutionFee>,
 ): string {
+  const advisorCost = getAdvisoryCostComparison(ctx.league, ctx.journeyType);
+  const minimumNote = fee.isMinimum ? '\nNote: The minimum execution fee is $999, which gives full access to everything.' : '';
+
   return `
-## PAYWALL — Platform Fee at Gate ${ctx.gate}
+## PAYWALL — Deal Execution Fee at Gate ${ctx.gate}
 The user has completed the free gates and is ready for the paid execution phase.
 
-PRICE: ${priceDisplay} (one-time platform fee for ${ctx.league} league)
-THIS IS A ONE-TIME FEE — everything from here through closing is included.
+PRICE: ${fee.feeDisplay} (0.1% of ${fee.basis}: ${fee.basisDisplay})${minimumNote}
+THIS IS A ONE-TIME FEE — everything from here through closing + 180-day integration is included.
 
 YOUR APPROACH:
-1. SHOW VALUE FIRST — demonstrate you already understand their business deeply
-2. Give them a FREE preview insight so they know you're not bluffing:
-   ${previewInsight || 'Reference their specific data and what the analysis will reveal.'}
-3. THEN present the platform fee with comparison: "${advisorCost} from a traditional advisor vs ${priceDisplay} all-inclusive"
-4. Emphasize: one payment, everything included through closing — no surprise charges
+1. Acknowledge what they've received for free — ValueLens, Value Readiness Report, CIM, preliminary analysis
+2. Present the fee transparently: "Your deal execution fee is ${fee.feeDisplay} — that's 0.1% of your ${fee.basis}"
+3. Compare: "${advisorCost} from a traditional advisor vs ${fee.feeDisplay} all-inclusive"
+4. Emphasize: one payment, everything included through closing — no surprise charges, no subscriptions
 5. Ask once. If they decline, respect it and continue helping with free guidance
 
 NEVER:
-- Mention "wallet" or "balance" or "credits" — this is a one-time platform fee
+- Mention "wallet" or "balance" or "credits" — this is a one-time execution fee
 - Quote per-deliverable prices — everything is included
 - Be pushy or repeat the offer
 - Make them feel bad for declining
-- Withhold useful free advice just because they haven't paid
+- Withhold useful free advice because they haven't paid
 - Mention the league label (L1, L2, etc.) to the user
+- Mention subscriptions or recurring charges
 
 IF THEY ACCEPT:
-- Confirm: "Processing your platform fee. Once confirmed, I'll generate your [deliverable name]."
+- Confirm: "Processing your execution fee. Once confirmed, I'll generate your [deliverable name]."
 - The system will redirect to Stripe checkout
-- After payment, all gates through closing are unlocked
+- After payment, all gates through closing + 180 days are unlocked
 
 IF THEY DECLINE:
 - "No problem. I can still help you think through [topic] — I just can't generate formal deliverables or unlock the deal execution tools. What questions do you have?"

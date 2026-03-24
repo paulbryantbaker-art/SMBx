@@ -1,12 +1,12 @@
 /**
  * Share Link Routes — CIM sharing with access levels (blind/teaser/full)
- * + Bizestimate public endpoint
+ * + ValueLens public endpoint
  */
 import { Router } from 'express';
 import crypto from 'crypto';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
-import { generateBizestimate } from '../services/generators/bizestimate.js';
+import { generateValueLens } from '../services/generators/valueLens.js';
 
 export const shareLinksRouter = Router();
 
@@ -201,9 +201,13 @@ shareLinksRouter.post('/shared/:token/sign-nda', async (req, res) => {
   }
 });
 
-// ─── Public Bizestimate (no auth — accessed via share token) ──
+// ─── Public ValueLens (no auth — accessed via share token) ──
+// Supports both /valuelens/:token and legacy /biz/:token routes
 
-shareLinksRouter.get('/biz/:token', async (req, res) => {
+shareLinksRouter.get('/valuelens/:token', valueLensHandler);
+shareLinksRouter.get('/biz/:token', valueLensHandler); // legacy
+
+async function valueLensHandler(req: any, res: any) {
   try {
     const { token } = req.params;
 
@@ -219,10 +223,10 @@ shareLinksRouter.get('/biz/:token', async (req, res) => {
       LIMIT 1
     `;
 
-    if (!profile) return res.status(404).json({ error: 'Bizestimate not found' });
+    if (!profile) return res.status(404).json({ error: 'ValueLens not found' });
 
     const location = [profile.city, profile.location_state].filter(Boolean).join(', ');
-    const markdown = generateBizestimate({
+    const markdown = generateValueLens({
       business_name: profile.name,
       industry: profile.industry,
       location: location || undefined,
@@ -237,10 +241,10 @@ shareLinksRouter.get('/biz/:token', async (req, res) => {
 
     return res.json({ markdown, businessName: profile.name || 'Your Business' });
   } catch (err: any) {
-    console.error('Bizestimate access error:', err.message);
-    return res.status(500).json({ error: 'Failed to load Bizestimate' });
+    console.error('ValueLens access error:', err.message);
+    return res.status(500).json({ error: 'Failed to load ValueLens' });
   }
-});
+}
 
 // ─── Content filtering helpers ───────────────────────────────
 

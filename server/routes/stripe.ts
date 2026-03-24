@@ -100,8 +100,9 @@ export async function handleStripeWebhook(req: any, res: any) {
           `;
 
           if (!existing) {
-            await markPlatformFeePaid(dealId, paymentIntentId);
-            console.log(`Platform fee paid: deal ${dealId}, PI ${paymentIntentId}`);
+            const feeCents = parseInt(session.metadata?.feeCents || '0') || (session.amount_total || 0);
+            await markPlatformFeePaid(dealId, feeCents, paymentIntentId);
+            console.log(`Execution fee paid: deal ${dealId}, $${feeCents / 100}, PI ${paymentIntentId}`);
           } else {
             console.log(`Duplicate webhook ignored: deal ${dealId}`);
           }

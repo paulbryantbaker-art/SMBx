@@ -39,7 +39,7 @@ const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
 const Search = lazy(() => import('./pages/Search'));
 const DayPassView = lazy(() => import('./pages/public/DayPassView'));
-const BizestimatePage = lazy(() => import('./pages/public/BizestimatePage'));
+const ValueLensPage = lazy(() => import('./pages/public/ValueLensPage'));
 const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/public/ResetPassword'));
 
@@ -160,10 +160,17 @@ export default function App() {
           </Suspense>
         )}
       </Route>
+      <Route path="/valuelens/:token">
+        {(params) => (
+          <Suspense fallback={<PageLoader />}>
+            <ValueLensPage token={params.token} />
+          </Suspense>
+        )}
+      </Route>
       <Route path="/biz/:token">
         {(params) => (
           <Suspense fallback={<PageLoader />}>
-            <BizestimatePage token={params.token} />
+            <ValueLensPage token={params.token} />
           </Suspense>
         )}
       </Route>

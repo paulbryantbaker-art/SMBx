@@ -148,7 +148,7 @@ export async function upsertCompanyProfile(
         );
       }
     } else {
-      // INSERT new profile with share token for Bizestimate
+      // INSERT new profile with share token for ValueLens
       const shareToken = crypto.randomBytes(16).toString('hex');
       const [row] = await sql`
         INSERT INTO company_profiles (

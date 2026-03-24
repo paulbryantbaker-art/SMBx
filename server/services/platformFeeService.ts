@@ -1,14 +1,15 @@
 /**
- * Platform Fee Service — One-time per-deal platform fee.
+ * Platform Fee Service — One-time per-deal execution fee.
  *
- * Replaces the old wallet-based per-deliverable pricing model.
- * Users pay a single fee at S2/B2 gate based on league.
- * Everything after payment is included.
+ * NEW MODEL: 0.1% of SDE or EBITDA, $999 minimum.
+ * One payment per deal. Unlocks everything through closing + 180 days.
  *
  * All amounts in CENTS (integers).
  */
 import Stripe from 'stripe';
 import { sql } from '../db.js';
+import { calculateExecutionFee } from './dealExecutionFee.js';
+import type { ExecutionFeeResult } from './dealExecutionFee.js';
 
 function getStripe(): Stripe {
   if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY not set');
@@ -18,29 +19,48 @@ function getStripe(): Stripe {
 export interface PlatformFee {
   feeCents: number;
   feeDisplay: string;
+  basis: 'SDE' | 'EBITDA';
+  basisDisplay: string;
+  isMinimum: boolean;
   league: string;
   isPaid: boolean;
   paidAt: string | null;
 }
 
 /**
- * Get the platform fee for a deal based on its league.
+ * Get the execution fee for a deal based on 0.1% of SDE/EBITDA ($999 minimum).
  */
 export async function getPlatformFee(dealId: number): Promise<PlatformFee> {
   const [deal] = await sql`
-    SELECT d.league, d.platform_fee_paid, d.platform_fee_paid_at, d.platform_fee_cents,
-           pfs.fee_cents as schedule_fee_cents
-    FROM deals d
-    LEFT JOIN platform_fee_schedule pfs ON pfs.league = d.league
-    WHERE d.id = ${dealId}
+    SELECT league, sde, ebitda, platform_fee_paid, platform_fee_paid_at, platform_fee_cents
+    FROM deals WHERE id = ${dealId}
   `;
 
   if (!deal) throw new Error(`Deal ${dealId} not found`);
 
-  const feeCents = deal.platform_fee_cents || deal.schedule_fee_cents || 99900; // fallback to L1
+  // If already paid, use stored amount; otherwise calculate from financials
+  let fee: ExecutionFeeResult;
+  if (deal.platform_fee_paid && deal.platform_fee_cents) {
+    const basis = (deal.ebitda && deal.ebitda > 0) ? 'EBITDA' : 'SDE';
+    const basisCents = basis === 'EBITDA' ? (deal.ebitda || 0) : (deal.sde || 0);
+    fee = {
+      feeCents: deal.platform_fee_cents,
+      feeDisplay: `$${(deal.platform_fee_cents / 100).toLocaleString('en-US')}`,
+      basis,
+      basisAmountCents: basisCents,
+      basisDisplay: `$${(basisCents / 100).toLocaleString('en-US')}`,
+      isMinimum: false,
+    };
+  } else {
+    fee = calculateExecutionFee({ sde: deal.sde, ebitda: deal.ebitda });
+  }
+
   return {
-    feeCents,
-    feeDisplay: `$${(feeCents / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+    feeCents: fee.feeCents,
+    feeDisplay: fee.feeDisplay,
+    basis: fee.basis,
+    basisDisplay: fee.basisDisplay,
+    isMinimum: fee.isMinimum,
     league: deal.league || 'L1',
     isPaid: deal.platform_fee_paid || false,
     paidAt: deal.platform_fee_paid_at || null,
@@ -58,8 +78,8 @@ export async function isPlatformFeePaid(dealId: number): Promise<boolean> {
 }
 
 /**
- * Create a Stripe Checkout Session for the platform fee.
- * Returns the checkout URL (or 'TEST_MODE_BYPASS' in test mode).
+ * Create a Stripe Checkout Session for the deal execution fee.
+ * Returns the checkout URL (or redirect in test mode).
  */
 export async function createPlatformFeeCheckout(
   dealId: number,
@@ -67,20 +87,20 @@ export async function createPlatformFeeCheckout(
 ): Promise<{ url: string; test?: boolean }> {
   // TEST_MODE bypass — mark as paid immediately
   if (process.env.TEST_MODE === 'true') {
-    await markPlatformFeePaid(dealId, 'test_' + Date.now());
+    const fee = await getPlatformFee(dealId);
+    await markPlatformFeePaid(dealId, fee.feeCents, 'test_' + Date.now());
     const appUrl = process.env.APP_URL || 'https://smbx.ai';
     return { url: `${appUrl}/chat?payment=success&dealId=${dealId}`, test: true };
   }
 
   const fee = await getPlatformFee(dealId);
-  if (fee.isPaid) throw new Error('Platform fee already paid for this deal');
+  if (fee.isPaid) throw new Error('Execution fee already paid for this deal');
 
   const [user] = await sql`SELECT email FROM users WHERE id = ${userId}`;
   if (!user) throw new Error('User not found');
 
   const [deal] = await sql`SELECT business_name, journey_type FROM deals WHERE id = ${dealId}`;
   const dealName = deal?.business_name || 'Your Deal';
-  const journey = deal?.journey_type === 'buy' ? 'Acquisition' : deal?.journey_type === 'raise' ? 'Capital Raise' : 'Exit';
 
   const stripe = getStripe();
   const appUrl = process.env.APP_URL || 'https://smbx.ai';
@@ -93,8 +113,8 @@ export async function createPlatformFeeCheckout(
       price_data: {
         currency: 'usd',
         product_data: {
-          name: `smbx.ai ${journey} Execution — ${fee.league}`,
-          description: `Full deal execution for "${dealName}" — all deliverables, deal room, and closing support included`,
+          name: `smbX.ai Deal Execution — ${dealName}`,
+          description: `0.1% of ${fee.basis} ($${(fee.feeCents / 100).toLocaleString()}). Full platform access through closing + 180-day integration.`,
         },
         unit_amount: fee.feeCents,
       },
@@ -104,7 +124,7 @@ export async function createPlatformFeeCheckout(
       type: 'platform_fee',
       dealId: dealId.toString(),
       userId: userId.toString(),
-      league: fee.league,
+      feeCents: fee.feeCents.toString(),
     },
     success_url: `${appUrl}/chat?payment=success&dealId=${dealId}`,
     cancel_url: `${appUrl}/chat?payment=cancelled&dealId=${dealId}`,
@@ -114,21 +134,19 @@ export async function createPlatformFeeCheckout(
 }
 
 /**
- * Mark a deal's platform fee as paid (called from webhook or TEST_MODE).
+ * Mark a deal's execution fee as paid (called from webhook or TEST_MODE).
  */
 export async function markPlatformFeePaid(
   dealId: number,
-  stripePaymentIntentId: string,
+  amountCents: number,
+  stripePaymentIntentId?: string,
 ): Promise<void> {
   await sql`
     UPDATE deals SET
       platform_fee_paid = true,
+      platform_fee_cents = ${amountCents},
       platform_fee_paid_at = NOW(),
-      stripe_payment_intent_id = ${stripePaymentIntentId},
-      platform_fee_cents = COALESCE(platform_fee_cents, (
-        SELECT fee_cents FROM platform_fee_schedule
-        WHERE league = (SELECT league FROM deals WHERE id = ${dealId})
-      ))
+      stripe_payment_intent_id = ${stripePaymentIntentId || null}
     WHERE id = ${dealId}
   `;
 }
