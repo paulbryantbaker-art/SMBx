@@ -47,11 +47,19 @@
 }
 
 html, body, #root, #app-root {
-  background-color: #ffffff;
+  background-color: #f9f9fc;
+}
+body {
+  background-image: radial-gradient(circle, #d5d5d8 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 html.dark, html.dark body, html.dark #root, html.dark #app-root {
   background-color: #1a1c1e !important;
   color-scheme: dark;
+}
+html.dark body {
+  background-image: radial-gradient(circle, #2a2c2e 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 html {
