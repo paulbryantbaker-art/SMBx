@@ -10,23 +10,17 @@ export default function DotField({ dark = false }: DotFieldProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const parent = canvas.parentElement;
-    if (!parent) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const draw = () => {
       const dpr = window.devicePixelRatio || 1;
-      const rect = parent.getBoundingClientRect();
-      const w = rect.width;
-      const h = rect.height;
-      if (w === 0 || h === 0) return;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
 
       canvas.width = w * dpr;
       canvas.height = h * dpr;
-      canvas.style.width = w + 'px';
-      canvas.style.height = h + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
 
@@ -34,11 +28,9 @@ export default function DotField({ dark = false }: DotFieldProps) {
       const fx = w / 2;
       const fy = h * 0.38;
 
-      // Base grid spacing
       const baseSpacing = 28;
       const dotColor = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)';
 
-      // Generate dots on a grid, then warp them
       const cols = Math.ceil(w / baseSpacing) + 4;
       const rows = Math.ceil(h / baseSpacing) + 4;
       const startX = -baseSpacing * 2;
@@ -51,33 +43,29 @@ export default function DotField({ dark = false }: DotFieldProps) {
           let x = startX + c * baseSpacing;
           let y = startY + r * baseSpacing;
 
-          // Distance from focal point (normalized)
           const dx = x - fx;
           const dy = y - fy;
           const dist = Math.sqrt(dx * dx + dy * dy);
           const maxDist = Math.sqrt(fx * fx + fy * fy);
           const normDist = dist / maxDist;
 
-          // Gravitational pull toward focal point — stronger when closer
-          const pullStrength = 0.15;
-          const pull = pullStrength / (normDist + 0.3);
+          // Gravitational pull toward focal point
+          const pull = 0.15 / (normDist + 0.3);
           x -= dx * pull * 0.08;
           y -= dy * pull * 0.08;
 
-          // Vertical density: dots below focal point get tighter spacing
+          // Vertical density gradient
           const verticalFactor = (y - fy) / h;
           if (verticalFactor < 0) {
-            // Above hero: push dots outward (sparser)
             const spread = 1 + Math.abs(verticalFactor) * 0.6;
             x = fx + (x - fx) * spread;
             y = fy + (y - fy) * spread;
           } else {
-            // Below hero: pull dots inward (denser)
             const compress = 1 - verticalFactor * 0.25;
             x = fx + (x - fx) * compress;
           }
 
-          // Slight curve: dots near the focal area arc slightly
+          // Subtle arc near focal area
           const focalProximity = Math.max(0, 1 - dist / (maxDist * 0.5));
           const curveAngle = focalProximity * 0.04;
           const cosA = Math.cos(curveAngle);
@@ -88,10 +76,9 @@ export default function DotField({ dark = false }: DotFieldProps) {
           y = y * 0.7 + ry * 0.3;
 
           // Dot size: slightly larger near focal point
-          const sizeBoost = focalProximity * 0.4;
-          const radius = 0.8 + sizeBoost;
+          const radius = 0.8 + focalProximity * 0.4;
 
-          // Fade out dots very close to focal point (clear space for text)
+          // Fade out dots close to focal point (clear space for text)
           const clearRadius = Math.min(w, h) * 0.12;
           if (dist < clearRadius) {
             const fade = dist / clearRadius;
@@ -108,18 +95,24 @@ export default function DotField({ dark = false }: DotFieldProps) {
       ctx.globalAlpha = 1;
     };
 
-    // Draw after a frame so parent has layout
-    requestAnimationFrame(draw);
+    draw();
 
-    const onResize = () => requestAnimationFrame(draw);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    window.addEventListener('resize', draw);
+    return () => window.removeEventListener('resize', draw);
   }, [dark]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 pointer-events-none"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        pointerEvents: 'none',
+        zIndex: 0,
+      }}
     />
   );
 }

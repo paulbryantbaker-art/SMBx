@@ -1008,8 +1008,8 @@ export default function AppShell() {
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE — New Design ═══ */}
-                <main className={`flex-1 flex flex-col relative ${dark ? 'bg-[#1a1c1e]' : 'bg-[#f9f9fc]'}`}>
-                  <DotField dark={dark} />
+                <DotField dark={dark} />
+                <main className={`flex-1 flex flex-col relative ${dark ? 'bg-transparent' : 'bg-transparent'}`}>
 
                   {/* Desktop: single centered cluster */}
                   <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
