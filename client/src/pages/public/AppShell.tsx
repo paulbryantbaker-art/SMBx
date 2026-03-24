@@ -903,7 +903,7 @@ export default function AppShell() {
   return (
     <div
       id="app-root"
-      className={`flex font-sans ${dark ? 'bg-[#1a1c1e] text-[#f0f0f3]' : 'bg-white text-[#1a1c1e]'}`}
+      className={`flex font-sans ${dark ? 'bg-transparent text-[#f0f0f3]' : 'bg-transparent text-[#1a1c1e]'}`}
       style={{
         height: 'var(--app-height, 100vh)',
         position: 'fixed' as const,
@@ -917,7 +917,7 @@ export default function AppShell() {
       {sidebarContent(false)}
 
       {/* Main canvas — offset by 80px sidebar on desktop */}
-      <div className={`flex-1 flex flex-col min-w-0 h-full lg:ml-20 ${dark ? 'bg-[#1a1c1e]' : 'bg-white'}`}>
+      <div className={`flex-1 flex flex-col min-w-0 h-full lg:ml-20 ${viewState === 'landing' && activeTab === 'home' ? 'bg-transparent' : dark ? 'bg-[#1a1c1e]' : 'bg-white'}`}>
         {/* Offline banner */}
         {isOffline && (
           <div className="shrink-0 bg-yellow-50 border-b border-yellow-200 px-4 py-2 flex items-center justify-center gap-2 z-30">
@@ -989,16 +989,16 @@ export default function AppShell() {
         )}
 
         {/* Main row: chat + canvas split */}
-        <div className={`flex-1 flex min-h-0 ${dark ? 'bg-[#1a1c1e]' : (viewState === 'landing' && activeTab !== 'home' ? 'bg-[#f9f9fc]' : 'bg-white')}`}>
+        <div className={`flex-1 flex min-h-0 ${viewState === 'landing' && activeTab === 'home' ? 'bg-transparent' : dark ? 'bg-[#1a1c1e]' : (viewState === 'landing' ? 'bg-[#f9f9fc]' : 'bg-white')}`}>
         {/* Chat column — resizable on desktop in chat mode, flex on landing/other */}
         <div
-          className={`flex flex-col min-w-0 ${dark ? 'bg-[#1a1c1e]' : (viewState === 'landing' && activeTab !== 'home' ? 'bg-[#f9f9fc]' : 'bg-white')}`}
+          className={`flex flex-col min-w-0 ${viewState === 'landing' && activeTab === 'home' ? 'bg-transparent' : dark ? 'bg-[#1a1c1e]' : (viewState === 'landing' ? 'bg-[#f9f9fc]' : 'bg-white')}`}
           style={!isMobile && viewState === 'chat' ? { width: chatWidth, flexShrink: 0 } : { flex: 1 }}
         >
         {/* Scroll area */}
         <div
           ref={scrollRef}
-          className={`flex-1 overflow-y-auto min-h-0 ${dark ? 'bg-[#1a1c1e]' : (viewState === 'landing' && activeTab !== 'home' ? 'bg-[#f9f9fc]' : 'bg-white')}`}
+          className={`flex-1 overflow-y-auto min-h-0 ${viewState === 'landing' && activeTab === 'home' ? 'bg-transparent' : dark ? 'bg-[#1a1c1e]' : (viewState === 'landing' ? 'bg-[#f9f9fc]' : 'bg-white')}`}
           style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' } as any}
         >
           {/* ════ LANDING MODE ════ */}
