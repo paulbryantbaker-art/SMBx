@@ -1016,8 +1016,8 @@ export default function AppShell() {
 
                   {/* Center zone — hero text (vertically centered) */}
                   <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
-                    <div className="max-w-4xl w-full text-center space-y-6">
-                      <LogoImg height={isMobile ? 32 : 32} className="mx-auto mb-2" />
+                    <div className="max-w-4xl w-full text-center space-y-6" style={isMobile ? undefined : { marginTop: '-80px' }}>
+                      <LogoImg height={isMobile ? 32 : 48} className="mx-auto mb-2" />
                       <h1 className="font-headline text-[36px] font-extrabold tracking-tighter leading-[1.15]">
                         <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Selling</span> your business?{' '}
                         <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Buying</span> one?{' '}
