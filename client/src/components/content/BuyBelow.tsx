@@ -136,8 +136,8 @@ export default function BuyBelow() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
               <div className={`lg:col-span-7 editorial text-lg space-y-6 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
                 <p>In any given year, roughly 10% of business owners are thinking about selling. The vast majority of those deals never get formally listed. They change hands through networks, referrals, and conversations — not listing sites.</p>
-                <p>Yulia maps your target market at the MSA level. She pulls Census business counts by NAICS code, cross-references BLS employment data, overlays SBA lending volume, and identifies markets where the ratio of businesses to active listings is highest.</p>
-                <p className={`font-bold ${dark ? 'text-white' : 'text-[#1a1c1e]'}`}>Those gaps — markets with lots of businesses and few listings — are where proprietary deal flow lives.</p>
+                <p>Yulia maps the full market landscape — establishment counts, competitive density, average deal multiples, SBA lending velocity, and growth trends — so you know exactly what you're walking into before you make a single call.</p>
+                <p className={`font-bold ${dark ? 'text-white' : 'text-[#1a1c1e]'}`}>Markets with high business density and low listing volume are where proprietary deal flow lives.</p>
                 <p>She'll tell you exactly how many businesses exist in your target market, what they average in employment and revenue, and where the competitive density creates opportunity.</p>
               </div>
               <div className="lg:col-span-5">
@@ -148,16 +148,16 @@ export default function BuyBelow() {
                   </div>
                   <div className="p-8 space-y-4">
                     {[
-                      { msa: 'Dallas-Fort Worth', count: '2,847', listings: '23', ratio: '124:1' },
-                      { msa: 'Houston', count: '3,102', listings: '31', ratio: '100:1' },
-                      { msa: 'Phoenix', count: '1,934', listings: '28', ratio: '69:1' },
-                      { msa: 'Atlanta', count: '2,215', listings: '42', ratio: '53:1' },
-                      { msa: 'Tampa', count: '1,567', listings: '35', ratio: '45:1' },
+                      { msa: 'Dallas-Fort Worth', count: '2,847', listings: '12.4% YoY', ratio: '124:1' },
+                      { msa: 'Houston', count: '3,102', listings: '9.8% YoY', ratio: '100:1' },
+                      { msa: 'Phoenix', count: '1,934', listings: '14.1% YoY', ratio: '69:1' },
+                      { msa: 'Atlanta', count: '2,215', listings: '11.2% YoY', ratio: '53:1' },
+                      { msa: 'Tampa', count: '1,567', listings: '8.7% YoY', ratio: '45:1' },
                     ].map((m, i) => (
                       <div key={m.msa} className={`flex justify-between items-center py-3 ${i < 4 ? (dark ? 'border-b border-zinc-800' : 'border-b border-[#eeeef0]') : ''}`}>
                         <div>
                           <p className="font-bold text-sm">{m.msa}</p>
-                          <p className={`text-xs ${dark ? 'text-[#dadadc]/60' : 'text-[#5d5e61]'}`}>{m.count} businesses · {m.listings} listed</p>
+                          <p className={`text-xs ${dark ? 'text-[#dadadc]/60' : 'text-[#5d5e61]'}`}>{m.count} establishments · {m.listings}</p>
                         </div>
                         <span className={`font-headline font-extrabold text-lg ${i === 0 ? 'text-[#b0004a]' : ''}`}>{m.ratio}</span>
                       </div>
@@ -312,9 +312,9 @@ export default function BuyBelow() {
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { type: 'First-Time Buyer', icon: 'person', desc: "You've got capital and conviction but no deal experience. Yulia walks you through every step — SBA mechanics, LOI terms, DD scope — in plain language. No jargon until you ask for it.", highlight: false },
-              { type: 'Search Funder', icon: 'search', desc: 'Your investors expect institutional process. Yulia generates the screening memos, financial models, and deal summaries your board needs — at the cadence they expect.', highlight: false },
+              { type: 'Search Funder', icon: 'search', desc: 'Institutional-grade deal screening, financial modeling, and LP reporting throughout the search — built for the pace and rigor your investors expect.', highlight: false },
               { type: 'Serial Acquirer', icon: 'stacks', desc: "You know what you're doing. You need speed. Yulia screens 50 targets in the time it takes to read one deal package. She flags what matters and ignores what doesn't.", highlight: true },
-              { type: 'PE Platform', icon: 'corporate_fare', desc: "Roll-up economics. Multiple arbitrage. Integration planning. Yulia models each add-on against the platform and shows you the blended multiple in real time.", highlight: false },
+              { type: 'PE Platform', icon: 'corporate_fare', desc: "Thesis-driven target screening, add-back validation, synergy modeling, and portfolio-level pipeline management at the speed your deal cadence demands.", highlight: false },
             ].map((card) => (
               <StaggerItem key={card.type}>
                 <div

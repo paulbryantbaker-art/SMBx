@@ -356,9 +356,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       // 6. Refresh conversations list (for new title, updated_at)
       loadConversations();
     } catch (err: any) {
-      if (err.name !== 'AbortError') {
+      if (err.name === 'AbortError') {
+        setError('The connection timed out. Please try sending your message again.');
+      } else {
         console.error('Chat error:', err);
-        setError('Something went wrong. Please try again.');
+        // Preserve server-provided messages (e.g. rate limit)
+        const msg = err.message?.includes('high demand') || err.message?.includes('try again')
+          ? err.message
+          : 'Something went wrong. Please try again.';
+        setError(msg);
       }
     } finally {
       setIsStreaming(false);

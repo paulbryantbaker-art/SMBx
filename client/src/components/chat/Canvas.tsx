@@ -49,6 +49,8 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
   const [filed, setFiled] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [genMessage, setGenMessage] = useState<string | null>(null);
+  const genStartRef = useRef<number>(0);
 
   // Determine mode
   const isMarkdownMode = !!markdownContent;
@@ -68,7 +70,16 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
       setError(null);
       // Keep polling if still generating
       if (d.status === 'queued' || d.status === 'generating') {
+        // Progressive timeout messages
+        const elapsed = Date.now() - genStartRef.current;
+        if (elapsed > 120_000) {
+          setGenMessage('Your document is still generating. Complex deliverables can take a few minutes.');
+        } else if (elapsed > 60_000) {
+          setGenMessage('This is taking longer than expected. Hang tight...');
+        }
         setTimeout(fetchData, 3000);
+      } else {
+        setGenMessage(null);
       }
     } catch {
       setError('Network error — please check your connection');
@@ -84,6 +95,8 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
     setLoading(true);
     setData(null);
     setError(null);
+    setGenMessage(null);
+    genStartRef.current = Date.now();
     fetchData();
   }, [fetchData, isMarkdownMode]);
 
@@ -343,7 +356,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
             <div className="flex flex-col items-center gap-3 text-center">
               <div className="w-12 h-12 border-2 border-[#BA3C60] border-t-transparent rounded-full animate-spin" />
               <p className="text-base font-semibold text-[#0D0D0D]">Generating your {data.name}...</p>
-              <p className="text-sm text-[#6E6A63] max-w-xs">This typically takes 30-60 seconds. The document will appear here when ready.</p>
+              <p className="text-sm text-[#6E6A63] max-w-xs">{genMessage || 'This typically takes 30-60 seconds. The document will appear here when ready.'}</p>
             </div>
           </div>
         )}

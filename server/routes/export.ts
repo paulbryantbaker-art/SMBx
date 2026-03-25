@@ -7,6 +7,7 @@ import archiver from 'archiver';
 import { sql } from '../db.js';
 import { hasDealAccess } from '../services/dealAccessService.js';
 import { exportToPDF, exportToDOCX, exportToXLSX, exportLOIToPDF } from '../services/exportService.js';
+import { exportToPPTX } from '../services/pptxExportService.js';
 import { readFile } from 'fs/promises';
 
 export const exportRouter = Router();
@@ -15,12 +16,14 @@ const CONTENT_TYPES: Record<string, string> = {
   pdf: 'application/pdf',
   docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 };
 
 const FILE_EXTENSIONS: Record<string, string> = {
   pdf: '.pdf',
   docx: '.docx',
   xlsx: '.xlsx',
+  pptx: '.pptx',
 };
 
 // ─── Export deliverable ──────────────────────────────────────
@@ -32,8 +35,8 @@ exportRouter.post('/deliverables/:id/export/:format', async (req, res) => {
   const deliverableId = parseInt(req.params.id, 10);
   const format = req.params.format.toLowerCase();
 
-  if (!['pdf', 'docx', 'xlsx'].includes(format)) {
-    return res.status(400).json({ error: 'Invalid format. Use pdf, docx, or xlsx.' });
+  if (!['pdf', 'docx', 'xlsx', 'pptx'].includes(format)) {
+    return res.status(400).json({ error: 'Invalid format. Use pdf, docx, xlsx, or pptx.' });
   }
 
   try {
@@ -84,6 +87,8 @@ exportRouter.post('/deliverables/:id/export/:format', async (req, res) => {
         : await exportToPDF(content, title, { watermark });
     } else if (format === 'docx') {
       buffer = await exportToDOCX(content, title);
+    } else if (format === 'pptx') {
+      buffer = await exportToPPTX(content, title);
     } else {
       buffer = await exportToXLSX(content, title);
     }

@@ -144,6 +144,7 @@ export function useAuthChat(user: User | null) {
     setSending(true);
     setStreamingText('');
 
+    let retried = false;
     try {
       const controller = new AbortController();
       abortRef.current = controller;
@@ -264,12 +265,83 @@ export function useAuthChat(user: User | null) {
 
       loadConversations();
     } catch (err: any) {
-      if (err.name !== 'AbortError') {
-        console.error('Send error:', err);
+      if (err.name === 'AbortError') {
+        // Stale-connection timeout — auto-retry once
+        if (!retried) {
+          retried = true;
+          setStreamingText('');
+          setActiveTool('Reconnecting');
+          // Retry after a brief pause
+          try {
+            const retryCtrl = new AbortController();
+            abortRef.current = retryCtrl;
+            const retryRes = await fetch(`/api/chat/conversations/${activeConversationId}/messages`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', ...authHeaders() },
+              body: JSON.stringify({ content }),
+              signal: retryCtrl.signal,
+            });
+            if (retryRes.ok) {
+              const retryReader = retryRes.body?.getReader();
+              if (retryReader) {
+                const retryDecoder = new TextDecoder();
+                let retryAccum = '';
+                while (true) {
+                  const { done, value } = await retryReader.read();
+                  if (done) break;
+                  const chunk = retryDecoder.decode(value, { stream: true });
+                  for (const line of chunk.split('\n')) {
+                    if (!line.startsWith('data: ')) continue;
+                    const data = line.slice(6).trim();
+                    if (data === '[DONE]') continue;
+                    try {
+                      const parsed = JSON.parse(data);
+                      if (parsed.type === 'text_delta') {
+                        setActiveTool(null);
+                        retryAccum += parsed.text;
+                        setStreamingText(retryAccum);
+                      } else if (parsed.type === 'done') {
+                        if (parsed.dealId) setActiveDealId(parsed.dealId);
+                      } else if (parsed.type === 'error') {
+                        retryAccum = parsed.error || 'Something went wrong.';
+                      }
+                    } catch { /* ignore */ }
+                  }
+                }
+                setStreamingText('');
+                if (retryAccum) {
+                  setMessages(prev => [...prev, {
+                    id: Date.now() + 1,
+                    role: 'assistant' as const,
+                    content: retryAccum,
+                    created_at: new Date().toISOString(),
+                  }]);
+                }
+                loadConversations();
+                return;
+              }
+            }
+          } catch { /* retry failed, fall through */ }
+        }
+        // If retry also failed or was already retried, show timeout message
         setMessages(prev => [...prev, {
           id: Date.now() + 1,
           role: 'assistant' as const,
-          content: 'Something went wrong. Please try again.',
+          content: 'The connection timed out. Please try sending your message again.',
+          created_at: new Date().toISOString(),
+        }]);
+      } else {
+        console.error('Send error:', err);
+        // Use server error message if available (e.g. rate limit messages)
+        const msg = err.message?.includes('high demand')
+          ? err.message
+          : err.message?.includes('try again')
+            ? err.message
+            : 'Something went wrong. Please try again.';
+        setMessages(prev => [...prev, {
+          id: Date.now() + 1,
+          role: 'assistant' as const,
+          content: msg,
           created_at: new Date().toISOString(),
         }]);
       }

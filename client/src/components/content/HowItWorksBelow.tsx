@@ -28,11 +28,11 @@ export default function HowItWorksBelow() {
   ];
 
   const engines = [
-    { icon: 'description', title: 'Financial Extraction', desc: 'Zero-hallucination mode. Temperature 0.0. Extracts exact values from tax returns and P&Ls without rounding or calculating. Displays the extracted number next to the PDF source.', mode: 'Mode: JSON_OUTPUT_ONLY · Temp: 0.0' },
-    { icon: 'travel_explore', title: 'Market Intelligence', desc: 'Live search grounding. Ignores training data. Pulls current sector multiples, PE activity, and consolidation trends from real-time sources. This is how Yulia knows your industry is "hot."', mode: 'Mode: SEARCH_GROUNDING · Live data' },
+    { icon: 'description', title: 'Financial Extraction', desc: 'Zero-hallucination mode. Extracts exact values from tax returns and P&Ls without rounding or calculating. Displays the extracted number next to the PDF source.', mode: 'Mode: STRUCTURED_EXTRACTION · Verified' },
+    { icon: 'travel_explore', title: 'Market Intelligence', desc: 'Government data grounding. Pulls current sector multiples, PE activity, and consolidation trends from Census, BLS, SBA, and FRED sources updated quarterly. This is how Yulia knows your industry is "hot."', mode: 'Mode: GOVERNMENT_DATA · Updated quarterly' },
     { icon: 'policy', title: 'Legal / Forensic Auditor', desc: 'Walled garden. Answers strictly from your uploaded documents. Returns "NOT FOUND" if it can\'t cite a source. Every claim includes a page reference. Never infers or assumes.', mode: 'Mode: GROUNDED_ONLY · Temp: 0.1' },
     { icon: 'calculate', title: 'Deal Modeling', desc: 'Formula injection into live financial models. DSCR calculations, SBA loan amortization, IRR projections, sensitivity analysis — all from verified inputs, never estimated.', mode: 'Mode: FORMULA_INJECTION · Deterministic' },
-    { icon: 'account_tree', title: 'Cap Table / Waterfall', desc: 'Structural reasoning for complex equity. Models Senior Debt → Mezzanine → Preferred → Common waterfalls. Calculates MOIC by investor class across exit scenarios.', mode: 'Mode: REASONING · Multi-class equity' },
+    { icon: 'account_tree', title: 'Cap Table / Waterfall', desc: 'Structural reasoning for equity scenarios. Models debt-to-equity waterfalls and calculates returns by investor class across exit multiples. Available at L4+ deal complexity.', mode: 'Mode: REASONING · Multi-class equity' },
     { icon: 'draw', title: 'Document Generation', desc: 'Template-driven drafting for CIMs, LOIs, pitch decks, and deal memos. Maps verified deal terms into league-specific templates — L1 gets plain English, L5 gets rep & warranty insurance clauses.', mode: 'Mode: TEMPLATE_INJECTION · League-specific' },
   ];
 
@@ -44,7 +44,7 @@ export default function HowItWorksBelow() {
   ];
 
   const comparisonRows = [
-    { feature: 'Market conditions', ai: 'Training cutoff', smbx: 'Live data feeds + Market Heat Index' },
+    { feature: 'Market conditions', ai: 'Training cutoff', smbx: 'Current market data + Market Heat scoring' },
     { feature: 'Financial precision', ai: 'Generates numbers', smbx: '6 specialized engines, deterministic math' },
     { feature: 'Local benchmarks', ai: 'National averages', smbx: 'MSA-level Census + BLS data' },
     { feature: 'Industry depth', ai: 'Generic for all sectors', smbx: '35 industries with PE tracking' },
@@ -643,7 +643,7 @@ export default function HowItWorksBelow() {
                 <p className="text-[#dadadc]/60 leading-relaxed">You can use smbX.ai without creating an account. If you do, your data is siloed and exportable. If you leave, your data goes with you or gets deleted — your choice.</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                {[{ icon: 'lock', label: 'AES-256 Encryption' }, { icon: 'visibility_off', label: 'No Model Training' }, { icon: 'cloud_off', label: 'Private Instances' }, { icon: 'download', label: 'Full Data Export' }].map((item) => (
+                {[{ icon: 'lock', label: 'Encrypted at Rest & Transit' }, { icon: 'visibility_off', label: 'No Model Training' }, { icon: 'cloud_off', label: 'Isolated Processing' }, { icon: 'download', label: 'Full Data Export' }].map((item) => (
                   <div key={item.label} className="bg-white/5 p-6 rounded-xl border border-white/10 text-center">
                     <span className="material-symbols-outlined text-[#b0004a] text-2xl mb-2">{item.icon}</span>
                     <h4 className="text-white font-bold text-sm">{item.label}</h4>
