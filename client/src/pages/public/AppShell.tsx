@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth, authHeaders } from '../../hooks/useAuth';
 import { useAnonymousChat, type AnonMessage } from '../../hooks/useAnonymousChat';
 import { useAuthChat } from '../../hooks/useAuthChat';
 import { useAppHeight } from '../../hooks/useAppHeight';
@@ -698,6 +698,20 @@ export default function AppShell() {
   const allConversations = user ? authChat.conversations : anonChat.conversations;
   const activeConvId = user ? authChat.activeConversationId : anonChat.activeConversationId;
 
+  const handleFileUpload = useCallback(async (file: File) => {
+    if (!activeConvId || !user) return null;
+    const form = new FormData();
+    form.append('file', file);
+    const res = await fetch(`/api/chat/conversations/${activeConvId}/upload`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form,
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return { name: data.file.name, size: data.file.sizeFormatted };
+  }, [activeConvId, user]);
+
   // Group conversations by date (fallback)
   const groupByDate = (convos: typeof allConversations) => {
     const now = new Date();
@@ -1295,6 +1309,7 @@ export default function AppShell() {
             <ChatDock
               ref={dockRef}
               onSend={handleSend}
+              onFileUpload={user ? handleFileUpload : undefined}
               variant="hero"
               rows={1}
               placeholder="Reply to Yulia..."

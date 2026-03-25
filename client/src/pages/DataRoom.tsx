@@ -79,7 +79,7 @@ export default function DataRoom({ dealId }: { dealId: number }) {
       formData.append('file', file);
       formData.append('folderId', String(folderId));
 
-      const res = await fetch(`/api/deals/${dealId}/data-room/upload`, {
+      const res = await fetch(`/api/data-room/${dealId}/upload`, {
         method: 'POST',
         headers: authHeaders(),
         body: formData,

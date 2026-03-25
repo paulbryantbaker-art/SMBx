@@ -1,5 +1,10 @@
 -- Fix deliverables schema: rename column to match code, relax NOT NULL on type
-ALTER TABLE deliverables RENAME COLUMN price_paid_cents TO price_charged_cents;
+-- Idempotent rename: only rename if old column exists
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='deliverables' AND column_name='price_paid_cents') THEN
+    ALTER TABLE deliverables RENAME COLUMN price_paid_cents TO price_charged_cents;
+  END IF;
+END $$;
 ALTER TABLE deliverables ALTER COLUMN type DROP NOT NULL;
 ALTER TABLE deliverables ALTER COLUMN type SET DEFAULT NULL;
 

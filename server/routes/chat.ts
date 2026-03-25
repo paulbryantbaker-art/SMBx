@@ -1,7 +1,13 @@
 import { Router } from 'express';
 import postgres from 'postgres';
 import Anthropic from '@anthropic-ai/sdk';
+import multer from 'multer';
+import crypto from 'crypto';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { optionalAuth, requireAuth } from '../middleware/auth.js';
+import { extractFromDocument } from '../services/documentExtractor.js';
 import { buildSystemPrompt, buildDynamicAnonymousPrompt } from '../services/promptBuilder.js';
 import type { ConversationState } from '../services/promptBuilder.js';
 import { streamAgenticResponse } from '../services/aiService.js';
@@ -29,6 +35,32 @@ import type { MessageParam } from '@anthropic-ai/sdk/resources/messages';
 const sql = postgres(process.env.DATABASE_URL!, {
   ssl: 'require',
   prepare: false,
+});
+
+// ─── File upload config ─────────────────────────────────────
+const __filename_chat = fileURLToPath(import.meta.url);
+const __dirname_chat = path.dirname(__filename_chat);
+const UPLOAD_DIR = path.resolve(__dirname_chat, '../../uploads');
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: UPLOAD_DIR,
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `${crypto.randomUUID()}${ext}`);
+    },
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = ['.pdf', '.xlsx', '.xls', '.csv'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF, XLSX, XLS, and CSV files are allowed'));
+    }
+  },
 });
 
 const STREAMING_MODEL = 'claude-sonnet-4-6';
@@ -1044,5 +1076,71 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
     } else {
       res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
+  }
+});
+
+// ─── POST /conversations/:id/upload — File upload for authenticated users ──
+chatRouter.post('/conversations/:id/upload', requireAuth, upload.single('file'), async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const conversationId = parseInt(req.params.id, 10);
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // Verify user owns this conversation
+    const [conv] = await sql`
+      SELECT id FROM conversations
+      WHERE id = ${conversationId} AND user_id = ${userId}
+    `;
+    if (!conv) {
+      return res.status(404).json({ error: 'Conversation not found' });
+    }
+
+    const fileInfo = {
+      originalName: req.file.originalname,
+      storedName: req.file.filename,
+      size: req.file.size,
+      mimeType: req.file.mimetype,
+    };
+
+    // Store file info in conversation extracted_data
+    await sql`
+      UPDATE conversations
+      SET extracted_data = COALESCE(extracted_data, '{}'::jsonb) || ${JSON.stringify({ uploaded_file: fileInfo })}::jsonb,
+          updated_at = NOW()
+      WHERE id = ${conversationId}
+    `;
+
+    // Fire-and-forget: extract financial data from the document
+    const fullPath = path.resolve(UPLOAD_DIR, req.file.filename);
+    extractFromDocument(fullPath, req.file.originalname).then(async (extracted) => {
+      if (extracted && extracted.confidence !== 'low') {
+        try {
+          await sql`
+            UPDATE conversations
+            SET extracted_data = COALESCE(extracted_data, '{}'::jsonb) || ${JSON.stringify({ extracted_financials: extracted })}::jsonb
+            WHERE id = ${conversationId}
+          `;
+        } catch (e: any) {
+          console.error('Document extraction storage error:', e.message);
+        }
+      }
+    }).catch((e) => console.error('Document extraction error:', e.message));
+
+    return res.json({
+      success: true,
+      file: {
+        name: fileInfo.originalName,
+        size: fileInfo.size,
+        sizeFormatted: fileInfo.size > 1024 * 1024
+          ? `${(fileInfo.size / (1024 * 1024)).toFixed(1)} MB`
+          : `${(fileInfo.size / 1024).toFixed(0)} KB`,
+      },
+    });
+  } catch (err: any) {
+    console.error('Upload error:', err.message);
+    return res.status(500).json({ error: 'Upload failed' });
   }
 });

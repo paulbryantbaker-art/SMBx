@@ -92,7 +92,7 @@ export default function Sourcing({ user, onLogout }: SourcingProps) {
         if (!res.ok) return;
         const convs = await res.json();
         // Find deals with sell journey from conversations
-        const dealRes = await fetch('/api/pipeline/deals', { headers: authHeaders() }).catch(() => null);
+        const dealRes = await fetch('/api/deals', { headers: authHeaders() }).catch(() => null);
         if (dealRes?.ok) {
           const deals = await dealRes.json();
           setSellDeals((deals || []).filter((d: any) => d.journey_type === 'sell' && d.status === 'active'));

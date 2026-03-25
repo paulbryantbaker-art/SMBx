@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import Markdown from 'react-markdown';
 import YuliaAvatar from '../public/YuliaAvatar';
 import ChatDock from '../shared/ChatDock';
 import { useChatContext } from '../../context/ChatContext';
+import { authHeaders } from '../../hooks/useAuth';
 
 const PLACEHOLDER_MAP: Record<string, string> = {
   '/sell': 'Tell Yulia about your business...',
@@ -20,9 +21,26 @@ export default function ChatView() {
     error,
     sourcePage,
     sendMessage,
+    activeConversationId,
   } = useChatContext();
   const [, navigate] = useLocation();
   const endRef = useRef<HTMLDivElement>(null);
+
+  const handleFileUpload = useCallback(async (file: File) => {
+    if (!activeConversationId) return null;
+    const form = new FormData();
+    form.append('file', file);
+    const hdrs = authHeaders();
+    // Remove Content-Type so browser sets multipart boundary
+    const res = await fetch(`/api/chat/conversations/${activeConversationId}/upload`, {
+      method: 'POST',
+      headers: hdrs,
+      body: form,
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return { name: data.file.name, size: data.file.sizeFormatted };
+  }, [activeConversationId]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -105,6 +123,7 @@ export default function ChatView() {
       <div className="shrink-0 pb-2">
         <ChatDock
           onSend={(text) => sendMessage(text)}
+          onFileUpload={handleFileUpload}
           disabled={isStreaming}
           placeholder={PLACEHOLDER_MAP[sourcePage] || 'Message Yulia...'}
         />

@@ -61,7 +61,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/intelligence/fred', { headers: authHeaders() });
+        const res = await fetch('/api/intelligence/economic-indicators', { headers: authHeaders() });
         if (res.ok) setFredData(await res.json());
       } catch { /* ignore */ }
       finally { setFredLoading(false); }
@@ -106,8 +106,10 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/intelligence/sba-analysis?purchasePrice=${pp}&annualDebtService=${ads}&ebitda=${eb}`, {
-        headers: authHeaders(),
+      const res = await fetch('/api/intelligence/sba-analysis', {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ purchasePrice: pp, ebitda: eb }),
       });
       if (!res.ok) throw new Error('Failed to run SBA analysis');
       setSbaResult(await res.json());
