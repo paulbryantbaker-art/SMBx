@@ -13,8 +13,8 @@ async function main() {
 
   // Check row counts
   const userCount = await sql`SELECT count(*) as n FROM users`;
-  const walletCount = await sql`SELECT count(*) as n FROM wallets`;
-  console.log(`\nUsers: ${userCount[0].n}, Wallets: ${walletCount[0].n}`);
+  const dealCount = await sql`SELECT count(*) as n FROM deals`;
+  console.log(`\nUsers: ${userCount[0].n}, Deals: ${dealCount[0].n}`);
 
   await sql.end();
 }

@@ -86,9 +86,7 @@ const ALWAYS_FREE_TYPES = new Set([
   'bizestimate',       // legacy alias
   'value_readiness_report',
   'deal_scoring',
-  'cim_generator',     // CIM is free — the Toast wedge
-  'sell_cim',
-  'cim',
+  // CIM is PAID — behind S2/B2 paywall, included in platform fee
 ]);
 
 /**

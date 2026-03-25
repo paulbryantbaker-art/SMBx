@@ -1,6 +1,6 @@
 CLAUDE.md — smbx.ai
 What This Is
-AI-powered M&A platform for SMB through mega-cap deals. Users talk to Yulia (AI advisor) who guides them through buying, selling, or raising capital for businesses. Chat-first experience — users talk to Yulia, not dashboards.
+AI-powered deal intelligence platform for business acquisitions from $300K to mega-cap. Users talk to Yulia (AI deal intelligence) who guides them through buying, selling, or raising capital for businesses. Chat-first experience — users talk to Yulia, not dashboards. Yulia IS the front door — there is no sales team, no contact forms, no dead-end CTAs. Every action routes to chat.
 Core Architecture
 
 Chat-first UX that mirrors claude.ai exactly — same layout, fonts, colors, sidebar, mobile behavior
@@ -9,21 +9,28 @@ React 19 + Vite 7 + Tailwind CSS v3 + Radix UI frontend
 wouter for client routing
 PostgreSQL via raw postgres-js (no ORM)
 Claude API (primary), Google Gemini (secondary), OpenAI (tertiary)
-Stripe wallet payments — NO SUBSCRIPTIONS, NO TIERS
+Stripe one-time platform fee per deal — NO SUBSCRIPTIONS for end users, NO WALLET
 JWT authentication (no sessions, no passport — sessions broke on Railway)
 Railway deployment (GitHub push → auto-deploy)
 
 Critical Rules — Read These First
 
-NO SUBSCRIPTIONS. Pure wallet + menu pricing. Users top up wallet with real dollars via Stripe, spend dollars on deliverables. $1 in wallet = $1 purchasing power. No separate "credit" unit. League multipliers adjust price by deal size.
-Gate-by-gate pricing. Users pay small amounts progressively as they advance through gates — NOT one big lump sum per journey. Each gate unlock is a manageable price point that keeps users moving forward.
+ONE-TIME PLATFORM FEE. 0.1% of SDE or EBITDA, $999 minimum, one payment per deal. No wallet, no per-deliverable pricing, no credits. Everything through close + 180 days PMI is included. Fee formula: `fee_cents = Math.max(99900, Math.round(sde_or_ebitda * 0.001 * 100))`
+FREE TIER IS GENEROUS. S0-S1, B0-B1, R0-R1, PMI0 are free. ValueLens, Value Readiness Report, Deal Scoring, Investment Thesis, Capital Stack — all free. CIM is PAID (behind S2/B2 paywall, included in platform fee).
 Mirror claude.ai UI exactly. Same layout, serif fonts (ui-serif/Georgia stack), warm cream background (#F5F5F0), terra cotta accent (#C96B4F), collapsible left sidebar with chat history, centered chat at max-w-3xl, rounded-2xl composer with subtle shadow.
 Mobile browser first. Design for mobile, then adapt to desktop. Sidebar hidden on mobile, slides in from left. Composer sticks above keyboard.
-Yulia never says "As an AI." She is an expert M&A advisor. Adapts persona by league: Coach (L1), Guide (L2), Analyst (L3), Associate (L4), Partner (L5), Macro (L6).
+Yulia never says "As an AI." She is an expert M&A deal intelligence. Adapts persona by league: Coach (L1), Guide (L2), Analyst (L3), Associate (L4), Partner (L5), Macro (L6).
 Financial data: zero hallucination. Extract exactly from documents, never invent numbers. Add-backs require user verification.
-League determines everything. L1-L6 controls: financial metric (SDE vs EBITDA), multiple ranges, deliverable pricing, Yulia persona, document complexity.
+League determines everything. L1-L6 controls: financial metric (SDE vs EBITDA), multiple ranges, Yulia persona, document complexity.
 All money stored in cents (integers). Never use floating point for financial values.
 Chinese wall. Buyer data and seller data strictly isolated. No cross-deal data leakage.
+
+Legal Identity — What We Are and Are Not
+
+smbx.ai is an AI-powered deal intelligence platform. NOT a broker, advisor, appraiser, law firm, or financial advisor. All outputs are AI-generated estimates for informational purposes only.
+Never say: "AI advisor", "business broker", "replace your broker", "appraisal", "we advise", "our advice"
+Always say: "AI deal intelligence", "AI-guided process", "AI-estimated value range", "our analysis shows"
+Required disclaimer on every deliverable: "smbx.ai is a technology platform, not a business brokerage, law firm, or financial advisor. All valuations, analyses, and documents are AI-generated estimates for informational purposes only."
 
 Reference Documents
 
@@ -42,32 +49,35 @@ css--bg-primary: #F5F5F0;        /* Warm cream canvas */
 --bg-primary-dark: #2B2A27;
 --bg-secondary-dark: #1F1E1B;
 --text-primary-dark: #EEEEEE;
-Pricing Model — Pure Wallet + Menu
+Pricing Model — One-Time Platform Fee
 How It Works
 
 User signs up free → free gates hook them in (S0-S1, B0-B1, R0-R1, PMI0)
-First paywall hits at gate 2 (valuation / investor materials)
-User tops up wallet with real dollars via Stripe
-Each gate advancement has a clear, small price — users pay as they progress
-$1 in wallet = $1 of purchasing power (no credit conversion)
-Yulia contextually proposes value-added services (optimization plans, transaction readiness) as natural upsells during the journey
+First paywall hits at S2/B2/R2 gate — after Yulia calculates SDE/EBITDA from actual financials
+Single Stripe checkout: 0.1% of SDE or EBITDA, $999 minimum
+Everything after payment is included: all deliverables, deal room, buyer matching, DD coordination, closing support, 180-day PMI
+No per-deliverable pricing. No wallet. No top-ups. One decision point.
 
-Wallet Top-Up Blocks
-BlockPriceBonusTotalExploratoryStarter$50—$50Early Commit$100+$5$105Active Deal$250+$15$265Serious$500+$40$540Full Journey$1,000+$100$1,100Advisor$2,500+$300$2,800
-Menu Tiers (Base Prices — before league multiplier)
+Platform Fee Examples
+| Deal | SDE/EBITDA | Fee | vs. Traditional |
+|------|-----------|-----|----------------|
+| Small business ($350K SDE) | $350K | $999 (minimum) | $15K-$40K broker |
+| Mid-market ($3M EBITDA) | $3M | $3,000 | $100K-$200K IB |
+| Upper mid ($8M EBITDA) | $8M | $8,000 | $200K-$400K IB |
+| Large ($50M+ EBITDA) | $50M+ | Custom | Full IB engagement |
 
-Analyst ($5–$25): Quick valuations, market snapshots, comparable pulls
-Associate ($25–$100): Full CIM drafts, buyer lists, financial models
-VP ($100–$500+): Deep research packages, full DD suites
+Advisor Subscriptions (separate from deal fee)
+| Plan | Price | Details |
+|------|-------|---------|
+| Trial | Free | First 3 client deals |
+| Pro | $299/month | Unlimited deals, branded outputs |
+| Enterprise | $499/month | API, white-label, team seats |
 
-League Multipliers
-LeagueDeal SizeMultiplierL1< $500K1.0×L2$500K–$1M1.25×L3$1M–$5M3.0×L4$5M–$10M5.0×L5$10M–$50M8.0×L6$50M+10.0×
-Price Formula
-Final Price = Base Price × League Multiplier × (1 + Wagyu Surcharge if applicable)
-Free vs Paid
+Free vs Paid Deliverables
 
-Free gates: S0-S1, B0-B1, R0-R1, PMI0 (intake, basic financials)
-First paywall: S2 (Valuation), B2 (Target Valuation), R2 (Investor Materials)
+Free (S0-S1, B0-B1): ValueLens, Value Readiness Report, SDE/EBITDA analysis, Investment Thesis, Capital Stack, Deal Scoring
+PAID (behind S2/B2 paywall): CIM, full financial models, DD packages, LOI tools, buyer lists, closing documents
+Everything paid is included in the one-time platform fee — no additional charges
 
 Four Journeys × Six Gates
 SELL (S0–S5)
@@ -83,7 +93,7 @@ SDE = Net_Income + Owner_Salary + D&A + Interest + One_Time + Verified_Addbacks
 EBITDA = Net_Income + D&A + Interest + Taxes + Verified_Addbacks - Non_Recurring
 DSCR = EBITDA / Annual_Debt_Service (SBA ≥ 1.25, Conventional ≥ 1.50)
 Valuation = (SDE or EBITDA) × (Base_Multiple + Growth_Premium + Margin_Premium)
-Transaction_Fee = MAX(deal_value × 0.5%, $2,000)
+Platform_Fee = MAX(99900, ROUND(sde_or_ebitda * 0.001 * 100)) // in cents
 League Multiple Ranges
 javascriptconst LEAGUE_MULTIPLE_RANGES = {
   L1: { metric: 'SDE', min: 2.0, max: 3.5 },
@@ -102,35 +112,43 @@ Key File Map
 | server/index.ts | Express entry point |
 | server/routes/chat.ts | Chat CRUD + SSE streaming endpoints |
 | server/routes/auth.ts | JWT auth routes (login, signup, verify, Google OAuth) |
-| server/routes/stripe.ts | Stripe checkout + webhooks |
-| server/routes/wallet.ts | Wallet balance + transaction history |
+| server/routes/stripe.ts | Platform fee checkout + Stripe webhooks |
 | server/routes/export.ts | PDF/DOCX/XLSX export endpoints (pdfkit, docx, exceljs) |
 | server/routes/dataRoom.ts | Folder/document management + deliverable comments |
 | server/routes/collaboration.ts | Deal invites, RBAC, NDA, day passes |
-| server/routes/deliverables.ts | Deliverable CRUD, content editing, AI revision |
+| server/routes/deliverables.ts | Deliverable CRUD, content editing, regeneration |
 | server/services/aiService.ts | AI orchestration + agentic loop |
-| server/services/walletService.ts | Wallet CRUD, balance checks |
-| server/services/menuCatalogService.ts | Menu items, wallet blocks, deal packages |
-| server/services/leagueClassifier.ts | League detection + multiplier calculation |
-| server/services/gateReadinessService.ts | Gate advancement logic |
+| server/services/platformFeeService.ts | Platform fee calculation, Stripe checkout, payment verification |
+| server/services/dealExecutionFee.ts | Fee formula: 0.1% of SDE/EBITDA, $999 min |
+| server/services/menuCatalogService.ts | Menu items catalog (deliverable listing, no per-item pricing) |
+| server/services/leagueClassifier.ts | League detection from deal financials |
+| server/services/gateReadinessService.ts | Gate advancement + paywall logic |
 | server/services/dealAccessService.ts | RBAC: hasDealAccess, folder visibility, activity logging |
-| server/services/complexityPreflightService.ts | Wagyu Rule surcharge detection (8 factors, 50% cap) |
+| server/services/dealService.ts | Deal CRUD, gate advancement, auto-advance |
+| server/services/dealFreshnessService.ts | Financial snapshot tracking, stale deliverable detection |
+| server/services/gateConversationService.ts | Gate transition lifecycle (summarize + archive + create) |
+| server/services/gateSummaryService.ts | Claude Haiku gate conversation summarization |
 | server/services/deliverableProcessor.ts | AI generation dispatch + category routing + auto-filing |
 | server/services/modelRouter.ts | Tier-based Claude model routing (Opus/Sonnet/Haiku) |
 | server/services/optimizationPlanService.ts | Seller value optimization engine + milestones |
 | server/services/exportService.ts | PDF/DOCX/XLSX generation with watermarking |
 | server/services/documentExtractor.ts | PDF/XLSX/CSV extraction via Claude Vision |
 | server/services/emailService.ts | Transactional emails via Resend (welcome, gate, deliverable) |
+| server/services/paywallService.ts | Paywall prompt generation with fee context |
 | server/services/tools.ts | 10 agentic tools for authenticated chat |
 | server/services/promptBuilder.ts | Dynamic prompt assembly with gate/league/knowledge layers |
-| server/prompts/gatePrompts.ts | Gate-specific prompts for all 4 journeys (S0-S5, B0-B5, R0-R5, PMI0-PMI3) |
+| server/prompts/gatePrompts.ts | Gate-specific prompts for all 4 journeys |
 | server/services/generators/ | 23 specialized generators (valuation, CIM, LOI, LBO, etc.) |
+| client/src/pages/Chat.tsx | Main chat page with canvas, sidebar, composer |
 | client/src/pages/public/AppShell.tsx | Unified shell for all public pages |
-| client/src/components/chat/Canvas.tsx | Document viewer with export, edit, comments |
+| client/src/components/chat/Canvas.tsx | Document viewer with export, edit, comments, stale badge |
+| client/src/components/chat/Sidebar.tsx | Deal-grouped conversation sidebar |
+| client/src/components/chat/PaywallCard.tsx | Platform fee paywall card at S2/B2/R2 |
 | client/src/components/chat/InteractiveModel.tsx | Financial model with sliders, scenarios, sensitivity |
 | client/src/components/chat/DataRoom.tsx | Data room UI with folders, search, share links |
 | client/src/components/chat/CommentsPanel.tsx | Deliverable commenting with resolve workflow |
 | client/src/components/chat/NDAModal.tsx | NDA acceptance modal for deal participants |
+| client/src/hooks/useAuthChat.ts | Chat state management + SSE event handling |
 AI Orchestration (Anthropic Only)
 
 | Task | Engine | Config |
@@ -140,6 +158,7 @@ AI Orchestration (Anthropic Only)
 | Document Extraction | Claude Sonnet 4.6 | Vision (page-by-image), JSON output |
 | Deliverable Generation | Tier-routed (Opus/Sonnet/Haiku) | 23 generators + 9 category generators + model routing |
 | CIM Generation | Claude Opus 4.6 | High-quality long-form document |
+| Gate Summarization | Claude Haiku 4.5 | Fast 3-4 sentence gate summaries |
 | Optimization Plans | Claude Sonnet 4.6 | Structured JSON output |
 
 Generators (server/services/generators/): valuationReport, sbaBankability, capitalStructure, cimGenerator, loiGenerator, financialModel, blindTeaser, ddPackage, workingCapital, dealScreeningMemo, intelligenceReport, fundsFlowStatement, closingChecklist, taxImpactAnalysis, pitchDeckGenerator, integrationPlanGenerator, executiveSummary, dealScoring, outreachStrategy, buyerList, lboModel, valueCreationPlan, dataRoomStructure

@@ -162,6 +162,22 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
 
   const handleNew = async () => { await createConversation(); };
 
+  // Pre-filled message from query param (e.g., ?message=I'm interested in...)
+  const prefillHandled = useRef(false);
+  useEffect(() => {
+    if (prefillHandled.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const prefill = params.get('message');
+    if (prefill) {
+      prefillHandled.current = true;
+      // Clean the URL
+      window.history.replaceState(null, '', window.location.pathname);
+      // Wait for conversations to load, then send
+      setTimeout(() => handleSend(prefill), 500);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Send message with SSE streaming via authenticated agentic endpoint
   const handleSend = async (content: string) => {
     const tempMsg: Message = { id: Date.now(), role: 'user', content, created_at: new Date().toISOString() };

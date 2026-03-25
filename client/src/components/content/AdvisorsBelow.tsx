@@ -160,7 +160,7 @@ export default function AdvisorsBelow() {
                     </li>
                   ))}
                 </ul>
-                <button onClick={handleCTA} className={`w-full py-4 rounded-xl font-bold transition-colors border-none cursor-pointer ${dark ? 'bg-zinc-800 hover:bg-zinc-700 text-white' : 'bg-white hover:bg-[#f3f3f6] text-[#1a1c1e]'}`} style={dark ? undefined : { border: '1px solid #eeeef0' }}>Contact Sales</button>
+                <button onClick={() => { window.location.href = '/chat?message=' + encodeURIComponent("I'm interested in Advisor Enterprise pricing for my firm. I manage multiple client deals."); }} className={`w-full py-4 rounded-xl font-bold transition-colors border-none cursor-pointer ${dark ? 'bg-zinc-800 hover:bg-zinc-700 text-white' : 'bg-white hover:bg-[#f3f3f6] text-[#1a1c1e]'}`} style={dark ? undefined : { border: '1px solid #eeeef0' }}>Talk to Yulia</button>
               </div>
             </StaggerItem>
           </StaggerContainer>
