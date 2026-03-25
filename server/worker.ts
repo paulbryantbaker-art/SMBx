@@ -13,6 +13,8 @@ import { processDeliverable, type DeliverableJobData } from './services/delivera
 import { runAllActiveTheses, detectNewListingMatches } from './services/thesisMatchingService.js';
 import { refreshAllValuations } from './services/valuationRefreshService.js';
 import { checkDealFreshness } from './services/dealFreshnessService.js';
+import { runDailyAggregatorScan } from './services/aggregatorMonitorService.js';
+import { batchEnrichTargets } from './services/websiteEnrichmentService.js';
 import { sql } from './db.js';
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -159,6 +161,24 @@ async function start() {
     }
   });
   console.log('Scheduled: fred_rate_monitor (Wednesday 3 AM UTC)');
+
+  // Daily aggregator scan — every day at 5 AM UTC
+  await (boss as any).schedule('daily_aggregator_scan', '0 5 * * *', {}, {});
+  await (boss as any).work('daily_aggregator_scan', async () => {
+    console.log('[worker] Running daily aggregator scan...');
+    const result = await runDailyAggregatorScan();
+    console.log(`[worker] Aggregator scan: ${result.listingsScanned} scanned, ${result.newListings} new, ${result.matchedTheses} matches, ${result.notificationsSent} notifications`);
+  });
+  console.log('Scheduled: daily_aggregator_scan (daily 5 AM UTC)');
+
+  // Website enrichment batch — every day at 8 AM UTC
+  await (boss as any).schedule('daily_enrichment_batch', '0 8 * * *', {}, {});
+  await (boss as any).work('daily_enrichment_batch', async () => {
+    console.log('[worker] Running daily website enrichment batch...');
+    const result = await batchEnrichTargets(20);
+    console.log(`[worker] Enrichment batch: ${result.enriched} enriched, ${result.failed} failed`);
+  });
+  console.log('Scheduled: daily_enrichment_batch (daily 8 AM UTC)');
 
   console.log('Worker ready — listening for jobs');
 }

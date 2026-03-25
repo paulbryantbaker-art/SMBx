@@ -9,6 +9,10 @@ import { generateOptimizationPlan, saveOptimizationPlan, createOptimizationMiles
 import { sendGateAdvancementEmail } from './emailService.js';
 import { handleGateTransition } from './gateConversationService.js';
 import { snapshotDealFinancials, checkDealFreshness } from './dealFreshnessService.js';
+import { fetchCBPData, fetchBDSData, calculateSBABankability } from './marketDataService.js';
+import { getSBALendingStats } from './sbaLendingService.js';
+import { getMarketHeat } from './marketHeatService.js';
+import { enrichCompanyWebsite } from './websiteEnrichmentService.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
@@ -164,6 +168,33 @@ export const TOOL_DEFINITIONS: Tool[] = [
       required: ['dealId'],
     },
   },
+  {
+    name: 'scan_market',
+    description: 'Scan market data for a buyer thesis or deal evaluation. Combines Census CBP (establishment counts), Census BDS (firm age/turnover), SBA 7(a) lending stats, and market heat scoring. Call this when: a buyer asks about market conditions for an industry, a seller wants to understand their competitive landscape, or when evaluating a deal in a specific geography.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        industry: { type: 'string', description: 'Industry name (e.g., "HVAC", "dental practice")' },
+        naicsCode: { type: 'string', description: 'NAICS code (2-6 digits). If unknown, provide industry name and we will infer.' },
+        stateCode: { type: 'string', description: '2-digit FIPS state code (e.g., "48" for Texas, "06" for California)' },
+        purchasePrice: { type: 'number', description: 'Estimated purchase price in cents for SBA analysis' },
+        earnings: { type: 'number', description: 'SDE or EBITDA in cents for SBA analysis' },
+      },
+      required: ['industry'],
+    },
+  },
+  {
+    name: 'enrich_target',
+    description: 'Enrich a discovery target or company profile by scraping and analyzing their website. Uses Claude Haiku to extract structured business data: years in business, services offered, team size, location details, and succession/sale signals. Call this when evaluating a specific business as a potential acquisition target.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        companyProfileId: { type: 'number', description: 'Company profile ID to enrich' },
+        websiteUrl: { type: 'string', description: 'Website URL to scrape. If companyProfileId is given, will use stored URL.' },
+      },
+      required: [],
+    },
+  },
 ];
 
 // ─── Tool Execution ────────────────────────────────────────
@@ -206,6 +237,10 @@ export async function executeTool(
         return await listUserDeals(input, userId);
       case 'switch_deal_context':
         return await switchDealContext(input, userId, conversationId);
+      case 'scan_market':
+        return await scanMarket(input, userId);
+      case 'enrich_target':
+        return await enrichTarget(input, userId);
       default:
         return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
@@ -723,4 +758,158 @@ async function switchDealContext(input: Record<string, any>, userId: number, con
 
   await sql`UPDATE conversations SET deal_id = ${dealId} WHERE id = ${conversationId}`;
   return JSON.stringify({ success: true, dealId, businessName: owned.business_name, journeyType: owned.journey_type, currentGate: owned.current_gate, role: 'owner' });
+}
+
+// ─── Market Intelligence Tools ─────────────────────────────
+
+// Common NAICS lookup by industry keyword
+const INDUSTRY_NAICS: Record<string, string> = {
+  'hvac': '2382', 'plumbing': '2381', 'electrical': '2382', 'construction': '2389',
+  'pest control': '5612', 'landscaping': '5617', 'cleaning': '5617',
+  'dental': '6213', 'veterinary': '5413', 'medical': '6211', 'healthcare': '6211',
+  'physical therapy': '6213', 'optometry': '6213',
+  'restaurant': '7225', 'food': '7225', 'coffee': '7225', 'bar': '7224',
+  'auto repair': '8111', 'mechanic': '8111', 'automotive': '8111',
+  'salon': '8121', 'barber': '8121', 'spa': '8121',
+  'accounting': '5412', 'cpa': '5412', 'law': '5411', 'legal': '5411',
+  'insurance': '5242', 'staffing': '5613', 'consulting': '5416',
+  'it': '5415', 'msp': '5415', 'software': '5112', 'saas': '5112',
+  'ecommerce': '4541', 'retail': '4529', 'grocery': '4451',
+  'manufacturing': '3111', 'fitness': '7139', 'gym': '7139',
+  'property management': '5312', 'real estate': '5312',
+  'home services': '2389', 'roofing': '2381',
+};
+
+function inferNaicsCode(industry: string): string {
+  const lower = industry.toLowerCase();
+  for (const [keyword, code] of Object.entries(INDUSTRY_NAICS)) {
+    if (lower.includes(keyword)) return code;
+  }
+  return '81'; // Default: Other Services
+}
+
+async function scanMarket(input: Record<string, any>, _userId: number): Promise<string> {
+  const { industry, naicsCode, stateCode, purchasePrice, earnings } = input;
+  const naics = naicsCode || inferNaicsCode(industry);
+  const results: Record<string, any> = { industry, naicsCode: naics };
+
+  // 1. Market heat
+  const heat = await getMarketHeat(industry).catch(() => null);
+  if (heat) {
+    results.marketHeat = {
+      score: heat.score,
+      label: heat.label,
+      peActivity: heat.peActivity,
+      multipleDirection: heat.multipleDirection,
+      signals: heat.signals,
+    };
+  }
+
+  // 2. Census CBP (establishment counts)
+  if (stateCode) {
+    const cbp = await fetchCBPData(naics, stateCode).catch(() => null);
+    if (cbp) {
+      results.establishments = {
+        count: cbp.establishments,
+        employees: cbp.employees,
+        avgPayrollPerEmployee: cbp.payrollPerEmployee,
+        geography: cbp.geography,
+      };
+    }
+  }
+
+  // 3. Census BDS (firm age / turnover)
+  const bds = await fetchBDSData(naics, stateCode).catch(() => null);
+  if (bds) {
+    results.firmDynamics = {
+      totalFirms: bds.totalFirms,
+      entryRate: `${bds.entryRate}%`,
+      exitRate: `${bds.exitRate}%`,
+      netGrowthRate: `${bds.netGrowthRate}%`,
+      firmAgeDistribution: bds.firmAgeDistribution,
+    };
+  }
+
+  // 4. SBA lending stats
+  const sba = await getSBALendingStats(naics, stateCode).catch(() => null);
+  if (sba) {
+    results.sbaLending = {
+      context: sba.context,
+      avgLoan: sba.avgLoanCents > 0 ? `$${(sba.avgLoanCents / 100).toLocaleString()}` : null,
+      approvalRate: sba.approvalRate ? `${sba.approvalRate}%` : null,
+      avgTermMonths: sba.avgTermMonths,
+    };
+  }
+
+  // 5. SBA bankability if price/earnings provided
+  if (purchasePrice && earnings) {
+    const bankability = await calculateSBABankability({
+      purchasePrice: purchasePrice / 100, // cents → dollars
+      ebitdaOrSde: earnings / 100,
+    }).catch(() => null);
+    if (bankability) {
+      results.sbaBankability = {
+        eligible: bankability.eligible,
+        dscr: bankability.dscr,
+        ltv: bankability.ltv,
+        monthlyPayment: `$${bankability.monthlyPayment.toLocaleString()}`,
+        reasoning: bankability.reasoning,
+      };
+    }
+  }
+
+  // 6. Active buyer theses on platform
+  try {
+    const theses = await sql`
+      SELECT COUNT(*)::int as cnt FROM buyer_theses
+      WHERE status = 'active' AND (
+        industries::text ILIKE ${`%${industry}%`}
+        OR target_description ILIKE ${`%${industry}%`}
+      )
+    `;
+    results.platformBuyerTheses = parseInt(theses[0]?.cnt || '0');
+  } catch { results.platformBuyerTheses = 0; }
+
+  // 7. Active listings on platform
+  try {
+    const listings = await sql`
+      SELECT COUNT(*)::int as cnt FROM listings
+      WHERE status = 'active' AND (
+        industry ILIKE ${`%${industry}%`}
+        OR title ILIKE ${`%${industry}%`}
+      )
+    `;
+    results.platformListings = parseInt(listings[0]?.cnt || '0');
+  } catch { results.platformListings = 0; }
+
+  // Build summary
+  const summaryParts: string[] = [];
+  if (heat) summaryParts.push(`Market heat: ${heat.label} (${heat.score}/5)`);
+  if (results.establishments) summaryParts.push(`${results.establishments.count.toLocaleString()} establishments in area`);
+  if (bds) summaryParts.push(`Firm exit rate: ${bds.exitRate}% (potential acquisition targets)`);
+  if (sba?.avgLoanCents) summaryParts.push(`Avg SBA loan: $${(sba.avgLoanCents / 100).toLocaleString()}`);
+  results.summary = summaryParts.join('. ') + '.';
+
+  return JSON.stringify({ success: true, ...results });
+}
+
+async function enrichTarget(input: Record<string, any>, userId: number): Promise<string> {
+  const { companyProfileId, websiteUrl } = input;
+
+  let url = websiteUrl;
+  let profileId = companyProfileId;
+
+  // If profileId given, look up stored website
+  if (profileId && !url) {
+    const [profile] = await sql`SELECT website FROM company_profiles WHERE id = ${profileId}`;
+    if (!profile?.website) return JSON.stringify({ error: 'No website URL on file for this company' });
+    url = profile.website;
+  }
+
+  if (!url) return JSON.stringify({ error: 'Provide websiteUrl or companyProfileId with a stored website' });
+
+  const enrichment = await enrichCompanyWebsite(url, profileId || undefined);
+  if (!enrichment) return JSON.stringify({ error: 'Could not enrich website — may be unreachable or blocked' });
+
+  return JSON.stringify({ success: true, ...enrichment });
 }

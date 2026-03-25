@@ -94,6 +94,90 @@ export async function fetchCBPData(naicsCode: string, stateCode: string, countyC
   }
 }
 
+// ─── Census BDS (Business Dynamics Statistics) ──────────────
+
+const CENSUS_BDS_BASE = 'https://api.census.gov/data/timeseries/bds/firms';
+
+export interface BDSData {
+  naicsCode: string;
+  firmAgeDistribution: Record<string, number>; // e.g. "0-1": 1234, "2-5": 5678
+  entryRate: number;   // firm birth rate %
+  exitRate: number;    // firm death rate %
+  totalFirms: number;
+  netGrowthRate: number;
+}
+
+/**
+ * Fetch Census Business Dynamics Statistics for firm age analysis.
+ * Tells us what % of firms are young (ripe for sale) vs. mature.
+ * @param naicsCode - 2-digit NAICS sector code
+ * @param stateCode - 2-digit FIPS state code (optional; omit for national)
+ */
+export async function fetchBDSData(naicsCode: string, stateCode?: string): Promise<BDSData | null> {
+  const geo = stateCode || 'US';
+  const cacheKey = `bds:${naicsCode}:${geo}`;
+
+  const cached = await getCached('census_bds', cacheKey);
+  if (cached) return cached as BDSData;
+
+  try {
+    // BDS uses 2-digit NAICS sector codes
+    const sector = naicsCode.substring(0, 2);
+    const geoParam = stateCode ? `&state=${stateCode}` : '';
+    const url = `${CENSUS_BDS_BASE}?get=firms,firmdeath_firms,firmbirth_firms,fage4&for=us:*${geoParam}&NAICS=${sector}&time=2021`;
+
+    const res = await fetch(url);
+    if (!res.ok) return null;
+
+    const json = await res.json();
+    if (!json || json.length < 2) return null;
+
+    const headers = json[0] as string[];
+    const rows = json.slice(1) as string[][];
+
+    const firmsIdx = headers.indexOf('firms');
+    const deathIdx = headers.indexOf('firmdeath_firms');
+    const birthIdx = headers.indexOf('firmbirth_firms');
+    const ageIdx = headers.indexOf('fage4');
+
+    // Aggregate by firm age bracket
+    const firmAgeDistribution: Record<string, number> = {};
+    let totalFirms = 0;
+    let totalBirths = 0;
+    let totalDeaths = 0;
+
+    for (const row of rows) {
+      const count = parseInt(row[firmsIdx], 10) || 0;
+      const ageBracket = row[ageIdx] || 'Unknown';
+      const births = parseInt(row[birthIdx], 10) || 0;
+      const deaths = parseInt(row[deathIdx], 10) || 0;
+
+      firmAgeDistribution[ageBracket] = (firmAgeDistribution[ageBracket] || 0) + count;
+      totalFirms += count;
+      totalBirths += births;
+      totalDeaths += deaths;
+    }
+
+    const entryRate = totalFirms > 0 ? Math.round((totalBirths / totalFirms) * 10000) / 100 : 0;
+    const exitRate = totalFirms > 0 ? Math.round((totalDeaths / totalFirms) * 10000) / 100 : 0;
+
+    const data: BDSData = {
+      naicsCode: sector,
+      firmAgeDistribution,
+      entryRate,
+      exitRate,
+      totalFirms,
+      netGrowthRate: Math.round((entryRate - exitRate) * 100) / 100,
+    };
+
+    await setCache('census_bds', cacheKey, data, 90); // 90-day TTL
+    return data;
+  } catch (err: any) {
+    console.error('Census BDS fetch error:', err.message);
+    return null;
+  }
+}
+
 // ─── FRED (Federal Reserve Economic Data) ────────────────────
 
 export interface FREDData {
