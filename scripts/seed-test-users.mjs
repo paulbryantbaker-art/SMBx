@@ -48,11 +48,11 @@ try {
 
   // ── 2. Deals ──────────────────────────────────────────────
   const [sellerDeal] = await sql`
-    INSERT INTO deals (user_id, journey_type, current_gate, league, industry, location, business_name, name, revenue, sde, ebitda, status, naics_code, employee_count)
+    INSERT INTO deals (user_id, journey_type, current_gate, league, industry, location, business_name, revenue, sde, ebitda, status, naics_code, employee_count)
     VALUES (
       ${seller.id}, 'sell', 'S2', 'L2',
       'HVAC', 'Austin, TX',
-      'Comfort Air HVAC', 'Comfort Air HVAC Sale',
+      'Comfort Air HVAC',
       180000000, 42000000, 36000000,
       'active', '238220', 22
     )
@@ -63,11 +63,11 @@ try {
   if (sellerDealId) console.log(`Seller deal: id=${sellerDealId}`);
 
   const [buyerDeal] = await sql`
-    INSERT INTO deals (user_id, journey_type, current_gate, league, industry, location, business_name, name, status, naics_code)
+    INSERT INTO deals (user_id, journey_type, current_gate, league, industry, location, business_name, status, naics_code)
     VALUES (
       ${buyer.id}, 'buy', 'B1', 'L1',
       'IT/MSP', 'Denver, CO',
-      'Target MSP Acquisition', 'MSP Search',
+      'Target MSP Acquisition',
       'active', '541512'
     )
     ON CONFLICT DO NOTHING
