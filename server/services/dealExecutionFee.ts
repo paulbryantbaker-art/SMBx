@@ -83,10 +83,13 @@ const FREE_GATES = new Set(['S0', 'S1', 'B0', 'B1', 'R0', 'R1', 'PMI0']);
 const ALWAYS_FREE_TYPES = new Set([
   'valuelens',
   'value_lens',
-  'bizestimate',       // legacy alias
   'value_readiness_report',
+  'investment_thesis',
+  'preliminary_sde',
+  'preliminary_ebitda',
+  'capital_stack_template',
   'deal_scoring',
-  // CIM is PAID — behind S2/B2 paywall, included in platform fee
+  // CIM is PAID — behind S2/B2 paywall, included in execution fee
 ]);
 
 /**

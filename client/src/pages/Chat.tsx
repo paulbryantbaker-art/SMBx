@@ -511,7 +511,6 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
                           setViewingDeliverable(deliverableId);
                         }
                       }}
-                      onTopUp={() => {}}
                     />
                   )}
 

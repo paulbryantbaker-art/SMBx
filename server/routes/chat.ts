@@ -10,7 +10,7 @@ import { extractFields } from '../services/fieldExtractor.js';
 import type { ExtractedFields } from '../services/fieldExtractor.js';
 import { checkGateReadiness } from '../services/gateReadinessService.js';
 import { generatePaywallPrompt } from '../services/paywallService.js';
-import { createPlatformFeeCheckout, isPlatformFeePaid, getPlatformFee } from '../services/platformFeeService.js';
+import { isExecutionFeePaid, calculateExecutionFee, markExecutionFeePaid } from '../services/dealExecutionFee.js';
 import { classifyLeague, getLeagueMultiplier } from '../services/leagueClassifier.js';
 import { getGateMenuItems } from '../services/menuCatalogService.js';
 import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
@@ -734,11 +734,12 @@ chatRouter.post('/deals/:dealId/unlock-gate', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Invalid gate unlock request' });
     }
 
-    // Platform fee model: redirect to Stripe checkout (or auto-pay in TEST_MODE)
-    const result = await createPlatformFeeCheckout(parseInt(req.params.dealId), userId);
+    // Execution fee model: auto-pay in TEST_MODE, otherwise redirect to Stripe checkout
+    const fee = calculateExecutionFee({ sde: deal.sde, ebitda: deal.ebitda });
 
-    if (result.test) {
-      // TEST_MODE: platform fee auto-paid — advance gate immediately
+    if (process.env.TEST_MODE === 'true') {
+      // TEST_MODE: execution fee auto-paid — advance gate immediately
+      await markExecutionFeePaid(dealId, fee.feeCents, 'test_' + Date.now());
       const newGate = await advanceGate(dealId, deal.current_gate);
 
       // Auto-trigger primary deliverable for the unlocked gate
@@ -772,7 +773,6 @@ chatRouter.post('/deals/:dealId/unlock-gate', requireAuth, async (req, res) => {
         console.error('Auto-trigger deliverable error:', e.message);
       }
 
-      const fee = await getPlatformFee(dealId);
       return res.json({
         success: true,
         fromGate: deal.current_gate,
@@ -783,10 +783,11 @@ chatRouter.post('/deals/:dealId/unlock-gate', requireAuth, async (req, res) => {
       });
     }
 
-    // Real Stripe: return checkout URL for client redirect
+    // Real Stripe: redirect to /api/stripe/deal-checkout via client
+    const appUrl = process.env.APP_URL || 'https://smbx.ai';
     return res.json({
       success: false,
-      checkoutUrl: result.url,
+      checkoutUrl: `${appUrl}/api/stripe/deal-checkout`,
       message: 'Redirect to Stripe checkout to pay platform fee',
     });
   } catch (err: any) {

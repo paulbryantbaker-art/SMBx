@@ -6,6 +6,14 @@ import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { hasDealAccess, getVisibleFolderIds, logActivity } from '../services/dealAccessService.js';
 import { createNotification } from './notifications.js';
+import multer from 'multer';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+});
 
 export const dataRoomRouter = Router();
 dataRoomRouter.use(requireAuth);
@@ -321,5 +329,56 @@ dataRoomRouter.patch('/deliverable-comments/:commentId/resolve', async (req, res
   } catch (err: any) {
     console.error('Resolve comment error:', err.message);
     return res.status(500).json({ error: 'Failed to resolve comment' });
+  }
+});
+
+// ─── File upload to data room ─────────────────────────────────
+
+dataRoomRouter.post('/data-room/:dealId/upload', upload.single('file'), async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const dealId = parseInt(req.params.dealId, 10);
+    const file = req.file;
+
+    if (!file) return res.status(400).json({ error: 'No file provided' });
+
+    // RBAC: check access
+    const access = await hasDealAccess(dealId, userId);
+    if (!access) return res.status(404).json({ error: 'Deal not found' });
+    if (access.access_level === 'read') return res.status(403).json({ error: 'Read-only access cannot upload files' });
+
+    // Save to disk at /tmp/uploads/{dealId}/
+    const uploadDir = join('/tmp', 'uploads', String(dealId));
+    await mkdir(uploadDir, { recursive: true });
+
+    const safeFilename = `${Date.now()}_${file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+    const filePath = join(uploadDir, safeFilename);
+    await writeFile(filePath, file.buffer);
+
+    // Determine folder from request body (optional)
+    const folderId = req.body.folderId ? parseInt(req.body.folderId, 10) : null;
+
+    // Detect file type from extension
+    const ext = file.originalname.split('.').pop()?.toLowerCase() || 'unknown';
+    const fileType = ['pdf', 'docx', 'xlsx', 'csv', 'pptx', 'txt'].includes(ext) ? ext : 'other';
+
+    // Create data_room_documents record
+    const [doc] = await sql`
+      INSERT INTO data_room_documents (deal_id, folder_id, user_id, name, file_type, file_url, file_size, status)
+      VALUES (${dealId}, ${folderId}, ${userId}, ${file.originalname}, ${fileType}, ${filePath}, ${file.size}, 'draft')
+      RETURNING id, name, file_type, file_size, status, created_at
+    `;
+
+    // Log activity
+    await logActivity(dealId, userId, 'uploaded', 'document', doc.id, {
+      filename: file.originalname,
+      fileType,
+      size: file.size,
+    }).catch(() => {});
+
+    return res.status(201).json(doc);
+  } catch (err: any) {
+    console.error('File upload error:', err.message);
+    return res.status(500).json({ error: 'Failed to upload file' });
   }
 });

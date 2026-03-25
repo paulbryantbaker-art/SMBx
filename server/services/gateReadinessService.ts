@@ -7,7 +7,7 @@
  * PMI gates are always free (included with the original deal).
  */
 import { GATE_MAP, getNextGate, isGateFree } from '../../shared/gateRegistry.js';
-import { isPlatformFeePaid } from './platformFeeService.js';
+import { isExecutionFeePaid } from './dealExecutionFee.js';
 
 export interface GateReadinessResult {
   ready: boolean;
@@ -63,7 +63,7 @@ export async function checkGateReadiness(
   if (nextGate && isPaywallGate(nextGate)) {
     // Check if platform fee is already paid
     if (deal.id) {
-      const paid = await isPlatformFeePaid(deal.id);
+      const paid = await isExecutionFeePaid(deal.id);
       paywallRequired = !paid;
     } else {
       paywallRequired = !(deal.platform_fee_paid || false);

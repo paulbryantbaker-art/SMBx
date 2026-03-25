@@ -64,7 +64,7 @@ function normalizeDeliverableType(raw: string): string {
     raise_blind_teaser: 'blind_teaser',
     raise_financial_model: 'financial_model',
     // Buy items → existing generators
-    buy_sources_uses: 'buy_capital_structure', // financing model with sources/uses
+    buy_sources_uses: 'capital_structure_analysis', // financing model with sources/uses
     buy_day_one_checklist: 'pmi_integration_plan', // day-one is integration subset
     // Sell items
     sell_financial_summary_package: 'sell_financial_spread', // category generator

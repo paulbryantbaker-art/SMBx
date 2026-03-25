@@ -1,7 +1,7 @@
 import postgres from 'postgres';
 import type { Tool } from '@anthropic-ai/sdk/resources/messages';
 import { checkGateReadinessSync as checkReadiness, isPaywallGate } from './gateReadinessService.js';
-import { isPlatformFeePaid } from './platformFeeService.js';
+import { isExecutionFeePaid, calculateExecutionFee } from './dealExecutionFee.js';
 import { generateProviderRecommendation, findProviders, trackReferral } from './providerMatchingService.js';
 import { matchFranchises } from './franchiseMatchingService.js';
 import { matchBuyersForSeller } from './buyerSourcingService.js';
@@ -370,15 +370,20 @@ async function advanceGate(input: Record<string, any>, userId: number): Promise<
     });
   }
 
-  // Check paywall — if next gate requires platform fee payment
+  // Check paywall — if next gate requires execution fee payment
   if (isPaywallGate(toGate)) {
-    const paid = await isPlatformFeePaid(dealId);
+    const paid = await isExecutionFeePaid(dealId);
     if (!paid) {
+      const fee = calculateExecutionFee(deal);
       return JSON.stringify({
         ready: true,
         paywallRequired: true,
         gate: toGate,
-        message: `Gate ${toGate} requires the platform fee. The user needs to pay before advancing.`,
+        feeCents: fee.feeCents,
+        feeDisplay: fee.feeDisplay,
+        basis: fee.basis,
+        basisDisplay: fee.basisDisplay,
+        message: `To continue, the deal execution fee is ${fee.feeDisplay} (0.1% of your ${fee.basis}).`,
       });
     }
   }

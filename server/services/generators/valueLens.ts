@@ -20,8 +20,6 @@ export interface ValueLensInput {
   exit_type?: string;
 }
 
-// Re-export old name for backward compatibility
-export type BizestimateInput = ValueLensInput;
 
 function centsToDisplay(cents: number | undefined | null): string {
   if (!cents) return 'Not provided';
@@ -144,5 +142,3 @@ export function generateValueLens(input: ValueLensInput): string {
   return lines.join('\n');
 }
 
-// Backward compatibility alias
-export const generateBizestimate = generateValueLens;

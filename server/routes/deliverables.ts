@@ -5,7 +5,7 @@ import { Router } from 'express';
 import { sql } from '../db.js';
 import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
 import { processDeliverable } from '../services/deliverableProcessor.js';
-import { isPlatformFeePaid } from '../services/platformFeeService.js';
+import { isExecutionFeePaid } from '../services/dealExecutionFee.js';
 import { hasDealAccess } from '../services/dealAccessService.js';
 import { isGateFree } from '../../shared/gateRegistry.js';
 import { markDeliverableRefreshed } from '../services/dealFreshnessService.js';
@@ -125,11 +125,11 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
     // Paid gates (S2+, B2+, R2+) → require platform fee to be paid
     const gate = menuItem.gate;
     if (gate && !isGateFree(gate)) {
-      const paid = await isPlatformFeePaid(dealId);
+      const paid = await isExecutionFeePaid(dealId);
       if (!paid) {
         return res.status(402).json({
-          error: 'Platform fee required',
-          message: 'Please pay the platform fee to unlock deal execution deliverables.',
+          error: 'Execution fee required',
+          message: 'Please pay the deal execution fee to unlock deliverables.',
         });
       }
     }
@@ -328,8 +328,8 @@ deliverablesRouter.get('/deals/:dealId/menu', async (req, res) => {
       ORDER BY gate ASC NULLS LAST, tier ASC, name ASC
     `;
 
-    // Platform fee model — no per-item pricing. Just return items with included status.
-    const paid = deal.platform_fee_paid || process.env.TEST_MODE === 'true' || process.env.DEV_NO_PAYWALL === 'true';
+    // Execution fee model — no per-item pricing. Just return items with included status.
+    const paid = deal.platform_fee_paid || deal.execution_paid || process.env.TEST_MODE === 'true' || process.env.DEV_NO_PAYWALL === 'true';
     const mapped = (items as any[]).map(item => ({
       ...item,
       included: isGateFree(item.gate) || paid,

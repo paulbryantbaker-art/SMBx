@@ -7,7 +7,6 @@ interface PaywallData {
   priceCents: number;
   priceDisplay: string;
   valueProps: string[];
-  comparisonText: string;
   callToAction: string;
   whatYouGet?: string[];
   dealId: number;
@@ -17,7 +16,6 @@ interface PaywallCardProps {
   paywall: PaywallData;
   dealId: number;
   onUnlocked: (toGate: string, deliverableId?: number) => void;
-  onTopUp?: () => void;  // kept for backward compat, unused in new model
 }
 
 const GATE_NAMES: Record<string, string> = {
@@ -98,7 +96,7 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
           </div>
           <div>
             <p className="text-lg font-bold text-[#0D0D0D] m-0">{GATE_NAMES[paywall.gate] || 'Deal Execution'}</p>
-            <p className="text-sm text-[#6E6A63] m-0 mt-1">One-time platform fee — everything through closing included</p>
+            <p className="text-sm text-[#6E6A63] m-0 mt-1">One-time execution fee — everything through closing included</p>
           </div>
         </div>
 
@@ -134,21 +132,18 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
           </div>
         )}
 
-        {/* Comparison */}
-        <p className="text-[13px] text-[#A9A49C] m-0 mb-4 italic">{paywall.comparisonText}</p>
-
         {/* Price + action */}
         <div className="flex items-center justify-between pt-3" style={{ borderTop: '1px solid #EBE7DF' }}>
           <div>
             <p className="text-2xl font-extrabold text-[#BA3C60] m-0">{paywall.priceDisplay}</p>
-            <p className="text-xs text-[#A9A49C] m-0 mt-0.5">One-time fee</p>
+            <p className="text-xs text-[#A9A49C] m-0 mt-0.5">One-time fee · 0.1% of earnings</p>
           </div>
           <button
             onClick={handlePurchase}
             disabled={purchasing}
             className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#BA3C60] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-60"
           >
-            {purchasing ? 'Processing...' : 'Proceed to Deal Execution'}
+            {purchasing ? 'Processing...' : 'Unlock Deal Execution'}
           </button>
         </div>
 

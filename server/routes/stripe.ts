@@ -1,19 +1,17 @@
 /**
- * Stripe Routes — Platform fee payment via Stripe Checkout.
- *
- * NEW MODEL: One-time per-deal platform fee (replaces wallet top-ups).
+ * Stripe Routes — Deal execution fee payment via Stripe Checkout.
  *
  * Flow:
  * 1. User hits S2/B2/R2 paywall gate
- * 2. POST /api/stripe/platform-fee creates a Checkout Session
+ * 2. POST /api/stripe/deal-checkout creates a Checkout Session
  * 3. User pays on Stripe's hosted page
- * 4. Stripe sends webhook → we mark deal.platform_fee_paid = true
+ * 4. Stripe sends webhook → we mark deal execution fee as paid
  * 5. User redirected back to the app, gate advances
  */
 import { Router } from 'express';
 import Stripe from 'stripe';
 import { sql } from '../db.js';
-import { createPlatformFeeCheckout, markPlatformFeePaid, getPlatformFee } from '../services/platformFeeService.js';
+import { calculateExecutionFee, isExecutionFeePaid, markExecutionFeePaid } from '../services/dealExecutionFee.js';
 
 export const stripeRouter = Router();
 
@@ -22,7 +20,7 @@ function getStripe(): Stripe {
   return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
 
-// ─── Get platform fee for a deal ─────────────────────────────
+// ─── Get execution fee for a deal ─────────────────────────────
 
 stripeRouter.get('/platform-fee/:dealId', async (req, res) => {
   const userId = (req as any).userId;
@@ -32,21 +30,41 @@ stripeRouter.get('/platform-fee/:dealId', async (req, res) => {
   if (!dealId) return res.status(400).json({ error: 'Invalid deal ID' });
 
   try {
-    // Verify ownership
-    const [deal] = await sql`SELECT id FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
+    const [deal] = await sql`SELECT id, sde, ebitda, league, platform_fee_paid, platform_fee_cents, platform_fee_paid_at FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
     if (!deal) return res.status(404).json({ error: 'Deal not found' });
 
-    const fee = await getPlatformFee(dealId);
-    return res.json(fee);
+    const paid = deal.platform_fee_paid || false;
+    if (paid && deal.platform_fee_cents) {
+      const basis = (deal.ebitda && deal.ebitda > 0) ? 'EBITDA' : 'SDE';
+      const basisCents = basis === 'EBITDA' ? (deal.ebitda || 0) : (deal.sde || 0);
+      return res.json({
+        feeCents: deal.platform_fee_cents,
+        feeDisplay: `$${(deal.platform_fee_cents / 100).toLocaleString('en-US')}`,
+        basis,
+        basisDisplay: `$${(basisCents / 100).toLocaleString('en-US')}`,
+        isMinimum: false,
+        league: deal.league || 'L1',
+        isPaid: true,
+        paidAt: deal.platform_fee_paid_at,
+      });
+    }
+
+    const fee = calculateExecutionFee({ sde: deal.sde, ebitda: deal.ebitda });
+    return res.json({
+      ...fee,
+      league: deal.league || 'L1',
+      isPaid: false,
+      paidAt: null,
+    });
   } catch (err: any) {
-    console.error('Platform fee fetch error:', err.message);
-    return res.status(500).json({ error: 'Failed to fetch platform fee' });
+    console.error('Execution fee fetch error:', err.message);
+    return res.status(500).json({ error: 'Failed to fetch execution fee' });
   }
 });
 
-// ─── Create Checkout Session for platform fee ────────────────
+// ─── Create Checkout Session for deal execution fee ────────────
 
-stripeRouter.post('/platform-fee', async (req, res) => {
+stripeRouter.post('/deal-checkout', async (req, res) => {
   const userId = (req as any).userId;
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
@@ -54,12 +72,68 @@ stripeRouter.post('/platform-fee', async (req, res) => {
   if (!dealId) return res.status(400).json({ error: 'dealId required' });
 
   try {
-    const result = await createPlatformFeeCheckout(parseInt(dealId), userId);
-    return res.json(result);
+    const parsedDealId = parseInt(dealId);
+
+    // TEST_MODE bypass — mark as paid immediately
+    if (process.env.TEST_MODE === 'true') {
+      const [deal] = await sql`SELECT sde, ebitda FROM deals WHERE id = ${parsedDealId} AND user_id = ${userId}`;
+      if (!deal) return res.status(404).json({ error: 'Deal not found' });
+      const fee = calculateExecutionFee({ sde: deal.sde, ebitda: deal.ebitda });
+      await markExecutionFeePaid(parsedDealId, fee.feeCents, 'test_' + Date.now());
+      const appUrl = process.env.APP_URL || 'https://smbx.ai';
+      return res.json({ url: `${appUrl}/chat?payment=success&dealId=${parsedDealId}`, test: true });
+    }
+
+    // Verify ownership
+    const [deal] = await sql`SELECT id, sde, ebitda, business_name, journey_type, platform_fee_paid FROM deals WHERE id = ${parsedDealId} AND user_id = ${userId}`;
+    if (!deal) return res.status(404).json({ error: 'Deal not found' });
+    if (deal.platform_fee_paid) return res.status(400).json({ error: 'Execution fee already paid for this deal' });
+
+    const fee = calculateExecutionFee({ sde: deal.sde, ebitda: deal.ebitda });
+    const [user] = await sql`SELECT email FROM users WHERE id = ${userId}`;
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const dealName = deal.business_name || 'Your Deal';
+    const stripe = getStripe();
+    const appUrl = process.env.APP_URL || 'https://smbx.ai';
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      customer_email: user.email as string,
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: `smbX.ai Deal Execution — ${dealName}`,
+            description: `0.1% of ${fee.basis} ($${(fee.feeCents / 100).toLocaleString()}). Full platform access through closing + 180-day integration.`,
+          },
+          unit_amount: fee.feeCents,
+        },
+        quantity: 1,
+      }],
+      metadata: {
+        type: 'platform_fee',
+        dealId: parsedDealId.toString(),
+        userId: userId.toString(),
+        feeCents: fee.feeCents.toString(),
+      },
+      success_url: `${appUrl}/chat?payment=success&dealId=${parsedDealId}`,
+      cancel_url: `${appUrl}/chat?payment=cancelled&dealId=${parsedDealId}`,
+    });
+
+    return res.json({ url: session.url! });
   } catch (err: any) {
-    console.error('Platform fee checkout error:', err.message);
+    console.error('Deal checkout error:', err.message);
     return res.status(500).json({ error: err.message || 'Failed to create checkout session' });
   }
+});
+
+// Legacy alias — keep for backward compatibility
+stripeRouter.post('/platform-fee', async (req, res) => {
+  // Forward to deal-checkout
+  req.url = '/deal-checkout';
+  return stripeRouter.handle(req, res, () => {});
 });
 
 // ─── Stripe Webhook ─────────────────────────────────────────
@@ -101,22 +175,16 @@ export async function handleStripeWebhook(req: any, res: any) {
 
           if (!existing) {
             const feeCents = parseInt(session.metadata?.feeCents || '0') || (session.amount_total || 0);
-            await markPlatformFeePaid(dealId, feeCents, paymentIntentId);
+            await markExecutionFeePaid(dealId, feeCents, paymentIntentId);
             console.log(`Execution fee paid: deal ${dealId}, $${feeCents / 100}, PI ${paymentIntentId}`);
           } else {
             console.log(`Duplicate webhook ignored: deal ${dealId}`);
           }
         } catch (err: any) {
-          console.error('Platform fee webhook error:', err.message);
+          console.error('Execution fee webhook error:', err.message);
           return res.status(500).send('Failed to process payment');
         }
       }
-    }
-
-    // Handle advisor subscription webhooks (future)
-    if (type === 'advisor_subscription') {
-      // TODO: Handle advisor subscription creation
-      console.log('Advisor subscription webhook received');
     }
   }
 

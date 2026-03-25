@@ -27,13 +27,13 @@ const FREE_ITEMS = [
   { title: 'SBA pre-qualification check', desc: 'Whether your deal qualifies for SBA financing and what that means for your buyer pool.' },
 ];
 
-const PLATFORM_FEES = [
-  { league: 'L1', size: 'Under $500K', fee: '$999', metric: 'SDE' },
-  { league: 'L2', size: '$500K \u2013 $2M', fee: '$1,500', metric: 'SDE' },
-  { league: 'L3', size: '$2M \u2013 $5M', fee: '$5,000', metric: 'EBITDA' },
-  { league: 'L4', size: '$5M \u2013 $10M', fee: '$15,000', metric: 'EBITDA' },
-  { league: 'L5', size: '$10M \u2013 $50M', fee: '$25,000', metric: 'EBITDA' },
-  { league: 'L6', size: '$50M+', fee: '$50,000', metric: 'EBITDA' },
+const FEE_EXAMPLES = [
+  { earnings: '$420K SDE', fee: '$999', note: 'Minimum applies' },
+  { earnings: '$1.2M SDE', fee: '$1,200', note: '' },
+  { earnings: '$3M EBITDA', fee: '$3,000', note: '' },
+  { earnings: '$8M EBITDA', fee: '$8,000', note: '' },
+  { earnings: '$25M EBITDA', fee: '$25,000', note: '' },
+  { earnings: '$80M EBITDA', fee: '$80,000', note: '' },
 ];
 
 const INCLUDED_DELIVERABLES = [
@@ -60,7 +60,7 @@ const FAQS = [
   },
   {
     q: 'What\u2019s included in the one-time fee?',
-    a: 'Everything from valuation through closing. Once you pay the platform fee for your deal, every deliverable \u2014 valuation reports, CIMs, financial models, due diligence packages, LOI drafts, closing checklists \u2014 is included at no additional cost. One fee, one deal, everything through close.',
+    a: 'Everything from valuation through closing, plus 180 days of post-close integration support. Once you pay the execution fee for your deal, every deliverable \u2014 valuation reports, CIMs, financial models, due diligence packages, LOI drafts, closing checklists \u2014 is included at no additional cost. One fee, one deal, everything through close.',
   },
   {
     q: 'What if I\u2019m working with a broker or advisor?',
@@ -396,7 +396,7 @@ export default function Pricing() {
           The conversation with Yulia is always free. Foundational analysis &mdash; classification, preliminary valuation, market overview &mdash; is free because the underlying data comes from authoritative public sources.
         </p>
         <p className="price-hero-sub" style={{ marginBottom: 32 }}>
-          When your deal is ready to move, one platform fee unlocks everything through closing. No per-deliverable charges, no subscriptions, no surprises.
+          When your deal is ready to move, one execution fee unlocks everything through closing. No per-deliverable charges, no subscriptions, no surprises.
         </p>
         <div className="price-callout">
           Free: what the data says. One fee: everything you need to close.
@@ -427,31 +427,36 @@ export default function Pricing() {
         </section>
       </ScrollReveal>
 
-      {/* === SECTION 2: PLATFORM FEE === */}
+      {/* === SECTION 2: EXECUTION FEE === */}
       <hr className="price-divider" />
       <ScrollReveal>
       <section className="price-section">
         <h2 className="price-heading">One fee. Everything through closing.</h2>
         <p className="price-body" style={{ marginBottom: 32 }}>
-          When your deal is ready to move past valuation, a single platform fee unlocks every deliverable through close. No per-document charges. No metering. Your fee is determined by your deal&apos;s size &mdash; your league.
+          When your deal is ready to move past valuation, a single execution fee unlocks every deliverable through closing &mdash; plus 180 days of post-close support. No per-document charges. No subscriptions.
         </p>
 
         <div className="price-fee-box" style={{ marginBottom: 40 }}>
+          <div style={{ marginBottom: 24 }}>
+            <p style={{ fontSize: 32, fontWeight: 800, color: T.terra, margin: '0 0 4px', letterSpacing: '-0.03em' }}>0.1%</p>
+            <p style={{ fontSize: 15, color: T.sub, margin: 0 }}>of your annual SDE or EBITDA &middot; $999 minimum &middot; one payment per deal</p>
+          </div>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
               <thead>
                 <tr style={{ borderBottom: `2px solid ${T.border}` }}>
-                  <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 600, color: T.text }}>League</th>
-                  <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 600, color: T.text }}>Deal Size</th>
-                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: T.text }}>Platform Fee</th>
+                  <th style={{ textAlign: 'left', padding: '8px 12px', fontWeight: 600, color: T.text }}>Annual Earnings</th>
+                  <th style={{ textAlign: 'right', padding: '8px 12px', fontWeight: 600, color: T.text }}>Execution Fee</th>
                 </tr>
               </thead>
               <tbody>
-                {PLATFORM_FEES.map((row, i) => (
+                {FEE_EXAMPLES.map((row, i) => (
                   <tr key={i} style={{ borderBottom: `1px solid ${T.border}` }}>
-                    <td style={{ padding: '10px 12px', fontWeight: 600, color: T.terra }}>{row.league}</td>
-                    <td style={{ padding: '10px 12px', color: T.sub }}>{row.size}</td>
-                    <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 700, color: T.text }}>{row.fee}</td>
+                    <td style={{ padding: '10px 12px', color: T.sub }}>{row.earnings}</td>
+                    <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 700, color: T.text }}>
+                      {row.fee}
+                      {row.note && <span style={{ fontSize: 11, color: T.faint, marginLeft: 6 }}>{row.note}</span>}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -463,7 +468,7 @@ export default function Pricing() {
           Everything included
         </h3>
         <p className="price-body" style={{ marginBottom: 20 }}>
-          Once you pay the platform fee, every deliverable for your deal is generated at no additional cost:
+          Once you pay the execution fee, every deliverable for your deal is generated at no additional cost:
         </p>
         <div className="price-included-grid" style={{ marginBottom: 16 }}>
           {INCLUDED_DELIVERABLES.map((item, i) => (
