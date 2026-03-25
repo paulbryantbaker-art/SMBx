@@ -20,6 +20,17 @@ export const GATE_LABELS: Record<string, string> = {
   PMI0: 'Day 0', PMI1: 'Stabilization', PMI2: 'Assessment', PMI3: 'Optimization',
 };
 
+/** Human-readable gate titles for conversation naming */
+export const GATE_TITLES: Record<string, string> = {
+  S0: 'Getting Started', S1: 'Financial Deep-Dive', S2: 'Valuation & Positioning',
+  S3: 'Deal Materials & Packaging', S4: 'Buyer Matching & Outreach', S5: 'Closing & Transition',
+  B0: 'Thesis & Readiness', B1: 'Deal Screening', B2: 'Valuation & Modeling',
+  B3: 'Due Diligence', B4: 'Deal Structure & Terms', B5: 'Closing & Integration',
+  R0: 'Readiness Assessment', R1: 'Financial Package', R2: 'Investor Materials',
+  R3: 'Investor Outreach', R4: 'Term Negotiation', R5: 'Closing the Raise',
+  PMI0: 'Day Zero', PMI1: 'Stabilization', PMI2: 'Assessment', PMI3: 'Optimization',
+};
+
 /**
  * Summarize the last 20 messages of a gate conversation into 3-4 sentences.
  * Returns null on failure (non-critical).
@@ -62,7 +73,6 @@ export async function summarizeGateConversation(conversationId: number, gateName
  * Generate a formatted title for a completed gate conversation.
  */
 export function gateCompletionTitle(gateName: string, businessName?: string | null): string {
-  const label = GATE_LABELS[gateName] || gateName;
-  const name = businessName || 'Deal';
-  return `${gateName} — ${label} — ${name}`;
+  const title = GATE_TITLES[gateName] || GATE_LABELS[gateName] || gateName;
+  return `${title} \u2713`;
 }

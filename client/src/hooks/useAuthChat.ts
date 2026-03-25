@@ -18,6 +18,7 @@ export interface Conversation {
   business_name?: string | null;
   industry?: string | null;
   gate_status?: string;
+  gate_label?: string | null;
   summary?: string;
   created_at: string;
   updated_at: string;

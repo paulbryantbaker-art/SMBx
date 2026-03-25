@@ -7,7 +7,7 @@
  * 2. Create new conversation for the next gate
  */
 import { sql } from '../db.js';
-import { summarizeGateConversation, gateCompletionTitle } from './gateSummaryService.js';
+import { summarizeGateConversation, gateCompletionTitle, GATE_TITLES } from './gateSummaryService.js';
 
 interface GateTransitionResult {
   newConversationId: number;
@@ -54,6 +54,7 @@ export async function handleGateTransition(
       UPDATE conversations
       SET gate_status = 'completed',
           title = ${title},
+          gate_label = ${fromGate},
           summary = ${summary},
           updated_at = NOW()
       WHERE id = ${convoId}
@@ -61,9 +62,10 @@ export async function handleGateTransition(
   }
 
   // 4. Create new conversation for the next gate
+  const nextTitle = GATE_TITLES[toGate] || toGate;
   const [newConvo] = await sql`
-    INSERT INTO conversations (user_id, title, deal_id, gate_status, created_at, updated_at)
-    VALUES (${userId}, ${`${toGate} — New conversation`}, ${dealId}, 'active', NOW(), NOW())
+    INSERT INTO conversations (user_id, title, deal_id, gate_status, gate_label, created_at, updated_at)
+    VALUES (${userId}, ${nextTitle}, ${dealId}, 'active', ${toGate}, NOW(), NOW())
     RETURNING id
   `;
 

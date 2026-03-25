@@ -566,7 +566,7 @@ chatRouter.get('/conversations', async (req, res) => {
     let convos;
     if (userId) {
       convos = await sql`
-        SELECT c.id, c.title, c.deal_id, c.is_archived, c.gate_status, c.summary, c.created_at, c.updated_at,
+        SELECT c.id, c.title, c.deal_id, c.is_archived, c.gate_status, c.gate_label, c.summary, c.created_at, c.updated_at,
                d.journey_type as journey, d.current_gate, d.business_name, d.industry
         FROM conversations c
         LEFT JOIN deals d ON c.deal_id = d.id
@@ -575,7 +575,7 @@ chatRouter.get('/conversations', async (req, res) => {
       `;
     } else if (sessionId) {
       convos = await sql`
-        SELECT c.id, c.title, c.deal_id, c.is_archived, c.gate_status, c.summary, c.created_at, c.updated_at,
+        SELECT c.id, c.title, c.deal_id, c.is_archived, c.gate_status, c.gate_label, c.summary, c.created_at, c.updated_at,
                d.journey_type as journey, d.current_gate, d.business_name, d.industry
         FROM conversations c
         LEFT JOIN deals d ON c.deal_id = d.id
@@ -608,9 +608,9 @@ chatRouter.post('/conversations/for-deal/:dealId', async (req, res) => {
     if (!deal) return res.status(404).json({ error: 'Deal not found' });
 
     const [convo] = await sql`
-      INSERT INTO conversations (user_id, title, deal_id, gate_status, created_at, updated_at)
-      VALUES (${userId}, ${`${deal.current_gate} — New conversation`}, ${dealId}, 'active', NOW(), NOW())
-      RETURNING id, title, deal_id, gate_status, created_at, updated_at
+      INSERT INTO conversations (user_id, title, deal_id, gate_status, gate_label, created_at, updated_at)
+      VALUES (${userId}, ${'New conversation'}, ${dealId}, 'active', ${deal.current_gate}, NOW(), NOW())
+      RETURNING id, title, deal_id, gate_status, gate_label, created_at, updated_at
     `;
     return res.status(201).json(convo);
   } catch (err: any) {

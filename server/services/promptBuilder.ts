@@ -7,6 +7,7 @@ import { BRANCHING_LOGIC } from '../prompts/branchingLogic.js';
 import { isPaywallGate } from './gateReadinessService.js';
 import { generatePaywallPrompt } from './paywallService.js';
 import { getKnowledgeForContext, formatKnowledgeForPrompt } from './knowledgeService.js';
+import { getMarketHeat, formatMarketHeatForPrompt } from './marketHeatService.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
@@ -352,6 +353,17 @@ Continue gathering the information the gate prompt describes, but through natura
     layers.push(knowledgeText);
   }
 
+  // Layer: Market heat for detected industry
+  const detectedIndustry = convState.extracted_data?.industry || null;
+  if (detectedIndustry) {
+    try {
+      const heat = await getMarketHeat(detectedIndustry);
+      if (heat.score >= 2) {
+        layers.push(formatMarketHeatForPrompt(heat, detectedIndustry));
+      }
+    } catch { /* non-critical */ }
+  }
+
   return layers.join('\n\n');
 }
 
@@ -452,7 +464,37 @@ export async function buildSystemPrompt(
       layers.push(knowledgeText);
     }
 
-    // Layer 3f: Stale deliverables alert
+    // Layer 3f: Market heat for the deal's industry
+    if (deal.industry) {
+      try {
+        const heat = await getMarketHeat(deal.industry);
+        if (heat.score >= 2) {
+          layers.push(formatMarketHeatForPrompt(heat, deal.industry));
+        }
+      } catch { /* non-critical */ }
+    }
+
+    // Layer 3g: Auditor mode — detect recent file uploads and switch to forensic behavior
+    try {
+      const recentUploads = await sql`
+        SELECT COUNT(*) as cnt FROM data_room_documents
+        WHERE deal_id = ${deal.id} AND file_type != 'deliverable'
+          AND created_at > NOW() - INTERVAL '24 hours'
+      `;
+      if (parseInt(recentUploads[0]?.cnt || '0') > 0) {
+        layers.push(`\n## AUDITOR MODE — ACTIVE
+You are analyzing uploaded documents. Switch to forensic auditor behavior:
+- ONLY state facts you can directly cite from the uploaded document
+- For every financial claim, reference the source (page, section, line)
+- If you cannot find evidence for something, say: "NOT FOUND IN DOCUMENTS — please verify manually"
+- Never infer, estimate, or assume financial data that isn't explicitly stated
+- When extracting numbers, show the exact value from the document alongside any adjustments
+- Flag any inconsistencies between documents (e.g., tax return vs P&L discrepancies)
+- When comparing uploaded data to deal record values, note any differences immediately`);
+      }
+    } catch { /* non-critical */ }
+
+    // Layer 3g: Stale deliverables alert
     try {
       const staleDeliverables = await sql`
         SELECT d.id, mi.name, d.stale_reason

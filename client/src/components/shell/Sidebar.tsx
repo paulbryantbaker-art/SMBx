@@ -1,10 +1,21 @@
+import { useState, useMemo } from 'react';
 import { useLocation } from 'wouter';
 import Logo from '../public/Logo';
 import type { User } from '../../hooks/useAuth';
+import { authHeaders } from '../../hooks/useAuth';
 import type { Conversation } from '../../hooks/useAuthChat';
 
 export type TabId = 'home' | 'sell' | 'buy' | 'advisors' | 'pricing';
 export type ViewState = 'landing' | 'chat' | 'pipeline' | 'dataroom' | 'settings';
+
+interface DealGroup {
+  dealId: number;
+  businessName: string;
+  journey: string | null;
+  currentGate: string | null;
+  active: Conversation[];
+  completed: Conversation[];
+}
 
 interface SidebarProps {
   activeTab: TabId;
@@ -145,9 +156,46 @@ export default function Sidebar({
     navigate(`/chat/${id}`);
   };
 
-  // Split conversations for authenticated users
-  const deals = conversations.filter(c => c.deal_id != null);
-  const recent = conversations.filter(c => c.deal_id == null);
+  // Group conversations by deal_id
+  const { dealGroups, recent } = useMemo(() => {
+    const groupMap = new Map<number, DealGroup>();
+    const recent: Conversation[] = [];
+    for (const c of conversations) {
+      if (c.deal_id == null) { recent.push(c); continue; }
+      let group = groupMap.get(c.deal_id);
+      if (!group) {
+        group = {
+          dealId: c.deal_id,
+          businessName: c.business_name || c.title || 'Untitled Deal',
+          journey: c.journey || null,
+          currentGate: c.current_gate || null,
+          active: [],
+          completed: [],
+        };
+        groupMap.set(c.deal_id, group);
+      }
+      if (c.business_name) group.businessName = c.business_name;
+      if (c.current_gate) group.currentGate = c.current_gate;
+      if (c.gate_status === 'completed') group.completed.push(c);
+      else group.active.push(c);
+    }
+    return { dealGroups: Array.from(groupMap.values()), recent };
+  }, [conversations]);
+
+  const [expandedDeals, setExpandedDeals] = useState<Set<number>>(new Set());
+
+  const handleNewDealChat = async (dealId: number) => {
+    try {
+      const resp = await fetch(`/api/chat/conversations/for-deal/${dealId}`, {
+        method: 'POST',
+        headers: authHeaders(),
+      });
+      if (resp.ok) {
+        const convo = await resp.json();
+        handleConversationClick(convo.id);
+      }
+    } catch { /* ignore */ }
+  };
 
   return (
     <div
@@ -211,28 +259,94 @@ export default function Sidebar({
         {/* Conversation history — authenticated only */}
         {user && conversations.length > 0 && (
           <div className="px-3 mt-4">
-            {deals.length > 0 && (
+            {dealGroups.length > 0 && (
               <div>
-                <div className="text-[11px] font-bold text-[rgba(0,0,0,0.25)] uppercase tracking-wider mb-2 px-3">Active Deals</div>
-                {deals.map(c => (
-                  <button
-                    key={c.id}
-                    onClick={() => handleConversationClick(c.id)}
-                    className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${
-                      c.id === activeConversationId && viewState === 'chat'
-                        ? 'bg-white text-[#0D0D0D] shadow-sm border border-[rgba(0,0,0,0.06)] font-bold'
-                        : 'text-[rgba(0,0,0,0.4)] hover:bg-white hover:text-[#0D0D0D] font-medium border border-transparent'
-                    }`}
-                    style={{ fontFamily: 'inherit' }}
-                    type="button"
-                  >
-                    <span
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{ backgroundColor: c.journey ? (JOURNEY_COLORS[c.journey] || '#6E6A63') : '#9CA3AF' }}
-                    />
-                    <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
-                  </button>
-                ))}
+                <div className="text-[11px] font-bold text-[rgba(0,0,0,0.25)] uppercase tracking-wider mb-2 px-3">Deals</div>
+                {dealGroups.map(group => {
+                  const color = JOURNEY_COLORS[group.journey || ''] || '#6E6A63';
+                  const isExpanded = expandedDeals.has(group.dealId);
+                  return (
+                    <div key={group.dealId} className="mb-1">
+                      {/* Deal header */}
+                      <div className="flex items-center gap-2 px-3 py-2">
+                        <span
+                          className="w-[18px] h-[18px] rounded-[5px] flex items-center justify-center text-[9px] font-bold text-white shrink-0"
+                          style={{ backgroundColor: color }}
+                        >
+                          {(group.journey || '?')[0].toUpperCase()}
+                        </span>
+                        <span className="text-[12px] font-semibold text-[#0D0D0D] truncate flex-1 min-w-0" style={{ fontFamily: 'inherit' }}>
+                          {group.businessName}
+                        </span>
+                        {group.currentGate && (
+                          <span className="text-[9px] font-bold text-[#BA3C60] bg-[#FFF0EB] px-[5px] py-[1px] rounded-[3px] shrink-0">
+                            {group.currentGate}
+                          </span>
+                        )}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleNewDealChat(group.dealId); }}
+                          className="w-[20px] h-[20px] rounded-full border-none cursor-pointer flex items-center justify-center text-[rgba(0,0,0,0.25)] hover:text-[#BA3C60] hover:bg-[#FFF0EB] transition-colors shrink-0 bg-transparent p-0"
+                          type="button"
+                          aria-label="New chat in deal"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                        </button>
+                      </div>
+                      {/* Active conversations */}
+                      {group.active.map(c => (
+                        <button
+                          key={c.id}
+                          onClick={() => handleConversationClick(c.id)}
+                          className={`flex items-center gap-2 w-full px-3 py-2 ml-1 rounded-lg text-sm transition-all cursor-pointer border ${
+                            c.id === activeConversationId && viewState === 'chat'
+                              ? 'bg-white text-[#0D0D0D] shadow-sm border-[rgba(0,0,0,0.06)] font-bold'
+                              : 'text-[rgba(0,0,0,0.4)] hover:bg-white hover:text-[#0D0D0D] font-medium border-transparent'
+                          }`}
+                          style={{ fontFamily: 'inherit', width: 'calc(100% - 4px)' }}
+                          type="button"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#4CAF50] shrink-0" />
+                          <span className="truncate flex-1 min-w-0 text-left">{c.title}</span>
+                        </button>
+                      ))}
+                      {/* Completed toggle */}
+                      {group.completed.length > 0 && (
+                        <>
+                          <button
+                            onClick={() => setExpandedDeals(prev => {
+                              const next = new Set(prev);
+                              if (next.has(group.dealId)) next.delete(group.dealId);
+                              else next.add(group.dealId);
+                              return next;
+                            })}
+                            className="w-full text-left border-none cursor-pointer bg-transparent px-3 py-1 ml-1 text-[10px] font-medium text-[rgba(0,0,0,0.3)] hover:text-[rgba(0,0,0,0.5)] transition-colors flex items-center gap-1"
+                            style={{ fontFamily: 'inherit', width: 'calc(100% - 4px)' }}
+                            type="button"
+                          >
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.15s' }}><path d="M9 18l6-6-6-6" /></svg>
+                            {group.completed.length} completed
+                          </button>
+                          {isExpanded && group.completed.map(c => (
+                            <button
+                              key={c.id}
+                              onClick={() => handleConversationClick(c.id)}
+                              className={`flex items-center gap-2 w-full px-3 py-1.5 ml-1 rounded-lg text-sm transition-all cursor-pointer border ${
+                                c.id === activeConversationId && viewState === 'chat'
+                                  ? 'bg-white text-[#0D0D0D] shadow-sm border-[rgba(0,0,0,0.06)]'
+                                  : 'text-[rgba(0,0,0,0.35)] hover:bg-white hover:text-[#0D0D0D] border-transparent'
+                              }`}
+                              style={{ fontFamily: 'inherit', width: 'calc(100% - 4px)' }}
+                              type="button"
+                            >
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="2.5" className="shrink-0"><path d="M20 6L9 17l-5-5" /></svg>
+                              <span className="truncate flex-1 min-w-0 text-left text-[12px]">{c.title}</span>
+                            </button>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
 

@@ -99,6 +99,67 @@ async function start() {
   });
   console.log('Scheduled: weekly_freshness_scan (Monday 7 AM UTC)');
 
+  // Weekly FRED rate monitoring — Wednesday 3 AM UTC
+  await (boss as any).schedule('fred_rate_monitor', '0 3 * * 3', {}, {});
+  await (boss as any).work('fred_rate_monitor', async () => {
+    console.log('[worker] Running FRED rate monitor...');
+    try {
+      // Fetch current Prime rate from FRED API
+      const fredUrl = 'https://api.stlouisfed.org/fred/series/observations?series_id=DPRIME&sort_order=desc&limit=1&api_key=DEMO_KEY&file_type=json';
+      const resp = await fetch(fredUrl);
+      if (!resp.ok) { console.log('[worker] FRED API unavailable, skipping'); return; }
+      const data = await resp.json();
+      const currentRate = parseFloat(data.observations?.[0]?.value || '0');
+      if (!currentRate) return;
+
+      // Check last stored rate
+      const [lastRate] = await sql`
+        SELECT value FROM system_settings WHERE key = 'fred_prime_rate' LIMIT 1
+      `.catch(() => [null]);
+
+      const prevRate = lastRate ? parseFloat(lastRate.value) : 0;
+
+      // Update stored rate
+      await sql`
+        INSERT INTO system_settings (key, value, updated_at)
+        VALUES ('fred_prime_rate', ${String(currentRate)}, NOW())
+        ON CONFLICT (key) DO UPDATE SET value = ${String(currentRate)}, updated_at = NOW()
+      `.catch(() => {});
+
+      // If rate changed, notify buyer deals with SBA financing
+      if (prevRate > 0 && Math.abs(currentRate - prevRate) >= 0.25) {
+        const direction = currentRate > prevRate ? 'increased' : 'decreased';
+        console.log(`[worker] Prime rate ${direction} from ${prevRate}% to ${currentRate}%`);
+
+        const buyerDeals = await sql`
+          SELECT d.id, d.user_id, d.business_name, d.ebitda, d.sde
+          FROM deals d
+          WHERE d.journey_type = 'buy' AND d.status = 'active'
+            AND (d.financials->>'financing_type' = 'sba' OR d.current_gate IN ('B2', 'B3', 'B4', 'B5'))
+        `.catch(() => []);
+
+        for (const deal of buyerDeals as any[]) {
+          const earnings = deal.ebitda || deal.sde || 0;
+          if (earnings <= 0) continue;
+          // Rough DSCR impact: 0.25% rate change affects annual debt service
+          await sql`
+            INSERT INTO notifications (user_id, deal_id, type, title, body, action_url, created_at)
+            VALUES (${deal.user_id}, ${deal.id}, 'rate_change',
+              ${'Prime rate ' + direction},
+              ${'The Prime rate ' + direction + ' to ' + currentRate + '%. This may affect your SBA loan terms and buying power for ' + (deal.business_name || 'your deal') + '.'},
+              '/chat', NOW())
+          `.catch(() => {});
+        }
+        console.log(`[worker] Notified ${(buyerDeals as any[]).length} buyer deals of rate change`);
+      } else {
+        console.log(`[worker] Prime rate unchanged at ${currentRate}%`);
+      }
+    } catch (e: any) {
+      console.error('[worker] FRED rate monitor error:', e.message);
+    }
+  });
+  console.log('Scheduled: fred_rate_monitor (Wednesday 3 AM UTC)');
+
   console.log('Worker ready — listening for jobs');
 }
 
