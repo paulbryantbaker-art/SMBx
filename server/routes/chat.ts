@@ -566,7 +566,7 @@ chatRouter.get('/conversations', async (req, res) => {
     let convos;
     if (userId) {
       convos = await sql`
-        SELECT c.id, c.title, c.deal_id, c.is_archived, c.created_at, c.updated_at,
+        SELECT c.id, c.title, c.deal_id, c.is_archived, c.gate_status, c.summary, c.created_at, c.updated_at,
                d.journey_type as journey, d.current_gate, d.business_name, d.industry
         FROM conversations c
         LEFT JOIN deals d ON c.deal_id = d.id
@@ -575,7 +575,7 @@ chatRouter.get('/conversations', async (req, res) => {
       `;
     } else if (sessionId) {
       convos = await sql`
-        SELECT c.id, c.title, c.deal_id, c.is_archived, c.created_at, c.updated_at,
+        SELECT c.id, c.title, c.deal_id, c.is_archived, c.gate_status, c.summary, c.created_at, c.updated_at,
                d.journey_type as journey, d.current_gate, d.business_name, d.industry
         FROM conversations c
         LEFT JOIN deals d ON c.deal_id = d.id
@@ -591,6 +591,31 @@ chatRouter.get('/conversations', async (req, res) => {
   } catch (err: any) {
     console.error('List conversations error:', err.message);
     return res.status(500).json({ error: 'Failed to list conversations' });
+  }
+});
+
+// ─── Create conversation within a deal ──────────────────────
+
+chatRouter.post('/conversations/for-deal/:dealId', async (req, res) => {
+  const userId = (req as any).userId;
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+  const dealId = parseInt(req.params.dealId, 10);
+  if (!dealId) return res.status(400).json({ error: 'Invalid dealId' });
+
+  try {
+    const [deal] = await sql`SELECT id, current_gate, business_name FROM deals WHERE id = ${dealId} AND user_id = ${userId} LIMIT 1`;
+    if (!deal) return res.status(404).json({ error: 'Deal not found' });
+
+    const [convo] = await sql`
+      INSERT INTO conversations (user_id, title, deal_id, gate_status, created_at, updated_at)
+      VALUES (${userId}, ${`${deal.current_gate} — New conversation`}, ${dealId}, 'active', NOW(), NOW())
+      RETURNING id, title, deal_id, gate_status, created_at, updated_at
+    `;
+    return res.status(201).json(convo);
+  } catch (err: any) {
+    console.error('Create deal conversation error:', err.message);
+    return res.status(500).json({ error: 'Failed to create conversation' });
   }
 });
 

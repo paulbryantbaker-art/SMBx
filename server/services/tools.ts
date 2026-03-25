@@ -7,6 +7,8 @@ import { matchFranchises } from './franchiseMatchingService.js';
 import { matchBuyersForSeller } from './buyerSourcingService.js';
 import { generateOptimizationPlan, saveOptimizationPlan, createOptimizationMilestone } from './optimizationPlanService.js';
 import { sendGateAdvancementEmail } from './emailService.js';
+import { handleGateTransition } from './gateConversationService.js';
+import { snapshotDealFinancials, checkDealFreshness } from './dealFreshnessService.js';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false });
 
@@ -228,12 +230,20 @@ async function createDeal(input: Record<string, any>, userId: number, conversati
   return JSON.stringify({ success: true, dealId: deal.id, journeyType, gate: initialGate });
 }
 
+const FINANCIAL_FIELDS = new Set(['revenue', 'sde', 'ebitda', 'asking_price']);
+
 async function updateDealField(input: Record<string, any>, userId: number): Promise<string> {
   const { dealId, field, value } = input;
 
   // Verify ownership
   const [deal] = await sql`SELECT id, financials FROM deals WHERE id = ${dealId} AND user_id = ${userId} LIMIT 1`;
   if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  // Snapshot financials before update for freshness tracking
+  const isFinancialUpdate = FINANCIAL_FIELDS.has(field) || (field === 'financials' && typeof value === 'object');
+  if (isFinancialUpdate) {
+    await snapshotDealFinancials(dealId).catch(() => {});
+  }
 
   if (field === 'financials' && typeof value === 'object') {
     // Merge entire object into financials jsonb
@@ -248,6 +258,11 @@ async function updateDealField(input: Record<string, any>, userId: number): Prom
     const existing = typeof deal.financials === 'string' ? JSON.parse(deal.financials) : (deal.financials || {});
     existing[field] = value;
     await sql`UPDATE deals SET financials = ${JSON.stringify(existing)}::jsonb, updated_at = NOW() WHERE id = ${dealId}`;
+  }
+
+  // Check freshness after financial updates (non-blocking)
+  if (isFinancialUpdate) {
+    setImmediate(() => checkDealFreshness(dealId).catch(() => {}));
   }
 
   return JSON.stringify({ success: true, field, value });
@@ -384,7 +399,10 @@ async function advanceGate(input: Record<string, any>, userId: number): Promise<
   // Notify user via email (fire-and-forget)
   sendGateAdvancementEmail(userId, toGate, deal.journey_type || 'sell', deal.business_name).catch(() => {});
 
-  return JSON.stringify({ success: true, newGate: toGate });
+  // Gate conversation lifecycle: summarize old, create new
+  const transition = await handleGateTransition(dealId, userId, fromGate, toGate).catch(() => null);
+
+  return JSON.stringify({ success: true, newGate: toGate, newConversationId: transition?.newConversationId ?? null });
 }
 
 async function generateFreeDeliverable(input: Record<string, any>, userId: number): Promise<string> {

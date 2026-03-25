@@ -17,6 +17,8 @@ export interface Conversation {
   current_gate?: string | null;
   business_name?: string | null;
   industry?: string | null;
+  gate_status?: string;
+  summary?: string;
   created_at: string;
   updated_at: string;
 }
@@ -216,6 +218,10 @@ export function useAuthChat(user: User | null) {
                 } else if (parsed.type === 'gate_advance') {
                   if (parsed.toGate) setCurrentGate(parsed.toGate);
                   loadConversations();
+                  if (parsed.newConversationId) {
+                    setActiveConversationId(parsed.newConversationId);
+                    window.history.pushState(null, '', `/chat/${parsed.newConversationId}`);
+                  }
                 } else if (parsed.type === 'paywall') {
                   setPaywallData(parsed);
                 } else if (parsed.type === 'error') {

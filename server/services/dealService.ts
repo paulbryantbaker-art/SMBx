@@ -5,6 +5,7 @@
 import { sql } from '../db.js';
 import { getFirstGate, GATE_MAP, getNextGate, getJourneyGates, isGateFree } from '../../shared/gateRegistry.js';
 import { checkGateReadiness } from './gateReadinessService.js';
+import { handleGateTransition } from './gateConversationService.js';
 
 export interface Deal {
   id: number;
@@ -181,6 +182,7 @@ export async function checkAndAutoAdvance(dealId: number): Promise<{
   fromGate: string;
   toGate: string;
   gateName: string;
+  newConversationId?: number;
 } | null> {
   const deal = await getDeal(dealId);
   if (!deal) return null;
@@ -194,15 +196,20 @@ export async function checkAndAutoAdvance(dealId: number): Promise<{
   // Only auto-advance if next gate is free
   if (!isGateFree(readiness.nextGate)) return null;
 
-  const toGate = await advanceGate(dealId, deal.current_gate);
+  const fromGate = deal.current_gate;
+  const toGate = await advanceGate(dealId, fromGate);
   if (!toGate) return null;
+
+  // Gate conversation lifecycle: summarize old, create new
+  const transition = await handleGateTransition(dealId, deal.user_id, fromGate, toGate).catch(() => null);
 
   const gateInfo = GATE_MAP[toGate];
   return {
     advanced: true,
-    fromGate: deal.current_gate,
+    fromGate,
     toGate,
     gateName: gateInfo?.name || toGate,
+    newConversationId: transition?.newConversationId,
   };
 }
 

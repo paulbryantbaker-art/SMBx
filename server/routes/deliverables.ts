@@ -8,6 +8,7 @@ import { processDeliverable } from '../services/deliverableProcessor.js';
 import { isPlatformFeePaid } from '../services/platformFeeService.js';
 import { hasDealAccess } from '../services/dealAccessService.js';
 import { isGateFree } from '../../shared/gateRegistry.js';
+import { markDeliverableRefreshed } from '../services/dealFreshnessService.js';
 
 export const deliverablesRouter = Router();
 
@@ -165,6 +166,61 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
   } catch (err: any) {
     console.error('Generate deliverable error:', err.message);
     return res.status(500).json({ error: 'Failed to generate deliverable' });
+  }
+});
+
+// ─── Regenerate a stale deliverable ──────────────────────
+
+deliverablesRouter.post('/deliverables/:id/regenerate', async (req, res) => {
+  const userId = (req as any).userId;
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+  const deliverableId = parseInt(req.params.id);
+  if (!deliverableId) return res.status(400).json({ error: 'Invalid deliverable ID' });
+
+  try {
+    const [deliverable] = await sql`
+      SELECT d.id, d.deal_id, d.menu_item_id, d.status
+      FROM deliverables d WHERE d.id = ${deliverableId}
+    `;
+    if (!deliverable) return res.status(404).json({ error: 'Deliverable not found' });
+
+    const access = await hasDealAccess(deliverable.deal_id, userId);
+    if (!access) return res.status(404).json({ error: 'Deliverable not found' });
+
+    // Archive old version, bump version number, clear stale flags
+    await markDeliverableRefreshed(deliverableId);
+
+    // Reset status and clear content for regeneration
+    await sql`
+      UPDATE deliverables SET status = 'queued', content = NULL, completed_at = NULL, updated_at = NOW()
+      WHERE id = ${deliverableId}
+    `;
+
+    // Get menu item slug for job data
+    const [menuItem] = await sql`SELECT slug FROM menu_items WHERE id = ${deliverable.menu_item_id}`;
+    const slug = menuItem?.slug || 'unknown';
+
+    const jobData = {
+      deliverableId,
+      dealId: deliverable.deal_id,
+      userId,
+      menuItemSlug: slug,
+      deliverableType: slug.replace(/-/g, '_'),
+    };
+    const jobId = await enqueueDeliverableGeneration(jobData);
+
+    // Inline fallback
+    setImmediate(() => {
+      processDeliverable(jobData).catch(err =>
+        console.error('Inline regeneration error:', err.message),
+      );
+    });
+
+    return res.json({ success: true, status: 'queued', jobId });
+  } catch (err: any) {
+    console.error('Regenerate deliverable error:', err.message);
+    return res.status(500).json({ error: 'Failed to regenerate deliverable' });
   }
 });
 

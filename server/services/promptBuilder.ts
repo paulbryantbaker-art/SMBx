@@ -396,6 +396,19 @@ export async function buildSystemPrompt(
     // Layer 3a: Deal context summary
     layers.push(`\n## CURRENT DEAL (ID: ${deal.id})\n${formatDealContext(deal)}`);
 
+    // Layer 3a+: Previous gate summaries for context carry-forward
+    try {
+      const completedGates = await sql`
+        SELECT title, summary FROM conversations
+        WHERE deal_id = ${deal.id} AND gate_status = 'completed' AND summary IS NOT NULL
+        ORDER BY updated_at ASC
+      `;
+      if (completedGates.length > 0) {
+        const summaryLines = completedGates.map((g: any) => `- **${g.title}**: ${g.summary}`).join('\n');
+        layers.push(`\n## PREVIOUS GATE SUMMARIES\nThe user has already completed these gates. Do NOT re-ask questions already covered.\n${summaryLines}`);
+      }
+    } catch { /* non-critical */ }
+
     // Layer 3b: League persona
     const league = deal.league || user.league;
     if (league && PERSONAS[league]) {
@@ -438,6 +451,20 @@ export async function buildSystemPrompt(
     if (knowledgeText) {
       layers.push(knowledgeText);
     }
+
+    // Layer 3f: Stale deliverables alert
+    try {
+      const staleDeliverables = await sql`
+        SELECT d.id, mi.name, d.stale_reason
+        FROM deliverables d
+        LEFT JOIN menu_items mi ON d.menu_item_id = mi.id
+        WHERE d.deal_id = ${deal.id} AND d.is_stale = true AND d.status = 'complete'
+      `;
+      if (staleDeliverables.length > 0) {
+        const staleList = staleDeliverables.map((d: any) => `- ${d.name || `Deliverable #${d.id}`}: ${d.stale_reason || 'Financial data changed'}`).join('\n');
+        layers.push(`\n## STALE DELIVERABLES ALERT\nThe following deliverables are outdated because the deal's financial data has changed since they were generated. Proactively mention this to the user and offer to regenerate them.\n${staleList}`);
+      }
+    } catch { /* non-critical */ }
   }
 
   // Layer 4: Branching logic

@@ -27,6 +27,9 @@ interface DeliverableData {
   completed_at: string | null;
   generation_model: string | null;
   generation_time_ms: number | null;
+  is_stale?: boolean;
+  stale_reason?: string;
+  version_number?: number;
 }
 
 const DELIVERABLE_LABELS: Record<string, string> = {
@@ -45,6 +48,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
   const [filing, setFiling] = useState(false);
   const [filed, setFiled] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
 
   // Determine mode
   const isMarkdownMode = !!markdownContent;
@@ -95,6 +99,22 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
       if (res.ok) setFiled(true);
     } catch { /* ignore */ }
     finally { setFiling(false); }
+  };
+
+  const handleRegenerate = async () => {
+    if (!deliverableId || regenerating) return;
+    setRegenerating(true);
+    try {
+      const res = await fetch(`/api/deliverables/${deliverableId}/regenerate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      });
+      if (res.ok) {
+        // Polling in fetchData will pick up the new status
+        setData(prev => prev ? { ...prev, status: 'queued', is_stale: false } : prev);
+      }
+    } catch { /* ignore */ }
+    finally { setRegenerating(false); }
   };
 
   const [exportOpen, setExportOpen] = useState(false);
@@ -192,8 +212,30 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
               data.status === 'generating' ? 'text-blue-600 bg-blue-50' : data.status === 'queued' ? 'text-yellow-600 bg-yellow-50' : 'text-red-600 bg-red-50'
             }`}>{data.status}</span>
           )}
+          {!isMarkdownMode && data?.is_stale && (
+            <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full shrink-0 text-amber-700 bg-amber-50">
+              Outdated
+            </span>
+          )}
+          {!isMarkdownMode && data?.version_number && data.version_number > 1 && (
+            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full shrink-0 text-[rgba(0,0,0,0.4)] bg-[#F5F5F0]">
+              v{data.version_number}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
+          {!isMarkdownMode && data?.is_stale && deliverableId && (
+            <button
+              onClick={handleRegenerate}
+              disabled={regenerating}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors bg-amber-50 text-amber-700 hover:bg-amber-100 disabled:opacity-60"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M1 4v6h6" /><path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+              </svg>
+              {regenerating ? 'Refreshing...' : 'Refresh'}
+            </button>
+          )}
           {showContent && dealId && deliverableId && !isMarkdownMode && (
             <button
               onClick={handleSaveToDataRoom}
