@@ -1188,9 +1188,8 @@ export default function AppShell() {
                    activeTab === 'advisors' ? <AdvisorsBelow /> :
                    activeTab === 'pricing' ? <PricingBelow /> : null}
                 </Suspense>
-                <footer className={`py-10 flex flex-col items-center gap-3 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`}>
-                  <LogoIcon height={28} />
-                  <span className={`text-xs ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>smbx.ai</span>
+                <footer className={`py-12 flex justify-center ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`}>
+                  <LogoIcon height={44} />
                 </footer>
               </>
               ) : null}

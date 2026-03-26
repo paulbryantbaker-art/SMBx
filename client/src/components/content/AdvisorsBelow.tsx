@@ -107,63 +107,19 @@ export default function AdvisorsBelow() {
         {/* ═══ 4. PRICING ═══ */}
         <section className="mb-32">
           <ScrollReveal>
-            <div className="text-center mb-16">
-              <h2 className="font-headline text-5xl font-extrabold tracking-tighter mb-4">Choose your operating scale</h2>
-              <p className={dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}>Predictable pricing for high-performance firms.</p>
+            <div className={`rounded-2xl p-10 md:p-14 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-[#f3f3f6]'}`}>
+              <h2 className="font-headline text-3xl font-extrabold tracking-tight mb-4">Same platform. Same pricing.</h2>
+              <p className={`text-lg leading-relaxed mb-6 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
+                Brokers and advisors use the same platform as everyone else. Solo practitioners start with Professional ($149/month). Teams and brokerages use Enterprise ($999/month, unlimited users). Try Professional free for 30 days.
+              </p>
+              <button
+                onClick={handleCTA}
+                className="px-8 py-4 bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white rounded-xl font-bold text-lg hover:opacity-90 transition-all border-none cursor-pointer"
+              >
+                Try Professional free
+              </button>
             </div>
           </ScrollReveal>
-          <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Trial */}
-            <StaggerItem>
-              <div className={`p-10 rounded-2xl flex flex-col h-full ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                <h3 className="text-2xl font-bold mb-2">Advisor Trial</h3>
-                <div className="text-4xl font-headline font-extrabold mb-2">$0<span className={`text-lg font-medium ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}> / first 3 deals</span></div>
-                <p className={`text-sm mb-8 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Full platform access for your first three client engagements.</p>
-                <ul className="space-y-4 mb-12 flex-1">
-                  {['3 Client Engagements', 'Automated Data Ingestion', 'Core Deal Documents'].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-sm font-medium">
-                      <span className="material-symbols-outlined text-[#b0004a] text-lg">check_circle</span> {item}
-                    </li>
-                  ))}
-                </ul>
-                <button onClick={handleCTA} className={`w-full py-4 rounded-xl font-bold transition-colors border-none cursor-pointer ${dark ? 'bg-zinc-800 hover:bg-zinc-700 text-white' : 'bg-white border border-[#eeeef0] hover:bg-[#f3f3f6] text-[#1a1c1e]'}`} style={dark ? undefined : { border: '1px solid #eeeef0' }}>Start Free Trial</button>
-              </div>
-            </StaggerItem>
-            {/* Pro */}
-            <StaggerItem>
-              <div className={`p-10 rounded-2xl flex flex-col h-full scale-105 shadow-2xl relative ${dark ? 'bg-gradient-to-br from-[#b0004a] to-[#d81b60] text-white' : 'bg-[#1a1c1e] text-white'}`}>
-                <div className="absolute top-0 right-10 -translate-y-1/2 bg-[#b0004a] text-white text-[10px] font-extrabold tracking-widest px-4 py-1 rounded-full uppercase">Most Popular</div>
-                <h3 className="text-2xl font-bold mb-2">Advisor Pro</h3>
-                <div className="text-4xl font-headline font-extrabold mb-2">$299<span className="text-lg font-medium text-gray-400"> / month</span></div>
-                <p className="text-sm text-gray-400 mb-8">Designed for independent advisors managing multiple active listings.</p>
-                <ul className="space-y-4 mb-12 flex-1">
-                  {['Unlimited Active Mandates', 'Full Document Suite', 'Smart Buyer Matching', 'Custom Brand Styling'].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-sm font-medium">
-                      <span className="material-symbols-outlined text-[#b0004a] text-lg">check_circle</span> {item}
-                    </li>
-                  ))}
-                </ul>
-                <button onClick={handleCTA} className="w-full py-4 rounded-xl bg-[#b0004a] font-bold text-white hover:bg-[#d81b60] transition-colors border-none cursor-pointer">Upgrade to Pro</button>
-              </div>
-            </StaggerItem>
-            {/* Enterprise */}
-            <StaggerItem>
-              <div className={`p-10 rounded-2xl flex flex-col h-full ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                <h3 className="text-2xl font-bold mb-2">Advisor Enterprise</h3>
-                <div className="text-4xl font-headline font-extrabold mb-2">$499<span className={`text-lg font-medium ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}> / month</span></div>
-                <p className={`text-sm mb-8 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>The full suite for established firms and collaborative teams.</p>
-                <ul className="space-y-4 mb-12 flex-1">
-                  <li className={`flex items-center gap-3 text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Everything in Pro, plus:</li>
-                  {['API Access', 'White-label Options', 'Priority Support & Team Seats'].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-sm font-medium">
-                      <span className="material-symbols-outlined text-[#b0004a] text-lg">check_circle</span> {item}
-                    </li>
-                  ))}
-                </ul>
-                <button onClick={() => { window.location.href = '/chat?message=' + encodeURIComponent("I'm interested in Advisor Enterprise pricing for my firm. I manage multiple client deals."); }} className={`w-full py-4 rounded-xl font-bold transition-colors border-none cursor-pointer ${dark ? 'bg-zinc-800 hover:bg-zinc-700 text-white' : 'bg-white hover:bg-[#f3f3f6] text-[#1a1c1e]'}`} style={dark ? undefined : { border: '1px solid #eeeef0' }}>Talk to Yulia</button>
-              </div>
-            </StaggerItem>
-          </StaggerContainer>
         </section>
 
         {/* ═══ 5. FINAL CTA ═══ */}

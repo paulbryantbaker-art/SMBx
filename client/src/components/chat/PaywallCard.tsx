@@ -4,12 +4,14 @@ import { authHeaders } from '../../hooks/useAuth';
 interface PaywallData {
   gate: string;
   currentGate: string;
-  priceCents: number;
-  priceDisplay: string;
+  requiredPlan?: string;
+  priceDisplay?: string;
   valueProps: string[];
   callToAction: string;
   whatYouGet?: string[];
   dealId: number;
+  // Legacy fields kept for backwards compat
+  priceCents?: number;
 }
 
 interface PaywallCardProps {
@@ -18,10 +20,10 @@ interface PaywallCardProps {
   onUnlocked: (toGate: string, deliverableId?: number) => void;
 }
 
-const GATE_NAMES: Record<string, string> = {
-  S2: 'Deal Execution',
-  B2: 'Deal Execution',
-  R2: 'Capital Raise Execution',
+const PLAN_DISPLAY: Record<string, { name: string; price: string; note: string }> = {
+  starter: { name: 'Starter', price: '$49/month', note: 'Unlimited analysis and document exports' },
+  professional: { name: 'Professional', price: '$149/month', note: 'CIM, deal room, matching, and more' },
+  enterprise: { name: 'Enterprise', price: '$999/month', note: 'Teams, API, white-label, portfolio' },
 };
 
 export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCardProps) {
@@ -29,6 +31,8 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+
+  const plan = PLAN_DISPLAY[paywall.requiredPlan || 'starter'] || PLAN_DISPLAY.starter;
 
   const handlePurchase = async () => {
     setPurchasing(true);
@@ -75,8 +79,8 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
             </div>
             <div>
-              <p className="text-base font-semibold text-[#0D0D0D] m-0">Deal Execution Unlocked</p>
-              <p className="text-sm text-[#6E6A63] m-0">All deliverables through closing are now included.</p>
+              <p className="text-base font-semibold text-[#0D0D0D] m-0">{plan.name} Activated</p>
+              <p className="text-sm text-[#6E6A63] m-0">All {plan.name} features are now unlocked.</p>
             </div>
           </div>
         </div>
@@ -95,8 +99,8 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
             </svg>
           </div>
           <div>
-            <p className="text-lg font-bold text-[#0D0D0D] m-0">{GATE_NAMES[paywall.gate] || 'Deal Execution'}</p>
-            <p className="text-sm text-[#6E6A63] m-0 mt-1">One-time execution fee — everything through closing included</p>
+            <p className="text-lg font-bold text-[#0D0D0D] m-0">Upgrade to {plan.name}</p>
+            <p className="text-sm text-[#6E6A63] m-0 mt-1">{plan.note}</p>
           </div>
         </div>
 
@@ -135,15 +139,15 @@ export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCard
         {/* Price + action */}
         <div className="flex items-center justify-between pt-3" style={{ borderTop: '1px solid #EBE7DF' }}>
           <div>
-            <p className="text-2xl font-extrabold text-[#BA3C60] m-0">{paywall.priceDisplay}</p>
-            <p className="text-xs text-[#A9A49C] m-0 mt-0.5">One-time fee · 0.1% of earnings</p>
+            <p className="text-2xl font-extrabold text-[#BA3C60] m-0">{plan.price}</p>
+            <p className="text-xs text-[#A9A49C] m-0 mt-0.5">Cancel anytime · No commitments</p>
           </div>
           <button
             onClick={handlePurchase}
             disabled={purchasing}
             className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#BA3C60] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-60"
           >
-            {purchasing ? 'Processing...' : 'Unlock Deal Execution'}
+            {purchasing ? 'Processing...' : paywall.callToAction || `Start ${plan.name}`}
           </button>
         </div>
 

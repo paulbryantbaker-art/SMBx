@@ -207,7 +207,7 @@ export default function HowItWorksBelow() {
                   <div className={`w-3 h-3 rounded-sm ${dark ? 'bg-[#006630]/20' : 'bg-[#006630]/10'}`} />
                   <span className={`text-[10px] ${muted}`}>Free</span>
                   <div className="w-3 h-3 rounded-sm bg-[#b0004a]/10 ml-3" />
-                  <span className={`text-[10px] ${muted}`}>Execution fee</span>
+                  <span className={`text-[10px] ${muted}`}>Paid plan</span>
                 </div>
               </div>
             </div>

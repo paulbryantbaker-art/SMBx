@@ -10,14 +10,14 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 - wouter for client routing
 - PostgreSQL via raw postgres-js (no ORM)
 - Claude API (primary), Google Gemini (secondary), OpenAI (tertiary)
-- Stripe one-time execution fee per deal — NO SUBSCRIPTIONS, NO WALLET, NO PER-DELIVERABLE PRICING
+- Stripe monthly subscriptions: Free / $49 Starter / $149 Professional / $999 Enterprise
 - JWT authentication (no sessions, no passport — sessions broke on Railway)
 - Railway deployment (GitHub push → auto-deploy)
 
 ## Critical Rules — Read These First
-1. **ONE-TIME EXECUTION FEE.** 0.1% of SDE or EBITDA, $999 minimum, one payment per deal. No wallet, no per-deliverable pricing, no credits, no subscriptions. Everything through close + 180 days PMI is included. Formula: `fee_cents = Math.max(99900, Math.round(basis_cents * 0.001))`
-2. **FREE TIER.** S0-S1, B0-B1, R0-R1, PMI0 are free. ValueLens, Value Readiness Report, Deal Scoring, Investment Thesis, Capital Stack Template, Preliminary SDE/EBITDA — all free. Unlimited Yulia Q&A. **CIM is PAID** (behind execution fee).
-3. **LEAGUE MULTIPLIERS DO NOT AFFECT PRICE.** Everyone pays 0.1%. Leagues determine analytical complexity only (L1 gets 10-page CIM, L5 gets 60-page CIM).
+1. **MONTHLY SUBSCRIPTIONS.** Free (unlimited chat + 1 deliverable) / $49 Starter (unlimited analysis) / $149 Professional (CIM, deal room, matching) / $999 Enterprise (teams, API, white-label). No per-deal fees. No success fees. No wallet. Cancel anytime.
+2. **FREE TIER.** Unlimited Yulia conversation. ONE free structured deliverable (ValueLens or deal score, email required). Second deliverable requires $49/month Starter.
+3. **LEAGUE MULTIPLIERS DO NOT AFFECT PRICE.** Everyone uses the same subscription tiers. Leagues determine analytical complexity only (L1 gets 10-page CIM, L5 gets 60-page CIM).
 4. **Yulia never says "As an AI."** She is expert M&A deal intelligence. Adapts persona by league: Coach (L1), Guide (L2), Analyst (L3), Associate (L4), Partner (L5), Macro (L6).
 5. **Financial data: zero hallucination.** Extract exactly from documents, never invent numbers. Add-backs require user verification.
 6. **All money stored in cents (integers).** Never use floating point for financial values.
@@ -47,21 +47,24 @@ smbx.ai is an AI-powered deal intelligence platform. NOT a broker, advisor, appr
 --border-dark: zinc-800
 ```
 
-## Pricing Model — Execution Fee
+## Pricing Model — Monthly Subscriptions
 **How It Works:**
-1. User starts free → generous free tier hooks them in
-2. Yulia calculates SDE/EBITDA from actual financials during S1/B1/R1
-3. Paywall at end of Gate 1 → single Stripe checkout: 0.1% of SDE/EBITDA, $999 min
-4. Payment unlocks everything through closing + 180-day post-close integration
-5. No per-deliverable pricing. No wallet. No subscriptions. One decision point.
+1. User starts free → unlimited Yulia conversation, ONE free deliverable (ValueLens or deal score)
+2. Second deliverable → $49/month Starter paywall (unlimited analysis, exports)
+3. CIM, deal room, matching, sourcing → $149/month Professional upgrade
+4. Teams, API, white-label → $999/month Enterprise
+5. 30-day free trial of Professional available. Monthly billing, cancel anytime. No per-deal fees.
 
-**Free (S0-S1, B0-B1, R0-R1, PMI0):** ValueLens, Value Readiness Report, SDE/EBITDA analysis, Investment Thesis, Capital Stack Template, Deal Scoring, unlimited Yulia Q&A
-**PAID (S2+, B2+, R2+):** CIM, full valuation reports, financial models, DD packages, LOI tools, buyer lists, closing documents — all included in execution fee
+**Free:** Unlimited Yulia Q&A, ONE ValueLens or deal score (email required)
+**$49 Starter:** Unlimited ValueLens, deal scoring, VRR, SDE/EBITDA analysis, Investment Thesis, Capital Stack, document exports
+**$149 Professional:** Everything in Starter + CIM, deal room, buyer/seller matching, sourcing, DD checklists, LOI tools, living docs
+**$999 Enterprise:** Everything in Professional + unlimited users, white-label, API, portfolio dashboard, priority support
 
 ## Four Journeys × Six Gates
-- **SELL:** S0 Intake → S1 Financials → **S2 Valuation (PAYWALL)** → S3 Packaging → S4 Market Matching → S5 Closing
-- **BUY:** B0 Thesis → B1 Sourcing → **B2 Valuation (PAYWALL)** → B3 Due Diligence → B4 Structuring → B5 Closing
-- **RAISE:** R0 Intake → R1 Financial Package → **R2 Investor Materials (PAYWALL)** → R3 Outreach → R4 Terms → R5 Closing
+- **SELL:** S0 Intake → S1 Financials → S2 Valuation → S3 Packaging → S4 Market Matching → S5 Closing
+- **BUY:** B0 Thesis → B1 Sourcing → B2 Valuation → B3 Due Diligence → B4 Structuring → B5 Closing
+- **RAISE:** R0 Intake → R1 Financial Package → R2 Investor Materials → R3 Outreach → R4 Terms → R5 Closing
+- **Paywall:** After first free deliverable (not at a fixed gate). Upgrade prompts when user needs a higher-tier feature.
 - **PMI:** PMI0 Day 0 → PMI1 Stabilization → PMI2 Assessment → PMI3 Optimization
 
 ## Math Engine — Exact Formulas
@@ -70,7 +73,7 @@ SDE = Net_Income + Owner_Salary + D&A + Interest + One_Time + Verified_Addbacks
 EBITDA = Net_Income + D&A + Interest + Taxes + Verified_Addbacks - Non_Recurring
 DSCR = EBITDA / Annual_Debt_Service (SBA ≥ 1.25, Conventional ≥ 1.50)
 Valuation = (SDE or EBITDA) × (Base_Multiple + Growth_Premium + Margin_Premium)
-Execution_Fee = MAX(99900, ROUND(basis_cents * 0.001))  // in cents
+Subscription: $49/mo Starter, $149/mo Professional, $999/mo Enterprise
 ```
 
 **League Multiple Ranges:**
@@ -92,14 +95,14 @@ Execution_Fee = MAX(99900, ROUND(basis_cents * 0.001))  // in cents
 | server/index.ts | Express entry point |
 | server/routes/chat.ts | Chat CRUD + SSE streaming endpoints |
 | server/routes/auth.ts | JWT auth routes (login, signup, verify, Google OAuth) |
-| server/routes/stripe.ts | Execution fee checkout + Stripe webhooks |
+| server/routes/stripe.ts | Subscription checkout + Stripe webhooks |
 | server/routes/export.ts | PDF/DOCX/XLSX export endpoints (pdfkit, docx, exceljs) |
 | server/routes/dataRoom.ts | Folder/document management + file upload |
 | server/routes/collaboration.ts | Deal invites, RBAC, NDA, day passes |
 | server/routes/deliverables.ts | Deliverable CRUD, content editing, regeneration |
 | server/services/aiService.ts | AI orchestration + agentic loop |
-| server/services/dealExecutionFee.ts | Fee formula: 0.1% of SDE/EBITDA, $999 min |
-| server/services/paywallService.ts | Paywall prompt generation with fee context |
+| server/services/subscriptionService.ts | Subscription management, plan access checks (replaces dealExecutionFee.ts) |
+| server/services/paywallService.ts | Paywall prompt generation with subscription context |
 | server/services/menuCatalogService.ts | Menu items catalog (deliverable listing) |
 | server/services/leagueClassifier.ts | League detection from deal financials |
 | server/services/gateReadinessService.ts | Gate advancement + paywall logic |
@@ -122,7 +125,7 @@ Execution_Fee = MAX(99900, ROUND(basis_cents * 0.001))  // in cents
 | client/src/pages/public/AppShell.tsx | Unified shell for all public pages |
 | client/src/components/chat/Canvas.tsx | Document viewer with export, edit, comments, stale badge |
 | client/src/components/chat/Sidebar.tsx | Deal-grouped conversation sidebar |
-| client/src/components/chat/PaywallCard.tsx | Execution fee card at S2/B2/R2 |
+| client/src/components/chat/PaywallCard.tsx | Subscription upgrade card (triggers after free deliverable) |
 | client/src/hooks/useAuthChat.ts | Chat state management + SSE event handling |
 
 ## AI Orchestration (Anthropic Only)

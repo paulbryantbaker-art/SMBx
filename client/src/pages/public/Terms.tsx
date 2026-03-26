@@ -44,9 +44,9 @@ export default function Terms() {
           <div>
             <h2 className="font-sans text-xl font-bold text-[#0D0D0D] mb-3 m-0">Payments</h2>
             <p className="m-0">
-              smbx.ai uses a one-time platform fee model. A single fee per deal unlocks all
-              deliverables from valuation through closing. Refunds are available
-              if our work product does not meet professional standards.
+              smbx.ai uses a monthly subscription model. Plans start at $49/month and can be
+              canceled anytime. Your subscription covers all features included in your plan tier.
+              No per-deal fees, no success fees, no hidden charges.
             </p>
           </div>
 
