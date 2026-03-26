@@ -1,45 +1,21 @@
 /**
  * Gate Readiness Service — Determines when a deal can advance to the next gate.
  *
- * Subscription model: S2/B2/R2 require at least Starter subscription.
- * Everything before the paywall is free.
- * Everything after is included in the subscription.
- * PMI gates are always free.
+ * Gates are READINESS gates, not PAYMENT gates.
+ * Gate advancement checks whether prerequisite work is done.
+ * Payment/subscription is handled by subscriptionService on deliverable generation.
  */
 import { GATE_MAP, getNextGate, isGateFree } from '../../shared/gateRegistry.js';
-import { isExecutionFeePaid } from './dealExecutionFee.js';
-import { getUserPlan, planMeetsRequirement } from './subscriptionService.js';
 
 export interface GateReadinessResult {
   ready: boolean;
   missing: string[];
-  paywallRequired: boolean;
-  paywallGate?: string;
   nextGate: string | null;
-}
-
-/** Paywall gates — S2, B2, R2 require at least Starter subscription */
-export const PAYWALL_GATES = new Set(['S2', 'B2', 'R2']);
-
-/** Check if a gate is a paywall gate (respects DEV_NO_PAYWALL) */
-export function isPaywallGate(gateId: string): boolean {
-  if (process.env.DEV_NO_PAYWALL === 'true') return false;
-  return PAYWALL_GATES.has(gateId);
-}
-
-/** Check if a user's subscription allows access to a paywall gate */
-export async function hasSubscriptionForGate(userId: number): Promise<boolean> {
-  if (process.env.TEST_MODE === 'true' || process.env.DEV_NO_PAYWALL === 'true') return true;
-  const plan = await getUserPlan(userId);
-  return planMeetsRequirement(plan, 'starter');
 }
 
 /**
  * Check whether a deal is ready to advance from its current gate.
- * Returns missing fields, paywall status, and next gate.
- *
- * For paywall gates (S2/B2/R2): checks deal.platform_fee_paid.
- * If platform fee is paid (or TEST_MODE/DEV_NO_PAYWALL), advances freely.
+ * Returns missing fields and next gate. No payment checks.
  */
 export async function checkGateReadiness(
   currentGate: string,
@@ -54,42 +30,25 @@ export async function checkGateReadiness(
     asking_price?: number | null;
     business_name?: string | null;
     financials?: Record<string, any> | null;
-    platform_fee_paid?: boolean;
   },
 ): Promise<GateReadinessResult> {
   const nextGate = getNextGate(currentGate);
   const missing: string[] = [];
 
-  // Gate-specific field requirements
   const checker = GATE_CHECKS[currentGate];
   if (checker) {
     checker(deal, missing);
   }
 
-  // Check if the NEXT gate requires platform fee payment
-  let paywallRequired = false;
-  if (nextGate && isPaywallGate(nextGate)) {
-    // Check if platform fee is already paid
-    if (deal.id) {
-      const paid = await isExecutionFeePaid(deal.id);
-      paywallRequired = !paid;
-    } else {
-      paywallRequired = !(deal.platform_fee_paid || false);
-    }
-  }
-
   return {
     ready: missing.length === 0,
     missing,
-    paywallRequired,
-    paywallGate: paywallRequired && nextGate ? nextGate : undefined,
     nextGate,
   };
 }
 
 /**
- * Synchronous version for backward compatibility where async isn't possible.
- * Uses deal.platform_fee_paid directly instead of querying DB.
+ * Synchronous version for contexts where async isn't possible.
  */
 export function checkGateReadinessSync(
   currentGate: string,
@@ -103,7 +62,6 @@ export function checkGateReadinessSync(
     asking_price?: number | null;
     business_name?: string | null;
     financials?: Record<string, any> | null;
-    platform_fee_paid?: boolean;
   },
 ): GateReadinessResult {
   const nextGate = getNextGate(currentGate);
@@ -114,16 +72,9 @@ export function checkGateReadinessSync(
     checker(deal, missing);
   }
 
-  let paywallRequired = false;
-  if (nextGate && isPaywallGate(nextGate)) {
-    paywallRequired = !(deal.platform_fee_paid || process.env.DEV_NO_PAYWALL === 'true' || process.env.TEST_MODE === 'true');
-  }
-
   return {
     ready: missing.length === 0,
     missing,
-    paywallRequired,
-    paywallGate: paywallRequired && nextGate ? nextGate : undefined,
     nextGate,
   };
 }
@@ -267,10 +218,3 @@ const GATE_CHECKS: Record<string, GateChecker> = {
 
   PMI3: (_deal, _missing) => {},
 };
-
-/** Get the base price for a paywall gate — DEPRECATED, use getPlatformFee() instead */
-export function getPaywallBasePrice(_gateId: string): number {
-  // Platform fee model — price is per-deal, not per-gate
-  // Kept for backward compatibility; returns 0 since pricing is now in platform_fee_schedule
-  return 0;
-}

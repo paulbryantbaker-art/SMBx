@@ -16,13 +16,53 @@ AI-powered deal intelligence platform for business acquisitions from $300K to me
 
 ## Critical Rules — Read These First
 1. **MONTHLY SUBSCRIPTIONS.** Free (unlimited chat + 1 deliverable) / $49 Starter (unlimited analysis) / $149 Professional (CIM, deal room, matching) / $999 Enterprise (teams, API, white-label). No per-deal fees. No success fees. No wallet. Cancel anytime.
-2. **FREE TIER.** Unlimited Yulia conversation. ONE free structured deliverable (ValueLens or deal score, email required). Second deliverable requires $49/month Starter.
+2. **FREE TIER.** Unlimited Yulia conversation. ONE free structured deliverable per user (ValueLens or deal score, email required). Paywall triggers after first free deliverable, NOT at a fixed gate.
 3. **LEAGUE MULTIPLIERS DO NOT AFFECT PRICE.** Everyone uses the same subscription tiers. Leagues determine analytical complexity only (L1 gets 10-page CIM, L5 gets 60-page CIM).
 4. **Yulia never says "As an AI."** She is expert M&A deal intelligence. Adapts persona by league: Coach (L1), Guide (L2), Analyst (L3), Associate (L4), Partner (L5), Macro (L6).
 5. **Financial data: zero hallucination.** Extract exactly from documents, never invent numbers. Add-backs require user verification.
 6. **All money stored in cents (integers).** Never use floating point for financial values.
 7. **Chinese wall.** Buyer data and seller data strictly isolated. No cross-deal data leakage.
 8. **Mobile browser first.** Design for mobile, then adapt to desktop.
+
+## The Line — What smbx.ai Is and Isn't
+smbx.ai does 90% of what an investment bank does — the 90% that doesn't require a license. This is "The Line." Everything we do stays on the right side of it.
+
+**What we DO (no license required):**
+- Financial analysis: SDE, EBITDA, add-backs, trend analysis, projections
+- Valuation modeling: market comps, multiple analysis, DCF, LBO models
+- Document generation: CIMs, blind teasers, executive summaries, pitch decks
+- Deal structuring: capital stack modeling, DSCR analysis, sources & uses
+- Due diligence coordination: checklists, document tracking, red flag analysis
+- Market intelligence: industry multiples, PE activity, buyer demand signals
+- Process management: gate advancement, milestone tracking, timeline coordination
+
+**What we DON'T do (requires a license):**
+- Represent buyers or sellers in negotiations (broker license)
+- Provide legal opinions or draft legal documents (law license)
+- Provide tax advice (CPA/EA license)
+- Formally appraise businesses (ASA/CVA certification)
+- Manage client funds (fiduciary registration)
+
+**Language rules — encoded in all prompts:**
+- NEVER: "I recommend" / "I advise" / "you should" → USE: "The analysis shows" / "The data suggests" / "Here are your options"
+- NEVER: "Contact sales" / "Talk to our team" → Yulia IS the team. Everything routes to chat.
+- NEVER: "As an AI" / "As a language model" → Never break character.
+- ALWAYS: Present analysis with options, not directives. Let the user decide.
+- ALWAYS: Cite data sources. "Based on 2024 BizBuySell data..." / "Census CBP shows..."
+
+**The Golden Pattern (every substantive response):**
+1. ANALYSIS — "Here's what the data shows."
+2. OPTIONS — "Here are 2-3 ways to approach this."
+3. IMPLICATIONS — "Here's what happens with each."
+4. USER DECIDES — "Which direction do you want to go?"
+
+**Proactive behavior — Yulia drives the process:**
+- S1 complete (SDE calculated) → automatically start Value Readiness Report
+- S2 complete (valuation done) → if VRR > 5/7, suggest CIM generation
+- B1 (deal brought in) → immediately calculate implied multiple, DSCR, flag issues
+- LOI received → automatically generate offer analysis
+- DD started → proactively generate DD checklist
+- Draft communications without being asked: emails to buyers, counter-offers, LOI terms
 
 ## Legal Identity
 smbx.ai is an AI-powered deal intelligence platform. NOT a broker, advisor, appraiser, law firm, or financial advisor. All outputs are AI-generated estimates for informational purposes only.
@@ -60,12 +100,18 @@ smbx.ai is an AI-powered deal intelligence platform. NOT a broker, advisor, appr
 **$149 Professional:** Everything in Starter + CIM, deal room, buyer/seller matching, sourcing, DD checklists, LOI tools, living docs
 **$999 Enterprise:** Everything in Professional + unlimited users, white-label, API, portfolio dashboard, priority support
 
+**Subscription messaging rules:**
+- Never mention tier names unprompted — only when user hits a paywall
+- Never push aggressively — one clear explanation, then move on
+- After payment, never mention pricing again — the user is a paying client
+- Free users still get unlimited conversation + one deliverable — always deliver value first
+
 ## Four Journeys × Six Gates
 - **SELL:** S0 Intake → S1 Financials → S2 Valuation → S3 Packaging → S4 Market Matching → S5 Closing
 - **BUY:** B0 Thesis → B1 Sourcing → B2 Valuation → B3 Due Diligence → B4 Structuring → B5 Closing
 - **RAISE:** R0 Intake → R1 Financial Package → R2 Investor Materials → R3 Outreach → R4 Terms → R5 Closing
-- **Paywall:** After first free deliverable (not at a fixed gate). Upgrade prompts when user needs a higher-tier feature.
 - **PMI:** PMI0 Day 0 → PMI1 Stabilization → PMI2 Assessment → PMI3 Optimization
+- **Gate advancement is readiness-only.** No payment checks in gates. Subscription checks happen only at deliverable generation time.
 
 ## Math Engine — Exact Formulas
 ```
@@ -101,11 +147,10 @@ Subscription: $49/mo Starter, $149/mo Professional, $999/mo Enterprise
 | server/routes/collaboration.ts | Deal invites, RBAC, NDA, day passes |
 | server/routes/deliverables.ts | Deliverable CRUD, content editing, regeneration |
 | server/services/aiService.ts | AI orchestration + agentic loop |
-| server/services/subscriptionService.ts | Subscription management, plan access checks (replaces dealExecutionFee.ts) |
-| server/services/paywallService.ts | Paywall prompt generation with subscription context |
+| server/services/subscriptionService.ts | Subscription management, plan access checks, free deliverable tracking |
 | server/services/menuCatalogService.ts | Menu items catalog (deliverable listing) |
 | server/services/leagueClassifier.ts | League detection from deal financials |
-| server/services/gateReadinessService.ts | Gate advancement + paywall logic |
+| server/services/gateReadinessService.ts | Gate advancement — readiness checks only, no payment logic |
 | server/services/dealAccessService.ts | RBAC: hasDealAccess, folder visibility, activity logging |
 | server/services/dealService.ts | Deal CRUD, gate advancement, auto-advance |
 | server/services/dealFreshnessService.ts | Financial snapshot tracking, stale deliverable detection |
@@ -118,9 +163,10 @@ Subscription: $49/mo Starter, $149/mo Professional, $999/mo Enterprise
 | server/services/documentExtractor.ts | PDF/XLSX/CSV extraction via Claude Vision |
 | server/services/emailService.ts | Transactional emails via Resend |
 | server/services/tools.ts | 12 agentic tools for authenticated chat |
-| server/services/promptBuilder.ts | Dynamic prompt assembly with gate/league/knowledge layers |
-| server/prompts/gatePrompts.ts | Gate-specific prompts for all 4 journeys |
-| shared/gateRegistry.ts | 22 gate definitions, ordering, free/paid flags |
+| server/services/promptBuilder.ts | Dynamic prompt assembly with gate/league/knowledge/language layers |
+| server/prompts/masterPrompt.ts | Master system prompt with golden pattern + The Line |
+| server/prompts/gatePrompts.ts | Gate-specific prompts for all 4 journeys + proactive triggers |
+| shared/gateRegistry.ts | 22 gate definitions, ordering |
 | client/src/pages/Chat.tsx | Main chat page with canvas, sidebar, composer |
 | client/src/pages/public/AppShell.tsx | Unified shell for all public pages |
 | client/src/components/chat/Canvas.tsx | Document viewer with export, edit, comments, stale badge |

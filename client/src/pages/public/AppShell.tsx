@@ -18,7 +18,7 @@ import Canvas from '../../components/chat/Canvas';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
 import SellerDashboard from '../../components/chat/SellerDashboard';
 import BuyerPipeline from '../../components/chat/BuyerPipeline';
-// WalletPanel removed — platform fee model
+// Subscription model — no wallet, no per-deal fees
 import DocumentLibrary from '../../components/chat/DocumentLibrary';
 import AnalyticsView from '../../components/chat/AnalyticsView';
 import NDAModal from '../../components/chat/NDAModal';
@@ -429,7 +429,7 @@ export default function AppShell() {
   const [chatWidth, setChatWidth] = useState(520); // resizable chat column width
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop sidebar collapse
   const [ndaRequired, setNdaRequired] = useState<{ dealId: number; dealName?: string } | null>(null);
-  // walletBalance removed — platform fee model
+  // Subscription model handles pricing
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -562,7 +562,7 @@ export default function AppShell() {
     }
   }, [viewState, activeTab]);
 
-  // Wallet balance fetch removed — platform fee model (no wallet)
+  // Subscription model — no wallet balance needed
 
   // Send handler — morph from landing to chat
   const handleSend = useCallback((content: string) => {
@@ -1294,7 +1294,7 @@ export default function AppShell() {
             </div>
           )}
 
-          {/* Wallet view removed — platform fee model (no wallet) */}
+          {/* Subscription model — no wallet view */}
 
           {viewState === 'documents' && user && (
             <DocumentLibrary onViewDeliverable={(id) => setViewingDeliverable(id)} />

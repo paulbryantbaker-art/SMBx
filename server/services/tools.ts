@@ -1,7 +1,6 @@
 import postgres from 'postgres';
 import type { Tool } from '@anthropic-ai/sdk/resources/messages';
-import { checkGateReadinessSync as checkReadiness, isPaywallGate } from './gateReadinessService.js';
-import { isExecutionFeePaid, calculateExecutionFee } from './dealExecutionFee.js';
+import { checkGateReadinessSync as checkReadiness } from './gateReadinessService.js';
 import { generateProviderRecommendation, findProviders, trackReferral } from './providerMatchingService.js';
 import { matchFranchises } from './franchiseMatchingService.js';
 import { matchBuyersForSeller } from './buyerSourcingService.js';
@@ -405,20 +404,8 @@ async function advanceGate(input: Record<string, any>, userId: number): Promise<
     });
   }
 
-  // Check paywall — if next gate requires subscription
-  if (isPaywallGate(toGate)) {
-    const paid = await isExecutionFeePaid(dealId);
-    if (!paid) {
-      return JSON.stringify({
-        ready: true,
-        paywallRequired: true,
-        gate: toGate,
-        requiredPlan: 'starter',
-        priceDisplay: '$49/month',
-        message: 'To continue, you need a Starter subscription ($49/month). This unlocks all analysis and document features for all your deals.',
-      });
-    }
-  }
+  // Gates are readiness-only — no payment checks here.
+  // Subscription is enforced on deliverable generation, not gate advancement.
 
   // Advance the gate
   await sql`UPDATE deals SET current_gate = ${toGate}, updated_at = NOW() WHERE id = ${dealId}`;

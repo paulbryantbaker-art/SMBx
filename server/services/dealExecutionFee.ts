@@ -82,7 +82,7 @@ const FREE_GATES = new Set(['S0', 'S1', 'B0', 'B1', 'R0', 'R1', 'PMI0']);
 const ALWAYS_FREE_TYPES = new Set([
   'valuelens',
   'value_lens',
-  'bizestimate',
+  'bizestimate', // legacy alias
   'value_readiness_report',
   'investment_thesis',
   'preliminary_sde',

@@ -5,7 +5,7 @@ import { Router } from 'express';
 import { sql } from '../db.js';
 import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
 import { processDeliverable } from '../services/deliverableProcessor.js';
-import { isExecutionFeePaid } from '../services/dealExecutionFee.js';
+import { canGenerateDeliverable, markFreeDeliverableUsed, getUserPlan, planMeetsRequirement, getRequiredPlan } from '../services/subscriptionService.js';
 import { hasDealAccess } from '../services/dealAccessService.js';
 import { isGateFree } from '../../shared/gateRegistry.js';
 import { markDeliverableRefreshed } from '../services/dealFreshnessService.js';
@@ -120,21 +120,19 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
     const [menuItem] = await sql`SELECT * FROM menu_items WHERE slug = ${menuItemSlug} AND active = true`;
     if (!menuItem) return res.status(404).json({ error: 'Menu item not found' });
 
-    // Platform fee model: check if this gate's deliverable requires payment
-    // Free gates (S0, S1, B0, B1, etc.) → generate freely
-    // Paid gates (S2+, B2+, R2+) → require platform fee to be paid
-    const gate = menuItem.gate;
-    if (gate && !isGateFree(gate)) {
-      const paid = await isExecutionFeePaid(dealId);
-      if (!paid) {
-        return res.status(402).json({
-          error: 'Execution fee required',
-          message: 'Please pay the deal execution fee to unlock deliverables.',
-        });
-      }
+    // Subscription model: check if user can generate this deliverable
+    const deliverableType = menuItem.slug.replace(/-/g, '_');
+    const access = await canGenerateDeliverable(userId, deliverableType);
+    if (!access.allowed) {
+      return res.status(402).json({
+        error: 'Subscription required',
+        requiredPlan: access.requiredPlan,
+        currentPlan: access.currentPlan,
+        message: `This deliverable requires a ${access.requiredPlan} subscription.`,
+      });
     }
 
-    // Create deliverable record (no per-item pricing — included in platform fee)
+    // Create deliverable record (subscription covers all deliverables at user's tier)
     const [deliverable] = await sql`
       INSERT INTO deliverables (deal_id, user_id, menu_item_id, status, price_charged_cents)
       VALUES (${dealId}, ${userId}, ${menuItem.id}, 'queued', 0)
@@ -150,6 +148,11 @@ deliverablesRouter.post('/deals/:dealId/deliverables', async (req, res) => {
       deliverableType: menuItem.slug.replace(/-/g, '_'),
     };
     const jobId = await enqueueDeliverableGeneration(jobData);
+
+    // Mark free deliverable as used if this was the user's one free deliverable
+    if (access.isFreeDeliverable) {
+      await markFreeDeliverableUsed(userId, deliverableType);
+    }
 
     // Inline fallback: process in this process if worker isn't running.
     setImmediate(() => {
@@ -328,14 +331,13 @@ deliverablesRouter.get('/deals/:dealId/menu', async (req, res) => {
       ORDER BY gate ASC NULLS LAST, tier ASC, name ASC
     `;
 
-    // Subscription model — check user's plan to determine included items
-    const { getUserPlan, planMeetsRequirement } = await import('../services/subscriptionService.js');
+    // Check user's plan to determine included items
     const userPlan = await getUserPlan(userId);
-    const hasSubscription = planMeetsRequirement(userPlan, 'starter') || deal.platform_fee_paid || process.env.TEST_MODE === 'true' || process.env.DEV_NO_PAYWALL === 'true';
-    const mapped = (items as any[]).map(item => ({
-      ...item,
-      included: isGateFree(item.gate) || hasSubscription,
-    }));
+    const mapped = (items as any[]).map(item => {
+      const dt = item.slug?.replace(/-/g, '_') || '';
+      const required = getRequiredPlan(dt);
+      return { ...item, included: planMeetsRequirement(userPlan, required) };
+    });
 
     return res.json(mapped);
   } catch (err: any) {

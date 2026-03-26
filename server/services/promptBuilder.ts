@@ -4,8 +4,7 @@ import { PERSONAS } from '../prompts/personas.js';
 import { JOURNEY_DETECTION_PROMPT } from '../prompts/journeyDetection.js';
 import { GATE_PROMPTS } from '../prompts/gatePrompts.js';
 import { BRANCHING_LOGIC } from '../prompts/branchingLogic.js';
-import { isPaywallGate } from './gateReadinessService.js';
-import { generatePaywallPrompt } from './paywallService.js';
+import { getUserPlan, hasActiveSubscription, PLANS } from './subscriptionService.js';
 import { getKnowledgeForContext, formatKnowledgeForPrompt } from './knowledgeService.js';
 import { getMarketHeat, formatMarketHeatForPrompt } from './marketHeatService.js';
 
@@ -432,22 +431,20 @@ export async function buildSystemPrompt(
       layers.push(GATE_PROMPTS[deal.current_gate]);
     }
 
-    // Layer 3d: Paywall context (if at a paywall gate)
-    if (isPaywallGate(deal.current_gate)) {
-      const paywallCtx = generatePaywallPrompt({
-        gate: deal.current_gate,
-        league: deal.league || user.league || 'L1',
-        journeyType: deal.journey_type,
-        dealData: {
-          industry: deal.industry || undefined,
-          revenue: deal.revenue || undefined,
-          sde: deal.sde || undefined,
-          ebitda: deal.ebitda || undefined,
-          business_name: deal.business_name || undefined,
-          asking_price: deal.asking_price || undefined,
-        },
-      });
-      layers.push(paywallCtx.systemPromptAddition);
+    // Layer 3d: Subscription context
+    if (user.id) {
+      const userPlan = await getUserPlan(user.id);
+      if (!hasActiveSubscription(userPlan)) {
+        layers.push(`
+## SUBSCRIPTION CONTEXT
+The user is on the Free plan. They get unlimited conversation and ONE free structured deliverable.
+If they've used their free deliverable, paid deliverables require a subscription.
+Starter is ${PLANS.starter.priceDisplay} — covers analysis, valuations, exports.
+Professional is ${PLANS.professional.priceDisplay} — adds CIM, deal room, matching, sourcing.
+NEVER be pushy. Mention subscription only when the user requests a paid deliverable.
+If they decline, continue helping with conversation and guidance.
+`);
+      }
     }
 
     // Layer 3e: Deep knowledge injection based on deal context
@@ -509,7 +506,29 @@ You are analyzing uploaded documents. Switch to forensic auditor behavior:
     } catch { /* non-critical */ }
   }
 
-  // Layer 4: Branching logic
+  // Layer 4: Language rules — The Line
+  layers.push(`
+## LANGUAGE RULES — THE LINE
+smbx.ai does 90% of what an investment bank does — the 90% that doesn't require a license.
+
+NEVER SAY:
+- "I recommend" / "I advise" / "my recommendation" → SAY: "The analysis shows" / "The data suggests" / "Based on comparable transactions"
+- "You should" (as directive) → SAY: "Here are 2-3 options" / "Most sellers in your position..."
+- "I think" → SAY: "The market data indicates" / "Comparable deals show"
+- "Trust me" / "In my experience" → SAY: cite specific data, multiples, or comparable transactions
+- "Contact sales" / "Talk to our team" → This does not exist. Yulia IS the team. Route to chat.
+- "As an AI" / "As a language model" → Never break character.
+
+ALWAYS:
+- Present analysis with options, not directives
+- Let the user make the final call
+- Cite data sources: "Based on 2024 BizBuySell transaction data..." / "Census CBP shows..."
+- When uncertain, say so: "I don't have enough data to model this accurately. Can you share [specific document]?"
+- Draft communications proactively: emails to buyers, counter-offer language, LOI terms
+- Drive the process forward — don't wait to be asked what's next
+`);
+
+  // Layer 5: Branching logic
   layers.push(BRANCHING_LOGIC);
 
   return layers.join('\n\n');

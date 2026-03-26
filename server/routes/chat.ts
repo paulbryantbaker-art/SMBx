@@ -15,8 +15,7 @@ import { checkAndAutoAdvance, getDeal, updateDealFields, updateDealFinancials, a
 import { extractFields } from '../services/fieldExtractor.js';
 import type { ExtractedFields } from '../services/fieldExtractor.js';
 import { checkGateReadiness } from '../services/gateReadinessService.js';
-import { generatePaywallPrompt } from '../services/paywallService.js';
-import { isExecutionFeePaid, calculateExecutionFee, markExecutionFeePaid } from '../services/dealExecutionFee.js';
+// paywallService and dealExecutionFee removed — subscription model handles pricing
 import { classifyLeague, getLeagueMultiplier } from '../services/leagueClassifier.js';
 import { getGateMenuItems } from '../services/menuCatalogService.js';
 import { enqueueDeliverableGeneration } from '../services/jobQueue.js';
@@ -743,7 +742,7 @@ chatRouter.get('/deals/:dealId/gates', requireAuth, async (req, res) => {
   }
 });
 
-// ─── Unlock a paywall gate (purchase) ───────────────────────
+// ─── Advance gate (readiness check only, no payment) ────────
 
 chatRouter.post('/deals/:dealId/unlock-gate', requireAuth, async (req, res) => {
   try {
@@ -757,87 +756,26 @@ chatRouter.post('/deals/:dealId/unlock-gate', requireAuth, async (req, res) => {
     const deal = await getDeal(dealId);
     if (!deal || deal.user_id !== userId) return res.status(404).json({ error: 'Deal not found' });
 
-    // Verify this is a valid paywall transition
+    // Check readiness (no payment checks — subscription is on deliverable generation)
     const readiness = await checkGateReadiness(deal.current_gate, deal);
     if (!readiness.ready) {
       return res.status(400).json({ error: 'Current gate not ready for advancement', missing: readiness.missing });
     }
-    if (!readiness.paywallRequired || readiness.nextGate !== gate) {
-      return res.status(400).json({ error: 'Invalid gate unlock request' });
+    if (readiness.nextGate !== gate) {
+      return res.status(400).json({ error: 'Invalid gate transition' });
     }
 
-    // Subscription model: check if user has an active subscription
-    const { getUserPlan, planMeetsRequirement, PLANS, createSubscriptionCheckout } = await import('../services/subscriptionService.js');
-    const userPlan = await getUserPlan(userId);
+    // Advance the gate
+    const newGate = await advanceGate(dealId, deal.current_gate);
 
-    if (planMeetsRequirement(userPlan, 'starter') || process.env.TEST_MODE === 'true') {
-      // User has subscription (or TEST_MODE) — advance gate immediately
-      const newGate = await advanceGate(dealId, deal.current_gate);
-
-      // Auto-trigger primary deliverable for the unlocked gate
-      let deliverableId: number | null = null;
-      try {
-        const gateItems = await getGateMenuItems(gate);
-        if (gateItems.length > 0) {
-          const primaryItem = gateItems[0];
-          const [deliverable] = await sql`
-            INSERT INTO deliverables (deal_id, user_id, menu_item_id, status, price_charged_cents)
-            VALUES (${dealId}, ${userId}, ${primaryItem.id}, 'queued', 0)
-            RETURNING id
-          `;
-          deliverableId = deliverable.id;
-          const jobData = {
-            deliverableId: deliverable.id,
-            dealId,
-            userId,
-            menuItemSlug: primaryItem.slug,
-            deliverableType: primaryItem.slug.replace(/-/g, '_'),
-          };
-          await enqueueDeliverableGeneration(jobData);
-
-          setImmediate(() => {
-            processDeliverable(jobData).catch(err =>
-              console.error('Inline gate deliverable generation error:', err.message),
-            );
-          });
-        }
-      } catch (e: any) {
-        console.error('Auto-trigger deliverable error:', e.message);
-      }
-
-      const planInfo = PLANS[userPlan];
-      return res.json({
-        success: true,
-        fromGate: deal.current_gate,
-        toGate: newGate,
-        plan: userPlan,
-        planDisplay: planInfo.name,
-        deliverableId,
-      });
-    }
-
-    // User needs to subscribe — redirect to Stripe checkout
-    try {
-      const result = await createSubscriptionCheckout(userId, 'starter');
-      return res.json({
-        success: false,
-        checkoutUrl: result.url,
-        requiredPlan: 'starter',
-        priceDisplay: PLANS.starter.priceDisplay,
-        message: 'Subscribe to unlock this gate',
-      });
-    } catch (err: any) {
-      // If Stripe prices not configured, return info for client-side handling
-      return res.json({
-        success: false,
-        requiredPlan: 'starter',
-        priceDisplay: PLANS.starter.priceDisplay,
-        message: 'Subscription required to unlock this gate',
-      });
-    }
+    return res.json({
+      success: true,
+      fromGate: deal.current_gate,
+      toGate: newGate,
+    });
   } catch (err: any) {
     console.error('Gate unlock error:', err.message);
-    return res.status(500).json({ error: 'Failed to unlock gate' });
+    return res.status(500).json({ error: 'Failed to advance gate' });
   }
 });
 
@@ -1027,43 +965,6 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
               res.write(`data: ${JSON.stringify({ type: 'gate_advance', ...gateResult })}\n\n`);
             }
             createNotification({ userId, dealId: deal.id, type: 'gate_advance', title: `Gate complete: ${gateResult.gateName || gateResult.toGate}`, body: `Your deal has advanced to ${gateResult.toGate}`, actionUrl: '/chat' }).catch(() => {});
-          } else {
-            // Check if we're at a paywall — gate is ready but next gate requires platform fee
-            const freshDeal = await getDeal(deal.id);
-            if (freshDeal) {
-              const readiness = await checkGateReadiness(freshDeal.current_gate, freshDeal);
-              if (readiness.ready && readiness.paywallRequired && readiness.nextGate) {
-                const league = freshDeal.league || user.league || 'L1';
-                const paywall = await generatePaywallPrompt({
-                  gate: readiness.nextGate,
-                  league,
-                  journeyType: freshDeal.journey_type,
-                  dealId: freshDeal.id,
-                  dealData: {
-                    industry: freshDeal.industry || undefined,
-                    revenue: freshDeal.revenue || undefined,
-                    sde: freshDeal.sde || undefined,
-                    ebitda: freshDeal.ebitda || undefined,
-                    business_name: freshDeal.business_name || undefined,
-                    asking_price: freshDeal.asking_price || undefined,
-                  },
-                });
-                if (!clientDisconnected && !res.writableEnded) {
-                  res.write(`data: ${JSON.stringify({
-                    type: 'paywall',
-                    gate: readiness.nextGate,
-                    currentGate: freshDeal.current_gate,
-                    priceCents: paywall.priceCents,
-                    priceDisplay: paywall.priceDisplay,
-                    valueProps: paywall.valueProps,
-                    comparisonText: paywall.comparisonText,
-                    callToAction: paywall.callToAction,
-                    whatYouGet: paywall.whatYouGet,
-                    dealId: freshDeal.id,
-                  })}\n\n`);
-                }
-              }
-            }
           }
         } catch (e: any) {
           console.error('Gate auto-advance error:', e.message);
