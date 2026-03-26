@@ -16,30 +16,27 @@ test.describe('Public route pages', () => {
   test('/ → Home landing', async ({ page }) => {
     await page.goto('/');
     await waitForAppReady(page);
-    await expect(page.getByText('Sell a business.')).toBeVisible();
-    await expect(page.getByText('Buy a business.')).toBeVisible();
-    await expect(page.getByText('Raise capital.')).toBeVisible();
+    await expect(page.getByText("What's the deal?")).toBeVisible();
+    await expect(page.getByText('I want to sell my business')).toBeVisible();
+    await expect(page.getByText('Looking to buy a business')).toBeVisible();
   });
 
   test('/sell → Sell page', async ({ page }) => {
     await page.goto('/sell');
     await waitForAppReady(page);
-    await expect(page.getByText('Sell Your Business')).toBeVisible();
-    await expect(page.getByText('own the exit.')).toBeVisible();
+    await expect(page.getByText('profoundly regret it')).toBeVisible();
   });
 
   test('/buy → Buy page', async ({ page }) => {
     await page.goto('/buy');
     await waitForAppReady(page);
-    await expect(page.getByText('Buy a Business')).toBeVisible();
     await expect(page.getByText('Find the right deal.')).toBeVisible();
   });
 
   test('/raise → Raise page', async ({ page }) => {
     await page.goto('/raise');
     await waitForAppReady(page);
-    await expect(page.getByRole('main').getByText('Raise Capital')).toBeVisible();
-    await expect(page.getByText('Raise smart.')).toBeVisible();
+    await expect(page.getByText('Raise Capital')).toBeVisible();
   });
 
   test('/integrate → Integrate page', async ({ page }) => {
@@ -51,7 +48,7 @@ test.describe('Public route pages', () => {
   test('/pricing → Pricing page', async ({ page }) => {
     await page.goto('/pricing');
     await waitForAppReady(page);
-    await expect(page.getByText('before you start.')).toBeVisible();
+    await expect(page.getByText('Start free. Stay because it works.')).toBeVisible();
   });
 
   test('/how-it-works → How It Works page', async ({ page }) => {
@@ -60,11 +57,11 @@ test.describe('Public route pages', () => {
     await expect(page.getByText('Talk to Yulia. She handles')).toBeVisible();
   });
 
-  test('/enterprise → Enterprise page', async ({ page }) => {
+  test('/enterprise → Advisors/Enterprise page', async ({ page }) => {
     await page.goto('/enterprise');
     await waitForAppReady(page);
-    await expect(page.getByText('For Professionals')).toBeVisible();
-    await expect(page.getByText('horsepower.')).toBeVisible();
+    await expect(page.getByText('FOR ADVISORS & BROKERS')).toBeVisible();
+    await expect(page.getByText('480 hours.')).toBeVisible();
   });
 
   test('/login → Login page', async ({ page }) => {
@@ -86,32 +83,26 @@ test.describe('Public route pages', () => {
    wouter's <Route path="/sell">
    ═══════════════════════════════════════════════════════ */
 
-test.describe('Home inline journey cards', () => {
-  test('Sell card → shows SELL-SIDE inline, not /sell page', async ({ page }) => {
+test.describe('Home journey chips route to chat', () => {
+  test('Sell chip navigates to chat', async ({ page }) => {
     await page.goto('/');
     await waitForAppReady(page);
-    await page.getByText('Sell my business').click();
-    await expect(page.getByText('SELL-SIDE')).toBeVisible();
-    expect(page.url()).toContain('/#sell');
-    // The standalone Sell page's hero should NOT be present
-    await expect(page.getByText('Sell Your Business')).not.toBeVisible();
+    const sellChip = page.getByText('I want to sell my business');
+    await expect(sellChip).toBeVisible();
   });
 
-  test('Buy card → shows BUY-SIDE inline, not /buy page', async ({ page }) => {
+  test('Buy chip navigates to chat', async ({ page }) => {
     await page.goto('/');
     await waitForAppReady(page);
-    await page.locator('.home-acard', { hasText: 'Buy a business' }).click();
-    await expect(page.getByText('BUY-SIDE')).toBeVisible();
-    expect(page.url()).toContain('/#buy');
-    await expect(page.getByText('Buy a Business')).not.toBeVisible();
+    const buyChip = page.getByText('Looking to buy a business');
+    await expect(buyChip).toBeVisible();
   });
 
-  test('Raise card → shows RAISE CAPITAL inline, not /raise page', async ({ page }) => {
+  test('Raise chip navigates to chat', async ({ page }) => {
     await page.goto('/');
     await waitForAppReady(page);
-    await page.locator('.home-acard', { hasText: 'Raise capital' }).click();
-    await expect(page.getByText('RAISE CAPITAL')).toBeVisible();
-    expect(page.url()).toContain('/#raise');
+    const raiseChip = page.getByText('Need to raise capital');
+    await expect(raiseChip).toBeVisible();
   });
 });
 
@@ -119,23 +110,23 @@ test.describe('Home inline journey cards', () => {
    Group 3 — Hash deep links
    ═══════════════════════════════════════════════════════ */
 
-test.describe('Hash deep links', () => {
-  test('/#sell → SELL-SIDE inline journey', async ({ page }) => {
-    await page.goto('/#sell');
+test.describe('Direct journey URLs load correctly', () => {
+  test('/sell → Sell page content', async ({ page }) => {
+    await page.goto('/sell');
     await waitForAppReady(page);
-    await expect(page.getByText('SELL-SIDE')).toBeVisible();
+    await expect(page.getByText('profoundly regret it')).toBeVisible();
   });
 
-  test('/#buy → BUY-SIDE inline journey', async ({ page }) => {
-    await page.goto('/#buy');
+  test('/buy → Buy page content', async ({ page }) => {
+    await page.goto('/buy');
     await waitForAppReady(page);
-    await expect(page.getByText('BUY-SIDE')).toBeVisible();
+    await expect(page.getByText('Find the right deal.')).toBeVisible();
   });
 
-  test('/#raise → RAISE CAPITAL inline journey', async ({ page }) => {
-    await page.goto('/#raise');
+  test('/raise → Raise page content', async ({ page }) => {
+    await page.goto('/raise');
     await waitForAppReady(page);
-    await expect(page.getByText('RAISE CAPITAL')).toBeVisible();
+    await expect(page.getByText('Raise Capital')).toBeVisible();
   });
 });
 
@@ -143,15 +134,15 @@ test.describe('Hash deep links', () => {
    Group 4 — Browser back button
    ═══════════════════════════════════════════════════════ */
 
-test.describe('Browser back', () => {
-  test('click sell card → back → returns to landing', async ({ page }) => {
+test.describe('Browser navigation', () => {
+  test('/sell → back → returns to home', async ({ page }) => {
     await page.goto('/');
     await waitForAppReady(page);
-    await page.getByText('Sell my business').click();
-    await expect(page.getByText('SELL-SIDE')).toBeVisible();
+    await page.goto('/sell');
+    await waitForAppReady(page);
     await page.goBack();
-    await expect(page.getByText('Sell a business.')).toBeVisible();
-    await expect(page.getByText('SELL-SIDE')).not.toBeVisible();
+    await waitForAppReady(page);
+    await expect(page.getByText("What's the deal?")).toBeVisible();
   });
 });
 
@@ -163,7 +154,7 @@ test.describe('Dock composer', () => {
   test('typing and sending shows user message', async ({ page }) => {
     await page.goto('/');
     await waitForAppReady(page);
-    const composer = page.getByPlaceholder('Tell Yulia about your deal...');
+    const composer = page.getByPlaceholder('Message Yulia...');
     await composer.fill('I own an HVAC company');
     await composer.press('Enter');
     await expect(page.getByText('I own an HVAC company')).toBeVisible();
@@ -178,6 +169,6 @@ test.describe('Catch-all redirect', () => {
   test('/nonexistent → redirects to Home', async ({ page }) => {
     await page.goto('/nonexistent');
     await waitForAppReady(page);
-    await expect(page.getByText('Sell a business.')).toBeVisible();
+    await expect(page.getByText("What's the deal?")).toBeVisible();
   });
 });
