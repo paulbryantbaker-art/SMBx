@@ -1,64 +1,35 @@
 /**
- * Deal Execution Fee — 0.1% of SDE or EBITDA, $999 minimum.
- * One-time payment per deal. Unlocks all deliverables through closing + 180 days.
+ * Deal Execution Fee — DEPRECATED. Now uses subscription model.
  *
- * All amounts in CENTS (integers).
+ * This file is kept for backward compatibility with existing code
+ * that references these functions. All pricing is now handled by
+ * subscriptionService.ts.
  */
 import { sql } from '../db.js';
-
-const FEE_RATE = 0.001;           // 0.1%
-const MINIMUM_FEE_CENTS = 99900;  // $999
-
-export interface ExecutionFeeResult {
-  feeCents: number;
-  feeDisplay: string;
-  basis: 'SDE' | 'EBITDA';
-  basisAmountCents: number;
-  basisDisplay: string;
-  isMinimum: boolean;
-}
+import { getUserPlan, planMeetsRequirement } from './subscriptionService.js';
 
 /**
- * Calculate the deal execution fee from deal financials.
- * Uses EBITDA if available (L3+), otherwise SDE.
- */
-export function calculateExecutionFee(deal: {
-  sde?: number | null;      // cents
-  ebitda?: number | null;   // cents
-}): ExecutionFeeResult {
-  const ebitda = deal.ebitda || 0;
-  const sde = deal.sde || 0;
-
-  // Use EBITDA if available and > 0, otherwise SDE
-  const useEbitda = ebitda > 0;
-  const basisCents = useEbitda ? ebitda : sde;
-  const basis: 'SDE' | 'EBITDA' = useEbitda ? 'EBITDA' : 'SDE';
-
-  const rawFeeCents = Math.round(basisCents * FEE_RATE);
-  const feeCents = Math.max(MINIMUM_FEE_CENTS, rawFeeCents);
-  const isMinimum = rawFeeCents < MINIMUM_FEE_CENTS;
-
-  return {
-    feeCents,
-    feeDisplay: `$${(feeCents / 100).toLocaleString('en-US')}`,
-    basis,
-    basisAmountCents: basisCents,
-    basisDisplay: `$${(basisCents / 100).toLocaleString('en-US')}`,
-    isMinimum,
-  };
-}
-
-/**
- * Check if a deal's execution fee has been paid.
+ * @deprecated Use subscriptionService.getUserPlan() instead.
+ * Check if a deal's execution fee has been paid (or user has a subscription).
  */
 export async function isExecutionFeePaid(dealId: number): Promise<boolean> {
   if (process.env.TEST_MODE === 'true' || process.env.DEV_NO_PAYWALL === 'true') return true;
-  const [deal] = await sql`SELECT platform_fee_paid FROM deals WHERE id = ${dealId}`;
-  return deal?.platform_fee_paid === true;
+
+  // Check if deal's owner has an active subscription
+  const [deal] = await sql`SELECT user_id, platform_fee_paid FROM deals WHERE id = ${dealId}`;
+  if (!deal) return false;
+
+  // Legacy: if platform_fee_paid is true, honor it
+  if (deal.platform_fee_paid) return true;
+
+  // New: check subscription
+  const plan = await getUserPlan(deal.user_id);
+  return planMeetsRequirement(plan, 'starter');
 }
 
 /**
- * Mark a deal's execution fee as paid.
+ * @deprecated Use subscriptionService.setUserPlan() instead.
+ * Legacy function kept for backward compat.
  */
 export async function markExecutionFeePaid(
   dealId: number,
@@ -75,25 +46,53 @@ export async function markExecutionFeePaid(
   `;
 }
 
+/**
+ * @deprecated No longer relevant — subscriptions replace per-deal fees.
+ */
+export interface ExecutionFeeResult {
+  feeCents: number;
+  feeDisplay: string;
+  basis: 'SDE' | 'EBITDA';
+  basisAmountCents: number;
+  basisDisplay: string;
+  isMinimum: boolean;
+}
+
+/**
+ * @deprecated Kept for backward compat. Returns a stub result.
+ */
+export function calculateExecutionFee(deal: {
+  sde?: number | null;
+  ebitda?: number | null;
+}): ExecutionFeeResult {
+  return {
+    feeCents: 0,
+    feeDisplay: '$0',
+    basis: 'SDE',
+    basisAmountCents: 0,
+    basisDisplay: '$0',
+    isMinimum: false,
+  };
+}
+
 // ─── Free-tier deliverable classification ──────────────────
 
 const FREE_GATES = new Set(['S0', 'S1', 'B0', 'B1', 'R0', 'R1', 'PMI0']);
 
-/** Deliverables that are always free regardless of gate */
 const ALWAYS_FREE_TYPES = new Set([
   'valuelens',
   'value_lens',
+  'bizestimate',
   'value_readiness_report',
   'investment_thesis',
   'preliminary_sde',
   'preliminary_ebitda',
   'capital_stack_template',
   'deal_scoring',
-  // CIM is PAID — behind S2/B2 paywall, included in execution fee
 ]);
 
 /**
- * Check if a deliverable is free-tier (no payment required).
+ * Check if a deliverable is free-tier (no subscription required).
  */
 export function isFreeTierDeliverable(gate: string | null, deliverableType?: string): boolean {
   if (deliverableType && ALWAYS_FREE_TYPES.has(deliverableType.toLowerCase())) return true;

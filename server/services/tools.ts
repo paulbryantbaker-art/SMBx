@@ -405,20 +405,17 @@ async function advanceGate(input: Record<string, any>, userId: number): Promise<
     });
   }
 
-  // Check paywall — if next gate requires execution fee payment
+  // Check paywall — if next gate requires subscription
   if (isPaywallGate(toGate)) {
     const paid = await isExecutionFeePaid(dealId);
     if (!paid) {
-      const fee = calculateExecutionFee(deal);
       return JSON.stringify({
         ready: true,
         paywallRequired: true,
         gate: toGate,
-        feeCents: fee.feeCents,
-        feeDisplay: fee.feeDisplay,
-        basis: fee.basis,
-        basisDisplay: fee.basisDisplay,
-        message: `To continue, the deal execution fee is ${fee.feeDisplay} (0.1% of your ${fee.basis}).`,
+        requiredPlan: 'starter',
+        priceDisplay: '$49/month',
+        message: 'To continue, you need a Starter subscription ($49/month). This unlocks all analysis and document features for all your deals.',
       });
     }
   }

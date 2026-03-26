@@ -14,11 +14,10 @@ export interface GateDef {
 }
 
 /**
- * Platform fee model: one-time payment at S2/B2/R2 gate.
- * Gates before paywall are free. Gates after paywall are included in the platform fee.
- * PMI gates are included (typically follows a completed buy deal).
- * The `free` field marks gates that NEVER require payment.
- * S2, B2, R2 are the only paywall gates — checked against deal.platform_fee_paid.
+ * Subscription model: S2/B2/R2 require at least Starter plan ($49/mo).
+ * Gates before the paywall are free. Gates after the paywall are included
+ * in the subscription. PMI gates are always free.
+ * The `free` field marks gates accessible without a subscription.
  */
 const SELL_GATES: GateDef[] = [
   { id: 'S0', journey: 'sell', index: 0, name: 'Intake', free: true,

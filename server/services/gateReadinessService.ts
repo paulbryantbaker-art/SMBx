@@ -1,13 +1,14 @@
 /**
  * Gate Readiness Service — Determines when a deal can advance to the next gate.
  *
- * Platform fee model: one-time payment at S2/B2/R2 gate.
+ * Subscription model: S2/B2/R2 require at least Starter subscription.
  * Everything before the paywall is free.
- * Everything after the paywall is included in the platform fee.
- * PMI gates are always free (included with the original deal).
+ * Everything after is included in the subscription.
+ * PMI gates are always free.
  */
 import { GATE_MAP, getNextGate, isGateFree } from '../../shared/gateRegistry.js';
 import { isExecutionFeePaid } from './dealExecutionFee.js';
+import { getUserPlan, planMeetsRequirement } from './subscriptionService.js';
 
 export interface GateReadinessResult {
   ready: boolean;
@@ -17,13 +18,20 @@ export interface GateReadinessResult {
   nextGate: string | null;
 }
 
-/** Paywall gates — only S2, B2, R2 require platform fee payment */
+/** Paywall gates — S2, B2, R2 require at least Starter subscription */
 export const PAYWALL_GATES = new Set(['S2', 'B2', 'R2']);
 
 /** Check if a gate is a paywall gate (respects DEV_NO_PAYWALL) */
 export function isPaywallGate(gateId: string): boolean {
   if (process.env.DEV_NO_PAYWALL === 'true') return false;
   return PAYWALL_GATES.has(gateId);
+}
+
+/** Check if a user's subscription allows access to a paywall gate */
+export async function hasSubscriptionForGate(userId: number): Promise<boolean> {
+  if (process.env.TEST_MODE === 'true' || process.env.DEV_NO_PAYWALL === 'true') return true;
+  const plan = await getUserPlan(userId);
+  return planMeetsRequirement(plan, 'starter');
 }
 
 /**

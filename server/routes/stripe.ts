@@ -1,17 +1,25 @@
 /**
- * Stripe Routes — Deal execution fee payment via Stripe Checkout.
+ * Stripe Routes — Subscription checkout + webhook handling.
  *
  * Flow:
- * 1. User hits S2/B2/R2 paywall gate
- * 2. POST /api/stripe/deal-checkout creates a Checkout Session
- * 3. User pays on Stripe's hosted page
- * 4. Stripe sends webhook → we mark deal execution fee as paid
- * 5. User redirected back to the app, gate advances
+ * 1. User hits paywall at S2/B2/R2 (or any paid feature)
+ * 2. POST /api/stripe/subscribe creates a Stripe Checkout Session (subscription)
+ * 3. User subscribes on Stripe's hosted page
+ * 4. Stripe sends webhook → we update user's plan
+ * 5. User redirected back to the app, features unlocked
  */
 import { Router } from 'express';
 import Stripe from 'stripe';
 import { sql } from '../db.js';
-import { calculateExecutionFee, isExecutionFeePaid, markExecutionFeePaid } from '../services/dealExecutionFee.js';
+import {
+  getUserPlan,
+  createSubscriptionCheckout,
+  createCustomerPortal,
+  setUserPlan,
+  cancelSubscription,
+  PLANS,
+  type Plan,
+} from '../services/subscriptionService.js';
 
 export const stripeRouter = Router();
 
@@ -20,118 +28,100 @@ function getStripe(): Stripe {
   return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
 
-// ─── Get execution fee for a deal ─────────────────────────────
+// ─── Get user's current plan ─────────────────────────────────
+
+stripeRouter.get('/plan', async (req, res) => {
+  const userId = (req as any).userId;
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const plan = await getUserPlan(userId);
+    const planInfo = PLANS[plan];
+    return res.json({ plan, ...planInfo });
+  } catch (err: any) {
+    console.error('Get plan error:', err.message);
+    return res.status(500).json({ error: 'Failed to get plan' });
+  }
+});
+
+// ─── Create subscription checkout ────────────────────────────
+
+stripeRouter.post('/subscribe', async (req, res) => {
+  const userId = (req as any).userId;
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+  const { plan } = req.body;
+  if (!plan || !PLANS[plan as Plan]) return res.status(400).json({ error: 'Invalid plan' });
+  if (plan === 'free') return res.status(400).json({ error: 'Cannot subscribe to free plan' });
+
+  try {
+    const result = await createSubscriptionCheckout(userId, plan as Plan);
+    return res.json(result);
+  } catch (err: any) {
+    console.error('Subscribe error:', err.message);
+    return res.status(500).json({ error: err.message || 'Failed to create checkout' });
+  }
+});
+
+// ─── Customer portal (manage subscription) ───────────────────
+
+stripeRouter.post('/portal', async (req, res) => {
+  const userId = (req as any).userId;
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const url = await createCustomerPortal(userId);
+    return res.json({ url });
+  } catch (err: any) {
+    console.error('Portal error:', err.message);
+    return res.status(500).json({ error: err.message || 'Failed to create portal session' });
+  }
+});
+
+// ─── Legacy: execution fee endpoint (backward compat) ────────
 
 stripeRouter.get('/platform-fee/:dealId', async (req, res) => {
   const userId = (req as any).userId;
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
-  const dealId = parseInt(req.params.dealId);
-  if (!dealId) return res.status(400).json({ error: 'Invalid deal ID' });
-
   try {
-    const [deal] = await sql`SELECT id, sde, ebitda, league, platform_fee_paid, platform_fee_cents, platform_fee_paid_at FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
-    if (!deal) return res.status(404).json({ error: 'Deal not found' });
-
-    const paid = deal.platform_fee_paid || false;
-    if (paid && deal.platform_fee_cents) {
-      const basis = (deal.ebitda && deal.ebitda > 0) ? 'EBITDA' : 'SDE';
-      const basisCents = basis === 'EBITDA' ? (deal.ebitda || 0) : (deal.sde || 0);
-      return res.json({
-        feeCents: deal.platform_fee_cents,
-        feeDisplay: `$${(deal.platform_fee_cents / 100).toLocaleString('en-US')}`,
-        basis,
-        basisDisplay: `$${(basisCents / 100).toLocaleString('en-US')}`,
-        isMinimum: false,
-        league: deal.league || 'L1',
-        isPaid: true,
-        paidAt: deal.platform_fee_paid_at,
-      });
-    }
-
-    const fee = calculateExecutionFee({ sde: deal.sde, ebitda: deal.ebitda });
+    const plan = await getUserPlan(userId);
+    const planInfo = PLANS[plan];
     return res.json({
-      ...fee,
-      league: deal.league || 'L1',
-      isPaid: false,
-      paidAt: null,
+      plan,
+      planName: planInfo.name,
+      priceDisplay: planInfo.priceDisplay,
+      isPaid: plan !== 'free',
     });
   } catch (err: any) {
-    console.error('Execution fee fetch error:', err.message);
-    return res.status(500).json({ error: 'Failed to fetch execution fee' });
+    return res.status(500).json({ error: 'Failed to fetch plan info' });
   }
 });
 
-// ─── Create Checkout Session for deal execution fee ────────────
+// ─── Legacy: deal-checkout → redirect to subscribe ───────────
 
 stripeRouter.post('/deal-checkout', async (req, res) => {
   const userId = (req as any).userId;
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
-  const { dealId } = req.body;
-  if (!dealId) return res.status(400).json({ error: 'dealId required' });
-
   try {
-    const parsedDealId = parseInt(dealId);
-
-    // TEST_MODE bypass — mark as paid immediately
-    if (process.env.TEST_MODE === 'true') {
-      const [deal] = await sql`SELECT sde, ebitda FROM deals WHERE id = ${parsedDealId} AND user_id = ${userId}`;
-      if (!deal) return res.status(404).json({ error: 'Deal not found' });
-      const fee = calculateExecutionFee({ sde: deal.sde, ebitda: deal.ebitda });
-      await markExecutionFeePaid(parsedDealId, fee.feeCents, 'test_' + Date.now());
-      const appUrl = process.env.APP_URL || 'https://smbx.ai';
-      return res.json({ url: `${appUrl}/chat?payment=success&dealId=${parsedDealId}`, test: true });
+    // New model: redirect to subscription instead of per-deal fee
+    const plan = await getUserPlan(userId);
+    if (plan !== 'free') {
+      return res.json({ success: true, message: 'Already subscribed' });
     }
 
-    // Verify ownership
-    const [deal] = await sql`SELECT id, sde, ebitda, business_name, journey_type, platform_fee_paid FROM deals WHERE id = ${parsedDealId} AND user_id = ${userId}`;
-    if (!deal) return res.status(404).json({ error: 'Deal not found' });
-    if (deal.platform_fee_paid) return res.status(400).json({ error: 'Execution fee already paid for this deal' });
-
-    const fee = calculateExecutionFee({ sde: deal.sde, ebitda: deal.ebitda });
-    const [user] = await sql`SELECT email FROM users WHERE id = ${userId}`;
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    const dealName = deal.business_name || 'Your Deal';
-    const stripe = getStripe();
-    const appUrl = process.env.APP_URL || 'https://smbx.ai';
-
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: ['card'],
-      customer_email: user.email as string,
-      line_items: [{
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: `smbX.ai Deal Execution — ${dealName}`,
-            description: `0.1% of ${fee.basis} ($${(fee.feeCents / 100).toLocaleString()}). Full platform access through closing + 180-day integration.`,
-          },
-          unit_amount: fee.feeCents,
-        },
-        quantity: 1,
-      }],
-      metadata: {
-        type: 'platform_fee',
-        dealId: parsedDealId.toString(),
-        userId: userId.toString(),
-        feeCents: fee.feeCents.toString(),
-      },
-      success_url: `${appUrl}/chat?payment=success&dealId=${parsedDealId}`,
-      cancel_url: `${appUrl}/chat?payment=cancelled&dealId=${parsedDealId}`,
-    });
-
-    return res.json({ url: session.url! });
+    // Default to starter plan for legacy paywall flow
+    const result = await createSubscriptionCheckout(userId, 'starter');
+    return res.json({ url: result.url, test: result.test });
   } catch (err: any) {
-    console.error('Deal checkout error:', err.message);
-    return res.status(500).json({ error: err.message || 'Failed to create checkout session' });
+    console.error('Legacy checkout error:', err.message);
+    return res.status(500).json({ error: err.message || 'Failed to create checkout' });
   }
 });
 
-// Legacy alias — keep for backward compatibility
+// Legacy alias
 stripeRouter.post('/platform-fee', async (req, res) => {
-  // Forward to deal-checkout
   req.url = '/deal-checkout';
   return stripeRouter.handle(req, res, () => {});
 });
@@ -157,36 +147,92 @@ export async function handleStripeWebhook(req: any, res: any) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.Checkout.Session;
-    const type = session.metadata?.type;
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const type = session.metadata?.type;
 
-    if (type === 'platform_fee') {
-      const dealId = parseInt(session.metadata?.dealId || '0');
-      const paymentIntentId = session.payment_intent as string;
+        if (type === 'subscription') {
+          const userId = parseInt(session.metadata?.userId || '0');
+          const plan = (session.metadata?.plan || 'starter') as Plan;
+          const subscriptionId = session.subscription as string;
+          const customerId = session.customer as string;
 
-      if (dealId && paymentIntentId) {
-        try {
-          // Check for duplicate webhook
-          const [existing] = await sql`
-            SELECT id FROM deals
-            WHERE id = ${dealId} AND stripe_payment_intent_id = ${paymentIntentId}
-          `;
-
-          if (!existing) {
-            const feeCents = parseInt(session.metadata?.feeCents || '0') || (session.amount_total || 0);
-            await markExecutionFeePaid(dealId, feeCents, paymentIntentId);
-            console.log(`Execution fee paid: deal ${dealId}, $${feeCents / 100}, PI ${paymentIntentId}`);
-          } else {
-            console.log(`Duplicate webhook ignored: deal ${dealId}`);
+          if (userId) {
+            await setUserPlan(userId, plan, subscriptionId, customerId);
+            console.log(`Subscription activated: user ${userId}, plan ${plan}`);
           }
-        } catch (err: any) {
-          console.error('Execution fee webhook error:', err.message);
-          return res.status(500).send('Failed to process payment');
         }
+
+        // Legacy: one-time platform fee
+        if (type === 'platform_fee') {
+          const dealId = parseInt(session.metadata?.dealId || '0');
+          const userId = parseInt(session.metadata?.userId || '0');
+          if (dealId && userId) {
+            // Mark deal as paid + upgrade user to starter as migration path
+            await sql`
+              UPDATE deals SET platform_fee_paid = true, platform_fee_paid_at = NOW()
+              WHERE id = ${dealId}
+            `;
+            const currentPlan = await getUserPlan(userId);
+            if (currentPlan === 'free') {
+              await setUserPlan(userId, 'starter');
+            }
+            console.log(`Legacy platform fee: deal ${dealId}, user upgraded to starter`);
+          }
+        }
+        break;
+      }
+
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription;
+        const customerId = subscription.customer as string;
+        const [user] = await sql`SELECT id FROM users WHERE stripe_customer_id = ${customerId}`;
+
+        if (user) {
+          if (subscription.status === 'active') {
+            // Plan may have changed (upgrade/downgrade)
+            const priceId = subscription.items.data[0]?.price?.id;
+            const plan = getPlanFromPriceId(priceId) || 'starter';
+            await setUserPlan(user.id, plan, subscription.id, customerId);
+            console.log(`Subscription updated: user ${user.id}, plan ${plan}`);
+          } else if (subscription.status === 'past_due') {
+            // Keep current plan but flag status
+            await sql`
+              UPDATE subscriptions SET status = 'past_due', updated_at = NOW()
+              WHERE user_id = ${user.id} AND status = 'active'
+            `;
+          }
+        }
+        break;
+      }
+
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription;
+        const customerId = subscription.customer as string;
+        const [user] = await sql`SELECT id FROM users WHERE stripe_customer_id = ${customerId}`;
+
+        if (user) {
+          await cancelSubscription(user.id);
+          console.log(`Subscription canceled: user ${user.id}`);
+        }
+        break;
       }
     }
+  } catch (err: any) {
+    console.error('Webhook processing error:', err.message);
+    return res.status(500).send('Failed to process webhook');
   }
 
   return res.json({ received: true });
+}
+
+/** Map Stripe price ID back to plan name */
+function getPlanFromPriceId(priceId?: string): Plan | null {
+  if (!priceId) return null;
+  if (priceId === process.env.STRIPE_PRICE_STARTER) return 'starter';
+  if (priceId === process.env.STRIPE_PRICE_PROFESSIONAL) return 'professional';
+  if (priceId === process.env.STRIPE_PRICE_ENTERPRISE) return 'enterprise';
+  return null;
 }

@@ -1,12 +1,12 @@
 /**
- * Bizestimate Generator — Free Living Valuation Card
+ * ValueLens Generator — Free Living Valuation Card
  *
  * One-page shareable business value summary.
  * Deterministic (no AI call) — uses extracted financials + league multiples.
  */
 import { getLeagueMultipleRange } from '../leagueClassifier.js';
 
-export interface BizestimateInput {
+export interface ValueLensInput {
   business_name?: string;
   industry?: string;
   location?: string;
@@ -38,10 +38,10 @@ const EXIT_TYPE_LABELS: Record<string, string> = {
 };
 
 /**
- * Generate a Bizestimate card.
+ * Generate a ValueLens card.
  * Returns markdown content for display and sharing.
  */
-export function generateBizestimate(input: BizestimateInput): string {
+export function generateValueLens(input: ValueLensInput): string {
   const {
     business_name, industry, location, revenue, league,
     sde, ebitda, owner_compensation, employee_count,
@@ -74,7 +74,7 @@ export function generateBizestimate(input: BizestimateInput): string {
 
   const lines: string[] = [];
 
-  lines.push(`# Bizestimate\u2122 \u2014 ${business_name || 'Your Business'}`);
+  lines.push(`# ValueLens\u2122 \u2014 ${business_name || 'Your Business'}`);
   lines.push('');
   lines.push('---');
   lines.push('');

@@ -1,34 +1,31 @@
 /**
- * Paywall Service — Generates execution fee prompts when users
- * hit the paywall gate (S2/B2/R2).
+ * Paywall Service — Generates subscription upgrade prompts when users
+ * hit the paywall gate (S2/B2/R2) or try to access paid features.
  *
- * NEW MODEL: 0.1% of SDE or EBITDA, $999 minimum.
- * One-time payment per deal. No wallet, no per-deliverable pricing.
- * All amounts in CENTS.
+ * NEW MODEL: Monthly subscriptions — Starter $49, Professional $149, Enterprise $999.
+ * No per-deal fees, no wallet, no credits.
  */
-import { calculateExecutionFee } from './dealExecutionFee.js';
+import { getUserPlan, getRequiredPlan, PLANS, type Plan } from './subscriptionService.js';
 
 export interface PaywallContext {
   gate: string;
   league: string;
   journeyType: string;
   dealId?: number;
+  userId?: number;
   dealData: {
     industry?: string;
-    revenue?: number;       // cents
-    sde?: number;           // cents
-    ebitda?: number;        // cents
+    revenue?: number;
+    sde?: number;
+    ebitda?: number;
     business_name?: string;
-    asking_price?: number;  // cents
+    asking_price?: number;
   };
 }
 
 export interface PaywallPrompt {
-  priceCents: number;
+  requiredPlan: Plan;
   priceDisplay: string;
-  basis: 'SDE' | 'EBITDA';
-  basisDisplay: string;
-  isMinimum: boolean;
   valueProps: string[];
   callToAction: string;
   systemPromptAddition: string;
@@ -36,33 +33,33 @@ export interface PaywallPrompt {
 }
 
 /**
- * Generate an execution fee paywall prompt based on deal financials.
+ * Generate a subscription paywall prompt based on the gate/deliverable.
  */
 export function generatePaywallPrompt(ctx: PaywallContext): PaywallPrompt {
-  const fee = calculateExecutionFee({
-    sde: ctx.dealData.sde,
-    ebitda: ctx.dealData.ebitda,
-  });
-
   const generator = PAYWALL_GENERATORS[ctx.gate];
+  const requiredPlan: Plan = generator ? getGateRequiredPlan(ctx.gate) : 'starter';
+  const planInfo = PLANS[requiredPlan];
+
   if (!generator) {
     return {
-      priceCents: fee.feeCents,
-      priceDisplay: fee.feeDisplay,
-      basis: fee.basis,
-      basisDisplay: fee.basisDisplay,
-      isMinimum: fee.isMinimum,
+      requiredPlan,
+      priceDisplay: planInfo.priceDisplay,
       valueProps: ['Full deal execution platform access'],
-      callToAction: `Your deal execution fee is ${fee.feeDisplay} — 0.1% of your ${fee.basis}. One payment, everything included.`,
-      systemPromptAddition: buildPaywallSystemPrompt(ctx, fee),
+      callToAction: `Upgrade to ${planInfo.name} for ${planInfo.priceDisplay} to unlock all features.`,
+      systemPromptAddition: buildPaywallSystemPrompt(ctx, requiredPlan),
       whatYouGet: getWhatYouGet(ctx.journeyType),
     };
   }
 
-  return generator(ctx, fee);
+  return generator(ctx, requiredPlan);
 }
 
-// ─── What's included in the execution fee ─────────────────
+function getGateRequiredPlan(gate: string): Plan {
+  // S2/B2/R2 and beyond need at least starter
+  return 'starter';
+}
+
+// ─── What's included per journey ─────────────────────────────
 
 function getWhatYouGet(journeyType: string): string[] {
   if (journeyType === 'sell') {
@@ -87,7 +84,6 @@ function getWhatYouGet(journeyType: string): string[] {
       '180-day post-acquisition integration plan',
     ];
   }
-  // raise
   return [
     'Investor-ready pitch deck and executive summary',
     'Financial model with 3-5 year projections',
@@ -100,90 +96,78 @@ function getWhatYouGet(journeyType: string): string[] {
 
 // ─── Gate-specific paywall generators ───────────────────────
 
-type PaywallGenerator = (ctx: PaywallContext, fee: ReturnType<typeof calculateExecutionFee>) => PaywallPrompt;
+type PaywallGenerator = (ctx: PaywallContext, requiredPlan: Plan) => PaywallPrompt;
 
 function makeResult(
-  fee: ReturnType<typeof calculateExecutionFee>,
   ctx: PaywallContext,
+  requiredPlan: Plan,
   valueProps: string[],
   journeyType: string,
 ): PaywallPrompt {
+  const planInfo = PLANS[requiredPlan];
   return {
-    priceCents: fee.feeCents,
-    priceDisplay: fee.feeDisplay,
-    basis: fee.basis,
-    basisDisplay: fee.basisDisplay,
-    isMinimum: fee.isMinimum,
+    requiredPlan,
+    priceDisplay: planInfo.priceDisplay,
     valueProps,
-    callToAction: `Your deal execution fee is ${fee.feeDisplay} — 0.1% of your ${fee.basis}. One payment, everything included through closing.`,
-    systemPromptAddition: buildPaywallSystemPrompt(ctx, fee),
+    callToAction: `Upgrade to ${planInfo.name} for ${planInfo.priceDisplay} to unlock everything for this deal and beyond.`,
+    systemPromptAddition: buildPaywallSystemPrompt(ctx, requiredPlan),
     whatYouGet: getWhatYouGet(journeyType),
   };
 }
 
 const PAYWALL_GENERATORS: Record<string, PaywallGenerator> = {
-  S2: (ctx, fee) => {
-    return makeResult(fee, ctx, [
-      'Multi-methodology valuation (market comps + financial analysis)',
-      'Defensible price range (conservative / likely / optimistic)',
-      'Industry-specific multiple analysis with growth premiums',
-      'Go/no-go recommendation with probability of sale score',
-    ], 'sell');
-  },
+  S2: (ctx, plan) => makeResult(ctx, plan, [
+    'Multi-methodology valuation (market comps + financial analysis)',
+    'Defensible price range (conservative / likely / optimistic)',
+    'Industry-specific multiple analysis with growth premiums',
+    'Go/no-go recommendation with probability of sale score',
+  ], 'sell'),
 
-  B2: (ctx, fee) => {
-    return makeResult(fee, ctx, [
-      'Buyer\'s valuation model (what the business is worth TO YOU)',
-      'DSCR analysis with your actual financing terms',
-      'Cash-on-cash and IRR projections (Year 1 through Year 5)',
-      'Due diligence checklists and deal-breaker identification',
-    ], 'buy');
-  },
+  B2: (ctx, plan) => makeResult(ctx, plan, [
+    'Buyer\'s valuation model (what the business is worth TO YOU)',
+    'DSCR analysis with your actual financing terms',
+    'Cash-on-cash and IRR projections (Year 1 through Year 5)',
+    'Due diligence checklists and deal-breaker identification',
+  ], 'buy'),
 
-  R2: (ctx, fee) => {
-    return makeResult(fee, ctx, [
-      '10-15 slide pitch deck tailored to your raise',
-      'Executive summary and blind teaser for outreach',
-      'Financial model with 3-5 year projections',
-      'Investor list with outreach strategy',
-    ], 'raise');
-  },
+  R2: (ctx, plan) => makeResult(ctx, plan, [
+    '10-15 slide pitch deck tailored to your raise',
+    'Executive summary and blind teaser for outreach',
+    'Financial model with 3-5 year projections',
+    'Investor list with outreach strategy',
+  ], 'raise'),
 };
 
-function buildPaywallSystemPrompt(
-  ctx: PaywallContext,
-  fee: ReturnType<typeof calculateExecutionFee>,
-): string {
-  const minimumNote = fee.isMinimum ? '\nNote: The minimum execution fee is $999, which gives full access to everything.' : '';
+function buildPaywallSystemPrompt(ctx: PaywallContext, requiredPlan: Plan): string {
+  const planInfo = PLANS[requiredPlan];
 
   return `
-## PAYWALL — Deal Execution Fee at Gate ${ctx.gate}
-The user has completed the free gates and is ready for the paid execution phase.
+## PAYWALL — Subscription Required at Gate ${ctx.gate}
+The user has completed the free gates and is ready for paid features.
 
-PRICE: ${fee.feeDisplay} (0.1% of ${fee.basis}: ${fee.basisDisplay})${minimumNote}
-THIS IS A ONE-TIME FEE — everything from here through closing + 180-day integration is included.
+REQUIRED PLAN: ${planInfo.name} (${planInfo.priceDisplay})
+This is a monthly subscription — all features at this tier and below are included for all deals.
 
 YOUR APPROACH:
-Based on the financials you've shared, I've calculated ${fee.basis === 'EBITDA' ? 'an' : 'a'} ${fee.basis} of ${fee.basisDisplay}. Everything I've generated so far — the ValueLens audit, the Value Readiness Report, the preliminary valuation — is yours to keep.
+Everything generated so far — the ValueLens audit, the Value Readiness Report, the preliminary analysis — is yours to keep, no payment required.
 
-To unlock the full execution platform — your deal room, professional deal documents, legal templates, closing support, and your 180-day integration plan — the deal execution fee is ${fee.feeDisplay}. That's 0.1% of your ${fee.basis}, and it covers everything for this deal through closing day. No subscriptions, no additional charges.
+To unlock the full execution platform — your deal room, professional deal documents, legal templates, closing support, and more — you'll need a ${planInfo.name} subscription at ${planInfo.priceDisplay}. It covers all your deals, cancel anytime.
 
 NEVER:
-- Mention "wallet" or "balance" or "credits" — this is a one-time execution fee
-- Quote per-deliverable prices — everything is included
-- Compare to traditional advisor fees — let the value speak for itself
+- Mention "wallet" or "balance" or "credits" — this is a subscription
+- Mention "execution fee" or "platform fee" — those are deprecated
+- Quote per-deliverable prices — everything at the tier is included
 - Be pushy or repeat the offer
 - Make them feel bad for declining
 - Mention the league label (L1, L2, etc.) to the user
-- Mention subscriptions or recurring charges
 
 IF THEY ACCEPT:
-- Confirm: "Processing your execution fee. Once confirmed, I'll unlock your full deal execution platform."
+- Confirm: "Let me set up your ${planInfo.name} subscription."
 - The system will redirect to Stripe checkout
-- After payment, all gates through closing + 180 days are unlocked
+- After subscribing, all features at this tier are unlocked for all deals
 
 IF THEY DECLINE:
-- "No problem. I can still help you think through any questions — I just can't generate the execution-level deliverables. What would you like to explore?"
+- "No problem. I can still help you think through any questions — I just can't generate the paid deliverables. What would you like to explore?"
 - Continue providing valuable conversational guidance
 `;
 }

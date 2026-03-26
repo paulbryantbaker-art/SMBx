@@ -766,12 +766,12 @@ chatRouter.post('/deals/:dealId/unlock-gate', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Invalid gate unlock request' });
     }
 
-    // Execution fee model: auto-pay in TEST_MODE, otherwise redirect to Stripe checkout
-    const fee = calculateExecutionFee({ sde: deal.sde, ebitda: deal.ebitda });
+    // Subscription model: check if user has an active subscription
+    const { getUserPlan, planMeetsRequirement, PLANS, createSubscriptionCheckout } = await import('../services/subscriptionService.js');
+    const userPlan = await getUserPlan(userId);
 
-    if (process.env.TEST_MODE === 'true') {
-      // TEST_MODE: execution fee auto-paid — advance gate immediately
-      await markExecutionFeePaid(dealId, fee.feeCents, 'test_' + Date.now());
+    if (planMeetsRequirement(userPlan, 'starter') || process.env.TEST_MODE === 'true') {
+      // User has subscription (or TEST_MODE) — advance gate immediately
       const newGate = await advanceGate(dealId, deal.current_gate);
 
       // Auto-trigger primary deliverable for the unlocked gate
@@ -805,23 +805,36 @@ chatRouter.post('/deals/:dealId/unlock-gate', requireAuth, async (req, res) => {
         console.error('Auto-trigger deliverable error:', e.message);
       }
 
+      const planInfo = PLANS[userPlan];
       return res.json({
         success: true,
         fromGate: deal.current_gate,
         toGate: newGate,
-        priceCharged: fee.feeCents,
-        priceDisplay: fee.feeDisplay,
+        plan: userPlan,
+        planDisplay: planInfo.name,
         deliverableId,
       });
     }
 
-    // Real Stripe: redirect to /api/stripe/deal-checkout via client
-    const appUrl = process.env.APP_URL || 'https://smbx.ai';
-    return res.json({
-      success: false,
-      checkoutUrl: `${appUrl}/api/stripe/deal-checkout`,
-      message: 'Redirect to Stripe checkout to pay platform fee',
-    });
+    // User needs to subscribe — redirect to Stripe checkout
+    try {
+      const result = await createSubscriptionCheckout(userId, 'starter');
+      return res.json({
+        success: false,
+        checkoutUrl: result.url,
+        requiredPlan: 'starter',
+        priceDisplay: PLANS.starter.priceDisplay,
+        message: 'Subscribe to unlock this gate',
+      });
+    } catch (err: any) {
+      // If Stripe prices not configured, return info for client-side handling
+      return res.json({
+        success: false,
+        requiredPlan: 'starter',
+        priceDisplay: PLANS.starter.priceDisplay,
+        message: 'Subscription required to unlock this gate',
+      });
+    }
   } catch (err: any) {
     console.error('Gate unlock error:', err.message);
     return res.status(500).json({ error: 'Failed to unlock gate' });

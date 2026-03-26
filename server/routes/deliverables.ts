@@ -328,11 +328,13 @@ deliverablesRouter.get('/deals/:dealId/menu', async (req, res) => {
       ORDER BY gate ASC NULLS LAST, tier ASC, name ASC
     `;
 
-    // Execution fee model — no per-item pricing. Just return items with included status.
-    const paid = deal.platform_fee_paid || deal.execution_paid || process.env.TEST_MODE === 'true' || process.env.DEV_NO_PAYWALL === 'true';
+    // Subscription model — check user's plan to determine included items
+    const { getUserPlan, planMeetsRequirement } = await import('../services/subscriptionService.js');
+    const userPlan = await getUserPlan(userId);
+    const hasSubscription = planMeetsRequirement(userPlan, 'starter') || deal.platform_fee_paid || process.env.TEST_MODE === 'true' || process.env.DEV_NO_PAYWALL === 'true';
     const mapped = (items as any[]).map(item => ({
       ...item,
-      included: isGateFree(item.gate) || paid,
+      included: isGateFree(item.gate) || hasSubscription,
     }));
 
     return res.json(mapped);

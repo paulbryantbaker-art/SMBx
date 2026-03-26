@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import Markdown from 'react-markdown';
 
-interface BizestimatePageProps {
+interface ValueLensPageProps {
   token: string;
 }
 
-export default function BizestimatePage({ token }: BizestimatePageProps) {
+export default function ValueLensPage({ token }: ValueLensPageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [markdown, setMarkdown] = useState('');
@@ -17,14 +17,14 @@ export default function BizestimatePage({ token }: BizestimatePageProps) {
         const res = await fetch(`/api/biz/${token}`);
         if (!res.ok) {
           const data = await res.json().catch(() => ({ error: 'Not found' }));
-          setError(data.error || 'Bizestimate not found');
+          setError(data.error || 'ValueLens not found');
           return;
         }
         const data = await res.json();
         setMarkdown(data.markdown);
         setBusinessName(data.businessName || 'Your Business');
       } catch {
-        setError('Failed to load Bizestimate');
+        setError('Failed to load ValueLens');
       } finally {
         setLoading(false);
       }
@@ -43,7 +43,7 @@ export default function BizestimatePage({ token }: BizestimatePageProps) {
     return (
       <div className="min-h-dvh bg-[#FFFFFF] flex items-center justify-center">
         <div className="bg-white rounded-2xl shadow-md p-8 max-w-md text-center">
-          <p className="text-lg font-semibold text-[#0D0D0D] mb-2">Bizestimate Not Found</p>
+          <p className="text-lg font-semibold text-[#0D0D0D] mb-2">ValueLens Not Found</p>
           <p className="text-sm text-[#6E6A63]">{error}</p>
         </div>
       </div>
@@ -57,7 +57,7 @@ export default function BizestimatePage({ token }: BizestimatePageProps) {
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="font-bold text-lg text-[#0D0D0D]">smbx<span className="text-[#BA3C60]">.</span>ai</span>
-            <span className="text-xs text-[#6E6A63]">Bizestimate</span>
+            <span className="text-xs text-[#6E6A63]">ValueLens</span>
           </div>
           <a
             href="/"

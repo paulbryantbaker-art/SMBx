@@ -58,16 +58,26 @@ function normalizeDeliverableType(raw: string): string {
     universal_market_intelligence: 'intelligence_report',
     universal_sba_analysis: 'sba_bankability_report',
     universal_cap_stack_model: 'capital_structure_analysis',
-    universal_comp_analysis: 'intelligence_report', // uses comp analysis section
+    universal_comp_analysis: 'intelligence_report',
     universal_industry_report: 'intelligence_report',
     // Raise items → existing generators
     raise_blind_teaser: 'blind_teaser',
     raise_financial_model: 'financial_model',
+    raise_pitch_deck: 'pitch_deck',
+    raise_executive_summary: 'executive_summary',
     // Buy items → existing generators
-    buy_sources_uses: 'capital_structure_analysis', // financing model with sources/uses
-    buy_day_one_checklist: 'pmi_integration_plan', // day-one is integration subset
+    buy_sources_uses: 'capital_structure_analysis',
+    buy_day_one_checklist: 'pmi_integration_plan',
+    buy_working_capital: 'working_capital_analysis',
+    buy_loi: 'loi',
     // Sell items
-    sell_financial_summary_package: 'sell_financial_spread', // category generator
+    sell_financial_summary_package: 'sell_financial_spread',
+    sell_tax_impact: 'tax_impact_analysis',
+    sell_data_room_setup: 'data_room_structure',
+    // ValueLens aliases
+    valuelens: 'valuelens',
+    value_lens: 'valuelens',
+    bizestimate: 'valuelens',
   };
   return ALIASES[raw] || raw;
 }
