@@ -8,21 +8,25 @@
     <meta property="og:title" content="smbx.ai — AI Deal Advisory" />
     <meta property="og:description" content="AI deal advisory from valuation to close. Sell, buy, raise capital, or integrate. Start free." />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" id="theme-color-light" />
-    <meta name="theme-color" content="#1a1c1e" media="(prefers-color-scheme: dark)" id="theme-color-dark" />
-    <meta name="supported-color-schemes" content="light dark" />
-    <meta name="color-scheme" content="light" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f9f9fc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1012" media="(prefers-color-scheme: dark)" />
     <script>
-      // Sync dark mode before first paint — prevents flash and sets Safari chrome
+      // Resolve dark mode before first paint — prevents flash
+      // Three states: 'light', 'dark', or null (follow OS)
       (function() {
-        var isDark = localStorage.getItem('smbx-dark') === '1';
+        var stored = localStorage.getItem('smbx-theme'); // 'light' | 'dark' | null
+        var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var isDark = stored === 'dark' || (!stored && systemDark);
         if (isDark) {
           document.documentElement.classList.add('dark');
           document.documentElement.style.colorScheme = 'dark';
+        }
+        // Only override theme-color when user has a manual preference
+        if (stored) {
+          var color = isDark ? '#0f1012' : '#f9f9fc';
           var metas = document.querySelectorAll('meta[name="theme-color"]');
-          metas.forEach(function(m) { m.setAttribute('content', '#1a1c1e'); m.removeAttribute('media'); });
-          var cs = document.querySelector('meta[name="color-scheme"]');
-          if (cs) cs.setAttribute('content', 'dark');
+          metas.forEach(function(m) { m.setAttribute('content', color); });
         }
       })();
     </script>
