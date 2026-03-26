@@ -5,7 +5,7 @@
  */
 import { sql } from '../db.js';
 
-export const VALID_ROLES = ['owner', 'attorney', 'cpa', 'broker', 'lender', 'consultant', 'counterparty'] as const;
+export const VALID_ROLES = ['owner', 'attorney', 'cpa', 'broker', 'lender', 'consultant', 'counterparty', 'auditor'] as const;
 export const VALID_ACCESS_LEVELS = ['full', 'comment', 'read'] as const;
 
 /** Role-based folder visibility: which folder names each role can see.
@@ -18,6 +18,7 @@ export const ROLE_FOLDER_ACCESS: Record<string, string[] | null> = {
   lender: ['Financials', 'Valuation'],
   consultant: null, // scoped by folder_scope
   counterparty: null, // scoped by folder_scope
+  auditor: null, // read-only access to all folders
 };
 
 export interface DealAccess {
