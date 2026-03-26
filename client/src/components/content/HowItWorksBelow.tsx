@@ -11,7 +11,7 @@ export default function HowItWorksBelow() {
   // Shared class helpers
   const card = dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]';
   const muted = dark ? 'text-[#dadadc]/70' : 'text-[#5d5e61]';
-  const codeBg = dark ? 'bg-[#3a3c3e] text-[#f9f9fc]' : 'bg-[#f3f3f6] text-[#1a1c1e]';
+  const codeBg = dark ? 'bg-[#2f3133] text-[#f9f9fc]' : 'bg-[#f3f3f6] text-[#1a1c1e]';
   const emphasis = dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]';
   const subtleBg = dark ? 'bg-[#2f3133]' : 'bg-[#f3f3f6]';
   const borderColor = dark ? 'border-zinc-800' : 'border-[#eeeef0]';
@@ -54,6 +54,17 @@ export default function HowItWorksBelow() {
     { feature: 'Your data', ai: 'Trains the model', smbx: 'Private. Always.' },
   ];
 
+  const ibRows = [
+    { ib: 'Business valuation ($2K–$10K)', smbx: '3 methodologies, math shown' },
+    { ib: 'CIM / deal materials ($5K–$25K)', smbx: '25–40 pages, league-adapted' },
+    { ib: 'Financial modeling ($3K–$10K)', smbx: 'DCF, sensitivity, cap table' },
+    { ib: 'Market intelligence ($2K–$5K)', smbx: 'Live data + Market Heat' },
+    { ib: 'Buyer identification (included)', smbx: 'Scored & ranked by type' },
+    { ib: 'DD coordination (included)', smbx: '50–100 items tracked' },
+    { ib: 'Negotiation prep (included)', smbx: 'Comps + counter-offers drafted' },
+    { ib: 'Closing coordination (included)', smbx: 'Checklist + funds flow' },
+  ];
+
   const journeys = [
     { icon: 'storefront', title: 'Sell', href: '/sell', desc: 'Understand your real value. Optimize before you go to market. Prepare materials that withstand buyer scrutiny. Negotiate from knowledge. Close with confidence.' },
     { icon: 'shopping_bag', title: 'Buy', href: '/buy', desc: 'Define your thesis. Screen every deal against real data. Model the economics before you fall in love. Execute diligence. Close and integrate with a 180-day plan.' },
@@ -83,7 +94,7 @@ export default function HowItWorksBelow() {
   ];
 
   return (
-    <div className={dark ? 'bg-transparent text-[#dadadc]' : 'bg-transparent text-[#1a1c1e]'}>
+    <div className={dark ? 'bg-transparent text-[#f9f9fc]' : 'bg-transparent text-[#1a1c1e]'}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
         {/* ═══ 1. HERO ═══ */}
@@ -130,7 +141,7 @@ export default function HowItWorksBelow() {
               <div>
                 <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Enforced Methodology</span>
                 <h2 className="font-headline text-4xl font-black tracking-tight mb-8">Yulia won't let you skip steps.</h2>
-                <div className={`space-y-6 leading-[1.75] ${muted}`}>
+                <div className={`space-y-6 editorial ${muted}`}>
                   <p>Most AI tools let you ask anything in any order. That's fine for general questions. It's dangerous when there's real money on the line.</p>
                   <p>Drafting an LOI before your financials are normalized means negotiating from a wrong number. Presenting deal materials before your value readiness is scored means showing fixable weaknesses to buyers. Skipping due diligence coordination means discovering deal-killers at the closing table.</p>
                   <p className={`${emphasis} font-semibold`}>smbX.ai enforces a gate system. Each gate has specific completion triggers that Yulia verifies from your conversation and your data. She advances you when the prerequisite work is done — and not before.</p>
@@ -207,7 +218,7 @@ export default function HowItWorksBelow() {
                   <div className={`w-3 h-3 rounded-sm ${dark ? 'bg-[#006630]/20' : 'bg-[#006630]/10'}`} />
                   <span className={`text-[10px] ${muted}`}>Free</span>
                   <div className="w-3 h-3 rounded-sm bg-[#b0004a]/10 ml-3" />
-                  <span className={`text-[10px] ${muted}`}>Paid plan</span>
+                  <span className={`text-[10px] ${muted}`}>Execution fee</span>
                 </div>
               </div>
             </div>
@@ -233,7 +244,7 @@ export default function HowItWorksBelow() {
                   <div className="w-8 h-8 rounded-full bg-[#b0004a] flex items-center justify-center text-white text-xs font-bold shrink-0">Y</div>
                   <div className="bg-white/10 p-5 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed max-w-[80%]">
                     Residential cleaning in Phoenix — I know this market well. Let me run some numbers while we talk.
-                    <span className="block mt-3 text-[#dadadc]/40 text-xs italic">Classifying: NAICS 561720 · Maricopa County MSA · Gate S0 initiated · pulling Census, BLS, SBA data...</span>
+                    <span className="block mt-3 text-[#dadadc]/60 text-xs italic">Classifying: NAICS 561720 · Maricopa County MSA · Gate S0 initiated · pulling Census, BLS, SBA data...</span>
                   </div>
                 </div>
                 {/* Yulia analysis */}
@@ -248,9 +259,9 @@ export default function HowItWorksBelow() {
                 <div className="flex gap-3 items-start">
                   <div className="w-8 shrink-0" />
                   <div className="grid grid-cols-3 gap-3 max-w-[80%]">
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/10"><p className="text-[9px] text-[#dadadc]/40 uppercase font-bold mb-1">SDE Range</p><p className="text-lg font-black text-white">$360K–$540K</p></div>
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/10"><p className="text-[9px] text-[#dadadc]/40 uppercase font-bold mb-1">Multiple Range</p><p className="text-lg font-black text-white">2.8x–3.5x</p></div>
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/10"><p className="text-[9px] text-[#dadadc]/40 uppercase font-bold mb-1">Est. Value</p><p className="text-lg font-black text-[#ffb2bf]">$1.08M–$1.89M</p></div>
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/10"><p className="text-[9px] text-[#dadadc]/60 uppercase font-bold mb-1">SDE Range</p><p className="text-lg font-black text-white">$360K–$540K</p></div>
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/10"><p className="text-[9px] text-[#dadadc]/60 uppercase font-bold mb-1">Multiple Range</p><p className="text-lg font-black text-white">2.8x–3.5x</p></div>
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/10"><p className="text-[9px] text-[#dadadc]/60 uppercase font-bold mb-1">Est. Value</p><p className="text-lg font-black text-[#ffb2bf]">$1.08M–$1.89M</p></div>
                   </div>
                 </div>
                 {/* User reply */}
@@ -267,7 +278,7 @@ export default function HowItWorksBelow() {
                 </div>
               </div>
               <div className="max-w-4xl mx-auto mt-10 pt-8 border-t border-white/10 text-center">
-                <p className="text-[#dadadc]/40 text-sm">90 seconds. No signup. No credit card. Yulia is already in Gate S1 — normalizing your financials — and she'll keep going until the picture is complete.</p>
+                <p className="text-[#dadadc]/60 text-sm">90 seconds. No signup. No credit card. Yulia is already in Gate S1 — normalizing your financials — and she'll keep going until the picture is complete.</p>
               </div>
             </div>
           </section>
@@ -342,7 +353,7 @@ export default function HowItWorksBelow() {
               <div>
                 <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Market Intelligence</span>
                 <h2 className="font-headline text-4xl font-black tracking-tight mb-8">Yulia doesn't wait for you to ask. She tells you when the market moves.</h2>
-                <div className={`space-y-6 leading-[1.75] ${muted}`}>
+                <div className={`space-y-6 editorial ${muted}`}>
                   <p>When you tell Yulia your industry, she runs a live Market Heat scan — pulling current PE consolidation trends, active buyer platforms, and multiple direction. If your sector is "hot," she increases the defensible valuation range. If it's cooling, she tells you before you overpay.</p>
                   <p>When the Fed changes rates, Yulia recalculates every DSCR model on the platform. If your buying power just dropped $150K, she tells you that morning — not after you've signed the LOI.</p>
                   <p>This isn't a feature you activate. It's running in the background from the moment you describe your deal.</p>
@@ -352,9 +363,9 @@ export default function HowItWorksBelow() {
                 <div className={`${darkPanel} rounded-2xl p-6 text-white`}>
                   <h4 className="font-bold text-sm mb-4 flex items-center gap-2"><span className="material-symbols-outlined text-[#b0004a] text-lg">local_fire_department</span>Market Heat Index</h4>
                   <div className="space-y-3">
-                    <div className="bg-white/5 rounded-xl p-4"><p className="text-[10px] text-[#dadadc]/40 uppercase font-bold mb-1">Sector Alert</p><p className="text-sm text-[#dadadc]/80">"Veterinary is currently a Super-Hot sector. 14 PE-backed platforms actively acquiring. Position this as a platform play, not a standard sale."</p></div>
-                    <div className="bg-white/5 rounded-xl p-4"><p className="text-[10px] text-[#dadadc]/40 uppercase font-bold mb-1">Multiple Trend</p><p className="text-sm text-[#dadadc]/80">"HVAC multiples up 0.5x in Q4 — residential service mix above 70% commanding 15% strategic premium."</p></div>
-                    <div className="bg-white/5 rounded-xl p-4"><p className="text-[10px] text-[#dadadc]/40 uppercase font-bold mb-1">Rate Impact</p><p className="text-sm text-[#dadadc]/80">"SBA rates up 25bps yesterday. Your buying power reduced by $150K. Updated your affordability model."</p></div>
+                    <div className="bg-white/5 rounded-xl p-4"><p className="text-[10px] text-[#dadadc]/60 uppercase font-bold mb-1">Sector Alert</p><p className="text-sm text-[#dadadc]/80">"Veterinary is currently a Super-Hot sector. 14 PE-backed platforms actively acquiring. Position this as a platform play, not a standard sale."</p></div>
+                    <div className="bg-white/5 rounded-xl p-4"><p className="text-[10px] text-[#dadadc]/60 uppercase font-bold mb-1">Multiple Trend</p><p className="text-sm text-[#dadadc]/80">"HVAC multiples up 0.5x in Q4 — residential service mix above 70% commanding 15% strategic premium."</p></div>
+                    <div className="bg-white/5 rounded-xl p-4"><p className="text-[10px] text-[#dadadc]/60 uppercase font-bold mb-1">Rate Impact</p><p className="text-sm text-[#dadadc]/80">"SBA rates up 25bps yesterday. Your buying power reduced by $150K. Updated your affordability model."</p></div>
                   </div>
                 </div>
                 <div className={`${card} rounded-2xl p-6`}>
@@ -420,7 +431,7 @@ export default function HowItWorksBelow() {
               <p className={`text-xl mt-4 ${muted}`}>This is why national averages are dangerous. Every deal is local.</p>
             </div>
             <div className="flex flex-col lg:flex-row gap-8">
-              <div className={`flex-1 ${dark ? 'bg-white' : 'bg-white'} p-10 rounded-3xl border ${borderColor} shadow-sm`}>
+              <div className={`flex-1 bg-white p-10 rounded-3xl border ${borderColor} shadow-sm`}>
                 <div className="flex justify-between items-start mb-8">
                   <div><div className="text-xs font-bold text-[#5d5e61] uppercase tracking-widest mb-2">Service Sector</div><h4 className="text-2xl font-black text-[#1a1c1e]">Cleaning in Phoenix</h4></div>
                   <div className="bg-[#b0004a]/10 px-4 py-2 rounded-xl text-[#b0004a] font-bold text-sm">$380K SDE</div>
@@ -485,16 +496,16 @@ export default function HowItWorksBelow() {
               <div className="lg:col-span-5">
                 <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">The Math Engine</span>
                 <h2 className="font-headline text-4xl font-black tracking-tight mb-8">AI that interprets. Math that doesn't hallucinate.</h2>
-                <div className={`space-y-6 leading-[1.75] ${muted}`}>
+                <div className={`space-y-6 editorial ${muted}`}>
                   <p>The AI layer decides what to calculate. The deterministic engine guarantees the math is right. Every financial claim passes through a three-step verification loop — AI suggests, you verify, engine calculates.</p>
                   <p>This is why your valuation is defensible. It was built the same way a buyer's QoE firm would build it.</p>
                 </div>
                 <div className={`mt-10 ${darkPanel} rounded-2xl p-6 text-white`}>
                   <h4 className="font-bold text-sm mb-4 flex items-center gap-2"><span className="material-symbols-outlined text-[#b0004a] text-lg">sync</span>The Verification Loop</h4>
                   <div className="space-y-4">
-                    <div className="flex items-start gap-3"><div className="w-7 h-7 rounded-lg bg-[#b0004a] flex items-center justify-center text-white text-xs font-bold shrink-0">1</div><div><p className="text-sm font-semibold">AI Identifies</p><p className="text-xs text-[#dadadc]/50">Scans for add-backs — vehicles, rent, travel, one-time legal fees, family payroll — using IRS industry benchmarks.</p></div></div>
-                    <div className="flex items-start gap-3"><div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-white text-xs font-bold shrink-0">2</div><div><p className="text-sm font-semibold">You Verify</p><p className="text-xs text-[#dadadc]/50">AI cannot confirm add-backs. You review each one. Your judgment, your numbers. Yulia explains why she flagged it — you decide.</p></div></div>
-                    <div className="flex items-start gap-3"><div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-white text-xs font-bold shrink-0">3</div><div><p className="text-sm font-semibold">Engine Calculates</p><p className="text-xs text-[#dadadc]/50">Only verified add-backs enter the formula. Deterministic engine recalculates SDE/EBITDA and updates every downstream model.</p></div></div>
+                    <div className="flex items-start gap-3"><div className="w-7 h-7 rounded-lg bg-[#b0004a] flex items-center justify-center text-white text-xs font-bold shrink-0">1</div><div><p className="text-sm font-semibold">AI Identifies</p><p className="text-xs text-[#dadadc]/70">Scans for add-backs — vehicles, rent, travel, one-time legal fees, family payroll — using IRS industry benchmarks.</p></div></div>
+                    <div className="flex items-start gap-3"><div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-white text-xs font-bold shrink-0">2</div><div><p className="text-sm font-semibold">You Verify</p><p className="text-xs text-[#dadadc]/70">AI cannot confirm add-backs. You review each one. Your judgment, your numbers. Yulia explains why she flagged it — you decide.</p></div></div>
+                    <div className="flex items-start gap-3"><div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-white text-xs font-bold shrink-0">3</div><div><p className="text-sm font-semibold">Engine Calculates</p><p className="text-xs text-[#dadadc]/70">Only verified add-backs enter the formula. Deterministic engine recalculates SDE/EBITDA and updates every downstream model.</p></div></div>
                   </div>
                 </div>
               </div>
@@ -521,7 +532,7 @@ export default function HowItWorksBelow() {
                 <div className={`${darkPanel} rounded-2xl p-6 text-white`}>
                   <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#b0004a]">speed</span><h4 className="font-bold">Valuation Defense</h4></div>
                   <div className="bg-white/5 rounded-xl p-4 font-mono text-sm text-[#dadadc]">Value = Base Multiple × Adj. Earnings + Growth Premium + Margin Premium − Risk Discount</div>
-                  <p className="text-xs text-[#dadadc]/50 mt-3">Every component sourced from verified comparables and the seven-dimension analysis. A "Defensible Thesis" — not an estimate.</p>
+                  <p className="text-xs text-[#dadadc]/70 mt-3">Every component sourced from verified comparables and the seven-dimension analysis. A "Defensible Thesis" — not an estimate.</p>
                 </div>
               </div>
             </div>
@@ -551,7 +562,48 @@ export default function HowItWorksBelow() {
           </section>
         </ScrollReveal>
 
-        {/* ═══ 13. FOUR JOURNEYS CTA ═══ */}
+        {/* ═══ 13. IB COVERAGE COMPARISON ═══ */}
+        <ScrollReveal>
+          <section className="mb-32">
+            <div className="max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+                <div className="lg:col-span-5">
+                  <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Coverage Comparison</span>
+                  <h2 className="font-headline text-4xl font-black tracking-tight mb-8">90% of what an investment bank does. Everything that doesn't require a license.</h2>
+                  <p className={`leading-relaxed editorial mb-6 ${muted}`}>An investment banking engagement gives you an analyst team, a CIM, a buyer outreach process, deal management, and negotiation support — for $150K–$500K. smbX.ai gives you the same analytical coverage. The difference: you run the conversations yourself.</p>
+                  <p className={`font-bold text-xl border-l-4 border-[#b0004a] pl-6 italic ${emphasis}`}>Yulia is the analyst, the associate, and the VP. You're the Managing Director.</p>
+                </div>
+                <div className="lg:col-span-7">
+                  <div className={`${card} rounded-2xl overflow-hidden`}>
+                    <table className="w-full text-left">
+                      <thead><tr className={subtleBg}>
+                        <th className={`px-5 py-4 text-xs font-bold uppercase tracking-widest ${muted}`}>IB Engagement</th>
+                        <th className="px-5 py-4 text-xs font-bold uppercase tracking-widest text-[#b0004a]">smbX.ai</th>
+                      </tr></thead>
+                      <tbody className={`divide-y ${borderColor} text-sm`}>
+                        {ibRows.map((r) => (
+                          <tr key={r.ib}>
+                            <td className={`px-5 py-3.5 ${muted}`}>{r.ib}</td>
+                            <td className="px-5 py-3.5"><span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[#b0004a] text-sm">check_circle</span>{r.smbx}</span></td>
+                          </tr>
+                        ))}
+                        <tr className={subtleBg}><td className={`px-5 py-3.5 ${muted} font-medium`}>Negotiate on your behalf</td><td className={`px-5 py-3.5 ${muted}`}>You handle this (Yulia preps you)</td></tr>
+                        <tr className={subtleBg}><td className={`px-5 py-3.5 ${muted} font-medium`}>Fiduciary representation</td><td className={`px-5 py-3.5 ${muted}`}>Not included (connect to licensed advisor)</td></tr>
+                        <tr className={`${darkPanel} text-white`}><td className="px-5 py-4 font-bold">Total (12-month engagement)</td><td className="px-5 py-4 font-bold text-[#b0004a]">$1,788/year vs. $150K–$500K+</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className={`mt-4 ${dark ? 'bg-[#b0004a]/10 border border-[#b0004a]/20' : 'bg-[#b0004a]/5 border border-[#b0004a]/15'} rounded-2xl p-5 flex items-start gap-3`}>
+                    <span className="material-symbols-outlined text-[#b0004a] text-lg shrink-0 mt-0.5">info</span>
+                    <p className={`text-xs ${muted}`}><span className={`font-bold ${emphasis}`}>This is not an anti-advisor comparison.</span> Many advisors use smbX.ai themselves. The work Yulia produces makes any advisor engagement faster, cheaper, and more effective.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* ═══ 14. FOUR JOURNEYS CTA ═══ */}
         <ScrollReveal>
           <section className="mb-32">
             <div className="mb-12"><h2 className="font-headline text-4xl font-bold tracking-tight">Every side of the deal. One platform.</h2><p className={`mt-3 ${muted}`}>Yulia adapts the methodology to your specific journey.</p></div>
@@ -572,7 +624,7 @@ export default function HowItWorksBelow() {
           </section>
         </ScrollReveal>
 
-        {/* ═══ 14. PRIVACY ═══ */}
+        {/* ═══ 15. PRIVACY ═══ */}
         <ScrollReveal>
           <section className="mb-32">
             <div className={`${darkPanel} rounded-3xl p-10 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center`}>
@@ -599,15 +651,15 @@ export default function HowItWorksBelow() {
           </section>
         </ScrollReveal>
 
-        {/* ═══ 15. CTA ═══ */}
+        {/* ═══ 16. CTA ═══ */}
         <ScrollReveal>
           <section className="mb-12 text-center max-w-4xl mx-auto">
             <div className={`${subtleBg} py-20 px-10 rounded-3xl`}>
               <h2 className="font-headline text-5xl md:text-6xl font-black tracking-tighter mb-6 leading-none">See for <span className="text-[#b0004a] italic">yourself.</span></h2>
               <p className={`text-xl mb-12 max-w-2xl mx-auto ${muted}`}>Tell Yulia about your deal. Watch the intelligence layer work. Keep everything she finds — free, no account required.</p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                <button onClick={handleCTA} className="px-12 py-6 bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white rounded-full font-black text-xl hover:scale-105 transition-all shadow-xl">Talk to Yulia</button>
-                <button onClick={handleCTA} className={`px-12 py-6 bg-transparent border-2 ${dark ? 'border-white hover:bg-white hover:text-[#1a1c1e]' : 'border-[#1a1c1e] hover:bg-[#1a1c1e] hover:text-white'} rounded-full font-black text-xl transition-all`}>Message Yulia</button>
+                <button onClick={handleCTA} className="px-12 py-6 bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white rounded-full font-black text-xl hover:scale-105 transition-all shadow-xl border-none cursor-pointer">Talk to Yulia</button>
+                <button onClick={handleCTA} className={`px-12 py-6 bg-transparent border-2 ${dark ? 'border-white hover:bg-white hover:text-[#1a1c1e]' : 'border-[#1a1c1e] hover:bg-[#1a1c1e] hover:text-white'} rounded-full font-black text-xl transition-all cursor-pointer`}>Message Yulia</button>
               </div>
             </div>
           </section>

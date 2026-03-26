@@ -2,112 +2,88 @@ import { useDarkMode } from '../shared/DarkModeToggle';
 import { ScrollReveal, StaggerContainer, StaggerItem } from './animations';
 
 export default function IntegrateBelow() {
-  const [dark, setDark] = useDarkMode();
+  const [dark] = useDarkMode();
 
   const handleCTA = () => {
     window.location.href = '/chat';
   };
 
-  const timeline = [
-    { num: '01', title: 'STABILIZE', time: 'Day 1–30', desc: "Day Zero: passwords, bank accounts, insurance, physical access — forty items most new owners forget. Meet every employee individually. Call the top twenty customers. Secure every vendor relationship.", footer: '"The hardest discipline of all for a new owner: change nothing. The business works. Learn why before you change how."', italic: true },
-    { num: '02', title: 'OPTIMIZE', time: 'Day 30–90', desc: "Now you've learned it from the inside. Capture the quick wins your DD identified. Install financial controls — many acquired businesses have surprisingly loose cash management.", footer: 'Fix the operational gaps. Start measuring the KPIs that actually matter for your thesis.', italic: false },
-    { num: '03', title: 'GROW', time: 'Day 90–180', desc: "Execute the value creation plan. Track monthly: revenue vs. model, EBITDA vs. model, customer retention, employee retention.", footer: "The scorecard that tells you whether reality is matching what you underwrote — and what to adjust when it isn't.", italic: false },
-  ];
-
   return (
-    <div className={dark ? 'bg-transparent text-[#dadadc]' : 'bg-transparent text-[#1a1c1e]'}>
+    <div className={dark ? 'bg-transparent text-[#f9f9fc]' : 'bg-transparent text-[#1a1c1e]'}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
         {/* ═══ 1. HERO ═══ */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-32 items-start">
-          <div className="lg:col-span-8">
+        <section className="mb-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          <div className="lg:col-span-7">
             <ScrollReveal>
-              <div className="flex gap-2 mb-10">
-                <span className="inline-block px-3 py-1 bg-[#b0004a]/10 text-[#b0004a] text-[10px] font-extrabold uppercase tracking-[0.2em] rounded-sm">Integrate</span>
-                <span className={`inline-block px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-zinc-800 text-[#dadadc]/80' : 'bg-[#eeeef0] text-[#5d5e61]'}`}>Post-Acquisition</span>
+              <div className="flex items-center gap-2 mb-8">
+                <span className="inline-block px-3 py-1 bg-[#b0004a]/10 text-[#b0004a] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Integrate</span>
+                <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-[#2f3133] text-[#dadadc]/80' : 'bg-[#f3f3f6] text-[#5d5e61]'}`}>Post-Acquisition</span>
               </div>
             </ScrollReveal>
             <ScrollReveal y={40} delay={0.1}>
-              <h1 className="font-headline text-6xl md:text-8xl font-extrabold tracking-tighter leading-[0.85] mb-8">
+              <h1 className="font-headline font-black text-5xl md:text-6xl tracking-tighter leading-[0.92] mb-8">
                 The first 180 days determine <span className="text-[#b0004a]">everything.</span>
               </h1>
             </ScrollReveal>
+            <ScrollReveal delay={0.2}>
+              <div className={`space-y-6 text-xl editorial max-w-xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
+                <p>70% of acquisitions fail to deliver the returns that justified the price. Not because the thesis was wrong. Because the execution was unstructured. No system for Day 1. No framework for the first 90 days. No tracking against the deal model's projections.</p>
+                <p className={`font-bold border-l-4 border-[#b0004a] pl-6 text-2xl italic ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>Yulia builds your value creation plan from what due diligence actually revealed. Not a template. Your plan.</p>
+              </div>
+            </ScrollReveal>
           </div>
-          <ScrollReveal delay={0.2} className="lg:col-span-4 lg:pt-24">
-            <p className={`text-xl leading-relaxed ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
-              70% of acquisitions fail to deliver the returns that justified the price. Not because the thesis was wrong. Because the execution was unstructured.
-            </p>
-          </ScrollReveal>
-        </section>
-
-        {/* ═══ 2. MANIFEST ═══ */}
-        <ScrollReveal>
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-24 mb-32">
-            <div className="space-y-10">
-              <div className="h-[3px] w-24 bg-[#b0004a]"></div>
-              <div className={`space-y-8 editorial text-xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
-                <p className={`font-medium ${dark ? 'text-white' : 'text-[#1a1c1e]'}`}>I've seen it happen the same way every time. The intensity of the deal process — months of evaluation, negotiation, diligence, financing, legal work — creates a natural letdown the day after close.</p>
-                <p>The DD findings that should be driving every decision for the next six months are scattered across email threads and shared folders. The financial model that justified the purchase price is a spreadsheet on someone's laptop. <span className={`font-extrabold ${dark ? 'text-white' : 'text-[#1a1c1e]'}`}>Nobody has a plan for Monday morning.</span></p>
-              </div>
-            </div>
-            <div className={`p-12 md:p-16 rounded-3xl relative overflow-hidden flex flex-col justify-center ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-[#f3f3f6]'}`}>
-              <div className="relative z-10 space-y-8">
-                <span className="material-symbols-outlined text-[#b0004a] text-5xl">warning</span>
-                <p className="text-2xl font-semibold leading-snug">The employees are watching. Some are updating their resumes. The customers haven't been told. The vendors are wondering if terms change under new ownership.</p>
-                <p className={`text-xl italic ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>And the new owner is improvising.</p>
-              </div>
-              <div className="absolute -right-12 -bottom-12 opacity-[0.03] pointer-events-none"><span className="material-symbols-outlined text-[320px]">crisis_alert</span></div>
-            </div>
-          </section>
-        </ScrollReveal>
-
-        {/* ═══ 3. YULIA SPOTLIGHT ═══ */}
-        <ScrollReveal>
-          <section className="bg-[#2f3133] text-white rounded-3xl p-12 md:p-24 mb-32 overflow-hidden relative">
-            <div className="max-w-4xl relative z-10">
-              <h2 className="font-headline text-4xl md:text-6xl font-extrabold tracking-tight mb-10 leading-[1.1]">
-                When your deal closes on smbX.ai, <span className="text-[#d81b60]">Yulia doesn't stop.</span>
-              </h2>
-              <p className="text-xl md:text-2xl text-[#dadadc] leading-relaxed mb-16 font-medium">
-                She carries forward everything — DD findings, risk flags, financial model, operational gaps, customer data — and builds a <span className="text-white border-b-2 border-[#d81b60]/40">180-day plan specific to this business</span>, this deal, these findings.
-              </p>
-              <div className="flex flex-wrap gap-x-12 gap-y-8">
+          <ScrollReveal delay={0.25} className="lg:col-span-5 mt-4">
+            <div className={`rounded-3xl p-8 text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
+              <p className="text-[10px] text-[#dadadc]/60 uppercase tracking-[0.2em] font-bold mb-6">Your AI integration team</p>
+              <div className="space-y-4">
                 {[
-                  { icon: 'verified', label: 'Custom Architecture' },
-                  { icon: 'analytics', label: 'Data Continuity' },
-                  { icon: 'timer', label: '180-Day Scope' },
-                ].map((f) => (
-                  <div key={f.label} className="flex items-center gap-4">
-                    <span className="material-symbols-outlined text-[#d81b60] text-3xl">{f.icon}</span>
-                    <span className="text-xs font-bold tracking-[0.2em] uppercase text-[#dadadc]">{f.label}</span>
+                  'Generates a 180-day value creation plan from your deal\u2019s financials and thesis',
+                  'Tracks integration milestones with deadline management',
+                  'Monitors customer retention, employee retention, key vendor relationships',
+                  'Compares financial performance against the deal model\u2019s projections',
+                  'Sends proactive alerts when metrics deviate from plan',
+                  'Provides communication templates for employees, customers, vendors',
+                  'Manages the seller transition timeline',
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-3">
+                    <span className="material-symbols-outlined text-[#b0004a] text-lg shrink-0 mt-0.5">check_circle</span>
+                    <p className="text-sm text-[#dadadc]/90">{item}</p>
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="absolute top-0 right-0 w-2/3 h-full opacity-10 bg-gradient-to-l from-[#b0004a] to-transparent pointer-events-none"></div>
-          </section>
-        </ScrollReveal>
-
-        {/* ═══ 4. 180-DAY TIMELINE ═══ */}
-        <section className="mb-32">
-          <ScrollReveal>
-            <div className="flex items-center gap-6 mb-20">
-              <h3 className={`text-xs font-extrabold tracking-[0.3em] uppercase shrink-0 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>The Timeline</h3>
-              <div className={`flex-1 h-px ${dark ? 'bg-zinc-800' : 'bg-[#eeeef0]'}`}></div>
+              <div className="mt-6 pt-6 border-t border-white/10">
+                <p className="text-xs text-[#dadadc]/60 italic">You run the business. Yulia makes sure nothing falls through the cracks.</p>
+              </div>
             </div>
           </ScrollReveal>
-          <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {timeline.map((phase) => (
-              <StaggerItem key={phase.num}>
-                <div className="group">
-                  <div className={`rounded-3xl p-10 h-full transition-all flex flex-col ${dark ? 'bg-[#2f3133] border border-zinc-800 hover:shadow-2xl hover:shadow-black/20' : 'bg-white border border-[#eeeef0] hover:shadow-2xl hover:shadow-black/5'}`}>
-                    <div className="w-14 h-14 rounded-2xl bg-[#b0004a] flex items-center justify-center text-white text-xl font-extrabold mb-10 group-hover:-translate-y-2 transition-transform">{phase.num}</div>
-                    <h4 className="font-headline text-3xl font-extrabold mb-2">{phase.title}</h4>
-                    <p className="text-[#b0004a] font-bold text-sm mb-8 tracking-widest">{phase.time}</p>
-                    <p className={`leading-relaxed text-lg mb-10 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{phase.desc}</p>
-                    <div className={`mt-auto pt-8 ${dark ? 'border-t border-zinc-800' : 'border-t border-[#eeeef0]'}`}>
-                      <p className={`text-sm font-bold leading-relaxed ${phase.italic ? 'italic' : ''}`}>{phase.footer}</p>
-                    </div>
+        </section>
+
+        {/* ═══ 2. THE 180-DAY FRAMEWORK ═══ */}
+        <section className="mb-24">
+          <ScrollReveal>
+            <div className="mb-12">
+              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">The Framework</span>
+              <h2 className="text-4xl font-headline font-black tracking-tight mb-4">Four phases. 180 days. Every milestone tracked.</h2>
+            </div>
+          </ScrollReveal>
+          <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { phase: '01', time: 'Day 0–14', title: 'Stabilize', desc: 'Meet every employee individually. Contact top 10 customers personally. Shadow every role for at least 2 hours. Extract tribal knowledge from the seller daily. Change nothing on Day 1 — your job is to listen, not fix.', progress: 25 },
+              { phase: '02', time: 'Day 15–30', title: 'Quick Wins', desc: "Raise prices where the market supports it. Fire bad customers. Fix the website. Set up financial reporting — monthly P&L, weekly cash flow, daily revenue dashboard. Document the 5 processes that exist only in the seller's head.", progress: 50 },
+              { phase: '03', time: 'Day 30–90', title: 'Strengthen', desc: 'Hire for critical gaps identified in the first 30 days. Implement technology the business should have had — CRM, scheduling, modern accounting. Build the 12-month operating plan. Complete seller transition. Renegotiate vendor contracts.', progress: 75 },
+              { phase: '04', time: 'Day 90–180', title: 'Accelerate', desc: "Launch growth initiatives — new service offerings, marketing channels, customer segments. Establish KPI dashboard and weekly management meeting cadence. Evaluate add-on acquisition opportunities. The business runs on your systems now, not the seller's memory.", progress: 100 },
+            ].map((p) => (
+              <StaggerItem key={p.phase}>
+                <div className={`rounded-2xl p-8 hover:shadow-lg transition-all ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[#b0004a] font-bold text-xs uppercase tracking-widest">Phase {p.phase}</span>
+                    <span className="text-[10px] bg-[#b0004a]/10 text-[#b0004a] px-2 py-1 rounded font-bold">{p.time}</span>
+                  </div>
+                  <h3 className="text-2xl font-headline font-black mb-3">{p.title}</h3>
+                  <p className={`text-sm leading-relaxed mb-5 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{p.desc}</p>
+                  <div className={`h-1.5 rounded-full overflow-hidden ${dark ? 'bg-zinc-700' : 'bg-[#f3f3f6]'}`}>
+                    <div className="h-full bg-[#b0004a] rounded-full" style={{ width: `${p.progress}%` }} />
                   </div>
                 </div>
               </StaggerItem>
@@ -115,18 +91,90 @@ export default function IntegrateBelow() {
           </StaggerContainer>
         </section>
 
-        {/* ═══ 5. FINAL CTA ═══ */}
+        {/* ═══ 3. WHAT YULIA TRACKS ═══ */}
+        <section className="mb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+            <ScrollReveal className="lg:col-span-5">
+              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Live Monitoring</span>
+              <h2 className="text-4xl font-headline font-black tracking-tight mb-8">Every metric that matters. Flagged before it becomes a problem.</h2>
+              <p className={`leading-relaxed editorial mb-6 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>When a metric deviates from plan, Yulia doesn't wait for you to notice. She flags it, explains the impact, and suggests corrective actions — all before your next lender covenant check.</p>
+              <div className={`rounded-2xl p-6 ${dark ? 'bg-[#b0004a]/10 border border-[#b0004a]/20' : 'bg-[#b0004a]/5 border border-[#b0004a]/15'}`}>
+                <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}><span className={`font-bold ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>Proactive, not reactive.</span> Traditional integration consulting checks in monthly. Yulia checks every metric continuously and only interrupts you when something needs attention.</p>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={0.15} className="lg:col-span-7">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { icon: 'trending_up', title: 'Revenue vs. deal model', desc: 'Are you hitting the projections that justified the price? Variance analysis against the pre-close financial model.' },
+                  { icon: 'group', title: 'Customer retention', desc: 'Have you lost any of the top 20 customers since close? Churn monitoring and sentiment tracking.' },
+                  { icon: 'badge', title: 'Employee retention', desc: 'Are key employees staying through transition? Engagement tracking and flight-risk identification.' },
+                  { icon: 'hub', title: 'Vendor relationships', desc: 'Any disruptions to critical supply chains? Contract health and cost monitoring post-transition.' },
+                  { icon: 'account_balance_wallet', title: 'Cash flow vs. debt service', desc: 'Is the business generating enough to service the acquisition debt? Covenant compliance and liquidity runway.' },
+                  { icon: 'checklist', title: 'Integration milestones', desc: 'Are the Day 30/60/90 objectives on track? Completion tracking with deadline alerts and blocker identification.' },
+                ].map((metric) => (
+                  <div key={metric.title} className={`rounded-2xl p-6 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
+                    <span className="material-symbols-outlined text-[#b0004a] text-xl mb-3">{metric.icon}</span>
+                    <h4 className="font-bold text-sm mb-2">{metric.title}</h4>
+                    <p className={`text-xs ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{metric.desc}</p>
+                  </div>
+                ))}
+                <div className={`sm:col-span-2 rounded-2xl p-6 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
+                  <span className="material-symbols-outlined text-[#b0004a] text-xl mb-3">handshake</span>
+                  <h4 className="font-bold text-sm mb-2">Seller transition</h4>
+                  <p className={`text-xs ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Is knowledge transfer happening on schedule? Milestone check-ins for departing management. Tribal knowledge documentation status. The seller's exit timeline against your operational readiness.</p>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+
+        {/* ═══ 4. THE 7 MISTAKES ═══ */}
         <ScrollReveal>
-          <section className="mb-12 max-w-4xl mx-auto text-center">
-            <div className={`py-20 px-8 rounded-3xl shadow-xl ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0] shadow-black/[0.02]'}`}>
-              <h2 className="font-headline text-4xl md:text-5xl font-extrabold mb-8 leading-[1.1] tracking-tight">Not a template downloaded from a blog. <span className="text-[#b0004a]">Your plan, built from your deal.</span></h2>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-12">
-                <button onClick={handleCTA} className="px-12 py-6 bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white rounded-full font-headline font-extrabold text-xl hover:scale-105 transition-all shadow-xl flex items-center gap-3 border-none cursor-pointer">
-                  Tell Yulia about your acquisition <span className="material-symbols-outlined">arrow_forward</span>
-                </button>
-                <button onClick={handleCTA} className={`px-12 py-6 bg-transparent rounded-full font-headline font-extrabold text-xl transition-all cursor-pointer ${dark ? 'border-2 border-white text-white hover:bg-white hover:text-[#1a1c1e]' : 'border-2 border-[#1a1c1e] text-[#1a1c1e] hover:bg-[#1a1c1e] hover:text-white'}`}>
-                  Message Yulia
-                </button>
+          <section className="mb-24">
+            <div className={`rounded-3xl p-10 md:p-16 text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
+              <div className="mb-12">
+                <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Avoid These</span>
+                <h2 className="text-4xl font-headline font-black tracking-tight mb-4">The 7 mistakes that destroy post-acquisition value.</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {[
+                  { num: '01', title: 'Changing too much too fast', desc: 'The business works. Don\u2019t break it trying to improve it in the first month. Understand the engine before you rebuild it.' },
+                  { num: '02', title: 'Cutting costs before understanding them', desc: 'Every expense exists for a reason. That \u201Cunnecessary\u201D contractor might be the only person who knows how the HVAC system works. Understand before cutting.' },
+                  { num: '03', title: 'Ignoring employee concerns', desc: 'Your employees are scared. They\u2019re googling \u201Cwhat happens when a business gets sold.\u201D Address their fears explicitly, early, and personally.' },
+                  { num: '04', title: 'Losing key customers during transition', desc: 'Personal outreach to your top customers in Week 1 is non-negotiable. Your competitors know there\u2019s a transition happening. They\u2019re calling your customers.' },
+                  { num: '05', title: 'Fighting with the seller post-close', desc: 'The seller knows things you don\u2019t \u2014 where the bodies are buried, which customers are difficult, which employees are the real MVPs. Treat them well even when the earnout creates tension.' },
+                  { num: '06', title: 'Under-investing in the business', desc: 'The worst buyers squeeze margins immediately. The best buyers invest in growth and reap returns in Years 2\u20135. Your acquisition thesis promised growth \u2014 fund it.' },
+                ].map((mistake) => (
+                  <div key={mistake.num} className="border-t border-white/15 pt-6">
+                    <span className="text-[#b0004a] font-black text-2xl mb-3 block">{mistake.num}</span>
+                    <h4 className="font-bold mb-2">{mistake.title}</h4>
+                    <p className="text-sm text-[#dadadc]/70">{mistake.desc}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-[#b0004a] rounded-2xl p-8">
+                <span className="text-white font-black text-2xl mb-3 block">07</span>
+                <h4 className="font-bold text-lg mb-2">No financial reporting on Day 1</h4>
+                <p className="text-sm text-white/80">If you can't measure it, you can't manage it. Monthly P&L, weekly cash flow, daily revenue — set up on Day 1 before you change a single thing about the operation.</p>
+                <div className="mt-4 pt-4 border-t border-white/20">
+                  <p className="text-xs text-white/80 italic">Yulia's integration plan is built to prevent every one of these. Not because she's read about them — because they're encoded in the methodology.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* ═══ 5. CTA ═══ */}
+        <ScrollReveal>
+          <section className="mb-12">
+            <div className={`rounded-3xl p-12 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
+              <div>
+                <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95]">Sell. Buy. Raise.<br/><span className="text-[#b0004a]">Talk to Yulia.</span></h2>
+                <p className="text-lg text-[#dadadc]/70 mt-4">Just closed an acquisition? Tell Yulia about the deal and she'll build your 180-day plan — from the financials and risks that due diligence actually revealed.</p>
+              </div>
+              <div className="flex flex-col items-center lg:items-end gap-4">
+                <button onClick={handleCTA} className="px-10 py-5 bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Talk to Yulia</button>
+                <p className="text-xs text-[#dadadc]/70">Free analysis · No account required · Your data stays yours</p>
               </div>
             </div>
           </section>

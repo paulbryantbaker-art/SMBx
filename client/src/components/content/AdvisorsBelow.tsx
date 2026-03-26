@@ -1,102 +1,265 @@
 import { useDarkMode } from '../shared/DarkModeToggle';
-import { ScrollReveal, StaggerContainer, StaggerItem, AnimatedCounter } from './animations';
+import { ScrollReveal, StaggerContainer, StaggerItem } from './animations';
 
 export default function AdvisorsBelow() {
-  const [dark, setDark] = useDarkMode();
+  const [dark] = useDarkMode();
 
   const handleCTA = () => {
     window.location.href = '/chat';
   };
 
+  const card = dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]';
+  const muted = dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]';
+  const emphasis = dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]';
+  const subtleBg = dark ? 'bg-[#2f3133]' : 'bg-[#f3f3f6]';
+  const darkPanel = dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]';
+
+  const timeRows = [
+    { before: '40 hrs', after: '2 hrs', label: 'CIM generation', highlight: true },
+    { before: '1 week', after: '5 min', label: 'Valuation analysis', highlight: false },
+    { before: '1 month', after: '1 day', label: 'Buyer outreach list', highlight: false },
+    { before: '3–5', after: '15–20', label: 'Deals managed simultaneously', highlight: false },
+  ];
+
+  const capabilities = [
+    { icon: 'description', title: 'Deal-ready documents in minutes', desc: 'CIMs, valuations, blind teasers, deal memos — generated from client financials, adapted to the deal\'s league. The same documents that take your team 40 hours take Yulia 2.' },
+    { icon: 'analytics', title: 'Instant financial analysis', desc: 'Add-back identification, SDE/EBITDA normalization, DSCR modeling, SBA qualification — run on every client engagement automatically. Your first meeting starts with real numbers, not estimates.' },
+    { icon: 'groups', title: 'Buyer sourcing at scale', desc: 'Yulia researches the buyer landscape for every listing — PE platforms active in the sector, individual operators in the geography, search funds with matching theses. Scored and ranked. Not a database dump.' },
+    { icon: 'folder_managed', title: 'Multi-deal pipeline management', desc: 'Every client engagement tracked through the gate system. DD checklists, deadline alerts, party coordination — across 15–20 simultaneous deals instead of 3–5.' },
+    { icon: 'gavel', title: 'Negotiation prep for every deal', desc: 'Comparable transaction data, counter-offer frameworks, working capital analysis — the prep work that makes your clients more confident and your deals close faster.' },
+    { icon: 'draft', title: 'Communication drafting', desc: 'Every email, every update, every response to buyer questions — Yulia drafts it with the deal context already loaded. You review, edit, send. No more starting from scratch on every communication.' },
+  ];
+
+  const perceptionCards = [
+    { icon: 'visibility_off', title: 'White-label output', desc: 'Every document Yulia generates can carry your branding, your letterhead, your firm\'s identity. The client sees your work product.' },
+    { icon: 'shield', title: 'Client data isolation', desc: 'Each client engagement is siloed. No cross-client data leakage. No training on client data. Full compliance with your fiduciary obligations.' },
+    { icon: 'speed', title: 'Speed as differentiator', desc: '"I ran the numbers overnight" becomes literally true. First meetings with real analysis. Listing presentations with actual valuations. Speed wins mandates.' },
+    { icon: 'trending_up', title: 'More deals, same quality', desc: 'The bottleneck was always analytical capacity. Remove it, and your deal volume scales with your relationship capacity — which is the part you\'re actually good at.' },
+  ];
+
+  const advisorTypes = [
+    { icon: 'storefront', title: 'Business brokers', desc: 'CIMs in 2 hours instead of 40. Valuations at your first meeting. Buyer lists scored and ranked for every listing. Your listing presentations go from "I think it\'s worth..." to "here\'s the data."' },
+    { icon: 'account_balance', title: 'M&A advisors', desc: 'Institutional-quality deal materials for every engagement. Financial models that survive buyer scrutiny. DD coordination across multiple simultaneous transactions.' },
+    { icon: 'calculate', title: 'CPAs & financial advisors', desc: 'When your client asks "what\'s my business worth?" — answer in the same meeting. Add exit planning and transaction support to your practice without hiring an analyst.' },
+    { icon: 'gavel', title: 'M&A attorneys', desc: 'Financial context for every deal you\'re advising on. DD checklists that match the transaction\'s complexity. Working capital analysis before the closing table surprises start.' },
+    { icon: 'real_estate_agent', title: 'Wealth managers', desc: 'When a client\'s biggest asset is their business — and the liquidity event is the single largest financial decision of their life — you need deal intelligence, not just financial planning.' },
+    { icon: 'search', title: 'Search fund advisors', desc: 'Help your searchers find, evaluate, and close faster. Deal scoring in 60 seconds. Thesis refinement from data, not gut. Financial models that satisfy LPs.' },
+  ];
+
+  const faqs = [
+    { q: 'Will my clients know I\'m using AI?', a: 'Only if you tell them. Every document can carry your branding. The analysis has your methodology. Yulia is the engine behind the scenes — your clients see your work product.' },
+    { q: 'Is client data secure?', a: 'Every client engagement is siloed. No cross-client data access. No model training on client data. Encrypted at rest and in transit. Full compliance with your fiduciary obligations.' },
+    { q: 'Do I need a separate advisor account?', a: 'No. Same platform, same tiers as everyone else. Solo practitioners typically use Professional ($149/mo). Firms use Enterprise ($999/mo). The difference is scale, not features.' },
+    { q: 'Can I try it on a real deal before paying?', a: 'Yes. Professional comes with a 30-day free trial — full access, no restrictions. Run a complete client engagement before you decide.' },
+    { q: 'What if I have a team?', a: 'Enterprise ($999/mo) includes unlimited team seats, API access, white-label options, and priority support. Every team member gets full platform access across all client engagements.' },
+    { q: 'Does this replace me?', a: 'No. It replaces the spreadsheet work, the document drafting, the data gathering, and the checklist management. It does not replace your client relationships, your deal judgment, your negotiation instinct, or your license. It makes you faster.' },
+  ];
+
   return (
-    <div className={dark ? 'bg-transparent text-[#dadadc]' : 'bg-transparent text-[#1a1c1e]'}>
+    <div className={dark ? 'bg-transparent text-[#f9f9fc]' : 'bg-transparent text-[#1a1c1e]'}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
         {/* ═══ 1. HERO ═══ */}
-        <section className="mb-24">
-          <ScrollReveal>
-            <div className="mb-8">
-              <span className="inline-block px-3 py-1 bg-[#b0004a]/10 text-[#b0004a] text-[10px] font-extrabold uppercase tracking-[0.2em] rounded-sm">For Advisors</span>
+        <section className="mb-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          <div className="lg:col-span-7">
+            <ScrollReveal>
+              <div className="flex items-center gap-2 mb-8">
+                <span className="inline-block px-3 py-1 bg-[#b0004a]/10 text-[#b0004a] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Advisors</span>
+                <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-[#2f3133] text-[#dadadc]/80' : 'bg-[#f3f3f6] text-[#5d5e61]'}`}>Brokers & Professionals</span>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal y={40} delay={0.1}>
+              <h1 className="font-headline font-black text-5xl md:text-6xl tracking-tighter leading-[0.92] mb-8">
+                A CIM that takes you 40 hours takes Yulia <span className="text-[#b0004a]">two.</span>
+              </h1>
+            </ScrollReveal>
+            <ScrollReveal delay={0.2}>
+              <div className={`space-y-6 text-xl editorial max-w-xl ${muted}`}>
+                <p>You're not here to be replaced. You're here because your time is the bottleneck. Every hour you spend building documents is an hour you're not spending on client relationships, deal sourcing, and the judgment calls that actually require a human.</p>
+                <p className={`font-bold border-l-4 border-[#b0004a] pl-6 text-2xl italic ${emphasis}`}>Same platform. Same intelligence. Your superpower is that Yulia does 80% of the analytical work.</p>
+              </div>
+            </ScrollReveal>
+          </div>
+          <ScrollReveal delay={0.25} className="lg:col-span-5 mt-4">
+            <div className={`${darkPanel} rounded-3xl p-8 text-white`}>
+              <p className="text-[10px] text-[#dadadc]/60 uppercase tracking-[0.2em] font-bold mb-6">Your AI back office</p>
+              <div className="space-y-5">
+                {timeRows.map((row, i) => (
+                  <div key={row.label} className="flex items-center gap-4">
+                    <div className={`${i === 0 ? 'bg-[#b0004a]/20' : 'bg-white/5'} rounded-xl px-3 py-2 text-center min-w-[80px]`}>
+                      <p className="text-[10px] text-[#dadadc]/60">Before</p>
+                      <p className="font-bold text-[#dadadc]/90">{row.before}</p>
+                    </div>
+                    <span className="material-symbols-outlined text-[#b0004a]">arrow_forward</span>
+                    <div className={`${i === 0 ? 'bg-[#b0004a]/20' : 'bg-white/5'} rounded-xl px-3 py-2 text-center min-w-[80px]`}>
+                      <p className="text-[10px] text-[#dadadc]/60">With Yulia</p>
+                      <p className="font-bold text-[#b0004a]">{row.after}</p>
+                    </div>
+                    <p className="text-sm text-[#dadadc]/90 flex-1">{row.label}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 pt-6 border-t border-white/10">
+                <p className="text-xs text-[#dadadc]/60 italic">You focus on client relationships and deal judgment — the work that actually requires a human.</p>
+              </div>
             </div>
           </ScrollReveal>
-          <ScrollReveal y={40} delay={0.1}>
-            <h1 className="font-headline text-5xl md:text-7xl font-extrabold tracking-tighter leading-[0.9] mb-8">
-              Scale your advisory <span className="text-[#b0004a]">without adding headcount.</span>
-            </h1>
-          </ScrollReveal>
-          <ScrollReveal delay={0.2}>
-            <div className={`rounded-xl p-12 mt-12 relative overflow-hidden ${dark ? 'bg-[#2f3133]' : 'bg-[#f3f3f6]'}`}>
-              <div className="max-w-3xl relative z-10">
-                <p className="text-3xl font-medium leading-tight mb-6">You have twelve active listings. Something isn't getting done this week.</p>
-                <p className={`text-xl leading-relaxed mb-8 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>The bottleneck isn't your judgment — it's the sheer volume of data transcription, PDF formatting, and repetitive buyer screening. You're a strategist being used as a clerk.</p>
-                <div className="flex gap-4">
-                  <button onClick={handleCTA} className="bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-2 hover:opacity-90 transition-all border-none cursor-pointer">
-                    Start with your mandate <span className="material-symbols-outlined">arrow_forward</span>
-                  </button>
-                  <button onClick={handleCTA} className={`px-8 py-4 rounded-xl font-bold text-lg shadow-sm hover:shadow-md transition-all border-none cursor-pointer ${dark ? 'bg-[#3a3c3e] text-white' : 'bg-white text-[#1a1c1e]'}`}>
-                    Message Yulia
-                  </button>
+        </section>
+
+        {/* ═══ 2. THE SHIFT ═══ */}
+        <ScrollReveal>
+          <section className="mb-24">
+            <div className={`${darkPanel} rounded-3xl p-10 md:p-16 text-white`}>
+              <div className="mb-12">
+                <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">The Leverage</span>
+                <h2 className="font-headline text-4xl font-black tracking-tight mb-4">3–5 deals managed becomes 15–20 deals managed.</h2>
+                <p className="text-lg text-[#dadadc]/70 max-w-2xl">Same quality. Same output. You spend 80% of your time on relationships instead of 80% on analysis. The math changes everything about your practice.</p>
+              </div>
+              <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {capabilities.map((c) => (
+                  <StaggerItem key={c.title}>
+                    <div className="bg-white/5 rounded-2xl border border-white/10 p-8 hover:bg-white/10 transition-colors h-full">
+                      <span className="material-symbols-outlined text-[#b0004a] text-3xl mb-4">{c.icon}</span>
+                      <h3 className="font-bold text-lg mb-3">{c.title}</h3>
+                      <p className="text-sm text-[#dadadc]/70">{c.desc}</p>
+                    </div>
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* ═══ 3. CLIENT PERCEPTION ═══ */}
+        <ScrollReveal>
+          <section className="mb-24">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+              <div className="lg:col-span-5">
+                <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Client Perception</span>
+                <h2 className="font-headline text-4xl font-black tracking-tight mb-8">Your clients don't know Yulia exists. They just think you're fast.</h2>
+                <p className={`leading-relaxed editorial mb-6 ${muted}`}>The #1 adoption barrier for any tool in advisory is client perception — "will this make me look replaceable?" With smbX.ai, the answer is no. Your clients see your work product, your analysis, your expertise. Yulia is the engine behind the scenes.</p>
+                <p className={`font-bold text-xl border-l-4 border-[#b0004a] pl-6 italic ${emphasis}`}>The CIM has your name on it. The valuation has your methodology. The deal runs on your relationships. Yulia just made it all possible in a fraction of the time.</p>
+              </div>
+              <div className="lg:col-span-7">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {perceptionCards.map((p) => (
+                    <div key={p.title} className={`${card} rounded-2xl p-6 hover:shadow-lg transition-all`}>
+                      <span className="material-symbols-outlined text-[#b0004a] text-xl mb-3">{p.icon}</span>
+                      <h4 className="font-bold text-sm mb-2">{p.title}</h4>
+                      <p className={`text-xs ${muted}`}>{p.desc}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-[#b0004a]/5 to-transparent"></div>
             </div>
-          </ScrollReveal>
-        </section>
+          </section>
+        </ScrollReveal>
 
-        {/* ═══ 2. MULTIPLIED EXPERTISE ═══ */}
-        <section className="mb-32 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          <ScrollReveal className="lg:col-span-5">
-            <h2 className="font-headline text-5xl font-extrabold tracking-tighter mb-8 leading-none">Your expertise isn't being replaced. It's being multiplied.</h2>
-            <p className={`text-lg leading-relaxed mb-6 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Most advisory tools are glorified spreadsheets. smbX.ai handles the heavy lifting of data synthesis, so you can focus on the art of negotiation and client relationships.</p>
-          </ScrollReveal>
-          <StaggerContainer className="lg:col-span-7 grid grid-cols-2 gap-6">
-            {[
-              { icon: 'speed', title: 'Deal-ready documents in minutes, not weeks', desc: "Upload the financials and let Yulia produce the complete deal package — professional, institutional grade, in your firm's voice. The work that used to consume an analyst for a week, finished before your next meeting." },
-              { icon: 'branding_watermark', title: 'White-labeled outputs', desc: "Every report, teaser, and data visualization is exported as your firm's property. Professional, institutional grade, and investor-ready." },
-            ].map((card) => (
-              <StaggerItem key={card.title}>
-                <div className={`p-8 rounded-xl shadow-sm h-full ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                  <span className="material-symbols-outlined text-[#b0004a] text-4xl mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>{card.icon}</span>
-                  <h3 className="text-xl font-bold mb-2">{card.title}</h3>
-                  <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{card.desc}</p>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        </section>
-
-        {/* ═══ 3. EFFICIENCY DATA ═══ */}
+        {/* ═══ 4. YOUR WORKFLOW ═══ */}
         <ScrollReveal>
-          <section className="mb-32">
-            <div className={`p-1 rounded-2xl ${dark ? 'bg-zinc-800' : 'bg-[#1a1c1e]'}`}>
-              <div className={`rounded-xl p-10 overflow-hidden ${dark ? 'bg-[#2f3133]' : 'bg-white'}`}>
-                <div className="flex justify-between items-end mb-12">
-                  <div>
-                    <span className="text-[#b0004a] font-bold tracking-widest text-xs uppercase mb-2 block">Efficiency Matrix</span>
-                    <h2 className="font-headline text-4xl font-extrabold tracking-tighter">Throughput Comparison</h2>
+          <section className="mb-24">
+            <div className="mb-12">
+              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Your Workflow</span>
+              <h2 className="font-headline text-4xl font-black tracking-tight">How your practice changes.</h2>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Before */}
+              <div className={`${subtleBg} rounded-2xl p-8`}>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${dark ? 'bg-[#dadadc]/10' : 'bg-[#5d5e61]/10'}`}>
+                    <span className={`material-symbols-outlined ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>schedule</span>
                   </div>
-                  <div className="flex gap-4">
-                    <div className="flex items-center gap-2 text-xs font-semibold"><div className="w-3 h-3 bg-[#5d5e61] rounded-sm"></div> Legacy Workflow</div>
-                    <div className="flex items-center gap-2 text-xs font-semibold"><div className="w-3 h-3 bg-[#b0004a] rounded-sm"></div> smbX.ai</div>
-                  </div>
+                  <h3 className="font-bold text-lg">Before Yulia</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-                  <div className="space-y-8">
-                    <div className={`relative h-64 flex items-end gap-4 ${dark ? 'border-b border-zinc-800' : 'border-b border-[#eeeef0]'}`}>
-                      <div className="w-full bg-[#5d5e61]/10 h-[90%] rounded-t-lg relative"><div className="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-bold">20 HRS</div></div>
-                      <div className="w-full bg-[#b0004a] h-[8%] rounded-t-lg relative"><div className="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#b0004a]">20 MIN</div></div>
-                    </div>
-                    <div className="text-center font-bold text-sm tracking-tight">Deal Package Production</div>
+                <div className={`space-y-4 text-sm ${muted}`}>
+                  <div className="flex items-start gap-3"><span className="opacity-40 font-bold min-w-[48px]">20%</span><p>Client meetings, relationship building, deal sourcing</p></div>
+                  <div className="flex items-start gap-3"><span className="opacity-40 font-bold min-w-[48px]">40%</span><p>Financial analysis, CIM drafting, valuation work</p></div>
+                  <div className="flex items-start gap-3"><span className="opacity-40 font-bold min-w-[48px]">25%</span><p>DD coordination, document management, checklists</p></div>
+                  <div className="flex items-start gap-3"><span className="opacity-40 font-bold min-w-[48px]">15%</span><p>Admin, communication drafting, follow-ups</p></div>
+                </div>
+                <div className={`mt-6 pt-4 border-t ${dark ? 'border-zinc-800' : 'border-[#eeeef0]'}`}>
+                  <p className={`text-sm font-bold ${muted}`}>3–5 active deals · 80% on analysis</p>
+                </div>
+              </div>
+              {/* After */}
+              <div className={`${dark ? 'bg-[#2f3133]' : 'bg-white'} rounded-2xl border-2 border-[#b0004a] p-8`}>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-[#b0004a]/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[#b0004a]">bolt</span>
                   </div>
-                  <div className="space-y-6">
-                    <div className={`flex justify-between items-center p-6 rounded-xl ${dark ? 'bg-zinc-800' : 'bg-[#f3f3f6]'}`}>
-                      <div>
-                        <div className={`text-xs font-bold uppercase tracking-widest mb-1 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Deal Capacity Increase</div>
-                        <div className="text-4xl font-headline font-extrabold"><AnimatedCounter value={34} suffix="" prefix="" />.<span className="text-4xl">4x</span></div>
-                      </div>
-                      <span className="material-symbols-outlined text-[#b0004a] text-5xl">trending_up</span>
+                  <h3 className="font-bold text-lg">With Yulia</h3>
+                </div>
+                <div className="space-y-4 text-sm">
+                  <div className="flex items-start gap-3"><span className="text-[#b0004a] font-bold min-w-[48px]">60%</span><p className={`font-medium ${emphasis}`}>Client meetings, relationship building, deal sourcing</p></div>
+                  <div className="flex items-start gap-3"><span className="text-[#b0004a] font-bold min-w-[48px]">15%</span><p className={muted}>Review Yulia's analysis, apply judgment, refine</p></div>
+                  <div className="flex items-start gap-3"><span className="text-[#b0004a] font-bold min-w-[48px]">15%</span><p className={muted}>Oversee DD coordination (Yulia tracks the details)</p></div>
+                  <div className="flex items-start gap-3"><span className="text-[#b0004a] font-bold min-w-[48px]">10%</span><p className={muted}>Review and send communications Yulia drafted</p></div>
+                </div>
+                <div className="mt-6 pt-4 border-t border-[#b0004a]/20">
+                  <p className="text-sm font-bold text-[#b0004a]">15–20 active deals · 80% on relationships</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* ═══ 5. PRICING ═══ */}
+        <ScrollReveal>
+          <section className="mb-24">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+              <div className="lg:col-span-5">
+                <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Pricing</span>
+                <h2 className="font-headline text-4xl font-black tracking-tight mb-8">Same platform as your clients. Same tiers. Your advantage is leverage.</h2>
+                <p className={`leading-relaxed editorial mb-6 ${muted}`}>No separate "advisor pricing." No upsell gates. You use the same platform your clients use — but you use it across 15–20 engagements simultaneously. That's where the economics change.</p>
+                <p className={`font-bold text-xl border-l-4 border-[#b0004a] pl-6 italic ${emphasis}`}>Try Professional free for 30 days. No credit card.</p>
+              </div>
+              <div className="lg:col-span-7">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Professional */}
+                  <div className={`${dark ? 'bg-[#2f3133]' : 'bg-white'} rounded-2xl border-2 border-[#b0004a] p-6 flex flex-col relative shadow-lg`}>
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#b0004a] text-white text-[8px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Solo Advisors</span>
+                    <h4 className="font-black text-sm mb-2 mt-2">Professional</h4>
+                    <p className="text-3xl font-black text-[#b0004a] mb-1">$149<span className={`text-sm font-medium ${muted}`}>/mo</span></p>
+                    <p className={`text-[10px] mb-4 ${muted}`}>30-day free trial</p>
+                    <div className="space-y-2 flex-1">
+                      {['Unlimited client engagements', 'All documents + analysis', 'Full methodology (22 gates)', 'Pipeline management'].map((f) => (
+                        <div key={f} className="flex items-start gap-2">
+                          <span className="material-symbols-outlined text-[#b0004a] text-sm shrink-0 mt-0.5">check_circle</span>
+                          <p className={`text-xs ${muted}`}>{f}</p>
+                        </div>
+                      ))}
                     </div>
-                    <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>The ability to move from data ingestion to a full teaser in under an hour changes your entire deal screening protocol. More deals evaluated, more mandates won, same team.</p>
+                    <button onClick={handleCTA} className="mt-6 w-full py-2.5 bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white rounded-full font-bold text-xs hover:scale-[1.02] transition-all border-none cursor-pointer">Try Free for 30 Days</button>
+                  </div>
+                  {/* Enterprise */}
+                  <div className={`${darkPanel} rounded-2xl p-6 flex flex-col text-white relative`}>
+                    <span className={`absolute -top-3 left-1/2 -translate-x-1/2 ${darkPanel} border border-white/20 text-white text-[8px] font-bold px-3 py-1 rounded-full uppercase tracking-wider`}>Teams</span>
+                    <h4 className="font-black text-sm mb-2 mt-2">Enterprise</h4>
+                    <p className="text-3xl font-black mb-1">$999<span className="text-sm font-medium text-[#dadadc]/70">/mo</span></p>
+                    <p className="text-[10px] text-[#dadadc]/60 mb-4">Unlimited users</p>
+                    <div className="space-y-2 flex-1">
+                      {['Everything in Professional', 'Unlimited team seats', 'API access', 'White-label options', 'Priority support'].map((f) => (
+                        <div key={f} className="flex items-start gap-2">
+                          <span className="material-symbols-outlined text-[#b0004a] text-sm shrink-0 mt-0.5">check_circle</span>
+                          <p className="text-xs text-[#dadadc]/90">{f}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={handleCTA} className="mt-6 w-full py-2.5 border border-white/30 rounded-full font-bold text-xs hover:bg-white hover:text-[#1a1c1e] transition-all bg-transparent text-white cursor-pointer">Start Enterprise</button>
+                  </div>
+                  {/* ROI card */}
+                  <div className="bg-[#b0004a] rounded-2xl p-6 flex flex-col text-white">
+                    <h4 className="font-black text-sm mb-4">The math</h4>
+                    <div className="space-y-4 flex-1">
+                      <div><p className="text-xs text-white/80">Average deal commission</p><p className="text-xl font-black">$25K–$75K</p></div>
+                      <div><p className="text-xs text-white/80">Deals per year (before)</p><p className="text-xl font-black">4–6</p></div>
+                      <div><p className="text-xs text-white/80">Deals per year (with Yulia)</p><p className="text-xl font-black">12–20</p></div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-white/20">
+                      <p className="text-xs text-white/80">Revenue impact</p>
+                      <p className="text-2xl font-black">2–4x</p>
+                      <p className="text-xs text-white/80 mt-1">at $149/mo cost</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -104,33 +267,53 @@ export default function AdvisorsBelow() {
           </section>
         </ScrollReveal>
 
-        {/* ═══ 4. PRICING ═══ */}
-        <section className="mb-32">
-          <ScrollReveal>
-            <div className={`rounded-2xl p-10 md:p-14 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-[#f3f3f6]'}`}>
-              <h2 className="font-headline text-3xl font-extrabold tracking-tight mb-4">Same platform. Same pricing.</h2>
-              <p className={`text-lg leading-relaxed mb-6 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
-                Brokers and advisors use the same platform as everyone else. Solo practitioners start with Professional ($149/month). Teams and brokerages use Enterprise ($999/month, unlimited users). Try Professional free for 30 days.
-              </p>
-              <button
-                onClick={handleCTA}
-                className="px-8 py-4 bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white rounded-xl font-bold text-lg hover:opacity-90 transition-all border-none cursor-pointer"
-              >
-                Try Professional free
-              </button>
-            </div>
-          </ScrollReveal>
-        </section>
-
-        {/* ═══ 5. FINAL CTA ═══ */}
+        {/* ═══ 6. WHO THIS IS FOR ═══ */}
         <ScrollReveal>
-          <section className="mb-12 text-center max-w-4xl mx-auto">
-            <div className={`py-20 px-10 rounded-3xl ${dark ? 'bg-[#2f3133]' : 'bg-[#f3f3f6]'}`}>
-              <h2 className="font-headline text-5xl md:text-6xl font-extrabold tracking-tighter mb-6 leading-none">Ready to reclaim your <span className="text-[#b0004a] italic">judgment?</span></h2>
-              <p className={`text-xl max-w-2xl mx-auto mb-12 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Stop spending your strategic hours on data entry and formatting. Let Yulia handle the analytical work so you can focus on closing deals.</p>
-              <div className="flex flex-col sm:flex-row justify-center gap-6">
-                <button onClick={handleCTA} className="px-12 py-6 bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white rounded-full font-headline font-extrabold text-xl hover:scale-105 transition-all shadow-xl border-none cursor-pointer">Start with your mandate</button>
-                <button onClick={handleCTA} className={`px-12 py-6 bg-transparent rounded-full font-headline font-extrabold text-xl transition-all cursor-pointer ${dark ? 'border-2 border-white text-white hover:bg-white hover:text-[#1a1c1e]' : 'border-2 border-[#1a1c1e] text-[#1a1c1e] hover:bg-[#1a1c1e] hover:text-white'}`}>Message Yulia</button>
+          <section className="mb-24">
+            <div className="mb-12">
+              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Who Uses This</span>
+              <h2 className="font-headline text-4xl font-black tracking-tight">Every type of deal professional.</h2>
+            </div>
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {advisorTypes.map((a) => (
+                <StaggerItem key={a.title}>
+                  <div className={`${card} rounded-2xl p-8 hover:shadow-lg transition-all h-full`}>
+                    <span className="material-symbols-outlined text-[#b0004a] text-2xl mb-3">{a.icon}</span>
+                    <h3 className="font-bold mb-2">{a.title}</h3>
+                    <p className={`text-sm ${muted}`}>{a.desc}</p>
+                  </div>
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </section>
+        </ScrollReveal>
+
+        {/* ═══ 7. FAQ ═══ */}
+        <ScrollReveal>
+          <section className="mb-24">
+            <h2 className="font-headline text-4xl font-black tracking-tight mb-12">Questions from advisors</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10">
+              {faqs.map((f) => (
+                <div key={f.q}>
+                  <h4 className="font-bold mb-2">{f.q}</h4>
+                  <p className={`text-sm leading-relaxed ${muted}`}>{f.a}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* ═══ 8. CTA ═══ */}
+        <ScrollReveal>
+          <section className="mb-12">
+            <div className={`${darkPanel} rounded-3xl p-12 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center text-white`}>
+              <div>
+                <h2 className="font-headline text-4xl md:text-5xl font-black tracking-tighter leading-[0.95]">Try Professional<br/><span className="text-[#b0004a]">free for 30 days.</span></h2>
+                <p className="text-lg text-[#dadadc]/70 mt-4">Run a complete client engagement. Generate a CIM. Build a valuation. See how the pipeline changes. No credit card required.</p>
+              </div>
+              <div className="flex flex-col items-center lg:items-end gap-4">
+                <button onClick={handleCTA} className="px-10 py-5 bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Start Free Trial</button>
+                <p className="text-xs text-[#dadadc]/70">30 days · Full access · No credit card</p>
               </div>
             </div>
           </section>
