@@ -121,10 +121,10 @@ export default function PricingBelow() {
         </ScrollReveal>
       </section>
 
-      {/* ═══ 2. FREE TIER — full-bleed dark band ═══ */}
-      <section className={`mb-24 ${darkPanel} px-6 md:px-12 py-20 text-white`}>
+      {/* ═══ 2. FREE TIER — dark panel ═══ */}
+      <section className="mb-24 px-6 md:px-12 max-w-6xl mx-auto">
         <ScrollReveal>
-          <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className={`${darkPanel} rounded-3xl px-10 md:px-16 py-16 text-white grid grid-cols-1 lg:grid-cols-2 gap-16 items-center`}>
             <div>
               <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Free Forever</span>
               <h2 className="font-headline text-4xl font-black tracking-tight mb-6">Start for free.<br />Keep everything Yulia finds.</h2>

@@ -64,15 +64,33 @@ function getGreeting(): string {
   return 'Hi there, having a good night?';
 }
 
-/* ═══ LOGO — transparent PNG with copper X ═══ */
-function LogoImg({ height = 28, style, className }: { height?: number; style?: React.CSSProperties; className?: string }) {
+/* ═══ LOGO — "smb" + X image + ".ai" in Poppins 800 ═══ */
+function LogoImg({ height = 28, style, className, dark }: { height?: number; style?: React.CSSProperties; className?: string; dark?: boolean }) {
+  const fontSize = height;
+  const xSize = fontSize * 0.78;
+  const color = dark ? '#f0f0f2' : '#1a1c1e';
+  return (
+    <span
+      className={className}
+      style={{ display: 'inline-flex', alignItems: 'center', fontFamily: "'Poppins', sans-serif", fontWeight: 800, fontSize, color, lineHeight: 1, letterSpacing: '-0.04em', userSelect: 'none', ...style }}
+      aria-label="smbx.ai"
+    >
+      smb
+      <img src="/x-logo.png" alt="" draggable={false} style={{ height: xSize, width: xSize, objectFit: 'contain', margin: `0 ${-xSize * 0.04}px`, filter: 'brightness(1.45) saturate(1.2)' }} />
+      .ai
+    </span>
+  );
+}
+
+/* ═══ LOGO ICON — just the X mark for compact spaces ═══ */
+function LogoIcon({ height = 28, className, style }: { height?: number; className?: string; style?: React.CSSProperties }) {
   return (
     <img
-      src="/logo-smbx.png"
+      src="/x-logo.png"
       alt="smbx.ai"
       draggable={false}
       className={className}
-      style={{ height, objectFit: 'contain', display: 'inline-block', ...style }}
+      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', filter: 'brightness(1.45) saturate(1.2)', ...style }}
     />
   );
 }
@@ -958,7 +976,7 @@ export default function AppShell() {
                     <path d="M19 12H5" /><polyline points="12 19 5 12 12 5" />
                   </svg>
                 </button>
-                <LogoImg height={20} />
+                <LogoIcon height={20} />
               </div>
             ) : (
               <>
@@ -969,7 +987,7 @@ export default function AppShell() {
                     className="bg-transparent border-none cursor-pointer p-0 leading-none"
                     type="button"
                   >
-                    <LogoImg height={22} />
+                    <LogoIcon height={22} />
                   </button>
                 )}
                 {!isMobile && (
@@ -978,7 +996,7 @@ export default function AppShell() {
                     className="bg-transparent border-none cursor-pointer p-0 leading-none"
                     type="button"
                   >
-                    <LogoImg height={22} />
+                    <LogoIcon height={22} />
                   </button>
                 )}
               </>
@@ -1029,12 +1047,12 @@ export default function AppShell() {
                       {!isMobile && (
                         <>
                           <div className="mb-4 flex justify-center">
-                            <LogoImg height={32} />
+                            <LogoImg height={32} dark={dark} />
                           </div>
                           <div className={`w-8 h-[2px] mx-auto mb-5 ${dark ? 'bg-[#d81b60]' : 'bg-[#b0004a]'}`} />
                         </>
                       )}
-                      {isMobile && <LogoImg height={32} className="mx-auto mb-2" />}
+                      {isMobile && <LogoImg height={32} dark={dark} className="mx-auto mb-2" />}
                       <h1 className={`font-headline font-extrabold tracking-tighter leading-[1.05] ${isMobile ? 'text-[36px]' : 'text-[50px]'}`}>
                         <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Selling</span> your business,<br/>
                         <span className={`italic underline decoration-[3px] underline-offset-[6px] ${dark ? 'decoration-[#d81b60]' : 'decoration-[#b0004a]'}`}>buying</span> one, or{' '}
@@ -1159,34 +1177,22 @@ export default function AppShell() {
                   )}
                 </main>
               </>
-              ) : activeTab === 'sell' ? (
-              <Suspense fallback={<BelowSkeleton />}>
-              <SellBelow />
-              </Suspense>
-              ) : activeTab === 'buy' ? (
-              <Suspense fallback={<BelowSkeleton />}>
-              <BuyBelow />
-              </Suspense>
-              ) : activeTab === 'raise' ? (
-              <Suspense fallback={<BelowSkeleton />}>
-              <RaiseBelow />
-              </Suspense>
-              ) : activeTab === 'how-it-works' ? (
-              <Suspense fallback={<BelowSkeleton />}>
-              <HowItWorksBelow />
-              </Suspense>
-              ) : activeTab === 'integrate' ? (
-              <Suspense fallback={<BelowSkeleton />}>
-              <IntegrateBelow />
-              </Suspense>
-              ) : activeTab === 'advisors' ? (
-              <Suspense fallback={<BelowSkeleton />}>
-              <AdvisorsBelow />
-              </Suspense>
-              ) : activeTab === 'pricing' ? (
-              <Suspense fallback={<BelowSkeleton />}>
-              <PricingBelow />
-              </Suspense>
+              ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing'].includes(activeTab) ? (
+              <>
+                <Suspense fallback={<BelowSkeleton />}>
+                  {activeTab === 'sell' ? <SellBelow /> :
+                   activeTab === 'buy' ? <BuyBelow /> :
+                   activeTab === 'raise' ? <RaiseBelow /> :
+                   activeTab === 'how-it-works' ? <HowItWorksBelow /> :
+                   activeTab === 'integrate' ? <IntegrateBelow /> :
+                   activeTab === 'advisors' ? <AdvisorsBelow /> :
+                   activeTab === 'pricing' ? <PricingBelow /> : null}
+                </Suspense>
+                <footer className={`py-10 flex flex-col items-center gap-3 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`}>
+                  <LogoIcon height={28} />
+                  <span className={`text-xs ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>smbx.ai</span>
+                </footer>
+              </>
               ) : null}
             </div>
           )}
@@ -1376,7 +1382,7 @@ export default function AppShell() {
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                 height: '100%', gap: 16, opacity: 0.4,
               }}>
-                <LogoImg height={36} />
+                <LogoImg height={36} dark={dark} />
                 <p className="font-headline text-sm font-medium" style={{ color: dark ? '#f0f0f3' : '#1a1c1e', margin: 0 }}>
                   Nothing to see here
                 </p>
@@ -1468,7 +1474,7 @@ export default function AppShell() {
             >
               <span className="material-symbols-outlined text-[24px]">close</span>
             </button>
-            <LogoImg height={22} className="mb-8" />
+            <LogoIcon height={22} className="mb-8" />
             <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-4 ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Explore</span>
             {([
               { id: 'home' as TabId, icon: 'home', label: 'Home' },
