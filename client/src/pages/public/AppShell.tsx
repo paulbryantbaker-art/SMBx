@@ -1112,8 +1112,15 @@ export default function AppShell() {
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE — New Design ═══ */}
-                <main className="flex-1 flex flex-col relative">
-                <DotField dark={dark} />
+                <main
+                  className="flex-1 flex flex-col relative"
+                  style={{
+                    backgroundImage: dark
+                      ? 'radial-gradient(circle, rgba(255,255,255,0.10) 1px, transparent 1px)'
+                      : 'radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px)',
+                    backgroundSize: '28px 28px',
+                  }}
+                >
 
                   {/* Desktop: single centered cluster */}
                   <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
