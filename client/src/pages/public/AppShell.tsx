@@ -419,8 +419,21 @@ export default function AppShell() {
 
   // Core state
   const [viewState, setViewState] = useState<ViewState>(() => pathToViewState(location));
-  const { appOffset } = useAppHeight(true);   // Track visual viewport for keyboard handling
+  const isChat = viewState === 'chat';
+  const { appOffset } = useAppHeight(isChat);   // Only constrain viewport in chat mode
   const [activeTab, setActiveTab] = useState<TabId>(() => pathToTab(location));
+
+  // Toggle chat-mode class on <html> — landing pages use natural body scroll,
+  // chat mode uses constrained viewport for keyboard handling
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isChat) {
+      root.classList.add('chat-mode');
+    } else {
+      root.classList.remove('chat-mode');
+    }
+    return () => root.classList.remove('chat-mode');
+  }, [isChat]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
   const [canvasMarkdown, setCanvasMarkdown] = useState<{ content: string; title: string } | null>(null);
@@ -938,7 +951,7 @@ export default function AppShell() {
       className={`flex font-sans ${dark ? 'bg-[#1a1c1e] text-[#f0f0f3]' : 'bg-[#f9f9fc] text-[#1a1c1e]'}`}
       style={{
         width: '100%',
-        height: '100%',
+        ...(isChat ? { height: '100%' } : {}),
         paddingTop: 'env(safe-area-inset-top)',
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)',
@@ -949,7 +962,7 @@ export default function AppShell() {
       {sidebarContent(false)}
 
       {/* Main canvas — offset by 80px sidebar on desktop */}
-      <div className="flex-1 flex flex-col min-w-0 h-full lg:ml-20 bg-transparent">
+      <div className={`flex-1 flex flex-col min-w-0 lg:ml-20 bg-transparent ${isChat ? 'h-full' : ''}`}>
         {/* Offline banner */}
         {isOffline && (
           <div className="shrink-0 bg-yellow-50 border-b border-yellow-200 px-4 py-2 flex items-center justify-center gap-2 z-30">
@@ -1030,8 +1043,8 @@ export default function AppShell() {
         {/* Scroll area */}
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto min-h-0 bg-transparent"
-          style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', paddingBottom: 'env(safe-area-inset-bottom)' } as any}
+          className={isChat ? 'flex-1 overflow-y-auto min-h-0 bg-transparent' : 'flex-1 bg-transparent'}
+          style={isChat ? { WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', paddingBottom: 'env(safe-area-inset-bottom)' } as any : { paddingBottom: 'env(safe-area-inset-bottom)' } as any}
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
