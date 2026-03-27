@@ -54,6 +54,13 @@ html, body {
   background-size: 26px 26px;
   background-position: 13px 13px;
 }
+@media (max-width: 767px) {
+  html, body {
+    background-image: radial-gradient(circle, rgba(0,0,0,0.16) 1.4px, transparent 1.4px) !important;
+    background-size: 24px 24px;
+    background-position: 12px 12px;
+  }
+}
 /* Default: natural document flow for landing/journey pages */
 #root {
   width: 100%;
@@ -97,7 +104,7 @@ html.dark {
 }
 html.dark, html.dark body {
   background-color: #1a1c1e !important;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1.2px, transparent 1.2px);
+  background-image: radial-gradient(circle, rgba(255,255,255,0.10) 1.2px, transparent 1.2px);
   background-size: 26px 26px;
   background-position: 13px 13px;
   color-scheme: dark;
@@ -107,6 +114,13 @@ html.dark #root {
 }
 html.dark #app-root {
   background-color: #1a1c1e !important;
+}
+@media (max-width: 767px) {
+  html.dark, html.dark body {
+    background-image: radial-gradient(circle, rgba(255,255,255,0.14) 1.4px, transparent 1.4px) !important;
+    background-size: 24px 24px;
+    background-position: 12px 12px;
+  }
 }
 
 /* Theme transition — applied temporarily during dark/light toggle */
