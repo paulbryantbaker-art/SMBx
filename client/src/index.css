@@ -58,7 +58,6 @@ html, body {
 }
 #app-root {
   width: 100%;
-  background-color: #f9f9fc;
 }
 
 /* Chat mode: constrained viewport for keyboard handling */

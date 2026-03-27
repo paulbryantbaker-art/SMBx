@@ -1069,7 +1069,7 @@ export default function AppShell() {
   return (
     <div
       id="app-root"
-      className={`flex font-sans ${dark ? 'bg-[#1a1c1e] text-[#f0f0f3]' : 'bg-[#f9f9fc] text-[#1a1c1e]'}`}
+      className={`flex font-sans ${dark ? 'bg-[#1a1c1e] text-[#f0f0f3]' : `${viewState === 'landing' && activeTab === 'home' ? 'bg-transparent' : 'bg-[#f9f9fc]'} text-[#1a1c1e]`}`}
       style={{
         width: '100%',
         ...(isChat ? { height: '100%' } : {}),
