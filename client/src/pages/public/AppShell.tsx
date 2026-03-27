@@ -42,18 +42,6 @@ function BelowSkeleton() {
   );
 }
 
-/* ═══ YULIA WELCOME MESSAGE — shown as first chat message ═══ */
-const YULIA_WELCOME_MESSAGE: AnonMessage = {
-  id: -1,
-  role: 'assistant',
-  content: `## Chat with your deals!
-
-Yulia is a chat agent for all things M&A and she can guide you through the entire process of selling or buying a business, all by just chatting with your deals. No deal is too small or too complex.
-
-**Start now completely free!**`,
-  created_at: new Date().toISOString(),
-};
-
 /* ═══ DYNAMIC GREETING (time-of-day) ═══ */
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -528,8 +516,7 @@ export default function AppShell() {
 
   // Unified message interface
   const rawMessages = user ? authChat.messages : anonChat.messages;
-  // Show Yulia's welcome message only when chat has no messages yet
-  const messages: AnonMessage[] = rawMessages.length === 0 ? [YULIA_WELCOME_MESSAGE] : rawMessages as AnonMessage[];
+  const messages: AnonMessage[] = rawMessages as AnonMessage[];
   const sending = user ? authChat.sending : anonChat.sending;
   const streamingText = user ? authChat.streamingText : anonChat.streamingText;
   const activeTool = user ? authChat.activeTool : null;
@@ -1486,19 +1473,6 @@ export default function AppShell() {
           aria-label="Open menu"
         >
           <span className="material-symbols-outlined text-[22px]">menu</span>
-        </button>
-      )}
-
-      {/* ═══ MOBILE FLOATING BACK ARROW — top left in chat mode ═══ */}
-      {isMobile && viewState === 'chat' && (
-        <button
-          onClick={handleBack}
-          className="fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#d81b60]"
-          style={{ top: 16, left: 16 }}
-          type="button"
-          aria-label="Back"
-        >
-          <span className="material-symbols-outlined text-[22px]">arrow_back</span>
         </button>
       )}
 
