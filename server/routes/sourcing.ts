@@ -7,6 +7,7 @@ import { requireAuth } from '../middleware/auth.js';
 import { runThesisMatch } from '../services/thesisMatchingService.js';
 import { findUnderservedMarkets } from '../services/marketOpportunityService.js';
 import { matchBuyersForSeller, estimateDemand } from '../services/buyerSourcingService.js';
+import { initializePipeline, getPortfolioProgress, enrichCandidateOnDemand } from '../services/sourcingPipelineService.js';
 
 export const sourcingRouter = Router();
 sourcingRouter.use(requireAuth);
@@ -359,3 +360,270 @@ function scoreMatch(
   const total = totalWeight > 0 ? Math.round(totalScore / totalWeight) : 50;
   return { total, breakdown };
 }
+
+// ─── Sourcing Pipeline (5-Stage Engine) ─────────────────────────────
+
+/** Initialize the sourcing pipeline for a thesis. Stage 1 runs synchronously. */
+sourcingRouter.post('/sourcing/theses/:thesisId/pipeline', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const thesisId = parseInt(req.params.thesisId, 10);
+
+    // Verify ownership
+    const [thesis] = await sql`
+      SELECT id FROM buyer_theses WHERE id = ${thesisId} AND user_id = ${userId}
+    `;
+    if (!thesis) return res.status(404).json({ error: 'Thesis not found' });
+
+    // TODO: subscription check — Professional tier required
+    // const sub = await getSubscription(userId);
+    // if (!sub || sub.plan === 'free' || sub.plan === 'starter') {
+    //   return res.status(403).json({ error: 'Professional subscription required', paywall: true });
+    // }
+
+    const result = await initializePipeline(thesisId, userId);
+    return res.json(result);
+  } catch (err: any) {
+    console.error('Pipeline init error:', err);
+    return res.status(500).json({ error: err.message || 'Pipeline initialization failed' });
+  }
+});
+
+/** Get a portfolio with stats */
+sourcingRouter.get('/sourcing/portfolios/:portfolioId', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const portfolioId = parseInt(req.params.portfolioId, 10);
+
+    const [portfolio] = await sql`
+      SELECT p.*,
+        b.market_density, b.deal_economics, b.acquisition_signals,
+        b.competitive_landscape, b.key_risks, b.recommended_params,
+        b.narrative_markdown, b.status as brief_status,
+        b.generation_time_ms as brief_generation_time_ms
+      FROM sourcing_portfolios p
+      LEFT JOIN sourcing_briefs b ON b.id = p.brief_id
+      WHERE p.id = ${portfolioId} AND p.user_id = ${userId}
+    `;
+    if (!portfolio) return res.status(404).json({ error: 'Portfolio not found' });
+
+    return res.json(portfolio);
+  } catch (err: any) {
+    console.error('Portfolio fetch error:', err);
+    return res.status(500).json({ error: 'Failed to fetch portfolio' });
+  }
+});
+
+/** Get intelligence brief content */
+sourcingRouter.get('/sourcing/briefs/:briefId', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const briefId = parseInt(req.params.briefId, 10);
+
+    const [brief] = await sql`
+      SELECT * FROM sourcing_briefs
+      WHERE id = ${briefId} AND user_id = ${userId}
+    `;
+    if (!brief) return res.status(404).json({ error: 'Brief not found' });
+
+    return res.json(brief);
+  } catch (err: any) {
+    console.error('Brief fetch error:', err);
+    return res.status(500).json({ error: 'Failed to fetch brief' });
+  }
+});
+
+/** SSE endpoint for pipeline progress */
+sourcingRouter.get('/sourcing/portfolios/:portfolioId/progress', async (req, res) => {
+  const userId = (req as any).userId;
+  const portfolioId = parseInt(req.params.portfolioId, 10);
+
+  // Verify ownership
+  const [portfolio] = await sql`
+    SELECT id FROM sourcing_portfolios WHERE id = ${portfolioId} AND user_id = ${userId}
+  `;
+  if (!portfolio) return res.status(404).json({ error: 'Portfolio not found' });
+
+  // SSE headers
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+
+  const sendEvent = (event: string, data: unknown) => {
+    if (res.destroyed || res.writableEnded) return;
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
+
+  // Poll progress every 2 seconds
+  const interval = setInterval(async () => {
+    try {
+      const progress = await getPortfolioProgress(portfolioId);
+      if (!progress) {
+        sendEvent('error', { message: 'Portfolio not found' });
+        clearInterval(interval);
+        res.end();
+        return;
+      }
+
+      sendEvent('progress', progress);
+
+      // Close when pipeline is ready or failed
+      if (progress.pipelineStatus === 'ready' || progress.pipelineStatus === 'failed') {
+        sendEvent('pipeline-complete', progress);
+        clearInterval(interval);
+        res.end();
+      }
+    } catch {
+      // Ignore poll errors
+    }
+  }, 2000);
+
+  // Heartbeat every 15 seconds
+  const heartbeat = setInterval(() => {
+    if (res.destroyed || res.writableEnded) return;
+    res.write(': heartbeat\n\n');
+  }, 15000);
+
+  // Cleanup on client disconnect
+  req.on('close', () => {
+    clearInterval(interval);
+    clearInterval(heartbeat);
+  });
+});
+
+/** Get portfolio candidates with filtering */
+sourcingRouter.get('/sourcing/portfolios/:portfolioId/candidates', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const portfolioId = parseInt(req.params.portfolioId, 10);
+    const tier = req.query.tier as string | undefined;
+    const status = req.query.status as string | undefined;
+    const page = parseInt(req.query.page as string || '1', 10);
+    const limit = Math.min(parseInt(req.query.limit as string || '50', 10), 100);
+    const offset = (page - 1) * limit;
+
+    // Verify ownership
+    const [portfolio] = await sql`
+      SELECT id FROM sourcing_portfolios WHERE id = ${portfolioId} AND user_id = ${userId}
+    `;
+    if (!portfolio) return res.status(404).json({ error: 'Portfolio not found' });
+
+    // Build query with optional filters
+    const candidates = await sql`
+      SELECT * FROM sourcing_candidates
+      WHERE portfolio_id = ${portfolioId}
+        ${tier ? sql`AND tier = ${tier}` : sql``}
+        ${status ? sql`AND pipeline_status = ${status}` : sql``}
+      ORDER BY total_score DESC, created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+
+    const [{ count }] = await sql`
+      SELECT COUNT(*)::int as count FROM sourcing_candidates
+      WHERE portfolio_id = ${portfolioId}
+        ${tier ? sql`AND tier = ${tier}` : sql``}
+        ${status ? sql`AND pipeline_status = ${status}` : sql``}
+    `;
+
+    return res.json({ candidates, total: count, page, limit });
+  } catch (err: any) {
+    console.error('Candidates fetch error:', err);
+    return res.status(500).json({ error: 'Failed to fetch candidates' });
+  }
+});
+
+/** Get single candidate detail */
+sourcingRouter.get('/sourcing/candidates/:candidateId', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const candidateId = parseInt(req.params.candidateId, 10);
+
+    const [candidate] = await sql`
+      SELECT * FROM sourcing_candidates
+      WHERE id = ${candidateId} AND user_id = ${userId}
+    `;
+    if (!candidate) return res.status(404).json({ error: 'Candidate not found' });
+
+    return res.json(candidate);
+  } catch (err: any) {
+    console.error('Candidate fetch error:', err);
+    return res.status(500).json({ error: 'Failed to fetch candidate' });
+  }
+});
+
+/** Update candidate status/notes */
+sourcingRouter.patch('/sourcing/candidates/:candidateId', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const candidateId = parseInt(req.params.candidateId, 10);
+    const { status, notes } = req.body;
+
+    const validStatuses = ['new', 'reviewing', 'contacted', 'responded', 'meeting', 'pursuing', 'passed', 'archived'];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const [candidate] = await sql`
+      SELECT id FROM sourcing_candidates WHERE id = ${candidateId} AND user_id = ${userId}
+    `;
+    if (!candidate) return res.status(404).json({ error: 'Candidate not found' });
+
+    const [updated] = await sql`
+      UPDATE sourcing_candidates SET
+        ${status ? sql`pipeline_status = ${status}, pipeline_status_changed_at = NOW(),` : sql``}
+        ${notes !== undefined ? sql`user_notes = ${notes},` : sql``}
+        updated_at = NOW()
+      WHERE id = ${candidateId}
+      RETURNING *
+    `;
+
+    return res.json(updated);
+  } catch (err: any) {
+    console.error('Candidate update error:', err);
+    return res.status(500).json({ error: 'Failed to update candidate' });
+  }
+});
+
+/** Get user's portfolios for a thesis (or all) */
+sourcingRouter.get('/sourcing/portfolios', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const thesisId = req.query.thesisId ? parseInt(req.query.thesisId as string, 10) : null;
+
+    const portfolios = await sql`
+      SELECT p.*, b.status as brief_status
+      FROM sourcing_portfolios p
+      LEFT JOIN sourcing_briefs b ON b.id = p.brief_id
+      WHERE p.user_id = ${userId}
+        ${thesisId ? sql`AND p.thesis_id = ${thesisId}` : sql``}
+      ORDER BY p.updated_at DESC
+    `;
+
+    return res.json(portfolios);
+  } catch (err: any) {
+    console.error('Portfolios fetch error:', err);
+    return res.status(500).json({ error: 'Failed to fetch portfolios' });
+  }
+});
+
+/** On-demand enrichment for a single candidate (Tier 3 or 4) */
+sourcingRouter.post('/sourcing/candidates/:candidateId/enrich', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const candidateId = parseInt(req.params.candidateId, 10);
+
+    const [candidate] = await sql`
+      SELECT * FROM sourcing_candidates WHERE id = ${candidateId} AND user_id = ${userId}
+    `;
+    if (!candidate) return res.status(404).json({ error: 'Candidate not found' });
+
+    const updated = await enrichCandidateOnDemand(candidateId);
+    return res.json(updated);
+  } catch (err: any) {
+    console.error('Enrichment error:', err);
+    return res.status(500).json({ error: err.message || 'Enrichment failed' });
+  }
+});

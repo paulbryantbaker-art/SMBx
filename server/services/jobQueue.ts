@@ -44,6 +44,24 @@ export async function getJobStatus(jobId: string): Promise<string | null> {
   return job?.state ?? null;
 }
 
+// ─── Sourcing Pipeline Jobs ─────────────────────────────────────────
+
+export interface PipelineStageData {
+  portfolioId: number;
+  stage: number; // 2, 3, or 4
+}
+
+/** Enqueue a sourcing pipeline stage (2=expansion, 3=enrichment, 4=scoring) */
+export async function enqueuePipelineStage(portfolioId: number, stage: number): Promise<string | null> {
+  const queue = await getBoss();
+  const data: PipelineStageData = { portfolioId, stage };
+  return queue.send(`sourcing-stage-${stage}`, data, {
+    retryLimit: 1,
+    retryDelay: 60,
+    expireInMinutes: 30,
+  }) as Promise<string | null>;
+}
+
 /** Graceful shutdown */
 export async function stopQueue(): Promise<void> {
   if (boss) {

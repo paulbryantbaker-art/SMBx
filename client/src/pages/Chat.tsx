@@ -12,7 +12,6 @@ import Canvas from '../components/chat/Canvas';
 import ParticipantPanel from '../components/chat/ParticipantPanel';
 import NotificationBell from '../components/chat/NotificationBell';
 import ResizeHandle from '../components/chat/ResizeHandle';
-import CanvasShell from '../components/chat/CanvasShell';
 import PipelinePanel from '../components/chat/PipelinePanel';
 import IntelPanel from '../components/chat/IntelPanel';
 import SourcingPanel from '../components/chat/SourcingPanel';
@@ -25,22 +24,31 @@ interface ChatProps {
   initialConversationId?: number;
 }
 
-type CanvasPanel = 'pipeline' | 'intel' | 'sourcing' | 'dataroom' | 'settings' | null;
+// ─── Tab System ─────────────────────────────────────────────────────
 
-const NAV_ITEMS: { key: Exclude<CanvasPanel, 'settings' | null>; label: string }[] = [
+interface CanvasTab {
+  id: string;
+  type: string;       // 'pipeline' | 'intel' | 'sourcing' | 'dataroom' | 'settings' | 'deliverable'
+  label: string;
+  icon: string;       // material symbol name or svg key
+  closable: boolean;
+  props?: Record<string, any>;
+}
+
+const TAB_REGISTRY: Record<string, { label: string; icon: string }> = {
+  pipeline: { label: 'Pipeline', icon: 'monitoring' },
+  intel: { label: 'Intel', icon: 'insights' },
+  sourcing: { label: 'Sourcing', icon: 'search' },
+  dataroom: { label: 'Data Room', icon: 'folder_open' },
+  settings: { label: 'Settings', icon: 'settings' },
+};
+
+const NAV_ITEMS: { key: string; label: string }[] = [
   { key: 'pipeline', label: 'Pipeline' },
   { key: 'intel', label: 'Intel' },
   { key: 'sourcing', label: 'Sourcing' },
   { key: 'dataroom', label: 'Data Room' },
 ];
-
-const CANVAS_TITLES: Record<string, [string, string]> = {
-  pipeline: ['Pipeline', 'active deals'],
-  intel: ['Market Intelligence', 'industry data & reports'],
-  sourcing: ['Deal Sourcing', 'buy theses & matches'],
-  dataroom: ['Data Room', 'documents & deliverables'],
-  settings: ['Settings', 'account & usage'],
-};
 
 const JOURNEY_CARDS = [
   { id: 'sell', title: 'Sell My Business', description: "I'll value your business, prepare it for market, find qualified buyers, and guide you through closing.", prompt: 'I want to sell my business.' },
@@ -56,47 +64,105 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
   const [messages, setMessages] = useState<Message[]>([]);
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState('');
-  const [sidebarOpen, setSidebarOpen] = useState(false); // mobile only
-  const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeDealId, setActiveDealId] = useState<number | null>(null);
   const [currentGate, setCurrentGate] = useState<string | undefined>();
   const [paywallData, setPaywallData] = useState<any | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  // Canvas state — matches prototype exactly
-  const [canvas, setCanvas] = useState<CanvasPanel>(null);
+  // ─── Tabbed Canvas State ────────────────────────────────────────
+  const [tabs, setTabs] = useState<CanvasTab[]>([]);
+  const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [canvasFS, setCanvasFS] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [canvasW, setCanvasW] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const closeCanvas = useCallback(() => {
-    setCanvas(null);
+  const activeTab = tabs.find(t => t.id === activeTabId) || null;
+  const hasTabs = tabs.length > 0;
+
+  // Open a tab (or switch to existing)
+  const openTab = useCallback((type: string, props?: Record<string, any>) => {
+    const reg = TAB_REGISTRY[type];
+
+    // For deliverables, always create a new tab (each deliverable is unique)
+    if (type === 'deliverable' && props?.deliverableId) {
+      const tabId = `deliverable-${props.deliverableId}`;
+      setTabs(prev => {
+        const existing = prev.find(t => t.id === tabId);
+        if (existing) {
+          setActiveTabId(tabId);
+          return prev;
+        }
+        return [...prev, {
+          id: tabId,
+          type: 'deliverable',
+          label: props.label || 'Document',
+          icon: 'description',
+          closable: true,
+          props,
+        }];
+      });
+      setActiveTabId(tabId);
+    } else {
+      // For panel types, reuse existing tab
+      const tabId = type;
+      setTabs(prev => {
+        const existing = prev.find(t => t.id === tabId);
+        if (existing) {
+          setActiveTabId(tabId);
+          return prev;
+        }
+        return [...prev, {
+          id: tabId,
+          type,
+          label: reg?.label || type,
+          icon: reg?.icon || 'tab',
+          closable: true,
+          props,
+        }];
+      });
+      setActiveTabId(tabId);
+    }
+
+    setSidebarVisible(false);
+    setSidebarOpen(false);
     setCanvasFS(false);
-    setCanvasW(null);
-    setSidebarVisible(true);
-    setViewingDeliverable(null);
   }, []);
 
-  const toggleCanvas = useCallback((k: CanvasPanel) => {
-    if (canvas === k) { closeCanvas(); return; }
-    setCanvas(k);
+  const closeTab = useCallback((tabId: string) => {
+    setTabs(prev => {
+      const idx = prev.findIndex(t => t.id === tabId);
+      const next = prev.filter(t => t.id !== tabId);
+
+      // Switch to adjacent tab if closing the active one
+      if (activeTabId === tabId) {
+        if (next.length === 0) {
+          setActiveTabId(null);
+          setSidebarVisible(true);
+          setCanvasFS(false);
+          setCanvasW(null);
+        } else {
+          const newIdx = Math.min(idx, next.length - 1);
+          setActiveTabId(next[newIdx].id);
+        }
+      }
+      return next;
+    });
+  }, [activeTabId]);
+
+  const closeAllTabs = useCallback(() => {
+    setTabs([]);
+    setActiveTabId(null);
+    setSidebarVisible(true);
     setCanvasFS(false);
     setCanvasW(null);
-    setSidebarVisible(false);
-    setViewingDeliverable(null);
-    setSidebarOpen(false); // close mobile sidebar
-  }, [canvas, closeCanvas]);
+  }, []);
 
   const toggleFS = useCallback(() => {
-    if (canvasFS) {
-      setCanvasFS(false);
-      // stay in split, sidebar stays hidden
-    } else {
-      setCanvasFS(true);
-      setSidebarVisible(false);
-    }
+    setCanvasFS(prev => !prev);
+    if (!canvasFS) setSidebarVisible(false);
   }, [canvasFS]);
 
   const handleDrag = useCallback((clientX: number) => {
@@ -105,14 +171,14 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
     setCanvasW(Math.max(300, Math.min(r.right - clientX, r.width - 320)));
   }, []);
 
-  // Canvas sizing — matches prototype
   const canvasStyle = (): React.CSSProperties => {
     if (canvasFS) return { flex: 1 };
     if (canvasW) return { width: canvasW, minWidth: 300, maxWidth: '75%', flexShrink: 0 };
     return { width: '42%', minWidth: 340, maxWidth: 560, flexShrink: 0 };
   };
 
-  // Load conversations
+  // ─── Data Loading ─────────────────────────────────────────────────
+
   const loadConversations = useCallback(async () => {
     try {
       const res = await fetch('/api/chat/conversations', { headers: authHeaders() });
@@ -124,7 +190,6 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
 
   useEffect(() => { loadConversations(); }, [loadConversations]);
 
-  // Load messages when conversation changes
   useEffect(() => {
     if (!activeId) { setMessages([]); return; }
     (async () => {
@@ -137,12 +202,10 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
     })();
   }, [activeId]);
 
-  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingText, sending]);
 
-  // Create conversation
   const createConversation = async (): Promise<number | null> => {
     try {
       const res = await fetch('/api/chat/conversations', {
@@ -162,7 +225,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
 
   const handleNew = async () => { await createConversation(); };
 
-  // Pre-filled message from query param (e.g., ?message=I'm interested in...)
+  // Pre-filled message from query param
   const prefillHandled = useRef(false);
   useEffect(() => {
     if (prefillHandled.current) return;
@@ -170,15 +233,14 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
     const prefill = params.get('message');
     if (prefill) {
       prefillHandled.current = true;
-      // Clean the URL
       window.history.replaceState(null, '', window.location.pathname);
-      // Wait for conversations to load, then send
       setTimeout(() => handleSend(prefill), 500);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Send message with SSE streaming via authenticated agentic endpoint
+  // ─── Send Message (SSE) ───────────────────────────────────────────
+
   const handleSend = async (content: string) => {
     const tempMsg: Message = { id: Date.now(), role: 'user', content, created_at: new Date().toISOString() };
     setMessages(prev => [...prev, tempMsg]);
@@ -189,7 +251,6 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
       const controller = new AbortController();
       abortRef.current = controller;
 
-      // Ensure we have a conversation
       let convId = activeId;
       if (!convId) {
         convId = await createConversation();
@@ -203,67 +264,62 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
         signal: controller.signal,
       });
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Request failed' }));
-        throw new Error(err.error || 'Request failed');
-      }
+      if (!res.ok) throw new Error('Send failed');
+      if (!res.body) throw new Error('No response body');
 
-      const reader = res.body?.getReader();
+      const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let accumulated = '';
+      let assistantText = '';
+      let buf = '';
 
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split('\n');
+        buf = lines.pop() || '';
 
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
-
-          for (const line of lines) {
-            if (!line.startsWith('data: ')) continue;
-            const data = line.slice(6).trim();
-            if (data === '[DONE]') continue;
-
-            try {
-              const parsed = JSON.parse(data);
-
-              if (parsed.type === 'text_delta') {
-                accumulated += parsed.text;
-                setStreamingText(accumulated);
-              } else if (parsed.type === 'done') {
-                // Agentic endpoint returns dealId and conversationId on completion
-                if (parsed.dealId) {
-                  setActiveDealId(parsed.dealId);
-                }
-                if (parsed.conversationId) {
-                  setActiveId(parsed.conversationId);
-                }
-              } else if (parsed.type === 'gate_advance') {
-                // Gate advanced — update current gate and refresh conversations
-                if (parsed.toGate) {
-                  setCurrentGate(parsed.toGate);
-                }
-                loadConversations();
-              } else if (parsed.type === 'paywall') {
-                // Paywall triggered — render PaywallCard
-                setPaywallData(parsed);
-              } else if (parsed.type === 'error') {
-                accumulated = parsed.error || 'Something went wrong.';
-              }
-            } catch {
-              // ignore parse errors on partial chunks
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const raw = line.slice(6);
+          if (raw === '[DONE]') continue;
+          try {
+            const evt = JSON.parse(raw);
+            if (evt.type === 'text_delta') {
+              assistantText += evt.text;
+              setStreamingText(assistantText);
             }
-          }
+            if (evt.type === 'done') {
+              setMessages(prev => [...prev, {
+                id: evt.messageId || Date.now() + 1,
+                role: 'assistant',
+                content: assistantText,
+                created_at: new Date().toISOString(),
+                metadata: evt.metadata,
+              }]);
+              assistantText = '';
+              setStreamingText('');
+            }
+            if (evt.type === 'gate_advance') {
+              setCurrentGate(evt.toGate);
+              if (evt.dealId) setActiveDealId(evt.dealId);
+            }
+            if (evt.type === 'paywall') {
+              setPaywallData(evt);
+            }
+            if (evt.type === 'deal_created' && evt.dealId) {
+              setActiveDealId(evt.dealId);
+            }
+          } catch { /* ignore parse errors */ }
         }
       }
 
-      setStreamingText('');
-      if (accumulated) {
+      // If there's remaining text
+      if (assistantText) {
         setMessages(prev => [...prev, {
           id: Date.now() + 1,
-          role: 'assistant' as const,
-          content: accumulated,
+          role: 'assistant',
+          content: assistantText,
           created_at: new Date().toISOString(),
         }]);
       }
@@ -286,33 +342,15 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
     }
   };
 
-  const showWelcome = messages.length === 0 && !sending;
-  const hasCanvas = canvas !== null;
-  const showDeliverableCanvas = viewingDeliverable !== null;
-  const showCanvasPanel = hasCanvas || showDeliverableCanvas;
+  // ─── Canvas Content Renderer ──────────────────────────────────────
 
-  // Canvas title
-  const [cTitle, cSub] = showDeliverableCanvas
-    ? ['Deliverable', 'generated document']
-    : (canvas ? CANVAS_TITLES[canvas] || ['', ''] : ['', '']);
-
-  // Canvas content renderer
-  const renderCanvasContent = () => {
-    if (showDeliverableCanvas) {
-      return (
-        <Canvas
-          deliverableId={viewingDeliverable!}
-          onClose={() => setViewingDeliverable(null)}
-        />
-      );
-    }
-
-    switch (canvas) {
+  const renderTabContent = (tab: CanvasTab) => {
+    switch (tab.type) {
       case 'pipeline':
         return (
           <PipelinePanel
-            onOpenConversation={(convId) => { setActiveId(convId); closeCanvas(); }}
-            onNewDeal={() => { closeCanvas(); }}
+            onOpenConversation={(convId) => { setActiveId(convId); }}
+            onNewDeal={() => {}}
             isFullscreen={canvasFS}
           />
         );
@@ -325,16 +363,27 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
       case 'dataroom':
         return (
           <>
-            <DataRoom dealId={activeDealId} onViewDeliverable={(id) => { setViewingDeliverable(id); }} />
+            <DataRoom dealId={activeDealId} onViewDeliverable={(id) => {
+              openTab('deliverable', { deliverableId: id, label: `Document #${id}` });
+            }} />
             <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
               <ParticipantPanel dealId={activeDealId} />
             </div>
           </>
         );
+      case 'deliverable':
+        return (
+          <Canvas
+            deliverableId={tab.props?.deliverableId}
+            onClose={() => closeTab(tab.id)}
+          />
+        );
       default:
         return null;
     }
   };
+
+  const showWelcome = messages.length === 0 && !sending;
 
   return (
     <div
@@ -346,7 +395,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
         <div className="fixed inset-0 bg-[rgba(0,0,0,0.2)] z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar — desktop: width-based collapse; mobile: fixed overlay */}
+      {/* Sidebar */}
       <div className={`fixed md:relative z-50 md:z-auto transition-transform duration-200 ease-out md:transition-none md:transform-none ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       }`}>
@@ -362,15 +411,14 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
         />
       </div>
 
-      {/* Main column (topbar + chat/canvas below) */}
+      {/* Main column */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* TOPBAR — single logo lives here */}
+        {/* TOPBAR */}
         <div
           className="shrink-0 flex items-center justify-between bg-[#FAFAFA]"
           style={{ padding: '10px 20px', borderBottom: '1px solid rgba(0,0,0,0.06)' }}
         >
           <div className="flex items-center gap-2.5">
-            {/* Mobile hamburger */}
             <button
               onClick={() => setSidebarOpen(true)}
               className="flex items-center justify-center w-[34px] h-[34px] rounded-full bg-transparent border-none cursor-pointer text-[#3D3B37] hover:bg-[rgba(186,60,96,.08)] hover:text-[#BA3C60] transition-colors md:hidden"
@@ -380,7 +428,6 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
                 <path d="M3 12h18M3 6h18M3 18h18" />
               </svg>
             </button>
-            {/* Desktop: show sidebar toggle when sidebar is hidden */}
             {!sidebarVisible && (
               <button
                 onClick={() => setSidebarVisible(true)}
@@ -399,35 +446,36 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
           </div>
 
           <div className="flex items-center gap-0.5">
-            {/* Nav items */}
-            {NAV_ITEMS.map(n => (
-              <button
-                key={n.key}
-                onClick={() => toggleCanvas(n.key)}
-                className={`hidden sm:block px-3.5 py-[7px] rounded-lg bg-transparent border-none cursor-pointer text-sm font-semibold tracking-[-0.01em] transition-colors relative ${
-                  canvas === n.key ? 'text-[#BA3C60]' : 'text-[#3D3B37] hover:text-[#BA3C60]'
-                }`}
-              >
-                {n.label}
-                {/* Active dot indicator */}
-                {canvas === n.key && (
-                  <span
-                    className="absolute left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#BA3C60]"
-                    style={{ bottom: 2 }}
-                  />
-                )}
-              </button>
-            ))}
+            {NAV_ITEMS.map(n => {
+              const isOpen = tabs.some(t => t.id === n.key);
+              const isActive = activeTabId === n.key;
+              return (
+                <button
+                  key={n.key}
+                  onClick={() => openTab(n.key)}
+                  className={`hidden sm:block px-3.5 py-[7px] rounded-lg bg-transparent border-none cursor-pointer text-sm font-semibold tracking-[-0.01em] transition-colors relative ${
+                    isActive ? 'text-[#BA3C60]' : isOpen ? 'text-[#0D0D0D]' : 'text-[#3D3B37] hover:text-[#BA3C60]'
+                  }`}
+                >
+                  {n.label}
+                  {isActive && (
+                    <span className="absolute left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#BA3C60]" style={{ bottom: 2 }} />
+                  )}
+                  {isOpen && !isActive && (
+                    <span className="absolute left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#6E6A63]" style={{ bottom: 2 }} />
+                  )}
+                </button>
+              );
+            })}
 
-            {/* Divider */}
             <div className="hidden sm:block w-px h-5 bg-[rgba(0,0,0,0.06)] mx-1.5" />
 
             <NotificationBell />
 
             <button
-              onClick={() => toggleCanvas('settings')}
+              onClick={() => openTab('settings')}
               className={`flex items-center justify-center w-8 h-8 rounded-full text-sm transition-colors cursor-pointer border-0 bg-transparent ${
-                canvas === 'settings' ? 'text-[#BA3C60]' : 'text-[#6E6A63] hover:bg-[rgba(0,0,0,0.04)] hover:text-[#0D0D0D]'
+                activeTabId === 'settings' ? 'text-[#BA3C60]' : 'text-[#6E6A63] hover:bg-[rgba(0,0,0,0.04)] hover:text-[#0D0D0D]'
               }`}
               title="Settings"
             >
@@ -438,15 +486,13 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
           </div>
         </div>
 
-        {/* Below topbar: chat + resize + canvas */}
+        {/* Below topbar: chat + resize + canvas area */}
         <div className="flex-1 flex min-h-0">
           {/* CHAT column — hidden when canvas is fullscreen */}
           {!canvasFS && (
             <div className="flex-1 flex flex-col" style={{ minWidth: 320 }}>
-              {/* Gate progress indicator */}
               <GateProgress dealId={activeDealId} currentGate={currentGate} />
 
-              {/* Messages */}
               <div className="flex-1 overflow-y-auto min-h-0 pt-4 pb-2" style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
                 <div className="max-w-[860px] w-full mx-auto px-4 space-y-4">
                   {showWelcome && (
@@ -467,12 +513,8 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
                             onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)')}
                             onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,.05)')}
                           >
-                            <p className="text-[19px] font-bold text-[#0D0D0D] font-sans m-0 mb-1">
-                              {card.title}
-                            </p>
-                            <p className="text-[15px] text-[#3D3B37] font-sans m-0 leading-[1.55]">
-                              {card.description}
-                            </p>
+                            <p className="text-[19px] font-bold text-[#0D0D0D] font-sans m-0 mb-1">{card.title}</p>
+                            <p className="text-[15px] text-[#3D3B37] font-sans m-0 leading-[1.55]">{card.description}</p>
                           </button>
                         ))}
                       </div>
@@ -506,9 +548,7 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
                           metadata: { type: 'gate_transition' },
                         }]);
                         if (deliverableId) {
-                          setCanvas('dataroom');
-                          setSidebarVisible(false);
-                          setViewingDeliverable(deliverableId);
+                          openTab('deliverable', { deliverableId, label: 'Deliverable' });
                         }
                       }}
                     />
@@ -523,17 +563,17 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
             </div>
           )}
 
-          {/* Resize handle — only when canvas open and not fullscreen */}
-          {showCanvasPanel && !canvasFS && (
+          {/* Resize handle */}
+          {hasTabs && !canvasFS && (
             <div className="hidden md:block">
               <ResizeHandle onDrag={handleDrag} />
             </div>
           )}
 
-          {/* CANVAS panel — desktop */}
-          {showCanvasPanel && (
+          {/* CANVAS AREA — tab content + vertical tab strip */}
+          {hasTabs && (
             <div
-              className="hidden md:flex flex-col"
+              className="hidden md:flex"
               style={{
                 ...canvasStyle(),
                 borderLeft: canvasFS ? 'none' : '1px solid rgba(0,0,0,0.06)',
@@ -541,46 +581,181 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
                 transition: canvasW ? 'none' : 'all 0.25s ease',
               }}
             >
-              {showDeliverableCanvas ? (
-                <Canvas
-                  deliverableId={viewingDeliverable!}
-                  onClose={() => setViewingDeliverable(null)}
-                />
-              ) : (
-                <CanvasShell
-                  title={cTitle}
-                  subtitle={cSub}
-                  onClose={closeCanvas}
-                  onFullscreen={toggleFS}
-                  isFullscreen={canvasFS}
+              {/* Active tab content */}
+              <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+                {/* Tab content header */}
+                {activeTab && (
+                  <div
+                    className="shrink-0 flex items-center justify-between"
+                    style={{ padding: '10px 16px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}
+                  >
+                    <h2 className="font-sans m-0 truncate text-sm font-bold text-[#0D0D0D]">
+                      {activeTab.label}
+                    </h2>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={toggleFS}
+                        title={canvasFS ? 'Exit fullscreen' : 'Fullscreen'}
+                        className="flex items-center justify-center cursor-pointer border-0 w-7 h-7 rounded-md bg-transparent text-[#6E6A63] hover:bg-[rgba(0,0,0,0.04)]"
+                      >
+                        {canvasFS ? (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7" />
+                          </svg>
+                        ) : (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" />
+                          </svg>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => closeTab(activeTab.id)}
+                        className="flex items-center justify-center cursor-pointer border-0 w-7 h-7 rounded-md bg-transparent text-[#6E6A63] hover:bg-[rgba(0,0,0,0.04)]"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                          <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab content — all tabs mounted, only active visible */}
+                <div className="flex-1 overflow-y-auto relative">
+                  {tabs.map(tab => (
+                    <div
+                      key={tab.id}
+                      className="absolute inset-0 overflow-y-auto"
+                      style={{ display: tab.id === activeTabId ? 'block' : 'none' }}
+                    >
+                      {renderTabContent(tab)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Vertical tab strip — right edge (Dia-style) */}
+              {tabs.length > 1 && (
+                <div
+                  className="shrink-0 flex flex-col items-center py-2 gap-1"
+                  style={{
+                    width: 44,
+                    borderLeft: '1px solid rgba(0,0,0,0.06)',
+                    background: '#FAFAFA',
+                  }}
                 >
-                  {renderCanvasContent()}
-                </CanvasShell>
+                  {tabs.map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTabId(tab.id)}
+                      title={tab.label}
+                      className={`relative flex items-center justify-center w-9 h-9 rounded-lg border-0 cursor-pointer transition-all ${
+                        tab.id === activeTabId
+                          ? 'bg-[#BA3C60]/10 text-[#BA3C60]'
+                          : 'bg-transparent text-[#6E6A63] hover:bg-[rgba(0,0,0,0.04)] hover:text-[#0D0D0D]'
+                      }`}
+                    >
+                      <TabIcon type={tab.type} />
+                      {/* Close button on hover */}
+                      {tab.closable && (
+                        <span
+                          onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }}
+                          className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#6E6A63] text-white flex items-center justify-center text-[8px] font-bold opacity-0 hover:opacity-100 group-hover:opacity-100 transition-opacity"
+                          style={{ lineHeight: 1 }}
+                        >
+                          ×
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Mobile: Canvas panel as full-screen overlay */}
-      {showCanvasPanel && (
+      {/* Mobile: Canvas as full-screen overlay */}
+      {hasTabs && activeTab && (
         <div className="fixed inset-0 z-50 md:hidden flex flex-col" style={{ background: '#FFFFFF' }}>
-          {showDeliverableCanvas ? (
-            <Canvas
-              deliverableId={viewingDeliverable!}
-              onClose={() => setViewingDeliverable(null)}
-            />
-          ) : (
-            <CanvasShell
-              title={cTitle}
-              subtitle={cSub}
-              onClose={closeCanvas}
+          {/* Mobile tab header */}
+          <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-[rgba(0,0,0,0.06)]">
+            <div className="flex items-center gap-2 overflow-x-auto">
+              {tabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTabId(tab.id)}
+                  className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
+                    tab.id === activeTabId
+                      ? 'bg-[#BA3C60] text-white border-[#BA3C60]'
+                      : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)]'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => closeTab(activeTab.id)}
+              className="shrink-0 ml-2 w-8 h-8 rounded-full flex items-center justify-center border-0 bg-transparent text-[#6E6A63] cursor-pointer"
             >
-              {renderCanvasContent()}
-            </CanvasShell>
-          )}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {renderTabContent(activeTab)}
+          </div>
         </div>
       )}
     </div>
   );
+}
+
+// ─── Tab Icon Component ─────────────────────────────────────────────
+
+function TabIcon({ type }: { type: string }) {
+  switch (type) {
+    case 'pipeline':
+      return (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M3 3v18h18" /><path d="M7 16l4-8 4 4 4-8" />
+        </svg>
+      );
+    case 'intel':
+      return (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+        </svg>
+      );
+    case 'sourcing':
+      return (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+        </svg>
+      );
+    case 'dataroom':
+      return (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+        </svg>
+      );
+    case 'settings':
+      return (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <circle cx="12" cy="12" r="3" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+        </svg>
+      );
+    case 'deliverable':
+      return (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" />
+        </svg>
+      );
+    default:
+      return (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+        </svg>
+      );
+  }
 }

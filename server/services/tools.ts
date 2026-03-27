@@ -194,6 +194,17 @@ export const TOOL_DEFINITIONS: Tool[] = [
       required: [],
     },
   },
+  {
+    name: 'get_sourcing_portfolio',
+    description: "Get the buyer's sourcing portfolio — their acquisition target pipeline with scored candidates. Returns portfolio stats, top A-tier candidates, and recent status changes. Call this when the user asks about their pipeline, deal flow, targets, or acquisition candidates.",
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        thesisId: { type: 'number', description: 'Specific thesis ID. If omitted, returns the most recent active portfolio.' },
+      },
+      required: [],
+    },
+  },
 ];
 
 // ─── Tool Execution ────────────────────────────────────────
@@ -240,6 +251,8 @@ export async function executeTool(
         return await scanMarket(input, userId);
       case 'enrich_target':
         return await enrichTarget(input, userId);
+      case 'get_sourcing_portfolio':
+        return await getSourcingPortfolio(input, userId);
       default:
         return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
@@ -896,4 +909,127 @@ async function enrichTarget(input: Record<string, any>, userId: number): Promise
   if (!enrichment) return JSON.stringify({ error: 'Could not enrich website — may be unreachable or blocked' });
 
   return JSON.stringify({ success: true, ...enrichment });
+}
+
+// ─── Sourcing Portfolio Tool ──────────────────────────────────
+
+async function getSourcingPortfolio(input: Record<string, any>, userId: number): Promise<string> {
+  const { thesisId } = input;
+
+  // Find the portfolio
+  let portfolio;
+  if (thesisId) {
+    [portfolio] = await sql`
+      SELECT p.*, b.narrative_markdown
+      FROM sourcing_portfolios p
+      LEFT JOIN sourcing_briefs b ON b.id = p.brief_id
+      WHERE p.thesis_id = ${thesisId} AND p.user_id = ${userId}
+      ORDER BY p.created_at DESC LIMIT 1
+    `;
+  } else {
+    [portfolio] = await sql`
+      SELECT p.*, b.narrative_markdown
+      FROM sourcing_portfolios p
+      LEFT JOIN sourcing_briefs b ON b.id = p.brief_id
+      WHERE p.user_id = ${userId} AND p.pipeline_status = 'ready'
+      ORDER BY p.updated_at DESC LIMIT 1
+    `;
+  }
+
+  if (!portfolio) {
+    // Check if they have theses but no portfolio
+    const theses = await sql`
+      SELECT id, name, industry, geography FROM buyer_theses
+      WHERE user_id = ${userId} AND status = 'active'
+      ORDER BY updated_at DESC LIMIT 5
+    `;
+    if (theses.length > 0) {
+      return JSON.stringify({
+        hasPortfolio: false,
+        message: `You have ${theses.length} active acquisition ${theses.length === 1 ? 'thesis' : 'theses'} but haven't run the sourcing pipeline yet. Open the Sourcing panel and click "Generate Intelligence Brief" on a thesis to start.`,
+        theses: theses.map((t: any) => ({ id: t.id, name: t.name, industry: t.industry, geography: t.geography })),
+      });
+    }
+    return JSON.stringify({
+      hasPortfolio: false,
+      message: 'No acquisition theses or sourcing portfolios found. Create a buy thesis first by telling me about what kind of business you want to acquire.',
+    });
+  }
+
+  // Get top A-tier candidates
+  const topCandidates = await sql`
+    SELECT name, city, state, total_score, tier, rating, review_count,
+           ai_summary, ai_score_summary, pipeline_status, year_founded,
+           estimated_revenue_low_cents, estimated_revenue_high_cents,
+           sba_match, succession_signals
+    FROM sourcing_candidates
+    WHERE portfolio_id = ${portfolio.id} AND tier = 'A'
+    ORDER BY total_score DESC
+    LIMIT 5
+  `;
+
+  // Get pipeline status counts
+  const [statusCounts] = await sql`
+    SELECT
+      COUNT(*) FILTER (WHERE pipeline_status = 'pursuing')::int as pursuing,
+      COUNT(*) FILTER (WHERE pipeline_status = 'reviewing')::int as reviewing,
+      COUNT(*) FILTER (WHERE pipeline_status = 'contacted')::int as contacted,
+      COUNT(*) FILTER (WHERE pipeline_status = 'new')::int as new_count
+    FROM sourcing_candidates
+    WHERE portfolio_id = ${portfolio.id}
+  `;
+
+  // Get recently changed candidates (last 7 days)
+  const recentChanges = await sql`
+    SELECT name, city, state, pipeline_status, pipeline_status_changed_at
+    FROM sourcing_candidates
+    WHERE portfolio_id = ${portfolio.id}
+      AND pipeline_status_changed_at > NOW() - INTERVAL '7 days'
+      AND pipeline_status != 'new'
+    ORDER BY pipeline_status_changed_at DESC
+    LIMIT 5
+  `;
+
+  const formatRevenue = (low: number | null, high: number | null) => {
+    if (!low && !high) return null;
+    const fmt = (c: number) => c >= 100000000 ? `$${(c / 100000000).toFixed(1)}M` : `$${(c / 100000).toFixed(0)}K`;
+    if (low && high) return `${fmt(low)}–${fmt(high)}`;
+    return low ? `${fmt(low)}+` : `up to ${fmt(high!)}`;
+  };
+
+  return JSON.stringify({
+    hasPortfolio: true,
+    portfolioName: portfolio.name,
+    pipelineStatus: portfolio.pipeline_status,
+    stats: {
+      total: portfolio.total_candidates,
+      aTier: portfolio.a_tier_count,
+      bTier: portfolio.b_tier_count,
+      cTier: portfolio.c_tier_count,
+      pursuing: statusCounts.pursuing,
+      reviewing: statusCounts.reviewing,
+      contacted: statusCounts.contacted,
+      newUnreviewed: statusCounts.new_count,
+    },
+    briefSummary: portfolio.narrative_markdown ? portfolio.narrative_markdown.slice(0, 500) : null,
+    topATierCandidates: (topCandidates as any[]).map(c => ({
+      name: c.name,
+      location: [c.city, c.state].filter(Boolean).join(', '),
+      score: c.total_score,
+      rating: c.rating ? `${parseFloat(c.rating).toFixed(1)}/5` : null,
+      reviews: c.review_count,
+      founded: c.year_founded,
+      estRevenue: formatRevenue(c.estimated_revenue_low_cents, c.estimated_revenue_high_cents),
+      status: c.pipeline_status,
+      sbaHistory: c.sba_match || false,
+      exitSignals: (c.succession_signals || []).length > 0,
+      summary: c.ai_score_summary || c.ai_summary,
+    })),
+    recentActivity: (recentChanges as any[]).map(c => ({
+      name: c.name,
+      location: [c.city, c.state].filter(Boolean).join(', '),
+      status: c.pipeline_status,
+      changedAt: c.pipeline_status_changed_at,
+    })),
+  });
 }

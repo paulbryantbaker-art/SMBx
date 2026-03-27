@@ -15,6 +15,7 @@ import { refreshAllValuations } from './services/valuationRefreshService.js';
 import { checkDealFreshness } from './services/dealFreshnessService.js';
 import { runDailyAggregatorScan } from './services/aggregatorMonitorService.js';
 import { batchEnrichTargets } from './services/websiteEnrichmentService.js';
+import { runStage2, runStage3, runStage4, runWeeklyPortfolioRefresh, runMonthlyPortfolioExpansion } from './services/sourcingPipelineService.js';
 import { sql } from './db.js';
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -68,6 +69,24 @@ async function start() {
   await (boss as any).work('generate-deliverable', { teamSize: 3, teamConcurrency: 1 }, handleGenerateDeliverable);
   await (boss as any).work('listing-match-check', { teamSize: 2, teamConcurrency: 1 }, handleListingMatchCheck);
   console.log('Registered job handlers: generate-deliverable, listing-match-check');
+
+  // Sourcing pipeline stage handlers
+  await (boss as any).work('sourcing-stage-2', { teamSize: 1, teamConcurrency: 1 }, async (job: { data: { portfolioId: number } }) => {
+    console.log(`[worker] Running sourcing Stage 2 for portfolio ${job.data.portfolioId}`);
+    await runStage2(job.data.portfolioId);
+    console.log(`[worker] Sourcing Stage 2 complete for portfolio ${job.data.portfolioId}`);
+  });
+  await (boss as any).work('sourcing-stage-3', { teamSize: 1, teamConcurrency: 1 }, async (job: { data: { portfolioId: number } }) => {
+    console.log(`[worker] Running sourcing Stage 3 for portfolio ${job.data.portfolioId}`);
+    await runStage3(job.data.portfolioId);
+    console.log(`[worker] Sourcing Stage 3 complete for portfolio ${job.data.portfolioId}`);
+  });
+  await (boss as any).work('sourcing-stage-4', { teamSize: 1, teamConcurrency: 1 }, async (job: { data: { portfolioId: number } }) => {
+    console.log(`[worker] Running sourcing Stage 4 for portfolio ${job.data.portfolioId}`);
+    await runStage4(job.data.portfolioId);
+    console.log(`[worker] Sourcing Stage 4 complete for portfolio ${job.data.portfolioId}`);
+  });
+  console.log('Registered job handlers: sourcing-stage-2, sourcing-stage-3, sourcing-stage-4');
 
   // Schedule daily thesis scan at 6 AM UTC
   await (boss as any).schedule('thesis-daily-scan', '0 6 * * *', {}, {});
@@ -179,6 +198,24 @@ async function start() {
     console.log(`[worker] Enrichment batch: ${result.enriched} enriched, ${result.failed} failed`);
   });
   console.log('Scheduled: daily_enrichment_batch (daily 8 AM UTC)');
+
+  // Weekly portfolio refresh — Wednesday 4 AM UTC
+  await (boss as any).schedule('portfolio_weekly_refresh', '0 4 * * 3', {}, {});
+  await (boss as any).work('portfolio_weekly_refresh', async () => {
+    console.log('[worker] Running weekly portfolio refresh...');
+    const result = await runWeeklyPortfolioRefresh();
+    console.log(`[worker] Portfolio refresh: ${result.portfoliosRefreshed} portfolios, ${result.candidatesUpdated} candidates updated`);
+  });
+  console.log('Scheduled: portfolio_weekly_refresh (Wednesday 4 AM UTC)');
+
+  // Monthly portfolio expansion — 1st of month 5 AM UTC
+  await (boss as any).schedule('portfolio_monthly_expansion', '0 5 1 * *', {}, {});
+  await (boss as any).work('portfolio_monthly_expansion', async () => {
+    console.log('[worker] Running monthly portfolio expansion...');
+    const result = await runMonthlyPortfolioExpansion();
+    console.log(`[worker] Portfolio expansion: ${result.portfoliosExpanded} portfolios, ${result.newCandidates} new candidates`);
+  });
+  console.log('Scheduled: portfolio_monthly_expansion (1st of month 5 AM UTC)');
 
   console.log('Worker ready — listening for jobs');
 }
