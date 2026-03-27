@@ -72,7 +72,6 @@ export default function Buy() {
         /* ── Topbar ── */
         .buy-topbar {
           height: 56px; padding: 0 20px;
-          padding-top: env(safe-area-inset-top, 0px);
           display: flex; align-items: center; gap: 16px;
           background: ${T.bg};
           border-bottom: 1px solid rgba(0,0,0,0.06);

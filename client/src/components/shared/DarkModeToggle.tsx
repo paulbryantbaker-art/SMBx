@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useCallback } from 'react';
 
 type ThemePref = 'light' | 'dark' | 'system';
 const STORAGE_KEY = 'smbx-theme';
 const LIGHT_COLOR = '#f9f9fc';
-const DARK_COLOR = '#0f1012';
+const DARK_COLOR = '#1a1c1e';
 
 function getSystemDark() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -17,6 +17,10 @@ function resolve(pref: ThemePref): boolean {
 
 function applyDark(isDark: boolean, isManual: boolean) {
   const root = document.documentElement;
+
+  // Smooth transition during toggle — temporary class removed after animation
+  root.classList.add('theme-transition');
+  setTimeout(() => root.classList.remove('theme-transition'), 350);
 
   // Toggle .dark class (Tailwind class strategy)
   root.classList.toggle('dark', isDark);
@@ -60,8 +64,9 @@ export function useDarkMode() {
 
   const [dark, setDarkResolved] = useState(() => resolve(pref));
 
-  // Apply to DOM whenever resolved state changes
-  useEffect(() => {
+  // Apply to DOM whenever resolved state changes — useLayoutEffect fires before paint
+  // so .dark class toggle and React component colors land in the same frame (no flicker)
+  useLayoutEffect(() => {
     applyDark(dark, pref !== 'system');
   }, [dark, pref]);
 
@@ -101,7 +106,7 @@ export function DarkModeToggle({ dark, setDark }: { dark: boolean; setDark: (v: 
   return (
     <button
       onClick={() => setDark(!dark)}
-      className="fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 bg-[#1a1c1e] text-[#d81b60]"
+      className={`fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 ${dark ? 'bg-white/10 backdrop-blur-sm border border-white/10 text-[#f9f9fc]' : 'bg-[#1a1c1e] text-[#d81b60]'}`}
       style={{ top: 16, right: 16 }}
       aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
     >

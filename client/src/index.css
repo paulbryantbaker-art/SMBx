@@ -50,8 +50,11 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
 html, body {
   background-color: #f9f9fc;
 }
-#root, #app-root {
+#root {
   background-color: transparent;
+}
+#app-root {
+  background-color: #f9f9fc;
 }
 body {
   background-image: radial-gradient(circle, #d5d5d8 1px, transparent 1px);
@@ -81,12 +84,24 @@ html.dark, html.dark body {
   background-color: #1a1c1e !important;
   color-scheme: dark;
 }
-html.dark #root, html.dark #app-root {
+html.dark #root {
   background-color: transparent !important;
+}
+html.dark #app-root {
+  background-color: #1a1c1e !important;
 }
 html.dark body {
   background-image: radial-gradient(circle, #2a2c2e 1px, transparent 1px);
   background-size: 24px 24px;
+}
+
+/* Theme transition — applied temporarily during dark/light toggle */
+html.theme-transition,
+html.theme-transition body,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease !important;
 }
 
 html {

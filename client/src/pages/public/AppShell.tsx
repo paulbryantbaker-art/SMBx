@@ -935,13 +935,17 @@ export default function AppShell() {
   return (
     <div
       id="app-root"
-      className={`flex font-sans ${dark ? 'bg-transparent text-[#f0f0f3]' : 'bg-transparent text-[#1a1c1e]'}`}
+      className={`flex font-sans ${dark ? 'bg-[#1a1c1e] text-[#f0f0f3]' : 'bg-[#f9f9fc] text-[#1a1c1e]'}`}
       style={{
-        height: 'var(--app-height, 100vh)',
+        height: 'var(--app-height, 100dvh)',
         position: 'fixed' as const,
         top: 0,
         left: 0,
         right: 0,
+        bottom: 0,
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
         ...(appOffset ? { transform: `translateY(${appOffset}px)` } : {}),
       }}
     >
