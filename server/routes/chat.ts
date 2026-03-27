@@ -544,7 +544,13 @@ chatRouter.post('/message', async (req, res) => {
     // Don't log or respond if client already disconnected
     if (clientDisconnected || res.writableEnded || res.destroyed) return;
 
-    console.error('Chat message error:', err.message, err.status, JSON.stringify(err.error || err.body || {}).substring(0, 500), err.stack);
+    console.error('\n\n========== CHAT ERROR ==========');
+    console.error('Message:', err.message);
+    console.error('Status:', err.status);
+    console.error('Code:', err.code);
+    console.error('Body:', JSON.stringify(err.error || err.body || {}).substring(0, 500));
+    console.error('Stack:', err.stack?.substring(0, 500));
+    console.error('================================\n\n');
 
     // Headers are always sent (SSE), so send error as SSE event
     if (!res.writableEnded) {
@@ -1065,5 +1071,21 @@ chatRouter.post('/conversations/:id/upload', requireAuth, upload.single('file'),
   } catch (err: any) {
     console.error('Upload error:', err.message);
     return res.status(500).json({ error: 'Upload failed' });
+  }
+});
+
+// ─── GET /debug/api-test — Test Claude API connection ──────────────────
+chatRouter.get('/debug/api-test', async (_req, res) => {
+  try {
+    const anthropic = getAnthropicClient();
+    const response = await anthropic.messages.create({
+      model: STREAMING_MODEL,
+      max_tokens: 50,
+      messages: [{ role: 'user', content: 'Say "API working" in exactly two words.' }],
+    });
+    const text = response.content.filter(b => b.type === 'text').map(b => (b as any).text).join('');
+    res.json({ ok: true, model: STREAMING_MODEL, response: text });
+  } catch (err: any) {
+    res.json({ ok: false, model: STREAMING_MODEL, error: err.message, status: err.status, code: err.code });
   }
 });
