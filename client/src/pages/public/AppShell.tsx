@@ -970,68 +970,7 @@ export default function AppShell() {
             <span className="text-xs font-semibold text-yellow-800">You appear to be offline. Messages will send when you reconnect.</span>
           </div>
         )}
-        {/* Header — hidden on mobile (floating icons replace it), shown on desktop */}
-        {!isMobile && (viewState !== 'landing' || activeTab !== 'home') && (
-        <header
-          className={`flex-shrink-0 flex items-center justify-between h-14 px-6 z-20 ${dark ? 'border-b border-zinc-800/50' : 'border-b border-[#eeeef0]'}`}
-          style={{ background: dark ? 'rgba(26,28,30,0.80)' : 'rgba(255,255,255,0.80)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
-        >
-          <div className="flex items-center gap-3">
-            {viewState === 'chat' ? (
-              <div className="flex items-center gap-3" style={{ animation: 'fadeIn 0.3s ease' }}>
-                <button
-                  onClick={handleBack}
-                  className={`w-10 h-10 flex items-center justify-center bg-transparent border-none cursor-pointer ${dark ? 'text-zinc-400' : 'text-[#5d5e61]'}`}
-                  style={{ borderRadius: 12 }}
-                  type="button"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M19 12H5" /><polyline points="12 19 5 12 12 5" />
-                  </svg>
-                </button>
-                <LogoIcon height={20} />
-              </div>
-            ) : (
-              <>
-                {isMobile && (
-                  <button
-                    ref={mobileHeaderLogoRef}
-                    onClick={() => handleTabClick('home')}
-                    className="bg-transparent border-none cursor-pointer p-0 leading-none"
-                    type="button"
-                  >
-                    <LogoIcon height={22} />
-                  </button>
-                )}
-                {!isMobile && (
-                  <button
-                    onClick={() => handleTabClick('home')}
-                    className="bg-transparent border-none cursor-pointer p-0 leading-none"
-                    type="button"
-                  >
-                    <LogoIcon height={22} />
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            {!user && (
-              <button
-                onClick={() => navigate('/login')}
-                className="text-white border-none cursor-pointer hover:opacity-90 transition-all font-headline text-[13px] font-bold"
-                style={{ background: 'linear-gradient(135deg, #b0004a, #d81b60)', borderRadius: '100px', padding: '9px 20px' }}
-                type="button"
-              >
-                Start chatting
-              </button>
-            )}
-            {user && (
-              <span className={`text-[13px] font-semibold font-headline ${dark ? 'text-zinc-400' : 'text-[#5d5e61]'}`}>{user.display_name || user.email}</span>
-            )}
-          </div>
-        </header>
-        )}
+        {/* No header bar — sidebar handles navigation, floating buttons handle actions */}
 
         {/* Main row: chat + canvas split */}
         <div className="flex-1 flex min-h-0 bg-transparent">
@@ -1561,6 +1500,32 @@ export default function AppShell() {
         >
           <span className="material-symbols-outlined text-[22px]">arrow_back</span>
         </button>
+      )}
+
+      {/* ═══ FLOATING CTA — "Start chatting" ═══ */}
+      {!user && viewState === 'landing' && (
+        isMobile ? (
+          /* Mobile: bottom-right FAB like a chatbot bubble */
+          <button
+            onClick={() => navigate('/login')}
+            className="fixed z-50 flex items-center gap-2 border-none cursor-pointer text-white font-headline text-[14px] font-bold shadow-xl hover:scale-105 active:scale-95 transition-all duration-200"
+            style={{ bottom: 'calc(24px + env(safe-area-inset-bottom))', right: 16, background: 'linear-gradient(135deg, #b0004a, #d81b60)', borderRadius: '100px', padding: '14px 22px' }}
+            type="button"
+          >
+            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>chat</span>
+            Start chatting
+          </button>
+        ) : (
+          /* Desktop: pill next to dark mode toggle, top-right */
+          <button
+            onClick={() => navigate('/login')}
+            className="fixed z-50 flex items-center gap-2 border-none cursor-pointer text-white font-headline text-[13px] font-bold shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
+            style={{ top: 16, right: 64, background: 'linear-gradient(135deg, #b0004a, #d81b60)', borderRadius: '100px', padding: '9px 20px' }}
+            type="button"
+          >
+            Start chatting
+          </button>
+        )
       )}
 
       {/* Dark mode toggle */}
