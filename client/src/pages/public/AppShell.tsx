@@ -1132,13 +1132,13 @@ export default function AppShell() {
               ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing'].includes(activeTab) ? (
               <>
                 <Suspense fallback={<BelowSkeleton />}>
-                  {activeTab === 'sell' ? <SellBelow /> :
-                   activeTab === 'buy' ? <BuyBelow /> :
-                   activeTab === 'raise' ? <RaiseBelow /> :
-                   activeTab === 'how-it-works' ? <HowItWorksBelow /> :
-                   activeTab === 'integrate' ? <IntegrateBelow /> :
-                   activeTab === 'advisors' ? <AdvisorsBelow /> :
-                   activeTab === 'pricing' ? <PricingBelow /> : null}
+                  {activeTab === 'sell' ? <SellBelow dark={dark} /> :
+                   activeTab === 'buy' ? <BuyBelow dark={dark} /> :
+                   activeTab === 'raise' ? <RaiseBelow dark={dark} /> :
+                   activeTab === 'how-it-works' ? <HowItWorksBelow dark={dark} /> :
+                   activeTab === 'integrate' ? <IntegrateBelow dark={dark} /> :
+                   activeTab === 'advisors' ? <AdvisorsBelow dark={dark} /> :
+                   activeTab === 'pricing' ? <PricingBelow dark={dark} /> : null}
                 </Suspense>
                 <footer className={`py-12 flex justify-center ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`}>
                   <LogoIcon height={44} />

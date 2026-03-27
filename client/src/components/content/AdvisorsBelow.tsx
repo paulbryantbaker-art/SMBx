@@ -1,8 +1,6 @@
-import { useDarkMode } from '../shared/DarkModeToggle';
 import { ScrollReveal, StaggerContainer, StaggerItem } from './animations';
 
-export default function AdvisorsBelow() {
-  const [dark] = useDarkMode();
+export default function AdvisorsBelow({ dark }: { dark: boolean }) {
 
   const handleCTA = () => {
     window.location.href = '/chat';

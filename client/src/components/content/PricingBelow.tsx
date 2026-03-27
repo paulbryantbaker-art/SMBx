@@ -1,8 +1,6 @@
-import { useDarkMode } from '../shared/DarkModeToggle';
 import { ScrollReveal, StaggerContainer, StaggerItem } from './animations';
 
-export default function PricingBelow() {
-  const [dark] = useDarkMode();
+export default function PricingBelow({ dark }: { dark: boolean }) {
 
   const handleCTA = (plan?: string) => {
     if (plan === 'enterprise') {
