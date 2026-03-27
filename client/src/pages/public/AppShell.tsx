@@ -925,19 +925,15 @@ export default function AppShell() {
         </button>
       </div>
 
-      {/* Bottom: Settings + Profile */}
-      <div className="flex flex-col items-center gap-3 mt-auto pt-4">
+      {/* Bottom: Account & Settings */}
+      <div className="flex flex-col items-center gap-1 mt-auto pt-4">
         <button
           onClick={() => { if (user) { setViewState('settings'); navigate('/settings'); } else navigate('/login'); }}
-          className={`material-symbols-outlined transition-colors text-[22px] bg-transparent border-none cursor-pointer ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#b0004a]'}`}
-          type="button"
-        >settings</button>
-        <button
-          onClick={() => { if (user) { setViewState('settings'); navigate('/settings'); } else navigate('/login'); }}
-          className={`h-9 w-9 rounded-xl overflow-hidden flex items-center justify-center border-none cursor-pointer ${dark ? 'bg-zinc-800 border border-zinc-700' : 'bg-[#eeeef0] border border-[#e3bdc3]'}`}
+          className={`flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#b0004a]'}`}
           type="button"
         >
-          <span className={`material-symbols-outlined text-[18px] ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>person</span>
+          <span className="material-symbols-outlined text-[22px]">person</span>
+          <span className="text-[9px] font-semibold">Account</span>
         </button>
       </div>
     </aside>
@@ -1469,7 +1465,7 @@ export default function AppShell() {
                 type="button"
               >
                 <span className="material-symbols-outlined text-[20px]">person</span>
-                {user ? 'Settings' : 'Sign In'}
+                {user ? 'Account & Settings' : 'Account & Settings'}
               </button>
             </div>
           </nav>
@@ -1518,9 +1514,9 @@ export default function AppShell() {
       {/* ═══ FLOATING CTA — "Start chatting" ═══ */}
       {!user && viewState === 'landing' && (
         isMobile ? (
-          /* Mobile: bottom-right FAB like a chatbot bubble */
+          /* Mobile: bottom-right FAB — only on landing pages, not chat */
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => handleTabClick('home')}
             className="fixed z-50 flex items-center gap-2 border-none cursor-pointer text-white font-headline text-[14px] font-bold shadow-xl hover:scale-105 active:scale-95 transition-all duration-200"
             style={{ bottom: 'calc(24px + env(safe-area-inset-bottom))', right: 16, background: 'linear-gradient(135deg, #b0004a, #d81b60)', borderRadius: '100px', padding: '14px 22px' }}
             type="button"
@@ -1531,7 +1527,7 @@ export default function AppShell() {
         ) : (
           /* Desktop: pill next to dark mode toggle, top-right */
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => handleTabClick('home')}
             className="fixed z-50 flex items-center gap-2 border-none cursor-pointer text-white font-headline text-[13px] font-bold shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
             style={{ top: 16, right: 64, background: 'linear-gradient(135deg, #b0004a, #d81b60)', borderRadius: '100px', padding: '9px 20px' }}
             type="button"
