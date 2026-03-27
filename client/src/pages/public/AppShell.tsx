@@ -419,7 +419,7 @@ export default function AppShell() {
 
   // Core state
   const [viewState, setViewState] = useState<ViewState>(() => pathToViewState(location));
-  const appOffset = useAppHeight(true);   // Always track visual viewport + lock body scroll (inner divs handle scrolling)
+  const { appOffset, keyboardOpen } = useAppHeight(true);   // Always track visual viewport + lock body scroll (inner divs handle scrolling)
   const [activeTab, setActiveTab] = useState<TabId>(() => pathToTab(location));
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
@@ -937,7 +937,6 @@ export default function AppShell() {
       id="app-root"
       className={`flex font-sans ${dark ? 'bg-[#1a1c1e] text-[#f0f0f3]' : 'bg-[#f9f9fc] text-[#1a1c1e]'}`}
       style={{
-        height: 'var(--app-height, 100dvh)',
         position: 'fixed' as const,
         top: 0,
         left: 0,
@@ -946,6 +945,8 @@ export default function AppShell() {
         paddingTop: 'env(safe-area-inset-top)',
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)',
+        // Only constrain height when keyboard is open — otherwise inset:0 fills full viewport
+        ...(keyboardOpen ? { height: 'var(--app-height, 100dvh)' } : {}),
         ...(appOffset ? { transform: `translateY(${appOffset}px)` } : {}),
       }}
     >
