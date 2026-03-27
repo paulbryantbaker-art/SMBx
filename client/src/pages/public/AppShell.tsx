@@ -940,17 +940,15 @@ export default function AppShell() {
     <aside
       className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950 border-r border-zinc-800/50' : 'bg-white border-r border-[#eeeef0] shadow-sm'}`}
     >
-      {/* Logo */}
-      <div className="flex flex-col items-center mb-4" ref={sidebarLogoRef as any}>
+      {/* Logo — X mark */}
+      <div className="flex flex-col items-center mb-3" ref={sidebarLogoRef as any}>
         <button
-          onClick={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); }}
-          className="border-0 bg-transparent cursor-pointer p-0"
+          onClick={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); setCanvasTabs([]); setActiveCanvasTabId(null); }}
+          className="border-0 bg-transparent cursor-pointer p-1 rounded-xl hover:bg-[rgba(0,0,0,0.04)] transition-colors"
           title="Home"
           type="button"
         >
-          <span className={`text-[16px] font-extrabold tracking-[-0.03em] ${dark ? 'text-white' : 'text-[#0D0D0D]'}`}>
-            smb<span className="text-[#BA3C60]">x</span>
-          </span>
+          <img src="/X2 Transaparant.png" alt="smbx.ai" width={36} height={36} style={{ display: 'block' }} />
         </button>
       </div>
 
@@ -1071,7 +1069,7 @@ export default function AppShell() {
   return (
     <div
       id="app-root"
-      className={`flex font-sans ${dark ? 'bg-[#1a1c1e] text-[#f0f0f3]' : `${viewState === 'landing' && activeTab === 'home' ? 'bg-transparent' : 'bg-[#f9f9fc]'} text-[#1a1c1e]`}`}
+      className={`flex font-sans ${dark ? 'bg-[#1a1c1e] text-[#f0f0f3]' : 'bg-[#f9f9fc] text-[#1a1c1e]'}`}
       style={{
         width: '100%',
         ...(isChat ? { height: '100%' } : {}),
@@ -1114,8 +1112,8 @@ export default function AppShell() {
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE — New Design ═══ */}
-                <DotField dark={dark} />
                 <main className="flex-1 flex flex-col relative">
+                <DotField dark={dark} />
 
                   {/* Desktop: single centered cluster */}
                   <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
