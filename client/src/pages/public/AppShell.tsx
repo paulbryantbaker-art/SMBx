@@ -940,8 +940,22 @@ export default function AppShell() {
     <aside
       className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950 border-r border-zinc-800/50' : 'bg-white border-r border-[#eeeef0] shadow-sm'}`}
     >
+      {/* Logo */}
+      <div className="flex flex-col items-center mb-4" ref={sidebarLogoRef as any}>
+        <button
+          onClick={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); }}
+          className="border-0 bg-transparent cursor-pointer p-0"
+          title="Home"
+          type="button"
+        >
+          <span className={`text-[16px] font-extrabold tracking-[-0.03em] ${dark ? 'text-white' : 'text-[#0D0D0D]'}`}>
+            smb<span className="text-[#BA3C60]">x</span>
+          </span>
+        </button>
+      </div>
+
       {/* Explore section */}
-      <div className="flex flex-col items-center gap-1 w-full px-2 mt-2" ref={sidebarLogoRef as any}>
+      <div className="flex flex-col items-center gap-1 w-full px-2">
         <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Explore</span>
         {([
           { id: 'sell' as TabId, icon: 'storefront', label: 'Sell' },
@@ -1057,7 +1071,7 @@ export default function AppShell() {
   return (
     <div
       id="app-root"
-      className={`flex font-sans ${dark ? 'bg-[#1a1c1e] text-[#f0f0f3]' : 'bg-[#f9f9fc] text-[#1a1c1e]'}`}
+      className={`flex font-sans ${dark ? 'bg-[#1a1c1e] text-[#f0f0f3]' : `${viewState === 'landing' && activeTab === 'home' ? 'bg-transparent' : 'bg-[#f9f9fc]'} text-[#1a1c1e]`}`}
       style={{
         width: '100%',
         ...(isChat ? { height: '100%' } : {}),
