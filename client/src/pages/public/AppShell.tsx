@@ -1627,18 +1627,7 @@ export default function AppShell() {
         </button>
       )}
 
-      {/* ═══ DESKTOP FLOATING LOGO — top left on non-home pages ═══ */}
-      {!isMobile && viewState === 'landing' && activeTab !== 'home' && (
-        <button
-          onClick={() => handleTabClick('home')}
-          className="fixed z-50 border-none cursor-pointer p-0 bg-transparent hover:scale-110 active:scale-95 transition-all duration-200"
-          style={{ top: 16, left: 96 }}
-          type="button"
-          aria-label="Home"
-        >
-          <LogoIcon height={28} />
-        </button>
-      )}
+      {/* Floating logo removed — X logo now lives in sidebar permanently */}
 
       {/* ═══ FLOATING CTA — "Start chatting" ═══ */}
       {!user && viewState === 'landing' && activeTab !== 'home' && (
