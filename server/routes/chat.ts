@@ -206,10 +206,8 @@ chatRouter.post('/message', async (req, res) => {
       }
     }
 
-    // Send conversation ID to client as soon as we have it
-    if (!res.writableEnded) {
-      res.setHeader('X-Conversation-Id', String(convId));
-    }
+    // Send conversation ID to client via SSE (can't set headers after flushHeaders)
+    safeWrite(res, `data: ${JSON.stringify({ type: 'conversation_id', conversationId: convId })}\n\n`);
 
     // Save user message
     await sql`
