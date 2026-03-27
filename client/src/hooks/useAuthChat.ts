@@ -174,13 +174,14 @@ export function useAuthChat(user: User | null) {
       let sseBuffer = '';
 
       if (reader) {
-        // Stale-connection timeout: abort if no data arrives for 45s
+        // Stale-connection timeout: abort if no data arrives for 120s
+        // (agentic tool loops can take 60s+ with multiple Claude calls)
         let staleTimer: ReturnType<typeof setTimeout> | null = null;
         const resetStaleTimer = () => {
           if (staleTimer) clearTimeout(staleTimer);
           staleTimer = setTimeout(() => {
             controller.abort();
-          }, 45000);
+          }, 120000);
         };
         resetStaleTimer();
 

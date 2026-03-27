@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import type { Response } from 'express';
 import postgres from 'postgres';
 import Anthropic from '@anthropic-ai/sdk';
 import multer from 'multer';
@@ -11,6 +12,18 @@ import { extractFromDocument } from '../services/documentExtractor.js';
 import { buildSystemPrompt, buildDynamicAnonymousPrompt } from '../services/promptBuilder.js';
 import type { ConversationState } from '../services/promptBuilder.js';
 import { streamAgenticResponse } from '../services/aiService.js';
+
+/** Safe SSE write — checks destroyed + writableEnded, catches errors */
+function safeWrite(res: Response, data: string): boolean {
+  try {
+    if (res.destroyed || res.writableEnded) return false;
+    res.write(data);
+    return true;
+  } catch (err: any) {
+    console.error('SSE write failed:', err.code || err.message);
+    return false;
+  }
+}
 import { checkAndAutoAdvance, getDeal, updateDealFields, updateDealFinancials, advanceGate } from '../services/dealService.js';
 import { extractFields } from '../services/fieldExtractor.js';
 import type { ExtractedFields } from '../services/fieldExtractor.js';
@@ -72,7 +85,7 @@ function getAnthropicClient(): Anthropic {
     }
     anthropicClient = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
-      timeout: 60_000, // 60s timeout — fail fast rather than hang
+      timeout: 120_000, // 120s timeout — match client stale timer
       maxRetries: 2,   // Auto-retry on 429/529
     });
   }
@@ -314,22 +327,18 @@ chatRouter.post('/message', async (req, res) => {
           event.delta.type === 'text_delta'
         ) {
           fullText += event.delta.text;
-          if (!res.writableEnded) {
-            res.write(`data: ${JSON.stringify({ type: 'text_delta', text: event.delta.text })}\n\n`);
-          }
+          safeWrite(res, `data: ${JSON.stringify({ type: 'text_delta', text: event.delta.text })}\n\n`);
         }
       }
     } catch (streamErr: any) {
       if (clientDisconnected) {
         console.log(`[chat] Client disconnected during stream (conv ${convId})`);
       } else {
-        console.error('Anthropic streaming error:', streamErr.message, streamErr.status);
+        console.error('Anthropic streaming error:', streamErr.message, streamErr.status, streamErr.code);
         const userMessage = streamErr.status === 429
           ? 'I\'m experiencing high demand right now. Please try again in a moment.'
           : 'I ran into a temporary issue. Please try again.';
-        if (!res.writableEnded) {
-          res.write(`data: ${JSON.stringify({ type: 'text_delta', text: userMessage })}\n\n`);
-        }
+        safeWrite(res, `data: ${JSON.stringify({ type: 'text_delta', text: userMessage })}\n\n`);
         fullText = userMessage;
       }
     } finally {

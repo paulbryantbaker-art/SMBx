@@ -15,11 +15,23 @@ function getClient(): Anthropic {
     }
     client = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
-      timeout: 60_000, // 60s timeout — fail fast rather than hang
-      maxRetries: 2,   // Auto-retry on 429/529
+      timeout: 120_000, // 120s timeout — agentic loops need headroom
+      maxRetries: 2,    // Auto-retry on 429/529
     });
   }
   return client;
+}
+
+/** Safe SSE write — checks destroyed + writableEnded, catches errors */
+function safeWrite(res: Response, data: string): boolean {
+  try {
+    if (res.destroyed || res.writableEnded) return false;
+    res.write(data);
+    return true;
+  } catch (err: any) {
+    console.error('SSE write failed:', err.code || err.message);
+    return false;
+  }
 }
 
 interface StreamContext {
@@ -43,9 +55,17 @@ export async function streamAgenticResponse(
   let fullText = '';
   let round = 0;
 
+  // Heartbeat during agentic loop — keeps SSE alive through proxies/Railway
+  const heartbeat = setInterval(() => {
+    safeWrite(res, ': heartbeat\n\n');
+  }, 10_000);
+
   try {
     while (round < MAX_TOOL_ROUNDS) {
       round++;
+
+      // Bail early if client disconnected
+      if (res.destroyed || res.writableEnded) break;
 
       // Call Claude (non-streaming for tool use rounds, streaming for final response)
       const response = await anthropic.messages.create({
@@ -69,7 +89,6 @@ export async function streamAgenticResponse(
 
       // If no tool calls, we're done — stream the text
       if (toolUseBlocks.length === 0 || response.stop_reason === 'end_turn') {
-        // Stream the accumulated text to client
         if (fullText) {
           streamText(res, fullText);
         }
@@ -80,10 +99,7 @@ export async function streamAgenticResponse(
       const toolResults: ContentBlockParam[] = [];
       for (const block of toolUseBlocks) {
         if (block.type === 'tool_use') {
-          // Send tool activity indicator to client
-          if (!res.writableEnded) {
-            res.write(`data: ${JSON.stringify({ type: 'tool_start', tool: block.name })}\n\n`);
-          }
+          safeWrite(res, `data: ${JSON.stringify({ type: 'tool_start', tool: block.name })}\n\n`);
 
           if (process.env.NODE_ENV !== 'production') {
             console.log(`Tool call: ${block.name}(${JSON.stringify(block.input).substring(0, 200)})`);
@@ -100,9 +116,7 @@ export async function streamAgenticResponse(
               console.log(`Tool result: ${result.substring(0, 200)}`);
             }
 
-            if (!res.writableEnded) {
-              res.write(`data: ${JSON.stringify({ type: 'tool_done', tool: block.name })}\n\n`);
-            }
+            safeWrite(res, `data: ${JSON.stringify({ type: 'tool_done', tool: block.name })}\n\n`);
 
             toolResults.push({
               type: 'tool_result' as const,
@@ -111,9 +125,7 @@ export async function streamAgenticResponse(
             });
           } catch (toolErr: any) {
             console.error(`Tool execution error (${block.name}):`, toolErr.message);
-            if (!res.writableEnded) {
-              res.write(`data: ${JSON.stringify({ type: 'tool_done', tool: block.name })}\n\n`);
-            }
+            safeWrite(res, `data: ${JSON.stringify({ type: 'tool_done', tool: block.name })}\n\n`);
             toolResults.push({
               type: 'tool_result' as const,
               tool_use_id: block.id,
@@ -132,7 +144,6 @@ export async function streamAgenticResponse(
       ];
 
       // If Claude also produced text alongside tool calls, hold it for now
-      // (the final round after all tools will produce the complete text)
       if ((response.stop_reason as string) === 'end_turn') {
         if (fullText) streamText(res, fullText);
         break;
@@ -142,13 +153,14 @@ export async function streamAgenticResponse(
       fullText = '';
     }
   } catch (err: any) {
-    console.error('Agentic streaming error:', err.message, err.status);
+    console.error('Agentic streaming error:', err.message, err.status, err.code);
     const userMessage = err.status === 429
       ? 'I\'m experiencing high demand right now. Please try again in a moment.'
       : 'I ran into a temporary issue. Let me try that again.';
-    // Stream error message to user so they see something instead of a hang
     streamText(res, fullText ? `${fullText}\n\n${userMessage}` : userMessage);
     fullText = fullText ? `${fullText}\n\n${userMessage}` : userMessage;
+  } finally {
+    clearInterval(heartbeat);
   }
 
   return fullText;
@@ -158,23 +170,19 @@ export async function streamAgenticResponse(
  * Streams text to client as SSE chunks (word by word for typing effect).
  */
 function streamText(res: Response, text: string) {
-  // Split into small chunks for streaming effect
   const words = text.split(/(\s+)/);
   let buffer = '';
 
   for (const word of words) {
     buffer += word;
-    // Send every few words for smooth streaming
     if (buffer.length >= 10 || word.includes('\n')) {
-      if (res.writableEnded) return;
-      res.write(`data: ${JSON.stringify({ type: 'text_delta', text: buffer })}\n\n`);
+      if (!safeWrite(res, `data: ${JSON.stringify({ type: 'text_delta', text: buffer })}\n\n`)) return;
       buffer = '';
     }
   }
 
-  // Flush remaining
-  if (buffer && !res.writableEnded) {
-    res.write(`data: ${JSON.stringify({ type: 'text_delta', text: buffer })}\n\n`);
+  if (buffer) {
+    safeWrite(res, `data: ${JSON.stringify({ type: 'text_delta', text: buffer })}\n\n`);
   }
 }
 
