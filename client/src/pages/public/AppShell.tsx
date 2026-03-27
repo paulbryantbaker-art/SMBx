@@ -8,6 +8,7 @@ import { useAppHeight } from '../../hooks/useAppHeight';
 import { useDarkMode, DarkModeToggle } from '../../components/shared/DarkModeToggle';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
 import ChatMessages from '../../components/shell/ChatMessages';
+import DotField from '../../components/shared/DotField';
 // Authenticated tool components
 import PipelinePanel from '../../components/chat/PipelinePanel';
 import DataRoom from '../../components/chat/DataRoom';
@@ -22,6 +23,8 @@ import BuyerPipeline from '../../components/chat/BuyerPipeline';
 import DocumentLibrary from '../../components/chat/DocumentLibrary';
 import AnalyticsView from '../../components/chat/AnalyticsView';
 import NDAModal from '../../components/chat/NDAModal';
+import SourcingPanel from '../../components/chat/SourcingPanel';
+import IntelPanel from '../../components/chat/IntelPanel';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
 const RaiseBelow = lazy(() => import('../../components/content/RaiseBelow'));
@@ -425,6 +428,61 @@ export default function AppShell() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
   const [canvasMarkdown, setCanvasMarkdown] = useState<{ content: string; title: string } | null>(null);
+
+  // ─── Tabbed Canvas System ───────────────────────────────────
+  interface CanvasTab {
+    id: string;
+    type: string;
+    label: string;
+    closable: boolean;
+    props?: Record<string, any>;
+  }
+  const [canvasTabs, setCanvasTabs] = useState<CanvasTab[]>([]);
+  const [activeCanvasTabId, setActiveCanvasTabId] = useState<string | null>(null);
+  const activeCanvasTab = canvasTabs.find(t => t.id === activeCanvasTabId) || null;
+
+  const openCanvasTab = useCallback((type: string, label: string, props?: Record<string, any>) => {
+    // Deliverables get unique tabs
+    if (type === 'deliverable' && props?.deliverableId) {
+      const tabId = `deliverable-${props.deliverableId}`;
+      setCanvasTabs(prev => {
+        if (prev.find(t => t.id === tabId)) { setActiveCanvasTabId(tabId); return prev; }
+        return [...prev, { id: tabId, type, label: props.label || label, closable: true, props }];
+      });
+      setActiveCanvasTabId(tabId);
+    } else if (type === 'markdown' && props?.content) {
+      const tabId = `md-${Date.now()}`;
+      setCanvasTabs(prev => [...prev, { id: tabId, type, label, closable: true, props }]);
+      setActiveCanvasTabId(tabId);
+    } else {
+      // Panel types reuse existing tab
+      setCanvasTabs(prev => {
+        if (prev.find(t => t.id === type)) { setActiveCanvasTabId(type); return prev; }
+        return [...prev, { id: type, type, label, closable: true }];
+      });
+      setActiveCanvasTabId(type);
+    }
+    // If we're in landing mode, switch to chat so the canvas panel appears
+    if (viewState === 'landing') {
+      setViewState('chat');
+      navigate('/chat');
+    }
+  }, [viewState, navigate]);
+
+  const closeCanvasTab = useCallback((tabId: string) => {
+    setCanvasTabs(prev => {
+      const idx = prev.findIndex(t => t.id === tabId);
+      const next = prev.filter(t => t.id !== tabId);
+      if (activeCanvasTabId === tabId) {
+        if (next.length === 0) {
+          setActiveCanvasTabId(null);
+        } else {
+          setActiveCanvasTabId(next[Math.min(idx, next.length - 1)].id);
+        }
+      }
+      return next;
+    });
+  }, [activeCanvasTabId]);
   const [morphing, setMorphing] = useState(false);
   const [heroFocused, setHeroFocused] = useState(false); // tracks when hero input is focused — controls logo position
   const [chatWidth, setChatWidth] = useState(520); // resizable chat column width
@@ -653,7 +711,7 @@ export default function AppShell() {
         thesis_document: 'Acquisition Thesis',
         sde_analysis: 'SDE Analysis',
       };
-      setCanvasMarkdown({ content: msg.content, title: LABELS[type] || 'Document' });
+      openCanvasTab('markdown', LABELS[type] || 'Document', { content: msg.content });
       anonChat.setPendingDeliverable(null);
     }
   }, [user, anonChat.pendingDeliverable]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -669,8 +727,7 @@ export default function AppShell() {
       deal_screening_memo: 'Deal Screening Memo',
       sba_financing_model: 'SBA Financing Model',
     };
-    setCanvasMarkdown({ content: msg.content, title: LABELS[type || ''] || 'Document' });
-    // Push artifact state so swipe-back closes it and returns to chat
+    openCanvasTab('markdown', LABELS[type || ''] || 'Document', { content: msg.content });
     window.history.pushState({ artifact: true }, '');
   }, []);
 
@@ -679,7 +736,7 @@ export default function AppShell() {
     setViewingDeliverable(null);
   }, []);
 
-  const canvasOpen = canvasMarkdown !== null || viewingDeliverable !== null;
+  const canvasOpen = canvasTabs.length > 0 || canvasMarkdown !== null || viewingDeliverable !== null;
 
   // Auto-collapse sidebar when canvas opens
   useEffect(() => {
@@ -716,6 +773,64 @@ export default function AppShell() {
 
   // Show dock
   const showDock = (viewState === 'landing' || viewState === 'chat') && !(!user && anonChat.limitReached);
+
+  // ─── Canvas Tab Content Renderer ──────────────────────────────
+  const renderCanvasTabContent = (tab: { id: string; type: string; label: string; props?: Record<string, any> }) => {
+    switch (tab.type) {
+      case 'pipeline':
+        return (
+          <PipelinePanel
+            onOpenConversation={(convId: number) => { authChat.selectConversation(convId); setViewState('chat'); navigate(`/chat/${convId}`); }}
+            onNewDeal={() => { authChat.newConversation(); setViewState('chat'); navigate('/chat'); }}
+            isFullscreen={false}
+          />
+        );
+      case 'dataroom':
+        return (
+          <DataRoom
+            dealId={authChat.activeDealId}
+            onViewDeliverable={(id: number) => { openCanvasTab('deliverable', `Document #${id}`, { deliverableId: id }); }}
+          />
+        );
+      case 'documents':
+        return (
+          <DocumentLibrary onViewDeliverable={(id: number) => { openCanvasTab('deliverable', `Document #${id}`, { deliverableId: id }); }} />
+        );
+      case 'sourcing':
+        return <SourcingPanel isFullscreen={false} />;
+      case 'settings':
+        return <SettingsPanel user={user!} onLogout={handleLogout} isFullscreen={false} />;
+      case 'seller-dashboard':
+        return <SellerDashboard />;
+      case 'buyer-pipeline':
+        return <BuyerPipeline />;
+      case 'analytics':
+        return (
+          <AnalyticsView
+            onOpenConversation={(convId: number) => { authChat.selectConversation(convId); setViewState('chat'); navigate(`/chat/${convId}`); }}
+            onNewDeal={() => { authChat.newConversation(); setViewState('chat'); navigate('/chat'); }}
+          />
+        );
+      case 'deliverable':
+        return (
+          <Canvas
+            deliverableId={tab.props?.deliverableId}
+            dealId={user ? authChat.activeDealId : null}
+            onClose={() => closeCanvasTab(tab.id)}
+          />
+        );
+      case 'markdown':
+        return (
+          <Canvas
+            markdownContent={tab.props?.content}
+            title={tab.label}
+            onClose={() => closeCanvasTab(tab.id)}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   // Current page copy
   const page = PAGE_COPY[activeTab];
@@ -865,15 +980,16 @@ export default function AppShell() {
       <div className="flex flex-col items-center gap-1 w-full px-2">
         <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Tools</span>
         {([
-          { view: 'documents' as ViewState, icon: 'folder_open', label: 'Library', route: '/documents' },
-          { view: 'dataroom' as ViewState, icon: 'lock', label: 'Data Rm', route: '/dataroom' },
-          { view: 'pipeline' as ViewState, icon: 'view_kanban', label: 'Pipeline', route: '/pipeline' },
+          { type: 'documents', icon: 'folder_open', label: 'Library' },
+          { type: 'dataroom', icon: 'lock', label: 'Data Rm' },
+          { type: 'pipeline', icon: 'view_kanban', label: 'Pipeline' },
+          { type: 'sourcing', icon: 'search', label: 'Sourcing' },
         ]).map(item => {
-          const isActive = viewState === item.view;
+          const isActive = activeCanvasTabId === item.type;
           return (
             <button
-              key={item.view}
-              onClick={() => { setViewState(item.view); navigate(item.route); }}
+              key={item.type}
+              onClick={() => openCanvasTab(item.type, item.label)}
               className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                 isActive
                   ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5')
@@ -925,7 +1041,7 @@ export default function AppShell() {
       {/* Bottom: Account & Settings */}
       <div className="flex flex-col items-center gap-1 mt-auto pt-4">
         <button
-          onClick={() => { if (user) { setViewState('settings'); navigate('/settings'); } else navigate('/login'); }}
+          onClick={() => { if (user) { openCanvasTab('settings', 'Settings'); } else navigate('/login'); }}
           className={`flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#b0004a]'}`}
           type="button"
         >
@@ -984,6 +1100,7 @@ export default function AppShell() {
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE — New Design ═══ */}
+                <DotField dark={dark} />
                 <main className="flex-1 flex flex-col relative">
 
                   {/* Desktop: single centered cluster */}
@@ -1183,7 +1300,7 @@ export default function AppShell() {
                     dealId={authChat.activeDealId}
                     onUnlocked={(toGate, deliverableId) => {
                       authChat.setPaywallData(null);
-                      if (deliverableId) { setViewingDeliverable(deliverableId); window.history.pushState({ artifact: true }, ''); }
+                      if (deliverableId) { openCanvasTab('deliverable', 'Deliverable', { deliverableId }); window.history.pushState({ artifact: true }, ''); }
                     }}
                   />
                 </div>
@@ -1199,23 +1316,6 @@ export default function AppShell() {
             </motion.div>
           )}
 
-          {/* ════ TOOL VIEWS ════ */}
-          {viewState === 'pipeline' && user && (
-            <div className="max-w-5xl mx-auto px-4 py-6">
-              <PipelinePanel
-                onOpenConversation={(convId) => { const wasChat = viewState === 'chat'; authChat.selectConversation(convId); setViewState('chat'); navigate(`/chat/${convId}`, { replace: wasChat }); }}
-                onNewDeal={() => { authChat.newConversation(); setViewState('chat'); navigate('/chat', { replace: viewState === 'chat' }); }}
-                isFullscreen={true}
-              />
-            </div>
-          )}
-
-          {viewState === 'dataroom' && user && (
-            <div className="max-w-5xl mx-auto px-4 py-6">
-              <DataRoom dealId={authChat.activeDealId} onViewDeliverable={(id) => { setViewingDeliverable(id); window.history.pushState({ artifact: true }, ''); }} />
-            </div>
-          )}
-
           {/* NDA Modal */}
           {ndaRequired && (
             <NDAModal
@@ -1226,36 +1326,7 @@ export default function AppShell() {
             />
           )}
 
-          {viewState === 'seller-dashboard' && user && (
-            <div className="max-w-5xl mx-auto px-4 py-6">
-              <SellerDashboard />
-            </div>
-          )}
-
-          {viewState === 'buyer-pipeline' && user && (
-            <div className="max-w-5xl mx-auto px-4 py-6">
-              <BuyerPipeline />
-            </div>
-          )}
-
-          {viewState === 'settings' && user && (
-            <div className="max-w-3xl mx-auto px-4 py-6">
-              <SettingsPanel user={user} onLogout={handleLogout} isFullscreen={true} />
-            </div>
-          )}
-
-          {/* Subscription model — no wallet view */}
-
-          {viewState === 'documents' && user && (
-            <DocumentLibrary onViewDeliverable={(id) => { setViewingDeliverable(id); window.history.pushState({ artifact: true }, ''); }} />
-          )}
-
-          {viewState === 'analytics' && user && (
-            <AnalyticsView
-              onOpenConversation={(convId) => { const wasChat = viewState === 'chat'; authChat.selectConversation(convId); setViewState('chat'); navigate(`/chat/${convId}`, { replace: wasChat }); }}
-              onNewDeal={() => { authChat.newConversation(); setViewState('chat'); navigate('/chat', { replace: viewState === 'chat' }); }}
-            />
-          )}
+          {/* Tool views now render as canvas tabs */}
         </div>
 
         {/* ════ CHATDOCK — chat mode, pinned at bottom ════ */}
@@ -1299,42 +1370,75 @@ export default function AppShell() {
           </div>
         )}
 
-        {/* ════ DESKTOP CANVAS PANEL — always visible on desktop ════ */}
+        {/* ════ DESKTOP CANVAS PANEL — tabbed, always visible on desktop ════ */}
         {!isMobile && viewState === 'chat' && (
           <div
-            className="flex flex-col min-w-0"
+            className="flex min-w-0"
             style={{
               flex: 1,
-              background: canvasOpen ? '#fff' : '#EDEDEA',
+              background: canvasTabs.length > 0 ? '#fff' : '#EDEDEA',
               position: 'relative',
             }}
           >
-            {canvasOpen ? (
-              <>
-                {canvasMarkdown ? (
-                  <Canvas
-                    markdownContent={canvasMarkdown.content}
-                    title={canvasMarkdown.title}
-                    onClose={closeCanvas}
-                  />
-                ) : viewingDeliverable !== null ? (
-                  <Canvas
-                    deliverableId={viewingDeliverable}
-                    dealId={user ? authChat.activeDealId : null}
-                    onClose={closeCanvas}
-                  />
-                ) : null}
-              </>
-            ) : (
-              /* Empty state — logo + message */
-              <div style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                height: '100%', gap: 16, opacity: 0.4,
-              }}>
-                <LogoImg height={36} dark={dark} />
-                <p className="font-headline text-sm font-medium" style={{ color: dark ? '#f0f0f3' : '#1a1c1e', margin: 0 }}>
-                  Nothing to see here
-                </p>
+            {/* Tab content area */}
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+              {canvasTabs.length > 0 ? (
+                <>
+                  {/* Tab content header */}
+                  {activeCanvasTab && (
+                    <div className="shrink-0 flex items-center justify-between" style={{ padding: '10px 16px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                      <h2 className="font-sans m-0 truncate text-sm font-bold" style={{ color: dark ? '#f0f0f3' : '#0D0D0D' }}>
+                        {activeCanvasTab.label}
+                      </h2>
+                      <button
+                        onClick={() => closeCanvasTab(activeCanvasTab.id)}
+                        className="flex items-center justify-center cursor-pointer border-0 w-7 h-7 rounded-md bg-transparent hover:bg-[rgba(0,0,0,0.04)]"
+                        style={{ color: dark ? '#a0a0a0' : '#6E6A63' }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                      </button>
+                    </div>
+                  )}
+                  {/* All tabs mounted, only active visible */}
+                  <div className="flex-1 overflow-y-auto relative">
+                    {canvasTabs.map(tab => (
+                      <div key={tab.id} className="absolute inset-0 overflow-y-auto" style={{ display: tab.id === activeCanvasTabId ? 'block' : 'none' }}>
+                        {renderCanvasTabContent(tab)}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                /* Empty state */
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 16, opacity: 0.4 }}>
+                  <LogoImg height={36} dark={dark} />
+                  <p className="font-headline text-sm font-medium" style={{ color: dark ? '#f0f0f3' : '#1a1c1e', margin: 0 }}>
+                    Nothing to see here
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Vertical tab strip — right edge (Dia-style) */}
+            {canvasTabs.length > 1 && (
+              <div
+                className="shrink-0 flex flex-col items-center py-2 gap-1"
+                style={{ width: 44, borderLeft: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`, background: dark ? '#18181b' : '#FAFAFA' }}
+              >
+                {canvasTabs.map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveCanvasTabId(tab.id)}
+                    title={tab.label}
+                    className={`relative w-9 h-9 rounded-lg border-0 cursor-pointer transition-all flex items-center justify-center ${
+                      tab.id === activeCanvasTabId
+                        ? (dark ? 'bg-rose-500/15 text-rose-400' : 'bg-[#BA3C60]/10 text-[#BA3C60]')
+                        : (dark ? 'bg-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800' : 'bg-transparent text-[#6E6A63] hover:text-[#0D0D0D] hover:bg-[rgba(0,0,0,0.04)]')
+                    }`}
+                  >
+                    <CanvasTabIcon type={tab.type} />
+                  </button>
+                ))}
               </div>
             )}
           </div>
@@ -1343,21 +1447,35 @@ export default function AppShell() {
         </div>{/* end main row */}
 
         {/* ════ MOBILE CANVAS OVERLAY ════ */}
-        {canvasOpen && isMobile && (
+        {canvasTabs.length > 0 && isMobile && (
           <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ animation: 'slideUpIn 0.3s ease' }}>
-            {canvasMarkdown ? (
-              <Canvas
-                markdownContent={canvasMarkdown.content}
-                title={canvasMarkdown.title}
-                onClose={closeCanvas}
-              />
-            ) : viewingDeliverable !== null ? (
-              <Canvas
-                deliverableId={viewingDeliverable}
-                dealId={user ? authChat.activeDealId : null}
-                onClose={closeCanvas}
-              />
-            ) : null}
+            {/* Mobile tab pills */}
+            <div className="shrink-0 flex items-center justify-between px-3 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+              <div className="flex items-center gap-1.5 overflow-x-auto flex-1 mr-2">
+                {canvasTabs.map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveCanvasTabId(tab.id)}
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
+                      tab.id === activeCanvasTabId
+                        ? 'bg-[#BA3C60] text-white border-[#BA3C60]'
+                        : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)]'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => { if (activeCanvasTab) closeCanvasTab(activeCanvasTab.id); }}
+                className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-0 bg-transparent text-[#6E6A63] cursor-pointer"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {activeCanvasTab && renderCanvasTabContent(activeCanvasTab)}
+            </div>
           </div>
         )}
       </div>
@@ -1464,7 +1582,7 @@ export default function AppShell() {
               </button>
               )}
               <button
-                onClick={() => { setIsMobileSidebarOpen(false); if (user) { const wasSettings = viewState === 'settings'; setViewState('settings'); navigate('/settings', { replace: wasSettings }); } else navigate('/login'); }}
+                onClick={() => { setIsMobileSidebarOpen(false); if (user) { openCanvasTab('settings', 'Settings'); } else navigate('/login'); }}
                 className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 bg-transparent' : 'text-[#636467] bg-transparent'}`}
                 type="button"
               >
@@ -1633,5 +1751,27 @@ export default function AppShell() {
         });
       })()}
     </div>
+  );
+}
+
+// ─── Canvas Tab Icon ────────────────────────────────────────────────
+
+function CanvasTabIcon({ type }: { type: string }) {
+  const icons: Record<string, string> = {
+    pipeline: 'view_kanban',
+    dataroom: 'lock',
+    documents: 'folder_open',
+    sourcing: 'search',
+    settings: 'settings',
+    'seller-dashboard': 'storefront',
+    'buyer-pipeline': 'shopping_bag',
+    analytics: 'bar_chart',
+    deliverable: 'description',
+    markdown: 'article',
+  };
+  return (
+    <span className="material-symbols-outlined text-[18px]">
+      {icons[type] || 'tab'}
+    </span>
   );
 }
