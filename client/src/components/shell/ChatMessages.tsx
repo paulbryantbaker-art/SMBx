@@ -111,7 +111,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
   /* Desktop label: tiny uppercase, muted */
   const Label = ({ text }: { text: string }) => (
     <p style={{
-      fontSize: 11, fontWeight: 700, color: text === 'You' ? '#b0004a' : '#94a3b8',
+      fontSize: 11, fontWeight: 700, color: text === 'Yulia' ? '#b0004a' : '#94a3b8',
       textTransform: 'uppercase', letterSpacing: '0.1em',
       margin: '0 0 4px 0',
     }}>{text}</p>
@@ -203,7 +203,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
           if (isDeliverable && deliverableType) {
             return (
               <div key={m.id || i}>
-                {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" />}
+                {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" accent />}
                 <button
                   onClick={() => onOpenDeliverable?.(m)}
                   type="button"
@@ -260,7 +260,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
                 borderRadius: 10,
                 padding: desktop ? '12px 16px' : '10px 14px',
               }}>
-                {desktop ? <Label text="You" /> : <SenderLabel name="You" accent />}
+                {desktop ? <Label text="You" /> : <SenderLabel name="You" />}
                 <div className={PROSE} style={textStyle}>
                   <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{m.content}</p>
                 </div>
@@ -271,7 +271,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
           /* ─── Assistant message ─────────────────────────── */
           return (
             <div key={m.id || i}>
-              {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" />}
+              {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" accent />}
               <div className={PROSE} style={textStyle}>
                 <Markdown>{m.content}</Markdown>
               </div>
@@ -287,7 +287,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
         {/* ─── Streaming message ─────────────────────────── */}
         {streamingText && (
           <div>
-            {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" />}
+            {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" accent />}
             <div className={PROSE} style={textStyle}>
               <Markdown>{streamingText}</Markdown>
               <span style={{
@@ -302,7 +302,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
         {/* ─── Typing indicator ──────────────────────────── */}
         {sending && !streamingText && (
           <div>
-            {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" />}
+            {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" accent />}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
               <div style={{ display: 'flex', gap: 4 }}>
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite' }} />
