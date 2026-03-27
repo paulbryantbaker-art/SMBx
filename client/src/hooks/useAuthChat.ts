@@ -223,7 +223,7 @@ export function useAuthChat(user: User | null) {
                   loadConversations();
                   if (parsed.newConversationId) {
                     setActiveConversationId(parsed.newConversationId);
-                    window.history.pushState(null, '', `/chat/${parsed.newConversationId}`);
+                    window.history.replaceState(null, '', `/chat/${parsed.newConversationId}`);
                   }
                 } else if (parsed.type === 'paywall') {
                   setPaywallData(parsed);

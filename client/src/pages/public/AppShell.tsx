@@ -572,14 +572,14 @@ export default function AppShell() {
       if (isMobile) {
         // Mobile: instant swap, no morphing — chat fade-in handles the transition
         setViewState('chat');
-        if (window.location.pathname !== '/chat') navigate('/chat');
+        if (window.location.pathname !== '/chat') navigate('/chat'); // push: landing→chat
       } else {
         // Desktop: smooth morph-out then swap
         setMorphing(true);
         setTimeout(() => {
           setViewState('chat');
           setMorphing(false);
-          if (window.location.pathname !== '/chat') navigate('/chat');
+          if (window.location.pathname !== '/chat') navigate('/chat'); // push: landing→chat
         }, 300);
       }
       return;
@@ -594,36 +594,36 @@ export default function AppShell() {
     handleSend(text);
   }, [handleSend]);
 
-  // Back to landing
+  // Back to landing — replace so user doesn't get stuck in back-forward loop
   const handleBack = useCallback(() => {
     setHeroFocused(false);
     setViewState('landing');
     const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
-    navigate(urlMap[activeTab]);
+    navigate(urlMap[activeTab], { replace: true });
   }, [activeTab, navigate]);
 
-  // Tab click
+  // Tab click — same-level navigation within landing, replace history
   const handleTabClick = useCallback((tab: TabId) => {
     setActiveTab(tab);
     setViewState('landing');
     setIsMobileSidebarOpen(false);
     const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
-    if (window.location.pathname !== urlMap[tab]) navigate(urlMap[tab]);
+    if (window.location.pathname !== urlMap[tab]) navigate(urlMap[tab], { replace: true });
   }, [navigate]);
 
-  // New chat
+  // New chat — same-level within chat, replace history
   const handleNewChat = useCallback(() => {
     if (user) authChat.newConversation();
     setViewState('chat');
-    navigate('/chat');
+    navigate('/chat', { replace: true });
   }, [user, authChat, navigate]);
 
-  // Logout
+  // Logout — replace history, don't push back to authenticated views
   const handleLogout = useCallback(() => {
     logout();
     setViewState('landing');
     setActiveTab('home');
-    navigate('/');
+    navigate('/', { replace: true });
   }, [logout, navigate]);
 
 
@@ -900,7 +900,7 @@ export default function AppShell() {
         </button>
         )}
         <button
-          onClick={() => { setViewState('chat'); navigate('/chat'); }}
+          onClick={() => { setViewState('chat'); navigate('/chat', { replace: viewState === 'chat' }); }}
           className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
             viewState === 'chat'
               ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5')
@@ -1195,8 +1195,8 @@ export default function AppShell() {
           {viewState === 'pipeline' && user && (
             <div className="max-w-5xl mx-auto px-4 py-6">
               <PipelinePanel
-                onOpenConversation={(convId) => { authChat.selectConversation(convId); setViewState('chat'); navigate(`/chat/${convId}`); }}
-                onNewDeal={() => { authChat.newConversation(); setViewState('chat'); navigate('/chat'); }}
+                onOpenConversation={(convId) => { const wasChat = viewState === 'chat'; authChat.selectConversation(convId); setViewState('chat'); navigate(`/chat/${convId}`, { replace: wasChat }); }}
+                onNewDeal={() => { authChat.newConversation(); setViewState('chat'); navigate('/chat', { replace: viewState === 'chat' }); }}
                 isFullscreen={true}
               />
             </div>
@@ -1244,8 +1244,8 @@ export default function AppShell() {
 
           {viewState === 'analytics' && user && (
             <AnalyticsView
-              onOpenConversation={(convId) => { authChat.selectConversation(convId); setViewState('chat'); navigate(`/chat/${convId}`); }}
-              onNewDeal={() => { authChat.newConversation(); setViewState('chat'); navigate('/chat'); }}
+              onOpenConversation={(convId) => { const wasChat = viewState === 'chat'; authChat.selectConversation(convId); setViewState('chat'); navigate(`/chat/${convId}`, { replace: wasChat }); }}
+              onNewDeal={() => { authChat.newConversation(); setViewState('chat'); navigate('/chat', { replace: viewState === 'chat' }); }}
             />
           )}
         </div>
@@ -1456,7 +1456,7 @@ export default function AppShell() {
               </button>
               )}
               <button
-                onClick={() => { setIsMobileSidebarOpen(false); if (user) { setViewState('settings'); navigate('/settings'); } else navigate('/login'); }}
+                onClick={() => { setIsMobileSidebarOpen(false); if (user) { const wasSettings = viewState === 'settings'; setViewState('settings'); navigate('/settings', { replace: wasSettings }); } else navigate('/login'); }}
                 className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 bg-transparent' : 'text-[#636467] bg-transparent'}`}
                 type="button"
               >
