@@ -1139,7 +1139,11 @@ export default function AppShell() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              style={isMobile ? { paddingTop: 48 } : undefined}
+              style={{
+                display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+                minHeight: '100%',
+                ...(isMobile ? { paddingTop: 48 } : {}),
+              }}
             >
               {user && authChat.activeDealId && (
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
