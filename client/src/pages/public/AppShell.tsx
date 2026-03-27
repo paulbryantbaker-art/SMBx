@@ -1477,7 +1477,7 @@ export default function AppShell() {
       )}
 
       {/* ═══ MOBILE FLOATING HAMBURGER — top left ═══ */}
-      {isMobile && viewState === 'landing' && (
+      {isMobile && (viewState === 'landing' || viewState === 'chat') && (
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
           className="fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#d81b60]"
