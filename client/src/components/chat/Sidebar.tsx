@@ -244,8 +244,11 @@ export default function Sidebar({ conversations, activeId, onSelect, onNew, onCl
         transition: 'width 0.25s ease, min-width 0.25s ease',
       }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-end px-3.5 pt-3.5 pb-1.5" style={{ minWidth: 240 }}>
+      {/* Header — logo + new chat */}
+      <div className="flex items-center justify-between px-3.5 pt-3.5 pb-1.5" style={{ minWidth: 240 }}>
+        <div className="text-[18px] font-extrabold tracking-[-0.03em] text-[#0D0D0D] font-sans">
+          smb<span className="text-[#BA3C60]">x</span>.ai
+        </div>
         <button
           onClick={onNew}
           className="w-[34px] h-[34px] rounded-full border-none cursor-pointer flex items-center justify-center text-[#BA3C60] hover:bg-[#FFF0EB] transition-colors"

@@ -440,9 +440,6 @@ export default function Chat({ user, onLogout, initialConversationId }: ChatProp
                 </svg>
               </button>
             )}
-            <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D] font-sans">
-              smb<span className="text-[#BA3C60]">x</span>.ai
-            </div>
           </div>
 
           <div className="flex items-center gap-0.5">
