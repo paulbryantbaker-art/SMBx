@@ -16,11 +16,15 @@ export function useAppHeight(_enabled = true) {
       const vvHeight = vv ? vv.height : fullHeight;
       const offset = vv ? vv.offsetTop : 0;
 
-      // Only use visualViewport height when keyboard is open (>100px shrinkage)
+      // Only constrain height when keyboard is open (>100px shrinkage).
+      // Otherwise remove --app-height so CSS fallback (100dvh) fills
+      // the full viewport including behind iOS 26 Liquid Glass bars.
       const keyboardOpen = (fullHeight - vvHeight) > 100;
-      const h = keyboardOpen ? vvHeight : fullHeight;
-
-      document.documentElement.style.setProperty('--app-height', h + 'px');
+      if (keyboardOpen) {
+        document.documentElement.style.setProperty('--app-height', vvHeight + 'px');
+      } else {
+        document.documentElement.style.removeProperty('--app-height');
+      }
       setAppOffset(keyboardOpen ? offset : 0);
     }
 

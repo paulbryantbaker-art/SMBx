@@ -1031,7 +1031,7 @@ export default function AppShell() {
         <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto min-h-0 bg-transparent"
-          style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' } as any}
+          style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', paddingBottom: 'env(safe-area-inset-bottom)' } as any}
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
