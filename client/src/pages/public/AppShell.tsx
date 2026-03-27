@@ -1161,6 +1161,7 @@ export default function AppShell() {
                   handleSend(fill);
                 }}
                 desktop={!isMobile}
+                dark={dark}
               />
 
               {user && authChat.paywallData && authChat.activeDealId && (

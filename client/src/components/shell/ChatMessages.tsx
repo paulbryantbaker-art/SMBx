@@ -24,6 +24,7 @@ interface ChatMessagesProps {
   onOpenDeliverable?: (message: AnonMessage) => void;
   onShortcutClick?: (fill: string) => void;
   desktop?: boolean;
+  dark?: boolean;
 }
 
 function formatTimestamp(iso: string): string {
@@ -57,25 +58,55 @@ function SenderLabel({ name, accent }: { name: string; accent?: boolean }) {
   );
 }
 
-/* ─── Markdown prose styles (shared) ─────────────────────── */
-const PROSE_CLASSES = [
-  '[&_p]:m-0 [&_p]:mb-2 [&_p:last-child]:mb-0',
-  '[&_ul]:mt-1 [&_ul]:mb-1.5 [&_ul]:pl-5 [&_ol]:mt-1 [&_ol]:mb-1.5 [&_ol]:pl-5 [&_li]:mb-0.5',
-  '[&_strong]:font-bold',
-  '[&_h1]:text-lg [&_h1]:font-bold [&_h1]:mb-2 [&_h1]:mt-3',
-  '[&_h2]:text-base [&_h2]:font-bold [&_h2]:mb-1.5 [&_h2]:mt-2.5',
-  '[&_h3]:text-sm [&_h3]:font-bold [&_h3]:mb-1 [&_h3]:mt-2',
-  '[&_code]:bg-[rgba(0,0,0,0.05)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-[13px]',
-  '[&_pre]:bg-[#F5F5F5] [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:text-[13px]',
-  '[&_blockquote]:border-l-2 [&_blockquote]:border-[#E0E0E0] [&_blockquote]:pl-3 [&_blockquote]:text-[#555] [&_blockquote]:italic',
-  '[&_table]:w-full [&_table]:text-left [&_table]:text-sm',
-  '[&_th]:px-2.5 [&_th]:py-1.5 [&_th]:font-bold [&_th]:border-b [&_th]:border-[rgba(0,0,0,0.08)]',
-  '[&_td]:px-2.5 [&_td]:py-1.5 [&_td]:border-b [&_td]:border-[rgba(0,0,0,0.04)]',
-  '[&_a]:text-[#000] [&_a]:underline [&_a]:underline-offset-2',
-].join(' ');
+/* ─── Markdown prose styles ───────────────────────────────── */
+function proseClasses(dark: boolean) {
+  const codeBg = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const preBg = dark ? 'rgba(255,255,255,0.06)' : '#F5F5F5';
+  const borderColor = dark ? 'rgba(255,255,255,0.12)' : '#E0E0E0';
+  const bqColor = dark ? 'rgba(255,255,255,0.5)' : '#555';
+  const thBorder = dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+  const tdBorder = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
+  const linkColor = dark ? '#e0e0e0' : '#000';
+  return [
+    '[&_p]:m-0 [&_p]:mb-2 [&_p:last-child]:mb-0',
+    '[&_ul]:mt-1 [&_ul]:mb-1.5 [&_ul]:pl-5 [&_ol]:mt-1 [&_ol]:mb-1.5 [&_ol]:pl-5 [&_li]:mb-0.5',
+    '[&_strong]:font-bold',
+    '[&_h1]:text-lg [&_h1]:font-bold [&_h1]:mb-2 [&_h1]:mt-3',
+    '[&_h2]:text-base [&_h2]:font-bold [&_h2]:mb-1.5 [&_h2]:mt-2.5',
+    '[&_h3]:text-sm [&_h3]:font-bold [&_h3]:mb-1 [&_h3]:mt-2',
+    `[&_code]:bg-[${codeBg}] [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-[13px]`,
+    `[&_pre]:bg-[${preBg}] [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_pre]:text-[13px]`,
+    `[&_blockquote]:border-l-2 [&_blockquote]:border-[${borderColor}] [&_blockquote]:pl-3 [&_blockquote]:text-[${bqColor}] [&_blockquote]:italic`,
+    '[&_table]:w-full [&_table]:text-left [&_table]:text-sm',
+    `[&_th]:px-2.5 [&_th]:py-1.5 [&_th]:font-bold [&_th]:border-b [&_th]:border-[${thBorder}]`,
+    `[&_td]:px-2.5 [&_td]:py-1.5 [&_td]:border-b [&_td]:border-[${tdBorder}]`,
+    `[&_a]:text-[${linkColor}] [&_a]:underline [&_a]:underline-offset-2`,
+  ].join(' ');
+}
 
-export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, onShortcutClick, desktop }: ChatMessagesProps) {
+export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, onShortcutClick, desktop, dark = false }: ChatMessagesProps) {
   const [helpExpanded, setHelpExpanded] = useState(false);
+
+  /* ─── Dark-aware colors ─── */
+  const textColor = dark
+    ? (desktop ? '#e2e8f0' : '#f0f0f2')
+    : (desktop ? '#1e293b' : '#1A1A1A');
+  const mutedColor = dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
+  const subtleColor = dark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)';
+  const itemLabelColor = dark ? '#e0e0e0' : '#0D0D0D';
+  const itemDescColor = dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
+  const hoverBg = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
+  const userMsgBg = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
+  const cardBg = dark ? '#2a2c2e' : '#fff';
+  const cardBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const cardIconBg = dark ? 'rgba(255,255,255,0.08)' : '#F5F5F5';
+  const cardTitleColor = dark ? '#f0f0f2' : '#000';
+  const cardDescColor = dark ? '#999' : '#6B6B6B';
+  const dotColor = dark ? '#e0e0e0' : '#000';
+  const timestampColor = dark ? '#666' : '#AAA';
+  const errorBg = dark ? 'rgba(220,38,38,0.12)' : '#FEF2F2';
+  const errorBorder = dark ? 'rgba(220,38,38,0.25)' : '#FECACA';
+  const retryColor = dark ? '#e0e0e0' : '#000';
 
   /* Desktop label: tiny uppercase, muted */
   const Label = ({ text }: { text: string }) => (
@@ -88,11 +119,12 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
 
   const textStyle: React.CSSProperties = {
     fontSize: 14, lineHeight: 1.65, fontWeight: 400,
-    color: desktop ? '#1e293b' : '#1A1A1A',
+    color: textColor,
     userSelect: 'text', WebkitUserSelect: 'text', cursor: 'text',
     textAlign: desktop ? 'justify' : undefined,
   };
 
+  const PROSE = proseClasses(dark);
   const isEmpty = messages.length === 0 && !streamingText && !sending;
 
   return (
@@ -108,7 +140,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
       {isEmpty && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: desktop ? 300 : 200, gap: 16, padding: '40px 20px' }}>
           <img src="/x-logo.png" alt="smbx.ai" draggable={false} style={{ height: 32, width: 32, objectFit: 'contain', opacity: 0.3 }} />
-          <p style={{ fontSize: 14, color: 'rgba(0,0,0,0.4)', textAlign: 'center', margin: 0, lineHeight: 1.6, maxWidth: 360 }}>
+          <p style={{ fontSize: 14, color: mutedColor, textAlign: 'center', margin: 0, lineHeight: 1.6, maxWidth: 360 }}>
             Drop any files here to upload, or just start typing to chat with Yulia.
           </p>
 
@@ -127,34 +159,34 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
 
           {helpExpanded && (
             <div style={{ width: '100%', maxWidth: 440, display: 'flex', flexDirection: 'column', gap: 4, animation: 'fadeIn 0.2s ease' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(0,0,0,0.3)', padding: '8px 12px 4px', marginTop: 4 }}>Journeys</div>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: subtleColor, padding: '8px 12px 4px', marginTop: 4 }}>Journeys</div>
               {SHORTCUT_TOOLS.filter(t => t.group === 'journey').map(tool => (
                 <button
                   key={tool.label}
                   onClick={() => onShortcutClick?.(tool.fill)}
                   className="bg-transparent border-none cursor-pointer"
                   style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '8px 12px', borderRadius: 10, fontFamily: 'inherit', textAlign: 'left', transition: 'background 0.15s' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.03)')}
+                  onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   type="button"
                 >
-                  <span style={{ fontSize: 14, fontWeight: 500, color: '#0D0D0D' }}>{tool.label}</span>
-                  <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{tool.desc}</span>
+                  <span style={{ fontSize: 14, fontWeight: 500, color: itemLabelColor }}>{tool.label}</span>
+                  <span style={{ fontSize: 12, color: itemDescColor }}>{tool.desc}</span>
                 </button>
               ))}
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(0,0,0,0.3)', padding: '12px 12px 4px' }}>Tools</div>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: subtleColor, padding: '12px 12px 4px' }}>Tools</div>
               {SHORTCUT_TOOLS.filter(t => t.group === 'tool').map(tool => (
                 <button
                   key={tool.label}
                   onClick={() => onShortcutClick?.(tool.fill)}
                   className="bg-transparent border-none cursor-pointer"
                   style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '8px 12px', borderRadius: 10, fontFamily: 'inherit', textAlign: 'left', transition: 'background 0.15s' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.03)')}
+                  onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                   type="button"
                 >
-                  <span style={{ fontSize: 14, fontWeight: 500, color: '#0D0D0D' }}>{tool.label}</span>
-                  <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.45)' }}>{tool.desc}</span>
+                  <span style={{ fontSize: 14, fontWeight: 500, color: itemLabelColor }}>{tool.label}</span>
+                  <span style={{ fontSize: 12, color: itemDescColor }}>{tool.desc}</span>
                 </button>
               ))}
             </div>
@@ -176,33 +208,35 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
                   onClick={() => onOpenDeliverable?.(m)}
                   type="button"
                   style={{
-                    width: '100%', textAlign: 'left', background: '#fff',
-                    border: '1px solid rgba(0,0,0,0.06)', borderRadius: 12,
+                    width: '100%', textAlign: 'left', background: cardBg,
+                    border: `1px solid ${cardBorder}`, borderRadius: 12,
                     padding: '14px 16px', cursor: 'pointer',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                    boxShadow: dark ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
                     transition: 'border-color 0.2s',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                     <div style={{
-                      width: 32, height: 32, borderRadius: 8, background: '#F5F5F5',
+                      width: 32, height: 32, borderRadius: 8, background: cardIconBg,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 15, flexShrink: 0,
                     }}>
                       {DELIVERABLE_ICONS[deliverableType] || '\u{1F4C4}'}
                     </div>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: '#000', margin: '0 0 3px 0' }}>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: cardTitleColor, margin: '0 0 3px 0' }}>
                         {DELIVERABLE_LABELS[deliverableType] || 'Document Ready'}
                       </p>
-                      <p style={{ fontSize: 12, color: '#6B6B6B', margin: '0 0 8px 0', lineHeight: 1.4 }}>
+                      <p style={{ fontSize: 12, color: cardDescColor, margin: '0 0 8px 0', lineHeight: 1.4 }}>
                         {getDeliverableDescription(deliverableType)}
                       </p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span style={{
                           display: 'inline-flex', alignItems: 'center', gap: 5,
-                          padding: '4px 10px', borderRadius: 999, background: '#000',
-                          color: '#fff', fontSize: 11, fontWeight: 600,
+                          padding: '4px 10px', borderRadius: 999,
+                          background: dark ? '#f0f0f2' : '#000',
+                          color: dark ? '#1a1c1e' : '#fff',
+                          fontSize: 11, fontWeight: 600,
                         }}>
                           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" />
@@ -222,12 +256,12 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
           if (m.role === 'user') {
             return (
               <div key={m.id || i} style={{
-                background: 'rgba(0,0,0,0.03)',
+                background: userMsgBg,
                 borderRadius: 10,
                 padding: desktop ? '12px 16px' : '10px 14px',
               }}>
                 {desktop ? <Label text="You" /> : <SenderLabel name="You" accent />}
-                <div className={PROSE_CLASSES} style={textStyle}>
+                <div className={PROSE} style={textStyle}>
                   <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{m.content}</p>
                 </div>
               </div>
@@ -238,11 +272,11 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
           return (
             <div key={m.id || i}>
               {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" />}
-              <div className={PROSE_CLASSES} style={textStyle}>
+              <div className={PROSE} style={textStyle}>
                 <Markdown>{m.content}</Markdown>
               </div>
               {m.created_at && (
-                <p style={{ fontSize: 10, color: '#AAA', margin: '3px 0 0' }}>
+                <p style={{ fontSize: 10, color: timestampColor, margin: '3px 0 0' }}>
                   {formatTimestamp(m.created_at)}
                 </p>
               )}
@@ -254,11 +288,11 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
         {streamingText && (
           <div>
             {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" />}
-            <div className={PROSE_CLASSES} style={textStyle}>
+            <div className={PROSE} style={textStyle}>
               <Markdown>{streamingText}</Markdown>
               <span style={{
                 display: 'inline-block', width: 5, height: 5, borderRadius: '50%',
-                background: '#000', marginLeft: 3, verticalAlign: 'middle',
+                background: dotColor, marginLeft: 3, verticalAlign: 'middle',
                 animation: 'dotPulse 1.4s ease infinite',
               }} />
             </div>
@@ -271,12 +305,12 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
             {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" />}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
               <div style={{ display: 'flex', gap: 4 }}>
-                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#000', animation: 'dotPulse 1.4s ease infinite' }} />
-                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#000', animation: 'dotPulse 1.4s ease infinite 0.15s' }} />
-                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#000', animation: 'dotPulse 1.4s ease infinite 0.3s' }} />
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite' }} />
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite 0.15s' }} />
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite 0.3s' }} />
               </div>
               {activeTool && (
-                <span style={{ fontSize: 12, color: '#999', fontWeight: 500 }}>{activeTool}...</span>
+                <span style={{ fontSize: 12, color: dark ? '#888' : '#999', fontWeight: 500 }}>{activeTool}...</span>
               )}
             </div>
           </div>
@@ -286,8 +320,8 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
         {error && !sending && (
           <div>
             <div style={{
-              background: '#FEF2F2',
-              border: '1px solid #FECACA',
+              background: errorBg,
+              border: `1px solid ${errorBorder}`,
               borderRadius: 10,
               padding: '10px 14px',
             }}>
@@ -297,7 +331,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
                   onClick={onRetry}
                   type="button"
                   style={{
-                    fontSize: 12, fontWeight: 600, color: '#000',
+                    fontSize: 12, fontWeight: 600, color: retryColor,
                     background: 'none', border: 'none', cursor: 'pointer',
                     padding: 0, textDecoration: 'underline',
                   }}
