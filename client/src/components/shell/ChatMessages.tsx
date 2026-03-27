@@ -42,23 +42,16 @@ const DELIVERABLE_ICONS: Record<string, string> = {
   sba_financing_model: '\u{1F3E6}',
 };
 
-/* ─── Yulia label row (above message, not beside) ────────── */
-function YuliaLabel() {
+/* ─── Sender label (above message) ────────────────────────── */
+function SenderLabel({ name, accent }: { name: string; accent?: boolean }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-      <div style={{
-        width: 20, height: 20, borderRadius: '50%',
-        background: '#000', color: '#fff',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 8, fontWeight: 700,
-      }}>
-        Y
-      </div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
       <span style={{
-        fontSize: 12, fontWeight: 700, color: '#000',
-        textTransform: 'uppercase', letterSpacing: '0.08em',
+        fontSize: 11, fontWeight: 700,
+        color: accent ? '#b0004a' : '#94a3b8',
+        textTransform: 'uppercase', letterSpacing: '0.1em',
       }}>
-        Yulia
+        {name}
       </span>
     </div>
   );
@@ -84,12 +77,12 @@ const PROSE_CLASSES = [
 export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, onShortcutClick, desktop }: ChatMessagesProps) {
   const [helpExpanded, setHelpExpanded] = useState(false);
 
-  /* Desktop label: tiny uppercase, muted — matches Stitch mockup */
+  /* Desktop label: tiny uppercase, muted */
   const Label = ({ text }: { text: string }) => (
     <p style={{
-      fontSize: 10, fontWeight: 700, color: text === 'You' ? '#b0004a' : '#94a3b8',
-      textTransform: 'uppercase', letterSpacing: '0.15em',
-      margin: '0 0 6px 0',
+      fontSize: 11, fontWeight: 700, color: text === 'You' ? '#b0004a' : '#94a3b8',
+      textTransform: 'uppercase', letterSpacing: '0.1em',
+      margin: '0 0 4px 0',
     }}>{text}</p>
   );
 
@@ -105,7 +98,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
   return (
     <div style={{
       width: '100%',
-      padding: desktop ? '24px 24px 128px 24px' : '12px 16px 128px 16px',
+      padding: desktop ? '24px 24px 24px 24px' : '12px 16px 16px 16px',
       fontFamily: "'Inter', system-ui, sans-serif",
       userSelect: 'text',
       WebkitUserSelect: 'text',
@@ -178,7 +171,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
           if (isDeliverable && deliverableType) {
             return (
               <div key={m.id || i}>
-                {desktop ? <Label text="Yulia AI" /> : <YuliaLabel />}
+                {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" />}
                 <button
                   onClick={() => onOpenDeliverable?.(m)}
                   type="button"
@@ -227,27 +220,14 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
 
           /* ─── User message ─────────────────────────────── */
           if (m.role === 'user') {
-            /* Desktop: plain text with "You" label, no bubble */
-            if (desktop) {
-              return (
-                <div key={m.id || i}>
-                  <Label text="You" />
-                  <div className={PROSE_CLASSES} style={textStyle}>
-                    <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{m.content}</p>
-                  </div>
-                </div>
-              );
-            }
-            /* Mobile: black pill, right-aligned */
             return (
-              <div key={m.id || i} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <div style={{
-                  maxWidth: '85%',
-                  background: '#000', color: '#fff',
-                  padding: '10px 14px',
-                  borderRadius: '16px 16px 4px 16px',
-                  fontSize: 14, lineHeight: 1.5, fontWeight: 450,
-                }}>
+              <div key={m.id || i} style={{
+                background: 'rgba(0,0,0,0.03)',
+                borderRadius: 10,
+                padding: desktop ? '12px 16px' : '10px 14px',
+              }}>
+                {desktop ? <Label text="You" /> : <SenderLabel name="You" accent />}
+                <div className={PROSE_CLASSES} style={textStyle}>
                   <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{m.content}</p>
                 </div>
               </div>
@@ -257,7 +237,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
           /* ─── Assistant message ─────────────────────────── */
           return (
             <div key={m.id || i}>
-              {desktop ? <Label text="Yulia AI" /> : <YuliaLabel />}
+              {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" />}
               <div className={PROSE_CLASSES} style={textStyle}>
                 <Markdown>{m.content}</Markdown>
               </div>
@@ -273,7 +253,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
         {/* ─── Streaming message ─────────────────────────── */}
         {streamingText && (
           <div>
-            {desktop ? <Label text="Yulia AI" /> : <YuliaLabel />}
+            {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" />}
             <div className={PROSE_CLASSES} style={textStyle}>
               <Markdown>{streamingText}</Markdown>
               <span style={{
@@ -288,7 +268,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
         {/* ─── Typing indicator ──────────────────────────── */}
         {sending && !streamingText && (
           <div>
-            {desktop ? <Label text="Yulia AI" /> : <YuliaLabel />}
+            {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" />}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
               <div style={{ display: 'flex', gap: 4 }}>
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#000', animation: 'dotPulse 1.4s ease infinite' }} />
