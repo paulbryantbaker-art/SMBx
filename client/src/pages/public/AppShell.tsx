@@ -1516,7 +1516,7 @@ export default function AppShell() {
       )}
 
       {/* ═══ FLOATING CTA — "Start chatting" ═══ */}
-      {!user && viewState === 'landing' && (
+      {!user && viewState === 'landing' && activeTab !== 'home' && (
         isMobile ? (
           /* Mobile: bottom-right FAB — only on landing pages, not chat */
           <button
