@@ -7,9 +7,18 @@ import {
   useEffect,
   type ReactNode,
 } from 'react';
-import type { Conversation } from '../components/chat/Sidebar';
-
 /* ─── Types ──────────────────────────────────────────────────── */
+
+export interface Conversation {
+  id: number;
+  title: string;
+  deal_id: number | null;
+  journey?: string | null;
+  current_gate?: string | null;
+  business_name?: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface ChatMessage {
   id: number;

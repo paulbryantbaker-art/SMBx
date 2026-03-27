@@ -6,7 +6,7 @@ import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
 import { fetchCBPData, fetchFREDData, calculateSBABankability, generateMarketOverview } from '../services/marketDataService.js';
 import { generateIntelligenceReport } from '../services/generators/intelligenceReport.js';
-import { isExecutionFeePaid } from '../services/dealExecutionFee.js';
+// dealExecutionFee removed — subscription model handles access
 
 export const intelligenceRouter = Router();
 intelligenceRouter.use(requireAuth);
@@ -190,17 +190,8 @@ intelligenceRouter.post('/intelligence/reports/generate', async (req, res) => {
       }
     }
 
-    // Execution fee model: intelligence reports are included if deal fee is paid
-    if (dealId) {
-      const paid = await isExecutionFeePaid(parseInt(dealId as string));
-      if (!paid) {
-        return res.status(402).json({
-          error: 'Execution fee required',
-          message: 'Pay the deal execution fee to unlock intelligence reports.',
-        });
-      }
-    }
-    const reportPrice = 0; // included in platform fee
+    // TODO: subscription access check here
+    const reportPrice = 0;
 
     // Create report record
     const [reportRecord] = await sql`

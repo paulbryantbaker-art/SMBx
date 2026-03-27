@@ -4,7 +4,7 @@
  */
 import { sql } from '../db.js';
 
-const CENSUS_CBP_BASE = 'https://api.census.gov/data/2021/cbp';
+const CENSUS_CBP_BASE = 'https://api.census.gov/data/2023/cbp';
 const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations';
 const BLS_BASE = 'https://api.bls.gov/publicAPI/v2/timeseries/data/';
 

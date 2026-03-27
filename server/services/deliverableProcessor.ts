@@ -77,7 +77,7 @@ function normalizeDeliverableType(raw: string): string {
     // ValueLens aliases
     valuelens: 'valuelens',
     value_lens: 'valuelens',
-    bizestimate: 'valuelens',
+    // bizestimate alias removed — use valuelens
   };
   return ALIASES[raw] || raw;
 }
