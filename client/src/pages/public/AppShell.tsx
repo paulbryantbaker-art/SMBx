@@ -529,7 +529,13 @@ export default function AppShell() {
 
   // Browser back/forward
   useEffect(() => {
-    const onPopState = () => {
+    const onPopState = (e: PopStateEvent) => {
+      // If an artifact/canvas is open, swipe-back closes it instead of navigating
+      if (canvasMarkdown || viewingDeliverable !== null) {
+        setCanvasMarkdown(null);
+        setViewingDeliverable(null);
+        return;
+      }
       const path = window.location.pathname;
       setViewState(pathToViewState(path));
       setActiveTab(pathToTab(path));
@@ -541,7 +547,7 @@ export default function AppShell() {
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, canvasMarkdown, viewingDeliverable]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-scroll on new messages — instant on first entry, smooth after
   const chatEnteredAt = useRef(0);
@@ -594,21 +600,21 @@ export default function AppShell() {
     handleSend(text);
   }, [handleSend]);
 
-  // Back to landing — replace so user doesn't get stuck in back-forward loop
+  // Back to landing
   const handleBack = useCallback(() => {
     setHeroFocused(false);
     setViewState('landing');
     const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
-    navigate(urlMap[activeTab], { replace: true });
+    navigate(urlMap[activeTab]);
   }, [activeTab, navigate]);
 
-  // Tab click — same-level navigation within landing, replace history
+  // Tab click — push so swipe-back returns to where user came from
   const handleTabClick = useCallback((tab: TabId) => {
     setActiveTab(tab);
     setViewState('landing');
     setIsMobileSidebarOpen(false);
     const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
-    if (window.location.pathname !== urlMap[tab]) navigate(urlMap[tab], { replace: true });
+    if (window.location.pathname !== urlMap[tab]) navigate(urlMap[tab]);
   }, [navigate]);
 
   // New chat — same-level within chat, replace history
@@ -664,6 +670,8 @@ export default function AppShell() {
       sba_financing_model: 'SBA Financing Model',
     };
     setCanvasMarkdown({ content: msg.content, title: LABELS[type || ''] || 'Document' });
+    // Push artifact state so swipe-back closes it and returns to chat
+    window.history.pushState({ artifact: true }, '');
   }, []);
 
   const closeCanvas = useCallback(() => {
@@ -1175,7 +1183,7 @@ export default function AppShell() {
                     dealId={authChat.activeDealId}
                     onUnlocked={(toGate, deliverableId) => {
                       authChat.setPaywallData(null);
-                      if (deliverableId) setViewingDeliverable(deliverableId);
+                      if (deliverableId) { setViewingDeliverable(deliverableId); window.history.pushState({ artifact: true }, ''); }
                     }}
                   />
                 </div>
@@ -1204,7 +1212,7 @@ export default function AppShell() {
 
           {viewState === 'dataroom' && user && (
             <div className="max-w-5xl mx-auto px-4 py-6">
-              <DataRoom dealId={authChat.activeDealId} onViewDeliverable={(id) => setViewingDeliverable(id)} />
+              <DataRoom dealId={authChat.activeDealId} onViewDeliverable={(id) => { setViewingDeliverable(id); window.history.pushState({ artifact: true }, ''); }} />
             </div>
           )}
 
@@ -1239,7 +1247,7 @@ export default function AppShell() {
           {/* Subscription model — no wallet view */}
 
           {viewState === 'documents' && user && (
-            <DocumentLibrary onViewDeliverable={(id) => setViewingDeliverable(id)} />
+            <DocumentLibrary onViewDeliverable={(id) => { setViewingDeliverable(id); window.history.pushState({ artifact: true }, ''); }} />
           )}
 
           {viewState === 'analytics' && user && (
