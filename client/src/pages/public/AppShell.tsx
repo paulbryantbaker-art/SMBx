@@ -8,7 +8,7 @@ import { useAppHeight } from '../../hooks/useAppHeight';
 import { useDarkMode, DarkModeToggle } from '../../components/shared/DarkModeToggle';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
 import ChatMessages from '../../components/shell/ChatMessages';
-import DotField from '../../components/shared/DotField';
+// Dot grid now lives on body in index.css — no component needed
 // Authenticated tool components
 import PipelinePanel from '../../components/chat/PipelinePanel';
 import DataRoom from '../../components/chat/DataRoom';
@@ -1112,16 +1112,7 @@ export default function AppShell() {
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE — New Design ═══ */}
-                <main
-                  className="flex-1 flex flex-col relative"
-                  style={{
-                    backgroundImage: dark
-                      ? 'radial-gradient(circle, rgba(255,255,255,0.15) 1.2px, transparent 1.2px)'
-                      : 'radial-gradient(circle, rgba(0,0,0,0.12) 1.2px, transparent 1.2px)',
-                    backgroundSize: '26px 26px',
-                    backgroundPosition: '13px 13px',
-                  }}
-                >
+                <main className="flex-1 flex flex-col relative">
 
                   {/* Desktop: single centered cluster */}
                   <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">

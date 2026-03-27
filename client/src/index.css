@@ -50,6 +50,9 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
 html, body {
   width: 100%;
   background-color: #f9f9fc !important;
+  background-image: radial-gradient(circle, rgba(0,0,0,0.10) 1.2px, transparent 1.2px);
+  background-size: 26px 26px;
+  background-position: 13px 13px;
 }
 /* Default: natural document flow for landing/journey pages */
 #root {
@@ -94,6 +97,9 @@ html.dark {
 }
 html.dark, html.dark body {
   background-color: #1a1c1e !important;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1.2px, transparent 1.2px);
+  background-size: 26px 26px;
+  background-position: 13px 13px;
   color-scheme: dark;
 }
 html.dark #root {
