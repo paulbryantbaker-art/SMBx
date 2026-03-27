@@ -901,6 +901,7 @@ export default function AppShell() {
       {/* Chats section */}
       <div className="flex flex-col items-center gap-1 w-full px-2 flex-1 min-h-0">
         <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Chats</span>
+        {user && (
         <button
           onClick={() => { handleNewChat(); }}
           className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5'}`}
@@ -910,6 +911,7 @@ export default function AppShell() {
           <span className="material-symbols-outlined text-[20px]">add_comment</span>
           <span className="text-[9px] font-semibold">New</span>
         </button>
+        )}
         <button
           onClick={() => { setViewState('chat'); navigate('/chat'); }}
           className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
@@ -1451,6 +1453,7 @@ export default function AppShell() {
               );
             })}
             <div className="mt-auto flex flex-col gap-2">
+              {user && (
               <button
                 onClick={() => { setIsMobileSidebarOpen(false); handleNewChat(); }}
                 className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5'}`}
@@ -1459,6 +1462,7 @@ export default function AppShell() {
                 <span className="material-symbols-outlined text-[20px]">add_comment</span>
                 New Chat
               </button>
+              )}
               <button
                 onClick={() => { setIsMobileSidebarOpen(false); if (user) { setViewState('settings'); navigate('/settings'); } else navigate('/login'); }}
                 className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 bg-transparent' : 'text-[#636467] bg-transparent'}`}
