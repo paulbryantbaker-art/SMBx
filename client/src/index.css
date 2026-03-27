@@ -52,13 +52,12 @@ html, body {
 }
 #root {
   background-color: transparent;
+  background-image: radial-gradient(circle, #d5d5d8 1px, transparent 1px);
+  background-size: 24px 24px;
+  min-height: 100dvh;
 }
 #app-root {
   background-color: #f9f9fc;
-}
-body {
-  background-image: radial-gradient(circle, #d5d5d8 1px, transparent 1px);
-  background-size: 24px 24px;
 }
 html.dark {
   --ink: #f0f0f2;
@@ -86,13 +85,11 @@ html.dark, html.dark body {
 }
 html.dark #root {
   background-color: transparent !important;
+  background-image: radial-gradient(circle, #2a2c2e 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 html.dark #app-root {
   background-color: #1a1c1e !important;
-}
-html.dark body {
-  background-image: radial-gradient(circle, #2a2c2e 1px, transparent 1px);
-  background-size: 24px 24px;
 }
 
 /* Theme transition — applied temporarily during dark/light toggle */
@@ -111,11 +108,15 @@ html {
 
 body {
   margin: 0;
+  padding: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100%;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Stitch V2 editorial title class */
