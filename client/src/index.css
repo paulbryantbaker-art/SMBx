@@ -48,15 +48,18 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
 }
 
 html, body {
+  width: 100%;
   background-color: #f9f9fc;
+  overflow-x: hidden;
 }
 #root {
-  background-color: transparent;
-  background-image: radial-gradient(circle, #d5d5d8 1px, transparent 1px);
-  background-size: 24px 24px;
-  min-height: 100dvh;
+  width: 100%;
+  height: var(--app-height, 100dvh);
+  overflow: hidden;
 }
 #app-root {
+  width: 100%;
+  height: 100%;
   background-color: #f9f9fc;
 }
 html.dark {
@@ -85,8 +88,6 @@ html.dark, html.dark body {
 }
 html.dark #root {
   background-color: transparent !important;
-  background-image: radial-gradient(circle, #2a2c2e 1px, transparent 1px);
-  background-size: 24px 24px;
 }
 html.dark #app-root {
   background-color: #1a1c1e !important;
@@ -102,11 +103,13 @@ html.theme-transition *::after {
 }
 
 html {
+  width: 100%;
   height: 100%;
   color-scheme: light dark;
 }
 
 body {
+  width: 100%;
   margin: 0;
   padding: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -115,6 +118,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   height: 100%;
   min-height: 100dvh;
+  overflow: hidden;
   overscroll-behavior-y: none;
   -webkit-text-size-adjust: 100%;
 }
@@ -484,10 +488,7 @@ input[type="range"]::-moz-range-track {
   }
 }
 
-/* Prevent horizontal overflow */
-#root {
-  overflow-x: hidden;
-}
+/* #root overflow handled in base styles above */
 
 /* ═══ PREMIUM MICRO-INTERACTIONS ═══ */
 
