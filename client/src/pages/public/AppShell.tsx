@@ -1116,9 +1116,10 @@ export default function AppShell() {
                   className="flex-1 flex flex-col relative"
                   style={{
                     backgroundImage: dark
-                      ? 'radial-gradient(circle, rgba(255,255,255,0.10) 1px, transparent 1px)'
-                      : 'radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px)',
-                    backgroundSize: '28px 28px',
+                      ? 'radial-gradient(circle, rgba(255,255,255,0.15) 1.2px, transparent 1.2px)'
+                      : 'radial-gradient(circle, rgba(0,0,0,0.12) 1.2px, transparent 1.2px)',
+                    backgroundSize: '26px 26px',
+                    backgroundPosition: '13px 13px',
                   }}
                 >
 
