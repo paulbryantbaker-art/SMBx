@@ -12,10 +12,16 @@ export function useAppHeight(_enabled = true) {
     const vv = window.visualViewport;
 
     function update() {
-      const h = vv ? vv.height : window.innerHeight;
+      const fullHeight = window.innerHeight;
+      const vvHeight = vv ? vv.height : fullHeight;
       const offset = vv ? vv.offsetTop : 0;
+
+      // Only use visualViewport height when keyboard is open (>100px shrinkage)
+      const keyboardOpen = (fullHeight - vvHeight) > 100;
+      const h = keyboardOpen ? vvHeight : fullHeight;
+
       document.documentElement.style.setProperty('--app-height', h + 'px');
-      setAppOffset(offset);
+      setAppOffset(keyboardOpen ? offset : 0);
     }
 
     if (vv) {
