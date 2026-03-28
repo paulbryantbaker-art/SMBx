@@ -59,7 +59,7 @@ function getGreeting(): string {
 /* ═══ LOGO — "smb" + X image + ".ai" in Poppins 800 ═══ */
 function LogoImg({ height = 28, style, className, dark }: { height?: number; style?: React.CSSProperties; className?: string; dark?: boolean }) {
   const fontSize = height;
-  const xSize = fontSize * 0.78;
+  const xSize = fontSize * 1.15;
   const color = dark ? '#f0f0f2' : '#1a1c1e';
   return (
     <span
@@ -68,7 +68,7 @@ function LogoImg({ height = 28, style, className, dark }: { height?: number; sty
       aria-label="smbx.ai"
     >
       smb
-      <img src="/x-logo.png" alt="" draggable={false} style={{ height: xSize, width: xSize, objectFit: 'contain', margin: `0 ${-xSize * 0.04}px`, filter: 'brightness(1.45) saturate(1.2)' }} />
+      <img src="/X2 Transaparant.png" alt="" draggable={false} style={{ height: xSize, width: xSize, objectFit: 'contain', margin: `0 ${-xSize * 0.06}px`, verticalAlign: 'middle' }} />
       .ai
     </span>
   );
