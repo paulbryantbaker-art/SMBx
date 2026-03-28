@@ -1,9 +1,7 @@
 FROM node:22-alpine
 
-# System deps for canvas (chartjs-node-canvas) and Chromium (puppeteer-core)
+# Chromium for Puppeteer PDF rendering (charts render via Chart.js CDN in-page)
 RUN apk add --no-cache \
-  build-base g++ make python3 \
-  cairo-dev pango-dev jpeg-dev giflib-dev librsvg-dev pixman-dev \
   chromium nss freetype harfbuzz ca-certificates ttf-freefont \
   font-noto font-noto-cjk
 

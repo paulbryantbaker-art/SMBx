@@ -1,28 +1,20 @@
 /**
- * Chart Service — Generates branded Chart.js charts as PNG buffers.
+ * Chart Service — Generates chart configurations for embedding in HTML templates.
  *
- * Uses chartjs-node-canvas for server-side rendering (no browser needed).
- * All charts use smbx.ai brand colors from smbxBrand.ts.
+ * Charts render inside the Puppeteer page using Chart.js CDN (loaded in base.ts).
+ * No native canvas dependency needed. Returns Chart.js config objects that get
+ * serialized into the HTML template as inline <script> blocks.
  */
-import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { COLORS } from '../templates/smbxBrand.js';
 
-// ─── Chart Renderer (singleton) ─────────────────────────────────────
+// ─── Types ──────────────────────────────────────────────────────────
 
-const WIDTH = 600;
-const HEIGHT = 280;
-
-// Each chart creates its own renderer at the needed size
-
-export interface ChartOutput {
-  png: Buffer;
-  width: number;
-  height: number;
-  base64: string;
-}
-
-function toOutput(png: Buffer, w: number, h: number): ChartOutput {
-  return { png, width: w, height: h, base64: `data:image/png;base64,${png.toString('base64')}` };
+export interface ChartConfig {
+  type: string;
+  data: Record<string, any>;
+  options: Record<string, any>;
+  width?: number;
+  height?: number;
 }
 
 // ─── Formatting helpers ─────────────────────────────────────────────
@@ -34,33 +26,17 @@ function fmtDollars(cents: number): string {
   return `$${d.toLocaleString()}`;
 }
 
-// ─── Chart 1: Valuation Range Bar ───────────────────────────────────
+// ─── Chart Configs ──────────────────────────────────────────────────
 
-export async function generateValuationRangeChart(
-  lowCents: number,
-  midCents: number,
-  highCents: number,
-): Promise<ChartOutput> {
-  const w = 560;
-  const h = 200;
-  const r = new ChartJSNodeCanvas({ width: w, height: h, backgroundColour: 'transparent' });
-
-  const png = await r.renderToBuffer({
+export function valuationRangeChartConfig(lowCents: number, midCents: number, highCents: number): ChartConfig {
+  return {
     type: 'bar',
     data: {
       labels: ['Low', 'Mid (Most Likely)', 'High'],
       datasets: [{
         data: [lowCents / 100, midCents / 100, highCents / 100],
-        backgroundColor: [
-          COLORS.tableHeader,
-          COLORS.terra,
-          `${COLORS.terra}44`,
-        ],
-        borderColor: [
-          COLORS.border,
-          COLORS.terra,
-          COLORS.terra,
-        ],
+        backgroundColor: [COLORS.tableHeader, COLORS.terra, `${COLORS.terra}44`],
+        borderColor: [COLORS.border, COLORS.terra, COLORS.terra],
         borderWidth: 1,
         borderRadius: 4,
         barPercentage: 0.6,
@@ -68,239 +44,85 @@ export async function generateValuationRangeChart(
     },
     options: {
       indexAxis: 'y',
-      responsive: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false },
-      },
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
       scales: {
-        x: {
-          beginAtZero: true,
-          grid: { color: 'rgba(0,0,0,0.04)' },
-          ticks: {
-            callback: (v) => fmtDollars(Number(v) * 100),
-            color: COLORS.textMuted,
-            font: { size: 11 },
-          },
-        },
-        y: {
-          grid: { display: false },
-          ticks: {
-            color: COLORS.text,
-            font: { size: 12, weight: 'bold' },
-          },
-        },
+        x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: COLORS.textMuted, font: { size: 11 } } },
+        y: { grid: { display: false }, ticks: { color: COLORS.text, font: { size: 12, weight: 'bold' } } },
       },
     },
-  });
-
-  return toOutput(png, w, h);
+    height: 180,
+  };
 }
 
-// ─── Chart 2: Multiple Comparison (Bullet / Range) ──────────────────
-
-export async function generateMultipleComparisonChart(
-  businessMultiple: number,
-  leagueMin: number,
-  leagueMax: number,
-  metric: string,
-): Promise<ChartOutput> {
-  const w = 560;
-  const h = 140;
-  const r = new ChartJSNodeCanvas({ width: w, height: h, backgroundColour: 'transparent' });
-
-  const png = await r.renderToBuffer({
+export function multipleComparisonChartConfig(businessMultiple: number, leagueMin: number, leagueMax: number, metric: string): ChartConfig {
+  return {
     type: 'bar',
     data: {
       labels: [`${metric} Multiple`],
       datasets: [
-        {
-          label: 'League Range',
-          data: [leagueMax],
-          backgroundColor: `${COLORS.tableHeader}`,
-          borderColor: COLORS.border,
-          borderWidth: 1,
-          borderRadius: 4,
-          barPercentage: 0.5,
-        },
-        {
-          label: 'This Business',
-          data: [businessMultiple],
-          backgroundColor: COLORS.terra,
-          borderColor: COLORS.terraDark,
-          borderWidth: 1,
-          borderRadius: 4,
-          barPercentage: 0.3,
-        },
+        { label: 'League Range', data: [leagueMax], backgroundColor: COLORS.tableHeader, borderColor: COLORS.border, borderWidth: 1, borderRadius: 4, barPercentage: 0.5 },
+        { label: 'This Business', data: [businessMultiple], backgroundColor: COLORS.terra, borderColor: COLORS.terraDark, borderWidth: 1, borderRadius: 4, barPercentage: 0.3 },
       ],
     },
     options: {
       indexAxis: 'y',
-      responsive: false,
+      responsive: true,
+      maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: true,
-          position: 'bottom',
-          labels: {
-            color: COLORS.textMuted,
-            font: { size: 10 },
-            boxWidth: 12,
-            padding: 16,
-          },
-        },
+        legend: { display: true, position: 'bottom', labels: { color: COLORS.textMuted, font: { size: 10 }, boxWidth: 12, padding: 16 } },
         tooltip: { enabled: false },
       },
       scales: {
-        x: {
-          min: 0,
-          max: Math.ceil(leagueMax * 1.3),
-          grid: { color: 'rgba(0,0,0,0.04)' },
-          ticks: {
-            callback: (v) => `${Number(v).toFixed(1)}x`,
-            color: COLORS.textMuted,
-            font: { size: 11 },
-          },
-        },
-        y: {
-          grid: { display: false },
-          ticks: {
-            color: COLORS.text,
-            font: { size: 12, weight: 'bold' },
-          },
-        },
+        x: { min: 0, max: Math.ceil(leagueMax * 1.3), grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: COLORS.textMuted, font: { size: 11 } } },
+        y: { grid: { display: false }, ticks: { color: COLORS.text, font: { size: 12, weight: 'bold' } } },
       },
     },
-  });
-
-  return toOutput(png, w, h);
+    height: 120,
+  };
 }
 
-// ─── Chart 3: Deal Score Radar ──────────────────────────────────────
-
-export async function generateDealScoreRadar(
-  factors: { name: string; score: number }[],
-): Promise<ChartOutput> {
-  const w = 400;
-  const h = 400;
-  const r = new ChartJSNodeCanvas({ width: w, height: h, backgroundColour: 'transparent' });
-
-  const png = await r.renderToBuffer({
-    type: 'radar',
-    data: {
-      labels: factors.map(f => f.name),
-      datasets: [{
-        data: factors.map(f => f.score),
-        backgroundColor: `${COLORS.terra}20`,
-        borderColor: COLORS.terra,
-        borderWidth: 2,
-        pointBackgroundColor: COLORS.terra,
-        pointRadius: 4,
-        pointHoverRadius: 5,
-      }],
-    },
-    options: {
-      responsive: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false },
-      },
-      scales: {
-        r: {
-          min: 0,
-          max: 100,
-          beginAtZero: true,
-          angleLines: { color: 'rgba(0,0,0,0.06)' },
-          grid: { color: 'rgba(0,0,0,0.06)' },
-          pointLabels: {
-            color: COLORS.text,
-            font: { size: 11 },
-          },
-          ticks: {
-            display: false,
-            stepSize: 25,
-          },
-        },
-      },
-    },
-  });
-
-  return toOutput(png, w, h);
-}
-
-// ─── Chart 4: Earnings Breakdown ────────────────────────────────────
-
-export async function generateEarningsBreakdownChart(
-  revenueCents: number,
-  sdeCents: number | null,
-  ebitdaCents: number | null,
-  ownerCompCents: number | null,
-): Promise<ChartOutput> {
-  const w = 560;
-  const h = 220;
-  const r = new ChartJSNodeCanvas({ width: w, height: h, backgroundColour: 'transparent' });
-
+export function earningsBreakdownChartConfig(revenueCents: number, sdeCents: number | null, ebitdaCents: number | null, ownerCompCents: number | null): ChartConfig {
   const labels: string[] = [];
   const values: number[] = [];
   const colors: string[] = [];
 
-  if (revenueCents) {
-    labels.push('Revenue');
-    values.push(revenueCents / 100);
-    colors.push('#6E6A63');
-  }
-  if (ownerCompCents) {
-    labels.push("Owner's Comp");
-    values.push(ownerCompCents / 100);
-    colors.push(COLORS.tableHeader);
-  }
-  if (sdeCents) {
-    labels.push('SDE');
-    values.push(sdeCents / 100);
-    colors.push(COLORS.terra);
-  }
-  if (ebitdaCents) {
-    labels.push('EBITDA');
-    values.push(ebitdaCents / 100);
-    colors.push(COLORS.terraDark);
-  }
+  if (revenueCents) { labels.push('Revenue'); values.push(revenueCents / 100); colors.push('#6E6A63'); }
+  if (ownerCompCents) { labels.push("Owner's Comp"); values.push(ownerCompCents / 100); colors.push(COLORS.tableHeader); }
+  if (sdeCents) { labels.push('SDE'); values.push(sdeCents / 100); colors.push(COLORS.terra); }
+  if (ebitdaCents) { labels.push('EBITDA'); values.push(ebitdaCents / 100); colors.push(COLORS.terraDark); }
 
-  const png = await r.renderToBuffer({
+  return {
     type: 'bar',
     data: {
       labels,
-      datasets: [{
-        data: values,
-        backgroundColor: colors,
-        borderRadius: 4,
-        barPercentage: 0.55,
-      }],
+      datasets: [{ data: values, backgroundColor: colors, borderRadius: 4, barPercentage: 0.55 }],
     },
     options: {
-      responsive: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false },
-      },
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
       scales: {
-        x: {
-          grid: { display: false },
-          ticks: {
-            color: COLORS.text,
-            font: { size: 11, weight: 'bold' },
-          },
-        },
-        y: {
-          beginAtZero: true,
-          grid: { color: 'rgba(0,0,0,0.04)' },
-          ticks: {
-            callback: (v) => fmtDollars(Number(v) * 100),
-            color: COLORS.textMuted,
-            font: { size: 10 },
-          },
-        },
+        x: { grid: { display: false }, ticks: { color: COLORS.text, font: { size: 11, weight: 'bold' } } },
+        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: COLORS.textMuted, font: { size: 10 } } },
       },
     },
-  });
+    height: 200,
+  };
+}
 
-  return toOutput(png, w, h);
+/**
+ * Render a chart config as an HTML <canvas> + <script> block.
+ * Chart.js is loaded via CDN in the HTML template's <head>.
+ */
+export function chartToHtml(config: ChartConfig, id: string): string {
+  return `
+    <div style="height: ${config.height || 200}px; position: relative;">
+      <canvas id="${id}"></canvas>
+    </div>
+    <script>
+      new Chart(document.getElementById('${id}'), ${JSON.stringify({ type: config.type, data: config.data, options: config.options })});
+    </script>
+  `;
 }

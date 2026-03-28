@@ -5,7 +5,7 @@
  * This is the conversion trigger — the first document a free user sees.
  */
 import { wrapHtml } from './base.js';
-import { coverPageHtml, tableHtml, chartHtml, disclaimerHtml, watermarkHtml } from './components.js';
+import { coverPageHtml, tableHtml, disclaimerHtml, watermarkHtml } from './components.js';
 
 function fmtDollars(cents: number | null | undefined): string {
   if (!cents) return '—';
@@ -105,14 +105,14 @@ export function valueLensTemplate(data: Record<string, any>, charts: Record<stri
           </p>
         </div>
 
-        ${charts.valuationRange ? chartHtml(charts.valuationRange, 'Valuation range distribution') : ''}
+        ${charts.valuationRange || ''}
       </div>
 
       <!-- Multiple Context -->
       ${charts.multipleComparison ? `
       <div class="no-break" style="margin-bottom: 28px;">
         <h2 class="section-subtitle">Market Multiple Context</h2>
-        ${chartHtml(charts.multipleComparison, `${leagueInfo.metric} multiple positioning within ${league} league range`)}
+        ${charts.multipleComparison}
       </div>
       ` : ''}
 
@@ -120,7 +120,7 @@ export function valueLensTemplate(data: Record<string, any>, charts: Record<stri
       ${charts.earningsBreakdown ? `
       <div class="no-break" style="margin-bottom: 28px;">
         <h2 class="section-subtitle">Earnings Profile</h2>
-        ${chartHtml(charts.earningsBreakdown, 'Revenue to earnings progression')}
+        ${charts.earningsBreakdown}
       </div>
       ` : ''}
 

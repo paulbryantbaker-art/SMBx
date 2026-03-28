@@ -1,15 +1,15 @@
 /**
- * Premium PDF Renderer — HTML→PDF via Puppeteer with Chart.js charts.
+ * Premium PDF Renderer — HTML→PDF via Puppeteer with Chart.js.
  *
- * Uses a singleton headless Chromium browser. Templates are HTML with
- * Tailwind CDN + Google Fonts. Charts pre-rendered as PNG base64 by chartService.
+ * Charts render inside the Puppeteer page using Chart.js CDN (no native canvas dep).
+ * Singleton headless Chromium browser.
  */
 import puppeteer, { type Browser } from 'puppeteer-core';
 import {
-  generateValuationRangeChart,
-  generateMultipleComparisonChart,
-  generateDealScoreRadar,
-  generateEarningsBreakdownChart,
+  valuationRangeChartConfig,
+  multipleComparisonChartConfig,
+  earningsBreakdownChartConfig,
+  chartToHtml,
 } from './chartService.js';
 import { valueLensTemplate } from '../templates/pdf/valueLens.js';
 
@@ -20,8 +20,7 @@ let browser: Browser | null = null;
 async function getBrowser(): Promise<Browser> {
   if (browser && browser.connected) return browser;
 
-  const execPath = process.env.PUPPETEER_EXECUTABLE_PATH
-    || '/usr/bin/chromium-browser';
+  const execPath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser';
 
   // In dev on macOS, try common Chrome paths
   const devPaths = [
@@ -40,13 +39,7 @@ async function getBrowser(): Promise<Browser> {
   browser = await puppeteer.launch({
     executablePath: finalPath,
     headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--single-process',
-    ],
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--single-process'],
   });
 
   return browser;
@@ -54,7 +47,7 @@ async function getBrowser(): Promise<Browser> {
 
 // ─── Template Registry ──────────────────────────────────────────────
 
-const TEMPLATES: Record<string, (data: any, charts: Record<string, string>) => string> = {
+const TEMPLATES: Record<string, (data: any, chartHtmlBlocks: Record<string, string>) => string> = {
   valueLens: valueLensTemplate,
 };
 
@@ -71,12 +64,9 @@ export function getPremiumTemplateKey(slug: string): string | undefined {
   return PREMIUM_SLUGS[slug];
 }
 
-// ─── Chart Pre-rendering ────────────────────────────────────────────
+// ─── Chart Generation ───────────────────────────────────────────────
 
-async function generateChartsForTemplate(
-  templateKey: string,
-  data: Record<string, any>,
-): Promise<Record<string, string>> {
+function generateChartHtml(templateKey: string, data: Record<string, any>): Record<string, string> {
   const charts: Record<string, string> = {};
 
   if (templateKey === 'valueLens') {
@@ -84,7 +74,6 @@ async function generateChartsForTemplate(
     const earnings = fd.sde || fd.ebitda || 0;
     const league = fd.league || 'L1';
 
-    // League multiple ranges
     const LEAGUE_MULTIPLES: Record<string, { min: number; max: number; metric: string }> = {
       L1: { min: 2.0, max: 3.5, metric: 'SDE' },
       L2: { min: 3.0, max: 5.0, metric: 'SDE' },
@@ -102,30 +91,14 @@ async function generateChartsForTemplate(
       const mid = Math.round(earnings * midMult);
       const high = Math.round(earnings * mult.max);
 
-      const valChart = await generateValuationRangeChart(low, mid, high);
-      charts.valuationRange = valChart.base64;
-
-      const multChart = await generateMultipleComparisonChart(midMult, mult.min, mult.max, mult.metric);
-      charts.multipleComparison = multChart.base64;
+      charts.valuationRange = chartToHtml(valuationRangeChartConfig(low, mid, high), 'chart-valuation');
+      charts.multipleComparison = chartToHtml(multipleComparisonChartConfig(midMult, mult.min, mult.max, mult.metric), 'chart-multiple');
 
       if (fd.revenue) {
-        const earningsChart = await generateEarningsBreakdownChart(
-          fd.revenue, fd.sde || null, fd.ebitda || null, fd.owner_compensation || null,
+        charts.earningsBreakdown = chartToHtml(
+          earningsBreakdownChartConfig(fd.revenue, fd.sde || null, fd.ebitda || null, fd.owner_compensation || null),
+          'chart-earnings',
         );
-        charts.earningsBreakdown = earningsChart.base64;
-      }
-    }
-
-    // Deal score radar if factor data exists
-    if (fd.seven_factor_scores || data.seven_factor_scores) {
-      const scores = fd.seven_factor_scores || data.seven_factor_scores;
-      const factors = Object.entries(scores).map(([name, score]) => ({
-        name: name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-        score: Number(score),
-      }));
-      if (factors.length >= 3) {
-        const radarChart = await generateDealScoreRadar(factors);
-        charts.dealScoreRadar = radarChart.base64;
       }
     }
   }
@@ -151,10 +124,10 @@ export async function renderPremiumPdf(options: PremiumPdfOptions): Promise<Buff
     throw new Error(`No premium template found for: ${options.template}`);
   }
 
-  // Generate charts
-  const charts = await generateChartsForTemplate(templateKey, options.data);
+  // Generate chart HTML blocks
+  const charts = generateChartHtml(templateKey, options.data);
 
-  // Build HTML
+  // Build full HTML
   const html = templateFn(
     { ...options.data, title: options.title, watermark: options.watermark, dealName: options.dealName },
     charts,
@@ -166,6 +139,12 @@ export async function renderPremiumPdf(options: PremiumPdfOptions): Promise<Buff
 
   try {
     await page.setContent(html, { waitUntil: 'networkidle0', timeout: 15000 });
+
+    // Wait for Chart.js to render
+    await page.waitForFunction(() => {
+      const canvases = document.querySelectorAll('canvas');
+      return canvases.length === 0 || Array.from(canvases).every(c => c.getContext('2d') !== null);
+    }, { timeout: 5000 }).catch(() => {});
 
     const pdf = await page.pdf({
       format: 'Letter',
