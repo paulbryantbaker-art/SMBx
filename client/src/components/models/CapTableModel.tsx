@@ -69,7 +69,7 @@ export default function CapTableModel({ tabId }: Props) {
               <span className="text-xs font-bold" style={{ color: COLORS[i % COLORS.length] }}>{round.label}</span>
               <button onClick={() => removeRound(i)} className="text-[10px] px-2 py-0.5 rounded bg-transparent border border-[#DDD9D1] cursor-pointer" style={{ color: '#6E6A63' }}>Remove</button>
             </div>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div>
                 <label className="block text-[9px] font-medium mb-0.5" style={{ color: '#6E6A63' }}>Investment</label>
                 <input type="number" value={(round.investment || 0) / 100} onChange={e => updateRound(i, 'investment', Number(e.target.value) * 100)}
@@ -101,7 +101,7 @@ export default function CapTableModel({ tabId }: Props) {
 
       {/* Ownership Chart + Table */}
       {dilution && dilution.rows.length > 0 && (
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Pie chart */}
           <div>
             <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>Ownership</h3>

@@ -69,7 +69,7 @@ export default function ComparisonModel({ tabId }: Props) {
       {linkedTabs.length >= 2 && linkedTabs.some(t => t.outputs.lbo) && (
         <div>
           <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>Risk-Return Profile</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {linkedTabs.map(t => {
               const lbo = t.outputs.lbo;
               if (!lbo) return null;

@@ -20,7 +20,7 @@ export default function TaxImpactModel({ tabId }: Props) {
       <h2 className="text-base font-bold m-0" style={{ fontFamily: 'Sora, sans-serif' }}>Tax Impact Analysis</h2>
 
       {/* Inputs */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <ModelInput label="Sale Price" value={a.salePrice || 0} onChange={v => update(tabId, 'salePrice', v)} prefix="$" />
         <ModelInput label="Seller's Basis" value={a.sellerBasis || 0} onChange={v => update(tabId, 'sellerBasis', v)} prefix="$" />
         <ModelSlider label="State Tax Rate" value={a.stateTaxRate ?? 0} onChange={v => update(tabId, 'stateTaxRate', v)} min={0} max={0.15} step={0.005} format="percent" />
@@ -28,7 +28,7 @@ export default function TaxImpactModel({ tabId }: Props) {
 
       {/* Side-by-side comparison */}
       {stockSale && (
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Stock Sale */}
           <div className="rounded-xl p-4" style={{ border: '1px solid #DDD9D1' }}>
             <h3 className="text-sm font-bold m-0 mb-3" style={{ fontFamily: 'Sora, sans-serif' }}>Stock Sale</h3>
@@ -64,7 +64,7 @@ export default function TaxImpactModel({ tabId }: Props) {
 
       {/* KPI comparison */}
       {stockSale && assetSale && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <KPICard label="Stock Sale Net" value={centsToDisplay(stockSale.netProceeds)} color="#34A853" />
           <KPICard label="Asset Sale Net" value={centsToDisplay(assetSale.netProceeds)} color="#34A853" />
           <KPICard
@@ -108,7 +108,7 @@ export default function TaxImpactModel({ tabId }: Props) {
       )}
 
       {/* Installment inputs */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <ModelInput label="Down Payment" value={a.downPayment || 0} onChange={v => update(tabId, 'downPayment', v)} prefix="$" />
         <ModelInput label="Annual Payments" value={a.annualPayments || 0} onChange={v => update(tabId, 'annualPayments', v)} prefix="$" />
         <ModelSlider label="Installment Years" value={a.installmentYears ?? 0} onChange={v => update(tabId, 'installmentYears', v)} min={0} max={10} step={1} suffix=" yrs" />

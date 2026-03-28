@@ -333,7 +333,7 @@ export function SourcesUsesTable({ sources, uses }: { sources: { label: string; 
   const totalUses = uses.reduce((s, i) => s + i.amount, 0);
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
         <h4 className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: MUTED }}>Sources</h4>
         {sources.map(s => (
@@ -368,10 +368,10 @@ export function SourcesUsesTable({ sources, uses }: { sources: { label: string; 
 
 export function KPICard({ label, value, sublabel, color }: { label: string; value: string; sublabel?: string; color?: string }) {
   return (
-    <div className="rounded-lg p-3" style={{ background: CREAM, border: `1px solid ${BORDER}` }}>
-      <p className="text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: MUTED }}>{label}</p>
-      <p className="text-xl font-bold m-0" style={{ color: color || TEXT, fontFamily: 'Sora, sans-serif' }}>{value}</p>
-      {sublabel && <p className="text-[10px] m-0 mt-0.5" style={{ color: MUTED }}>{sublabel}</p>}
+    <div className="rounded-lg p-3 sm:p-3" style={{ background: CREAM, border: `1px solid ${BORDER}` }}>
+      <p className="text-[10px] sm:text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: MUTED }}>{label}</p>
+      <p className="text-lg sm:text-xl font-bold m-0 truncate" style={{ color: color || TEXT, fontFamily: 'Sora, sans-serif' }}>{value}</p>
+      {sublabel && <p className="text-[10px] m-0 mt-0.5 truncate" style={{ color: MUTED }}>{sublabel}</p>}
     </div>
   );
 }
@@ -395,24 +395,28 @@ export function ModelSlider({ label, value, onChange, min, max, step, format = '
     return `${value.toLocaleString()}${suffix || ''}`;
   };
 
+  const pct = max > min ? ((value - min) / (max - min)) * 100 : 0;
+
   return (
-    <div className="mb-3">
-      <div className="flex items-center justify-between mb-1">
-        <label className="text-[10px] font-medium" style={{ color: MUTED }}>{label}</label>
-        <span className="text-xs font-semibold tabular-nums" style={{ color: TEXT }}>{displayValue()}</span>
+    <div className="mb-4 model-controls">
+      <div className="flex items-center justify-between mb-1.5">
+        <label className="text-[11px] sm:text-[10px] font-medium" style={{ color: MUTED }}>{label}</label>
+        <span className="text-sm sm:text-xs font-semibold tabular-nums" style={{ color: TEXT }}>{displayValue()}</span>
       </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={e => onChange(Number(e.target.value))}
-        className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-        style={{
-          background: `linear-gradient(to right, ${TERRA} 0%, ${TERRA} ${((value - min) / (max - min)) * 100}%, #EBEBEB ${((value - min) / (max - min)) * 100}%, #EBEBEB 100%)`,
-        }}
-      />
+      <div className="py-2">
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={e => onChange(Number(e.target.value))}
+          className="w-full cursor-pointer"
+          style={{
+            background: `linear-gradient(to right, ${TERRA} 0%, ${TERRA} ${pct}%, #EBEBEB ${pct}%, #EBEBEB 100%)`,
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -429,21 +433,22 @@ export function ModelInput({ label, value, onChange, prefix, suffix, min, max }:
   max?: number;
 }) {
   return (
-    <div className="mb-3">
-      <label className="block text-[10px] font-medium mb-1" style={{ color: MUTED }}>{label}</label>
-      <div className="flex items-center rounded-lg border px-3 py-1.5" style={{ borderColor: BORDER, background: 'white' }}>
-        {prefix && <span className="text-xs mr-1" style={{ color: MUTED }}>{prefix}</span>}
+    <div className="mb-4 model-controls">
+      <label className="block text-[11px] sm:text-[10px] font-medium mb-1" style={{ color: MUTED }}>{label}</label>
+      <div className="flex items-center rounded-lg border px-3 py-2 sm:py-1.5" style={{ borderColor: BORDER, background: 'white' }}>
+        {prefix && <span className="text-sm sm:text-xs mr-1.5" style={{ color: MUTED }}>{prefix}</span>}
         <input
           type="number"
+          inputMode="decimal"
           value={value / (prefix === '$' ? 100 : 1)}
           onChange={e => {
             const v = Number(e.target.value) * (prefix === '$' ? 100 : 1);
             onChange(min !== undefined ? Math.max(min, max !== undefined ? Math.min(max, v) : v) : v);
           }}
-          className="flex-1 text-sm font-medium outline-none bg-transparent tabular-nums"
-          style={{ color: TEXT, border: 'none' }}
+          className="flex-1 font-medium outline-none bg-transparent tabular-nums"
+          style={{ color: TEXT, border: 'none', fontSize: 'inherit' }}
         />
-        {suffix && <span className="text-xs ml-1" style={{ color: MUTED }}>{suffix}</span>}
+        {suffix && <span className="text-sm sm:text-xs ml-1.5" style={{ color: MUTED }}>{suffix}</span>}
       </div>
     </div>
   );

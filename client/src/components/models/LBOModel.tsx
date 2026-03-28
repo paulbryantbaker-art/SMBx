@@ -51,7 +51,7 @@ export default function LBOModel({ tabId }: Props) {
   return (
     <div className="p-5 space-y-6 max-w-4xl mx-auto">
       {/* KPI Row */}
-      <div className="grid grid-cols-5 gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
         <KPICard
           label="Entry Multiple"
           value={multDisplay(lbo.entryMultiple)}
@@ -81,7 +81,7 @@ export default function LBOModel({ tabId }: Props) {
       </div>
 
       {/* Controls + Outputs side by side */}
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {/* Left: Deal Inputs */}
         <div>
           <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>Deal Assumptions</h3>

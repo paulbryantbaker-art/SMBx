@@ -35,7 +35,7 @@ export default function EarnoutModel({ tabId }: Props) {
 
       {/* KPIs */}
       {earnout && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <KPICard label="Expected Value" value={centsToDisplay(earnout.expectedValue)} color="#BA3C60" sublabel="Probability-weighted" />
           <KPICard label="Max Payout" value={centsToDisplay(earnout.maxPayout)} sublabel="If all milestones hit" />
           <KPICard label="PV of Expected" value={centsToDisplay(earnout.pvExpected)} sublabel={`At ${pctDisplay(a.discountRate ?? 0.10)} discount`} />
@@ -91,7 +91,7 @@ export default function EarnoutModel({ tabId }: Props) {
         </div>
 
         {milestones.map((m: any, i: number) => (
-          <div key={i} className="grid grid-cols-4 gap-2 mb-2 rounded-lg p-2" style={{ border: '1px solid #DDD9D1' }}>
+          <div key={i} className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 rounded-lg p-2" style={{ border: '1px solid #DDD9D1' }}>
             <div>
               <label className="block text-[9px] font-medium mb-0.5" style={{ color: '#6E6A63' }}>Year</label>
               <input type="number" value={m.year} onChange={e => updateMilestone(i, 'year', Number(e.target.value))}

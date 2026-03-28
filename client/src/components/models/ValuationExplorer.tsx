@@ -29,7 +29,7 @@ export default function ValuationExplorer({ tabId }: Props) {
   return (
     <div className="p-5 space-y-6 max-w-3xl mx-auto">
       {/* KPI Row */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <KPICard
           label={leagueData.metric}
           value={centsToDisplay(a.sde || a.ebitda || 0)}
@@ -82,7 +82,7 @@ export default function ValuationExplorer({ tabId }: Props) {
       )}
 
       {/* Controls */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Left: Financial Inputs */}
         <div>
           <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>Financial Inputs</h3>

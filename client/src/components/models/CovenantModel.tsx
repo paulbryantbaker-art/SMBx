@@ -41,7 +41,7 @@ export default function CovenantModel({ tabId }: Props) {
 
       {/* Headroom gauges */}
       {cov && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* DSCR */}
           <div className="rounded-lg p-4" style={{ border: '1px solid #DDD9D1' }}>
             <h4 className="text-[10px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>DSCR</h4>
@@ -99,7 +99,7 @@ export default function CovenantModel({ tabId }: Props) {
       )}
 
       {/* Inputs */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
           <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>Business Financials</h3>
           <ModelInput label="EBITDA (Annual)" value={a.ebitda || 0} onChange={v => update(tabId, 'ebitda', v)} prefix="$" />

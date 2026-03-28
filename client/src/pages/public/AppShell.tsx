@@ -1488,7 +1488,7 @@ export default function AppShell() {
 
         {/* ════ MOBILE CANVAS OVERLAY ════ */}
         {canvasTabs.length > 0 && isMobile && (
-          <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ animation: 'slideUpIn 0.3s ease' }}>
+          <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ animation: 'slideUpIn 0.3s ease', overscrollBehavior: 'contain', touchAction: 'manipulation' }}>
             {/* Mobile tab pills */}
             <div className="shrink-0 flex items-center justify-between px-3 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
               <div className="flex items-center gap-1.5 overflow-x-auto flex-1 mr-2">
@@ -1496,7 +1496,7 @@ export default function AppShell() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveCanvasTabId(tab.id)}
-                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
+                    className={`canvas-tab-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
                       tab.id === activeCanvasTabId
                         ? 'bg-[#BA3C60] text-white border-[#BA3C60]'
                         : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)]'
@@ -1513,7 +1513,7 @@ export default function AppShell() {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
               {activeCanvasTab && renderCanvasTabContent(activeCanvasTab)}
             </div>
           </div>

@@ -45,7 +45,7 @@ export default function SBAModel({ tabId }: Props) {
       </div>
 
       {/* KPI Row */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <KPICard label="Loan Amount" value={centsToDisplay(sba.loanAmount)} />
         <KPICard label="Monthly Payment" value={centsToDisplay(sba.monthlyPayment)} />
         <KPICard label="Down Payment" value={centsToDisplay(sba.downPayment)} sublabel={pctDisplay(a.downPaymentPct ?? 0.10)} />
@@ -53,7 +53,7 @@ export default function SBAModel({ tabId }: Props) {
       </div>
 
       {/* DSCR Gauge + Controls side by side */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Left: DSCR + Details */}
         <div>
           <h3 className="text-[11px] font-bold uppercase tracking-wider mb-3" style={{ color: '#6E6A63' }}>Debt Service Coverage</h3>

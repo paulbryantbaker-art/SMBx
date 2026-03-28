@@ -31,7 +31,7 @@ export default function WorkingCapitalModel({ tabId }: Props) {
 
       {wc && (
         <>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <KPICard label="Working Capital Peg" value={centsToDisplay(wc.peg)} color="#BA3C60" sublabel="12-month average" />
             <KPICard label="Variance" value={centsToDisplay(wc.variance)} sublabel="Seasonal swing" />
             <KPICard label="Months Analyzed" value={String(wc.monthlyWC.filter((m: any) => m.wc !== 0).length)} />
