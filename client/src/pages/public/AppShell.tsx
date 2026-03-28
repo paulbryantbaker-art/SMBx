@@ -775,6 +775,32 @@ export default function AppShell() {
   // Show dock
   const showDock = (viewState === 'landing' || viewState === 'chat') && !(!user && anonChat.limitReached);
 
+  // ─── Canvas Action Handler (from Yulia's model tools) ───────
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (!detail?.canvas_action) return;
+
+      // Dynamic import to avoid circular deps
+      import('../../lib/modelStore').then(({ useModelStore }) => {
+        const store = useModelStore.getState();
+
+        if (detail.canvas_action === 'create_model_tab') {
+          const modelTabId = store.createTab(detail.modelType, detail.title, detail.initialAssumptions);
+          openCanvasTab('model', detail.title, { modelTabId });
+        } else if (detail.canvas_action === 'update_model') {
+          const tabId = detail.tabId === 'active' ? store.activeTabId : detail.tabId;
+          if (tabId && detail.updates) {
+            store.updateAssumptions(tabId, detail.updates);
+          }
+        }
+      });
+    };
+
+    window.addEventListener('smbx:canvas_action', handler);
+    return () => window.removeEventListener('smbx:canvas_action', handler);
+  }, [openCanvasTab]);
+
   // ─── Canvas Tab Content Renderer ──────────────────────────────
   const renderCanvasTabContent = (tab: { id: string; type: string; label: string; props?: Record<string, any> }) => {
     switch (tab.type) {

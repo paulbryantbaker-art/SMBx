@@ -215,6 +215,15 @@ export function useAuthChat(user: User | null) {
                   setActiveTool(TOOL_LABELS[parsed.tool] || 'Working');
                 } else if (parsed.type === 'tool_done') {
                   setActiveTool(null);
+                  // Handle canvas_action from model tools
+                  if (parsed.result) {
+                    try {
+                      const result = typeof parsed.result === 'string' ? JSON.parse(parsed.result) : parsed.result;
+                      if (result.canvas_action) {
+                        window.dispatchEvent(new CustomEvent('smbx:canvas_action', { detail: result }));
+                      }
+                    } catch { /* not JSON, ignore */ }
+                  }
                 } else if (parsed.type === 'done') {
                   if (parsed.dealId) setActiveDealId(parsed.dealId);
                   if (parsed.conversationId) setActiveConversationId(parsed.conversationId);
