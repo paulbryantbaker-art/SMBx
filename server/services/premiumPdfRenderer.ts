@@ -124,71 +124,108 @@ export async function renderPremiumPdf(options: PremiumPdfOptions): Promise<Buff
     throw new Error(`No premium template found for: ${options.template}`);
   }
 
-  // Generate chart HTML blocks
   const charts = generateChartHtml(templateKey, options.data);
 
-  // Build full HTML
   const html = templateFn(
     { ...options.data, title: options.title, watermark: options.watermark, dealName: options.dealName },
     charts,
   );
 
-  // Render to PDF via Puppeteer
   const b = await getBrowser();
   const page = await b.newPage();
 
   try {
-    // Set viewport to Letter width for consistent rendering
-    await page.setViewport({ width: 816, height: 1056, deviceScaleFactor: 2 });
+    // ── 1. Viewport: Letter at 3x for crisp text and charts ──
+    // 816px = 8.5in × 96dpi. 3x scale = effective 288dpi (print quality)
+    await page.setViewport({ width: 816, height: 1056, deviceScaleFactor: 3 });
+
+    // ── 2. Force sRGB color profile for consistent colors ──
+    await page.emulateMediaFeatures([
+      { name: 'color-gamut', value: 'srgb' },
+      { name: 'forced-colors', value: 'none' },
+    ]);
+    // Force print media for @media print rules
+    await page.emulateMediaType('print');
 
     await page.setContent(html, { waitUntil: 'networkidle0', timeout: 20000 });
 
-    // Wait for Google Fonts to load
+    // ── 3. Wait for Google Fonts to fully load ──
     await page.evaluateHandle('document.fonts.ready');
+    // Double-check specific fonts loaded
+    await page.evaluate(async () => {
+      const fonts = ['Sora', 'Inter'];
+      for (const font of fonts) {
+        try { await (document as any).fonts.load(`400 16px "${font}"`); } catch {}
+        try { await (document as any).fonts.load(`800 16px "${font}"`); } catch {}
+      }
+    });
 
-    // Wait for Chart.js to fully render all canvases
+    // ── 4. Wait for Chart.js to render all canvases ──
     await page.waitForFunction(() => {
       const canvases = document.querySelectorAll('canvas');
       if (canvases.length === 0) return true;
-      // Check each canvas has been drawn to (non-empty)
       return Array.from(canvases).every(c => {
         const ctx = c.getContext('2d');
         if (!ctx) return false;
-        // A rendered chart will have non-transparent pixels
         try {
-          const pixel = ctx.getImageData(10, 10, 1, 1).data;
-          return pixel[3] > 0; // alpha > 0 means something was drawn
-        } catch { return true; } // cross-origin canvas, assume rendered
+          const data = ctx.getImageData(0, 0, c.width, c.height).data;
+          // Check multiple pixels — a rendered chart has many non-transparent pixels
+          let nonEmpty = 0;
+          for (let i = 3; i < data.length; i += 4 * 20) { if (data[i] > 0) nonEmpty++; }
+          return nonEmpty > 5;
+        } catch { return true; }
       });
     }, { timeout: 8000 }).catch(() => {
-      console.warn('[premiumPdf] Chart render timeout — proceeding without full chart verification');
+      console.warn('[premiumPdf] Chart render timeout — proceeding');
     });
 
-    // Convert all Chart.js canvases to static <img> elements
-    // This prevents PDF rendering issues with canvas elements
+    // ── 5. Convert canvases to high-DPI static images ──
+    // This is the critical step: canvas elements can render
+    // inconsistently in PDF. Static <img> elements are reliable.
     await page.evaluate(() => {
       document.querySelectorAll('canvas').forEach(canvas => {
         try {
+          // Get the chart's container dimensions
+          const container = canvas.parentElement;
+          const displayWidth = container?.clientWidth || canvas.clientWidth;
+          const displayHeight = container?.clientHeight || canvas.clientHeight;
+
+          // Create high-DPI image (3x for print quality)
+          const scale = 3;
+          const offscreen = document.createElement('canvas');
+          offscreen.width = displayWidth * scale;
+          offscreen.height = displayHeight * scale;
+          const ctx = offscreen.getContext('2d');
+          if (ctx) {
+            ctx.scale(scale, scale);
+            ctx.drawImage(canvas, 0, 0, displayWidth, displayHeight);
+          }
+
           const img = document.createElement('img');
-          img.src = canvas.toDataURL('image/png', 1.0);
-          img.style.width = canvas.style.width || '100%';
-          img.style.height = canvas.style.height || 'auto';
+          img.src = offscreen.toDataURL('image/png', 1.0);
+          img.style.width = displayWidth + 'px';
+          img.style.height = displayHeight + 'px';
           img.style.maxWidth = '100%';
           img.style.display = 'block';
+          // Prevent image from being resampled by PDF engine
+          img.style.imageRendering = 'auto';
+
           canvas.parentNode?.replaceChild(img, canvas);
-        } catch { /* ignore cross-origin canvas errors */ }
+        } catch { /* ignore */ }
       });
     });
 
-    // Small delay for final paint
-    await new Promise(r => setTimeout(r, 300));
+    // ── 6. Final stabilization ──
+    await new Promise(r => setTimeout(r, 400));
 
+    // ── 7. Generate PDF ──
     const pdf = await page.pdf({
       format: 'Letter',
       printBackground: true,
       margin: { top: '0.5in', bottom: '0.5in', left: '0.6in', right: '0.6in' },
       displayHeaderFooter: false,
       preferCSSPageSize: false,
+      tagged: true, // accessibility: tagged PDF structure
     });
 
     return Buffer.from(pdf);

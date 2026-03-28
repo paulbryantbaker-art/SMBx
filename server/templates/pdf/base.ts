@@ -28,15 +28,24 @@ export function wrapHtml(body: string, title: string): string {
       --white: #FFFFFF;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       color: var(--text);
       font-size: 10.5pt;
       line-height: 1.55;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      /* Force sRGB color interpretation */
+      color-scheme: light;
+      /* Anti-aliased text for print */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
     }
 
     h1, h2, h3, h4 {
@@ -93,7 +102,7 @@ export function wrapHtml(body: string, title: string): string {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 4px;
+      height: 5px;
       background: var(--terra);
     }
 
@@ -104,7 +113,7 @@ export function wrapHtml(body: string, title: string): string {
       font-weight: 700;
       color: var(--text);
       padding-bottom: 8px;
-      border-bottom: 2px solid var(--terra);
+      border-bottom: 2.5px solid var(--terra);
       margin-bottom: 16px;
     }
 
@@ -136,7 +145,7 @@ export function wrapHtml(body: string, title: string): string {
     }
     .fin-table td {
       padding: 8px 12px;
-      border-bottom: 1px solid #EBEBEB;
+      border-bottom: 1.5px solid #EBEBEB;
       vertical-align: top;
     }
     .fin-table tr:nth-child(even) td {
@@ -199,7 +208,7 @@ export function wrapHtml(body: string, title: string): string {
     /* Callout box */
     .callout {
       background: var(--cream);
-      border-left: 3px solid var(--terra);
+      border-left: 4px solid var(--terra);
       padding: 14px 18px;
       margin: 16px 0;
       border-radius: 0 6px 6px 0;
@@ -215,7 +224,7 @@ export function wrapHtml(body: string, title: string): string {
       font-size: 7.5pt;
       color: var(--text-light);
       line-height: 1.5;
-      border-top: 1px solid var(--border);
+      border-top: 1.5px solid var(--border);
       padding-top: 12px;
       margin-top: 30px;
     }
@@ -255,7 +264,7 @@ export function wrapHtml(body: string, title: string): string {
       padding: 0 0.6in;
       font-size: 7pt;
       color: var(--text-light);
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1.5px solid var(--border);
     }
     .page-footer {
       position: fixed;
