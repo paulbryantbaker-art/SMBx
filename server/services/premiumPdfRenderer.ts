@@ -138,18 +138,57 @@ export async function renderPremiumPdf(options: PremiumPdfOptions): Promise<Buff
   const page = await b.newPage();
 
   try {
-    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 15000 });
+    // Set viewport to Letter width for consistent rendering
+    await page.setViewport({ width: 816, height: 1056, deviceScaleFactor: 2 });
 
-    // Wait for Chart.js to render
+    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 20000 });
+
+    // Wait for Google Fonts to load
+    await page.evaluateHandle('document.fonts.ready');
+
+    // Wait for Chart.js to fully render all canvases
     await page.waitForFunction(() => {
       const canvases = document.querySelectorAll('canvas');
-      return canvases.length === 0 || Array.from(canvases).every(c => c.getContext('2d') !== null);
-    }, { timeout: 5000 }).catch(() => {});
+      if (canvases.length === 0) return true;
+      // Check each canvas has been drawn to (non-empty)
+      return Array.from(canvases).every(c => {
+        const ctx = c.getContext('2d');
+        if (!ctx) return false;
+        // A rendered chart will have non-transparent pixels
+        try {
+          const pixel = ctx.getImageData(10, 10, 1, 1).data;
+          return pixel[3] > 0; // alpha > 0 means something was drawn
+        } catch { return true; } // cross-origin canvas, assume rendered
+      });
+    }, { timeout: 8000 }).catch(() => {
+      console.warn('[premiumPdf] Chart render timeout — proceeding without full chart verification');
+    });
+
+    // Convert all Chart.js canvases to static <img> elements
+    // This prevents PDF rendering issues with canvas elements
+    await page.evaluate(() => {
+      document.querySelectorAll('canvas').forEach(canvas => {
+        try {
+          const img = document.createElement('img');
+          img.src = canvas.toDataURL('image/png', 1.0);
+          img.style.width = canvas.style.width || '100%';
+          img.style.height = canvas.style.height || 'auto';
+          img.style.maxWidth = '100%';
+          img.style.display = 'block';
+          canvas.parentNode?.replaceChild(img, canvas);
+        } catch { /* ignore cross-origin canvas errors */ }
+      });
+    });
+
+    // Small delay for final paint
+    await new Promise(r => setTimeout(r, 300));
 
     const pdf = await page.pdf({
       format: 'Letter',
       printBackground: true,
       margin: { top: '0.5in', bottom: '0.5in', left: '0.6in', right: '0.6in' },
+      displayHeaderFooter: false,
+      preferCSSPageSize: false,
     });
 
     return Buffer.from(pdf);

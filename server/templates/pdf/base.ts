@@ -45,9 +45,38 @@ export function wrapHtml(body: string, title: string): string {
       line-height: 1.25;
     }
 
+    /* ─── Print / PDF optimization ─── */
+
+    @page {
+      size: Letter;
+      margin: 0.5in 0.6in;
+    }
+
+    @media print {
+      body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      * { color-adjust: exact !important; }
+      .no-break { page-break-inside: avoid !important; break-inside: avoid !important; }
+      .page-break { page-break-after: always !important; break-after: page !important; }
+      canvas { max-width: 100% !important; }
+      img { max-width: 100% !important; }
+      table { page-break-inside: avoid; }
+      tr { page-break-inside: avoid; }
+      thead { display: table-header-group; } /* repeat headers on new pages */
+    }
+
     /* Page break utilities */
     .page-break { page-break-after: always; break-after: page; }
     .no-break { page-break-inside: avoid; break-inside: avoid; }
+
+    /* Prevent chart canvases from overflowing */
+    canvas {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
+    /* Tables never split mid-row */
+    .fin-table tr { page-break-inside: avoid; break-inside: avoid; }
+    .fin-table thead { display: table-header-group; } /* headers repeat on page break */
 
     /* Cover page */
     .cover {
