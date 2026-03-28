@@ -1,9 +1,9 @@
-# STRATA OPERATING SYSTEM: MASTER METHODOLOGY (v17.0)
+# STRATA OPERATING SYSTEM: MASTER METHODOLOGY (v17.1)
 
-**Scope:** AI Governance, Workflow Logic, Calculation Engine, Tool Orchestration, GTM Features.
+**Scope:** AI Governance, Workflow Logic, Calculation Engine, Tool Orchestration, GTM Features, Interactive Canvas.
 **Core Mandate:** "Data is Commodity; Workflow is the Moat."
 **Security Level:** CRITICAL (Financial Data Governance)
-**Updated:** January 2026 - GTM Feature Release
+**Updated:** March 2026 — Interactive Canvas, Sourcing Engine, Premium Exports
 
 ---
 
@@ -1695,3 +1695,148 @@ Most states have repealed Article 6 of the UCC (bulk sales laws). However, some 
 - Failure to comply: creditors can potentially void the sale
 
 **Yulia's approach:** When state is identified, flag bulk sales as a checklist item: "Your attorney should confirm whether bulk sales notice is required in [state]. If so, it needs to be sent [X] days before closing."
+
+---
+
+## 11.0 INTERACTIVE CANVAS SYSTEM (Added v17.1)
+
+### 11.1 Tabbed Canvas Architecture
+
+The canvas follows the Dia Browser model — as many tabs as needed. Each tab is an independent rendering surface. Yulia can read from and write to any tab from the conversation.
+
+**Tab types:**
+- **Model tabs** — live interactive (Valuation Explorer, LBO, DCF, SBA Financing, Sensitivity, Cap Table, Earnout)
+- **Document tabs** — view/annotate (CIM, valuation report, DD checklist)
+- **Comparison tabs** — derived from two or more model tabs
+- **Data tabs** — sourcing results, market intelligence, pipeline view
+
+**Two input channels, one state:** Every model tab has a state object. Both UI controls (sliders, inputs) and Yulia's tools modify the same state. Calculations are deterministic (pure JavaScript math, not AI-generated). This makes updates instant (<16ms) and auditable.
+
+### 11.2 Interactive Model Types
+
+| Model | When Used | Key Inputs | Key Outputs |
+|-------|-----------|------------|-------------|
+| Valuation Explorer | S2, B2 | Revenue, add-backs, multiples, methodology weights | Valuation range, SDE waterfall, multiple context |
+| LBO / Acquisition | B2-B4, L4+ | Purchase price, EBITDA, growth, exit multiple, debt structure | IRR, MOIC, DSCR, pro forma P&L, sensitivity |
+| SBA Financing | L1-L3 buyer | Purchase price, down payment, rate, term, SDE | Go/No-Go (DSCR), monthly payment, amortization |
+| Deal Comparison | Buyer with 2+ targets | Reads from other model tabs | Side-by-side metrics, radar chart, ranking |
+| Sensitivity Matrix | Any model | Two variables to vary | Output metric at each intersection, color-coded |
+| Cap Table / Dilution | Raise journey | Pre-money, raise amount, option pool, preferences | Ownership pie, dilution waterfall, payout scenarios |
+| Earnout Scenario | Deal structuring | Targets, amounts, probabilities, discount rate | Expected value, scenario fan, effective price |
+| Tax Impact | Closing | Entity type, sale type, allocation | Net proceeds, federal/state tax, comparison |
+| Working Capital | DD | 12-month data, seasonal patterns | Peg, true-up scenarios, trend chart |
+| Covenant Compliance | L3+ financing | DSCR req, Debt/EBITDA limit, projections | Headroom dashboard, warning flags |
+
+### 11.3 Yulia's Canvas Tools
+
+- `update_model` — modify assumptions in any tab (Yulia or user, same state)
+- `create_model_tab` — open a new interactive model
+- `render_to_tab` — push generated content to a tab
+- `read_tab_state` — read current assumptions and outputs from any tab
+
+### 11.4 Cross-Tab Interactions
+
+Linked tabs auto-update when source data changes. Comparison tabs read from multiple model tabs. Yulia's system prompt includes a summary of all active tab states, enabling natural references: "Looking at your Tab 2 model, if you apply the same growth assumptions from Tab 1..."
+
+---
+
+## 12.0 SOURCING ENGINE (Added v17.1)
+
+### 12.1 Five-Stage Pipeline
+
+| Stage | What Happens | Cost | Time |
+|-------|-------------|------|------|
+| 1. Deep Research | Sonnet analyzes Census CBP + BDS + SBA + FRED data → Acquisition Intelligence Brief | $0.15-0.30 | 30-60s |
+| 2. Expansion Search | Google Places Text Search (IDs Only = free) → 500-2K candidates | $0 | 5-15s |
+| 3. Tiered Enrichment | Essentials → Pro → Haiku website → Sonnet deep analysis (progressive) | $0.50-2.00 | 2-5 min |
+| 4. Scoring | 6-dimension scoring (size, geography, industry, acquisition signals, quality, risk) + AI batch summaries | $0.20-0.80 | 1-3 min |
+| 5. Portfolio Management | Persistent PostgreSQL, hierarchical canvas display, background refresh | $0 | Ongoing |
+
+### 12.2 Scoring Dimensions (100 points total)
+
+- Size Match (0-20): review count proxy, team size, estimated revenue vs thesis
+- Geography Match (0-15): exact state, adjacent, same region
+- Industry Match (0-15): place types → NAICS, services keyword match
+- Acquisition Signals (0-20): SBA history, firm age, succession signals
+- Quality Indicators (0-15): rating, reviews, website, recurring revenue, certifications
+- Risk Factors (0-15, inverted): low rating, no website, owner dependency
+
+### 12.3 Tier Classification
+
+- A (75+): Strong match — present first
+- B (55-74): Good match — worth reviewing
+- C (35-54): Possible match — lower priority
+- D (<35): Weak match — archive
+
+### 12.4 Background Refresh
+
+- Weekly: re-fetch Google Pro data for A/B candidates, re-score, flag closed businesses
+- Monthly: re-run expansion search, process new candidates through enrichment + scoring
+
+---
+
+## 13.0 PREMIUM DOCUMENT EXPORTS (Added v17.1)
+
+### 13.1 HTML→PDF Pipeline
+
+Premium PDFs use Puppeteer (headless Chromium) to render HTML templates with:
+- Google Fonts (Sora headings, Inter body)
+- Chart.js charts rendered server-side as PNGs, embedded as base64
+- Full CSS control (gradients, rounded corners, multi-column, print @page rules)
+- Brand system: terra #BA3C60, cream #FAF8F4, text #1A1A18
+
+### 13.2 Chart Types Available
+
+1. Valuation Range Bar (horizontal, terra accent on mid)
+2. Multiple Comparison (bullet chart, position in league range)
+3. Deal Score Radar (7-factor spider chart)
+4. Earnings Breakdown (revenue → SDE/EBITDA waterfall)
+5. DSCR Gauge (with threshold markers)
+6. FCF Waterfall (EBITDA → taxes → CapEx → ΔNWC → FCF)
+7. Tax Comparison (asset vs stock sale side-by-side)
+8. Sensitivity Heatmap (2-variable color-coded matrix)
+9. Cap Table Waterfall (distribution by class at exit)
+10. Covenant Headroom Dashboard
+11. Working Capital Trend (12-month with peg line)
+12. Deal Velocity Pipeline (stage duration bars)
+
+### 13.3 Export Formats
+
+- **PDF**: Premium HTML→PDF for supported types, legacy pdfkit for others
+- **DOCX**: Branded with headers/footers, financial tables (docx library)
+- **XLSX**: Formulas for calculations, tabular-nums formatting (exceljs)
+- **Interactive model exports**: PDF captures snapshot of current state; XLSX exports with real formulas
+
+---
+
+## 14.0 LIVING CIM (Added v17.1)
+
+### 14.1 What It Is
+
+A CIM that stays connected to the deal's financial data. When financials change, Yulia detects staleness and offers to regenerate affected sections. Version tracking with publish states.
+
+### 14.2 Access Tiers
+
+- **Blind Profile**: Anonymized (state, industry, revenue range only)
+- **Teaser**: Executive summary, financial highlights (requires account)
+- **Full Access**: Complete CIM with all financials (requires NDA)
+
+### 14.3 Sensitivity Toggles
+
+Within the living CIM, users can toggle assumptions (growth rate, add-backs, methodology) and see how the CIM's valuation section updates in real-time. This uses the same deterministic calculation engine as the interactive canvas models.
+
+---
+
+## 15.0 SUBSCRIPTION MODEL (Added v17.1)
+
+| Tier | Price | Access |
+|------|-------|--------|
+| Free | $0 | Unlimited Yulia chat + ONE deliverable (email required) |
+| Starter | $49/mo | ValueLens, deal scoring, VRR, SDE/EBITDA analysis, exports |
+| Professional | $149/mo | CIM, deal room, matching, sourcing, DD/LOI, living docs |
+| Enterprise | $999/mo | Unlimited users, white-label, API, portfolio dashboard |
+
+- No per-deal fees. No success fees. No wallet. Cancel anytime.
+- 30-day free trial of Professional.
+- Brokers use the same tiers (no separate advisor pricing).
+- TEST_MODE=true → enterprise access for all users.

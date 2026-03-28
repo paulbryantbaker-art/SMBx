@@ -1,5 +1,5 @@
 CLAUDE.md — smbx.ai
-Last updated: 2026-03-27
+Last updated: 2026-03-28
 
 ## What This Is
 AI-powered deal intelligence platform for business acquisitions from $300K to mega-cap. Users talk to Yulia (AI deal intelligence) who guides them through buying, selling, or raising capital for businesses. Chat-first experience — users talk to Yulia, not dashboards. Yulia IS the front door — there is no sales team, no contact forms, no dead-end CTAs. Every action routes to chat.
@@ -90,9 +90,13 @@ EBITDA = Net_Income + D&A + Interest + Taxes + Verified_Addbacks - Non_Recurring
 DSCR = EBITDA / Annual_Debt_Service (SBA ≥ 1.25, Conventional ≥ 1.50)
 ```
 
+## Methodology Reference
+- METHODOLOGY_V17.md (v17.1) — Master methodology: all formulas, gate logic, analysis types, interactive canvas spec, sourcing engine, premium exports, subscription model
+
 ## Key File Map
 | File | Purpose |
 |------|---------|
+| METHODOLOGY_V17.md | Master methodology — ALL financial formulas, gate logic, analysis types |
 | client/src/pages/public/AppShell.tsx | THE layout — all routes, all views, tabbed canvas |
 | client/src/components/shell/Sidebar.tsx | Shell sidebar (conversations grouped by deal) |
 | client/src/components/shell/ChatMessages.tsx | Message rendering with markdown |
