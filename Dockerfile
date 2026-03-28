@@ -1,4 +1,15 @@
 FROM node:22-alpine
+
+# System deps for canvas (chartjs-node-canvas) and Chromium (puppeteer-core)
+RUN apk add --no-cache \
+  cairo-dev pango-dev jpeg-dev giflib-dev librsvg-dev \
+  chromium nss freetype harfbuzz ca-certificates ttf-freefont \
+  font-noto font-noto-cjk
+
+# Tell puppeteer to use system Chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci

@@ -8,6 +8,7 @@ import { sql } from '../db.js';
 import { hasDealAccess } from '../services/dealAccessService.js';
 import { exportToPDF, exportToDOCX, exportToXLSX, exportLOIToPDF } from '../services/exportService.js';
 import { exportToPPTX } from '../services/pptxExportService.js';
+import { renderPremiumPdf, getPremiumTemplateKey } from '../services/premiumPdfRenderer.js';
 import { readFile } from 'fs/promises';
 
 export const exportRouter = Router();
@@ -82,9 +83,14 @@ exportRouter.post('/deliverables/:id/export/:format', async (req, res) => {
     let buffer: Buffer;
 
     if (format === 'pdf') {
-      buffer = isLOI
-        ? await exportLOIToPDF(content, title)
-        : await exportToPDF(content, title, { watermark });
+      const premiumTemplate = getPremiumTemplateKey(slug);
+      if (premiumTemplate && !isLOI) {
+        buffer = await renderPremiumPdf({ template: premiumTemplate, data: content, title, watermark });
+      } else if (isLOI) {
+        buffer = await exportLOIToPDF(content, title);
+      } else {
+        buffer = await exportToPDF(content, title, { watermark });
+      }
     } else if (format === 'docx') {
       buffer = await exportToDOCX(content, title);
     } else if (format === 'pptx') {
