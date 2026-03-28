@@ -25,6 +25,7 @@ import AnalyticsView from '../../components/chat/AnalyticsView';
 import NDAModal from '../../components/chat/NDAModal';
 import SourcingPanel from '../../components/chat/SourcingPanel';
 import IntelPanel from '../../components/chat/IntelPanel';
+import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
 const RaiseBelow = lazy(() => import('../../components/content/RaiseBelow'));
@@ -827,6 +828,8 @@ export default function AppShell() {
             onClose={() => closeCanvasTab(tab.id)}
           />
         );
+      case 'model':
+        return <ModelRenderer tabId={tab.props?.modelTabId} />;
       default:
         return null;
     }

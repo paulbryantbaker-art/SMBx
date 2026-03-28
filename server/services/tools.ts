@@ -205,6 +205,42 @@ export const TOOL_DEFINITIONS: Tool[] = [
       required: [],
     },
   },
+  {
+    name: 'create_model_tab',
+    description: 'Create a new interactive financial model tab on the canvas. The model calculates instantly on the client with no API calls. Use when the user wants to model a scenario, run valuation, check SBA financing, or analyze a deal. Returns the tab ID so you can reference it later.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        modelType: { type: 'string', enum: ['valuation', 'lbo', 'sba_financing', 'dcf', 'sensitivity', 'comparison', 'cap_table', 'earnout', 'tax_impact', 'working_capital', 'covenant', 'sde_analysis'], description: 'Type of financial model' },
+        title: { type: 'string', description: 'Tab title shown in the canvas tab bar' },
+        initialAssumptions: { type: 'object', description: 'Starting assumptions. For valuation: { sde, ebitda, league, revenue }. For lbo: { purchasePrice, ebitda, revenue, revenueGrowthRate, ebitdaMargin, exitMultiple, holdPeriod, seniorDebtPct, seniorRate }. For sba_financing: { purchasePrice, earnings, downPaymentPct, interestRate, termMonths }. All money in cents.' },
+      },
+      required: ['modelType', 'title', 'initialAssumptions'],
+    },
+  },
+  {
+    name: 'update_model',
+    description: 'Update assumptions in an open financial model tab. The canvas recalculates and re-renders instantly (deterministic math, no API call). Use when the user says "what if EBITDA is $1.5M" or "change the exit multiple to 6x".',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        tabId: { type: 'string', description: 'Target model tab ID. Use "active" for the currently visible model tab.' },
+        updates: { type: 'object', description: 'Key-value pairs of assumptions to update. Example: { "ebitda": 150000000, "exitMultiple": 6.0 }. Money values in cents.' },
+      },
+      required: ['tabId', 'updates'],
+    },
+  },
+  {
+    name: 'read_tab_state',
+    description: 'Read the current state of a canvas model tab — assumptions, calculated outputs, and what the user is looking at. Use when the user references canvas content ("what about this one", "what does the model show").',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        tabId: { type: 'string', description: 'Tab to read. Use "active" for currently visible tab, "all" for all open model tabs.' },
+      },
+      required: ['tabId'],
+    },
+  },
 ];
 
 // ─── Tool Execution ────────────────────────────────────────
@@ -253,6 +289,12 @@ export async function executeTool(
         return await enrichTarget(input, userId);
       case 'get_sourcing_portfolio':
         return await getSourcingPortfolio(input, userId);
+      case 'create_model_tab':
+        return createModelTab(input);
+      case 'update_model':
+        return updateModel(input);
+      case 'read_tab_state':
+        return readTabState(input);
       default:
         return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
@@ -1031,5 +1073,52 @@ async function getSourcingPortfolio(input: Record<string, any>, userId: number):
       status: c.pipeline_status,
       changedAt: c.pipeline_status_changed_at,
     })),
+  });
+}
+
+// ─── Interactive Model Tools ──────────────────────────────────
+
+/**
+ * These tools return canvas_action instructions that the frontend
+ * applies to the zustand model store. The server doesn't run the
+ * calculations — they're deterministic pure functions on the client.
+ */
+
+function createModelTab(input: Record<string, any>): string {
+  const { modelType, title, initialAssumptions } = input;
+
+  return JSON.stringify({
+    success: true,
+    canvas_action: 'create_model_tab',
+    modelType,
+    title,
+    initialAssumptions: initialAssumptions || {},
+    message: `I've opened a ${title} model on your canvas. You can adjust the assumptions with the sliders, or tell me what to change.`,
+  });
+}
+
+function updateModel(input: Record<string, any>): string {
+  const { tabId, updates } = input;
+
+  return JSON.stringify({
+    success: true,
+    canvas_action: 'update_model',
+    tabId: tabId || 'active',
+    updates: updates || {},
+    message: `I've updated the model. The canvas recalculated instantly — take a look at the new numbers.`,
+  });
+}
+
+function readTabState(input: Record<string, any>): string {
+  // This tool's response is handled by the frontend — it injects
+  // the current tab state into the next prompt so Yulia can reference it.
+  // The server returns a placeholder; the SSE handler on the frontend
+  // intercepts this and injects actual tab state.
+  return JSON.stringify({
+    success: true,
+    canvas_action: 'read_tab_state',
+    tabId: input.tabId || 'active',
+    message: 'Reading canvas state...',
+    note: 'The frontend will inject actual model state into this response before Yulia sees it.',
   });
 }
