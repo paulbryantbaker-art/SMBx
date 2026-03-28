@@ -351,43 +351,116 @@ Extends 180 days post-close with PMI. Buyer value = speed to conviction.
 
 ---
 
-# §10. WHAT'S BUILT vs WHAT'S NOT (Post-Cleanup, March 28, 2026)
+# §10. WHAT'S BUILT vs WHAT'S NOT (Updated March 28, 2026)
 
 ## Built and Working
+
+### Core Platform
 - Chat loop: anonymous + authenticated, SSE streaming, morph from landing to chat
-- 12 agentic tools in tools.ts
+- 16 agentic tools in tools.ts (including 3 canvas model tools)
 - 28 generators with model routing (deterministic/haiku/sonnet/opus)
 - 45 normalizer switch cases + 10 aliases + category generators
 - Gate system: 22 gates, readiness checks, gate prompts (1,171 lines)
 - Knowledge injection: industry profiles, SBA rules, methodology, market context
 - Seven-factor scoring (123 lines)
 - All 7 journey pages as content components (6,434 lines total)
-- AppShell (1,516 lines) with unified routing, deal-grouped sidebar, canvas
-- Export pipeline: PDF/DOCX/XLSX (functional — being upgraded to branded templates)
+- AppShell (1,777 lines) — THE layout, unified routing, deal-grouped sidebar, tabbed canvas
+- Auth: register, login, JWT, Google OAuth, password reset, anonymous→auth migration
+- Auto-migrations on server startup (no manual SQL on Railway)
+
+### Subscription & Payments
+- subscriptionService.ts (387 lines) — getUserPlan, canGenerateDeliverable, createCheckout, webhook handling
+- Stripe integration: POST /subscribe, GET /subscription, POST /portal
+- TEST_MODE=true → enterprise for all users
+- Free deliverable tracking (one per user)
+- Paywall triggers after first free deliverable
+
+### Tabbed Canvas System
+- Multi-tab canvas in AppShell (Dia browser model)
+- Vertical icon strip on right edge (desktop, 2+ tabs)
+- Horizontal pill tabs in full-screen overlay (mobile)
+- Tab content persists when switching (all mounted, inactive hidden)
+- Tools (Pipeline, Sourcing, Data Room, Library, Settings) open as canvas tabs
+
+### Calculation Engine (22 formula types, all pure JS, <16ms)
+- SDE, EBITDA with add-back schedules
+- Valuation (multiple-based, blended multi-methodology, DCF)
+- DSCR, monthly payment, SBA eligibility, amortization
+- IRR (Newton-Raphson), MOIC, cash-on-cash
+- LBO full model (pro forma, sources/uses, exit analysis)
+- Sensitivity matrix builder (any 2 variables × any output)
+- Free cash flow waterfall
+- Tax impact (asset sale by IRC §1060 class, stock sale, goodwill §197, installment §453)
+- Cap table dilution + exit waterfall with liquidation preferences
+- Earnout expected value (probability-weighted, PV)
+- Working capital normalization (12-month average, seasonal variance)
+- Covenant compliance (DSCR, Debt/EBITDA, LTV headroom)
+
+### 10 Interactive Model UIs
+- Valuation Explorer: sliders for add-backs, multiples, methodology weights, live range chart
+- LBO / Acquisition: returns dashboard (IRR/MOIC/DSCR), pro forma table, DSCR timeline, sensitivity heatmap, sources & uses
+- SBA Financing: go/no-go traffic light, DSCR gauge, amortization schedule
+- Tax Impact: asset vs stock sale side-by-side, PPA allocation, installment sale
+- Cap Table: rounds editor, ownership pie chart, exit waterfall at multiple valuations
+- Sensitivity Matrix: 2-variable color-coded heatmap from any parent model
+- Deal Comparison: side-by-side metrics with best-deal highlighting, risk-return radar
+- Earnout: milestone editor with probability sliders, EV vs max payout chart
+- Working Capital: 12-month trend with peg line, seasonal variance
+- Covenant Compliance: DSCR/Debt-to-EBITDA/LTV headroom dashboard
+- All grids responsive (stack on mobile), 28px slider thumbs, numeric keyboard inputs
+
+### Yulia's Canvas Tools
+- create_model_tab — opens interactive models from conversation
+- update_model — modifies assumptions ("what if EBITDA is $1.5M") → instant recalc
+- read_tab_state — reads canvas state for contextual responses
+- get_sourcing_portfolio — reads buyer's sourcing pipeline
+- SSE canvas_action handler — tool results flow to zustand store → charts update
+
+### Sourcing Engine (5-stage pipeline)
+- sourcingPipelineService.ts — orchestrates all 5 stages
+- Stage 1: Intelligence Brief (Sonnet + Census CBP/BDS + SBA + FRED + market heat)
+- Stage 2: Expansion Search (Google Places free ID-only search, 500-2K candidates)
+- Stage 3: Tiered Enrichment (Essentials → Pro → Haiku website → Sonnet deep)
+- Stage 4: Multi-factor scoring (6 dimensions, A/B/C/D tiers, Haiku batch summaries)
+- Stage 5: Portfolio management (PortfolioCanvas UI, status tracking, on-demand enrichment)
+- googlePlacesClient.ts — field-mask-enforced billing safety, usage tracking
+- Background refresh: weekly (A/B candidates), monthly (expansion re-run)
+- marketHeatService.ts — industry heat 1-5 scale, PE activity signals
+- websiteEnrichmentService.ts — Haiku-powered website analysis, 30-day cache
+- aggregatorMonitorService.ts — BizBuySell via Apify, daily scans
+- thesisMatchingService.ts — buyer thesis scoring, daily scan job
+- buyerSourcingService.ts — reverse matching (sellers → buyer demand)
+
+### Premium Document Exports
+- HTML→PDF via Puppeteer (headless Chromium) + Chart.js server-side charts
+- ValueLens template: branded cover + financial analysis with 4 chart types
+- chartService.ts: valuation range bar, multiple comparison, deal score radar, earnings breakdown
+- Dockerfile updated with Chromium + canvas native deps
+- Legacy pdfkit/docx/exceljs pipeline preserved as fallback
 - Data room with folders, share links, NDA, access logs
 - Collaboration RBAC: owner/attorney/CPA/broker/lender roles
-- Sourcing infrastructure: Google Places, Census CBP, thesis matching, listing pipeline
-- Auth: register, login, JWT, password reset, anonymous→auth migration
-- pg-boss workers: daily thesis scan, quarterly refresh
+
+### Infrastructure
+- pg-boss workers: daily thesis scan, daily aggregator scan, daily enrichment batch, weekly freshness scan, weekly portfolio refresh, monthly portfolio expansion, quarterly ValueLens refresh, FRED rate monitor
+- Dot grid background on body (CSS radial-gradient, responsive opacity)
 
 ## Not Built Yet
-- subscriptionService.ts (subscription access checks — Session A prompt ready)
-- Interactive canvas models (architecture designed, components being built)
-- Living documents (stale detection, regeneration, version tracking)
-- Auditor mode (prompt injection when processing uploaded docs)
-- Market heat scoring service
-- scan_market tool for Yulia
-- Website enrichment service
-- Aggregator monitoring
-- Company type classification
-- Professional branded export templates (CC working on this NOW for ValueLens)
-- draft_communication tool
+- Living documents (stale detection exists in dealFreshnessService, but proactive regeneration + version tracking UI not wired)
+- Auditor mode (prompt injection when processing uploaded docs — NotebookLM-style grounded verification)
+- Company type classification (PE-backed, franchise, chain vs independent — filtering Census counts)
+- draft_communication tool (Yulia drafts outreach/counter-offers as in-chat cards with "Copy" button)
+- render_to_tab tool (push generated content to a specific canvas tab)
+- XLSX export with real Excel formulas (currently values snapshot, not formula-linked)
+- Map view for sourcing results (Google Maps embed with score-coded pins)
+- Canvas tab reordering and pinning
+- Swipe-between-tabs gesture on mobile
 
 ## Recently Cleaned Up (March 28, 2026)
-- All wallet code removed
+- All wallet code removed (walletService, paywallService, dealExecutionFee, platformFeeService deleted)
 - Bizestimate renamed to ValueLens everywhere
 - Pricing pages updated to $49/$149/$999
 - Advisor-specific tiers removed
-- Orphan files deleted
+- Orphan files deleted (Home.tsx, Chat.tsx, chat/Sidebar.tsx, standalone pages, animations duplicate)
 - Census CBP endpoint updated to 2023
 - CLAUDE.md rewritten
+- METHODOLOGY_V17.md updated to v17.1 (interactive canvas, sourcing, premium exports, subscriptions)
