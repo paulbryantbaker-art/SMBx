@@ -247,8 +247,48 @@ app.get('*', (_req, res) => {
   res.sendFile(path.join(clientPath, 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  // Start background worker (non-blocking)
-  startWorker().catch(err => console.warn('[worker] Init skipped:', err.message));
+// ─── Auto-run migrations on startup ─────────────────────────
+async function runMigrations() {
+  const sql = postgres(process.env.DATABASE_URL!, { ssl: process.env.NODE_ENV === 'production' ? 'require' : false as any, prepare: false });
+  try {
+    // Create tracking table if needed
+    await sql`CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ DEFAULT NOW())`;
+
+    // Read all migration files
+    const fs = await import('fs');
+    const migrationDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'migrations');
+    if (!fs.existsSync(migrationDir)) { console.log('[migrations] No migrations directory found'); return; }
+
+    const files = fs.readdirSync(migrationDir).filter((f: string) => f.endsWith('.sql')).sort();
+    const [applied] = [await sql`SELECT name FROM _migrations`];
+    const appliedSet = new Set((applied as any[]).map(r => r.name));
+
+    let ran = 0;
+    for (const file of files) {
+      if (appliedSet.has(file)) continue;
+      const content = fs.readFileSync(path.join(migrationDir, file), 'utf-8');
+      try {
+        await sql.unsafe(content);
+        await sql`INSERT INTO _migrations (name) VALUES (${file})`;
+        console.log(`[migrations] Applied: ${file}`);
+        ran++;
+      } catch (err: any) {
+        console.error(`[migrations] Failed: ${file} — ${err.message}`);
+        // Don't block startup — log and continue
+      }
+    }
+    if (ran === 0) console.log('[migrations] All up to date');
+    else console.log(`[migrations] Applied ${ran} new migrations`);
+  } catch (err: any) {
+    console.error('[migrations] Error:', err.message);
+  } finally {
+    await sql.end();
+  }
+}
+
+runMigrations().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    startWorker().catch(err => console.warn('[worker] Init skipped:', err.message));
+  });
 });
