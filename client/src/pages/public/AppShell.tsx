@@ -965,17 +965,19 @@ export default function AppShell() {
     <aside
       className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950 border-r border-zinc-800/50' : 'bg-white border-r border-[#eeeef0] shadow-sm'}`}
     >
-      {/* Logo — X mark */}
-      <div className="flex flex-col items-center mb-3" ref={sidebarLogoRef as any}>
-        <button
-          onClick={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); setCanvasTabs([]); setActiveCanvasTabId(null); }}
-          className="border-0 bg-transparent cursor-pointer p-1 rounded-xl hover:bg-[rgba(0,0,0,0.04)] transition-colors"
-          title="Home"
-          type="button"
-        >
-          <img src="/redx.png" alt="smbx.ai" width={32} height={32} style={{ display: 'block', filter: 'brightness(1.2) saturate(1.1)' }} />
-        </button>
-      </div>
+      {/* Logo — X mark (landing/journey pages only, hidden in chat) */}
+      {viewState !== 'chat' && (
+        <div className="flex flex-col items-center mb-3" ref={sidebarLogoRef as any}>
+          <button
+            onClick={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); setCanvasTabs([]); setActiveCanvasTabId(null); }}
+            className="border-0 bg-transparent cursor-pointer p-1 rounded-xl hover:bg-[rgba(0,0,0,0.04)] transition-colors"
+            title="Home"
+            type="button"
+          >
+            <img src="/redx.png" alt="smbx.ai" width={32} height={32} style={{ display: 'block', filter: 'brightness(1.2) saturate(1.1)' }} />
+          </button>
+        </div>
+      )}
 
       {/* Explore section */}
       <div className="flex flex-col items-center gap-1 w-full px-2">
