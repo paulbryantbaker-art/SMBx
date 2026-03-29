@@ -973,7 +973,7 @@ export default function AppShell() {
           title="Home"
           type="button"
         >
-          <img src="/Copy of Copy of Copy of Logo (300 x 300 px).png" alt="smbx.ai" width={36} height={36} style={{ display: 'block' }} />
+          <img src="/Copy of Copy of Copy of Logo (300 x 300 px).png" alt="smbx.ai" width={44} height={44} style={{ display: 'block' }} />
         </button>
       </div>
 
@@ -1145,12 +1145,12 @@ export default function AppShell() {
                       {!isMobile && (
                         <>
                           <div className="mb-4 flex justify-center">
-                            <LogoImg height={32} dark={dark} />
+                            <LogoImg height={64} dark={dark} />
                           </div>
                           <div className={`w-8 h-[2px] mx-auto mb-5 ${dark ? 'bg-[#d81b60]' : 'bg-[#b0004a]'}`} />
                         </>
                       )}
-                      {isMobile && <LogoImg height={32} dark={dark} className="mx-auto mb-2" />}
+                      {isMobile && <LogoImg height={56} dark={dark} className="mx-auto mb-3" />}
                       <h1 className={`font-headline font-extrabold tracking-tighter leading-[1.05] ${isMobile ? 'text-[36px]' : 'text-[50px]'}`}>
                         <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Selling</span> your business,<br/>
                         <span className={`italic underline decoration-[3px] underline-offset-[6px] ${dark ? 'decoration-[#d81b60]' : 'decoration-[#b0004a]'}`}>buying</span> one, or{' '}
