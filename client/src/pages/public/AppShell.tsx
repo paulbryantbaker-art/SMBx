@@ -64,7 +64,7 @@ function LogoImg({ height = 28, style, className }: { height?: number; style?: R
       alt="smbx.ai"
       draggable={false}
       className={className}
-      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', imageRendering: 'auto', , ...style }}
+      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', imageRendering: 'auto', ...style }}
       aria-label="smbx.ai"
     />
   );
@@ -78,7 +78,7 @@ function LogoIcon({ height = 28, className, style }: { height?: number; classNam
       alt="smbx.ai"
       draggable={false}
       className={className}
-      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', , ...style }}
+      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', ...style }}
     />
   );
 }
