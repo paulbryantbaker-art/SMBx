@@ -64,7 +64,7 @@ function LogoImg({ height = 28, style, className }: { height?: number; style?: R
       alt="smbx.ai"
       draggable={false}
       className={className}
-      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', imageRendering: 'auto',  ...style }}
+      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', imageRendering: 'auto', filter: 'brightness(1.2) saturate(1.1)', ...style }}
       aria-label="smbx.ai"
     />
   );
@@ -973,7 +973,7 @@ export default function AppShell() {
           title="Home"
           type="button"
         >
-          <img src="/redx.png" alt="smbx.ai" width={44} height={44} style={{ display: 'block' }} />
+          <img src="/redx.png" alt="smbx.ai" width={44} height={44} style={{ display: 'block', filter: 'brightness(1.2) saturate(1.1)' }} />
         </button>
       </div>
 
