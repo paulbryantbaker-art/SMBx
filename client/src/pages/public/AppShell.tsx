@@ -60,7 +60,7 @@ function getGreeting(): string {
 function LogoImg({ height = 28, style, className }: { height?: number; style?: React.CSSProperties; className?: string; dark?: boolean }) {
   return (
     <img
-      src="/darkx.png"
+      src="/redx.png"
       alt="smbx.ai"
       draggable={false}
       className={className}
@@ -973,7 +973,7 @@ export default function AppShell() {
           title="Home"
           type="button"
         >
-          <img src="/darkx.png" alt="smbx.ai" width={44} height={44} style={{ display: 'block' }} />
+          <img src="/redx.png" alt="smbx.ai" width={44} height={44} style={{ display: 'block' }} />
         </button>
       </div>
 
