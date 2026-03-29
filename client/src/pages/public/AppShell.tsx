@@ -68,7 +68,7 @@ function LogoImg({ height = 28, style, className, dark }: { height?: number; sty
       aria-label="smbx.ai"
     >
       smb
-      <img src="/X2 Transaparant.png" alt="" draggable={false} style={{ height: xSize, width: xSize, objectFit: 'contain', margin: `0 ${-xSize * 0.06}px`, verticalAlign: 'middle', filter: 'brightness(1.3) saturate(1.15)' }} />
+      <img src="/Copy of Copy of Copy of Logo (300 x 300 px).png" alt="" draggable={false} style={{ height: xSize, width: xSize, objectFit: 'contain', margin: `0 ${-xSize * 0.06}px`, verticalAlign: 'middle' }} />
       .ai
     </span>
   );
@@ -977,7 +977,7 @@ export default function AppShell() {
           title="Home"
           type="button"
         >
-          <img src="/X2 Transaparant.png" alt="smbx.ai" width={36} height={36} style={{ display: 'block', filter: 'brightness(1.3) saturate(1.15)' }} />
+          <img src="/Copy of Copy of Copy of Logo (300 x 300 px).png" alt="smbx.ai" width={36} height={36} style={{ display: 'block' }} />
         </button>
       </div>
 
