@@ -60,11 +60,11 @@ function getGreeting(): string {
 function LogoImg({ height = 28, style, className }: { height?: number; style?: React.CSSProperties; className?: string; dark?: boolean }) {
   return (
     <img
-      src="/Copy of Copy of Copy of Logo (300 x 300 px).png"
+      src="/x1 logo transparent.png"
       alt="smbx.ai"
       draggable={false}
       className={className}
-      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', imageRendering: 'auto', ...style }}
+      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', imageRendering: 'auto', filter: 'brightness(1.15) contrast(1.1) saturate(1.25)', ...style }}
       aria-label="smbx.ai"
     />
   );
@@ -973,7 +973,7 @@ export default function AppShell() {
           title="Home"
           type="button"
         >
-          <img src="/Copy of Copy of Copy of Logo (300 x 300 px).png" alt="smbx.ai" width={44} height={44} style={{ display: 'block' }} />
+          <img src="/x1 logo transparent.png" alt="smbx.ai" width={44} height={44} style={{ display: 'block', filter: 'brightness(1.15) contrast(1.1) saturate(1.25)' }} />
         </button>
       </div>
 
