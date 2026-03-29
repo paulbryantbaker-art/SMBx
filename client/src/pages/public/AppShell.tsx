@@ -57,20 +57,16 @@ function getGreeting(): string {
 }
 
 /* ═══ LOGO — "smb" + X image + ".ai" in Poppins 800 ═══ */
-function LogoImg({ height = 28, style, className, dark }: { height?: number; style?: React.CSSProperties; className?: string; dark?: boolean }) {
-  const fontSize = height;
-  const xSize = fontSize * 1.15;
-  const color = dark ? '#f0f0f2' : '#1a1c1e';
+function LogoImg({ height = 28, style, className }: { height?: number; style?: React.CSSProperties; className?: string; dark?: boolean }) {
   return (
-    <span
+    <img
+      src="/Copy of Copy of Copy of Logo (300 x 300 px).png"
+      alt="smbx.ai"
+      draggable={false}
       className={className}
-      style={{ display: 'inline-flex', alignItems: 'center', fontFamily: "'Poppins', sans-serif", fontWeight: 800, fontSize, color, lineHeight: 1, letterSpacing: '-0.04em', userSelect: 'none', ...style }}
+      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', imageRendering: 'auto', ...style }}
       aria-label="smbx.ai"
-    >
-      smb
-      <img src="/Copy of Copy of Copy of Logo (300 x 300 px).png" alt="" draggable={false} style={{ height: xSize, width: xSize, objectFit: 'contain', margin: `0 ${-xSize * 0.06}px`, verticalAlign: 'middle' }} />
-      .ai
-    </span>
+    />
   );
 }
 
