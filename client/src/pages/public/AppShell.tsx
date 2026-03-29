@@ -973,7 +973,7 @@ export default function AppShell() {
           title="Home"
           type="button"
         >
-          <img src="/redx.png" alt="smbx.ai" width={44} height={44} style={{ display: 'block', filter: 'brightness(1.2) saturate(1.1)' }} />
+          <img src="/redx.png" alt="smbx.ai" width={32} height={32} style={{ display: 'block', filter: 'brightness(1.2) saturate(1.1)' }} />
         </button>
       </div>
 
