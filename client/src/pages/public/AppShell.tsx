@@ -970,11 +970,11 @@ export default function AppShell() {
         <div className="flex flex-col items-center mb-3" ref={sidebarLogoRef as any}>
           <button
             onClick={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); setCanvasTabs([]); setActiveCanvasTabId(null); }}
-            className="border-0 bg-transparent cursor-pointer p-1 rounded-xl hover:bg-[rgba(0,0,0,0.04)] transition-colors"
+            className="sidebar-x-btn border-0 bg-transparent cursor-pointer p-1 rounded-xl"
             title="Home"
             type="button"
           >
-            <img src="/redx.png" alt="smbx.ai" width={32} height={32} style={{ display: 'block', filter: 'brightness(1.2) saturate(1.1)' }} />
+            <img src="/redx.png" alt="smbx.ai" width={32} height={32} className="sidebar-x-img" style={{ display: 'block', filter: 'brightness(1.2) saturate(1.1)' }} />
           </button>
         </div>
       )}
@@ -1517,6 +1517,12 @@ export default function AppShell() {
 
       {/* Global keyframe animations */}
       <style>{`
+        .sidebar-x-img {
+          transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-x-btn:hover .sidebar-x-img {
+          transform: rotate(180deg);
+        }
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
