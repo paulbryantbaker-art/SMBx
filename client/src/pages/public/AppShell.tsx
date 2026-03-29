@@ -60,11 +60,11 @@ function getGreeting(): string {
 function LogoImg({ height = 28, style, className }: { height?: number; style?: React.CSSProperties; className?: string; dark?: boolean }) {
   return (
     <img
-      src="/redx.png"
+      src="/GX.png"
       alt="smbx.ai"
       draggable={false}
       className={className}
-      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', imageRendering: 'auto', filter: 'brightness(1.2) saturate(1.1)', ...style }}
+      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', imageRendering: 'auto', , ...style }}
       aria-label="smbx.ai"
     />
   );
@@ -74,11 +74,11 @@ function LogoImg({ height = 28, style, className }: { height?: number; style?: R
 function LogoIcon({ height = 28, className, style }: { height?: number; className?: string; style?: React.CSSProperties }) {
   return (
     <img
-      src="/redx.png"
+      src="/GX.png"
       alt="smbx.ai"
       draggable={false}
       className={className}
-      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', filter: 'brightness(1.2) saturate(1.1)', ...style }}
+      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', , ...style }}
     />
   );
 }
@@ -974,7 +974,7 @@ export default function AppShell() {
             title="Home"
             type="button"
           >
-            <img src="/redx.png" alt="smbx.ai" width={32} height={32} className="sidebar-x-img" style={{ display: 'block', filter: 'brightness(1.2) saturate(1.1)' }} />
+            <img src="/GX.png" alt="smbx.ai" width={32} height={32} className="sidebar-x-img" style={{ display: 'block',  }} />
           </button>
         </div>
       )}
