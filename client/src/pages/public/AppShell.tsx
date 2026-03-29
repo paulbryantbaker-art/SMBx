@@ -74,11 +74,11 @@ function LogoImg({ height = 28, style, className }: { height?: number; style?: R
 function LogoIcon({ height = 28, className, style }: { height?: number; className?: string; style?: React.CSSProperties }) {
   return (
     <img
-      src="/x-logo.png"
+      src="/redx.png"
       alt="smbx.ai"
       draggable={false}
       className={className}
-      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', filter: 'brightness(1.45) saturate(1.2)', ...style }}
+      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', filter: 'brightness(1.2) saturate(1.1)', ...style }}
     />
   );
 }
@@ -1143,12 +1143,9 @@ export default function AppShell() {
                   <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-6' : 'max-w-3xl space-y-6'}`} style={isMobile ? undefined : { marginTop: '-5vh' }}>
                       {!isMobile && (
-                        <>
-                          <div className="mb-4 flex justify-center">
-                            <LogoImg height={64} dark={dark} />
-                          </div>
-                          <div className={`w-8 h-[2px] mx-auto mb-5 ${dark ? 'bg-[#d81b60]' : 'bg-[#b0004a]'}`} />
-                        </>
+                        <div className="mb-6 flex justify-center">
+                          <LogoImg height={64} dark={dark} />
+                        </div>
                       )}
                       {isMobile && <LogoImg height={56} dark={dark} className="mx-auto mb-3" />}
                       <h1 className={`font-headline font-extrabold tracking-tighter leading-[1.05] ${isMobile ? 'text-[36px]' : 'text-[50px]'}`}>
@@ -1577,7 +1574,7 @@ export default function AppShell() {
             >
               <span className="material-symbols-outlined text-[24px]">close</span>
             </button>
-            <LogoIcon height={22} className="mb-8" />
+            <LogoIcon height={40} className="mb-6" />
             <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-4 ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Explore</span>
             {([
               { id: 'home' as TabId, icon: 'home', label: 'Home' },
