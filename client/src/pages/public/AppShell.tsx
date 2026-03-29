@@ -271,7 +271,7 @@ function renderHeadline(text: string, terraWord: string) {
   return (
     <>
       {text.substring(0, idx)}
-      <span style={{ color: '#b0004a' }}>{terraWord}</span>
+      <span style={{ color: '#A85860' }}>{terraWord}</span>
       {text.substring(idx + terraWord.length)}
     </>
   );
@@ -392,7 +392,7 @@ function getInitialConversationId(path: string): number | null {
 }
 
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#b0004a',
+  sell: '#A85860',
   buy: '#4E8FD4',
   raise: '#6B8F4E',
   pmi: '#8F6BD4',
@@ -998,8 +998,8 @@ export default function AppShell() {
               onClick={() => handleTabClick(item.id)}
               className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                 isActive
-                  ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5')
-                  : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#b0004a] hover:bg-[#b0004a]/5')
+                  ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#A85860] bg-[#A85860]/5')
+                  : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#A85860] hover:bg-[#A85860]/5')
               }`}
               title={item.label}
               type="button"
@@ -1031,8 +1031,8 @@ export default function AppShell() {
               onClick={() => openCanvasTab(item.type, item.label)}
               className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                 isActive
-                  ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5')
-                  : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#b0004a] hover:bg-[#b0004a]/5')
+                  ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#A85860] bg-[#A85860]/5')
+                  : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#A85860] hover:bg-[#A85860]/5')
               }`}
               title={item.label}
               type="button"
@@ -1054,7 +1054,7 @@ export default function AppShell() {
         {user && (
         <button
           onClick={() => { handleNewChat(); }}
-          className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5'}`}
+          className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#A85860] bg-[#A85860]/5'}`}
           title="New Chat"
           type="button"
         >
@@ -1066,8 +1066,8 @@ export default function AppShell() {
           onClick={() => { setViewState('chat'); navigate('/chat', { replace: viewState === 'chat' }); }}
           className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
             viewState === 'chat'
-              ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5')
-              : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#b0004a] hover:bg-[#b0004a]/5')
+              ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#A85860] bg-[#A85860]/5')
+              : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#A85860] hover:bg-[#A85860]/5')
           }`}
           title="Chat History"
           type="button"
@@ -1081,7 +1081,7 @@ export default function AppShell() {
       <div className="flex flex-col items-center gap-1 mt-auto pt-4">
         <button
           onClick={() => { if (user) { openCanvasTab('settings', 'Settings'); } else navigate('/login'); }}
-          className={`flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#b0004a]'}`}
+          className={`flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#A85860]'}`}
           type="button"
         >
           <span className="material-symbols-outlined text-[22px]">person</span>
@@ -1151,9 +1151,9 @@ export default function AppShell() {
                       )}
                       {isMobile && <LogoImg height={56} dark={dark} className="mx-auto mb-3" />}
                       <h1 className={`font-headline font-extrabold tracking-tighter leading-[1.05] ${isMobile ? 'text-[36px]' : 'text-[50px]'}`}>
-                        <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>Selling</span> your business,<br/>
-                        <span className={`italic underline decoration-[3px] underline-offset-[6px] ${dark ? 'decoration-[#d81b60]' : 'decoration-[#b0004a]'}`}>buying</span> one, or{' '}
-                        <span className={dark ? 'text-[#d81b60]' : 'text-[#b0004a]'}>raising</span> capital?
+                        <span className={dark ? 'text-[#D4848C]' : 'text-[#A85860]'}>Selling</span> your business,<br/>
+                        <span className={`italic underline decoration-[3px] underline-offset-[6px] ${dark ? 'decoration-[#D4848C]' : 'decoration-[#A85860]'}`}>buying</span> one, or{' '}
+                        <span className={dark ? 'text-[#D4848C]' : 'text-[#A85860]'}>raising</span> capital?
                       </h1>
                       <p className={`text-base md:text-xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
                         Yulia handles the numbers, the documents, and the strategy<br className="hidden md:inline" /> — all by just talking to her.
@@ -1164,9 +1164,9 @@ export default function AppShell() {
                         <>
                           <div className="w-full max-w-3xl mx-auto mt-8">
                             <div className="relative group">
-                              <div className={`absolute -inset-1 bg-gradient-to-r from-[#b0004a] to-[#d81b60] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
+                              <div className={`absolute -inset-1 bg-gradient-to-r from-[#A85860] to-[#D4848C] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
                               <div className={`relative rounded-full flex items-center p-2 pl-6 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
-                                <span className={`material-symbols-outlined mr-4 ${dark ? 'text-rose-500' : 'text-[#b0004a]'}`}>bolt</span>
+                                <span className={`material-symbols-outlined mr-4 ${dark ? 'text-rose-500' : 'text-[#A85860]'}`}>bolt</span>
                                 <input
                                   className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
                                   placeholder="Message Yulia..."
@@ -1183,7 +1183,7 @@ export default function AppShell() {
                                     const input = (e.currentTarget.parentElement?.querySelector('input') as HTMLInputElement);
                                     if (input?.value.trim()) { handleSend(input.value.trim()); input.value = ''; }
                                   }}
-                                  className="bg-gradient-to-br from-[#b0004a] to-[#d81b60] text-white h-12 w-12 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform border-none cursor-pointer"
+                                  className="bg-gradient-to-br from-[#A85860] to-[#D4848C] text-white h-12 w-12 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform border-none cursor-pointer"
                                 >
                                   <span className="material-symbols-outlined">arrow_forward</span>
                                 </button>
@@ -1199,7 +1199,7 @@ export default function AppShell() {
                                   className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-all border-none ${
                                     dark
                                       ? 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
-                                      : 'bg-white text-[#636467] shadow-sm hover:border-[#b0004a] hover:text-[#b0004a]'
+                                      : 'bg-white text-[#636467] shadow-sm hover:border-[#A85860] hover:text-[#A85860]'
                                   }`}
                                   style={{ border: dark ? '1px solid rgba(63,63,70,0.5)' : '1px solid #e3bdc3' }}
                                   type="button"
@@ -1231,7 +1231,7 @@ export default function AppShell() {
                             className={`px-3 py-1.5 rounded-full text-xs cursor-pointer transition-all border-none ${
                               dark
                                 ? 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
-                                : 'bg-white text-[#636467] shadow-sm hover:border-[#b0004a] hover:text-[#b0004a]'
+                                : 'bg-white text-[#636467] shadow-sm hover:border-[#A85860] hover:text-[#A85860]'
                             }`}
                             style={{ border: dark ? '1px solid rgba(63,63,70,0.5)' : '1px solid #e3bdc3' }}
                             type="button"
@@ -1242,9 +1242,9 @@ export default function AppShell() {
                       </div>
                       {/* Gradient-glow input (same as desktop) */}
                       <div className="relative group">
-                        <div className={`absolute -inset-1 bg-gradient-to-r from-[#b0004a] to-[#d81b60] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
+                        <div className={`absolute -inset-1 bg-gradient-to-r from-[#A85860] to-[#D4848C] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
                         <div className={`relative rounded-full flex items-center p-2 pl-5 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
-                          <span className={`material-symbols-outlined mr-3 ${dark ? 'text-rose-500' : 'text-[#b0004a]'}`}>bolt</span>
+                          <span className={`material-symbols-outlined mr-3 ${dark ? 'text-rose-500' : 'text-[#A85860]'}`}>bolt</span>
                           <input
                             className={`bg-transparent border-none focus:ring-0 flex-1 py-3 text-base outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
                             placeholder="Message Yulia..."
@@ -1261,7 +1261,7 @@ export default function AppShell() {
                               const input = (e.currentTarget.parentElement?.querySelector('input') as HTMLInputElement);
                               if (input?.value.trim()) { handleSend(input.value.trim()); input.value = ''; }
                             }}
-                            className="bg-gradient-to-br from-[#b0004a] to-[#d81b60] text-white h-10 w-10 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform border-none cursor-pointer"
+                            className="bg-gradient-to-br from-[#A85860] to-[#D4848C] text-white h-10 w-10 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform border-none cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
                           </button>
@@ -1467,7 +1467,7 @@ export default function AppShell() {
                     title={tab.label}
                     className={`relative w-9 h-9 rounded-lg border-0 cursor-pointer transition-all flex items-center justify-center ${
                       tab.id === activeCanvasTabId
-                        ? (dark ? 'bg-rose-500/15 text-rose-400' : 'bg-[#BA3C60]/10 text-[#BA3C60]')
+                        ? (dark ? 'bg-rose-500/15 text-rose-400' : 'bg-[#B5636B]/10 text-[#B5636B]')
                         : (dark ? 'bg-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800' : 'bg-transparent text-[#6E6A63] hover:text-[#0D0D0D] hover:bg-[rgba(0,0,0,0.04)]')
                     }`}
                   >
@@ -1493,7 +1493,7 @@ export default function AppShell() {
                     onClick={() => setActiveCanvasTabId(tab.id)}
                     className={`canvas-tab-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
                       tab.id === activeCanvasTabId
-                        ? 'bg-[#BA3C60] text-white border-[#BA3C60]'
+                        ? 'bg-[#B5636B] text-white border-[#B5636B]'
                         : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)]'
                     }`}
                   >
@@ -1601,7 +1601,7 @@ export default function AppShell() {
                   onClick={() => handleTabClick(item.id)}
                   className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${
                     isActive
-                      ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5')
+                      ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#A85860] bg-[#A85860]/5')
                       : (dark ? 'text-zinc-400 hover:text-white bg-transparent' : 'text-[#636467] hover:text-[#1a1c1e] bg-transparent')
                   }`}
                   type="button"
@@ -1615,7 +1615,7 @@ export default function AppShell() {
               {user && (
               <button
                 onClick={() => { setIsMobileSidebarOpen(false); handleNewChat(); }}
-                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#b0004a] bg-[#b0004a]/5'}`}
+                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#A85860] bg-[#A85860]/5'}`}
                 type="button"
               >
                 <span className="material-symbols-outlined text-[20px]">add_comment</span>
@@ -1639,7 +1639,7 @@ export default function AppShell() {
       {isMobile && (viewState === 'landing' || viewState === 'chat') && (
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
-          className="fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#d81b60]"
+          className="fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#D4848C]"
           style={{ top: 16, left: 16 }}
           type="button"
           aria-label="Open menu"
@@ -1657,7 +1657,7 @@ export default function AppShell() {
           <button
             onClick={() => handleTabClick('home')}
             className="fixed z-50 flex items-center gap-2 border-none cursor-pointer text-white font-headline text-[14px] font-bold shadow-xl hover:scale-105 active:scale-95 transition-all duration-200"
-            style={{ bottom: 'calc(24px + env(safe-area-inset-bottom))', right: 16, background: 'linear-gradient(135deg, #b0004a, #d81b60)', borderRadius: '100px', padding: '14px 22px' }}
+            style={{ bottom: 'calc(24px + env(safe-area-inset-bottom))', right: 16, background: 'linear-gradient(135deg, #A85860, #D4848C)', borderRadius: '100px', padding: '14px 22px' }}
             type="button"
           >
             <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>chat</span>
@@ -1668,7 +1668,7 @@ export default function AppShell() {
           <button
             onClick={() => handleTabClick('home')}
             className="fixed z-50 flex items-center gap-2 border-none cursor-pointer text-white font-headline text-[13px] font-bold shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
-            style={{ top: 16, right: 64, background: 'linear-gradient(135deg, #b0004a, #d81b60)', borderRadius: '100px', padding: '9px 20px' }}
+            style={{ top: 16, right: 64, background: 'linear-gradient(135deg, #A85860, #D4848C)', borderRadius: '100px', padding: '9px 20px' }}
             type="button"
           >
             Start chatting
@@ -1684,7 +1684,7 @@ export default function AppShell() {
           { ch: 's', color: '#1A1A18', weight: 700 },
           { ch: 'm', color: '#1A1A18', weight: 700 },
           { ch: 'b', color: '#1A1A18', weight: 700 },
-          { ch: 'x', color: '#b0004a', weight: 800 },
+          { ch: 'x', color: '#A85860', weight: 800 },
           { ch: '.', color: '#1A1A18', weight: 700 },
           { ch: 'a', color: '#1A1A18', weight: 700 },
           { ch: 'i', color: '#1A1A18', weight: 700 },

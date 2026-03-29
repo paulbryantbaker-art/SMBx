@@ -7,7 +7,7 @@ interface TagProps {
 
 const styles: Record<TagVariant, string> = {
   free: 'bg-[#E8F5E9] text-[#2E7D32]',
-  paid: 'bg-[#FFF0EB] text-[#BA3C60]',
+  paid: 'bg-[#FFF0EB] text-[#B5636B]',
 };
 
 export default function Tag({ variant, children }: TagProps) {

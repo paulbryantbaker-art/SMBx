@@ -133,18 +133,18 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/chat')}
-            className="flex items-center gap-1.5 text-sm text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#BA3C60] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#B5636B] transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Chat
           </button>
           <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-            smb<span className="text-[#BA3C60]">x</span>.ai
+            smb<span className="text-[#B5636B]">x</span>.ai
           </div>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-[#6E6A63]">{user.display_name || user.email}</span>
-          <button onClick={onLogout} className="text-sm text-[#A9A49C] bg-transparent border-0 cursor-pointer hover:text-[#BA3C60] transition-colors">
+          <button onClick={onLogout} className="text-sm text-[#A9A49C] bg-transparent border-0 cursor-pointer hover:text-[#B5636B] transition-colors">
             Sign out
           </button>
         </div>
@@ -220,7 +220,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={naicsCode}
                     onChange={e => setNaicsCode(e.target.value)}
                     placeholder="e.g. 561710 (Pest Control)"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#BA3C60]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#B5636B]"
                   />
                 </div>
                 <div className="flex-1">
@@ -230,14 +230,14 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={geography}
                     onChange={e => setGeography(e.target.value)}
                     placeholder="e.g. Texas, Dallas County"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#BA3C60]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#B5636B]"
                   />
                 </div>
                 <div className="flex items-end">
                   <button
                     onClick={fetchOverview}
                     disabled={loading || !naicsCode.trim()}
-                    className="px-5 py-2 rounded-xl text-sm font-semibold bg-[#BA3C60] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                    className="px-5 py-2 rounded-xl text-sm font-semibold bg-[#B5636B] text-white border-0 cursor-pointer hover:bg-[#9A5058] transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                   >
                     {loading ? 'Loading...' : 'Analyze'}
                   </button>
@@ -278,7 +278,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                             <div key={i} className="flex items-center gap-2">
                               <span className="text-xs text-[#6E6A63] w-32 shrink-0">{sz.label}</span>
                               <div className="flex-1 h-2 bg-[#F5F5F5] rounded-full overflow-hidden">
-                                <div className="h-full bg-[#BA3C60] rounded-full" style={{ width: `${sz.pct || 0}%` }} />
+                                <div className="h-full bg-[#B5636B] rounded-full" style={{ width: `${sz.pct || 0}%` }} />
                               </div>
                               <span className="text-xs text-[#6E6A63] w-16 text-right">{sz.count?.toLocaleString()}</span>
                             </div>
@@ -350,7 +350,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
             ) : (
               <div className="space-y-3">
                 {reports.map(r => (
-                  <div key={r.id} className="bg-white rounded-2xl border border-border p-5 hover:border-[#BA3C60] transition-colors">
+                  <div key={r.id} className="bg-white rounded-2xl border border-border p-5 hover:border-[#B5636B] transition-colors">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
                         {r.report_type}
@@ -388,7 +388,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={sbaInputs.purchasePrice}
                     onChange={e => setSbaInputs(p => ({ ...p, purchasePrice: e.target.value }))}
                     placeholder="1,000,000"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#BA3C60]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#B5636B]"
                   />
                 </div>
                 <div>
@@ -398,7 +398,7 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={sbaInputs.annualDebtService}
                     onChange={e => setSbaInputs(p => ({ ...p, annualDebtService: e.target.value }))}
                     placeholder="120,000"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#BA3C60]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#B5636B]"
                   />
                 </div>
                 <div>
@@ -408,14 +408,14 @@ export default function Intelligence({ user, onLogout }: IntelligenceProps) {
                     value={sbaInputs.ebitda}
                     onChange={e => setSbaInputs(p => ({ ...p, ebitda: e.target.value }))}
                     placeholder="250,000"
-                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#BA3C60]"
+                    className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-[#FAFAFA] text-[#0D0D0D] outline-none focus:border-[#B5636B]"
                   />
                 </div>
               </div>
               <button
                 onClick={runSbaAnalysis}
                 disabled={loading || !sbaInputs.purchasePrice || !sbaInputs.annualDebtService || !sbaInputs.ebitda}
-                className="px-5 py-2 rounded-xl text-sm font-semibold bg-[#BA3C60] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-2 rounded-xl text-sm font-semibold bg-[#B5636B] text-white border-0 cursor-pointer hover:bg-[#9A5058] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Calculating...' : 'Check Eligibility'}
               </button>

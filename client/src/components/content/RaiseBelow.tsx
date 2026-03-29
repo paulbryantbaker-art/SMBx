@@ -15,19 +15,19 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
           <div className="lg:col-span-7">
             <ScrollReveal>
               <div className="flex items-center gap-2 mb-8">
-                <span className="inline-block px-3 py-1 bg-[#b0004a]/10 text-[#b0004a] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Raise</span>
+                <span className="inline-block px-3 py-1 bg-[#A85860]/10 text-[#A85860] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Raise</span>
                 <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-[#2f3133] text-[#dadadc]/80' : 'bg-[#f3f3f6] text-[#5d5e61]'}`}>Capital</span>
               </div>
             </ScrollReveal>
             <ScrollReveal y={40} delay={0.1}>
               <h1 className="font-headline font-black text-5xl md:text-6xl tracking-tighter leading-[0.92] mb-8">
-                More than half of search fund operators <span className="text-[#b0004a]">never acquire.</span> Most fundraising decks never get a second meeting.
+                More than half of search fund operators <span className="text-[#A85860]">never acquire.</span> Most fundraising decks never get a second meeting.
               </h1>
             </ScrollReveal>
             <ScrollReveal delay={0.2}>
               <div className={`space-y-6 text-xl editorial max-w-xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
                 <p>The difference isn't the business or the opportunity. It's the package. Investors make funding decisions based on the quality of your financial story, your market analysis, and your operational plan. Yulia builds all three.</p>
-                <p className={`font-bold border-l-4 border-[#b0004a] pl-6 text-2xl italic ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>Yulia builds your fundraising package. You take the meetings.</p>
+                <p className={`font-bold border-l-4 border-[#A85860] pl-6 text-2xl italic ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>Yulia builds your fundraising package. You take the meetings.</p>
               </div>
             </ScrollReveal>
           </div>
@@ -45,7 +45,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
                   'Drafts responses to investor questions with supporting data attached',
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-[#b0004a] text-lg shrink-0 mt-0.5">check_circle</span>
+                    <span className="material-symbols-outlined text-[#A85860] text-lg shrink-0 mt-0.5">check_circle</span>
                     <p className="text-sm text-[#dadadc]/90">{item}</p>
                   </div>
                 ))}
@@ -62,7 +62,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
           <section className="mb-24">
             <div className={`rounded-3xl p-10 md:p-16 text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
               <div className="mb-12">
-                <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">What Yulia Does</span>
+                <span className="text-[#A85860] font-bold uppercase tracking-widest text-xs block mb-3">What Yulia Does</span>
                 <h2 className="text-4xl font-headline font-black tracking-tight mb-4">The fundraising package that gets second meetings.</h2>
                 <p className="text-lg text-[#dadadc]/70 max-w-2xl">Capital structure modeling, investor-grade materials, cap table projections, investor matching, term sheet analysis, and communication management. Everything you need from "how much should I raise?" to "the capital just hit the account."</p>
               </div>
@@ -76,7 +76,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
                   { icon: 'mail', title: 'Investor communication', desc: "Every question investors ask \u2014 and they ask a lot \u2014 Yulia drafts your response with the supporting data already attached. You review and send. No more scrambling for numbers at 11pm." },
                 ].map((card) => (
                   <div key={card.title} className="bg-white/5 rounded-2xl border border-white/10 p-8">
-                    <span className="material-symbols-outlined text-[#b0004a] text-3xl mb-4">{card.icon}</span>
+                    <span className="material-symbols-outlined text-[#A85860] text-3xl mb-4">{card.icon}</span>
                     <h3 className="font-bold text-lg mb-3">{card.title}</h3>
                     <p className="text-sm text-[#dadadc]/70">{card.desc}</p>
                   </div>
@@ -90,9 +90,9 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
         <section className="mb-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <ScrollReveal className="lg:col-span-5">
-              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Your Raise Process</span>
+              <span className="text-[#A85860] font-bold uppercase tracking-widest text-xs block mb-3">Your Raise Process</span>
               <h2 className="text-4xl font-headline font-black tracking-tight mb-8">Six gates from readiness to close.</h2>
-              <p className={`font-bold text-xl border-l-4 border-[#b0004a] pl-6 italic mb-8 ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>Every gate has specific completion triggers. Yulia advances you when the prerequisite work is done — and not before.</p>
+              <p className={`font-bold text-xl border-l-4 border-[#A85860] pl-6 italic mb-8 ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>Every gate has specific completion triggers. Yulia advances you when the prerequisite work is done — and not before.</p>
               <p className={dark ? 'text-[#dadadc]/80 leading-relaxed' : 'text-[#5d5e61] leading-relaxed'}>From "how much should I raise?" to "the capital just hit the account" — a structured process that prevents the mistakes that kill 80% of fundraising efforts.</p>
             </ScrollReveal>
             <StaggerContainer className="lg:col-span-7 space-y-4">
@@ -106,7 +106,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
               ].map((step) => (
                 <StaggerItem key={step.num}>
                   <div className={`rounded-2xl p-6 flex items-start gap-4 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${step.free ? (dark ? 'bg-[#006630]/20 text-[#006630]' : 'bg-[#006630]/10 text-[#006630]') : 'bg-[#b0004a]/10 text-[#b0004a]'}`}>{step.num}</div>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${step.free ? (dark ? 'bg-[#006630]/20 text-[#006630]' : 'bg-[#006630]/10 text-[#006630]') : 'bg-[#A85860]/10 text-[#A85860]'}`}>{step.num}</div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-bold">{step.title}</h4>
@@ -125,10 +125,10 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
         <section className="mb-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <ScrollReveal className="lg:col-span-5">
-              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Dilution Intelligence</span>
+              <span className="text-[#A85860] font-bold uppercase tracking-widest text-xs block mb-3">Dilution Intelligence</span>
               <h2 className="text-4xl font-headline font-black tracking-tight mb-8">Know what you're giving up before you sign anything.</h2>
               <p className={`leading-relaxed editorial mb-6 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Most founders understand they're giving up equity. Very few understand what liquidation preferences, participation rights, and anti-dilution provisions actually cost them at different exit values. Yulia models all of it.</p>
-              <div className={`rounded-2xl p-6 ${dark ? 'bg-[#b0004a]/10 border border-[#b0004a]/20' : 'bg-[#b0004a]/5 border border-[#b0004a]/15'}`}>
+              <div className={`rounded-2xl p-6 ${dark ? 'bg-[#A85860]/10 border border-[#A85860]/20' : 'bg-[#A85860]/5 border border-[#A85860]/15'}`}>
                 <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}><span className={`font-bold ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>The question isn't "what percentage am I giving up."</span> It's "what do I actually receive at a $5M exit vs. a $20M exit vs. a $50M exit — after preferences, participation, and the waterfall." Yulia shows you the real math.</p>
               </div>
             </ScrollReveal>
@@ -144,7 +144,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
                     </div>
                     <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center">
                       <p className="text-[10px] text-[#dadadc]/60 uppercase mb-1">Investment</p>
-                      <p className="text-xl font-black text-[#b0004a]">$2M</p>
+                      <p className="text-xl font-black text-[#A85860]">$2M</p>
                     </div>
                     <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center">
                       <p className="text-[10px] text-[#dadadc]/60 uppercase mb-1">Your stake</p>
@@ -178,7 +178,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
         <section className="mb-24">
           <ScrollReveal>
             <div className="mb-12">
-              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Capital Options</span>
+              <span className="text-[#A85860] font-bold uppercase tracking-widest text-xs block mb-3">Capital Options</span>
               <h2 className="text-4xl font-headline font-black tracking-tight mb-4">Every structure modeled. You pick the one that fits.</h2>
               <p className={`text-lg max-w-2xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Most founders only consider equity. There are six fundamentally different capital structures — each with different implications for control, dilution, cost of capital, and your personal risk.</p>
             </div>
@@ -194,7 +194,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
             ].map((card) => (
               <StaggerItem key={card.title}>
                 <div className={`rounded-2xl p-8 hover:shadow-lg transition-all h-full ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                  <span className="material-symbols-outlined text-[#b0004a] text-2xl mb-3">{card.icon}</span>
+                  <span className="material-symbols-outlined text-[#A85860] text-2xl mb-3">{card.icon}</span>
                   <h3 className="font-bold mb-2">{card.title}</h3>
                   <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{card.desc}</p>
                 </div>
@@ -203,7 +203,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
           </StaggerContainer>
           <ScrollReveal delay={0.2}>
             <div className={`mt-8 rounded-2xl p-6 flex items-start gap-4 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-[#f3f3f6] border border-[#eeeef0]'}`}>
-              <span className="material-symbols-outlined text-[#b0004a] text-2xl shrink-0 mt-1">auto_fix_high</span>
+              <span className="material-symbols-outlined text-[#A85860] text-2xl shrink-0 mt-1">auto_fix_high</span>
               <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}><span className={`font-bold ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>Yulia models every structure side by side</span> — dilution impact, cost of capital, founder retention, personal risk, and what you actually take home at different exit values. You pick the one that fits your goals.</p>
             </div>
           </ScrollReveal>
@@ -214,11 +214,11 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
           <section className="mb-12">
             <div className={`rounded-3xl p-12 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
               <div>
-                <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95]">Sell. Buy. Raise.<br/><span className="text-[#b0004a]">Talk to Yulia.</span></h2>
+                <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95]">Sell. Buy. Raise.<br/><span className="text-[#A85860]">Talk to Yulia.</span></h2>
                 <p className="text-lg text-[#dadadc]/70 mt-4">Tell Yulia how much you need and what it's for. She'll model every structure, build the materials, and match you with investors — before your first meeting.</p>
               </div>
               <div className="flex flex-col items-center lg:items-end gap-4">
-                <button onClick={handleCTA} className="px-10 py-5 bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Talk to Yulia</button>
+                <button onClick={handleCTA} className="px-10 py-5 bg-gradient-to-r from-[#A85860] to-[#D4848C] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Talk to Yulia</button>
                 <p className="text-xs text-[#dadadc]/70">Free analysis · No account required · Your data stays yours</p>
               </div>
             </div>

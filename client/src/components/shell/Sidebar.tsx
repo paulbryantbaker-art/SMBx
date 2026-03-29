@@ -35,7 +35,7 @@ interface SidebarProps {
 }
 
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#BA3C60',
+  sell: '#B5636B',
   buy: '#4E8FD4',
   raise: '#6B8F4E',
   pmi: '#8F6BD4',
@@ -221,7 +221,7 @@ export default function Sidebar({
           style={{ fontFamily: 'inherit' }}
           type="button"
         >
-          <svg className="w-4 h-4 text-[#BA3C60]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <svg className="w-4 h-4 text-[#B5636B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
           New Workspace
@@ -248,7 +248,7 @@ export default function Sidebar({
                   style={{ fontFamily: 'inherit' }}
                   type="button"
                 >
-                  <span className={isActive ? 'text-[#BA3C60]' : 'text-[rgba(0,0,0,0.25)]'}>{item.icon}</span>
+                  <span className={isActive ? 'text-[#B5636B]' : 'text-[rgba(0,0,0,0.25)]'}>{item.icon}</span>
                   {item.label}
                 </button>
               );
@@ -279,13 +279,13 @@ export default function Sidebar({
                           {group.businessName}
                         </span>
                         {group.currentGate && (
-                          <span className="text-[9px] font-bold text-[#BA3C60] bg-[#FFF0EB] px-[5px] py-[1px] rounded-[3px] shrink-0">
+                          <span className="text-[9px] font-bold text-[#B5636B] bg-[#FFF0EB] px-[5px] py-[1px] rounded-[3px] shrink-0">
                             {group.currentGate}
                           </span>
                         )}
                         <button
                           onClick={(e) => { e.stopPropagation(); handleNewDealChat(group.dealId); }}
-                          className="w-[20px] h-[20px] rounded-full border-none cursor-pointer flex items-center justify-center text-[rgba(0,0,0,0.25)] hover:text-[#BA3C60] hover:bg-[#FFF0EB] transition-colors shrink-0 bg-transparent p-0"
+                          className="w-[20px] h-[20px] rounded-full border-none cursor-pointer flex items-center justify-center text-[rgba(0,0,0,0.25)] hover:text-[#B5636B] hover:bg-[#FFF0EB] transition-colors shrink-0 bg-transparent p-0"
                           type="button"
                           aria-label="New chat in deal"
                         >

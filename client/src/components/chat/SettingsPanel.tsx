@@ -134,7 +134,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
                         finally { setSendingVerification(false); }
                       }}
                       disabled={sendingVerification}
-                      className="text-[10px] font-semibold text-[#BA3C60] bg-[#FFF0EB] px-2 py-1 rounded-lg border border-[#F5D5C8] cursor-pointer hover:bg-[#FFE8DF] transition-colors whitespace-nowrap disabled:opacity-50"
+                      className="text-[10px] font-semibold text-[#B5636B] bg-[#FFF0EB] px-2 py-1 rounded-lg border border-[#F5D5C8] cursor-pointer hover:bg-[#FFE8DF] transition-colors whitespace-nowrap disabled:opacity-50"
                     >
                       {sendingVerification ? 'Sending...' : 'Verify email'}
                     </button>
@@ -166,7 +166,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
                 key={d}
                 onClick={() => setUsageDays(d)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium border-0 cursor-pointer transition-colors ${
-                  usageDays === d ? 'bg-[#BA3C60] text-white' : 'bg-[#F5F5F5] text-[#6E6A63] hover:bg-[#EBE7DF]'
+                  usageDays === d ? 'bg-[#B5636B] text-white' : 'bg-[#F5F5F5] text-[#6E6A63] hover:bg-[#EBE7DF]'
                 }`}
               >
                 {d}d
@@ -197,7 +197,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
               </div>
               <div className="bg-[#FAFAFA] rounded-xl p-3">
                 <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Deliverables</p>
-                <p className="text-base font-bold text-[#BA3C60] m-0">{usageTotals?.total_deliverables || 0}</p>
+                <p className="text-base font-bold text-[#B5636B] m-0">{usageTotals?.total_deliverables || 0}</p>
               </div>
               <div className="bg-[#FAFAFA] rounded-xl p-3">
                 <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Queries</p>
@@ -218,7 +218,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
                     <div key={d.date} className="flex items-center gap-2">
                       <span className="text-[10px] text-[#6E6A63] w-16 shrink-0">{new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                       <div className="flex-1 h-2 bg-white rounded-full overflow-hidden">
-                        <div className="h-full bg-[#BA3C60] rounded-full transition-all" style={{ width: `${pct}%` }} />
+                        <div className="h-full bg-[#B5636B] rounded-full transition-all" style={{ width: `${pct}%` }} />
                       </div>
                       <span className="text-[10px] text-[#A9A49C] w-12 text-right">{formatNumber(totalTokens)}</span>
                     </div>
@@ -273,7 +273,7 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
                     </div>
                     <div>
                       <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Median</p>
-                      <p className="text-base font-bold text-[#BA3C60] m-0">{b.median_multiple}x</p>
+                      <p className="text-base font-bold text-[#B5636B] m-0">{b.median_multiple}x</p>
                     </div>
                     <div>
                       <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Days</p>

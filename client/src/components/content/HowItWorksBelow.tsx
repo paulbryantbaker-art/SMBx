@@ -99,8 +99,8 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
         <ScrollReveal>
           <section className="mb-24">
             <div className="max-w-4xl">
-              <span className="inline-block px-3 py-1 bg-[#b0004a]/10 text-[#b0004a] text-[10px] font-black uppercase tracking-[0.2em] mb-8 rounded-sm">How It Works</span>
-              <h1 className="font-headline text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] mb-8">Every step of your deal.<br/><span className="text-[#b0004a]">Guided.</span></h1>
+              <span className="inline-block px-3 py-1 bg-[#A85860]/10 text-[#A85860] text-[10px] font-black uppercase tracking-[0.2em] mb-8 rounded-sm">How It Works</span>
+              <h1 className="font-headline text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] mb-8">Every step of your deal.<br/><span className="text-[#A85860]">Guided.</span></h1>
               <p className={`text-xl leading-relaxed max-w-2xl ${muted}`}>Selling a business, buying one, raising capital, or integrating an acquisition — each one has a right way to do it. A sequence that protects you. A methodology that catches what you'd miss. We built it. Yulia delivers it through a conversation.</p>
             </div>
           </section>
@@ -118,10 +118,10 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               ].map((j) => (
                 <StaggerItem key={j.title}>
                   <div className={`${card} rounded-2xl p-8 hover:shadow-lg transition-all h-full`}>
-                    <span className="material-symbols-outlined text-[#b0004a] text-3xl mb-4">{j.icon}</span>
+                    <span className="material-symbols-outlined text-[#A85860] text-3xl mb-4">{j.icon}</span>
                     <h3 className="font-headline font-black text-xl mb-2">{j.title}</h3>
                     <p className={`text-sm leading-relaxed ${muted}`}>{j.desc}</p>
-                    <p className="text-xs text-[#b0004a] font-bold mt-4">{j.timeline}</p>
+                    <p className="text-xs text-[#A85860] font-bold mt-4">{j.timeline}</p>
                   </div>
                 </StaggerItem>
               ))}
@@ -137,7 +137,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
           <section className="mb-32">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
               <div>
-                <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Enforced Methodology</span>
+                <span className="text-[#A85860] font-bold uppercase tracking-widest text-xs block mb-3">Enforced Methodology</span>
                 <h2 className="font-headline text-4xl font-black tracking-tight mb-8">Yulia won't let you skip steps.</h2>
                 <div className={`space-y-6 editorial ${muted}`}>
                   <p>Most AI tools let you ask anything in any order. That's fine for general questions. It's dangerous when there's real money on the line.</p>
@@ -146,7 +146,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
                   <p>This isn't a limitation. It's the methodology that prevents the mistakes most first-time deal participants make.</p>
                 </div>
                 <div className={`mt-8 ${darkPanel} rounded-2xl p-6 text-white`}>
-                  <h4 className="font-bold text-sm mb-3 flex items-center gap-2"><span className="material-symbols-outlined text-[#b0004a] text-lg">lock</span>What this means in practice</h4>
+                  <h4 className="font-bold text-sm mb-3 flex items-center gap-2"><span className="material-symbols-outlined text-[#A85860] text-lg">lock</span>What this means in practice</h4>
                   <div className="space-y-3 text-sm text-[#dadadc]/70">
                     <p>→ No valuation until your financials are normalized and add-backs verified</p>
                     <p>→ No deal materials until your Value Readiness Report is scored</p>
@@ -159,12 +159,12 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               <div className="space-y-4">
                 {/* Sell gates */}
                 <div className={`${card} rounded-2xl p-6`}>
-                  <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#b0004a]">storefront</span><h4 className="font-headline font-bold">Sell — 6 Gates</h4></div>
+                  <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#A85860]">storefront</span><h4 className="font-headline font-bold">Sell — 6 Gates</h4></div>
                   <div className="flex gap-2">
                     {['S0','S1','S2','S3','S4','S5'].map((g, i) => (
                       <div key={g} className="flex-1 text-center">
-                        <div className={`${i < 2 ? (dark ? 'bg-[#006630]/20' : 'bg-[#006630]/10') : 'bg-[#b0004a]/10'} rounded-lg py-2 px-1 mb-1`}>
-                          <span className={`text-[10px] font-bold ${i < 2 ? 'text-[#006630]' : 'text-[#b0004a]'}`}>{g}</span>
+                        <div className={`${i < 2 ? (dark ? 'bg-[#006630]/20' : 'bg-[#006630]/10') : 'bg-[#A85860]/10'} rounded-lg py-2 px-1 mb-1`}>
+                          <span className={`text-[10px] font-bold ${i < 2 ? 'text-[#006630]' : 'text-[#A85860]'}`}>{g}</span>
                         </div>
                         <p className={`text-[8px] ${muted}`}>{['Profile','Financials','Valuation','Prepare','Negotiate','Close'][i]}</p>
                       </div>
@@ -173,12 +173,12 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
                 </div>
                 {/* Buy gates */}
                 <div className={`${card} rounded-2xl p-6`}>
-                  <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#b0004a]">shopping_bag</span><h4 className="font-headline font-bold">Buy — 6 Gates</h4></div>
+                  <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#A85860]">shopping_bag</span><h4 className="font-headline font-bold">Buy — 6 Gates</h4></div>
                   <div className="flex gap-2">
                     {['B0','B1','B2','B3','B4','B5'].map((g, i) => (
                       <div key={g} className="flex-1 text-center">
-                        <div className={`${i < 2 ? (dark ? 'bg-[#006630]/20' : 'bg-[#006630]/10') : 'bg-[#b0004a]/10'} rounded-lg py-2 px-1 mb-1`}>
-                          <span className={`text-[10px] font-bold ${i < 2 ? 'text-[#006630]' : 'text-[#b0004a]'}`}>{g}</span>
+                        <div className={`${i < 2 ? (dark ? 'bg-[#006630]/20' : 'bg-[#006630]/10') : 'bg-[#A85860]/10'} rounded-lg py-2 px-1 mb-1`}>
+                          <span className={`text-[10px] font-bold ${i < 2 ? 'text-[#006630]' : 'text-[#A85860]'}`}>{g}</span>
                         </div>
                         <p className={`text-[8px] ${muted}`}>{['Thesis','Source','Underwrite','Diligence','Negotiate','Close'][i]}</p>
                       </div>
@@ -188,24 +188,24 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
                 {/* Raise + Integrate */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className={`${card} rounded-2xl p-6`}>
-                    <div className="flex items-center gap-3 mb-3"><span className="material-symbols-outlined text-[#b0004a]">trending_up</span><h4 className="font-headline font-bold text-sm">Raise — 6 Gates</h4></div>
+                    <div className="flex items-center gap-3 mb-3"><span className="material-symbols-outlined text-[#A85860]">trending_up</span><h4 className="font-headline font-bold text-sm">Raise — 6 Gates</h4></div>
                     <div className="flex gap-1">
                       {['R0','R1','R2','R3','R4','R5'].map((g, i) => (
                         <div key={g} className="flex-1 text-center">
-                          <div className={`${i < 2 ? (dark ? 'bg-[#006630]/20' : 'bg-[#006630]/10') : 'bg-[#b0004a]/10'} rounded-lg py-1.5 mb-1`}>
-                            <span className={`text-[9px] font-bold ${i < 2 ? 'text-[#006630]' : 'text-[#b0004a]'}`}>{g}</span>
+                          <div className={`${i < 2 ? (dark ? 'bg-[#006630]/20' : 'bg-[#006630]/10') : 'bg-[#A85860]/10'} rounded-lg py-1.5 mb-1`}>
+                            <span className={`text-[9px] font-bold ${i < 2 ? 'text-[#006630]' : 'text-[#A85860]'}`}>{g}</span>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
                   <div className={`${card} rounded-2xl p-6`}>
-                    <div className="flex items-center gap-3 mb-3"><span className="material-symbols-outlined text-[#b0004a]">merge</span><h4 className="font-headline font-bold text-sm">Integrate — 4 Gates</h4></div>
+                    <div className="flex items-center gap-3 mb-3"><span className="material-symbols-outlined text-[#A85860]">merge</span><h4 className="font-headline font-bold text-sm">Integrate — 4 Gates</h4></div>
                     <div className="flex gap-1">
                       {['I0','I1','I2','I3'].map((g, i) => (
                         <div key={g} className="flex-1 text-center">
-                          <div className={`${i < 1 ? (dark ? 'bg-[#006630]/20' : 'bg-[#006630]/10') : 'bg-[#b0004a]/10'} rounded-lg py-1.5 mb-1`}>
-                            <span className={`text-[9px] font-bold ${i < 1 ? 'text-[#006630]' : 'text-[#b0004a]'}`}>{g}</span>
+                          <div className={`${i < 1 ? (dark ? 'bg-[#006630]/20' : 'bg-[#006630]/10') : 'bg-[#A85860]/10'} rounded-lg py-1.5 mb-1`}>
+                            <span className={`text-[9px] font-bold ${i < 1 ? 'text-[#006630]' : 'text-[#A85860]'}`}>{g}</span>
                           </div>
                         </div>
                       ))}
@@ -215,7 +215,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
                 <div className="flex items-center gap-3 px-2">
                   <div className={`w-3 h-3 rounded-sm ${dark ? 'bg-[#006630]/20' : 'bg-[#006630]/10'}`} />
                   <span className={`text-[10px] ${muted}`}>Free</span>
-                  <div className="w-3 h-3 rounded-sm bg-[#b0004a]/10 ml-3" />
+                  <div className="w-3 h-3 rounded-sm bg-[#A85860]/10 ml-3" />
                   <span className={`text-[10px] ${muted}`}>Execution fee</span>
                 </div>
               </div>
@@ -227,7 +227,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
         <ScrollReveal>
           <section className="mb-32">
             <div className="mb-12">
-              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">What It Feels Like</span>
+              <span className="text-[#A85860] font-bold uppercase tracking-widest text-xs block mb-3">What It Feels Like</span>
               <h2 className="font-headline text-4xl font-bold tracking-tight">The methodology is delivered through a conversation</h2>
               <p className={`mt-3 max-w-2xl ${muted}`}>No intake forms. No 47-question wizard. You describe your situation in plain language. Yulia guides you through the methodology — one gate at a time — while doing the heavy lifting in the background.</p>
             </div>
@@ -239,7 +239,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
                 </div>
                 {/* Yulia initial */}
                 <div className="flex gap-3 items-start">
-                  <div className="w-8 h-8 rounded-full bg-[#b0004a] flex items-center justify-center text-white text-xs font-bold shrink-0">Y</div>
+                  <div className="w-8 h-8 rounded-full bg-[#A85860] flex items-center justify-center text-white text-xs font-bold shrink-0">Y</div>
                   <div className="bg-white/10 p-5 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed max-w-[80%]">
                     Residential cleaning in Phoenix — I know this market well. Let me run some numbers while we talk.
                     <span className="block mt-3 text-[#dadadc]/60 text-xs italic">Classifying: NAICS 561720 · Maricopa County MSA · Gate S0 initiated · pulling Census, BLS, SBA data...</span>
@@ -268,7 +268,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
                 </div>
                 {/* Yulia refined */}
                 <div className="flex gap-3 items-start">
-                  <div className="w-8 h-8 rounded-full bg-[#b0004a] flex items-center justify-center text-white text-xs font-bold shrink-0">Y</div>
+                  <div className="w-8 h-8 rounded-full bg-[#A85860] flex items-center justify-center text-white text-xs font-bold shrink-0">Y</div>
                   <div className="bg-white/10 p-5 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed max-w-[80%]">
                     That changes the picture. With $120K salary add-back and $45K in personal expenses, your adjusted SDE jumps to <span className="text-[#ffb2bf] font-bold">$525K</span>. At current Phoenix multiples, that's <span className="text-[#ffb2bf] font-bold">$1.47M–$1.84M</span>.
                     <span className="block mt-3 font-semibold">Are you paying rent to a property you own? That's one of the most common hidden add-backs in this industry.</span>
@@ -286,7 +286,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
         <ScrollReveal>
           <section className="mb-32">
             <div className="mb-12">
-              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">AI Orchestration</span>
+              <span className="text-[#A85860] font-bold uppercase tracking-widest text-xs block mb-3">AI Orchestration</span>
               <h2 className="font-headline text-4xl font-black tracking-tight mb-4">Yulia isn't one AI. She's six specialized engines working together.</h2>
               <p className={`text-lg max-w-3xl ${muted}`}>General-purpose AI does one thing — generate text. smbX.ai routes every task to a purpose-built engine with strict constraints. Financial extraction uses zero-hallucination mode. Market intelligence uses live search grounding. Legal review uses a forensic auditor that only cites from your actual documents.</p>
             </div>
@@ -294,7 +294,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               {engines.map((e) => (
                 <StaggerItem key={e.title}>
                   <div className={`${card} rounded-2xl p-6 h-full`}>
-                    <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#b0004a]">{e.icon}</span><h4 className="font-bold text-sm">{e.title}</h4></div>
+                    <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#A85860]">{e.icon}</span><h4 className="font-bold text-sm">{e.title}</h4></div>
                     <p className={`text-xs mb-3 ${muted}`}>{e.desc}</p>
                     <div className={`${monoBg} rounded-lg px-3 py-2`}><p className={`text-[10px] font-mono ${muted}`}>{e.mode}</p></div>
                   </div>
@@ -304,11 +304,11 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
             {/* Author vs Auditor */}
             <div className={`mt-8 ${darkPanel} rounded-2xl p-8 grid grid-cols-1 md:grid-cols-2 gap-8 text-white`}>
               <div>
-                <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#b0004a]">edit_note</span><h4 className="font-bold">Author Mode</h4><span className="text-[10px] bg-white/10 px-2 py-1 rounded">Creative</span></div>
+                <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#A85860]">edit_note</span><h4 className="font-bold">Author Mode</h4><span className="text-[10px] bg-white/10 px-2 py-1 rounded">Creative</span></div>
                 <p className="text-sm text-[#dadadc]/60">Generates CIMs, pitch decks, valuation narratives, market summaries. Synthesizes from multiple sources. This is the Yulia who writes the documents that close deals.</p>
               </div>
               <div>
-                <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#b0004a]">fact_check</span><h4 className="font-bold">Auditor Mode</h4><span className="text-[10px] bg-white/10 px-2 py-1 rounded">Forensic</span></div>
+                <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#A85860]">fact_check</span><h4 className="font-bold">Auditor Mode</h4><span className="text-[10px] bg-white/10 px-2 py-1 rounded">Forensic</span></div>
                 <p className="text-sm text-[#dadadc]/60">Verifies add-backs, extracts contract clauses, reviews tax returns. Only cites from your documents — never hallucinates. Returns "NOT FOUND" when information is missing.</p>
               </div>
             </div>
@@ -319,22 +319,22 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
         <ScrollReveal>
           <section className="mb-32">
             <div className="mb-12">
-              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Analytical Framework</span>
-              <h2 className="font-headline text-4xl md:text-5xl font-black tracking-tight mb-4">Every deal analyzed across seven dimensions. <span className="text-[#b0004a]">Simultaneously.</span></h2>
+              <span className="text-[#A85860] font-bold uppercase tracking-widest text-xs block mb-3">Analytical Framework</span>
+              <h2 className="font-headline text-4xl md:text-5xl font-black tracking-tight mb-4">Every deal analyzed across seven dimensions. <span className="text-[#A85860]">Simultaneously.</span></h2>
               <p className={`text-lg max-w-2xl ${muted}`}>Most tools check the financials. That misses six other factors that determine whether a deal closes, at what price, and whether the buyer succeeds after. Yulia runs all seven from your first sentence.</p>
             </div>
             <StaggerContainer className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {dimensions.map((d) => (
                 <StaggerItem key={d.title}>
-                  <div className={`p-8 ${card} rounded-2xl hover:shadow-xl hover:shadow-[#b0004a]/5 transition-all h-full`}>
-                    <span className="material-symbols-outlined text-[#b0004a] text-4xl mb-4">{d.icon}</span>
+                  <div className={`p-8 ${card} rounded-2xl hover:shadow-xl hover:shadow-[#A85860]/5 transition-all h-full`}>
+                    <span className="material-symbols-outlined text-[#A85860] text-4xl mb-4">{d.icon}</span>
                     <h3 className="font-headline text-xl font-bold leading-tight mb-3">{d.title}</h3>
                     <p className={`text-sm ${muted}`}>{d.desc}</p>
                   </div>
                 </StaggerItem>
               ))}
               <StaggerItem>
-                <div className="md:col-span-2 p-8 bg-[#b0004a] text-white rounded-2xl">
+                <div className="md:col-span-2 p-8 bg-[#A85860] text-white rounded-2xl">
                   <span className="material-symbols-outlined text-4xl mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>sensors</span>
                   <h3 className="font-headline text-3xl font-black mb-3">Forward Signals</h3>
                   <p className="text-lg opacity-90">Where is your industry's multiple heading in the next 12–24 months? Yulia models macro shifts, lending cycles, PE dry powder, and sector-specific catalysts. When she says "move now" or "wait six months" — the data supports it.</p>
@@ -349,7 +349,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
           <section className="mb-32">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
               <div>
-                <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Market Intelligence</span>
+                <span className="text-[#A85860] font-bold uppercase tracking-widest text-xs block mb-3">Market Intelligence</span>
                 <h2 className="font-headline text-4xl font-black tracking-tight mb-8">Yulia doesn't wait for you to ask. She tells you when the market moves.</h2>
                 <div className={`space-y-6 editorial ${muted}`}>
                   <p>When you tell Yulia your industry, she runs a live Market Heat scan — pulling current PE consolidation trends, active buyer platforms, and multiple direction. If your sector is "hot," she increases the defensible valuation range. If it's cooling, she tells you before you overpay.</p>
@@ -359,7 +359,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               </div>
               <div className="space-y-4">
                 <div className={`${darkPanel} rounded-2xl p-6 text-white`}>
-                  <h4 className="font-bold text-sm mb-4 flex items-center gap-2"><span className="material-symbols-outlined text-[#b0004a] text-lg">local_fire_department</span>Market Heat Index</h4>
+                  <h4 className="font-bold text-sm mb-4 flex items-center gap-2"><span className="material-symbols-outlined text-[#A85860] text-lg">local_fire_department</span>Market Heat Index</h4>
                   <div className="space-y-3">
                     <div className="bg-white/5 rounded-xl p-4"><p className="text-[10px] text-[#dadadc]/60 uppercase font-bold mb-1">Sector Alert</p><p className="text-sm text-[#dadadc]/80">"Veterinary is currently a Super-Hot sector. 14 PE-backed platforms actively acquiring. Position this as a platform play, not a standard sale."</p></div>
                     <div className="bg-white/5 rounded-xl p-4"><p className="text-[10px] text-[#dadadc]/60 uppercase font-bold mb-1">Multiple Trend</p><p className="text-sm text-[#dadadc]/80">"HVAC multiples up 0.5x in Q4 — residential service mix above 70% commanding 15% strategic premium."</p></div>
@@ -377,7 +377,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
                       { n: '4', label: 'Market Context', desc: 'Industry heat, regional pricing, macro overlay, recent comps', opacity: '/40' },
                     ].map((l) => (
                       <div key={l.n} className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded bg-[#b0004a]${l.opacity} flex items-center justify-center text-white text-[9px] font-bold`}>{l.n}</div>
+                        <div className={`w-6 h-6 rounded bg-[#A85860]${l.opacity} flex items-center justify-center text-white text-[9px] font-bold`}>{l.n}</div>
                         <div><p className="text-xs font-bold">{l.label}</p><p className={`text-[10px] ${muted}`}>{l.desc}</p></div>
                       </div>
                     ))}
@@ -392,7 +392,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
         <ScrollReveal>
           <section className="mb-32">
             <div className="mb-12">
-              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Industry Intelligence</span>
+              <span className="text-[#A85860] font-bold uppercase tracking-widest text-xs block mb-3">Industry Intelligence</span>
               <h2 className="font-headline text-4xl font-black tracking-tight mb-4">35 industries. Opinionated rankings. Updated continuously.</h2>
               <p className={`text-lg max-w-3xl ${muted}`}>Yulia doesn't give the same advice to a plumbing company that she gives to a SaaS company. She carries deep knowledge about PE activity, multiple trends, SBA lending appetite, operational complexity, and first-timer suitability for every industry she covers.</p>
             </div>
@@ -400,7 +400,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               {industries.map((ind) => (
                 <StaggerItem key={ind.name}>
                   <div className={`${card} rounded-2xl p-6 h-full`}>
-                    <div className="flex items-center justify-between mb-3"><h4 className="font-bold text-sm">{ind.name}</h4><span className="text-[9px] bg-[#b0004a]/10 text-[#b0004a] px-2 py-1 rounded font-bold">{ind.badge}</span></div>
+                    <div className="flex items-center justify-between mb-3"><h4 className="font-bold text-sm">{ind.name}</h4><span className="text-[9px] bg-[#A85860]/10 text-[#A85860] px-2 py-1 rounded font-bold">{ind.badge}</span></div>
                     <div className={`space-y-2 text-xs ${muted}`}>
                       <div className="flex justify-between"><span>Multiple Trend</span><span className={`font-bold ${emphasis}`}>{ind.trend}</span></div>
                       <div className="flex justify-between"><span>First-Timer</span><span className="font-bold text-[#006630]">{ind.firstTimer}</span></div>
@@ -412,7 +412,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               ))}
             </StaggerContainer>
             <div className={`${subtleBg} rounded-2xl p-6 flex items-start gap-4`}>
-              <span className="material-symbols-outlined text-[#b0004a] text-2xl shrink-0 mt-1">inventory_2</span>
+              <span className="material-symbols-outlined text-[#A85860] text-2xl shrink-0 mt-1">inventory_2</span>
               <div>
                 <h4 className="font-bold mb-1">35 industries. 9 buyer profiles. Real math for each.</h4>
                 <p className={`text-sm ${muted}`}>From commercial cleaning to SaaS, from first-time SBA buyers to PE-backed platforms — Yulia carries detailed intelligence on PE activity levels, multiple ranges, financing approaches, common mistakes, and specific entry points. Tell her your situation and she'll tell you where the opportunities are.</p>
@@ -424,7 +424,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
         {/* ═══ 9. LOCAL vs NATIONAL ═══ */}
         <ScrollReveal>
           <section className="mb-32">
-            <div className="border-l-8 border-[#b0004a] pl-8 mb-12">
+            <div className="border-l-8 border-[#A85860] pl-8 mb-12">
               <h2 className="font-headline text-4xl font-black tracking-tight">The same business in two cities. Completely different deal.</h2>
               <p className={`text-xl mt-4 ${muted}`}>This is why national averages are dangerous. Every deal is local.</p>
             </div>
@@ -432,9 +432,9 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               <div className={`flex-1 bg-white p-10 rounded-3xl border ${borderColor} shadow-sm`}>
                 <div className="flex justify-between items-start mb-8">
                   <div><div className="text-xs font-bold text-[#5d5e61] uppercase tracking-widest mb-2">Service Sector</div><h4 className="text-2xl font-black text-[#1a1c1e]">Cleaning in Phoenix</h4></div>
-                  <div className="bg-[#b0004a]/10 px-4 py-2 rounded-xl text-[#b0004a] font-bold text-sm">$380K SDE</div>
+                  <div className="bg-[#A85860]/10 px-4 py-2 rounded-xl text-[#A85860] font-bold text-sm">$380K SDE</div>
                 </div>
-                <div className="space-y-4 mb-8"><div className="flex items-center gap-3"><div className="w-10 h-1 bg-[#b0004a] rounded-full" /><span className="text-sm font-bold text-[#1a1c1e]">Labor Elasticity: HIGH</span></div><p className="text-sm text-[#5d5e61] leading-relaxed">Population growth driving demand, but labor costs rising faster than contract prices. Margin compression risk must be priced in.</p></div>
+                <div className="space-y-4 mb-8"><div className="flex items-center gap-3"><div className="w-10 h-1 bg-[#A85860] rounded-full" /><span className="text-sm font-bold text-[#1a1c1e]">Labor Elasticity: HIGH</span></div><p className="text-sm text-[#5d5e61] leading-relaxed">Population growth driving demand, but labor costs rising faster than contract prices. Margin compression risk must be priced in.</p></div>
                 <div className="text-4xl font-black text-[#1a1c1e]">3.2x <span className="text-sm font-medium text-[#5d5e61]">Effective Multiple</span></div>
               </div>
               <div className={`flex-1 ${subtleBg} p-10 rounded-3xl`}>
@@ -453,7 +453,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
         <ScrollReveal>
           <section className="mb-32">
             <div className="mb-12">
-              <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Adaptive Intelligence</span>
+              <span className="text-[#A85860] font-bold uppercase tracking-widest text-xs block mb-3">Adaptive Intelligence</span>
               <h2 className="font-headline text-4xl font-black tracking-tight mb-4">A $400K cleaning company and a $40M manufacturer get completely different Yulias.</h2>
               <p className={`text-lg max-w-3xl ${muted}`}>Yulia classifies your deal by complexity and adapts everything — language, metrics, analytical depth, buyer strategy, financial verification rigor, and the documents she produces. You never select a plan. The deal determines everything.</p>
             </div>
@@ -461,8 +461,8 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               {leagues.map((l) => (
                 <StaggerItem key={l.title}>
                   <div className={`${card} rounded-2xl overflow-hidden h-full`}>
-                    <div className={`bg-[#b0004a]/5 p-6 border-b ${borderColor}`}>
-                      <div className="flex items-center gap-3 mb-2"><span className="material-symbols-outlined text-[#b0004a]">{l.icon}</span><h3 className="font-headline font-black text-lg">{l.title}</h3></div>
+                    <div className={`bg-[#A85860]/5 p-6 border-b ${borderColor}`}>
+                      <div className="flex items-center gap-3 mb-2"><span className="material-symbols-outlined text-[#A85860]">{l.icon}</span><h3 className="font-headline font-black text-lg">{l.title}</h3></div>
                       <p className={`text-xs ${muted}`}>{l.range}</p>
                     </div>
                     <div className="p-6 space-y-3">
@@ -475,12 +475,12 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               ))}
             </StaggerContainer>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-              <div className={`${dark ? 'bg-[#b0004a]/10 border border-[#b0004a]/20' : 'bg-[#b0004a]/5 border border-[#b0004a]/15'} rounded-2xl p-6 flex items-start gap-4`}>
-                <span className="material-symbols-outlined text-[#b0004a] text-2xl shrink-0 mt-1">auto_fix_high</span>
+              <div className={`${dark ? 'bg-[#A85860]/10 border border-[#A85860]/20' : 'bg-[#A85860]/5 border border-[#A85860]/15'} rounded-2xl p-6 flex items-start gap-4`}>
+                <span className="material-symbols-outlined text-[#A85860] text-2xl shrink-0 mt-1">auto_fix_high</span>
                 <div><h4 className="font-bold mb-1">Industry Override</h4><p className={`text-sm ${muted}`}>Veterinary, dental, HVAC, managed services, and pest control switch to EBITDA automatically above $1.5M revenue — because PE roll-ups trade on institutional metrics even at small scale.</p></div>
               </div>
               <div className={`${subtleBg} border ${borderColor} rounded-2xl p-6 flex items-start gap-4`}>
-                <span className="material-symbols-outlined text-[#b0004a] text-2xl shrink-0 mt-1">verified</span>
+                <span className="material-symbols-outlined text-[#A85860] text-2xl shrink-0 mt-1">verified</span>
                 <div><h4 className="font-bold mb-1">You never select a tier</h4><p className={`text-sm ${muted}`}>No "Basic vs Pro vs Enterprise." Yulia classifies from the financials you share and explains the classification in plain language. The deal determines the depth.</p></div>
               </div>
             </div>
@@ -492,16 +492,16 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
           <section className="mb-32">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
               <div className="lg:col-span-5">
-                <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">The Math Engine</span>
+                <span className="text-[#A85860] font-bold uppercase tracking-widest text-xs block mb-3">The Math Engine</span>
                 <h2 className="font-headline text-4xl font-black tracking-tight mb-8">AI that interprets. Math that doesn't hallucinate.</h2>
                 <div className={`space-y-6 editorial ${muted}`}>
                   <p>The AI layer decides what to calculate. The deterministic engine guarantees the math is right. Every financial claim passes through a three-step verification loop — AI suggests, you verify, engine calculates.</p>
                   <p>This is why your valuation is defensible. It was built the same way a buyer's QoE firm would build it.</p>
                 </div>
                 <div className={`mt-10 ${darkPanel} rounded-2xl p-6 text-white`}>
-                  <h4 className="font-bold text-sm mb-4 flex items-center gap-2"><span className="material-symbols-outlined text-[#b0004a] text-lg">sync</span>The Verification Loop</h4>
+                  <h4 className="font-bold text-sm mb-4 flex items-center gap-2"><span className="material-symbols-outlined text-[#A85860] text-lg">sync</span>The Verification Loop</h4>
                   <div className="space-y-4">
-                    <div className="flex items-start gap-3"><div className="w-7 h-7 rounded-lg bg-[#b0004a] flex items-center justify-center text-white text-xs font-bold shrink-0">1</div><div><p className="text-sm font-semibold">AI Identifies</p><p className="text-xs text-[#dadadc]/70">Scans for add-backs — vehicles, rent, travel, one-time legal fees, family payroll — using IRS industry benchmarks.</p></div></div>
+                    <div className="flex items-start gap-3"><div className="w-7 h-7 rounded-lg bg-[#A85860] flex items-center justify-center text-white text-xs font-bold shrink-0">1</div><div><p className="text-sm font-semibold">AI Identifies</p><p className="text-xs text-[#dadadc]/70">Scans for add-backs — vehicles, rent, travel, one-time legal fees, family payroll — using IRS industry benchmarks.</p></div></div>
                     <div className="flex items-start gap-3"><div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-white text-xs font-bold shrink-0">2</div><div><p className="text-sm font-semibold">You Verify</p><p className="text-xs text-[#dadadc]/70">AI cannot confirm add-backs. You review each one. Your judgment, your numbers. Yulia explains why she flagged it — you decide.</p></div></div>
                     <div className="flex items-start gap-3"><div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-white text-xs font-bold shrink-0">3</div><div><p className="text-sm font-semibold">Engine Calculates</p><p className="text-xs text-[#dadadc]/70">Only verified add-backs enter the formula. Deterministic engine recalculates SDE/EBITDA and updates every downstream model.</p></div></div>
                   </div>
@@ -509,17 +509,17 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               </div>
               <div className="lg:col-span-7 space-y-4">
                 <div className={`${card} rounded-2xl p-6`}>
-                  <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#b0004a]">calculate</span><h4 className="font-bold">SDE (Seller Discretionary Earnings)</h4></div>
+                  <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#A85860]">calculate</span><h4 className="font-bold">SDE (Seller Discretionary Earnings)</h4></div>
                   <div className={`${codeBg} rounded-xl p-4 font-mono text-sm`}>SDE = Net Income + Owner Salary + D&A + Interest + One-Time + Verified Add-Backs</div>
                   <p className={`text-xs mt-3 ${muted}`}>"Verified" = you confirmed it. The AI flagged it; you approved it; the engine counted it.</p>
                 </div>
                 <div className={`${card} rounded-2xl p-6`}>
-                  <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#b0004a]">monitoring</span><h4 className="font-bold">Adjusted EBITDA</h4></div>
+                  <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#A85860]">monitoring</span><h4 className="font-bold">Adjusted EBITDA</h4></div>
                   <div className={`${codeBg} rounded-xl p-4 font-mono text-sm`}>Adj. EBITDA = Net Income + D&A + Interest + Taxes + Verified Add-Backs − Non-Recurring</div>
                   <p className={`text-xs mt-3 ${muted}`}>GAAP-normalized. The number a PE buyer's QoE firm will verify.</p>
                 </div>
                 <div className={`${card} rounded-2xl p-6`}>
-                  <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#b0004a]">account_balance_wallet</span><h4 className="font-bold">DSCR (Debt Service Coverage)</h4></div>
+                  <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#A85860]">account_balance_wallet</span><h4 className="font-bold">DSCR (Debt Service Coverage)</h4></div>
                   <div className={`${codeBg} rounded-xl p-4 font-mono text-sm`}>DSCR = EBITDA ÷ Annual Debt Service</div>
                   <div className="flex gap-4 mt-3">
                     <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#006630]" /><span className={`text-xs ${muted}`}>SBA minimum: 1.25×</span></div>
@@ -528,7 +528,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
                   <p className={`text-xs mt-3 ${muted}`}>Modeled at current rates. If the deal doesn't clear, Yulia tells you before you waste time.</p>
                 </div>
                 <div className={`${darkPanel} rounded-2xl p-6 text-white`}>
-                  <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#b0004a]">speed</span><h4 className="font-bold">Valuation Defense</h4></div>
+                  <div className="flex items-center gap-3 mb-4"><span className="material-symbols-outlined text-[#A85860]">speed</span><h4 className="font-bold">Valuation Defense</h4></div>
                   <div className="bg-white/5 rounded-xl p-4 font-mono text-sm text-[#dadadc]">Value = Base Multiple × Adj. Earnings + Growth Premium + Margin Premium − Risk Discount</div>
                   <p className="text-xs text-[#dadadc]/70 mt-3">Every component sourced from verified comparables and the seven-dimension analysis. A "Defensible Thesis" — not an estimate.</p>
                 </div>
@@ -541,16 +541,16 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
         <ScrollReveal>
           <section className="mb-32">
             <div className="max-w-4xl mx-auto">
-              <h2 className="font-headline text-4xl font-black text-center mb-12">What does this do that <span className="text-[#b0004a]">ChatGPT can't?</span></h2>
+              <h2 className="font-headline text-4xl font-black text-center mb-12">What does this do that <span className="text-[#A85860]">ChatGPT can't?</span></h2>
               <div className={`${card} rounded-2xl overflow-hidden`}>
                 <table className="w-full text-left">
-                  <thead><tr className={subtleBg}><th className={`px-6 py-4 text-xs font-bold uppercase tracking-widest ${muted}`}>Capability</th><th className={`px-6 py-4 text-xs font-bold uppercase tracking-widest ${muted}`}>Standard AI</th><th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#b0004a]">smbX.ai</th></tr></thead>
+                  <thead><tr className={subtleBg}><th className={`px-6 py-4 text-xs font-bold uppercase tracking-widest ${muted}`}>Capability</th><th className={`px-6 py-4 text-xs font-bold uppercase tracking-widest ${muted}`}>Standard AI</th><th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#A85860]">smbX.ai</th></tr></thead>
                   <tbody className={`divide-y ${borderColor} text-sm`}>
                     {comparisonRows.map((r) => (
                       <tr key={r.feature}>
                         <td className="px-6 py-4 font-semibold">{r.feature}</td>
                         <td className={`px-6 py-4 ${muted}`}>{r.ai}</td>
-                        <td className="px-6 py-4"><span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[#b0004a] text-sm">check_circle</span>{r.smbx}</span></td>
+                        <td className="px-6 py-4"><span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[#A85860] text-sm">check_circle</span>{r.smbx}</span></td>
                       </tr>
                     ))}
                   </tbody>
@@ -566,33 +566,33 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
             <div className="max-w-6xl mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
                 <div className="lg:col-span-5">
-                  <span className="text-[#b0004a] font-bold uppercase tracking-widest text-xs block mb-3">Coverage Comparison</span>
+                  <span className="text-[#A85860] font-bold uppercase tracking-widest text-xs block mb-3">Coverage Comparison</span>
                   <h2 className="font-headline text-4xl font-black tracking-tight mb-8">90% of what an investment bank does. Everything that doesn't require a license.</h2>
                   <p className={`leading-relaxed editorial mb-6 ${muted}`}>An investment banking engagement gives you an analyst team, a CIM, a buyer outreach process, deal management, and negotiation support — for $150K–$500K. smbX.ai gives you the same analytical coverage. The difference: you run the conversations yourself.</p>
-                  <p className={`font-bold text-xl border-l-4 border-[#b0004a] pl-6 italic ${emphasis}`}>Yulia is the analyst, the associate, and the VP. You're the Managing Director.</p>
+                  <p className={`font-bold text-xl border-l-4 border-[#A85860] pl-6 italic ${emphasis}`}>Yulia is the analyst, the associate, and the VP. You're the Managing Director.</p>
                 </div>
                 <div className="lg:col-span-7">
                   <div className={`${card} rounded-2xl overflow-hidden`}>
                     <table className="w-full text-left">
                       <thead><tr className={subtleBg}>
                         <th className={`px-5 py-4 text-xs font-bold uppercase tracking-widest ${muted}`}>IB Engagement</th>
-                        <th className="px-5 py-4 text-xs font-bold uppercase tracking-widest text-[#b0004a]">smbX.ai</th>
+                        <th className="px-5 py-4 text-xs font-bold uppercase tracking-widest text-[#A85860]">smbX.ai</th>
                       </tr></thead>
                       <tbody className={`divide-y ${borderColor} text-sm`}>
                         {ibRows.map((r) => (
                           <tr key={r.ib}>
                             <td className={`px-5 py-3.5 ${muted}`}>{r.ib}</td>
-                            <td className="px-5 py-3.5"><span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[#b0004a] text-sm">check_circle</span>{r.smbx}</span></td>
+                            <td className="px-5 py-3.5"><span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[#A85860] text-sm">check_circle</span>{r.smbx}</span></td>
                           </tr>
                         ))}
                         <tr className={subtleBg}><td className={`px-5 py-3.5 ${muted} font-medium`}>Negotiate on your behalf</td><td className={`px-5 py-3.5 ${muted}`}>You handle this (Yulia preps you)</td></tr>
                         <tr className={subtleBg}><td className={`px-5 py-3.5 ${muted} font-medium`}>Fiduciary representation</td><td className={`px-5 py-3.5 ${muted}`}>Not included (connect to licensed advisor)</td></tr>
-                        <tr className={`${darkPanel} text-white`}><td className="px-5 py-4 font-bold">Total (12-month engagement)</td><td className="px-5 py-4 font-bold text-[#b0004a]">$1,788/year vs. $150K–$500K+</td></tr>
+                        <tr className={`${darkPanel} text-white`}><td className="px-5 py-4 font-bold">Total (12-month engagement)</td><td className="px-5 py-4 font-bold text-[#A85860]">$1,788/year vs. $150K–$500K+</td></tr>
                       </tbody>
                     </table>
                   </div>
-                  <div className={`mt-4 ${dark ? 'bg-[#b0004a]/10 border border-[#b0004a]/20' : 'bg-[#b0004a]/5 border border-[#b0004a]/15'} rounded-2xl p-5 flex items-start gap-3`}>
-                    <span className="material-symbols-outlined text-[#b0004a] text-lg shrink-0 mt-0.5">info</span>
+                  <div className={`mt-4 ${dark ? 'bg-[#A85860]/10 border border-[#A85860]/20' : 'bg-[#A85860]/5 border border-[#A85860]/15'} rounded-2xl p-5 flex items-start gap-3`}>
+                    <span className="material-symbols-outlined text-[#A85860] text-lg shrink-0 mt-0.5">info</span>
                     <p className={`text-xs ${muted}`}><span className={`font-bold ${emphasis}`}>This is not an anti-advisor comparison.</span> Many advisors use smbX.ai themselves. The work Yulia produces makes any advisor engagement faster, cheaper, and more effective.</p>
                   </div>
                 </div>
@@ -609,11 +609,11 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               {journeys.map((j) => (
                 <StaggerItem key={j.title}>
                   <a href={j.href} className={`${card} p-8 rounded-2xl hover:shadow-lg transition-all group flex gap-6 items-start`}>
-                    <span className="material-symbols-outlined text-[#b0004a] text-3xl shrink-0 mt-1 group-hover:scale-110 transition-transform">{j.icon}</span>
+                    <span className="material-symbols-outlined text-[#A85860] text-3xl shrink-0 mt-1 group-hover:scale-110 transition-transform">{j.icon}</span>
                     <div>
                       <h3 className="font-headline text-xl font-black mb-2">{j.title}</h3>
                       <p className={`text-sm leading-relaxed ${muted}`}>{j.desc}</p>
-                      <span className="text-[#b0004a] text-xs font-bold mt-3 inline-flex items-center gap-1 group-hover:gap-2 transition-all">Learn more <span className="material-symbols-outlined text-sm">arrow_forward</span></span>
+                      <span className="text-[#A85860] text-xs font-bold mt-3 inline-flex items-center gap-1 group-hover:gap-2 transition-all">Learn more <span className="material-symbols-outlined text-sm">arrow_forward</span></span>
                     </div>
                   </a>
                 </StaggerItem>
@@ -627,7 +627,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
           <section className="mb-32">
             <div className={`${darkPanel} rounded-3xl p-10 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center`}>
               <div>
-                <span className="material-symbols-outlined text-[#b0004a] text-4xl mb-6">shield</span>
+                <span className="material-symbols-outlined text-[#A85860] text-4xl mb-6">shield</span>
                 <h2 className="text-3xl font-black text-white mb-6">Your data never trains a public model.</h2>
                 <p className="text-[#dadadc]/60 leading-relaxed mb-4">Every conversation and document is processed in a private instance. Your financial data is encrypted at rest, encrypted in transit, and never used to improve general AI models.</p>
                 <p className="text-[#dadadc]/60 leading-relaxed">You can use smbX.ai without creating an account. If you do, your data is siloed and exportable. If you leave, your data goes with you or gets deleted — your choice.</p>
@@ -640,7 +640,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
                   { icon: 'download', label: 'Full Data Export' },
                 ].map((p) => (
                   <div key={p.icon} className="bg-white/5 p-6 rounded-xl border border-white/10 text-center">
-                    <span className="material-symbols-outlined text-[#b0004a] text-2xl mb-2">{p.icon}</span>
+                    <span className="material-symbols-outlined text-[#A85860] text-2xl mb-2">{p.icon}</span>
                     <h4 className="text-white font-bold text-sm">{p.label}</h4>
                   </div>
                 ))}
@@ -653,10 +653,10 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
         <ScrollReveal>
           <section className="mb-12 text-center max-w-4xl mx-auto">
             <div className={`${subtleBg} py-20 px-10 rounded-3xl`}>
-              <h2 className="font-headline text-5xl md:text-6xl font-black tracking-tighter mb-6 leading-none">See for <span className="text-[#b0004a] italic">yourself.</span></h2>
+              <h2 className="font-headline text-5xl md:text-6xl font-black tracking-tighter mb-6 leading-none">See for <span className="text-[#A85860] italic">yourself.</span></h2>
               <p className={`text-xl mb-12 max-w-2xl mx-auto ${muted}`}>Tell Yulia about your deal. Watch the intelligence layer work. Keep everything she finds — free, no account required.</p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                <button onClick={handleCTA} className="px-12 py-6 bg-gradient-to-r from-[#b0004a] to-[#d81b60] text-white rounded-full font-black text-xl hover:scale-105 transition-all shadow-xl border-none cursor-pointer">Talk to Yulia</button>
+                <button onClick={handleCTA} className="px-12 py-6 bg-gradient-to-r from-[#A85860] to-[#D4848C] text-white rounded-full font-black text-xl hover:scale-105 transition-all shadow-xl border-none cursor-pointer">Talk to Yulia</button>
                 <button onClick={handleCTA} className={`px-12 py-6 bg-transparent border-2 ${dark ? 'border-white hover:bg-white hover:text-[#1a1c1e]' : 'border-[#1a1c1e] hover:bg-[#1a1c1e] hover:text-white'} rounded-full font-black text-xl transition-all cursor-pointer`}>Message Yulia</button>
               </div>
             </div>

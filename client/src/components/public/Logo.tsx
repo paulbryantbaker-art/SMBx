@@ -16,7 +16,7 @@ export default function Logo({ className = '', light = false, linked = true }: L
       style={{ fontFamily: "var(--sans)", fontSize: '22px', letterSpacing: '-.03em' }}
     >
       <span className={light ? 'text-white' : 'text-[#0D0D0D]'}>smbx</span>
-      <span className="text-[#BA3C60]">.</span>
+      <span className="text-[#B5636B]">.</span>
       <span className={light ? 'text-white' : 'text-[#0D0D0D]'}>ai</span>
     </span>
   );

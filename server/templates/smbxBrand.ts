@@ -11,10 +11,10 @@
 export const COLORS = {
   /** Page background (for PDF cover, tints) */
   cream:       '#FAF8F4',
-  /** Brand accent — terra cotta */
-  terra:       '#BA3C60',
-  /** Dark terra for hover / pressed states */
-  terraDark:   '#9A3250',
+  /** Brand accent — rose gold */
+  terra:       '#B5636B',
+  /** Dark rose for hover / pressed states */
+  terraDark:   '#9A5058',
   /** Primary text — near black */
   text:        '#1A1A18',
   /** Secondary text */
@@ -40,7 +40,7 @@ export const ARGB = {
   text:        'FF1A1A18',
   textMuted:   'FF6E6A63',
   textLight:   'FFA9A49C',
-  terra:       'FFBA3C60',
+  terra:       'FFB5636B',
   tableHeader: 'FFF3F0EA',
   tableStripe: 'FFFAFAF8',
   border:      'FFDDD9D1',

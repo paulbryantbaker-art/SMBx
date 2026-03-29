@@ -352,7 +352,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             className="flex items-center justify-center border-none cursor-pointer active:scale-95"
             style={{
               width: 46, height: 46, borderRadius: '50%',
-              background: hasContent && !disabled ? '#b0004a' : '#1a1c1e',
+              background: hasContent && !disabled ? '#A85860' : '#1a1c1e',
               color: '#fff',
               transition: 'background .25s ease',
               flexShrink: 0,
@@ -403,7 +403,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           {attachment && (
             <div className="flex flex-wrap gap-2 px-4 pt-3 pb-0">
               <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F5F5F5] rounded-lg max-w-[260px]">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b0004a" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A85860" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
                 <span className="text-[13px] font-medium text-[#1a1c1e] truncate">{attachment.name}</span>
                 <button onClick={() => setAttachment(null)} className="hover:text-[#1a1c1e] bg-transparent border-none cursor-pointer p-0 ml-0.5 flex-shrink-0" style={{ color: 'rgba(0,0,0,0.35)' }} type="button">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -485,7 +485,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               type="button"
             >
               {uploading ? (
-                <div className="w-4 h-4 border-2 border-[#b0004a] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
+                <div className="w-4 h-4 border-2 border-[#A85860] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
               ) : (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transform: toolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
                   <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -497,7 +497,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               className="flex items-center justify-center border-none cursor-pointer active:scale-95"
               style={{
                 width: 42, height: 42, borderRadius: 14,
-                background: hasContent && !disabled ? '#b0004a' : '#eeeef0',
+                background: hasContent && !disabled ? '#A85860' : '#eeeef0',
                 color: hasContent && !disabled ? '#fff' : 'rgba(0,0,0,0.25)',
                 transition: 'all .2s',
                 pointerEvents: hasContent && !disabled ? 'auto' : 'none',

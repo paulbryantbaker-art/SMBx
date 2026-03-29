@@ -28,7 +28,7 @@ interface PipelinePanelProps {
 }
 
 const JOURNEY_LABELS: Record<string, { label: string; color: string }> = {
-  sell: { label: 'Sell', color: 'bg-[#BA3C60] text-white' },
+  sell: { label: 'Sell', color: 'bg-[#B5636B] text-white' },
   buy: { label: 'Buy', color: 'bg-blue-600 text-white' },
   raise: { label: 'Raise', color: 'bg-green-600 text-white' },
   pmi: { label: 'PMI', color: 'bg-purple-600 text-white' },
@@ -101,7 +101,7 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
         {onNewDeal && (
           <button
             onClick={onNewDeal}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#BA3C60] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors"
+            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#B5636B] text-white border-0 cursor-pointer hover:bg-[#9A5058] transition-colors"
           >
             + New Deal
           </button>
@@ -138,7 +138,7 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
           {onNewDeal && (
             <button
               onClick={onNewDeal}
-              className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#BA3C60] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors"
+              className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#B5636B] text-white border-0 cursor-pointer hover:bg-[#9A5058] transition-colors"
             >
               Start a deal
             </button>
@@ -157,7 +157,7 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
             <button
               key={deal.id}
               onClick={() => deal.conversation_id && onOpenConversation?.(deal.conversation_id)}
-              className="w-full text-left bg-[#FAFAFA] rounded-2xl p-4 border border-transparent hover:border-[#BA3C60] transition-all cursor-pointer"
+              className="w-full text-left bg-[#FAFAFA] rounded-2xl p-4 border border-transparent hover:border-[#B5636B] transition-all cursor-pointer"
             >
               <div className="flex items-center gap-2.5 mb-2.5">
                 <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${journey.color}`}>
@@ -179,8 +179,8 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
                     <div key={gate} className="flex-1">
                       <div
                         className={`h-1.5 w-full rounded-full ${
-                          i < currentIdx ? 'bg-[#BA3C60]'
-                          : i === currentIdx ? 'bg-[#BA3C60] opacity-60'
+                          i < currentIdx ? 'bg-[#B5636B]'
+                          : i === currentIdx ? 'bg-[#B5636B] opacity-60'
                           : 'bg-[#EBE7DF]'
                         }`}
                       />
@@ -188,7 +188,7 @@ export default function PipelinePanel({ onOpenConversation, onNewDeal, isFullscr
                   ))}
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium text-[#BA3C60]">
+                  <span className="text-[11px] font-medium text-[#B5636B]">
                     {deal.current_gate}: {GATE_LABELS[deal.current_gate] || deal.current_gate}
                   </span>
                   <span className="text-[11px] text-[#A9A49C]">{progress}%</span>

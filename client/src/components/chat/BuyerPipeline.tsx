@@ -93,7 +93,7 @@ export default function BuyerPipeline() {
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#BA3C60] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#B5636B] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -126,7 +126,7 @@ export default function BuyerPipeline() {
               {thesis.revenue_min || thesis.revenue_max ? ` \u00B7 ${formatDollars(thesis.revenue_min)} - ${formatDollars(thesis.revenue_max)}` : ''}
             </p>
           </div>
-          <span className="text-sm font-bold text-[#BA3C60]">{targets.length} matches</span>
+          <span className="text-sm font-bold text-[#B5636B]">{targets.length} matches</span>
         </div>
       </div>
 
@@ -183,7 +183,7 @@ export default function BuyerPipeline() {
                       <span>Revenue: {formatDollars(target.revenue_reported || target.revenue_estimated_low)}</span>
                       {target.sde_reported && <span>SDE: {formatDollars(target.sde_reported)}</span>}
                       {target.thesis_fit_score !== null && (
-                        <span className="font-semibold text-[#BA3C60]">Score: {target.thesis_fit_score}/100</span>
+                        <span className="font-semibold text-[#B5636B]">Score: {target.thesis_fit_score}/100</span>
                       )}
                     </div>
                     {/* Conviction Check */}
@@ -216,7 +216,7 @@ export default function BuyerPipeline() {
                     <div className="flex items-center gap-1.5 mt-2 text-[10px] text-[#A9A49C]">
                       <span>Source: {target.source}</span>
                       {target.source_url && (
-                        <a href={target.source_url} target="_blank" rel="noopener" className="text-[#BA3C60] hover:underline">View listing</a>
+                        <a href={target.source_url} target="_blank" rel="noopener" className="text-[#B5636B] hover:underline">View listing</a>
                       )}
                     </div>
                   </div>
@@ -227,7 +227,7 @@ export default function BuyerPipeline() {
                       <button
                         onClick={() => updateTarget(target.id, 'pursuing')}
                         disabled={updatingId === target.id}
-                        className="text-[11px] font-semibold px-3 py-1.5 rounded-lg bg-[#BA3C60] text-white border-0 cursor-pointer hover:bg-[#BE6342] transition-colors disabled:opacity-50"
+                        className="text-[11px] font-semibold px-3 py-1.5 rounded-lg bg-[#B5636B] text-white border-0 cursor-pointer hover:bg-[#9A5058] transition-colors disabled:opacity-50"
                         type="button"
                       >
                         Pursue

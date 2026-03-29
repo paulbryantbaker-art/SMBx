@@ -52,7 +52,7 @@ export default function ForgotPassword({ onNavigateLogin }: ForgotPasswordProps)
             <button
               type="button"
               onClick={onNavigateLogin}
-              className="w-full py-3 bg-[#BA3C60] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer hover:bg-[#BE6342] transition-colors"
+              className="w-full py-3 bg-[#B5636B] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer hover:bg-[#9A5058] transition-colors"
             >
               Back to sign in
             </button>
@@ -69,14 +69,14 @@ export default function ForgotPassword({ onNavigateLogin }: ForgotPasswordProps)
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#BA3C60]"
+              className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#B5636B]"
               required
             />
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3 bg-[#BA3C60] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#BE6342] transition-colors disabled:opacity-50"
+              className="w-full py-3 bg-[#B5636B] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#9A5058] transition-colors disabled:opacity-50"
             >
               {submitting ? 'Sending...' : 'Send reset link'}
             </button>
@@ -87,7 +87,7 @@ export default function ForgotPassword({ onNavigateLogin }: ForgotPasswordProps)
           <button
             type="button"
             onClick={onNavigateLogin}
-            className="bg-transparent border-none text-[#BA3C60] font-semibold cursor-pointer text-sm p-0"
+            className="bg-transparent border-none text-[#B5636B] font-semibold cursor-pointer text-sm p-0"
           >
             Back to sign in
           </button>
