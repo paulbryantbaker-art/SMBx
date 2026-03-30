@@ -1160,7 +1160,13 @@ export default function AppShell() {
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
-                    opacity: dark ? 0.45 : 0.18,
+                    opacity: dark ? 0.4 : 0.13,
+                    pointerEvents: 'none',
+                  }} />
+                  {/* Center fade — lightens the middle so content reads clean, circuit stays at edges */}
+                  <div style={{
+                    position: 'fixed', inset: 0, zIndex: 2,
+                    background: `radial-gradient(ellipse 60% 50% at 50% 45%, ${dark ? 'rgba(15,16,18,0.7)' : 'rgba(249,249,252,0.75)'} 0%, transparent 100%)`,
                     pointerEvents: 'none',
                   }} />
 
