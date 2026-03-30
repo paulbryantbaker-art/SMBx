@@ -56,29 +56,74 @@ function getGreeting(): string {
   return 'Hi there, having a good night?';
 }
 
-/* ═══ LOGO — "smb" + X image + ".ai" in Poppins 800 ═══ */
+/* ═══ LOGO — Fancy combo (X + smbx.ai text) for hero placement ═══ */
 function LogoImg({ height = 28, style, className }: { height?: number; style?: React.CSSProperties; className?: string; dark?: boolean }) {
   return (
     <img
-      src="/GX.png"
+      src="/Fancy.png"
       alt="smbx.ai"
       draggable={false}
       className={className}
-      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', imageRendering: 'auto', ...style }}
+      style={{ height, objectFit: 'contain', display: 'inline-block', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.06))', ...style }}
       aria-label="smbx.ai"
     />
   );
 }
 
-/* ═══ LOGO ICON — just the X mark for compact spaces ═══ */
+/* ═══ LOGO WITH INTRO VIDEO — plays once then shows static logo ═══ */
+function LogoWithIntro({ height = 120, className }: { height?: number; className?: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [showVideo, setShowVideo] = useState(true);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.play().catch(() => setShowVideo(false));
+    const onEnd = () => setShowVideo(false);
+    video.addEventListener('ended', onEnd);
+    return () => video.removeEventListener('ended', onEnd);
+  }, []);
+
+  return (
+    <div className={className} style={{ position: 'relative', height, display: 'flex', justifyContent: 'center' }}>
+      {showVideo && (
+        <video
+          ref={videoRef}
+          src="/fancy.mp4"
+          muted
+          playsInline
+          style={{
+            height,
+            objectFit: 'contain',
+            position: 'absolute',
+            filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.06))',
+          }}
+        />
+      )}
+      <img
+        src="/Fancy.png"
+        alt="smbx.ai"
+        style={{
+          height,
+          objectFit: 'contain',
+          opacity: showVideo ? 0 : 1,
+          transition: 'opacity 0.6s ease',
+          filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.06))',
+        }}
+      />
+    </div>
+  );
+}
+
+/* ═══ LOGO ICON — just the X for sidebar/compact spaces ═══ */
 function LogoIcon({ height = 28, className, style }: { height?: number; className?: string; style?: React.CSSProperties }) {
   return (
     <img
-      src="/GX.png"
+      src="/F2.png"
       alt="smbx.ai"
       draggable={false}
       className={className}
-      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', ...style }}
+      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.08))', ...style }}
     />
   );
 }
@@ -974,7 +1019,7 @@ export default function AppShell() {
             title="Home"
             type="button"
           >
-            <img src="/GX.png" alt="smbx.ai" width={32} height={32} className="sidebar-x-img" style={{ display: 'block',  }} />
+            <img src="/F2.png" alt="smbx.ai" width={32} height={32} className="sidebar-x-img" style={{ display: 'block', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.08))' }} />
           </button>
         </div>
       )}
@@ -1146,10 +1191,10 @@ export default function AppShell() {
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-6' : 'max-w-3xl space-y-6'}`} style={isMobile ? undefined : { marginTop: '-5vh' }}>
                       {!isMobile && (
                         <div className="mb-6 flex justify-center">
-                          <LogoImg height={64} dark={dark} />
+                          <LogoWithIntro height={140} />
                         </div>
                       )}
-                      {isMobile && <LogoImg height={56} dark={dark} className="mx-auto mb-3" />}
+                      {isMobile && <LogoWithIntro height={110} className="mx-auto mb-3" />}
                       <h1 className={`font-headline font-extrabold tracking-tighter leading-[1.05] ${isMobile ? 'text-[36px]' : 'text-[50px]'}`}>
                         <span className={dark ? 'text-[#D4848C]' : 'text-[#A85860]'}>Selling</span> your business,<br/>
                         <span className={`italic underline decoration-[3px] underline-offset-[6px] ${dark ? 'decoration-[#D4848C]' : 'decoration-[#A85860]'}`}>buying</span> one, or{' '}
