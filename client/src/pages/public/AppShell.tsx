@@ -1182,8 +1182,8 @@ export default function AppShell() {
                     position: 'absolute', inset: 0, zIndex: 1,
                     backgroundImage: `url('/${dark ? 'dark bg' : 'light bg'}.png')`,
                     backgroundSize: isMobile ? '100% auto' : 'cover',
-                    backgroundPosition: 'top center',
-                    backgroundRepeat: 'repeat-y',
+                    backgroundPosition: isMobile ? 'top center' : 'center',
+                    backgroundRepeat: isMobile ? 'repeat-y' : 'no-repeat',
                     opacity: dark ? 0.7 : 0.35,
                   }} />
 
