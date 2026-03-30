@@ -1173,10 +1173,8 @@ export default function AppShell() {
               <>
                 {/* ═══ HOME PAGE — New Design ═══ */}
                 <main className="flex-1 flex flex-col relative">
-                  {/* Background image — fixed to cover full viewport */}
-                  {dark && (
-                    <div style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundColor: '#0f1012', pointerEvents: 'none' }} />
-                  )}
+                  {/* Solid base layer — blocks the body dot field from showing through */}
+                  <div style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundColor: dark ? '#0f1012' : '#f9f9fc', pointerEvents: 'none' }} />
                   <div style={{
                     position: 'fixed', inset: 0, zIndex: 1,
                     backgroundImage: `url('/${dark ? 'dark bg' : 'light bg'}.png')`,
