@@ -171,7 +171,7 @@ export default function SBAModel({ tabId }: Props) {
             <div className="mt-2 overflow-x-auto max-h-[400px] overflow-y-auto">
               <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
                 <thead className="sticky top-0 bg-white">
-                  <tr style={{ borderBottom: '2px solid #A03050' }}>
+                  <tr style={{ borderBottom: '2px solid #D44A78' }}>
                     {['Month', 'Payment', 'Principal', 'Interest', 'Balance'].map(h => (
                       <th key={h} style={{ padding: '4px 8px', textAlign: 'right', fontSize: 10, color: '#6E6A63', textTransform: 'uppercase' }}>
                         {h}

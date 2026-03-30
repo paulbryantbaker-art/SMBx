@@ -65,7 +65,7 @@ export async function sendInvitationEmail(invitation: {
           ${invitation.inviterName || 'Someone'} has invited you to join
           <strong>${invitation.dealName || 'a deal'}</strong> as a <strong>${roleName}</strong>.
         </p>
-        <a href="${acceptUrl}" style="display: inline-block; background: #A03050; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+        <a href="${acceptUrl}" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
           Accept Invitation
         </a>
         <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
@@ -100,7 +100,7 @@ export async function sendDayPassEmail(dayPass: {
         <p style="color: #6E6A63; line-height: 1.6;">
           Your 48-hour access window starts when you click the button below.
         </p>
-        <a href="${passUrl}" style="display: inline-block; background: #A03050; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+        <a href="${passUrl}" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
           Activate Day Pass
         </a>
         <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
@@ -130,7 +130,7 @@ export async function sendThesisMatchAlert(userId: number, matchCount: number): 
         <p style="color: #6E6A63; line-height: 1.6;">
           We found <strong>${matchCount}</strong> new listing${matchCount > 1 ? 's' : ''} that match your buy thesis criteria.
         </p>
-        <a href="${BASE_URL}/chat" style="display: inline-block; background: #A03050; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+        <a href="${BASE_URL}/chat" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
           View Matches
         </a>
         <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
@@ -157,7 +157,7 @@ export async function sendDocumentNotification(userId: number, dealName: string,
         <p style="color: #6E6A63; line-height: 1.6;">
           A new document "<strong>${docName}</strong>" has been added to <strong>${dealName}</strong>.
         </p>
-        <a href="${BASE_URL}/chat" style="display: inline-block; background: #A03050; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+        <a href="${BASE_URL}/chat" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
           View in SMBx
         </a>
       </div>
@@ -184,7 +184,7 @@ export async function sendWelcomeEmail(email: string, displayName?: string): Pro
         <p style="color: #6E6A63; line-height: 1.6;">
           Start by telling me about your deal. Upload financials, and I'll generate your first deliverable for free.
         </p>
-        <a href="${BASE_URL}/chat" style="display: inline-block; background: #A03050; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+        <a href="${BASE_URL}/chat" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
           Start a Conversation
         </a>
         <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
@@ -216,7 +216,7 @@ export async function sendGateAdvancementEmail(userId: number, gateName: string,
         <p style="color: #6E6A63; line-height: 1.6;">
           Your ${journey.toLowerCase()} journey${dealName ? ` for <strong>${dealName}</strong>` : ''} has advanced to <strong>${gateName}</strong>. New deliverables and tools are now available.
         </p>
-        <a href="${BASE_URL}/chat" style="display: inline-block; background: #A03050; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+        <a href="${BASE_URL}/chat" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
           Continue Your Journey
         </a>
       </div>
@@ -243,7 +243,7 @@ export async function sendDeliverableReadyEmail(userId: number, deliverableName:
         <p style="color: #6E6A63; line-height: 1.6;">
           Your <strong>${deliverableName}</strong>${dealName ? ` for <strong>${dealName}</strong>` : ''} has been generated and is ready for review.
         </p>
-        <a href="${BASE_URL}/chat" style="display: inline-block; background: #A03050; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+        <a href="${BASE_URL}/chat" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
           View Deliverable
         </a>
         <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">

@@ -74,14 +74,14 @@ function LogoImg({ height = 28, style, className }: { height?: number; style?: R
 function LogoHero({ height = 120, className, dark }: { height?: number; className?: string; dark?: boolean }) {
   return (
     <img
-      src={dark ? '/DG Trans.png' : '/Personal.png'}
+      src="/final logo.png"
       alt="smbx.ai"
       className={className}
       style={{
         height,
         objectFit: 'contain',
         display: 'block',
-        filter: dark ? 'none' : 'drop-shadow(0 6px 24px rgba(160, 48, 80, 0.4)) drop-shadow(0 3px 10px rgba(0,0,0,0.18))',
+        filter: 'drop-shadow(0 4px 16px rgba(160, 48, 80, 0.25)) drop-shadow(0 2px 6px rgba(0,0,0,0.1))',
       }}
     />
   );
@@ -91,7 +91,7 @@ function LogoHero({ height = 120, className, dark }: { height?: number; classNam
 function LogoIcon({ height = 28, className, style }: { height?: number; className?: string; style?: React.CSSProperties }) {
   return (
     <img
-      src="/TF3x.png"
+      src="/x.png"
       alt="smbx.ai"
       draggable={false}
       className={className}
@@ -288,7 +288,7 @@ function renderHeadline(text: string, terraWord: string) {
   return (
     <>
       {text.substring(0, idx)}
-      <span style={{ color: '#A03050' }}>{terraWord}</span>
+      <span style={{ color: '#D44A78' }}>{terraWord}</span>
       {text.substring(idx + terraWord.length)}
     </>
   );
@@ -409,7 +409,7 @@ function getInitialConversationId(path: string): number | null {
 }
 
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#A03050',
+  sell: '#D44A78',
   buy: '#4E8FD4',
   raise: '#6B8F4E',
   pmi: '#8F6BD4',
@@ -991,7 +991,7 @@ export default function AppShell() {
             title="Home"
             type="button"
           >
-            <img src="/TF3x.png" alt="smbx.ai" width={32} height={32} className="sidebar-x-img" style={{ display: 'block' }} />
+            <img src="/x.png" alt="smbx.ai" width={32} height={32} className="sidebar-x-img" style={{ display: 'block' }} />
           </button>
         </div>
       )}
@@ -1015,8 +1015,8 @@ export default function AppShell() {
               onClick={() => handleTabClick(item.id)}
               className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                 isActive
-                  ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#A03050] bg-[#A03050]/5')
-                  : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#A03050] hover:bg-[#A03050]/5')
+                  ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
+                  : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
               }`}
               title={item.label}
               type="button"
@@ -1048,8 +1048,8 @@ export default function AppShell() {
               onClick={() => openCanvasTab(item.type, item.label)}
               className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                 isActive
-                  ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#A03050] bg-[#A03050]/5')
-                  : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#A03050] hover:bg-[#A03050]/5')
+                  ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
+                  : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
               }`}
               title={item.label}
               type="button"
@@ -1071,7 +1071,7 @@ export default function AppShell() {
         {user && (
         <button
           onClick={() => { handleNewChat(); }}
-          className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#A03050] bg-[#A03050]/5'}`}
+          className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5'}`}
           title="New Chat"
           type="button"
         >
@@ -1083,8 +1083,8 @@ export default function AppShell() {
           onClick={() => { setViewState('chat'); navigate('/chat', { replace: viewState === 'chat' }); }}
           className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
             viewState === 'chat'
-              ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#A03050] bg-[#A03050]/5')
-              : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#A03050] hover:bg-[#A03050]/5')
+              ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
+              : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
           }`}
           title="Chat History"
           type="button"
@@ -1098,7 +1098,7 @@ export default function AppShell() {
       <div className="flex flex-col items-center gap-1 mt-auto pt-4">
         <button
           onClick={() => { if (user) { openCanvasTab('settings', 'Settings'); } else navigate('/login'); }}
-          className={`flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#A03050]'}`}
+          className={`flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
           type="button"
         >
           <span className="material-symbols-outlined text-[22px]">person</span>
@@ -1153,21 +1153,23 @@ export default function AppShell() {
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
             <div key={activeTab} style={{ animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : {}) }}>
+
+              {/* ═══ SHARED BACKGROUND — all landing pages ═══ */}
+              <div style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundColor: dark ? '#0f1012' : '#f9f9fc', pointerEvents: 'none' }} />
+              <div style={{
+                position: 'fixed', inset: 0, zIndex: 1,
+                backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                opacity: dark ? 0.35 : 0.10,
+                pointerEvents: 'none',
+              }} />
+
               {activeTab === 'home' ? (
               <>
-                {/* ═══ HOME PAGE — New Design ═══ */}
+                {/* ═══ HOME PAGE ═══ */}
                 <main className="flex-1 flex flex-col relative">
-                  {/* Solid base layer — blocks the body dot field from showing through */}
-                  <div style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundColor: dark ? '#0f1012' : '#f9f9fc', pointerEvents: 'none' }} />
-                  <div style={{
-                    position: 'fixed', inset: 0, zIndex: 1,
-                    backgroundImage: `url('/${dark ? 'GD' : 'Green BG'}.jpeg')`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                    opacity: dark ? 0.35 : 0.10,
-                    pointerEvents: 'none',
-                  }} />
                   {/* Center fade + blur — clean reading area in center, circuit visible at edges */}
                   <div style={{
                     position: 'fixed', inset: 0, zIndex: 2,
@@ -1199,9 +1201,9 @@ export default function AppShell() {
                         </div>
                       )}
                       <h1 className={`font-headline font-extrabold tracking-tighter leading-[1.05] ${isMobile ? 'text-[36px]' : 'text-[50px]'}`}>
-                        <span className={dark ? 'text-[#C45878]' : 'text-[#A03050]'}>Selling</span> your business,<br/>
-                        <span className={`italic underline decoration-[3px] underline-offset-[6px] ${dark ? 'decoration-[#C45878]' : 'decoration-[#A03050]'}`}>buying</span> one, or{' '}
-                        <span className={dark ? 'text-[#C45878]' : 'text-[#A03050]'}>raising</span> capital?
+                        <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>Selling</span> your business,<br/>
+                        <span className={`italic underline decoration-[3px] underline-offset-[6px] ${dark ? 'decoration-[#E8709A]' : 'decoration-[#D44A78]'}`}>buying</span> one, or{' '}
+                        <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>raising</span> capital?
                       </h1>
                       <p className={`text-base md:text-xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
                         Yulia handles the numbers, the documents, and the strategy<br className="hidden md:inline" /> — all by just talking to her.
@@ -1212,9 +1214,9 @@ export default function AppShell() {
                         <>
                           <div className="w-full max-w-3xl mx-auto mt-8">
                             <div className="relative group">
-                              <div className={`absolute -inset-1 bg-gradient-to-r from-[#A03050] to-[#C45878] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
+                              <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
                               <div className={`relative rounded-full flex items-center p-2 pl-6 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
-                                <span className={`material-symbols-outlined mr-4 ${dark ? 'text-rose-500' : 'text-[#A03050]'}`}>bolt</span>
+                                <span className={`material-symbols-outlined mr-4 ${dark ? 'text-rose-500' : 'text-[#D44A78]'}`}>bolt</span>
                                 <input
                                   className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
                                   placeholder="Message Yulia..."
@@ -1247,7 +1249,7 @@ export default function AppShell() {
                                   className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-all border-none ${
                                     dark
                                       ? 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
-                                      : 'bg-white text-[#636467] shadow-sm hover:border-[#A03050] hover:text-[#A03050]'
+                                      : 'bg-white text-[#636467] shadow-sm hover:border-[#D44A78] hover:text-[#D44A78]'
                                   }`}
                                   style={{ border: dark ? '1px solid rgba(63,63,70,0.5)' : '1px solid #e3bdc3' }}
                                   type="button"
@@ -1279,7 +1281,7 @@ export default function AppShell() {
                             className={`px-3 py-1.5 rounded-full text-xs cursor-pointer transition-all border-none ${
                               dark
                                 ? 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
-                                : 'bg-white text-[#636467] shadow-sm hover:border-[#A03050] hover:text-[#A03050]'
+                                : 'bg-white text-[#636467] shadow-sm hover:border-[#D44A78] hover:text-[#D44A78]'
                             }`}
                             style={{ border: dark ? '1px solid rgba(63,63,70,0.5)' : '1px solid #e3bdc3' }}
                             type="button"
@@ -1290,9 +1292,9 @@ export default function AppShell() {
                       </div>
                       {/* Gradient-glow input (same as desktop) */}
                       <div className="relative group">
-                        <div className={`absolute -inset-1 bg-gradient-to-r from-[#A03050] to-[#C45878] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
+                        <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
                         <div className={`relative rounded-full flex items-center p-2 pl-5 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
-                          <span className={`material-symbols-outlined mr-3 ${dark ? 'text-rose-500' : 'text-[#A03050]'}`}>bolt</span>
+                          <span className={`material-symbols-outlined mr-3 ${dark ? 'text-rose-500' : 'text-[#D44A78]'}`}>bolt</span>
                           <input
                             className={`bg-transparent border-none focus:ring-0 flex-1 py-3 text-base outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
                             placeholder="Message Yulia..."
@@ -1323,7 +1325,7 @@ export default function AppShell() {
                 </main>
               </>
               ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing'].includes(activeTab) ? (
-              <>
+              <div className="relative z-10">
                 <Suspense fallback={<BelowSkeleton />}>
                   {activeTab === 'sell' ? <SellBelow dark={dark} /> :
                    activeTab === 'buy' ? <BuyBelow dark={dark} /> :
@@ -1336,7 +1338,7 @@ export default function AppShell() {
                 <footer className={`py-12 flex justify-center ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`}>
                   <LogoIcon height={44} />
                 </footer>
-              </>
+              </div>
               ) : null}
             </div>
           )}
@@ -1515,7 +1517,7 @@ export default function AppShell() {
                     title={tab.label}
                     className={`relative w-9 h-9 rounded-lg border-0 cursor-pointer transition-all flex items-center justify-center ${
                       tab.id === activeCanvasTabId
-                        ? (dark ? 'bg-rose-500/15 text-rose-400' : 'bg-[#A03050]/10 text-[#A03050]')
+                        ? (dark ? 'bg-rose-500/15 text-rose-400' : 'bg-[#D44A78]/10 text-[#D44A78]')
                         : (dark ? 'bg-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800' : 'bg-transparent text-[#6E6A63] hover:text-[#0D0D0D] hover:bg-[rgba(0,0,0,0.04)]')
                     }`}
                   >
@@ -1541,7 +1543,7 @@ export default function AppShell() {
                     onClick={() => setActiveCanvasTabId(tab.id)}
                     className={`canvas-tab-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
                       tab.id === activeCanvasTabId
-                        ? 'bg-[#A03050] text-white border-[#A03050]'
+                        ? 'bg-[#D44A78] text-white border-[#D44A78]'
                         : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)]'
                     }`}
                   >
@@ -1572,7 +1574,7 @@ export default function AppShell() {
         }
         input:not(:placeholder-shown) + .hero-send-btn,
         input:focus:not(:placeholder-shown) + .hero-send-btn {
-          background: #A03050;
+          background: #D44A78;
           color: #fff;
           pointer-events: auto;
         }
@@ -1660,7 +1662,7 @@ export default function AppShell() {
                   onClick={() => handleTabClick(item.id)}
                   className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${
                     isActive
-                      ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#A03050] bg-[#A03050]/5')
+                      ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
                       : (dark ? 'text-zinc-400 hover:text-white bg-transparent' : 'text-[#636467] hover:text-[#1a1c1e] bg-transparent')
                   }`}
                   type="button"
@@ -1674,7 +1676,7 @@ export default function AppShell() {
               {user && (
               <button
                 onClick={() => { setIsMobileSidebarOpen(false); handleNewChat(); }}
-                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#A03050] bg-[#A03050]/5'}`}
+                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5'}`}
                 type="button"
               >
                 <span className="material-symbols-outlined text-[20px]">add_comment</span>
@@ -1698,7 +1700,7 @@ export default function AppShell() {
       {isMobile && (viewState === 'landing' || viewState === 'chat') && (
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
-          className="fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#C45878]"
+          className="fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#E8709A]"
           style={{ top: 16, left: 16 }}
           type="button"
           aria-label="Open menu"
@@ -1716,7 +1718,7 @@ export default function AppShell() {
           <button
             onClick={() => handleTabClick('home')}
             className="fixed z-50 flex items-center gap-2 border-none cursor-pointer text-white font-headline text-[14px] font-bold shadow-xl hover:scale-105 active:scale-95 transition-all duration-200"
-            style={{ bottom: 'calc(24px + env(safe-area-inset-bottom))', right: 16, background: 'linear-gradient(135deg, #A03050, #C45878)', borderRadius: '100px', padding: '14px 22px' }}
+            style={{ bottom: 'calc(24px + env(safe-area-inset-bottom))', right: 16, background: 'linear-gradient(135deg, #D44A78, #E8709A)', borderRadius: '100px', padding: '14px 22px' }}
             type="button"
           >
             <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>chat</span>
@@ -1727,7 +1729,7 @@ export default function AppShell() {
           <button
             onClick={() => handleTabClick('home')}
             className="fixed z-50 flex items-center gap-2 border-none cursor-pointer text-white font-headline text-[13px] font-bold shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
-            style={{ top: 16, right: 64, background: 'linear-gradient(135deg, #A03050, #C45878)', borderRadius: '100px', padding: '9px 20px' }}
+            style={{ top: 16, right: 64, background: 'linear-gradient(135deg, #D44A78, #E8709A)', borderRadius: '100px', padding: '9px 20px' }}
             type="button"
           >
             Start chatting
@@ -1743,7 +1745,7 @@ export default function AppShell() {
           { ch: 's', color: '#1A1A18', weight: 700 },
           { ch: 'm', color: '#1A1A18', weight: 700 },
           { ch: 'b', color: '#1A1A18', weight: 700 },
-          { ch: 'x', color: '#A03050', weight: 800 },
+          { ch: 'x', color: '#D44A78', weight: 800 },
           { ch: '.', color: '#1A1A18', weight: 700 },
           { ch: 'a', color: '#1A1A18', weight: 700 },
           { ch: 'i', color: '#1A1A18', weight: 700 },

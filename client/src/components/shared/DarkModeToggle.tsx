@@ -115,7 +115,7 @@ export function DarkModeToggle({ dark, setDark }: { dark: boolean; setDark: (v: 
   return (
     <button
       onClick={() => setDark(!dark)}
-      className={`fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 ${dark ? 'bg-white/10 backdrop-blur-sm border border-white/10 text-[#f9f9fc]' : 'bg-[#1a1c1e] text-[#C45878]'}`}
+      className={`fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 ${dark ? 'bg-white/10 backdrop-blur-sm border border-white/10 text-[#f9f9fc]' : 'bg-[#1a1c1e] text-[#E8709A]'}`}
       style={{ top: 16, right: 16 }}
       aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
     >

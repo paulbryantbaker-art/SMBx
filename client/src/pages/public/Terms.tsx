@@ -98,7 +98,7 @@ export default function Terms() {
             <h2 className="font-sans text-xl font-bold text-[#0D0D0D] mb-3 m-0">Contact</h2>
             <p className="m-0">
               Questions about these terms? Email us at{' '}
-              <a href="mailto:hello@smbx.ai" className="text-[#A03050] underline">hello@smbx.ai</a>.
+              <a href="mailto:hello@smbx.ai" className="text-[#D44A78] underline">hello@smbx.ai</a>.
             </p>
           </div>
         </div>

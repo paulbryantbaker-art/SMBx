@@ -66,7 +66,7 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Your name"
-            className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#A03050]"
+            className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#D44A78]"
           />
 
           <label className="block text-sm font-medium text-[#0D0D0D] mb-1.5">Email</label>
@@ -75,7 +75,7 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#A03050]"
+            className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#D44A78]"
           />
 
           <label className="block text-sm font-medium text-[#0D0D0D] mb-1.5">Password</label>
@@ -84,13 +84,13 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Create a password"
-            className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#A03050]"
+            className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#D44A78]"
           />
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 bg-[#A03050] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#802040] transition-colors disabled:opacity-50"
+            className="w-full py-3 bg-[#D44A78] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#B03860] transition-colors disabled:opacity-50"
           >
             {submitting ? 'Creating account...' : 'Create account'}
           </button>
@@ -101,7 +101,7 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
           <button
             type="button"
             onClick={onNavigateLogin}
-            className="bg-transparent border-none text-[#A03050] font-semibold cursor-pointer text-sm p-0"
+            className="bg-transparent border-none text-[#D44A78] font-semibold cursor-pointer text-sm p-0"
           >
             Sign in
           </button>

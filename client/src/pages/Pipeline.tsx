@@ -28,7 +28,7 @@ interface PipelineProps {
 }
 
 const JOURNEY_LABELS: Record<string, { label: string; color: string }> = {
-  sell: { label: 'Sell', color: 'bg-[#A03050] text-white' },
+  sell: { label: 'Sell', color: 'bg-[#D44A78] text-white' },
   buy: { label: 'Buy', color: 'bg-blue-600 text-white' },
   raise: { label: 'Raise', color: 'bg-green-600 text-white' },
   pmi: { label: 'PMI', color: 'bg-purple-600 text-white' },
@@ -104,20 +104,20 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/chat')}
-            className="flex items-center gap-1.5 text-sm text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#A03050] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#D44A78] transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Chat
           </button>
           <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-            smb<span className="text-[#A03050]">x</span>.ai
+            smb<span className="text-[#D44A78]">x</span>.ai
           </div>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-[#6E6A63]">{user.display_name || user.email}</span>
           <button
             onClick={onLogout}
-            className="text-sm text-[#A9A49C] bg-transparent border-0 cursor-pointer hover:text-[#A03050] transition-colors"
+            className="text-sm text-[#A9A49C] bg-transparent border-0 cursor-pointer hover:text-[#D44A78] transition-colors"
           >
             Sign out
           </button>
@@ -136,7 +136,7 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
           </div>
           <button
             onClick={() => navigate('/chat')}
-            className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#A03050] text-white border-0 cursor-pointer hover:bg-[#802040] transition-colors"
+            className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors"
           >
             + New Deal
           </button>
@@ -171,7 +171,7 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
             <p className="text-sm text-[#6E6A63] m-0 mb-4">Start a conversation with Yulia to begin your first deal.</p>
             <button
               onClick={() => navigate('/chat')}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#A03050] text-white border-0 cursor-pointer hover:bg-[#802040] transition-colors"
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors"
             >
               Start a deal
             </button>
@@ -190,7 +190,7 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
               <button
                 key={deal.id}
                 onClick={() => navigate(deal.conversation_id ? `/chat/${deal.conversation_id}` : '/chat')}
-                className="w-full text-left bg-white rounded-2xl p-5 border border-border hover:border-[#A03050] hover:shadow-sm transition-all cursor-pointer"
+                className="w-full text-left bg-white rounded-2xl p-5 border border-border hover:border-[#D44A78] hover:shadow-sm transition-all cursor-pointer"
               >
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-3">
@@ -214,8 +214,8 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
                       <div key={gate} className="flex-1 flex flex-col items-center">
                         <div
                           className={`h-1.5 w-full rounded-full ${
-                            i < currentIdx ? 'bg-[#A03050]'
-                            : i === currentIdx ? 'bg-[#A03050] opacity-60'
+                            i < currentIdx ? 'bg-[#D44A78]'
+                            : i === currentIdx ? 'bg-[#D44A78] opacity-60'
                             : 'bg-[#EBE7DF]'
                           }`}
                         />
@@ -223,7 +223,7 @@ export default function Pipeline({ user, onLogout }: PipelineProps) {
                     ))}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-medium text-[#A03050]">
+                    <span className="text-[11px] font-medium text-[#D44A78]">
                       {deal.current_gate}: {GATE_LABELS[deal.current_gate] || deal.current_gate}
                     </span>
                     <span className="text-[11px] text-[#A9A49C]">{progress}%</span>

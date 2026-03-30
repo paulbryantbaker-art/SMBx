@@ -88,7 +88,7 @@ export default function SellerDashboard() {
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#A03050] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -146,24 +146,24 @@ export default function SellerDashboard() {
                   {/* Connector line */}
                   {i > 0 && (
                     <div
-                      className={`absolute top-2.5 right-1/2 w-full h-0.5 ${isPast ? 'bg-[#A03050]' : 'bg-[#EBE7DF]'}`}
+                      className={`absolute top-2.5 right-1/2 w-full h-0.5 ${isPast ? 'bg-[#D44A78]' : 'bg-[#EBE7DF]'}`}
                       style={{ zIndex: 0 }}
                     />
                   )}
                   {/* Dot */}
                   <div
                     className={`w-5 h-5 rounded-full border-2 flex items-center justify-center relative z-10 ${
-                      isActive ? 'border-[#A03050] bg-[#A03050]'
-                      : isPast ? 'border-[#A03050] bg-white'
+                      isActive ? 'border-[#D44A78] bg-[#D44A78]'
+                      : isPast ? 'border-[#D44A78] bg-white'
                       : 'border-[rgba(0,0,0,0.08)] bg-white'
                     }`}
                   >
-                    {isPast && <span className="text-[9px] text-[#A03050] font-bold">{'\u2713'}</span>}
+                    {isPast && <span className="text-[9px] text-[#D44A78] font-bold">{'\u2713'}</span>}
                     {isActive && <span className="w-2 h-2 bg-white rounded-full" />}
                   </div>
                   {/* Label */}
                   <span className={`text-[9px] mt-1.5 text-center leading-tight ${
-                    isActive ? 'font-bold text-[#A03050]' : isPast ? 'text-[#6E6A63]' : 'text-[#A9A49C]'
+                    isActive ? 'font-bold text-[#D44A78]' : isPast ? 'text-[#6E6A63]' : 'text-[#A9A49C]'
                   }`}>
                     {phase.label}
                   </span>
@@ -192,7 +192,7 @@ export default function SellerDashboard() {
           <div className="flex items-end gap-2 mb-4">
             <span className="text-3xl font-bold text-[#0D0D0D]">{formatDollars(stats.valuationLow)}</span>
             <span className="text-lg text-[#6E6A63] mb-1">—</span>
-            <span className="text-3xl font-bold text-[#A03050]">{formatDollars(stats.valuationHigh)}</span>
+            <span className="text-3xl font-bold text-[#D44A78]">{formatDollars(stats.valuationHigh)}</span>
           </div>
           {/* Range bar */}
           <div className="h-3 bg-[#F5F5F5] rounded-full overflow-hidden">
@@ -200,7 +200,7 @@ export default function SellerDashboard() {
               className="h-full rounded-full"
               style={{
                 width: '65%',
-                background: 'linear-gradient(90deg, #A03050 0%, #E8956F 100%)',
+                background: 'linear-gradient(90deg, #D44A78 0%, #E8956F 100%)',
               }}
             />
           </div>
@@ -219,7 +219,7 @@ export default function SellerDashboard() {
           <p className="text-xs text-[#6E6A63]">Total Actions</p>
         </div>
         <div className="bg-white rounded-xl p-4 text-center" style={{ border: '1px solid #EBE7DF' }}>
-          <p className="text-2xl font-bold text-[#A03050]">{stats?.inProgressCount || 0}</p>
+          <p className="text-2xl font-bold text-[#D44A78]">{stats?.inProgressCount || 0}</p>
           <p className="text-xs text-[#6E6A63]">In Progress</p>
         </div>
         <div className="bg-white rounded-xl p-4 text-center" style={{ border: '1px solid #EBE7DF' }}>
@@ -253,8 +253,8 @@ export default function SellerDashboard() {
                   disabled={updatingId === action.id}
                   className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 cursor-pointer bg-transparent transition-colors ${
                     action.status === 'complete' ? 'border-green-500 text-green-500 bg-green-50'
-                    : action.status === 'in_progress' ? 'border-[#A03050] text-[#A03050]'
-                    : 'border-[rgba(0,0,0,0.08)] text-transparent hover:border-[#A03050]'
+                    : action.status === 'in_progress' ? 'border-[#D44A78] text-[#D44A78]'
+                    : 'border-[rgba(0,0,0,0.08)] text-transparent hover:border-[#D44A78]'
                   }`}
                   type="button"
                 >

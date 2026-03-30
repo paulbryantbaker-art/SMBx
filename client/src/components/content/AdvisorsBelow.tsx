@@ -62,19 +62,19 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           <div className="lg:col-span-7">
             <ScrollReveal>
               <div className="flex items-center gap-2 mb-8">
-                <span className="inline-block px-3 py-1 bg-[#A03050]/10 text-[#A03050] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Advisors</span>
+                <span className="inline-block px-3 py-1 bg-[#D44A78]/10 text-[#D44A78] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Advisors</span>
                 <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-[#2f3133] text-[#dadadc]/80' : 'bg-[#f3f3f6] text-[#5d5e61]'}`}>Brokers & Professionals</span>
               </div>
             </ScrollReveal>
             <ScrollReveal y={40} delay={0.1}>
               <h1 className="font-headline font-black text-5xl md:text-6xl tracking-tighter leading-[0.92] mb-8">
-                A CIM that takes you 40 hours takes Yulia <span className="text-[#A03050]">two.</span>
+                A CIM that takes you 40 hours takes Yulia <span className="text-[#D44A78]">two.</span>
               </h1>
             </ScrollReveal>
             <ScrollReveal delay={0.2}>
               <div className={`space-y-6 text-xl editorial max-w-xl ${muted}`}>
                 <p>You're not here to be replaced. You're here because your time is the bottleneck. Every hour you spend building documents is an hour you're not spending on client relationships, deal sourcing, and the judgment calls that actually require a human.</p>
-                <p className={`font-bold border-l-4 border-[#A03050] pl-6 text-2xl italic ${emphasis}`}>Same platform. Same intelligence. Your superpower is that Yulia does 80% of the analytical work.</p>
+                <p className={`font-bold border-l-4 border-[#D44A78] pl-6 text-2xl italic ${emphasis}`}>Same platform. Same intelligence. Your superpower is that Yulia does 80% of the analytical work.</p>
               </div>
             </ScrollReveal>
           </div>
@@ -84,14 +84,14 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
               <div className="space-y-5">
                 {timeRows.map((row, i) => (
                   <div key={row.label} className="flex items-center gap-4">
-                    <div className={`${i === 0 ? 'bg-[#A03050]/20' : 'bg-white/5'} rounded-xl px-3 py-2 text-center min-w-[80px]`}>
+                    <div className={`${i === 0 ? 'bg-[#D44A78]/20' : 'bg-white/5'} rounded-xl px-3 py-2 text-center min-w-[80px]`}>
                       <p className="text-[10px] text-[#dadadc]/60">Before</p>
                       <p className="font-bold text-[#dadadc]/90">{row.before}</p>
                     </div>
-                    <span className="material-symbols-outlined text-[#A03050]">arrow_forward</span>
-                    <div className={`${i === 0 ? 'bg-[#A03050]/20' : 'bg-white/5'} rounded-xl px-3 py-2 text-center min-w-[80px]`}>
+                    <span className="material-symbols-outlined text-[#D44A78]">arrow_forward</span>
+                    <div className={`${i === 0 ? 'bg-[#D44A78]/20' : 'bg-white/5'} rounded-xl px-3 py-2 text-center min-w-[80px]`}>
                       <p className="text-[10px] text-[#dadadc]/60">With Yulia</p>
-                      <p className="font-bold text-[#A03050]">{row.after}</p>
+                      <p className="font-bold text-[#D44A78]">{row.after}</p>
                     </div>
                     <p className="text-sm text-[#dadadc]/90 flex-1">{row.label}</p>
                   </div>
@@ -109,7 +109,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           <section className="mb-24">
             <div className={`${darkPanel} rounded-3xl p-10 md:p-16 text-white`}>
               <div className="mb-12">
-                <span className="text-[#A03050] font-bold uppercase tracking-widest text-xs block mb-3">The Leverage</span>
+                <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">The Leverage</span>
                 <h2 className="font-headline text-4xl font-black tracking-tight mb-4">3–5 deals managed becomes 15–20 deals managed.</h2>
                 <p className="text-lg text-[#dadadc]/70 max-w-2xl">Same quality. Same output. You spend 80% of your time on relationships instead of 80% on analysis. The math changes everything about your practice.</p>
               </div>
@@ -117,7 +117,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
                 {capabilities.map((c) => (
                   <StaggerItem key={c.title}>
                     <div className="bg-white/5 rounded-2xl border border-white/10 p-8 hover:bg-white/10 transition-colors h-full">
-                      <span className="material-symbols-outlined text-[#A03050] text-3xl mb-4">{c.icon}</span>
+                      <span className="material-symbols-outlined text-[#D44A78] text-3xl mb-4">{c.icon}</span>
                       <h3 className="font-bold text-lg mb-3">{c.title}</h3>
                       <p className="text-sm text-[#dadadc]/70">{c.desc}</p>
                     </div>
@@ -133,16 +133,16 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           <section className="mb-24">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
               <div className="lg:col-span-5">
-                <span className="text-[#A03050] font-bold uppercase tracking-widest text-xs block mb-3">Client Perception</span>
+                <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Client Perception</span>
                 <h2 className="font-headline text-4xl font-black tracking-tight mb-8">Your clients don't know Yulia exists. They just think you're fast.</h2>
                 <p className={`leading-relaxed editorial mb-6 ${muted}`}>The #1 adoption barrier for any tool in advisory is client perception — "will this make me look replaceable?" With smbX.ai, the answer is no. Your clients see your work product, your analysis, your expertise. Yulia is the engine behind the scenes.</p>
-                <p className={`font-bold text-xl border-l-4 border-[#A03050] pl-6 italic ${emphasis}`}>The CIM has your name on it. The valuation has your methodology. The deal runs on your relationships. Yulia just made it all possible in a fraction of the time.</p>
+                <p className={`font-bold text-xl border-l-4 border-[#D44A78] pl-6 italic ${emphasis}`}>The CIM has your name on it. The valuation has your methodology. The deal runs on your relationships. Yulia just made it all possible in a fraction of the time.</p>
               </div>
               <div className="lg:col-span-7">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {perceptionCards.map((p) => (
                     <div key={p.title} className={`${card} rounded-2xl p-6 hover:shadow-lg transition-all`}>
-                      <span className="material-symbols-outlined text-[#A03050] text-xl mb-3">{p.icon}</span>
+                      <span className="material-symbols-outlined text-[#D44A78] text-xl mb-3">{p.icon}</span>
                       <h4 className="font-bold text-sm mb-2">{p.title}</h4>
                       <p className={`text-xs ${muted}`}>{p.desc}</p>
                     </div>
@@ -157,7 +157,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
         <ScrollReveal>
           <section className="mb-24">
             <div className="mb-12">
-              <span className="text-[#A03050] font-bold uppercase tracking-widest text-xs block mb-3">Your Workflow</span>
+              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Your Workflow</span>
               <h2 className="font-headline text-4xl font-black tracking-tight">How your practice changes.</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -180,21 +180,21 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
                 </div>
               </div>
               {/* After */}
-              <div className={`${dark ? 'bg-[#2f3133]' : 'bg-white'} rounded-2xl border-2 border-[#A03050] p-8`}>
+              <div className={`${dark ? 'bg-[#2f3133]' : 'bg-white'} rounded-2xl border-2 border-[#D44A78] p-8`}>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-xl bg-[#A03050]/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[#A03050]">bolt</span>
+                  <div className="w-10 h-10 rounded-xl bg-[#D44A78]/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-[#D44A78]">bolt</span>
                   </div>
                   <h3 className="font-bold text-lg">With Yulia</h3>
                 </div>
                 <div className="space-y-4 text-sm">
-                  <div className="flex items-start gap-3"><span className="text-[#A03050] font-bold min-w-[48px]">60%</span><p className={`font-medium ${emphasis}`}>Client meetings, relationship building, deal sourcing</p></div>
-                  <div className="flex items-start gap-3"><span className="text-[#A03050] font-bold min-w-[48px]">15%</span><p className={muted}>Review Yulia's analysis, apply judgment, refine</p></div>
-                  <div className="flex items-start gap-3"><span className="text-[#A03050] font-bold min-w-[48px]">15%</span><p className={muted}>Oversee DD coordination (Yulia tracks the details)</p></div>
-                  <div className="flex items-start gap-3"><span className="text-[#A03050] font-bold min-w-[48px]">10%</span><p className={muted}>Review and send communications Yulia drafted</p></div>
+                  <div className="flex items-start gap-3"><span className="text-[#D44A78] font-bold min-w-[48px]">60%</span><p className={`font-medium ${emphasis}`}>Client meetings, relationship building, deal sourcing</p></div>
+                  <div className="flex items-start gap-3"><span className="text-[#D44A78] font-bold min-w-[48px]">15%</span><p className={muted}>Review Yulia's analysis, apply judgment, refine</p></div>
+                  <div className="flex items-start gap-3"><span className="text-[#D44A78] font-bold min-w-[48px]">15%</span><p className={muted}>Oversee DD coordination (Yulia tracks the details)</p></div>
+                  <div className="flex items-start gap-3"><span className="text-[#D44A78] font-bold min-w-[48px]">10%</span><p className={muted}>Review and send communications Yulia drafted</p></div>
                 </div>
-                <div className="mt-6 pt-4 border-t border-[#A03050]/20">
-                  <p className="text-sm font-bold text-[#A03050]">15–20 active deals · 80% on relationships</p>
+                <div className="mt-6 pt-4 border-t border-[#D44A78]/20">
+                  <p className="text-sm font-bold text-[#D44A78]">15–20 active deals · 80% on relationships</p>
                 </div>
               </div>
             </div>
@@ -206,28 +206,28 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           <section className="mb-24">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
               <div className="lg:col-span-5">
-                <span className="text-[#A03050] font-bold uppercase tracking-widest text-xs block mb-3">Pricing</span>
+                <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Pricing</span>
                 <h2 className="font-headline text-4xl font-black tracking-tight mb-8">Same platform as your clients. Same tiers. Your advantage is leverage.</h2>
                 <p className={`leading-relaxed editorial mb-6 ${muted}`}>No separate "advisor pricing." No upsell gates. You use the same platform your clients use — but you use it across 15–20 engagements simultaneously. That's where the economics change.</p>
-                <p className={`font-bold text-xl border-l-4 border-[#A03050] pl-6 italic ${emphasis}`}>Try Professional free for 30 days. No credit card.</p>
+                <p className={`font-bold text-xl border-l-4 border-[#D44A78] pl-6 italic ${emphasis}`}>Try Professional free for 30 days. No credit card.</p>
               </div>
               <div className="lg:col-span-7">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* Professional */}
-                  <div className={`${dark ? 'bg-[#2f3133]' : 'bg-white'} rounded-2xl border-2 border-[#A03050] p-6 flex flex-col relative shadow-lg`}>
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#A03050] text-white text-[8px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Solo Advisors</span>
+                  <div className={`${dark ? 'bg-[#2f3133]' : 'bg-white'} rounded-2xl border-2 border-[#D44A78] p-6 flex flex-col relative shadow-lg`}>
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#D44A78] text-white text-[8px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Solo Advisors</span>
                     <h4 className="font-black text-sm mb-2 mt-2">Professional</h4>
-                    <p className="text-3xl font-black text-[#A03050] mb-1">$149<span className={`text-sm font-medium ${muted}`}>/mo</span></p>
+                    <p className="text-3xl font-black text-[#D44A78] mb-1">$149<span className={`text-sm font-medium ${muted}`}>/mo</span></p>
                     <p className={`text-[10px] mb-4 ${muted}`}>30-day free trial</p>
                     <div className="space-y-2 flex-1">
                       {['Unlimited client engagements', 'All documents + analysis', 'Full methodology (22 gates)', 'Pipeline management'].map((f) => (
                         <div key={f} className="flex items-start gap-2">
-                          <span className="material-symbols-outlined text-[#A03050] text-sm shrink-0 mt-0.5">check_circle</span>
+                          <span className="material-symbols-outlined text-[#D44A78] text-sm shrink-0 mt-0.5">check_circle</span>
                           <p className={`text-xs ${muted}`}>{f}</p>
                         </div>
                       ))}
                     </div>
-                    <button onClick={handleCTA} className="mt-6 w-full py-2.5 bg-gradient-to-r from-[#A03050] to-[#C45878] text-white rounded-full font-bold text-xs hover:scale-[1.02] transition-all border-none cursor-pointer">Try Free for 30 Days</button>
+                    <button onClick={handleCTA} className="mt-6 w-full py-2.5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-bold text-xs hover:scale-[1.02] transition-all border-none cursor-pointer">Try Free for 30 Days</button>
                   </div>
                   {/* Enterprise */}
                   <div className={`${darkPanel} rounded-2xl p-6 flex flex-col text-white relative`}>
@@ -238,7 +238,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
                     <div className="space-y-2 flex-1">
                       {['Everything in Professional', 'Unlimited team seats', 'API access', 'White-label options', 'Priority support'].map((f) => (
                         <div key={f} className="flex items-start gap-2">
-                          <span className="material-symbols-outlined text-[#A03050] text-sm shrink-0 mt-0.5">check_circle</span>
+                          <span className="material-symbols-outlined text-[#D44A78] text-sm shrink-0 mt-0.5">check_circle</span>
                           <p className="text-xs text-[#dadadc]/90">{f}</p>
                         </div>
                       ))}
@@ -246,7 +246,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
                     <button onClick={handleCTA} className="mt-6 w-full py-2.5 border border-white/30 rounded-full font-bold text-xs hover:bg-white hover:text-[#1a1c1e] transition-all bg-transparent text-white cursor-pointer">Start Enterprise</button>
                   </div>
                   {/* ROI card */}
-                  <div className="bg-[#A03050] rounded-2xl p-6 flex flex-col text-white">
+                  <div className="bg-[#D44A78] rounded-2xl p-6 flex flex-col text-white">
                     <h4 className="font-black text-sm mb-4">The math</h4>
                     <div className="space-y-4 flex-1">
                       <div><p className="text-xs text-white/80">Average deal commission</p><p className="text-xl font-black">$25K–$75K</p></div>
@@ -269,14 +269,14 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
         <ScrollReveal>
           <section className="mb-24">
             <div className="mb-12">
-              <span className="text-[#A03050] font-bold uppercase tracking-widest text-xs block mb-3">Who Uses This</span>
+              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Who Uses This</span>
               <h2 className="font-headline text-4xl font-black tracking-tight">Every type of deal professional.</h2>
             </div>
             <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {advisorTypes.map((a) => (
                 <StaggerItem key={a.title}>
                   <div className={`${card} rounded-2xl p-8 hover:shadow-lg transition-all h-full`}>
-                    <span className="material-symbols-outlined text-[#A03050] text-2xl mb-3">{a.icon}</span>
+                    <span className="material-symbols-outlined text-[#D44A78] text-2xl mb-3">{a.icon}</span>
                     <h3 className="font-bold mb-2">{a.title}</h3>
                     <p className={`text-sm ${muted}`}>{a.desc}</p>
                   </div>
@@ -306,11 +306,11 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           <section className="mb-12">
             <div className={`${darkPanel} rounded-3xl p-12 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center text-white`}>
               <div>
-                <h2 className="font-headline text-4xl md:text-5xl font-black tracking-tighter leading-[0.95]">Try Professional<br/><span className="text-[#A03050]">free for 30 days.</span></h2>
+                <h2 className="font-headline text-4xl md:text-5xl font-black tracking-tighter leading-[0.95]">Try Professional<br/><span className="text-[#D44A78]">free for 30 days.</span></h2>
                 <p className="text-lg text-[#dadadc]/70 mt-4">Run a complete client engagement. Generate a CIM. Build a valuation. See how the pipeline changes. No credit card required.</p>
               </div>
               <div className="flex flex-col items-center lg:items-end gap-4">
-                <button onClick={handleCTA} className="px-10 py-5 bg-gradient-to-r from-[#A03050] to-[#C45878] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Start Free Trial</button>
+                <button onClick={handleCTA} className="px-10 py-5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Start Free Trial</button>
                 <p className="text-xs text-[#dadadc]/70">30 days · Full access · No credit card</p>
               </div>
             </div>

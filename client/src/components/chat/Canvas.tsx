@@ -186,7 +186,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
       <style>
         body { font-family: 'Inter', system-ui, sans-serif; color: #0D0D0D; padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.6; }
         h1, h2, h3 { font-weight: 700; margin-top: 1.5em; }
-        h1 { font-size: 24px; border-bottom: 2px solid #A03050; padding-bottom: 8px; }
+        h1 { font-size: 24px; border-bottom: 2px solid #D44A78; padding-bottom: 8px; }
         h2 { font-size: 18px; color: #3D3B37; }
         h3 { font-size: 15px; color: #6E6A63; }
         table { border-collapse: collapse; width: 100%; margin: 16px 0; }
@@ -214,7 +214,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
       {/* Toolbar */}
       <div className="shrink-0 flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-6 h-6 rounded bg-[#A03050] text-white flex items-center justify-center shrink-0">
+          <div className="w-6 h-6 rounded bg-[#D44A78] text-white flex items-center justify-center shrink-0">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" />
             </svg>
@@ -256,7 +256,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
                 filed
                   ? 'bg-green-50 text-green-700'
-                  : 'bg-[#A03050] text-white hover:bg-[#802040]'
+                  : 'bg-[#D44A78] text-white hover:bg-[#B03860]'
               } disabled:opacity-60`}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -269,7 +269,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
             <button
               onClick={() => setEditMode(!editMode)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
-                editMode ? 'bg-[#A03050] text-white' : 'bg-[#F5F5F5] text-[#3D3B37] hover:bg-[#EBE7DF]'
+                editMode ? 'bg-[#D44A78] text-white' : 'bg-[#F5F5F5] text-[#3D3B37] hover:bg-[#EBE7DF]'
               }`}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -283,7 +283,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
             <button
               onClick={() => setCommentsOpen(!commentsOpen)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
-                commentsOpen ? 'bg-[#A03050] text-white' : 'bg-[#F5F5F5] text-[#3D3B37] hover:bg-[#EBE7DF]'
+                commentsOpen ? 'bg-[#D44A78] text-white' : 'bg-[#F5F5F5] text-[#3D3B37] hover:bg-[#EBE7DF]'
               }`}
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -345,7 +345,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
         {!isMarkdownMode && loading && (
           <div className="flex items-center justify-center p-12">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-[#A03050] border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
               <p className="text-sm text-[#6E6A63]">Loading deliverable...</p>
             </div>
           </div>
@@ -354,7 +354,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
         {!isMarkdownMode && !loading && data?.status === 'generating' && (
           <div className="flex items-center justify-center p-12">
             <div className="flex flex-col items-center gap-3 text-center">
-              <div className="w-12 h-12 border-2 border-[#A03050] border-t-transparent rounded-full animate-spin" />
+              <div className="w-12 h-12 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
               <p className="text-base font-semibold text-[#0D0D0D]">Generating your {data.name}...</p>
               <p className="text-sm text-[#6E6A63] max-w-xs">{genMessage || 'This typically takes 30-60 seconds. The document will appear here when ready.'}</p>
             </div>
@@ -409,7 +409,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
               </div>
               <p className="text-sm text-[#6E6A63]">{error || 'Deliverable not found.'}</p>
-              <button onClick={fetchData} className="text-sm font-semibold text-[#A03050] bg-transparent border-0 cursor-pointer hover:underline">
+              <button onClick={fetchData} className="text-sm font-semibold text-[#D44A78] bg-transparent border-0 cursor-pointer hover:underline">
                 Try again
               </button>
             </div>
@@ -447,12 +447,12 @@ function CanvasContent({ content, name }: { content: Record<string, any>; name: 
   if (content.sections && Array.isArray(content.sections)) {
     return (
       <div className="space-y-6">
-        <h1 className="text-xl font-bold text-[#0D0D0D] m-0 pb-2" style={{ borderBottom: '2px solid #A03050' }}>
+        <h1 className="text-xl font-bold text-[#0D0D0D] m-0 pb-2" style={{ borderBottom: '2px solid #D44A78' }}>
           {name}
         </h1>
         {content.summary && (
           <div className="bg-[#FFF8F5] rounded-xl px-5 py-4" style={{ border: '1px solid rgba(186,60,96,.15)' }}>
-            <p className="text-sm font-semibold text-[#A03050] m-0 mb-1">Summary</p>
+            <p className="text-sm font-semibold text-[#D44A78] m-0 mb-1">Summary</p>
             <p className="text-sm text-[#3D3B37] leading-relaxed m-0">{content.summary}</p>
           </div>
         )}
@@ -486,7 +486,7 @@ function CanvasContent({ content, name }: { content: Record<string, any>; name: 
   // Key-value format
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-[#0D0D0D] m-0 pb-2" style={{ borderBottom: '2px solid #A03050' }}>
+      <h1 className="text-xl font-bold text-[#0D0D0D] m-0 pb-2" style={{ borderBottom: '2px solid #D44A78' }}>
         {name}
       </h1>
       {Object.entries(content).map(([key, value]) => {
@@ -562,7 +562,7 @@ function MarkdownCanvas({ content }: { content: string }) {
               <button
                 key={i}
                 onClick={() => scrollToSection(s.id)}
-                className={`block w-full text-left text-[12px] leading-tight bg-transparent border-0 cursor-pointer hover:text-[#A03050] transition-colors p-0 ${
+                className={`block w-full text-left text-[12px] leading-tight bg-transparent border-0 cursor-pointer hover:text-[#D44A78] transition-colors p-0 ${
                   s.level === 3 ? 'pl-3 text-[#A9A49C]' : 'text-[#6E6A63] font-medium'
                 }`}
                 style={{ marginBottom: '6px' }}

@@ -449,7 +449,7 @@ export function BeforeAfterSlider({
           left: `${pos}%`,
           transform: 'translateX(-50%)',
           width: 4,
-          background: '#A03050',
+          background: '#D44A78',
           cursor: 'col-resize',
           zIndex: 2,
         }}
@@ -464,7 +464,7 @@ export function BeforeAfterSlider({
             width: 36,
             height: 36,
             borderRadius: '50%',
-            background: '#A03050',
+            background: '#D44A78',
             border: '3px solid #fff',
             boxShadow: '0 2px 10px rgba(186,60,96,0.4)',
             display: 'flex',
@@ -480,7 +480,7 @@ export function BeforeAfterSlider({
 
       {/* Labels */}
       <span style={{ position: 'absolute', top: 12, left: 12, fontSize: 11, fontWeight: 700, color: '#fff', background: 'rgba(0,0,0,0.6)', padding: '3px 10px', borderRadius: 100, letterSpacing: '0.06em', textTransform: 'uppercase', zIndex: 3 }}>{beforeLabel}</span>
-      <span style={{ position: 'absolute', top: 12, right: 12, fontSize: 11, fontWeight: 700, color: '#fff', background: '#A03050', padding: '3px 10px', borderRadius: 100, letterSpacing: '0.06em', textTransform: 'uppercase', zIndex: 3 }}>{afterLabel}</span>
+      <span style={{ position: 'absolute', top: 12, right: 12, fontSize: 11, fontWeight: 700, color: '#fff', background: '#D44A78', padding: '3px 10px', borderRadius: 100, letterSpacing: '0.06em', textTransform: 'uppercase', zIndex: 3 }}>{afterLabel}</span>
     </div>
   );
 }
@@ -565,8 +565,8 @@ export function InteractiveCalculator({
                   width: 20,
                   height: 20,
                   borderRadius: 6,
-                  border: item.enabled ? '2px solid #A03050' : '2px solid rgba(0,0,0,0.15)',
-                  background: item.enabled ? '#A03050' : 'transparent',
+                  border: item.enabled ? '2px solid #D44A78' : '2px solid rgba(0,0,0,0.15)',
+                  background: item.enabled ? '#D44A78' : 'transparent',
                   transition: 'all 0.2s',
                   flexShrink: 0,
                 }}>
@@ -578,7 +578,7 @@ export function InteractiveCalculator({
                 </span>
                 {item.label}
               </span>
-              <span style={{ color: item.enabled ? '#A03050' : 'rgba(0,0,0,0.25)', fontWeight: 600, flexShrink: 0, marginLeft: 16 }}>
+              <span style={{ color: item.enabled ? '#D44A78' : 'rgba(0,0,0,0.25)', fontWeight: 600, flexShrink: 0, marginLeft: 16 }}>
                 +${item.amount.toLocaleString()}
               </span>
             </button>
@@ -589,7 +589,7 @@ export function InteractiveCalculator({
           layout
           style={{ borderTop: '2px solid rgba(0,0,0,0.12)', marginTop: 16, paddingTop: 16 }}
         >
-          <div className="flex justify-between" style={{ fontSize: '16px', fontWeight: 600, color: '#A03050' }}>
+          <div className="flex justify-between" style={{ fontSize: '16px', fontWeight: 600, color: '#D44A78' }}>
             <span>Adjusted SDE</span>
             <motion.span
               key={adjustedSDE}
@@ -600,7 +600,7 @@ export function InteractiveCalculator({
               ${adjustedSDE.toLocaleString()}
             </motion.span>
           </div>
-          <div className="flex justify-between mt-2" style={{ fontSize: '16px', fontWeight: 600, color: '#A03050' }}>
+          <div className="flex justify-between mt-2" style={{ fontSize: '16px', fontWeight: 600, color: '#D44A78' }}>
             <span>At {multiple}&times;</span>
             <motion.span
               key={valuation}
@@ -714,7 +714,7 @@ export function StatBar({
             textAlign: 'center',
           }}
         >
-          <div style={{ fontSize: '28px', fontWeight: 700, color: '#A03050', lineHeight: 1.1 }}>
+          <div style={{ fontSize: '28px', fontWeight: 700, color: '#D44A78', lineHeight: 1.1 }}>
             <AnimatedCounter value={s.value} prefix={s.prefix} suffix={s.suffix} />
           </div>
           <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.45)', marginTop: 4, fontWeight: 500 }}>{s.label}</div>
@@ -817,7 +817,7 @@ export function AnimatedTimeline({
       {/* Background line */}
       <div style={{ position: 'absolute', left: 4, top: 0, bottom: 0, width: 2, background: 'rgba(186,60,96,0.12)' }} />
       {/* Animated fill */}
-      <motion.div style={{ position: 'absolute', left: 4, top: 0, bottom: 0, width: 2, background: '#A03050', transformOrigin: 'top', scaleY }} />
+      <motion.div style={{ position: 'absolute', left: 4, top: 0, bottom: 0, width: 2, background: '#D44A78', transformOrigin: 'top', scaleY }} />
       {children}
     </div>
   );
@@ -852,7 +852,7 @@ export function FloatingParticles({ count = 6 }: { count?: number }) {
             width: 4 + Math.random() * 4,
             height: 4 + Math.random() * 4,
             borderRadius: '50%',
-            background: '#A03050',
+            background: '#D44A78',
           }}
         />
       ))}
@@ -957,16 +957,16 @@ export function FeatureGrid({
             background: '#FAFAFA',
             borderRadius: 20,
             border: '1px solid rgba(0,0,0,0.04)',
-            borderLeft: highlight ? '3px solid #A03050' : undefined,
+            borderLeft: highlight ? '3px solid #D44A78' : undefined,
             padding: '24px 28px',
             height: '100%',
           }}>
             <div className="flex items-start justify-between gap-3">
               <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#0D0D0D', margin: '0 0 6px' }}>
                 {item.title}
-                {item.badge && <PulseBadge color="#A03050" style={{ marginLeft: 8 }}>{item.badge}</PulseBadge>}
+                {item.badge && <PulseBadge color="#D44A78" style={{ marginLeft: 8 }}>{item.badge}</PulseBadge>}
               </h3>
-              {item.price && <span style={{ fontSize: '20px', fontWeight: 700, color: '#A03050', flexShrink: 0 }}>{item.price}</span>}
+              {item.price && <span style={{ fontSize: '20px', fontWeight: 700, color: '#D44A78', flexShrink: 0 }}>{item.price}</span>}
             </div>
             <p style={{ fontSize: '14px', fontWeight: 400, color: 'rgba(0,0,0,0.5)', margin: 0, lineHeight: 1.55 }}>{item.body}</p>
           </div>
@@ -999,7 +999,7 @@ export function PullQuote({
           value={number}
           prefix={prefix}
           suffix={suffix}
-          style={{ fontSize: 56, fontWeight: 700, color: '#A03050', lineHeight: 1 }}
+          style={{ fontSize: 56, fontWeight: 700, color: '#D44A78', lineHeight: 1 }}
         />
       ) : (
         <p style={{ fontSize: 36, fontWeight: 300, color: '#0D0D0D', lineHeight: 1.25, margin: 0 }}>{text}</p>
@@ -1051,14 +1051,14 @@ export function DataCard({
       {label && <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(0,0,0,0.45)', display: 'block', marginBottom: 16 }}>{label}</span>}
       <div style={{ fontSize: '14px', fontVariantNumeric: 'tabular-nums' }}>
         {rows.map((r) => (
-          <div key={r.label} className="flex justify-between" style={{ padding: '8px 0', borderBottom: '1px solid rgba(0,0,0,0.04)', color: r.highlight ? '#A03050' : 'rgba(0,0,0,0.5)' }}>
+          <div key={r.label} className="flex justify-between" style={{ padding: '8px 0', borderBottom: '1px solid rgba(0,0,0,0.04)', color: r.highlight ? '#D44A78' : 'rgba(0,0,0,0.5)' }}>
             <span>{r.label}</span>
-            <span style={{ fontWeight: 600, color: r.highlight ? '#A03050' : '#0D0D0D' }}>{r.value}</span>
+            <span style={{ fontWeight: 600, color: r.highlight ? '#D44A78' : '#0D0D0D' }}>{r.value}</span>
           </div>
         ))}
       </div>
       {footer && (
-        <div className="flex justify-between" style={{ marginTop: 12, paddingTop: 12, borderTop: '2px solid rgba(0,0,0,0.12)', fontSize: '16px', fontWeight: 700, color: '#A03050' }}>
+        <div className="flex justify-between" style={{ marginTop: 12, paddingTop: 12, borderTop: '2px solid rgba(0,0,0,0.12)', fontSize: '16px', fontWeight: 700, color: '#D44A78' }}>
           <span>{footer.label}</span>
           <span>{footer.value}</span>
         </div>
@@ -1096,7 +1096,7 @@ export function ExpandableCard({
         <motion.span
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: 0.2 }}
-          style={{ flexShrink: 0, color: '#A03050', fontSize: '18px', lineHeight: 1 }}
+          style={{ flexShrink: 0, color: '#D44A78', fontSize: '18px', lineHeight: 1 }}
         >
           &#9662;
         </motion.span>
@@ -1131,7 +1131,7 @@ export function DealPreview({
 }) {
   return (
     <div className={className} style={{ background: 'linear-gradient(135deg, #0D0D0D 0%, #2B2A27 100%)', borderRadius: 16, padding: '28px 32px', color: '#fff' }}>
-      <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#A03050' }}>{title}</span>
+      <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#D44A78' }}>{title}</span>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, marginTop: 20 }}>
         {metrics.map(m => (
           <div key={m.label} style={{ flex: '1 1 120px' }}>
@@ -1174,7 +1174,7 @@ export function SideBySideCard({
           ))}
         </div>
       </div>
-      <div style={{ flex: 1, padding: '24px', background: '#A03050' }}>
+      <div style={{ flex: 1, padding: '24px', background: '#D44A78' }}>
         <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: 16 }}>{rightLabel}</span>
         <div style={{ fontSize: '14px', fontVariantNumeric: 'tabular-nums' }}>
           {rightItems.map(r => (
@@ -1236,7 +1236,7 @@ export function ConversationPreview({
                 : { background: '#FFFFFF', color: '#0D0D0D' }),
             }}
           >
-            {msg.role === 'ai' && <span style={{ fontSize: '11px', fontWeight: 600, color: '#A03050', display: 'block', marginBottom: 4 }}>YULIA</span>}
+            {msg.role === 'ai' && <span style={{ fontSize: '11px', fontWeight: 600, color: '#D44A78', display: 'block', marginBottom: 4 }}>YULIA</span>}
             {msg.text}
           </motion.div>
         ))}
@@ -1272,7 +1272,7 @@ export function NumberedList({
         <ScrollReveal key={i} delay={i * 0.05}>
           <div className="flex gap-4 items-start">
             <span style={{
-              fontSize: '14px', fontWeight: 700, color: '#A03050',
+              fontSize: '14px', fontWeight: 700, color: '#D44A78',
               minWidth: 28, flexShrink: 0,
               borderLeft: '2px solid rgba(186,60,96,0.2)',
               paddingLeft: 10,

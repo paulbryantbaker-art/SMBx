@@ -180,7 +180,7 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
                   value={naicsCode}
                   onChange={e => setNaicsCode(e.target.value)}
                   placeholder="e.g. 561710"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#A03050]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
                 />
               </div>
               <div>
@@ -190,13 +190,13 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
                   value={geography}
                   onChange={e => setGeography(e.target.value)}
                   placeholder="e.g. Texas"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#A03050]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
                 />
               </div>
               <button
                 onClick={fetchOverview}
                 disabled={loading || !naicsCode.trim()}
-                className="w-full py-1.5 rounded-xl text-sm font-semibold bg-[#A03050] text-white border-0 cursor-pointer hover:bg-[#802040] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-1.5 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Loading...' : 'Analyze'}
               </button>
@@ -236,7 +236,7 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
                           <div key={i} className="flex items-center gap-2">
                             <span className="text-[10px] text-[#6E6A63] w-28 shrink-0 truncate">{sz.label}</span>
                             <div className="flex-1 h-1.5 bg-white rounded-full overflow-hidden">
-                              <div className="h-full bg-[#A03050] rounded-full" style={{ width: `${sz.pct || 0}%` }} />
+                              <div className="h-full bg-[#D44A78] rounded-full" style={{ width: `${sz.pct || 0}%` }} />
                             </div>
                             <span className="text-[10px] text-[#6E6A63] w-12 text-right">{sz.count?.toLocaleString()}</span>
                           </div>
@@ -341,7 +341,7 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
                   value={sbaInputs.purchasePrice}
                   onChange={e => setSbaInputs(p => ({ ...p, purchasePrice: e.target.value }))}
                   placeholder="1,000,000"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#A03050]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
                 />
               </div>
               <div>
@@ -351,7 +351,7 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
                   value={sbaInputs.annualDebtService}
                   onChange={e => setSbaInputs(p => ({ ...p, annualDebtService: e.target.value }))}
                   placeholder="120,000"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#A03050]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
                 />
               </div>
               <div>
@@ -361,13 +361,13 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
                   value={sbaInputs.ebitda}
                   onChange={e => setSbaInputs(p => ({ ...p, ebitda: e.target.value }))}
                   placeholder="250,000"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#A03050]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
                 />
               </div>
               <button
                 onClick={runSbaAnalysis}
                 disabled={loading || !sbaInputs.purchasePrice || !sbaInputs.annualDebtService || !sbaInputs.ebitda}
-                className="w-full py-1.5 rounded-xl text-sm font-semibold bg-[#A03050] text-white border-0 cursor-pointer hover:bg-[#802040] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-1.5 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Calculating...' : 'Check Eligibility'}
               </button>

@@ -229,7 +229,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
     return (
       <div className="p-6 text-center">
         <p className="text-sm text-red-600 m-0 mb-2">{error}</p>
-        <button onClick={fetchDataRoom} className="text-sm font-semibold text-[#A03050] bg-transparent border-0 cursor-pointer hover:underline">
+        <button onClick={fetchDataRoom} className="text-sm font-semibold text-[#D44A78] bg-transparent border-0 cursor-pointer hover:underline">
           Try again
         </button>
       </div>
@@ -323,7 +323,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
               >
                 <path d="M9 18l6-6-6-6" />
               </svg>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill={isExpanded ? '#A03050' : '#A9A49C'} stroke="none" className="shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill={isExpanded ? '#D44A78' : '#A9A49C'} stroke="none" className="shrink-0">
                 <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
               </svg>
               <span className="text-[13px] font-medium text-[#0D0D0D] truncate">{folder.name}</span>
@@ -372,7 +372,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
         <button
           onClick={() => setShowSharePanel(!showSharePanel)}
           className={`w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[12px] font-medium border-0 cursor-pointer transition-colors ${
-            showSharePanel ? 'bg-[#A03050] text-white' : 'bg-[#F5F5F5] text-[#6E6A63] hover:bg-[#EBE7DF]'
+            showSharePanel ? 'bg-[#D44A78] text-white' : 'bg-[#F5F5F5] text-[#6E6A63] hover:bg-[#EBE7DF]'
           }`}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -393,7 +393,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
                   key={level}
                   onClick={() => setShareAccess(level)}
                   className={`flex-1 py-1 rounded text-[10px] font-medium border-0 cursor-pointer transition-colors ${
-                    shareAccess === level ? 'bg-[#A03050] text-white' : 'bg-white text-[#6E6A63]'
+                    shareAccess === level ? 'bg-[#D44A78] text-white' : 'bg-white text-[#6E6A63]'
                   }`}
                 >
                   {level.charAt(0).toUpperCase() + level.slice(1)}
@@ -412,7 +412,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
             <button
               onClick={createShareLink}
               disabled={creatingLink}
-              className="w-full py-1.5 rounded-lg text-[11px] font-semibold bg-[#A03050] text-white border-0 cursor-pointer hover:bg-[#802040] transition-colors disabled:opacity-50"
+              className="w-full py-1.5 rounded-lg text-[11px] font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors disabled:opacity-50"
             >
               {creatingLink ? 'Creating...' : 'Create Link'}
             </button>
@@ -474,7 +474,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
                       isReady ? 'cursor-pointer' : 'cursor-default'
                     }`}
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isReady ? '#A03050' : '#A9A49C'} strokeWidth="1.5" className="shrink-0">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={isReady ? '#D44A78' : '#A9A49C'} strokeWidth="1.5" className="shrink-0">
                       <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                       <path d="M14 2v6h6" />
                     </svg>
@@ -494,7 +494,7 @@ export default function DataRoom({ dealId, onViewDeliverable }: DataRoomProps) {
                         key={f.id}
                         onClick={() => fileDeliverable(d.id, f.id)}
                         disabled={isFiling}
-                        className="text-[10px] px-2 py-0.5 rounded-full bg-[#F5F5F5] text-[#6E6A63] border-0 cursor-pointer hover:bg-[#EBE7DF] hover:text-[#A03050] transition-colors disabled:opacity-50"
+                        className="text-[10px] px-2 py-0.5 rounded-full bg-[#F5F5F5] text-[#6E6A63] border-0 cursor-pointer hover:bg-[#EBE7DF] hover:text-[#D44A78] transition-colors disabled:opacity-50"
                       >
                         {f.name}
                       </button>

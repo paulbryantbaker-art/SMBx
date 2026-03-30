@@ -88,7 +88,7 @@ export default function CanvasEditor({ deliverableId, content, onSave }: CanvasE
             onClick={() => setEditing(!editing)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
               editing
-                ? 'bg-[#A03050] text-white'
+                ? 'bg-[#D44A78] text-white'
                 : 'bg-[#F5F5F5] text-[#3D3B37] hover:bg-[#EBE7DF]'
             }`}
           >
@@ -121,7 +121,7 @@ export default function CanvasEditor({ deliverableId, content, onSave }: CanvasE
       {/* AI revision bar */}
       {editing && (
         <div className="shrink-0 flex items-center gap-2 px-4 py-2" style={{ borderBottom: '1px solid #EBE7DF', backgroundColor: '#FAFAF8' }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A03050" strokeWidth="2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D44A78" strokeWidth="2">
             <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
           </svg>
           <input
@@ -135,7 +135,7 @@ export default function CanvasEditor({ deliverableId, content, onSave }: CanvasE
           <button
             onClick={handleRevision}
             disabled={!revisionPrompt.trim() || revising}
-            className="px-3 py-1 rounded-md text-[10px] font-semibold bg-[#A03050] text-white border-0 cursor-pointer hover:bg-[#802040] disabled:opacity-40 transition-colors"
+            className="px-3 py-1 rounded-md text-[10px] font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] disabled:opacity-40 transition-colors"
           >
             {revising ? 'Revising...' : 'Revise'}
           </button>

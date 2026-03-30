@@ -36,7 +36,7 @@ export default function NDAModal({ dealId, dealName, inviterName, onAccept, onDe
         <div className="px-6 pt-6 pb-4">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-[#FFF0EB] flex items-center justify-center shrink-0">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A03050" strokeWidth="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D44A78" strokeWidth="2">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
               </svg>
             </div>
@@ -101,7 +101,7 @@ export default function NDAModal({ dealId, dealName, inviterName, onAccept, onDe
               type="checkbox"
               checked={agreed}
               onChange={e => setAgreed(e.target.checked)}
-              className="mt-0.5 w-4 h-4 rounded accent-[#A03050] cursor-pointer"
+              className="mt-0.5 w-4 h-4 rounded accent-[#D44A78] cursor-pointer"
             />
             <span className="text-[12px] text-[#3D3B37] leading-relaxed">
               I have read and agree to the terms of this Non-Disclosure Agreement. I understand that
@@ -113,7 +113,7 @@ export default function NDAModal({ dealId, dealName, inviterName, onAccept, onDe
             <button
               onClick={handleAccept}
               disabled={!agreed || submitting}
-              className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#A03050] border-0 cursor-pointer hover:bg-[#802040] transition-colors disabled:opacity-40 disabled:cursor-default"
+              className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#D44A78] border-0 cursor-pointer hover:bg-[#B03860] transition-colors disabled:opacity-40 disabled:cursor-default"
             >
               {submitting ? 'Accepting...' : 'Accept NDA & Continue'}
             </button>

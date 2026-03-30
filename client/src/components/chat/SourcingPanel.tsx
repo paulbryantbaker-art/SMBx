@@ -268,7 +268,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
         </p>
         <button
           onClick={() => setShowNewThesis(true)}
-          className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#A03050] text-white border-0 cursor-pointer hover:bg-[#802040] transition-colors"
+          className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors"
         >
           + New Thesis
         </button>
@@ -276,7 +276,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
 
       {/* New Thesis Form */}
       {showNewThesis && (
-        <div className="bg-[#FAFAFA] rounded-2xl border border-[#A03050] p-4 mb-5">
+        <div className="bg-[#FAFAFA] rounded-2xl border border-[#D44A78] p-4 mb-5">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-[#0D0D0D] m-0">Create Buy Thesis</h3>
             <button onClick={() => setShowNewThesis(false)} className="w-6 h-6 rounded-full hover:bg-[#F5F5F5] flex items-center justify-center cursor-pointer border-0 bg-transparent">
@@ -291,7 +291,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                 value={newThesis.name}
                 onChange={e => setNewThesis(p => ({ ...p, name: e.target.value }))}
                 placeholder="e.g. DFW HVAC Roll-up"
-                className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#A03050]"
+                className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -302,7 +302,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                   value={newThesis.industry}
                   onChange={e => setNewThesis(p => ({ ...p, industry: e.target.value }))}
                   placeholder="HVAC"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#A03050]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
                 />
               </div>
               <div>
@@ -312,7 +312,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                   value={newThesis.geography}
                   onChange={e => setNewThesis(p => ({ ...p, geography: e.target.value }))}
                   placeholder="Southeast US"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#A03050]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
                 />
               </div>
               <div>
@@ -322,7 +322,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                   value={newThesis.naicsCode}
                   onChange={e => setNewThesis(p => ({ ...p, naicsCode: e.target.value }))}
                   placeholder="238220"
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#A03050]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
                 />
               </div>
               <div>
@@ -331,7 +331,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                   type="number"
                   value={newThesis.minRevenue}
                   onChange={e => setNewThesis(p => ({ ...p, minRevenue: e.target.value }))}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#A03050]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
                 />
               </div>
               <div>
@@ -340,7 +340,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                   type="number"
                   value={newThesis.maxRevenue}
                   onChange={e => setNewThesis(p => ({ ...p, maxRevenue: e.target.value }))}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#A03050]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
                 />
               </div>
               <div>
@@ -349,7 +349,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                   type="number"
                   value={newThesis.minPrice}
                   onChange={e => setNewThesis(p => ({ ...p, minPrice: e.target.value }))}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#A03050]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
                 />
               </div>
               <div>
@@ -358,7 +358,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                   type="number"
                   value={newThesis.maxPrice}
                   onChange={e => setNewThesis(p => ({ ...p, maxPrice: e.target.value }))}
-                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#A03050]"
+                  className="w-full px-3 py-1.5 rounded-lg border border-[rgba(0,0,0,0.08)] text-sm bg-white text-[#0D0D0D] outline-none focus:border-[#D44A78]"
                 />
               </div>
             </div>
@@ -373,7 +373,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
             <button
               onClick={createThesis}
               disabled={saving || !newThesis.name.trim()}
-              className="px-4 py-1.5 rounded-xl text-xs font-semibold bg-[#A03050] text-white border-0 cursor-pointer hover:bg-[#802040] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-1.5 rounded-xl text-xs font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? 'Creating...' : 'Create'}
             </button>
@@ -408,7 +408,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
           <p className="text-xs text-[#6E6A63] m-0 mb-3">Define what you're looking for and we'll find matches.</p>
           <button
             onClick={() => setShowNewThesis(true)}
-            className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#A03050] text-white border-0 cursor-pointer hover:bg-[#802040] transition-colors"
+            className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors"
           >
             Create your first thesis
           </button>
@@ -426,8 +426,8 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                 onClick={() => setSelectedThesis(selectedThesis === t.id ? null : t.id)}
                 className={`w-full text-left rounded-xl p-3 border transition-all cursor-pointer ${
                   selectedThesis === t.id
-                    ? 'bg-[#FAFAFA] border-[#A03050]'
-                    : 'bg-[#FAFAFA] border-transparent hover:border-[#A03050]'
+                    ? 'bg-[#FAFAFA] border-[#D44A78]'
+                    : 'bg-[#FAFAFA] border-transparent hover:border-[#D44A78]'
                 }`}
               >
                 <div className="flex items-center gap-1.5 mb-0.5">
@@ -437,7 +437,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                     {t.status}
                   </span>
                   {(t.total_matches || 0) > 0 && (
-                    <span className="text-[9px] font-bold text-[#A03050] bg-[#A03050]/10 px-1.5 py-0.5 rounded-full">
+                    <span className="text-[9px] font-bold text-[#D44A78] bg-[#D44A78]/10 px-1.5 py-0.5 rounded-full">
                       {t.total_matches} match{t.total_matches !== 1 ? 'es' : ''}
                     </span>
                   )}
@@ -459,7 +459,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                 {!portfolio && !pipelineRunning && (
                   <button
                     onClick={() => startPipeline(selectedThesis)}
-                    className="w-full py-3 rounded-xl text-sm font-semibold bg-[#A03050] text-white border-0 cursor-pointer hover:bg-[#802040] transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-3 rounded-xl text-sm font-semibold bg-[#D44A78] text-white border-0 cursor-pointer hover:bg-[#B03860] transition-colors flex items-center justify-center gap-2"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -469,9 +469,9 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                 )}
 
                 {pipelineRunning && (
-                  <div className="bg-[#FAFAFA] rounded-xl p-4 border border-[#A03050]/20">
+                  <div className="bg-[#FAFAFA] rounded-xl p-4 border border-[#D44A78]/20">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-4 h-4 border-2 border-[#A03050] border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
                       <span className="text-sm font-medium text-[#0D0D0D]">Analyzing market data...</span>
                     </div>
                     <p className="text-xs text-[#6E6A63] m-0">
@@ -557,9 +557,9 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
 
                   {/* Pipeline progress for Stages 2-4 */}
                   {portfolio.pipeline_status !== 'ready' && portfolio.pipeline_status !== 'failed' && portfolio.pipeline_status !== 'initializing' && (
-                    <div className="mt-3 bg-[#FAFAFA] rounded-xl p-3 border border-[#A03050]/10">
+                    <div className="mt-3 bg-[#FAFAFA] rounded-xl p-3 border border-[#D44A78]/10">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <div className="w-3 h-3 border-2 border-[#A03050] border-t-transparent rounded-full animate-spin" />
+                        <div className="w-3 h-3 border-2 border-[#D44A78] border-t-transparent rounded-full animate-spin" />
                         <span className="text-xs font-medium text-[#0D0D0D]">
                           {portfolio.stage_progress?.message || 'Processing...'}
                         </span>
@@ -567,7 +567,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                       {portfolio.stage_progress?.pct != null && (
                         <div className="w-full h-1.5 bg-[#EBE7DF] rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-[#A03050] rounded-full transition-all duration-500"
+                            className="h-full bg-[#D44A78] rounded-full transition-all duration-500"
                             style={{ width: `${portfolio.stage_progress.pct}%` }}
                           />
                         </div>
@@ -671,7 +671,7 @@ export default function SourcingPanel({ isFullscreen }: SourcingPanelProps) {
                                 href={m.source_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[10px] font-medium text-[#A03050] hover:underline ml-auto"
+                                className="text-[10px] font-medium text-[#D44A78] hover:underline ml-auto"
                               >
                                 View listing
                               </a>

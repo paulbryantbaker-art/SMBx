@@ -150,7 +150,7 @@ function AssumptionSlider({
         onChange={e => onChange(parseFloat(e.target.value))}
         className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
         style={{
-          background: `linear-gradient(to right, #A03050 0%, #A03050 ${((value - min) / (max - min)) * 100}%, rgba(0,0,0,0.08) ${((value - min) / (max - min)) * 100}%, rgba(0,0,0,0.08) 100%)`,
+          background: `linear-gradient(to right, #D44A78 0%, #D44A78 ${((value - min) / (max - min)) * 100}%, rgba(0,0,0,0.08) ${((value - min) / (max - min)) * 100}%, rgba(0,0,0,0.08) 100%)`,
         }}
       />
       <span className="text-xs font-semibold text-[#0D0D0D] w-14 text-right tabular-nums">
@@ -352,7 +352,7 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
     { key: 'conservative', label: 'Conservative', color: '#9B9891' },
     { key: 'base', label: 'Base', color: '#0D0D0D' },
     { key: 'optimistic', label: 'Optimistic', color: '#22863a' },
-    { key: 'custom', label: 'Custom', color: '#A03050' },
+    { key: 'custom', label: 'Custom', color: '#D44A78' },
   ];
 
   return (
@@ -410,7 +410,7 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
           <div key={i} className="flex items-center gap-1 bg-[#F5F5F5] rounded-full pl-3 pr-1 py-1">
             <button
               onClick={() => loadSavedScenario(s)}
-              className="text-[10px] font-semibold text-[#3D3B37] bg-transparent border-0 cursor-pointer hover:text-[#A03050] p-0"
+              className="text-[10px] font-semibold text-[#3D3B37] bg-transparent border-0 cursor-pointer hover:text-[#D44A78] p-0"
             >
               {s.name}
             </button>
@@ -433,13 +433,13 @@ export default function InteractiveModel({ content }: InteractiveModelProps) {
               className="text-[11px] px-2 py-1 rounded border border-[rgba(0,0,0,0.08)] outline-none w-28"
               style={{ fontFamily: 'inherit' }}
             />
-            <button onClick={saveCurrentScenario} className="text-[10px] font-semibold text-[#A03050] bg-transparent border-0 cursor-pointer">Save</button>
+            <button onClick={saveCurrentScenario} className="text-[10px] font-semibold text-[#D44A78] bg-transparent border-0 cursor-pointer">Save</button>
             <button onClick={() => { setShowSaveInput(false); setSaveName(''); }} className="text-[10px] text-[#A9A49C] bg-transparent border-0 cursor-pointer">Cancel</button>
           </div>
         ) : (
           <button
             onClick={() => setShowSaveInput(true)}
-            className="text-[10px] font-medium text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#A03050] flex items-center gap-1"
+            className="text-[10px] font-medium text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#D44A78] flex items-center gap-1"
           >
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
             Save scenario

@@ -66,7 +66,7 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup, onNavi
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#A03050]"
+            className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#D44A78]"
           />
 
           <label className="block text-sm font-medium text-[#0D0D0D] mb-1.5">Password</label>
@@ -75,7 +75,7 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup, onNavi
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
-            className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#A03050]"
+            className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#D44A78]"
           />
 
           {onNavigateForgot && (
@@ -83,7 +83,7 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup, onNavi
               <button
                 type="button"
                 onClick={onNavigateForgot}
-                className="bg-transparent border-none text-[13px] text-[#7A766E] cursor-pointer p-0 hover:text-[#A03050] transition-colors"
+                className="bg-transparent border-none text-[13px] text-[#7A766E] cursor-pointer p-0 hover:text-[#D44A78] transition-colors"
               >
                 Forgot password?
               </button>
@@ -93,7 +93,7 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup, onNavi
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 bg-[#A03050] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#802040] transition-colors disabled:opacity-50"
+            className="w-full py-3 bg-[#D44A78] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#B03860] transition-colors disabled:opacity-50"
           >
             {submitting ? 'Signing in...' : 'Sign in'}
           </button>
@@ -104,7 +104,7 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup, onNavi
           <button
             type="button"
             onClick={onNavigateSignup}
-            className="bg-transparent border-none text-[#A03050] font-semibold cursor-pointer text-sm p-0"
+            className="bg-transparent border-none text-[#D44A78] font-semibold cursor-pointer text-sm p-0"
           >
             Sign up
           </button>

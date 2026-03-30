@@ -32,7 +32,7 @@ export default function WorkingCapitalModel({ tabId }: Props) {
       {wc && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <KPICard label="Working Capital Peg" value={centsToDisplay(wc.peg)} color="#A03050" sublabel="12-month average" />
+            <KPICard label="Working Capital Peg" value={centsToDisplay(wc.peg)} color="#D44A78" sublabel="12-month average" />
             <KPICard label="Variance" value={centsToDisplay(wc.variance)} sublabel="Seasonal swing" />
             <KPICard label="Months Analyzed" value={String(wc.monthlyWC.filter((m: any) => m.wc !== 0).length)} />
           </div>
@@ -47,12 +47,12 @@ export default function WorkingCapitalModel({ tabId }: Props) {
                     {
                       label: 'Working Capital',
                       data: wc.monthlyWC.map((m: any) => m.wc / 100),
-                      borderColor: '#A03050',
+                      borderColor: '#D44A78',
                       backgroundColor: 'rgba(186,60,96,0.1)',
                       fill: true,
                       tension: 0.3,
                       pointRadius: 4,
-                      pointBackgroundColor: '#A03050',
+                      pointBackgroundColor: '#D44A78',
                     },
                     {
                       label: 'Peg (Average)',
@@ -88,7 +88,7 @@ export default function WorkingCapitalModel({ tabId }: Props) {
         <div className="overflow-x-auto">
           <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid #A03050' }}>
+              <tr style={{ borderBottom: '2px solid #D44A78' }}>
                 <th style={{ padding: '4px 6px', textAlign: 'left', fontSize: 10, color: '#6E6A63' }}>Month</th>
                 <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: '#6E6A63' }}>Current Assets ($)</th>
                 <th style={{ padding: '4px 6px', textAlign: 'right', fontSize: 10, color: '#6E6A63' }}>Current Liabilities ($)</th>
