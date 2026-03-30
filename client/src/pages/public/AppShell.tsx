@@ -1155,7 +1155,7 @@ export default function AppShell() {
             <div key={activeTab} style={{ animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : {}) }}>
 
               {/* ═══ SHARED BACKGROUND — all landing pages ═══ */}
-              <div style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundColor: dark ? '#0f1012' : '#f9f9fc', pointerEvents: 'none' }} />
+              <div data-theme-bg style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundColor: dark ? '#1a1c1e' : '#f9f9fc', pointerEvents: 'none' }} />
               <div style={{
                 position: 'fixed', inset: 0, zIndex: 1,
                 backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,

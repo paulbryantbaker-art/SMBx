@@ -19,62 +19,42 @@ function applyDark(isDark: boolean, isManual: boolean) {
   const root = document.documentElement;
   const color = isDark ? DARK_COLOR : LIGHT_COLOR;
 
-  // Smooth transition
+  // Smooth transition during toggle
   root.classList.add('theme-transition');
   setTimeout(() => root.classList.remove('theme-transition'), 350);
 
-  // 1. Toggle .dark class
+  // Toggle .dark class (Tailwind class strategy)
   root.classList.toggle('dark', isDark);
 
-  // 2. Native UI
+  // Native UI: scrollbars, form controls, over-scroll
   root.style.colorScheme = isDark ? 'dark' : 'light';
 
-  // 3. color-scheme meta
-  const csMeta = document.querySelector('meta[name="color-scheme"]') as HTMLMetaElement | null;
-  if (csMeta) csMeta.content = isDark ? 'dark' : 'light';
+  // Safari toolbar via theme-color meta tags
+  const metas = document.querySelectorAll('meta[name="theme-color"]');
+  if (isManual) {
+    metas.forEach(m => {
+      m.removeAttribute('media');
+      m.setAttribute('content', color);
+    });
+  } else {
+    metas.forEach(m => {
+      const media = m.getAttribute('media') || '';
+      if (media.includes('dark')) m.setAttribute('content', DARK_COLOR);
+      else m.setAttribute('content', LIGHT_COLOR);
+    });
+  }
 
-  // 4. body + html background — Safari 26 reads this for toolbar
+  // Safari reads body/html bg for toolbar — must override !important from CSS
   document.body.style.setProperty('background-color', color, 'important');
   root.style.setProperty('background-color', color, 'important');
 
-  // 5. theme-color meta tags — Safari 15-18 (remove + recreate for reliability)
-  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
-  if (isManual) {
-    const meta = document.createElement('meta');
-    meta.name = 'theme-color';
-    meta.content = color;
-    document.head.appendChild(meta);
-  } else {
-    const lightMeta = document.createElement('meta');
-    lightMeta.name = 'theme-color';
-    lightMeta.content = LIGHT_COLOR;
-    lightMeta.setAttribute('media', '(prefers-color-scheme: light)');
-    document.head.appendChild(lightMeta);
-    const darkMeta = document.createElement('meta');
-    darkMeta.name = 'theme-color';
-    darkMeta.content = DARK_COLOR;
-    darkMeta.setAttribute('media', '(prefers-color-scheme: dark)');
-    document.head.appendChild(darkMeta);
-  }
+  // Update color-scheme meta tag
+  const csMeta = document.querySelector('meta[name="color-scheme"]') as HTMLMetaElement | null;
+  if (csMeta) csMeta.content = isDark ? 'dark' : 'light';
 
-  // 6. Safari 26 toolbar sentinel — fixed element near viewport edge
-  let sentinel = document.getElementById('safari-tint-sentinel');
-  if (!sentinel) {
-    sentinel = document.createElement('div');
-    sentinel.id = 'safari-tint-sentinel';
-    sentinel.setAttribute('aria-hidden', 'true');
-    Object.assign(sentinel.style, {
-      position: 'fixed',
-      top: '0',
-      left: '0',
-      width: '100%',
-      height: '1px',
-      pointerEvents: 'none',
-      zIndex: '99999',
-    });
-    document.body.appendChild(sentinel);
-  }
-  sentinel.style.setProperty('background-color', color, 'important');
+  // Update any fixed background layers (Safari 26 reads fixed elements for toolbar)
+  const fixedBg = document.querySelector('[data-theme-bg]') as HTMLElement | null;
+  if (fixedBg) fixedBg.style.backgroundColor = color;
 }
 
 export function useDarkMode() {
