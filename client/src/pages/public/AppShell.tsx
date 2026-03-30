@@ -1177,10 +1177,10 @@ export default function AppShell() {
                   <div style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundColor: dark ? '#0f1012' : '#f9f9fc', pointerEvents: 'none' }} />
                   <div style={{
                     position: 'fixed', inset: 0, zIndex: 1,
-                    backgroundImage: `url('/${dark ? 'dark bg' : 'light bg'}.jpeg')`,
-                    backgroundSize: isMobile ? '100vw auto' : 'auto',
-                    backgroundPosition: '0 0',
-                    backgroundRepeat: 'repeat',
+                    backgroundImage: `url('/${dark ? 'GD' : 'GL'}.jpeg')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
                     opacity: dark ? 0.7 : 0.35,
                     pointerEvents: 'none',
                   }} />
