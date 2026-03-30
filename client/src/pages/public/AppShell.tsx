@@ -1181,7 +1181,7 @@ export default function AppShell() {
                   <div style={{
                     position: 'absolute', inset: 0, zIndex: 1,
                     backgroundImage: `url('/${dark ? 'dark bg' : 'light bg'}.png')`,
-                    backgroundSize: 'cover',
+                    backgroundSize: isMobile ? '100% 100%' : 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
                     opacity: dark ? 0.7 : 0.35,
