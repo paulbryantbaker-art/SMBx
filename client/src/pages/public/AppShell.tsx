@@ -1174,13 +1174,17 @@ export default function AppShell() {
                 {/* ═══ HOME PAGE — New Design ═══ */}
                 <main className="flex-1 flex flex-col relative">
                   {/* Background image with opacity control */}
+                  {/* Dark mode: dark base layer prevents whitening when bg opacity is reduced */}
+                  {dark && (
+                    <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: '#0f1012' }} />
+                  )}
                   <div style={{
-                    position: 'absolute', inset: 0, zIndex: 0,
+                    position: 'absolute', inset: 0, zIndex: 1,
                     backgroundImage: `url('/${dark ? 'dark bg' : 'light bg'}.png')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
-                    opacity: dark ? 1 : 0.5,
+                    opacity: dark ? 0.7 : 0.35,
                   }} />
 
                   {/* Desktop: single centered cluster */}
