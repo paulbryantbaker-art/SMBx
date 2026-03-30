@@ -17,7 +17,7 @@ ChartJS.register(
 );
 
 // Brand colors
-const TERRA = '#B5636B';
+const TERRA = '#C4687A';
 const TERRA_LIGHT = 'rgba(186, 60, 96, 0.15)';
 const TEXT = '#1A1A18';
 const MUTED = '#6E6A63';

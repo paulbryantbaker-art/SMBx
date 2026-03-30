@@ -23,7 +23,7 @@ function authHeaders(): Record<string, string> {
 }
 
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#B5636B',
+  sell: '#C4687A',
   buy: '#4E8FD4',
   raise: '#6B8F4E',
   pmi: '#8F6BD4',
@@ -114,7 +114,7 @@ export default function AnalyticsView({
       {!loading && deals.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <StatCard label="Active Deals" value={String(deals.filter(d => d.status === 'active').length)} />
-          <StatCard label="Sell" value={String(deals.filter(d => d.journey_type === 'sell').length)} color="#B5636B" />
+          <StatCard label="Sell" value={String(deals.filter(d => d.journey_type === 'sell').length)} color="#C4687A" />
           <StatCard label="Buy" value={String(deals.filter(d => d.journey_type === 'buy').length)} color="#4E8FD4" />
           <StatCard label="Raise / PMI" value={String(deals.filter(d => d.journey_type === 'raise' || d.journey_type === 'pmi').length)} color="#6B8F4E" />
         </div>
@@ -205,8 +205,8 @@ function GateProgressView({ deal }: { deal: Deal }) {
               <span
                 className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                 style={{
-                  background: isDone ? '#B5636B' : isCurrent ? 'rgba(186,60,96,0.15)' : 'rgba(0,0,0,0.06)',
-                  color: isDone ? '#fff' : isCurrent ? '#B5636B' : 'rgba(0,0,0,0.3)',
+                  background: isDone ? '#C4687A' : isCurrent ? 'rgba(186,60,96,0.15)' : 'rgba(0,0,0,0.06)',
+                  color: isDone ? '#fff' : isCurrent ? '#C4687A' : 'rgba(0,0,0,0.3)',
                 }}
               >
                 {isDone ? (

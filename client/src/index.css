@@ -21,9 +21,9 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
 :root {
   /* Stitch V2 palette */
   --ink: #1a1c1e;
-  --terra: #A85860;
+  --terra: #C4687A;
   --terra-hover: #90003b;
-  --terra-container: #D4848C;
+  --terra-container: #E09098;
   --stone: rgba(0,0,0,0.06);
   --surface: #f9f9fc;
   --tint: #f9f9fc;
@@ -140,7 +140,7 @@ input[type="range"]::-webkit-slider-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #B5636B;
+  background: #C4687A;
   cursor: pointer;
   border: 2px solid white;
   box-shadow: 0 1px 4px rgba(0,0,0,0.15);
@@ -149,7 +149,7 @@ input[type="range"]::-moz-range-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #B5636B;
+  background: #C4687A;
   cursor: pointer;
   border: 2px solid white;
   box-shadow: 0 1px 4px rgba(0,0,0,0.15);
@@ -390,7 +390,7 @@ html.dark .glass-panel {
 }
 .home-tp-item:hover { background: #FAFAFA; }
 .home-tp-item:active { background: #E8E5E0; }
-.home-tp-item svg { width: 20px; height: 20px; color: #A85860; flex-shrink: 0; margin-top: 1px; }
+.home-tp-item svg { width: 20px; height: 20px; color: #C4687A; flex-shrink: 0; margin-top: 1px; }
 
 /* Dock outer wrapper */
 .dock-outer {
@@ -473,7 +473,7 @@ html.dark .glass-panel {
 }
 
 /* Canvas content styles */
-.canvas-md h1 { font-size: 20px; font-weight: 700; color: #0D0D0D; margin: 1.5em 0 0.5em; padding-bottom: 6px; border-bottom: 2px solid #A85860; }
+.canvas-md h1 { font-size: 20px; font-weight: 700; color: #0D0D0D; margin: 1.5em 0 0.5em; padding-bottom: 6px; border-bottom: 2px solid #C4687A; }
 .canvas-md h2 { font-size: 16px; font-weight: 700; color: #3D3B37; margin: 1.2em 0 0.4em; }
 .canvas-md h3 { font-size: 14px; font-weight: 600; color: #6E6A63; margin: 1em 0 0.3em; }
 .canvas-md p { font-size: 14px; line-height: 1.7; color: #3D3B37; margin: 0.6em 0; }
@@ -483,7 +483,7 @@ html.dark .glass-panel {
 .canvas-md table { border-collapse: collapse; width: 100%; margin: 12px 0; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden; }
 .canvas-md th { background: #F5F5F5; text-align: left; padding: 8px 12px; font-size: 12px; font-weight: 600; color: #3D3B37; border-bottom: 1px solid rgba(0,0,0,0.08); }
 .canvas-md td { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid #EBE7DF; }
-.canvas-md blockquote { border-left: 3px solid #A85860; margin: 1em 0; padding: 0.5em 1em; background: #FFF8F5; border-radius: 0 8px 8px 0; }
+.canvas-md blockquote { border-left: 3px solid #C4687A; margin: 1em 0; padding: 0.5em 1em; background: #FFF8F5; border-radius: 0 8px 8px 0; }
 .canvas-md code { background: #F5F5F5; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
 .canvas-md pre { background: #F5F5F5; padding: 16px; border-radius: 8px; overflow-x: auto; }
 .canvas-md pre code { background: none; padding: 0; }
@@ -521,7 +521,7 @@ input[type="range"]::-webkit-slider-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #A85860;
+  background: #C4687A;
   border: 3px solid #fff;
   box-shadow: 0 2px 8px rgba(176, 0, 74, 0.35);
   cursor: pointer;
@@ -536,7 +536,7 @@ input[type="range"]::-moz-range-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #A85860;
+  background: #C4687A;
   border: 3px solid #fff;
   box-shadow: 0 2px 8px rgba(176, 0, 74, 0.35);
   cursor: pointer;
@@ -772,7 +772,7 @@ button:active:not(:disabled), [role="button"]:active {
   top: 0;
   left: 0;
   height: 2px;
-  background: #A85860;
+  background: #C4687A;
   z-index: 100;
   transform-origin: left;
   will-change: transform;

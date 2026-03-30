@@ -94,18 +94,18 @@ export default function Settings({ user, onLogout }: SettingsProps) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/chat')}
-            className="flex items-center gap-1.5 text-sm text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#B5636B] transition-colors"
+            className="flex items-center gap-1.5 text-sm text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#C4687A] transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             Chat
           </button>
           <div className="text-[22px] font-extrabold tracking-[-0.03em] text-[#0D0D0D]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-            smb<span className="text-[#B5636B]">x</span>.ai
+            smb<span className="text-[#C4687A]">x</span>.ai
           </div>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-[#6E6A63]">{user.display_name || user.email}</span>
-          <button onClick={onLogout} className="text-sm text-[#A9A49C] bg-transparent border-0 cursor-pointer hover:text-[#B5636B] transition-colors">
+          <button onClick={onLogout} className="text-sm text-[#A9A49C] bg-transparent border-0 cursor-pointer hover:text-[#C4687A] transition-colors">
             Sign out
           </button>
         </div>
@@ -171,7 +171,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
                   key={d}
                   onClick={() => setUsageDays(d)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium border-0 cursor-pointer transition-colors ${
-                    usageDays === d ? 'bg-[#B5636B] text-white' : 'bg-[#F5F5F5] text-[#6E6A63] hover:bg-[#EBE7DF]'
+                    usageDays === d ? 'bg-[#C4687A] text-white' : 'bg-[#F5F5F5] text-[#6E6A63] hover:bg-[#EBE7DF]'
                   }`}
                 >
                   {d}d
@@ -203,7 +203,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
                 </div>
                 <div className="bg-white rounded-xl p-4 border border-border">
                   <p className="text-[11px] text-[#A9A49C] m-0 mb-1">Deliverables</p>
-                  <p className="text-lg font-bold text-[#B5636B] m-0">{usageTotals?.total_deliverables || 0}</p>
+                  <p className="text-lg font-bold text-[#C4687A] m-0">{usageTotals?.total_deliverables || 0}</p>
                 </div>
                 <div className="bg-white rounded-xl p-4 border border-border">
                   <p className="text-[11px] text-[#A9A49C] m-0 mb-1">Intel Queries</p>
@@ -225,7 +225,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
                       <div key={d.date} className="flex items-center gap-3">
                         <span className="text-[11px] text-[#6E6A63] w-20 shrink-0">{new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                         <div className="flex-1 h-3 bg-[#F5F5F5] rounded-full overflow-hidden">
-                          <div className="h-full bg-[#B5636B] rounded-full transition-all" style={{ width: `${pct}%` }} />
+                          <div className="h-full bg-[#C4687A] rounded-full transition-all" style={{ width: `${pct}%` }} />
                         </div>
                         <span className="text-[11px] text-[#A9A49C] w-16 text-right">{formatNumber(totalTokens)}</span>
                       </div>
@@ -284,7 +284,7 @@ export default function Settings({ user, onLogout }: SettingsProps) {
                       </div>
                       <div>
                         <p className="text-[11px] text-[#A9A49C] m-0 mb-0.5">Median Multiple</p>
-                        <p className="text-lg font-bold text-[#B5636B] m-0">{b.median_multiple}x</p>
+                        <p className="text-lg font-bold text-[#C4687A] m-0">{b.median_multiple}x</p>
                       </div>
                       <div>
                         <p className="text-[11px] text-[#A9A49C] m-0 mb-0.5">Avg Days to Close</p>

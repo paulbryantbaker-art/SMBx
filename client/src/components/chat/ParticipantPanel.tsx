@@ -24,7 +24,7 @@ interface ParticipantPanelProps {
 }
 
 const ROLE_LABELS: Record<string, { label: string; color: string }> = {
-  owner: { label: 'Owner', color: 'text-[#B5636B] bg-[#FFF8F5]' },
+  owner: { label: 'Owner', color: 'text-[#C4687A] bg-[#FFF8F5]' },
   attorney: { label: 'Attorney', color: 'text-purple-700 bg-purple-50' },
   cpa: { label: 'CPA', color: 'text-blue-700 bg-blue-50' },
   broker: { label: 'Broker', color: 'text-green-700 bg-green-50' },
@@ -108,7 +108,7 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
         <p className="text-[11px] font-semibold uppercase tracking-wider text-[#A9A49C] m-0">Team</p>
         <button
           onClick={() => setShowInvite(!showInvite)}
-          className="text-[11px] font-semibold text-[#B5636B] bg-transparent border-0 cursor-pointer hover:underline"
+          className="text-[11px] font-semibold text-[#C4687A] bg-transparent border-0 cursor-pointer hover:underline"
         >
           + Invite
         </button>
@@ -123,7 +123,7 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
               placeholder="Email address"
               value={inviteEmail}
               onChange={e => setInviteEmail(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-lg text-sm border border-border bg-white outline-none focus:border-[#B5636B]"
+              className="w-full px-3 py-1.5 rounded-lg text-sm border border-border bg-white outline-none focus:border-[#C4687A]"
             />
             <select
               value={inviteRole}
@@ -138,7 +138,7 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
               <button
                 onClick={handleInvite}
                 disabled={inviting || !inviteEmail.trim()}
-                className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#B5636B] text-white border-0 cursor-pointer hover:bg-[#9A5058] disabled:opacity-50"
+                className="flex-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#C4687A] text-white border-0 cursor-pointer hover:bg-[#A85568] disabled:opacity-50"
               >
                 {inviting ? 'Sending...' : 'Send Invite'}
               </button>
@@ -157,7 +157,7 @@ export default function ParticipantPanel({ dealId }: ParticipantPanelProps) {
       {/* Owner */}
       {owner && (
         <div className="flex items-center gap-2 px-3 py-1.5">
-          <div className="w-6 h-6 rounded-full bg-[#B5636B] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+          <div className="w-6 h-6 rounded-full bg-[#C4687A] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
             {(owner.display_name || owner.email)?.[0]?.toUpperCase() || '?'}
           </div>
           <div className="flex-1 min-w-0">

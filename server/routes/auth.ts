@@ -235,7 +235,7 @@ authRouter.post('/forgot-password', async (req, res) => {
           <p style="color: #6E6A63; line-height: 1.6;">
             Click below to reset your password. This link expires in 1 hour.
           </p>
-          <a href="${resetUrl}" style="display: inline-block; background: #B5636B; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+          <a href="${resetUrl}" style="display: inline-block; background: #C4687A; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
             Reset Password
           </a>
           <p style="color: #9CA3AF; font-size: 12px; margin-top: 24px;">
@@ -331,7 +331,7 @@ authRouter.post('/send-verification', requireAuth, async (req, res) => {
           <p style="color: #6E6A63; line-height: 1.6;">
             Click below to verify your email address. This link expires in 24 hours.
           </p>
-          <a href="${verifyUrl}" style="display: inline-block; background: #B5636B; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
+          <a href="${verifyUrl}" style="display: inline-block; background: #C4687A; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
             Verify Email
           </a>
         </div>
