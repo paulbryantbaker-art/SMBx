@@ -74,7 +74,7 @@ function LogoImg({ height = 28, style, className }: { height?: number; style?: R
 function LogoHero({ height = 120, className, dark }: { height?: number; className?: string; dark?: boolean }) {
   return (
     <img
-      src={dark ? '/DG Trans.png' : '/sbs.png'}
+      src={dark ? '/DG Trans.png' : '/sbs trans.png'}
       alt="smbx.ai"
       className={className}
       style={{ height, objectFit: 'contain', display: 'block' }}
