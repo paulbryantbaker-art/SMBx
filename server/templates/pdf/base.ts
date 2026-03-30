@@ -16,7 +16,7 @@ export function wrapHtml(body: string, title: string): string {
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <style>
     :root {
-      --terra: #C4687A;
+      --terra: #C25572;
       --terra-dark: #9A3250;
       --text: #1A1A18;
       --text-muted: #6E6A63;

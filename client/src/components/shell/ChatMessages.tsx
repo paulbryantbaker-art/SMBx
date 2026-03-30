@@ -49,7 +49,7 @@ function SenderLabel({ name, accent }: { name: string; accent?: boolean }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
       <span style={{
         fontSize: 11, fontWeight: 700,
-        color: accent ? '#C4687A' : '#94a3b8',
+        color: accent ? '#C25572' : '#94a3b8',
         textTransform: 'uppercase', letterSpacing: '0.1em',
       }}>
         {name}
@@ -111,7 +111,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
   /* Desktop label: tiny uppercase, muted */
   const Label = ({ text }: { text: string }) => (
     <p style={{
-      fontSize: 11, fontWeight: 700, color: text === 'Yulia' ? '#C4687A' : '#94a3b8',
+      fontSize: 11, fontWeight: 700, color: text === 'Yulia' ? '#C25572' : '#94a3b8',
       textTransform: 'uppercase', letterSpacing: '0.1em',
       margin: '0 0 4px 0',
     }}>{text}</p>
@@ -148,7 +148,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
           <button
             onClick={() => setHelpExpanded(h => !h)}
             className="bg-transparent border-none cursor-pointer"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 500, color: '#C4687A', fontFamily: 'inherit', padding: '4px 8px', borderRadius: 8 }}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 500, color: '#C25572', fontFamily: 'inherit', padding: '4px 8px', borderRadius: 8 }}
             type="button"
           >
             Quick starts

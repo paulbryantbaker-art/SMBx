@@ -12,9 +12,9 @@ export const COLORS = {
   /** Page background (for PDF cover, tints) */
   cream:       '#FAF8F4',
   /** Brand accent — rose gold */
-  terra:       '#C4687A',
+  terra:       '#C25572',
   /** Dark rose for hover / pressed states */
-  terraDark:   '#A85568',
+  terraDark:   '#9E4860',
   /** Primary text — near black */
   text:        '#1A1A18',
   /** Secondary text */

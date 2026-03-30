@@ -22,11 +22,11 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
         <section className="mb-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
           <div className="lg:col-span-7">
             <ScrollReveal>
-              <span className="inline-block px-3 py-1 bg-[#C4687A]/10 text-[#C4687A] text-[10px] font-black uppercase tracking-[0.2em] mb-8 rounded-sm">Pricing</span>
+              <span className="inline-block px-3 py-1 bg-[#C25572]/10 text-[#C25572] text-[10px] font-black uppercase tracking-[0.2em] mb-8 rounded-sm">Pricing</span>
             </ScrollReveal>
             <ScrollReveal y={40} delay={0.1}>
               <h1 className="font-headline font-black text-5xl md:text-7xl tracking-tighter leading-[0.9] mb-8">
-                Investment-grade deal intelligence.<br/><span className="text-[#C4687A]">From $0.</span>
+                Investment-grade deal intelligence.<br/><span className="text-[#C25572]">From $0.</span>
               </h1>
             </ScrollReveal>
             <ScrollReveal delay={0.2}>
@@ -40,7 +40,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
               <p className={`text-sm mb-6 ${muted}`}>for the same analytical coverage</p>
               <div className={`w-full h-px mb-6 ${dark ? 'bg-zinc-700' : 'bg-[#eeeef0]'}`} />
               <p className={`text-sm mb-3 ${muted}`}>smbX.ai Professional</p>
-              <p className="text-5xl font-black text-[#C4687A]">$149<span className={`text-lg font-medium ${muted}`}>/month</span></p>
+              <p className="text-5xl font-black text-[#C25572]">$149<span className={`text-lg font-medium ${muted}`}>/month</span></p>
             </div>
           </ScrollReveal>
         </section>
@@ -84,20 +84,20 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
             </StaggerItem>
             {/* Professional */}
             <StaggerItem>
-              <div className={`rounded-2xl border-2 border-[#C4687A] p-8 flex flex-col h-full relative shadow-lg ${dark ? 'bg-[#2f3133]' : 'bg-white'}`}>
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#C4687A] text-white text-[9px] font-bold px-4 py-1 rounded-full uppercase tracking-wider">Most Popular</span>
+              <div className={`rounded-2xl border-2 border-[#C25572] p-8 flex flex-col h-full relative shadow-lg ${dark ? 'bg-[#2f3133]' : 'bg-white'}`}>
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#C25572] text-white text-[9px] font-bold px-4 py-1 rounded-full uppercase tracking-wider">Most Popular</span>
                 <h3 className="font-black text-lg mb-1">Professional</h3>
-                <p className="text-4xl font-black text-[#C4687A] mb-1">$149<span className={`text-lg font-medium ${muted}`}>/mo</span></p>
+                <p className="text-4xl font-black text-[#C25572] mb-1">$149<span className={`text-lg font-medium ${muted}`}>/mo</span></p>
                 <p className={`text-xs mb-6 ${muted}`}>30-day free trial</p>
                 <div className="space-y-3 flex-1">
                   {['Everything in Starter', 'Institutional-quality CIM', 'Full financial modeling (DCF, sensitivity)', 'Buyer identification & scoring', 'Negotiation intelligence & counter-offers', 'Deal room & DD coordination', 'LOI drafting from comparable data', '180-day post-close integration'].map((f) => (
                     <div key={f} className="flex items-start gap-2">
-                      <span className="material-symbols-outlined text-[#C4687A] text-lg shrink-0 mt-0.5">check_circle</span>
+                      <span className="material-symbols-outlined text-[#C25572] text-lg shrink-0 mt-0.5">check_circle</span>
                       <p className={`text-sm font-medium ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>{f}</p>
                     </div>
                   ))}
                 </div>
-                <button onClick={() => handleCTA()} className="mt-8 w-full py-3 bg-gradient-to-r from-[#C4687A] to-[#E09098] text-white rounded-full font-bold text-sm hover:scale-[1.02] transition-all shadow-md border-none cursor-pointer">Try Professional Free</button>
+                <button onClick={() => handleCTA()} className="mt-8 w-full py-3 bg-gradient-to-r from-[#C25572] to-[#D9778A] text-white rounded-full font-bold text-sm hover:scale-[1.02] transition-all shadow-md border-none cursor-pointer">Try Professional Free</button>
               </div>
             </StaggerItem>
             {/* Enterprise */}
@@ -109,7 +109,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                 <div className="space-y-3 flex-1">
                   {['Everything in Professional', 'Unlimited team seats', 'API access', 'White-label options', 'Priority support', 'Multi-deal pipeline management'].map((f) => (
                     <div key={f} className="flex items-start gap-2">
-                      <span className="material-symbols-outlined text-[#C4687A] text-lg shrink-0 mt-0.5">check_circle</span>
+                      <span className="material-symbols-outlined text-[#C25572] text-lg shrink-0 mt-0.5">check_circle</span>
                       <p className="text-sm text-[#dadadc]/90">{f}</p>
                     </div>
                   ))}
@@ -124,7 +124,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
         <section className="mb-24">
           <ScrollReveal>
             <div className="mb-12">
-              <span className="text-[#C4687A] font-bold uppercase tracking-widest text-xs block mb-3">Coverage Comparison</span>
+              <span className="text-[#C25572] font-bold uppercase tracking-widest text-xs block mb-3">Coverage Comparison</span>
               <h2 className="text-4xl font-headline font-black tracking-tight mb-4">What $149/month actually includes.</h2>
               <p className={`text-lg max-w-2xl ${muted}`}>This is the same analytical coverage that a traditional investment banking engagement provides. The difference: you run the conversations yourself. Yulia prepares everything.</p>
             </div>
@@ -136,7 +136,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                   <tr className={dark ? 'bg-[#2f3133]' : 'bg-[#f3f3f6]'}>
                     <th className={`px-6 py-4 text-xs font-bold uppercase tracking-widest ${muted}`}>Deliverable</th>
                     <th className={`px-6 py-4 text-xs font-bold uppercase tracking-widest ${muted}`}>Traditional IB</th>
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#C4687A]">smbX.ai Professional</th>
+                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#C25572]">smbX.ai Professional</th>
                   </tr>
                 </thead>
                 <tbody className={`divide-y text-sm ${dark ? 'divide-zinc-800' : 'divide-[#eeeef0]'}`}>
@@ -154,7 +154,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                       <td className={`px-6 py-4 ${muted}`}>{ib}</td>
                       <td className="px-6 py-4">
                         <span className="flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-[#C4687A] text-sm">check_circle</span>
+                          <span className="material-symbols-outlined text-[#C25572] text-sm">check_circle</span>
                           {smbx}
                         </span>
                       </td>
@@ -173,13 +173,13 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                   <tr className={dark ? 'bg-[#2f3133]' : 'bg-[#f3f3f6]'}>
                     <td className="px-6 py-4 font-bold">Total cost (12-month engagement)</td>
                     <td className="px-6 py-4 font-bold">$150K\u2013$500K+</td>
-                    <td className="px-6 py-4 font-bold text-[#C4687A]">$1,788/year</td>
+                    <td className="px-6 py-4 font-bold text-[#C25572]">$1,788/year</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div className={`mt-6 rounded-2xl p-6 flex items-start gap-4 ${dark ? 'bg-[#C4687A]/10 border border-[#C4687A]/20' : 'bg-[#C4687A]/5 border border-[#C4687A]/15'}`}>
-              <span className="material-symbols-outlined text-[#C4687A] text-2xl shrink-0 mt-1">info</span>
+            <div className={`mt-6 rounded-2xl p-6 flex items-start gap-4 ${dark ? 'bg-[#C25572]/10 border border-[#C25572]/20' : 'bg-[#C25572]/5 border border-[#C25572]/15'}`}>
+              <span className="material-symbols-outlined text-[#C25572] text-2xl shrink-0 mt-1">info</span>
               <p className={`text-sm ${muted}`}><span className={`font-bold ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>This is not an anti-advisor comparison.</span> smbX.ai makes sure you're prepared before you hire an advisor — and if you do, the work Yulia has already done makes their engagement faster, cheaper, and more effective. Many advisors use smbX.ai themselves.</p>
             </div>
           </ScrollReveal>
@@ -189,10 +189,10 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
         <section className="mb-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <ScrollReveal className="lg:col-span-5">
-              <span className="text-[#C4687A] font-bold uppercase tracking-widest text-xs block mb-3">Free Forever</span>
+              <span className="text-[#C25572] font-bold uppercase tracking-widest text-xs block mb-3">Free Forever</span>
               <h2 className="text-4xl font-headline font-black tracking-tight mb-6">Start for free. Keep everything Yulia finds.</h2>
               <p className={`leading-relaxed editorial mb-6 ${muted}`}>No credit card required. Everything through your first gates is free — including a preliminary valuation range with real market data. Not a trial. Not a teaser. Real analysis you keep forever.</p>
-              <p className={`font-bold text-xl border-l-4 border-[#C4687A] pl-6 italic ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>If you could Google it, it's free. The moment Yulia tells you something you can't find anywhere else — that's where the value starts.</p>
+              <p className={`font-bold text-xl border-l-4 border-[#C25572] pl-6 italic ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>If you could Google it, it's free. The moment Yulia tells you something you can't find anywhere else — that's where the value starts.</p>
             </ScrollReveal>
             <ScrollReveal delay={0.15} className="lg:col-span-7">
               <div className="grid grid-cols-2 gap-4">
@@ -219,7 +219,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
         <section className="mb-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
             <ScrollReveal className="lg:col-span-5">
-              <div className="border-l-8 border-[#C4687A] pl-8">
+              <div className="border-l-8 border-[#C25572] pl-8">
                 <h2 className="text-4xl font-headline font-black tracking-tight mb-6">The upgrade happens naturally.</h2>
                 <p className={`text-xl ${muted}`}>No checkout page. No paywall modal. Yulia delivers free value, then tells you when the next step requires a plan. By then, she's already proven what she can do.</p>
               </div>
@@ -241,22 +241,22 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                       <span className={`text-[10px] px-2 py-1 rounded font-bold ${dark ? 'bg-[#006630]/20 text-[#006630]' : 'bg-[#006630]/10 text-[#006630]'}`}>FREE</span>
                     </div>
                   ))}
-                  <div className="w-full border-t border-dashed border-[#C4687A]/30 my-2" />
-                  <div className="flex items-center gap-4 p-4 rounded-xl bg-[#C4687A]/5">
-                    <div className="w-10 h-10 rounded-xl bg-[#C4687A]/10 flex items-center justify-center text-[#C4687A] font-bold shrink-0">4</div>
+                  <div className="w-full border-t border-dashed border-[#C25572]/30 my-2" />
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-[#C25572]/5">
+                    <div className="w-10 h-10 rounded-xl bg-[#C25572]/10 flex items-center justify-center text-[#C25572] font-bold shrink-0">4</div>
                     <div className="flex-1">
-                      <p className="font-bold text-[#C4687A]">Yulia suggests your plan</p>
+                      <p className="font-bold text-[#C25572]">Yulia suggests your plan</p>
                       <p className={`text-xs ${muted}`}>"Ready for the full valuation and deal materials? Here's what comes next."</p>
                     </div>
-                    <span className="text-[10px] bg-[#C4687A]/10 text-[#C4687A] px-2 py-1 rounded font-bold">$49+</span>
+                    <span className="text-[10px] bg-[#C25572]/10 text-[#C25572] px-2 py-1 rounded font-bold">$49+</span>
                   </div>
                   <div className={`flex items-center gap-4 p-4 rounded-xl ${dark ? 'hover:bg-zinc-800' : 'hover:bg-[#f3f3f6]'} transition-all`}>
-                    <div className="w-10 h-10 rounded-xl bg-[#C4687A]/10 flex items-center justify-center text-[#C4687A] font-bold shrink-0">5</div>
+                    <div className="w-10 h-10 rounded-xl bg-[#C25572]/10 flex items-center justify-center text-[#C25572] font-bold shrink-0">5</div>
                     <div className="flex-1">
                       <p className="font-bold">Everything unlocks</p>
                       <p className={`text-xs ${muted}`}>Full valuation, CIM, financial models, negotiation, closing, 180-day integration</p>
                     </div>
-                    <span className="text-[10px] bg-[#C4687A]/10 text-[#C4687A] px-2 py-1 rounded font-bold">ALL</span>
+                    <span className="text-[10px] bg-[#C25572]/10 text-[#C25572] px-2 py-1 rounded font-bold">ALL</span>
                   </div>
                 </div>
               </div>
@@ -269,7 +269,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           <section className="mb-24">
             <div className={`rounded-3xl p-10 md:p-16 text-white ${darkPanel}`}>
               <div className="mb-12">
-                <span className="text-[#C4687A] font-bold uppercase tracking-widest text-xs block mb-3">Professional Plan</span>
+                <span className="text-[#C25572] font-bold uppercase tracking-widest text-xs block mb-3">Professional Plan</span>
                 <h2 className="text-4xl font-headline font-black tracking-tight mb-4">$149/month. Everything through close — plus 180 days after.</h2>
                 <p className="text-lg text-[#dadadc]/70 max-w-2xl">Your subscription continues through post-close integration. Most deals take 6–18 months. Your total cost for the full journey: $894–$2,682. A traditional advisory engagement for the same coverage: $150K+.</p>
               </div>
@@ -283,7 +283,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                   { icon: 'merge', title: '180-day integration', desc: 'Post-close value creation plan from actual DD findings. Milestone tracking. Metric monitoring.' },
                 ].map((item) => (
                   <div key={item.title} className="bg-white/5 rounded-2xl border border-white/10 p-6">
-                    <span className="material-symbols-outlined text-[#C4687A] text-2xl mb-3">{item.icon}</span>
+                    <span className="material-symbols-outlined text-[#C25572] text-2xl mb-3">{item.icon}</span>
                     <h4 className="font-bold mb-2">{item.title}</h4>
                     <p className="text-sm text-[#dadadc]/70">{item.desc}</p>
                   </div>
@@ -322,11 +322,11 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           <section className="mb-12">
             <div className={`rounded-3xl p-12 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center text-white ${darkPanel}`}>
               <div>
-                <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95]">Free until you<br/>see the <span className="text-[#C4687A]">value.</span></h2>
+                <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95]">Free until you<br/>see the <span className="text-[#C25572]">value.</span></h2>
                 <p className="text-lg text-[#dadadc]/70 mt-4">Tell Yulia about your deal. Keep everything she finds. Pay only when you're ready for the full journey.</p>
               </div>
               <div className="flex flex-col items-center lg:items-end gap-4">
-                <button onClick={() => handleCTA()} className="px-10 py-5 bg-gradient-to-r from-[#C4687A] to-[#E09098] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Talk to Yulia</button>
+                <button onClick={() => handleCTA()} className="px-10 py-5 bg-gradient-to-r from-[#C25572] to-[#D9778A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Talk to Yulia</button>
                 <p className="text-xs text-[#dadadc]/70">No credit card required · Cancel anytime</p>
               </div>
             </div>

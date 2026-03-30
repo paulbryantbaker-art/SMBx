@@ -34,7 +34,7 @@ export default function ComparisonModel({ tabId }: Props) {
       <div className="overflow-x-auto">
         <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ borderBottom: '2px solid #C4687A' }}>
+            <tr style={{ borderBottom: '2px solid #C25572' }}>
               <th style={{ padding: '6px 10px', textAlign: 'left', fontSize: 10, color: '#6E6A63' }}>Metric</th>
               {linkedTabs.map(t => (
                 <th key={t.id} style={{ padding: '6px 10px', textAlign: 'right', fontSize: 10, color: '#1A1A18', fontWeight: 700 }}>

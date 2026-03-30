@@ -66,7 +66,7 @@ export default function ResetPassword({ token, onNavigateLogin }: ResetPasswordP
             <button
               type="button"
               onClick={() => window.location.href = '/chat'}
-              className="w-full py-3 bg-[#C4687A] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer hover:bg-[#A85568] transition-colors"
+              className="w-full py-3 bg-[#C25572] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer hover:bg-[#9E4860] transition-colors"
             >
               Go to SMBx
             </button>
@@ -83,7 +83,7 @@ export default function ResetPassword({ token, onNavigateLogin }: ResetPasswordP
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 8 characters"
-              className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#C4687A]"
+              className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#C25572]"
               required
               minLength={8}
             />
@@ -94,7 +94,7 @@ export default function ResetPassword({ token, onNavigateLogin }: ResetPasswordP
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               placeholder="Re-enter your password"
-              className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#C4687A]"
+              className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#C25572]"
               required
               minLength={8}
             />
@@ -102,7 +102,7 @@ export default function ResetPassword({ token, onNavigateLogin }: ResetPasswordP
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3 bg-[#C4687A] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#A85568] transition-colors disabled:opacity-50"
+              className="w-full py-3 bg-[#C25572] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#9E4860] transition-colors disabled:opacity-50"
             >
               {submitting ? 'Resetting...' : 'Reset password'}
             </button>
@@ -113,7 +113,7 @@ export default function ResetPassword({ token, onNavigateLogin }: ResetPasswordP
           <button
             type="button"
             onClick={onNavigateLogin}
-            className="bg-transparent border-none text-[#C4687A] font-semibold cursor-pointer text-sm p-0"
+            className="bg-transparent border-none text-[#C25572] font-semibold cursor-pointer text-sm p-0"
           >
             Back to sign in
           </button>

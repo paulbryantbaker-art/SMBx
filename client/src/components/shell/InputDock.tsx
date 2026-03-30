@@ -77,7 +77,7 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
     return (
       <div className="fixed bottom-6 md:bottom-10 left-0 right-0 px-4 z-50 pointer-events-none" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="max-w-[700px] mx-auto pointer-events-auto">
-          <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-2xl flex flex-col overflow-hidden shadow-[0_4px_12px_rgba(186,60,96,0.04)] transition-all duration-300 focus-within:shadow-[0_8px_30px_rgba(186,60,96,0.12)] focus-within:border-[#C4687A]/50 focus-within:ring-4 focus-within:ring-[#FFF0EB]">
+          <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-2xl flex flex-col overflow-hidden shadow-[0_4px_12px_rgba(186,60,96,0.04)] transition-all duration-300 focus-within:shadow-[0_8px_30px_rgba(186,60,96,0.12)] focus-within:border-[#C25572]/50 focus-within:ring-4 focus-within:ring-[#FFF0EB]">
             <textarea
               ref={textareaRef}
               value={value}
@@ -98,8 +98,8 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
                 disabled={!hasContent || disabled}
                 className={`px-5 py-2.5 rounded-xl font-bold text-sm tracking-widest uppercase transition-all shadow-sm ${
                   hasContent && !disabled
-                    ? 'bg-[#C4687A] text-white hover:bg-[#b8613d] cursor-pointer'
-                    : 'bg-[#C4687A] text-white opacity-50 shadow-none cursor-default'
+                    ? 'bg-[#C25572] text-white hover:bg-[#b8613d] cursor-pointer'
+                    : 'bg-[#C25572] text-white opacity-50 shadow-none cursor-default'
                 }`}
                 type="button"
               >
@@ -118,7 +118,7 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
       <div className="pointer-events-none absolute -top-16 left-0 right-0 h-16" style={{ background: 'linear-gradient(to bottom, transparent, white)' }} />
 
       <div className="max-w-3xl mx-auto px-4">
-        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-2xl flex flex-col overflow-hidden shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035)] transition-all duration-300 focus-within:shadow-[0_8px_30px_rgba(186,60,96,0.12)] focus-within:border-[#C4687A]/50">
+        <div className="bg-white border border-[rgba(0,0,0,0.06)] rounded-2xl flex flex-col overflow-hidden shadow-[0_0.25rem_1.25rem_rgba(0,0,0,0.035)] transition-all duration-300 focus-within:shadow-[0_8px_30px_rgba(186,60,96,0.12)] focus-within:border-[#C25572]/50">
           <textarea
             ref={textareaRef}
             value={value}
@@ -139,8 +139,8 @@ export default function InputDock({ viewState, activeTab, onSend, disabled }: In
               disabled={!hasContent || disabled}
               className={`px-5 py-2.5 rounded-xl font-bold text-sm tracking-widest uppercase transition-all shadow-sm ${
                 hasContent && !disabled
-                  ? 'bg-[#C4687A] text-white hover:bg-[#b8613d] cursor-pointer'
-                  : 'bg-[#C4687A] text-white opacity-50 shadow-none cursor-default'
+                  ? 'bg-[#C25572] text-white hover:bg-[#b8613d] cursor-pointer'
+                  : 'bg-[#C25572] text-white opacity-50 shadow-none cursor-default'
               }`}
               type="button"
             >

@@ -15,20 +15,20 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
           <div className="lg:col-span-7">
             <ScrollReveal>
               <div className="flex items-center gap-2 mb-8">
-                <span className="inline-block px-3 py-1 bg-[#C4687A]/10 text-[#C4687A] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Buy</span>
+                <span className="inline-block px-3 py-1 bg-[#C25572]/10 text-[#C25572] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Buy</span>
                 <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-[#2f3133] text-[#dadadc]/80' : 'bg-[#f3f3f6] text-[#5d5e61]'}`}>Acquisition Strategy</span>
               </div>
             </ScrollReveal>
             <ScrollReveal y={40} delay={0.1}>
               <h1 className="font-headline font-black text-5xl md:text-6xl tracking-tighter leading-[0.92] mb-8">
                 The best deals never hit the market.{' '}
-                <span className="text-[#C4687A]">You need to find them first.</span>
+                <span className="text-[#C25572]">You need to find them first.</span>
               </h1>
             </ScrollReveal>
             <ScrollReveal delay={0.2}>
               <div className={`space-y-6 text-xl editorial max-w-xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
                 <p>Eighty percent of small businesses that sell never get formally listed. They change hands through whisper networks — a broker mentions it to three people, a CPA tips off a client, a landlord knows the tenant is tired.</p>
-                <p className={`font-bold border-l-4 border-[#C4687A] pl-6 text-2xl italic ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>Yulia screens every deal against real market data before you spend a dollar.</p>
+                <p className={`font-bold border-l-4 border-[#C25572] pl-6 text-2xl italic ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>Yulia screens every deal against real market data before you spend a dollar.</p>
               </div>
             </ScrollReveal>
           </div>
@@ -47,7 +47,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
                   'Transitions you to a 180-day owner integration plan at close',
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-[#C4687A] text-lg shrink-0 mt-0.5">check_circle</span>
+                    <span className="material-symbols-outlined text-[#C25572] text-lg shrink-0 mt-0.5">check_circle</span>
                     <p className="text-sm text-[#dadadc]/90">{item}</p>
                   </div>
                 ))}
@@ -64,7 +64,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
           <section className="mb-24">
             <div className={`rounded-3xl p-10 md:p-16 text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
               <div className="mb-12">
-                <span className="text-[#C4687A] font-bold uppercase tracking-widest text-xs block mb-3">What Yulia Does</span>
+                <span className="text-[#C25572] font-bold uppercase tracking-widest text-xs block mb-3">What Yulia Does</span>
                 <h2 className="text-4xl font-headline font-black tracking-tight mb-4">Everything a $50K search fund advisor delivers. At a fraction of the cost.</h2>
                 <p className="text-lg text-[#dadadc]/60 max-w-2xl">The screening, the modeling, the diligence coordination, the deal structuring. Yulia does all of it. You focus on the decisions that matter.</p>
               </div>
@@ -78,7 +78,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
                   { icon: 'sync', title: 'Post-acquisition integration', desc: "180-day integration plan from Day 0. Knowledge transfer framework. Performance tracking against deal projections. You don't just close — you land." },
                 ].map((card) => (
                   <div key={card.title} className="bg-white/5 rounded-2xl border border-white/10 p-8">
-                    <span className="material-symbols-outlined text-[#C4687A] text-3xl mb-4">{card.icon}</span>
+                    <span className="material-symbols-outlined text-[#C25572] text-3xl mb-4">{card.icon}</span>
                     <h3 className="font-bold text-lg mb-3">{card.title}</h3>
                     <p className="text-sm text-[#dadadc]/70">{card.desc}</p>
                   </div>
@@ -92,9 +92,9 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
         <section className="mb-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <ScrollReveal className="lg:col-span-5">
-              <span className="text-[#C4687A] font-bold uppercase tracking-widest text-xs block mb-3">Your Acquisition Process</span>
+              <span className="text-[#C25572] font-bold uppercase tracking-widest text-xs block mb-3">Your Acquisition Process</span>
               <h2 className="text-4xl font-headline font-black tracking-tight mb-8">Six stages. Yulia manages every one.</h2>
-              <p className={`font-bold text-xl border-l-4 border-[#C4687A] pl-6 italic mb-8 ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>You don't need to know the process. You just need to show up for the decisions.</p>
+              <p className={`font-bold text-xl border-l-4 border-[#C25572] pl-6 italic mb-8 ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>You don't need to know the process. You just need to show up for the decisions.</p>
               <p className={dark ? 'text-[#dadadc]/80 leading-relaxed' : 'text-[#5d5e61] leading-relaxed'}>From your first conversation to 180 days after close, every step has specific completion triggers. Yulia advances you when the prerequisite work is done — and not before.</p>
             </ScrollReveal>
             <StaggerContainer className="lg:col-span-7 space-y-4">
@@ -108,7 +108,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
               ].map((step) => (
                 <StaggerItem key={step.num}>
                   <div className={`rounded-2xl p-6 flex items-start gap-4 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${step.free ? 'bg-[#006630]/10 text-[#006630]' : 'bg-[#C4687A]/10 text-[#C4687A]'}`}>{step.num}</div>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${step.free ? 'bg-[#006630]/10 text-[#006630]' : 'bg-[#C25572]/10 text-[#C25572]'}`}>{step.num}</div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-bold">{step.title}</h4>
@@ -127,7 +127,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
         <section className="mb-24">
           <ScrollReveal>
             <div className="mb-12">
-              <span className="text-[#C4687A] font-bold uppercase tracking-widest text-xs block mb-3">Buyer Intelligence</span>
+              <span className="text-[#C25572] font-bold uppercase tracking-widest text-xs block mb-3">Buyer Intelligence</span>
               <h2 className="text-4xl font-headline font-black tracking-tight mb-4">Whether it's your first deal or your fifteenth</h2>
               <p className={`text-lg max-w-2xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Yulia adapts her entire analytical framework to your buyer profile — different data, different tools, different depth.</p>
             </div>
@@ -141,7 +141,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
             ].map((card) => (
               <StaggerItem key={card.type}>
                 <div className={`p-8 rounded-2xl h-full ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                  <span className="material-symbols-outlined text-[#C4687A] text-3xl mb-4">{card.icon}</span>
+                  <span className="material-symbols-outlined text-[#C25572] text-3xl mb-4">{card.icon}</span>
                   <h3 className="font-headline font-bold text-xl mb-3">{card.type}</h3>
                   <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{card.desc}</p>
                 </div>
@@ -149,8 +149,8 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
             ))}
           </StaggerContainer>
           <ScrollReveal delay={0.2}>
-            <div className={`mt-8 rounded-2xl p-6 flex items-start gap-4 ${dark ? 'bg-[#C4687A]/10 border border-[#C4687A]/20' : 'bg-[#C4687A]/5 border border-[#C4687A]/15'}`}>
-              <span className="material-symbols-outlined text-[#C4687A] text-2xl shrink-0 mt-1">add_circle</span>
+            <div className={`mt-8 rounded-2xl p-6 flex items-start gap-4 ${dark ? 'bg-[#C25572]/10 border border-[#C25572]/20' : 'bg-[#C25572]/5 border border-[#C25572]/15'}`}>
+              <span className="material-symbols-outlined text-[#C25572] text-2xl shrink-0 mt-1">add_circle</span>
               <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}><span className={`font-bold ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>+5 more buyer profiles</span> — family office, ETA through acquisition, roll-up operator, strategic corporate acquirer, and international buyer. Yulia adapts to each.</p>
             </div>
           </ScrollReveal>
@@ -163,7 +163,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
               <div className="grid grid-cols-1 lg:grid-cols-12">
                 {/* Left: Financial Breakdown */}
                 <div className="lg:col-span-7 p-10 md:p-16">
-                  <span className="text-[#C4687A] font-bold uppercase tracking-widest text-xs block mb-3">Deal Economics</span>
+                  <span className="text-[#C25572] font-bold uppercase tracking-widest text-xs block mb-3">Deal Economics</span>
                   <h2 className="text-4xl font-headline font-black tracking-tight mb-4">The math behind the deal</h2>
                   <p className="text-lg text-[#dadadc]/60 mb-10 max-w-lg">Yulia models every scenario — SBA eligibility, capital structure, cash flow projections — before you make an offer.</p>
                   <div className="mb-6">
@@ -192,7 +192,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
                   </div>
                 </div>
                 {/* Right: Wealth Creation */}
-                <div className="lg:col-span-5 bg-[#C4687A] p-10 md:p-16 flex flex-col justify-center">
+                <div className="lg:col-span-5 bg-[#C25572] p-10 md:p-16 flex flex-col justify-center">
                   <p className="text-white/80 uppercase tracking-widest text-xs font-bold mb-8">5-Year Wealth Creation</p>
                   <div className="space-y-6">
                     {[
@@ -221,7 +221,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
         <section className="mb-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <ScrollReveal className="lg:col-span-5">
-              <span className="text-[#C4687A] font-bold uppercase tracking-widest text-xs block mb-3">Negotiation Intelligence</span>
+              <span className="text-[#C25572] font-bold uppercase tracking-widest text-xs block mb-3">Negotiation Intelligence</span>
               <h2 className="text-4xl font-headline font-black tracking-tight mb-8">Every offer backed by data. Every structure modeled.</h2>
               <p className={`leading-relaxed editorial ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Most buyers negotiate on instinct. Yulia negotiates on comparable transaction data — real multiples, real structures, real outcomes from deals in your sector and geography. She drafts every communication and models the tax impact of every counter-offer before you send it.</p>
             </ScrollReveal>
@@ -234,7 +234,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
                   { icon: 'receipt_long', title: 'Asset Allocation', desc: 'Tax-optimized purchase price allocation across equipment, goodwill, non-compete, and customer lists. The 5-year difference can be $100K+.' },
                 ].map((factor) => (
                   <div key={factor.title} className={`rounded-2xl p-6 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                    <span className="material-symbols-outlined text-[#C4687A] text-xl mb-2">{factor.icon}</span>
+                    <span className="material-symbols-outlined text-[#C25572] text-xl mb-2">{factor.icon}</span>
                     <h4 className="font-bold text-sm mb-1">{factor.title}</h4>
                     <p className={`text-xs ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{factor.desc}</p>
                   </div>
@@ -249,11 +249,11 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
           <section className="mb-12">
             <div className={`rounded-3xl p-12 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
               <div>
-                <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95]">Sell. Buy. Raise.<br/><span className="text-[#C4687A]">Talk to Yulia.</span></h2>
+                <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95]">Sell. Buy. Raise.<br/><span className="text-[#C25572]">Talk to Yulia.</span></h2>
                 <p className="text-lg text-[#dadadc]/60 mt-4">Tell her what you're looking for. She'll show you what the market actually looks like — and what comes next. Free, no account required.</p>
               </div>
               <div className="flex flex-col items-center lg:items-end gap-4">
-                <button onClick={handleCTA} className="px-10 py-5 bg-gradient-to-r from-[#C4687A] to-[#E09098] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Talk to Yulia</button>
+                <button onClick={handleCTA} className="px-10 py-5 bg-gradient-to-r from-[#C25572] to-[#D9778A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Talk to Yulia</button>
                 <p className="text-xs text-[#dadadc]/70">Free screening · No account required · Your data stays yours</p>
               </div>
             </div>

@@ -83,12 +83,12 @@ export default function CommentsPanel({ deliverableId, onClose }: CommentsPanelP
       {/* Header */}
       <div className="shrink-0 flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div className="flex items-center gap-2">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C4687A" strokeWidth="2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C25572" strokeWidth="2">
             <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
           </svg>
           <span className="text-sm font-semibold text-[#0D0D0D]">Comments</span>
           {active.length > 0 && (
-            <span className="text-[10px] font-bold bg-[#C4687A] text-white rounded-full w-5 h-5 flex items-center justify-center">
+            <span className="text-[10px] font-bold bg-[#C25572] text-white rounded-full w-5 h-5 flex items-center justify-center">
               {active.length}
             </span>
           )}
@@ -103,7 +103,7 @@ export default function CommentsPanel({ deliverableId, onClose }: CommentsPanelP
         <div className="shrink-0 px-4 py-2" style={{ borderBottom: '1px solid #EBE7DF' }}>
           <button
             onClick={() => setShowResolved(!showResolved)}
-            className="text-[11px] font-medium text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#C4687A] transition-colors p-0"
+            className="text-[11px] font-medium text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#C25572] transition-colors p-0"
           >
             {showResolved ? 'Hide resolved' : `Show ${resolved.length} resolved`}
           </button>
@@ -114,7 +114,7 @@ export default function CommentsPanel({ deliverableId, onClose }: CommentsPanelP
       <div className="flex-1 overflow-y-auto min-h-0 px-4 py-3 space-y-3">
         {loading && (
           <div className="flex items-center justify-center py-8">
-            <div className="w-5 h-5 border-2 border-[#C4687A] border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-[#C25572] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
@@ -133,7 +133,7 @@ export default function CommentsPanel({ deliverableId, onClose }: CommentsPanelP
           >
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-1.5">
-                <div className="w-5 h-5 rounded-full bg-[#C4687A] text-white flex items-center justify-center text-[9px] font-bold shrink-0">
+                <div className="w-5 h-5 rounded-full bg-[#C25572] text-white flex items-center justify-center text-[9px] font-bold shrink-0">
                   {(comment.display_name || comment.email)[0].toUpperCase()}
                 </div>
                 <span className="text-[11px] font-semibold text-[#0D0D0D]">
@@ -151,7 +151,7 @@ export default function CommentsPanel({ deliverableId, onClose }: CommentsPanelP
             </div>
 
             {comment.section_ref && (
-              <div className="text-[10px] font-medium text-[#C4687A] mb-1">
+              <div className="text-[10px] font-medium text-[#C25572] mb-1">
                 Re: {comment.section_ref}
               </div>
             )}
@@ -163,7 +163,7 @@ export default function CommentsPanel({ deliverableId, onClose }: CommentsPanelP
             {!comment.resolved && (
               <button
                 onClick={() => handleResolve(comment.id)}
-                className="mt-2 text-[10px] font-medium text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#C4687A] p-0"
+                className="mt-2 text-[10px] font-medium text-[#6E6A63] bg-transparent border-0 cursor-pointer hover:text-[#C25572] p-0"
               >
                 Resolve
               </button>
@@ -202,7 +202,7 @@ export default function CommentsPanel({ deliverableId, onClose }: CommentsPanelP
             <button
               onClick={handleSubmit}
               disabled={!newComment.trim() || submitting}
-              className="text-[11px] font-semibold text-white bg-[#C4687A] px-3 py-1 rounded border-0 cursor-pointer hover:bg-[#A85568] transition-colors disabled:opacity-40 disabled:cursor-default"
+              className="text-[11px] font-semibold text-white bg-[#C25572] px-3 py-1 rounded border-0 cursor-pointer hover:bg-[#9E4860] transition-colors disabled:opacity-40 disabled:cursor-default"
             >
               {submitting ? '...' : 'Send'}
             </button>

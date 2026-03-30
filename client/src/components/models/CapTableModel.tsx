@@ -9,7 +9,7 @@ import { centsToDisplay, pctDisplay, multDisplay } from '../../lib/calculations/
 
 interface Props { tabId: string; }
 
-const COLORS = ['#C4687A', '#4E8FD4', '#6B8F4E', '#8F6BD4', '#D4714E', '#4ECDC4', '#FF6B6B', '#6E6A63'];
+const COLORS = ['#C25572', '#4E8FD4', '#6B8F4E', '#8F6BD4', '#D4714E', '#4ECDC4', '#FF6B6B', '#6E6A63'];
 
 export default function CapTableModel({ tabId }: Props) {
   const tab = useModelStore(s => s.tabs[tabId]);
@@ -58,7 +58,7 @@ export default function CapTableModel({ tabId }: Props) {
       <div>
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-[11px] font-bold uppercase tracking-wider m-0" style={{ color: '#6E6A63' }}>Investment Rounds</h3>
-          <button onClick={addRound} className="text-xs font-semibold px-3 py-1 rounded-full border-0 cursor-pointer" style={{ background: '#C4687A', color: 'white' }}>
+          <button onClick={addRound} className="text-xs font-semibold px-3 py-1 rounded-full border-0 cursor-pointer" style={{ background: '#C25572', color: 'white' }}>
             + Add Round
           </button>
         </div>
@@ -160,7 +160,7 @@ export default function CapTableModel({ tabId }: Props) {
           <div className="overflow-x-auto">
             <table className="text-xs w-full" style={{ borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ borderBottom: '2px solid #C4687A' }}>
+                <tr style={{ borderBottom: '2px solid #C25572' }}>
                   <th style={{ padding: '4px 8px', textAlign: 'left', fontSize: 10, color: '#6E6A63' }}>Stakeholder</th>
                   {waterfalls.map((w: any) => (
                     <th key={w.exitValue} style={{ padding: '4px 8px', textAlign: 'right', fontSize: 10, color: '#6E6A63' }}>

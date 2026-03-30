@@ -129,8 +129,8 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
 
   if (success) {
     return (
-      <div className="self-center w-full max-w-[95%] bg-white rounded-2xl px-6 py-8 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)', borderLeft: '3px solid #C4687A' }}>
-        <div className="w-10 h-10 rounded-full bg-[#C4687A] text-white flex items-center justify-center mx-auto mb-3">
+      <div className="self-center w-full max-w-[95%] bg-white rounded-2xl px-6 py-8 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)', borderLeft: '3px solid #C25572' }}>
+        <div className="w-10 h-10 rounded-full bg-[#C25572] text-white flex items-center justify-center mx-auto mb-3">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
         </div>
         <p className="text-lg font-semibold text-[#0D0D0D] m-0">You're all set</p>
@@ -140,7 +140,7 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
   }
 
   return (
-    <div className="self-center w-full max-w-[95%] bg-white rounded-2xl px-6 py-6" style={{ boxShadow: '0 2px 8px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)', borderLeft: '3px solid #C4687A' }}>
+    <div className="self-center w-full max-w-[95%] bg-white rounded-2xl px-6 py-6" style={{ boxShadow: '0 2px 8px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04)', borderLeft: '3px solid #C25572' }}>
       {canDismiss && onDismiss && (
         <button
           onClick={onDismiss}
@@ -166,7 +166,7 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
             value={name}
             onChange={e => setName(e.target.value)}
             required
-            className="w-full px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] text-base text-[#0D0D0D] outline-none transition-colors focus:border-[#C4687A]"
+            className="w-full px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] text-base text-[#0D0D0D] outline-none transition-colors focus:border-[#C25572]"
             style={{ fontFamily: "'Inter', system-ui, sans-serif", boxShadow: 'inset 0 0 0 0 transparent' }}
           />
         )}
@@ -176,7 +176,7 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
-          className="w-full px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] text-base text-[#0D0D0D] outline-none transition-colors focus:border-[#C4687A]"
+          className="w-full px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] text-base text-[#0D0D0D] outline-none transition-colors focus:border-[#C25572]"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         />
         <input
@@ -186,7 +186,7 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
           onChange={e => setPassword(e.target.value)}
           required
           minLength={6}
-          className="w-full px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] text-base text-[#0D0D0D] outline-none transition-colors focus:border-[#C4687A]"
+          className="w-full px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] text-base text-[#0D0D0D] outline-none transition-colors focus:border-[#C25572]"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         />
 
@@ -197,7 +197,7 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-xl border-none bg-[#C4687A] text-white text-base font-semibold cursor-pointer hover:bg-[#A85568] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-3 rounded-xl border-none bg-[#C25572] text-white text-base font-semibold cursor-pointer hover:bg-[#9E4860] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           style={{ fontFamily: "'Inter', system-ui, sans-serif", height: '48px' }}
         >
           {loading ? 'Please wait...' : 'Continue'}
@@ -226,9 +226,9 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
       {/* Toggle mode */}
       <p className="text-[14px] text-[#6E6A63] text-center m-0 mt-4">
         {mode === 'signup' ? (
-          <>Already have an account? <button onClick={() => { setMode('login'); setError(null); }} className="text-[#C4687A] font-semibold bg-transparent border-none cursor-pointer underline" style={{ fontFamily: 'inherit', fontSize: 'inherit' }} type="button">Sign in</button></>
+          <>Already have an account? <button onClick={() => { setMode('login'); setError(null); }} className="text-[#C25572] font-semibold bg-transparent border-none cursor-pointer underline" style={{ fontFamily: 'inherit', fontSize: 'inherit' }} type="button">Sign in</button></>
         ) : (
-          <>New here? <button onClick={() => { setMode('signup'); setError(null); }} className="text-[#C4687A] font-semibold bg-transparent border-none cursor-pointer underline" style={{ fontFamily: 'inherit', fontSize: 'inherit' }} type="button">Create account</button></>
+          <>New here? <button onClick={() => { setMode('signup'); setError(null); }} className="text-[#C25572] font-semibold bg-transparent border-none cursor-pointer underline" style={{ fontFamily: 'inherit', fontSize: 'inherit' }} type="button">Create account</button></>
         )}
       </p>
     </div>

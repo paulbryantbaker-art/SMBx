@@ -18,15 +18,15 @@ const base = 'inline-flex items-center justify-center gap-1.5 font-sans whitespa
 
 const variants: Record<Variant, string> = {
   primary:
-    `${base} bg-[#C4687A] text-white border-none rounded-full text-[15px] font-semibold px-8 py-4 hover:bg-[#A85568] hover:-translate-y-px`,
+    `${base} bg-[#C25572] text-white border-none rounded-full text-[15px] font-semibold px-8 py-4 hover:bg-[#9E4860] hover:-translate-y-px`,
   secondary:
     `${base} bg-transparent text-[#0D0D0D] border-2 border-[#E8E4DC] rounded-full text-[15px] font-semibold px-7 py-3.5 hover:border-[#0D0D0D]`,
   nav:
-    `${base} bg-[#C4687A] text-white border-none rounded-full text-[13px] font-semibold py-2.5 px-[22px] hover:bg-[#A85568]`,
+    `${base} bg-[#C25572] text-white border-none rounded-full text-[13px] font-semibold py-2.5 px-[22px] hover:bg-[#9E4860]`,
   cardLink:
-    `inline-flex items-center gap-1.5 text-[#C4687A] text-sm font-semibold font-sans bg-transparent border-none p-0 cursor-pointer no-underline transition-transform duration-200 hover:translate-x-1`,
+    `inline-flex items-center gap-1.5 text-[#C25572] text-sm font-semibold font-sans bg-transparent border-none p-0 cursor-pointer no-underline transition-transform duration-200 hover:translate-x-1`,
   ctaBlock:
-    `${base} bg-white text-[#C4687A] border-none rounded-full text-base font-bold px-10 py-[18px] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)]`,
+    `${base} bg-white text-[#C25572] border-none rounded-full text-base font-bold px-10 py-[18px] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)]`,
 };
 
 export default function Button({
