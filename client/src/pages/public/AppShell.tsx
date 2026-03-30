@@ -60,7 +60,7 @@ function getGreeting(): string {
 function LogoImg({ height = 28, style, className }: { height?: number; style?: React.CSSProperties; className?: string; dark?: boolean }) {
   return (
     <img
-      src="/Fancy.png"
+      src="/TF3.png"
       alt="smbx.ai"
       draggable={false}
       className={className}
@@ -89,27 +89,25 @@ function LogoWithIntro({ height = 120, className }: { height?: number; className
       {showVideo && (
         <video
           ref={videoRef}
-          src="/fancy.mp4"
+          src="/TF3.mp4"
           muted
           playsInline
           style={{
             height,
             objectFit: 'contain',
             position: 'absolute',
-            filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.06))',
-          }}
+                      }}
         />
       )}
       <img
-        src="/Fancy.png"
+        src="/TF3.png"
         alt="smbx.ai"
         style={{
           height,
           objectFit: 'contain',
           opacity: showVideo ? 0 : 1,
           transition: 'opacity 0.6s ease',
-          filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.06))',
-        }}
+                  }}
       />
     </div>
   );
