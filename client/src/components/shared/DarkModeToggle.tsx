@@ -29,48 +29,31 @@ function applyDark(isDark: boolean, isManual: boolean) {
   root.style.colorScheme = isDark ? 'dark' : 'light';
 
   // Safari toolbar via theme-color meta tags
+  const color = isDark ? DARK_COLOR : LIGHT_COLOR;
   const metas = document.querySelectorAll('meta[name="theme-color"]');
+
   if (isManual) {
-    // Manual override: set both to the same color
-    const color = isDark ? DARK_COLOR : LIGHT_COLOR;
-    metas.forEach(m => m.setAttribute('content', color));
+    // Manual override: remove media attrs and set both to same color
+    metas.forEach(m => {
+      m.removeAttribute('media');
+      m.setAttribute('content', color);
+    });
   } else {
     // System mode: restore media queries so Safari auto-switches
     metas.forEach(m => {
       const media = m.getAttribute('media') || '';
       if (media.includes('dark')) m.setAttribute('content', DARK_COLOR);
       else m.setAttribute('content', LIGHT_COLOR);
-      // Re-add media attrs if they were stripped by a previous manual override
-      if (!m.hasAttribute('media')) {
-        // Can't reliably restore, so just set the current color
-        m.setAttribute('content', isDark ? DARK_COLOR : LIGHT_COLOR);
-      }
     });
   }
 
-  // Safari toolbar reads from multiple sources — set them ALL
-  const color = isDark ? DARK_COLOR : LIGHT_COLOR;
+  // Safari uses body + html background for toolbar colors
+  document.body.style.setProperty('background-color', color, 'important');
+  root.style.setProperty('background-color', color, 'important');
 
-  // 1. Body background (Safari bottom toolbar / over-scroll)
-  document.body.style.backgroundColor = color;
-  // 2. HTML element background (Safari top toolbar)
-  document.documentElement.style.backgroundColor = color;
-
-  // 3. Force theme-color meta refresh — remove all, add fresh
-  metas.forEach(m => m.remove());
-  const newMeta = document.createElement('meta');
-  newMeta.name = 'theme-color';
-  newMeta.content = color;
-  document.head.appendChild(newMeta);
-
-  // 4. color-scheme meta
+  // Update color-scheme meta tag
   const csMeta = document.querySelector('meta[name="color-scheme"]') as HTMLMetaElement | null;
   if (csMeta) csMeta.content = isDark ? 'dark' : 'light';
-
-  // 5. Force Safari repaint by toggling a style
-  document.body.style.display = 'none';
-  void document.body.offsetHeight; // force reflow
-  document.body.style.display = '';
 }
 
 export function useDarkMode() {
@@ -81,39 +64,25 @@ export function useDarkMode() {
 
   const [dark, setDarkResolved] = useState(() => resolve(pref));
 
-  // Apply to DOM whenever resolved state changes — useLayoutEffect fires before paint
-  // so .dark class toggle and React component colors land in the same frame (no flicker)
+  // Apply to DOM whenever resolved state changes
   useLayoutEffect(() => {
     applyDark(dark, pref !== 'system');
   }, [dark, pref]);
 
-  // Persist preference
+  // Listen for system changes
   useEffect(() => {
-    if (pref === 'system') {
-      localStorage.removeItem(STORAGE_KEY);
-    } else {
-      localStorage.setItem(STORAGE_KEY, pref);
-    }
+    if (pref !== 'system') return;
+    const mql = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => setDarkResolved(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
   }, [pref]);
 
-  // Listen for OS-level mode changes
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = (e: MediaQueryListEvent) => {
-      // Only follow OS if user hasn't set a manual preference
-      if (pref === 'system') {
-        setDarkResolved(e.matches);
-      }
-    };
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, [pref]);
-
-  // Simple toggle: dark ↔ light (sets manual preference)
-  const setDark = useCallback((v: boolean) => {
-    const next: ThemePref = v ? 'dark' : 'light';
-    setPref(next);
-    setDarkResolved(v);
+  const setDark = useCallback((wantDark: boolean) => {
+    const newPref: ThemePref = wantDark ? 'dark' : 'light';
+    setPref(newPref);
+    setDarkResolved(wantDark);
+    localStorage.setItem(STORAGE_KEY, newPref);
   }, []);
 
   return [dark, setDark] as const;
