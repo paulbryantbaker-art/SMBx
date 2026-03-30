@@ -1160,7 +1160,7 @@ export default function AppShell() {
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
-                    opacity: dark ? 0.7 : 0.35,
+                    opacity: dark ? 0.45 : 0.18,
                     pointerEvents: 'none',
                   }} />
 
