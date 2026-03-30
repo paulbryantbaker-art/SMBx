@@ -48,21 +48,29 @@ function applyDark(isDark: boolean, isManual: boolean) {
     });
   }
 
-  // Safari uses body background for bottom toolbar / over-scroll
-  document.body.style.backgroundColor = isDark ? DARK_COLOR : LIGHT_COLOR;
-
-  // Force Safari to re-read theme-color by removing and re-adding the meta tags
-  const head = document.head;
+  // Safari toolbar reads from multiple sources — set them ALL
   const color = isDark ? DARK_COLOR : LIGHT_COLOR;
+
+  // 1. Body background (Safari bottom toolbar / over-scroll)
+  document.body.style.backgroundColor = color;
+  // 2. HTML element background (Safari top toolbar)
+  document.documentElement.style.backgroundColor = color;
+
+  // 3. Force theme-color meta refresh — remove all, add fresh
   metas.forEach(m => m.remove());
   const newMeta = document.createElement('meta');
   newMeta.name = 'theme-color';
   newMeta.content = color;
-  head.appendChild(newMeta);
+  document.head.appendChild(newMeta);
 
-  // Update color-scheme meta tag
+  // 4. color-scheme meta
   const csMeta = document.querySelector('meta[name="color-scheme"]') as HTMLMetaElement | null;
   if (csMeta) csMeta.content = isDark ? 'dark' : 'light';
+
+  // 5. Force Safari repaint by toggling a style
+  document.body.style.display = 'none';
+  void document.body.offsetHeight; // force reflow
+  document.body.style.display = '';
 }
 
 export function useDarkMode() {
