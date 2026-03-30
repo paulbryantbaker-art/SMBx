@@ -17,43 +17,64 @@ function resolve(pref: ThemePref): boolean {
 
 function applyDark(isDark: boolean, isManual: boolean) {
   const root = document.documentElement;
+  const color = isDark ? DARK_COLOR : LIGHT_COLOR;
 
-  // Smooth transition during toggle — temporary class removed after animation
+  // Smooth transition
   root.classList.add('theme-transition');
   setTimeout(() => root.classList.remove('theme-transition'), 350);
 
-  // Toggle .dark class (Tailwind class strategy)
+  // 1. Toggle .dark class
   root.classList.toggle('dark', isDark);
 
-  // Native UI: scrollbars, form controls, over-scroll
+  // 2. Native UI
   root.style.colorScheme = isDark ? 'dark' : 'light';
 
-  // Safari toolbar via theme-color meta tags
-  const color = isDark ? DARK_COLOR : LIGHT_COLOR;
-  const metas = document.querySelectorAll('meta[name="theme-color"]');
+  // 3. color-scheme meta
+  const csMeta = document.querySelector('meta[name="color-scheme"]') as HTMLMetaElement | null;
+  if (csMeta) csMeta.content = isDark ? 'dark' : 'light';
 
-  if (isManual) {
-    // Manual override: remove media attrs and set both to same color
-    metas.forEach(m => {
-      m.removeAttribute('media');
-      m.setAttribute('content', color);
-    });
-  } else {
-    // System mode: restore media queries so Safari auto-switches
-    metas.forEach(m => {
-      const media = m.getAttribute('media') || '';
-      if (media.includes('dark')) m.setAttribute('content', DARK_COLOR);
-      else m.setAttribute('content', LIGHT_COLOR);
-    });
-  }
-
-  // Safari uses body + html background for toolbar colors
+  // 4. body + html background — Safari 26 reads this for toolbar
   document.body.style.setProperty('background-color', color, 'important');
   root.style.setProperty('background-color', color, 'important');
 
-  // Update color-scheme meta tag
-  const csMeta = document.querySelector('meta[name="color-scheme"]') as HTMLMetaElement | null;
-  if (csMeta) csMeta.content = isDark ? 'dark' : 'light';
+  // 5. theme-color meta tags — Safari 15-18 (remove + recreate for reliability)
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
+  if (isManual) {
+    const meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    meta.content = color;
+    document.head.appendChild(meta);
+  } else {
+    const lightMeta = document.createElement('meta');
+    lightMeta.name = 'theme-color';
+    lightMeta.content = LIGHT_COLOR;
+    lightMeta.setAttribute('media', '(prefers-color-scheme: light)');
+    document.head.appendChild(lightMeta);
+    const darkMeta = document.createElement('meta');
+    darkMeta.name = 'theme-color';
+    darkMeta.content = DARK_COLOR;
+    darkMeta.setAttribute('media', '(prefers-color-scheme: dark)');
+    document.head.appendChild(darkMeta);
+  }
+
+  // 6. Safari 26 toolbar sentinel — fixed element near viewport edge
+  let sentinel = document.getElementById('safari-tint-sentinel');
+  if (!sentinel) {
+    sentinel = document.createElement('div');
+    sentinel.id = 'safari-tint-sentinel';
+    sentinel.setAttribute('aria-hidden', 'true');
+    Object.assign(sentinel.style, {
+      position: 'fixed',
+      top: '0',
+      left: '0',
+      width: '100%',
+      height: '1px',
+      pointerEvents: 'none',
+      zIndex: '99999',
+    });
+    document.body.appendChild(sentinel);
+  }
+  sentinel.style.setProperty('background-color', color, 'important');
 }
 
 export function useDarkMode() {
@@ -64,12 +85,10 @@ export function useDarkMode() {
 
   const [dark, setDarkResolved] = useState(() => resolve(pref));
 
-  // Apply to DOM whenever resolved state changes
   useLayoutEffect(() => {
     applyDark(dark, pref !== 'system');
   }, [dark, pref]);
 
-  // Listen for system changes
   useEffect(() => {
     if (pref !== 'system') return;
     const mql = window.matchMedia('(prefers-color-scheme: dark)');
