@@ -51,6 +51,15 @@ function applyDark(isDark: boolean, isManual: boolean) {
   // Safari uses body background for bottom toolbar / over-scroll
   document.body.style.backgroundColor = isDark ? DARK_COLOR : LIGHT_COLOR;
 
+  // Force Safari to re-read theme-color by removing and re-adding the meta tags
+  const head = document.head;
+  const color = isDark ? DARK_COLOR : LIGHT_COLOR;
+  metas.forEach(m => m.remove());
+  const newMeta = document.createElement('meta');
+  newMeta.name = 'theme-color';
+  newMeta.content = color;
+  head.appendChild(newMeta);
+
   // Update color-scheme meta tag
   const csMeta = document.querySelector('meta[name="color-scheme"]') as HTMLMetaElement | null;
   if (csMeta) csMeta.content = isDark ? 'dark' : 'light';
