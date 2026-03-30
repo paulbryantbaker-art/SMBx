@@ -72,30 +72,9 @@ function LogoImg({ height = 28, style, className }: { height?: number; style?: R
 
 /* ═══ LOGO HERO — sbs (side-by-side X + smbx.ai) for home page ═══ */
 function LogoHero({ height = 120, className, dark }: { height?: number; className?: string; dark?: boolean }) {
-  if (dark) {
-    // Dark version has baked-in bg — smooth edges with rounded corners + shadow
-    return (
-      <div
-        className={className}
-        style={{
-          height,
-          borderRadius: 16,
-          overflow: 'hidden',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-          display: 'inline-block',
-        }}
-      >
-        <img
-          src="/sbs dark.jpeg"
-          alt="smbx.ai"
-          style={{ height, objectFit: 'cover', display: 'block' }}
-        />
-      </div>
-    );
-  }
   return (
     <img
-      src="/sbs.png"
+      src={dark ? '/DG Trans.png' : '/sbs.png'}
       alt="smbx.ai"
       className={className}
       style={{ height, objectFit: 'contain', display: 'block' }}
