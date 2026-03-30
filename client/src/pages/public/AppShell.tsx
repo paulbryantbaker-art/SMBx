@@ -70,58 +70,27 @@ function LogoImg({ height = 28, style, className }: { height?: number; style?: R
   );
 }
 
-/* ═══ LOGO WITH INTRO VIDEO — plays once then shows static logo ═══ */
-function LogoWithIntro({ height = 120, className }: { height?: number; className?: string }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [showVideo, setShowVideo] = useState(true);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.play().catch(() => setShowVideo(false));
-    const onEnd = () => setShowVideo(false);
-    video.addEventListener('ended', onEnd);
-    return () => video.removeEventListener('ended', onEnd);
-  }, []);
-
+/* ═══ LOGO HERO — TF3 combo (X + smbx.ai) for home page ═══ */
+function LogoHero({ height = 120, className }: { height?: number; className?: string }) {
   return (
-    <div className={className} style={{ position: 'relative', height, display: 'flex', justifyContent: 'center' }}>
-      {showVideo && (
-        <video
-          ref={videoRef}
-          src="/TF3.mp4"
-          muted
-          playsInline
-          style={{
-            height,
-            objectFit: 'contain',
-            position: 'absolute',
-                      }}
-        />
-      )}
-      <img
-        src="/TF3.png"
-        alt="smbx.ai"
-        style={{
-          height,
-          objectFit: 'contain',
-          opacity: showVideo ? 0 : 1,
-          transition: 'opacity 0.6s ease',
-                  }}
-      />
-    </div>
+    <img
+      src="/TF3.png"
+      alt="smbx.ai"
+      className={className}
+      style={{ height, objectFit: 'contain', display: 'block' }}
+    />
   );
 }
 
-/* ═══ LOGO ICON — just the X for sidebar/compact spaces ═══ */
+/* ═══ LOGO ICON — just the X (TF3x) for sidebar/compact spaces ═══ */
 function LogoIcon({ height = 28, className, style }: { height?: number; className?: string; style?: React.CSSProperties }) {
   return (
     <img
-      src="/F2.png"
+      src="/TF3x.png"
       alt="smbx.ai"
       draggable={false}
       className={className}
-      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.08))', ...style }}
+      style={{ height, width: height, objectFit: 'contain', display: 'inline-block', ...style }}
     />
   );
 }
@@ -1017,7 +986,7 @@ export default function AppShell() {
             title="Home"
             type="button"
           >
-            <img src="/F2.png" alt="smbx.ai" width={32} height={32} className="sidebar-x-img" style={{ display: 'block', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.08))' }} />
+            <img src="/TF3x.png" alt="smbx.ai" width={32} height={32} className="sidebar-x-img" style={{ display: 'block' }} />
           </button>
         </div>
       )}
@@ -1189,10 +1158,10 @@ export default function AppShell() {
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-6' : 'max-w-3xl space-y-6'}`} style={isMobile ? undefined : { marginTop: '-5vh' }}>
                       {!isMobile && (
                         <div className="mb-6 flex justify-center">
-                          <LogoWithIntro height={140} />
+                          <LogoHero height={140} />
                         </div>
                       )}
-                      {isMobile && <LogoWithIntro height={110} className="mx-auto mb-3" />}
+                      {isMobile && <LogoHero height={110} className="mx-auto mb-3" />}
                       <h1 className={`font-headline font-extrabold tracking-tighter leading-[1.05] ${isMobile ? 'text-[36px]' : 'text-[50px]'}`}>
                         <span className={dark ? 'text-[#D4848C]' : 'text-[#A85860]'}>Selling</span> your business,<br/>
                         <span className={`italic underline decoration-[3px] underline-offset-[6px] ${dark ? 'decoration-[#D4848C]' : 'decoration-[#A85860]'}`}>buying</span> one, or{' '}
