@@ -1156,7 +1156,7 @@ export default function AppShell() {
                   <div style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundColor: dark ? '#0f1012' : '#f9f9fc', pointerEvents: 'none' }} />
                   <div style={{
                     position: 'fixed', inset: 0, zIndex: 1,
-                    backgroundImage: `url('/${dark ? 'GD' : 'GL'}.jpeg')`,
+                    backgroundImage: `url('/${dark ? 'GD' : 'Green BG'}.jpeg')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',
