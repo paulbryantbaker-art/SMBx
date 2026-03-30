@@ -70,11 +70,11 @@ function LogoImg({ height = 28, style, className }: { height?: number; style?: R
   );
 }
 
-/* ═══ LOGO HERO — TF3 combo (X + smbx.ai) for home page ═══ */
-function LogoHero({ height = 120, className }: { height?: number; className?: string }) {
+/* ═══ LOGO HERO — sbs (side-by-side X + smbx.ai) for home page ═══ */
+function LogoHero({ height = 120, className, dark }: { height?: number; className?: string; dark?: boolean }) {
   return (
     <img
-      src="/TF3.png"
+      src={dark ? '/sbs dark.png' : '/sbs.png'}
       alt="smbx.ai"
       className={className}
       style={{ height, objectFit: 'contain', display: 'block' }}
@@ -1151,17 +1151,25 @@ export default function AppShell() {
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE — New Design ═══ */}
-                <main className="flex-1 flex flex-col relative">
+                <main
+                  className="flex-1 flex flex-col relative"
+                  style={{
+                    backgroundImage: `url('/${dark ? 'dark bg' : 'light bg'}.png')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                  }}
+                >
 
                   {/* Desktop: single centered cluster */}
                   <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-6' : 'max-w-3xl space-y-6'}`} style={isMobile ? undefined : { marginTop: '-5vh' }}>
                       {!isMobile && (
                         <div className="mb-6 flex justify-center">
-                          <LogoHero height={140} />
+                          <LogoHero height={80} dark={dark} />
                         </div>
                       )}
-                      {isMobile && <LogoHero height={110} className="mx-auto mb-3" />}
+                      {isMobile && <LogoHero height={60} dark={dark} className="mx-auto mb-3" />}
                       <h1 className={`font-headline font-extrabold tracking-tighter leading-[1.05] ${isMobile ? 'text-[36px]' : 'text-[50px]'}`}>
                         <span className={dark ? 'text-[#D4848C]' : 'text-[#A85860]'}>Selling</span> your business,<br/>
                         <span className={`italic underline decoration-[3px] underline-offset-[6px] ${dark ? 'decoration-[#D4848C]' : 'decoration-[#A85860]'}`}>buying</span> one, or{' '}
