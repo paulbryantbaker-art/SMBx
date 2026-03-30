@@ -52,9 +52,8 @@ function applyDark(isDark: boolean, isManual: boolean) {
   const csMeta = document.querySelector('meta[name="color-scheme"]') as HTMLMetaElement | null;
   if (csMeta) csMeta.content = isDark ? 'dark' : 'light';
 
-  // Update any fixed background layers (Safari 26 reads fixed elements for toolbar)
-  const fixedBg = document.querySelector('[data-theme-bg]') as HTMLElement | null;
-  if (fixedBg) fixedBg.style.backgroundColor = color;
+  // Background layers are now position:absolute (not fixed) so Safari
+  // reads body/html bg for toolbar, not the background layers.
 }
 
 export function useDarkMode() {

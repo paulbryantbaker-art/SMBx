@@ -1152,18 +1152,20 @@ export default function AppShell() {
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
-            <div key={activeTab} style={{ animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : {}) }}>
+            <div key={activeTab} style={{ position: 'relative', animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : { minHeight: '100dvh' }) }}>
 
               {/* ═══ SHARED BACKGROUND — all landing pages ═══ */}
-              <div data-theme-bg style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundColor: dark ? '#1a1c1e' : '#f9f9fc', pointerEvents: 'none' }} />
+              {/* Uses absolute (not fixed) so Safari doesn't sample these for toolbar tinting */}
+              <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#1a1c1e' : '#f9f9fc', pointerEvents: 'none', minHeight: '100dvh' }} />
               <div style={{
-                position: 'fixed', inset: 0, zIndex: 1,
+                position: 'absolute', inset: 0, zIndex: 1,
                 backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
                 opacity: dark ? 0.35 : 0.10,
                 pointerEvents: 'none',
+                minHeight: '100dvh',
               }} />
 
               {activeTab === 'home' ? (
@@ -1172,7 +1174,7 @@ export default function AppShell() {
                 <main className="flex-1 flex flex-col relative">
                   {/* Center fade + blur — clean reading area in center, circuit visible at edges */}
                   <div style={{
-                    position: 'fixed', inset: 0, zIndex: 2,
+                    position: 'absolute', inset: 0, zIndex: 2, minHeight: '100dvh',
                     background: isMobile
                       ? `radial-gradient(ellipse 90% 60% at 50% 38%, ${dark ? 'rgba(15,16,18,0.85)' : 'rgba(249,249,252,0.9)'} 0%, ${dark ? 'rgba(15,16,18,0.4)' : 'rgba(249,249,252,0.3)'} 50%, transparent 100%)`
                       : `radial-gradient(ellipse 80% 70% at 50% 42%, ${dark ? 'rgba(15,16,18,0.85)' : 'rgba(249,249,252,0.9)'} 0%, ${dark ? 'rgba(15,16,18,0.4)' : 'rgba(249,249,252,0.3)'} 50%, transparent 100%)`,
