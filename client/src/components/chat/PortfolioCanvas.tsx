@@ -279,9 +279,9 @@ export default function PortfolioCanvas({ portfolioId, isFullscreen, onClose }: 
 
         {/* Pipeline progress (active only) */}
         {isActive && (
-          <div className="mb-4 bg-[#FAFAFA] rounded-xl p-3 border border-[#C25572]/10">
+          <div className="mb-4 bg-[#FAFAFA] rounded-xl p-3 border border-[#A03050]/10">
             <div className="flex items-center gap-2 mb-1.5">
-              <div className="w-3 h-3 border-2 border-[#C25572] border-t-transparent rounded-full animate-spin" />
+              <div className="w-3 h-3 border-2 border-[#A03050] border-t-transparent rounded-full animate-spin" />
               <span className="text-xs font-medium text-[#0D0D0D]">
                 {portfolio.stage_progress?.message || 'Processing...'}
               </span>
@@ -289,7 +289,7 @@ export default function PortfolioCanvas({ portfolioId, isFullscreen, onClose }: 
             {portfolio.stage_progress?.pct != null && (
               <div className="w-full h-1.5 bg-[#EBE7DF] rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#C25572] rounded-full transition-all duration-700"
+                  className="h-full bg-[#A03050] rounded-full transition-all duration-700"
                   style={{ width: `${portfolio.stage_progress.pct}%` }}
                 />
               </div>
@@ -426,8 +426,8 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
       onClick={onClick}
       className={`px-3 py-1 rounded-full text-[11px] font-medium border transition-colors cursor-pointer shrink-0 ${
         active
-          ? 'bg-[#C25572] text-white border-[#C25572]'
-          : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)] hover:border-[#C25572]'
+          ? 'bg-[#A03050] text-white border-[#A03050]'
+          : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)] hover:border-[#A03050]'
       }`}
     >
       {label}
@@ -489,7 +489,7 @@ function CandidateCard({ candidate: c, onSelect, onStatusChange }: {
   return (
     <div
       onClick={onSelect}
-      className="bg-white rounded-xl p-3 border border-[rgba(0,0,0,0.06)] hover:border-[#C25572]/30 cursor-pointer transition-all"
+      className="bg-white rounded-xl p-3 border border-[rgba(0,0,0,0.06)] hover:border-[#A03050]/30 cursor-pointer transition-all"
     >
       <div className="flex items-start gap-2.5">
         {/* Score badge */}
@@ -646,7 +646,7 @@ function CandidateDetail({ candidate: c, onClose, onStatusChange, onEnrich, enri
             <div className="space-y-1.5 text-xs">
               {c.website_url && (
                 <DetailRow label="Website">
-                  <a href={c.website_url} target="_blank" rel="noopener noreferrer" className="text-[#C25572] hover:underline truncate">
+                  <a href={c.website_url} target="_blank" rel="noopener noreferrer" className="text-[#A03050] hover:underline truncate">
                     {c.website_url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
                   </a>
                 </DetailRow>
@@ -699,7 +699,7 @@ function CandidateDetail({ candidate: c, onClose, onStatusChange, onEnrich, enri
             <button
               onClick={() => onEnrich(c.id)}
               disabled={enriching}
-              className="w-full py-2.5 rounded-xl text-xs font-semibold bg-[#C25572] text-white border-0 cursor-pointer hover:bg-[#9E4860] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-xl text-xs font-semibold bg-[#A03050] text-white border-0 cursor-pointer hover:bg-[#802040] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {enriching ? (
                 <>
@@ -742,7 +742,7 @@ function CandidateDetail({ candidate: c, onClose, onStatusChange, onEnrich, enri
                     className={`text-[10px] font-medium px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
                       isActive
                         ? `${cfg.color} border-current`
-                        : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)] hover:border-[#C25572]'
+                        : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)] hover:border-[#A03050]'
                     }`}
                   >
                     {cfg.label}
@@ -760,12 +760,12 @@ function CandidateDetail({ candidate: c, onClose, onStatusChange, onEnrich, enri
               onChange={e => onNoteChange(e.target.value)}
               placeholder="Add notes about this candidate..."
               rows={3}
-              className="w-full px-3 py-2 rounded-lg border border-[rgba(0,0,0,0.08)] text-xs bg-white text-[#0D0D0D] outline-none focus:border-[#C25572] resize-none"
+              className="w-full px-3 py-2 rounded-lg border border-[rgba(0,0,0,0.08)] text-xs bg-white text-[#0D0D0D] outline-none focus:border-[#A03050] resize-none"
             />
             {noteDraft !== (c.user_notes || '') && (
               <button
                 onClick={onNoteSave}
-                className="mt-1.5 px-3 py-1 rounded-lg text-[10px] font-medium bg-[#C25572] text-white border-0 cursor-pointer hover:bg-[#9E4860] transition-colors"
+                className="mt-1.5 px-3 py-1 rounded-lg text-[10px] font-medium bg-[#A03050] text-white border-0 cursor-pointer hover:bg-[#802040] transition-colors"
               >
                 Save Notes
               </button>

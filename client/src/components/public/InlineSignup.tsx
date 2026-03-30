@@ -45,27 +45,27 @@ export default function InlineSignup({ onRegister, onNavigateLogin, className = 
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name"
-            className="w-full px-3 py-2 text-[14px] border border-[#FAFAFA] rounded-lg outline-none bg-white text-[#0D0D0D] focus:border-[#C25572] font-sans"
+            className="w-full px-3 py-2 text-[14px] border border-[#FAFAFA] rounded-lg outline-none bg-white text-[#0D0D0D] focus:border-[#A03050] font-sans"
           />
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
-            className="w-full px-3 py-2 text-[14px] border border-[#FAFAFA] rounded-lg outline-none bg-white text-[#0D0D0D] focus:border-[#C25572] font-sans"
+            className="w-full px-3 py-2 text-[14px] border border-[#FAFAFA] rounded-lg outline-none bg-white text-[#0D0D0D] focus:border-[#A03050] font-sans"
           />
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="w-full px-3 py-2 text-[14px] border border-[#FAFAFA] rounded-lg outline-none bg-white text-[#0D0D0D] focus:border-[#C25572] font-sans"
+            className="w-full px-3 py-2 text-[14px] border border-[#FAFAFA] rounded-lg outline-none bg-white text-[#0D0D0D] focus:border-[#A03050] font-sans"
           />
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-2.5 bg-[#C25572] text-white border-none rounded-full text-[14px] font-semibold cursor-pointer hover:bg-[#9E4860] transition-colors disabled:opacity-50"
+            className="w-full py-2.5 bg-[#A03050] text-white border-none rounded-full text-[14px] font-semibold cursor-pointer hover:bg-[#802040] transition-colors disabled:opacity-50"
           >
             {submitting ? 'Creating account\u2026' : 'Create free account'}
           </button>
@@ -76,7 +76,7 @@ export default function InlineSignup({ onRegister, onNavigateLogin, className = 
           <button
             type="button"
             onClick={onNavigateLogin}
-            className="bg-transparent border-none text-[#C25572] font-semibold cursor-pointer text-xs p-0"
+            className="bg-transparent border-none text-[#A03050] font-semibold cursor-pointer text-xs p-0"
           >
             Sign in
           </button>

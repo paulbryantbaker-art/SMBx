@@ -36,7 +36,7 @@ export default function EarnoutModel({ tabId }: Props) {
       {/* KPIs */}
       {earnout && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <KPICard label="Expected Value" value={centsToDisplay(earnout.expectedValue)} color="#C25572" sublabel="Probability-weighted" />
+          <KPICard label="Expected Value" value={centsToDisplay(earnout.expectedValue)} color="#A03050" sublabel="Probability-weighted" />
           <KPICard label="Max Payout" value={centsToDisplay(earnout.maxPayout)} sublabel="If all milestones hit" />
           <KPICard label="PV of Expected" value={centsToDisplay(earnout.pvExpected)} sublabel={`At ${pctDisplay(a.discountRate ?? 0.10)} discount`} />
         </div>
@@ -53,14 +53,14 @@ export default function EarnoutModel({ tabId }: Props) {
                   label: 'Max Payout',
                   data: earnout.byMilestone.map((m: any) => m.payout / 100),
                   backgroundColor: 'rgba(186, 60, 96, 0.15)',
-                  borderColor: '#C25572',
+                  borderColor: '#A03050',
                   borderWidth: 1,
                   borderRadius: 4,
                 },
                 {
                   label: 'Expected Value',
                   data: earnout.byMilestone.map((m: any) => m.ev / 100),
-                  backgroundColor: '#C25572',
+                  backgroundColor: '#A03050',
                   borderRadius: 4,
                 },
               ],
@@ -87,7 +87,7 @@ export default function EarnoutModel({ tabId }: Props) {
       <div>
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-[11px] font-bold uppercase tracking-wider m-0" style={{ color: '#6E6A63' }}>Milestones</h3>
-          <button onClick={addMilestone} className="text-xs font-semibold px-3 py-1 rounded-full border-0 cursor-pointer" style={{ background: '#C25572', color: 'white' }}>+ Add</button>
+          <button onClick={addMilestone} className="text-xs font-semibold px-3 py-1 rounded-full border-0 cursor-pointer" style={{ background: '#A03050', color: 'white' }}>+ Add</button>
         </div>
 
         {milestones.map((m: any, i: number) => (

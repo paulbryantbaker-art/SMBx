@@ -6,7 +6,7 @@ interface Props {
 export default function YuliaAvatar({ size = 32, className = '' }: Props) {
   return (
     <div
-      className={`shrink-0 rounded-lg bg-[#C25572] flex items-center justify-center ${className}`}
+      className={`shrink-0 rounded-lg bg-[#A03050] flex items-center justify-center ${className}`}
       style={{ width: size, height: size, borderRadius: 8 }}
     >
       <span

@@ -43,7 +43,7 @@ export default function ValuationExplorer({ tabId }: Props) {
         <KPICard
           label="Valuation (Mid)"
           value={centsToDisplay(val?.mid || 0)}
-          color="#C25572"
+          color="#A03050"
         />
         <KPICard
           label="SBA Eligible"
@@ -64,8 +64,8 @@ export default function ValuationExplorer({ tabId }: Props) {
               <p className="text-lg font-bold m-0" style={{ color: '#6E6A63' }}>{centsToDisplay(val.low)}</p>
             </div>
             <div className="text-center">
-              <p className="text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: '#C25572' }}>Most Likely</p>
-              <p className="text-2xl font-bold m-0" style={{ color: '#C25572', fontFamily: 'Sora, sans-serif' }}>{centsToDisplay(val.mid)}</p>
+              <p className="text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: '#A03050' }}>Most Likely</p>
+              <p className="text-2xl font-bold m-0" style={{ color: '#A03050', fontFamily: 'Sora, sans-serif' }}>{centsToDisplay(val.mid)}</p>
             </div>
             <div className="text-center">
               <p className="text-[9px] font-bold uppercase tracking-wider m-0 mb-1" style={{ color: '#6E6A63' }}>High</p>
@@ -192,7 +192,7 @@ export default function ValuationExplorer({ tabId }: Props) {
       {o.blended && (
         <div className="rounded-lg p-4" style={{ border: '1px solid #DDD9D1' }}>
           <h3 className="text-sm font-bold m-0 mb-2" style={{ fontFamily: 'Sora, sans-serif' }}>Blended Valuation</h3>
-          <p className="text-xl font-bold m-0" style={{ color: '#C25572' }}>{centsToDisplay(o.blended.blended)}</p>
+          <p className="text-xl font-bold m-0" style={{ color: '#A03050' }}>{centsToDisplay(o.blended.blended)}</p>
           <div className="mt-2 space-y-1">
             {o.blended.methods.map((m: any) => (
               <div key={m.label} className="flex justify-between text-xs">
