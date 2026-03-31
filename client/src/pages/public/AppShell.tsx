@@ -991,7 +991,7 @@ export default function AppShell() {
             title="Home"
             type="button"
           >
-            <img src="/x.png" alt="smbx.ai" width={32} height={32} className="sidebar-x-img" style={{ display: 'block' }} />
+            <img src="/x.png" alt="smbx.ai" width={38} height={38} className="sidebar-x-img" style={{ display: 'block' }} />
           </button>
         </div>
       )}
