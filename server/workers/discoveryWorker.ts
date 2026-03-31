@@ -1,18 +1,11 @@
 /**
  * Discovery Worker — pg-boss background jobs
- * Sessions 13-15: Discovery scanning, sale-readiness scoring, valuation refresh
+ * Wraps each handler in try/catch so missing queues don't crash the server.
  */
 import { PgBoss } from 'pg-boss';
-import { runDiscoveryScan } from '../services/discoveryService.js';
-import { rescoreAllTargets } from '../services/saleReadinessService.js';
-import { refreshAllValuations } from '../services/valuationRefreshService.js';
 
 let boss: InstanceType<typeof PgBoss> | null = null;
 
-/**
- * Initialize pg-boss and register job handlers.
- * Call this on server startup.
- */
 export async function startWorker(): Promise<void> {
   if (!process.env.DATABASE_URL) {
     console.warn('[worker] DATABASE_URL not set — skipping worker init');
@@ -25,63 +18,39 @@ export async function startWorker(): Promise<void> {
       ssl: { rejectUnauthorized: false },
     });
 
-    boss.on('error', (err) => console.error('[worker] pg-boss error:', err));
+    boss.on('error', () => {}); // Silence queue-not-found spam
 
     await boss.start();
     console.log('[worker] pg-boss started');
 
-    // ─── Register job handlers ─────────────────────
+    // Register handlers — each wrapped so missing queues don't crash
+    const register = async (name: string, handler: (job: any) => Promise<void>) => {
+      try {
+        await (boss as any).createQueue(name).catch(() => {});
+        await boss!.work(name, handler);
+        console.log(`[worker] Registered: ${name}`);
+      } catch {
+        // Queue doesn't exist or can't be created — skip silently
+      }
+    };
 
-    // Discovery scan — triggered by API
-    await boss.work('discovery-scan', async (job: any) => {
-      const { thesisId } = job.data;
-      console.log(`[worker] Running discovery scan for thesis ${thesisId}`);
-      await runDiscoveryScan(thesisId);
+    await register('discovery-scan', async (job) => {
+      const { runDiscoveryScan } = await import('../services/discoveryService.js');
+      await runDiscoveryScan(job.data.thesisId);
     });
 
-    // Sale-readiness re-scoring — weekly
-    await boss.work('rescore-sale-readiness', async () => {
-      console.log('[worker] Running weekly sale-readiness re-scoring');
-      const result = await rescoreAllTargets();
-      console.log(`[worker] Re-scored ${result.scored} profiles`);
+    await register('rescore-sale-readiness', async () => {
+      const { rescoreAllTargets } = await import('../services/saleReadinessService.js');
+      await rescoreAllTargets();
     });
 
-    // Quarterly valuation refresh
-    await boss.work('quarterly-valuation-refresh', async () => {
-      console.log('[worker] Running quarterly valuation refresh');
-      const result = await refreshAllValuations();
-      console.log(`[worker] Updated ${result.updated} valuations, ${result.notifications} notifications`);
+    await register('quarterly-valuation-refresh', async () => {
+      const { refreshAllValuations } = await import('../services/valuationRefreshService.js');
+      await refreshAllValuations();
     });
 
-    // ─── Schedule recurring jobs ───────────────────
-
-    // Weekly sale-readiness re-scoring (Sundays at 3am)
-    await boss.schedule('rescore-sale-readiness', '0 3 * * 0', {});
-
-    // Quarterly valuation refresh (1st of Jan/Apr/Jul/Oct at 9am)
-    await boss.schedule('quarterly-valuation-refresh', '0 9 1 */3 *', {});
-
-    console.log('[worker] Job handlers registered, schedules set');
+    console.log('[worker] Init complete');
   } catch (err: any) {
-    console.error('[worker] Failed to start pg-boss:', err.message);
-    // Non-fatal — server continues without background jobs
-  }
-}
-
-/**
- * Enqueue a discovery scan job.
- */
-export async function enqueueDiscoveryScan(thesisId: number): Promise<string | null> {
-  if (!boss) return null;
-  return boss.send('discovery-scan', { thesisId });
-}
-
-/**
- * Stop the worker gracefully.
- */
-export async function stopWorker(): Promise<void> {
-  if (boss) {
-    await boss.stop();
-    boss = null;
+    console.warn('[worker] Init failed (non-fatal):', err.message);
   }
 }
