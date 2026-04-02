@@ -241,10 +241,57 @@ const clientPath = path.resolve(__dirname, '../client');
 app.use('/assets', express.static(path.join(clientPath, 'assets'), { maxAge: '1y', immutable: true }));
 app.use(express.static(clientPath, { maxAge: 0 }));
 
+// ─── 5b. Support: client-side error capture (no auth required) ──
+app.post('/api/support/client-error', express.json(), async (req, res) => {
+  try {
+    const supportSql = postgres(process.env.DATABASE_URL!, { ssl: process.env.NODE_ENV === 'production' ? 'require' : false as any, prepare: false });
+    await supportSql`
+      INSERT INTO support_issues (type, severity, title, description, context)
+      VALUES (
+        'system_error', 'major',
+        ${`Client error: ${(req.body.message || 'Unknown').substring(0, 100)}`},
+        ${req.body.stack || req.body.message || 'No details'},
+        ${JSON.stringify({
+          componentStack: req.body.componentStack,
+          url: req.body.url,
+          viewport: req.body.viewport,
+          userAgent: req.body.userAgent,
+          timestamp: new Date().toISOString(),
+        })}::jsonb
+      )
+    `;
+    await supportSql.end();
+    res.json({ ok: true });
+  } catch {
+    res.json({ ok: false });
+  }
+});
+
 // ─── 6. SPA catch-all (must be LAST) ──────────────────────
 app.get('*', (_req, res) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.sendFile(path.join(clientPath, 'index.html'));
+});
+
+// ─── 7. Global error handler — auto-logs to support_issues ──
+app.use((err: any, req: any, res: any, _next: any) => {
+  console.error('Unhandled error:', err.message || err);
+  try {
+    const errorSql = postgres(process.env.DATABASE_URL!, { ssl: process.env.NODE_ENV === 'production' ? 'require' : false as any, prepare: false });
+    errorSql`
+      INSERT INTO support_issues (user_id, type, severity, title, description, context)
+      VALUES (
+        ${req.userId || null},
+        'system_error', 'critical',
+        ${`Server error: ${(err.message || 'Unknown').substring(0, 100)}`},
+        ${err.stack || err.message || 'No stack trace'},
+        ${JSON.stringify({ path: req.path, method: req.method, timestamp: new Date().toISOString() })}::jsonb
+      )
+    `.then(() => errorSql.end()).catch(() => {});
+  } catch { /* don't let logging crash the error handler */ }
+  if (!res.headersSent) {
+    res.status(500).json({ error: 'Something went wrong. Yulia has logged the issue.' });
+  }
 });
 
 // ─── Auto-run migrations on startup ─────────────────────────

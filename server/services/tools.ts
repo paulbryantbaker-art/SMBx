@@ -241,6 +241,21 @@ export const TOOL_DEFINITIONS: Tool[] = [
       required: ['tabId'],
     },
   },
+  {
+    name: 'create_support_issue',
+    description: 'Create a support ticket when the user reports a problem Yulia cannot resolve, when Yulia detects a system error, or when the user makes a feature request. TRY TO FIX THE ISSUE FIRST before creating a ticket. Only create a ticket if you genuinely cannot resolve it yourself.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        type: { type: 'string', enum: ['bug', 'feature_request', 'feedback', 'system_error'], description: 'Type of issue' },
+        title: { type: 'string', description: 'Short summary — generate from conversation context' },
+        description: { type: 'string', description: 'Detailed: what user was trying to do, what happened, what should have happened' },
+        severity: { type: 'string', enum: ['critical', 'major', 'minor', 'enhancement'], description: 'critical = blocked, major = wrong behavior, minor = cosmetic, enhancement = feature request' },
+        userMessage: { type: 'string', description: "The user's own words describing the problem (verbatim from chat)" },
+      },
+      required: ['type', 'title', 'description', 'severity'],
+    },
+  },
 ];
 
 // ─── Tool Execution ────────────────────────────────────────
@@ -295,6 +310,8 @@ export async function executeTool(
         return updateModel(input);
       case 'read_tab_state':
         return readTabState(input);
+      case 'create_support_issue':
+        return await createSupportIssue(input, userId, conversationId);
       default:
         return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
@@ -1120,5 +1137,79 @@ function readTabState(input: Record<string, any>): string {
     tabId: input.tabId || 'active',
     message: 'Reading canvas state...',
     note: 'The frontend will inject actual model state into this response before Yulia sees it.',
+  });
+}
+
+// ─── Support Issue Tool ───────────────────────────────────
+
+async function createSupportIssue(
+  input: Record<string, any>,
+  userId: number,
+  conversationId: number,
+): Promise<string> {
+  const { type, title, description, severity, userMessage } = input;
+
+  // Auto-capture context
+  let dealId: number | null = null;
+  let context: Record<string, any> = {};
+
+  try {
+    // Get deal from conversation
+    const [conv] = await sql`
+      SELECT deal_id, journey_context, current_gate FROM conversations WHERE id = ${conversationId}
+    `;
+    if (conv) {
+      dealId = conv.deal_id;
+      context.journey = conv.journey_context;
+      context.gate = conv.current_gate;
+    }
+
+    // Get deal details if available
+    if (dealId) {
+      const [deal] = await sql`
+        SELECT business_name, industry, league, revenue, sde, ebitda
+        FROM deals WHERE id = ${dealId}
+      `;
+      if (deal) {
+        context.deal = {
+          name: deal.business_name,
+          industry: deal.industry,
+          league: deal.league,
+          revenue: deal.revenue,
+          sde: deal.sde,
+          ebitda: deal.ebitda,
+        };
+      }
+    }
+
+    // Get user subscription
+    const [sub] = await sql`
+      SELECT plan, status FROM subscriptions WHERE user_id = ${userId}
+    `.catch(() => [null]);
+    if (sub) context.subscription = sub.plan;
+
+    context.timestamp = new Date().toISOString();
+    context.conversationId = conversationId;
+  } catch {
+    // Context capture is best-effort — don't fail the ticket creation
+  }
+
+  // Create the issue
+  const [issue] = await sql`
+    INSERT INTO support_issues (user_id, deal_id, conversation_id, type, severity, title, description, user_message, context)
+    VALUES (${userId}, ${dealId}, ${conversationId}, ${type}, ${severity}, ${title}, ${description}, ${userMessage || null}, ${JSON.stringify(context)}::jsonb)
+    RETURNING id, type, severity
+  `;
+
+  const ref = `#${issue.id}`;
+  const typeLabel = type === 'feature_request' ? 'feature request' : type === 'system_error' ? 'system issue' : type;
+
+  return JSON.stringify({
+    success: true,
+    issueId: issue.id,
+    reference: ref,
+    message: type === 'feature_request'
+      ? `I've captured that as ${ref}. Good idea — I've logged it with your deal context so we understand the use case.`
+      : `I've logged this as ${ref}. Paul will look into it. In the meantime, let's keep working on everything else.`,
   });
 }

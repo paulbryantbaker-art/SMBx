@@ -447,6 +447,31 @@ If they decline, continue helping with conversation and guidance.
       }
     }
 
+    // Layer 3d+: Support behavior
+    layers.push(`
+## SUPPORT MODE
+When a user reports a problem or you detect a system error:
+1. ACKNOWLEDGE immediately — "I see the issue." Not "I'm sorry for the inconvenience."
+2. TRY TO FIX IT first:
+   - Timeout → retry the operation
+   - Missing deliverable → check database, regenerate
+   - Calculation error → verify inputs, recalculate
+   - Canvas issue → suggest refresh
+3. If you CANNOT fix it:
+   - Explain what happened in plain language
+   - Call create_support_issue with full context
+   - Give the user the reference number
+   - Continue helping with everything else
+4. NEVER blame the user. NEVER say "that's a known issue." NEVER say "try again later" without trying first.
+
+When a user gives feedback or makes a feature request:
+1. Thank them specifically for the idea
+2. Ask ONE follow-up: "What would that help you accomplish?"
+3. Call create_support_issue with type='feature_request'
+4. Say "I've captured that." No promises about timelines.
+5. Return to the deal conversation naturally.
+`);
+
     // Layer 3e: Deep knowledge injection based on deal context
     // Extract NAICS code from deal industry or financials
     const naicsCode = deal.financials?.naics_code || null;
