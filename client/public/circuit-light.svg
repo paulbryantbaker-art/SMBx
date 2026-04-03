@@ -1,122 +1,218 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" fill="none">
   <defs>
     <style>
-      .trace { stroke: #C4A088; stroke-width: 1.2; stroke-linecap: round; fill: none; }
-      .trace-thin { stroke: #C4A088; stroke-width: 0.6; stroke-linecap: round; fill: none; }
-      .node { fill: #C4A088; }
-      .node-ring { stroke: #C4A088; stroke-width: 0.8; fill: none; }
-      .pad { fill: #D4B09A; opacity: 0.4; }
+      .t { stroke: #BFA08A; stroke-width: 1.2; stroke-linecap: round; fill: none; }
+      .tt { stroke: #BFA08A; stroke-width: 0.7; stroke-linecap: round; fill: none; }
+      .n { fill: #BFA08A; }
+      .nr { stroke: #BFA08A; stroke-width: 0.8; fill: none; }
+      .cp { fill: #C8A48E; opacity: 0.12; }
+      .hatch { stroke: #C8A48E; stroke-width: 0.4; opacity: 0.18; }
     </style>
   </defs>
 
-  <!-- Quadrant: Top-left traces -->
-  <path class="trace" d="M0 120 H80 L120 80 V0"/>
-  <path class="trace" d="M0 140 H60 L100 100 H160 L200 60 V0"/>
-  <path class="trace-thin" d="M0 100 H40 V40 H100"/>
-  <path class="trace" d="M0 280 H120 L160 240 H240 V180 L280 140 H340"/>
-  <path class="trace-thin" d="M0 300 H80 L120 260 V200"/>
-  <path class="trace" d="M40 0 V60 L80 100 H140"/>
-  <path class="trace-thin" d="M160 0 V40 L200 80 V140"/>
+  <!-- ═══ BOTTOM-LEFT CORNER — dense copper pour + traces ═══ -->
+  <!-- Copper pour hatching -->
+  <rect class="cp" x="0" y="780" width="380" height="300" rx="0"/>
+  <rect class="cp" x="0" y="820" width="320" height="260" rx="0"/>
+  <rect class="cp" x="0" y="860" width="260" height="220" rx="0"/>
+  <line class="hatch" x1="0" y1="800" x2="360" y2="800"/>
+  <line class="hatch" x1="0" y1="820" x2="340" y2="820"/>
+  <line class="hatch" x1="0" y1="840" x2="320" y2="840"/>
+  <line class="hatch" x1="0" y1="860" x2="300" y2="860"/>
+  <line class="hatch" x1="0" y1="880" x2="280" y2="880"/>
+  <line class="hatch" x1="0" y1="900" x2="260" y2="900"/>
+  <line class="hatch" x1="0" y1="920" x2="240" y2="920"/>
+  <line class="hatch" x1="0" y1="940" x2="220" y2="940"/>
+  <line class="hatch" x1="0" y1="960" x2="200" y2="960"/>
+  <line class="hatch" x1="0" y1="980" x2="180" y2="980"/>
+  <line class="hatch" x1="0" y1="1000" x2="160" y2="1000"/>
+  <line class="hatch" x1="0" y1="1020" x2="140" y2="1020"/>
+  <line class="hatch" x1="0" y1="1040" x2="120" y2="1040"/>
+  <line class="hatch" x1="0" y1="1060" x2="100" y2="1060"/>
+  <!-- Diagonal hatching -->
+  <line class="hatch" x1="0" y1="850" x2="200" y2="1050"/>
+  <line class="hatch" x1="0" y1="900" x2="150" y2="1050"/>
+  <line class="hatch" x1="0" y1="950" x2="100" y2="1050"/>
+  <line class="hatch" x1="50" y1="800" x2="300" y2="1050"/>
+  <line class="hatch" x1="100" y1="800" x2="350" y2="1050"/>
+  <line class="hatch" x1="150" y1="800" x2="360" y2="1010"/>
 
-  <!-- Quadrant: Top-right traces -->
-  <path class="trace" d="M800 80 H720 L680 120 V200 L640 240 H580"/>
-  <path class="trace" d="M800 160 H740 V220 L700 260 H640"/>
-  <path class="trace-thin" d="M800 200 H760 L720 240 H660"/>
-  <path class="trace" d="M600 0 V80 L560 120 H500 L460 160 V220"/>
-  <path class="trace-thin" d="M680 0 V60 L640 100 H580"/>
-  <path class="trace" d="M800 320 H740 L700 280 V240"/>
+  <!-- BL traces radiating inward -->
+  <path class="t" d="M0 780 H100 L160 720 H260 L320 660 H400"/>
+  <path class="t" d="M0 760 H80 L120 720 V660 L180 600 H280"/>
+  <path class="t" d="M0 740 H60 V680 L120 620 H200 L260 560 H340"/>
+  <path class="t" d="M0 700 H40 L80 660 H140 L200 600 V540 L260 480"/>
+  <path class="tt" d="M0 720 H50 L90 680 H160"/>
+  <path class="t" d="M0 660 H80 L140 600 H220 L280 540 V480 L340 420"/>
+  <path class="tt" d="M0 640 H60 L100 600 V540"/>
+  <path class="t" d="M0 600 H100 L160 540 H240 V480 L300 420 H380"/>
+  <path class="tt" d="M0 580 H40 L80 540 H140 L180 500"/>
+  <path class="t" d="M0 540 H60 L120 480 H200 L260 420 H360"/>
+  <path class="tt" d="M40 1080 V1020 L100 960 H180 L240 900"/>
+  <path class="t" d="M100 1080 V1000 L160 940 H240 V880 L300 820 H380"/>
+  <path class="t" d="M180 1080 V1020 L240 960 H320 L380 900 V840"/>
+  <path class="tt" d="M260 1080 V1040 L300 1000 H360"/>
+  <path class="t" d="M340 1080 V1000 L400 940 H460 L500 900"/>
+  <!-- BL parallel bus runs -->
+  <path class="tt" d="M0 810 H60 L100 770 H180"/>
+  <path class="tt" d="M0 830 H50 L90 790 H170"/>
+  <path class="tt" d="M0 850 H40 L80 810 H160"/>
 
-  <!-- Quadrant: Bottom-left traces -->
-  <path class="trace" d="M0 520 H100 L140 560 V640 L180 680 H260"/>
-  <path class="trace" d="M0 600 H60 L100 640 H180 V700 L220 740 H300"/>
-  <path class="trace-thin" d="M0 640 H40 L80 680 V760"/>
-  <path class="trace" d="M0 720 H80 L120 760 V800"/>
-  <path class="trace-thin" d="M120 800 V740 L160 700 H220"/>
-  <path class="trace" d="M200 800 V720 L240 680 H320 L360 640 V580"/>
+  <!-- ═══ TOP-RIGHT CORNER — dense copper pour + traces ═══ -->
+  <rect class="cp" x="1540" y="0" width="380" height="300" rx="0"/>
+  <rect class="cp" x="1600" y="0" width="320" height="260" rx="0"/>
+  <rect class="cp" x="1660" y="0" width="260" height="220" rx="0"/>
+  <line class="hatch" x1="1560" y1="20" x2="1920" y2="20"/>
+  <line class="hatch" x1="1580" y1="40" x2="1920" y2="40"/>
+  <line class="hatch" x1="1600" y1="60" x2="1920" y2="60"/>
+  <line class="hatch" x1="1620" y1="80" x2="1920" y2="80"/>
+  <line class="hatch" x1="1640" y1="100" x2="1920" y2="100"/>
+  <line class="hatch" x1="1660" y1="120" x2="1920" y2="120"/>
+  <line class="hatch" x1="1680" y1="140" x2="1920" y2="140"/>
+  <line class="hatch" x1="1700" y1="160" x2="1920" y2="160"/>
+  <line class="hatch" x1="1720" y1="180" x2="1920" y2="180"/>
+  <line class="hatch" x1="1740" y1="200" x2="1920" y2="200"/>
+  <line class="hatch" x1="1760" y1="220" x2="1920" y2="220"/>
+  <line class="hatch" x1="1780" y1="240" x2="1920" y2="240"/>
+  <!-- Diagonal hatching TR -->
+  <line class="hatch" x1="1600" y1="0" x2="1920" y2="260"/>
+  <line class="hatch" x1="1660" y1="0" x2="1920" y2="200"/>
+  <line class="hatch" x1="1720" y1="0" x2="1920" y2="140"/>
+  <line class="hatch" x1="1780" y1="0" x2="1920" y2="80"/>
 
-  <!-- Quadrant: Bottom-right traces -->
-  <path class="trace" d="M800 540 H700 L660 580 H600 L560 620 V680"/>
-  <path class="trace" d="M800 640 H740 L700 680 V740 L660 780 H600"/>
-  <path class="trace-thin" d="M800 700 H760 V760 L720 800"/>
-  <path class="trace" d="M560 800 V740 L600 700 H660 L700 660 H760"/>
-  <path class="trace-thin" d="M640 800 V760 L680 720 H740"/>
+  <!-- TR traces radiating inward -->
+  <path class="t" d="M1920 80 H1820 L1760 140 H1660 L1600 200 H1520"/>
+  <path class="t" d="M1920 120 H1840 L1800 160 V240 L1740 300 H1640"/>
+  <path class="t" d="M1920 160 H1860 V220 L1800 280 H1700 L1640 340 H1560"/>
+  <path class="t" d="M1920 220 H1860 L1800 280 V340 L1740 400 H1640"/>
+  <path class="tt" d="M1920 200 H1870 L1830 240 H1760"/>
+  <path class="t" d="M1920 280 H1840 L1780 340 H1700 V400 L1640 460 H1540"/>
+  <path class="tt" d="M1920 320 H1860 L1820 360 V420"/>
+  <path class="t" d="M1920 380 H1820 L1760 440 H1680 V500 L1620 560 H1540"/>
+  <path class="tt" d="M1920 420 H1880 L1840 460 H1780 L1740 500"/>
+  <path class="t" d="M1700 0 V80 L1640 140 H1560 L1500 200 H1420"/>
+  <path class="t" d="M1620 0 V60 L1560 120 H1480 L1420 180 V260"/>
+  <path class="t" d="M1540 0 V100 L1480 160 V240 L1420 300 H1340"/>
+  <path class="tt" d="M1800 0 V40 L1740 100 H1660"/>
+  <path class="tt" d="M1860 0 V60 L1820 100 H1780"/>
+  <!-- TR parallel bus -->
+  <path class="tt" d="M1920 100 H1850 L1810 140 H1740"/>
+  <path class="tt" d="M1920 140 H1870 L1830 180 H1760"/>
 
-  <!-- Center-reaching traces (sparse, fade toward middle) -->
-  <path class="trace-thin" d="M340 340 L380 300 H420"/>
-  <path class="trace-thin" d="M460 380 H500 L540 340"/>
-  <path class="trace-thin" d="M340 460 L380 500 H420"/>
-  <path class="trace-thin" d="M460 420 L500 460 V500"/>
-  <path class="trace-thin" d="M300 400 H340"/>
-  <path class="trace-thin" d="M460 400 H500"/>
+  <!-- ═══ TOP-LEFT CORNER — medium density ═══ -->
+  <path class="t" d="M0 120 H100 L160 60 V0"/>
+  <path class="t" d="M0 160 H80 L140 100 H220 L280 40 V0"/>
+  <path class="tt" d="M0 80 H60 L100 40 V0"/>
+  <path class="t" d="M0 200 H120 L180 140 H280 L340 80 V0"/>
+  <path class="tt" d="M0 240 H80 L120 200 V140 L180 80"/>
+  <path class="t" d="M0 300 H100 L160 240 V180 L220 120 H320"/>
+  <path class="tt" d="M0 340 H60 L100 300 H160"/>
+  <path class="t" d="M0 380 H80 L140 320 H240 L300 260"/>
+  <path class="t" d="M60 0 V80 L120 140 H200"/>
+  <path class="tt" d="M140 0 V60 L200 120 V180"/>
+  <path class="t" d="M240 0 V40 L300 100 H380 L440 40 V0"/>
+  <path class="tt" d="M380 0 V60 L420 100 H480"/>
+  <path class="t" d="M480 0 V80 L540 140 H600"/>
+  <!-- TL nodes -->
+  <circle class="n" cx="100" cy="120" r="3"/>
+  <circle class="n" cx="160" cy="60" r="2.5"/>
+  <circle class="n" cx="280" cy="40" r="2.5"/>
+  <circle class="n" cx="180" cy="140" r="3"/>
+  <circle class="n" cx="300" cy="100" r="2"/>
+  <circle class="nr" cx="220" cy="120" r="5"/>
+  <circle class="nr" cx="120" cy="200" r="5"/>
 
-  <!-- Diagonal traces (45° angles) -->
-  <path class="trace" d="M240 0 L320 80 V160 L380 220"/>
-  <path class="trace" d="M0 400 H60 L120 340 H200 L260 280"/>
-  <path class="trace" d="M800 400 H740 L680 460 H600 L540 520"/>
-  <path class="trace-thin" d="M400 0 V40 L440 80 H500"/>
-  <path class="trace-thin" d="M400 800 V760 L360 720 H300"/>
+  <!-- ═══ BOTTOM-RIGHT CORNER — medium density ═══ -->
+  <path class="t" d="M1920 780 H1820 L1760 840 H1660 L1600 900"/>
+  <path class="t" d="M1920 820 H1840 L1780 880 V940 L1720 1000 V1080"/>
+  <path class="tt" d="M1920 860 H1860 L1820 900 H1760"/>
+  <path class="t" d="M1920 920 H1840 V980 L1780 1040 V1080"/>
+  <path class="t" d="M1920 960 H1860 L1800 1020 H1720 V1080"/>
+  <path class="tt" d="M1920 1000 H1880 L1840 1040 V1080"/>
+  <path class="t" d="M1600 1080 V1020 L1660 960 H1740 L1800 900 V840"/>
+  <path class="t" d="M1500 1080 V1000 L1560 940 H1640 V880"/>
+  <path class="tt" d="M1420 1080 V1040 L1480 980 H1560"/>
+  <path class="t" d="M1700 1080 V1040 L1740 1000 H1800"/>
+  <!-- BR nodes -->
+  <circle class="n" cx="1820" cy="780" r="3"/>
+  <circle class="n" cx="1660" cy="840" r="2.5"/>
+  <circle class="n" cx="1780" cy="880" r="3"/>
+  <circle class="n" cx="1660" cy="960" r="2.5"/>
+  <circle class="nr" cx="1740" cy="900" r="5"/>
 
-  <!-- Long horizontal/vertical runs -->
-  <path class="trace-thin" d="M0 440 H120 L160 480 H280"/>
-  <path class="trace-thin" d="M520 320 H600 L640 360 H720 V400"/>
-  <path class="trace" d="M280 800 V720 L320 680 H400"/>
-  <path class="trace" d="M480 0 V60 L520 100 V180"/>
+  <!-- ═══ EDGE TRACES — left and right sides ═══ -->
+  <path class="tt" d="M0 440 H80 L120 480 H200"/>
+  <path class="t" d="M0 480 H60 L120 420 H200 L260 360"/>
+  <path class="tt" d="M0 520 H40 L80 480"/>
+  <path class="t" d="M1920 500 H1840 L1780 560 H1700"/>
+  <path class="tt" d="M1920 540 H1860 L1820 580 H1760"/>
+  <path class="t" d="M1920 600 H1840 L1780 660 V720"/>
+  <path class="tt" d="M1920 660 H1880 L1840 700 H1780"/>
+  <path class="t" d="M1920 720 H1860 V760"/>
 
-  <!-- Nodes (junction circles) -->
-  <circle class="node" cx="80" cy="120" r="3"/>
-  <circle class="node" cx="120" cy="80" r="2.5"/>
-  <circle class="node" cx="160" cy="240" r="3"/>
-  <circle class="node" cx="240" cy="180" r="2.5"/>
-  <circle class="node" cx="340" cy="140" r="2"/>
-  <circle class="node" cx="140" cy="100" r="2"/>
+  <!-- ═══ INNER TRACES — reaching toward center but not touching ═══ -->
+  <path class="tt" d="M400 660 L460 600 H520 L560 560"/>
+  <path class="tt" d="M380 420 H440 L480 380"/>
+  <path class="tt" d="M340 340 L400 280 H460"/>
+  <path class="tt" d="M1540 380 H1480 L1440 420"/>
+  <path class="tt" d="M1520 660 L1460 600 H1400 L1360 560"/>
+  <path class="tt" d="M1540 480 H1480 L1440 520"/>
+  <path class="tt" d="M600 140 H660 L700 180"/>
+  <path class="tt" d="M500 900 L560 840 H620"/>
+  <path class="tt" d="M1340 300 H1400 L1440 260"/>
+  <path class="tt" d="M1420 840 L1360 780 H1300"/>
 
-  <circle class="node" cx="720" cy="120" r="3"/>
-  <circle class="node" cx="640" cy="240" r="2.5"/>
-  <circle class="node" cx="580" cy="120" r="2"/>
-  <circle class="node" cx="460" cy="160" r="3"/>
-  <circle class="node" cx="700" cy="280" r="2.5"/>
+  <!-- ═══ NODES — junction circles ═══ -->
+  <!-- BL nodes -->
+  <circle class="n" cx="100" cy="780" r="3"/>
+  <circle class="n" cx="260" cy="560" r="3"/>
+  <circle class="n" cx="160" cy="720" r="2.5"/>
+  <circle class="n" cx="340" cy="660" r="2"/>
+  <circle class="n" cx="400" cy="940" r="3"/>
+  <circle class="n" cx="240" cy="880" r="2.5"/>
+  <circle class="n" cx="300" cy="420" r="2.5"/>
+  <circle class="n" cx="200" cy="600" r="3"/>
+  <circle class="nr" cx="280" cy="540" r="5"/>
+  <circle class="nr" cx="180" cy="680" r="5"/>
+  <circle class="nr" cx="380" cy="820" r="5"/>
+  <circle class="nr" cx="460" cy="600" r="4"/>
 
-  <circle class="node" cx="100" cy="560" r="3"/>
-  <circle class="node" cx="180" cy="680" r="2.5"/>
-  <circle class="node" cx="260" cy="680" r="2"/>
-  <circle class="node" cx="320" cy="640" r="3"/>
-  <circle class="node" cx="220" cy="740" r="2.5"/>
+  <!-- TR nodes -->
+  <circle class="n" cx="1820" cy="80" r="3"/>
+  <circle class="n" cx="1660" cy="140" r="3"/>
+  <circle class="n" cx="1740" cy="300" r="2.5"/>
+  <circle class="n" cx="1560" cy="120" r="2.5"/>
+  <circle class="n" cx="1640" cy="460" r="2"/>
+  <circle class="n" cx="1480" cy="160" r="3"/>
+  <circle class="n" cx="1420" cy="300" r="2.5"/>
+  <circle class="nr" cx="1640" cy="340" r="5"/>
+  <circle class="nr" cx="1540" cy="200" r="5"/>
+  <circle class="nr" cx="1740" cy="400" r="4"/>
+  <circle class="nr" cx="1420" cy="180" r="5"/>
 
-  <circle class="node" cx="700" cy="580" r="3"/>
-  <circle class="node" cx="560" cy="620" r="2.5"/>
-  <circle class="node" cx="660" cy="780" r="2"/>
-  <circle class="node" cx="600" cy="700" r="3"/>
-  <circle class="node" cx="700" cy="660" r="2.5"/>
-
-  <!-- Node rings (IC pads) -->
-  <circle class="node-ring" cx="280" cy="140" r="5"/>
-  <circle class="node-ring" cx="500" cy="100" r="5"/>
-  <circle class="node-ring" cx="120" cy="340" r="5"/>
-  <circle class="node-ring" cx="680" cy="460" r="5"/>
-  <circle class="node-ring" cx="200" cy="700" r="5"/>
-  <circle class="node-ring" cx="560" cy="680" r="5"/>
-  <circle class="node-ring" cx="740" cy="220" r="5"/>
-  <circle class="node-ring" cx="60" cy="640" r="5"/>
-
-  <!-- Corner pads (cross-hatch areas suggesting PCB copper) -->
-  <rect class="pad" x="0" y="0" width="40" height="40" rx="2"/>
-  <rect class="pad" x="760" y="0" width="40" height="40" rx="2"/>
-  <rect class="pad" x="0" y="760" width="40" height="40" rx="2"/>
-  <rect class="pad" x="760" y="760" width="40" height="40" rx="2"/>
-
-  <!-- Small dots (vias) scattered -->
-  <circle class="node" cx="200" cy="320" r="1.5"/>
-  <circle class="node" cx="360" cy="200" r="1.5"/>
-  <circle class="node" cx="440" cy="280" r="1.5"/>
-  <circle class="node" cx="560" cy="360" r="1.5"/>
-  <circle class="node" cx="300" cy="500" r="1.5"/>
-  <circle class="node" cx="500" cy="540" r="1.5"/>
-  <circle class="node" cx="180" cy="440" r="1.5"/>
-  <circle class="node" cx="620" cy="400" r="1.5"/>
-  <circle class="node" cx="400" cy="600" r="1.5"/>
-  <circle class="node" cx="400" cy="200" r="1.5"/>
-  <circle class="node" cx="160" cy="160" r="1.5"/>
-  <circle class="node" cx="640" cy="160" r="1.5"/>
-  <circle class="node" cx="160" cy="640" r="1.5"/>
-  <circle class="node" cx="640" cy="640" r="1.5"/>
+  <!-- ═══ CENTER SCATTER — sparse particles/vias ═══ -->
+  <circle class="n" cx="700" cy="380" r="1.2"/>
+  <circle class="n" cx="780" cy="440" r="1"/>
+  <circle class="n" cx="850" cy="360" r="1.2"/>
+  <circle class="n" cx="920" cy="500" r="1"/>
+  <circle class="n" cx="960" cy="420" r="1.3"/>
+  <circle class="n" cx="1020" cy="480" r="1"/>
+  <circle class="n" cx="1060" cy="380" r="1.2"/>
+  <circle class="n" cx="1140" cy="440" r="1"/>
+  <circle class="n" cx="1200" cy="520" r="1.2"/>
+  <circle class="n" cx="840" cy="540" r="1"/>
+  <circle class="n" cx="760" cy="600" r="1.2"/>
+  <circle class="n" cx="1100" cy="600" r="1"/>
+  <circle class="n" cx="1180" cy="360" r="1.2"/>
+  <circle class="n" cx="680" cy="500" r="1"/>
+  <circle class="n" cx="900" cy="620" r="1"/>
+  <circle class="n" cx="1000" cy="340" r="1"/>
+  <circle class="n" cx="1060" cy="560" r="1"/>
+  <circle class="n" cx="860" cy="480" r="0.8"/>
+  <circle class="n" cx="940" cy="560" r="0.8"/>
+  <circle class="n" cx="1020" cy="620" r="0.8"/>
+  <circle class="n" cx="780" cy="340" r="0.8"/>
+  <circle class="n" cx="1140" cy="340" r="0.8"/>
+  <circle class="n" cx="720" cy="560" r="0.8"/>
+  <circle class="n" cx="1220" cy="460" r="0.8"/>
 </svg>

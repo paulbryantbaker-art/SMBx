@@ -1215,9 +1215,9 @@ export default function AppShell() {
                 height: '100dvh',
                 zIndex: 1,
                 backgroundImage: `url('/circuit-${dark ? 'dark' : 'light'}.svg')`,
-                backgroundSize: '800px 800px',
+                backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                backgroundRepeat: 'repeat',
+                backgroundRepeat: 'no-repeat',
                 opacity: dark ? 0.40 : 0.14,
                 pointerEvents: 'none',
               }} />
