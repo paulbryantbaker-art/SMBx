@@ -1211,14 +1211,15 @@ export default function AppShell() {
               {/* Uses absolute (not fixed) so Safari doesn't sample these for toolbar tinting */}
               <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#1a1c1e' : '#f9f9fc', pointerEvents: 'none', minHeight: '100dvh' }} />
               <div style={{
-                position: 'absolute', inset: 0, zIndex: 1,
+                position: 'absolute', left: 0, right: 0, top: 0,
+                height: '100dvh',
+                zIndex: 1,
                 backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
+                backgroundSize: '100% auto',
+                backgroundPosition: 'center top',
                 backgroundRepeat: 'no-repeat',
-                opacity: dark ? 0.35 : 0.10,
+                opacity: dark ? 0.35 : 0.12,
                 pointerEvents: 'none',
-                minHeight: '100dvh',
               }} />
 
               {activeTab === 'home' ? (
