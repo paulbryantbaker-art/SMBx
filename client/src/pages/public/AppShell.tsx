@@ -1214,11 +1214,11 @@ export default function AppShell() {
                 position: 'absolute', left: 0, right: 0, top: 0,
                 height: '100dvh',
                 zIndex: 1,
-                backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,
-                backgroundSize: '100% auto',
-                backgroundPosition: 'center top',
-                backgroundRepeat: 'no-repeat',
-                opacity: dark ? 0.35 : 0.12,
+                backgroundImage: `url('/circuit-${dark ? 'dark' : 'light'}.svg')`,
+                backgroundSize: '800px 800px',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'repeat',
+                opacity: dark ? 0.40 : 0.14,
                 pointerEvents: 'none',
               }} />
 
