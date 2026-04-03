@@ -1218,7 +1218,7 @@ export default function AppShell() {
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
-                opacity: dark ? 0.45 : 0.22,
+                opacity: dark ? 0.35 : 0.15,
                 pointerEvents: 'none',
               }} />
               {/* Circuit spark nodes — subtle pulse on a few nodes */}
