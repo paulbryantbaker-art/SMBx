@@ -1231,8 +1231,7 @@ export default function AppShell() {
                     background: isMobile
                       ? `radial-gradient(ellipse 90% 60% at 50% 38%, ${dark ? 'rgba(15,16,18,0.85)' : 'rgba(249,249,252,0.9)'} 0%, ${dark ? 'rgba(15,16,18,0.4)' : 'rgba(249,249,252,0.3)'} 50%, transparent 100%)`
                       : `radial-gradient(ellipse 80% 70% at 50% 42%, ${dark ? 'rgba(15,16,18,0.85)' : 'rgba(249,249,252,0.9)'} 0%, ${dark ? 'rgba(15,16,18,0.4)' : 'rgba(249,249,252,0.3)'} 50%, transparent 100%)`,
-                    backdropFilter: 'blur(2.5px)',
-                    WebkitBackdropFilter: 'blur(2.5px)',
+                    /* No backdrop blur — radial gradient handles the fade. Blur made the circuit board look out of focus. */
                     maskImage: isMobile
                       ? 'radial-gradient(ellipse 85% 55% at 50% 38%, black 0%, transparent 100%)'
                       : 'radial-gradient(ellipse 75% 65% at 50% 42%, black 0%, transparent 100%)',
