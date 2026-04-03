@@ -1218,7 +1218,7 @@ export default function AppShell() {
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
-                opacity: dark ? 0.30 : 0.08,
+                opacity: dark ? 0.35 : 0.18,
                 pointerEvents: 'none',
               }} />
               {/* Circuit spark nodes — subtle pulse on a few nodes */}
@@ -1232,15 +1232,14 @@ export default function AppShell() {
                   <div style={{
                     position: 'absolute', inset: 0, zIndex: 2, minHeight: '100dvh',
                     background: isMobile
-                      ? `radial-gradient(ellipse 90% 60% at 50% 38%, ${dark ? 'rgba(15,16,18,0.85)' : 'rgba(249,249,252,0.9)'} 0%, ${dark ? 'rgba(15,16,18,0.4)' : 'rgba(249,249,252,0.3)'} 50%, transparent 100%)`
-                      : `radial-gradient(ellipse 80% 70% at 50% 42%, ${dark ? 'rgba(15,16,18,0.85)' : 'rgba(249,249,252,0.9)'} 0%, ${dark ? 'rgba(15,16,18,0.4)' : 'rgba(249,249,252,0.3)'} 50%, transparent 100%)`,
-                    /* No backdrop blur — radial gradient handles the fade. Blur made the circuit board look out of focus. */
+                      ? `radial-gradient(ellipse 70% 45% at 50% 40%, ${dark ? 'rgba(15,16,18,0.88)' : 'rgba(249,249,252,0.92)'} 0%, ${dark ? 'rgba(15,16,18,0.2)' : 'rgba(249,249,252,0.15)'} 60%, transparent 100%)`
+                      : `radial-gradient(ellipse 55% 50% at 50% 44%, ${dark ? 'rgba(15,16,18,0.88)' : 'rgba(249,249,252,0.92)'} 0%, ${dark ? 'rgba(15,16,18,0.2)' : 'rgba(249,249,252,0.15)'} 55%, transparent 100%)`,
                     maskImage: isMobile
-                      ? 'radial-gradient(ellipse 85% 55% at 50% 38%, black 0%, transparent 100%)'
-                      : 'radial-gradient(ellipse 75% 65% at 50% 42%, black 0%, transparent 100%)',
+                      ? 'radial-gradient(ellipse 65% 42% at 50% 40%, black 0%, transparent 100%)'
+                      : 'radial-gradient(ellipse 50% 45% at 50% 44%, black 0%, transparent 100%)',
                     WebkitMaskImage: isMobile
-                      ? 'radial-gradient(ellipse 85% 55% at 50% 38%, black 0%, transparent 100%)'
-                      : 'radial-gradient(ellipse 75% 65% at 50% 42%, black 0%, transparent 100%)',
+                      ? 'radial-gradient(ellipse 65% 42% at 50% 40%, black 0%, transparent 100%)'
+                      : 'radial-gradient(ellipse 50% 45% at 50% 44%, black 0%, transparent 100%)',
                     pointerEvents: 'none',
                   }} />
 
