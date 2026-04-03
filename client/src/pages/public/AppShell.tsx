@@ -1214,11 +1214,11 @@ export default function AppShell() {
                 position: 'absolute', left: 0, right: 0, top: 0,
                 height: '100dvh',
                 zIndex: 1,
-                backgroundImage: `url('/circuit-${dark ? 'dark' : 'light'}.svg')`,
+                backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
-                opacity: dark ? 0.35 : 0.18,
+                opacity: dark ? 0.45 : 0.22,
                 pointerEvents: 'none',
               }} />
               {/* Circuit spark nodes — subtle pulse on a few nodes */}
