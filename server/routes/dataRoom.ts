@@ -7,8 +7,7 @@ import { requireAuth } from '../middleware/auth.js';
 import { hasDealAccess, getVisibleFolderIds, logActivity } from '../services/dealAccessService.js';
 import { createNotification } from './notifications.js';
 import multer from 'multer';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
+import { uploadFile, downloadFile } from '../services/storageService.js';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -214,17 +213,27 @@ dataRoomRouter.patch('/data-room/documents/:docId', async (req, res) => {
     const docId = parseInt(req.params.docId, 10);
     const { status } = req.body;
 
-    const validStatuses = ['draft', 'review', 'approved', 'locked'];
+    const validStatuses = ['draft', 'review', 'approved', 'locked', 'agreed', 'executed', 'archived'];
     if (!validStatuses.includes(status)) return res.status(400).json({ error: 'Invalid status' });
 
     // Look up document's deal_id and check RBAC
-    const [doc] = await sql`SELECT id, deal_id, status FROM data_room_documents WHERE id = ${docId}`;
+    const [doc] = await sql`SELECT id, deal_id, status, doc_class FROM data_room_documents WHERE id = ${docId}`;
     if (!doc) return res.status(404).json({ error: 'Document not found' });
 
     const access = await hasDealAccess(doc.deal_id, userId);
     if (!access) return res.status(404).json({ error: 'Document not found' });
     if (access.access_level === 'read') return res.status(403).json({ error: 'Read-only access cannot update documents' });
-    if (doc.status === 'locked') return res.status(400).json({ error: 'Document is locked and cannot be modified' });
+
+    // Enforce doc_class-based lifecycle rules
+    const { canTransition, isImmutable } = await import('../services/documentLifecycle.js');
+    if (isImmutable(doc.doc_class || 'working', doc.status)) {
+      return res.status(400).json({ error: 'Document is immutable and cannot be modified' });
+    }
+    if (doc.doc_class && !canTransition(doc.doc_class, doc.status, status)) {
+      return res.status(400).json({
+        error: `Cannot transition ${doc.doc_class} document from '${doc.status}' to '${status}'`,
+      });
+    }
 
     const [updated] = await sql`
       UPDATE data_room_documents SET status = ${status}, updated_at = NOW()
@@ -347,13 +356,8 @@ dataRoomRouter.post('/data-room/:dealId/upload', upload.single('file'), async (r
     if (!access) return res.status(404).json({ error: 'Deal not found' });
     if (access.access_level === 'read') return res.status(403).json({ error: 'Read-only access cannot upload files' });
 
-    // Save to disk at /tmp/uploads/{dealId}/
-    const uploadDir = join('/tmp', 'uploads', String(dealId));
-    await mkdir(uploadDir, { recursive: true });
-
-    const safeFilename = `${Date.now()}_${file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-    const filePath = join(uploadDir, safeFilename);
-    await writeFile(filePath, file.buffer);
+    // Upload to S3 (or local fallback)
+    const { key, url: fileUrl } = await uploadFile(dealId, file.originalname, file.buffer, file.mimetype);
 
     // Determine folder from request body (optional)
     const folderId = req.body.folderId ? parseInt(req.body.folderId, 10) : null;
@@ -362,11 +366,16 @@ dataRoomRouter.post('/data-room/:dealId/upload', upload.single('file'), async (r
     const ext = file.originalname.split('.').pop()?.toLowerCase() || 'unknown';
     const fileType = ['pdf', 'docx', 'xlsx', 'csv', 'pptx', 'txt'].includes(ext) ? ext : 'other';
 
+    // SHA-256 hash for integrity
+    const { createHash } = await import('crypto');
+    const contentHash = createHash('sha256').update(file.buffer).digest('hex');
+    const docClass = req.body.docClass || 'evidence';
+
     // Create data_room_documents record
     const [doc] = await sql`
-      INSERT INTO data_room_documents (deal_id, folder_id, user_id, name, file_type, file_url, file_size, status)
-      VALUES (${dealId}, ${folderId}, ${userId}, ${file.originalname}, ${fileType}, ${filePath}, ${file.size}, 'draft')
-      RETURNING id, name, file_type, file_size, status, created_at
+      INSERT INTO data_room_documents (deal_id, folder_id, user_id, name, file_type, file_url, file_size, status, doc_class, content_hash)
+      VALUES (${dealId}, ${folderId}, ${userId}, ${file.originalname}, ${fileType}, ${fileUrl}, ${file.size}, 'draft', ${docClass}, ${contentHash})
+      RETURNING id, name, file_type, file_size, status, doc_class, content_hash, created_at
     `;
 
     // Log activity
@@ -380,5 +389,46 @@ dataRoomRouter.post('/data-room/:dealId/upload', upload.single('file'), async (r
   } catch (err: any) {
     console.error('File upload error:', err.message);
     return res.status(500).json({ error: 'Failed to upload file' });
+  }
+});
+
+// ─── Download / view a data room file ────────────────────────────
+
+dataRoomRouter.get('/data-room/documents/:docId/download', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const docId = parseInt(req.params.docId, 10);
+
+    const [doc] = await sql`
+      SELECT id, deal_id, name, file_type, file_url, file_size
+      FROM data_room_documents WHERE id = ${docId}
+    `;
+    if (!doc || !doc.file_url) return res.status(404).json({ error: 'Document not found' });
+
+    const access = await hasDealAccess(doc.deal_id, userId);
+    if (!access) return res.status(404).json({ error: 'Document not found' });
+
+    // S3: redirect to presigned URL. Local: stream the file.
+    const { getPresignedDownloadUrl, isS3Active } = await import('../services/storageService.js');
+    if (isS3Active() && doc.file_url.startsWith('s3://')) {
+      const url = await getPresignedDownloadUrl(doc.file_url, doc.name, 3600);
+      return res.redirect(url);
+    }
+
+    // Local fallback: stream file
+    const { readFile: fsRead } = await import('fs/promises');
+    const fileData = await fsRead(doc.file_url);
+    const mimeTypes: Record<string, string> = {
+      pdf: 'application/pdf', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', csv: 'text/csv',
+      pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', txt: 'text/plain',
+    };
+    res.setHeader('Content-Type', mimeTypes[doc.file_type] || 'application/octet-stream');
+    res.setHeader('Content-Disposition', `inline; filename="${doc.name}"`);
+    res.setHeader('Content-Length', fileData.length);
+    return res.send(fileData);
+  } catch (err: any) {
+    console.error('File download error:', err.message);
+    return res.status(500).json({ error: 'Failed to download file' });
   }
 });

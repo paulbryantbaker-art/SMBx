@@ -116,7 +116,14 @@ export async function streamAgenticResponse(
               console.log(`Tool result: ${result.substring(0, 200)}`);
             }
 
-            safeWrite(res, `data: ${JSON.stringify({ type: 'tool_done', tool: block.name })}\n\n`);
+            // Send tool result to client — includes canvas_action if present
+            let parsedResult: any = null;
+            try { parsedResult = JSON.parse(result); } catch { /* not JSON */ }
+            safeWrite(res, `data: ${JSON.stringify({
+              type: 'tool_done',
+              tool: block.name,
+              result: parsedResult,
+            })}\n\n`);
 
             toolResults.push({
               type: 'tool_result' as const,

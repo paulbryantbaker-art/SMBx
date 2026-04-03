@@ -756,13 +756,19 @@ export async function processDeliverable(data: DeliverableJobData): Promise<void
 
     const generationTime = Date.now() - startTime;
 
+    // Classify document type
+    const docClass = /loi|nda|agreement|term_sheet|counter_proposal|term-sheet|counter-proposal/i.test(normalizedType) ? 'legal'
+      : /cim|teaser|pitch_deck|executive_summary|outreach|pitch-deck|executive-summary/i.test(normalizedType) ? 'marketing'
+      : 'working';
+
     await sql`
       UPDATE deliverables
       SET status = 'complete',
           content = ${JSON.stringify(result)}::jsonb,
           generation_model = ${model},
           generation_time_ms = ${generationTime},
-          completed_at = NOW()
+          completed_at = NOW(),
+          doc_class = ${docClass}
       WHERE id = ${deliverableId}
     `;
 

@@ -3,9 +3,11 @@
  *
  * Each model tab has: assumptions (inputs) → calculation engine → outputs.
  * Both UI controls and Yulia's tools modify the same state.
+ * Analytics tracked via trackEvent.
  * Cross-tab linking: comparison/sensitivity tabs subscribe to source tabs.
  */
 import { create } from 'zustand';
+import { trackEvent } from './analytics';
 import {
   calculateValuation, calculateLBO, calculateSBAFinancing,
   calculateDSCRFull, calculateFCF, calculateBlendedValuation,
@@ -214,6 +216,7 @@ export const useModelStore = create<ModelStore>((set, get) => ({
       tabs: { ...state.tabs, [id]: tab },
       activeTabId: id,
     }));
+    trackEvent('model_created', { model: type, title });
     return id;
   },
 

@@ -453,3 +453,164 @@ collaborationRouter.post('/deals/:dealId/sign-nda', async (req, res) => {
     return res.status(500).json({ error: 'Failed to sign NDA' });
   }
 });
+
+// ─── Review Requests ───────────────────────────────────────
+
+collaborationRouter.post('/deals/:dealId/review-requests', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const dealId = parseInt(req.params.dealId, 10);
+    const { deliverableId, documentId, reviewerId, focusAreas } = req.body;
+
+    if (!reviewerId) return res.status(400).json({ error: 'reviewerId is required' });
+    if (!deliverableId && !documentId) return res.status(400).json({ error: 'deliverableId or documentId required' });
+
+    // Only deal owner or full-access participants can request reviews
+    const access = await hasDealAccess(dealId, userId);
+    if (!access || access.access_level === 'read') {
+      return res.status(403).json({ error: 'Cannot request reviews' });
+    }
+
+    // Verify reviewer is a participant
+    const [reviewer] = await sql`
+      SELECT dp.role FROM deal_participants dp
+      WHERE dp.deal_id = ${dealId} AND dp.user_id = ${reviewerId} AND dp.accepted_at IS NOT NULL
+    `;
+    if (!reviewer) return res.status(400).json({ error: 'Reviewer is not a deal participant' });
+
+    const { createReviewRequest } = await import('../services/reviewService.js');
+    const review = await createReviewRequest({
+      dealId,
+      deliverableId: deliverableId ? parseInt(deliverableId) : undefined,
+      documentId: documentId ? parseInt(documentId) : undefined,
+      requestedBy: userId,
+      reviewerId: parseInt(reviewerId),
+      reviewerRole: reviewer.role,
+      focusAreas,
+    });
+
+    await logActivity(dealId, userId, 'review_requested', 'deliverable', deliverableId || documentId, {
+      reviewerId, focusAreas: focusAreas?.substring(0, 100),
+    });
+
+    return res.status(201).json(review);
+  } catch (err: any) {
+    console.error('Create review request error:', err.message);
+    return res.status(500).json({ error: 'Failed to create review request' });
+  }
+});
+
+collaborationRouter.get('/deals/:dealId/review-requests', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const dealId = parseInt(req.params.dealId, 10);
+
+    const access = await hasDealAccess(dealId, userId);
+    if (!access) return res.status(404).json({ error: 'Deal not found' });
+
+    const { getReviewsForDeal } = await import('../services/reviewService.js');
+    const reviews = await getReviewsForDeal(dealId);
+    return res.json(reviews);
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to get reviews' });
+  }
+});
+
+collaborationRouter.patch('/review-requests/:reviewId/respond', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const reviewId = parseInt(req.params.reviewId, 10);
+    const { status, notes } = req.body;
+
+    if (!['approved', 'changes_requested', 'flagged'].includes(status)) {
+      return res.status(400).json({ error: 'Status must be approved, changes_requested, or flagged' });
+    }
+
+    const { respondToReview } = await import('../services/reviewService.js');
+    const result = await respondToReview(reviewId, userId, status, notes);
+
+    if (!result) return res.status(404).json({ error: 'Review not found or not assigned to you' });
+    return res.json(result);
+  } catch (err: any) {
+    console.error('Respond to review error:', err.message);
+    return res.status(500).json({ error: 'Failed to respond to review' });
+  }
+});
+
+collaborationRouter.get('/my-reviews', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const { getPendingReviewsForUser } = await import('../services/reviewService.js');
+    const reviews = await getPendingReviewsForUser(userId);
+    return res.json(reviews);
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to get reviews' });
+  }
+});
+
+// ─── Document Sharing ──────────────────────────────────────
+
+collaborationRouter.post('/deals/:dealId/share', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const dealId = parseInt(req.params.dealId, 10);
+
+    const access = await hasDealAccess(dealId, userId);
+    if (!access || access.access_level === 'read') {
+      return res.status(403).json({ error: 'Cannot share documents' });
+    }
+
+    const {
+      deliverableId, documentId, shareType,
+      accessLevel, authRequired, downloadEnabled, watermark,
+      expiresInDays, maxViews, recipientEmail, recipientName, message,
+    } = req.body;
+
+    if (!deliverableId && !documentId) {
+      return res.status(400).json({ error: 'deliverableId or documentId required' });
+    }
+
+    const { createDocumentShare } = await import('../services/documentShareService.js');
+    const result = await createDocumentShare({
+      dealId,
+      deliverableId: deliverableId ? parseInt(deliverableId) : undefined,
+      documentId: documentId ? parseInt(documentId) : undefined,
+      sharedBy: userId,
+      shareType: shareType || 'external',
+      accessLevel: accessLevel || 'view',
+      authRequired: authRequired || 'none',
+      downloadEnabled: downloadEnabled ?? false,
+      watermark,
+      expiresInDays: expiresInDays ? parseInt(expiresInDays) : undefined,
+      maxViews: maxViews ? parseInt(maxViews) : undefined,
+      recipientEmail,
+      recipientName,
+      message,
+    });
+
+    await logActivity(dealId, userId, 'shared_document', 'document_share', result.shareId, {
+      recipientEmail, shareType, accessLevel,
+    });
+
+    return res.status(201).json(result);
+  } catch (err: any) {
+    console.error('Share document error:', err.message);
+    return res.status(500).json({ error: 'Failed to share document' });
+  }
+});
+
+collaborationRouter.get('/deals/:dealId/shares', async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+    const dealId = parseInt(req.params.dealId, 10);
+
+    const access = await hasDealAccess(dealId, userId);
+    if (!access) return res.status(404).json({ error: 'Deal not found' });
+
+    const { getShareStats } = await import('../services/documentShareService.js');
+    const result = await getShareStats(dealId);
+    return res.json(result);
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to get shares' });
+  }
+});

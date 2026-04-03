@@ -234,12 +234,14 @@ deliverablesRouter.patch('/deliverables/:id/content', async (req, res) => {
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
 
   const deliverableId = parseInt(req.params.id);
-  const { markdown } = req.body;
-  if (typeof markdown !== 'string') return res.status(400).json({ error: 'markdown field required' });
+  const { markdown, tiptapContent } = req.body;
+  if (typeof markdown !== 'string' && !tiptapContent) {
+    return res.status(400).json({ error: 'markdown or tiptapContent required' });
+  }
 
   try {
     const [deliverable] = await sql`
-      SELECT d.id, d.deal_id, d.content FROM deliverables d WHERE d.id = ${deliverableId}
+      SELECT d.id, d.deal_id, d.content, d.doc_class FROM deliverables d WHERE d.id = ${deliverableId}
     `;
     if (!deliverable) return res.status(404).json({ error: 'Deliverable not found' });
 
@@ -252,10 +254,13 @@ deliverablesRouter.patch('/deliverables/:id/content', async (req, res) => {
     const existing = typeof deliverable.content === 'string'
       ? JSON.parse(deliverable.content)
       : deliverable.content || {};
-    const updated = { ...existing, markdown };
+    const updated = markdown ? { ...existing, markdown } : existing;
 
     await sql`
-      UPDATE deliverables SET content = ${JSON.stringify(updated)}, updated_at = NOW()
+      UPDATE deliverables
+      SET content = ${JSON.stringify(updated)}::jsonb,
+          tiptap_content = ${tiptapContent ? JSON.stringify(tiptapContent) : null}::jsonb,
+          updated_at = NOW()
       WHERE id = ${deliverableId}
     `;
 

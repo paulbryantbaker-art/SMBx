@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Markdown from 'react-markdown';
 import { authHeaders } from '../../hooks/useAuth';
 import InteractiveModel from './InteractiveModel';
-import CanvasEditor from './CanvasEditor';
+import DocumentEditor from '../documents/DocumentEditor';
 import CommentsPanel from './CommentsPanel';
 
 interface CanvasProps {
@@ -30,6 +30,8 @@ interface DeliverableData {
   is_stale?: boolean;
   stale_reason?: string;
   version_number?: number;
+  tiptap_content?: Record<string, any> | null;
+  doc_class?: string;
 }
 
 const DELIVERABLE_LABELS: Record<string, string> = {
@@ -265,7 +267,7 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
               {filed ? 'Saved' : filing ? 'Saving...' : 'Save to Data Room'}
             </button>
           )}
-          {showContent && !isMarkdownMode && data?.content?.markdown && deliverableId && (
+          {showContent && !isMarkdownMode && data?.content && deliverableId && data.content.type !== 'financial_model' && (
             <button
               onClick={() => setEditMode(!editMode)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border-0 cursor-pointer transition-colors ${
@@ -374,19 +376,27 @@ export default function Canvas({ deliverableId, markdownContent, title, dealId, 
         )}
 
         {!isMarkdownMode && !loading && data?.status === 'complete' && data.content && (
-          data.content.markdown && deliverableId && editMode ? (
-            <CanvasEditor
-              deliverableId={deliverableId}
-              content={data.content.markdown}
-              onSave={(newMd) => {
-                setData(prev => prev ? { ...prev, content: { ...prev.content!, markdown: newMd } } : prev);
+          data.content.type === 'financial_model' && data.content.base_case && data.content.assumptions ? (
+            <div id="canvas-print-area" className="px-6 py-5 max-w-[700px] mx-auto canvas-content">
+              <InteractiveModel content={data.content as any} />
+            </div>
+          ) : (
+            <DocumentEditor
+              content={data.content}
+              tiptapContent={data.tiptap_content}
+              deliverableId={deliverableId ?? undefined}
+              name={data.name}
+              editable={editMode}
+              docClass={data.doc_class}
+              onSave={(tiptapJson, markdown) => {
+                setData(prev => prev ? {
+                  ...prev,
+                  content: { ...prev.content!, markdown },
+                  tiptap_content: tiptapJson as Record<string, any>,
+                } : prev);
                 setEditMode(false);
               }}
             />
-          ) : (
-            <div id="canvas-print-area" className="px-6 py-5 max-w-[700px] mx-auto canvas-content">
-              <CanvasContent content={data.content} name={data.name} />
-            </div>
           )
         )}
 

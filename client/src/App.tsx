@@ -36,6 +36,7 @@ import Terms from './pages/public/Terms';
 
 // Lazy-load secondary pages
 const SharedDocument = lazy(() => import('./pages/public/SharedDocument'));
+const SharedDocumentView = lazy(() => import('./pages/SharedDocumentView'));
 const AcceptInvite = lazy(() => import('./pages/public/AcceptInvite'));
 const Search = lazy(() => import('./pages/Search'));
 const DayPassView = lazy(() => import('./pages/public/DayPassView'));
@@ -139,6 +140,13 @@ export default function App() {
       </Route>
 
       {/* Shared / invite / day-pass */}
+      <Route path="/shared/doc/:token">
+        {(params) => (
+          <Suspense fallback={<PageLoader />}>
+            <SharedDocumentView token={params.token} />
+          </Suspense>
+        )}
+      </Route>
       <Route path="/shared/:token">
         {(params) => (
           <Suspense fallback={<PageLoader />}>

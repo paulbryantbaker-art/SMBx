@@ -242,6 +242,28 @@ export const TOOL_DEFINITIONS: Tool[] = [
     },
   },
   {
+    name: 'query_admin_data',
+    description: 'Admin-only tool for querying platform metrics, user activity, issues, and system health. Only available when the user is an admin. Use to answer questions like "how many users signed up this week?", "what are the top bugs?", "show me conversion metrics", "are there any critical issues?".',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        query: {
+          type: 'string',
+          enum: [
+            'metrics_overview', 'conversion_funnel', 'journey_distribution',
+            'gate_heatmap', 'revenue_breakdown', 'engagement_7d',
+            'open_issues', 'critical_issues', 'feature_requests',
+            'recent_errors', 'user_growth', 'service_health',
+          ],
+          description: 'Predefined metric query to run',
+        },
+        timeRange: { type: 'string', enum: ['24h', '7d', '30d', '90d'], description: 'Time range filter (default: 7d)' },
+        limit: { type: 'number', description: 'Max results for list queries (default: 20)' },
+      },
+      required: ['query'],
+    },
+  },
+  {
     name: 'create_support_issue',
     description: 'Create a support ticket when the user reports a problem Yulia cannot resolve, when Yulia detects a system error, or when the user makes a feature request. TRY TO FIX THE ISSUE FIRST before creating a ticket. Only create a ticket if you genuinely cannot resolve it yourself.',
     input_schema: {
@@ -254,6 +276,40 @@ export const TOOL_DEFINITIONS: Tool[] = [
         userMessage: { type: 'string', description: "The user's own words describing the problem (verbatim from chat)" },
       },
       required: ['type', 'title', 'description', 'severity'],
+    },
+  },
+  {
+    name: 'request_review',
+    description: 'Send a document to a deal participant for review. Use this proactively when a deliverable is ready for legal, financial, or strategic review. Yulia should specify focus areas to guide the reviewer. The reviewer gets notified and the document opens for them with review tools.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'Deal ID' },
+        deliverableId: { type: 'number', description: 'Deliverable to review' },
+        reviewerRole: { type: 'string', enum: ['attorney', 'cpa', 'broker', 'lender'], description: 'Role of the reviewer to assign' },
+        focusAreas: { type: 'string', description: 'Specific areas the reviewer should focus on — be detailed: section numbers, specific terms, risk areas. Example: "Focus on non-compete scope in §4.2 — broader than typical for HVAC. Also review working capital peg methodology in §3.1."' },
+      },
+      required: ['dealId', 'deliverableId', 'reviewerRole'],
+    },
+  },
+  {
+    name: 'share_document',
+    description: 'Share a document with someone — sends them an email with a link to view it in the platform. Use this to share CIMs with buyers, LOIs across the fence, reports with lenders, or any document with anyone. The recipient opens it in-browser on smbx.ai, not as a download.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        dealId: { type: 'number', description: 'Deal ID' },
+        deliverableId: { type: 'number', description: 'Deliverable to share' },
+        recipientEmail: { type: 'string', description: 'Email address of the recipient' },
+        recipientName: { type: 'string', description: 'Name of the recipient (for the email)' },
+        shareType: { type: 'string', enum: ['external', 'cross_fence', 'internal'], description: 'external = anyone, cross_fence = other side of deal, internal = my team' },
+        accessLevel: { type: 'string', enum: ['view', 'comment'], description: 'What the recipient can do. Default: view' },
+        authRequired: { type: 'string', enum: ['none', 'email', 'account', 'nda'], description: 'Auth required to view. Use nda for sensitive docs like CIMs.' },
+        message: { type: 'string', description: 'Personal message from the sender, included in the email. Yulia should write this contextually.' },
+        expiresInDays: { type: 'number', description: 'Days until link expires. Default: no expiration.' },
+        downloadEnabled: { type: 'boolean', description: 'Allow download. Default: false.' },
+      },
+      required: ['dealId', 'deliverableId', 'recipientEmail'],
     },
   },
 ];
@@ -312,6 +368,12 @@ export async function executeTool(
         return readTabState(input);
       case 'create_support_issue':
         return await createSupportIssue(input, userId, conversationId);
+      case 'query_admin_data':
+        return await queryAdminData(input, userId);
+      case 'request_review':
+        return await requestReviewTool(input, userId);
+      case 'share_document':
+        return await shareDocumentTool(input, userId);
       default:
         return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
@@ -498,7 +560,14 @@ async function advanceGate(input: Record<string, any>, userId: number): Promise<
   // Gate conversation lifecycle: summarize old, create new
   const transition = await handleGateTransition(dealId, userId, fromGate, toGate).catch(() => null);
 
-  return JSON.stringify({ success: true, newGate: toGate, newConversationId: transition?.newConversationId ?? null });
+  // Show the pipeline view so user sees their progress
+  return JSON.stringify({
+    success: true,
+    canvas_action: 'open_pipeline',
+    title: `${deal.journey_type === 'sell' ? 'Sell' : deal.journey_type === 'buy' ? 'Buy' : deal.journey_type === 'raise' ? 'Raise' : 'PMI'} Journey`,
+    newGate: toGate,
+    newConversationId: transition?.newConversationId ?? null,
+  });
 }
 
 async function generateFreeDeliverable(input: Record<string, any>, userId: number): Promise<string> {
@@ -551,7 +620,13 @@ async function generateFreeDeliverable(input: Record<string, any>, userId: numbe
     RETURNING id, type
   `;
 
-  return JSON.stringify({ success: true, deliverableId: deliverable.id, content });
+  return JSON.stringify({
+    success: true,
+    canvas_action: 'open_deliverable',
+    deliverableId: deliverable.id,
+    title: deliverableType.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+    content,
+  });
 }
 
 function getMultipleRange(league: string): string {
@@ -598,8 +673,27 @@ async function recommendProviders(input: Record<string, any>, userId: number): P
       }
     }
 
+    // Build provider summary markdown for canvas display
+    const providerLines: string[] = [];
+    for (const [provType, providers] of Object.entries(result.recommendations)) {
+      if ((providers as any[]).length > 0) {
+        providerLines.push(`## ${provType.charAt(0).toUpperCase() + provType.slice(1)}s`);
+        for (const p of providers as any[]) {
+          providerLines.push(`**${p.name}**${p.firm_name ? ` — ${p.firm_name}` : ''}`);
+          const details = [p.location_city, p.location_state].filter(Boolean).join(', ');
+          if (details) providerLines.push(`${details}`);
+          if (p.practice_areas?.length) providerLines.push(`Practice areas: ${p.practice_areas.join(', ')}`);
+          if (p.client_rating) providerLines.push(`Rating: ${p.client_rating}/5`);
+          providerLines.push('');
+        }
+      }
+    }
+
     return JSON.stringify({
       success: true,
+      canvas_action: 'show_content',
+      title: 'Recommended Providers',
+      content: `# Professional Services — ${result.context}\n\n${providerLines.join('\n')}`,
       context: result.context,
       neededTypes: result.neededTypes,
       recommendations: result.recommendations,
@@ -626,7 +720,22 @@ async function analyzeBuyerDemandTool(input: Record<string, any>, userId: number
   if (!deal) return JSON.stringify({ error: 'Deal not found' });
 
   const result = await matchBuyersForSeller(dealId);
-  return JSON.stringify({ success: true, ...result });
+
+  // Build markdown summary for canvas
+  const lines: string[] = ['# Buyer Demand Analysis\n'];
+  if (result.buyerDemand) {
+    lines.push(`**Market Heat:** ${result.buyerDemand.heat || 'Moderate'}\n`);
+    if (result.buyerDemand.activeTheses) lines.push(`**Active buyer theses matching your profile:** ${result.buyerDemand.activeTheses}`);
+    if (result.buyerDemand.summary) lines.push(`\n${result.buyerDemand.summary}`);
+  }
+
+  return JSON.stringify({
+    success: true,
+    canvas_action: 'show_content',
+    title: 'Buyer Demand Analysis',
+    content: lines.join('\n'),
+    ...result,
+  });
 }
 
 async function matchFranchiseTool(input: Record<string, any>): Promise<string> {
@@ -1058,6 +1167,8 @@ async function getSourcingPortfolio(input: Record<string, any>, userId: number):
 
   return JSON.stringify({
     hasPortfolio: true,
+    canvas_action: 'open_sourcing',
+    title: portfolio.name || 'Sourcing Pipeline',
     portfolioName: portfolio.name,
     pipelineStatus: portfolio.pipeline_status,
     stats: {
@@ -1211,5 +1322,295 @@ async function createSupportIssue(
     message: type === 'feature_request'
       ? `I've captured that as ${ref}. Good idea — I've logged it with your deal context so we understand the use case.`
       : `I've logged this as ${ref}. Paul will look into it. In the meantime, let's keep working on everything else.`,
+  });
+}
+
+// ─── Admin Query Tool ────────────────────────────────────────
+
+const ADMIN_EMAILS = ['paulbryantbaker@gmail.com'];
+
+async function queryAdminData(input: Record<string, any>, userId: number): Promise<string> {
+  // Verify admin
+  const [user] = await sql`SELECT email, role FROM users WHERE id = ${userId}`;
+  if (!user || (user.role !== 'admin' && !ADMIN_EMAILS.includes(user.email))) {
+    return JSON.stringify({ error: 'Admin access required' });
+  }
+
+  const { query, timeRange = '7d', limit = 20 } = input;
+  const interval = { '24h': '24 hours', '7d': '7 days', '30d': '30 days', '90d': '90 days' }[timeRange] || '7 days';
+
+  switch (query) {
+    case 'metrics_overview': {
+      const [users] = await sql`SELECT COUNT(*)::int as total FROM users`;
+      const [active] = await sql`
+        SELECT COUNT(DISTINCT user_id)::int as c FROM conversations
+        WHERE updated_at > NOW() - INTERVAL ${interval} AND user_id IS NOT NULL
+      `;
+      const [deals] = await sql`SELECT COUNT(*)::int as total FROM deals WHERE status = 'active'`;
+      const [mrr] = await sql`
+        SELECT COALESCE(SUM(CASE
+          WHEN plan = 'starter' THEN 4900 WHEN plan = 'professional' THEN 14900 WHEN plan = 'enterprise' THEN 99900 ELSE 0
+        END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')
+      `;
+      const [msgs] = await sql`SELECT COUNT(*)::int as c FROM messages WHERE created_at > NOW() - INTERVAL ${interval}`;
+      const [delivs] = await sql`SELECT COUNT(*)::int as c FROM deliverables WHERE created_at > NOW() - INTERVAL ${interval}`;
+      const [errors] = await sql`
+        SELECT COUNT(*)::int as c FROM support_issues WHERE type = 'system_error' AND created_at > NOW() - INTERVAL '24 hours'
+      `;
+      return JSON.stringify({
+        totalUsers: users.total, activeUsers: active.c, activeDeals: deals.total,
+        mrrCents: Number(mrr.mrr_cents), messages: msgs.c, deliverables: delivs.c,
+        errors24h: errors.c, timeRange,
+      });
+    }
+
+    case 'conversion_funnel': {
+      const [total] = await sql`SELECT COUNT(*)::int as c FROM users`;
+      const [withConv] = await sql`SELECT COUNT(DISTINCT user_id)::int as c FROM conversations WHERE user_id IS NOT NULL`;
+      const [with3Msg] = await sql`
+        SELECT COUNT(DISTINCT c.user_id)::int as c FROM conversations c
+        JOIN (SELECT conversation_id, COUNT(*)::int as cnt FROM messages GROUP BY conversation_id HAVING COUNT(*) >= 3) m
+        ON m.conversation_id = c.id WHERE c.user_id IS NOT NULL
+      `;
+      const [withDeal] = await sql`SELECT COUNT(DISTINCT user_id)::int as c FROM deals`;
+      const [withDeliv] = await sql`SELECT COUNT(DISTINCT user_id)::int as c FROM deliverables`;
+      const [withSub] = await sql`SELECT COUNT(DISTINCT user_id)::int as c FROM subscriptions WHERE status IN ('active', 'trialing')`;
+      return JSON.stringify({
+        funnel: [
+          { stage: 'Registered', count: total.c },
+          { stage: 'First Conversation', count: withConv.c },
+          { stage: '3+ Messages', count: with3Msg.c },
+          { stage: 'Deal Created', count: withDeal.c },
+          { stage: 'Deliverable Generated', count: withDeliv.c },
+          { stage: 'Subscribed', count: withSub.c },
+        ],
+      });
+    }
+
+    case 'journey_distribution': {
+      const journeys = await sql`
+        SELECT journey_type, COUNT(*)::int as count,
+               AVG(CASE WHEN current_gate ~ '[0-9]' THEN CAST(SUBSTRING(current_gate FROM '[0-9]+') AS INTEGER) ELSE 0 END)::numeric(3,1) as avg_gate
+        FROM deals WHERE status = 'active' GROUP BY journey_type ORDER BY count DESC
+      `;
+      return JSON.stringify({ journeys });
+    }
+
+    case 'gate_heatmap': {
+      const gates = await sql`
+        SELECT current_gate, COUNT(*)::int as count FROM deals
+        WHERE status = 'active' AND current_gate IS NOT NULL
+        GROUP BY current_gate ORDER BY current_gate
+      `;
+      return JSON.stringify({ gates });
+    }
+
+    case 'revenue_breakdown': {
+      const breakdown = await sql`
+        SELECT plan, status, COUNT(*)::int as count FROM subscriptions GROUP BY plan, status ORDER BY plan
+      `;
+      const [mrr] = await sql`
+        SELECT COALESCE(SUM(CASE
+          WHEN plan = 'starter' THEN 4900 WHEN plan = 'professional' THEN 14900 WHEN plan = 'enterprise' THEN 99900 ELSE 0
+        END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')
+      `;
+      return JSON.stringify({ breakdown, mrrCents: Number(mrr.mrr_cents) });
+    }
+
+    case 'engagement_7d': {
+      const [msgs] = await sql`SELECT COUNT(*)::int as c FROM messages WHERE created_at > NOW() - INTERVAL ${interval}`;
+      const [delivs] = await sql`SELECT COUNT(*)::int as c FROM deliverables WHERE created_at > NOW() - INTERVAL ${interval}`;
+      const events = await sql`
+        SELECT event_type, COUNT(*)::int as c FROM analytics_events
+        WHERE created_at > NOW() - INTERVAL ${interval}
+        GROUP BY event_type ORDER BY c DESC LIMIT 20
+      `;
+      return JSON.stringify({ messages: msgs.c, deliverables: delivs.c, topEvents: events, timeRange });
+    }
+
+    case 'open_issues': {
+      const issues = await sql`
+        SELECT si.id, si.type, si.severity, si.title, si.status, si.created_at,
+               u.email as user_email, d.business_name
+        FROM support_issues si
+        LEFT JOIN users u ON u.id = si.user_id
+        LEFT JOIN deals d ON d.id = si.deal_id
+        WHERE si.status = 'open'
+        ORDER BY CASE si.severity WHEN 'critical' THEN 0 WHEN 'major' THEN 1 WHEN 'minor' THEN 2 ELSE 3 END,
+                 si.created_at DESC
+        LIMIT ${limit}
+      `;
+      const [stats] = await sql`
+        SELECT COUNT(*) FILTER (WHERE status = 'open')::int as open_total,
+               COUNT(*) FILTER (WHERE status = 'open' AND severity = 'critical')::int as critical
+        FROM support_issues
+      `;
+      return JSON.stringify({ issues, openTotal: stats.open_total, critical: stats.critical });
+    }
+
+    case 'critical_issues': {
+      const issues = await sql`
+        SELECT si.id, si.type, si.severity, si.title, si.description, si.status, si.created_at,
+               u.email as user_email, d.business_name, si.context
+        FROM support_issues si
+        LEFT JOIN users u ON u.id = si.user_id
+        LEFT JOIN deals d ON d.id = si.deal_id
+        WHERE si.severity = 'critical' AND si.status != 'resolved'
+        ORDER BY si.created_at DESC LIMIT ${limit}
+      `;
+      return JSON.stringify({ issues });
+    }
+
+    case 'feature_requests': {
+      const features = await sql`
+        SELECT si.id, si.title, si.description, si.user_message, si.severity, si.status, si.created_at,
+               u.email as user_email
+        FROM support_issues si
+        LEFT JOIN users u ON u.id = si.user_id
+        WHERE si.type = 'feature_request'
+        ORDER BY si.created_at DESC LIMIT ${limit}
+      `;
+      return JSON.stringify({ features });
+    }
+
+    case 'recent_errors': {
+      const errors = await sql`
+        SELECT si.id, si.title, si.description, si.severity, si.created_at, si.context,
+               u.email as user_email
+        FROM support_issues si
+        LEFT JOIN users u ON u.id = si.user_id
+        WHERE si.type = 'system_error' AND si.created_at > NOW() - INTERVAL ${interval}
+        ORDER BY si.created_at DESC LIMIT ${limit}
+      `;
+      return JSON.stringify({ errors, timeRange });
+    }
+
+    case 'user_growth': {
+      const growth = await sql`
+        SELECT DATE_TRUNC('day', created_at)::date as day, COUNT(*)::int as signups
+        FROM users WHERE created_at > NOW() - INTERVAL ${interval}
+        GROUP BY day ORDER BY day
+      `;
+      const [total] = await sql`SELECT COUNT(*)::int as c FROM users`;
+      return JSON.stringify({ dailySignups: growth, totalUsers: total.c, timeRange });
+    }
+
+    case 'service_health': {
+      const services = await sql`
+        SELECT related_service, COUNT(*)::int as error_count, MAX(created_at) as last_error
+        FROM support_issues WHERE type = 'system_error' AND created_at > NOW() - INTERVAL '24 hours'
+        GROUP BY related_service
+      `;
+      const [dbCheck] = await sql`SELECT 1 as ok`;
+      return JSON.stringify({
+        database: dbCheck ? 'healthy' : 'error',
+        services: services || [],
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    default:
+      return JSON.stringify({ error: `Unknown query: ${query}` });
+  }
+}
+
+// ─── Review Request Tool ──────────────────────────────────────────
+
+async function requestReviewTool(input: Record<string, any>, userId: number): Promise<string> {
+  const { dealId, deliverableId, reviewerRole, focusAreas } = input;
+
+  // Verify deal ownership
+  const [deal] = await sql`SELECT id, business_name FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  // Find a participant with the specified role
+  const [reviewer] = await sql`
+    SELECT dp.user_id, u.display_name, u.email, dp.role
+    FROM deal_participants dp
+    JOIN users u ON u.id = dp.user_id
+    WHERE dp.deal_id = ${dealId} AND dp.role = ${reviewerRole} AND dp.accepted_at IS NOT NULL
+    LIMIT 1
+  `;
+
+  if (!reviewer) {
+    return JSON.stringify({
+      error: `No ${reviewerRole} found on this deal. Invite one first.`,
+      suggestion: `The deal needs a ${reviewerRole}. Ask the user to invite one by sharing their email.`,
+    });
+  }
+
+  // Create the review request
+  const { createReviewRequest } = await import('./reviewService.js');
+  const review = await createReviewRequest({
+    dealId,
+    deliverableId,
+    requestedBy: userId,
+    reviewerId: reviewer.user_id,
+    reviewerRole: reviewer.role,
+    focusAreas,
+  });
+
+  const reviewerName = reviewer.display_name || reviewer.email.split('@')[0];
+
+  return JSON.stringify({
+    success: true,
+    canvas_action: 'open_deliverable',
+    deliverableId,
+    title: 'Document Under Review',
+    reviewId: review.id,
+    reviewerName,
+    reviewerRole,
+    message: `Review request sent to ${reviewerName} (${reviewerRole}). They'll be notified via email and in-app.`,
+  });
+}
+
+// ─── Share Document Tool ──────────────────────────────────────────
+
+async function shareDocumentTool(input: Record<string, any>, userId: number): Promise<string> {
+  const {
+    dealId, deliverableId, recipientEmail, recipientName,
+    shareType, accessLevel, authRequired, message,
+    expiresInDays, downloadEnabled,
+  } = input;
+
+  // Verify deal access
+  const [deal] = await sql`SELECT id, business_name FROM deals WHERE id = ${dealId} AND user_id = ${userId}`;
+  if (!deal) return JSON.stringify({ error: 'Deal not found' });
+
+  // Get doc title for response
+  let docTitle = 'Document';
+  if (deliverableId) {
+    const [d] = await sql`
+      SELECT m.name FROM deliverables del
+      LEFT JOIN menu_items m ON m.id = del.menu_item_id
+      WHERE del.id = ${deliverableId}
+    `;
+    docTitle = d?.name || 'Document';
+  }
+
+  const { createDocumentShare } = await import('./documentShareService.js');
+  const result = await createDocumentShare({
+    dealId,
+    deliverableId,
+    sharedBy: userId,
+    shareType: shareType || 'external',
+    accessLevel: accessLevel || 'view',
+    authRequired: authRequired || 'none',
+    downloadEnabled: downloadEnabled ?? false,
+    expiresInDays,
+    recipientEmail,
+    recipientName,
+    message,
+  });
+
+  const name = recipientName || recipientEmail.split('@')[0];
+
+  return JSON.stringify({
+    success: true,
+    shareUrl: result.shareUrl,
+    recipientEmail,
+    recipientName: name,
+    docTitle,
+    message: `Shared "${docTitle}" with ${name} at ${recipientEmail}. They'll receive an email with a link to view it on smbx.ai.`,
   });
 }

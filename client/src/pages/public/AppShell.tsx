@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
+import { trackEvent } from '../../lib/analytics';
 import { useAuth, authHeaders } from '../../hooks/useAuth';
 import { useAnonymousChat, type AnonMessage } from '../../hooks/useAnonymousChat';
 import { useAuthChat } from '../../hooks/useAuthChat';
@@ -25,6 +26,8 @@ import AnalyticsView from '../../components/chat/AnalyticsView';
 import NDAModal from '../../components/chat/NDAModal';
 import SourcingPanel from '../../components/chat/SourcingPanel';
 import IntelPanel from '../../components/chat/IntelPanel';
+import DealMessagesPanel from '../../components/documents/DealMessagesPanel';
+import CanvasTabBar from '../../components/canvas/CanvasTabBar';
 import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
@@ -456,6 +459,7 @@ export default function AppShell() {
   const activeCanvasTab = canvasTabs.find(t => t.id === activeCanvasTabId) || null;
 
   const openCanvasTab = useCallback((type: string, label: string, props?: Record<string, any>) => {
+    trackEvent('tab_opened', { tabType: type, label });
     // Deliverables get unique tabs
     if (type === 'deliverable' && props?.deliverableId) {
       const tabId = `deliverable-${props.deliverableId}`;
@@ -788,26 +792,67 @@ export default function AppShell() {
   // Show dock
   const showDock = (viewState === 'landing' || viewState === 'chat') && !(!user && anonChat.limitReached);
 
-  // ─── Canvas Action Handler (from Yulia's model tools) ───────
+  // ─── Canvas Action Handler (from Yulia's tools) ────────────
+  // Yulia shows, doesn't just tell. Tools return canvas_action to open tabs.
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (!detail?.canvas_action) return;
 
-      // Dynamic import to avoid circular deps
-      import('../../lib/modelStore').then(({ useModelStore }) => {
-        const store = useModelStore.getState();
+      const action = detail.canvas_action;
 
-        if (detail.canvas_action === 'create_model_tab') {
+      // Model tabs (valuation, LBO, SBA, etc.)
+      if (action === 'create_model_tab') {
+        import('../../lib/modelStore').then(({ useModelStore }) => {
+          const store = useModelStore.getState();
           const modelTabId = store.createTab(detail.modelType, detail.title, detail.initialAssumptions);
           openCanvasTab('model', detail.title, { modelTabId });
-        } else if (detail.canvas_action === 'update_model') {
+        });
+      } else if (action === 'update_model') {
+        import('../../lib/modelStore').then(({ useModelStore }) => {
+          const store = useModelStore.getState();
           const tabId = detail.tabId === 'active' ? store.activeTabId : detail.tabId;
           if (tabId && detail.updates) {
             store.updateAssumptions(tabId, detail.updates);
           }
-        }
-      });
+        });
+      }
+      // Open sourcing portfolio
+      else if (action === 'open_sourcing') {
+        openCanvasTab('sourcing', detail.title || 'Sourcing Pipeline', detail.props);
+      }
+      // Open buyer pipeline
+      else if (action === 'open_buyer_pipeline') {
+        openCanvasTab('buyer-pipeline', detail.title || 'Buyer Pipeline', detail.props);
+      }
+      // Open a deliverable in canvas
+      else if (action === 'open_deliverable') {
+        openCanvasTab('deliverable', detail.title || 'Document', {
+          deliverableId: detail.deliverableId,
+        });
+      }
+      // Open data room
+      else if (action === 'open_dataroom') {
+        openCanvasTab('dataroom', detail.title || 'Data Room', detail.props);
+      }
+      // Open pipeline view
+      else if (action === 'open_pipeline') {
+        openCanvasTab('pipeline', detail.title || 'Deal Pipeline', detail.props);
+      }
+      // Open seller dashboard
+      else if (action === 'open_seller_dashboard') {
+        openCanvasTab('seller-dashboard', detail.title || 'Seller Dashboard', detail.props);
+      }
+      // Open deal messages (participant chat)
+      else if (action === 'open_deal_messages') {
+        openCanvasTab('deal-messages', detail.title || 'Deal Discussion', { dealId: detail.dealId });
+      }
+      // Render markdown/analysis in a new tab
+      else if (action === 'show_content') {
+        openCanvasTab('markdown', detail.title || 'Analysis', {
+          content: detail.content,
+        });
+      }
     };
 
     window.addEventListener('smbx:canvas_action', handler);
@@ -869,6 +914,14 @@ export default function AppShell() {
         );
       case 'model':
         return <ModelRenderer tabId={tab.props?.modelTabId} />;
+      case 'deal-messages':
+        return (
+          <DealMessagesPanel
+            dealId={tab.props?.dealId || authChat.activeDealId}
+            currentUserEmail={user?.email}
+            onClose={() => closeCanvasTab(tab.id)}
+          />
+        );
       default:
         return null;
     }
@@ -1471,21 +1524,14 @@ export default function AppShell() {
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
               {canvasTabs.length > 0 ? (
                 <>
-                  {/* Tab content header */}
-                  {activeCanvasTab && (
-                    <div className="shrink-0 flex items-center justify-between" style={{ padding: '10px 16px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-                      <h2 className="font-sans m-0 truncate text-sm font-bold" style={{ color: dark ? '#f0f0f3' : '#0D0D0D' }}>
-                        {activeCanvasTab.label}
-                      </h2>
-                      <button
-                        onClick={() => closeCanvasTab(activeCanvasTab.id)}
-                        className="flex items-center justify-center cursor-pointer border-0 w-7 h-7 rounded-md bg-transparent hover:bg-[rgba(0,0,0,0.04)]"
-                        style={{ color: dark ? '#a0a0a0' : '#6E6A63' }}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                      </button>
-                    </div>
-                  )}
+                  {/* Horizontal tab bar — browser/VS Code style */}
+                  <CanvasTabBar
+                    tabs={canvasTabs}
+                    activeTabId={activeCanvasTabId}
+                    onSelect={setActiveCanvasTabId}
+                    onClose={closeCanvasTab}
+                    dark={dark}
+                  />
                   {/* All tabs mounted, only active visible */}
                   <div className="flex-1 overflow-y-auto relative">
                     {canvasTabs.map(tab => (
@@ -1505,29 +1551,6 @@ export default function AppShell() {
                 </div>
               )}
             </div>
-
-            {/* Vertical tab strip — right edge (Dia-style) */}
-            {canvasTabs.length > 1 && (
-              <div
-                className="shrink-0 flex flex-col items-center py-2 gap-1"
-                style={{ width: 44, borderLeft: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`, background: dark ? '#18181b' : '#FAFAFA' }}
-              >
-                {canvasTabs.map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveCanvasTabId(tab.id)}
-                    title={tab.label}
-                    className={`relative w-9 h-9 rounded-lg border-0 cursor-pointer transition-all flex items-center justify-center ${
-                      tab.id === activeCanvasTabId
-                        ? (dark ? 'bg-rose-500/15 text-rose-400' : 'bg-[#D44A78]/10 text-[#D44A78]')
-                        : (dark ? 'bg-transparent text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800' : 'bg-transparent text-[#6E6A63] hover:text-[#0D0D0D] hover:bg-[rgba(0,0,0,0.04)]')
-                    }`}
-                  >
-                    <CanvasTabIcon type={tab.type} />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         )}
 

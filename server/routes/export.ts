@@ -9,7 +9,7 @@ import { hasDealAccess } from '../services/dealAccessService.js';
 import { exportToPDF, exportToDOCX, exportToXLSX, exportLOIToPDF } from '../services/exportService.js';
 import { exportToPPTX } from '../services/pptxExportService.js';
 import { renderPremiumPdf, getPremiumTemplateKey } from '../services/premiumPdfRenderer.js';
-import { readFile } from 'fs/promises';
+// fs/promises no longer needed — file reads go through storageService
 
 export const exportRouter = Router();
 
@@ -200,14 +200,14 @@ exportRouter.get('/deals/:dealId/export-all', async (req, res) => {
         created_at: doc.created_at,
       });
 
-      // Try to include actual files
+      // Try to include actual files (S3 or local)
       if (doc.file_url) {
         try {
-          const fileData = await readFile(doc.file_url);
-          const ext = doc.name?.split('.').pop() || doc.file_type || 'bin';
+          const { downloadFile } = await import('../services/storageService.js');
+          const fileData = await downloadFile(doc.file_url);
           const docName = (doc.name || `document-${doc.id}`).replace(/[^a-zA-Z0-9._\- ]/g, '_');
           archive.append(fileData, { name: `data_room/${docName}` });
-        } catch { /* file may not exist on disk */ }
+        } catch { /* file may not exist */ }
       }
     }
     archive.append(JSON.stringify(docManifest, null, 2), { name: 'data_room/manifest.json' });

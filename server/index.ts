@@ -25,6 +25,8 @@ import { franchiseRouter } from './routes/franchise.js';
 import { sellerDashboardRouter } from './routes/sellerDashboard.js';
 import { buyerPipelineRouter } from './routes/buyerPipeline.js';
 import { discoveryRouter } from './routes/discovery.js';
+import { adminRouter } from './routes/admin.js';
+import { passkeyRouter } from './routes/passkeys.js';
 
 import { exportRouter } from './routes/export.js';
 import { startWorker } from './workers/discoveryWorker.js';
@@ -152,6 +154,41 @@ app.use('/api/chat', chatLimiter, chatRouter);
 app.use('/api/stripe', stripeRouter);
 app.use('/api', shareLinksRouter); // has both public (/shared/:token) and protected routes
 
+// ─── Public document share viewer (no auth — token-based) ────────
+app.get('/api/shared/doc/:token', async (req, res) => {
+  try {
+    const { trackShareView } = await import('./services/documentShareService.js');
+    const { token } = req.params;
+    const viewerIp = req.ip || req.headers['x-forwarded-for'] as string;
+
+    const { share, content, allowed, reason } = await trackShareView(token, undefined, viewerIp);
+
+    if (!allowed) {
+      return res.status(share ? 403 : 404).json({ error: reason });
+    }
+
+    // Return share metadata + content for rendering
+    return res.json({
+      accessLevel: share.access_level,
+      authRequired: share.auth_required,
+      downloadEnabled: share.download_enabled,
+      watermark: share.watermark,
+      dealName: share.deal_name,
+      recipientName: share.recipient_name,
+      docName: content?.name || 'Document',
+      docClass: content?.doc_class,
+      // Content for rendering
+      content: content?.content || null,
+      tiptapContent: content?.tiptap_content || null,
+      fileType: content?.file_type || null,
+      slug: content?.slug || null,
+    });
+  } catch (err: any) {
+    console.error('Shared doc view error:', err.message);
+    return res.status(500).json({ error: 'Failed to load shared document' });
+  }
+});
+
 // ─── Public info endpoints (no auth) for invitations and day passes ─
 app.get('/api/invitations/:token/info', async (req, res) => {
   try {
@@ -227,6 +264,8 @@ app.use('/api', franchiseRouter);
 app.use('/api', sellerDashboardRouter);
 app.use('/api', buyerPipelineRouter);
 app.use('/api', discoveryRouter);
+app.use('/api', adminRouter);
+app.use('/api', passkeyRouter);
 
 app.use('/api', exportRouter);
 
@@ -242,6 +281,34 @@ app.use('/assets', express.static(path.join(clientPath, 'assets'), { maxAge: '1y
 app.use(express.static(clientPath, { maxAge: 0 }));
 
 // ─── 5b. Support: client-side error capture (no auth required) ──
+// Analytics event capture (no auth required — uses sendBeacon)
+app.post('/api/analytics/event', express.json(), async (req, res) => {
+  try {
+    const { event_type, event_data, session_id, token } = req.body;
+    if (!event_type) return res.json({ ok: false });
+
+    // Extract userId from token if present
+    let userId: number | null = null;
+    if (token) {
+      try {
+        const jwt = await import('jsonwebtoken');
+        const decoded = jwt.default.verify(token, process.env.JWT_SECRET || process.env.SESSION_SECRET || 'dev') as any;
+        userId = decoded.userId || null;
+      } catch { /* invalid token — log as anonymous */ }
+    }
+
+    const eventSql = postgres(process.env.DATABASE_URL!, { ssl: process.env.NODE_ENV === 'production' ? 'require' : false as any, prepare: false });
+    await eventSql`
+      INSERT INTO analytics_events (user_id, session_id, event_type, event_data)
+      VALUES (${userId}, ${session_id || null}, ${event_type}, ${JSON.stringify(event_data || {})}::jsonb)
+    `;
+    await eventSql.end();
+    res.json({ ok: true });
+  } catch {
+    res.json({ ok: false });
+  }
+});
+
 app.post('/api/support/client-error', express.json(), async (req, res) => {
   try {
     const supportSql = postgres(process.env.DATABASE_URL!, { ssl: process.env.NODE_ENV === 'production' ? 'require' : false as any, prepare: false });

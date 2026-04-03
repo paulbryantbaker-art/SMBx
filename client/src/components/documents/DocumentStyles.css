@@ -1,0 +1,361 @@
+/**
+ * Document Editor Styles — Professional M&A document presentation
+ * Sora headings, Inter body, terra accents, designed tables
+ * Applied via .document-editor-content class on TipTap editor
+ */
+
+/* ─── Base Typography ───────────────────────────────────────────────── */
+
+.document-editor-content {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.65;
+  color: #0D0D0D;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 28px 24px;
+  outline: none;
+}
+
+.document-editor-content:focus {
+  outline: none;
+}
+
+/* ─── Headings ──────────────────────────────────────────────────────── */
+
+.document-editor-content h1 {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #0D0D0D;
+  margin: 0 0 16px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #D44A78;
+  line-height: 1.3;
+}
+
+.document-editor-content h2 {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0D0D0D;
+  margin: 28px 0 12px 0;
+  padding-left: 12px;
+  border-left: 3px solid #D44A78;
+  line-height: 1.35;
+}
+
+.document-editor-content h3 {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #3D3B37;
+  margin: 20px 0 8px 0;
+  line-height: 1.4;
+}
+
+/* ─── Paragraphs ────────────────────────────────────────────────────── */
+
+.document-editor-content p {
+  margin: 0 0 12px 0;
+  color: #3D3B37;
+}
+
+.document-editor-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* ─── Strong / Emphasis ─────────────────────────────────────────────── */
+
+.document-editor-content strong {
+  font-weight: 600;
+  color: #0D0D0D;
+}
+
+.document-editor-content em {
+  color: #6E6A63;
+}
+
+/* ─── Links ─────────────────────────────────────────────────────────── */
+
+.document-editor-content a {
+  color: #D44A78;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease;
+}
+
+.document-editor-content a:hover {
+  border-bottom-color: #D44A78;
+}
+
+/* ─── Lists ─────────────────────────────────────────────────────────── */
+
+.document-editor-content ul,
+.document-editor-content ol {
+  padding-left: 20px;
+  margin: 0 0 12px 0;
+  color: #3D3B37;
+}
+
+.document-editor-content li {
+  margin-bottom: 4px;
+}
+
+.document-editor-content li p {
+  margin: 0;
+}
+
+/* ─── Tables ────────────────────────────────────────────────────────── */
+
+.document-editor-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 13px;
+}
+
+.document-editor-content thead {
+  border-top: 2px solid #D44A78;
+}
+
+.document-editor-content th {
+  text-align: left;
+  padding: 8px 12px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #3D3B37;
+  background: #F5F5F5;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.document-editor-content td {
+  padding: 8px 12px;
+  color: #0D0D0D;
+  border-bottom: 1px solid #EBE7DF;
+}
+
+.document-editor-content tbody tr:nth-child(even) {
+  background: #FAFAF8;
+}
+
+.document-editor-content tbody tr:hover {
+  background: #F5F3EF;
+}
+
+/* ─── Table editing — selected cells ────────────────────────────────── */
+
+.document-editor-content .selectedCell {
+  background: rgba(212, 74, 120, 0.08);
+}
+
+.document-editor-content .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #D44A78;
+  cursor: col-resize;
+}
+
+/* ─── Blockquotes ───────────────────────────────────────────────────── */
+
+.document-editor-content blockquote {
+  margin: 16px 0;
+  padding: 12px 16px;
+  border-left: 3px solid #D44A78;
+  background: #FFF8F5;
+  border-radius: 0 6px 6px 0;
+}
+
+.document-editor-content blockquote p {
+  color: #3D3B37;
+  margin: 0;
+}
+
+/* ─── Horizontal Rules ──────────────────────────────────────────────── */
+
+.document-editor-content hr {
+  border: none;
+  border-top: 1px solid #EBE7DF;
+  margin: 24px 0;
+}
+
+/* ─── Code ──────────────────────────────────────────────────────────── */
+
+.document-editor-content code {
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+  font-size: 12px;
+  background: #F5F5F5;
+  padding: 2px 5px;
+  border-radius: 3px;
+  color: #D44A78;
+}
+
+.document-editor-content pre {
+  background: #1A1C1E;
+  color: #E8E6E3;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+.document-editor-content pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  font-size: 13px;
+}
+
+/* ─── Images ────────────────────────────────────────────────────────── */
+
+.document-editor-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 16px 0;
+}
+
+/* ─── Placeholder (empty editor) ────────────────────────────────────── */
+
+.document-editor-content p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #A9A49C;
+  pointer-events: none;
+  height: 0;
+  font-style: italic;
+}
+
+/* ─── Edit mode cursor / selection ──────────────────────────────────── */
+
+.document-editor-content.ProseMirror-focused {
+  outline: none;
+}
+
+.document-editor-content ::selection {
+  background: rgba(212, 74, 120, 0.15);
+}
+
+/* ─── Dark Mode ─────────────────────────────────────────────────────── */
+
+html.dark .document-editor-content {
+  color: #E8E6E3;
+}
+
+html.dark .document-editor-content h1 {
+  color: #F5F3EF;
+  border-bottom-color: #E8709A;
+}
+
+html.dark .document-editor-content h2 {
+  color: #F5F3EF;
+  border-left-color: #E8709A;
+}
+
+html.dark .document-editor-content h3 {
+  color: #C8C4BC;
+}
+
+html.dark .document-editor-content p {
+  color: #C8C4BC;
+}
+
+html.dark .document-editor-content strong {
+  color: #F5F3EF;
+}
+
+html.dark .document-editor-content em {
+  color: #8A8680;
+}
+
+html.dark .document-editor-content a {
+  color: #E8709A;
+}
+
+html.dark .document-editor-content thead {
+  border-top-color: #E8709A;
+}
+
+html.dark .document-editor-content th {
+  color: #C8C4BC;
+  background: #2A2C2E;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+html.dark .document-editor-content td {
+  color: #E8E6E3;
+  border-bottom-color: #3A3C3E;
+}
+
+html.dark .document-editor-content tbody tr:nth-child(even) {
+  background: #222426;
+}
+
+html.dark .document-editor-content tbody tr:hover {
+  background: #2A2C2E;
+}
+
+html.dark .document-editor-content .selectedCell {
+  background: rgba(232, 112, 154, 0.12);
+}
+
+html.dark .document-editor-content blockquote {
+  border-left-color: #E8709A;
+  background: rgba(232, 112, 154, 0.06);
+}
+
+html.dark .document-editor-content blockquote p {
+  color: #C8C4BC;
+}
+
+html.dark .document-editor-content hr {
+  border-top-color: #3A3C3E;
+}
+
+html.dark .document-editor-content code {
+  background: #2A2C2E;
+  color: #E8709A;
+}
+
+html.dark .document-editor-content ::selection {
+  background: rgba(232, 112, 154, 0.2);
+}
+
+/* ─── Print ─────────────────────────────────────────────────────────── */
+
+@media print {
+  .document-editor-content {
+    max-width: none;
+    padding: 0;
+    font-size: 11pt;
+  }
+
+  .document-editor-content h1 {
+    font-size: 18pt;
+  }
+
+  .document-editor-content h2 {
+    font-size: 14pt;
+    break-after: avoid;
+  }
+
+  .document-editor-content h3 {
+    font-size: 12pt;
+    break-after: avoid;
+  }
+
+  .document-editor-content table {
+    break-inside: avoid;
+  }
+
+  .document-editor-content blockquote {
+    break-inside: avoid;
+  }
+}

@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useImperativeHandle, forwardRef, useMemo } from 'react';
+import { trackEvent } from '../../lib/analytics';
 
 /* ═══ TOOL ITEMS ═══ */
 
@@ -217,6 +218,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
     setToolsOpen(false);
     setValue('');
     if (inputRef.current) inputRef.current.style.height = 'auto';
+    trackEvent('message_sent');
     onSend(t);
   }, [value, disabled, onSend]);
 
