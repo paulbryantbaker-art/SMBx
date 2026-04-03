@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" fill="none">
   <defs>
     <style>
-      .t { stroke: #8B7A6E; stroke-width: 1.2; stroke-linecap: round; fill: none; }
-      .tt { stroke: #8B7A6E; stroke-width: 0.7; stroke-linecap: round; fill: none; }
-      .n { fill: #8B7A6E; }
-      .nr { stroke: #8B7A6E; stroke-width: 0.8; fill: none; }
-      .cp { fill: #6B5E52; opacity: 0.12; }
-      .hatch { stroke: #6B5E52; stroke-width: 0.4; opacity: 0.18; }
+      .t { stroke: #9A8A7E; stroke-width: 1.2; stroke-linecap: round; fill: none; }
+      .tt { stroke: #9A8A7E; stroke-width: 0.7; stroke-linecap: round; fill: none; }
+      .n { fill: #9A8A7E; }
+      .nr { stroke: #9A8A7E; stroke-width: 0.8; fill: none; }
+      .cp { fill: #7A6E62; opacity: 0.12; }
+      .hatch { stroke: #7A6E62; stroke-width: 0.4; opacity: 0.18; }
     </style>
   </defs>
 
