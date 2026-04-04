@@ -1298,25 +1298,29 @@ export default function AppShell() {
                     pointerEvents: 'none',
                   }} />
 
-                  {/* Top cluster — centered desktop; anchored to top on mobile (Grok-like) */}
-                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? 'pt-8' : 'flex-1 justify-center'}`}>
-                    <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-5' : 'max-w-3xl space-y-6'}`}>
+                  {/* Mobile: flex spacers create optical centering — 2.5:1 top:middle ratio
+                      places the cluster slightly above geometric center (where the eye expects it) */}
+                  {isMobile && <div className="flex-[2.5]" aria-hidden />}
+
+                  {/* Top cluster — centered desktop; optical-center on mobile */}
+                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? 'shrink-0' : 'flex-1 justify-center'}`}>
+                    <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-6' : 'max-w-3xl space-y-6'}`}>
                       {!isMobile && (
                         <div className="mb-10 flex justify-center">
                           <LogoHero height={60} dark={dark} />
                         </div>
                       )}
                       {isMobile && (
-                        <div className="mb-7 flex justify-center">
-                          <LogoHero height={55} dark={dark} />
+                        <div className="mb-8 flex justify-center">
+                          <LogoHero height={64} dark={dark} />
                         </div>
                       )}
-                      <h1 className={`font-headline font-extrabold tracking-tighter leading-[1.05] ${isMobile ? 'text-[36px]' : 'text-[50px]'}`}>
+                      <h1 className={`font-headline font-extrabold tracking-tighter ${isMobile ? 'text-[40px] leading-[1.02]' : 'text-[50px] leading-[1.05]'}`}>
                         <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>Selling</span> your business,<br/>
                         <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>buying</span> one, or{' '}
                         <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>raising</span> capital?
                       </h1>
-                      <p className={`text-base md:text-xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                      <p className={`mx-auto font-medium ${isMobile ? 'text-[17px] leading-[1.5] max-w-sm' : 'text-xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
                         Yulia handles the numbers, the documents, and the strategy<br className="hidden md:inline" /> — all by just talking to her.
                       </p>
 
@@ -1405,9 +1409,13 @@ export default function AppShell() {
                     </div>
                   </div>
 
-                  {/* Mobile bottom zone: gradient input + trust line (Grok-like — breathing room above) */}
+                  {/* Middle flex spacer — the larger side of the 2.5:1 ratio sits above this */}
+                  {isMobile && <div className="flex-1" aria-hidden />}
+
+                  {/* Mobile bottom zone: gradient input + trust line.
+                      Bottom padding clears Safari's floating address bar (~54px) on top of the home indicator */}
                   {isMobile && (
-                    <div className="shrink-0 px-4 relative z-10 mt-auto" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}>
+                    <div className="shrink-0 px-4 relative z-10" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 3.5rem)' }}>
                       {/* Tool popup (drops UP from input) */}
                       <div ref={homeToolsRef} className={`home-tools-popup ${homeToolsOpen ? 'open' : ''}`} style={{ bottom: 'calc(100% + 8px)', left: 16, right: 16 }}>
                         <div className="px-4 pt-3 pb-2">
