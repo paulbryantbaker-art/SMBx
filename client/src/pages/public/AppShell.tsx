@@ -1245,20 +1245,20 @@ export default function AppShell() {
 
                   {/* Desktop: single centered cluster */}
                   <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
-                    <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-5' : 'max-w-3xl space-y-6'}`} style={isMobile ? { marginTop: '10px' } : { marginTop: '-5vh' }}>
+                    <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-5' : 'max-w-3xl space-y-6'}`}>
                       {!isMobile && (
-                        <div className="mb-6 flex justify-center">
-                          <LogoHero height={95} dark={dark} />
+                        <div className="mb-10 flex justify-center">
+                          <LogoHero height={60} dark={dark} />
                         </div>
                       )}
                       {isMobile && (
-                        <div className="mb-3 flex justify-center">
-                          <LogoHero height={90} dark={dark} />
+                        <div className="mb-7 flex justify-center">
+                          <LogoHero height={55} dark={dark} />
                         </div>
                       )}
                       <h1 className={`font-headline font-extrabold tracking-tighter leading-[1.05] ${isMobile ? 'text-[36px]' : 'text-[50px]'}`}>
                         <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>Selling</span> your business,<br/>
-                        <span className={`italic underline decoration-[3px] underline-offset-[6px] ${dark ? 'decoration-[#E8709A]' : 'decoration-[#D44A78]'}`}>buying</span> one, or{' '}
+                        <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>buying</span> one, or{' '}
                         <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>raising</span> capital?
                       </h1>
                       <p className={`text-base md:text-xl mx-auto font-medium ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
@@ -1270,7 +1270,7 @@ export default function AppShell() {
                         <>
                           <div className="w-full max-w-3xl mx-auto mt-8">
                             <div className="relative group">
-                              <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
+                              <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'}`} />
                               <div className={`relative rounded-full flex items-center p-2 pl-6 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
                                 <span className={`material-symbols-outlined mr-4 ${dark ? 'text-rose-500' : 'text-[#D44A78]'}`}>bolt</span>
                                 <input
@@ -1348,7 +1348,7 @@ export default function AppShell() {
                       </div>
                       {/* Gradient-glow input (same as desktop) */}
                       <div className="relative group">
-                        <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-10 group-hover:opacity-20'}`} />
+                        <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'}`} />
                         <div className={`relative rounded-full flex items-center p-2 pl-5 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
                           <span className={`material-symbols-outlined mr-3 ${dark ? 'text-rose-500' : 'text-[#D44A78]'}`}>bolt</span>
                           <input
@@ -1373,7 +1373,7 @@ export default function AppShell() {
                           </button>
                         </div>
                       </div>
-                      <p className={`text-[10px] font-medium text-center mt-3 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
+                      <p className={`text-xs font-medium text-center mt-3 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
                         Free analysis · No account required · Your data stays yours
                       </p>
                     </div>
