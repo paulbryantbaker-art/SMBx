@@ -1210,44 +1210,45 @@ export default function AppShell() {
               {/* ═══ SHARED BACKGROUND — all landing pages ═══ */}
               {/* Uses absolute (not fixed) so Safari doesn't sample these for toolbar tinting */}
               <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#1a1c1e' : '#f9f9fc', pointerEvents: 'none', minHeight: '100dvh' }} />
-              {/* Circuit board — 4 corners at native resolution for crisp Retina rendering */}
-              {/* Each corner shows a quadrant of the image at ~1:1 device pixels */}
-              {(['topLeft', 'topRight', 'bottomLeft', 'bottomRight'] as const).map(corner => (
-                <div key={corner} style={{
-                  position: 'absolute',
-                  zIndex: 1,
-                  width: isMobile ? '45%' : '55%',
-                  height: isMobile ? '40%' : '55%',
-                  ...(corner === 'topLeft' ? { top: 0, left: 0 } : {}),
-                  ...(corner === 'topRight' ? { top: 0, right: 0 } : {}),
-                  ...(corner === 'bottomLeft' ? { bottom: 0, left: 0 } : {}),
-                  ...(corner === 'bottomRight' ? { bottom: 0, right: 0 } : {}),
-                  backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,
-                  backgroundSize: isMobile ? '182% 182%' : '1377px auto',
-                  backgroundPosition:
-                    corner === 'topLeft' ? '0% 0%'
-                    : corner === 'topRight' ? '100% 0%'
-                    : corner === 'bottomLeft' ? '0% 100%'
-                    : '100% 100%',
-                  backgroundRepeat: 'no-repeat',
-                  opacity: dark ? 0.35 : 0.15,
-                  pointerEvents: 'none',
-                  maskImage: `radial-gradient(ellipse at ${
-                    corner === 'topLeft' ? '0% 0%'
-                    : corner === 'topRight' ? '100% 0%'
-                    : corner === 'bottomLeft' ? '0% 100%'
-                    : '100% 100%'
-                  }, black 0%, black ${isMobile ? '15%' : '30%'}, transparent ${isMobile ? '50%' : '70%'})`,
-                  WebkitMaskImage: `radial-gradient(ellipse at ${
-                    corner === 'topLeft' ? '0% 0%'
-                    : corner === 'topRight' ? '100% 0%'
-                    : corner === 'bottomLeft' ? '0% 100%'
-                    : '100% 100%'
-                  }, black 0%, black ${isMobile ? '15%' : '30%'}, transparent ${isMobile ? '50%' : '70%'})`,
-                }} />
-              ))}
-              {/* Circuit spark nodes — subtle pulse on a few nodes */}
-              <CircuitSparks dark={dark} />
+              {/* Circuit board — sticky container stays in viewport as user scrolls */}
+              <div style={{ position: 'sticky', top: 0, height: 0, zIndex: 1, pointerEvents: 'none', overflow: 'visible' }}>
+                <div style={{ position: 'relative', width: '100%', height: '100dvh', pointerEvents: 'none' }}>
+                  {(['topLeft', 'topRight', 'bottomLeft', 'bottomRight'] as const).map(corner => (
+                    <div key={corner} style={{
+                      position: 'absolute',
+                      width: isMobile ? '45%' : '55%',
+                      height: isMobile ? '40%' : '55%',
+                      ...(corner === 'topLeft' ? { top: 0, left: 0 } : {}),
+                      ...(corner === 'topRight' ? { top: 0, right: 0 } : {}),
+                      ...(corner === 'bottomLeft' ? { bottom: 0, left: 0 } : {}),
+                      ...(corner === 'bottomRight' ? { bottom: 0, right: 0 } : {}),
+                      backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,
+                      backgroundSize: isMobile ? '182% 182%' : '1377px auto',
+                      backgroundPosition:
+                        corner === 'topLeft' ? '0% 0%'
+                        : corner === 'topRight' ? '100% 0%'
+                        : corner === 'bottomLeft' ? '0% 100%'
+                        : '100% 100%',
+                      backgroundRepeat: 'no-repeat',
+                      opacity: dark ? 0.35 : 0.15,
+                      pointerEvents: 'none',
+                      maskImage: `radial-gradient(ellipse at ${
+                        corner === 'topLeft' ? '0% 0%'
+                        : corner === 'topRight' ? '100% 0%'
+                        : corner === 'bottomLeft' ? '0% 100%'
+                        : '100% 100%'
+                      }, black 0%, black ${isMobile ? '15%' : '30%'}, transparent ${isMobile ? '50%' : '70%'})`,
+                      WebkitMaskImage: `radial-gradient(ellipse at ${
+                        corner === 'topLeft' ? '0% 0%'
+                        : corner === 'topRight' ? '100% 0%'
+                        : corner === 'bottomLeft' ? '0% 100%'
+                        : '100% 100%'
+                      }, black 0%, black ${isMobile ? '15%' : '30%'}, transparent ${isMobile ? '50%' : '70%'})`,
+                    }} />
+                  ))}
+                  <CircuitSparks dark={dark} />
+                </div>
+              </div>
 
               {activeTab === 'home' ? (
               <>
