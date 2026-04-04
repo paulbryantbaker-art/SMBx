@@ -47,30 +47,16 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
   --serif: 'Sora', sans-serif;
 }
 
-/* ═══ SITE BACKGROUND — Warm paper with rose-gold accent glow ═══
-   Layer 1: rose-gold radial glow (top-right) — atmospheric accent
-   Layer 2: subtle SVG fractal noise — film grain for "paper" character
-   Layer 3: warm cream base color — complements the rose-gold brand
-   Approach: boutique advisory firm / high-end financial document */
+/* ═══ SITE BACKGROUND — Warm paper, Grok-minimal ═══
+   Just the cream base + subtle film grain. No gradients, no glows, no
+   atmospheric color. Rose gold only appears intentionally (H1 accents,
+   chat pill, CTAs) — never as ambient decoration. */
 html, body {
   width: 100%;
   background-color: #f8f6f2 !important;
-  background-image:
-    radial-gradient(ellipse 900px 600px at 92% 8%, rgba(212, 74, 120, 0.07) 0%, transparent 55%),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: auto, 180px 180px;
-  background-position: 0 0, 0 0;
-  background-repeat: no-repeat, repeat;
-}
-@media (max-width: 767px) {
-  /* Mobile: shrink glow so it stays contained in the top-right corner
-     instead of washing the whole viewport with pink tint. Safari toolbar
-     then matches the cream base color cleanly. */
-  html, body {
-    background-image:
-      radial-gradient(ellipse 280px 220px at 100% 0%, rgba(212, 74, 120, 0.08) 0%, transparent 70%),
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") !important;
-  }
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  background-repeat: repeat;
 }
 /* Default: natural document flow for landing/journey pages */
 #root {
@@ -115,20 +101,10 @@ html.dark {
 }
 html.dark, html.dark body {
   background-color: #151617 !important;
-  background-image:
-    radial-gradient(ellipse 900px 600px at 92% 8%, rgba(232, 112, 154, 0.09) 0%, transparent 55%),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: auto, 180px 180px;
-  background-position: 0 0, 0 0;
-  background-repeat: no-repeat, repeat;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  background-repeat: repeat;
   color-scheme: dark;
-}
-@media (max-width: 767px) {
-  html.dark, html.dark body {
-    background-image:
-      radial-gradient(ellipse 280px 220px at 100% 0%, rgba(232, 112, 154, 0.12) 0%, transparent 70%),
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") !important;
-  }
 }
 html.dark #root {
   background-color: transparent !important;

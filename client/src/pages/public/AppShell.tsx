@@ -1264,45 +1264,16 @@ export default function AppShell() {
           {viewState === 'landing' && (
             <div key={activeTab} style={{ position: 'relative', animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : { minHeight: '100dvh' }) }}>
 
-              {/* ═══ SHARED BACKGROUND — all landing pages ═══
-                  Warm paper base (#f8f6f2 / #151617) set on html/body, with a single
-                  rose-gold radial glow and subtle film grain. No circuit board, no
-                  dot grid — quiet canvas that lets typography and the rose-gold
-                  accent do the work. */}
+              {/* ═══ SHARED BACKGROUND — Grok-minimal warm paper ═══
+                  Solid cream base only. Film grain comes from html/body (index.css).
+                  No gradients, no glows, no atmospheric color — rose gold only
+                  appears where it's intentional (H1 accents, chat pill, CTAs). */}
               <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#151617' : '#f8f6f2', pointerEvents: 'none' }} />
-              {/* Atmospheric rose-gold glow — top right corner.
-                  Mobile uses a much smaller ellipse so the glow stays contained
-                  instead of covering the entire viewport with pink tint. */}
-              <div style={{
-                position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
-                background: isMobile
-                  ? (dark
-                      ? 'radial-gradient(ellipse 280px 220px at 100% 0%, rgba(232, 112, 154, 0.12) 0%, transparent 70%)'
-                      : 'radial-gradient(ellipse 280px 220px at 100% 0%, rgba(212, 74, 120, 0.08) 0%, transparent 70%)')
-                  : (dark
-                      ? 'radial-gradient(ellipse 1000px 700px at 90% 5%, rgba(232, 112, 154, 0.08) 0%, transparent 60%)'
-                      : 'radial-gradient(ellipse 1000px 700px at 90% 5%, rgba(212, 74, 120, 0.06) 0%, transparent 60%)'),
-              }} />
 
               {activeTab === 'home' ? (
               <>
                 {/* ═══ HOME PAGE ═══ */}
                 <main className="flex-1 flex flex-col relative">
-                  {/* Center fade — clean reading area over circuit board */}
-                  <div style={{
-                    position: 'absolute', inset: 0, zIndex: 2,
-                    background: isMobile
-                      ? `radial-gradient(ellipse 80% 50% at 50% 42%, ${dark ? 'rgba(26,28,30,0.92)' : 'rgba(249,249,252,0.92)'} 0%, ${dark ? 'rgba(26,28,30,0.3)' : 'rgba(249,249,252,0.2)'} 55%, transparent 100%)`
-                      : `radial-gradient(ellipse 60% 55% at 50% 44%, ${dark ? 'rgba(26,28,30,0.90)' : 'rgba(249,249,252,0.90)'} 0%, ${dark ? 'rgba(26,28,30,0.25)' : 'rgba(249,249,252,0.15)'} 50%, transparent 100%)`,
-                    maskImage: isMobile
-                      ? 'radial-gradient(ellipse 75% 45% at 50% 42%, black 0%, transparent 100%)'
-                      : 'radial-gradient(ellipse 55% 50% at 50% 44%, black 0%, transparent 100%)',
-                    WebkitMaskImage: isMobile
-                      ? 'radial-gradient(ellipse 75% 45% at 50% 42%, black 0%, transparent 100%)'
-                      : 'radial-gradient(ellipse 55% 50% at 50% 44%, black 0%, transparent 100%)',
-                    pointerEvents: 'none',
-                  }} />
-
                   {/* Top cluster — centered on desktop; fixed top position on mobile so the
                       logo stays put regardless of cluster content height. Mobile uses pt-[14vh]
                       to pin the logo at ~14% of viewport height. */}
