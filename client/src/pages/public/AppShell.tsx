@@ -532,7 +532,18 @@ export default function AppShell() {
   }, [activeCanvasTabId]);
   const [morphing, setMorphing] = useState(false);
   const [heroFocused, setHeroFocused] = useState(false); // tracks when hero input is focused — controls logo position
+  const [chatWidth, setChatWidth] = useState(520); // resizable chat column width
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop sidebar collapse
+  const [ndaRequired, setNdaRequired] = useState<{ dealId: number; dealName?: string } | null>(null);
+  // Subscription model handles pricing
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
   // Home hero tool popup (+ button menu with journey shortcuts + tools)
+  // Declared AFTER isMobile because fillHomeInput depends on it (TDZ safety)
   const [homeToolsOpen, setHomeToolsOpen] = useState(false);
   const homeInputRef = useRef<HTMLInputElement>(null);
   const homeInputMobileRef = useRef<HTMLInputElement>(null);
@@ -559,16 +570,6 @@ export default function AppShell() {
     }
     setHomeToolsOpen(false);
   }, [isMobile]);
-  const [chatWidth, setChatWidth] = useState(520); // resizable chat column width
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop sidebar collapse
-  const [ndaRequired, setNdaRequired] = useState<{ dealId: number; dealName?: string } | null>(null);
-  // Subscription model handles pricing
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
   // Chat hooks (always called for hook order)
   const anonChat = useAnonymousChat();
   const authChat = useAuthChat(user);
