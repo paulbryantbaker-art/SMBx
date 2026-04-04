@@ -1213,7 +1213,7 @@ export default function AppShell() {
               {/* Circuit board image — cover the full container, visible at edges */}
               <div style={{
                 position: 'absolute', inset: 0, zIndex: 1,
-                backgroundImage: `url('/${dark ? 'G2D' : 'G1L'}.png')`,
+                backgroundImage: `url('/${dark ? '1' : '2'}.png')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
