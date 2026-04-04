@@ -1267,14 +1267,18 @@ export default function AppShell() {
               {/* ═══ SHARED BACKGROUND — all landing pages ═══ */}
               {/* Solid bg covers the body dot-grid. Absolute (not fixed) so Safari toolbar reads body bg. */}
               <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#1a1c1e' : '#f9f9fc', pointerEvents: 'none' }} />
-              {/* Circuit board image — cover the full container, visible at edges */}
+              {/* Circuit board image — cover the full container, visible at edges.
+                  Low opacity + slight blur softens the baked-in annotation text
+                  ("PART NO: 4K-RGE-MOD-01", etc.) into pure texture so it can't
+                  be read behind content. */}
               <div style={{
                 position: 'absolute', inset: 0, zIndex: 1,
                 backgroundImage: `url('/${dark ? 'G2' : 'G1'}.png')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
-                opacity: dark ? 0.18 : 0.08,
+                opacity: dark ? 0.14 : 0.05,
+                filter: 'blur(1.5px)',
                 pointerEvents: 'none',
               }} />
               <CircuitSparks dark={dark} />
