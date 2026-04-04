@@ -1205,7 +1205,7 @@ export default function AppShell() {
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
-            <div key={activeTab} style={{ position: 'relative', animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { display: 'flex', flexDirection: 'column' as const, minHeight: 'calc(100dvh + 1px)' } : { minHeight: '100dvh' }) }}>
+            <div key={activeTab} style={{ position: 'relative', animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : { minHeight: '100dvh' }) }}>
 
               {/* ═══ SHARED BACKGROUND — all landing pages ═══ */}
               {/* Solid bg covers the body dot-grid. Absolute (not fixed) so Safari toolbar reads body bg. */}
@@ -1377,6 +1377,8 @@ export default function AppShell() {
                     </div>
                   )}
                 </main>
+                {/* Scroll spacer — gives Safari enough content to detect scroll and minimize its chrome */}
+                {isMobile && <div style={{ height: 60, flexShrink: 0 }} aria-hidden="true" />}
               </>
               ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing'].includes(activeTab) ? (
               <div className="relative z-10">
