@@ -84,7 +84,9 @@ function LogoHero({ height = 120, className, dark }: { height?: number; classNam
         height,
         objectFit: 'contain',
         display: 'block',
-        filter: 'drop-shadow(0 4px 16px rgba(160, 48, 80, 0.25)) drop-shadow(0 2px 6px rgba(0,0,0,0.1))',
+        filter: dark
+          ? 'drop-shadow(0 4px 20px rgba(180, 100, 60, 0.5)) drop-shadow(0 2px 8px rgba(0,0,0,0.4))'
+          : 'drop-shadow(0 4px 16px rgba(160, 48, 80, 0.3)) drop-shadow(0 2px 6px rgba(0,0,0,0.15))',
       }}
     />
   );
@@ -1251,7 +1253,7 @@ export default function AppShell() {
                       )}
                       {isMobile && (
                         <div className="mb-3 flex justify-center">
-                          <LogoHero height={70} dark={dark} />
+                          <LogoHero height={90} dark={dark} />
                         </div>
                       )}
                       <h1 className={`font-headline font-extrabold tracking-tighter leading-[1.05] ${isMobile ? 'text-[36px]' : 'text-[50px]'}`}>
