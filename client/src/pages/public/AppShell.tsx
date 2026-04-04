@@ -1208,8 +1208,8 @@ export default function AppShell() {
             <div key={activeTab} style={{ position: 'relative', animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : { minHeight: '100dvh' }) }}>
 
               {/* ═══ SHARED BACKGROUND — all landing pages ═══ */}
-              {/* Uses absolute (not fixed) so Safari doesn't sample these for toolbar tinting */}
-              <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#1a1c1e' : '#f9f9fc', pointerEvents: 'none', minHeight: '100dvh' }} />
+              {/* Page bg color comes from body/html (set by DarkModeToggle with !important). */}
+              {/* No absolute bg div here — it confused Safari toolbar color sampling. */}
               {/* Circuit board — sticky container stays in viewport as user scrolls */}
               <div style={{ position: 'sticky', top: 0, height: 0, zIndex: 1, pointerEvents: 'none', overflow: 'visible' }}>
                 <div style={{ position: 'relative', width: '100%', height: '100dvh', pointerEvents: 'none' }}>
