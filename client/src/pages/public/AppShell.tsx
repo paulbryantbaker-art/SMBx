@@ -1298,24 +1298,22 @@ export default function AppShell() {
                     pointerEvents: 'none',
                   }} />
 
-                  {/* Mobile: 1:2 ratio — cluster sits in upper third, pill floats near bottom
-                      (matches Grok/premium app pattern where content leads, action anchors) */}
-                  {isMobile && <div className="flex-1" aria-hidden />}
-
-                  {/* Top cluster — centered desktop; optical-center on mobile */}
-                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? 'shrink-0' : 'flex-1 justify-center'}`}>
-                    <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-6' : 'max-w-3xl space-y-6'}`}>
+                  {/* Top cluster — centered on desktop; fixed top position on mobile so the
+                      logo stays put regardless of cluster content height. Mobile uses pt-[14vh]
+                      to pin the logo at ~14% of viewport height. */}
+                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? 'shrink-0 pt-[14vh]' : 'flex-1 justify-center'}`}>
+                    <div className={`w-full text-center ${isMobile ? 'max-w-4xl' : 'max-w-3xl space-y-6'}`}>
                       {!isMobile && (
                         <div className="mb-10 flex justify-center">
                           <LogoHero height={60} dark={dark} />
                         </div>
                       )}
                       {isMobile && (
-                        <div className="flex justify-center">
-                          <LogoHero height={64} dark={dark} />
+                        <div className="flex justify-center mb-12">
+                          <LogoHero height={52} dark={dark} />
                         </div>
                       )}
-                      <h1 className={`font-headline font-extrabold tracking-tighter ${isMobile ? 'text-[40px] leading-[1.02]' : 'text-[50px] leading-[1.05]'}`}>
+                      <h1 className={`font-headline font-extrabold tracking-tighter ${isMobile ? 'text-[42px] leading-[1.02] mb-6' : 'text-[50px] leading-[1.05]'}`}>
                         <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>Selling</span> your business,<br/>
                         <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>buying</span> one, or{' '}
                         <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>raising</span> capital?
@@ -1409,8 +1407,8 @@ export default function AppShell() {
                     </div>
                   </div>
 
-                  {/* Middle flex spacer — 2× the top spacer, pushes pill to bottom */}
-                  {isMobile && <div className="flex-[2]" aria-hidden />}
+                  {/* Flex spacer — fills remaining space between cluster and pill zone */}
+                  {isMobile && <div className="flex-1" aria-hidden />}
 
                   {/* Mobile bottom zone: pill + trust line pinned near the bottom.
                       Safe-area padding clears the home indicator */}
