@@ -1264,24 +1264,19 @@ export default function AppShell() {
           {viewState === 'landing' && (
             <div key={activeTab} style={{ position: 'relative', animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : { minHeight: '100dvh' }) }}>
 
-              {/* ═══ SHARED BACKGROUND — all landing pages ═══ */}
-              {/* Solid bg covers the body dot-grid. Absolute (not fixed) so Safari toolbar reads body bg. */}
-              <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#1a1c1e' : '#f9f9fc', pointerEvents: 'none' }} />
-              {/* Circuit board image — cover the full container, visible at edges.
-                  Low opacity + slight blur softens the baked-in annotation text
-                  ("PART NO: 4K-RGE-MOD-01", etc.) into pure texture so it can't
-                  be read behind content. */}
+              {/* ═══ SHARED BACKGROUND — all landing pages ═══
+                  Warm paper base (#f8f6f2 / #151617) set on html/body, with a single
+                  rose-gold radial glow and subtle film grain. No circuit board, no
+                  dot grid — quiet canvas that lets typography and the rose-gold
+                  accent do the work. */}
+              <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#151617' : '#f8f6f2', pointerEvents: 'none' }} />
+              {/* Atmospheric rose-gold glow — top right corner */}
               <div style={{
-                position: 'absolute', inset: 0, zIndex: 1,
-                backgroundImage: `url('/${dark ? 'G2' : 'G1'}.png')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                opacity: dark ? 0.14 : 0.05,
-                filter: 'blur(1.5px)',
-                pointerEvents: 'none',
+                position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
+                background: dark
+                  ? 'radial-gradient(ellipse 1000px 700px at 90% 5%, rgba(232, 112, 154, 0.08) 0%, transparent 60%)'
+                  : 'radial-gradient(ellipse 1000px 700px at 90% 5%, rgba(212, 74, 120, 0.06) 0%, transparent 60%)',
               }} />
-              <CircuitSparks dark={dark} />
 
               {activeTab === 'home' ? (
               <>

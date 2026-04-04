@@ -47,19 +47,20 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
   --serif: 'Sora', sans-serif;
 }
 
+/* ═══ SITE BACKGROUND — Warm paper with rose-gold accent glow ═══
+   Layer 1: rose-gold radial glow (top-right) — atmospheric accent
+   Layer 2: subtle SVG fractal noise — film grain for "paper" character
+   Layer 3: warm cream base color — complements the rose-gold brand
+   Approach: boutique advisory firm / high-end financial document */
 html, body {
   width: 100%;
-  background-color: #f9f9fc !important;
-  background-image: radial-gradient(circle, rgba(0,0,0,0.12) 1.2px, transparent 1.2px);
-  background-size: 26px 26px;
-  background-position: 13px 13px;
-}
-@media (max-width: 767px) {
-  html, body {
-    background-image: radial-gradient(circle, rgba(0,0,0,0.14) 1.4px, transparent 1.4px) !important;
-    background-size: 24px 24px;
-    background-position: 12px 12px;
-  }
+  background-color: #f8f6f2 !important;
+  background-image:
+    radial-gradient(ellipse 900px 600px at 92% 8%, rgba(212, 74, 120, 0.07) 0%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: auto, 180px 180px;
+  background-position: 0 0, 0 0;
+  background-repeat: no-repeat, repeat;
 }
 /* Default: natural document flow for landing/journey pages */
 #root {
@@ -103,10 +104,13 @@ html.dark {
   --shadow-lg: 0 4px 24px rgba(0,0,0,.5);
 }
 html.dark, html.dark body {
-  background-color: #1a1c1e !important;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.10) 1.2px, transparent 1.2px);
-  background-size: 26px 26px;
-  background-position: 13px 13px;
+  background-color: #151617 !important;
+  background-image:
+    radial-gradient(ellipse 900px 600px at 92% 8%, rgba(232, 112, 154, 0.09) 0%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: auto, 180px 180px;
+  background-position: 0 0, 0 0;
+  background-repeat: no-repeat, repeat;
   color-scheme: dark;
 }
 html.dark #root {
@@ -114,13 +118,6 @@ html.dark #root {
 }
 html.dark #app-root {
   background-color: transparent !important;
-}
-@media (max-width: 767px) {
-  html.dark, html.dark body {
-    background-image: radial-gradient(circle, rgba(255,255,255,0.10) 1.4px, transparent 1.4px) !important;
-    background-size: 24px 24px;
-    background-position: 12px 12px;
-  }
 }
 
 /* ─── Mobile Interactive Model Polish ──────────────────────── */
