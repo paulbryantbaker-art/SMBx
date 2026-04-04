@@ -96,7 +96,7 @@ function LogoHero({ height = 120, className, dark }: { height?: number; classNam
 function LogoIcon({ height = 28, className, style }: { height?: number; className?: string; style?: React.CSSProperties }) {
   return (
     <img
-      src="/x.png"
+      src="/x.png?v=2"
       alt="smbx.ai"
       draggable={false}
       className={className}
@@ -1101,7 +1101,7 @@ export default function AppShell() {
             title="Home"
             type="button"
           >
-            <img src="/x.png" alt="smbx.ai" width={42} height={42} className="sidebar-x-img" style={{ display: 'block' }} />
+            <img src="/x.png?v=2" alt="smbx.ai" width={42} height={42} className="sidebar-x-img" style={{ display: 'block' }} />
           </button>
         </div>
       )}
