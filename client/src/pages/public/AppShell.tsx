@@ -77,7 +77,7 @@ function LogoImg({ height = 28, style, className }: { height?: number; style?: R
 function LogoHero({ height = 120, className, dark }: { height?: number; className?: string; dark?: boolean }) {
   return (
     <img
-      src="/New G1 Logo T.png"
+      src={dark ? '/New G1 Logo T.png' : '/G3.png'}
       alt="smbx.ai"
       className={className}
       style={{
@@ -86,7 +86,7 @@ function LogoHero({ height = 120, className, dark }: { height?: number; classNam
         display: 'block',
         filter: dark
           ? 'drop-shadow(0 4px 20px rgba(180, 100, 60, 0.5)) drop-shadow(0 2px 8px rgba(0,0,0,0.4))'
-          : 'drop-shadow(0 4px 16px rgba(160, 48, 80, 0.3)) drop-shadow(0 2px 6px rgba(0,0,0,0.15))',
+          : 'drop-shadow(0 2px 8px rgba(0,0,0,0.08))',
       }}
     />
   );
