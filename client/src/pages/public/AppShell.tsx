@@ -1298,8 +1298,8 @@ export default function AppShell() {
                     pointerEvents: 'none',
                   }} />
 
-                  {/* Mobile: flex spacer above cluster. 1:1 ratio with middle spacer
-                      keeps cluster at optical center while pushing pill near the bottom */}
+                  {/* Mobile: 1:2 ratio — cluster sits in upper third, pill floats near bottom
+                      (matches Grok/premium app pattern where content leads, action anchors) */}
                   {isMobile && <div className="flex-1" aria-hidden />}
 
                   {/* Top cluster — centered desktop; optical-center on mobile */}
@@ -1409,13 +1409,13 @@ export default function AppShell() {
                     </div>
                   </div>
 
-                  {/* Middle flex spacer — pushes pill zone to the bottom of main */}
-                  {isMobile && <div className="flex-1" aria-hidden />}
+                  {/* Middle flex spacer — 2× the top spacer, pushes pill to bottom */}
+                  {isMobile && <div className="flex-[2]" aria-hidden />}
 
-                  {/* Mobile bottom zone: pill + trust line. Zero internal padding —
-                      the scroll spacer below main provides the Safari chrome buffer */}
+                  {/* Mobile bottom zone: pill + trust line pinned near the bottom.
+                      Safe-area padding clears the home indicator */}
                   {isMobile && (
-                    <div className="shrink-0 px-4 relative z-10">
+                    <div className="shrink-0 px-4 relative z-10" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}>
                       {/* Tool popup (drops UP from input) */}
                       <div ref={homeToolsRef} className={`home-tools-popup ${homeToolsOpen ? 'open' : ''}`} style={{ bottom: 'calc(100% + 8px)', left: 16, right: 16 }}>
                         <div className="px-4 pt-3 pb-2">
@@ -1489,15 +1489,8 @@ export default function AppShell() {
                     </div>
                   )}
                 </main>
-                {/* Scroll spacer — creates minimal overflow so Safari minimizes its chrome.
-                    85px is the minimum that reliably triggers minimization on iPhone Safari. */}
-                {isMobile && (
-                  <div className="shrink-0 flex flex-col items-center justify-end relative z-10" style={{ height: 85, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)' }}>
-                    <p className={`text-[10px] font-medium ${dark ? 'text-zinc-700' : 'text-[#C8C4BC]'}`}>
-                      AI deal intelligence for business acquisitions
-                    </p>
-                  </div>
-                )}
+                {/* Scroll spacer removed — page is exactly 100dvh, pill sits at bottom of
+                    visible viewport with safe-area padding for the home indicator. */}
               </>
               ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing'].includes(activeTab) ? (
               <div className="relative z-10">
