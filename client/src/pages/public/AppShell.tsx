@@ -1377,8 +1377,16 @@ export default function AppShell() {
                     </div>
                   )}
                 </main>
-                {/* Scroll spacer — gives Safari enough content to detect scroll and minimize its chrome */}
-                {isMobile && <div style={{ height: 60, flexShrink: 0 }} aria-hidden="true" />}
+                {/* Scroll spacer — Safari only minimizes its chrome when body has real scrollable content.
+                    Needs ~120-150px of overflow (Safari ignores trivially small amounts).
+                    Designed as intentional footer space, not a hack. */}
+                {isMobile && (
+                  <div className="shrink-0 flex flex-col items-center justify-end relative z-10" style={{ height: 140, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 20px)' }}>
+                    <p className={`text-[10px] font-medium ${dark ? 'text-zinc-700' : 'text-[#C8C4BC]'}`}>
+                      AI deal intelligence for business acquisitions
+                    </p>
+                  </div>
+                )}
               </>
               ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing'].includes(activeTab) ? (
               <div className="relative z-10">
