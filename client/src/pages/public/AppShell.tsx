@@ -1216,8 +1216,8 @@ export default function AppShell() {
                 <div key={corner} style={{
                   position: 'absolute',
                   zIndex: 1,
-                  width: '55%',
-                  height: '55%',
+                  width: isMobile ? '45%' : '55%',
+                  height: isMobile ? '40%' : '55%',
                   ...(corner === 'topLeft' ? { top: 0, left: 0 } : {}),
                   ...(corner === 'topRight' ? { top: 0, right: 0 } : {}),
                   ...(corner === 'bottomLeft' ? { bottom: 0, left: 0 } : {}),
@@ -1237,13 +1237,13 @@ export default function AppShell() {
                     : corner === 'topRight' ? '100% 0%'
                     : corner === 'bottomLeft' ? '0% 100%'
                     : '100% 100%'
-                  }, black 0%, black 30%, transparent 70%)`,
+                  }, black 0%, black ${isMobile ? '15%' : '30%'}, transparent ${isMobile ? '50%' : '70%'})`,
                   WebkitMaskImage: `radial-gradient(ellipse at ${
                     corner === 'topLeft' ? '0% 0%'
                     : corner === 'topRight' ? '100% 0%'
                     : corner === 'bottomLeft' ? '0% 100%'
                     : '100% 100%'
-                  }, black 0%, black 30%, transparent 70%)`,
+                  }, black 0%, black ${isMobile ? '15%' : '30%'}, transparent ${isMobile ? '50%' : '70%'})`,
                 }} />
               ))}
               {/* Circuit spark nodes — subtle pulse on a few nodes */}
