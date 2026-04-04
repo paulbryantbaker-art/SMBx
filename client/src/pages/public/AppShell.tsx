@@ -1243,8 +1243,8 @@ export default function AppShell() {
                     pointerEvents: 'none',
                   }} />
 
-                  {/* Desktop: single centered cluster */}
-                  <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
+                  {/* Top cluster — centered on desktop, bottom-anchored on mobile to sit close to chips */}
+                  <div className={`flex-1 flex flex-col items-center px-6 relative z-10 ${isMobile ? 'justify-end pb-8' : 'justify-center'}`}>
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-5' : 'max-w-3xl space-y-6'}`}>
                       {!isMobile && (
                         <div className="mb-10 flex justify-center">
@@ -1271,8 +1271,14 @@ export default function AppShell() {
                           <div className="w-full max-w-3xl mx-auto mt-8">
                             <div className="relative group">
                               <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'}`} />
-                              <div className={`relative rounded-full flex items-center p-2 pl-6 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
-                                <span className={`material-symbols-outlined mr-4 ${dark ? 'text-rose-500' : 'text-[#D44A78]'}`}>bolt</span>
+                              <div className={`relative rounded-full flex items-center p-2 pl-4 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
+                                <button
+                                  type="button"
+                                  aria-label="Add"
+                                  className={`h-10 w-10 rounded-full flex items-center justify-center mr-2 transition-all active:scale-95 cursor-pointer border-none ${dark ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700' : 'bg-[#f3f3f6] text-[#D44A78] hover:bg-[#e3bdc3]/40'}`}
+                                >
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
+                                </button>
                                 <input
                                   className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
                                   placeholder="Message Yulia..."
@@ -1349,8 +1355,14 @@ export default function AppShell() {
                       {/* Gradient-glow input (same as desktop) */}
                       <div className="relative group">
                         <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'}`} />
-                        <div className={`relative rounded-full flex items-center p-2 pl-5 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
-                          <span className={`material-symbols-outlined mr-3 ${dark ? 'text-rose-500' : 'text-[#D44A78]'}`}>bolt</span>
+                        <div className={`relative rounded-full flex items-center p-2 pl-3 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
+                          <button
+                            type="button"
+                            aria-label="Add"
+                            className={`h-9 w-9 rounded-full flex items-center justify-center mr-2 transition-all active:scale-95 cursor-pointer border-none ${dark ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700' : 'bg-[#f3f3f6] text-[#D44A78] hover:bg-[#e3bdc3]/40'}`}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
+                          </button>
                           <input
                             className={`bg-transparent border-none focus:ring-0 flex-1 py-3 text-base outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
                             placeholder="Message Yulia..."
