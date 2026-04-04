@@ -1208,10 +1208,9 @@ export default function AppShell() {
             <div key={activeTab} style={{ position: 'relative', animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : { minHeight: '100dvh' }) }}>
 
               {/* ═══ SHARED BACKGROUND — all landing pages ═══ */}
-              {/* Solid bg covers the body dot-grid pattern. Must be absolute (not fixed) so Safari */}
-              {/* reads body/html bg for toolbar tinting, not this layer. */}
-              <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#1a1c1e' : '#f9f9fc', pointerEvents: 'none', minHeight: '100dvh' }} />
-              {/* Circuit board — single centered cover, fades at edges */}
+              {/* Solid bg covers the body dot-grid. Absolute (not fixed) so Safari toolbar reads body bg. */}
+              <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#1a1c1e' : '#f9f9fc', pointerEvents: 'none' }} />
+              {/* Circuit board image — cover the full container, visible at edges */}
               <div style={{
                 position: 'absolute', inset: 0, zIndex: 1,
                 backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,
@@ -1220,7 +1219,6 @@ export default function AppShell() {
                 backgroundRepeat: 'no-repeat',
                 opacity: dark ? 0.35 : 0.12,
                 pointerEvents: 'none',
-                minHeight: '100dvh',
               }} />
               <CircuitSparks dark={dark} />
 
@@ -1228,19 +1226,18 @@ export default function AppShell() {
               <>
                 {/* ═══ HOME PAGE ═══ */}
                 <main className="flex-1 flex flex-col relative">
-                  {/* Center fade + blur — clean reading area in center, circuit visible at edges */}
+                  {/* Center fade — clean reading area over circuit board */}
                   <div style={{
-                    position: 'absolute', inset: 0, zIndex: 2, minHeight: '100dvh',
+                    position: 'absolute', inset: 0, zIndex: 2,
                     background: isMobile
-                      ? `radial-gradient(ellipse 90% 60% at 50% 38%, ${dark ? 'rgba(15,16,18,0.85)' : 'rgba(249,249,252,0.9)'} 0%, ${dark ? 'rgba(15,16,18,0.4)' : 'rgba(249,249,252,0.3)'} 50%, transparent 100%)`
-                      : `radial-gradient(ellipse 80% 70% at 50% 42%, ${dark ? 'rgba(15,16,18,0.85)' : 'rgba(249,249,252,0.9)'} 0%, ${dark ? 'rgba(15,16,18,0.4)' : 'rgba(249,249,252,0.3)'} 50%, transparent 100%)`,
-                    /* backdrop blur removed — made circuit board look out of focus */
+                      ? `radial-gradient(ellipse 80% 50% at 50% 42%, ${dark ? 'rgba(26,28,30,0.92)' : 'rgba(249,249,252,0.92)'} 0%, ${dark ? 'rgba(26,28,30,0.3)' : 'rgba(249,249,252,0.2)'} 55%, transparent 100%)`
+                      : `radial-gradient(ellipse 60% 55% at 50% 44%, ${dark ? 'rgba(26,28,30,0.90)' : 'rgba(249,249,252,0.90)'} 0%, ${dark ? 'rgba(26,28,30,0.25)' : 'rgba(249,249,252,0.15)'} 50%, transparent 100%)`,
                     maskImage: isMobile
-                      ? 'radial-gradient(ellipse 85% 55% at 50% 38%, black 0%, transparent 100%)'
-                      : 'radial-gradient(ellipse 75% 65% at 50% 42%, black 0%, transparent 100%)',
+                      ? 'radial-gradient(ellipse 75% 45% at 50% 42%, black 0%, transparent 100%)'
+                      : 'radial-gradient(ellipse 55% 50% at 50% 44%, black 0%, transparent 100%)',
                     WebkitMaskImage: isMobile
-                      ? 'radial-gradient(ellipse 85% 55% at 50% 38%, black 0%, transparent 100%)'
-                      : 'radial-gradient(ellipse 75% 65% at 50% 42%, black 0%, transparent 100%)',
+                      ? 'radial-gradient(ellipse 75% 45% at 50% 42%, black 0%, transparent 100%)'
+                      : 'radial-gradient(ellipse 55% 50% at 50% 44%, black 0%, transparent 100%)',
                     pointerEvents: 'none',
                   }} />
 
