@@ -2,8 +2,8 @@ import { useState, useEffect, useLayoutEffect, useCallback } from 'react';
 
 type ThemePref = 'light' | 'dark' | 'system';
 const STORAGE_KEY = 'smbx-theme';
-const LIGHT_COLOR = '#f9f9fc';
-const DARK_COLOR = '#1a1c1e';
+const LIGHT_COLOR = '#f8f6f2';
+const DARK_COLOR = '#151617';
 
 function getSystemDark() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
