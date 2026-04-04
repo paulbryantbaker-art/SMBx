@@ -1874,6 +1874,34 @@ export default function AppShell() {
 
 // ─── Canvas Tab Icon ────────────────────────────────────────────────
 
+function CircuitSparks({ dark }: { dark: boolean }) {
+  const sparkColor = dark ? '#E8709A' : '#D44A78';
+  const sparks = [
+    { left: '14%', top: '72%', delay: '0s', duration: '4.5s' },
+    { left: '82%', top: '18%', delay: '2.2s', duration: '5.8s' },
+    { left: '88%', top: '78%', delay: '3.8s', duration: '6.2s' },
+  ];
+  return (
+    <>
+      <style>{`
+        @keyframes circuit-spark {
+          0%, 85%, 100% { opacity: 0; transform: scale(0.5); }
+          90% { opacity: 0.8; transform: scale(1); }
+          95% { opacity: 0.3; transform: scale(1.6); }
+        }
+      `}</style>
+      {sparks.map((s, i) => (
+        <div key={i} style={{
+          position: 'absolute', left: s.left, top: s.top, width: 6, height: 6,
+          borderRadius: '50%', background: sparkColor, zIndex: 2, pointerEvents: 'none',
+          boxShadow: `0 0 8px 3px ${sparkColor}40, 0 0 20px 6px ${sparkColor}20`,
+          animation: `circuit-spark ${s.duration} ${s.delay} ease-in-out infinite`, opacity: 0,
+        }} />
+      ))}
+    </>
+  );
+}
+
 function CanvasTabIcon({ type }: { type: string }) {
   const icons: Record<string, string> = {
     pipeline: 'view_kanban',
