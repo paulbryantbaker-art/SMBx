@@ -1211,41 +1211,17 @@ export default function AppShell() {
               {/* Solid bg covers the body dot-grid pattern. Must be absolute (not fixed) so Safari */}
               {/* reads body/html bg for toolbar tinting, not this layer. */}
               <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#1a1c1e' : '#f9f9fc', pointerEvents: 'none', minHeight: '100dvh' }} />
-              {/* Circuit board — 4 corner panels, absolute positioned */}
-              {(['topLeft', 'topRight', 'bottomLeft', 'bottomRight'] as const).map(corner => (
-                <div key={corner} style={{
-                  position: 'absolute',
-                  zIndex: 1,
-                  width: isMobile ? '45%' : '55%',
-                  height: isMobile ? '40%' : '55%',
-                  ...(corner === 'topLeft' ? { top: 0, left: 0 } : {}),
-                  ...(corner === 'topRight' ? { top: 0, right: 0 } : {}),
-                  ...(corner === 'bottomLeft' ? { bottom: 0, left: 0 } : {}),
-                  ...(corner === 'bottomRight' ? { bottom: 0, right: 0 } : {}),
-                  backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,
-                  backgroundSize: isMobile ? '182% 182%' : '1377px auto',
-                  backgroundPosition:
-                    corner === 'topLeft' ? '0% 0%'
-                    : corner === 'topRight' ? '100% 0%'
-                    : corner === 'bottomLeft' ? '0% 100%'
-                    : '100% 100%',
-                  backgroundRepeat: 'no-repeat',
-                  opacity: dark ? 0.35 : 0.15,
-                  pointerEvents: 'none',
-                  maskImage: `radial-gradient(ellipse at ${
-                    corner === 'topLeft' ? '0% 0%'
-                    : corner === 'topRight' ? '100% 0%'
-                    : corner === 'bottomLeft' ? '0% 100%'
-                    : '100% 100%'
-                  }, black 0%, black ${isMobile ? '15%' : '30%'}, transparent ${isMobile ? '50%' : '70%'})`,
-                  WebkitMaskImage: `radial-gradient(ellipse at ${
-                    corner === 'topLeft' ? '0% 0%'
-                    : corner === 'topRight' ? '100% 0%'
-                    : corner === 'bottomLeft' ? '0% 100%'
-                    : '100% 100%'
-                  }, black 0%, black ${isMobile ? '15%' : '30%'}, transparent ${isMobile ? '50%' : '70%'})`,
-                }} />
-              ))}
+              {/* Circuit board — single centered cover, fades at edges */}
+              <div style={{
+                position: 'absolute', inset: 0, zIndex: 1,
+                backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                opacity: dark ? 0.35 : 0.12,
+                pointerEvents: 'none',
+                minHeight: '100dvh',
+              }} />
               <CircuitSparks dark={dark} />
 
               {activeTab === 'home' ? (
@@ -1256,14 +1232,15 @@ export default function AppShell() {
                   <div style={{
                     position: 'absolute', inset: 0, zIndex: 2, minHeight: '100dvh',
                     background: isMobile
-                      ? `radial-gradient(ellipse 70% 45% at 50% 40%, ${dark ? 'rgba(15,16,18,0.88)' : 'rgba(249,249,252,0.92)'} 0%, ${dark ? 'rgba(15,16,18,0.2)' : 'rgba(249,249,252,0.15)'} 60%, transparent 100%)`
-                      : `radial-gradient(ellipse 55% 50% at 50% 44%, ${dark ? 'rgba(15,16,18,0.88)' : 'rgba(249,249,252,0.92)'} 0%, ${dark ? 'rgba(15,16,18,0.2)' : 'rgba(249,249,252,0.15)'} 55%, transparent 100%)`,
+                      ? `radial-gradient(ellipse 90% 60% at 50% 38%, ${dark ? 'rgba(15,16,18,0.85)' : 'rgba(249,249,252,0.9)'} 0%, ${dark ? 'rgba(15,16,18,0.4)' : 'rgba(249,249,252,0.3)'} 50%, transparent 100%)`
+                      : `radial-gradient(ellipse 80% 70% at 50% 42%, ${dark ? 'rgba(15,16,18,0.85)' : 'rgba(249,249,252,0.9)'} 0%, ${dark ? 'rgba(15,16,18,0.4)' : 'rgba(249,249,252,0.3)'} 50%, transparent 100%)`,
+                    /* backdrop blur removed — made circuit board look out of focus */
                     maskImage: isMobile
-                      ? 'radial-gradient(ellipse 65% 42% at 50% 40%, black 0%, transparent 100%)'
-                      : 'radial-gradient(ellipse 50% 45% at 50% 44%, black 0%, transparent 100%)',
+                      ? 'radial-gradient(ellipse 85% 55% at 50% 38%, black 0%, transparent 100%)'
+                      : 'radial-gradient(ellipse 75% 65% at 50% 42%, black 0%, transparent 100%)',
                     WebkitMaskImage: isMobile
-                      ? 'radial-gradient(ellipse 65% 42% at 50% 40%, black 0%, transparent 100%)'
-                      : 'radial-gradient(ellipse 50% 45% at 50% 44%, black 0%, transparent 100%)',
+                      ? 'radial-gradient(ellipse 85% 55% at 50% 38%, black 0%, transparent 100%)'
+                      : 'radial-gradient(ellipse 75% 65% at 50% 42%, black 0%, transparent 100%)',
                     pointerEvents: 'none',
                   }} />
 
@@ -1896,48 +1873,6 @@ export default function AppShell() {
 }
 
 // ─── Canvas Tab Icon ────────────────────────────────────────────────
-
-/** Subtle electricity sparks on circuit board nodes — 3 positioned glowing dots that pulse randomly */
-function CircuitSparks({ dark }: { dark: boolean }) {
-  const sparkColor = dark ? '#E8709A' : '#D44A78';
-  // Positions correspond to node locations in the SVG (% of viewport)
-  const sparks = [
-    { left: '14%', top: '72%', delay: '0s', duration: '4.5s' },
-    { left: '82%', top: '18%', delay: '2.2s', duration: '5.8s' },
-    { left: '88%', top: '78%', delay: '3.8s', duration: '6.2s' },
-  ];
-
-  return (
-    <>
-      <style>{`
-        @keyframes circuit-spark {
-          0%, 85%, 100% { opacity: 0; transform: scale(0.5); }
-          90% { opacity: 0.8; transform: scale(1); }
-          95% { opacity: 0.3; transform: scale(1.6); }
-        }
-      `}</style>
-      {sparks.map((s, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'absolute',
-            left: s.left,
-            top: s.top,
-            width: 6,
-            height: 6,
-            borderRadius: '50%',
-            background: sparkColor,
-            boxShadow: `0 0 8px 3px ${sparkColor}40, 0 0 20px 6px ${sparkColor}20`,
-            zIndex: 2,
-            pointerEvents: 'none',
-            animation: `circuit-spark ${s.duration} ${s.delay} ease-in-out infinite`,
-            opacity: 0,
-          }}
-        />
-      ))}
-    </>
-  );
-}
 
 function CanvasTabIcon({ type }: { type: string }) {
   const icons: Record<string, string> = {
