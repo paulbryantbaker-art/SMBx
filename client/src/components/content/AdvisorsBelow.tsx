@@ -1,16 +1,31 @@
-import { ScrollReveal, StaggerContainer, StaggerItem } from './animations';
+import { ScrollReveal, StaggerContainer, StaggerItem, TiltCard, MagneticButton, AnimatedCounter } from './animations';
+import { darkClasses } from './darkHelpers';
+import { goToChat } from './chatBridge';
+import { AdvisorROICalc } from './LandingCalculators';
+import usePageMeta from '../../hooks/usePageMeta';
 
 export default function AdvisorsBelow({ dark }: { dark: boolean }) {
+  const dc = darkClasses(dark);
 
-  const handleCTA = () => {
-    window.location.href = '/chat';
-  };
+  usePageMeta({
+    title: 'For M&A Advisors & Business Brokers | AI Deal Management — smbx.ai',
+    description: 'Generate CIMs in 2 hours. Manage 15-20 deals simultaneously. White-label AI deal intelligence for brokers, M&A advisors, CPAs, and attorneys.',
+    canonical: 'https://smbx.ai/advisors',
+    faqs: [
+      { question: 'Will my clients know I\'m using AI?', answer: 'Only if you tell them. Every document Yulia generates can carry your branding, your letterhead, your firm\'s identity. The analysis has your methodology. Yulia is the engine behind the scenes — your clients see your work product.' },
+      { question: 'Is client data secure?', answer: 'Every client engagement is siloed. No cross-client data access. No model training on client data. Encrypted at rest and in transit. Full compliance with your fiduciary obligations.' },
+      { question: 'Do I need a separate advisor account?', answer: 'No. Same platform, same tiers as everyone else. Solo practitioners typically use Professional ($149/mo). Firms use Enterprise ($999/mo). The difference is scale, not features.' },
+      { question: 'Does this replace me?', answer: 'No. It replaces the spreadsheet work, the document drafting, the data gathering, and the checklist management. It does not replace your client relationships, your deal judgment, your negotiation instinct, or your license. It makes you faster.' },
+    ],
+  });
 
-  const card = dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]';
-  const muted = dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]';
-  const emphasis = dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]';
-  const subtleBg = dark ? 'bg-[#2f3133]' : 'bg-[#f3f3f6]';
-  const darkPanel = dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]';
+  const handleCTA = goToChat;
+
+  const card = dc.card;
+  const muted = dc.muted;
+  const emphasis = dc.emphasis;
+  const subtleBg = dc.subtleBg;
+  const darkPanel = dc.darkPanel;
 
   const timeRows = [
     { before: '40 hrs', after: '2 hrs', label: 'CIM generation', highlight: true },
@@ -286,7 +301,26 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           </section>
         </ScrollReveal>
 
-        {/* ═══ 7. FAQ ═══ */}
+        {/* ═══ 7. ROI CALCULATOR ═══ */}
+        <section className="mb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <ScrollReveal className="lg:col-span-5">
+              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Your ROI</span>
+              <h2 className="font-headline text-4xl font-black tracking-tight mb-6">The math on your practice revenue.</h2>
+              <p className={`leading-relaxed editorial mb-6 ${muted}`}>
+                The bottleneck in your practice is analytical capacity. When CIM generation takes 40 hours, deal flow management caps at 3-5 deals. Remove the bottleneck and your deal volume scales with your relationship capacity — which is the part you're actually good at.
+              </p>
+              <p className={`font-bold text-xl border-l-4 border-[#D44A78] pl-6 italic ${emphasis}`}>
+                3-4x more deals at $149/month. Run the numbers yourself.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.15} className="lg:col-span-7">
+              <AdvisorROICalc dark={dark} />
+            </ScrollReveal>
+          </div>
+        </section>
+
+        {/* ═══ 8. FAQ ═══ */}
         <ScrollReveal>
           <section className="mb-24">
             <h2 className="font-headline text-4xl font-black tracking-tight mb-12">Questions from advisors</h2>
@@ -310,7 +344,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
                 <p className="text-lg text-[#dadadc]/70 mt-4">Run a complete client engagement. Generate a CIM. Build a valuation. See how the pipeline changes. No credit card required.</p>
               </div>
               <div className="flex flex-col items-center lg:items-end gap-4">
-                <button onClick={handleCTA} className="px-10 py-5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Start Free Trial</button>
+                <MagneticButton onClick={handleCTA} className="px-10 py-5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Start Free Trial</MagneticButton>
                 <p className="text-xs text-[#dadadc]/70">30 days · Full access · No credit card</p>
               </div>
             </div>

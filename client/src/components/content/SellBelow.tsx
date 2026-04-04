@@ -1,294 +1,287 @@
-import { ScrollReveal, StaggerContainer, StaggerItem } from './animations';
+import {
+  ScrollReveal, StaggerContainer, StaggerItem,
+  AnimatedTimeline, TiltCard, BeforeAfterSlider,
+  InteractiveCalculator, MagneticButton, GlowingOrb,
+  AnimatedCounter, StatBar, ZigZagSection,
+} from './animations';
+import { darkClasses } from './darkHelpers';
+import { bridgeToYulia, goToChat } from './chatBridge';
+import { BaselineCalculator, LandingTaxCalc } from './LandingCalculators';
+import usePageMeta from '../../hooks/usePageMeta';
 
 export default function SellBelow({ dark }: { dark: boolean }) {
+  const dc = darkClasses(dark);
 
-  const handleCTA = () => {
-    window.location.href = '/chat';
-  };
+  usePageMeta({
+    title: 'Sell Your Business | AI Valuation & Exit Planning — smbx.ai',
+    description: 'Find out what your business is worth. AI-powered business valuation calculator, SDE add-back analysis, institutional CIM, and full exit strategy.',
+    canonical: 'https://smbx.ai/sell',
+    faqs: [
+      { question: 'What is Seller\'s Discretionary Earnings (SDE)?', answer: 'Seller\'s Discretionary Earnings (SDE) is the total financial benefit a single owner-operator derives from the business. It includes net income plus owner salary, personal expenses run through the business, depreciation, amortization, interest, and one-time costs. SDE is the standard earnings metric for valuing businesses under $5M.' },
+      { question: 'How long does it take to sell a business?', answer: 'Most business sales take 6 to 18 months from listing to close. The timeline depends on deal complexity, buyer financing, due diligence scope, and industry. Proper exit planning — financial normalization, CIM preparation, and buyer identification — can significantly reduce time to close.' },
+      { question: 'What is the difference between an asset sale and a stock sale?', answer: 'In an asset sale, the buyer purchases individual business assets (equipment, inventory, goodwill, customer lists). In a stock sale, the buyer purchases the owner\'s shares in the entity. The after-tax difference can be hundreds of thousands of dollars depending on purchase price allocation under IRC §1060.' },
+      { question: 'What are common SDE add-backs?', answer: 'Common add-backs include owner salary and benefits, personal vehicle expenses, family member compensation above market rate, personal travel, one-time legal or professional fees, above-market rent paid to owner-held real estate, and personal insurance. Properly identifying add-backs can increase your SDE — and your valuation — by 15-30%.' },
+    ],
+  });
 
   return (
     <div className={dark ? 'bg-transparent text-[#f9f9fc]' : 'bg-transparent text-[#1a1c1e]'}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
-        {/* ═══ 1. HERO ═══ */}
-        <section className="mb-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          <div className="lg:col-span-7">
-            <ScrollReveal>
-              <div className="flex items-center gap-2 mb-8">
-                <span className="inline-block px-3 py-1 bg-[#D44A78]/10 text-[#D44A78] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Sell</span>
-                <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-[#2f3133] text-[#dadadc]/80' : 'bg-[#f3f3f6] text-[#5d5e61]'}`}>Exit Planning</span>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal y={40} delay={0.1}>
-              <h1 className="font-headline font-black text-5xl md:text-6xl tracking-tighter leading-[0.92] mb-8">
-                75% of owners who sell profoundly <span className="text-[#D44A78]">regret it</span> within a year.
-              </h1>
-            </ScrollReveal>
-            <ScrollReveal delay={0.2}>
-              <div className={`space-y-6 text-xl editorial max-w-xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
-                <p>Not because they sold. Because they weren't ready. Wrong valuation. Wrong timing. Wrong structure. Fixable problems they didn't know existed until after the wire hit.</p>
-                <p className={`font-bold border-l-4 border-[#D44A78] pl-6 text-2xl italic ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>Yulia makes sure that doesn't happen to you.</p>
-              </div>
-            </ScrollReveal>
-          </div>
-          <ScrollReveal delay={0.25} className="lg:col-span-5 mt-4">
-            <div className={`rounded-3xl p-8 text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
-              <p className="text-[10px] text-[#dadadc]/60 uppercase tracking-[0.2em] font-bold mb-6">Your AI deal team</p>
-              <div className="space-y-4">
-                {[
-                  'Builds your valuation with three methodologies — math shown',
-                  'Finds every add-back hiding in your financials',
-                  'Generates a 25–40 page CIM that looks like a $50K IB deliverable',
-                  'Identifies and scores buyer categories against your business',
-                  'Manages your deal room, tracks DD, coordinates every party',
-                  'Preps you for every negotiation with comp data and counter-offers',
-                  'Drafts every communication — to buyers, attorneys, CPAs, lenders',
-                  'Transitions you to a 180-day post-close plan the moment the deal funds',
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-[#D44A78] text-lg shrink-0 mt-0.5">check_circle</span>
-                    <p className="text-sm text-[#dadadc]/90">{item}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 pt-6 border-t border-white/10">
-                <p className="text-xs text-[#dadadc]/60 italic">The only thing you do yourself is decide which offer to accept and sign your name.</p>
-              </div>
+        {/* ═══ 1. HERO — Full-width centered (breaks the 7/5 template) ═══ */}
+        <section className="mb-24">
+          <ScrollReveal>
+            <div className="flex items-center gap-2 mb-8">
+              <span className="inline-block px-3 py-1 bg-[#D44A78]/10 text-[#D44A78] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Sell</span>
+              <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dc.subtleBg} ${dc.muted}`}>Exit Planning</span>
             </div>
+          </ScrollReveal>
+
+          <ScrollReveal y={40} delay={0.1}>
+            <h1 className="font-headline font-black text-5xl md:text-7xl tracking-tighter leading-[0.9] mb-8 max-w-4xl">
+              75% of owners who sell profoundly <span className="text-[#D44A78]">regret it</span> within a year.
+            </h1>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.2}>
+            <p className={`text-xl leading-relaxed max-w-2xl mb-10 ${dc.muted}`}>
+              Not because they sold. Because they weren't ready. Wrong valuation. Wrong timing. Wrong structure. Fixable problems they didn't know existed until after the wire hit. Most owners asking "what is my business worth" start with a Google search. Yulia starts with your actual financials.
+            </p>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.3}>
+            <StatBar
+              stats={[
+                { label: 'Average value left on the table', value: 340, prefix: '$', suffix: 'K' },
+                { label: 'Owners with no succession plan', value: 46, suffix: '%' },
+                { label: 'Add-backs missed by typical CPAs', value: 5 },
+              ]}
+              className="max-w-3xl"
+            />
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.35}>
+            <p className={`font-bold text-2xl border-l-4 border-[#D44A78] pl-6 italic mt-12 max-w-xl ${dc.emphasis}`}>
+              Yulia makes sure that doesn't happen to you.
+            </p>
           </ScrollReveal>
         </section>
 
-        {/* ═══ 2. WHAT YULIA DOES ═══ */}
-        <ScrollReveal>
-          <section className="mb-24">
-            <div className={`rounded-3xl p-10 md:p-16 text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
-              <div className="mb-12">
-                <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">What Yulia Does</span>
-                <h2 className="text-4xl font-headline font-black tracking-tight mb-4">What an investment bank delivers for $150K–$500K.</h2>
-                <p className="text-lg text-[#dadadc]/60 max-w-2xl">The analysis, the documents, the buyer outreach, the process management, the negotiation prep. Yulia does all of it. You focus on the decisions that matter.</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  { icon: 'monitoring', title: 'Valuation with the math shown', desc: 'Three methodologies — SDE multiples, comparable transactions, asset floor. Seven-factor quality score. Every number sourced, every assumption documented. Not a range. A defensible thesis.' },
-                  { icon: 'search', title: 'Add-back forensics', desc: "The car. The insurance. The one-time legal bill. The family payroll your CPA never flagged. Yulia scans your financials against IRS industry benchmarks and surfaces every dollar that should be added back to your SDE." },
-                  { icon: 'description', title: 'Institutional-quality CIM', desc: '25–40 pages. Business overview, 3-year financials, management summary, market analysis, competitive position, investment thesis. Adapted to your league. The document that gets deals done.' },
-                  { icon: 'groups', title: 'Buyer identification & scoring', desc: "Strategic acquirers, PE platforms, individual operators, search funds — each category scored against your business profile. Who's buying in your sector, what they're paying, and which ones are the best fit." },
-                  { icon: 'folder_managed', title: 'Deal room & DD coordination', desc: "NDA execution, document access control, activity tracking. A 50–100 item DD checklist tracked to completion with deadline alerts. Multi-party coordination between your attorney, CPA, the buyer's team, and the lender." },
-                  { icon: 'gavel', title: 'Negotiation intelligence', desc: 'Every negotiation moment — initial offer, counter, working capital adjustment, non-compete terms, earnout structure — Yulia prepares you with comparable transaction data and drafts the exact communication for you to review and send.' },
-                ].map((card) => (
-                  <div key={card.title} className="bg-white/5 rounded-2xl border border-white/10 p-8">
-                    <span className="material-symbols-outlined text-[#D44A78] text-3xl mb-4">{card.icon}</span>
-                    <h3 className="font-bold text-lg mb-3">{card.title}</h3>
-                    <p className="text-sm text-[#dadadc]/70">{card.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        </ScrollReveal>
-
-        {/* ═══ 3. THE DEAL PROCESS ═══ */}
+        {/* ═══ 2. "WHAT'S YOUR BASELINE?" — Interactive valuation calculator ═══ */}
         <section className="mb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             <ScrollReveal className="lg:col-span-5">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Your Exit Process</span>
-              <h2 className="text-4xl font-headline font-black tracking-tight mb-8">Eight stages. Yulia manages every one.</h2>
-              <p className={`font-bold text-xl border-l-4 border-[#D44A78] pl-6 italic mb-8 ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>You don't need to know the process. You just need to show up for the decisions.</p>
-              <p className={dark ? 'text-[#dadadc]/80 leading-relaxed' : 'text-[#5d5e61] leading-relaxed'}>From your first conversation to 180 days after close, every step has specific completion triggers. Yulia advances you when the prerequisite work is done — and not before.</p>
+              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">What's Your Baseline?</span>
+              <h2 className="text-4xl font-headline font-black tracking-tight mb-6">Every exit starts with a number. Get yours in 30 seconds.</h2>
+              <p className={`leading-relaxed editorial mb-6 ${dc.muted}`}>
+                A business valuation calculator gives you a range. But the range is only as good as the earnings estimate. Most owners know their revenue — few know their real Seller's Discretionary Earnings (SDE). And valuation multiples by industry can vary by 2x depending on owner dependency, customer concentration, and growth trajectory.
+              </p>
+              <p className={`leading-relaxed editorial ${dc.muted}`}>
+                This calculator uses SDE margins by industry and current market multiples to estimate your Baseline. It's a starting point. Yulia goes deeper — she finds every add-back, scores your business on 7 value factors, and builds a defensible valuation with the math shown.
+              </p>
             </ScrollReveal>
-            <StaggerContainer className="lg:col-span-7 space-y-4">
-              {[
-                { num: '1', title: 'Know your number', desc: 'ValueLens preliminary valuation + add-back analysis + Value Readiness Report. This is where most people realize their business is worth more than they thought — or less than they hoped.', free: true },
-                { num: '2', title: 'Get deal-ready', desc: 'Financial cleanup, documentation gaps, readiness improvements. Yulia tells you exactly what to fix and what each fix is worth in dollars. A $15K improvement to your processes might add $60K to your valuation.' },
-                { num: '3', title: 'Build your materials', desc: 'CIM generated from your verified financials. Blind teasers for initial outreach. Every document adapted to your league — L1 gets clear and direct, L5 gets institutional.' },
-                { num: '4', title: 'Identify buyers', desc: 'Buyer categories mapped and scored. PE platforms currently acquiring in your sector. Individual operators who match your geography. Search funds with your thesis on their target list.' },
-                { num: '5', title: 'Manage interest', desc: 'NDAs executed through the platform. CIMs released with access control. Buyer questions fielded — Yulia drafts your responses, you review and send.' },
-                { num: '6', title: 'Evaluate offers', desc: 'Comparison matrix across every term — not just price. Risk-adjusted scoring. Tax implications modeled for each structure. Counter-offer frameworks with the math to support them.' },
-                { num: '7', title: 'Close', desc: "Closing checklist tracked to completion. Funds flow coordination. Final document package. Every party knows what's due and when." },
-                { num: '8', title: 'Transition', desc: "180-day post-close plan. Knowledge transfer framework. Performance tracking against deal projections. You don't just close — you land." },
-              ].map((step) => (
-                <StaggerItem key={step.num}>
-                  <div className={`rounded-2xl p-6 flex items-start gap-4 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${step.free ? 'bg-[#006630]/10 text-[#006630]' : 'bg-[#D44A78]/10 text-[#D44A78]'}`}>{step.num}</div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-bold">{step.title}</h4>
-                        {step.free && <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${dark ? 'bg-[#006630]/20 text-[#006630]' : 'bg-[#006630]/10 text-[#006630]'}`}>FREE</span>}
-                      </div>
-                      <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{step.desc}</p>
-                    </div>
-                  </div>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
+            <ScrollReveal delay={0.15} className="lg:col-span-7">
+              <BaselineCalculator dark={dark} />
+            </ScrollReveal>
           </div>
         </section>
 
-        {/* ═══ 4. NEGOTIATION INTELLIGENCE ═══ */}
+        {/* ═══ 3. "FIND YOUR BLIND EQUITY" — SDE add-back toggle calculator ═══ */}
+        <section className="mb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <ScrollReveal className="lg:col-span-5">
+              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Find Your Blind Equity</span>
+              <h2 className="text-4xl font-headline font-black tracking-tight mb-6">The money hiding in your books that your CPA never flagged.</h2>
+              <p className={`leading-relaxed editorial mb-6 ${dc.muted}`}>
+                Seller's Discretionary Earnings isn't what your tax return says you made. It's what a buyer would actually earn running your business. The difference is your Blind Equity — legitimate SDE add-backs that increase your valuation without changing a thing about how you operate.
+              </p>
+              <p className={`leading-relaxed editorial mb-6 ${dc.muted}`}>
+                The personal vehicle. The family cell phones. The one-time legal bill. The above-market rent you pay yourself. Most CPAs optimize for tax savings, not exit value. Understanding SDE vs EBITDA — and when each metric applies — is the first step to knowing what your business is really worth.
+              </p>
+              <div className={`rounded-2xl p-6 ${dark ? 'bg-[#D44A78]/10 border border-[#D44A78]/20' : 'bg-[#D44A78]/5 border border-[#D44A78]/15'}`}>
+                <p className={`text-sm ${dc.muted}`}><span className={`font-bold ${dc.emphasis}`}>Average Blind Equity found by Yulia: $124,000.</span> That's money that was always there. You just didn't know to count it.</p>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={0.15} className="lg:col-span-7">
+              <InteractiveCalculator className={dark ? 'bg-[#2f3133] border border-zinc-800' : undefined} />
+              <MagneticButton
+                onClick={() => bridgeToYulia("I'd like to find my Blind Equity. Can you walk me through all the potential SDE add-backs for my business?")}
+                className="w-full mt-4 px-6 py-3.5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-bold text-sm hover:scale-[1.02] transition-all shadow-md border-none cursor-pointer"
+              >
+                Yulia finds add-backs your CPA missed
+              </MagneticButton>
+            </ScrollReveal>
+          </div>
+        </section>
+
+        {/* ═══ 4. EXIT PREPARATION TIMELINE — AnimatedTimeline ═══ */}
+        <section className="mb-24">
+          <ScrollReveal>
+            <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Your Exit Process</span>
+            <h2 className="text-4xl font-headline font-black tracking-tight mb-4">Exit planning for business owners isn't a single event. It's eight stages.</h2>
+            <p className={`text-lg max-w-2xl mb-12 ${dc.muted}`}>
+              Whether you're 3 years from an exit or 3 months, the sequence matters. Yulia manages every stage — from business succession planning through wire transfer. You don't need to know the process. You just need to show up for the decisions.
+            </p>
+          </ScrollReveal>
+
+          <AnimatedTimeline>
+            {[
+              { num: '1', title: 'Know your number', desc: 'ValueLens preliminary valuation + add-back analysis + Value Readiness Report. This is where most people realize their business is worth more than they thought — or less than they hoped.', free: true },
+              { num: '2', title: 'Get deal-ready', desc: 'Financial cleanup, documentation gaps, readiness improvements. Yulia tells you exactly what to fix and what each fix is worth in dollars. A $15K improvement to your processes might add $60K to your valuation.' },
+              { num: '3', title: 'Build your materials', desc: 'CIM generated from your verified financials — the Confidential Information Memorandum that gets deals done. 25–40 pages. Blind teasers for initial outreach. Every document adapted to your league.' },
+              { num: '4', title: 'Identify buyers', desc: 'Buyer categories mapped and scored. PE platforms currently acquiring in your sector. Individual operators who match your geography. Search funds with your thesis on their target list.' },
+              { num: '5', title: 'Manage interest', desc: 'NDAs executed through the platform. CIMs released with access control. Buyer questions fielded — Yulia drafts your responses, you review and send.' },
+              { num: '6', title: 'Evaluate offers', desc: 'Comparison matrix across every term — not just price. Risk-adjusted scoring. Tax implications modeled for each structure. Counter-offer frameworks with comparable transaction data.' },
+              { num: '7', title: 'Close', desc: "Closing checklist tracked to completion. Funds flow coordination. Final document package. A Letter of Intent that protects your interests. Every party knows what's due and when." },
+              { num: '8', title: 'Transition', desc: "180-day post-close plan. Knowledge transfer framework. Performance tracking against deal projections. You don't just close — you land." },
+            ].map((step) => (
+              <div key={step.num} className={`pl-10 pb-8 relative ${dark ? '' : ''}`}>
+                <div className={`absolute left-0 top-0 w-[10px] h-[10px] rounded-full ${step.free ? 'bg-[#006630]' : 'bg-[#D44A78]'}`} />
+                <div className="flex items-center gap-2 mb-1">
+                  <h4 className="font-bold">{step.title}</h4>
+                  {step.free && <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${dark ? 'bg-[#006630]/20 text-[#006630]' : 'bg-[#006630]/10 text-[#006630]'}`}>FREE</span>}
+                </div>
+                <p className={`text-sm ${dc.muted}`}>{step.desc}</p>
+              </div>
+            ))}
+          </AnimatedTimeline>
+        </section>
+
+        {/* ═══ 5. NEGOTIATION INTELLIGENCE — BeforeAfterSlider ═══ */}
         <section className="mb-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <ScrollReveal className="lg:col-span-5">
               <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Negotiation Intelligence</span>
-              <h2 className="text-4xl font-headline font-black tracking-tight mb-8">Every counter-offer backed by data. Every communication drafted for you.</h2>
-              <p className={`leading-relaxed editorial ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>No other platform tells sellers what comparable deals settled at and drafts counter-offers. Every negotiation moment in your deal — the initial offer, the counter, the working capital adjustment, the non-compete terms, the earnout structure — Yulia prepares you with data from comparable transactions and drafts the exact communication for you to review and send.</p>
+              <h2 className="text-4xl font-headline font-black tracking-tight mb-6">Every counter-offer backed by comparable transaction data.</h2>
+              <p className={`leading-relaxed editorial mb-6 ${dc.muted}`}>
+                Most owners sell a business without a broker and negotiate on instinct. Even those with brokers often lack real-time market data. Yulia prepares you with actual multiples, actual deal structures, and actual outcomes from comparable transactions in your sector — and drafts every communication for you.
+              </p>
+              <p className={`leading-relaxed editorial ${dc.muted}`}>
+                An offer comes in at $1.6M for your $2.1M valuation. Yulia analyzes it against comps, identifies the working capital gap, and drafts three counter-structures — each with a different after-tax outcome. You pick the one that fits your goals.
+              </p>
             </ScrollReveal>
             <ScrollReveal delay={0.15} className="lg:col-span-7">
-              <div className={`rounded-3xl p-8 text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
-                <p className="text-[10px] text-[#dadadc]/60 uppercase tracking-[0.2em] font-bold mb-4">Worked example</p>
-                <h4 className="font-bold text-lg mb-6">An offer comes in at $1.6M for your $2.1M valuation.</h4>
-                <div className="space-y-3 mb-6">
-                  {[
-                    { icon: 'analytics', text: 'Offer is', bold: '24% below', after: 'your defensible range' },
-                    { icon: 'compare_arrows', text: 'Comparable transactions closed at', bold: '3.1x–3.4x SDE', after: '' },
-                    { icon: 'psychology', text: 'Buyer is using a standard opening discount —', bold: 'expected behavior', after: '' },
-                    { icon: 'warning', text: 'Working capital peg at $180K —', bold: '$40K below', after: 'your trailing average' },
-                  ].map((item) => (
-                    <div key={item.icon} className="bg-white/5 rounded-xl p-4 flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#D44A78] text-sm shrink-0 mt-0.5">{item.icon}</span>
-                      <p className="text-sm text-[#dadadc]/90">{item.text} <span className="text-white font-bold">{item.bold}</span>{item.after ? ` ${item.after}` : ''}</p>
+              <BeforeAfterSlider
+                beforeLabel="Negotiating blind"
+                afterLabel="Negotiating with Yulia"
+                beforeContent={
+                  <div className="p-6 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
+                      <p className="text-sm text-[#dadadc]/90">No idea if the offer price is fair</p>
                     </div>
-                  ))}
-                </div>
-                <p className="text-xs text-[#dadadc]/60 uppercase tracking-widest font-bold mb-4">Yulia drafts three counter-structures</p>
-                <div className="space-y-3">
-                  <div className="bg-[#D44A78]/20 rounded-xl p-4 border border-[#D44A78]/30">
-                    <p className="text-sm"><span className="font-bold text-white">Option A:</span> <span className="text-[#dadadc]/90">Full price counter at $2.05M, standard terms</span> <span className="text-[#D44A78] font-bold">→ nets $1.82M after tax</span></p>
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
+                      <p className="text-sm text-[#dadadc]/90">Working capital peg? "What's that?"</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
+                      <p className="text-sm text-[#dadadc]/90">Counter-offer based on gut feeling</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
+                      <p className="text-sm text-[#dadadc]/90">Tax structure chosen by buyer's attorney</p>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-white/10 text-center">
+                      <p className="text-sm text-[#EA4335] font-bold">$340K left on the table</p>
+                    </div>
                   </div>
-                  <div className="bg-white/5 rounded-xl p-4">
-                    <p className="text-sm"><span className="font-bold text-white">Option B:</span> <span className="text-[#dadadc]/90">Concession to $1.9M with earnout kicker</span> <span className="text-white font-bold">→ nets $1.78M + up to $210K</span></p>
+                }
+                afterContent={
+                  <div className="p-6 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
+                      <p className="text-sm text-[#dadadc]/90">Offer is 24% below defensible range — comps shown</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
+                      <p className="text-sm text-[#dadadc]/90">Working capital peg $40K below trailing average</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
+                      <p className="text-sm text-[#dadadc]/90">Three counter-structures drafted with tax math</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
+                      <p className="text-sm text-[#dadadc]/90">Asset vs stock sale modeled — $300K difference</p>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-white/10 text-center">
+                      <p className="text-sm text-[#34A853] font-bold">You keep what's yours</p>
+                    </div>
                   </div>
-                  <div className="bg-white/5 rounded-xl p-4">
-                    <p className="text-sm"><span className="font-bold text-white">Option C:</span> <span className="text-[#dadadc]/90">Meet at $1.8M with seller note at 5%</span> <span className="text-white font-bold">→ nets $1.72M + $180K over 3yr</span></p>
-                  </div>
-                </div>
-                <p className="text-xs text-[#dadadc]/70 italic mt-4">"Each structure has different tax implications. Here's the after-tax comparison for your state."</p>
-              </div>
+                }
+              />
             </ScrollReveal>
           </div>
         </section>
 
-        {/* ═══ 5. EXIT STRUCTURES ═══ */}
+        {/* ═══ 6. TAX IMPLICATIONS — Interactive tax calculator ═══ */}
+        <section className="mb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <ScrollReveal className="lg:col-span-5">
+              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Tax Implications of Selling</span>
+              <h2 className="text-4xl font-headline font-black tracking-tight mb-6">The difference between an asset sale and a stock sale can be $300K in your pocket.</h2>
+              <p className={`leading-relaxed editorial mb-6 ${dc.muted}`}>
+                Most sellers don't choose their deal structure — the buyer's attorney does. And buyers prefer asset sales because they get to depreciate the purchase price. That's fine for them. But the tax implications of selling a business vary wildly depending on purchase price allocation under IRC §1060, your state's capital gains tax rate, and whether goodwill qualifies for Section 197 amortization.
+              </p>
+              <p className={`leading-relaxed editorial ${dc.muted}`}>
+                Yulia models the after-tax impact of every structure before you commit to one. She doesn't replace your CPA — she makes sure you walk into that meeting with the right questions and the right numbers.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.15} className="lg:col-span-7">
+              <LandingTaxCalc dark={dark} />
+            </ScrollReveal>
+          </div>
+        </section>
+
+        {/* ═══ 7. EXIT STRUCTURES — ZigZag layout ═══ */}
         <section className="mb-24">
           <ScrollReveal>
-            <div className="mb-12">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Exit Structures</span>
-              <h2 className="text-4xl font-headline font-black tracking-tight mb-4">Six ways to exit. Yulia models all of them.</h2>
-              <p className={`text-lg max-w-2xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Most people assume there's one way to sell. There are six fundamentally different structures — and the after-tax difference can be hundreds of thousands of dollars.</p>
-            </div>
+            <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Exit Structures</span>
+            <h2 className="text-4xl font-headline font-black tracking-tight mb-4">Six ways to exit. Yulia models all of them.</h2>
+            <p className={`text-lg max-w-2xl mb-12 ${dc.muted}`}>
+              Most people assume there's one way to sell a business. There are six fundamentally different structures — and the after-tax difference can mean hundreds of thousands of dollars.
+            </p>
           </ScrollReveal>
-          <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { icon: 'key', title: 'Full Sale', desc: 'Complete exit. Hand over the keys, cash the check. The simplest structure.' },
-              { icon: 'handshake', title: 'Partner Buyout', desc: 'Your partner buys your share. Yulia models the valuation methodology and payment structure.' },
-              { icon: 'trending_up', title: 'Capital Raise', desc: 'Sell a minority stake (10–49%) while keeping operational control. Different documents, different buyers.' },
-              { icon: 'diversity_3', title: 'Employee Buyout (ESOP)', desc: 'Tax-advantaged transfer to your team. Complex but powerful — Yulia models the trust structure and tax benefits.' },
-              { icon: 'pie_chart', title: 'Majority Share Sale', desc: 'Sell controlling interest but retain a minority stake. Common in PE roll-ups where they want you to stay.' },
-              { icon: 'category', title: 'Partial Stock/Asset Sale', desc: 'Sell specific assets or a division. The most flexible — and most complex — structure.' },
-            ].map((card) => (
-              <StaggerItem key={card.title}>
-                <div className={`rounded-2xl p-8 hover:shadow-lg transition-all h-full ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                  <span className="material-symbols-outlined text-[#D44A78] text-2xl mb-3">{card.icon}</span>
-                  <h3 className="font-bold mb-2">{card.title}</h3>
-                  <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{card.desc}</p>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+
+          <ZigZagSection
+            items={[
+              { icon: 'key', title: 'Full Sale', body: 'Complete exit. Hand over the keys, cash the check. The simplest structure — and the one most owners default to without modeling the alternatives.' },
+              { icon: 'handshake', title: 'Partner Buyout', body: 'Your partner buys your share. Yulia models the valuation methodology, payment structure, and tax impact for both sides.' },
+              { icon: 'trending_up', title: 'Capital Raise', body: 'Sell a minority stake (10–49%) while keeping operational control. Different documents, different buyers, different tax treatment.' },
+              { icon: 'diversity_3', title: 'Employee Buyout (ESOP)', body: 'Tax-advantaged transfer to your team. Complex trust structure but powerful tax benefits. Yulia models the setup and ongoing obligations.' },
+              { icon: 'pie_chart', title: 'Majority Share Sale', body: 'Sell controlling interest but retain a minority stake. Common in PE roll-ups where they want you to stay and grow.' },
+              { icon: 'category', title: 'Partial Stock/Asset Sale', body: 'Sell specific assets or a division. The most flexible — and most complex — structure. Requires careful purchase price allocation.' },
+            ]}
+          />
+
           <ScrollReveal delay={0.2}>
             <div className={`mt-8 rounded-2xl p-6 flex items-start gap-4 ${dark ? 'bg-[#D44A78]/10 border border-[#D44A78]/20' : 'bg-[#D44A78]/5 border border-[#D44A78]/15'}`}>
               <span className="material-symbols-outlined text-[#D44A78] text-2xl shrink-0 mt-1">auto_fix_high</span>
-              <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}><span className={`font-bold ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>Yulia models the after-tax impact of each structure before you commit to one.</span> The difference between an asset sale and a stock sale on a $2.4M deal can be $300K in your pocket.</p>
+              <p className={`text-sm ${dc.muted}`}><span className={`font-bold ${dc.emphasis}`}>Yulia models the after-tax impact of each structure before you commit to one.</span> The difference between an asset sale and a stock sale on a $2.4M deal can be $300K in your pocket.</p>
             </div>
           </ScrollReveal>
         </section>
 
-        {/* ═══ 6. VALUE READINESS ═══ */}
-        <section className="mb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-            <ScrollReveal className="lg:col-span-5">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Value Readiness</span>
-              <h2 className="text-4xl font-headline font-black tracking-tight mb-8">Most sellers leave 15–30% on the table. Yulia finds it before you go to market.</h2>
-              <p className={`leading-relaxed editorial mb-6 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>The Value Readiness Report scores your business on 7 factors and tells you exactly what to fix — with the dollar impact of each improvement. A $15K process documentation effort might add $60K to your valuation. A 90-day customer diversification push might add $120K. Yulia shows you the math before you decide what's worth doing.</p>
-              <p className="text-sm text-[#006630] font-bold">This analysis is free. Keep it even if you decide you're not ready to sell yet.</p>
-            </ScrollReveal>
-            <ScrollReveal delay={0.15} className="lg:col-span-7">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  { icon: 'receipt_long', title: 'Financial Documentation', desc: 'Are your books buyer-ready?' },
-                  { icon: 'person_off', title: 'Owner Dependency', desc: 'Could the business run without you for 90 days?' },
-                  { icon: 'group', title: 'Customer Concentration', desc: 'Does any single customer represent >15% of revenue?' },
-                  { icon: 'autorenew', title: 'Revenue Quality', desc: 'Recurring vs. one-time. Contract vs. handshake.' },
-                  { icon: 'show_chart', title: 'Growth Trajectory', desc: 'Trending up, flat, or declining?' },
-                  { icon: 'settings', title: 'Operational Systems', desc: 'Documented processes or tribal knowledge?' },
-                ].map((factor) => (
-                  <div key={factor.title} className={`rounded-2xl p-6 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                    <span className="material-symbols-outlined text-[#D44A78] text-xl mb-2">{factor.icon}</span>
-                    <h4 className="font-bold text-sm mb-1">{factor.title}</h4>
-                    <p className={`text-xs ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{factor.desc}</p>
-                  </div>
-                ))}
-                <div className={`sm:col-span-2 rounded-2xl p-6 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-[#f3f3f6] border border-[#eeeef0]'}`}>
-                  <span className="material-symbols-outlined text-[#D44A78] text-xl mb-2">shield</span>
-                  <h4 className="font-bold text-sm mb-1">Market Position</h4>
-                  <p className={`text-xs ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Competitive moat or commodity service? Yulia assesses your defensibility against buyer alternatives.</p>
-                </div>
-              </div>
-            </ScrollReveal>
-          </div>
-        </section>
-
-        {/* ═══ 7. DEAL TEAM COMPARISON ═══ */}
+        {/* ═══ 8. CTA — Journey-specific ═══ */}
         <ScrollReveal>
-          <section className="mb-24">
-            <div className="mb-12">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Your Deal Team</span>
-              <h2 className="text-4xl font-headline font-black tracking-tight">Yulia runs the deal. You make the calls.</h2>
-            </div>
-            <div className={`rounded-2xl border overflow-hidden ${dark ? 'bg-[#2f3133] border-zinc-800' : 'bg-white border-[#eeeef0]'}`}>
-              <table className="w-full text-left">
-                <thead>
-                  <tr className={dark ? 'bg-[#2f3133]' : 'bg-[#f3f3f6]'}>
-                    <th className={`px-6 py-4 text-xs font-bold uppercase tracking-widest ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>What your deal needs</th>
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-[#D44A78]">What Yulia does</th>
-                    <th className={`px-6 py-4 text-xs font-bold uppercase tracking-widest ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>What you do</th>
-                  </tr>
-                </thead>
-                <tbody className={`divide-y text-sm ${dark ? 'divide-zinc-800' : 'divide-[#eeeef0]'}`}>
-                  {[
-                    ['Business valuation', 'Builds it — three methodologies, math shown', 'Review and approve assumptions'],
-                    ['Financial normalization', 'Identifies every add-back, calculates adjusted SDE/EBITDA', 'Confirm which add-backs are real'],
-                    ['Deal materials', 'Generates CIM, blind teasers, presentations', 'Review and share'],
-                    ['Buyer identification', 'Maps and scores buyer categories for your sector', 'Choose which buyers to engage'],
-                    ['Deal room', 'NDA execution, document access, activity tracking', 'Grant access decisions'],
-                    ['Offer analysis', 'Scores and compares with risk-adjusted math', 'Pick your preferred structure'],
-                    ['Negotiation prep', 'Drafts counter-offers with comparable data', 'Review, edit, send'],
-                    ['DD coordination', 'Tracks 50–100 items, manages deadlines', 'Provide requested documents'],
-                    ['Closing', 'Checklist, funds flow, document package', 'Sign'],
-                    ['Post-close', '180-day value creation plan, milestone tracking', 'Run the transition'],
-                  ].map(([need, yulia, you]) => (
-                    <tr key={need}>
-                      <td className="px-6 py-4 font-semibold">{need}</td>
-                      <td className={`px-6 py-4 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{yulia}</td>
-                      <td className={`px-6 py-4 ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{you}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </ScrollReveal>
-
-        {/* ═══ 8. CTA ═══ */}
-        <ScrollReveal>
-          <section className="mb-12">
-            <div className={`rounded-3xl p-12 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
-              <div>
-                <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95]">Sell. Buy. Raise.<br/><span className="text-[#D44A78]">Talk to Yulia.</span></h2>
-                <p className="text-lg text-[#dadadc]/60 mt-4">Tell her about your business. She'll tell you what it's worth — and what comes next. Free, no account required.</p>
-              </div>
-              <div className="flex flex-col items-center lg:items-end gap-4">
-                <button onClick={handleCTA} className="px-10 py-5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Talk to Yulia</button>
-                <p className="text-xs text-[#dadadc]/70">Free analysis · No account required · Your data stays yours</p>
+          <section className="mb-12 relative">
+            <GlowingOrb size={300} color="rgba(212,74,120,0.15)" top="-100px" right="-80px" />
+            <div className={`rounded-3xl p-12 md:p-16 text-center relative z-10 ${dc.darkPanel} text-white`}>
+              <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95] mb-4">
+                Know your number<br />before you <span className="text-[#D44A78]">commit.</span>
+              </h2>
+              <p className="text-lg text-[#dadadc]/60 max-w-xl mx-auto mb-8">
+                Tell Yulia about your business. She'll find your Blind Equity, build your Baseline valuation, and tell you exactly what comes next. Free, no account required.
+              </p>
+              <div className="flex flex-col items-center gap-4">
+                <MagneticButton
+                  onClick={goToChat}
+                  className="px-10 py-5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl border-none cursor-pointer"
+                >
+                  Tell Yulia about your business
+                </MagneticButton>
+                <p className="text-xs text-[#dadadc]/70">Free Baseline valuation · No account required · Your data stays yours</p>
               </div>
             </div>
           </section>

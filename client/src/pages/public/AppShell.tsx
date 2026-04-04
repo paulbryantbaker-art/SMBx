@@ -77,7 +77,7 @@ function LogoImg({ height = 28, style, className }: { height?: number; style?: R
 function LogoHero({ height = 120, className, dark }: { height?: number; className?: string; dark?: boolean }) {
   return (
     <img
-      src="/final logo.png"
+      src="/New G1 Logo T.png"
       alt="smbx.ai"
       className={className}
       style={{
@@ -1213,11 +1213,11 @@ export default function AppShell() {
               {/* Circuit board image — cover the full container, visible at edges */}
               <div style={{
                 position: 'absolute', inset: 0, zIndex: 1,
-                backgroundImage: `url('/${dark ? '1' : '2'}.png')`,
+                backgroundImage: `url('/${dark ? 'G2' : 'G1'}.png')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
-                opacity: dark ? 0.35 : 0.12,
+                opacity: dark ? 0.18 : 0.08,
                 pointerEvents: 'none',
               }} />
               <CircuitSparks dark={dark} />

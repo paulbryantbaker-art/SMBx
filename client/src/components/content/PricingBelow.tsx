@@ -1,18 +1,35 @@
-import { ScrollReveal, StaggerContainer, StaggerItem } from './animations';
+import { ScrollReveal, StaggerContainer, StaggerItem, MagneticButton } from './animations';
+import { darkClasses } from './darkHelpers';
+import { bridgeToYulia, goToChat } from './chatBridge';
+import { CostSavingsCalc } from './LandingCalculators';
+import usePageMeta from '../../hooks/usePageMeta';
 
 export default function PricingBelow({ dark }: { dark: boolean }) {
+  const dc = darkClasses(dark);
+
+  usePageMeta({
+    title: 'Pricing | Free Business Valuation, $149/mo Deal Intelligence — smbx.ai',
+    description: 'Start free with AI business valuation. Professional plan: $149/month for institutional-quality deal materials, financial modeling, and negotiation intelligence. No per-deal fees.',
+    canonical: 'https://smbx.ai/pricing',
+    faqs: [
+      { question: 'How long do most deals take?', answer: 'Seller exits: 6–18 months. Buyer acquisitions: 6–12 months. Capital raises: 3–6 months. Your subscription continues through close and 180 days of post-close support.' },
+      { question: 'What if my deal doesn\'t close?', answer: 'Cancel anytime. No success fees. No close fees. Ever. The work Yulia produced is yours to keep — valuations, documents, analysis — regardless of outcome.' },
+      { question: 'Can I start free and upgrade later?', answer: 'Yes. Start with a conversation. Yulia delivers real analysis for free. When you\'re ready for the full journey — CIM, financial models, negotiation support — upgrade to the plan that fits.' },
+      { question: 'How does this compare to ChatGPT?', answer: 'ChatGPT generates plausible text. smbx.ai runs 6 specialized engines with live market data, deterministic financial calculations, a 22-gate methodology, and 35 industries of deep intelligence. The difference is defensibility.' },
+    ],
+  });
 
   const handleCTA = (plan?: string) => {
     if (plan === 'enterprise') {
-      window.location.href = '/chat?message=' + encodeURIComponent("I'm interested in the Enterprise plan for my team.");
+      bridgeToYulia("I'm interested in the Enterprise plan for my team.");
     } else {
-      window.location.href = '/chat';
+      goToChat();
     }
   };
 
-  const muted = dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]';
-  const card = dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]';
-  const darkPanel = dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]';
+  const muted = dc.muted;
+  const card = dc.card;
+  const darkPanel = dc.darkPanel;
 
   return (
     <div className={dark ? 'bg-transparent text-[#f9f9fc]' : 'bg-transparent text-[#1a1c1e]'}>
@@ -293,7 +310,26 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           </section>
         </ScrollReveal>
 
-        {/* ═══ 7. FAQ ═══ */}
+        {/* ═══ 7. COST SAVINGS CALCULATOR ═══ */}
+        <section className="mb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <ScrollReveal className="lg:col-span-5">
+              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Advisory Cost Comparison</span>
+              <h2 className="text-4xl font-headline font-black tracking-tight mb-6">See what you save on your deal.</h2>
+              <p className={`leading-relaxed editorial mb-6 ${muted}`}>
+                A traditional investment bank charges $150K–$500K for the same analytical coverage. A business broker takes 6–10% of the deal. smbX.ai Professional: $149/month. The analysis is the same. The difference: you run the conversations yourself.
+              </p>
+              <p className={`font-bold text-xl border-l-4 border-[#D44A78] pl-6 italic ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>
+                Enter your deal size. See the savings.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.15} className="lg:col-span-7">
+              <CostSavingsCalc dark={dark} />
+            </ScrollReveal>
+          </div>
+        </section>
+
+        {/* ═══ 8. FAQ ═══ */}
         <section className="mb-24">
           <ScrollReveal>
             <h2 className="text-4xl font-headline font-black tracking-tight mb-12">Questions</h2>
@@ -326,7 +362,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                 <p className="text-lg text-[#dadadc]/70 mt-4">Tell Yulia about your deal. Keep everything she finds. Pay only when you're ready for the full journey.</p>
               </div>
               <div className="flex flex-col items-center lg:items-end gap-4">
-                <button onClick={() => handleCTA()} className="px-10 py-5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Talk to Yulia</button>
+                <MagneticButton onClick={() => handleCTA()} className="px-10 py-5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Talk to Yulia</MagneticButton>
                 <p className="text-xs text-[#dadadc]/70">No credit card required · Cancel anytime</p>
               </div>
             </div>

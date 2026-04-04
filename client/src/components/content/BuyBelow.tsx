@@ -1,171 +1,143 @@
-import { ScrollReveal, StaggerContainer, StaggerItem } from './animations';
+import {
+  ScrollReveal, StaggerContainer, StaggerItem,
+  AnimatedTimeline, TiltCard, BeforeAfterSlider,
+  ConversationTyping, DSCRCalculator, MagneticButton,
+  GlowingOrb, AnimatedCounter, PulseBadge,
+} from './animations';
+import { darkClasses } from './darkHelpers';
+import { bridgeToYulia, goToChat } from './chatBridge';
+import { LandingSBACalc } from './LandingCalculators';
+import usePageMeta from '../../hooks/usePageMeta';
 
 export default function BuyBelow({ dark }: { dark: boolean }) {
+  const dc = darkClasses(dark);
 
-  const handleCTA = () => {
-    window.location.href = '/chat';
-  };
+  usePageMeta({
+    title: 'Buy a Business | SBA 7(a) Guide, Deal Scoring & Due Diligence — smbx.ai',
+    description: 'Screen acquisitions against real market data. SBA 7(a) eligibility, DSCR analysis, deal scoring, and 180-day integration plan. AI deal intelligence for buyers.',
+    canonical: 'https://smbx.ai/buy',
+    faqs: [
+      { question: 'How do I know if a business is worth buying?', answer: 'Evaluate a business across seven dimensions: financial performance (SDE/EBITDA trends), market position, owner dependency, customer concentration, growth trajectory, deal structure bankability (DSCR), and operational risk. Yulia runs all seven analyses from a single conversation and gives you a pursue-or-pass recommendation backed by data.' },
+      { question: 'What is DSCR and why does it matter for SBA loans?', answer: 'DSCR (Debt Service Coverage Ratio) measures whether a business generates enough cash flow to cover loan payments. It\'s calculated as annual earnings divided by annual debt service. SBA 7(a) loans require a minimum DSCR of 1.25x — meaning the business must earn $1.25 for every $1 of debt payment. A DSCR below 1.25x means the deal is not SBA bankable at the proposed terms.' },
+      { question: 'What is Entrepreneurship Through Acquisition (ETA)?', answer: 'Entrepreneurship Through Acquisition (ETA) is the strategy of buying an existing profitable business rather than starting one from scratch. It includes search funds (institutional capital backing an individual\'s search), self-funded searches, and acquisition entrepreneurship. ETA has become a mainstream path at top MBA programs and is growing rapidly as an alternative to traditional startups.' },
+      { question: 'How much money do I need to buy a business?', answer: 'With SBA 7(a) financing, you can buy a business with as little as 10% down. On a $2M acquisition, that\'s $200K equity. The SBA lends up to $5M with 10-year terms. Acquisition financing structures can also include seller notes (5-15% of price), earnouts, and equity rolls to reduce the upfront cash required.' },
+    ],
+  });
 
   return (
     <div className={dark ? 'bg-transparent text-[#f9f9fc]' : 'bg-transparent text-[#1a1c1e]'}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
-        {/* ═══ 1. HERO ═══ */}
-        <section className="mb-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          <div className="lg:col-span-7">
-            <ScrollReveal>
-              <div className="flex items-center gap-2 mb-8">
-                <span className="inline-block px-3 py-1 bg-[#D44A78]/10 text-[#D44A78] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Buy</span>
-                <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-[#2f3133] text-[#dadadc]/80' : 'bg-[#f3f3f6] text-[#5d5e61]'}`}>Acquisition Strategy</span>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal y={40} delay={0.1}>
-              <h1 className="font-headline font-black text-5xl md:text-6xl tracking-tighter leading-[0.92] mb-8">
-                The best deals never hit the market.{' '}
-                <span className="text-[#D44A78]">You need to find them first.</span>
-              </h1>
-            </ScrollReveal>
-            <ScrollReveal delay={0.2}>
-              <div className={`space-y-6 text-xl editorial max-w-xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>
-                <p>Eighty percent of small businesses that sell never get formally listed. They change hands through whisper networks — a broker mentions it to three people, a CPA tips off a client, a landlord knows the tenant is tired.</p>
-                <p className={`font-bold border-l-4 border-[#D44A78] pl-6 text-2xl italic ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>Yulia screens every deal against real market data before you spend a dollar.</p>
-              </div>
-            </ScrollReveal>
-          </div>
-          <ScrollReveal delay={0.25} className="lg:col-span-5 mt-4">
-            <div className={`rounded-3xl p-8 text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
-              <p className="text-[10px] text-[#dadadc]/60 uppercase tracking-[0.2em] font-bold mb-6">Your AI deal team</p>
-              <div className="space-y-4">
-                {[
-                  'Screens targets against real market data before you spend a dollar',
-                  'Models SBA eligibility, DSCR, and capital structure for every deal',
-                  'Maps market density — establishments, comps, and lending velocity',
-                  'Generates deal scoring with risk-adjusted return analysis',
-                  'Builds your due diligence checklist — 50 to 100 tracked items',
-                  'Drafts LOIs with every economic lever modeled',
-                  'Models asset allocation to optimize your 5-year tax impact',
-                  'Transitions you to a 180-day owner integration plan at close',
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-[#D44A78] text-lg shrink-0 mt-0.5">check_circle</span>
-                    <p className="text-sm text-[#dadadc]/90">{item}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 pt-6 border-t border-white/10">
-                <p className="text-xs text-[#dadadc]/60 italic">The only thing you do yourself is decide which deal to pursue and sign your name.</p>
-              </div>
-            </div>
-          </ScrollReveal>
-        </section>
-
-        {/* ═══ 2. WHAT YULIA DOES ═══ */}
-        <ScrollReveal>
-          <section className="mb-24">
-            <div className={`rounded-3xl p-10 md:p-16 text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
-              <div className="mb-12">
-                <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">What Yulia Does</span>
-                <h2 className="text-4xl font-headline font-black tracking-tight mb-4">Everything a $50K search fund advisor delivers. At a fraction of the cost.</h2>
-                <p className="text-lg text-[#dadadc]/60 max-w-2xl">The screening, the modeling, the diligence coordination, the deal structuring. Yulia does all of it. You focus on the decisions that matter.</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  { icon: 'monitoring', title: 'Deal screening & underwriting', desc: 'Every target screened against Census NAICS data, BLS wage benchmarks, SBA lending velocity, and transaction comps. Not opinions. Sovereign data.' },
-                  { icon: 'map', title: 'Market mapping & density', desc: "Establishment counts, competitive density, growth trends, and listing-to-business ratios by MSA. Know exactly what you're walking into before you make a single call." },
-                  { icon: 'account_balance', title: 'SBA bankability modeling', desc: 'DSCR analysis, down payment scenarios, debt service projections, and eligibility screening — modeled before you write the LOI, not after.' },
-                  { icon: 'checklist', title: 'Due diligence coordination', desc: 'QofE coordination. Customer concentration. Employee dependency. Technology risk. A 50–100 item DD checklist tracked to completion with deadline alerts.' },
-                  { icon: 'gavel', title: 'LOI & deal structuring', desc: 'Purchase price, earnout terms, working capital peg, exclusivity period, seller financing — every economic lever modeled with the math to support it.' },
-                  { icon: 'sync', title: 'Post-acquisition integration', desc: "180-day integration plan from Day 0. Knowledge transfer framework. Performance tracking against deal projections. You don't just close — you land." },
-                ].map((card) => (
-                  <div key={card.title} className="bg-white/5 rounded-2xl border border-white/10 p-8">
-                    <span className="material-symbols-outlined text-[#D44A78] text-3xl mb-4">{card.icon}</span>
-                    <h3 className="font-bold text-lg mb-3">{card.title}</h3>
-                    <p className="text-sm text-[#dadadc]/70">{card.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        </ScrollReveal>
-
-        {/* ═══ 3. ACQUISITION PROCESS ═══ */}
-        <section className="mb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-            <ScrollReveal className="lg:col-span-5">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Your Acquisition Process</span>
-              <h2 className="text-4xl font-headline font-black tracking-tight mb-8">Six stages. Yulia manages every one.</h2>
-              <p className={`font-bold text-xl border-l-4 border-[#D44A78] pl-6 italic mb-8 ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>You don't need to know the process. You just need to show up for the decisions.</p>
-              <p className={dark ? 'text-[#dadadc]/80 leading-relaxed' : 'text-[#5d5e61] leading-relaxed'}>From your first conversation to 180 days after close, every step has specific completion triggers. Yulia advances you when the prerequisite work is done — and not before.</p>
-            </ScrollReveal>
-            <StaggerContainer className="lg:col-span-7 space-y-4">
-              {[
-                { num: '1', title: 'Define your thesis', desc: "Tell Yulia what you're looking for — the industry, the geography, the size, the economics. She builds your acquisition criteria and target profile from a conversation.", free: true },
-                { num: '2', title: 'Source targets', desc: 'Proprietary deal flow. Yulia maps the full market landscape — establishment counts, competitive density, average deal multiples, SBA lending velocity — and screens targets against real data.', free: true },
-                { num: '3', title: 'Underwrite the deal', desc: 'Full financial modeling. SBA bankability. DSCR analysis. Sensitivity scenarios. Capital structure optimization. Every number modeled before you make an offer.' },
-                { num: '4', title: 'Run due diligence', desc: 'QofE coordination. Customer concentration. Employee dependency. Technology risk. Working capital analysis. A 50–100 item checklist tracked to completion.' },
-                { num: '5', title: 'Structure and close', desc: 'LOI drafting with every economic lever. Asset allocation optimization. Purchase agreement review. Closing checklist. Funds flow coordination.' },
-                { num: '6', title: 'Integrate and grow', desc: '180-day post-close integration plan. Knowledge transfer framework. Performance tracking against deal projections. Day 0 operational playbook.' },
-              ].map((step) => (
-                <StaggerItem key={step.num}>
-                  <div className={`rounded-2xl p-6 flex items-start gap-4 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${step.free ? 'bg-[#006630]/10 text-[#006630]' : 'bg-[#D44A78]/10 text-[#D44A78]'}`}>{step.num}</div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-bold">{step.title}</h4>
-                        {step.free && <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${dark ? 'bg-[#006630]/20 text-[#006630]' : 'bg-[#006630]/10 text-[#006630]'}`}>FREE</span>}
-                      </div>
-                      <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{step.desc}</p>
-                    </div>
-                  </div>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-        </section>
-
-        {/* ═══ 4. BUYER TYPE INTELLIGENCE ═══ */}
+        {/* ═══ 1. HERO — Centered with conversation demo ═══ */}
         <section className="mb-24">
           <ScrollReveal>
-            <div className="mb-12">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Buyer Intelligence</span>
-              <h2 className="text-4xl font-headline font-black tracking-tight mb-4">Whether it's your first deal or your fifteenth</h2>
-              <p className={`text-lg max-w-2xl ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Yulia adapts her entire analytical framework to your buyer profile — different data, different tools, different depth.</p>
+            <div className="flex items-center gap-2 mb-8">
+              <span className="inline-block px-3 py-1 bg-[#D44A78]/10 text-[#D44A78] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Buy</span>
+              <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dc.subtleBg} ${dc.muted}`}>Acquisition Strategy</span>
             </div>
           </ScrollReveal>
-          <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { type: 'First-Time Buyer', icon: 'person', desc: "You've got capital and conviction but no deal experience. Yulia walks you through every step — SBA mechanics, LOI terms, DD scope — in plain language. No jargon until you ask for it." },
-              { type: 'Search Funder', icon: 'search', desc: 'Institutional-grade deal screening, financial modeling, and LP reporting throughout the search — built for the pace and rigor your investors expect.' },
-              { type: 'Serial Acquirer', icon: 'stacks', desc: "You know what you're doing. You need speed. Yulia screens 50 targets in the time it takes to read one deal package. She flags what matters and ignores what doesn't." },
-              { type: 'PE Platform', icon: 'corporate_fare', desc: 'Thesis-driven target screening, add-back validation, synergy modeling, and portfolio-level pipeline management at the speed your deal cadence demands.' },
-            ].map((card) => (
-              <StaggerItem key={card.type}>
-                <div className={`p-8 rounded-2xl h-full ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                  <span className="material-symbols-outlined text-[#D44A78] text-3xl mb-4">{card.icon}</span>
-                  <h3 className="font-headline font-bold text-xl mb-3">{card.type}</h3>
-                  <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{card.desc}</p>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+
+          <ScrollReveal y={40} delay={0.1}>
+            <h1 className="font-headline font-black text-5xl md:text-7xl tracking-tighter leading-[0.9] mb-8 max-w-4xl">
+              How to buy a business without <span className="text-[#D44A78]">overpaying.</span>
+            </h1>
+          </ScrollReveal>
+
           <ScrollReveal delay={0.2}>
-            <div className={`mt-8 rounded-2xl p-6 flex items-start gap-4 ${dark ? 'bg-[#D44A78]/10 border border-[#D44A78]/20' : 'bg-[#D44A78]/5 border border-[#D44A78]/15'}`}>
-              <span className="material-symbols-outlined text-[#D44A78] text-2xl shrink-0 mt-1">add_circle</span>
-              <p className={`text-sm ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}><span className={`font-bold ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>+5 more buyer profiles</span> — family office, ETA through acquisition, roll-up operator, strategic corporate acquirer, and international buyer. Yulia adapts to each.</p>
+            <p className={`text-xl leading-relaxed max-w-2xl mb-10 ${dc.muted}`}>
+              Eighty percent of small businesses that sell never get formally listed. They change hands through whisper networks — a broker mentions it to three people, a CPA tips off a client. Whether it's your first acquisition or your fifteenth, Yulia screens every deal against real market data before you spend a dollar on due diligence.
+            </p>
+          </ScrollReveal>
+
+          {/* Conversation demo — Yulia screening a deal live */}
+          <ScrollReveal delay={0.3}>
+            <div className={`rounded-3xl p-6 md:p-8 max-w-3xl ${dc.darkPanel}`}>
+              <ConversationTyping
+                messages={[
+                  {
+                    type: 'user',
+                    content: (
+                      <div className="bg-white/5 border border-white/10 p-4 rounded-2xl rounded-tr-none text-white text-[15px] leading-relaxed">
+                        I found a listing — HVAC company in Dallas, $1.8M revenue, asking $2M. Is the price fair?
+                      </div>
+                    ),
+                    delay: 600,
+                  },
+                  {
+                    type: 'ai',
+                    content: (
+                      <div className="flex gap-3 items-start">
+                        <div className="w-8 h-8 rounded-full bg-[#D44A78] flex items-center justify-center text-white text-xs font-bold shrink-0">Y</div>
+                        <div className="bg-white/10 p-4 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed">
+                          HVAC in Dallas-Fort Worth trades at 2.6x–3.4x SDE. At $1.8M revenue with typical 28% SDE margin, that's roughly $504K SDE. The $2M ask implies a 3.97x multiple — <span className="text-[#ffb2bf] font-bold">above the defensible range.</span>
+                          <span className="block mt-2 font-semibold">Let me check the DSCR before we go further.</span>
+                        </div>
+                      </div>
+                    ),
+                    delay: 1400,
+                  },
+                  {
+                    type: 'ai',
+                    content: (
+                      <div className="flex gap-3 items-start">
+                        <div className="w-8 shrink-0" />
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="bg-white/5 p-3 rounded-xl border border-white/10"><p className="text-[9px] text-[#dadadc]/60 uppercase font-bold mb-1">Ask Multiple</p><p className="text-lg font-black text-[#EA4335]">3.97x</p></div>
+                          <div className="bg-white/5 p-3 rounded-xl border border-white/10"><p className="text-[9px] text-[#dadadc]/60 uppercase font-bold mb-1">Fair Range</p><p className="text-lg font-black text-[#34A853]">2.6–3.4x</p></div>
+                          <div className="bg-white/5 p-3 rounded-xl border border-white/10"><p className="text-[9px] text-[#dadadc]/60 uppercase font-bold mb-1">Verdict</p><p className="text-lg font-black text-[#FBBC04]">NEGOTIATE</p></div>
+                        </div>
+                      </div>
+                    ),
+                    delay: 800,
+                  },
+                ]}
+              />
+              <p className="text-[#dadadc]/50 text-xs text-center mt-6">60 seconds. No signup. Yulia is already running deal intelligence.</p>
             </div>
           </ScrollReveal>
         </section>
 
-        {/* ═══ 5. DEAL ECONOMICS ═══ */}
+        {/* ═══ 2. "HOW TO BUY A BUSINESS" — AnimatedTimeline ═══ */}
+        <section className="mb-24">
+          <ScrollReveal>
+            <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">How to Buy a Business</span>
+            <h2 className="text-4xl font-headline font-black tracking-tight mb-4">Six stages from thesis to close. Yulia manages every one.</h2>
+            <p className={`text-lg max-w-2xl mb-12 ${dc.muted}`}>
+              Whether you're a first-time buyer or a serial acquirer, the acquisition process has a right sequence. Skipping steps — running due diligence before the financials are modeled, or signing a Letter of Intent before the DSCR clears — is how deals fall apart at the closing table.
+            </p>
+          </ScrollReveal>
+
+          <AnimatedTimeline>
+            {[
+              { num: '1', title: 'Define your thesis', desc: "Tell Yulia what you're looking for — the industry, the geography, the size, the economics. She builds your acquisition criteria from a conversation. Whether you're interested in boring businesses like HVAC and plumbing or high-growth sectors like IT/MSP, the thesis drives everything.", free: true },
+              { num: '2', title: 'Source targets', desc: 'Yulia maps the full market landscape — establishment counts, competitive density, average deal multiples, SBA lending velocity — and screens targets against real data. Not a database dump. Deal intelligence scored and ranked.', free: true },
+              { num: '3', title: 'Underwrite the deal', desc: "Full financial modeling. SBA bankability. DSCR analysis. Sensitivity scenarios. Capital structure optimization. Every number modeled before you make an offer. This is where acquisition financing gets built — not after you've fallen in love with the deal." },
+              { num: '4', title: 'Run due diligence', desc: 'Quality of Earnings (QofE) coordination. Customer concentration. Employee dependency. Technology risk. Working capital analysis. A 50–100 item business due diligence checklist tracked to completion with deadline alerts.' },
+              { num: '5', title: 'Structure and close', desc: "LOI drafting with every economic lever — purchase price, earnout terms, working capital peg, exclusivity period, seller financing. Asset allocation optimization for your 5-year tax impact. Closing checklist and funds flow coordination." },
+              { num: '6', title: 'Integrate and grow', desc: "180-day post-close integration plan. Knowledge transfer framework. Performance tracking against deal projections. Day 0 operational playbook. You don't just close — you land." },
+            ].map((step) => (
+              <div key={step.num} className="pl-10 pb-8 relative">
+                <div className={`absolute left-0 top-0 w-[10px] h-[10px] rounded-full ${step.free ? 'bg-[#006630]' : 'bg-[#D44A78]'}`} />
+                <div className="flex items-center gap-2 mb-1">
+                  <h4 className="font-bold">{step.title}</h4>
+                  {step.free && <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${dark ? 'bg-[#006630]/20 text-[#006630]' : 'bg-[#006630]/10 text-[#006630]'}`}>FREE</span>}
+                </div>
+                <p className={`text-sm ${dc.muted}`}>{step.desc}</p>
+              </div>
+            ))}
+          </AnimatedTimeline>
+        </section>
+
+        {/* ═══ 3. "THE RUNDOWN — SCORE ANY DEAL" — Deal economics showcase ═══ */}
         <ScrollReveal>
           <section className="mb-24">
-            <div className={`rounded-3xl overflow-hidden text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
+            <div className={`rounded-3xl overflow-hidden text-white ${dc.darkPanel}`}>
               <div className="grid grid-cols-1 lg:grid-cols-12">
                 {/* Left: Financial Breakdown */}
                 <div className="lg:col-span-7 p-10 md:p-16">
-                  <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Deal Economics</span>
-                  <h2 className="text-4xl font-headline font-black tracking-tight mb-4">The math behind the deal</h2>
-                  <p className="text-lg text-[#dadadc]/60 mb-10 max-w-lg">Yulia models every scenario — SBA eligibility, capital structure, cash flow projections — before you make an offer.</p>
+                  <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">The Rundown — Score Any Deal</span>
+                  <h2 className="text-4xl font-headline font-black tracking-tight mb-4">How to evaluate a business to buy — in 60 seconds.</h2>
+                  <p className="text-lg text-[#dadadc]/60 mb-10 max-w-lg">Yulia models every scenario — SBA eligibility, capital structure, cash flow projections — before you make an offer. Here's what a real deal looks like.</p>
                   <div className="mb-6">
                     <p className="text-xs text-[#dadadc]/60 uppercase tracking-widest font-bold">SBA Bankability</p>
                     <p className="font-headline font-bold text-xl mt-1">HVAC · Dallas-Fort Worth</p>
@@ -185,29 +157,37 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
                       </div>
                     ))}
                   </div>
-                  <div className="bg-[#006630]/20 border border-[#006630]/30 p-5 rounded-xl text-center">
-                    <span className="material-symbols-outlined text-[#8ff9a8] text-2xl block mb-1">check_circle</span>
-                    <p className="text-[#8ff9a8] font-bold">SBA ELIGIBLE</p>
-                    <p className="text-[#dadadc]/60 text-xs mt-1">DSCR clears minimum by 0.69× — strong margin of safety</p>
-                  </div>
+                  <TiltCard className="inline-block w-full">
+                    <div className="bg-[#006630]/20 border border-[#006630]/30 p-5 rounded-xl text-center">
+                      <PulseBadge color="#34A853">
+                        <span className="material-symbols-outlined text-[#8ff9a8] text-2xl">check_circle</span>
+                      </PulseBadge>
+                      <p className="text-[#8ff9a8] font-bold mt-1">SBA ELIGIBLE</p>
+                      <p className="text-[#dadadc]/60 text-xs mt-1">DSCR clears minimum by 0.69× — strong margin of safety</p>
+                    </div>
+                  </TiltCard>
                 </div>
                 {/* Right: Wealth Creation */}
                 <div className="lg:col-span-5 bg-[#D44A78] p-10 md:p-16 flex flex-col justify-center">
                   <p className="text-white/80 uppercase tracking-widest text-xs font-bold mb-8">5-Year Wealth Creation</p>
                   <div className="space-y-6">
                     {[
-                      { label: 'Year 1 owner compensation', value: '$232,000' },
-                      { label: 'Years 1–5 cumulative cash flow', value: '$1.16M' },
-                      { label: 'Equity value at exit (3.2×)', value: '$1.85M' },
+                      { label: 'Year 1 owner compensation', value: 232000 },
+                      { label: 'Years 1–5 cumulative cash flow', value: 1160000 },
+                      { label: 'Equity value at exit (3.2×)', value: 1850000 },
                     ].map((item) => (
                       <div key={item.label}>
                         <p className="text-white/80 text-xs uppercase tracking-widest mb-1">{item.label}</p>
-                        <p className="font-headline font-black text-3xl">{item.value}</p>
+                        <p className="font-headline font-black text-3xl">
+                          <AnimatedCounter value={item.value} prefix="$" suffix="" />
+                        </p>
                       </div>
                     ))}
                     <div className="pt-6 border-t border-white/20">
                       <p className="text-white/80 text-xs uppercase tracking-widest mb-1">Total 5-year wealth creation</p>
-                      <p className="font-headline font-black text-5xl tracking-tight">$3.01M</p>
+                      <p className="font-headline font-black text-5xl tracking-tight">
+                        $<AnimatedCounter value={3010000} />
+                      </p>
                       <p className="text-white/80 text-sm mt-2">14.9× return on $201,600 down payment</p>
                     </div>
                   </div>
@@ -217,44 +197,135 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
           </section>
         </ScrollReveal>
 
-        {/* ═══ 6. NEGOTIATION ADVANTAGE ═══ */}
+        {/* ═══ 4. "SBA 7(a) FOR ACQUISITIONS (2026)" — DSCR Calculator ═══ */}
         <section className="mb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             <ScrollReveal className="lg:col-span-5">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Negotiation Intelligence</span>
-              <h2 className="text-4xl font-headline font-black tracking-tight mb-8">Every offer backed by data. Every structure modeled.</h2>
-              <p className={`leading-relaxed editorial ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Most buyers negotiate on instinct. Yulia negotiates on comparable transaction data — real multiples, real structures, real outcomes from deals in your sector and geography. She drafts every communication and models the tax impact of every counter-offer before you send it.</p>
+              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">SBA 7(a) for Acquisitions — 2026 Guide</span>
+              <h2 className="text-4xl font-headline font-black tracking-tight mb-6">Every acquisition needs a DSCR calculator before you fall in love with the deal.</h2>
+              <p className={`leading-relaxed editorial mb-6 ${dc.muted}`}>
+                SBA 7(a) loans are the most common acquisition financing vehicle for deals under $5M. The 2026 requirements include a minimum DSCR of 1.25x, maximum loan amount of $5M, and typically 10-year terms with rates tied to Prime + 2.75%. The SBSS (Small Business Scoring Service) has been discontinued for loans under $350K — all applications now go through standard underwriting.
+              </p>
+              <p className={`leading-relaxed editorial mb-6 ${dc.muted}`}>
+                The DSCR is the single number that determines whether your deal is bankable. It measures whether the business generates enough cash flow to cover the loan payments — and SBA lenders won't move forward without it clearing 1.25x.
+              </p>
+              <div className={`rounded-2xl p-6 ${dark ? 'bg-[#D44A78]/10 border border-[#D44A78]/20' : 'bg-[#D44A78]/5 border border-[#D44A78]/15'}`}>
+                <p className={`text-sm ${dc.muted}`}><span className={`font-bold ${dc.emphasis}`}>2026 Update:</span> SBA manufacturing fee waivers extended. DSCR minimum remains 1.10:1 for preferred lenders, 1.25:1 for standard. Check with your lender for current terms.</p>
+              </div>
             </ScrollReveal>
             <ScrollReveal delay={0.15} className="lg:col-span-7">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  { icon: 'analytics', title: 'Market Comps', desc: "Real transaction data from your sector and MSA — not rules of thumb or broker opinions. Actual multiples. Actual deal structures." },
-                  { icon: 'balance', title: 'Working Capital Peg', desc: "Trailing 12-month average vs. seller's proposed peg. The difference is often $40K–$80K in your pocket at close." },
-                  { icon: 'speed', title: 'Earnout Structure', desc: 'Risk allocation tied to performance milestones. Yulia models expected value under 3 scenarios — base, upside, downside.' },
-                  { icon: 'receipt_long', title: 'Asset Allocation', desc: 'Tax-optimized purchase price allocation across equipment, goodwill, non-compete, and customer lists. The 5-year difference can be $100K+.' },
-                ].map((factor) => (
-                  <div key={factor.title} className={`rounded-2xl p-6 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-                    <span className="material-symbols-outlined text-[#D44A78] text-xl mb-2">{factor.icon}</span>
-                    <h4 className="font-bold text-sm mb-1">{factor.title}</h4>
-                    <p className={`text-xs ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>{factor.desc}</p>
-                  </div>
-                ))}
-              </div>
+              <LandingSBACalc dark={dark} />
             </ScrollReveal>
           </div>
         </section>
 
-        {/* ═══ 7. CTA ═══ */}
+        {/* ═══ 5. "ENTREPRENEURSHIP THROUGH ACQUISITION" — Buyer types ═══ */}
+        <section className="mb-24">
+          <ScrollReveal>
+            <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Entrepreneurship Through Acquisition</span>
+            <h2 className="text-4xl font-headline font-black tracking-tight mb-4">Whether it's your first deal or your fifteenth.</h2>
+            <p className={`text-lg max-w-2xl mb-12 ${dc.muted}`}>
+              Entrepreneurship Through Acquisition (ETA) is the fastest-growing path to business ownership. From search fund operators backed by institutional capital to self-funded acquirers using SBA financing, Yulia adapts her analytical framework to your buyer profile — different data, different tools, different depth.
+            </p>
+          </ScrollReveal>
+          <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { type: 'First-Time Buyer', icon: 'person', desc: "You've got capital and conviction but no deal experience. Yulia walks you through every step — from understanding how to buy a small business, to SBA mechanics, LOI terms, and DD scope — in plain language. No jargon until you ask for it. The boring businesses that make great first acquisitions — HVAC, plumbing, landscaping — are Yulia's sweet spot." },
+              { type: 'Search Fund Operator', icon: 'search', desc: "Institutional-grade deal screening, financial modeling, and LP reporting throughout the search — built for the pace and rigor your investors expect. Search fund operators are the most sophisticated first-time buyers. Yulia matches that sophistication." },
+              { type: 'Serial Acquirer', icon: 'stacks', desc: "You know what you're doing. You need speed. Yulia screens 50 targets in the time it takes to read one deal package. She flags what matters and ignores what doesn't. Deal flow management at the velocity your pipeline demands." },
+              { type: 'PE Platform Builder', icon: 'corporate_fare', desc: "Thesis-driven target screening, add-back validation, synergy modeling, and portfolio-level pipeline management at the speed your deal cadence demands. Quality of Earnings coordination across multiple simultaneous transactions." },
+            ].map((card) => (
+              <StaggerItem key={card.type}>
+                <TiltCard className="h-full">
+                  <div className={`p-8 rounded-2xl h-full ${dc.card}`}>
+                    <span className="material-symbols-outlined text-[#D44A78] text-3xl mb-4">{card.icon}</span>
+                    <h3 className="font-headline font-bold text-xl mb-3">{card.type}</h3>
+                    <p className={`text-sm ${dc.muted}`}>{card.desc}</p>
+                  </div>
+                </TiltCard>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        </section>
+
+        {/* ═══ 6. NEGOTIATION ADVANTAGE — BeforeAfterSlider ═══ */}
+        <section className="mb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+            <ScrollReveal className="lg:col-span-5">
+              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Negotiation Intelligence</span>
+              <h2 className="text-4xl font-headline font-black tracking-tight mb-6">Every LOI backed by comparable transaction data.</h2>
+              <p className={`leading-relaxed editorial ${dc.muted}`}>
+                Most buyers negotiate on instinct. Yulia negotiates on comparable transaction data — real multiples, real structures, real outcomes from deals in your sector and geography. She drafts every Letter of Intent and models the tax impact of every counter-offer before you send it. Questions to ask when buying a business? Yulia has already asked them.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal delay={0.15} className="lg:col-span-7">
+              <BeforeAfterSlider
+                beforeLabel="Gut-feel negotiation"
+                afterLabel="Data-backed with Yulia"
+                beforeContent={
+                  <div className="p-6 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
+                      <p className="text-sm text-[#dadadc]/90">Offer based on asking price, not market data</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
+                      <p className="text-sm text-[#dadadc]/90">No idea what comparable deals actually closed at</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
+                      <p className="text-sm text-[#dadadc]/90">Working capital and earnout terms undefined</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
+                      <p className="text-sm text-[#dadadc]/90">Red flags discovered at due diligence — deal collapses</p>
+                    </div>
+                  </div>
+                }
+                afterContent={
+                  <div className="p-6 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
+                      <p className="text-sm text-[#dadadc]/90">Offer anchored to comparable transaction multiples</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
+                      <p className="text-sm text-[#dadadc]/90">Working capital peg calculated from trailing 12-month average</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
+                      <p className="text-sm text-[#dadadc]/90">Asset allocation optimized for 5-year tax benefit</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
+                      <p className="text-sm text-[#dadadc]/90">Red flags caught during screening — before LOI is signed</p>
+                    </div>
+                  </div>
+                }
+              />
+            </ScrollReveal>
+          </div>
+        </section>
+
+        {/* ═══ 7. CTA — Journey-specific ═══ */}
         <ScrollReveal>
-          <section className="mb-12">
-            <div className={`rounded-3xl p-12 md:p-16 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center text-white ${dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]'}`}>
-              <div>
-                <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95]">Sell. Buy. Raise.<br/><span className="text-[#D44A78]">Talk to Yulia.</span></h2>
-                <p className="text-lg text-[#dadadc]/60 mt-4">Tell her what you're looking for. She'll show you what the market actually looks like — and what comes next. Free, no account required.</p>
-              </div>
-              <div className="flex flex-col items-center lg:items-end gap-4">
-                <button onClick={handleCTA} className="px-10 py-5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer">Talk to Yulia</button>
-                <p className="text-xs text-[#dadadc]/70">Free screening · No account required · Your data stays yours</p>
+          <section className="mb-12 relative">
+            <GlowingOrb size={300} color="rgba(212,74,120,0.15)" top="-100px" left="-80px" />
+            <div className={`rounded-3xl p-12 md:p-16 text-center relative z-10 ${dc.darkPanel} text-white`}>
+              <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95] mb-4">
+                Screen your first deal<br /><span className="text-[#D44A78]">free.</span>
+              </h2>
+              <p className="text-lg text-[#dadadc]/60 max-w-xl mx-auto mb-8">
+                Tell Yulia what you're looking for. She'll show you what the market actually looks like — and score any deal in 60 seconds. No account required.
+              </p>
+              <div className="flex flex-col items-center gap-4">
+                <MagneticButton
+                  onClick={goToChat}
+                  className="px-10 py-5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl border-none cursor-pointer"
+                >
+                  Tell Yulia about a deal
+                </MagneticButton>
+                <p className="text-xs text-[#dadadc]/70">Free deal screening · No account required · Your data stays yours</p>
               </div>
             </div>
           </section>

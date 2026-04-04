@@ -1,19 +1,32 @@
-import { ScrollReveal, StaggerContainer, StaggerItem } from './animations';
+import { ScrollReveal, StaggerContainer, StaggerItem, InteractiveCalculator, DSCRCalculator, MagneticButton, GlowingOrb } from './animations';
+import { darkClasses } from './darkHelpers';
+import { goToChat } from './chatBridge';
+import usePageMeta from '../../hooks/usePageMeta';
 
 export default function HowItWorksBelow({ dark }: { dark: boolean }) {
+  const dc = darkClasses(dark);
 
-  const handleCTA = () => {
-    window.location.href = '/chat';
-  };
+  usePageMeta({
+    title: 'How smbx.ai Works | AI Deal Intelligence, 22 Gates, 6 Engines — smbx.ai',
+    description: 'Six specialized AI engines. 22 enforced gates. From first conversation to 180 days post-close. See how AI deal intelligence for M&A actually works.',
+    canonical: 'https://smbx.ai/how-it-works',
+    faqs: [
+      { question: 'How is smbx.ai different from ChatGPT for M&A?', answer: 'ChatGPT generates plausible text. smbx.ai runs 6 specialized engines with live market data, deterministic financial calculations, a 22-gate methodology, and 35 industries of deep intelligence. Financial data uses zero-hallucination mode (temperature 0.0) and every claim is sourced. The difference is defensibility — our valuations survive buyer scrutiny.' },
+      { question: 'What is the 22-gate methodology?', answer: 'The gate system enforces a proven M&A process. Each of the 4 journeys (Sell, Buy, Raise, Integrate) has specific gates with completion triggers that Yulia verifies from your conversation and data. No valuation until financials are normalized. No LOI until DSCR clears. No closing coordination until DD items are resolved. This prevents the mistakes that kill deals.' },
+      { question: 'What does deal intelligence mean?', answer: 'Deal intelligence is the combination of financial analysis, market data, industry benchmarks, and process management needed to execute a business transaction. Unlike deal listings (BizBuySell) or general AI (ChatGPT), deal intelligence is purpose-built for evaluating, structuring, and closing transactions — from valuation to post-close integration.' },
+    ],
+  });
+
+  const handleCTA = goToChat;
 
   // Shared class helpers
-  const card = dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]';
+  const card = dc.card;
   const muted = dark ? 'text-[#dadadc]/70' : 'text-[#5d5e61]';
   const codeBg = dark ? 'bg-[#2f3133] text-[#f9f9fc]' : 'bg-[#f3f3f6] text-[#1a1c1e]';
-  const emphasis = dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]';
-  const subtleBg = dark ? 'bg-[#2f3133]' : 'bg-[#f3f3f6]';
-  const borderColor = dark ? 'border-zinc-800' : 'border-[#eeeef0]';
-  const darkPanel = dark ? 'bg-[#0f1012]' : 'bg-[#1a1c1e]';
+  const emphasis = dc.emphasis;
+  const subtleBg = dc.subtleBg;
+  const borderColor = dc.borderColor;
+  const darkPanel = dc.darkPanel;
   const monoBg = dark ? 'bg-[#2f3133]' : 'bg-[#f3f3f6]';
 
   const dimensions = [
@@ -649,15 +662,46 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
           </section>
         </ScrollReveal>
 
-        {/* ═══ 16. CTA ═══ */}
+        {/* ═══ 16. TRY IT YOURSELF — Interactive calculators ═══ */}
         <ScrollReveal>
-          <section className="mb-12 text-center max-w-4xl mx-auto">
-            <div className={`${subtleBg} py-20 px-10 rounded-3xl`}>
-              <h2 className="font-headline text-5xl md:text-6xl font-black tracking-tighter mb-6 leading-none">See for <span className="text-[#D44A78] italic">yourself.</span></h2>
-              <p className={`text-xl mb-12 max-w-2xl mx-auto ${muted}`}>Tell Yulia about your deal. Watch the intelligence layer work. Keep everything she finds — free, no account required.</p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                <button onClick={handleCTA} className="px-12 py-6 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-xl hover:scale-105 transition-all shadow-xl border-none cursor-pointer">Talk to Yulia</button>
-                <button onClick={handleCTA} className={`px-12 py-6 bg-transparent border-2 ${dark ? 'border-white hover:bg-white hover:text-[#1a1c1e]' : 'border-[#1a1c1e] hover:bg-[#1a1c1e] hover:text-white'} rounded-full font-black text-xl transition-all cursor-pointer`}>Message Yulia</button>
+          <section className="mb-32">
+            <div className="mb-12">
+              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Try It Yourself</span>
+              <h2 className="font-headline text-4xl font-black tracking-tight mb-4">Two of Yulia's tools. Right here. No signup.</h2>
+              <p className={`text-lg max-w-2xl ${muted}`}>Toggle add-backs to see how they change a business valuation calculator result. Adjust loan terms to check SBA bankability with the DSCR calculator. These are the same engines that power Yulia's deal intelligence.</p>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div>
+                <h3 className={`font-bold text-sm uppercase tracking-widest mb-4 ${muted}`}>SDE Add-Back Calculator</h3>
+                <InteractiveCalculator className={dark ? 'bg-[#2f3133] border border-zinc-800' : undefined} />
+              </div>
+              <div>
+                <h3 className={`font-bold text-sm uppercase tracking-widest mb-4 ${muted}`}>DSCR Calculator</h3>
+                <DSCRCalculator className={dark ? 'bg-[#2f3133] border border-zinc-800' : undefined} />
+              </div>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* ═══ 17. CTA — Journey-specific ═══ */}
+        <ScrollReveal>
+          <section className="mb-12 relative">
+            <GlowingOrb size={300} color="rgba(212,74,120,0.15)" top="-100px" right="-80px" />
+            <div className={`${darkPanel} rounded-3xl p-12 md:p-16 text-center relative z-10 text-white`}>
+              <h2 className="font-headline text-4xl md:text-5xl font-black tracking-tighter leading-[0.95] mb-4">
+                Describe your deal.<br /><span className="text-[#D44A78]">Watch Yulia work.</span>
+              </h2>
+              <p className="text-lg text-[#dadadc]/60 max-w-xl mx-auto mb-8">
+                Tell her about your business, a deal you're evaluating, or capital you need to raise. Keep everything she finds — free, no account required.
+              </p>
+              <div className="flex flex-col items-center gap-4">
+                <MagneticButton
+                  onClick={handleCTA}
+                  className="px-10 py-5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl border-none cursor-pointer"
+                >
+                  Talk to Yulia
+                </MagneticButton>
+                <p className="text-xs text-[#dadadc]/70">Free deal intelligence · No account required · Your data stays yours</p>
               </div>
             </div>
           </section>
