@@ -1213,11 +1213,11 @@ export default function AppShell() {
               {/* Circuit board image — cover the full container, visible at edges */}
               <div style={{
                 position: 'absolute', inset: 0, zIndex: 1,
-                backgroundImage: dark ? `url('/circuit-dark.svg')` : `url('/rose gold bg.jpeg')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                opacity: dark ? 1 : 0.12,
+                backgroundImage: `url('/${dark ? 'G dark' : 'G light'}.png')`,
+                backgroundSize: '1024px auto',
+                backgroundPosition: 'center top',
+                backgroundRepeat: 'repeat',
+                opacity: dark ? 0.5 : 0.18,
                 pointerEvents: 'none',
               }} />
               <CircuitSparks dark={dark} />
