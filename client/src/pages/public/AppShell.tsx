@@ -1243,7 +1243,7 @@ export default function AppShell() {
 
                   {/* Desktop: single centered cluster */}
                   <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
-                    <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-6' : 'max-w-3xl space-y-6'}`} style={isMobile ? undefined : { marginTop: '-5vh' }}>
+                    <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-5' : 'max-w-3xl space-y-6'}`} style={isMobile ? { marginTop: '10px' } : { marginTop: '-5vh' }}>
                       {!isMobile && (
                         <div className="mb-6 flex justify-center">
                           <LogoHero height={95} dark={dark} />
@@ -1325,7 +1325,7 @@ export default function AppShell() {
 
                   {/* Mobile bottom zone: chips + gradient input + micro-copy */}
                   {isMobile && (
-                    <div className="shrink-0 px-4 pb-2 relative z-10" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
+                    <div className="shrink-0 px-4 relative z-10" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}>
                       {/* Mobile chips */}
                       <div className="flex flex-wrap justify-center gap-2 mb-4">
                         {['I want to sell my business', 'Looking to buy a business', 'Need to raise capital', 'Just closed — what now?'].map(chip => (
