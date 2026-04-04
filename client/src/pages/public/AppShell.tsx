@@ -1270,12 +1270,18 @@ export default function AppShell() {
                   dot grid — quiet canvas that lets typography and the rose-gold
                   accent do the work. */}
               <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#151617' : '#f8f6f2', pointerEvents: 'none' }} />
-              {/* Atmospheric rose-gold glow — top right corner */}
+              {/* Atmospheric rose-gold glow — top right corner.
+                  Mobile uses a much smaller ellipse so the glow stays contained
+                  instead of covering the entire viewport with pink tint. */}
               <div style={{
                 position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
-                background: dark
-                  ? 'radial-gradient(ellipse 1000px 700px at 90% 5%, rgba(232, 112, 154, 0.08) 0%, transparent 60%)'
-                  : 'radial-gradient(ellipse 1000px 700px at 90% 5%, rgba(212, 74, 120, 0.06) 0%, transparent 60%)',
+                background: isMobile
+                  ? (dark
+                      ? 'radial-gradient(ellipse 280px 220px at 100% 0%, rgba(232, 112, 154, 0.12) 0%, transparent 70%)'
+                      : 'radial-gradient(ellipse 280px 220px at 100% 0%, rgba(212, 74, 120, 0.08) 0%, transparent 70%)')
+                  : (dark
+                      ? 'radial-gradient(ellipse 1000px 700px at 90% 5%, rgba(232, 112, 154, 0.08) 0%, transparent 60%)'
+                      : 'radial-gradient(ellipse 1000px 700px at 90% 5%, rgba(212, 74, 120, 0.06) 0%, transparent 60%)'),
               }} />
 
               {activeTab === 'home' ? (

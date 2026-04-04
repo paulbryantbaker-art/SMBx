@@ -62,6 +62,16 @@ html, body {
   background-position: 0 0, 0 0;
   background-repeat: no-repeat, repeat;
 }
+@media (max-width: 767px) {
+  /* Mobile: shrink glow so it stays contained in the top-right corner
+     instead of washing the whole viewport with pink tint. Safari toolbar
+     then matches the cream base color cleanly. */
+  html, body {
+    background-image:
+      radial-gradient(ellipse 280px 220px at 100% 0%, rgba(212, 74, 120, 0.08) 0%, transparent 70%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") !important;
+  }
+}
 /* Default: natural document flow for landing/journey pages */
 #root {
   width: 100%;
@@ -112,6 +122,13 @@ html.dark, html.dark body {
   background-position: 0 0, 0 0;
   background-repeat: no-repeat, repeat;
   color-scheme: dark;
+}
+@media (max-width: 767px) {
+  html.dark, html.dark body {
+    background-image:
+      radial-gradient(ellipse 280px 220px at 100% 0%, rgba(232, 112, 154, 0.12) 0%, transparent 70%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") !important;
+  }
 }
 html.dark #root {
   background-color: transparent !important;
