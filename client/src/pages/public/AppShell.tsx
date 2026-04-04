@@ -1223,7 +1223,7 @@ export default function AppShell() {
                   ...(corner === 'bottomLeft' ? { bottom: 0, left: 0 } : {}),
                   ...(corner === 'bottomRight' ? { bottom: 0, right: 0 } : {}),
                   backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,
-                  backgroundSize: '182% 182%',
+                  backgroundSize: isMobile ? '182% 182%' : '1377px auto',
                   backgroundPosition:
                     corner === 'topLeft' ? '0% 0%'
                     : corner === 'topRight' ? '100% 0%'
