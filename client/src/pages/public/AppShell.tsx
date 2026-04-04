@@ -167,6 +167,33 @@ const TYPEWRITER_HINTS = [
   "I'm Yulia. I can model tax impact, purchase price allocation, and help you keep more of what you earn.",
 ];
 
+/* ═══ HOME HERO TOOLS — opens from + button, mirrors ChatDock pattern ═══ */
+interface HomeToolItem {
+  label: string;
+  desc: string;
+  fill: string;
+  group: 'journey' | 'tool';
+  icon: JSX.Element;
+}
+const HOME_TOOLS: HomeToolItem[] = [
+  { group: 'journey', label: 'Sell my business', desc: 'Valuation, packaging, buyer matching, and closing', fill: 'I want to sell my business — ',
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> },
+  { group: 'journey', label: 'Buy a business', desc: 'Thesis, sourcing, diligence, and deal structuring', fill: 'I want to buy a business — ',
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> },
+  { group: 'journey', label: 'Raise capital', desc: 'Model dilution, find the right structure, build materials', fill: 'I need to raise capital — ',
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> },
+  { group: 'journey', label: 'Just closed — what now?', desc: '180-day integration plan, value creation roadmap', fill: 'I just closed an acquisition — ',
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg> },
+  { group: 'tool', label: 'Business valuation', desc: 'Multi-methodology estimate with defensible range', fill: 'I need a business valuation — I own a ',
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg> },
+  { group: 'tool', label: 'SBA loan check', desc: 'Eligibility, DSCR analysis, and equity injection modeling', fill: "Can this deal get SBA financing? I'm looking at a ",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
+  { group: 'tool', label: 'Search for a business', desc: 'Define criteria and evaluate opportunities', fill: "Help me find a business — I'm looking for ",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> },
+  { group: 'tool', label: 'Upload financials', desc: 'P&L, tax return, or balance sheet — continue in chat', fill: 'I want to upload my financials for analysis',
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg> },
+];
+
 /* ═══ TYPES ═══ */
 
 export type TabId = 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'how-it-works' | 'advisors' | 'pricing';
@@ -505,6 +532,33 @@ export default function AppShell() {
   }, [activeCanvasTabId]);
   const [morphing, setMorphing] = useState(false);
   const [heroFocused, setHeroFocused] = useState(false); // tracks when hero input is focused — controls logo position
+  // Home hero tool popup (+ button menu with journey shortcuts + tools)
+  const [homeToolsOpen, setHomeToolsOpen] = useState(false);
+  const homeInputRef = useRef<HTMLInputElement>(null);
+  const homeInputMobileRef = useRef<HTMLInputElement>(null);
+  const homeToolsRef = useRef<HTMLDivElement>(null);
+  const homePlusRef = useRef<HTMLButtonElement>(null);
+  const homePlusMobileRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!homeToolsOpen) return;
+    const onClick = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (homeToolsRef.current?.contains(t)) return;
+      if (homePlusRef.current?.contains(t)) return;
+      if (homePlusMobileRef.current?.contains(t)) return;
+      setHomeToolsOpen(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [homeToolsOpen]);
+  const fillHomeInput = useCallback((text: string) => {
+    const ref = isMobile ? homeInputMobileRef : homeInputRef;
+    if (ref.current) {
+      ref.current.value = text;
+      ref.current.focus();
+    }
+    setHomeToolsOpen(false);
+  }, [isMobile]);
   const [chatWidth, setChatWidth] = useState(520); // resizable chat column width
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop sidebar collapse
   const [ndaRequired, setNdaRequired] = useState<{ dealId: number; dealName?: string } | null>(null);
@@ -1243,8 +1297,8 @@ export default function AppShell() {
                     pointerEvents: 'none',
                   }} />
 
-                  {/* Top cluster — centered on desktop, bottom-anchored on mobile to sit close to chips */}
-                  <div className={`flex-1 flex flex-col items-center px-6 relative z-10 ${isMobile ? 'justify-end pb-8' : 'justify-center'}`}>
+                  {/* Top cluster — centered desktop; anchored to top on mobile (Grok-like) */}
+                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? 'pt-8' : 'flex-1 justify-center'}`}>
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl space-y-5' : 'max-w-3xl space-y-6'}`}>
                       {!isMobile && (
                         <div className="mb-10 flex justify-center">
@@ -1265,21 +1319,28 @@ export default function AppShell() {
                         Yulia handles the numbers, the documents, and the strategy<br className="hidden md:inline" /> — all by just talking to her.
                       </p>
 
-                      {/* Desktop: input + chips + micro-copy */}
+                      {/* Desktop: input + micro-copy */}
                       {!isMobile && (
                         <>
                           <div className="w-full max-w-3xl mx-auto mt-8">
                             <div className="relative group">
                               <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'}`} />
                               <div className={`relative rounded-full flex items-center p-2 pl-4 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
+                                {/* + Tools button */}
                                 <button
+                                  ref={homePlusRef}
                                   type="button"
-                                  aria-label="Add"
+                                  aria-label="Tools menu"
+                                  aria-expanded={homeToolsOpen}
+                                  onClick={() => setHomeToolsOpen(p => !p)}
                                   className={`h-10 w-10 rounded-full flex items-center justify-center mr-2 transition-all active:scale-95 cursor-pointer border-none ${dark ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700' : 'bg-[#f3f3f6] text-[#D44A78] hover:bg-[#e3bdc3]/40'}`}
                                 >
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: homeToolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
+                                    <path d="M12 5v14" /><path d="M5 12h14" />
+                                  </svg>
                                 </button>
                                 <input
+                                  ref={homeInputRef}
                                   className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
                                   placeholder="Message Yulia..."
                                   type="text"
@@ -1300,25 +1361,37 @@ export default function AppShell() {
                                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
                                 </button>
                               </div>
-                            </div>
 
-                            {/* Suggestion chips */}
-                            <div className="mt-6 flex flex-wrap justify-center gap-3">
-                              {['I want to sell my business', 'Looking to buy a business', 'Need to raise capital', 'Just closed — what now?'].map(chip => (
-                                <button
-                                  key={chip}
-                                  onClick={() => handleSend(chip)}
-                                  className={`px-4 py-2 rounded-full text-sm cursor-pointer transition-all border-none ${
-                                    dark
-                                      ? 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
-                                      : 'bg-white text-[#636467] shadow-sm hover:border-[#D44A78] hover:text-[#D44A78]'
-                                  }`}
-                                  style={{ border: dark ? '1px solid rgba(63,63,70,0.5)' : '1px solid #e3bdc3' }}
-                                  type="button"
-                                >
-                                  {chip}
-                                </button>
-                              ))}
+                              {/* Tool popup (drops UP from input) */}
+                              {!isMobile && (
+                                <div ref={homeToolsRef} className={`home-tools-popup ${homeToolsOpen ? 'open' : ''}`} style={{ bottom: 'calc(100% + 12px)' }}>
+                                  <div className="px-4 pt-3 pb-2">
+                                    <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)' }}>Start with Yulia</span>
+                                  </div>
+                                  {HOME_TOOLS.filter(t => t.group === 'journey').map(t => (
+                                    <button key={t.label} className="home-tp-item" onClick={() => fillHomeInput(t.fill)} type="button">
+                                      {t.icon}
+                                      <div>
+                                        <div className={`text-[15px] font-semibold leading-[1.3] ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}>{t.label}</div>
+                                        <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
+                                      </div>
+                                    </button>
+                                  ))}
+                                  <div className="mx-4 my-1" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}` }} />
+                                  <div className="px-4 pt-2 pb-1">
+                                    <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)' }}>Tools</span>
+                                  </div>
+                                  {HOME_TOOLS.filter(t => t.group === 'tool').map(t => (
+                                    <button key={t.label} className="home-tp-item" onClick={() => fillHomeInput(t.fill)} type="button">
+                                      {t.icon}
+                                      <div>
+                                        <div className={`text-[15px] font-semibold leading-[1.3] ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}>{t.label}</div>
+                                        <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
+                                      </div>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -1331,39 +1404,55 @@ export default function AppShell() {
                     </div>
                   </div>
 
-                  {/* Mobile bottom zone: chips + gradient input + micro-copy */}
+                  {/* Mobile bottom zone: gradient input + trust line (Grok-like — breathing room above) */}
                   {isMobile && (
-                    <div className="shrink-0 px-4 relative z-10" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}>
-                      {/* Mobile chips */}
-                      <div className="flex flex-wrap justify-center gap-2 mb-4">
-                        {['I want to sell my business', 'Looking to buy a business', 'Need to raise capital', 'Just closed — what now?'].map(chip => (
-                          <button
-                            key={chip}
-                            onClick={() => handleSend(chip)}
-                            className={`px-3 py-1.5 rounded-full text-xs cursor-pointer transition-all border-none ${
-                              dark
-                                ? 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
-                                : 'bg-white text-[#636467] shadow-sm hover:border-[#D44A78] hover:text-[#D44A78]'
-                            }`}
-                            style={{ border: dark ? '1px solid rgba(63,63,70,0.5)' : '1px solid #e3bdc3' }}
-                            type="button"
-                          >
-                            {chip}
+                    <div className="shrink-0 px-4 relative z-10 mt-auto" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}>
+                      {/* Tool popup (drops UP from input) */}
+                      <div ref={homeToolsRef} className={`home-tools-popup ${homeToolsOpen ? 'open' : ''}`} style={{ bottom: 'calc(100% + 8px)', left: 16, right: 16 }}>
+                        <div className="px-4 pt-3 pb-2">
+                          <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)' }}>Start with Yulia</span>
+                        </div>
+                        {HOME_TOOLS.filter(t => t.group === 'journey').map(t => (
+                          <button key={t.label} className="home-tp-item" onClick={() => fillHomeInput(t.fill)} type="button">
+                            {t.icon}
+                            <div>
+                              <div className={`text-[15px] font-semibold leading-[1.3] ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}>{t.label}</div>
+                              <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
+                            </div>
+                          </button>
+                        ))}
+                        <div className="mx-4 my-1" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}` }} />
+                        <div className="px-4 pt-2 pb-1">
+                          <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)' }}>Tools</span>
+                        </div>
+                        {HOME_TOOLS.filter(t => t.group === 'tool').map(t => (
+                          <button key={t.label} className="home-tp-item" onClick={() => fillHomeInput(t.fill)} type="button">
+                            {t.icon}
+                            <div>
+                              <div className={`text-[15px] font-semibold leading-[1.3] ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}>{t.label}</div>
+                              <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
+                            </div>
                           </button>
                         ))}
                       </div>
-                      {/* Gradient-glow input (same as desktop) */}
+                      {/* Gradient-glow input */}
                       <div className="relative group">
                         <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'}`} />
                         <div className={`relative rounded-full flex items-center p-2 pl-3 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
                           <button
+                            ref={homePlusMobileRef}
                             type="button"
-                            aria-label="Add"
+                            aria-label="Tools menu"
+                            aria-expanded={homeToolsOpen}
+                            onClick={() => setHomeToolsOpen(p => !p)}
                             className={`h-9 w-9 rounded-full flex items-center justify-center mr-2 transition-all active:scale-95 cursor-pointer border-none ${dark ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700' : 'bg-[#f3f3f6] text-[#D44A78] hover:bg-[#e3bdc3]/40'}`}
                           >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: homeToolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
+                              <path d="M12 5v14" /><path d="M5 12h14" />
+                            </svg>
                           </button>
                           <input
+                            ref={homeInputMobileRef}
                             className={`bg-transparent border-none focus:ring-0 flex-1 py-3 text-base outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
                             placeholder="Message Yulia..."
                             type="text"
