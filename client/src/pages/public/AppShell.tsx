@@ -1298,9 +1298,9 @@ export default function AppShell() {
                     pointerEvents: 'none',
                   }} />
 
-                  {/* Mobile: flex spacer above cluster for optical centering.
-                      1.4 top : 1 middle ratio biases cluster slightly above center (where the eye expects it) */}
-                  {isMobile && <div className="flex-[1.4]" aria-hidden />}
+                  {/* Mobile: flex spacer above cluster. 1:1 ratio with middle spacer
+                      keeps cluster at optical center while pushing pill near the bottom */}
+                  {isMobile && <div className="flex-1" aria-hidden />}
 
                   {/* Top cluster — centered desktop; optical-center on mobile */}
                   <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? 'shrink-0' : 'flex-1 justify-center'}`}>
@@ -1311,7 +1311,7 @@ export default function AppShell() {
                         </div>
                       )}
                       {isMobile && (
-                        <div className="mb-8 flex justify-center">
+                        <div className="flex justify-center">
                           <LogoHero height={64} dark={dark} />
                         </div>
                       )}
@@ -1412,10 +1412,10 @@ export default function AppShell() {
                   {/* Middle flex spacer — pushes pill zone to the bottom of main */}
                   {isMobile && <div className="flex-1" aria-hidden />}
 
-                  {/* Mobile bottom zone: pill + trust line. Minimal internal padding —
+                  {/* Mobile bottom zone: pill + trust line. Zero internal padding —
                       the scroll spacer below main provides the Safari chrome buffer */}
                   {isMobile && (
-                    <div className="shrink-0 px-4 relative z-10" style={{ paddingBottom: '0.5rem' }}>
+                    <div className="shrink-0 px-4 relative z-10">
                       {/* Tool popup (drops UP from input) */}
                       <div ref={homeToolsRef} className={`home-tools-popup ${homeToolsOpen ? 'open' : ''}`} style={{ bottom: 'calc(100% + 8px)', left: 16, right: 16 }}>
                         <div className="px-4 pt-3 pb-2">
@@ -1489,11 +1489,10 @@ export default function AppShell() {
                     </div>
                   )}
                 </main>
-                {/* Scroll spacer — creates overflow so Safari minimizes its chrome.
-                    Minimum ~100-120px needed; the pill now sits at the bottom of main
-                    and this strip provides the buffer over Safari's bar + home indicator. */}
+                {/* Scroll spacer — creates minimal overflow so Safari minimizes its chrome.
+                    85px is the minimum that reliably triggers minimization on iPhone Safari. */}
                 {isMobile && (
-                  <div className="shrink-0 flex flex-col items-center justify-end relative z-10" style={{ height: 110, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}>
+                  <div className="shrink-0 flex flex-col items-center justify-end relative z-10" style={{ height: 85, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)' }}>
                     <p className={`text-[10px] font-medium ${dark ? 'text-zinc-700' : 'text-[#C8C4BC]'}`}>
                       AI deal intelligence for business acquisitions
                     </p>
