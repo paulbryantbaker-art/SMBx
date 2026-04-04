@@ -1208,47 +1208,45 @@ export default function AppShell() {
             <div key={activeTab} style={{ position: 'relative', animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : { minHeight: '100dvh' }) }}>
 
               {/* ═══ SHARED BACKGROUND — all landing pages ═══ */}
-              {/* Page bg color comes from body/html (set by DarkModeToggle with !important). */}
-              {/* No absolute bg div here — it confused Safari toolbar color sampling. */}
-              {/* Circuit board — sticky container stays in viewport as user scrolls */}
-              <div style={{ position: 'sticky', top: 0, height: 0, zIndex: 1, pointerEvents: 'none', overflow: 'visible' }}>
-                <div style={{ position: 'relative', width: '100%', height: '100dvh', pointerEvents: 'none' }}>
-                  {(['topLeft', 'topRight', 'bottomLeft', 'bottomRight'] as const).map(corner => (
-                    <div key={corner} style={{
-                      position: 'absolute',
-                      width: isMobile ? '45%' : '55%',
-                      height: isMobile ? '40%' : '55%',
-                      ...(corner === 'topLeft' ? { top: 0, left: 0 } : {}),
-                      ...(corner === 'topRight' ? { top: 0, right: 0 } : {}),
-                      ...(corner === 'bottomLeft' ? { bottom: 0, left: 0 } : {}),
-                      ...(corner === 'bottomRight' ? { bottom: 0, right: 0 } : {}),
-                      backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,
-                      backgroundSize: isMobile ? '182% 182%' : '1377px auto',
-                      backgroundPosition:
-                        corner === 'topLeft' ? '0% 0%'
-                        : corner === 'topRight' ? '100% 0%'
-                        : corner === 'bottomLeft' ? '0% 100%'
-                        : '100% 100%',
-                      backgroundRepeat: 'no-repeat',
-                      opacity: dark ? 0.35 : 0.15,
-                      pointerEvents: 'none',
-                      maskImage: `radial-gradient(ellipse at ${
-                        corner === 'topLeft' ? '0% 0%'
-                        : corner === 'topRight' ? '100% 0%'
-                        : corner === 'bottomLeft' ? '0% 100%'
-                        : '100% 100%'
-                      }, black 0%, black ${isMobile ? '15%' : '30%'}, transparent ${isMobile ? '50%' : '70%'})`,
-                      WebkitMaskImage: `radial-gradient(ellipse at ${
-                        corner === 'topLeft' ? '0% 0%'
-                        : corner === 'topRight' ? '100% 0%'
-                        : corner === 'bottomLeft' ? '0% 100%'
-                        : '100% 100%'
-                      }, black 0%, black ${isMobile ? '15%' : '30%'}, transparent ${isMobile ? '50%' : '70%'})`,
-                    }} />
-                  ))}
-                  <CircuitSparks dark={dark} />
-                </div>
-              </div>
+              {/* Solid bg covers the body dot-grid pattern. Must be absolute (not fixed) so Safari */}
+              {/* reads body/html bg for toolbar tinting, not this layer. */}
+              <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#1a1c1e' : '#f9f9fc', pointerEvents: 'none', minHeight: '100dvh' }} />
+              {/* Circuit board — 4 corner panels, absolute positioned */}
+              {(['topLeft', 'topRight', 'bottomLeft', 'bottomRight'] as const).map(corner => (
+                <div key={corner} style={{
+                  position: 'absolute',
+                  zIndex: 1,
+                  width: isMobile ? '45%' : '55%',
+                  height: isMobile ? '40%' : '55%',
+                  ...(corner === 'topLeft' ? { top: 0, left: 0 } : {}),
+                  ...(corner === 'topRight' ? { top: 0, right: 0 } : {}),
+                  ...(corner === 'bottomLeft' ? { bottom: 0, left: 0 } : {}),
+                  ...(corner === 'bottomRight' ? { bottom: 0, right: 0 } : {}),
+                  backgroundImage: `url('/${dark ? 'GD' : 'rose gold bg'}.jpeg')`,
+                  backgroundSize: isMobile ? '182% 182%' : '1377px auto',
+                  backgroundPosition:
+                    corner === 'topLeft' ? '0% 0%'
+                    : corner === 'topRight' ? '100% 0%'
+                    : corner === 'bottomLeft' ? '0% 100%'
+                    : '100% 100%',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: dark ? 0.35 : 0.15,
+                  pointerEvents: 'none',
+                  maskImage: `radial-gradient(ellipse at ${
+                    corner === 'topLeft' ? '0% 0%'
+                    : corner === 'topRight' ? '100% 0%'
+                    : corner === 'bottomLeft' ? '0% 100%'
+                    : '100% 100%'
+                  }, black 0%, black ${isMobile ? '15%' : '30%'}, transparent ${isMobile ? '50%' : '70%'})`,
+                  WebkitMaskImage: `radial-gradient(ellipse at ${
+                    corner === 'topLeft' ? '0% 0%'
+                    : corner === 'topRight' ? '100% 0%'
+                    : corner === 'bottomLeft' ? '0% 100%'
+                    : '100% 100%'
+                  }, black 0%, black ${isMobile ? '15%' : '30%'}, transparent ${isMobile ? '50%' : '70%'})`,
+                }} />
+              ))}
+              <CircuitSparks dark={dark} />
 
               {activeTab === 'home' ? (
               <>
