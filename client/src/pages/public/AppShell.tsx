@@ -1309,11 +1309,11 @@ export default function AppShell() {
                         </div>
                       )}
                       {isMobile && (
-                        <div className="flex justify-center mb-12">
+                        <div className="flex justify-center mb-20">
                           <LogoHero height={52} dark={dark} />
                         </div>
                       )}
-                      <h1 className={`font-headline font-extrabold tracking-tighter ${isMobile ? 'text-[42px] leading-[1.02] mb-6' : 'text-[50px] leading-[1.05]'}`}>
+                      <h1 className={`font-headline font-extrabold tracking-tighter ${isMobile ? 'text-[42px] leading-[1.02] mb-12' : 'text-[50px] leading-[1.05]'}`}>
                         <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>Selling</span> your business,<br/>
                         <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>buying</span> one, or{' '}
                         <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>raising</span> capital?
