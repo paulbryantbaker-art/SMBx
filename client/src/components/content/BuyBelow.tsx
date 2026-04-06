@@ -263,43 +263,23 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
                 beforeLabel="Gut-feel negotiation"
                 afterLabel="Data-backed with Yulia"
                 beforeContent={
-                  <div className="p-6 space-y-4">
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
-                      <p className="text-sm text-[#dadadc]/90">Offer based on asking price, not market data</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
-                      <p className="text-sm text-[#dadadc]/90">No idea what comparable deals actually closed at</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
-                      <p className="text-sm text-[#dadadc]/90">Working capital and earnout terms undefined</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
-                      <p className="text-sm text-[#dadadc]/90">Red flags discovered at due diligence — deal collapses</p>
-                    </div>
+                  <div className="space-y-4">
+                    {['Offer based on asking price, not market data', 'No idea what comparable deals actually closed at', 'Working capital and earnout terms undefined', 'Red flags discovered at due diligence — deal collapses'].map(t => (
+                      <div key={t} className="flex items-start gap-3">
+                        <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
+                        <p className="text-sm text-[#5d5e61]">{t}</p>
+                      </div>
+                    ))}
                   </div>
                 }
                 afterContent={
-                  <div className="p-6 space-y-4">
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
-                      <p className="text-sm text-[#dadadc]/90">Offer anchored to comparable transaction multiples</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
-                      <p className="text-sm text-[#dadadc]/90">Working capital peg calculated from trailing 12-month average</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
-                      <p className="text-sm text-[#dadadc]/90">Asset allocation optimized for 5-year tax benefit</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
-                      <p className="text-sm text-[#dadadc]/90">Red flags caught during screening — before LOI is signed</p>
-                    </div>
+                  <div className="space-y-4">
+                    {['Offer anchored to comparable transaction multiples', 'Working capital peg calculated from trailing 12-month average', 'Asset allocation optimized for 5-year tax benefit', 'Red flags caught during screening — before LOI is signed'].map(t => (
+                      <div key={t} className="flex items-start gap-3">
+                        <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
+                        <p className="text-sm text-[#1a1c1e]">{t}</p>
+                      </div>
+                    ))}
                   </div>
                 }
               />

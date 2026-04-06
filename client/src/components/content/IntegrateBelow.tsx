@@ -197,8 +197,8 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
                 beforeLabel="Manual monthly check-ins"
                 afterLabel="Continuous AI monitoring"
                 beforeContent={
-                  <div className={`p-8 min-h-[340px] ${dark ? 'bg-[#1a1c1e]' : 'bg-[#f3f3f6]'}`}>
-                    <p className={`font-bold text-lg mb-6 ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>The old way</p>
+                  <div>
+                    <p className="font-bold text-base mb-5 text-[#1a1c1e]">The old way</p>
                     <div className="space-y-4">
                       {[
                         { icon: 'schedule', text: 'Monthly reports arrive 3 weeks late' },
@@ -209,16 +209,16 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
                         { icon: 'error', text: 'Integration stalls with no accountability' },
                       ].map((item) => (
                         <div key={item.text} className="flex items-start gap-3">
-                          <span className="material-symbols-outlined text-red-400 text-base shrink-0 mt-0.5">{item.icon}</span>
-                          <p className={`text-sm ${dc.muted}`}>{item.text}</p>
+                          <span className="material-symbols-outlined text-[#EA4335] text-base shrink-0 mt-0.5">{item.icon}</span>
+                          <p className="text-sm text-[#5d5e61]">{item.text}</p>
                         </div>
                       ))}
                     </div>
                   </div>
                 }
                 afterContent={
-                  <div className={`p-8 min-h-[340px] ${dark ? 'bg-[#0f1012]' : 'bg-white'}`}>
-                    <p className={`font-bold text-lg mb-6 ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>With Yulia</p>
+                  <div>
+                    <p className="font-bold text-base mb-5 text-[#1a1c1e]">With Yulia</p>
                     <div className="space-y-4">
                       {[
                         { icon: 'bolt', text: 'Real-time alerts on metric deviations' },
@@ -229,8 +229,8 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
                         { icon: 'task_alt', text: 'Milestone accountability with deadlines' },
                       ].map((item) => (
                         <div key={item.text} className="flex items-start gap-3">
-                          <span className="material-symbols-outlined text-[#D44A78] text-base shrink-0 mt-0.5">{item.icon}</span>
-                          <p className={`text-sm ${dc.muted}`}>{item.text}</p>
+                          <span className="material-symbols-outlined text-[#34A853] text-base shrink-0 mt-0.5">{item.icon}</span>
+                          <p className="text-sm text-[#1a1c1e]">{item.text}</p>
                         </div>
                       ))}
                     </div>

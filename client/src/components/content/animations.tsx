@@ -394,6 +394,9 @@ export function BeforeAfterSlider({
   afterContent: ReactNode;
   className?: string;
 }) {
+  /* Two genuine side-by-side panels with a draggable divider.
+     No clipping/overlay — each panel is its own container so text
+     never overlaps. Light themed to match the site's warm paper base. */
   const [pos, setPos] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
@@ -401,19 +404,20 @@ export function BeforeAfterSlider({
   const updatePos = (clientX: number) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    const pct = Math.max(5, Math.min(95, ((clientX - rect.left) / rect.width) * 100));
+    const pct = Math.max(20, Math.min(80, ((clientX - rect.left) / rect.width) * 100));
     setPos(pct);
   };
 
   useEffect(() => {
     const onMove = (e: MouseEvent | TouchEvent) => {
       if (!dragging.current) return;
+      e.preventDefault();
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       updatePos(clientX);
     };
     const onUp = () => { dragging.current = false; };
     window.addEventListener('mousemove', onMove);
-    window.addEventListener('touchmove', onMove, { passive: true });
+    window.addEventListener('touchmove', onMove, { passive: false });
     window.addEventListener('mouseup', onUp);
     window.addEventListener('touchend', onUp);
     return () => {
@@ -428,59 +432,54 @@ export function BeforeAfterSlider({
     <div
       ref={containerRef}
       className={className}
-      style={{ position: 'relative', overflow: 'hidden', borderRadius: 24, userSelect: 'none', touchAction: 'none' }}
+      style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', userSelect: 'none', touchAction: 'none', border: '1px solid #eeeef0' }}
     >
-      {/* After (full) — solid bg prevents text overlap */}
-      <div style={{ width: '100%', background: '#0f1012' }}>{afterContent}</div>
+      <div style={{ display: 'flex', minHeight: 320 }}>
+        {/* Left (Before) panel — light warm with subtle red tint */}
+        <div style={{ width: `${pos}%`, overflow: 'hidden', flexShrink: 0, background: '#faf5f5', borderRight: 'none' }}>
+          <div style={{ padding: '48px 20px 20px' }}>
+            {beforeContent}
+          </div>
+        </div>
 
-      {/* Before (clipped) — solid bg hides the after panel beneath */}
-      <div style={{ position: 'absolute', inset: 0, width: `${pos}%`, overflow: 'hidden' }}>
-        <div style={{ width: containerRef.current?.offsetWidth || '100%', background: '#1a1c1e' }}>{beforeContent}</div>
+        {/* Right (After) panel — light warm with subtle green tint */}
+        <div style={{ flex: 1, overflow: 'hidden', background: '#f4faf6' }}>
+          <div style={{ padding: '48px 20px 20px' }}>
+            {afterContent}
+          </div>
+        </div>
       </div>
 
-      {/* Divider */}
+      {/* Divider line + drag handle */}
       <div
         onMouseDown={() => { dragging.current = true; }}
         onTouchStart={() => { dragging.current = true; }}
         style={{
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          left: `${pos}%`,
-          transform: 'translateX(-50%)',
-          width: 4,
-          background: '#D44A78',
-          cursor: 'col-resize',
-          zIndex: 2,
+          position: 'absolute', top: 0, bottom: 0,
+          left: `${pos}%`, transform: 'translateX(-50%)',
+          width: 24, cursor: 'col-resize', zIndex: 2,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
       >
-        {/* Handle */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            background: '#D44A78',
-            border: '3px solid #fff',
-            boxShadow: '0 2px 10px rgba(186,60,96,0.4)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        {/* Visible line */}
+        <div style={{ position: 'absolute', top: 0, bottom: 0, width: 2, background: '#D44A78', opacity: 0.5 }} />
+        {/* Handle circle */}
+        <div style={{
+          width: 32, height: 32, borderRadius: '50%',
+          background: '#D44A78', border: '3px solid #fff',
+          boxShadow: '0 2px 8px rgba(212,74,120,0.3)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          position: 'relative', zIndex: 3,
+        }}>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <path d="M4 8L1 8M12 8L15 8M4 8L6 6M4 8L6 10M12 8L10 6M12 8L10 10" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </div>
       </div>
 
       {/* Labels */}
-      <span style={{ position: 'absolute', top: 12, left: 12, fontSize: 11, fontWeight: 700, color: '#fff', background: 'rgba(0,0,0,0.6)', padding: '3px 10px', borderRadius: 100, letterSpacing: '0.06em', textTransform: 'uppercase', zIndex: 3 }}>{beforeLabel}</span>
-      <span style={{ position: 'absolute', top: 12, right: 12, fontSize: 11, fontWeight: 700, color: '#fff', background: '#D44A78', padding: '3px 10px', borderRadius: 100, letterSpacing: '0.06em', textTransform: 'uppercase', zIndex: 3 }}>{afterLabel}</span>
+      <span style={{ position: 'absolute', top: 12, left: 12, fontSize: 10, fontWeight: 700, color: '#5d5e61', background: 'rgba(0,0,0,0.06)', padding: '3px 10px', borderRadius: 100, letterSpacing: '0.08em', textTransform: 'uppercase', zIndex: 3 }}>{beforeLabel}</span>
+      <span style={{ position: 'absolute', top: 12, right: 12, fontSize: 10, fontWeight: 700, color: '#fff', background: '#D44A78', padding: '3px 10px', borderRadius: 100, letterSpacing: '0.08em', textTransform: 'uppercase', zIndex: 3 }}>{afterLabel}</span>
     </div>
   );
 }

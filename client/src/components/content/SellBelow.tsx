@@ -165,47 +165,27 @@ export default function SellBelow({ dark }: { dark: boolean }) {
                 beforeLabel="Negotiating blind"
                 afterLabel="Negotiating with Yulia"
                 beforeContent={
-                  <div className="p-6 space-y-4">
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
-                      <p className="text-sm text-[#dadadc]/90">No idea if the offer price is fair</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
-                      <p className="text-sm text-[#dadadc]/90">Working capital peg? "What's that?"</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
-                      <p className="text-sm text-[#dadadc]/90">Counter-offer based on gut feeling</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
-                      <p className="text-sm text-[#dadadc]/90">Tax structure chosen by buyer's attorney</p>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-white/10 text-center">
+                  <div className="space-y-4">
+                    {['No idea if the offer price is fair', 'Working capital peg? "What\'s that?"', 'Counter-offer based on gut feeling', 'Tax structure chosen by buyer\'s attorney'].map(t => (
+                      <div key={t} className="flex items-start gap-3">
+                        <span className="material-symbols-outlined text-[#EA4335] text-lg shrink-0 mt-0.5">close</span>
+                        <p className="text-sm text-[#5d5e61]">{t}</p>
+                      </div>
+                    ))}
+                    <div className="mt-4 pt-4 border-t border-[#EA4335]/15 text-center">
                       <p className="text-sm text-[#EA4335] font-bold">$340K left on the table</p>
                     </div>
                   </div>
                 }
                 afterContent={
-                  <div className="p-6 space-y-4">
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
-                      <p className="text-sm text-[#dadadc]/90">Offer is 24% below defensible range — comps shown</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
-                      <p className="text-sm text-[#dadadc]/90">Working capital peg $40K below trailing average</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
-                      <p className="text-sm text-[#dadadc]/90">Three counter-structures drafted with tax math</p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
-                      <p className="text-sm text-[#dadadc]/90">Asset vs stock sale modeled — $300K difference</p>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-white/10 text-center">
+                  <div className="space-y-4">
+                    {['Offer is 24% below defensible range — comps shown', 'Working capital peg $40K below trailing average', 'Three counter-structures drafted with tax math', 'Asset vs stock sale modeled — $300K difference'].map(t => (
+                      <div key={t} className="flex items-start gap-3">
+                        <span className="material-symbols-outlined text-[#34A853] text-lg shrink-0 mt-0.5">check_circle</span>
+                        <p className="text-sm text-[#1a1c1e]">{t}</p>
+                      </div>
+                    ))}
+                    <div className="mt-4 pt-4 border-t border-[#34A853]/15 text-center">
                       <p className="text-sm text-[#34A853] font-bold">You keep what's yours</p>
                     </div>
                   </div>
