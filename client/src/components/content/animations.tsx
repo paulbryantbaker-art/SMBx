@@ -430,12 +430,12 @@ export function BeforeAfterSlider({
       className={className}
       style={{ position: 'relative', overflow: 'hidden', borderRadius: 24, userSelect: 'none', touchAction: 'none' }}
     >
-      {/* After (full) */}
-      <div style={{ width: '100%' }}>{afterContent}</div>
+      {/* After (full) — solid bg prevents text overlap */}
+      <div style={{ width: '100%', background: '#0f1012' }}>{afterContent}</div>
 
-      {/* Before (clipped) */}
+      {/* Before (clipped) — solid bg hides the after panel beneath */}
       <div style={{ position: 'absolute', inset: 0, width: `${pos}%`, overflow: 'hidden' }}>
-        <div style={{ width: containerRef.current?.offsetWidth || '100%' }}>{beforeContent}</div>
+        <div style={{ width: containerRef.current?.offsetWidth || '100%', background: '#1a1c1e' }}>{beforeContent}</div>
       </div>
 
       {/* Divider */}
@@ -884,9 +884,9 @@ export function ZigZagSection({
                 width: 56, height: 56, borderRadius: '50%',
                 background: 'rgba(186,60,96,0.08)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '24px', flexShrink: 0,
+                flexShrink: 0,
               }}>
-                {item.icon}
+                <span className="material-symbols-outlined" style={{ fontSize: 26, color: '#D44A78' }}>{item.icon}</span>
               </div>
             </div>
           </div>

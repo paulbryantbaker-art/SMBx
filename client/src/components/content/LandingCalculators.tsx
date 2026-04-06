@@ -440,7 +440,7 @@ export function AdvisorROICalc({ dark }: { dark?: boolean }) {
 export function CostSavingsCalc({ dark }: { dark?: boolean }) {
   const [dealSize, setDealSize] = useState(2000000);
 
-  // Traditional IB: 5% Lehman + $15K retainer
+  // Traditional IB: Modified Lehman scale + $15K retainer
   const ibRetainer = 15_000;
   const ibSuccess = dealSize <= 1_000_000 ? dealSize * 0.10
     : dealSize <= 2_000_000 ? 100_000 + (dealSize - 1_000_000) * 0.08
@@ -448,9 +448,12 @@ export function CostSavingsCalc({ dark }: { dark?: boolean }) {
     : 360_000 + (dealSize - 5_000_000) * 0.04;
   const ibTotal = ibRetainer + ibSuccess;
 
-  // Broker: 10-12% on smaller, 5-8% on larger
-  const brokerPct = dealSize <= 1_000_000 ? 0.10 : dealSize <= 3_000_000 ? 0.08 : 0.06;
-  const brokerTotal = Math.round(dealSize * brokerPct);
+  // M&A Advisory / Boutique underwriting: similar Lehman but smaller retainer
+  const advisoryRetainer = 10_000;
+  const advisorySuccess = dealSize <= 1_000_000 ? dealSize * 0.08
+    : dealSize <= 3_000_000 ? 80_000 + (dealSize - 1_000_000) * 0.06
+    : 200_000 + (dealSize - 3_000_000) * 0.04;
+  const advisoryTotal = advisoryRetainer + advisorySuccess;
 
   // smbx: $149/mo × 12 months avg deal
   const smbxTotal = 149 * 12;
@@ -468,12 +471,18 @@ export function CostSavingsCalc({ dark }: { dark?: boolean }) {
       <div className={`mt-6 pt-6 ${dark ? 'border-t border-zinc-700' : 'border-t border-[#eeeef0]'}`}>
         <div className="space-y-3 mb-4">
           <div className={`flex justify-between items-center p-4 rounded-xl ${dark ? 'bg-[#1a1c1e]' : 'bg-[#f3f3f6]'}`}>
-            <span className={`text-sm ${dark ? 'text-[#dadadc]/70' : 'text-[#5d5e61]'}`}>Investment Bank</span>
+            <div>
+              <span className={`text-sm block ${dark ? 'text-[#dadadc]/70' : 'text-[#5d5e61]'}`}>Investment Bank</span>
+              <span className={`text-[10px] ${dark ? 'text-[#dadadc]/40' : 'text-[#5d5e61]/50'}`}>Modified Lehman + retainer</span>
+            </div>
             <span className={`font-bold text-lg tabular-nums line-through ${dark ? 'text-[#dadadc]/40' : 'text-[#5d5e61]/40'}`}>{fmt(ibTotal)}</span>
           </div>
           <div className={`flex justify-between items-center p-4 rounded-xl ${dark ? 'bg-[#1a1c1e]' : 'bg-[#f3f3f6]'}`}>
-            <span className={`text-sm ${dark ? 'text-[#dadadc]/70' : 'text-[#5d5e61]'}`}>Business Broker</span>
-            <span className={`font-bold text-lg tabular-nums line-through ${dark ? 'text-[#dadadc]/40' : 'text-[#5d5e61]/40'}`}>{fmt(brokerTotal)}</span>
+            <div>
+              <span className={`text-sm block ${dark ? 'text-[#dadadc]/70' : 'text-[#5d5e61]'}`}>M&A Advisory Firm</span>
+              <span className={`text-[10px] ${dark ? 'text-[#dadadc]/40' : 'text-[#5d5e61]/50'}`}>Boutique Lehman + retainer</span>
+            </div>
+            <span className={`font-bold text-lg tabular-nums line-through ${dark ? 'text-[#dadadc]/40' : 'text-[#5d5e61]/40'}`}>{fmt(advisoryTotal)}</span>
           </div>
           <div className="flex justify-between items-center p-4 rounded-xl bg-[#D44A78]/10 border border-[#D44A78]/20">
             <span className="text-sm font-bold text-[#D44A78]">smbx.ai Professional</span>
@@ -481,7 +490,7 @@ export function CostSavingsCalc({ dark }: { dark?: boolean }) {
           </div>
         </div>
         <div className="rounded-xl p-4 text-center bg-[#34A853]/10 border border-[#34A853]/20">
-          <p className="text-sm font-bold text-[#34A853]">Save {fmt(savings)} in advisory fees</p>
+          <p className="text-sm font-bold text-[#34A853]">Save {fmt(savings)} vs investment bank fees</p>
           <p className={`text-xs mt-1 ${dark ? 'text-[#dadadc]/60' : 'text-[#5d5e61]'}`}>
             Same analytical coverage. You handle the relationships. Yulia prepares everything.
           </p>

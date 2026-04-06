@@ -317,7 +317,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
               <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Advisory Cost Comparison</span>
               <h2 className="text-4xl font-headline font-black tracking-tight mb-6">See what you save on your deal.</h2>
               <p className={`leading-relaxed editorial mb-6 ${muted}`}>
-                A traditional investment bank charges $150K–$500K for the same analytical coverage. A business broker takes 6–10% of the deal. smbX.ai Professional: $149/month. The analysis is the same. The difference: you run the conversations yourself.
+                A traditional investment bank charges $150K–$500K for the same analytical coverage. M&A advisory firms charge Modified Lehman fees plus retainers. smbX.ai Professional: $149/month. The analysis is the same. The difference: you run the conversations yourself.
               </p>
               <p className={`font-bold text-xl border-l-4 border-[#D44A78] pl-6 italic ${dark ? 'text-[#f9f9fc]' : 'text-[#1a1c1e]'}`}>
                 Enter your deal size. See the savings.

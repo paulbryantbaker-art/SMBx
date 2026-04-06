@@ -77,32 +77,32 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
           <ZigZagSection
             items={[
               {
-                icon: '📊',
+                icon: 'pie_chart',
                 title: 'Equity Financing',
                 body: 'Sell a percentage of ownership to angel investors, venture capital, private equity, family offices, or strategic buyers. Yulia builds your cap table projections showing dilution across multiple funding rounds — so you understand how each equity raise compounds before you sign the term sheet.',
               },
               {
-                icon: '🏦',
+                icon: 'account_balance',
                 title: 'Debt Financing',
                 body: 'SBA loans, conventional lending, or private credit. No dilution but personal guarantees and debt service obligations. Yulia models your DSCR impact, amortization schedules, and covenant compliance so you know exactly what the debt costs you in cash flow.',
               },
               {
-                icon: '📐',
+                icon: 'layers',
                 title: 'Mezzanine',
                 body: 'Subordinated debt with equity kickers — warrants, conversion rights, or participation features. Higher cost of capital than senior debt but significantly less dilution than pure equity financing. Common in PE-backed acquisitions and growth capital structures.',
               },
               {
-                icon: '🔄',
+                icon: 'sync_alt',
                 title: 'Revenue-Based Financing',
                 body: 'Repay as a percentage of monthly revenue. No dilution, no fixed payment schedule, no personal guarantee in most cases. Higher total cost of capital but maximum flexibility for seasonal or high-growth businesses raising capital without giving up ownership.',
               },
               {
-                icon: '👥',
+                icon: 'diversity_3',
                 title: 'ESOP',
                 body: 'Employee Stock Ownership Plan — a tax-advantaged structure that transfers ownership to employees through a trust. Powerful Section 1042 tax benefits for sellers and deductible contributions for the company. Yulia models setup costs, repurchase obligations, and the ongoing cap table impact.',
               },
               {
-                icon: '🏛️',
+                icon: 'savings',
                 title: 'ROBS (Rollover for Business Startups)',
                 body: 'Use your retirement funds as equity injection without early withdrawal penalties or tax consequences. Legitimate under IRS rules but creates concentration risk — your retirement and your business succeed or fail together. Yulia models the trade-offs against conventional equity or debt financing alternatives.',
               },
