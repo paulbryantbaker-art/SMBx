@@ -297,10 +297,13 @@ app.post('/api/analytics/event', express.json(), async (req, res) => {
       } catch { /* invalid token — log as anonymous */ }
     }
 
+    // Capture IP for geo resolution in admin traffic view
+    const ip = req.ip || (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || null;
+
     const eventSql = postgres(process.env.DATABASE_URL!, { ssl: process.env.NODE_ENV === 'production' ? 'require' : false as any, prepare: false });
     await eventSql`
-      INSERT INTO analytics_events (user_id, session_id, event_type, event_data)
-      VALUES (${userId}, ${session_id || null}, ${event_type}, ${JSON.stringify(event_data || {})}::jsonb)
+      INSERT INTO analytics_events (user_id, session_id, event_type, event_data, ip_address)
+      VALUES (${userId}, ${session_id || null}, ${event_type}, ${JSON.stringify(event_data || {})}::jsonb, ${ip}::inet)
     `;
     await eventSql.end();
     res.json({ ok: true });

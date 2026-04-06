@@ -1,7 +1,8 @@
-import { useEffect, useCallback, lazy, Suspense } from 'react';
+import { useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { Route, Switch, Redirect, useLocation } from 'wouter';
 import { useAuth, authHeaders } from './hooks/useAuth';
 import { ChatProvider } from './context/ChatContext';
+import { trackEvent } from './lib/analytics';
 
 /** Transfer anonymous conversations to the newly-authenticated user */
 async function migrateSessionConversations() {
@@ -43,6 +44,7 @@ const DayPassView = lazy(() => import('./pages/public/DayPassView'));
 const ValueLensPage = lazy(() => import('./pages/public/ValueLensPage'));
 const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/public/ResetPassword'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 
 /** Check if a path should be handled by the unified AppShell */
 function isShellPath(path: string): boolean {
@@ -115,6 +117,19 @@ export default function App() {
       if (cfg.googleClientId) (window as any).__GOOGLE_CLIENT_ID = cfg.googleClientId;
     }).catch(() => {});
   }, []);
+
+  // Page view tracking — fires on every route change
+  const prevPath = useRef(location);
+  useEffect(() => {
+    if (location !== prevPath.current) {
+      prevPath.current = location;
+      trackEvent('page_view', { path: location, referrer: document.referrer });
+    }
+  }, [location]);
+  // Also fire on initial load
+  useEffect(() => {
+    trackEvent('page_view', { path: location, referrer: document.referrer });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (
@@ -221,6 +236,15 @@ export default function App() {
           <Suspense fallback={<PageLoader />}>
             <ResetPassword token={params.token} onNavigateLogin={() => navigate('/login')} />
           </Suspense>
+        )}
+      </Route>
+
+      {/* Admin Dashboard */}
+      <Route path="/admin">
+        {user?.role === 'admin' || user?.email === 'paulbryantbaker@gmail.com' ? (
+          <Suspense fallback={<PageLoader />}><AdminDashboard /></Suspense>
+        ) : (
+          <Redirect to={user ? '/chat' : '/login'} />
         )}
       </Route>
 

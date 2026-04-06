@@ -278,6 +278,192 @@ adminRouter.get('/admin/issues/features', async (_req, res) => {
 
 // ─── Service Health ─────────────────────────────────────────
 
+// ─── Daily Metrics Timeseries ────────────────────────────────
+
+adminRouter.get('/admin/metrics/daily', async (req, res) => {
+  try {
+    const days = Math.min(parseInt(req.query.days as string || '30'), 365);
+    const metrics = await sql`
+      SELECT * FROM daily_metrics
+      WHERE date >= CURRENT_DATE - ${days}
+      ORDER BY date ASC
+    `;
+    res.json({ metrics });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── User List ──────────────────────────────────────────────
+
+adminRouter.get('/admin/users', async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page as string || '1'));
+    const limit = Math.min(parseInt(req.query.limit as string || '50'), 200);
+    const offset = (page - 1) * limit;
+    const search = (req.query.search as string || '').trim();
+
+    const countResult = await sql`
+      SELECT COUNT(*)::int as total FROM users
+      ${search ? sql`WHERE email ILIKE ${'%' + search + '%'} OR display_name ILIKE ${'%' + search + '%'}` : sql``}
+    `;
+
+    const users = await sql`
+      SELECT
+        u.id, u.email, u.display_name, u.role, u.league, u.created_at,
+        (SELECT MAX(c.updated_at) FROM conversations c WHERE c.user_id = u.id) as last_activity,
+        (SELECT COUNT(*)::int FROM messages m JOIN conversations c ON c.id = m.conversation_id WHERE c.user_id = u.id AND m.role = 'user') as message_count,
+        (SELECT COUNT(*)::int FROM deals d WHERE d.user_id = u.id) as deal_count,
+        (SELECT status FROM subscriptions WHERE user_id = u.id ORDER BY created_at DESC LIMIT 1) as subscription_status,
+        (SELECT plan FROM subscriptions WHERE user_id = u.id ORDER BY created_at DESC LIMIT 1) as subscription_plan
+      FROM users u
+      ${search ? sql`WHERE u.email ILIKE ${'%' + search + '%'} OR u.display_name ILIKE ${'%' + search + '%'}` : sql``}
+      ORDER BY u.created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+
+    res.json({ users, total: countResult[0].total, page, limit });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+adminRouter.get('/admin/users/:id/conversations', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const conversations = await sql`
+      SELECT c.id, c.title, c.journey, c.current_gate, c.updated_at,
+             (SELECT COUNT(*)::int FROM messages WHERE conversation_id = c.id) as message_count
+      FROM conversations c WHERE c.user_id = ${userId}
+      ORDER BY c.updated_at DESC LIMIT 5
+    `;
+    res.json({ conversations });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+adminRouter.get('/admin/users/:id/deliverables', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const deliverables = await sql`
+      SELECT id, type, status, created_at
+      FROM deliverables WHERE user_id = ${userId}
+      ORDER BY created_at DESC LIMIT 5
+    `;
+    res.json({ deliverables });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Page Views ─────────────────────────────────────────────
+
+adminRouter.get('/admin/page-views', async (req, res) => {
+  try {
+    const days = Math.min(parseInt(req.query.days as string || '7'), 90);
+    const views = await sql`
+      SELECT
+        event_data->>'path' as path,
+        COUNT(*)::int as views,
+        COUNT(DISTINCT COALESCE(user_id::text, session_id))::int as unique_visitors
+      FROM analytics_events
+      WHERE event_type = 'page_view'
+        AND created_at > NOW() - make_interval(days => ${days})
+        AND event_data->>'path' IS NOT NULL
+      GROUP BY event_data->>'path'
+      ORDER BY views DESC
+      LIMIT 50
+    `;
+
+    const totals = await sql`
+      SELECT
+        COUNT(*)::int as total_views,
+        COUNT(DISTINCT COALESCE(user_id::text, session_id))::int as total_unique
+      FROM analytics_events
+      WHERE event_type = 'page_view'
+        AND created_at > NOW() - make_interval(days => ${days})
+    `;
+
+    res.json({ views, totals: totals[0] || { total_views: 0, total_unique: 0 } });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Recent Visitors with Geo ───────────────────────────────
+
+adminRouter.get('/admin/visitors/recent', async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit as string || '50'), 200);
+
+    const visitors = await sql`
+      SELECT
+        session_id,
+        user_id,
+        MIN(created_at) as first_seen,
+        MAX(created_at) as last_seen,
+        COUNT(*)::int as page_count,
+        ARRAY_AGG(DISTINCT event_data->>'path') as pages_viewed,
+        (ARRAY_AGG(event_data->>'referrer' ORDER BY created_at ASC))[1] as referrer,
+        (ARRAY_AGG(ip_address::text ORDER BY created_at DESC))[1] as ip_address
+      FROM analytics_events
+      WHERE event_type = 'page_view'
+        AND session_id IS NOT NULL
+        AND created_at > NOW() - INTERVAL '7 days'
+      GROUP BY session_id, user_id
+      ORDER BY MAX(created_at) DESC
+      LIMIT ${limit}
+    `;
+
+    // Batch geo resolution from cache + ip-api.com
+    const ips = [...new Set((visitors as any[]).map(v => v.ip_address).filter(Boolean))];
+    const geoMap: Record<string, any> = {};
+
+    if (ips.length > 0) {
+      // Check cache
+      const cached = await sql`
+        SELECT ip_address::text, city, region, country_code
+        FROM ip_geo_cache WHERE ip_address = ANY(${ips}::inet[])
+      `;
+      for (const c of cached as any[]) geoMap[c.ip_address] = c;
+
+      // Resolve uncached IPs (skip private/local)
+      const uncached = ips.filter(ip => !geoMap[ip] && !ip.startsWith('10.') && !ip.startsWith('192.168.') && !ip.startsWith('127.') && ip !== '::1');
+      if (uncached.length > 0) {
+        try {
+          const resp = await fetch('http://ip-api.com/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(uncached.slice(0, 100).map(ip => ({ query: ip, fields: 'query,city,regionName,countryCode,lat,lon,isp' }))),
+          });
+          if (resp.ok) {
+            for (const r of await resp.json()) {
+              if (r.city) {
+                geoMap[r.query] = { city: r.city, region: r.regionName, country_code: r.countryCode };
+                sql`INSERT INTO ip_geo_cache (ip_address, city, region, country_code, lat, lon, isp)
+                    VALUES (${r.query}::inet, ${r.city}, ${r.regionName || ''}, ${r.countryCode || ''}, ${r.lat || null}, ${r.lon || null}, ${r.isp || ''})
+                    ON CONFLICT (ip_address) DO NOTHING`.catch(() => {});
+              }
+            }
+          }
+        } catch { /* geo is best-effort */ }
+      }
+    }
+
+    const enriched = (visitors as any[]).map(v => ({
+      ...v,
+      geo: v.ip_address ? geoMap[v.ip_address] || null : null,
+    }));
+
+    res.json({ visitors: enriched });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Service Health ─────────────────────────────────────────
+
 adminRouter.get('/admin/health', async (_req, res) => {
   try {
     // Check each service by looking at recent errors
