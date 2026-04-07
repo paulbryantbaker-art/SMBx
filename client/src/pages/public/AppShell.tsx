@@ -1309,6 +1309,9 @@ export default function AppShell() {
                       <p className={`mx-auto font-medium ${isMobile ? 'text-[17px] leading-[1.5] max-w-sm' : 'text-xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
                         Yulia handles the numbers, the documents, and the strategy<br className="hidden md:inline" /> — all by just talking to her.
                       </p>
+                      <p className={`mx-auto font-medium ${isMobile ? 'text-[14px] max-w-xs' : 'text-base'} ${dark ? 'text-zinc-500' : 'text-[#636467]/70'}`}>
+                        The analytical rigor of a $500K bank engagement. Through a conversation.
+                      </p>
 
                       {/* Desktop: input + micro-copy */}
                       {!isMobile && (
@@ -1333,7 +1336,7 @@ export default function AppShell() {
                                 <input
                                   ref={homeInputRef}
                                   className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
-                                  placeholder="Message Yulia..."
+                                  placeholder="Tell me about your business..."
                                   type="text"
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
@@ -1449,7 +1452,7 @@ export default function AppShell() {
                           <input
                             ref={homeInputMobileRef}
                             className={`bg-transparent border-none focus:ring-0 flex-1 py-3 text-base outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
-                            placeholder="Message Yulia..."
+                            placeholder="Tell me about your business..."
                             type="text"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {

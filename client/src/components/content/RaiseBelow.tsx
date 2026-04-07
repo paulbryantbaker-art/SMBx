@@ -1,4 +1,4 @@
-import { ScrollReveal, StaggerContainer, StaggerItem, AnimatedTimeline, TiltCard, ZigZagSection, MagneticButton, GlowingOrb, AnimatedCounter } from './animations';
+import { ScrollReveal, StaggerContainer, StaggerItem, TiltCard, MagneticButton, GlowingOrb } from './animations';
 import { darkClasses } from './darkHelpers';
 import { bridgeToYulia, goToChat } from './chatBridge';
 import { LandingCapTableCalc } from './LandingCalculators';
@@ -9,33 +9,62 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
 
   usePageMeta({
     title: 'Raise Capital | Dilution Modeling & Capital Structure — smbx.ai',
-    description: 'Model every capital structure — equity, debt, mezzanine, ROBS, ESOP. Build investor-ready materials. AI-powered fundraising intelligence.',
+    description: 'You raise $2M at a $10M pre-money. You own 83%. After liquidation preferences, you get 50% at a $5M exit — not 83%. Model every structure before you sign.',
     canonical: 'https://smbx.ai/raise',
     faqs: [
       {
-        question: 'What capital structures can I model when raising capital for my business?',
-        answer: 'smbx.ai models six capital structures side by side: equity financing (angel, VC, PE, family office), debt financing (SBA, conventional, private credit), mezzanine (subordinated debt with equity kickers), revenue-based financing, ESOP (employee stock ownership plans), and ROBS (Rollover for Business Startups using retirement funds). Each structure is modeled with dilution impact, cost of capital, and founder retention so you can compare them before making a decision.',
+        question: 'What does 83% ownership actually mean after liquidation preferences?',
+        answer: 'Ownership percentage and proceeds percentage are not the same thing. If you raise $2M at a $10M pre-money valuation with 1x participating preferred, the investor gets their $2M back first (liquidation preference) then shares pro rata in what remains. At a $5M exit your 83% ownership translates to 50% of proceeds. At $20M you get 75%. The preferences compress your returns at every exit below the post-money valuation.',
       },
       {
-        question: 'How does the dilution modeling and cap table tool work?',
-        answer: 'The cap table and dilution modeling tool lets you input your pre-money valuation, investment amount, and liquidation preferences to see exactly what founders receive at different exit values. It accounts for participating preferred equity, anti-dilution provisions, and liquidation waterfalls — so you understand the real math behind your ownership percentage before you sign a term sheet.',
+        question: 'How does the dilution and cap table calculator work?',
+        answer: 'The cap table calculator lets you input pre-money valuation, investment amount, and liquidation preferences to model what founders actually receive at different exit values. It accounts for participating preferred equity and liquidation waterfalls so you see the real math behind your ownership percentage before signing a term sheet.',
       },
       {
-        question: 'Can Yulia help me build a pitch deck and investor-ready materials?',
-        answer: 'Yes. Yulia generates a complete fundraising package from your verified financials including a pitch deck tailored to your investor audience, an executive summary, a detailed financial model, cap table projections across funding scenarios, and a fully organized data room. These are built from your actual numbers — not templates — so they survive investor scrutiny.',
-      },
-      {
-        question: 'What is the process for raising capital through smbx.ai?',
-        answer: 'The raise journey has six structured gates: (1) Readiness assessment including capital needs analysis and timeline planning (free), (2) Financial package with verified financials and growth model, (3) Investor materials including pitch deck and data room, (4) Investor outreach with targeted matching and teaser distribution, (5) Term sheet negotiation with market benchmark comparisons, and (6) Close with DD coordination and final documentation.',
+        question: 'What capital structures can I model for raising capital?',
+        answer: 'smbx.ai models six capital structures: equity financing (dilutive but fast), debt financing (SBA is cheapest, personal guarantee required), mezzanine (subordinated debt with equity kickers), revenue-based financing (no dilution, higher total cost), ESOP (tax-advantaged employee transfer with Section 1042 benefits), and ROBS (retirement funds as equity, no penalties). Each is modeled with dilution impact and founder retention.',
       },
     ],
   });
+
+  const structures = [
+    {
+      icon: 'pie_chart',
+      name: 'Equity',
+      line: 'Dilutive but fast. Best when you have a clear exit horizon and investors who add strategic value.',
+    },
+    {
+      icon: 'account_balance',
+      name: 'Debt',
+      line: 'No dilution. SBA is the cheapest path. Personal guarantee required.',
+    },
+    {
+      icon: 'layers',
+      name: 'Mezzanine',
+      line: 'Subordinated debt with equity kickers. PE roll-up territory.',
+    },
+    {
+      icon: 'sync_alt',
+      name: 'Revenue-Based',
+      line: 'Repay as you earn. No dilution, no personal guarantee, higher total cost.',
+    },
+    {
+      icon: 'diversity_3',
+      name: 'ESOP',
+      line: 'Tax-advantaged transfer to employees. Powerful \u00A71042 benefits. Complex setup.',
+    },
+    {
+      icon: 'savings',
+      name: 'ROBS',
+      line: 'Retirement funds as equity. No penalties. Your retirement is now your business — for better or worse.',
+    },
+  ];
 
   return (
     <div className={dark ? 'bg-transparent text-[#f9f9fc]' : 'bg-transparent text-[#1a1c1e]'}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
-        {/* ═══ 1. HERO — Full-width centered ═══ */}
+        {/* ═══ 1. HERO + DILUTION SHOCK ═══ */}
         <section className="mb-24 max-w-3xl mx-auto text-center">
           <ScrollReveal>
             <div className="flex items-center justify-center gap-2 mb-8">
@@ -45,284 +74,111 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
           </ScrollReveal>
           <ScrollReveal y={40} delay={0.1}>
             <h1 className="font-headline font-black text-5xl md:text-6xl tracking-tighter leading-[0.92] mb-8">
-              Most pitch decks never get{' '}
-              <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>a second meeting.</span>
+              83% ownership doesn't mean{' '}
+              <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>83% of the money.</span>
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
-            <div className={`space-y-6 text-xl editorial max-w-2xl mx-auto ${dc.muted}`}>
+            <div className={`space-y-6 text-xl editorial max-w-2xl mx-auto text-left ${dc.muted}`}>
               <p>
-                The difference between a funded search fund and a stalled one isn't the opportunity — it's the package. Investors evaluate your pre-money valuation, your cap table, your dilution modeling, and your financial story before they evaluate you. Equity financing, debt financing, mezzanine, ROBS, ESOP, revenue-based financing — each capital structure tells a different story about what you're willing to give up and what you expect in return. Yulia builds the story that gets term sheets.
+                You raise $2M at a $10M pre-money. You own 83%. You think that means 83% of the exit. It doesn't. After 1x liquidation preferences (the investor gets paid first), at a $5M exit you get 50% — not 83%. At $20M you get 75%. The preferences eat your upside at every exit below $50M.
               </p>
             </div>
           </ScrollReveal>
+
+          {/* Worked example table — immediately in hero */}
           <ScrollReveal delay={0.3}>
-            <p className={`font-bold border-l-4 border-[#D44A78] pl-6 text-2xl italic mt-10 text-left max-w-2xl mx-auto ${dc.emphasis}`}>
-              Yulia builds your fundraising package, models every capital structure, and shows you exactly what you keep. You take the meetings.
-            </p>
-          </ScrollReveal>
-        </section>
+            <div className="mt-10 max-w-2xl mx-auto">
+              <TiltCard className="w-full">
+                <div className={`rounded-3xl p-8 md:p-10 text-white ${dc.darkPanel}`}>
+                  <p className="text-[10px] text-[#dadadc]/60 uppercase tracking-[0.2em] font-bold mb-4">$2M raise at $10M pre-money &middot; 1x liquidation preference</p>
 
-        {/* ═══ 2. Capital Structure Explorer — ZigZagSection ═══ */}
-        <section className="mb-24">
-          <ScrollReveal>
-            <div className="mb-12 text-center">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Capital Structure Explorer</span>
-              <h2 className="font-headline font-black text-4xl tracking-tight mb-4">Six structures. Every trade-off modeled.</h2>
-              <p className={`text-lg max-w-2xl mx-auto ${dc.muted}`}>
-                Most founders only consider equity financing. There are six fundamentally different ways to raise capital for a business — each with different implications for dilution, control, and what you take home at exit.
-              </p>
-            </div>
-          </ScrollReveal>
-          <ZigZagSection
-            items={[
-              {
-                icon: 'pie_chart',
-                title: 'Equity Financing',
-                body: 'Sell a percentage of ownership to angel investors, venture capital, private equity, family offices, or strategic buyers. Yulia builds your cap table projections showing dilution across multiple funding rounds — so you understand how each equity raise compounds before you sign the term sheet.',
-              },
-              {
-                icon: 'account_balance',
-                title: 'Debt Financing',
-                body: 'SBA loans, conventional lending, or private credit. No dilution but personal guarantees and debt service obligations. Yulia models your DSCR impact, amortization schedules, and covenant compliance so you know exactly what the debt costs you in cash flow.',
-              },
-              {
-                icon: 'layers',
-                title: 'Mezzanine',
-                body: 'Subordinated debt with equity kickers — warrants, conversion rights, or participation features. Higher cost of capital than senior debt but significantly less dilution than pure equity financing. Common in PE-backed acquisitions and growth capital structures.',
-              },
-              {
-                icon: 'sync_alt',
-                title: 'Revenue-Based Financing',
-                body: 'Repay as a percentage of monthly revenue. No dilution, no fixed payment schedule, no personal guarantee in most cases. Higher total cost of capital but maximum flexibility for seasonal or high-growth businesses raising capital without giving up ownership.',
-              },
-              {
-                icon: 'diversity_3',
-                title: 'ESOP',
-                body: 'Employee Stock Ownership Plan — a tax-advantaged structure that transfers ownership to employees through a trust. Powerful Section 1042 tax benefits for sellers and deductible contributions for the company. Yulia models setup costs, repurchase obligations, and the ongoing cap table impact.',
-              },
-              {
-                icon: 'savings',
-                title: 'ROBS (Rollover for Business Startups)',
-                body: 'Use your retirement funds as equity injection without early withdrawal penalties or tax consequences. Legitimate under IRS rules but creates concentration risk — your retirement and your business succeed or fail together. Yulia models the trade-offs against conventional equity or debt financing alternatives.',
-              },
-            ]}
-          />
-        </section>
-
-        {/* ═══ 3. Know Your Dilution — Split 5/7 with Calculator ═══ */}
-        <section className="mb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-            <ScrollReveal className="lg:col-span-5">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Know Your Dilution</span>
-              <h2 className="font-headline font-black text-4xl tracking-tight mb-8">
-                Ownership percentage is not the same as what you take home.
-              </h2>
-              <div className={`space-y-5 leading-relaxed editorial ${dc.muted}`}>
-                <p>
-                  Most founders raising capital understand they are giving up equity. Very few understand what liquidation preferences, participation rights, and anti-dilution provisions actually cost them when it matters — at exit.
-                </p>
-                <p>
-                  Pre-money valuation determines your ownership percentage. But the cap table waterfall determines what you actually receive. A 1x participating preferred with a $10M pre-money valuation means the investor gets their money back first, then shares in the remaining proceeds proportionally. At lower exit values, your "83% ownership" can translate to 50% of proceeds or less.
-                </p>
-                <p>
-                  Yulia models every dilution scenario before you sign. Drag the sliders. See the real math.
-                </p>
-              </div>
-              <div className={`mt-8 rounded-2xl p-6 ${dark ? 'bg-[#D44A78]/10 border border-[#D44A78]/20' : 'bg-[#D44A78]/5 border border-[#D44A78]/15'}`}>
-                <p className={`text-sm ${dc.muted}`}>
-                  <span className={`font-bold ${dc.emphasis}`}>The question is not "what percentage am I giving up."</span>{' '}
-                  It is "what do I actually receive at a $5M exit vs. a $20M exit vs. a $50M exit — after preferences, participation, and the waterfall."
-                </p>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal delay={0.15} className="lg:col-span-7">
-              <LandingCapTableCalc dark={dark} />
-            </ScrollReveal>
-          </div>
-        </section>
-
-        {/* ═══ 4. The Raise Process — AnimatedTimeline ═══ */}
-        <section className="mb-24">
-          <ScrollReveal>
-            <div className="mb-12">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">The Raise Process</span>
-              <h2 className="font-headline font-black text-4xl tracking-tight mb-4">Six gates from readiness to close.</h2>
-              <p className={`text-lg max-w-2xl ${dc.muted}`}>
-                Every gate has specific completion triggers. Yulia advances you when the prerequisite work is done — and not before. From "how much should I raise?" to "the capital just hit the account."
-              </p>
-            </div>
-          </ScrollReveal>
-          <AnimatedTimeline>
-            {/* Step 1 — FREE */}
-            <div className="pl-10 pb-8 relative">
-              <div className="absolute left-0 top-0 w-[10px] h-[10px] rounded-full bg-[#22C55E]" />
-              <div className={`rounded-2xl p-6 ${dc.card}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <h4 className={`font-bold ${dc.emphasis}`}>1. Readiness Assessment</h4>
-                  <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${dark ? 'bg-[#006630]/20 text-[#22C55E]' : 'bg-[#006630]/10 text-[#006630]'}`}>FREE</span>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/10">
+                          <th className="text-left py-2 text-[#dadadc]/60 font-medium text-xs uppercase tracking-wider">Exit Value</th>
+                          <th className="text-right py-2 text-[#dadadc]/60 font-medium text-xs uppercase tracking-wider">You Get</th>
+                          <th className="text-right py-2 text-[#dadadc]/60 font-medium text-xs uppercase tracking-wider">Your %</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b border-white/10">
+                          <td className="py-3 text-[#dadadc]/90">$5M exit</td>
+                          <td className="py-3 text-right font-bold text-white">$2.5M</td>
+                          <td className="py-3 text-right text-[#E8709A] font-bold">50%</td>
+                        </tr>
+                        <tr className="border-b border-white/10">
+                          <td className="py-3 text-[#dadadc]/90">$20M exit</td>
+                          <td className="py-3 text-right font-bold text-white">$15M</td>
+                          <td className="py-3 text-right text-[#E8709A] font-bold">75%</td>
+                        </tr>
+                        <tr>
+                          <td className="py-3 text-[#dadadc]/90">$50M exit</td>
+                          <td className="py-3 text-right font-bold text-white">$40M</td>
+                          <td className="py-3 text-right text-[#E8709A] font-bold">80%</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-                <p className={`text-sm ${dc.muted}`}>
-                  Capital needs analysis, funding options comparison, timeline planning. "How much do you need, what is it for, and what are you willing to give up?" Yulia evaluates your business against each capital structure — equity financing, debt, mezzanine, revenue-based, ESOP, ROBS — and recommends the path that fits your goals.
-                </p>
-              </div>
+              </TiltCard>
             </div>
-
-            {/* Step 2 */}
-            <div className="pl-10 pb-8 relative">
-              <div className="absolute left-0 top-0 w-[10px] h-[10px] rounded-full bg-[#D44A78]" />
-              <div className={`rounded-2xl p-6 ${dc.card}`}>
-                <h4 className={`font-bold mb-2 ${dc.emphasis}`}>2. Financial Package</h4>
-                <p className={`text-sm ${dc.muted}`}>
-                  Verified financials, growth model, use-of-funds detail. The numbers that survive investor scrutiny — because they were built the same way an investor would build them. Includes historical recast, forward projections, and sensitivity analysis across scenarios.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="pl-10 pb-8 relative">
-              <div className="absolute left-0 top-0 w-[10px] h-[10px] rounded-full bg-[#D44A78]" />
-              <div className={`rounded-2xl p-6 ${dc.card}`}>
-                <h4 className={`font-bold mb-2 ${dc.emphasis}`}>3. Investor Materials</h4>
-                <p className={`text-sm ${dc.muted}`}>
-                  Pitch deck, executive summary, financial model, data room. Everything an investor needs to move from "interesting" to "let's talk terms." Your pitch deck is built from verified financials — not a template — and adapted to your audience. Angel investors get the vision; PE firms get the returns math.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 4 */}
-            <div className="pl-10 pb-8 relative">
-              <div className="absolute left-0 top-0 w-[10px] h-[10px] rounded-full bg-[#D44A78]" />
-              <div className={`rounded-2xl p-6 ${dc.card}`}>
-                <h4 className={`font-bold mb-2 ${dc.emphasis}`}>4. Investor Outreach</h4>
-                <p className={`text-sm ${dc.muted}`}>
-                  Targeted list of matched investors from SBIC directories, SEC filings, and search fund networks. Teaser distribution, NDA management, and engagement tracking. Yulia tracks who has engaged, who has passed, and who needs a follow-up — so nothing falls through the cracks.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 5 */}
-            <div className="pl-10 pb-8 relative">
-              <div className="absolute left-0 top-0 w-[10px] h-[10px] rounded-full bg-[#D44A78]" />
-              <div className={`rounded-2xl p-6 ${dc.card}`}>
-                <h4 className={`font-bold mb-2 ${dc.emphasis}`}>5. Term Sheet Negotiation</h4>
-                <p className={`text-sm ${dc.muted}`}>
-                  When offers arrive, Yulia compares each term sheet against market benchmarks. Is the pre-money valuation fair? Are the liquidation preferences standard? What does the cap table waterfall look like at different exit values? You negotiate from knowledge — with dilution modeling that shows what each term actually costs you.
-                </p>
-              </div>
-            </div>
-
-            {/* Step 6 */}
-            <div className="pl-10 pb-8 relative">
-              <div className="absolute left-0 top-0 w-[10px] h-[10px] rounded-full bg-[#D44A78]" />
-              <div className={`rounded-2xl p-6 ${dc.card}`}>
-                <h4 className={`font-bold mb-2 ${dc.emphasis}`}>6. Close</h4>
-                <p className={`text-sm ${dc.muted}`}>
-                  Due diligence coordination, final documentation, closing checklist. The capital hits your account and Yulia transitions you to execution mode. Every document, every approval, every wire instruction — managed through a single thread.
-                </p>
-              </div>
-            </div>
-          </AnimatedTimeline>
+          </ScrollReveal>
         </section>
 
-        {/* ═══ 5. Worked Example: Dilution at Exit ═══ */}
+        {/* ═══ 2. CAP TABLE CALCULATOR ═══ */}
         <section className="mb-24">
           <ScrollReveal>
-            <div className="mb-12">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Dilution at Exit</span>
+            <div className="mb-8 text-center max-w-2xl mx-auto">
               <h2 className="font-headline font-black text-4xl tracking-tight mb-4">
-                83% ownership does not mean 83% of proceeds.
+                Run your actual numbers. See what you keep.
               </h2>
-              <p className={`text-lg max-w-2xl ${dc.muted}`}>
-                Liquidation preferences eat your upside at lower exit values. Here is what a typical raise looks like after the waterfall.
+              <p className={`text-lg ${dc.muted}`}>
+                Most founders don't model their liquidation waterfall until after the term sheet is signed. By then it's too late to negotiate.
               </p>
             </div>
           </ScrollReveal>
-          <TiltCard className="max-w-3xl mx-auto">
-            <div className={`rounded-3xl p-8 md:p-10 text-white ${dc.darkPanel}`}>
-              <p className="text-[10px] text-[#dadadc]/60 uppercase tracking-[0.2em] font-bold mb-4">Worked example</p>
-              <h4 className="font-bold text-lg mb-6">You raise $2M at a $10M pre-money valuation. Here is what you actually keep.</h4>
-
-              <div className="mb-6">
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center">
-                    <p className="text-[10px] text-[#dadadc]/60 uppercase mb-1">Pre-money</p>
-                    <p className="text-xl font-black">$10M</p>
-                  </div>
-                  <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center">
-                    <p className="text-[10px] text-[#dadadc]/60 uppercase mb-1">Investment</p>
-                    <p className="text-xl font-black text-[#D44A78]">$2M</p>
-                  </div>
-                  <div className="bg-white/5 rounded-xl p-4 border border-white/10 text-center">
-                    <p className="text-[10px] text-[#dadadc]/60 uppercase mb-1">Your stake</p>
-                    <p className="text-xl font-black">83.3%</p>
-                  </div>
-                </div>
-              </div>
-
-              <p className="text-xs text-[#dadadc]/60 uppercase tracking-widest font-bold mb-4">What you receive at exit (after 1x participating preferred)</p>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="text-left py-2 text-[#dadadc]/60 font-medium text-xs uppercase tracking-wider">Exit Value</th>
-                      <th className="text-right py-2 text-[#dadadc]/60 font-medium text-xs uppercase tracking-wider">Investor Gets</th>
-                      <th className="text-right py-2 text-[#dadadc]/60 font-medium text-xs uppercase tracking-wider">You Get</th>
-                      <th className="text-right py-2 text-[#dadadc]/60 font-medium text-xs uppercase tracking-wider">Your %</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-white/10">
-                      <td className="py-3 text-[#dadadc]/90">$5M exit</td>
-                      <td className="py-3 text-right text-[#dadadc]/90">$2.50M</td>
-                      <td className="py-3 text-right font-bold text-white">$2.50M</td>
-                      <td className="py-3 text-right text-[#E8709A] font-bold">50%</td>
-                    </tr>
-                    <tr className="border-b border-white/10">
-                      <td className="py-3 text-[#dadadc]/90">$10M exit</td>
-                      <td className="py-3 text-right text-[#dadadc]/90">$3.33M</td>
-                      <td className="py-3 text-right font-bold text-white">$6.67M</td>
-                      <td className="py-3 text-right text-[#E8709A] font-bold">67%</td>
-                    </tr>
-                    <tr className="border-b border-white/10">
-                      <td className="py-3 text-[#dadadc]/90">$20M exit</td>
-                      <td className="py-3 text-right text-[#dadadc]/90">$5.00M</td>
-                      <td className="py-3 text-right font-bold text-white">$15.00M</td>
-                      <td className="py-3 text-right text-[#E8709A] font-bold">75%</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3 text-[#dadadc]/90">$50M exit</td>
-                      <td className="py-3 text-right text-[#dadadc]/90">$10.00M</td>
-                      <td className="py-3 text-right font-bold text-white">$40.00M</td>
-                      <td className="py-3 text-right text-[#E8709A] font-bold">80%</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-white/10">
-                <p className="text-xs text-[#dadadc]/70 italic">
-                  At a $5M exit, your 83% ownership translates to only 50% of proceeds. The 1x participating preferred means the investor recovers their $2M first, then participates pro rata in the remaining $3M. Liquidation preferences compress your returns at every exit below the post-money valuation. Yulia models this before you sign the term sheet.
-                </p>
-              </div>
-            </div>
-          </TiltCard>
+          <ScrollReveal delay={0.1}>
+            <LandingCapTableCalc dark={dark} />
+          </ScrollReveal>
         </section>
 
-        {/* ═══ 6. CTA — Journey-specific ═══ */}
+        {/* ═══ 3. CAPITAL STRUCTURES — 2x3 grid ═══ */}
+        <section className="mb-24">
+          <ScrollReveal>
+            <div className="mb-12 text-center max-w-2xl mx-auto">
+              <h2 className="font-headline font-black text-4xl tracking-tight mb-4">
+                Six ways to fund your deal. Here's which one fits.
+              </h2>
+            </div>
+          </ScrollReveal>
+          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
+            {structures.map((s) => (
+              <StaggerItem key={s.name}>
+                <div className={`rounded-2xl p-6 h-full ${dc.card}`}>
+                  <span className="material-symbols-rounded text-[#D44A78] text-2xl mb-3 block">{s.icon}</span>
+                  <h3 className={`font-bold text-base mb-2 ${dc.emphasis}`}>{s.name}</h3>
+                  <p className={`text-sm leading-relaxed ${dc.muted}`}>{s.line}</p>
+                </div>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        </section>
+
+        {/* ═══ 4. CTA ═══ */}
         <ScrollReveal>
           <section className="mb-12">
             <div className={`rounded-3xl p-12 md:p-16 text-white relative overflow-hidden ${dc.darkPanel}`}>
               <GlowingOrb top="-80px" left="-60px" size={300} color="rgba(212,74,120,0.15)" />
-              <GlowingOrb top="40px" left="70%" size={220} color="rgba(232,112,154,0.10)" delay={2} />
+              <GlowingOrb top="40px" right="10%" size={220} color="rgba(232,112,154,0.10)" delay={2} />
               <div className="relative z-10 max-w-2xl mx-auto text-center">
                 <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95] mb-6">
-                  Model Your Raise.<br />
-                  <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>Know what you keep.</span>
+                  Model your raise before you{' '}
+                  <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>sign anything.</span>
                 </h2>
                 <p className="text-lg text-[#dadadc]/70 mb-8 max-w-xl mx-auto">
-                  Tell Yulia how much you need and what it is for. She will model every capital structure — equity, debt, mezzanine, ROBS, ESOP — build your pitch deck and investor materials, project your cap table, and show you the dilution math before your first meeting.
+                  Tell Yulia how much you need and what it's for. She'll model every structure and show you what you actually keep.
                 </p>
                 <MagneticButton
                   onClick={() => bridgeToYulia("I'm raising capital for a business acquisition. Help me model the capital structure and understand my dilution.")}
@@ -330,7 +186,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
                 >
                   Model Your Raise
                 </MagneticButton>
-                <p className="text-xs text-[#dadadc]/50 mt-4">Free readiness assessment. No account required. Your data stays yours.</p>
+                <p className="text-xs text-[#dadadc]/50 mt-4">Free readiness assessment. No account required.</p>
               </div>
             </div>
           </section>
