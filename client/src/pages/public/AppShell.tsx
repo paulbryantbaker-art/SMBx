@@ -1204,8 +1204,20 @@ export default function AppShell() {
         </button>
       </div>
 
-      {/* Bottom: Account & Settings */}
+      {/* Bottom: Admin + Account */}
       <div className="flex flex-col items-center gap-1 mt-auto pt-4">
+        {/* Admin Console — visible only to admins */}
+        {user && (user.role === 'admin' || user.email === 'paulbryantbaker@gmail.com') && (
+          <button
+            onClick={() => navigate('/admin')}
+            className={`flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
+            type="button"
+            title="Admin Console"
+          >
+            <span className="material-symbols-outlined text-[22px]">admin_panel_settings</span>
+            <span className="text-[9px] font-semibold">Admin</span>
+          </button>
+        )}
         <button
           onClick={() => { if (user) { openCanvasTab('settings', 'Settings'); } else navigate('/login'); }}
           className={`flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
@@ -1793,6 +1805,17 @@ export default function AppShell() {
               >
                 <span className="material-symbols-outlined text-[20px]">add_comment</span>
                 New Chat
+              </button>
+              )}
+              {/* Admin Console — visible only to admins */}
+              {user && (user.role === 'admin' || user.email === 'paulbryantbaker@gmail.com') && (
+              <button
+                onClick={() => { setIsMobileSidebarOpen(false); navigate('/admin'); }}
+                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 bg-transparent' : 'text-[#636467] bg-transparent'}`}
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+                Admin Console
               </button>
               )}
               <button
