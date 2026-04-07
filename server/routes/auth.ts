@@ -37,8 +37,8 @@ authRouter.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
     const [user] = await sql`
-      INSERT INTO users (email, password, display_name)
-      VALUES (${emailLower}, ${hashedPassword}, ${displayName || emailLower})
+      INSERT INTO users (email, password, display_name, trial_ends_at)
+      VALUES (${emailLower}, ${hashedPassword}, ${displayName || emailLower}, NOW() + INTERVAL '90 days')
       RETURNING id, email, display_name, google_id, league, role, created_at, updated_at
     `;
 
@@ -165,10 +165,10 @@ authRouter.post('/google', async (req, res) => {
         user.google_id = googleId;
       }
     } else {
-      // Create new user
+      // Create new user with 90-day early-access trial
       [user] = await sql`
-        INSERT INTO users (email, google_id, display_name)
-        VALUES (${emailLower}, ${googleId}, ${name || emailLower})
+        INSERT INTO users (email, google_id, display_name, trial_ends_at)
+        VALUES (${emailLower}, ${googleId}, ${name || emailLower}, NOW() + INTERVAL '90 days')
         RETURNING id, email, display_name, google_id, league, role, created_at, updated_at
       `;
 

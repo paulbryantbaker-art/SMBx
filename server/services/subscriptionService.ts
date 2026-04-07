@@ -110,8 +110,16 @@ export async function getUserPlan(userId: number): Promise<Plan> {
   if (process.env.TEST_MODE === 'true' || process.env.DEV_NO_PAYWALL === 'true') {
     return 'enterprise';
   }
-  const [user] = await sql`SELECT plan FROM users WHERE id = ${userId}`;
-  return (user?.plan as Plan) || 'free';
+  const [user] = await sql`SELECT plan, trial_ends_at FROM users WHERE id = ${userId}`;
+  if (!user) return 'free';
+
+  // Early-access trial: grants Professional until trial_ends_at
+  if (user.trial_ends_at && new Date(user.trial_ends_at) > new Date()) {
+    const basePlan = (user.plan as Plan) || 'free';
+    return PLAN_RANK[basePlan] >= PLAN_RANK.professional ? basePlan : 'professional';
+  }
+
+  return (user.plan as Plan) || 'free';
 }
 
 /** Check if user's plan meets or exceeds a required plan */
