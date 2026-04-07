@@ -6,9 +6,10 @@ interface LoginProps {
   onGoogleLogin: () => void;
   onNavigateSignup: () => void;
   onNavigateForgot?: () => void;
+  googleError?: string;
 }
 
-export default function Login({ onLogin, onGoogleLogin, onNavigateSignup, onNavigateForgot }: LoginProps) {
+export default function Login({ onLogin, onGoogleLogin, onNavigateSignup, onNavigateForgot, googleError }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -48,6 +49,10 @@ export default function Login({ onLogin, onGoogleLogin, onNavigateSignup, onNavi
           </svg>
           Continue with Google
         </button>
+
+        {googleError && (
+          <div className="bg-[#FEF2F2] text-[#B91C1C] px-3.5 py-2.5 rounded-xl text-sm mt-3">{googleError}</div>
+        )}
 
         <div className="flex items-center gap-3 my-6">
           <div className="flex-1 h-px bg-[#FAFAFA]" />

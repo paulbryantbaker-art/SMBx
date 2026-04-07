@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { Route, Switch, Redirect, useLocation } from 'wouter';
 import { useAuth, authHeaders } from './hooks/useAuth';
 import { ChatProvider } from './context/ChatContext';
@@ -58,17 +58,19 @@ export default function App() {
   const { user, loading, login, register, loginWithGoogle, migrateSession, logout } = useAuth();
   const [location, navigate] = useLocation();
 
+  const [googleError, setGoogleError] = useState('');
   const handleGoogleLogin = useCallback(() => {
     const clientId = (window as any).__GOOGLE_CLIENT_ID;
     if (!clientId) {
-      console.warn('Google Client ID not configured');
+      setGoogleError('Google Sign-In is not configured yet. Please use email/password to create an account.');
       return;
     }
     const google = (window as any).google;
     if (!google?.accounts?.id) {
-      console.warn('Google Identity Services not loaded');
+      setGoogleError('Google Sign-In is loading. Please try again in a moment.');
       return;
     }
+    setGoogleError('');
     google.accounts.id.initialize({
       client_id: clientId,
       callback: async (response: any) => {
@@ -206,6 +208,7 @@ export default function App() {
           <Login
             onLogin={handleLoginSuccess}
             onGoogleLogin={handleGoogleLogin}
+            googleError={googleError}
             onNavigateSignup={() => navigate('/signup')}
             onNavigateForgot={() => navigate('/forgot-password')}
           />
