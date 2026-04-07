@@ -87,7 +87,7 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
 
           <ScrollReveal y={40} delay={0.1}>
             <div className="text-center max-w-3xl mx-auto mb-8">
-              <h1 className="text-5xl md:text-6xl font-headline font-black tracking-tighter mb-6">
+              <h1 className="font-headline font-black text-5xl md:text-7xl tracking-tighter leading-[0.9] mb-8">
                 The 7 mistakes that destroy post-acquisition value.
               </h1>
               <p className={`text-xl editorial ${dc.muted}`}>

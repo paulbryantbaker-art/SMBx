@@ -73,7 +73,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
             </div>
           </ScrollReveal>
           <ScrollReveal y={40} delay={0.1}>
-            <h1 className="font-headline font-black text-5xl md:text-6xl tracking-tighter leading-[0.92] mb-8">
+            <h1 className="font-headline font-black text-5xl md:text-7xl tracking-tighter leading-[0.9] mb-8">
               83% ownership doesn't mean{' '}
               <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>83% of the money.</span>
             </h1>
