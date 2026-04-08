@@ -177,8 +177,8 @@ authRouter.post('/google', async (req, res) => {
     const token = signToken(user.id);
     return res.json({ token, user });
   } catch (err: any) {
-    console.error('Google auth error:', err.message);
-    return res.status(500).json({ error: 'Google authentication failed' });
+    console.error('Google auth error:', err.message, err.stack);
+    return res.status(500).json({ error: `Google authentication failed: ${err.message}` });
   }
 });
 

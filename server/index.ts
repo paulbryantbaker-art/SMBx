@@ -403,7 +403,23 @@ async function runMigrations() {
   }
 }
 
-runMigrations().then(() => {
+runMigrations().then(async () => {
+  // Post-migration: ensure critical schema and admin account exist
+  const bootSql = postgres(process.env.DATABASE_URL!, { ssl: process.env.NODE_ENV === 'production' ? 'require' : false as any, prepare: false });
+  try {
+    await bootSql`ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ`;
+    await bootSql`
+      INSERT INTO users (email, password, display_name, role, trial_ends_at)
+      VALUES ('pbaker@smbx.ai', '$2b$10$mNL0ykJmWlbqzVCzLM4w4.KuHpAkezdSQSzEN6F2x/tKrKL9fqYFW', 'Paul Baker', 'admin', NOW() + INTERVAL '90 days')
+      ON CONFLICT (email) DO UPDATE SET password = EXCLUDED.password, role = 'admin'
+    `;
+    console.log('[boot] Admin account verified');
+  } catch (err: any) {
+    console.error('[boot] Admin account check failed:', err.message);
+  } finally {
+    await bootSql.end();
+  }
+
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     startWorker().catch(err => console.warn('[worker] Init skipped:', err.message));
