@@ -65,11 +65,14 @@ export async function startWorker(): Promise<void> {
         `;
         const [msgs] = await metricsSql`SELECT COUNT(*)::int as c FROM messages WHERE created_at::date = ${dateStr}`;
         const [delivs] = await metricsSql`SELECT COUNT(*)::int as c FROM deliverables WHERE created_at::date = ${dateStr}`;
-        const [mrr] = await metricsSql`
-          SELECT COALESCE(SUM(CASE
-            WHEN plan = 'starter' THEN 4900 WHEN plan = 'professional' THEN 14900 WHEN plan = 'enterprise' THEN 99900 ELSE 0
-          END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')
-        `;
+        const [mrrExists] = await metricsSql`SELECT to_regclass('public.subscriptions') IS NOT NULL as exists`;
+        const [mrr] = mrrExists.exists
+          ? await metricsSql`
+              SELECT COALESCE(SUM(CASE
+                WHEN plan = 'starter' THEN 4900 WHEN plan = 'professional' THEN 14900 WHEN plan = 'enterprise' THEN 99900 ELSE 0
+              END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')
+            `
+          : [{ mrr_cents: 0 }];
         const [errors] = await metricsSql`
           SELECT COUNT(*)::int as c FROM support_issues WHERE type = 'system_error' AND created_at::date = ${dateStr}
         `;

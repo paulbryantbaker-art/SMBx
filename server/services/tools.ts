@@ -1327,7 +1327,7 @@ async function createSupportIssue(
 
 // ─── Admin Query Tool ────────────────────────────────────────
 
-const ADMIN_EMAILS = ['paulbryantbaker@gmail.com'];
+const ADMIN_EMAILS = ['pbaker@smbx.ai'];
 
 async function queryAdminData(input: Record<string, any>, userId: number): Promise<string> {
   // Verify admin

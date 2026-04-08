@@ -3,7 +3,6 @@
 
 ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ;
 
--- Grant trial to all existing users who don't have a paid subscription
+-- Grant trial to all existing users who don't already have one
 UPDATE users SET trial_ends_at = NOW() + INTERVAL '90 days'
-WHERE trial_ends_at IS NULL
-  AND id NOT IN (SELECT user_id FROM subscriptions WHERE status IN ('active', 'trialing'));
+WHERE trial_ends_at IS NULL;

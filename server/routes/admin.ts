@@ -9,7 +9,7 @@ import { requireAuth } from '../middleware/auth.js';
 export const adminRouter = Router();
 
 // Admin check — only Paul (or future admins)
-const ADMIN_EMAILS = ['paulbryantbaker@gmail.com']; // Add more as needed
+const ADMIN_EMAILS = ['pbaker@smbx.ai']; // Add more as needed
 function requireAdmin(req: any, res: any, next: any) {
   const userId = req.userId;
   if (!userId) return res.status(401).json({ error: 'Auth required' });

@@ -1207,7 +1207,7 @@ export default function AppShell() {
       {/* Bottom: Admin + Account */}
       <div className="flex flex-col items-center gap-1 mt-auto pt-4">
         {/* Admin Console — visible only to admins */}
-        {user && (user.role === 'admin' || user.email === 'paulbryantbaker@gmail.com') && (
+        {user && (user.role === 'admin' || user.email === 'pbaker@smbx.ai') && (
           <button
             onClick={() => navigate('/admin')}
             className={`flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
@@ -1811,7 +1811,7 @@ export default function AppShell() {
               </button>
               )}
               {/* Admin Console — visible only to admins */}
-              {user && (user.role === 'admin' || user.email === 'paulbryantbaker@gmail.com') && (
+              {user && (user.role === 'admin' || user.email === 'pbaker@smbx.ai') && (
               <button
                 onClick={() => { setIsMobileSidebarOpen(false); navigate('/admin'); }}
                 className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 bg-transparent' : 'text-[#636467] bg-transparent'}`}

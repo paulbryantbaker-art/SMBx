@@ -244,7 +244,7 @@ export default function App() {
 
       {/* Admin Dashboard */}
       <Route path="/admin">
-        {user?.role === 'admin' || user?.email === 'paulbryantbaker@gmail.com' ? (
+        {user?.role === 'admin' || user?.email === 'pbaker@smbx.ai' ? (
           <Suspense fallback={<PageLoader />}><AdminDashboard /></Suspense>
         ) : (
           <Redirect to={user ? '/chat' : '/login'} />

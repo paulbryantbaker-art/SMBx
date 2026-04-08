@@ -20,7 +20,7 @@ export default function AdminDashboard() {
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
 
-  if (!user || (user.role !== 'admin' && user.email !== 'paulbryantbaker@gmail.com')) {
+  if (!user || (user.role !== 'admin' && user.email !== 'pbaker@smbx.ai')) {
     navigate('/chat');
     return null;
   }
