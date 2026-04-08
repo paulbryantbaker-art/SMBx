@@ -139,7 +139,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
       {/* ─── Empty state: help area ─── */}
       {isEmpty && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: desktop ? 300 : 200, gap: 16, padding: '40px 20px' }}>
-          <img src="/x-logo.png" alt="smbx.ai" draggable={false} style={{ height: 32, width: 32, objectFit: 'contain', opacity: 0.3 }} />
+          <img src="/X.png" alt="smbx.ai" draggable={false} style={{ height: 32, width: 32, objectFit: 'contain', opacity: 0.15 }} />
           <p style={{ fontSize: 14, color: mutedColor, textAlign: 'center', margin: 0, lineHeight: 1.6, maxWidth: 360 }}>
             Drop any files here to upload, or just start typing to chat with Yulia.
           </p>

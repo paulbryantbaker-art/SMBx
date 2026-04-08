@@ -60,10 +60,10 @@ function getGreeting(): string {
 }
 
 /* ═══ LOGO — Fancy combo (X + smbx.ai text) for hero placement ═══ */
-function LogoImg({ height = 28, style, className }: { height?: number; style?: React.CSSProperties; className?: string; dark?: boolean }) {
+function LogoImg({ height = 28, style, className, dark }: { height?: number; style?: React.CSSProperties; className?: string; dark?: boolean }) {
   return (
     <img
-      src="/TF3.png"
+      src={dark ? '/G3D.png' : '/G3L.png'}
       alt="smbx.ai"
       draggable={false}
       className={className}
@@ -1645,10 +1645,17 @@ export default function AppShell() {
                 </>
               ) : (
                 /* Empty state */
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 16, opacity: 0.4 }}>
-                  <LogoImg height={36} dark={dark} />
-                  <p className="font-headline text-sm font-medium" style={{ color: dark ? '#f0f0f3' : '#1a1c1e', margin: 0 }}>
-                    Nothing to see here
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 20 }}>
+                  <div style={{ opacity: 0.10 }}>
+                    <img
+                      src={dark ? '/G3D.png' : '/G3L.png'}
+                      alt="smbx.ai"
+                      draggable={false}
+                      style={{ height: 64, objectFit: 'contain' }}
+                    />
+                  </div>
+                  <p className="font-body text-sm" style={{ color: dark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.18)', margin: 0, letterSpacing: '0.03em' }}>
+                    Ask Yulia to open a tool
                   </p>
                 </div>
               )}
