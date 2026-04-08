@@ -1329,6 +1329,12 @@ async function createSupportIssue(
 
 const ADMIN_EMAILS = ['pbaker@smbx.ai'];
 
+// Check if a table exists before querying
+async function tableExists(name: string): Promise<boolean> {
+  const [r] = await sql`SELECT to_regclass('public.' || ${name}) IS NOT NULL as exists`;
+  return r.exists;
+}
+
 async function queryAdminData(input: Record<string, any>, userId: number): Promise<string> {
   // Verify admin
   const [user] = await sql`SELECT email, role FROM users WHERE id = ${userId}`;
@@ -1338,25 +1344,24 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
 
   const { query, timeRange = '7d', limit = 20 } = input;
   const interval = { '24h': '24 hours', '7d': '7 days', '30d': '30 days', '90d': '90 days' }[timeRange] || '7 days';
+  const hasSubs = await tableExists('subscriptions');
 
   switch (query) {
     case 'metrics_overview': {
       const [users] = await sql`SELECT COUNT(*)::int as total FROM users`;
       const [active] = await sql`
         SELECT COUNT(DISTINCT user_id)::int as c FROM conversations
-        WHERE updated_at > NOW() - INTERVAL ${interval} AND user_id IS NOT NULL
+        WHERE updated_at > NOW() - ${interval}::interval AND user_id IS NOT NULL
       `;
       const [deals] = await sql`SELECT COUNT(*)::int as total FROM deals WHERE status = 'active'`;
-      const [mrr] = await sql`
-        SELECT COALESCE(SUM(CASE
-          WHEN plan = 'starter' THEN 4900 WHEN plan = 'professional' THEN 14900 WHEN plan = 'enterprise' THEN 99900 ELSE 0
-        END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')
-      `;
-      const [msgs] = await sql`SELECT COUNT(*)::int as c FROM messages WHERE created_at > NOW() - INTERVAL ${interval}`;
-      const [delivs] = await sql`SELECT COUNT(*)::int as c FROM deliverables WHERE created_at > NOW() - INTERVAL ${interval}`;
+      const [mrr] = hasSubs
+        ? await sql`SELECT COALESCE(SUM(CASE WHEN plan = 'starter' THEN 4900 WHEN plan = 'professional' THEN 14900 WHEN plan = 'enterprise' THEN 99900 ELSE 0 END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')`
+        : [{ mrr_cents: 0 }];
+      const [msgs] = await sql`SELECT COUNT(*)::int as c FROM messages WHERE created_at > NOW() - ${interval}::interval`;
+      const [delivs] = await sql`SELECT COUNT(*)::int as c FROM deliverables WHERE created_at > NOW() - ${interval}::interval`;
       const [errors] = await sql`
         SELECT COUNT(*)::int as c FROM support_issues WHERE type = 'system_error' AND created_at > NOW() - INTERVAL '24 hours'
-      `;
+      `.catch(() => [{ c: 0 }]);
       return JSON.stringify({
         totalUsers: users.total, activeUsers: active.c, activeDeals: deals.total,
         mrrCents: Number(mrr.mrr_cents), messages: msgs.c, deliverables: delivs.c,
@@ -1374,7 +1379,9 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
       `;
       const [withDeal] = await sql`SELECT COUNT(DISTINCT user_id)::int as c FROM deals`;
       const [withDeliv] = await sql`SELECT COUNT(DISTINCT user_id)::int as c FROM deliverables`;
-      const [withSub] = await sql`SELECT COUNT(DISTINCT user_id)::int as c FROM subscriptions WHERE status IN ('active', 'trialing')`;
+      const [withSub] = hasSubs
+        ? await sql`SELECT COUNT(DISTINCT user_id)::int as c FROM subscriptions WHERE status IN ('active', 'trialing')`
+        : [{ c: 0 }];
       return JSON.stringify({
         funnel: [
           { stage: 'Registered', count: total.c },
@@ -1406,25 +1413,23 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
     }
 
     case 'revenue_breakdown': {
-      const breakdown = await sql`
-        SELECT plan, status, COUNT(*)::int as count FROM subscriptions GROUP BY plan, status ORDER BY plan
-      `;
-      const [mrr] = await sql`
-        SELECT COALESCE(SUM(CASE
-          WHEN plan = 'starter' THEN 4900 WHEN plan = 'professional' THEN 14900 WHEN plan = 'enterprise' THEN 99900 ELSE 0
-        END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')
-      `;
+      const breakdown = hasSubs
+        ? await sql`SELECT plan, status, COUNT(*)::int as count FROM subscriptions GROUP BY plan, status ORDER BY plan`
+        : [];
+      const [mrr] = hasSubs
+        ? await sql`SELECT COALESCE(SUM(CASE WHEN plan = 'starter' THEN 4900 WHEN plan = 'professional' THEN 14900 WHEN plan = 'enterprise' THEN 99900 ELSE 0 END), 0)::bigint as mrr_cents FROM subscriptions WHERE status IN ('active', 'trialing')`
+        : [{ mrr_cents: 0 }];
       return JSON.stringify({ breakdown, mrrCents: Number(mrr.mrr_cents) });
     }
 
     case 'engagement_7d': {
-      const [msgs] = await sql`SELECT COUNT(*)::int as c FROM messages WHERE created_at > NOW() - INTERVAL ${interval}`;
-      const [delivs] = await sql`SELECT COUNT(*)::int as c FROM deliverables WHERE created_at > NOW() - INTERVAL ${interval}`;
+      const [msgs] = await sql`SELECT COUNT(*)::int as c FROM messages WHERE created_at > NOW() - ${interval}::interval`;
+      const [delivs] = await sql`SELECT COUNT(*)::int as c FROM deliverables WHERE created_at > NOW() - ${interval}::interval`;
       const events = await sql`
         SELECT event_type, COUNT(*)::int as c FROM analytics_events
-        WHERE created_at > NOW() - INTERVAL ${interval}
+        WHERE created_at > NOW() - ${interval}::interval
         GROUP BY event_type ORDER BY c DESC LIMIT 20
-      `;
+      `.catch(() => []);
       return JSON.stringify({ messages: msgs.c, deliverables: delivs.c, topEvents: events, timeRange });
     }
 
@@ -1479,7 +1484,7 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
                u.email as user_email
         FROM support_issues si
         LEFT JOIN users u ON u.id = si.user_id
-        WHERE si.type = 'system_error' AND si.created_at > NOW() - INTERVAL ${interval}
+        WHERE si.type = 'system_error' AND si.created_at > NOW() - ${interval}::interval
         ORDER BY si.created_at DESC LIMIT ${limit}
       `;
       return JSON.stringify({ errors, timeRange });
@@ -1488,7 +1493,7 @@ async function queryAdminData(input: Record<string, any>, userId: number): Promi
     case 'user_growth': {
       const growth = await sql`
         SELECT DATE_TRUNC('day', created_at)::date as day, COUNT(*)::int as signups
-        FROM users WHERE created_at > NOW() - INTERVAL ${interval}
+        FROM users WHERE created_at > NOW() - ${interval}::interval
         GROUP BY day ORDER BY day
       `;
       const [total] = await sql`SELECT COUNT(*)::int as c FROM users`;
