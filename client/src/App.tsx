@@ -85,6 +85,7 @@ export default function App() {
           navigate('/chat');
         } catch (err: any) {
           console.error('Google login error:', err.message);
+          setGoogleError(err.message || 'Google sign-in failed. Please try email/password.');
         }
       },
     });
