@@ -145,14 +145,16 @@ After Phase 2: Yulia responds, files persist, emails send, Google sign-in works,
    STRIPE_PUBLISHABLE_KEY=pk_live_xxxxx
    STRIPE_WEBHOOK_SECRET=whsec_xxxxx
    ```
-6. **Turn off TEST_MODE:**
+6. **Turn off TEST_MODE and enable scheduled jobs:**
    ```
    TEST_MODE=false
+   ENABLE_SCHEDULED_JOBS=true
    ```
+   This enables: daily thesis scans, aggregator scans, website enrichment batches, portfolio refresh, FRED rate monitoring, freshness scans, and valuation refresh. These are disabled pre-launch to avoid burning API credits.
 7. Redeploy
 8. **Test:** Trigger a paywall → Stripe checkout loads → test with a real card
 
-**Result:** Users hit the paywall after their 90-day trial expires (or on premium features if trial is expired). Stripe handles billing, upgrades, cancellations.
+**Result:** Users hit the paywall after their 90-day trial expires (or on premium features if trial is expired). Stripe handles billing, upgrades, cancellations. Background intelligence jobs run on schedule.
 
 ### Google Places API (Sourcing Enhancement)
 
@@ -207,6 +209,7 @@ Not required for launch. Enhances market intelligence with demographic data.
 | `STRIPE_PUBLISHABLE_KEY` | Client payments | ⚠️ Test key set |
 | `STRIPE_WEBHOOK_SECRET` | Webhook verification | ⚠️ Check |
 | `TEST_MODE` | Bypass paywalls | ✅ `true` (switch to `false` at go-live) |
+| `ENABLE_SCHEDULED_JOBS` | Worker cron jobs (thesis scans, enrichment, aggregator, portfolio refresh) | ❌ `false` — set to `true` at go-live |
 
 ### Optional (enhance but don't block)
 | Variable | Purpose | Status |

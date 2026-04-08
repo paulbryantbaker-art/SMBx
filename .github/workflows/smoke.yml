@@ -1,5 +1,7 @@
 name: Smoke Tests
-on: [push, pull_request]
+# Disabled: e2e tests require a running server + database + API keys.
+# Re-enable when CI environment is configured with test database and secrets.
+on: workflow_dispatch
 
 jobs:
   test:
@@ -8,7 +10,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: npm
       - run: npm ci
       - run: npx playwright install chromium
