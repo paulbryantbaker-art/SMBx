@@ -59,7 +59,7 @@ export default function App() {
   const [location, navigate] = useLocation();
 
   const [googleError, setGoogleError] = useState('');
-  const googleInitRef = React.useRef(false);
+  const googleInitRef = useRef(false);
 
   const handleGoogleLogin = useCallback(() => {
     const clientId = (window as any).__GOOGLE_CLIENT_ID;
