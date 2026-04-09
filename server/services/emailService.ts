@@ -35,9 +35,13 @@ export function brandedEmail({ headline, body, ctaLabel, ctaUrl, footnote }: {
   footnote?: string;
 }): string {
   const cta = ctaLabel && ctaUrl ? `
-    <a class="email-cta" href="${ctaUrl}" style="display:inline-block;background:#1A1C1E;color:#fff;padding:16px 36px;border-radius:100px;text-decoration:none;font-weight:700;font-size:16px;font-family:'Inter',system-ui,sans-serif;margin:28px 0 8px;letter-spacing:-0.01em;">
-      ${ctaLabel}
-    </a>` : '';
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 8px;">
+      <tr><td style="background:#1A1C1E;border-radius:100px;">
+        <a href="${ctaUrl}" target="_blank" style="display:inline-block;background:#1A1C1E;color:#ffffff;padding:16px 36px;border-radius:100px;text-decoration:none;font-weight:700;font-size:16px;font-family:'Inter',system-ui,sans-serif;letter-spacing:-0.01em;mso-padding-alt:0;text-underline-color:#1A1C1E;">
+          ${ctaLabel}
+        </a>
+      </td></tr>
+    </table>` : '';
 
   const foot = footnote ? `
     <p class="email-footnote" style="color:#A9A49C;font-size:13px;line-height:1.5;margin:28px 0 0;font-family:'Inter',system-ui,sans-serif;">
