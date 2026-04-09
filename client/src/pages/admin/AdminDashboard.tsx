@@ -16,9 +16,13 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 ];
 
 export default function AdminDashboard() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [, navigate] = useLocation();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
+
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-dvh bg-[#F8F6F2]"><p className="text-[#9CA3AF]">Loading...</p></div>;
+  }
 
   if (!user || (user.role !== 'admin' && user.email !== 'pbaker@smbx.ai')) {
     navigate('/chat');
