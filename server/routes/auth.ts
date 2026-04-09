@@ -318,12 +318,16 @@ authRouter.post('/send-verification', requireAuth, async (req, res) => {
 
     const sent = await sendEmail({
       to: user.email,
-      subject: 'Verify your email — smbx.ai',
+      subject: 'Quick confirmation — then we\'re good',
       html: brandedEmail({
         headline: 'Confirm your email.',
-        body: '<p style="margin:0;">Hey there, it\'s me, Yulia from smbx.ai! Just confirming your email. Click the link below, and you\'ll be good to go!</p>',
-        ctaLabel: 'Verify Email',
+        body: `
+          <p style="margin:0 0 14px;">Hey, it's Yulia from smbx.ai. Just making sure this is actually you (and not someone's cat walking across the keyboard).</p>
+          <p style="margin:0;">One click and we're set.</p>
+        `,
+        ctaLabel: 'Confirm My Email',
         ctaUrl: verifyUrl,
+        footnote: 'If you didn\'t create an smbx.ai account, you can safely ignore this. No harm done.',
       }),
     });
     console.log(`[auth] Verification email to ${user.email}: ${sent ? 'sent' : 'FAILED (check RESEND_API_KEY)'}`);
