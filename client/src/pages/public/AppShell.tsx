@@ -1092,13 +1092,21 @@ export default function AppShell() {
     <aside
       className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950 border-r border-zinc-800/50' : 'bg-white border-r border-[#eeeef0] shadow-sm'}`}
     >
-      {/* Logo — X mark (everywhere except home page) */}
-      {!(viewState === 'landing' && activeTab === 'home') && (
+      {/* Logo — X mark */}
+      {!(viewState === 'landing' && activeTab === 'home' && !user) && (
         <div className="flex flex-col items-center mb-3" ref={sidebarLogoRef as any}>
           <button
-            onClick={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); setCanvasTabs([]); setActiveCanvasTabId(null); }}
+            onClick={() => {
+              if (user) {
+                // Logged in: go to chat workspace
+                setViewState('chat'); navigate('/chat');
+              } else {
+                // Logged out: go to marketing home
+                setViewState('landing'); setActiveTab('home'); navigate('/'); setCanvasTabs([]); setActiveCanvasTabId(null);
+              }
+            }}
             className="sidebar-x-btn border-0 bg-transparent cursor-pointer p-1 rounded-xl"
-            title="Home"
+            title={user ? 'Chat' : 'Home'}
             type="button"
           >
             <img src="/x.png?v=2" alt="smbx.ai" width={42} height={42} className="sidebar-x-img" style={{ display: 'block' }} />
@@ -1106,7 +1114,9 @@ export default function AppShell() {
         </div>
       )}
 
-      {/* Explore section */}
+      {/* Explore section — marketing pages, hidden when logged in */}
+      {!user && (
+      <>
       <div className="flex flex-col items-center gap-1 w-full px-2">
         <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Explore</span>
         {([
@@ -1140,6 +1150,8 @@ export default function AppShell() {
 
       {/* Divider */}
       <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`} />
+      </>
+      )}
 
       {/* Tools section — logged-in user features */}
       {user && (
@@ -1776,6 +1788,9 @@ export default function AppShell() {
               <span className="material-symbols-outlined text-[24px]">close</span>
             </button>
             <LogoIcon height={40} className="mb-6" />
+            {/* Explore — marketing pages, hidden when logged in */}
+            {!user && (
+            <>
             <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-4 ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Explore</span>
             {([
               { id: 'home' as TabId, icon: 'home', label: 'Home' },
@@ -1804,17 +1819,40 @@ export default function AppShell() {
                 </button>
               );
             })}
-            <div className="mt-auto flex flex-col gap-2">
-              {user && (
+            </>
+            )}
+            {/* Workspace tools — shown when logged in */}
+            {user && (
+            <>
+            <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-4 ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Workspace</span>
+            {([
+              { action: 'chat', icon: 'forum', label: 'Chat' },
+              { action: 'new-chat', icon: 'add_comment', label: 'New Chat' },
+              { action: 'library', icon: 'folder_open', label: 'Library' },
+              { action: 'dataroom', icon: 'lock', label: 'Data Room' },
+              { action: 'pipeline', icon: 'view_kanban', label: 'Pipeline' },
+              { action: 'sourcing', icon: 'search', label: 'Sourcing' },
+            ]).map(item => (
               <button
-                onClick={() => { setIsMobileSidebarOpen(false); handleNewChat(); }}
-                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5'}`}
+                key={item.action}
+                onClick={() => {
+                  setIsMobileSidebarOpen(false);
+                  if (item.action === 'chat') { setViewState('chat'); navigate('/chat'); }
+                  else if (item.action === 'new-chat') { handleNewChat(); }
+                  else { openCanvasTab(item.action === 'library' ? 'documents' : item.action, item.label); }
+                }}
+                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${
+                  dark ? 'text-zinc-400 hover:text-white bg-transparent' : 'text-[#636467] hover:text-[#1a1c1e] bg-transparent'
+                }`}
                 type="button"
               >
-                <span className="material-symbols-outlined text-[20px]">add_comment</span>
-                New Chat
+                <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                {item.label}
               </button>
-              )}
+            ))}
+            </>
+            )}
+            <div className="mt-auto flex flex-col gap-2">
               {/* Admin Console — visible only to admins */}
               {user && (user.role === 'admin' || user.email === 'pbaker@smbx.ai') && (
               <button
