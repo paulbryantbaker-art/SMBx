@@ -8,12 +8,17 @@ let resendClient: any = null;
 
 async function getResend() {
   if (resendClient) return resendClient;
-  if (!process.env.RESEND_API_KEY) return null;
+  if (!process.env.RESEND_API_KEY) {
+    console.log('[email] RESEND_API_KEY not set');
+    return null;
+  }
   try {
     const { Resend } = await import('resend');
     resendClient = new Resend(process.env.RESEND_API_KEY);
+    console.log('[email] Resend client initialized');
     return resendClient;
-  } catch {
+  } catch (err: any) {
+    console.error('[email] Failed to import resend:', err.message);
     return null;
   }
 }
