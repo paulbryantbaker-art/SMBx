@@ -96,7 +96,7 @@ function LogoHero({ height = 120, className, dark }: { height?: number; classNam
 function LogoIcon({ height = 28, className, style, dark }: { height?: number; className?: string; style?: React.CSSProperties; dark?: boolean }) {
   return (
     <img
-      src={dark ? '/White X.png' : '/X.png'}
+      src={dark ? '/X-white.png' : '/X.png'}
       alt="smbx.ai"
       draggable={false}
       className={className}
@@ -1109,7 +1109,7 @@ export default function AppShell() {
             title={user ? 'Chat' : 'Home'}
             type="button"
           >
-            <img src={dark ? '/White X.png' : '/X.png'} alt="smbx.ai" width={42} height={42} className="sidebar-x-img" style={{ display: 'block' }} />
+            <img src={dark ? '/X-white.png' : '/X.png'} alt="smbx.ai" width={42} height={42} className="sidebar-x-img" style={{ display: 'block' }} />
           </button>
         </div>
       )}
@@ -1193,7 +1193,7 @@ export default function AppShell() {
         {user && (
         <button
           onClick={() => { handleNewChat(); }}
-          className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5'}`}
+          className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer active:scale-95 transition-all ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5'}`}
           title="New Chat"
           type="button"
         >
@@ -1617,7 +1617,7 @@ export default function AppShell() {
             <div style={{
               position: 'absolute',
               top: 0, bottom: 0, left: 2,
-              width: 2, background: 'rgba(0,0,0,0.08)',
+              width: 2, background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
               borderRadius: 1,
               transition: 'background 0.15s ease',
             }} />
@@ -1630,7 +1630,7 @@ export default function AppShell() {
             className="flex min-w-0"
             style={{
               flex: 1,
-              background: canvasTabs.length > 0 ? '#fff' : '#EDEDEA',
+              background: canvasTabs.length > 0 ? (dark ? '#1A1C1E' : '#fff') : (dark ? '#151617' : '#EDEDEA'),
               position: 'relative',
             }}
           >
@@ -1677,18 +1677,18 @@ export default function AppShell() {
 
         {/* ════ MOBILE CANVAS OVERLAY ════ */}
         {canvasTabs.length > 0 && isMobile && (
-          <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ animation: 'slideUpIn 0.3s ease', overscrollBehavior: 'contain', touchAction: 'manipulation' }}>
+          <div className={`fixed inset-0 z-50 flex flex-col ${dark ? 'bg-[#1A1C1E]' : 'bg-white'}`} style={{ animation: 'slideUpIn 0.3s ease', overscrollBehavior: 'contain', touchAction: 'manipulation' }}>
             {/* Mobile tab pills — pl-14 clears the floating hamburger button */}
-            <div className="shrink-0 flex items-center justify-between pl-14 pr-3 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+            <div className="shrink-0 flex items-center justify-between pl-14 pr-3 py-2.5" style={{ borderBottom: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}>
               <div className="flex items-center gap-1.5 overflow-x-auto flex-1 mr-2">
                 {canvasTabs.map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveCanvasTabId(tab.id)}
-                    className={`canvas-tab-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
+                    className={`canvas-tab-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer active:scale-95 ${
                       tab.id === activeCanvasTabId
-                        ? 'bg-[#D44A78] text-white border-[#D44A78]'
-                        : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)]'
+                        ? (dark ? 'bg-white text-[#1A1C1E] border-white' : 'bg-[#1A1C1E] text-white border-[#1A1C1E]')
+                        : (dark ? 'bg-transparent text-[#A0A0A0] border-[rgba(255,255,255,0.1)]' : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)]')
                     }`}
                   >
                     {tab.label}
@@ -1697,7 +1697,7 @@ export default function AppShell() {
               </div>
               <button
                 onClick={() => { if (activeCanvasTab) closeCanvasTab(activeCanvasTab.id); }}
-                className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-0 bg-transparent text-[#6E6A63] cursor-pointer"
+                className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-0 bg-transparent cursor-pointer active:scale-90 ${dark ? 'text-[#A0A0A0]' : 'text-[#6E6A63]'}`}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
@@ -1761,7 +1761,14 @@ export default function AppShell() {
         }
         .resize-handle:hover > div,
         .resize-handle:active > div {
-          background: rgba(0,0,0,0.2) !important;
+          background: rgba(128,128,128,0.3) !important;
+        }
+        /* Tactile press feedback on all buttons */
+        button:active:not(:disabled) {
+          transform: scale(0.97);
+        }
+        button {
+          transition: transform 0.1s ease, background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
         }
       `}</style>
 

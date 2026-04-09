@@ -87,7 +87,7 @@ export default function CanvasTabBar({ tabs, activeTabId, onSelect, onClose, dar
                 background: isActive
                   ? (dark ? '#1A1C1E' : '#FFFFFF')
                   : 'transparent',
-                borderTop: isActive ? '2px solid #D44A78' : '2px solid transparent',
+                borderTop: isActive ? `2px solid ${dark ? '#F0F0F3' : '#1A1C1E'}` : '2px solid transparent',
                 borderRight: `1px solid ${dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)'}`,
                 borderRadius: isActive ? '6px 6px 0 0' : 0,
                 marginBottom: isActive ? -1 : 0,
@@ -105,7 +105,7 @@ export default function CanvasTabBar({ tabs, activeTabId, onSelect, onClose, dar
               }}
             >
               {/* Icon */}
-              <span className={`shrink-0 ${isActive ? 'text-[#D44A78]' : dark ? 'text-[#6E6A63]' : 'text-[#A9A49C]'}`}>
+              <span className={`shrink-0 ${isActive ? (dark ? 'text-[#F0F0F3]' : 'text-[#1A1C1E]') : dark ? 'text-[#6E6A63]' : 'text-[#A9A49C]'}`}>
                 <TabIcon type={tab.type} />
               </span>
 
@@ -131,8 +131,8 @@ export default function CanvasTabBar({ tabs, activeTabId, onSelect, onClose, dar
                   onClick={e => { e.stopPropagation(); onClose(tab.id); }}
                   className={`shrink-0 w-4 h-4 rounded flex items-center justify-center border-0 cursor-pointer transition-all ${
                     isActive
-                      ? 'opacity-60 hover:opacity-100 hover:bg-[rgba(0,0,0,0.08)]'
-                      : 'opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:bg-[rgba(0,0,0,0.08)]'
+                      ? `opacity-60 hover:opacity-100 hover:bg-[${dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}]`
+                      : `opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:bg-[${dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}]`
                   }`}
                   style={{ background: 'transparent', padding: 0 }}
                 >

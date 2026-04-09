@@ -34,7 +34,7 @@
         // Favicon: dark X for light mode, white X for dark mode
         function setFavicon(dark) {
           var link = document.querySelector('link[rel="icon"]');
-          if (link) link.href = dark ? '/White X.png' : '/X.png';
+          if (link) link.href = dark ? '/X-white.png' : '/X.png';
         }
         setFavicon(isDark);
         window.__setFavicon = setFavicon;
