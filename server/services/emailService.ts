@@ -19,7 +19,7 @@ async function getResend() {
 }
 
 const FROM_EMAIL = process.env.EMAIL_FROM || 'SMBx <notifications@smbx.ai>';
-const BASE_URL = process.env.BASE_URL || 'https://app.smbx.ai';
+const BASE_URL = process.env.APP_URL || process.env.BASE_URL || 'https://smbx.ai';
 
 /**
  * Send an email. Falls back to console.log if Resend is not configured.

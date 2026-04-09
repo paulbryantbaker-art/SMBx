@@ -321,9 +321,9 @@ authRouter.post('/send-verification', requireAuth, async (req, res) => {
       `;
     });
 
-    const verifyUrl = `${process.env.BASE_URL || 'https://app.smbx.ai'}/verify-email?token=${token}`;
+    const verifyUrl = `${process.env.APP_URL || process.env.BASE_URL || 'https://smbx.ai'}/verify-email?token=${token}`;
 
-    await sendEmail({
+    const sent = await sendEmail({
       to: user.email,
       subject: 'Verify your email — SMBx',
       html: `
@@ -338,6 +338,7 @@ authRouter.post('/send-verification', requireAuth, async (req, res) => {
         </div>
       `,
     });
+    console.log(`[auth] Verification email to ${user.email}: ${sent ? 'sent' : 'FAILED (check RESEND_API_KEY)'}`);
 
     return res.json({ ok: true });
   } catch (err: any) {
