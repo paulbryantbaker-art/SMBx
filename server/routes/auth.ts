@@ -195,9 +195,9 @@ authRouter.post('/forgot-password', async (req, res) => {
     // Always return success to prevent email enumeration
     if (!user) return res.json({ ok: true });
 
-    // Google-only accounts can't reset password
-    const [fullUser] = await sql`SELECT password, google_id FROM users WHERE id = ${user.id}`;
-    if (!fullUser.password && fullUser.google_id) return res.json({ ok: true });
+    // Google-only accounts (no password set) can't reset password
+    const [fullUser] = await sql`SELECT password FROM users WHERE id = ${user.id}`;
+    if (!fullUser.password) return res.json({ ok: true });
 
     // Generate a secure reset token (valid 1 hour)
     const token = crypto.randomBytes(32).toString('hex');
@@ -224,9 +224,9 @@ authRouter.post('/forgot-password', async (req, res) => {
       `;
     });
 
-    const resetUrl = `${process.env.BASE_URL || 'https://app.smbx.ai'}/reset-password/${token}`;
+    const resetUrl = `${process.env.APP_URL || process.env.BASE_URL || 'https://smbx.ai'}/reset-password/${token}`;
 
-    await sendEmail({
+    const sent = await sendEmail({
       to: user.email,
       subject: 'Reset your password — SMBx',
       html: `
@@ -244,6 +244,7 @@ authRouter.post('/forgot-password', async (req, res) => {
         </div>
       `,
     });
+    console.log(`[auth] Password reset email to ${user.email}: ${sent ? 'sent' : 'FAILED (check RESEND_API_KEY)'}`);
 
     return res.json({ ok: true });
   } catch (err: any) {
