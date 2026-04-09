@@ -79,18 +79,18 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
         {/* ═══ 1. HERO + 7 MISTAKES ═══ */}
         <section className="mb-24">
           <ScrollReveal>
-            <div className="flex items-center justify-center gap-2 mb-8">
+            <div className="flex items-center gap-2 mb-8">
               <span className="inline-block px-3 py-1 bg-[#D44A78]/10 text-[#D44A78] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Integrate</span>
               <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-[#2f3133] text-[#dadadc]/80' : 'bg-[#f3f3f6] text-[#5d5e61]'}`}>Post-Acquisition</span>
             </div>
           </ScrollReveal>
 
           <ScrollReveal y={40} delay={0.1}>
-            <div className="text-center max-w-3xl mx-auto mb-8">
-              <h1 className="font-headline font-black text-5xl md:text-7xl tracking-tighter leading-[0.9] mb-8">
+            <div className="mb-8">
+              <h1 className="font-headline font-black text-5xl md:text-7xl tracking-tighter leading-[0.9] mb-8 max-w-4xl">
                 The 7 mistakes that destroy post-acquisition value.
               </h1>
-              <p className={`text-xl editorial ${dc.muted}`}>
+              <p className={`text-xl editorial max-w-2xl ${dc.muted}`}>
                 The deal closed. The wire hit. Now what? Most buyers wing it. They change too much too fast, cut costs before understanding them, and lose their best employees in month one. Here's the playbook that prevents all of it.
               </p>
             </div>

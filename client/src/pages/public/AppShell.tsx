@@ -1092,8 +1092,8 @@ export default function AppShell() {
     <aside
       className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950 border-r border-zinc-800/50' : 'bg-white border-r border-[#eeeef0] shadow-sm'}`}
     >
-      {/* Logo — X mark */}
-      {!(viewState === 'landing' && activeTab === 'home' && !user) && (
+      {/* Logo — X mark (always visible for logged-in users, hidden on home for logged-out) */}
+      {(user || !(viewState === 'landing' && activeTab === 'home')) && (
         <div className="flex flex-col items-center mb-3" ref={sidebarLogoRef as any}>
           <button
             onClick={() => {

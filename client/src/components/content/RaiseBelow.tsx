@@ -65,21 +65,21 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
         {/* ═══ 1. HERO + DILUTION SHOCK ═══ */}
-        <section className="mb-24 max-w-3xl mx-auto text-center">
+        <section className="mb-24">
           <ScrollReveal>
-            <div className="flex items-center justify-center gap-2 mb-8">
+            <div className="flex items-center gap-2 mb-8">
               <span className="inline-block px-3 py-1 bg-[#D44A78]/10 text-[#D44A78] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Raise</span>
               <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-[#2f3133] text-[#dadadc]/80' : 'bg-[#f3f3f6] text-[#5d5e61]'}`}>Capital</span>
             </div>
           </ScrollReveal>
           <ScrollReveal y={40} delay={0.1}>
-            <h1 className="font-headline font-black text-5xl md:text-7xl tracking-tighter leading-[0.9] mb-8">
+            <h1 className="font-headline font-black text-5xl md:text-7xl tracking-tighter leading-[0.9] mb-8 max-w-4xl">
               83% ownership doesn't mean{' '}
               <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>83% of the money.</span>
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
-            <div className={`space-y-6 text-xl editorial max-w-2xl mx-auto text-left ${dc.muted}`}>
+            <div className={`space-y-6 text-xl editorial max-w-2xl ${dc.muted}`}>
               <p>
                 You raise $2M at a $10M pre-money. You own 83%. You think that means 83% of the exit. It doesn't. After 1x liquidation preferences (the investor gets paid first), at a $5M exit you get 50% — not 83%. At $20M you get 75%. The preferences eat your upside at every exit below $50M.
               </p>
