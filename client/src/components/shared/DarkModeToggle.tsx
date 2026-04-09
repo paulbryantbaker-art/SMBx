@@ -81,6 +81,8 @@ export function useDarkMode() {
     setPref(newPref);
     setDarkResolved(wantDark);
     localStorage.setItem(STORAGE_KEY, newPref);
+    // Swap favicon for dark/light mode
+    if ((window as any).__setFavicon) (window as any).__setFavicon(wantDark);
   }, []);
 
   return [dark, setDark] as const;

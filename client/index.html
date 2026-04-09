@@ -31,6 +31,16 @@
           var metas = document.querySelectorAll('meta[name="theme-color"]');
           metas.forEach(function(m) { m.setAttribute('content', color); });
         }
+        // Favicon: dark X for light mode, white X for dark mode
+        function setFavicon(dark) {
+          var link = document.querySelector('link[rel="icon"]');
+          if (link) link.href = dark ? '/White X.png' : '/X.png';
+        }
+        setFavicon(isDark);
+        window.__setFavicon = setFavicon;
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+          if (!localStorage.getItem('smbx-theme')) setFavicon(e.matches);
+        });
       })();
     </script>
     <link rel="icon" type="image/png" href="/X.png" />
