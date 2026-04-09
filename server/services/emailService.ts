@@ -35,37 +35,55 @@ export function brandedEmail({ headline, body, ctaLabel, ctaUrl, footnote }: {
   footnote?: string;
 }): string {
   const cta = ctaLabel && ctaUrl ? `
-    <a href="${ctaUrl}" style="display:inline-block;background:#1A1C1E;color:#fff;padding:14px 32px;border-radius:100px;text-decoration:none;font-weight:700;font-size:15px;font-family:'Inter',system-ui,sans-serif;margin:24px 0 8px;letter-spacing:-0.01em;">
+    <a class="email-cta" href="${ctaUrl}" style="display:inline-block;background:#1A1C1E;color:#fff;padding:16px 36px;border-radius:100px;text-decoration:none;font-weight:700;font-size:16px;font-family:'Inter',system-ui,sans-serif;margin:28px 0 8px;letter-spacing:-0.01em;">
       ${ctaLabel}
     </a>` : '';
 
   const foot = footnote ? `
-    <p style="color:#A9A49C;font-size:12px;line-height:1.5;margin:24px 0 0;font-family:'Inter',system-ui,sans-serif;">
+    <p class="email-footnote" style="color:#A9A49C;font-size:13px;line-height:1.5;margin:28px 0 0;font-family:'Inter',system-ui,sans-serif;">
       ${footnote}
     </p>` : '';
 
   return `
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#EDEDEA;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EDEDEA;">
-    <tr><td align="center" style="padding:40px 16px;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#F8F6F2;border-radius:16px;overflow:hidden;">
-        <!-- Rose accent stripe -->
-        <tr><td style="height:4px;background:#D44A78;"></td></tr>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .email-body { background-color: #151617 !important; }
+      .email-card { background-color: #1A1C1E !important; }
+      .email-headline { color: #F0F0F3 !important; }
+      .email-text { color: #A0A0A0 !important; }
+      .email-cta { background-color: #F0F0F3 !important; color: #1A1C1E !important; }
+      .email-footer { border-top-color: rgba(255,255,255,0.06) !important; }
+      .email-footer-text { color: #636467 !important; }
+      .email-footnote { color: #636467 !important; }
+    }
+  </style>
+</head>
+<body class="email-body" style="margin:0;padding:0;background:#F8F6F2;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-text-size-adjust:100%;">
+  <!-- Full-bleed rose accent stripe -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="height:4px;background:#D44A78;"></td></tr></table>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:0;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
 
         <!-- Logo -->
-        <tr><td style="padding:32px 40px 0;">
-          <img src="${BASE_URL}/G3L.png" alt="smbx.ai" height="28" style="height:28px;display:block;" />
+        <tr><td style="padding:40px 32px 0;">
+          <img src="https://smbx.ai/G3L.png" alt="smbx.ai" height="32" width="140" style="height:32px;width:auto;display:block;" />
         </td></tr>
 
         <!-- Content -->
-        <tr><td style="padding:28px 40px 36px;">
-          <h1 style="font-family:'Inter',system-ui,sans-serif;font-weight:800;font-size:24px;color:#1A1C1E;margin:0 0 16px;line-height:1.2;letter-spacing:-0.03em;">
+        <tr><td style="padding:32px 32px 44px;">
+          <h1 class="email-headline" style="font-family:'Inter',system-ui,sans-serif;font-weight:800;font-size:28px;color:#1A1C1E;margin:0 0 20px;line-height:1.15;letter-spacing:-0.03em;">
             ${headline}
           </h1>
-          <div style="font-family:'Inter',system-ui,sans-serif;font-size:15px;color:#5D5E61;line-height:1.65;">
+          <div class="email-text" style="font-family:'Inter',system-ui,sans-serif;font-size:16px;color:#5D5E61;line-height:1.7;">
             ${body}
           </div>
           ${cta}
@@ -73,16 +91,25 @@ export function brandedEmail({ headline, body, ctaLabel, ctaUrl, footnote }: {
         </td></tr>
 
         <!-- Footer -->
-        <tr><td style="padding:20px 40px;border-top:1px solid rgba(0,0,0,0.06);">
-          <p style="font-family:'Inter',system-ui,sans-serif;font-size:11px;color:#A9A49C;margin:0;letter-spacing:0.03em;">
-            smbx.ai &middot; AI Deal Intelligence
-          </p>
+        <tr><td class="email-footer" style="padding:24px 32px;border-top:1px solid rgba(0,0,0,0.06);">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+            <td>
+              <img src="https://smbx.ai/G3L.png" alt="smbx.ai" height="18" width="80" style="height:18px;width:auto;display:block;opacity:0.4;" />
+            </td>
+            <td align="right">
+              <p class="email-footer-text" style="font-family:'Inter',system-ui,sans-serif;font-size:11px;color:#A9A49C;margin:0;letter-spacing:0.03em;">
+                AI Deal Intelligence
+              </p>
+            </td>
+          </tr></table>
         </td></tr>
+
       </table>
     </td></tr>
   </table>
 </body>
 </html>`;
+}
 }
 
 /**
