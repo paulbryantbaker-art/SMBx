@@ -1668,8 +1668,8 @@ export default function AppShell() {
         {/* ════ MOBILE CANVAS OVERLAY ════ */}
         {canvasTabs.length > 0 && isMobile && (
           <div className="fixed inset-0 z-50 bg-white flex flex-col" style={{ animation: 'slideUpIn 0.3s ease', overscrollBehavior: 'contain', touchAction: 'manipulation' }}>
-            {/* Mobile tab pills */}
-            <div className="shrink-0 flex items-center justify-between px-3 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+            {/* Mobile tab pills — pl-14 clears the floating hamburger button */}
+            <div className="shrink-0 flex items-center justify-between pl-14 pr-3 py-2.5" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
               <div className="flex items-center gap-1.5 overflow-x-auto flex-1 mr-2">
                 {canvasTabs.map(tab => (
                   <button
@@ -1766,7 +1766,7 @@ export default function AppShell() {
           />
           {/* Drawer */}
           <nav
-            className={`fixed top-0 left-0 bottom-0 z-[61] w-64 flex flex-col py-12 px-6 ${dark ? 'bg-[#1a1c1e] border-r border-zinc-800' : 'bg-white border-r border-[#eeeef0] shadow-xl'}`}
+            className={`fixed top-0 left-0 bottom-0 z-[61] w-64 flex flex-col py-12 px-6 overflow-y-auto ${dark ? 'bg-[#1a1c1e] border-r border-zinc-800' : 'bg-white border-r border-[#eeeef0] shadow-xl'}`}
             style={{ animation: 'slideInLeft 0.25s ease' }}
           >
             <button
