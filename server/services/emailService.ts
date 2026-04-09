@@ -110,7 +110,6 @@ export function brandedEmail({ headline, body, ctaLabel, ctaUrl, footnote }: {
 </body>
 </html>`;
 }
-}
 
 /**
  * Send an email. Falls back to console.log if Resend is not configured.
