@@ -29,6 +29,48 @@ function PageLoader() {
   );
 }
 
+function VerifyEmail({ onDone }: { onDone: () => void }) {
+  const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
+  const [msg, setMsg] = useState('');
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get('token');
+    if (!token) { setStatus('error'); setMsg('No verification token found.'); return; }
+    fetch('/api/auth/verify-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    }).then(async r => {
+      if (r.ok) { setStatus('success'); setTimeout(onDone, 2000); }
+      else { const d = await r.json().catch(() => ({})); setStatus('error'); setMsg(d.error || 'Verification failed.'); }
+    }).catch(() => { setStatus('error'); setMsg('Network error.'); });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <div className="flex justify-center items-center min-h-dvh bg-[#F8F6F2] px-5">
+      <div className="w-full max-w-[400px] bg-white rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.06)] text-center">
+        {status === 'verifying' && <p className="text-sm text-[#5D5E61] m-0">Verifying your email...</p>}
+        {status === 'success' && (
+          <>
+            <div className="w-12 h-12 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mx-auto mb-4">
+              <span className="material-symbols-outlined text-green-600 text-2xl">check</span>
+            </div>
+            <p className="text-base font-semibold text-[#0D0D0D] m-0 mb-1">Email verified</p>
+            <p className="text-sm text-[#5D5E61] m-0">Redirecting you now...</p>
+          </>
+        )}
+        {status === 'error' && (
+          <>
+            <div className="w-12 h-12 rounded-full bg-red-50 border border-red-200 flex items-center justify-center mx-auto mb-4">
+              <span className="material-symbols-outlined text-red-500 text-2xl">close</span>
+            </div>
+            <p className="text-base font-semibold text-[#0D0D0D] m-0 mb-1">Verification failed</p>
+            <p className="text-sm text-[#5D5E61] m-0">{msg}</p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 import AppShell from './pages/public/AppShell';
 import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
@@ -237,6 +279,9 @@ export default function App() {
             onNavigateLogin={() => navigate('/login')}
           />
         )}
+      </Route>
+      <Route path="/verify-email">
+        <VerifyEmail onDone={() => navigate(user ? '/chat' : '/login')} />
       </Route>
       <Route path="/forgot-password">
         {user ? (
