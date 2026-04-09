@@ -40,7 +40,7 @@ export default function AdminDashboard() {
           title="Back to Chat"
           type="button"
         >
-          <img src="/x.png?v=2" alt="smbx.ai" width={42} height={42} className="sidebar-x-img" style={{ display: 'block' }} />
+          <img src="/X.png" alt="smbx.ai" width={42} height={42} className="sidebar-x-img" style={{ display: 'block' }} />
         </button>
 
         <span className="text-[9px] font-bold uppercase tracking-widest text-[#5a4044] mb-3">Admin</span>
@@ -85,7 +85,7 @@ export default function AdminDashboard() {
           className="shrink-0 mr-1 border-0 bg-transparent cursor-pointer p-0"
           type="button"
         >
-          <img src="/x.png?v=2" alt="smbx.ai" className="w-7 h-7" style={{ display: 'block' }} />
+          <img src="/X.png" alt="smbx.ai" className="w-7 h-7" style={{ display: 'block' }} />
         </button>
         {TABS.map(tab => (
           <button
