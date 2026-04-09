@@ -24,32 +24,43 @@ interface UsageTotals {
   total_queries: number;
 }
 
-interface BenchmarkStats {
-  naics_code: string;
-  industry: string;
-  sample_size: number;
-  avg_multiple: number;
-  median_multiple: number;
-  avg_days_to_close: number;
+interface Subscription {
+  plan: string;
+  status: string;
+  current_period_end: string | null;
+  trial_end: string | null;
+}
+
+function formatNumber(val: number | null): string {
+  if (!val) return '0';
+  if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
+  if (val >= 1000) return `${(val / 1000).toFixed(1)}K`;
+  return val.toLocaleString();
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#5D5E61] m-0 mb-3">{children}</h3>;
+}
+
+function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return <div className={`bg-white rounded-2xl border border-[rgba(0,0,0,0.06)] p-5 ${className}`}>{children}</div>;
 }
 
 export default function SettingsPanel({ user, onLogout, isFullscreen }: SettingsPanelProps) {
-  const [tab, setTab] = useState<'account' | 'usage' | 'benchmarks'>('account');
   const [verificationSent, setVerificationSent] = useState(false);
   const [sendingVerification, setSendingVerification] = useState(false);
 
   const [usageDaily, setUsageDaily] = useState<UsageDay[]>([]);
   const [usageTotals, setUsageTotals] = useState<UsageTotals | null>(null);
   const [usageLoading, setUsageLoading] = useState(true);
-  const [usageDays, setUsageDays] = useState(30);
 
-  const [benchmarks, setBenchmarks] = useState<BenchmarkStats[]>([]);
-  const [benchLoading, setBenchLoading] = useState(true);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [subLoading, setSubLoading] = useState(true);
 
   const loadUsage = useCallback(async () => {
     setUsageLoading(true);
     try {
-      const res = await fetch(`/api/flywheel/usage?days=${usageDays}`, { headers: authHeaders() });
+      const res = await fetch('/api/flywheel/usage?days=30', { headers: authHeaders() });
       if (res.ok) {
         const data = await res.json();
         setUsageDaily(data.daily || []);
@@ -57,235 +68,190 @@ export default function SettingsPanel({ user, onLogout, isFullscreen }: Settings
       }
     } catch { /* ignore */ }
     finally { setUsageLoading(false); }
-  }, [usageDays]);
+  }, []);
 
   useEffect(() => { loadUsage(); }, [loadUsage]);
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/flywheel/benchmarks/stats', { headers: authHeaders() });
-        if (res.ok) setBenchmarks(await res.json());
+        const res = await fetch('/api/subscriptions/current', { headers: authHeaders() });
+        if (res.ok) setSubscription(await res.json());
       } catch { /* ignore */ }
-      finally { setBenchLoading(false); }
+      finally { setSubLoading(false); }
     })();
   }, []);
 
-  function formatNumber(val: number | null): string {
-    if (!val) return '0';
-    if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
-    if (val >= 1000) return `${(val / 1000).toFixed(1)}K`;
-    return val.toLocaleString();
-  }
+  const trialEndsAt = (user as any).trial_ends_at;
+  const trialActive = trialEndsAt && new Date(trialEndsAt) > new Date();
+  const daysLeft = trialEndsAt ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000)) : 0;
 
-  const TABS = [
-    { id: 'account' as const, label: 'Account' },
-    { id: 'usage' as const, label: 'Usage' },
-    { id: 'benchmarks' as const, label: 'Benchmarks' },
-  ];
+  const planLabel = subscription?.plan
+    ? subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1)
+    : trialActive ? 'Professional Trial' : 'Free';
 
   return (
-    <div style={{ padding: isFullscreen ? '24px 40px' : 20 }}>
-      <div style={{ maxWidth: isFullscreen ? 900 : undefined, margin: isFullscreen ? '0 auto' : undefined }}>
-      {/* Tabs */}
-      <div className="flex gap-1 mb-5 bg-[#EBE7DF] rounded-xl p-1">
-        {TABS.map(t => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-medium border-0 cursor-pointer transition-colors ${
-              tab === t.id ? 'bg-white text-[#0D0D0D] shadow-sm' : 'bg-transparent text-[#6E6A63] hover:text-[#0D0D0D]'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+    <div style={{ padding: isFullscreen ? '32px 40px' : 20 }}>
+      <div style={{ maxWidth: isFullscreen ? 720 : undefined, margin: isFullscreen ? '0 auto' : undefined }}>
 
-      {/* Account Tab */}
-      {tab === 'account' && (
-        <div className="space-y-3">
-          <div className="bg-[#FAFAFA] rounded-2xl p-4">
-            <h3 className="text-sm font-semibold text-[#0D0D0D] m-0 mb-3">Profile</h3>
-            <div className="space-y-2.5">
-              <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Name</label>
-                <p className="text-sm text-[#0D0D0D] m-0 px-3 py-1.5 bg-white rounded-lg border border-[rgba(0,0,0,0.08)]">{user.display_name || '—'}</p>
-              </div>
-              <div>
-                <label className="block text-[10px] font-medium text-[#6E6A63] mb-0.5">Email</label>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-[#0D0D0D] m-0 px-3 py-1.5 bg-white rounded-lg border border-[rgba(0,0,0,0.08)] flex-1">{user.email}</p>
-                  {(user as any).email_verified ? (
-                    <span className="text-[10px] font-semibold text-green-700 bg-green-50 px-2 py-1 rounded-lg border border-green-200 whitespace-nowrap">Verified</span>
-                  ) : verificationSent ? (
-                    <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 px-2 py-1 rounded-lg border border-blue-200 whitespace-nowrap">Email sent</span>
-                  ) : (
-                    <button
-                      onClick={async () => {
-                        setSendingVerification(true);
-                        try {
-                          await fetch('/api/auth/send-verification', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', ...authHeaders() },
-                          });
-                          setVerificationSent(true);
-                        } catch { /* ignore */ }
-                        finally { setSendingVerification(false); }
-                      }}
-                      disabled={sendingVerification}
-                      className="text-[10px] font-semibold text-[#D44A78] bg-[#FFF0EB] px-2 py-1 rounded-lg border border-[#F5D5C8] cursor-pointer hover:bg-[#FFE8DF] transition-colors whitespace-nowrap disabled:opacity-50"
-                    >
-                      {sendingVerification ? 'Sending...' : 'Verify email'}
-                    </button>
-                  )}
-                </div>
+        {/* ─── Profile ─── */}
+        <SectionHeading>Profile</SectionHeading>
+        <Card className="mb-6">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="w-12 h-12 rounded-full bg-[#D44A78]/10 flex items-center justify-center shrink-0">
+              <span className="text-[#D44A78] font-headline font-bold text-lg">
+                {(user.display_name || user.email)[0].toUpperCase()}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-semibold text-[#0D0D0D] m-0 truncate">{user.display_name || '—'}</p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <p className="text-sm text-[#5D5E61] m-0 truncate">{user.email}</p>
+                {(user as any).email_verified ? (
+                  <span className="text-[10px] font-semibold text-green-700 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200 shrink-0">Verified</span>
+                ) : verificationSent ? (
+                  <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full border border-blue-200 shrink-0">Sent</span>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      setSendingVerification(true);
+                      try {
+                        await fetch('/api/auth/send-verification', { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() } });
+                        setVerificationSent(true);
+                      } catch { /* ignore */ }
+                      finally { setSendingVerification(false); }
+                    }}
+                    disabled={sendingVerification}
+                    className="text-[10px] font-semibold text-[#D44A78] bg-[#D44A78]/5 px-1.5 py-0.5 rounded-full border border-[#D44A78]/20 cursor-pointer hover:bg-[#D44A78]/10 transition-colors shrink-0 disabled:opacity-50"
+                  >
+                    {sendingVerification ? '...' : 'Verify'}
+                  </button>
+                )}
               </div>
             </div>
           </div>
-
-          <div className="bg-[#FAFAFA] rounded-2xl p-4">
-            <h3 className="text-sm font-semibold text-[#0D0D0D] m-0 mb-1.5">Account</h3>
-            <p className="text-xs text-[#6E6A63] m-0 mb-3">Member since {new Date(user.created_at || Date.now()).toLocaleDateString()}</p>
-            <button
-              onClick={onLogout}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-medium bg-transparent text-red-600 border border-red-200 cursor-pointer hover:bg-red-50 transition-colors"
-            >
-              Sign out
-            </button>
+          <div className="flex items-center gap-3 text-xs text-[#5D5E61]">
+            <span>Joined {new Date(user.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+            {user.role === 'admin' && <span className="text-[10px] font-semibold text-[#D44A78] bg-[#D44A78]/5 px-1.5 py-0.5 rounded-full">Admin</span>}
+            {user.google_id && <span className="text-[10px] text-[#5D5E61] bg-[#f3f3f6] px-1.5 py-0.5 rounded-full">Google linked</span>}
           </div>
-        </div>
-      )}
+        </Card>
 
-      {/* Usage Tab */}
-      {tab === 'usage' && (
-        <div>
-          <div className="flex gap-1.5 mb-3">
-            {[7, 30, 90].map(d => (
-              <button
-                key={d}
-                onClick={() => setUsageDays(d)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium border-0 cursor-pointer transition-colors ${
-                  usageDays === d ? 'bg-[#D44A78] text-white' : 'bg-[#F5F5F5] text-[#6E6A63] hover:bg-[#EBE7DF]'
-                }`}
-              >
-                {d}d
-              </button>
-            ))}
-          </div>
-
-          {usageLoading ? (
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-xl p-3">
-                  <div className="h-2.5 bg-[#EBE7DF] rounded w-2/3 mb-1.5" />
-                  <div className="h-5 bg-[#EBE7DF] rounded w-1/2" />
-                </div>
-              ))}
+        {/* ─── Plan & Billing ─── */}
+        <SectionHeading>Plan & Billing</SectionHeading>
+        <Card className="mb-6">
+          {subLoading ? (
+            <div className="animate-pulse flex items-center gap-3">
+              <div className="h-5 bg-[#f3f3f6] rounded w-32" />
+              <div className="h-4 bg-[#f3f3f6] rounded w-20" />
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              <div className="bg-[#FAFAFA] rounded-xl p-3">
-                <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Tokens</p>
-                <p className="text-base font-bold text-[#0D0D0D] m-0">
-                  {formatNumber((usageTotals?.total_input_tokens || 0) + (usageTotals?.total_output_tokens || 0))}
+            <>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-base font-bold text-[#0D0D0D]">{planLabel}</span>
+                {subscription?.status === 'active' && (
+                  <span className="text-[10px] font-semibold text-green-700 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200">Active</span>
+                )}
+                {trialActive && !subscription?.plan && (
+                  <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full border border-blue-200">{daysLeft} days left</span>
+                )}
+              </div>
+              {subscription?.current_period_end && (
+                <p className="text-xs text-[#5D5E61] m-0 mb-2">
+                  {subscription.status === 'active' ? 'Renews' : 'Expires'} {new Date(subscription.current_period_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                 </p>
+              )}
+              {trialActive && !subscription?.plan && (
+                <p className="text-xs text-[#5D5E61] m-0 mb-2">
+                  Trial expires {new Date(trialEndsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </p>
+              )}
+              <div className="flex gap-2 mt-3">
+                {(!subscription?.plan || subscription.plan === 'free') && (
+                  <button className="px-3.5 py-2 rounded-full text-xs font-semibold bg-[#D44A78] text-white border-none cursor-pointer hover:bg-[#B03860] transition-colors">
+                    Upgrade Plan
+                  </button>
+                )}
+                {subscription?.plan && subscription.plan !== 'free' && (
+                  <button className="px-3.5 py-2 rounded-full text-xs font-medium bg-transparent text-[#5D5E61] border border-[rgba(0,0,0,0.08)] cursor-pointer hover:bg-[#f3f3f6] transition-colors">
+                    Manage Billing
+                  </button>
+                )}
               </div>
-              <div className="bg-[#FAFAFA] rounded-xl p-3">
-                <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Tool Calls</p>
-                <p className="text-base font-bold text-[#0D0D0D] m-0">{formatNumber(usageTotals?.total_tool_calls || 0)}</p>
-              </div>
-              <div className="bg-[#FAFAFA] rounded-xl p-3">
-                <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Deliverables</p>
-                <p className="text-base font-bold text-[#D44A78] m-0">{usageTotals?.total_deliverables || 0}</p>
-              </div>
-              <div className="bg-[#FAFAFA] rounded-xl p-3">
-                <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Queries</p>
-                <p className="text-base font-bold text-[#0D0D0D] m-0">{usageTotals?.total_queries || 0}</p>
-              </div>
-            </div>
+            </>
           )}
+        </Card>
 
-          {!usageLoading && usageDaily.length > 0 && (
-            <div className="bg-[#FAFAFA] rounded-2xl p-4">
-              <h3 className="text-xs font-semibold text-[#0D0D0D] m-0 mb-2">Daily Activity</h3>
-              <div className="space-y-1.5">
-                {usageDaily.map(d => {
-                  const totalTokens = (d.input_tokens || 0) + (d.output_tokens || 0);
-                  const maxTokens = Math.max(...usageDaily.map(x => (x.input_tokens || 0) + (x.output_tokens || 0)), 1);
-                  const pct = Math.round((totalTokens / maxTokens) * 100);
-                  return (
-                    <div key={d.date} className="flex items-center gap-2">
-                      <span className="text-[10px] text-[#6E6A63] w-16 shrink-0">{new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                      <div className="flex-1 h-2 bg-white rounded-full overflow-hidden">
-                        <div className="h-full bg-[#D44A78] rounded-full transition-all" style={{ width: `${pct}%` }} />
-                      </div>
-                      <span className="text-[10px] text-[#A9A49C] w-12 text-right">{formatNumber(totalTokens)}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {!usageLoading && usageDaily.length === 0 && (
-            <div className="text-center py-6 bg-[#FAFAFA] rounded-xl">
-              <p className="text-xs text-[#6E6A63] m-0">No usage data for this period.</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Benchmarks Tab */}
-      {tab === 'benchmarks' && (
-        <div>
-          <p className="text-xs text-[#6E6A63] m-0 mb-3">Anonymized transaction benchmarks from closed deals.</p>
-
-          {benchLoading ? (
-            <div className="space-y-2">
-              {[1,2].map(i => (
-                <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-2xl p-4">
-                  <div className="h-3 bg-[#EBE7DF] rounded w-1/3 mb-2" />
-                  <div className="flex gap-4">
-                    <div className="h-6 bg-[#EBE7DF] rounded w-14" />
-                    <div className="h-6 bg-[#EBE7DF] rounded w-14" />
-                  </div>
+        {/* ─── Usage (30d) ─── */}
+        <SectionHeading>Usage — Last 30 Days</SectionHeading>
+        <Card className="mb-6">
+          {usageLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-2.5 bg-[#f3f3f6] rounded w-2/3 mb-1.5" />
+                  <div className="h-5 bg-[#f3f3f6] rounded w-1/2" />
                 </div>
               ))}
-            </div>
-          ) : benchmarks.length === 0 ? (
-            <div className="text-center py-8 bg-[#FAFAFA] rounded-xl">
-              <p className="text-sm font-semibold text-[#0D0D0D] m-0 mb-0.5">No benchmarks yet</p>
-              <p className="text-xs text-[#6E6A63] m-0">Benchmarks appear as deals close.</p>
             </div>
           ) : (
-            <div className="space-y-2">
-              {benchmarks.map((b, i) => (
-                <div key={i} className="bg-[#FAFAFA] rounded-2xl p-4">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <h3 className="text-sm font-semibold text-[#0D0D0D] m-0">{b.industry || b.naics_code}</h3>
-                    <span className="text-[9px] text-[#A9A49C] bg-white px-1.5 py-0.5 rounded-full">n={b.sample_size}</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Avg</p>
-                      <p className="text-base font-bold text-[#0D0D0D] m-0">{b.avg_multiple}x</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Median</p>
-                      <p className="text-base font-bold text-[#D44A78] m-0">{b.median_multiple}x</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5">Days</p>
-                      <p className="text-base font-bold text-[#0D0D0D] m-0">{b.avg_days_to_close}</p>
-                    </div>
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                <div>
+                  <p className="text-[11px] text-[#5D5E61] m-0 mb-0.5">Tokens Used</p>
+                  <p className="text-lg font-bold text-[#0D0D0D] m-0 tabular-nums">
+                    {formatNumber((usageTotals?.total_input_tokens || 0) + (usageTotals?.total_output_tokens || 0))}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-[#5D5E61] m-0 mb-0.5">Tool Calls</p>
+                  <p className="text-lg font-bold text-[#0D0D0D] m-0 tabular-nums">{formatNumber(usageTotals?.total_tool_calls || 0)}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-[#5D5E61] m-0 mb-0.5">Deliverables</p>
+                  <p className="text-lg font-bold text-[#D44A78] m-0 tabular-nums">{usageTotals?.total_deliverables || 0}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-[#5D5E61] m-0 mb-0.5">Queries</p>
+                  <p className="text-lg font-bold text-[#0D0D0D] m-0 tabular-nums">{usageTotals?.total_queries || 0}</p>
+                </div>
+              </div>
+
+              {usageDaily.length > 0 && (
+                <div className="pt-3 border-t border-[rgba(0,0,0,0.06)]">
+                  <p className="text-[11px] text-[#5D5E61] m-0 mb-2 font-medium">Daily Activity</p>
+                  <div className="space-y-1">
+                    {usageDaily.slice(-14).map(d => {
+                      const totalTokens = (d.input_tokens || 0) + (d.output_tokens || 0);
+                      const maxTokens = Math.max(...usageDaily.map(x => (x.input_tokens || 0) + (x.output_tokens || 0)), 1);
+                      const pct = Math.round((totalTokens / maxTokens) * 100);
+                      return (
+                        <div key={d.date} className="flex items-center gap-2">
+                          <span className="text-[10px] text-[#5D5E61] w-14 shrink-0 tabular-nums">{new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                          <div className="flex-1 h-1.5 bg-[#f3f3f6] rounded-full overflow-hidden">
+                            <div className="h-full bg-[#D44A78] rounded-full transition-all" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="text-[10px] text-[#5D5E61] w-12 text-right tabular-nums">{formatNumber(totalTokens)}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
+        </Card>
+
+        {/* ─── Sign Out ─── */}
+        <div className="pt-2">
+          <button
+            onClick={onLogout}
+            className="px-4 py-2 rounded-full text-sm font-medium bg-transparent text-red-500 border border-red-200 cursor-pointer hover:bg-red-50 transition-colors"
+          >
+            Sign out
+          </button>
         </div>
-      )}
+
       </div>
     </div>
   );
