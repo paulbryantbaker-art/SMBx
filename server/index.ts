@@ -414,6 +414,11 @@ runMigrations().then(async () => {
       ON CONFLICT (email) DO UPDATE SET password = EXCLUDED.password, role = 'admin'
     `;
     console.log('[boot] Admin account verified');
+    // Debug: log which email/API keys are configured
+    const keyStatus = ['RESEND_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_CLIENT_ID', 'STRIPE_SECRET_KEY', 'EMAIL_FROM']
+      .map(k => `${k}=${process.env[k] ? 'SET' : 'MISSING'}`)
+      .join(', ');
+    console.log(`[boot] Env check: ${keyStatus}`);
   } catch (err: any) {
     console.error('[boot] Admin account check failed:', err.message);
   } finally {
