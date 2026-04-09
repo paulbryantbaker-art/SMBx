@@ -1092,27 +1092,23 @@ export default function AppShell() {
     <aside
       className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950 border-r border-zinc-800/50' : 'bg-white border-r border-[#eeeef0] shadow-sm'}`}
     >
-      {/* Logo — X mark (always visible for logged-in users, hidden on home for logged-out) */}
-      {(user || !(viewState === 'landing' && activeTab === 'home')) && (
-        <div className="flex flex-col items-center mb-3" ref={sidebarLogoRef as any}>
-          <button
-            onClick={() => {
-              if (user) {
-                // Logged in: go to chat workspace
-                setViewState('chat'); navigate('/chat');
-              } else {
-                // Logged out: go to marketing home
-                setViewState('landing'); setActiveTab('home'); navigate('/'); setCanvasTabs([]); setActiveCanvasTabId(null);
-              }
-            }}
-            className="sidebar-x-btn border-0 bg-transparent cursor-pointer p-1 rounded-xl"
-            title={user ? 'Chat' : 'Home'}
-            type="button"
-          >
-            <img src={dark ? '/X-white.png' : '/X.png'} alt="smbx.ai" width={42} height={42} className="sidebar-x-img" style={{ display: 'block' }} />
-          </button>
-        </div>
-      )}
+      {/* Logo — X mark, always visible */}
+      <div className="flex flex-col items-center mb-3" ref={sidebarLogoRef as any}>
+        <button
+          onClick={() => {
+            if (user) {
+              setViewState('chat'); navigate('/chat');
+            } else {
+              setViewState('landing'); setActiveTab('home'); navigate('/'); setCanvasTabs([]); setActiveCanvasTabId(null);
+            }
+          }}
+          className="sidebar-x-btn border-0 bg-transparent cursor-pointer p-1 rounded-xl"
+          title={user ? 'Chat' : 'Home'}
+          type="button"
+        >
+          <img src={dark ? '/X-white.png' : '/X.png'} alt="smbx.ai" width={42} height={42} className="sidebar-x-img" style={{ display: 'block' }} />
+        </button>
+      </div>
 
       {/* Explore section — marketing pages, hidden when logged in */}
       {!user && (
