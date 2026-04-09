@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import postgres from 'postgres';
 import { requireAuth, signToken } from '../middleware/auth.js';
-import { sendEmail, sendWelcomeEmail } from '../services/emailService.js';
+import { sendEmail, sendWelcomeEmail, brandedEmail } from '../services/emailService.js';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -228,21 +228,14 @@ authRouter.post('/forgot-password', async (req, res) => {
 
     const sent = await sendEmail({
       to: user.email,
-      subject: 'Reset your password — SMBx',
-      html: `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2 style="color: #1A1A18; font-size: 20px;">Reset your password</h2>
-          <p style="color: #6E6A63; line-height: 1.6;">
-            Click below to reset your password. This link expires in 1 hour.
-          </p>
-          <a href="${resetUrl}" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
-            Reset Password
-          </a>
-          <p style="color: #9CA3AF; font-size: 12px; margin-top: 24px;">
-            If you didn't request this, you can safely ignore this email.
-          </p>
-        </div>
-      `,
+      subject: 'Reset your password — smbx.ai',
+      html: brandedEmail({
+        headline: 'Reset your password.',
+        body: '<p style="margin:0;">Click below to reset your password. This link expires in 1 hour.</p>',
+        ctaLabel: 'Reset Password',
+        ctaUrl: resetUrl,
+        footnote: 'If you didn\'t request this, you can safely ignore this email.',
+      }),
     });
     console.log(`[auth] Password reset email to ${user.email}: ${sent ? 'sent' : 'FAILED (check RESEND_API_KEY)'}`);
 
@@ -325,18 +318,14 @@ authRouter.post('/send-verification', requireAuth, async (req, res) => {
 
     const sent = await sendEmail({
       to: user.email,
-      subject: 'Verify your email — SMBx',
-      html: `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto;">
-          <h2 style="color: #1A1A18; font-size: 20px;">Verify your email</h2>
-          <p style="color: #6E6A63; line-height: 1.6;">
-            Click below to verify your email address. This link expires in 24 hours.
-          </p>
-          <a href="${verifyUrl}" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
-            Verify Email
-          </a>
-        </div>
-      `,
+      subject: 'Verify your email — smbx.ai',
+      html: brandedEmail({
+        headline: 'Verify your email.',
+        body: '<p style="margin:0;">Click below to verify your email address. This link expires in 24 hours.</p>',
+        ctaLabel: 'Verify Email',
+        ctaUrl: verifyUrl,
+        footnote: 'If you didn\'t request this, you can safely ignore this email.',
+      }),
     });
     console.log(`[auth] Verification email to ${user.email}: ${sent ? 'sent' : 'FAILED (check RESEND_API_KEY)'}`);
 

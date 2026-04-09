@@ -26,6 +26,65 @@ async function getResend() {
 const FROM_EMAIL = process.env.EMAIL_FROM || 'SMBx <notifications@smbx.ai>';
 const BASE_URL = process.env.APP_URL || process.env.BASE_URL || 'https://smbx.ai';
 
+// ─── Branded email wrapper matching marketing materials ───
+export function brandedEmail({ headline, body, ctaLabel, ctaUrl, footnote }: {
+  headline: string;
+  body: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+  footnote?: string;
+}): string {
+  const cta = ctaLabel && ctaUrl ? `
+    <a href="${ctaUrl}" style="display:inline-block;background:#1A1C1E;color:#fff;padding:14px 32px;border-radius:100px;text-decoration:none;font-weight:700;font-size:15px;font-family:'Inter',system-ui,sans-serif;margin:24px 0 8px;letter-spacing:-0.01em;">
+      ${ctaLabel}
+    </a>` : '';
+
+  const foot = footnote ? `
+    <p style="color:#A9A49C;font-size:12px;line-height:1.5;margin:24px 0 0;font-family:'Inter',system-ui,sans-serif;">
+      ${footnote}
+    </p>` : '';
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#EDEDEA;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EDEDEA;">
+    <tr><td align="center" style="padding:40px 16px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#F8F6F2;border-radius:16px;overflow:hidden;">
+        <!-- Rose accent stripe -->
+        <tr><td style="height:4px;background:#D44A78;"></td></tr>
+
+        <!-- Logo -->
+        <tr><td style="padding:32px 40px 0;">
+          <img src="${BASE_URL}/G3L.png" alt="smbx.ai" height="28" style="height:28px;display:block;" />
+        </td></tr>
+
+        <!-- Content -->
+        <tr><td style="padding:28px 40px 36px;">
+          <h1 style="font-family:'Inter',system-ui,sans-serif;font-weight:800;font-size:24px;color:#1A1C1E;margin:0 0 16px;line-height:1.2;letter-spacing:-0.03em;">
+            ${headline}
+          </h1>
+          <div style="font-family:'Inter',system-ui,sans-serif;font-size:15px;color:#5D5E61;line-height:1.65;">
+            ${body}
+          </div>
+          ${cta}
+          ${foot}
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="padding:20px 40px;border-top:1px solid rgba(0,0,0,0.06);">
+          <p style="font-family:'Inter',system-ui,sans-serif;font-size:11px;color:#A9A49C;margin:0;letter-spacing:0.03em;">
+            smbx.ai &middot; AI Deal Intelligence
+          </p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 /**
  * Send an email. Falls back to console.log if Resend is not configured.
  */
@@ -62,22 +121,16 @@ export async function sendInvitationEmail(invitation: {
 
   return sendEmail({
     to: invitation.email,
-    subject: `You've been invited to collaborate on ${invitation.dealName || 'a deal'} — SMBx`,
-    html: `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: #1A1A18; font-size: 20px;">You're invited to collaborate</h2>
-        <p style="color: #6E6A63; line-height: 1.6;">
-          ${invitation.inviterName || 'Someone'} has invited you to join
-          <strong>${invitation.dealName || 'a deal'}</strong> as a <strong>${roleName}</strong>.
-        </p>
-        <a href="${acceptUrl}" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
-          Accept Invitation
-        </a>
-        <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
-          This invitation expires in 7 days. If you didn't expect this email, you can ignore it.
-        </p>
-      </div>
-    `,
+    subject: `You've been invited to collaborate on ${invitation.dealName || 'a deal'} — smbx.ai`,
+    html: brandedEmail({
+      headline: 'You\'re invited to collaborate.',
+      body: `
+        <p style="margin:0 0 12px;">${invitation.inviterName || 'Someone'} has invited you to join <strong style="color:#1A1C1E;">${invitation.dealName || 'a deal'}</strong> as a <strong style="color:#1A1C1E;">${roleName}</strong>.</p>
+      `,
+      ctaLabel: 'Accept Invitation',
+      ctaUrl: acceptUrl,
+      footnote: 'This invitation expires in 7 days. If you didn\'t expect this email, you can ignore it.',
+    }),
   });
 }
 
@@ -94,25 +147,17 @@ export async function sendDayPassEmail(dayPass: {
 
   return sendEmail({
     to: dayPass.email,
-    subject: `48-hour access to ${dayPass.dealName || 'a deal'} — SMBx`,
-    html: `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: #1A1A18; font-size: 20px;">You have a 48-hour Day Pass</h2>
-        <p style="color: #6E6A63; line-height: 1.6;">
-          You've been granted temporary access to <strong>${dayPass.dealName || 'a deal'}</strong>
-          as a <strong>${dayPass.role.replace(/_/g, ' ')}</strong>.
-        </p>
-        <p style="color: #6E6A63; line-height: 1.6;">
-          Your 48-hour access window starts when you click the button below.
-        </p>
-        <a href="${passUrl}" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
-          Activate Day Pass
-        </a>
-        <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
-          This pass provides limited-time access. No account required.
-        </p>
-      </div>
-    `,
+    subject: `48-hour access to ${dayPass.dealName || 'a deal'} — smbx.ai`,
+    html: brandedEmail({
+      headline: '48-hour Day Pass.',
+      body: `
+        <p style="margin:0 0 12px;">You've been granted temporary access to <strong style="color:#1A1C1E;">${dayPass.dealName || 'a deal'}</strong> as a <strong style="color:#1A1C1E;">${dayPass.role.replace(/_/g, ' ')}</strong>.</p>
+        <p style="margin:0;">Your access window starts when you click the button below.</p>
+      `,
+      ctaLabel: 'Activate Day Pass',
+      ctaUrl: passUrl,
+      footnote: 'This pass provides limited-time access. No account required.',
+    }),
   });
 }
 
@@ -125,24 +170,17 @@ export async function sendThesisMatchAlert(userId: number, matchCount: number): 
 
   return sendEmail({
     to: user.email,
-    subject: `${matchCount} new listing${matchCount > 1 ? 's' : ''} match your thesis — SMBx`,
-    html: `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: #1A1A18; font-size: 20px;">New matches found</h2>
-        <p style="color: #6E6A63; line-height: 1.6;">
-          Hi ${user.display_name || 'there'},
-        </p>
-        <p style="color: #6E6A63; line-height: 1.6;">
-          We found <strong>${matchCount}</strong> new listing${matchCount > 1 ? 's' : ''} that match your buy thesis criteria.
-        </p>
-        <a href="${BASE_URL}/chat" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
-          View Matches
-        </a>
-        <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
-          You're receiving this because you have an active buy thesis on SMBx.
-        </p>
-      </div>
-    `,
+    subject: `${matchCount} new listing${matchCount > 1 ? 's' : ''} match your thesis — smbx.ai`,
+    html: brandedEmail({
+      headline: `${matchCount} new match${matchCount > 1 ? 'es' : ''} found.`,
+      body: `
+        <p style="margin:0 0 12px;">Hi ${user.display_name || 'there'},</p>
+        <p style="margin:0;">We found <strong style="color:#1A1C1E;">${matchCount}</strong> new listing${matchCount > 1 ? 's' : ''} that match your buy thesis criteria.</p>
+      `,
+      ctaLabel: 'View Matches',
+      ctaUrl: `${BASE_URL}/chat`,
+      footnote: 'You\'re receiving this because you have an active buy thesis on smbx.ai.',
+    }),
   });
 }
 
@@ -155,18 +193,15 @@ export async function sendDocumentNotification(userId: number, dealName: string,
 
   return sendEmail({
     to: user.email,
-    subject: `New document added to ${dealName} — SMBx`,
-    html: `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: #1A1A18; font-size: 20px;">New document uploaded</h2>
-        <p style="color: #6E6A63; line-height: 1.6;">
-          A new document "<strong>${docName}</strong>" has been added to <strong>${dealName}</strong>.
-        </p>
-        <a href="${BASE_URL}/chat" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
-          View in SMBx
-        </a>
-      </div>
-    `,
+    subject: `New document added to ${dealName} — smbx.ai`,
+    html: brandedEmail({
+      headline: 'New document uploaded.',
+      body: `
+        <p style="margin:0;">A new document "<strong style="color:#1A1C1E;">${docName}</strong>" has been added to <strong style="color:#1A1C1E;">${dealName}</strong>.</p>
+      `,
+      ctaLabel: 'View in SMBx',
+      ctaUrl: `${BASE_URL}/chat`,
+    }),
   });
 }
 
@@ -176,27 +211,17 @@ export async function sendDocumentNotification(userId: number, dealName: string,
 export async function sendWelcomeEmail(email: string, displayName?: string): Promise<boolean> {
   return sendEmail({
     to: email,
-    subject: 'Welcome to SMBx — Your M&A advisor is ready',
-    html: `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: #1A1A18; font-size: 20px;">Welcome to SMBx</h2>
-        <p style="color: #6E6A63; line-height: 1.6;">
-          Hi ${displayName || 'there'},
-        </p>
-        <p style="color: #6E6A63; line-height: 1.6;">
-          I'm Yulia, your AI M&A advisor. Whether you're buying, selling, or raising capital, I'll guide you through every step — from initial valuation to closing.
-        </p>
-        <p style="color: #6E6A63; line-height: 1.6;">
-          Start by telling me about your deal. Upload financials, and I'll generate your first deliverable for free.
-        </p>
-        <a href="${BASE_URL}/chat" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
-          Start a Conversation
-        </a>
-        <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
-          Free gates include intake, financial analysis, and your first valuation snapshot. No credit card required.
-        </p>
-      </div>
-    `,
+    subject: 'Welcome to smbx.ai — Yulia is ready',
+    html: brandedEmail({
+      headline: `Welcome${displayName ? `, ${displayName}` : ''}.`,
+      body: `
+        <p style="margin:0 0 12px;">I'm Yulia, your AI deal intelligence advisor. Whether you're buying, selling, or raising capital, I'll guide you through every step — from initial valuation to closing.</p>
+        <p style="margin:0;">Start by telling me about your deal. Upload financials, and I'll generate your first deliverable for free.</p>
+      `,
+      ctaLabel: 'Start a Conversation',
+      ctaUrl: `${BASE_URL}/chat`,
+      footnote: 'Free gates include intake, financial analysis, and your first valuation. No credit card required.',
+    }),
   });
 }
 
@@ -211,21 +236,16 @@ export async function sendGateAdvancementEmail(userId: number, gateName: string,
 
   return sendEmail({
     to: user.email,
-    subject: `${journey} journey advanced to ${gateName} — SMBx`,
-    html: `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: #1A1A18; font-size: 20px;">New gate unlocked</h2>
-        <p style="color: #6E6A63; line-height: 1.6;">
-          Hi ${user.display_name || 'there'},
-        </p>
-        <p style="color: #6E6A63; line-height: 1.6;">
-          Your ${journey.toLowerCase()} journey${dealName ? ` for <strong>${dealName}</strong>` : ''} has advanced to <strong>${gateName}</strong>. New deliverables and tools are now available.
-        </p>
-        <a href="${BASE_URL}/chat" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
-          Continue Your Journey
-        </a>
-      </div>
-    `,
+    subject: `${journey} journey advanced to ${gateName} — smbx.ai`,
+    html: brandedEmail({
+      headline: 'New gate unlocked.',
+      body: `
+        <p style="margin:0 0 12px;">Hi ${user.display_name || 'there'},</p>
+        <p style="margin:0;">Your ${journey.toLowerCase()} journey${dealName ? ` for <strong style="color:#1A1C1E;">${dealName}</strong>` : ''} has advanced to <strong style="color:#1A1C1E;">${gateName}</strong>. New deliverables and tools are now available.</p>
+      `,
+      ctaLabel: 'Continue Your Journey',
+      ctaUrl: `${BASE_URL}/chat`,
+    }),
   });
 }
 
@@ -238,23 +258,16 @@ export async function sendDeliverableReadyEmail(userId: number, deliverableName:
 
   return sendEmail({
     to: user.email,
-    subject: `Your ${deliverableName} is ready — SMBx`,
-    html: `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: #1A1A18; font-size: 20px;">Deliverable ready</h2>
-        <p style="color: #6E6A63; line-height: 1.6;">
-          Hi ${user.display_name || 'there'},
-        </p>
-        <p style="color: #6E6A63; line-height: 1.6;">
-          Your <strong>${deliverableName}</strong>${dealName ? ` for <strong>${dealName}</strong>` : ''} has been generated and is ready for review.
-        </p>
-        <a href="${BASE_URL}/chat" style="display: inline-block; background: #D44A78; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 16px 0;">
-          View Deliverable
-        </a>
-        <p style="color: #A9A49C; font-size: 12px; margin-top: 24px;">
-          You can export to PDF, DOCX, or XLSX from the canvas view.
-        </p>
-      </div>
-    `,
+    subject: `Your ${deliverableName} is ready — smbx.ai`,
+    html: brandedEmail({
+      headline: 'Deliverable ready.',
+      body: `
+        <p style="margin:0 0 12px;">Hi ${user.display_name || 'there'},</p>
+        <p style="margin:0;">Your <strong style="color:#1A1C1E;">${deliverableName}</strong>${dealName ? ` for <strong style="color:#1A1C1E;">${dealName}</strong>` : ''} has been generated and is ready for review.</p>
+      `,
+      ctaLabel: 'View Deliverable',
+      ctaUrl: `${BASE_URL}/chat`,
+      footnote: 'You can export to PDF, DOCX, or XLSX from the canvas view.',
+    }),
   });
 }
