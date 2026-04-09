@@ -92,11 +92,11 @@ function LogoHero({ height = 120, className, dark }: { height?: number; classNam
   );
 }
 
-/* ═══ LOGO ICON — just the X (TF3x) for sidebar/compact spaces ═══ */
-function LogoIcon({ height = 28, className, style }: { height?: number; className?: string; style?: React.CSSProperties }) {
+/* ═══ LOGO ICON — just the X for sidebar/compact spaces ═══ */
+function LogoIcon({ height = 28, className, style, dark }: { height?: number; className?: string; style?: React.CSSProperties; dark?: boolean }) {
   return (
     <img
-      src="/x.png?v=2"
+      src={dark ? '/White X.png' : '/X.png'}
       alt="smbx.ai"
       draggable={false}
       className={className}
@@ -1109,7 +1109,7 @@ export default function AppShell() {
             title={user ? 'Chat' : 'Home'}
             type="button"
           >
-            <img src="/x.png?v=2" alt="smbx.ai" width={42} height={42} className="sidebar-x-img" style={{ display: 'block' }} />
+            <img src={dark ? '/White X.png' : '/X.png'} alt="smbx.ai" width={42} height={42} className="sidebar-x-img" style={{ display: 'block' }} />
           </button>
         </div>
       )}
@@ -1505,7 +1505,7 @@ export default function AppShell() {
                    activeTab === 'pricing' ? <PricingBelow dark={dark} /> : null}
                 </Suspense>
                 <footer className={`py-12 flex justify-center ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`}>
-                  <LogoIcon height={44} />
+                  <LogoIcon height={44} dark={dark} />
                 </footer>
               </div>
               ) : null}
@@ -1787,7 +1787,7 @@ export default function AppShell() {
             >
               <span className="material-symbols-outlined text-[24px]">close</span>
             </button>
-            <LogoIcon height={40} className="mb-6" />
+            <LogoIcon height={40} className="mb-6" dark={dark} />
             {/* Explore — marketing pages, hidden when logged in */}
             {!user && (
             <>
