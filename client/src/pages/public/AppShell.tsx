@@ -1219,12 +1219,12 @@ export default function AppShell() {
           </button>
         )}
         <button
-          onClick={() => { if (user) { openCanvasTab('settings', 'Settings'); } else navigate('/login'); }}
+          onClick={() => { if (user) { openCanvasTab('settings', 'Settings'); } else window.location.href = '/login'; }}
           className={`flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
           type="button"
         >
-          <span className="material-symbols-outlined text-[22px]">person</span>
-          <span className="text-[9px] font-semibold">Account</span>
+          <span className="material-symbols-outlined text-[22px]">{user ? 'person' : 'login'}</span>
+          <span className="text-[9px] font-semibold">{user ? 'Account' : 'Sign In'}</span>
         </button>
       </div>
     </aside>
@@ -1645,16 +1645,14 @@ export default function AppShell() {
                 </>
               ) : (
                 /* Empty state */
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 20 }}>
-                  <div style={{ opacity: 0.10 }}>
-                    <img
-                      src={dark ? '/G3D.png' : '/G3L.png'}
-                      alt="smbx.ai"
-                      draggable={false}
-                      style={{ height: 64, objectFit: 'contain' }}
-                    />
-                  </div>
-                  <p className="font-body text-sm" style={{ color: dark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.18)', margin: 0, letterSpacing: '0.03em' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 24 }}>
+                  <img
+                    src={dark ? '/G3D.png' : '/G3L.png'}
+                    alt="smbx.ai"
+                    draggable={false}
+                    style={{ height: 48, objectFit: 'contain', opacity: 0.35 }}
+                  />
+                  <p className="font-body text-[15px] font-medium" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)', margin: 0 }}>
                     Ask Yulia to open a tool
                   </p>
                 </div>
