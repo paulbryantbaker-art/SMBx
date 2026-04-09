@@ -34,10 +34,10 @@ export default function ForgotPassword({ onNavigateLogin }: ForgotPasswordProps)
   };
 
   return (
-    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#FAFAFA]">
+    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#F8F6F2]">
       <div className="w-full max-w-[400px] bg-white rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.06)]">
-        <div className="text-center mb-7">
-          <Logo linked={false} />
+        <div className="flex flex-col items-center mb-7">
+          <Logo linked={false} height={32} />
           <p className="text-sm text-[#7A766E] mt-2 m-0">
             {submitted ? 'Check your email' : 'Reset your password'}
           </p>
@@ -49,13 +49,6 @@ export default function ForgotPassword({ onNavigateLogin }: ForgotPasswordProps)
               If an account exists for <strong>{email}</strong>, we sent a password reset link.
               Check your inbox and spam folder.
             </p>
-            <button
-              type="button"
-              onClick={onNavigateLogin}
-              className="w-full py-3 bg-[#D44A78] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer hover:bg-[#B03860] transition-colors"
-            >
-              Back to sign in
-            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} noValidate>

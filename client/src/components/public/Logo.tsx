@@ -5,20 +5,20 @@ interface LogoProps {
   className?: string;
   light?: boolean;
   linked?: boolean;
+  height?: number;
 }
 
-export default function Logo({ className = '', light = false, linked = true }: LogoProps) {
+export default function Logo({ className = '', light = false, linked = true, height = 28 }: LogoProps) {
   const { user } = useAuth();
 
   const mark = (
-    <span
-      className={`font-bold tracking-tight ${className}`}
-      style={{ fontFamily: "var(--sans)", fontSize: '22px', letterSpacing: '-.03em' }}
-    >
-      <span className={light ? 'text-white' : 'text-[#0D0D0D]'}>smbx</span>
-      <span className="text-[#D44A78]">.</span>
-      <span className={light ? 'text-white' : 'text-[#0D0D0D]'}>ai</span>
-    </span>
+    <img
+      src={light ? '/G3D.png' : '/G3L.png'}
+      alt="smbx.ai"
+      draggable={false}
+      className={className}
+      style={{ height, objectFit: 'contain', display: 'block' }}
+    />
   );
 
   if (!linked) return mark;
