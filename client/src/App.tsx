@@ -59,6 +59,8 @@ export default function App() {
   const [location, navigate] = useLocation();
 
   const [googleError, setGoogleError] = useState('');
+  const googleInitRef = React.useRef(false);
+
   const handleGoogleLogin = useCallback(() => {
     const clientId = (window as any).__GOOGLE_CLIENT_ID;
     if (!clientId) {
@@ -71,25 +73,35 @@ export default function App() {
       return;
     }
     setGoogleError('');
-    google.accounts.id.initialize({
-      client_id: clientId,
-      callback: async (response: any) => {
-        try {
-          await loginWithGoogle(response.credential);
-          const anonId = sessionStorage.getItem('smbx_anon_session');
-          if (anonId) {
-            await migrateSession(anonId);
-            sessionStorage.removeItem('smbx_anon_session');
+
+    // Only initialize once to avoid Google rate-limiting
+    if (!googleInitRef.current) {
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async (response: any) => {
+          try {
+            await loginWithGoogle(response.credential);
+            const anonId = sessionStorage.getItem('smbx_anon_session');
+            if (anonId) {
+              await migrateSession(anonId);
+              sessionStorage.removeItem('smbx_anon_session');
+            }
+            await migrateSessionConversations();
+            navigate('/chat');
+          } catch (err: any) {
+            console.error('Google login error:', err.message);
+            setGoogleError(err.message || 'Google sign-in failed. Please try email/password.');
           }
-          await migrateSessionConversations();
-          navigate('/chat');
-        } catch (err: any) {
-          console.error('Google login error:', err.message);
-          setGoogleError(err.message || 'Google sign-in failed. Please try email/password.');
-        }
-      },
+        },
+      });
+      googleInitRef.current = true;
+    }
+    google.accounts.id.prompt((notification: any) => {
+      // Google suppressed the prompt (cooldown, dismissed, etc.)
+      if (notification?.isNotDisplayed() || notification?.isSkippedMoment()) {
+        setGoogleError('Google sign-in is temporarily unavailable. Please use email/password, or try again in a few minutes.');
+      }
     });
-    google.accounts.id.prompt();
   }, [loginWithGoogle, migrateSession, navigate]);
 
   const handleLoginSuccess = useCallback(async (email: string, password: string) => {

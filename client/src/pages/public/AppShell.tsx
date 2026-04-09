@@ -1841,17 +1841,30 @@ export default function AppShell() {
         </>
       )}
 
-      {/* ═══ MOBILE FLOATING HAMBURGER — top left ═══ */}
+      {/* ═══ MOBILE FLOATING BUTTONS — hamburger (left) + account (right) ═══ */}
       {isMobile && (viewState === 'landing' || viewState === 'chat') && (
-        <button
-          onClick={() => setIsMobileSidebarOpen(true)}
-          className="fixed z-50 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#E8709A]"
-          style={{ top: 16, left: 16 }}
-          type="button"
-          aria-label="Open menu"
-        >
-          <span className="material-symbols-outlined text-[22px]">menu</span>
-        </button>
+        <>
+          <button
+            onClick={() => setIsMobileSidebarOpen(true)}
+            className="fixed z-[51] w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#E8709A]"
+            style={{ top: 16, left: 16 }}
+            type="button"
+            aria-label="Open menu"
+          >
+            <span className="material-symbols-outlined text-[22px]">menu</span>
+          </button>
+          {user && (
+            <button
+              onClick={() => openCanvasTab('settings', 'Settings')}
+              className="fixed z-[51] w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#E8709A]"
+              style={{ top: 16, right: 16 }}
+              type="button"
+              aria-label="Account & Settings"
+            >
+              <span className="material-symbols-outlined text-[22px]">person</span>
+            </button>
+          )}
+        </>
       )}
 
       {/* Floating logo removed — X logo now lives in sidebar permanently */}
