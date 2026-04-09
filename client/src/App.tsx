@@ -40,29 +40,45 @@ function VerifyEmail({ onDone }: { onDone: () => void }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token }),
     }).then(async r => {
-      if (r.ok) { setStatus('success'); setTimeout(onDone, 2000); }
+      if (r.ok) {
+        setStatus('success');
+        // Try to close this tab after a moment — user likely has the app open already
+        setTimeout(() => {
+          window.close(); // works if this tab was opened by a link
+          // If window.close() didn't work (browser blocked it), redirect instead
+          setTimeout(onDone, 500);
+        }, 4000);
+      }
       else { const d = await r.json().catch(() => ({})); setStatus('error'); setMsg(d.error || 'Verification failed.'); }
     }).catch(() => { setStatus('error'); setMsg('Network error.'); });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="flex justify-center items-center min-h-dvh bg-[#F8F6F2] px-5">
-      <div className="w-full max-w-[400px] bg-white rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.06)] text-center">
-        {status === 'verifying' && <p className="text-sm text-[#5D5E61] m-0">Verifying your email...</p>}
+      <div className="w-full max-w-[400px] bg-white rounded-2xl p-10 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.06)] text-center">
+        {status === 'verifying' && (
+          <>
+            <div className="w-12 h-12 rounded-full bg-[#F3F3F6] flex items-center justify-center mx-auto mb-4">
+              <span className="material-symbols-outlined text-[#5D5E61] text-2xl" style={{ animation: 'spin 1s linear infinite' }}>progress_activity</span>
+            </div>
+            <p className="text-sm text-[#5D5E61] m-0">Verifying your email...</p>
+          </>
+        )}
         {status === 'success' && (
           <>
-            <div className="w-12 h-12 rounded-full bg-green-50 border border-green-200 flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-green-600 text-2xl">check</span>
+            <div className="w-14 h-14 rounded-full bg-green-50 border-2 border-green-200 flex items-center justify-center mx-auto mb-5">
+              <span className="material-symbols-outlined text-green-600 text-3xl">check</span>
             </div>
-            <p className="text-base font-semibold text-[#0D0D0D] m-0 mb-1">Email verified</p>
-            <p className="text-sm text-[#5D5E61] m-0">Redirecting you now...</p>
+            <p className="text-xl font-bold text-[#0D0D0D] m-0 mb-2" style={{ letterSpacing: '-0.02em' }}>You're verified.</p>
+            <p className="text-sm text-[#5D5E61] m-0 mb-1">Your email has been confirmed. You can close this tab.</p>
+            <p className="text-xs text-[#A9A49C] m-0 mt-4">This tab will close automatically...</p>
           </>
         )}
         {status === 'error' && (
           <>
-            <div className="w-12 h-12 rounded-full bg-red-50 border border-red-200 flex items-center justify-center mx-auto mb-4">
-              <span className="material-symbols-outlined text-red-500 text-2xl">close</span>
+            <div className="w-14 h-14 rounded-full bg-red-50 border-2 border-red-200 flex items-center justify-center mx-auto mb-5">
+              <span className="material-symbols-outlined text-red-500 text-3xl">close</span>
             </div>
-            <p className="text-base font-semibold text-[#0D0D0D] m-0 mb-1">Verification failed</p>
+            <p className="text-xl font-bold text-[#0D0D0D] m-0 mb-2" style={{ letterSpacing: '-0.02em' }}>Verification failed</p>
             <p className="text-sm text-[#5D5E61] m-0">{msg}</p>
           </>
         )}

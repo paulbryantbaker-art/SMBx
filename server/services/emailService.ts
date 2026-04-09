@@ -37,7 +37,7 @@ export function brandedEmail({ headline, body, ctaLabel, ctaUrl, footnote }: {
   const cta = ctaLabel && ctaUrl ? `
     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 8px;">
       <tr><td style="background:#1A1C1E;border-radius:100px;">
-        <a href="${ctaUrl}" target="_blank" style="display:inline-block;background:#1A1C1E;color:#ffffff;padding:16px 36px;border-radius:100px;text-decoration:none;font-weight:700;font-size:16px;font-family:'Inter',system-ui,sans-serif;letter-spacing:-0.01em;mso-padding-alt:0;text-underline-color:#1A1C1E;">
+        <a href="${ctaUrl}" style="display:inline-block;background:#1A1C1E;color:#ffffff;padding:16px 36px;border-radius:100px;text-decoration:none;font-weight:700;font-size:16px;font-family:'Inter',system-ui,sans-serif;letter-spacing:-0.01em;mso-padding-alt:0;text-underline-color:#1A1C1E;">
           ${ctaLabel}
         </a>
       </td></tr>
