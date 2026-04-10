@@ -779,19 +779,14 @@ export default function AppShell() {
     if (viewState === 'landing') {
       if (user) authChat.sendMessage(content);
       else anonChat.sendMessage(content, activeTab);
-      if (isMobile) {
-        // Mobile: instant swap, no morphing — chat fade-in handles the transition
-        setViewState('chat');
-        if (window.location.pathname !== '/chat') navigate('/chat'); // push: landing→chat
-      } else {
-        // Desktop: smooth morph-out then swap
-        setMorphing(true);
-        setTimeout(() => {
-          setViewState('chat');
-          setMorphing(false);
-          if (window.location.pathname !== '/chat') navigate('/chat'); // push: landing→chat
-        }, 300);
+      // Logged-out morph: from /home, default the canvas to Sell so the user
+      // doesn't see "home" content duplicated in the canvas position.
+      if (!user && activeTab === 'home') {
+        setActiveTab('sell');
       }
+      // Instant swap to chat mode — the journey card stays visible in the canvas position
+      setViewState('chat');
+      if (window.location.pathname !== '/chat') navigate('/chat');
       return;
     }
     if (user) authChat.sendMessage(content);
@@ -815,11 +810,18 @@ export default function AppShell() {
   // Tab click — push so swipe-back returns to where user came from
   const handleTabClick = useCallback((tab: TabId) => {
     setActiveTab(tab);
-    setViewState('landing');
     setIsMobileSidebarOpen(false);
+    // If user has already engaged (in chat mode), keep them in chat mode and just
+    // change the canvas content. Don't snap back to landing.
+    // Exception: clicking "home" while in chat mode → go back to landing/home
+    if (viewState === 'chat' && tab !== 'home') {
+      // Stay in chat; the canvas card will pick up the new active journey
+      return;
+    }
+    setViewState('landing');
     const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
     if (window.location.pathname !== urlMap[tab]) navigate(urlMap[tab]);
-  }, [navigate]);
+  }, [navigate, viewState]);
 
   // New chat — same-level within chat, replace history
   const handleNewChat = useCallback(() => {
@@ -1944,8 +1946,28 @@ export default function AppShell() {
                     );
                   })()}
                 </>
+              ) : !user ? (
+                /* Logged-out: render the active journey page in the canvas */
+                <div className="flex-1 overflow-y-auto relative">
+                  <Suspense fallback={<BelowSkeleton />}>
+                    {(() => {
+                      // Default to 'sell' if activeTab is 'home' (no canvas content for home post-morph)
+                      const journey = activeTab === 'home' ? 'sell' : activeTab;
+                      switch (journey) {
+                        case 'sell': return <SellBelow dark={dark} />;
+                        case 'buy': return <BuyBelow dark={dark} />;
+                        case 'raise': return <RaiseBelow dark={dark} />;
+                        case 'integrate': return <IntegrateBelow dark={dark} />;
+                        case 'advisors': return <AdvisorsBelow dark={dark} />;
+                        case 'how-it-works': return <HowItWorksBelow dark={dark} />;
+                        case 'pricing': return <PricingBelow dark={dark} />;
+                        default: return <SellBelow dark={dark} />;
+                      }
+                    })()}
+                  </Suspense>
+                </div>
               ) : (
-                /* Empty state */
+                /* Logged-in empty state */
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 24 }}>
                   <img
                     src={dark ? '/G3D.png' : '/G3L.png'}
