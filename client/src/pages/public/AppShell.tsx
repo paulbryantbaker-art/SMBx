@@ -1241,55 +1241,44 @@ export default function AppShell() {
 
   /* ═══ RENDER ═══ */
 
-  // ─── Mobile swipe gestures with non-passive listener (prevents iOS edge nav) ───
+  // ─── Mobile swipe gestures with edge guard (gestures from inside viewport, not edges) ───
   useEffect(() => {
     if (!isMobile) return;
     let startX = 0;
     let startY = 0;
     let startT = 0;
-    let isEdgeSwipe = false;
+    let trackable = false;
 
     const onStart = (e: TouchEvent) => {
       const t = e.touches[0];
       startX = t.clientX;
       startY = t.clientY;
       startT = Date.now();
-      // Mark as edge swipe if starting within 30px of either edge
-      isEdgeSwipe = startX < 30 || startX > window.innerWidth - 30;
-    };
-
-    const onMove = (e: TouchEvent) => {
-      if (!isEdgeSwipe) return;
-      const t = e.touches[0];
-      const dx = t.clientX - startX;
-      const dy = t.clientY - startY;
-      // Only block if horizontal motion dominates
-      if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
-        e.preventDefault();
-      }
+      // Track swipes that start INSIDE the safe zone (40-120px from edges)
+      // This avoids fighting iOS edge back-swipe which lives in 0-30px
+      const w = window.innerWidth;
+      trackable = (startX > 40 && startX < 120) || (startX > w - 120 && startX < w - 40);
     };
 
     const onEnd = (e: TouchEvent) => {
-      if (!isEdgeSwipe) return;
-      isEdgeSwipe = false;
+      if (!trackable) return;
+      trackable = false;
       const t = e.changedTouches[0];
       const dx = t.clientX - startX;
       const dy = t.clientY - startY;
       const dt = Date.now() - startT;
-      if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) || dt > 600) return;
-      if (dx > 0 && startX < 30 && !isMobileSidebarOpen && !isMobileCanvasDrawerOpen) {
+      if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) || dt > 600) return;
+      if (dx > 0 && startX < 120 && !isMobileSidebarOpen && !isMobileCanvasDrawerOpen) {
         setIsMobileSidebarOpen(true);
-      } else if (dx < 0 && startX > window.innerWidth - 30 && !isMobileSidebarOpen && !isMobileCanvasDrawerOpen) {
+      } else if (dx < 0 && startX > window.innerWidth - 120 && !isMobileSidebarOpen && !isMobileCanvasDrawerOpen) {
         setIsMobileCanvasDrawerOpen(true);
       }
     };
 
     document.addEventListener('touchstart', onStart, { passive: true });
-    document.addEventListener('touchmove', onMove, { passive: false });
     document.addEventListener('touchend', onEnd, { passive: true });
     return () => {
       document.removeEventListener('touchstart', onStart);
-      document.removeEventListener('touchmove', onMove);
       document.removeEventListener('touchend', onEnd);
     };
   }, [isMobile, isMobileSidebarOpen, isMobileCanvasDrawerOpen]);
