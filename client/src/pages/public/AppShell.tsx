@@ -28,6 +28,7 @@ import SourcingPanel from '../../components/chat/SourcingPanel';
 import IntelPanel from '../../components/chat/IntelPanel';
 import DealMessagesPanel from '../../components/documents/DealMessagesPanel';
 import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/CanvasToolbar';
+import FloatingTabBar from '../../components/canvas/FloatingTabBar';
 import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
@@ -490,6 +491,8 @@ export default function AppShell() {
 
   // Conversation id ref — written by an effect later, read by tab callbacks
   const conversationIdRef = useRef<number | null>(null);
+  // Canvas card ref — used by floating tab bar for hover proximity detection
+  const canvasCardRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<typeof user>(user);
   useEffect(() => { userRef.current = user; }, [user]);
 
@@ -1378,70 +1381,8 @@ export default function AppShell() {
         </button>
       </div>
 
-      {/* Open tabs section — only content tabs (not panels which already have buttons) */}
-      {(() => {
-        // Panel types live in the Tools section, not here
-        const PANEL_TYPES = new Set(['pipeline', 'dataroom', 'documents', 'sourcing', 'settings', 'seller-dashboard', 'buyer-pipeline']);
-        const contentTabs = canvasTabs.filter(t => !PANEL_TYPES.has(t.type));
-        if (!user || contentTabs.length === 0) return null;
-        return (
-        <>
-          <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`} />
-          <div className="flex flex-col items-center gap-1 w-full px-2 flex-1 min-h-0 overflow-y-auto">
-            <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Tabs</span>
-            {contentTabs.map(tab => {
-              const isActive = tab.id === activeCanvasTabId;
-              const tabIcons: Record<string, string> = {
-                pipeline: 'view_kanban',
-                dataroom: 'lock',
-                documents: 'folder_open',
-                sourcing: 'search',
-                settings: 'person',
-                deliverable: 'description',
-                markdown: 'article',
-                model: 'calculate',
-                'buyer-pipeline': 'store',
-                'seller-dashboard': 'storefront',
-                'deal-messages': 'forum',
-              };
-              return (
-                <div key={tab.id} className="relative w-full flex justify-center group">
-                  <button
-                    onClick={() => setActiveCanvasTabId(tab.id)}
-                    className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
-                      isActive
-                        ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
-                        : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
-                    }`}
-                    title={tab.label}
-                    type="button"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">{tabIcons[tab.type] || 'tab'}</span>
-                    <span className="text-[8px] font-semibold truncate max-w-[44px]">{tab.label}</span>
-                  </button>
-                  {/* Close button — visible on hover */}
-                  <button
-                    onClick={(e) => { e.stopPropagation(); closeCanvasTab(tab.id); }}
-                    className={`absolute top-0 right-1 w-4 h-4 rounded-full flex items-center justify-center border-0 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity ${dark ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700' : 'bg-white text-[#636467] hover:bg-[#f5f5f5]'}`}
-                    style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.08)' }}
-                    title="Close tab"
-                    type="button"
-                  >
-                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </>
-        );
-      })()}
-      {/* Spacer to push admin/account to bottom when no content tabs */}
-      {(() => {
-        const PANEL_TYPES = new Set(['pipeline', 'dataroom', 'documents', 'sourcing', 'settings', 'seller-dashboard', 'buyer-pipeline']);
-        const hasContentTabs = user && canvasTabs.some(t => !PANEL_TYPES.has(t.type));
-        return !hasContentTabs ? <div className="flex-1" /> : null;
-      })()}
+      {/* Spacer to push admin/account to bottom */}
+      <div className="flex-1" />
 
       {/* Bottom: Admin + Account */}
       <div className="flex flex-col items-center gap-1 mt-auto pt-4">
@@ -1961,6 +1902,7 @@ export default function AppShell() {
 
             {/* The active card — sharp 1px border + tight defined shadow (Canva-style) */}
             <div
+              ref={canvasCardRef}
               className="flex-1 flex flex-col min-w-0 overflow-hidden relative"
               style={{
                 background: canvasTabs.length > 0 ? (dark ? '#1A1C1E' : '#FFFFFF') : (dark ? '#151617' : '#FAFAF7'),
@@ -1988,6 +1930,21 @@ export default function AppShell() {
                       </div>
                     ))}
                   </div>
+                  {/* Floating tab bar — content tabs only, hover-near to show */}
+                  {(() => {
+                    const PANEL_TYPES = new Set(['pipeline', 'dataroom', 'documents', 'sourcing', 'settings', 'seller-dashboard', 'buyer-pipeline']);
+                    const contentTabs = canvasTabs.filter(t => !PANEL_TYPES.has(t.type));
+                    return (
+                      <FloatingTabBar
+                        tabs={contentTabs}
+                        activeTabId={activeCanvasTabId}
+                        onSelect={setActiveCanvasTabId}
+                        onClose={closeCanvasTab}
+                        containerRef={canvasCardRef}
+                        dark={dark}
+                      />
+                    );
+                  })()}
                 </>
               ) : (
                 /* Empty state */
