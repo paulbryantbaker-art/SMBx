@@ -7,6 +7,18 @@
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
+/* ─── Global tactile button feedback (applies everywhere) ─── */
+button {
+  transition: transform 0.12s ease, background-color 0.18s ease, color 0.18s ease, opacity 0.15s ease, box-shadow 0.18s ease;
+}
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  button { transition: none; }
+  button:active:not(:disabled) { transform: none; }
+}
+
 /* Stitch editorial utilities */
 .editorial-spacing { margin-top: 160px; margin-bottom: 160px; }
 .editorial-margin { margin-top: 160px; margin-bottom: 160px; }

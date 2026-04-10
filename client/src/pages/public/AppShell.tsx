@@ -1969,13 +1969,6 @@ export default function AppShell() {
         .resize-handle:active > div {
           background: rgba(128,128,128,0.3) !important;
         }
-        /* Tactile press feedback on all buttons */
-        button:active:not(:disabled) {
-          transform: scale(0.97);
-        }
-        button {
-          transition: transform 0.1s ease, background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
-        }
       `}</style>
 
       {/* ═══ MOBILE SIDEBAR DRAWER ═══ */}
