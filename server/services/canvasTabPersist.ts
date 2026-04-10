@@ -36,10 +36,9 @@ export async function persistCanvasTabFromAction(
 
   switch (action.canvas_action) {
     case 'create_model_tab':
-      // Model tabs use a generated id (we don't have access to the modelStore on the server,
-      // so we'll just upsert the panel-style tab. The client's modelStore handles details.)
+      // Model tabs reuse tab id 'model' (matches client panel pattern)
       type = 'model';
-      tabId = `model-${Date.now()}`;
+      tabId = 'model';
       label = action.title || 'Model';
       props = { modelType: action.modelType, initialAssumptions: action.initialAssumptions };
       break;

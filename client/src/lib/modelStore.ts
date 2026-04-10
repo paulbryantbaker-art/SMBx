@@ -44,6 +44,7 @@ interface ModelStore {
 
   // Actions
   createTab: (type: ModelType, title: string, initialAssumptions?: Record<string, any>, dealId?: number) => string;
+  restoreTab: (id: string, type: ModelType, title: string, assumptions: Record<string, any>, dealId?: number) => void;
   closeTab: (tabId: string) => void;
   setActiveTab: (tabId: string) => void;
   updateAssumption: (tabId: string, key: string, value: any) => void;
@@ -218,6 +219,21 @@ export const useModelStore = create<ModelStore>((set, get) => ({
     }));
     trackEvent('model_created', { model: type, title });
     return id;
+  },
+
+  restoreTab: (id, type, title, assumptions, dealId) => {
+    // Used when hydrating canvas tabs from server — preserves the original tab id
+    const tab: ModelTab = {
+      id, type, title, dealId,
+      assumptions: assumptions || {},
+      outputs: {},
+      linkedTabs: [],
+      createdAt: Date.now(),
+    };
+    tab.outputs = recalculate(tab);
+    set(state => ({
+      tabs: { ...state.tabs, [id]: tab },
+    }));
   },
 
   closeTab: (tabId) => {

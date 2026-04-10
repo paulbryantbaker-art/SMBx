@@ -1066,9 +1066,28 @@ export default function AppShell() {
     let cancelled = false;
     fetch(`/api/conversations/${convId}/canvas-tabs`, { headers: authHeaders() })
       .then(r => r.ok ? r.json() : { tabs: [] })
-      .then(({ tabs }) => {
+      .then(async ({ tabs }) => {
         if (cancelled) return;
         if (!Array.isArray(tabs) || tabs.length === 0) return;
+
+        // Restore model tabs into the zustand modelStore so they actually render
+        const modelTabs = tabs.filter((t: any) => t.type === 'model');
+        if (modelTabs.length > 0) {
+          const { useModelStore } = await import('../../lib/modelStore');
+          const store = useModelStore.getState();
+          for (const t of modelTabs) {
+            const props = t.props || {};
+            // Use the canvas tab_id as the zustand model id
+            // (deterministic — client and server agree)
+            const modelId = t.tab_id;
+            if (props.modelType) {
+              store.restoreTab(modelId, props.modelType, t.label, props.initialAssumptions || props.assumptions || {});
+              props.modelTabId = modelId;
+              t.props = props;
+            }
+          }
+        }
+
         const restored: CanvasTab[] = tabs.map((t: any) => ({
           id: t.tab_id,
           type: t.type,
