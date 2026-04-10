@@ -1733,7 +1733,7 @@ export default function AppShell() {
                     visible viewport with safe-area padding for the home indicator. */}
               </>
               ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing'].includes(activeTab) ? (
-              <div className="relative z-10" style={{ padding: !isMobile ? '16px 16px 16px 0' : '0' }}>
+              <div className="relative z-10" style={{ padding: !isMobile ? '16px 16px 16px 8px' : '0' }}>
                 {/* Floating card — matches the canvas card style in the workspace */}
                 <div
                   style={{
