@@ -3,6 +3,7 @@
  * Shows a filterable list with deal context, status, and type.
  */
 import { useState, useEffect, useCallback } from 'react';
+import { useIsDark } from '../../hooks/useIsDark';
 
 interface Deliverable {
   id: number;
@@ -24,15 +25,15 @@ function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  queued: { bg: 'rgba(0,0,0,0.05)', text: 'rgba(0,0,0,0.4)' },
-  generating: { bg: '#FEF3C7', text: '#92400E' },
-  completed: { bg: '#ECFDF5', text: '#065F46' },
-  failed: { bg: '#FEF2F2', text: '#991B1B' },
-  draft: { bg: '#EFF6FF', text: '#1E40AF' },
-  review: { bg: '#FEF3C7', text: '#92400E' },
-  approved: { bg: '#ECFDF5', text: '#065F46' },
-  locked: { bg: '#F3F4F6', text: '#374151' },
+const STATUS_COLORS: Record<string, { bg: string; text: string; darkBg: string; darkText: string }> = {
+  queued:     { bg: 'rgba(0,0,0,0.05)', text: 'rgba(0,0,0,0.4)', darkBg: 'rgba(255,255,255,0.06)', darkText: 'rgba(255,255,255,0.5)' },
+  generating: { bg: '#FEF3C7', text: '#92400E', darkBg: 'rgba(251,191,4,0.15)', darkText: '#FCD34D' },
+  completed:  { bg: '#ECFDF5', text: '#065F46', darkBg: 'rgba(52,168,83,0.15)', darkText: '#6EE7B7' },
+  failed:     { bg: '#FEF2F2', text: '#991B1B', darkBg: 'rgba(234,67,53,0.15)', darkText: '#FCA5A5' },
+  draft:      { bg: '#EFF6FF', text: '#1E40AF', darkBg: 'rgba(78,143,212,0.15)', darkText: '#93C5FD' },
+  review:     { bg: '#FEF3C7', text: '#92400E', darkBg: 'rgba(251,191,4,0.15)', darkText: '#FCD34D' },
+  approved:   { bg: '#ECFDF5', text: '#065F46', darkBg: 'rgba(52,168,83,0.15)', darkText: '#6EE7B7' },
+  locked:     { bg: '#F3F4F6', text: '#374151', darkBg: 'rgba(255,255,255,0.06)', darkText: 'rgba(255,255,255,0.55)' },
 };
 
 const JOURNEY_LABELS: Record<string, string> = {
@@ -43,6 +44,7 @@ const JOURNEY_LABELS: Record<string, string> = {
 };
 
 export default function DocumentLibrary({ onViewDeliverable }: { onViewDeliverable?: (id: number) => void }) {
+  const dark = useIsDark();
   const [deliverables, setDeliverables] = useState<Deliverable[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterDeal, setFilterDeal] = useState<string>('all');
@@ -61,16 +63,27 @@ export default function DocumentLibrary({ onViewDeliverable }: { onViewDeliverab
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // Derive unique deals for filter
   const dealOptions = Array.from(new Map(deliverables.map(d => [d.deal_id, { id: d.deal_id, name: d.deal_name || `Deal #${d.deal_id}` }])).values());
 
-  // Filter
   const filtered = deliverables.filter(d => {
     if (filterDeal !== 'all' && String(d.deal_id) !== filterDeal) return false;
     if (filterStatus !== 'all' && d.status !== filterStatus) return false;
     if (search && !d.name.toLowerCase().includes(search.toLowerCase()) && !d.slug.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  // Theme-aware colors
+  const c = {
+    text: dark ? '#F0F0F3' : '#0D0D0D',
+    textMuted: dark ? 'rgba(218,218,220,0.6)' : 'rgba(0,0,0,0.4)',
+    textFaint: dark ? 'rgba(218,218,220,0.4)' : 'rgba(0,0,0,0.3)',
+    inputBg: dark ? '#2F3133' : '#FFFFFF',
+    inputBorder: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.1)',
+    rowBorder: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+    rowHeaderBg: dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+    rowHover: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+    panelBorder: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+  };
 
   if (loading) {
     return (
@@ -84,8 +97,8 @@ export default function DocumentLibrary({ onViewDeliverable }: { onViewDeliverab
     <div className="max-w-5xl mx-auto px-4 py-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#0D0D0D', margin: 0, letterSpacing: '-0.02em' }}>Documents</h1>
-        <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.4)', margin: '4px 0 0' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: 700, color: c.text, margin: 0, letterSpacing: '-0.02em' }}>Documents</h1>
+        <p style={{ fontSize: '14px', color: c.textMuted, margin: '4px 0 0' }}>
           All deliverables across your deals
         </p>
       </div>
@@ -94,7 +107,7 @@ export default function DocumentLibrary({ onViewDeliverable }: { onViewDeliverab
       <div className="flex flex-wrap items-center gap-3 mb-4">
         {/* Search */}
         <div className="relative flex-1 min-w-[200px]">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c.textFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <input
@@ -102,16 +115,16 @@ export default function DocumentLibrary({ onViewDeliverable }: { onViewDeliverab
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search documents..."
-            className="w-full pl-9 pr-3 py-2 text-sm border rounded-lg bg-white outline-none"
-            style={{ borderColor: 'rgba(0,0,0,0.1)', fontFamily: 'inherit' }}
+            className="w-full pl-9 pr-3 py-2 text-sm border rounded-lg outline-none"
+            style={{ background: c.inputBg, color: c.text, borderColor: c.inputBorder, fontFamily: 'inherit' }}
           />
         </div>
         {/* Deal filter */}
         <select
           value={filterDeal}
           onChange={e => setFilterDeal(e.target.value)}
-          className="text-sm py-2 px-3 border rounded-lg bg-white outline-none cursor-pointer"
-          style={{ borderColor: 'rgba(0,0,0,0.1)', fontFamily: 'inherit', color: '#0D0D0D' }}
+          className="text-sm py-2 px-3 border rounded-lg outline-none cursor-pointer"
+          style={{ background: c.inputBg, color: c.text, borderColor: c.inputBorder, fontFamily: 'inherit' }}
         >
           <option value="all">All Deals</option>
           {dealOptions.map(d => (
@@ -122,8 +135,8 @@ export default function DocumentLibrary({ onViewDeliverable }: { onViewDeliverab
         <select
           value={filterStatus}
           onChange={e => setFilterStatus(e.target.value)}
-          className="text-sm py-2 px-3 border rounded-lg bg-white outline-none cursor-pointer"
-          style={{ borderColor: 'rgba(0,0,0,0.1)', fontFamily: 'inherit', color: '#0D0D0D' }}
+          className="text-sm py-2 px-3 border rounded-lg outline-none cursor-pointer"
+          style={{ background: c.inputBg, color: c.text, borderColor: c.inputBorder, fontFamily: 'inherit' }}
         >
           <option value="all">All Statuses</option>
           <option value="completed">Completed</option>
@@ -136,10 +149,10 @@ export default function DocumentLibrary({ onViewDeliverable }: { onViewDeliverab
       {/* Empty state */}
       {filtered.length === 0 && (
         <div className="text-center py-16">
-          <svg className="mx-auto mb-3" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg className="mx-auto mb-3" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={c.textFaint} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
           </svg>
-          <p style={{ fontSize: '14px', color: 'rgba(0,0,0,0.4)', margin: 0 }}>
+          <p style={{ fontSize: '14px', color: c.textMuted, margin: 0 }}>
             {deliverables.length === 0 ? 'No documents yet. Chat with Yulia to generate deliverables.' : 'No documents match your filters.'}
           </p>
         </div>
@@ -147,14 +160,14 @@ export default function DocumentLibrary({ onViewDeliverable }: { onViewDeliverab
 
       {/* Document list */}
       {filtered.length > 0 && (
-        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(0,0,0,0.08)' }}>
+        <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${c.panelBorder}` }}>
           {/* Table header */}
-          <div className="hidden md:grid grid-cols-[1fr_150px_100px_100px_120px] gap-2 px-4 py-2.5" style={{ background: 'rgba(0,0,0,0.02)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(0,0,0,0.3)' }}>Name</span>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(0,0,0,0.3)' }}>Deal</span>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(0,0,0,0.3)' }}>Type</span>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(0,0,0,0.3)' }}>Status</span>
-            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(0,0,0,0.3)' }}>Date</span>
+          <div className="hidden md:grid grid-cols-[1fr_150px_100px_100px_120px] gap-2 px-4 py-2.5" style={{ background: c.rowHeaderBg, borderBottom: `1px solid ${c.rowBorder}` }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: c.textFaint }}>Name</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: c.textFaint }}>Deal</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: c.textFaint }}>Type</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: c.textFaint }}>Status</span>
+            <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: c.textFaint }}>Date</span>
           </div>
           {/* Rows */}
           {filtered.map(d => {
@@ -163,29 +176,31 @@ export default function DocumentLibrary({ onViewDeliverable }: { onViewDeliverab
               <button
                 key={d.id}
                 onClick={() => onViewDeliverable?.(d.id)}
-                className="w-full text-left px-4 py-3 flex md:grid md:grid-cols-[1fr_150px_100px_100px_120px] gap-2 items-center bg-transparent border-0 cursor-pointer hover:bg-[rgba(0,0,0,0.02)] transition-colors"
-                style={{ borderBottom: '1px solid rgba(0,0,0,0.04)', fontFamily: 'inherit' }}
+                className="w-full text-left px-4 py-3 flex md:grid md:grid-cols-[1fr_150px_100px_100px_120px] gap-2 items-center bg-transparent border-0 cursor-pointer transition-colors"
+                style={{ borderBottom: `1px solid ${c.rowBorder}`, fontFamily: 'inherit' }}
+                onMouseEnter={e => (e.currentTarget.style.background = c.rowHover)}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 type="button"
               >
                 <div className="min-w-0">
-                  <p style={{ fontSize: '14px', fontWeight: 500, color: '#0D0D0D', margin: 0 }} className="truncate">{d.name}</p>
-                  <p style={{ fontSize: '12px', color: 'rgba(0,0,0,0.35)', margin: '2px 0 0' }} className="truncate md:hidden">
+                  <p style={{ fontSize: '14px', fontWeight: 500, color: c.text, margin: 0 }} className="truncate">{d.name}</p>
+                  <p style={{ fontSize: '12px', color: c.textMuted, margin: '2px 0 0' }} className="truncate md:hidden">
                     {d.deal_name || `Deal #${d.deal_id}`}
                   </p>
                 </div>
-                <span className="hidden md:block text-sm truncate" style={{ color: 'rgba(0,0,0,0.5)' }}>
+                <span className="hidden md:block text-sm truncate" style={{ color: c.textMuted }}>
                   {d.deal_name || `Deal #${d.deal_id}`}
                 </span>
-                <span className="hidden md:block text-xs" style={{ color: 'rgba(0,0,0,0.4)' }}>
+                <span className="hidden md:block text-xs" style={{ color: c.textMuted }}>
                   {JOURNEY_LABELS[d.journey_type] || d.journey_type}
                 </span>
                 <span
                   className="text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap w-fit"
-                  style={{ background: statusStyle.bg, color: statusStyle.text }}
+                  style={{ background: dark ? statusStyle.darkBg : statusStyle.bg, color: dark ? statusStyle.darkText : statusStyle.text }}
                 >
                   {d.status}
                 </span>
-                <span className="hidden md:block text-xs" style={{ color: 'rgba(0,0,0,0.35)' }}>
+                <span className="hidden md:block text-xs" style={{ color: c.textFaint }}>
                   {new Date(d.completed_at || d.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                 </span>
               </button>
