@@ -228,13 +228,16 @@ authRouter.post('/forgot-password', async (req, res) => {
 
     const sent = await sendEmail({
       to: user.email,
-      subject: 'Reset your password — smbx.ai',
+      subject: 'Let\'s get you back in',
       html: brandedEmail({
-        headline: 'Reset your password.',
-        body: '<p style="margin:0;">Click below to reset your password. This link expires in 1 hour.</p>',
-        ctaLabel: 'Reset Password',
+        headline: 'Forgot your password? Happens to the best of us.',
+        body: `
+          <p style="margin:0 0 14px;">No judgment here — I forget things too. (Not deal numbers. Never deal numbers.)</p>
+          <p style="margin:0;">Click below to set a new password. This link expires in 30 minutes, so don't sit on it.</p>
+        `,
+        ctaLabel: 'Reset My Password',
         ctaUrl: resetUrl,
-        footnote: 'If you didn\'t request this, you can safely ignore this email.',
+        footnote: 'Didn\'t request this? Someone may have typed your email by mistake. Nothing has changed on your account.',
       }),
     });
     console.log(`[auth] Password reset email to ${user.email}: ${sent ? 'sent' : 'FAILED (check RESEND_API_KEY)'}`);
@@ -327,7 +330,7 @@ authRouter.post('/send-verification', requireAuth, async (req, res) => {
         `,
         ctaLabel: 'Confirm My Email',
         ctaUrl: verifyUrl,
-        footnote: 'If you didn\'t create an smbx.ai account, you can safely ignore this. No harm done.',
+        footnote: 'If you didn\'t create an smbx.ai account, you can safely ignore this.',
       }),
     });
     console.log(`[auth] Verification email to ${user.email}: ${sent ? 'sent' : 'FAILED (check RESEND_API_KEY)'}`);

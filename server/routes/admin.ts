@@ -27,6 +27,19 @@ function requireAdmin(req: any, res: any, next: any) {
 adminRouter.use(requireAuth);
 adminRouter.use(requireAdmin);
 
+// ─── Test Emails ────────────────────────────────────────────
+adminRouter.post('/admin/test-emails', async (req, res) => {
+  try {
+    const [user] = await sql`SELECT email FROM users WHERE id = ${(req as any).userId}`;
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const { sendTestEmails } = await import('../services/emailService.js');
+    const result = await sendTestEmails(user.email);
+    return res.json(result);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── Metrics Overview ───────────────────────────────────────
 
 adminRouter.get('/admin/metrics/overview', async (_req, res) => {
