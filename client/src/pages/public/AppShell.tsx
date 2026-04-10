@@ -1265,9 +1265,9 @@ export default function AppShell() {
         left: 16,
         bottom: 16,
         height: 'auto',
-        background: dark ? '#1A1C1E' : '#FFFFFF',
+        background: dark ? '#1A1C1E' : '#F0EBE0',
         borderRadius: 14,
-        border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+        border: dark ? '1px solid #2A2C2E' : '1px solid #DDD7C8',
         boxShadow: dark
           ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
           : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
@@ -1741,8 +1741,8 @@ export default function AppShell() {
                 {/* Floating card — matches the canvas card style in the workspace */}
                 <div
                   style={{
-                    background: dark ? '#1A1C1E' : '#FFFFFF',
-                    border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+                    background: dark ? '#1A1C1E' : '#F0EBE0',
+                    border: dark ? '1px solid #2A2C2E' : '1px solid #DDD7C8',
                     borderRadius: !isMobile ? 14 : 0,
                     boxShadow: !isMobile ? (dark
                       ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
@@ -1907,8 +1907,8 @@ export default function AppShell() {
               ref={canvasCardRef}
               className="flex-1 flex flex-col min-w-0 overflow-hidden relative"
               style={{
-                background: canvasTabs.length > 0 ? (dark ? '#1A1C1E' : '#FFFFFF') : (dark ? '#151617' : '#FAFAF7'),
-                border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+                background: dark ? '#1A1C1E' : '#F0EBE0',
+                border: dark ? '1px solid #2A2C2E' : '1px solid #DDD7C8',
                 borderRadius: 14,
                 // Tight defined shadow — close 1px + a single 6px lift, NO blur spread
                 boxShadow: dark
