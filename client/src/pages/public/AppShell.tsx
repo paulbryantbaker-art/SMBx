@@ -27,7 +27,7 @@ import NDAModal from '../../components/chat/NDAModal';
 import SourcingPanel from '../../components/chat/SourcingPanel';
 import IntelPanel from '../../components/chat/IntelPanel';
 import DealMessagesPanel from '../../components/documents/DealMessagesPanel';
-import CanvasTabBar from '../../components/canvas/CanvasTabBar';
+import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/CanvasToolbar';
 import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
@@ -974,6 +974,42 @@ export default function AppShell() {
     window.addEventListener('smbx:canvas_action', handler);
     return () => window.removeEventListener('smbx:canvas_action', handler);
   }, [openCanvasTab]);
+
+  // ─── Canvas Toolbar Actions — context-aware floating toolbar ──
+  const getToolbarActionsFor = (tab: { id: string; type: string; label: string; props?: Record<string, any> }): ToolbarAction[] => {
+    switch (tab.type) {
+      case 'deliverable':
+        return [
+          { id: 'edit', label: 'Edit', icon: 'edit', onClick: () => { /* TODO: open editor */ } },
+          { id: 'export', label: 'Export', icon: 'download', onClick: () => {
+            const id = tab.props?.deliverableId;
+            if (id) window.open(`/api/deliverables/${id}/export?format=pdf`, '_blank');
+          }, divider: true },
+          { id: 'share', label: 'Share', icon: 'share', onClick: () => { /* TODO: share modal */ } },
+        ];
+      case 'model':
+        return [
+          { id: 'reset', label: 'Reset', icon: 'restart_alt', onClick: () => { /* TODO: reset model */ } },
+          { id: 'compare', label: 'Compare', icon: 'compare_arrows', onClick: () => { /* TODO: compare scenarios */ }, divider: true },
+          { id: 'export', label: 'Export', icon: 'download', onClick: () => { /* TODO: export model */ } },
+        ];
+      case 'markdown':
+        return [
+          { id: 'copy', label: 'Copy', icon: 'content_copy', onClick: () => {
+            if (tab.props?.content) navigator.clipboard.writeText(tab.props.content);
+          } },
+          { id: 'export', label: 'Export', icon: 'download', onClick: () => { /* TODO: export markdown */ }, divider: true },
+        ];
+      case 'dataroom':
+        return [
+          { id: 'upload', label: 'Upload', icon: 'upload_file', onClick: () => { /* TODO: trigger upload */ }, primary: true },
+          { id: 'invite', label: 'Invite', icon: 'person_add', onClick: () => { /* TODO: invite */ }, divider: true },
+        ];
+      // Panels with their own internal controls (Library, Pipeline, Sourcing, Settings) — no floating toolbar
+      default:
+        return [];
+    }
+  };
 
   // ─── Canvas Tab Content Renderer ──────────────────────────────
   const renderCanvasTabContent = (tab: { id: string; type: string; label: string; props?: Record<string, any> }) => {
@@ -1929,14 +1965,11 @@ export default function AppShell() {
             >
               {canvasTabs.length > 0 ? (
                 <>
-                  {/* Horizontal tab bar — browser/VS Code style */}
-                  <CanvasTabBar
-                    tabs={canvasTabs}
-                    activeTabId={activeCanvasTabId}
-                    onSelect={setActiveCanvasTabId}
-                    onClose={closeCanvasTab}
-                    dark={dark}
-                  />
+                  {/* Floating toolbar — appears for tab types that need actions */}
+                  {activeCanvasTab && (() => {
+                    const actions = getToolbarActionsFor(activeCanvasTab);
+                    return actions.length > 0 ? <CanvasToolbar actions={actions} dark={dark} /> : null;
+                  })()}
                   {/* All tabs mounted, only active visible */}
                   <div className="flex-1 overflow-y-auto relative">
                     {canvasTabs.map(tab => (
