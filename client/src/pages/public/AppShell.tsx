@@ -1259,12 +1259,13 @@ export default function AppShell() {
 
   const sidebarContent = (_mobile: boolean) => (
     <aside
-      className={`hidden lg:flex flex-col w-[72px] fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-[#1A1C1E]' : 'bg-white'}`}
+      className="hidden lg:flex flex-col w-[72px] fixed left-0 top-0 z-50 items-center py-6"
       style={{
         top: 16,
         left: 16,
         bottom: 16,
         height: 'auto',
+        background: dark ? '#1A1C1E' : '#FFFFFF',
         borderRadius: 14,
         border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
         boxShadow: dark
@@ -1735,7 +1736,7 @@ export default function AppShell() {
                     visible viewport with safe-area padding for the home indicator. */}
               </>
               ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing'].includes(activeTab) ? (
-              <div className="relative z-10" style={{ padding: !isMobile ? '16px 16px 16px 8px' : '0' }}>
+              <div className="relative z-10" style={{ padding: !isMobile ? '16px 16px 16px 16px' : '0' }}>
                 {/* Floating card — matches the canvas card style in the workspace */}
                 <div
                   style={{
@@ -1897,7 +1898,7 @@ export default function AppShell() {
               flex: 1,
               background: 'transparent',
               position: 'relative',
-              padding: '16px 16px 16px 8px',
+              padding: '16px 16px 16px 16px',
             }}
           >
             {/* The active card — sharp 1px border + tight defined shadow (Canva-style) */}
