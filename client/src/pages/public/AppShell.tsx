@@ -1248,7 +1248,7 @@ export default function AppShell() {
             <button
               key={item.id}
               onClick={() => handleTabClick(item.id)}
-              className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
+              className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                 isActive
                   ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
                   : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
@@ -1283,7 +1283,7 @@ export default function AppShell() {
             <button
               key={item.type}
               onClick={() => openCanvasTab(item.type, item.label)}
-              className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
+              className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                 isActive
                   ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
                   : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
@@ -1308,7 +1308,7 @@ export default function AppShell() {
         {user && (
         <button
           onClick={() => { handleNewChat(); }}
-          className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer active:scale-95 transition-all ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5'}`}
+          className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer transition-all ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5'}`}
           title="New Chat"
           type="button"
         >
@@ -1318,7 +1318,7 @@ export default function AppShell() {
         )}
         <button
           onClick={() => { setViewState('chat'); navigate('/chat', { replace: viewState === 'chat' }); }}
-          className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
+          className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
             viewState === 'chat'
               ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
               : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
@@ -1337,7 +1337,7 @@ export default function AppShell() {
         {user && (user.role === 'admin' || user.email === 'pbaker@smbx.ai') && (
           <button
             onClick={() => navigate('/admin')}
-            className={`flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
+            className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
             type="button"
             title="Admin Console"
           >
@@ -1347,7 +1347,7 @@ export default function AppShell() {
         )}
         <button
           onClick={() => { if (user) { openCanvasTab('settings', 'Settings'); } else window.location.href = '/login'; }}
-          className={`flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
+          className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
           type="button"
         >
           <span className="material-symbols-outlined text-[22px]">{user ? 'person' : 'login'}</span>
@@ -1880,11 +1880,59 @@ export default function AppShell() {
           color: #fff;
           pointer-events: auto;
         }
+        /* X logo button: hover highlight + spin-once on click */
+        .sidebar-x-btn {
+          position: relative;
+          transition: background 0.2s ease;
+        }
+        .sidebar-x-btn::before {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          border-radius: 14px;
+          background: radial-gradient(circle at center, rgba(212,74,120,0.18), rgba(212,74,120,0) 70%);
+          opacity: 0;
+          transition: opacity 0.25s ease;
+          pointer-events: none;
+        }
+        .sidebar-x-btn:hover::before { opacity: 1; }
         .sidebar-x-img {
-          transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: transform 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
+          position: relative;
+          z-index: 1;
         }
         .sidebar-x-btn:hover .sidebar-x-img {
-          transform: rotate(180deg);
+          transform: scale(1.08);
+        }
+        .sidebar-x-btn:active .sidebar-x-img {
+          animation: xSpin 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
+        }
+        @keyframes xSpin {
+          from { transform: rotate(0deg) scale(1.08); }
+          to { transform: rotate(360deg) scale(1.08); }
+        }
+
+        /* Sidebar icon buttons: subtle press feedback with brief flash */
+        .sidebar-icon-btn {
+          position: relative;
+          transition: transform 0.12s ease, background-color 0.18s ease, color 0.18s ease;
+        }
+        .sidebar-icon-btn:active:not(:disabled) {
+          transform: scale(0.9);
+        }
+        .sidebar-icon-btn::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          background: currentColor;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.25s ease;
+        }
+        .sidebar-icon-btn:active::after {
+          opacity: 0.10;
+          transition: opacity 0.05s ease;
         }
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(8px); }
