@@ -62,10 +62,12 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
 /* ═══ SITE BACKGROUND — Warm paper, Grok-minimal ═══
    Just the cream base + subtle film grain. No gradients, no glows, no
    atmospheric color. Rose gold only appears intentionally (H1 accents,
-   chat pill, CTAs) — never as ambient decoration. */
+   chat pill, CTAs) — never as ambient decoration.
+   This matches the logged-in app's back layer (#EFEBE3) so journey
+   pages and the workspace share one consistent background. */
 html, body {
   width: 100%;
-  background-color: #f8f6f2 !important;
+  background-color: #EFEBE3 !important;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
   background-repeat: repeat;
@@ -112,7 +114,7 @@ html.dark {
   --shadow-lg: 0 4px 24px rgba(0,0,0,.5);
 }
 html.dark, html.dark body {
-  background-color: #151617 !important;
+  background-color: #0B0C0E !important;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
   background-repeat: repeat;
