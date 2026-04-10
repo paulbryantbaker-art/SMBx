@@ -1850,9 +1850,9 @@ export default function AppShell() {
           {/* Tool views now render as canvas tabs */}
         </div>
 
-        {/* ════ CHATDOCK — chat mode, pinned at bottom ════ */}
+        {/* ════ CHATDOCK — chat mode, pinned at bottom, aligned with sidebar/canvas ════ */}
         {showDock && viewState === 'chat' && (
-          <div className="shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
+          <div className="shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
             <ChatDock
               ref={dockRef}
               onSend={handleSend}
