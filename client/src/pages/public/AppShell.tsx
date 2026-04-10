@@ -472,6 +472,7 @@ export default function AppShell() {
     return () => root.classList.remove('chat-mode');
   }, [isChat]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isMobileCanvasDrawerOpen, setIsMobileCanvasDrawerOpen] = useState(false);
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
   const [canvasMarkdown, setCanvasMarkdown] = useState<{ content: string; title: string } | null>(null);
 
@@ -1240,16 +1241,47 @@ export default function AppShell() {
 
   /* ═══ RENDER ═══ */
 
+  // ─── Mobile swipe gestures ───
+  const swipeStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
+  const handleSwipeStart = useCallback((e: React.TouchEvent) => {
+    if (!isMobile) return;
+    const t = e.touches[0];
+    swipeStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+  }, [isMobile]);
+  const handleSwipeEnd = useCallback((e: React.TouchEvent) => {
+    if (!isMobile) return;
+    const start = swipeStartRef.current;
+    if (!start) return;
+    swipeStartRef.current = null;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    const dt = Date.now() - start.t;
+    // Must be horizontal, fast enough, and minimum distance
+    if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) || dt > 600) return;
+    // Right swipe from left edge → open menu drawer
+    if (dx > 0 && start.x < 30 && !isMobileSidebarOpen && !isMobileCanvasDrawerOpen) {
+      setIsMobileSidebarOpen(true);
+    }
+    // Left swipe from right edge → open canvas drawer
+    else if (dx < 0 && start.x > window.innerWidth - 30 && !isMobileSidebarOpen && !isMobileCanvasDrawerOpen) {
+      setIsMobileCanvasDrawerOpen(true);
+    }
+  }, [isMobile, isMobileSidebarOpen, isMobileCanvasDrawerOpen]);
+
   return (
     <div
       id="app-root"
       className={`flex font-sans bg-transparent ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}
+      onTouchStart={handleSwipeStart}
+      onTouchEnd={handleSwipeEnd}
       style={{
         width: '100%',
         ...(isChat ? { height: '100%' } : {}),
         paddingTop: 'env(safe-area-inset-top)',
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)',
+        overscrollBehaviorX: 'contain',
         ...(appOffset ? { transform: `translateY(${appOffset}px)` } : {}),
       }}
     >
@@ -1876,6 +1908,73 @@ export default function AppShell() {
                 {user ? 'Account & Settings' : 'Account & Settings'}
               </button>
             </div>
+          </nav>
+        </>
+      )}
+
+      {/* ═══ MOBILE CANVAS DRAWER (right side) ═══ */}
+      {isMobile && isMobileCanvasDrawerOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-[60] bg-black/40"
+            onClick={() => setIsMobileCanvasDrawerOpen(false)}
+            style={{ animation: 'fadeOnly 0.2s ease' }}
+          />
+          <nav
+            className={`fixed top-0 right-0 bottom-0 z-[61] w-64 flex flex-col py-12 px-6 overflow-y-auto ${dark ? 'bg-[#1a1c1e] border-l border-zinc-800' : 'bg-white border-l border-[#eeeef0] shadow-xl'}`}
+            style={{ animation: 'slideInRight 0.25s ease' }}
+          >
+            <button
+              onClick={() => setIsMobileCanvasDrawerOpen(false)}
+              className={`absolute top-4 left-4 bg-transparent border-none cursor-pointer p-0 ${dark ? 'text-[#f0f0f3]/70' : 'text-[#1a1c1e]/70'}`}
+              type="button"
+              aria-label="Close canvas menu"
+            >
+              <span className="material-symbols-outlined text-[24px]">close</span>
+            </button>
+            <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-4 mt-2 ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Canvas Tools</span>
+            {user ? (
+              <>
+                {([
+                  { type: 'documents', icon: 'folder_open', label: 'Library' },
+                  { type: 'dataroom', icon: 'lock', label: 'Data Room' },
+                  { type: 'pipeline', icon: 'view_kanban', label: 'Pipeline' },
+                  { type: 'sourcing', icon: 'search', label: 'Sourcing' },
+                ]).map(item => (
+                  <button
+                    key={item.type}
+                    onClick={() => { setIsMobileCanvasDrawerOpen(false); openCanvasTab(item.type, item.label); }}
+                    className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 hover:text-white bg-transparent' : 'text-[#636467] hover:text-[#1a1c1e] bg-transparent'}`}
+                    type="button"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                    {item.label}
+                  </button>
+                ))}
+                {canvasTabs.length > 0 && (
+                  <>
+                    <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-2 mt-6 ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Open Tabs</span>
+                    {canvasTabs.map(tab => (
+                      <button
+                        key={tab.id}
+                        onClick={() => { setIsMobileCanvasDrawerOpen(false); setActiveCanvasTabId(tab.id); }}
+                        className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${
+                          tab.id === activeCanvasTabId
+                            ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
+                            : (dark ? 'text-zinc-400 hover:text-white bg-transparent' : 'text-[#636467] hover:text-[#1a1c1e] bg-transparent')
+                        }`}
+                        type="button"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">tab</span>
+                        <span className="truncate">{tab.label}</span>
+                      </button>
+                    ))}
+                  </>
+                )}
+              </>
+            ) : (
+              <p className={`text-sm ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Sign in to access canvas tools.</p>
+            )}
           </nav>
         </>
       )}
