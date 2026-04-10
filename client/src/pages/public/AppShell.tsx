@@ -1259,15 +1259,17 @@ export default function AppShell() {
 
   const sidebarContent = (_mobile: boolean) => (
     <aside
-      className="hidden lg:flex flex-col w-[72px] fixed left-0 top-0 z-50 items-center py-6"
+      className={`hidden lg:flex flex-col w-[72px] fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-[#1A1C1E]' : 'bg-white'}`}
       style={{
         top: 16,
         left: 16,
         bottom: 16,
         height: 'auto',
-        background: 'transparent',
         borderRadius: 14,
-        border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+        border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+        boxShadow: dark
+          ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
+          : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
       }}
     >
       {/* Logo — X mark, always visible */}
@@ -1735,12 +1737,15 @@ export default function AppShell() {
               </>
               ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing'].includes(activeTab) ? (
               <div className="relative z-10" style={{ padding: !isMobile ? '16px 16px 16px 16px' : '0' }}>
-                {/* Floating card — transparent fill, hairline border only */}
+                {/* Floating card — matches the canvas card style in the workspace */}
                 <div
                   style={{
-                    background: 'transparent',
-                    border: !isMobile ? (dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)') : 'none',
+                    background: dark ? '#1A1C1E' : '#FFFFFF',
+                    border: !isMobile ? (dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9') : 'none',
                     borderRadius: !isMobile ? 14 : 0,
+                    boxShadow: !isMobile ? (dark
+                      ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
+                      : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)') : 'none',
                     overflow: 'hidden',
                   }}
                 >
@@ -1896,14 +1901,17 @@ export default function AppShell() {
               padding: '16px 16px 16px 16px',
             }}
           >
-            {/* The active card — transparent fill, hairline border only */}
+            {/* The active card — sharp 1px border + tight defined shadow */}
             <div
               ref={canvasCardRef}
               className="flex-1 flex flex-col min-w-0 overflow-hidden relative"
               style={{
-                background: 'transparent',
-                border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+                background: dark ? '#1A1C1E' : '#FFFFFF',
+                border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
                 borderRadius: 14,
+                boxShadow: dark
+                  ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
+                  : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
                 zIndex: 1,
               }}
             >
