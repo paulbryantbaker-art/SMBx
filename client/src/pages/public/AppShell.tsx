@@ -1314,7 +1314,7 @@ export default function AppShell() {
       <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`} />
 
       {/* Chats section */}
-      <div className="flex flex-col items-center gap-1 w-full px-2 flex-1 min-h-0">
+      <div className="flex flex-col items-center gap-1 w-full px-2">
         <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Chats</span>
         {user && (
         <button
@@ -1341,6 +1341,61 @@ export default function AppShell() {
           <span className="text-[9px] font-semibold">History</span>
         </button>
       </div>
+
+      {/* Open tabs section — only when there are canvas tabs open */}
+      {user && canvasTabs.length > 0 && (
+        <>
+          <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`} />
+          <div className="flex flex-col items-center gap-1 w-full px-2 flex-1 min-h-0 overflow-y-auto">
+            <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Tabs</span>
+            {canvasTabs.map(tab => {
+              const isActive = tab.id === activeCanvasTabId;
+              const tabIcons: Record<string, string> = {
+                pipeline: 'view_kanban',
+                dataroom: 'lock',
+                documents: 'folder_open',
+                sourcing: 'search',
+                settings: 'person',
+                deliverable: 'description',
+                markdown: 'article',
+                model: 'calculate',
+                'buyer-pipeline': 'store',
+                'seller-dashboard': 'storefront',
+                'deal-messages': 'forum',
+              };
+              return (
+                <div key={tab.id} className="relative w-full flex justify-center group">
+                  <button
+                    onClick={() => setActiveCanvasTabId(tab.id)}
+                    className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
+                      isActive
+                        ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
+                        : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
+                    }`}
+                    title={tab.label}
+                    type="button"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">{tabIcons[tab.type] || 'tab'}</span>
+                    <span className="text-[8px] font-semibold truncate max-w-[44px]">{tab.label}</span>
+                  </button>
+                  {/* Close button — visible on hover */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); closeCanvasTab(tab.id); }}
+                    className={`absolute top-0 right-1 w-4 h-4 rounded-full flex items-center justify-center border-0 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity ${dark ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700' : 'bg-white text-[#636467] hover:bg-[#f5f5f5]'}`}
+                    style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.08)' }}
+                    title="Close tab"
+                    type="button"
+                  >
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+      {/* Spacer to push admin/account to bottom when no tabs */}
+      {(!user || canvasTabs.length === 0) && <div className="flex-1" />}
 
       {/* Bottom: Admin + Account */}
       <div className="flex flex-col items-center gap-1 mt-auto pt-4">
