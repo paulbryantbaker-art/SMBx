@@ -1822,20 +1822,21 @@ export default function AppShell() {
               padding: '16px 16px 16px 8px',
             }}
           >
-            {/* Stack hint cards — sharp tight outlines with their own shadow */}
+            {/* Stack hint cards — peek out top-right of the active card */}
             {canvasTabs.length > 1 && (
               <div
                 aria-hidden
                 style={{
                   position: 'absolute',
-                  top: 26, right: 30, bottom: 26, left: 14,
-                  background: dark ? '#1A1C1E' : '#FFFFFF',
+                  top: 11, right: 11, bottom: 21, left: 13,
+                  background: dark ? '#1F2123' : '#FFFFFF',
                   border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
                   borderRadius: 14,
                   boxShadow: dark
                     ? '0 1px 2px rgba(0,0,0,0.4)'
-                    : '0 1px 2px rgba(0,0,0,0.05)',
+                    : '0 1px 2px rgba(60,55,45,0.06)',
                   pointerEvents: 'none',
+                  zIndex: 0,
                 }}
               />
             )}
@@ -1844,14 +1845,15 @@ export default function AppShell() {
                 aria-hidden
                 style={{
                   position: 'absolute',
-                  top: 23, right: 27, bottom: 23, left: 11,
-                  background: dark ? '#1A1C1E' : '#FFFFFF',
+                  top: 6, right: 6, bottom: 26, left: 18,
+                  background: dark ? '#23252A' : '#FAFAF7',
                   border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
                   borderRadius: 14,
                   boxShadow: dark
                     ? '0 1px 2px rgba(0,0,0,0.4)'
-                    : '0 1px 2px rgba(0,0,0,0.05)',
+                    : '0 1px 2px rgba(60,55,45,0.06)',
                   pointerEvents: 'none',
+                  zIndex: 0,
                 }}
               />
             )}
