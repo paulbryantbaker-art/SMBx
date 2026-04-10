@@ -1241,40 +1241,63 @@ export default function AppShell() {
 
   /* ═══ RENDER ═══ */
 
-  // ─── Mobile swipe gestures ───
-  const swipeStartRef = useRef<{ x: number; y: number; t: number } | null>(null);
-  const handleSwipeStart = useCallback((e: React.TouchEvent) => {
+  // ─── Mobile swipe gestures with non-passive listener (prevents iOS edge nav) ───
+  useEffect(() => {
     if (!isMobile) return;
-    const t = e.touches[0];
-    swipeStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now() };
-  }, [isMobile]);
-  const handleSwipeEnd = useCallback((e: React.TouchEvent) => {
-    if (!isMobile) return;
-    const start = swipeStartRef.current;
-    if (!start) return;
-    swipeStartRef.current = null;
-    const t = e.changedTouches[0];
-    const dx = t.clientX - start.x;
-    const dy = t.clientY - start.y;
-    const dt = Date.now() - start.t;
-    // Must be horizontal, fast enough, and minimum distance
-    if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) || dt > 600) return;
-    // Right swipe from left edge → open menu drawer
-    if (dx > 0 && start.x < 30 && !isMobileSidebarOpen && !isMobileCanvasDrawerOpen) {
-      setIsMobileSidebarOpen(true);
-    }
-    // Left swipe from right edge → open canvas drawer
-    else if (dx < 0 && start.x > window.innerWidth - 30 && !isMobileSidebarOpen && !isMobileCanvasDrawerOpen) {
-      setIsMobileCanvasDrawerOpen(true);
-    }
+    let startX = 0;
+    let startY = 0;
+    let startT = 0;
+    let isEdgeSwipe = false;
+
+    const onStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+      startT = Date.now();
+      // Mark as edge swipe if starting within 30px of either edge
+      isEdgeSwipe = startX < 30 || startX > window.innerWidth - 30;
+    };
+
+    const onMove = (e: TouchEvent) => {
+      if (!isEdgeSwipe) return;
+      const t = e.touches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      // Only block if horizontal motion dominates
+      if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+        e.preventDefault();
+      }
+    };
+
+    const onEnd = (e: TouchEvent) => {
+      if (!isEdgeSwipe) return;
+      isEdgeSwipe = false;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      const dt = Date.now() - startT;
+      if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) || dt > 600) return;
+      if (dx > 0 && startX < 30 && !isMobileSidebarOpen && !isMobileCanvasDrawerOpen) {
+        setIsMobileSidebarOpen(true);
+      } else if (dx < 0 && startX > window.innerWidth - 30 && !isMobileSidebarOpen && !isMobileCanvasDrawerOpen) {
+        setIsMobileCanvasDrawerOpen(true);
+      }
+    };
+
+    document.addEventListener('touchstart', onStart, { passive: true });
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd, { passive: true });
+    return () => {
+      document.removeEventListener('touchstart', onStart);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onEnd);
+    };
   }, [isMobile, isMobileSidebarOpen, isMobileCanvasDrawerOpen]);
 
   return (
     <div
       id="app-root"
       className={`flex font-sans bg-transparent ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}
-      onTouchStart={handleSwipeStart}
-      onTouchEnd={handleSwipeEnd}
       style={{
         width: '100%',
         ...(isChat ? { height: '100%' } : {}),
