@@ -64,6 +64,8 @@ export default function CanvasTabBar({ tabs, activeTabId, onSelect, onClose, dar
         background: dark ? '#141416' : '#F5F5F3',
         borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
         height: 38,
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
       }}
     >
       <div

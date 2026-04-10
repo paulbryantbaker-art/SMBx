@@ -1209,7 +1209,14 @@ export default function AppShell() {
 
   const sidebarContent = (_mobile: boolean) => (
     <aside
-      className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950 border-r border-zinc-800/50' : 'bg-white border-r border-[#eeeef0] shadow-sm'}`}
+      className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950' : 'bg-white'}`}
+      style={{
+        borderRight: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+        // Soft lift shadow on the right edge — sidebar floats slightly above the chat
+        boxShadow: dark
+          ? '4px 0 20px rgba(0,0,0,0.4), 1px 0 0 rgba(255,255,255,0.02)'
+          : '4px 0 20px rgba(0,0,0,0.04), 1px 0 0 rgba(0,0,0,0.02)',
+      }}
     >
       {/* Logo — X mark, always visible */}
       <div className="flex flex-col items-center mb-3" ref={sidebarLogoRef as any}>
@@ -1788,12 +1795,63 @@ export default function AppShell() {
             className="flex min-w-0"
             style={{
               flex: 1,
-              background: canvasTabs.length > 0 ? (dark ? '#1A1C1E' : '#fff') : (dark ? '#151617' : '#EDEDEA'),
+              // The "table" — slightly darker than the chat side, with padding
+              background: dark ? '#0E0F11' : '#EDEDEA',
               position: 'relative',
+              padding: '14px 16px 14px 4px',
             }}
           >
-            {/* Tab content area */}
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            {/* Stack hint cards — peek out from behind the active card */}
+            {canvasTabs.length > 1 && (
+              <>
+                <div
+                  aria-hidden
+                  style={{
+                    position: 'absolute',
+                    top: 22, right: 24, bottom: 22, left: 12,
+                    background: dark ? '#1A1C1E' : '#fff',
+                    border: dark ? '1px solid rgba(255,255,255,0.04)' : '1px solid rgba(0,0,0,0.04)',
+                    borderRadius: 16,
+                    boxShadow: dark
+                      ? '0 4px 12px rgba(0,0,0,0.3)'
+                      : '0 4px 12px rgba(0,0,0,0.04)',
+                    opacity: 0.6,
+                    pointerEvents: 'none',
+                  }}
+                />
+                {canvasTabs.length > 2 && (
+                  <div
+                    aria-hidden
+                    style={{
+                      position: 'absolute',
+                      top: 18, right: 20, bottom: 18, left: 8,
+                      background: dark ? '#1F2123' : '#fafaf8',
+                      border: dark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
+                      borderRadius: 16,
+                      boxShadow: dark
+                        ? '0 6px 16px rgba(0,0,0,0.35)'
+                        : '0 6px 16px rgba(0,0,0,0.05)',
+                      opacity: 0.85,
+                      pointerEvents: 'none',
+                    }}
+                  />
+                )}
+              </>
+            )}
+
+            {/* The active card — the page in front of the stack */}
+            <div
+              className="flex-1 flex flex-col min-w-0 overflow-hidden relative"
+              style={{
+                background: canvasTabs.length > 0 ? (dark ? '#1A1C1E' : '#fff') : (dark ? '#151617' : '#F8F6F2'),
+                border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+                borderRadius: 16,
+                boxShadow: dark
+                  ? '0 1px 3px rgba(0,0,0,0.2), 0 12px 32px rgba(0,0,0,0.4)'
+                  : '0 1px 3px rgba(0,0,0,0.04), 0 12px 32px rgba(0,0,0,0.08)',
+                zIndex: 1,
+              }}
+            >
               {canvasTabs.length > 0 ? (
                 <>
                   {/* Horizontal tab bar — browser/VS Code style */}
