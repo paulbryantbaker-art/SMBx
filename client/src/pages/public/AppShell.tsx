@@ -1209,9 +1209,17 @@ export default function AppShell() {
 
   const sidebarContent = (_mobile: boolean) => (
     <aside
-      className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950' : 'bg-white'}`}
+      className={`hidden lg:flex flex-col w-[72px] fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-[#1A1C1E]' : 'bg-white'}`}
       style={{
-        // No border line. Depth comes from the content area being clearly different.
+        top: 16,
+        left: 16,
+        bottom: 16,
+        height: 'auto',
+        borderRadius: 14,
+        border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+        boxShadow: dark
+          ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
+          : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
       }}
     >
       {/* Logo — X mark, always visible */}
@@ -1407,9 +1415,11 @@ export default function AppShell() {
   return (
     <div
       id="app-root"
-      className={`flex font-sans bg-transparent ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}
+      className={`flex font-sans ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}
       style={{
         width: '100%',
+        // The "back layer" everything sits on
+        background: dark ? '#0B0C0E' : '#EFEBE3',
         ...(isChat ? { height: '100%' } : {}),
         paddingTop: 'env(safe-area-inset-top)',
         paddingLeft: 'env(safe-area-inset-left)',
@@ -1421,8 +1431,8 @@ export default function AppShell() {
       {/* Desktop sidebar — fixed 80px icon rail */}
       {sidebarContent(false)}
 
-      {/* Main canvas — offset by 80px sidebar on desktop */}
-      <div className={`flex-1 flex flex-col min-w-0 lg:ml-20 bg-transparent ${isChat ? 'h-full' : ''}`}>
+      {/* Main canvas — offset by sidebar (16 left + 72 width + 16 gap = 104px) */}
+      <div className={`flex-1 flex flex-col min-w-0 lg:ml-[104px] bg-transparent ${isChat ? 'h-full' : ''}`}>
         {/* Offline banner */}
         {isOffline && (
           <div className="shrink-0 bg-yellow-50 border-b border-yellow-200 px-4 py-2 flex items-center justify-center gap-2 z-30">
@@ -1434,13 +1444,11 @@ export default function AppShell() {
 
         {/* Main row: chat + canvas split */}
         <div className="flex-1 flex min-h-0 bg-transparent">
-        {/* Chat column — resizable on desktop in chat mode, flex on landing/other */}
+        {/* Chat column — transparent, lets the back layer show through */}
         <div
           className="flex flex-col min-w-0"
           style={{
-            ...(viewState === 'chat'
-              ? { background: dark ? '#101214' : '#F5F2EC' }
-              : { background: 'transparent' }),
+            background: 'transparent',
             ...(!isMobile && viewState === 'chat'
               ? { width: chatWidth, flexShrink: 0 }
               : { flex: 1 }),
@@ -1768,27 +1776,38 @@ export default function AppShell() {
 
         </div>{/* end chat column */}
 
-        {/* ════ RESIZE HANDLE ════ */}
+        {/* ════ RESIZE HANDLE — vertical dots on the canvas card edge ════ */}
         {!isMobile && viewState === 'chat' && (
           <div
-            className="resize-handle"
+            className="resize-handle group"
             onMouseDown={handleResizeStart}
             style={{
-              width: 6,
+              width: 14,
               cursor: 'col-resize',
               background: 'transparent',
               flexShrink: 0,
               position: 'relative',
               zIndex: 10,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            <div style={{
-              position: 'absolute',
-              top: 0, bottom: 0, left: 2,
-              width: 2, background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-              borderRadius: 1,
-              transition: 'background 0.15s ease',
-            }} />
+            <div
+              className="resize-dots"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 3,
+                opacity: 0.35,
+                transition: 'opacity 0.15s ease',
+              }}
+            >
+              <div style={{ width: 3, height: 3, borderRadius: '50%', background: dark ? '#A0A0A0' : '#7A766E' }} />
+              <div style={{ width: 3, height: 3, borderRadius: '50%', background: dark ? '#A0A0A0' : '#7A766E' }} />
+              <div style={{ width: 3, height: 3, borderRadius: '50%', background: dark ? '#A0A0A0' : '#7A766E' }} />
+              <div style={{ width: 3, height: 3, borderRadius: '50%', background: dark ? '#A0A0A0' : '#7A766E' }} />
+            </div>
           </div>
         )}
 
@@ -1798,10 +1817,9 @@ export default function AppShell() {
             className="flex min-w-0"
             style={{
               flex: 1,
-              // The "table" — same as chat column so seam disappears, card sits on it
-              background: dark ? '#101214' : '#F5F2EC',
+              background: 'transparent',
               position: 'relative',
-              padding: '20px 24px 20px 8px',
+              padding: '16px 16px 16px 8px',
             }}
           >
             {/* Stack hint cards — sharp tight outlines with their own shadow */}
@@ -2023,9 +2041,9 @@ export default function AppShell() {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
         }
-        .resize-handle:hover > div,
-        .resize-handle:active > div {
-          background: rgba(128,128,128,0.3) !important;
+        .resize-handle:hover .resize-dots,
+        .resize-handle:active .resize-dots {
+          opacity: 0.8 !important;
         }
       `}</style>
 
