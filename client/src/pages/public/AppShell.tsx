@@ -474,6 +474,13 @@ export default function AppShell() {
   }, [isChat]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isMobileCanvasDrawerOpen, setIsMobileCanvasDrawerOpen] = useState(false);
+  // Mobile canvas overlay visibility — separate from canvasTabs.length so tabs persist
+  // when user navigates back to chat
+  const [mobileCanvasVisible, setMobileCanvasVisible] = useState(false);
+  // Auto-hide overlay when all tabs are closed
+  useEffect(() => {
+    if (canvasTabs.length === 0) setMobileCanvasVisible(false);
+  }, [canvasTabs.length]);
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
   const [canvasMarkdown, setCanvasMarkdown] = useState<{ content: string; title: string } | null>(null);
 
@@ -575,6 +582,8 @@ export default function AppShell() {
       setViewState('chat');
       navigate('/chat');
     }
+    // On mobile, surface the canvas overlay when a tab is opened
+    setMobileCanvasVisible(true);
   }, [viewState, navigate, persistTab]);
 
   const closeCanvasTab = useCallback((tabId: string) => {
@@ -1943,7 +1952,7 @@ export default function AppShell() {
         </div>{/* end main row */}
 
         {/* ════ MOBILE CANVAS OVERLAY ════ */}
-        {canvasTabs.length > 0 && isMobile && (
+        {canvasTabs.length > 0 && isMobile && mobileCanvasVisible && (
           <div
             className={`fixed inset-0 z-40 flex flex-col ${dark ? 'bg-[#1A1C1E]' : 'bg-white'}`}
             style={{
@@ -2186,8 +2195,8 @@ export default function AppShell() {
             <>
             <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-4 ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Workspace</span>
             {([
-              { action: 'chat', icon: 'forum', label: 'Chat' },
               { action: 'new-chat', icon: 'add_comment', label: 'New Chat' },
+              { action: 'chat', icon: 'forum', label: 'Chat History' },
               { action: 'library', icon: 'folder_open', label: 'Library' },
               { action: 'dataroom', icon: 'lock', label: 'Data Room' },
               { action: 'pipeline', icon: 'view_kanban', label: 'Pipeline' },
@@ -2197,8 +2206,15 @@ export default function AppShell() {
                 key={item.action}
                 onClick={() => {
                   setIsMobileSidebarOpen(false);
-                  if (item.action === 'chat') { setViewState('chat'); navigate('/chat'); }
-                  else if (item.action === 'new-chat') { handleNewChat(); }
+                  if (item.action === 'chat') {
+                    setMobileCanvasVisible(false);
+                    setViewState('chat');
+                    navigate('/chat');
+                  }
+                  else if (item.action === 'new-chat') {
+                    setMobileCanvasVisible(false);
+                    handleNewChat();
+                  }
                   else { openCanvasTab(item.action === 'library' ? 'documents' : item.action, item.label); }
                 }}
                 className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${
