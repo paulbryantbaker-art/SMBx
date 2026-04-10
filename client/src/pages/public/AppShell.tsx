@@ -477,10 +477,6 @@ export default function AppShell() {
   // Mobile canvas overlay visibility — separate from canvasTabs.length so tabs persist
   // when user navigates back to chat
   const [mobileCanvasVisible, setMobileCanvasVisible] = useState(false);
-  // Auto-hide overlay when all tabs are closed
-  useEffect(() => {
-    if (canvasTabs.length === 0) setMobileCanvasVisible(false);
-  }, [canvasTabs.length]);
   const [viewingDeliverable, setViewingDeliverable] = useState<number | null>(null);
   const [canvasMarkdown, setCanvasMarkdown] = useState<{ content: string; title: string } | null>(null);
 
@@ -495,6 +491,10 @@ export default function AppShell() {
   const [canvasTabs, setCanvasTabs] = useState<CanvasTab[]>([]);
   const [activeCanvasTabId, setActiveCanvasTabId] = useState<string | null>(null);
   const activeCanvasTab = canvasTabs.find(t => t.id === activeCanvasTabId) || null;
+  // Auto-hide mobile canvas overlay when all tabs are closed
+  useEffect(() => {
+    if (canvasTabs.length === 0) setMobileCanvasVisible(false);
+  }, [canvasTabs.length]);
 
   // Conversation id ref — written by an effect later, read by tab callbacks
   const conversationIdRef = useRef<number | null>(null);
