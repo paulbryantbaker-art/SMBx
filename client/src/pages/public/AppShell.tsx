@@ -1211,7 +1211,7 @@ export default function AppShell() {
     <aside
       className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950' : 'bg-white'}`}
       style={{
-        borderRight: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
+        borderRight: dark ? '1px solid #2A2C2E' : '1px solid #E8E6E1',
       }}
     >
       {/* Logo — X mark, always visible */}
@@ -1791,22 +1791,22 @@ export default function AppShell() {
             className="flex min-w-0"
             style={{
               flex: 1,
-              // The "table" — Canva-style: clean, minimal, no inset padding
-              background: dark ? '#0E0F11' : '#F2F1EE',
+              // The "table" — clearly different from card background, no fuzz
+              background: dark ? '#0B0C0E' : '#EAE8E3',
               position: 'relative',
-              padding: '8px 10px 8px 0',
+              padding: '10px 12px 10px 0',
             }}
           >
-            {/* Stack hint cards — sharp edges, tight offset, sit behind the active card */}
+            {/* Stack hint cards — clean solid borders, no shadow, no fuzz */}
             {canvasTabs.length > 1 && (
               <div
                 aria-hidden
                 style={{
                   position: 'absolute',
-                  top: 12, right: 14, bottom: 12, left: 4,
-                  background: dark ? '#1A1C1E' : '#fff',
-                  border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
-                  borderRadius: 10,
+                  top: 14, right: 16, bottom: 14, left: 4,
+                  background: dark ? '#1A1C1E' : '#FFFFFF',
+                  border: dark ? '1px solid #2A2C2E' : '1px solid #E8E6E1',
+                  borderRadius: 12,
                   pointerEvents: 'none',
                 }}
               />
@@ -1816,25 +1816,22 @@ export default function AppShell() {
                 aria-hidden
                 style={{
                   position: 'absolute',
-                  top: 10, right: 12, bottom: 10, left: 2,
-                  background: dark ? '#1A1C1E' : '#fff',
-                  border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
-                  borderRadius: 10,
+                  top: 12, right: 14, bottom: 12, left: 2,
+                  background: dark ? '#1A1C1E' : '#FFFFFF',
+                  border: dark ? '1px solid #2A2C2E' : '1px solid #E8E6E1',
+                  borderRadius: 12,
                   pointerEvents: 'none',
                 }}
               />
             )}
 
-            {/* The active card — sharp 1px border, very tight shadow */}
+            {/* The active card — solid crisp border, NO shadow, depth from contrast */}
             <div
               className="flex-1 flex flex-col min-w-0 overflow-hidden relative"
               style={{
-                background: canvasTabs.length > 0 ? (dark ? '#1A1C1E' : '#fff') : (dark ? '#151617' : '#F8F6F2'),
-                border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
-                borderRadius: 10,
-                boxShadow: dark
-                  ? '0 1px 2px rgba(0,0,0,0.3)'
-                  : '0 1px 2px rgba(0,0,0,0.04)',
+                background: canvasTabs.length > 0 ? (dark ? '#1A1C1E' : '#FFFFFF') : (dark ? '#151617' : '#F8F6F2'),
+                border: dark ? '1px solid #2A2C2E' : '1px solid #E8E6E1',
+                borderRadius: 12,
                 zIndex: 1,
               }}
             >
