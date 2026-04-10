@@ -337,8 +337,32 @@ export default function AdminOverview() {
   };
 
   /* ── render ── */
+  const [testStatus, setTestStatus] = useState<string | null>(null);
+  const sendTestEmails = async () => {
+    setTestStatus('Sending...');
+    try {
+      const res = await fetch('/api/admin/test-emails', { method: 'POST', headers: authHeaders() });
+      const data = await res.json();
+      setTestStatus(`Sent ${data.sent}/9 emails. Check your inbox.`);
+    } catch {
+      setTestStatus('Failed to send test emails.');
+    }
+  };
+
   return (
     <div>
+      {/* Test Emails */}
+      <div className="mb-6 flex items-center gap-3">
+        <button
+          onClick={sendTestEmails}
+          disabled={testStatus === 'Sending...'}
+          className="px-4 py-2 rounded-full text-xs font-semibold bg-[#1A1C1E] text-white border-none cursor-pointer hover:bg-[#333] transition-colors disabled:opacity-50"
+        >
+          Send Test Emails
+        </button>
+        {testStatus && <span className="text-xs text-[#5d5e61]">{testStatus}</span>}
+      </div>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {kpis.map((kpi) => (
