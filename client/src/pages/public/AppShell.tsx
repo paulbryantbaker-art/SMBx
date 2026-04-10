@@ -1378,13 +1378,18 @@ export default function AppShell() {
         </button>
       </div>
 
-      {/* Open tabs section — only when there are canvas tabs open */}
-      {user && canvasTabs.length > 0 && (
+      {/* Open tabs section — only content tabs (not panels which already have buttons) */}
+      {(() => {
+        // Panel types live in the Tools section, not here
+        const PANEL_TYPES = new Set(['pipeline', 'dataroom', 'documents', 'sourcing', 'settings', 'seller-dashboard', 'buyer-pipeline']);
+        const contentTabs = canvasTabs.filter(t => !PANEL_TYPES.has(t.type));
+        if (!user || contentTabs.length === 0) return null;
+        return (
         <>
           <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`} />
           <div className="flex flex-col items-center gap-1 w-full px-2 flex-1 min-h-0 overflow-y-auto">
             <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Tabs</span>
-            {canvasTabs.map(tab => {
+            {contentTabs.map(tab => {
               const isActive = tab.id === activeCanvasTabId;
               const tabIcons: Record<string, string> = {
                 pipeline: 'view_kanban',
@@ -1429,9 +1434,14 @@ export default function AppShell() {
             })}
           </div>
         </>
-      )}
-      {/* Spacer to push admin/account to bottom when no tabs */}
-      {(!user || canvasTabs.length === 0) && <div className="flex-1" />}
+        );
+      })()}
+      {/* Spacer to push admin/account to bottom when no content tabs */}
+      {(() => {
+        const PANEL_TYPES = new Set(['pipeline', 'dataroom', 'documents', 'sourcing', 'settings', 'seller-dashboard', 'buyer-pipeline']);
+        const hasContentTabs = user && canvasTabs.some(t => !PANEL_TYPES.has(t.type));
+        return !hasContentTabs ? <div className="flex-1" /> : null;
+      })()}
 
       {/* Bottom: Admin + Account */}
       <div className="flex flex-col items-center gap-1 mt-auto pt-4">
