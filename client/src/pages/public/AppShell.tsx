@@ -1384,8 +1384,20 @@ export default function AppShell() {
       {/* Spacer to push admin/account to bottom */}
       <div className="flex-1" />
 
-      {/* Bottom: Admin + Account */}
+      {/* Bottom: Theme + Admin + Account */}
       <div className="flex flex-col items-center gap-1 mt-auto pt-4">
+        {/* Theme toggle — only for logged-in users */}
+        {user && (
+          <button
+            onClick={() => setDark(!dark)}
+            className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
+            type="button"
+            title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <span className="material-symbols-outlined text-[22px]">{dark ? 'light_mode' : 'dark_mode'}</span>
+            <span className="text-[9px] font-semibold">{dark ? 'Light' : 'Dark'}</span>
+          </button>
+        )}
         {/* Admin Console — visible only to admins */}
         {user && (user.role === 'admin' || user.email === 'pbaker@smbx.ai') && (
           <button
@@ -1938,25 +1950,11 @@ export default function AppShell() {
               animation: 'slideUpIn 0.3s ease',
               overscrollBehavior: 'contain',
               touchAction: 'manipulation',
-              paddingTop: 'env(safe-area-inset-top)',
+              paddingTop: 'calc(env(safe-area-inset-top) + 64px)', // clear floating hamburger
               paddingBottom: 'env(safe-area-inset-bottom)',
             }}
           >
-            {/* Top bar — just a close-to-chat button on the right, hamburger stays at z-[51] */}
-            <div
-              className="shrink-0 flex items-center justify-end px-4 py-2.5"
-              style={{ borderBottom: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
-            >
-              <button
-                onClick={() => { setCanvasTabs([]); setActiveCanvasTabId(null); }}
-                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border-none cursor-pointer active:scale-95 flex items-center gap-1 ${dark ? 'text-[#E0DDD7] bg-white/10' : 'text-[#1A1C1E] bg-black/5'}`}
-                type="button"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                Back to chat
-              </button>
-            </div>
-            {/* Active tab content */}
+            {/* Active tab content — no header, swipe back to return to chat */}
             <div
               className="flex-1 overflow-y-auto"
               style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
@@ -2215,6 +2213,17 @@ export default function AppShell() {
             </>
             )}
             <div className="mt-auto flex flex-col gap-2">
+              {/* Theme toggle — only for logged-in users */}
+              {user && (
+              <button
+                onClick={() => setDark(!dark)}
+                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 bg-transparent' : 'text-[#636467] bg-transparent'}`}
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[20px]">{dark ? 'light_mode' : 'dark_mode'}</span>
+                {dark ? 'Light mode' : 'Dark mode'}
+              </button>
+              )}
               {/* Admin Console — visible only to admins */}
               {user && (user.role === 'admin' || user.email === 'pbaker@smbx.ai') && (
               <button
@@ -2347,8 +2356,8 @@ export default function AppShell() {
         )
       )}
 
-      {/* Dark mode toggle */}
-      <DarkModeToggle dark={dark} setDark={setDark} />
+      {/* Dark mode toggle — only for logged-out users; logged-in users have it in the sidebar */}
+      {!user && <DarkModeToggle dark={dark} setDark={setDark} />}
 
       {flyingLogo && (() => {
         const letters = [
