@@ -1864,42 +1864,6 @@ export default function AppShell() {
               padding: '16px 16px 16px 8px',
             }}
           >
-            {/* Stack hint cards — peek out top-right of the active card */}
-            {canvasTabs.length > 1 && (
-              <div
-                aria-hidden
-                style={{
-                  position: 'absolute',
-                  top: 11, right: 11, bottom: 21, left: 13,
-                  background: dark ? '#1F2123' : '#FFFFFF',
-                  border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
-                  borderRadius: 14,
-                  boxShadow: dark
-                    ? '0 1px 2px rgba(0,0,0,0.4)'
-                    : '0 1px 2px rgba(60,55,45,0.06)',
-                  pointerEvents: 'none',
-                  zIndex: 0,
-                }}
-              />
-            )}
-            {canvasTabs.length > 2 && (
-              <div
-                aria-hidden
-                style={{
-                  position: 'absolute',
-                  top: 6, right: 6, bottom: 26, left: 18,
-                  background: dark ? '#23252A' : '#FAFAF7',
-                  border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
-                  borderRadius: 14,
-                  boxShadow: dark
-                    ? '0 1px 2px rgba(0,0,0,0.4)'
-                    : '0 1px 2px rgba(60,55,45,0.06)',
-                  pointerEvents: 'none',
-                  zIndex: 0,
-                }}
-              />
-            )}
-
             {/* The active card — sharp 1px border + tight defined shadow (Canva-style) */}
             <div
               ref={canvasCardRef}
@@ -1968,34 +1932,93 @@ export default function AppShell() {
 
         {/* ════ MOBILE CANVAS OVERLAY ════ */}
         {canvasTabs.length > 0 && isMobile && (
-          <div className={`fixed inset-0 z-50 flex flex-col ${dark ? 'bg-[#1A1C1E]' : 'bg-white'}`} style={{ animation: 'slideUpIn 0.3s ease', overscrollBehavior: 'contain', touchAction: 'manipulation' }}>
-            {/* Mobile tab pills — pl-14 clears the floating hamburger button */}
-            <div className="shrink-0 flex items-center justify-between pl-14 pr-3 py-2.5" style={{ borderBottom: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}>
-              <div className="flex items-center gap-1.5 overflow-x-auto flex-1 mr-2">
-                {canvasTabs.map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveCanvasTabId(tab.id)}
-                    className={`canvas-tab-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer active:scale-95 ${
-                      tab.id === activeCanvasTabId
-                        ? (dark ? 'bg-white text-[#1A1C1E] border-white' : 'bg-[#1A1C1E] text-white border-[#1A1C1E]')
-                        : (dark ? 'bg-transparent text-[#A0A0A0] border-[rgba(255,255,255,0.1)]' : 'bg-white text-[#6E6A63] border-[rgba(0,0,0,0.08)]')
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
+          <div
+            className={`fixed inset-0 z-40 flex flex-col ${dark ? 'bg-[#1A1C1E]' : 'bg-white'}`}
+            style={{
+              animation: 'slideUpIn 0.3s ease',
+              overscrollBehavior: 'contain',
+              touchAction: 'manipulation',
+              paddingTop: 'env(safe-area-inset-top)',
+              paddingBottom: 'env(safe-area-inset-bottom)',
+            }}
+          >
+            {/* Top bar — just a close-to-chat button on the right, hamburger stays at z-[51] */}
+            <div
+              className="shrink-0 flex items-center justify-end px-4 py-2.5"
+              style={{ borderBottom: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)' }}
+            >
               <button
-                onClick={() => { if (activeCanvasTab) closeCanvasTab(activeCanvasTab.id); }}
-                className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-0 bg-transparent cursor-pointer active:scale-90 ${dark ? 'text-[#A0A0A0]' : 'text-[#6E6A63]'}`}
+                onClick={() => { setCanvasTabs([]); setActiveCanvasTabId(null); }}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border-none cursor-pointer active:scale-95 flex items-center gap-1 ${dark ? 'text-[#E0DDD7] bg-white/10' : 'text-[#1A1C1E] bg-black/5'}`}
+                type="button"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Back to chat
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+            {/* Active tab content */}
+            <div
+              className="flex-1 overflow-y-auto"
+              style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
+            >
               {activeCanvasTab && renderCanvasTabContent(activeCanvasTab)}
             </div>
+            {/* Mobile floating tab bar — only when there are content tabs */}
+            {(() => {
+              const PANEL_TYPES = new Set(['pipeline', 'dataroom', 'documents', 'sourcing', 'settings', 'seller-dashboard', 'buyer-pipeline']);
+              const contentTabs = canvasTabs.filter(t => !PANEL_TYPES.has(t.type));
+              if (contentTabs.length === 0) return null;
+              return (
+                <div
+                  className="shrink-0 flex justify-center"
+                  style={{
+                    padding: '8px 12px max(12px, env(safe-area-inset-bottom)) 12px',
+                    borderTop: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+                  }}
+                >
+                  <div
+                    className="flex items-center gap-1 overflow-x-auto"
+                    style={{
+                      maxWidth: '100%',
+                      scrollbarWidth: 'none',
+                      background: dark ? '#1A1C1E' : '#FFFFFF',
+                      border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+                      borderRadius: 100,
+                      padding: '4px',
+                    }}
+                  >
+                    {contentTabs.map(tab => {
+                      const isActive = tab.id === activeCanvasTabId;
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveCanvasTabId(tab.id)}
+                          className="shrink-0 active:scale-95"
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: 100,
+                            border: 'none',
+                            background: isActive
+                              ? (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)')
+                              : 'transparent',
+                            color: isActive
+                              ? (dark ? '#F0F0F3' : '#1A1C1E')
+                              : (dark ? '#A0A0A0' : '#5D5E61'),
+                            fontSize: 12,
+                            fontWeight: isActive ? 600 : 500,
+                            whiteSpace: 'nowrap',
+                            cursor: 'pointer',
+                            fontFamily: "'Inter', system-ui, sans-serif",
+                          }}
+                        >
+                          {tab.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
@@ -2284,12 +2307,12 @@ export default function AppShell() {
       )}
 
       {/* ═══ MOBILE FLOATING BUTTONS — hamburger (left) + account (right) ═══ */}
-      {isMobile && (viewState === 'landing' || viewState === 'chat') && (
+      {isMobile && (
         <>
           <button
             onClick={() => setIsMobileSidebarOpen(true)}
-            className="fixed z-[51] w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#E8709A]"
-            style={{ top: 16, left: 16 }}
+            className="fixed z-[55] w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#E8709A] active:scale-90"
+            style={{ top: 'calc(env(safe-area-inset-top) + 12px)', left: 16 }}
             type="button"
             aria-label="Open menu"
           >
@@ -2298,8 +2321,8 @@ export default function AppShell() {
           {user && (
             <button
               onClick={() => openCanvasTab('settings', 'Settings')}
-              className="fixed z-[51] w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#E8709A]"
-              style={{ top: 16, right: 16 }}
+              className="fixed z-[55] w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#E8709A] active:scale-90"
+              style={{ top: 'calc(env(safe-area-inset-top) + 12px)', right: 16 }}
               type="button"
               aria-label="Account & Settings"
             >
