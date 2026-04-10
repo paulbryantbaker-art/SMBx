@@ -106,6 +106,7 @@ export default function AdminOverview() {
   const [daily, setDaily] = useState<DailyMetric[]>([]);
   const [revenue, setRevenue] = useState<RevenuePlan[]>([]);
   const [journeys, setJourneys] = useState<JourneyEntry[]>([]);
+  const [testStatus, setTestStatus] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -337,7 +338,6 @@ export default function AdminOverview() {
   };
 
   /* ── render ── */
-  const [testStatus, setTestStatus] = useState<string | null>(null);
   const sendTestEmails = async () => {
     setTestStatus('Sending...');
     try {
