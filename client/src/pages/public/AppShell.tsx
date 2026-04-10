@@ -1211,11 +1211,7 @@ export default function AppShell() {
     <aside
       className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950' : 'bg-white'}`}
       style={{
-        borderRight: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
-        // Soft lift shadow on the right edge — sidebar floats slightly above the chat
-        boxShadow: dark
-          ? '4px 0 20px rgba(0,0,0,0.4), 1px 0 0 rgba(255,255,255,0.02)'
-          : '4px 0 20px rgba(0,0,0,0.04), 1px 0 0 rgba(0,0,0,0.02)',
+        borderRight: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
       }}
     >
       {/* Logo — X mark, always visible */}
@@ -1795,60 +1791,50 @@ export default function AppShell() {
             className="flex min-w-0"
             style={{
               flex: 1,
-              // The "table" — slightly darker than the chat side, with padding
-              background: dark ? '#0E0F11' : '#EDEDEA',
+              // The "table" — Canva-style: clean, minimal, no inset padding
+              background: dark ? '#0E0F11' : '#F2F1EE',
               position: 'relative',
-              padding: '14px 16px 14px 4px',
+              padding: '8px 10px 8px 0',
             }}
           >
-            {/* Stack hint cards — peek out from behind the active card */}
+            {/* Stack hint cards — sharp edges, tight offset, sit behind the active card */}
             {canvasTabs.length > 1 && (
-              <>
-                <div
-                  aria-hidden
-                  style={{
-                    position: 'absolute',
-                    top: 22, right: 24, bottom: 22, left: 12,
-                    background: dark ? '#1A1C1E' : '#fff',
-                    border: dark ? '1px solid rgba(255,255,255,0.04)' : '1px solid rgba(0,0,0,0.04)',
-                    borderRadius: 16,
-                    boxShadow: dark
-                      ? '0 4px 12px rgba(0,0,0,0.3)'
-                      : '0 4px 12px rgba(0,0,0,0.04)',
-                    opacity: 0.6,
-                    pointerEvents: 'none',
-                  }}
-                />
-                {canvasTabs.length > 2 && (
-                  <div
-                    aria-hidden
-                    style={{
-                      position: 'absolute',
-                      top: 18, right: 20, bottom: 18, left: 8,
-                      background: dark ? '#1F2123' : '#fafaf8',
-                      border: dark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
-                      borderRadius: 16,
-                      boxShadow: dark
-                        ? '0 6px 16px rgba(0,0,0,0.35)'
-                        : '0 6px 16px rgba(0,0,0,0.05)',
-                      opacity: 0.85,
-                      pointerEvents: 'none',
-                    }}
-                  />
-                )}
-              </>
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  top: 12, right: 14, bottom: 12, left: 4,
+                  background: dark ? '#1A1C1E' : '#fff',
+                  border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+                  borderRadius: 10,
+                  pointerEvents: 'none',
+                }}
+              />
+            )}
+            {canvasTabs.length > 2 && (
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  top: 10, right: 12, bottom: 10, left: 2,
+                  background: dark ? '#1A1C1E' : '#fff',
+                  border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+                  borderRadius: 10,
+                  pointerEvents: 'none',
+                }}
+              />
             )}
 
-            {/* The active card — the page in front of the stack */}
+            {/* The active card — sharp 1px border, very tight shadow */}
             <div
               className="flex-1 flex flex-col min-w-0 overflow-hidden relative"
               style={{
                 background: canvasTabs.length > 0 ? (dark ? '#1A1C1E' : '#fff') : (dark ? '#151617' : '#F8F6F2'),
-                border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
-                borderRadius: 16,
+                border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
+                borderRadius: 10,
                 boxShadow: dark
-                  ? '0 1px 3px rgba(0,0,0,0.2), 0 12px 32px rgba(0,0,0,0.4)'
-                  : '0 1px 3px rgba(0,0,0,0.04), 0 12px 32px rgba(0,0,0,0.08)',
+                  ? '0 1px 2px rgba(0,0,0,0.3)'
+                  : '0 1px 2px rgba(0,0,0,0.04)',
                 zIndex: 1,
               }}
             >
