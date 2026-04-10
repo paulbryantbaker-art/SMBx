@@ -1484,8 +1484,9 @@ export default function AppShell() {
       className={`flex font-sans ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}
       style={{
         width: '100%',
-        // The "back layer" everything sits on
-        background: dark ? '#0B0C0E' : '#EFEBE3',
+        // No background here — body provides the warm paper back layer with noise.
+        // Setting bg here would create a solid patch that doesn't match the body's textured cream.
+        background: 'transparent',
         ...(isChat ? { height: '100%' } : {}),
         paddingTop: 'env(safe-area-inset-top)',
         paddingLeft: 'env(safe-area-inset-left)',
