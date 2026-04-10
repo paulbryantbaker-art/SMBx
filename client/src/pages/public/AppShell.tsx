@@ -488,34 +488,91 @@ export default function AppShell() {
   const [activeCanvasTabId, setActiveCanvasTabId] = useState<string | null>(null);
   const activeCanvasTab = canvasTabs.find(t => t.id === activeCanvasTabId) || null;
 
+  // Conversation id ref — written by an effect later, read by tab callbacks
+  const conversationIdRef = useRef<number | null>(null);
+  const userRef = useRef<typeof user>(user);
+  useEffect(() => { userRef.current = user; }, [user]);
+
+  // Persist a tab to the server (fire-and-forget, no-op if not signed in)
+  const persistTab = useCallback(async (tab: CanvasTab, position: number, isActive: boolean) => {
+    const convId = conversationIdRef.current;
+    if (!convId || !userRef.current) return;
+    try {
+      await fetch(`/api/conversations/${convId}/canvas-tabs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ tabId: tab.id, type: tab.type, label: tab.label, props: tab.props || {}, position, isActive }),
+      });
+    } catch { /* non-critical */ }
+  }, []);
+
+  const persistTabClose = useCallback(async (tabId: string) => {
+    const convId = conversationIdRef.current;
+    if (!convId || !userRef.current) return;
+    try {
+      await fetch(`/api/conversations/${convId}/canvas-tabs/${encodeURIComponent(tabId)}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+    } catch { /* non-critical */ }
+  }, []);
+
+  const persistActiveTab = useCallback(async (tabId: string | null) => {
+    const convId = conversationIdRef.current;
+    if (!convId || !userRef.current) return;
+    try {
+      await fetch(`/api/conversations/${convId}/canvas-tabs/active`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ tabId }),
+      });
+    } catch { /* non-critical */ }
+  }, []);
+
   const openCanvasTab = useCallback((type: string, label: string, props?: Record<string, any>) => {
     trackEvent('tab_opened', { tabType: type, label });
+    let newTab: CanvasTab | null = null;
+    let newId: string;
+
     // Deliverables get unique tabs
     if (type === 'deliverable' && props?.deliverableId) {
-      const tabId = `deliverable-${props.deliverableId}`;
+      newId = `deliverable-${props.deliverableId}`;
       setCanvasTabs(prev => {
-        if (prev.find(t => t.id === tabId)) { setActiveCanvasTabId(tabId); return prev; }
-        return [...prev, { id: tabId, type, label: props.label || label, closable: true, props }];
+        if (prev.find(t => t.id === newId)) { setActiveCanvasTabId(newId); return prev; }
+        newTab = { id: newId, type, label: props.label || label, closable: true, props };
+        const next = [...prev, newTab];
+        persistTab(newTab, next.length - 1, true);
+        return next;
       });
-      setActiveCanvasTabId(tabId);
+      setActiveCanvasTabId(newId);
     } else if (type === 'markdown' && props?.content) {
-      const tabId = `md-${Date.now()}`;
-      setCanvasTabs(prev => [...prev, { id: tabId, type, label, closable: true, props }]);
-      setActiveCanvasTabId(tabId);
+      newId = `md-${Date.now()}`;
+      newTab = { id: newId, type, label, closable: true, props };
+      setCanvasTabs(prev => {
+        const next = [...prev, newTab!];
+        persistTab(newTab!, next.length - 1, true);
+        return next;
+      });
+      setActiveCanvasTabId(newId);
     } else {
       // Panel types reuse existing tab
+      newId = type;
       setCanvasTabs(prev => {
-        if (prev.find(t => t.id === type)) { setActiveCanvasTabId(type); return prev; }
-        return [...prev, { id: type, type, label, closable: true }];
+        if (prev.find(t => t.id === newId)) { setActiveCanvasTabId(newId); return prev; }
+        newTab = { id: newId, type, label, closable: true };
+        const next = [...prev, newTab];
+        persistTab(newTab, next.length - 1, true);
+        return next;
       });
-      setActiveCanvasTabId(type);
+      setActiveCanvasTabId(newId);
     }
+
     // If we're in landing mode, switch to chat so the canvas panel appears
     if (viewState === 'landing') {
       setViewState('chat');
       navigate('/chat');
     }
-  }, [viewState, navigate]);
+  }, [viewState, navigate, persistTab]);
 
   const closeCanvasTab = useCallback((tabId: string) => {
     setCanvasTabs(prev => {
@@ -530,7 +587,8 @@ export default function AppShell() {
       }
       return next;
     });
-  }, [activeCanvasTabId]);
+    persistTabClose(tabId);
+  }, [activeCanvasTabId, persistTabClose]);
   const [morphing, setMorphing] = useState(false);
   const [heroFocused, setHeroFocused] = useState(false); // tracks when hero input is focused — controls logo position
   const [chatWidth, setChatWidth] = useState(520); // resizable chat column width
@@ -991,6 +1049,47 @@ export default function AppShell() {
   // Conversations — unified across auth and anonymous
   const allConversations = user ? authChat.conversations : anonChat.conversations;
   const activeConvId = user ? authChat.activeConversationId : anonChat.activeConversationId;
+
+  // ─── Canvas Tab Persistence ───
+  // 1. Update ref so persist callbacks see the current conversation
+  useEffect(() => {
+    conversationIdRef.current = (user ? authChat.activeConversationId : null) as number | null;
+  }, [user, authChat.activeConversationId]);
+
+  // 2. Hydrate canvas tabs from server when conversation changes
+  useEffect(() => {
+    if (!user || !authChat.activeConversationId) {
+      // No conversation = no persisted tabs
+      return;
+    }
+    const convId = authChat.activeConversationId;
+    let cancelled = false;
+    fetch(`/api/conversations/${convId}/canvas-tabs`, { headers: authHeaders() })
+      .then(r => r.ok ? r.json() : { tabs: [] })
+      .then(({ tabs }) => {
+        if (cancelled) return;
+        if (!Array.isArray(tabs) || tabs.length === 0) return;
+        const restored: CanvasTab[] = tabs.map((t: any) => ({
+          id: t.tab_id,
+          type: t.type,
+          label: t.label,
+          closable: true,
+          props: t.props || undefined,
+        }));
+        setCanvasTabs(restored);
+        const active = tabs.find((t: any) => t.is_active);
+        if (active) setActiveCanvasTabId(active.tab_id);
+        else if (restored.length > 0) setActiveCanvasTabId(restored[0].id);
+      })
+      .catch(() => { /* non-critical */ });
+    return () => { cancelled = true; };
+  }, [user, authChat.activeConversationId]);
+
+  // 3. Sync active tab changes to server
+  useEffect(() => {
+    if (!user || !authChat.activeConversationId) return;
+    persistActiveTab(activeCanvasTabId);
+  }, [user, authChat.activeConversationId, activeCanvasTabId, persistActiveTab]);
 
   const handleFileUpload = useCallback(async (file: File) => {
     if (!activeConvId || !user) return null;

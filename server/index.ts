@@ -5,6 +5,7 @@ import postgres from 'postgres';
 import { fileURLToPath } from 'url';
 import { requireAuth } from './middleware/auth.js';
 import { authRouter } from './routes/auth.js';
+import { canvasTabsRouter } from './routes/canvasTabs.js';
 import { chatRouter } from './routes/chat.js';
 import { anonymousRouter } from './routes/anonymous.js';
 import { stripeRouter, handleStripeWebhook } from './routes/stripe.js';
@@ -266,6 +267,7 @@ app.use('/api', buyerPipelineRouter);
 app.use('/api', discoveryRouter);
 app.use('/api', adminRouter);
 app.use('/api', passkeyRouter);
+app.use('/api', canvasTabsRouter);
 
 app.use('/api', exportRouter);
 
