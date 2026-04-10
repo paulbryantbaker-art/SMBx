@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { MessageParam, ContentBlockParam } from '@anthropic-ai/sdk/resources/messages';
 import { TOOL_DEFINITIONS, executeTool } from './tools.js';
+import { persistCanvasTabFromAction } from './canvasTabPersist.js';
 import type { Response } from 'express';
 
 const MODEL = 'claude-sonnet-4-6';
@@ -124,6 +125,13 @@ export async function streamAgenticResponse(
               tool: block.name,
               result: parsedResult,
             })}\n\n`);
+
+            // Persist any canvas_action server-side so the tab survives client disconnects
+            if (parsedResult?.canvas_action && ctx.conversationId) {
+              persistCanvasTabFromAction(ctx.conversationId, parsedResult).catch(err =>
+                console.error('[aiService] canvas tab persist failed:', err.message)
+              );
+            }
 
             toolResults.push({
               type: 'tool_result' as const,
