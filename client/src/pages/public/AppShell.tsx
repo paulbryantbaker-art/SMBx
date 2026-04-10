@@ -1733,19 +1733,32 @@ export default function AppShell() {
                     visible viewport with safe-area padding for the home indicator. */}
               </>
               ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing'].includes(activeTab) ? (
-              <div className="relative z-10">
-                <Suspense fallback={<BelowSkeleton />}>
-                  {activeTab === 'sell' ? <SellBelow dark={dark} /> :
-                   activeTab === 'buy' ? <BuyBelow dark={dark} /> :
-                   activeTab === 'raise' ? <RaiseBelow dark={dark} /> :
-                   activeTab === 'how-it-works' ? <HowItWorksBelow dark={dark} /> :
-                   activeTab === 'integrate' ? <IntegrateBelow dark={dark} /> :
-                   activeTab === 'advisors' ? <AdvisorsBelow dark={dark} /> :
-                   activeTab === 'pricing' ? <PricingBelow dark={dark} /> : null}
-                </Suspense>
-                <footer className={`py-12 flex justify-center ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`}>
-                  <LogoIcon height={44} dark={dark} />
-                </footer>
+              <div className="relative z-10" style={{ padding: !isMobile ? '16px 16px 16px 0' : '0' }}>
+                {/* Floating card — matches the canvas card style in the workspace */}
+                <div
+                  style={{
+                    background: dark ? '#1A1C1E' : '#FFFFFF',
+                    border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+                    borderRadius: !isMobile ? 14 : 0,
+                    boxShadow: !isMobile ? (dark
+                      ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
+                      : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)') : 'none',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <Suspense fallback={<BelowSkeleton />}>
+                    {activeTab === 'sell' ? <SellBelow dark={dark} /> :
+                     activeTab === 'buy' ? <BuyBelow dark={dark} /> :
+                     activeTab === 'raise' ? <RaiseBelow dark={dark} /> :
+                     activeTab === 'how-it-works' ? <HowItWorksBelow dark={dark} /> :
+                     activeTab === 'integrate' ? <IntegrateBelow dark={dark} /> :
+                     activeTab === 'advisors' ? <AdvisorsBelow dark={dark} /> :
+                     activeTab === 'pricing' ? <PricingBelow dark={dark} /> : null}
+                  </Suspense>
+                  <footer className={`py-12 flex justify-center ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`}>
+                    <LogoIcon height={44} dark={dark} />
+                  </footer>
+                </div>
               </div>
               ) : null}
             </div>
