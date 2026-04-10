@@ -2252,12 +2252,12 @@ export default function AppShell() {
               </button>
               )}
               <button
-                onClick={() => { setIsMobileSidebarOpen(false); if (user) { openCanvasTab('settings', 'Settings'); } else navigate('/login'); }}
+                onClick={() => { setIsMobileSidebarOpen(false); if (user) { openCanvasTab('settings', 'Settings'); } else { window.location.href = '/login'; } }}
                 className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 bg-transparent' : 'text-[#636467] bg-transparent'}`}
                 type="button"
               >
-                <span className="material-symbols-outlined text-[20px]">person</span>
-                {user ? 'Account & Settings' : 'Account & Settings'}
+                <span className="material-symbols-outlined text-[20px]">{user ? 'person' : 'login'}</span>
+                {user ? 'Account & Settings' : 'Sign In'}
               </button>
             </div>
           </nav>
