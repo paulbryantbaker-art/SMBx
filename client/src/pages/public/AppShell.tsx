@@ -1265,12 +1265,9 @@ export default function AppShell() {
         left: 16,
         bottom: 16,
         height: 'auto',
-        background: dark ? '#1A1C1E' : '#F0EBE0',
+        background: 'transparent',
         borderRadius: 14,
-        border: dark ? '1px solid #2A2C2E' : '1px solid #DDD7C8',
-        boxShadow: dark
-          ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
-          : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
+        border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
       }}
     >
       {/* Logo — X mark, always visible */}
@@ -1738,15 +1735,12 @@ export default function AppShell() {
               </>
               ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing'].includes(activeTab) ? (
               <div className="relative z-10" style={{ padding: !isMobile ? '16px 16px 16px 16px' : '0' }}>
-                {/* Floating card — matches the canvas card style in the workspace */}
+                {/* Floating card — transparent fill, hairline border only */}
                 <div
                   style={{
-                    background: dark ? '#1A1C1E' : '#F0EBE0',
-                    border: dark ? '1px solid #2A2C2E' : '1px solid #DDD7C8',
+                    background: 'transparent',
+                    border: !isMobile ? (dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)') : 'none',
                     borderRadius: !isMobile ? 14 : 0,
-                    boxShadow: !isMobile ? (dark
-                      ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
-                      : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)') : 'none',
                     overflow: 'hidden',
                   }}
                 >
@@ -1902,18 +1896,14 @@ export default function AppShell() {
               padding: '16px 16px 16px 16px',
             }}
           >
-            {/* The active card — sharp 1px border + tight defined shadow (Canva-style) */}
+            {/* The active card — transparent fill, hairline border only */}
             <div
               ref={canvasCardRef}
               className="flex-1 flex flex-col min-w-0 overflow-hidden relative"
               style={{
-                background: dark ? '#1A1C1E' : '#F0EBE0',
-                border: dark ? '1px solid #2A2C2E' : '1px solid #DDD7C8',
+                background: 'transparent',
+                border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
                 borderRadius: 14,
-                // Tight defined shadow — close 1px + a single 6px lift, NO blur spread
-                boxShadow: dark
-                  ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
-                  : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
                 zIndex: 1,
               }}
             >
