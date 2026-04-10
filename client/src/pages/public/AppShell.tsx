@@ -1211,7 +1211,7 @@ export default function AppShell() {
     <aside
       className={`hidden lg:flex flex-col h-screen w-20 fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-zinc-950' : 'bg-white'}`}
       style={{
-        borderRight: dark ? '1px solid #2A2C2E' : '1px solid #E8E6E1',
+        // No border line. Depth comes from the content area being clearly different.
       }}
     >
       {/* Logo — X mark, always visible */}
@@ -1436,8 +1436,15 @@ export default function AppShell() {
         <div className="flex-1 flex min-h-0 bg-transparent">
         {/* Chat column — resizable on desktop in chat mode, flex on landing/other */}
         <div
-          className={`flex flex-col min-w-0 ${viewState === 'chat' ? (dark ? 'bg-[#1a1c1e]' : 'bg-white') : 'bg-transparent'}`}
-          style={!isMobile && viewState === 'chat' ? { width: chatWidth, flexShrink: 0 } : { flex: 1 }}
+          className="flex flex-col min-w-0"
+          style={{
+            ...(viewState === 'chat'
+              ? { background: dark ? '#101214' : '#F5F2EC' }
+              : { background: 'transparent' }),
+            ...(!isMobile && viewState === 'chat'
+              ? { width: chatWidth, flexShrink: 0 }
+              : { flex: 1 }),
+          }}
         >
         {/* Scroll area */}
         <div
@@ -1791,22 +1798,25 @@ export default function AppShell() {
             className="flex min-w-0"
             style={{
               flex: 1,
-              // The "table" — clearly different from card background, no fuzz
-              background: dark ? '#0B0C0E' : '#EAE8E3',
+              // The "table" — same as chat column so seam disappears, card sits on it
+              background: dark ? '#101214' : '#F5F2EC',
               position: 'relative',
-              padding: '10px 12px 10px 0',
+              padding: '20px 24px 20px 8px',
             }}
           >
-            {/* Stack hint cards — clean solid borders, no shadow, no fuzz */}
+            {/* Stack hint cards — sharp tight outlines with their own shadow */}
             {canvasTabs.length > 1 && (
               <div
                 aria-hidden
                 style={{
                   position: 'absolute',
-                  top: 14, right: 16, bottom: 14, left: 4,
+                  top: 26, right: 30, bottom: 26, left: 14,
                   background: dark ? '#1A1C1E' : '#FFFFFF',
-                  border: dark ? '1px solid #2A2C2E' : '1px solid #E8E6E1',
-                  borderRadius: 12,
+                  border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+                  borderRadius: 14,
+                  boxShadow: dark
+                    ? '0 1px 2px rgba(0,0,0,0.4)'
+                    : '0 1px 2px rgba(0,0,0,0.05)',
                   pointerEvents: 'none',
                 }}
               />
@@ -1816,22 +1826,29 @@ export default function AppShell() {
                 aria-hidden
                 style={{
                   position: 'absolute',
-                  top: 12, right: 14, bottom: 12, left: 2,
+                  top: 23, right: 27, bottom: 23, left: 11,
                   background: dark ? '#1A1C1E' : '#FFFFFF',
-                  border: dark ? '1px solid #2A2C2E' : '1px solid #E8E6E1',
-                  borderRadius: 12,
+                  border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+                  borderRadius: 14,
+                  boxShadow: dark
+                    ? '0 1px 2px rgba(0,0,0,0.4)'
+                    : '0 1px 2px rgba(0,0,0,0.05)',
                   pointerEvents: 'none',
                 }}
               />
             )}
 
-            {/* The active card — solid crisp border, NO shadow, depth from contrast */}
+            {/* The active card — sharp 1px border + tight defined shadow (Canva-style) */}
             <div
               className="flex-1 flex flex-col min-w-0 overflow-hidden relative"
               style={{
-                background: canvasTabs.length > 0 ? (dark ? '#1A1C1E' : '#FFFFFF') : (dark ? '#151617' : '#F8F6F2'),
-                border: dark ? '1px solid #2A2C2E' : '1px solid #E8E6E1',
-                borderRadius: 12,
+                background: canvasTabs.length > 0 ? (dark ? '#1A1C1E' : '#FFFFFF') : (dark ? '#151617' : '#FAFAF7'),
+                border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+                borderRadius: 14,
+                // Tight defined shadow — close 1px + a single 6px lift, NO blur spread
+                boxShadow: dark
+                  ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
+                  : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
                 zIndex: 1,
               }}
             >
