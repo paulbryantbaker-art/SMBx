@@ -2,8 +2,11 @@ import { useState, useEffect, useLayoutEffect, useCallback } from 'react';
 
 type ThemePref = 'light' | 'dark' | 'system';
 const STORAGE_KEY = 'smbx-theme';
-const LIGHT_COLOR = '#151617'; // body is always dark — JS keeps it dark in both modes
-const DARK_COLOR = '#151617';
+// Body is always the medium charcoal back layer — never changes with theme.
+// The floating cards (sidebar, canvas, journey) flip between white and
+// near-black based on the user's toggle, floating on this constant body.
+const LIGHT_COLOR = '#2A2C2E';
+const DARK_COLOR = '#2A2C2E';
 
 function getSystemDark() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches;

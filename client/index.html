@@ -10,7 +10,7 @@
     <meta property="og:description" content="AI deal advisory from valuation to close. Sell, buy, raise capital, or integrate. Start free." />
     <meta property="og:type" content="website" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#151617" />
+    <meta name="theme-color" content="#2A2C2E" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <script>
@@ -24,9 +24,9 @@
           document.documentElement.classList.add('dark');
           document.documentElement.style.colorScheme = 'dark';
         }
-        // Body is always dark — keep Safari toolbar matching it
+        // Body is always #2A2C2E (medium charcoal) — Safari toolbar matches it
         var metas = document.querySelectorAll('meta[name="theme-color"]');
-        metas.forEach(function(m) { m.setAttribute('content', '#151617'); });
+        metas.forEach(function(m) { m.setAttribute('content', '#2A2C2E'); });
         // Favicon: dark X for light mode, white X for dark mode
         function setFavicon(dark) {
           var link = document.querySelector('link[rel="icon"]');

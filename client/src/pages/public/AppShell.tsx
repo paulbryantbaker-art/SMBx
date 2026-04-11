@@ -1259,14 +1259,14 @@ export default function AppShell() {
 
   const sidebarContent = (_mobile: boolean) => (
     <aside
-      className={`hidden lg:flex flex-col w-[72px] fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-[#1A1C1E]' : 'bg-white'}`}
+      className={`hidden lg:flex flex-col w-[72px] fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-[#151617]' : 'bg-white'}`}
       style={{
         top: 16,
         left: 16,
         bottom: 16,
         height: 'auto',
         borderRadius: 14,
-        border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+        border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9',
         boxShadow: dark
           ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
           : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
@@ -1539,8 +1539,8 @@ export default function AppShell() {
                 <div
                   className="flex-1 flex flex-col"
                   style={{
-                    background: dark ? '#1A1C1E' : '#FFFFFF',
-                    border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+                    background: dark ? '#151617' : '#FFFFFF',
+                    border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9',
                     borderRadius: !isMobile ? 14 : 18,
                     boxShadow: dark
                       ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
@@ -1750,8 +1750,8 @@ export default function AppShell() {
                 {/* Floating card — matches the canvas card style in the workspace */}
                 <div
                   style={{
-                    background: dark ? '#1A1C1E' : '#FFFFFF',
-                    border: !isMobile ? (dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9') : 'none',
+                    background: dark ? '#151617' : '#FFFFFF',
+                    border: !isMobile ? (dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9') : 'none',
                     borderRadius: !isMobile ? 14 : 0,
                     boxShadow: !isMobile ? (dark
                       ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
@@ -1920,8 +1920,8 @@ export default function AppShell() {
               ref={canvasCardRef}
               className="flex-1 flex flex-col min-w-0 overflow-hidden relative"
               style={{
-                background: dark ? '#1A1C1E' : '#FFFFFF',
-                border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+                background: dark ? '#151617' : '#FFFFFF',
+                border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9',
                 borderRadius: 14,
                 boxShadow: dark
                   ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
@@ -2003,7 +2003,7 @@ export default function AppShell() {
         {/* ════ MOBILE CANVAS OVERLAY ════ */}
         {canvasTabs.length > 0 && isMobile && mobileCanvasVisible && (
           <div
-            className={`fixed inset-0 z-40 flex flex-col ${dark ? 'bg-[#1A1C1E]' : 'bg-white'}`}
+            className={`fixed inset-0 z-40 flex flex-col ${dark ? 'bg-[#151617]' : 'bg-white'}`}
             style={{
               animation: 'slideUpIn 0.3s ease',
               overscrollBehavior: 'contain',
@@ -2037,8 +2037,8 @@ export default function AppShell() {
                     style={{
                       maxWidth: '100%',
                       scrollbarWidth: 'none',
-                      background: dark ? '#1A1C1E' : '#FFFFFF',
-                      border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+                      background: dark ? '#151617' : '#FFFFFF',
+                      border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9',
                       borderRadius: 100,
                       padding: '4px',
                     }}
