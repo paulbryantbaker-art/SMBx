@@ -1530,11 +1530,10 @@ export default function AppShell() {
           {viewState === 'landing' && (
             <div key={activeTab} style={{ position: 'relative', animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : { minHeight: '100dvh' }) }}>
 
-              {/* ═══ SHARED BACKGROUND — Grok-minimal warm paper ═══
-                  Solid cream base only. Film grain comes from html/body (index.css).
-                  No gradients, no glows, no atmospheric color — rose gold only
-                  appears where it's intentional (H1 accents, chat pill, CTAs). */}
-              <div style={{ position: 'absolute', inset: 0, zIndex: 0, backgroundColor: dark ? '#151617' : '#f8f6f2', pointerEvents: 'none' }} />
+              {/* No background layer here — body (#E8DFC9 warm beige in index.css)
+                  provides the back-layer color. Adding an absolute-positioned div
+                  here was painting a lighter rectangle over the body, creating a
+                  visible mismatch between sidebar/journey cards and the body. */}
 
               {activeTab === 'home' ? (
               <>
