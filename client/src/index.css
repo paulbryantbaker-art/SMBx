@@ -114,11 +114,9 @@ html.dark {
   --shadow-md: 0 2px 10px rgba(0,0,0,.4);
   --shadow-lg: 0 4px 24px rgba(0,0,0,.5);
 }
-html.dark, html.dark body {
-  background-color: #151617 !important;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
-  background-repeat: repeat;
+html.dark {
+  /* Body bg + noise are set once at the top of this file (always dark).
+     Only set color-scheme here for native UI in dark mode. */
   color-scheme: dark;
 }
 html.dark #root {
@@ -414,7 +412,7 @@ html.dark .glass-panel {
   box-shadow: 0 6px 32px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
 }
 .dark .dock-hero-pill {
-  background: #1A1C1E;
+  background: #2f3133;
   border-color: rgba(255,255,255,0.12);
   box-shadow: 0 6px 32px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
 }
@@ -433,7 +431,7 @@ html.dark .glass-panel {
 
 /* ═══ CHATDOCK DARK MODE ═══ */
 .dark .home-dock-card {
-  background: #1A1C1E;
+  background: #2f3133;
   border-color: rgba(255,255,255,0.08);
 }
 .dark .home-dock-card:focus-within {
