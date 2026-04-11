@@ -6,7 +6,7 @@ import { useAuth, authHeaders } from '../../hooks/useAuth';
 import { useAnonymousChat, type AnonMessage } from '../../hooks/useAnonymousChat';
 import { useAuthChat } from '../../hooks/useAuthChat';
 import { useAppHeight } from '../../hooks/useAppHeight';
-import { useDarkMode, DarkModeToggle } from '../../components/shared/DarkModeToggle';
+import { useDarkMode } from '../../components/shared/DarkModeToggle';
 import ChatDock, { type ChatDockHandle } from '../../components/shared/ChatDock';
 import ChatMessages from '../../components/shell/ChatMessages';
 // Dot grid now lives on body in index.css — no component needed
@@ -1397,18 +1397,16 @@ export default function AppShell() {
 
       {/* Bottom: Theme + Admin + Account */}
       <div className="flex flex-col items-center gap-1 mt-auto pt-4">
-        {/* Theme toggle — only for logged-in users */}
-        {user && (
-          <button
-            onClick={() => setDark(!dark)}
-            className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
-            type="button"
-            title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            <span className="material-symbols-outlined text-[22px]">{dark ? 'light_mode' : 'dark_mode'}</span>
-            <span className="text-[9px] font-semibold">{dark ? 'Light' : 'Dark'}</span>
-          </button>
-        )}
+        {/* Theme toggle — always visible (logged in or out) */}
+        <button
+          onClick={() => setDark(!dark)}
+          className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
+          type="button"
+          title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          <span className="material-symbols-outlined text-[22px]">{dark ? 'light_mode' : 'dark_mode'}</span>
+          <span className="text-[9px] font-semibold">{dark ? 'Light' : 'Dark'}</span>
+        </button>
         {/* Admin Console — visible only to admins */}
         {user && (user.role === 'admin' || user.email === 'pbaker@smbx.ai') && (
           <button
@@ -2276,8 +2274,7 @@ export default function AppShell() {
             </>
             )}
             <div className="mt-auto flex flex-col gap-2">
-              {/* Theme toggle — only for logged-in users */}
-              {user && (
+              {/* Theme toggle — always visible (logged in or out) */}
               <button
                 onClick={() => setDark(!dark)}
                 className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 bg-transparent' : 'text-[#636467] bg-transparent'}`}
@@ -2286,7 +2283,6 @@ export default function AppShell() {
                 <span className="material-symbols-outlined text-[20px]">{dark ? 'light_mode' : 'dark_mode'}</span>
                 {dark ? 'Light mode' : 'Dark mode'}
               </button>
-              )}
               {/* Admin Console — visible only to admins */}
               {user && (user.role === 'admin' || user.email === 'pbaker@smbx.ai') && (
               <button
@@ -2419,8 +2415,8 @@ export default function AppShell() {
         )
       )}
 
-      {/* Dark mode toggle — only for logged-out users; logged-in users have it in the sidebar */}
-      {!user && <DarkModeToggle dark={dark} setDark={setDark} />}
+      {/* Dark mode toggle lives in the sidebar (desktop + mobile menu) for all users.
+          The floating top-right toggle was removed — it kept overlapping content. */}
 
       {flyingLogo && (() => {
         const letters = [
