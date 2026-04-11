@@ -8,6 +8,7 @@ import {
   StoryBlock,
   SlowVsFast,
   SectionHeader,
+  SignOffChain,
   PageCTA,
 } from './storyBlocks';
 
@@ -287,6 +288,52 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
             />
           </div>
         </section>
+
+        {/* ═══ Sign-off chain ═══ */}
+        <SignOffChain
+          intro={
+            <>
+              Ed didn't just model the cap stack. He closed it. Yulia drafted the LP pitch deck from
+              the modeled stack, routed it to his deal counsel for redlines, sent the structure deck
+              to the senior bank and the mezz fund in parallel, tracked every term-sheet response,
+              and logged every version. When the LPs asked for the deal narrative six months later,
+              the chain of custody was already in place.
+            </>
+          }
+          steps={[
+            {
+              label: 'Draft',
+              yulia: 'Yulia drafts the LP pitch deck + structure memo',
+              chain: 'From the modeled stack. Senior, unitranche, mezz, equity, rollover all itemized.',
+            },
+            {
+              label: 'Route',
+              yulia: 'Routes the structure memo to deal counsel',
+              chain: 'request_review with focus_areas: "Verify the mezz warrant terms and the seller rollover mechanics."',
+            },
+            {
+              label: 'Wait',
+              yulia: "Holds the LP deck in 'review' until counsel signs off",
+              chain: 'Counsel comments inline. State machine advances on approval.',
+            },
+            {
+              label: 'Execute',
+              yulia: 'Sends structure deck to senior bank + mezz fund in parallel',
+              chain: 'share_document with watermark + view tracking. Yulia logs every term-sheet response.',
+            },
+            {
+              label: 'Log',
+              yulia: 'Chain of custody on every term-sheet revision',
+              chain: 'When LPs ask "show me the deal narrative" six months in, the answer is in the database.',
+            },
+          ]}
+          bottomNote={
+            <>
+              Cap stacks die in the modeling phase. Yulia compresses modeling into one afternoon — and then runs the chain that keeps the deal moving until close.
+            </>
+          }
+          dark={dark}
+        />
 
         {/* ═══ CTA ═══ */}
         <PageCTA

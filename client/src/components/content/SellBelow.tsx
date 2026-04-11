@@ -9,6 +9,7 @@ import {
   BrandedTermCard,
   SlowVsFast,
   SectionHeader,
+  SignOffChain,
   PageCTA,
 } from './storyBlocks';
 
@@ -259,6 +260,52 @@ export default function SellBelow({ dark }: { dark: boolean }) {
             />
           </div>
         </section>
+
+        {/* ═══ Sign-off chain ═══ */}
+        <SignOffChain
+          intro={
+            <>
+              Mark didn't just get a number. He got a workflow that closed the deal. Yulia drafted the
+              add-back schedule, routed it to his CPA with the legitimate add-back categories flagged,
+              waited for sign-off, generated the comp memo for his M&amp;A advisor, and logged every
+              version of every document. When the buyer's QoE firm asked for provenance on every line,
+              the answer was in the audit log.
+            </>
+          }
+          steps={[
+            {
+              label: 'Draft',
+              yulia: 'Yulia drafts the add-back schedule and Baseline memo',
+              chain: 'From your verified P&L. Every category cited to the source line.',
+            },
+            {
+              label: 'Route',
+              yulia: 'Routes to your CPA for verification',
+              chain: 'request_review with focus_areas: "Confirm rent above-market, family comp, one-time legal."',
+            },
+            {
+              label: 'Wait',
+              yulia: "Holds the schedule in 'review' state until your CPA signs off",
+              chain: 'State machine: draft → review → approved. CPA notes attached to the record.',
+            },
+            {
+              label: 'Execute',
+              yulia: 'Sends the approved schedule to your M&A advisor',
+              chain: 'share_document with watermark, your advisor only, view tracked.',
+            },
+            {
+              label: 'Log',
+              yulia: 'Every action recorded forever',
+              chain: 'deal_activity_log with actor, timestamp, IP. Survives DD.',
+            },
+          ]}
+          bottomNote={
+            <>
+              When the buyer's QoE firm asks "where did this $1.8M of add-backs come from and who signed off?" — the answer is in the database, not in someone's email thread.
+            </>
+          }
+          dark={dark}
+        />
 
         {/* ═══ CTA ═══ */}
         <PageCTA

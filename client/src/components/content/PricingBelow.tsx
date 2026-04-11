@@ -1,6 +1,7 @@
 import { goToChat, bridgeToYulia } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { DealCostMap } from './DealCostMap';
+import { ChatGPTvsYulia } from './ChatGPTvsYulia';
 import {
   HookHeader,
   SectionHeader,
@@ -11,45 +12,47 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
   usePageMeta({
     title: 'Investment bank power. For everyone. · smbx.ai pricing',
     description:
-      'Yulia gives owners, buyers, and advisors the analytical horsepower an IB analyst pod gives a fee-paying client — for $149 a month. The relationships and signatures still belong to your team.',
+      'Yulia gives everyone investment bank power, knowledge, and guidance. 5-tier subscription from Free to Institutional. Verified deal professionals — attorneys, CPAs, brokers — free forever.',
     canonical: 'https://smbx.ai/pricing',
     faqs: [
       {
         question: 'Is Yulia a substitute for my M&A advisor or investment bank?',
         answer:
-          "No. Yulia is the analytical engine. Your IB is the relationship engine, your fiduciary, and your seat at the closing table. What Yulia does that scales: research, modeling, document drafting, comp analysis, scenario testing — the boring stuff that takes an analyst pod 200 hours. What your IB does that doesn't scale: walking the deal into a room of strategic buyers, signing the engagement letter as your fiduciary, defending the price when the buyer's lawyer pushes back. Bring both.",
+          "No. Yulia is the analytical engine and the workflow operating system. Your IB is the relationship engine, your fiduciary, and your seat at the closing table. Yulia routes your CIM to your attorney for review with focus areas. Your attorney signs off; the document state advances. The buyer's lawyer can ask where any number came from and the answer is in the audit log. Bring both — they do different jobs.",
+      },
+      {
+        question: "I'm an attorney, CPA, or other deal professional. What do I pay?",
+        answer:
+          'Nothing. Verified deal professionals — attorneys, CPAs, real estate brokers, wealth managers, appraisers, insurance brokers, estate planners — get full Pro features for free, forever. Your clients pay their own subscription if they engage the platform directly. When you tell Yulia you are advising on a deal, she switches to peer-to-peer mode automatically.',
+      },
+      {
+        question: "Why does the Pro tier cost so much less than what an IB would charge?",
+        answer:
+          'Yulia is software, not headcount. The math an IB analyst pod runs is the same math Yulia runs — comps, models, CIM drafts, capital stacks, after-tax modeling. The cost difference is the labor, the office, the recruiting pipeline, and the fee model. Yulia is a flat subscription. The IB is people. You can run both at once.',
       },
       {
         question: 'Can Yulia give me legal advice on my term sheet?',
         answer:
-          "No. Yulia can read a term sheet and explain what each clause typically does in market deals. She can flag terms that look unusual versus comparable transactions. She can model the after-tax impact of an asset sale versus a stock sale. What she cannot do is tell you whether to sign — that's your attorney's job. She does the homework. Your attorney does the calls.",
-      },
-      {
-        question: 'Can Yulia certify my financials or give me a Quality of Earnings opinion?',
-        answer:
-          'No. Yulia normalizes EBITDA, finds the legitimate add-backs your tax-optimized statements hide, and surfaces what a buyer would actually underwrite. She does not certify, audit, or attest. When you take Yulia\'s add-back schedule to a buyer, your CPA or QoE firm has to stand behind the numbers in writing. Yulia builds the schedule. Your accountant signs it.',
+          "No. Yulia can read a term sheet and explain what each clause typically does in market deals, flag terms that look unusual versus comparable transactions, and model the after-tax impact of asset versus stock sales. What she cannot do is tell you whether to sign — that is your attorney's job. She does the homework. Your attorney does the calls.",
       },
       {
         question: 'Does Yulia take a success fee on my deal?',
         answer:
-          'No. Yulia is a flat-rate software subscription — $0, $49, $149, or $999 a month, period. She does not earn a percentage of any transaction, does not effect any securities trades, and is not a registered broker-dealer with FINRA. The line between "software tools" and "broker-dealer" is bright. We sit firmly on the software side.',
-      },
-      {
-        question: 'What does "investment bank power" actually mean if Yulia isn\'t an IB?',
-        answer:
-          "It means you get the same analytical horsepower an IB's analyst pod gives a fee-paying client — comps, models, CIM drafts, buyer scoring, cap stack work, after-tax modeling — at a flat software price. The bank still owns the relationships, the fiduciary duty, the regulated work, and the closing-table seat. Yulia does the work that scales. They do the work that doesn't.",
+          'No. Yulia is a flat-rate software subscription, period. She does not earn a percentage of any transaction, does not effect any securities trades, and is not a registered broker-dealer. The line between software tools and broker-dealer is bright. We sit firmly on the software side.',
       },
       {
         question: 'Where does Yulia stop and a human take over?',
         answer:
-          'The line is "thinking and drafting" versus "deciding and signing." Yulia thinks for you — analyzes, models, drafts, projects. You decide and sign — usually with your attorney, CPA, or M&A advisor in the room. If a recommendation requires fiduciary judgment, a notarized signature, a courtroom appearance, or a regulated filing, that\'s where your human team takes over. Yulia gets you there ten times faster, but the last yard is theirs.',
+          'The line is "thinking and drafting" versus "deciding and signing." Yulia thinks for you — analyzes, models, drafts, projects, routes documents through the sign-off chain. You decide and sign — usually with your attorney, CPA, or M&A advisor in the room. If a recommendation requires fiduciary judgment, a notarized signature, a courtroom appearance, or a regulated filing, that is where your human team takes over. Yulia gets you there ten times faster, but the last yard is theirs.',
       },
     ],
   });
 
   const handleCTA = (plan?: string) => {
-    if (plan === 'enterprise') {
-      bridgeToYulia("I'm interested in the Enterprise plan for my team.");
+    if (plan === 'institutional') {
+      bridgeToYulia("I'm interested in the Institutional plan for my fund.");
+    } else if (plan === 'firm') {
+      bridgeToYulia("I'm interested in the Firm plan for our team.");
     } else {
       goToChat();
     }
@@ -63,38 +66,44 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
   const innerBg = dark ? 'rgba(255,255,255,0.04)' : 'white';
   const border = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
 
-  /* ───────── Tier definitions ───────── */
+  /* ───────── Hero tier (Professional) ───────── */
   const proFeatures = [
     'CIM generated from your verified financials — 25-40 pages, not a template',
-    'Buyers identified, ranked, and scored by fit — not just listed',
-    'Every counter-offer drafted with comparable deal data',
-    'Due diligence coordinated — 50-100 items tracked to completion',
-    'LOI terms modeled for after-tax impact before you send',
-    '180-day post-close integration plan from actual DD findings',
-    'Capital stack modeling against live 2024-2025 lender rates',
     'The Rundown™ — 7-dimension deal scoring in 8 seconds',
+    'Stack Builder for live capital structure modeling',
+    'Buyers, lenders, and advisors identified, ranked, and scored',
+    'Document state machine — draft → review → approved → executed',
+    'Yulia routes documents to your attorney with focus areas',
+    'Every action audited in the deal log (chain of custody)',
+    'Full deal room — your CPA, attorney, broker, lender all in one place',
+    '180-day post-close integration plan from your DD report',
+    'After-tax modeling on asset vs stock sale, earnouts, escrows',
   ];
 
-  const tinyTiers = [
+  /* ───────── Other tiers ───────── */
+  const otherTiers = [
     {
+      key: 'free',
       name: 'Free',
       price: '$0',
-      sub: 'Forever · email only',
-      protagonist: 'Mark D. started here.',
+      sub: 'Forever',
+      protagonist: 'Everyone starts here',
       features: [
-        'Talk to Yulia, unlimited',
-        'Preliminary Baseline range',
-        '7-factor readiness score',
+        'Unlimited Yulia conversation',
         'One full deliverable, yours to keep',
+        'Real Baseline range, 7-factor readiness',
+        'Email required after first deliverable',
       ],
       cta: 'Start free',
       ctaPlan: undefined as string | undefined,
+      tone: 'light' as const,
     },
     {
+      key: 'starter',
       name: 'Starter',
       price: '$49',
-      sub: '/mo · one specific deal',
-      protagonist: 'For your first close.',
+      sub: '/mo · single deal',
+      protagonist: 'For your first close',
       features: [
         'Real SDE & EBITDA normalization',
         'Add-back schedule',
@@ -104,20 +113,58 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
       ],
       cta: 'Start for $49',
       ctaPlan: undefined as string | undefined,
+      tone: 'light' as const,
     },
     {
-      name: 'Enterprise',
-      price: '$999',
+      key: 'practice',
+      name: 'Practice',
+      price: '$1,499',
       sub: '/mo · for the team',
-      protagonist: 'Ed K. runs this.',
+      protagonist: 'Reese & Hammond runs this',
       features: [
-        'Everything in Professional × team',
-        'White-label output — your brand',
-        'API access for pipeline integration',
-        'Dedicated onboarding & priority support',
+        'Everything in Professional × 5 seats',
+        'Multi-deal portfolio view',
+        'White-label outputs (your brand)',
+        'Up to 10 active deals',
+        'Shared DD library',
+      ],
+      cta: 'Start 90-day trial',
+      ctaPlan: undefined as string | undefined,
+      tone: 'light' as const,
+    },
+    {
+      key: 'firm',
+      name: 'Firm',
+      price: '$4,999',
+      sub: '/mo · mid-market firms',
+      protagonist: 'Sub-$1B PE & multi-MD shops',
+      features: [
+        'Unlimited users + unlimited deals',
+        'API for pipeline integration',
+        'Dedicated CSM + onboarding',
+        'SOC 2 / SLA / contract terms',
+        'Quarterly business reviews',
       ],
       cta: 'Talk to us',
-      ctaPlan: 'enterprise' as string | undefined,
+      ctaPlan: 'firm' as string | undefined,
+      tone: 'light' as const,
+    },
+    {
+      key: 'institutional',
+      name: 'Institutional',
+      price: 'Custom',
+      sub: '$1B+ funds & bulge bracket',
+      protagonist: 'Annual contract, ~$50K-$150K',
+      features: [
+        'Custom contract & terms',
+        'SSO / SAML / on-prem option',
+        'Dedicated solutions architect',
+        'Co-development of features',
+        'Shared private comp data',
+      ],
+      cta: 'Talk to us',
+      ctaPlan: 'institutional' as string | undefined,
+      tone: 'dark' as const,
     },
   ];
 
@@ -131,9 +178,9 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
       bullets: [
         'Real Baseline against your industry comp set',
         'Blind Equity™ add-back schedule',
-        'CIM drafted from your verified financials',
-        'Buyer pool identified, ranked, and scored',
-        'Counter-offer math with comparable deal data',
+        'CIM drafted from verified financials',
+        'Buyer pool identified, ranked, scored',
+        'Yulia routes draft to your CPA + attorney with focus areas',
       ],
     },
     {
@@ -142,7 +189,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
       icon: 'shopping_cart',
       protagonist: 'Priya S., growth equity VP',
       bullets: [
-        'The Rundown™ — 7-dimension scoring in 8 seconds',
+        'The Rundown™ — 7-dim scoring in 8 seconds',
         'IC memo drafted from a CIM excerpt',
         'Capital stack modeled against live lender rates',
         'DSCR, leverage, and covenant headroom',
@@ -205,8 +252,8 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           }
           sub={
             <>
-              Knowledge, models, drafting, guidance — at <strong style={{ color: headingColor }}>$149 a month</strong>. The
-              relationships, the fiduciary duty, and the signatures still belong to your team. Yulia does the work that scales.
+              Knowledge, models, drafting, guidance — and the workflow that closes the deal. <strong style={{ color: headingColor }}>Everyone starts free.</strong>{' '}
+              You only pay when you've decided Yulia is doing the work of an analyst pod for the price of a Slack subscription.
             </>
           }
           dark={dark}
@@ -214,17 +261,22 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
 
         {/* ═══ Connector — protagonists ═══ */}
         <p
-          className="text-[13px] md:text-[14px] leading-relaxed mb-16 max-w-2xl"
+          className="text-[13px] md:text-[14px] leading-relaxed mb-16 max-w-3xl"
           style={{ color: mutedColor }}
         >
           <span className="font-bold" style={{ color: accent }}>Mark D.</span> ran Free until he was ready, then upgraded.{' '}
           <span className="font-bold" style={{ color: accent }}>Anna J.</span> runs Professional.{' '}
-          <span className="font-bold" style={{ color: accent }}>Reese & Hammond</span> runs Professional for the partners.{' '}
-          <span className="font-bold" style={{ color: accent }}>Ed K.</span> runs Enterprise for his deal team.
-          Pick the tier that fits your job — change later, no penalty.
+          <span className="font-bold" style={{ color: accent }}>Reese & Hammond</span> runs Practice for the partners.{' '}
+          <span className="font-bold" style={{ color: accent }}>Ed K.'s</span> deal team runs Firm. The bulge bracket ones run Institutional.
+          And every attorney, CPA, broker, and wealth manager on the platform runs free, forever.
         </p>
 
-        {/* ═══ The Deal Cost Map — hero math ═══ */}
+        {/* ═══ ChatGPT vs Yulia — the actual differentiator ═══ */}
+        <section className="mb-20">
+          <ChatGPTvsYulia dark={dark} />
+        </section>
+
+        {/* ═══ The Deal Cost Map ═══ */}
         <section className="mb-20">
           <SectionHeader
             label="The math · interactive"
@@ -235,12 +287,12 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           <DealCostMap dark={dark} />
         </section>
 
-        {/* ═══ Tier cards — Pro hero + 3 small ═══ */}
-        <section className="mb-28">
+        {/* ═══ Tier cards — Pro hero + 5 smaller ═══ */}
+        <section className="mb-12">
           <SectionHeader
             label="Pick your tier"
-            title="One hero plan. Three on-ramps."
-            sub="Most owners, buyers, and advisors land on Professional. The other tiers are entry doors and team upgrades."
+            title="One hero plan. Five on-ramps."
+            sub="Most owners, individual buyers, and indie sponsors land on Professional. The other tiers are entry doors and team upgrades."
             dark={dark}
           />
 
@@ -252,7 +304,6 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
               border: `2px solid ${accent}`,
             }}
           >
-            {/* Glow */}
             <div
               aria-hidden
               className="absolute -top-32 -right-32 w-96 h-96 rounded-full pointer-events-none"
@@ -262,7 +313,6 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
             />
 
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
-              {/* Left: name + price */}
               <div className="lg:col-span-5">
                 <p
                   className="text-[10px] font-bold uppercase tracking-[0.22em] mb-3"
@@ -285,19 +335,19 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                     className="font-headline font-black tabular-nums tracking-tight"
                     style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', color: accent, lineHeight: 1 }}
                   >
-                    $149
+                    $199
                   </span>
                   <span className="text-base font-medium" style={{ color: mutedColor }}>
                     / month
                   </span>
                 </div>
                 <p className="text-sm mb-6" style={{ color: mutedColor }}>
-                  Full deal execution · 90-day free trial for new accounts
+                  Full deal execution · 90-day free trial · cancel anytime
                 </p>
 
                 <p className="text-[14px] leading-relaxed mb-6" style={{ color: bodyColor }}>
                   Anna J. runs Professional. Mark D. upgraded into it after his free Baseline.
-                  Reese & Hammond's partners share a single Pro account across 22 active mandates.
+                  The default tier for most engaged owners, individual buyers, and indie sponsors running 1-5 deals.
                 </p>
 
                 <button
@@ -321,7 +371,6 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                 </button>
               </div>
 
-              {/* Right: feature list */}
               <div className="lg:col-span-7">
                 <p
                   className="text-[10px] font-bold uppercase tracking-[0.22em] mb-4"
@@ -329,7 +378,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                 >
                   What you get
                 </p>
-                <ul className="space-y-3">
+                <ul className="space-y-2.5">
                   {proFeatures.map((f) => (
                     <li key={f} className="flex items-start gap-3">
                       <span
@@ -338,7 +387,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                       >
                         check
                       </span>
-                      <span className="text-[15px] leading-relaxed" style={{ color: bodyColor }}>
+                      <span className="text-[14px] leading-relaxed" style={{ color: bodyColor }}>
                         {f}
                       </span>
                     </li>
@@ -348,66 +397,175 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
             </div>
           </div>
 
-          {/* Free / Starter / Enterprise — 3 smaller cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {tinyTiers.map((t) => (
-              <div
-                key={t.name}
-                className="rounded-2xl p-6 flex flex-col"
-                style={{
-                  background: t.name === 'Enterprise' ? '#0f1012' : innerBg,
-                  border: `1px solid ${t.name === 'Enterprise' ? 'rgba(255,255,255,0.08)' : border}`,
-                  color: t.name === 'Enterprise' ? '#f9f9fc' : headingColor,
-                }}
-              >
-                <div className="flex items-baseline justify-between mb-1">
-                  <h4 className="font-headline font-black text-lg tracking-tight">
-                    {t.name}
-                  </h4>
-                  <span
-                    className="text-[10px] font-bold uppercase tracking-wider"
-                    style={{ color: accent }}
-                  >
-                    {t.protagonist}
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span className="font-headline font-black tabular-nums" style={{ fontSize: '2rem', lineHeight: 1 }}>
-                    {t.price}
-                  </span>
-                  <span className="text-xs" style={{ color: t.name === 'Enterprise' ? 'rgba(218,218,220,0.55)' : mutedColor }}>
-                    {t.sub}
-                  </span>
-                </div>
-                <ul className="mt-4 space-y-1.5 flex-1">
-                  {t.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-[12px] leading-relaxed">
-                      <span
-                        className="material-symbols-outlined text-[14px] shrink-0 mt-0.5"
-                        style={{ color: accent }}
-                      >
-                        check
-                      </span>
-                      <span style={{ color: t.name === 'Enterprise' ? 'rgba(218,218,220,0.78)' : bodyColor }}>
-                        {f}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  onClick={() => handleCTA(t.ctaPlan)}
-                  className="mt-5 w-full py-2.5 rounded-full text-xs font-bold transition-all"
+          {/* Other tiers — 5 cards in a responsive grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            {otherTiers.map((t) => {
+              const isDark = t.tone === 'dark';
+              return (
+                <div
+                  key={t.key}
+                  className="rounded-2xl p-5 flex flex-col"
                   style={{
-                    background: 'transparent',
-                    color: t.name === 'Enterprise' ? '#f9f9fc' : headingColor,
-                    border: `1.5px solid ${t.name === 'Enterprise' ? 'rgba(255,255,255,0.3)' : border}`,
-                    cursor: 'pointer',
+                    background: isDark ? '#0f1012' : innerBg,
+                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : border}`,
+                    color: isDark ? '#f9f9fc' : headingColor,
                   }}
                 >
-                  {t.cta}
-                </button>
+                  <div className="mb-2">
+                    <span
+                      className="text-[9px] font-bold uppercase tracking-wider block mb-1"
+                      style={{ color: accent }}
+                    >
+                      {t.protagonist}
+                    </span>
+                    <h4 className="font-headline font-black text-base tracking-tight">
+                      {t.name}
+                    </h4>
+                  </div>
+                  <div className="flex items-baseline gap-1 mb-1">
+                    <span
+                      className="font-headline font-black tabular-nums"
+                      style={{ fontSize: '1.625rem', lineHeight: 1 }}
+                    >
+                      {t.price}
+                    </span>
+                  </div>
+                  <p
+                    className="text-[10px] mb-3"
+                    style={{ color: isDark ? 'rgba(218,218,220,0.55)' : mutedColor }}
+                  >
+                    {t.sub}
+                  </p>
+                  <ul className="space-y-1.5 flex-1 mb-4">
+                    {t.features.map((f) => (
+                      <li key={f} className="flex items-start gap-1.5 text-[11px] leading-snug">
+                        <span
+                          className="material-symbols-outlined text-[12px] shrink-0 mt-0.5"
+                          style={{ color: accent }}
+                        >
+                          check
+                        </span>
+                        <span style={{ color: isDark ? 'rgba(218,218,220,0.78)' : bodyColor }}>
+                          {f}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    onClick={() => handleCTA(t.ctaPlan)}
+                    className="w-full py-2 rounded-full text-[11px] font-bold transition-all"
+                    style={{
+                      background: 'transparent',
+                      color: isDark ? '#f9f9fc' : headingColor,
+                      border: `1.5px solid ${isDark ? 'rgba(255,255,255,0.3)' : border}`,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {t.cta}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ═══ Pro · Free callout ═══ */}
+        <section className="mb-20">
+          <div
+            className="rounded-2xl p-8 md:p-12 relative overflow-hidden"
+            style={{
+              background: dark ? '#0f1012' : '#0f1012',
+              border: `1px solid rgba(255,255,255,0.08)`,
+              color: '#f9f9fc',
+            }}
+          >
+            <div
+              aria-hidden
+              className="absolute -top-24 -left-24 w-80 h-80 rounded-full pointer-events-none"
+              style={{
+                background: `radial-gradient(circle, ${accent}22, transparent 60%)`,
+              }}
+            />
+
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <div className="lg:col-span-7">
+                <p
+                  className="text-[10px] font-bold uppercase tracking-[0.24em] mb-4"
+                  style={{ color: accent }}
+                >
+                  Pro · Free · forever
+                </p>
+                <h3
+                  className="font-headline font-black tracking-[-0.02em] mb-5"
+                  style={{
+                    fontSize: 'clamp(2rem, 4vw, 3rem)',
+                    lineHeight: 1,
+                  }}
+                >
+                  Are you a deal professional?<br />
+                  <em className="not-italic" style={{ color: accent }}>Yulia is free for you.</em>
+                </h3>
+                <p className="text-[16px] md:text-[17px] leading-relaxed mb-5" style={{ color: 'rgba(218,218,220,0.85)' }}>
+                  Attorneys, CPAs, real estate brokers, wealth managers, appraisers, rep & warranty insurance brokers,
+                  estate planners — full Professional features, free forever. White-label outputs that carry your firm's brand.
+                  Multi-client deal view. Yulia switches to peer-to-peer mode the moment you tell her you're advising.
+                </p>
+                <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(218,218,220,0.55)' }}>
+                  The catch: when your client engages the platform directly to manage their own deal, they get a 14-day trial
+                  and then need their own subscription. We make it free for you. We don't make it free for them through you.
+                </p>
               </div>
-            ))}
+
+              <div className="lg:col-span-5">
+                <div
+                  className="rounded-xl p-6"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid rgba(255,255,255,0.08)` }}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] mb-3" style={{ color: accent }}>
+                    Eligible roles
+                  </p>
+                  <ul className="space-y-2 text-[13px] mb-6" style={{ color: 'rgba(218,218,220,0.85)' }}>
+                    {[
+                      'M&A attorneys (corporate, transactional, tax)',
+                      'CPAs and accounting firms',
+                      'Commercial real estate brokers',
+                      'Wealth managers serving deal clients',
+                      'Appraisers and valuation firms',
+                      'Rep & warranty insurance brokers',
+                      'Estate planners',
+                    ].map((r) => (
+                      <li key={r} className="flex items-start gap-2">
+                        <span
+                          className="material-symbols-outlined text-[14px] shrink-0 mt-0.5"
+                          style={{ color: accent }}
+                        >
+                          check
+                        </span>
+                        <span>{r}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    onClick={() =>
+                      bridgeToYulia(
+                        "I'm a deal professional. I'd like to use Yulia for my client work."
+                      )
+                    }
+                    className="w-full py-3 rounded-full text-sm font-bold text-white transition-all"
+                    style={{
+                      background: accent,
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Tell Yulia what you do
+                  </button>
+                  <p className="text-[10px] text-center mt-3" style={{ color: 'rgba(218,218,220,0.4)' }}>
+                    Yulia will recognize you in conversation. No application form.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -427,7 +585,6 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                 className="grid grid-cols-12 gap-6 md:gap-10 pt-8"
                 style={{ borderTop: `1px solid ${border}` }}
               >
-                {/* Number / title / protagonist */}
                 <div className="col-span-12 md:col-span-4">
                   <div className="flex items-baseline gap-3 mb-2">
                     <span
@@ -458,7 +615,6 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                   </p>
                 </div>
 
-                {/* Bullets */}
                 <div className="col-span-12 md:col-span-8">
                   <ul className="space-y-3">
                     {job.bullets.map((b) => (
@@ -481,12 +637,12 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           </div>
         </section>
 
-        {/* ═══ The IB Line — legal FAQ ═══ */}
+        {/* ═══ The Line — legal FAQ ═══ */}
         <section className="mb-28">
           <SectionHeader
             label="The line"
             title="What Yulia can't do — and why that matters."
-            sub="Yulia educates, models, drafts, and guides. She doesn't sign, certify, or close. The line between software and broker-dealer is bright. Here's where it sits."
+            sub="Yulia educates, models, drafts, routes, and orchestrates. She doesn't sign, certify, or close. The line between software and broker-dealer is bright. Here's where it sits."
             dark={dark}
           />
 
@@ -496,11 +652,21 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                 q: 'Is Yulia a substitute for my M&A advisor or investment bank?',
                 a: (
                   <>
-                    No. Yulia is the analytical engine. Your IB is the relationship engine, your fiduciary, and your seat at the
-                    closing table. What Yulia does that scales: research, modeling, document drafting, comp analysis, scenario
-                    testing — the boring stuff that takes an analyst pod 200 hours. What your IB does that{' '}
-                    <em>doesn't</em> scale: walking the deal into a room of strategic buyers, signing the engagement letter as
-                    your fiduciary, defending the price when the buyer's lawyer pushes back. <strong>Bring both.</strong>
+                    No. Yulia is the analytical engine and the workflow operating system. Your IB is the relationship engine,
+                    your fiduciary, and your seat at the closing table. Yulia routes your CIM to your attorney with focus areas;
+                    your attorney signs off; the document state advances; the buyer's lawyer can ask where any number came from
+                    and the answer is in the audit log. <strong>Bring both.</strong>
+                  </>
+                ),
+              },
+              {
+                q: "I'm an attorney, CPA, or other deal professional. What do I pay?",
+                a: (
+                  <>
+                    <strong>Nothing.</strong> Verified deal professionals — attorneys, CPAs, real estate brokers, wealth managers,
+                    appraisers, insurance brokers, estate planners — get full Professional features for free, forever. Your clients
+                    pay their own subscription if they engage the platform directly. Yulia recognizes you in conversation and switches
+                    to peer-to-peer mode automatically.
                   </>
                 ),
               },
@@ -508,9 +674,9 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                 q: 'Can Yulia give me legal advice on my term sheet?',
                 a: (
                   <>
-                    No. Yulia can read a term sheet and explain what each clause typically does in market deals. She can flag
-                    terms that look unusual versus comparable transactions. She can model the after-tax impact of an asset sale
-                    versus a stock sale. What she <em>cannot</em> do is tell you whether to sign — that's your attorney's job.{' '}
+                    No. Yulia can read a term sheet and explain what each clause typically does in market deals. She can flag terms
+                    that look unusual versus comparable transactions. She can model the after-tax impact of an asset sale versus a
+                    stock sale. What she <em>cannot</em> do is tell you whether to sign — that's your attorney's job.{' '}
                     <strong>She does the homework. Your attorney does the calls.</strong>
                   </>
                 ),
@@ -530,21 +696,9 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                 q: 'Does Yulia take a success fee on my deal?',
                 a: (
                   <>
-                    No. Yulia is a flat-rate software subscription — $0, $49, $149, or $999 a month, period. She does <em>not</em>{' '}
-                    earn a percentage of any transaction, does not effect any securities trades, and is not a registered
-                    broker-dealer with FINRA. The line between "software tools" and "broker-dealer" is bright.{' '}
-                    <strong>We sit firmly on the software side.</strong>
-                  </>
-                ),
-              },
-              {
-                q: 'What does "investment bank power" actually mean if Yulia isn\'t an IB?',
-                a: (
-                  <>
-                    It means you get the same analytical horsepower an IB's analyst pod gives a fee-paying client — comps,
-                    models, CIM drafts, buyer scoring, cap stack work, after-tax modeling — at a flat software price. The bank
-                    still owns the relationships, the fiduciary duty, the regulated work, and the closing-table seat.{' '}
-                    <strong>Yulia does the work that scales. They do the work that doesn't.</strong>
+                    No. Yulia is a flat-rate software subscription, period. She does <em>not</em> earn a percentage of any
+                    transaction, does not effect any securities trades, and is not a registered broker-dealer with FINRA.
+                    The line between "software tools" and "broker-dealer" is bright. <strong>We sit firmly on the software side.</strong>
                   </>
                 ),
               },
@@ -553,9 +707,9 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                 a: (
                   <>
                     The line is "thinking and drafting" versus "deciding and signing." Yulia thinks for you — analyzes, models,
-                    drafts, projects. You decide and sign — usually with your attorney, CPA, or M&A advisor in the room. If a
-                    recommendation requires fiduciary judgment, a notarized signature, a courtroom appearance, or a regulated
-                    filing, that's where your human team takes over.{' '}
+                    drafts, projects, routes documents through the sign-off chain. You decide and sign — usually with your attorney,
+                    CPA, or M&A advisor in the room. If a recommendation requires fiduciary judgment, a notarized signature, a
+                    courtroom appearance, or a regulated filing, that's where your human team takes over.{' '}
                     <strong>Yulia gets you there ten times faster, but the last yard is theirs.</strong>
                   </>
                 ),

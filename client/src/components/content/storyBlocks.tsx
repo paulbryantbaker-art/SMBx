@@ -1,10 +1,13 @@
 /**
  * storyBlocks.tsx
  * Reusable editorial blocks used across all 5 journey pages.
+ *  - HookHeader: opinionated hero block (eyebrow + giant H1 + sub)
  *  - StoryBlock: named-protagonist deal story with inline numbers
  *  - BrandedTermCard: Baseline / Blind Equity / The Rundown as visible products
  *  - SlowVsFast: side-by-side contrast — "the way it's been" vs "with Yulia"
- *  - HookHeader: opinionated hero block (eyebrow + giant H1 + sub)
+ *  - SignOffChain: 5-step deal-operator workflow block (the chain Yulia runs)
+ *  - SectionHeader: small label/title combo
+ *  - PageCTA: bottom-of-page action
  *
  *  All blocks accept a `dark` prop and use the project palette.
  *  No card grids. No identical shadows. No AI-slop patterns.
@@ -422,6 +425,118 @@ export function SlowVsFast({
         style={{ color: headingColor }}
       >
         {takeaway}
+      </motion.p>
+    </section>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   SignOffChain — the deal-operator workflow block
+   Renders 5 numbered chain steps that show how Yulia drafts → routes →
+   waits → executes → logs. Used on every journey page to back the
+   "Yulia runs your deal" claim with the actual chain that exists in code.
+   ════════════════════════════════════════════════════════════ */
+export function SignOffChain({
+  intro,
+  steps,
+  bottomNote,
+  dark,
+}: {
+  intro: ReactNode;
+  steps: { label: string; yulia: string; chain: string }[];
+  bottomNote: ReactNode;
+  dark: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-100px' });
+
+  const headingColor = dark ? '#f9f9fc' : '#0f1012';
+  const bodyColor = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
+  const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
+  const ruleColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
+  const accent = dark ? PINK_DARK : PINK;
+
+  return (
+    <section ref={ref} className="mb-28">
+      <p
+        className="text-[10px] font-bold uppercase tracking-[0.24em] mb-4"
+        style={{ color: accent }}
+      >
+        Sign-off chain · Yulia runs the workflow
+      </p>
+      <h2
+        className="font-headline font-black tracking-[-0.025em] leading-[1] mb-4 max-w-3xl"
+        style={{
+          fontSize: 'clamp(1.875rem, 4vw, 3rem)',
+          color: headingColor,
+        }}
+      >
+        Yulia drafts. Routes. Waits. Executes. Logs.
+      </h2>
+      <p
+        className="max-w-3xl text-[16px] md:text-[18px] leading-[1.6] mb-12"
+        style={{ color: bodyColor }}
+      >
+        {intro}
+      </p>
+
+      {/* The 5 steps as a horizontal timeline on desktop, vertical on mobile */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-0 mb-10">
+        {steps.map((step, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 16 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+            className="relative md:border-r md:last:border-r-0 px-0 md:px-5 first:pl-0 last:pr-0 py-4 md:py-0"
+            style={{ borderRightColor: ruleColor, borderTop: i > 0 ? `1px solid ${ruleColor}` : 'none' }}
+          >
+            {/* Step number */}
+            <div className="flex items-baseline gap-2 mb-3">
+              <span
+                className="font-headline font-black tabular-nums"
+                style={{
+                  fontSize: '1.5rem',
+                  color: accent,
+                  lineHeight: 0.95,
+                }}
+              >
+                0{i + 1}
+              </span>
+              <span
+                className="text-[11px] font-bold uppercase tracking-wider"
+                style={{ color: mutedColor }}
+              >
+                {step.label}
+              </span>
+            </div>
+            {/* Yulia action */}
+            <p
+              className="text-[14px] font-bold mb-2"
+              style={{ color: headingColor, lineHeight: 1.3 }}
+            >
+              {step.yulia}
+            </p>
+            {/* Chain detail */}
+            <p
+              className="text-[12px] leading-relaxed"
+              style={{ color: mutedColor }}
+            >
+              {step.chain}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Bottom note */}
+      <motion.p
+        initial={{ opacity: 0, y: 8 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.5, delay: 0.6 }}
+        className="max-w-3xl text-[15px] md:text-[16px] italic leading-relaxed border-l-4 pl-5"
+        style={{ color: bodyColor, borderColor: accent }}
+      >
+        {bottomNote}
       </motion.p>
     </section>
   );

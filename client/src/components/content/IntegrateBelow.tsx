@@ -6,6 +6,7 @@ import {
   StoryBlock,
   SlowVsFast,
   SectionHeader,
+  SignOffChain,
   PageCTA,
 } from './storyBlocks';
 
@@ -236,6 +237,51 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
             <>
               The plan isn't a binder. It's a daily conversation with someone who's watching the numbers
               while you're running the business. <strong>Year 1 is when the deal model becomes real — or doesn't.</strong>
+            </>
+          }
+          dark={dark}
+        />
+
+        {/* ═══ Sign-off chain ═══ */}
+        <SignOffChain
+          intro={
+            <>
+              Anna's first 180 days were not 180 days of guesswork. They were 180 days of decisions
+              Yulia drafted, routed to the right human, waited for sign-off, executed, and logged.
+              Pricing memo to head of sales. Customer save scripts to customer success. Covenant report
+              to the senior bank. Year-2 refi prep to the new lender. Every step audited.
+            </>
+          }
+          steps={[
+            {
+              label: 'Draft',
+              yulia: 'Yulia drafts the pricing memo, save scripts, board updates',
+              chain: 'From the deal model + customer health data. Specific account by specific account.',
+            },
+            {
+              label: 'Route',
+              yulia: 'Routes pricing memo to head of sales for review',
+              chain: 'request_review with focus_areas: "Confirm pricing elasticity assumption on top-20."',
+            },
+            {
+              label: 'Wait',
+              yulia: 'Holds the rate-card change in queue until sign-off',
+              chain: 'Sales head reviews, comments, approves. State machine advances. No surprise rate changes.',
+            },
+            {
+              label: 'Execute',
+              yulia: 'Sends customer-by-customer renewal letters, tracks responses',
+              chain: 'share_document with the personalized rate. Every customer interaction logged.',
+            },
+            {
+              label: 'Log',
+              yulia: 'Chain of custody for the year-2 refi conversation',
+              chain: 'New senior lender asks "show me the EBITDA build-back." Audit log = the answer.',
+            },
+          ]}
+          bottomNote={
+            <>
+              60% of buyers miss year-1 plan. The ones who don't have a workflow that makes every decision visible, traceable, and approved before it ships.
             </>
           }
           dark={dark}

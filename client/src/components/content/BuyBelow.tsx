@@ -9,6 +9,7 @@ import {
   BrandedTermCard,
   SlowVsFast,
   SectionHeader,
+  SignOffChain,
   PageCTA,
 } from './storyBlocks';
 
@@ -248,6 +249,52 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
           />
           <LandingSBACalc dark={dark} />
         </section>
+
+        {/* ═══ Sign-off chain ═══ */}
+        <SignOffChain
+          intro={
+            <>
+              Priya doesn't just screen deals. She closes them. Yulia builds the IC memo from the
+              CIM, routes it to the deal team for review, holds it in queue until the partner signs off,
+              models the cap stack against current lender quotes, transmits the LOI to the seller's
+              broker, and logs every version of every document. Year-2 refi conversations start with
+              a clean audit trail.
+            </>
+          }
+          steps={[
+            {
+              label: 'Draft',
+              yulia: 'Yulia drafts the IC memo + LOI',
+              chain: 'From the CIM excerpt + your thesis. The Rundown score baked in.',
+            },
+            {
+              label: 'Route',
+              yulia: 'Routes IC memo to your partners',
+              chain: 'request_review with focus_areas: "Verify the comp set and DSCR assumption."',
+            },
+            {
+              label: 'Wait',
+              yulia: "Holds LOI in 'review' until partner sign-off + your attorney redlines",
+              chain: 'Two-stage review chain: deal team approval → counsel approval → owner final.',
+            },
+            {
+              label: 'Execute',
+              yulia: "Sends LOI to the seller's broker",
+              chain: 'share_document with the brokered terms. Every view tracked.',
+            },
+            {
+              label: 'Log',
+              yulia: 'Chain of custody on every number',
+              chain: "Year-2 refi conversation starts with the lender asking for the audit trail. It's there.",
+            },
+          ]}
+          bottomNote={
+            <>
+              The 99 deals you killed take seconds. The 1 you closed takes a chain of custody that survives the buyer's lawyer, the senior bank's covenant review, and the year-2 refi.
+            </>
+          }
+          dark={dark}
+        />
 
         {/* ═══ CTA ═══ */}
         <PageCTA
