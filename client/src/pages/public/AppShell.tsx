@@ -38,6 +38,13 @@ const HowItWorksBelow = lazy(() => import('../../components/content/HowItWorksBe
 const AdvisorsBelow = lazy(() => import('../../components/content/AdvisorsBelow'));
 const PricingBelow = lazy(() => import('../../components/content/PricingBelow'));
 
+// Mobile rebuild — Claude+ pattern
+import { MobileSidebar, type LearnDest } from '../../components/mobile/MobileSidebar';
+import { LearnDrawer } from '../../components/mobile/LearnDrawer';
+import { StarterChips } from '../../components/mobile/StarterChips';
+import { MobileSellPage } from '../../components/mobile/MobileSellPage';
+import { MobileJourneySheet } from '../../components/mobile/MobileJourneySheet';
+
 /* Minimal skeleton for lazy Below pages */
 function BelowSkeleton() {
   return (
@@ -474,6 +481,9 @@ export default function AppShell() {
   }, [isChat]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isMobileCanvasDrawerOpen, setIsMobileCanvasDrawerOpen] = useState(false);
+  // Mobile rebuild state — LearnDrawer + journey sheets
+  const [learnDrawerOpen, setLearnDrawerOpen] = useState(false);
+  const [mobileJourneyOpen, setMobileJourneyOpen] = useState<LearnDest | null>(null);
   // Mobile canvas overlay visibility — separate from canvasTabs.length so tabs persist
   // when user navigates back to chat
   const [mobileCanvasVisible, setMobileCanvasVisible] = useState(false);
@@ -1660,10 +1670,21 @@ export default function AppShell() {
                   {/* Flex spacer — fills remaining space between cluster and pill zone */}
                   {isMobile && <div className="flex-1" aria-hidden />}
 
-                  {/* Mobile bottom zone: pill + trust line pinned near the bottom.
+                  {/* Mobile bottom zone: starter chips + pill + trust line pinned near the bottom.
                       Safe-area padding clears the home indicator */}
                   {isMobile && (
-                    <div className="shrink-0 px-4 relative z-10" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}>
+                    <div
+                      className="shrink-0 relative z-10 chat-pill-mobile-container"
+                      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}
+                    >
+                      {/* New mobile starter chips — pre-fill conversations + open LearnDrawer */}
+                      <StarterChips
+                        dark={dark}
+                        onChipTap={(fill) => fillHomeInput(fill)}
+                        onLearnTap={() => setLearnDrawerOpen(true)}
+                      />
+
+                      <div className="px-4">
                       {/* Tool popup (drops UP from input) */}
                       <div ref={homeToolsRef} className={`home-tools-popup ${homeToolsOpen ? 'open' : ''}`} style={{ bottom: 'calc(100% + 8px)', left: 16, right: 16 }}>
                         <div className="px-4 pt-3 pb-2">
@@ -1734,6 +1755,7 @@ export default function AppShell() {
                       <p className={`text-xs font-medium text-center mt-3 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
                         Free analysis · No account required · Your data stays yours
                       </p>
+                      </div>
                     </div>
                   )}
                 </main>
@@ -2179,132 +2201,110 @@ export default function AppShell() {
         }
       `}</style>
 
-      {/* ═══ MOBILE SIDEBAR DRAWER ═══ */}
-      {isMobile && isMobileSidebarOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-[60] bg-black/40"
-            onClick={() => setIsMobileSidebarOpen(false)}
-            style={{ animation: 'fadeOnly 0.2s ease' }}
-          />
-          {/* Drawer */}
-          <nav
-            className={`fixed top-0 left-0 bottom-0 z-[61] w-64 flex flex-col py-12 px-6 overflow-y-auto ${dark ? 'bg-[#1a1c1e] border-r border-zinc-800' : 'bg-white border-r border-[#eeeef0] shadow-xl'}`}
-            style={{ animation: 'slideInLeft 0.25s ease' }}
-          >
-            <button
-              onClick={() => setIsMobileSidebarOpen(false)}
-              className={`absolute top-4 right-4 bg-transparent border-none cursor-pointer p-0 ${dark ? 'text-[#f0f0f3]/70' : 'text-[#1a1c1e]/70'}`}
-              type="button"
-              aria-label="Close menu"
-            >
-              <span className="material-symbols-outlined text-[24px]">close</span>
-            </button>
-            <LogoIcon height={40} className="mb-6" dark={dark} />
-            {/* Explore — marketing pages, hidden when logged in */}
-            {!user && (
-            <>
-            <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-4 ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Explore</span>
-            {([
-              { id: 'home' as TabId, icon: 'home', label: 'Home' },
-              { id: 'sell' as TabId, icon: 'storefront', label: 'Sell' },
-              { id: 'buy' as TabId, icon: 'shopping_bag', label: 'Buy' },
-              { id: 'raise' as TabId, icon: 'trending_up', label: 'Raise' },
-              { id: 'integrate' as TabId, icon: 'merge', label: 'Integrate' },
-              { id: 'advisors' as TabId, icon: 'handshake', label: 'Advisors' },
-              { id: 'how-it-works' as TabId, icon: 'help_outline', label: 'How It Works' },
-              { id: 'pricing' as TabId, icon: 'sell', label: 'Pricing' },
-            ]).map(item => {
-              const isActive = activeTab === item.id && viewState === 'landing';
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleTabClick(item.id)}
-                  className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${
-                    isActive
-                      ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
-                      : (dark ? 'text-zinc-400 hover:text-white bg-transparent' : 'text-[#636467] hover:text-[#1a1c1e] bg-transparent')
-                  }`}
-                  type="button"
-                >
-                  <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-                  {item.label}
-                </button>
-              );
-            })}
-            </>
-            )}
-            {/* Workspace tools — shown when logged in */}
-            {user && (
-            <>
-            <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-4 ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Workspace</span>
-            {([
-              { action: 'new-chat', icon: 'add_comment', label: 'New Chat' },
-              { action: 'chat', icon: 'forum', label: 'Chat History' },
-              { action: 'library', icon: 'folder_open', label: 'Library' },
-              { action: 'dataroom', icon: 'lock', label: 'Data Room' },
-              { action: 'pipeline', icon: 'view_kanban', label: 'Pipeline' },
-              { action: 'sourcing', icon: 'search', label: 'Sourcing' },
-            ]).map(item => (
-              <button
-                key={item.action}
-                onClick={() => {
-                  setIsMobileSidebarOpen(false);
-                  if (item.action === 'chat') {
-                    setMobileCanvasVisible(false);
-                    setViewState('chat');
-                    navigate('/chat');
-                  }
-                  else if (item.action === 'new-chat') {
-                    setMobileCanvasVisible(false);
-                    handleNewChat();
-                  }
-                  else { openCanvasTab(item.action === 'library' ? 'documents' : item.action, item.label); }
-                }}
-                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${
-                  dark ? 'text-zinc-400 hover:text-white bg-transparent' : 'text-[#636467] hover:text-[#1a1c1e] bg-transparent'
-                }`}
-                type="button"
-              >
-                <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-                {item.label}
-              </button>
-            ))}
-            </>
-            )}
-            <div className="mt-auto flex flex-col gap-2">
-              {/* Theme toggle — always visible (logged in or out) */}
-              <button
-                onClick={() => setDark(!dark)}
-                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 bg-transparent' : 'text-[#636467] bg-transparent'}`}
-                type="button"
-              >
-                <span className="material-symbols-outlined text-[20px]">{dark ? 'light_mode' : 'dark_mode'}</span>
-                {dark ? 'Light mode' : 'Dark mode'}
-              </button>
-              {/* Admin Console — visible only to admins */}
-              {user && (user.role === 'admin' || user.email === 'pbaker@smbx.ai') && (
-              <button
-                onClick={() => { setIsMobileSidebarOpen(false); navigate('/admin'); }}
-                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 bg-transparent' : 'text-[#636467] bg-transparent'}`}
-                type="button"
-              >
-                <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span>
-                Admin Console
-              </button>
-              )}
-              <button
-                onClick={() => { setIsMobileSidebarOpen(false); if (user) { openCanvasTab('settings', 'Settings'); } else { window.location.href = '/login'; } }}
-                className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 bg-transparent' : 'text-[#636467] bg-transparent'}`}
-                type="button"
-              >
-                <span className="material-symbols-outlined text-[20px]">{user ? 'person' : 'login'}</span>
-                {user ? 'Account & Settings' : 'Sign In'}
-              </button>
-            </div>
-          </nav>
-        </>
+      {/* ═══ NEW MOBILE SIDEBAR — Vaul-powered, Claude+ pattern ═══ */}
+      {isMobile && (
+        <MobileSidebar
+          open={isMobileSidebarOpen}
+          onOpenChange={setIsMobileSidebarOpen}
+          dark={dark}
+          chats={(allConversations || []).slice(0, 12).map((c: any) => ({
+            id: c.id,
+            title: c.business_name || c.title || 'Untitled',
+            subtitle: c.journey || undefined,
+            active: c.id === activeConvId,
+          }))}
+          docs={[]}
+          artifacts={[]}
+          userName={user?.display_name}
+          userEmail={user?.email}
+          onNewChat={handleNewChat}
+          onChatTap={(_id) => {
+            setMobileCanvasVisible(false);
+            setViewState('chat');
+            navigate('/chat');
+          }}
+          onLearnTap={(dest) => setMobileJourneyOpen(dest)}
+          onProfileTap={() => {
+            if (user) openCanvasTab('settings', 'Settings');
+            else window.location.href = '/login';
+          }}
+          onSettingsTap={() => {
+            if (user) openCanvasTab('settings', 'Settings');
+            else window.location.href = '/login';
+          }}
+          onDarkModeToggle={() => setDark(!dark)}
+        />
+      )}
+
+      {/* ═══ NEW MOBILE LEARN DRAWER — bottom sheet from "How can Yulia help me?" ═══ */}
+      {isMobile && (
+        <LearnDrawer
+          open={learnDrawerOpen}
+          onOpenChange={setLearnDrawerOpen}
+          dark={dark}
+          onPick={(dest) => setMobileJourneyOpen(dest)}
+        />
+      )}
+
+      {/* ═══ NEW MOBILE JOURNEY SHEETS — full-screen drawers per journey ═══ */}
+      {isMobile && (
+        <MobileSellPage
+          open={mobileJourneyOpen === 'sell'}
+          onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
+          dark={dark}
+          onTalkToYulia={(prefill) => {
+            setMobileJourneyOpen(null);
+            if (prefill) {
+              setTimeout(() => fillHomeInput(prefill), 350);
+            }
+          }}
+        />
+      )}
+
+      {isMobile && mobileJourneyOpen && mobileJourneyOpen !== 'sell' && (
+        <MobileJourneySheet
+          open={true}
+          onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
+          dark={dark}
+          eyebrow={
+            mobileJourneyOpen === 'how-it-works' ? 'How it works' :
+            mobileJourneyOpen === 'advisors' ? 'Advisors' :
+            mobileJourneyOpen.charAt(0).toUpperCase() + mobileJourneyOpen.slice(1)
+          }
+          topBarTitle={
+            mobileJourneyOpen === 'buy'          ? 'Kill 100 bad deals' :
+            mobileJourneyOpen === 'raise'        ? 'Get the capital. Keep the company.' :
+            mobileJourneyOpen === 'integrate'    ? 'Make the deal pay' :
+            mobileJourneyOpen === 'advisors'     ? 'Win the pitch' :
+            mobileJourneyOpen === 'how-it-works' ? 'How Yulia runs your deal' :
+            mobileJourneyOpen === 'pricing'      ? 'Investment bank power' :
+            ''
+          }
+          ctaLabel="Talk to Yulia"
+          ctaSubLabel="Pre-fills your next conversation"
+          onCTA={() => {
+            const prefillMap: Record<string, string> = {
+              buy: "I want to buy a business — ",
+              raise: "I need to raise capital — ",
+              integrate: "I just closed an acquisition — ",
+              advisors: "I'm an M&A advisor / broker — ",
+              'how-it-works': "Walk me through how you actually run a deal end-to-end.",
+              pricing: "How much does Yulia cost for my situation?",
+            };
+            const dest = mobileJourneyOpen!;
+            setMobileJourneyOpen(null);
+            setTimeout(() => fillHomeInput(prefillMap[dest] || ''), 350);
+          }}
+        >
+          <Suspense fallback={<BelowSkeleton />}>
+            {mobileJourneyOpen === 'buy'          && <BuyBelow dark={dark} />}
+            {mobileJourneyOpen === 'raise'        && <RaiseBelow dark={dark} />}
+            {mobileJourneyOpen === 'integrate'    && <IntegrateBelow dark={dark} />}
+            {mobileJourneyOpen === 'advisors'     && <AdvisorsBelow dark={dark} />}
+            {mobileJourneyOpen === 'how-it-works' && <HowItWorksBelow dark={dark} />}
+            {mobileJourneyOpen === 'pricing'      && <PricingBelow dark={dark} />}
+          </Suspense>
+        </MobileJourneySheet>
       )}
 
       {/* ═══ MOBILE CANVAS DRAWER (right side) ═══ */}
