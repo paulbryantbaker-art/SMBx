@@ -777,6 +777,8 @@ export default function AppShell() {
   // Send handler — morph from landing to chat
   const handleSend = useCallback((content: string) => {
     if (viewState === 'landing') {
+      // Fire the message immediately so the backend starts working
+      // while the morph animation plays — no wasted time.
       if (user) authChat.sendMessage(content);
       else anonChat.sendMessage(content, activeTab);
       // Logged-out morph: from /home, default the canvas to Sell so the user
@@ -784,9 +786,20 @@ export default function AppShell() {
       if (!user && activeTab === 'home') {
         setActiveTab('sell');
       }
-      // Instant swap to chat mode — the journey card stays visible in the canvas position
-      setViewState('chat');
-      if (window.location.pathname !== '/chat') navigate('/chat');
+      if (isMobile) {
+        // Mobile: instant swap, no morph animation (feels snappier on touch)
+        setViewState('chat');
+        if (window.location.pathname !== '/chat') navigate('/chat');
+        return;
+      }
+      // Desktop: tactile morph — fade the landing out, pause briefly, then
+      // swap to chat. Total ≈ 260ms out + framer-motion entry ≈ tactile feel.
+      setMorphing(true);
+      setTimeout(() => {
+        setViewState('chat');
+        setMorphing(false);
+        if (window.location.pathname !== '/chat') navigate('/chat');
+      }, 260);
       return;
     }
     if (user) authChat.sendMessage(content);
@@ -1526,7 +1539,7 @@ export default function AppShell() {
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
-            <div key={activeTab} style={{ position: 'relative', animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : { minHeight: '100dvh' }) }}>
+            <div key={activeTab} style={{ position: 'relative', animation: morphing ? 'morphOut 0.26s cubic-bezier(0.32, 0, 0.67, 0) forwards' : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'fadeOnly 0.3s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : { minHeight: '100dvh' }) }}>
 
               {/* No background layer here — body (#E8DFC9 warm beige in index.css)
                   provides the back-layer color. Adding an absolute-positioned div
@@ -1780,9 +1793,11 @@ export default function AppShell() {
           {/* ════ CHAT MODE ════ */}
           {viewState === 'chat' && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              initial={isMobile ? { opacity: 0 } : { opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={isMobile
+                ? { duration: 0.2, ease: 'easeOut' }
+                : { duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
               style={{
                 display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
                 minHeight: '100%',
