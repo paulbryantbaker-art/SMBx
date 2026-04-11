@@ -1,6 +1,6 @@
 /**
  * MultipleMap.tsx
- * 2D interactive: drag (or tap) a pin onto a chart of
+ * 2D interactive: click anywhere on the chart to position the pin.
  *   X = customer concentration (%)
  *   Y = 3-year revenue CAGR (%)
  * The pin's position picks an EBITDA multiple from the industry curve.
@@ -12,7 +12,7 @@
  */
 
 import { useState, useRef, useMemo } from 'react';
-import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const PINK = '#D44A78';
 const PINK_DARK = '#E8709A';
@@ -134,7 +134,7 @@ export function MultipleMap({
             className="text-[10px] font-bold uppercase tracking-[0.22em] mb-2"
             style={{ color: accent }}
           >
-            Interactive · drag the pin
+            Interactive · click the chart to place the pin
           </p>
           <h3
             className="font-headline font-black text-2xl md:text-3xl tracking-tight"
@@ -232,28 +232,17 @@ export function MultipleMap({
                 />
               ))}
 
-              {/* The pin */}
+              {/* The pin — click chart anywhere to reposition */}
               <motion.div
-                drag
-                dragConstraints={chartRef}
-                dragElastic={0}
-                dragMomentum={false}
-                onDrag={(_, info) => {
-                  const rect = chartRef.current?.getBoundingClientRect();
-                  if (!rect) return;
-                  const x = Math.max(0, Math.min(1, (info.point.x - rect.left) / rect.width));
-                  const y = Math.max(0, Math.min(1, (info.point.y - rect.top) / rect.height));
-                  setPinPct({ x, y });
-                }}
-                className="absolute z-10"
-                style={{
+                className="absolute z-10 pointer-events-none"
+                animate={{
                   left: `${pinPct.x * 100}%`,
                   top: `${pinPct.y * 100}%`,
-                  transform: 'translate(-50%, -50%)',
-                  cursor: 'grab',
                 }}
-                whileDrag={{ scale: 1.15, cursor: 'grabbing' }}
-                whileHover={{ scale: 1.08 }}
+                transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+                style={{
+                  transform: 'translate(-50%, -50%)',
+                }}
               >
                 {/* Pulse halo */}
                 <div

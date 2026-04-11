@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  calculateValuation,
   calculateDSCRFull,
   calculateStockSaleTax,
   FEDERAL_RATES,
-  LEAGUE_MULTIPLES,
 } from '../../lib/calculations/core';
 import { MagneticButton, AnimatedCounter } from './animations';
 import { bridgeToYulia } from './chatBridge';
@@ -66,41 +64,54 @@ function ResultCard({ label, value, highlight, dark }: {
    "What is my business worth?"
    ═══════════════════════════════════════════════ */
 
+/**
+ * Industry consensus ranges, $5M-$100M EBITDA segment, 2024-2025 mid-market data.
+ * Each entry: ebitdaMargin (revenue → EBITDA), multipleMin/Max (EBITDA × multiple).
+ */
 const INDUSTRIES = [
-  { label: 'HVAC', sdeMargin: 0.28 },
-  { label: 'Plumbing', sdeMargin: 0.25 },
-  { label: 'Cleaning', sdeMargin: 0.22 },
-  { label: 'Landscaping', sdeMargin: 0.20 },
-  { label: 'Pest Control', sdeMargin: 0.30 },
-  { label: 'Insurance Agency', sdeMargin: 0.35 },
-  { label: 'IT / MSP', sdeMargin: 0.32 },
-  { label: 'Dental Practice', sdeMargin: 0.33 },
-  { label: 'Accounting Firm', sdeMargin: 0.38 },
-  { label: 'Restaurant', sdeMargin: 0.12 },
-  { label: 'Auto Repair', sdeMargin: 0.22 },
-  { label: 'E-commerce', sdeMargin: 0.20 },
-  { label: 'Other', sdeMargin: 0.22 },
+  { label: 'Tech-enabled services',          ebitdaMargin: 0.22, multipleMin: 9,    multipleMax: 13   },
+  { label: 'Vertical SaaS at scale',         ebitdaMargin: 0.28, multipleMin: 12,   multipleMax: 20   },
+  { label: 'Healthcare services',            ebitdaMargin: 0.18, multipleMin: 9,    multipleMax: 12   },
+  { label: 'Insurance brokerage',            ebitdaMargin: 0.25, multipleMin: 10,   multipleMax: 14   },
+  { label: 'Wealth management / RIA',        ebitdaMargin: 0.30, multipleMin: 10,   multipleMax: 15   },
+  { label: 'MSP / IT services',              ebitdaMargin: 0.22, multipleMin: 8,    multipleMax: 12   },
+  { label: 'Specialty distribution',         ebitdaMargin: 0.13, multipleMin: 6,    multipleMax: 9    },
+  { label: 'HVAC / contractors (PE rollup)', ebitdaMargin: 0.18, multipleMin: 7,    multipleMax: 10   },
+  { label: 'Industrial manufacturing',       ebitdaMargin: 0.14, multipleMin: 6,    multipleMax: 9    },
+  { label: 'Building products',              ebitdaMargin: 0.15, multipleMin: 7,    multipleMax: 10   },
+  { label: 'Specialty chemicals',            ebitdaMargin: 0.16, multipleMin: 7,    multipleMax: 10   },
+  { label: 'Logistics / 3PL',                ebitdaMargin: 0.12, multipleMin: 6,    multipleMax: 9    },
+  { label: 'Pharma services / CRO',          ebitdaMargin: 0.20, multipleMin: 11,   multipleMax: 14   },
+  { label: 'Food & beverage specialty',      ebitdaMargin: 0.14, multipleMin: 8,    multipleMax: 12   },
+  { label: 'Defense manufacturing',          ebitdaMargin: 0.14, multipleMin: 6,    multipleMax: 9    },
+];
+
+/** Revenue stops for stop-indexed slider — $1M to $1B */
+const REVENUE_STOPS = [
+  1_000_000, 5_000_000, 10_000_000, 25_000_000, 50_000_000, 100_000_000,
+  200_000_000, 350_000_000, 500_000_000, 750_000_000, 1_000_000_000,
 ];
 
 export function BaselineCalculator({ dark }: { dark?: boolean }) {
-  const [industry, setIndustry] = useState(0);
-  const [revenue, setRevenue] = useState(1500000);
+  const [industry, setIndustry] = useState(0); // Tech-enabled services default
+  const [revenueIdx, setRevenueIdx] = useState(4); // $50M revenue default
 
   const ind = INDUSTRIES[industry];
-  const estimatedSDE = Math.round(revenue * ind.sdeMargin);
-  // Use dollars directly — core.ts works with raw numbers, league determines multiples
-  const league = estimatedSDE < 50_000_000 ? 'L1' : estimatedSDE < 200_000_000 ? 'L2' : 'L3';
-  const result = calculateValuation(estimatedSDE, league);
+  const revenue = REVENUE_STOPS[revenueIdx];
+  const ebitda = Math.round(revenue * ind.ebitdaMargin);
+  const valuationLow = Math.round(ebitda * ind.multipleMin);
+  const valuationHigh = Math.round(ebitda * ind.multipleMax);
 
   const fmt = (n: number) => {
-    if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+    if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2).replace(/\.?0+$/, '')}B`;
+    if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2).replace(/\.?0+$/, '')}M`;
     if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
     return `$${n.toLocaleString()}`;
   };
 
   return (
     <div className={`rounded-2xl p-8 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-      <p className="text-[#D44A78] font-bold uppercase tracking-widest text-xs mb-6">Business Valuation Calculator</p>
+      <p className="text-[#D44A78] font-bold uppercase tracking-widest text-xs mb-6">Baseline Calculator · 2024-2025 mid-market consensus</p>
 
       <div className="mb-6">
         <label className={`text-sm font-medium mb-2 block ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>Industry</label>
@@ -111,36 +122,51 @@ export function BaselineCalculator({ dark }: { dark?: boolean }) {
             dark ? 'bg-[#1a1c1e] border-zinc-700 text-[#f9f9fc]' : 'bg-[#f3f3f6] border-[#eeeef0] text-[#1a1c1e]'
           }`}
         >
-          {INDUSTRIES.map((ind, i) => (
-            <option key={ind.label} value={i}>{ind.label}</option>
+          {INDUSTRIES.map((i, idx) => (
+            <option key={i.label} value={idx}>
+              {i.label} · {i.multipleMin}-{i.multipleMax}× EBITDA
+            </option>
           ))}
         </select>
       </div>
 
       <Slider
-        value={revenue} min={200000} max={10000000} step={50000}
-        onChange={setRevenue}
-        label="Annual Revenue"
+        value={revenueIdx}
+        min={0}
+        max={REVENUE_STOPS.length - 1}
+        step={1}
+        onChange={setRevenueIdx}
+        label="Annual revenue"
         displayValue={fmt(revenue)}
         dark={dark}
       />
 
       <div className={`mt-6 pt-6 ${dark ? 'border-t border-zinc-700' : 'border-t border-[#eeeef0]'}`}>
         <div className="grid grid-cols-3 gap-3 mb-4">
-          <ResultCard label="Est. SDE" value={fmt(estimatedSDE)} dark={dark} />
-          <ResultCard label="Multiple" value={`${result.multipleMin.toFixed(1)}x–${result.multipleMax.toFixed(1)}x`} dark={dark} />
-          <ResultCard label="Est. Value" value={`${fmt(result.low)}–${fmt(result.high)}`} highlight dark={dark} />
+          <ResultCard label="Est. EBITDA" value={fmt(ebitda)} dark={dark} />
+          <ResultCard
+            label="Multiple range"
+            value={`${ind.multipleMin}-${ind.multipleMax}×`}
+            dark={dark}
+          />
+          <ResultCard
+            label="Baseline range"
+            value={`${fmt(valuationLow)}–${fmt(valuationHigh)}`}
+            highlight
+            dark={dark}
+          />
         </div>
         <p className={`text-xs mb-4 ${dark ? 'text-[#dadadc]/60' : 'text-[#5d5e61]'}`}>
-          Based on {ind.label} industry SDE margins and {LEAGUE_MULTIPLES[league].metric} valuation multiples by industry. Your actual valuation depends on add-backs, owner dependency, customer concentration, and growth trajectory.
+          {ind.label} at {fmt(revenue)} revenue and ~{Math.round(ind.ebitdaMargin * 100)}% EBITDA margin trades {ind.multipleMin}-{ind.multipleMax}× EBITDA in the 2024-2025 mid-market consensus. Add-backs (Blind Equity™), customer concentration, growth, and recurring revenue mix move you within the range.
         </p>
       </div>
 
       <MagneticButton
         onClick={() => bridgeToYulia(
-          `I own a ${ind.label} business with about ${fmt(revenue)} in annual revenue. ` +
-          `The calculator estimated my SDE at ${fmt(estimatedSDE)} and a valuation range of ${fmt(result.low)}–${fmt(result.high)}. ` +
-          `Can you help me find my real Baseline — including any add-backs I might be missing?`
+          `I'm looking at a ${ind.label} business with about ${fmt(revenue)} in annual revenue. ` +
+          `The calculator estimated EBITDA at ${fmt(ebitda)} and a Baseline range of ${fmt(valuationLow)}–${fmt(valuationHigh)} ` +
+          `(${ind.multipleMin}-${ind.multipleMax}× EBITDA). ` +
+          `Can you find the Blind Equity I'm missing and pin down where in the range we should land?`
         )}
         className="w-full mt-2 px-6 py-3.5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-bold text-sm hover:scale-[1.02] transition-all shadow-md border-none cursor-pointer"
       >

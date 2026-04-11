@@ -90,12 +90,23 @@ export default function SellBelow({ dark }: { dark: boolean }) {
           Owners can run their own Baseline too — most discover their business is worth 20-50% more than the rule of thumb. <strong style={{ color: accent }}>Verified deal professionals are free, forever.</strong>
         </p>
 
-        {/* ═══ Baseline Calculator — leads ═══ */}
+        {/* ═══ Multiple Map — leads (cool, sexy, click-to-position) ═══ */}
         <section className="mb-28">
           <SectionHeader
-            label="Step 1 · Baseline™"
-            title="Run your seller's number now."
-            sub="Drop in revenue, EBITDA, and a couple of fundamentals. You'll have a defensible Baseline range in 30 seconds — built on the same comp data the buyer's IB will use to underwrite the deal."
+            label="Step 1 · The Multiple Map"
+            title="See where your seller lands in their comp set."
+            sub="Pick the industry. Click the chart to place the pin. The position tells you whether the seller is in the premium zone, the middle, or the bottom — and what's holding them back from the next half-turn of multiple. Bring the chart to the pitch."
+            dark={dark}
+          />
+          <MultipleMap dark={dark} ebitda={18} />
+        </section>
+
+        {/* ═══ Baseline Calculator — second ═══ */}
+        <section className="mb-28">
+          <SectionHeader
+            label="Step 2 · Baseline™"
+            title="Run the number now."
+            sub="Pick the industry, drag in the revenue, watch the multiple range pull from the 2024-2025 mid-market consensus. You'll have a defensible Baseline range in 30 seconds — the same math the buyer's IB will run."
             dark={dark}
           />
           <BaselineCalculator dark={dark} />
@@ -136,17 +147,6 @@ export default function SellBelow({ dark }: { dark: boolean }) {
               dark={dark}
             />
           </div>
-        </section>
-
-        {/* ═══ Multiple Map ═══ */}
-        <section className="mb-28">
-          <SectionHeader
-            label="Step 2 · The Multiple Map"
-            title="See where your seller lands in their comp set."
-            sub="Pick the industry. Drag the pin. The position tells you whether the seller is in the premium zone, the middle, or the bottom — and what's holding them back from the next half-turn of multiple. Bring the chart to the pitch."
-            dark={dark}
-          />
-          <MultipleMap dark={dark} ebitda={18} />
         </section>
 
         {/* ═══ The Story — now told from the broker's perspective ═══ */}
