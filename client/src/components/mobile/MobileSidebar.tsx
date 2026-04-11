@@ -27,23 +27,18 @@ export type LearnDest =
   | 'how-it-works'
   | 'pricing';
 
+export type WorkspaceTool =
+  | 'documents'
+  | 'library'
+  | 'analysis'
+  | 'sourcing'
+  | 'pipeline';
+
 export interface ConvoItem {
   id: number;
   title: string;
   subtitle?: string;
   active?: boolean;
-}
-
-export interface DocItem {
-  id: number;
-  name: string;
-  meta?: string;
-}
-
-export interface ArtifactItem {
-  id: number;
-  name: string;
-  kind?: string;
 }
 
 interface Props {
@@ -53,19 +48,20 @@ interface Props {
 
   // Data feeds
   chats: ConvoItem[];
-  docs: DocItem[];
-  artifacts: ArtifactItem[];
 
   // Profile
   userName?: string | null;
   userEmail?: string | null;
+  isLoggedIn: boolean;
 
   // Actions
   onNewChat: () => void;
   onChatTap: (id: number) => void;
+  onWorkspaceTap: (tool: WorkspaceTool) => void;
   onLearnTap: (dest: LearnDest) => void;
   onProfileTap: () => void;
   onSettingsTap: () => void;
+  onSignIn: () => void;
   onDarkModeToggle: () => void;
 }
 
@@ -79,20 +75,29 @@ const LEARN_ITEMS: { id: LearnDest; label: string; desc: string }[] = [
   { id: 'pricing',      label: 'Pricing',       desc: 'IB power, software pricing' },
 ];
 
+const WORKSPACE_ITEMS: { id: WorkspaceTool; label: string; desc: string; icon: string }[] = [
+  { id: 'documents', label: 'Documents', desc: 'Tax returns, P&Ls, contracts',          icon: 'description'    },
+  { id: 'library',   label: 'Library',   desc: 'Generated CIMs, term sheets, memos',     icon: 'menu_book'     },
+  { id: 'analysis',  label: 'Analysis',  desc: 'Open models, valuations, scenarios',     icon: 'analytics'     },
+  { id: 'sourcing',  label: 'Sourcing',  desc: 'Acquisition targets, scored & ranked',   icon: 'travel_explore' },
+  { id: 'pipeline',  label: 'Pipeline',  desc: 'Active deals across all your journeys',  icon: 'view_kanban'   },
+];
+
 export function MobileSidebar({
   open,
   onOpenChange,
   dark,
   chats,
-  docs,
-  artifacts,
   userName,
   userEmail,
+  isLoggedIn,
   onNewChat,
   onChatTap,
+  onWorkspaceTap,
   onLearnTap,
   onProfileTap,
   onSettingsTap,
+  onSignIn,
   onDarkModeToggle,
 }: Props) {
   // Color tokens — Grok-style dark with pink-tinted accents
@@ -212,69 +217,84 @@ export function MobileSidebar({
               )}
             </Section>
 
-            {/* DOCS */}
-            <Section label="Documents" sectionColor={sectionC} mutedColor={mutedC}>
-              {docs.length === 0 ? (
-                <EmptyState
-                  text="Upload P&Ls, tax returns, or contracts and Yulia will read them."
-                  mutedColor={mutedC}
-                />
-              ) : (
-                docs.slice(0, 8).map((d) => (
-                  <DrawerItem
-                    key={d.id}
-                    headingColor={headingC}
-                    mutedColor={mutedC}
-                    pinkColor={pinkC}
-                    tintBg={tintBg}
+            {/* WORKSPACE — only when logged in. Each item launches a full-screen tool sheet. */}
+            {isLoggedIn ? (
+              <Section label="Workspace" sectionColor={sectionC} mutedColor={mutedC}>
+                {WORKSPACE_ITEMS.map((item, i) => (
+                  <motion.button
+                    key={item.id}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: i * 0.04, ease: [0.32, 0.72, 0, 1] }}
+                    onClick={() => {
+                      onWorkspaceTap(item.id);
+                      onOpenChange(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-xl mb-1 transition-all active:scale-[0.985]"
+                    style={{
+                      background: 'transparent',
+                      border: `1px solid ${ruleC}`,
+                      cursor: 'pointer',
+                      WebkitTapHighlightColor: 'transparent',
+                    }}
                   >
-                    <span className="material-symbols-outlined text-[16px] shrink-0" style={{ color: mutedC }}>
-                      description
-                    </span>
-                    <span className="flex-1 truncate text-[14px] font-medium" style={{ color: headingC }}>
-                      {d.name}
-                    </span>
-                    {d.meta && (
-                      <span className="text-[10px] font-mono shrink-0" style={{ color: mutedC }}>
-                        {d.meta}
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                      style={{
+                        background: tintBg,
+                        border: `1px solid ${dark ? 'rgba(232,112,154,0.18)' : 'rgba(212,74,120,0.16)'}`,
+                      }}
+                    >
+                      <span className="material-symbols-outlined text-[18px]" style={{ color: pinkC }}>
+                        {item.icon}
                       </span>
-                    )}
-                  </DrawerItem>
-                ))
-              )}
-            </Section>
-
-            {/* ARTIFACTS */}
-            <Section label="Artifacts" sectionColor={sectionC} mutedColor={mutedC}>
-              {artifacts.length === 0 ? (
-                <EmptyState
-                  text="Baselines, CIMs, capital stacks, and 180-day plans show up here."
-                  mutedColor={mutedC}
-                />
-              ) : (
-                artifacts.slice(0, 8).map((a) => (
-                  <DrawerItem
-                    key={a.id}
-                    headingColor={headingC}
-                    mutedColor={mutedC}
-                    pinkColor={pinkC}
-                    tintBg={tintBg}
-                  >
-                    <span className="material-symbols-outlined text-[16px] shrink-0" style={{ color: mutedC }}>
-                      auto_awesome
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className="text-[13px] font-bold leading-tight" style={{ color: headingC }}>
+                        {item.label}
+                      </p>
+                      <p className="text-[11px] truncate" style={{ color: mutedC }}>
+                        {item.desc}
+                      </p>
+                    </div>
+                    <span className="material-symbols-outlined text-[14px] shrink-0" style={{ color: mutedC }}>
+                      arrow_forward
                     </span>
-                    <span className="flex-1 truncate text-[14px] font-medium" style={{ color: headingC }}>
-                      {a.name}
-                    </span>
-                    {a.kind && (
-                      <span className="text-[10px] font-mono shrink-0" style={{ color: mutedC }}>
-                        {a.kind}
-                      </span>
-                    )}
-                  </DrawerItem>
-                ))
-              )}
-            </Section>
+                  </motion.button>
+                ))}
+              </Section>
+            ) : (
+              <Section label="Workspace" sectionColor={sectionC} mutedColor={mutedC}>
+                <button
+                  onClick={() => {
+                    onSignIn();
+                    onOpenChange(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-1 transition-all active:scale-[0.985]"
+                  style={{
+                    background: tintBg,
+                    border: `1px solid ${dark ? 'rgba(232,112,154,0.20)' : 'rgba(212,74,120,0.18)'}`,
+                    cursor: 'pointer',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  <span className="material-symbols-outlined text-[18px]" style={{ color: pinkC }}>
+                    lock_open
+                  </span>
+                  <div className="flex-1 text-left">
+                    <p className="text-[13px] font-bold" style={{ color: headingC }}>
+                      Sign in to unlock
+                    </p>
+                    <p className="text-[11px]" style={{ color: mutedC }}>
+                      Documents, library, analysis, sourcing, pipeline
+                    </p>
+                  </div>
+                  <span className="material-symbols-outlined text-[14px]" style={{ color: pinkC }}>
+                    arrow_forward
+                  </span>
+                </button>
+              </Section>
+            )}
 
             {/* LEARN */}
             <Section label="How Yulia helps" sectionColor={sectionC} mutedColor={mutedC}>

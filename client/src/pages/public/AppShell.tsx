@@ -39,11 +39,13 @@ const AdvisorsBelow = lazy(() => import('../../components/content/AdvisorsBelow'
 const PricingBelow = lazy(() => import('../../components/content/PricingBelow'));
 
 // Mobile rebuild — Claude+ pattern
-import { MobileSidebar, type LearnDest } from '../../components/mobile/MobileSidebar';
+import { MobileSidebar, type LearnDest, type WorkspaceTool } from '../../components/mobile/MobileSidebar';
 import { LearnDrawer } from '../../components/mobile/LearnDrawer';
 import { StarterChips } from '../../components/mobile/StarterChips';
 import { MobileSellPage } from '../../components/mobile/MobileSellPage';
 import { MobileJourneySheet } from '../../components/mobile/MobileJourneySheet';
+import { MobileWorkspaceSheet } from '../../components/mobile/MobileWorkspaceSheet';
+import { MobileLivePulse } from '../../components/mobile/MobileLivePulse';
 
 /* Minimal skeleton for lazy Below pages */
 function BelowSkeleton() {
@@ -481,9 +483,10 @@ export default function AppShell() {
   }, [isChat]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isMobileCanvasDrawerOpen, setIsMobileCanvasDrawerOpen] = useState(false);
-  // Mobile rebuild state — LearnDrawer + journey sheets
+  // Mobile rebuild state — LearnDrawer + journey sheets + workspace tool sheets
   const [learnDrawerOpen, setLearnDrawerOpen] = useState(false);
   const [mobileJourneyOpen, setMobileJourneyOpen] = useState<LearnDest | null>(null);
+  const [mobileWorkspaceOpen, setMobileWorkspaceOpen] = useState<WorkspaceTool | null>(null);
   // Mobile canvas overlay visibility — separate from canvasTabs.length so tabs persist
   // when user navigates back to chat
   const [mobileCanvasVisible, setMobileCanvasVisible] = useState(false);
@@ -1544,25 +1547,23 @@ export default function AppShell() {
                   visible mismatch between sidebar/journey cards and the body. */}
 
               {activeTab === 'home' ? (
-              <div className="relative z-10 flex-1 flex flex-col" style={{ padding: !isMobile ? '16px' : '12px' }}>
-                {/* ═══ HOME PAGE ═══ Floating card matches canvas/journey style */}
+              <div className="relative z-10 flex-1 flex flex-col" style={{ padding: !isMobile ? '16px' : '0' }}>
+                {/* ═══ HOME PAGE ═══ Floating card on desktop, edge-to-edge on mobile */}
                 <div
                   className="flex-1 flex flex-col"
                   style={{
                     background: dark ? '#151617' : '#FFFFFF',
-                    border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9',
-                    borderRadius: !isMobile ? 14 : 18,
-                    boxShadow: dark
+                    border: !isMobile ? (dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9') : 'none',
+                    borderRadius: !isMobile ? 14 : 0,
+                    boxShadow: !isMobile ? (dark
                       ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
-                      : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
+                      : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)') : 'none',
                     overflow: 'hidden',
                   }}
                 >
                 <main className="flex-1 flex flex-col relative">
-                  {/* Top cluster — centered on desktop; fixed top position on mobile so the
-                      logo stays put regardless of cluster content height. Mobile uses pt-[14vh]
-                      to pin the logo at ~14% of viewport height. */}
-                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? 'shrink-0 pt-[14vh]' : 'flex-1 justify-center'}`}>
+                  {/* Top cluster — centered on desktop; tighter rhythm on mobile */}
+                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? 'shrink-0 pt-[10vh]' : 'flex-1 justify-center'}`}>
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl' : 'max-w-3xl space-y-6'}`}>
                       {!isMobile && (
                         <div className="mb-10 flex justify-center">
@@ -1570,17 +1571,36 @@ export default function AppShell() {
                         </div>
                       )}
                       {isMobile && (
-                        <div className="flex justify-center mb-20">
-                          <LogoHero height={52} dark={dark} />
-                        </div>
+                        <>
+                          {/* Yulia status indicator — Grok-style live dot */}
+                          <div className="flex items-center justify-center gap-2 mb-4">
+                            <span
+                              className="inline-block w-1.5 h-1.5 rounded-full animate-pulse-dot"
+                              style={{
+                                background: dark ? '#E8709A' : '#D44A78',
+                                boxShadow: `0 0 10px ${dark ? '#E8709A' : '#D44A78'}`,
+                              }}
+                            />
+                            <span
+                              className="text-[10px] font-bold uppercase tracking-[0.2em] font-mono"
+                              style={{ color: dark ? 'rgba(218,218,220,0.6)' : '#7c7d80' }}
+                            >
+                              Yulia · senior M&amp;A advisor
+                            </span>
+                          </div>
+                          <div className="flex justify-center mb-10">
+                            <LogoHero height={42} dark={dark} />
+                          </div>
+                        </>
                       )}
-                      <h1 className={`font-headline font-black tracking-[-0.04em] ${isMobile ? 'text-[44px] leading-[0.95] mb-8' : 'text-[64px] leading-[0.95] mb-4'}`}>
+                      <h1 className={`font-headline font-black tracking-[-0.04em] ${isMobile ? 'text-[42px] leading-[0.95] mb-6' : 'text-[64px] leading-[0.95] mb-4'}`}>
                         AI that makes <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>M&amp;A</span><br/>
                         faster and easier.
                       </h1>
-                      <p className={`mx-auto font-medium ${isMobile ? 'text-[17px] leading-[1.5] max-w-sm' : 'text-xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                      <p className={`mx-auto font-medium ${isMobile ? 'text-[16px] leading-[1.5] max-w-xs' : 'text-xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
                         Sell, buy, raise, or integrate — by talking to Yulia.
                       </p>
+                      {isMobile && <MobileLivePulse dark={dark} />}
 
                       {/* Desktop: input + micro-copy */}
                       {!isMobile && (
@@ -2207,14 +2227,13 @@ export default function AppShell() {
           open={isMobileSidebarOpen}
           onOpenChange={setIsMobileSidebarOpen}
           dark={dark}
+          isLoggedIn={!!user}
           chats={(allConversations || []).slice(0, 12).map((c: any) => ({
             id: c.id,
             title: c.business_name || c.title || 'Untitled',
             subtitle: c.journey || undefined,
             active: c.id === activeConvId,
           }))}
-          docs={[]}
-          artifacts={[]}
           userName={user?.display_name}
           userEmail={user?.email}
           onNewChat={handleNewChat}
@@ -2223,6 +2242,7 @@ export default function AppShell() {
             setViewState('chat');
             navigate('/chat');
           }}
+          onWorkspaceTap={(tool) => setMobileWorkspaceOpen(tool)}
           onLearnTap={(dest) => setMobileJourneyOpen(dest)}
           onProfileTap={() => {
             if (user) openCanvasTab('settings', 'Settings');
@@ -2232,6 +2252,7 @@ export default function AppShell() {
             if (user) openCanvasTab('settings', 'Settings');
             else window.location.href = '/login';
           }}
+          onSignIn={() => { window.location.href = '/login'; }}
           onDarkModeToggle={() => setDark(!dark)}
         />
       )}
@@ -2259,6 +2280,52 @@ export default function AppShell() {
             }
           }}
         />
+      )}
+
+      {/* ═══ NEW MOBILE WORKSPACE SHEETS ═══ */}
+      {isMobile && mobileWorkspaceOpen && (
+        <MobileWorkspaceSheet
+          open={true}
+          onOpenChange={(o) => !o && setMobileWorkspaceOpen(null)}
+          dark={dark}
+          icon={
+            mobileWorkspaceOpen === 'documents' ? 'description' :
+            mobileWorkspaceOpen === 'library'   ? 'menu_book' :
+            mobileWorkspaceOpen === 'analysis'  ? 'analytics' :
+            mobileWorkspaceOpen === 'sourcing'  ? 'travel_explore' :
+            'view_kanban'
+          }
+          title={
+            mobileWorkspaceOpen === 'documents' ? 'Documents' :
+            mobileWorkspaceOpen === 'library'   ? 'Library' :
+            mobileWorkspaceOpen === 'analysis'  ? 'Analysis' :
+            mobileWorkspaceOpen === 'sourcing'  ? 'Sourcing' :
+            'Pipeline'
+          }
+          subtitle={
+            mobileWorkspaceOpen === 'documents' ? 'Tax returns, P&Ls, contracts' :
+            mobileWorkspaceOpen === 'library'   ? 'Generated CIMs, term sheets, memos' :
+            mobileWorkspaceOpen === 'analysis'  ? 'Open models, valuations, scenarios' :
+            mobileWorkspaceOpen === 'sourcing'  ? 'Acquisition targets, scored & ranked' :
+            'Active deals across all your journeys'
+          }
+        >
+          {user ? (
+            <>
+              {mobileWorkspaceOpen === 'documents' && <DataRoom dealId={null} onViewDeliverable={() => {}} />}
+              {mobileWorkspaceOpen === 'library'   && <DocumentLibrary />}
+              {mobileWorkspaceOpen === 'analysis'  && <IntelPanel isFullscreen />}
+              {mobileWorkspaceOpen === 'sourcing'  && <SourcingPanel isFullscreen />}
+              {mobileWorkspaceOpen === 'pipeline'  && <PipelinePanel isFullscreen />}
+            </>
+          ) : (
+            <div className="px-6 py-12 text-center">
+              <p className="text-sm" style={{ color: dark ? 'rgba(218,218,220,0.6)' : '#7c7d80' }}>
+                Sign in to access this workspace.
+              </p>
+            </div>
+          )}
+        </MobileWorkspaceSheet>
       )}
 
       {isMobile && mobileJourneyOpen && mobileJourneyOpen !== 'sell' && (

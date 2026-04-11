@@ -992,6 +992,27 @@ body.has-vaul-drawer-open {
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Yulia "live" pulse dot — Grok-style status indicator */
+@keyframes pulseDot {
+  0%, 100% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+.animate-pulse-dot {
+  animation: pulseDot 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-dot {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 /* ═══ PRINT STYLES ═══ */
 @media print {
   body { background: white !important; }
