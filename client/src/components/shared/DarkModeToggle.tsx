@@ -2,7 +2,7 @@ import { useState, useEffect, useLayoutEffect, useCallback } from 'react';
 
 type ThemePref = 'light' | 'dark' | 'system';
 const STORAGE_KEY = 'smbx-theme';
-const LIGHT_COLOR = '#E8DFC9';
+const LIGHT_COLOR = '#151617'; // body always uses dark-mode back layer
 const DARK_COLOR = '#151617';
 
 function getSystemDark() {

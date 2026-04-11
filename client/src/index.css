@@ -59,15 +59,15 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
   --serif: 'Sora', sans-serif;
 }
 
-/* ═══ SITE BACKGROUND — Claude.com-style warm beige back layer ═══
-   The body is the "table" — a noticeably darker warm beige that
-   contrasts with the white floating cards (sidebar, canvas, journey).
-   Noise opacity reduced from 0.45 → 0.18 so the warm color isn't
-   greyed out by the black noise overlay. */
+/* ═══ SITE BACKGROUND — dark back layer (same as dark mode) ═══
+   The body is always the dark-mode color (#151617) regardless of
+   theme preference. The white floating cards (sidebar, canvas,
+   journey) pop against it with strong depth. Light noise overlay
+   (alpha 0.04) adds subtle paper texture without lightening. */
 html, body {
   width: 100%;
-  background-color: #E8DFC9 !important;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-color: #151617 !important;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
   background-repeat: repeat;
 }
