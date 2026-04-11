@@ -1536,8 +1536,20 @@ export default function AppShell() {
                   visible mismatch between sidebar/journey cards and the body. */}
 
               {activeTab === 'home' ? (
-              <>
-                {/* ═══ HOME PAGE ═══ */}
+              <div className="relative z-10 flex-1 flex flex-col" style={{ padding: !isMobile ? '16px' : '0' }}>
+                {/* ═══ HOME PAGE ═══ Floating card matches canvas/journey style */}
+                <div
+                  className="flex-1 flex flex-col"
+                  style={{
+                    background: dark ? '#1A1C1E' : '#FFFFFF',
+                    border: !isMobile ? (dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9') : 'none',
+                    borderRadius: !isMobile ? 14 : 0,
+                    boxShadow: !isMobile ? (dark
+                      ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
+                      : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)') : 'none',
+                    overflow: 'hidden',
+                  }}
+                >
                 <main className="flex-1 flex flex-col relative">
                   {/* Top cluster — centered on desktop; fixed top position on mobile so the
                       logo stays put regardless of cluster content height. Mobile uses pt-[14vh]
@@ -1731,9 +1743,10 @@ export default function AppShell() {
                     </div>
                   )}
                 </main>
+                </div>
                 {/* Scroll spacer removed — page is exactly 100dvh, pill sits at bottom of
                     visible viewport with safe-area padding for the home indicator. */}
-              </>
+              </div>
               ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing'].includes(activeTab) ? (
               <div className="relative z-10" style={{ padding: !isMobile ? '16px 16px 16px 16px' : '0' }}>
                 {/* Floating card — matches the canvas card style in the workspace */}
