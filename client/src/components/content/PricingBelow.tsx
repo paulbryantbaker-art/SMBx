@@ -49,9 +49,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
   });
 
   const handleCTA = (plan?: string) => {
-    if (plan === 'institutional') {
-      bridgeToYulia("I'm interested in the Institutional plan for my fund.");
-    } else if (plan === 'firm') {
+    if (plan === 'firm') {
       bridgeToYulia("I'm interested in the Firm plan for our team.");
     } else {
       goToChat();
@@ -152,18 +150,18 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
     {
       key: 'institutional',
       name: 'Institutional',
-      price: 'Custom',
-      sub: '$1B+ funds & bulge bracket',
-      protagonist: 'Annual contract, ~$50K-$150K',
+      price: '$9,999',
+      sub: '/mo · $1B+ funds & bulge bracket',
+      protagonist: 'Self-serve, no sales call',
       features: [
-        'Custom contract & terms',
-        'SSO / SAML / on-prem option',
-        'Dedicated solutions architect',
-        'Co-development of features',
-        'Shared private comp data',
+        'Unlimited users + unlimited deals',
+        'SSO / SAML',
+        'Full API + webhooks',
+        'Priority engineering support',
+        'White-glove onboarding',
       ],
-      cta: 'Talk to us',
-      ctaPlan: 'institutional' as string | undefined,
+      cta: 'Start Institutional',
+      ctaPlan: undefined as string | undefined,
       tone: 'dark' as const,
     },
   ];

@@ -155,66 +155,158 @@ export function BaselineCalculator({ dark }: { dark?: boolean }) {
    "Is this deal SBA bankable?"
    ═══════════════════════════════════════════════ */
 
+/** EBITDA stops — log-ish progression from SBA to upper middle market to mega-cap */
+const EBITDA_STOPS = [
+  200_000, 500_000, 1_000_000, 2_500_000, 5_000_000, 10_000_000, 20_000_000,
+  40_000_000, 75_000_000, 150_000_000, 300_000_000,
+];
+
+function fmtBig(n: number): string {
+  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2).replace(/\.00$/, '')}B`;
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2).replace(/\.?0+$/, '')}M`;
+  if (n >= 1_000) return `$${Math.round(n / 1_000)}K`;
+  return `$${n}`;
+}
+
+/** Choose a sensible default rate for the deal scale */
+function defaultRateFor(ev: number): number {
+  if (ev <= 5_000_000) return 10.75;       // SBA 7(a)
+  if (ev <= 50_000_000) return 9.5;        // Bank senior + unitranche blend
+  if (ev <= 250_000_000) return 9.0;       // Mid-market senior
+  return 8.5;                              // Large-cap senior
+}
+
+/** What kind of debt this deal would actually use */
+function debtTypeFor(ev: number): string {
+  if (ev <= 5_000_000) return 'SBA 7(a)';
+  if (ev <= 25_000_000) return 'Conventional senior';
+  if (ev <= 100_000_000) return 'Senior + unitranche';
+  if (ev <= 500_000_000) return 'Senior + unitranche + mezz';
+  return 'Multi-tranche structured';
+}
+
 export function LandingSBACalc({ dark }: { dark?: boolean }) {
-  const [purchasePrice, setPurchasePrice] = useState(2000000);
-  const [earnings, setEarnings] = useState(480000);
-  const [downPct, setDownPct] = useState(10);
-  const [rate, setRate] = useState(10.75);
+  // Stop-indexed sliders make a 1500x range manageable
+  const [ebitdaIdx, setEbitdaIdx] = useState(4); // $5M EBITDA default
+  const [multiple, setMultiple] = useState(8);
+  const [downPct, setDownPct] = useState(20);
+  const [rate, setRate] = useState(9.5);
+  const [termYears, setTermYears] = useState(7);
 
-  const loanAmount = Math.round(purchasePrice * (1 - downPct / 100));
-  const result = calculateDSCRFull(earnings, loanAmount, rate / 100, 120);
-
-  const fmt = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(2)}M` : `$${(n / 1_000).toFixed(0)}K`;
+  const ebitda = EBITDA_STOPS[ebitdaIdx];
+  const purchasePrice = Math.round(ebitda * multiple);
+  const equity = Math.round(purchasePrice * (downPct / 100));
+  const loanAmount = purchasePrice - equity;
+  const result = calculateDSCRFull(ebitda, loanAmount, rate / 100, termYears * 12);
 
   const dscrColor = result.dscr >= 1.5 ? '#34A853' : result.dscr >= 1.25 ? '#FBBC04' : '#EA4335';
-  const dscrLabel = result.eligible ? 'SBA ELIGIBLE' : 'BELOW SBA THRESHOLD';
+  const dscrLabel =
+    result.dscr >= 1.5 ? 'COMFORTABLE CUSHION' :
+    result.dscr >= 1.25 ? 'CLEARS WITH MARGIN' :
+    result.dscr >= 1.20 ? 'TIGHT — NEGOTIATE TERMS' :
+    'BELOW COVENANT';
+
+  const debtType = debtTypeFor(purchasePrice);
 
   return (
     <div className={`rounded-2xl p-8 ${dark ? 'bg-[#2f3133] border border-zinc-800' : 'bg-white border border-[#eeeef0]'}`}>
-      <p className="text-[#D44A78] font-bold uppercase tracking-widest text-xs mb-6">SBA 7(a) DSCR Calculator</p>
+      <div className="flex items-baseline justify-between mb-6 flex-wrap gap-2">
+        <p className="text-[#D44A78] font-bold uppercase tracking-widest text-xs">Acquisition capital calculator</p>
+        <span className={`text-[10px] font-bold uppercase tracking-wider ${dark ? 'text-[#dadadc]/55' : 'text-[#7c7d80]'}`}>
+          {debtType}
+        </span>
+      </div>
 
-      <Slider value={purchasePrice} min={200000} max={5000000} step={50000}
-        onChange={setPurchasePrice} label="Purchase Price" displayValue={fmt(purchasePrice)} dark={dark} />
-      <Slider value={earnings} min={50000} max={2000000} step={10000}
-        onChange={setEarnings} label="Annual SDE / EBITDA" displayValue={fmt(earnings)} dark={dark} />
-      <Slider value={downPct} min={5} max={30} step={1}
-        onChange={setDownPct} label="Down Payment" displayValue={`${downPct}%`} dark={dark} />
-      <Slider value={rate} min={7} max={14} step={0.25}
-        onChange={setRate} label="SBA 7(a) Rate" displayValue={`${rate}%`} dark={dark} />
+      <Slider
+        value={ebitdaIdx}
+        min={0}
+        max={EBITDA_STOPS.length - 1}
+        step={1}
+        onChange={setEbitdaIdx}
+        label="Annual EBITDA"
+        displayValue={fmtBig(ebitda)}
+        dark={dark}
+      />
+      <Slider
+        value={multiple}
+        min={3}
+        max={18}
+        step={0.5}
+        onChange={setMultiple}
+        label="Multiple"
+        displayValue={`${multiple}×`}
+        dark={dark}
+      />
+      <Slider
+        value={downPct}
+        min={5}
+        max={50}
+        step={1}
+        onChange={setDownPct}
+        label="Equity / Down"
+        displayValue={`${downPct}%`}
+        dark={dark}
+      />
+      <Slider
+        value={rate}
+        min={5}
+        max={15}
+        step={0.25}
+        onChange={setRate}
+        label="Blended debt rate"
+        displayValue={`${rate}%`}
+        dark={dark}
+      />
+      <Slider
+        value={termYears}
+        min={5}
+        max={25}
+        step={1}
+        onChange={setTermYears}
+        label="Loan term"
+        displayValue={`${termYears} yrs`}
+        dark={dark}
+      />
 
       <div className={`mt-6 pt-6 ${dark ? 'border-t border-zinc-700' : 'border-t border-[#eeeef0]'}`}>
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <ResultCard label="Loan Amount" value={fmt(loanAmount)} dark={dark} />
-          <ResultCard label="Annual Debt Service" value={fmt(result.annualDebtService)} dark={dark} />
-          <ResultCard label="DSCR" value={result.dscr === Infinity ? '—' : `${result.dscr.toFixed(2)}x`} highlight dark={dark} />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          <ResultCard label="Purchase price" value={fmtBig(purchasePrice)} dark={dark} />
+          <ResultCard label="Equity required" value={fmtBig(equity)} dark={dark} />
+          <ResultCard label="Annual debt svc" value={fmtBig(result.annualDebtService)} dark={dark} />
+          <ResultCard
+            label="Year-1 DSCR"
+            value={result.dscr === Infinity ? '—' : `${result.dscr.toFixed(2)}×`}
+            highlight
+            dark={dark}
+          />
         </div>
 
         <motion.div
-          key={result.eligible ? 'yes' : 'no'}
+          key={dscrLabel}
           initial={{ scale: 0.95, opacity: 0.5 }}
           animate={{ scale: 1, opacity: 1 }}
           className="rounded-xl p-4 text-center mb-4"
           style={{ background: `${dscrColor}20`, border: `1px solid ${dscrColor}40` }}
         >
           <span className="material-symbols-outlined text-2xl mb-1 block" style={{ color: dscrColor }}>
-            {result.eligible ? 'check_circle' : 'warning'}
+            {result.dscr >= 1.25 ? 'check_circle' : 'warning'}
           </span>
           <p className="font-bold text-sm" style={{ color: dscrColor }}>{dscrLabel}</p>
           <p className={`text-xs mt-1 ${dark ? 'text-[#dadadc]/60' : 'text-[#5d5e61]'}`}>
-            SBA 7(a) minimum: 1.25x · Your DSCR: {result.dscr === Infinity ? '—' : result.dscr.toFixed(2)}x
+            Senior covenant typical minimum: 1.20× · Your DSCR: {result.dscr === Infinity ? '—' : `${result.dscr.toFixed(2)}×`}
           </p>
         </motion.div>
       </div>
 
       <MagneticButton
         onClick={() => bridgeToYulia(
-          `I'm looking at a ${fmt(purchasePrice)} acquisition with ${fmt(earnings)} in annual earnings. ` +
-          `With ${downPct}% down at ${rate}% SBA rate, the DSCR is ${result.dscr.toFixed(2)}x. ` +
-          `Can you model the full capital stack and tell me if this deal makes sense?`
+          `Modeling a ${fmtBig(purchasePrice)} acquisition: ${fmtBig(ebitda)} EBITDA at ${multiple}× multiple. ` +
+          `With ${downPct}% equity (${fmtBig(equity)}) at ${rate}% blended rate, year-1 DSCR is ${result.dscr.toFixed(2)}×. ` +
+          `Can you model the full capital stack — senior, unitranche, mezz, equity, rollover — and show me what closes?`
         )}
         className="w-full mt-2 px-6 py-3.5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-bold text-sm hover:scale-[1.02] transition-all shadow-md border-none cursor-pointer"
       >
-        Model your full capital stack with Yulia
+        Build the full capital stack with Yulia
       </MagneticButton>
     </div>
   );

@@ -86,8 +86,8 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
                   type: 'user',
                   content: (
                     <div className="bg-white/5 border border-white/10 p-4 rounded-2xl rounded-tr-none text-white text-[15px] leading-relaxed">
-                      MSP / IT services in Texas. $48M revenue, $11M EBITDA, asking 8.2×. Top-10 customers
-                      ~22%. 18% three-year CAGR. 14 years operating. Worth a deeper look?
+                      Cybersecurity SaaS in Boston. $88M ARR, $24M EBITDA, asking 18×. NRR 132%, top-10 customers
+                      16%, 32% YoY growth, 9 years operating. Should I dig in?
                     </div>
                   ),
                 },
@@ -99,10 +99,10 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
                         Y
                       </div>
                       <div className="bg-white/10 p-4 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed">
-                        Running The Rundown. MSP at $11M EBITDA trades 8-12× in the 2024 set; 8.2× ask is{' '}
-                        <span className="text-[#ffb2bf] font-bold">below median for your size</span>. 22% top-10 is healthy.
-                        18% CAGR is double the industry median.
-                        <span className="block mt-2 font-semibold">Composite score: 80/100 — PURSUE.</span>
+                        Cybersecurity SaaS at $24M EBITDA — let me run The Rundown.{' '}
+                        <span className="text-[#ffb2bf] font-bold">Composite score 83/100 — PURSUE.</span>{' '}
+                        Headline: Rule of 40 = 64 (top decile), NRR 132% (best in class), 16% top-10 (fully diversified),
+                        32% YoY (double the cohort median). Headline weakness: bankability is asset-light.
                       </div>
                     </div>
                   ),
@@ -111,7 +111,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
                   type: 'user',
                   content: (
                     <div className="bg-white/5 border border-white/10 p-4 rounded-2xl rounded-tr-none text-white text-[15px] leading-relaxed mt-4">
-                      What's the cap stack look like?
+                      What does the cap stack look like at 18×?
                     </div>
                   ),
                 },
@@ -123,10 +123,11 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
                         Y
                       </div>
                       <div className="bg-white/10 p-4 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed">
-                        At $90M EV: $50M senior @ SOFR+450, $20M unitranche @ 10%, $20M sponsor equity. Year-1 DSCR{' '}
-                        <span className="text-[#8ff9a8] font-bold">1.42×</span> — comfortable cushion above the 1.20× covenant.
-                        Sponsor equity grows to ~$54M at year-2 refi if EBITDA holds. <strong>2.7× MOIC over 18 months
-                        modeled.</strong> Want the IC memo?
+                        $432M EV at 18× × $24M. Asset-light caps senior at ~1.8× → <strong>$43M senior</strong> @ SOFR+475.{' '}
+                        <strong>$40M unitranche second lien</strong> @ 10.5% (additional 1.7× leverage). That leaves{' '}
+                        <strong>$349M of sponsor equity + seller rollover.</strong> Year-1 DSCR clears at{' '}
+                        <span className="text-[#8ff9a8] font-bold">1.85×</span> — comfortable cushion.
+                        Real question is whether your fund has the equity check size. Want me to model 3 scenarios?
                       </div>
                     </div>
                   ),
@@ -142,13 +143,13 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
         {/* ═══ The Story ═══ */}
         <StoryBlock
           byline="Priya S.*"
-          role="VP, $700M growth equity fund"
-          dealLine="Coverage: tech-enabled services · $20-80M EBITDA · $40M avg equity check"
+          role="Principal, $2.5B mid-market PE fund"
+          dealLine="Coverage: vertical SaaS · cybersecurity · healthcare services · $25-100M EBITDA · $200M avg equity check"
           body={
             <>
               <p>
-                Priya's fund had committed $700M of capital, a focused thesis on tech-enabled services, and a single
-                bottleneck: <strong style={{ color: headingColor }}>inbound CIM volume.</strong>
+                Priya's fund had $2.5B of committed capital, a sharp thesis on vertical SaaS and tech-enabled
+                services, and a single bottleneck: <strong style={{ color: headingColor }}>inbound CIM volume.</strong>
               </p>
               <p className="mt-4">
                 Sell-side advisors were sending her <strong style={{ color: accent }}>40-60 CIMs a week</strong>.
@@ -158,7 +159,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
               <p className="mt-4">
                 Industry conversion from screen to live diligence is about 3%. From 624 screens a year, that's{' '}
                 <strong style={{ color: headingColor }}>roughly 19 live deals</strong>. From 19 live deals, the fund
-                closed maybe 2.
+                closed maybe 2 — at $200M average EV, that's $400M deployed per principal per year.
               </p>
               <p className="mt-4">
                 Yulia changed the math at the top of the funnel. The Rundown™ runs all seven dimensions in 8 seconds —
@@ -168,8 +169,8 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
               <p className="mt-4">
                 She's also more selective. Effective conversion from screen to live drops to 1% — but on 15,600 annual
                 screens, that's <strong style={{ color: accent }}>156 live deals</strong>. Same 10% close rate. About{' '}
-                <strong style={{ color: accent }}>16 closes a year per analyst</strong>, vs. 2 before. Same fund, same
-                thesis, eight times the deal flow.
+                <strong style={{ color: accent }}>16 closes a year per principal</strong>, vs. 2 before. At $200M average EV, that's{' '}
+                <strong style={{ color: accent }}>$3.2B of deal flow per principal per year.</strong> Same fund, same thesis, eight times the throughput.
               </p>
               <p className="mt-4 text-base italic" style={{ color: mutedColor }}>
                 The unlock isn't "buy faster." It's "kill faster, so you can find the one that pays."
@@ -177,9 +178,9 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
             </>
           }
           kpis={[
-            { label: 'Pre-Yulia closes / yr', value: '~2', sub: '12 CIMs/wk × 3% × 10%' },
-            { label: 'Post-Yulia closes / yr', value: '~16', sub: '300 CIMs/wk × 1% × 10%' },
-            { label: 'Throughput multiplier', value: '8×', sub: 'same analyst, same fund' },
+            { label: 'Pre-Yulia · annual deployed', value: '~$400M', sub: '12 CIMs/wk × 3% × 10% × $200M avg' },
+            { label: 'Post-Yulia · annual deployed', value: '~$3.2B', sub: '300 CIMs/wk × 1% × 10% × $200M avg' },
+            { label: 'Throughput multiplier', value: '8×', sub: 'same principal, same fund, no headcount' },
           ]}
           dark={dark}
         />
@@ -196,7 +197,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
             term="The Rundown"
             oneLiner="Score any deal in 8 seconds. Pursue, negotiate, or kill."
             definition="Seven dimensions: financial performance, market position, owner dependency, customer concentration, growth trajectory, bankability (DSCR at proposed structure), and operational risk. Each dimension gets 0-100 with a one-line justification. The composite picks the verdict."
-            example="A $48M revenue MSP at 8.2× ask, 22% top-10 concentration, 18% CAGR: composite 80/100 → PURSUE. A $112M revenue distributor at 9.4× ask, 38% top-5, 4% CAGR: composite 64/100 → NEGOTIATE."
+            example="A $24M EBITDA cybersecurity SaaS at 18× ask, NRR 132%, 32% YoY: composite 83/100 → PURSUE. A $58M EBITDA defense manufacturer at 9.5× ask, 71% DoD concentration, 11% CAGR: composite 71/100 → NEGOTIATE."
             onCTA={() => goToChat()}
             ctaLabel="Run The Rundown on a deal"
             dark={dark}

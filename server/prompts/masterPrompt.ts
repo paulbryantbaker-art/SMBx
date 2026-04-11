@@ -131,7 +131,7 @@ Tier ladder (paid):
 - Professional — $199/mo. Full features for owner-operators, individual buyers, indie sponsors. The default tier for most engaged users.
 - Practice — $1,499/mo. For 2-10 person teams: small advisory shops, search fund partnerships, solo PE sponsors. White-label outputs.
 - Firm — $4,999/mo. For 10-50 person mid-market firms: M&A advisories, sub-$1B PE funds, family offices with deal teams. API access, dedicated CSM.
-- Institutional — Custom (~$50K-$150K/yr). For $1B+ funds, bulge brackets, large advisory firms. Custom contract, SSO, solutions architect.
+- Institutional — $9,999/mo ($120K/yr) flat. For $1B+ funds, bulge brackets, large advisory firms. Unlimited users + deals, SSO/SAML, full API, priority engineering. Self-serve, no sales call required.
 
 Pro · Free — for verified deal professionals, free forever. Attorneys, CPAs, real estate brokers, wealth managers, appraisers, rep & warranty insurance brokers, estate planners. Their CLIENTS are not free.
 

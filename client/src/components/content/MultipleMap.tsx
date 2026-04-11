@@ -6,8 +6,9 @@
  * The pin's position picks an EBITDA multiple from the industry curve.
  * Industry selector determines the comp set and base multiple range.
  *
- * Real industry multiples sourced from PitchBook + GF Data 2024 ranges
- * for $5M-$100M EBITDA businesses.
+ * Industry multiples reflect 2024-2025 mid-market deal consensus ranges
+ * for $5M-$100M EBITDA businesses. Sourced from public deal databases,
+ * SBA 7(a) lending data, NAICS benchmarks, and aggregated investor reports.
  */
 
 import { useState, useRef, useMemo } from 'react';
@@ -375,8 +376,8 @@ export function MultipleMap({
       </div>
 
       <p className="text-xs mt-6" style={{ color: mutedColor }}>
-        Comp data: PitchBook + GF Data 2024, $5M-$100M EBITDA segment.
-        Pin position estimates relative position — Yulia runs the real Baseline against your verified financials.
+        2024-2025 mid-market consensus ranges, $5M-$100M EBITDA segment. Yulia runs the real Baseline against your verified financials,
+        Census + SBA + NAICS benchmark data, and the actual deals closed in your sector this year.
       </p>
 
       <style>{`
