@@ -1794,7 +1794,7 @@ export default function AppShell() {
               )}
 
               {/* Chat pane is always dark — matches the always-dark body. */}
-              <div className="dark">
+              <div className="force-chat-dark">
               <ChatMessages
                 messages={messages}
                 streamingText={streamingText}
@@ -1852,9 +1852,9 @@ export default function AppShell() {
         </div>
 
         {/* ════ CHATDOCK — chat mode, pinned at bottom, aligned with sidebar/canvas ════
-            Always rendered in .dark scope so the pill matches the dark body. */}
+            Uses force-chat-dark so the pill is always dark-mode styled. */}
         {showDock && viewState === 'chat' && (
-          <div className="dark shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
+          <div className="force-chat-dark shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
             <ChatDock
               ref={dockRef}
               onSend={handleSend}

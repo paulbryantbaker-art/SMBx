@@ -429,6 +429,37 @@ html.dark .glass-panel {
   color: rgba(255,255,255,0.4) !important;
 }
 
+/* ═══ CHAT-PANE FORCED DARK ═══
+   The body and chat pane are always dark (even in light mode).
+   This class forces the ChatDock pill to use dark-mode styling
+   regardless of html.dark — wrap the dock in .force-chat-dark. */
+.force-chat-dark .dock-hero-pill {
+  background: #2f3133 !important;
+  border: 1.5px solid rgba(255,255,255,0.12) !important;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2) !important;
+}
+.force-chat-dark .dock-hero-pill textarea {
+  color: #f0f0f3 !important;
+}
+.force-chat-dark .dock-hero-pill textarea::placeholder {
+  color: rgba(255,255,255,0.4) !important;
+}
+.force-chat-dark .home-dock-card {
+  background: #2f3133 !important;
+  border-color: rgba(255,255,255,0.08) !important;
+}
+.force-chat-dark .home-dock-card textarea {
+  color: #f0f0f3 !important;
+}
+.force-chat-dark .home-dock-card textarea::placeholder {
+  color: rgba(255,255,255,0.4) !important;
+}
+.force-chat-dark .dock-plus-btn {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  color: rgba(255,255,255,0.6) !important;
+}
+
 /* ═══ CHATDOCK DARK MODE ═══ */
 .dark .home-dock-card {
   background: #2f3133;
