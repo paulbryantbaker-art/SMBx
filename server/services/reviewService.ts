@@ -5,9 +5,45 @@
  * (approved / changes_requested / flagged) → owner notified with summary.
  *
  * Yulia can add focus_areas to guide the reviewer on what to look at.
+ *
+ * Counsel Attestation: when a reviewer with a regulated role (attorney, cpa)
+ * approves a document, they accept an attestation text that becomes part of
+ * the chain of custody. This is what lets Yulia execute downstream actions
+ * without crossing UPL/UPA lines — we have written record that the licensed
+ * professional reviewed and approved.
  */
 import { sql } from '../db.js';
 import { createNotification } from '../routes/notifications.js';
+
+// ─── Attestation phrasings ─────────────────────────────────────────
+//
+// These are the exact texts a reviewer must accept when approving a
+// document, by role. Captured verbatim so the audit log records which
+// version they signed off on.
+
+export const ATTESTATIONS: Record<string, string> = {
+  attorney:
+    'I have reviewed this document. I have advised my client of the legal implications of the terms herein. My client has accepted my advice. I am acting as counsel of record for this engagement.',
+  cpa:
+    'I have reviewed the financial schedule attached to this document. The add-backs, normalizations, and assumptions are reasonable based on the source documents I have examined. I am acting as accountant of record for this engagement.',
+  broker:
+    'I have reviewed this document in my capacity as broker on this transaction. The terms are consistent with market practice for deals of this size and structure.',
+  lender:
+    'I have reviewed this document in my capacity as lender on this transaction. The financing terms reflect our current credit policy.',
+};
+
+/** Roles that REQUIRE attestation when approving */
+const ATTESTATION_REQUIRED_ROLES = new Set(['attorney', 'cpa']);
+
+export function getAttestationText(role?: string | null): string | null {
+  if (!role) return null;
+  return ATTESTATIONS[role.toLowerCase()] ?? null;
+}
+
+export function attestationRequired(role?: string | null): boolean {
+  if (!role) return false;
+  return ATTESTATION_REQUIRED_ROLES.has(role.toLowerCase());
+}
 
 interface ReviewRequestInput {
   dealId: number;
@@ -82,6 +118,8 @@ export async function respondToReview(
   reviewerId: number,
   status: 'approved' | 'changes_requested' | 'flagged',
   notes?: string,
+  attestationAccepted?: boolean,
+  attestationIp?: string,
 ): Promise<any> {
   // Verify this review belongs to this reviewer
   const [review] = await sql`
@@ -93,11 +131,28 @@ export async function respondToReview(
   `;
   if (!review) return null;
 
+  // Counsel attestation gate: when approving, regulated roles MUST accept the attestation.
+  // This is the legal cover that lets downstream actions proceed without crossing UPL/UPA lines.
+  let attestationText: string | null = null;
+  let attestedAt: Date | null = null;
+  if (status === 'approved' && attestationRequired(review.reviewer_role)) {
+    if (!attestationAccepted) {
+      throw new Error(
+        `Counsel attestation required for ${review.reviewer_role} approvals. Reviewer must accept the attestation text before the review can be marked approved.`,
+      );
+    }
+    attestationText = getAttestationText(review.reviewer_role);
+    attestedAt = new Date();
+  }
+
   // Update the review
   const [updated] = await sql`
     UPDATE review_requests
     SET status = ${status},
         reviewer_notes = ${notes || null},
+        attestation_text = ${attestationText},
+        attested_at = ${attestedAt},
+        attested_ip = ${attestationIp || null},
         resolved_at = NOW(),
         updated_at = NOW()
     WHERE id = ${reviewId}

@@ -520,17 +520,37 @@ collaborationRouter.patch('/review-requests/:reviewId/respond', async (req, res)
   try {
     const userId = (req as any).userId;
     const reviewId = parseInt(req.params.reviewId, 10);
-    const { status, notes } = req.body;
+    const { status, notes, attestationAccepted } = req.body;
 
     if (!['approved', 'changes_requested', 'flagged'].includes(status)) {
       return res.status(400).json({ error: 'Status must be approved, changes_requested, or flagged' });
     }
 
-    const { respondToReview } = await import('../services/reviewService.js');
-    const result = await respondToReview(reviewId, userId, status, notes);
+    // Capture IP for the attestation chain of custody
+    const ip = (req.headers['x-forwarded-for']?.toString().split(',')[0].trim()) || req.socket?.remoteAddress || undefined;
 
-    if (!result) return res.status(404).json({ error: 'Review not found or not assigned to you' });
-    return res.json(result);
+    const { respondToReview } = await import('../services/reviewService.js');
+    try {
+      const result = await respondToReview(reviewId, userId, status, notes, attestationAccepted === true, ip);
+      if (!result) return res.status(404).json({ error: 'Review not found or not assigned to you' });
+      return res.json(result);
+    } catch (innerErr: any) {
+      // Counsel attestation required but not accepted -> return 422 with the required text
+      if (innerErr.message?.includes('Counsel attestation required')) {
+        const { getAttestationText } = await import('../services/reviewService.js');
+        // Look up the review to get the role
+        const [{ reviewer_role: role } = {} as any] = await (await import('../db.js')).sql`
+          SELECT reviewer_role FROM review_requests WHERE id = ${reviewId} AND reviewer_id = ${userId}
+        `;
+        return res.status(422).json({
+          error: innerErr.message,
+          attestationRequired: true,
+          attestationText: getAttestationText(role),
+          reviewerRole: role,
+        });
+      }
+      throw innerErr;
+    }
   } catch (err: any) {
     console.error('Respond to review error:', err.message);
     return res.status(500).json({ error: 'Failed to respond to review' });
