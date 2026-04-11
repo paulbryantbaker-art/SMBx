@@ -43,17 +43,19 @@ const DELIVERABLE_ICONS: Record<string, string> = {
   sba_financing_model: '\u{1F3E6}',
 };
 
-/* ─── Sender label (above message) ────────────────────────── */
-function SenderLabel({ name, accent }: { name: string; accent?: boolean }) {
+/* ─── Yulia avatar dot — small accent for mobile assistant messages ──── */
+function YuliaAvatar({ dark }: { dark: boolean }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-      <span style={{
-        fontSize: 11, fontWeight: 700,
-        color: accent ? '#D44A78' : '#94a3b8',
-        textTransform: 'uppercase', letterSpacing: '0.1em',
-      }}>
-        {name}
-      </span>
+    <div style={{
+      width: 24, height: 24, borderRadius: '50%',
+      background: 'linear-gradient(135deg, #D44A78 0%, #E8709A 100%)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexShrink: 0,
+      boxShadow: dark
+        ? '0 1px 2px rgba(0,0,0,0.4)'
+        : '0 1px 2px rgba(212,74,120,0.18)',
+    }}>
+      <span style={{ color: '#fff', fontSize: 11, fontWeight: 800, letterSpacing: '-0.02em', fontFamily: "'Sora', system-ui, sans-serif" }}>Y</span>
     </div>
   );
 }
@@ -118,11 +120,19 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
   );
 
   const textStyle: React.CSSProperties = {
-    fontSize: 14, lineHeight: 1.65, fontWeight: 400,
+    fontSize: desktop ? 14 : 15.5,
+    lineHeight: desktop ? 1.65 : 1.55,
+    fontWeight: desktop ? 400 : 450,
     color: textColor,
+    letterSpacing: desktop ? undefined : '-0.005em',
+    WebkitFontSmoothing: 'antialiased',
     userSelect: 'text', WebkitUserSelect: 'text', cursor: 'text',
     textAlign: desktop ? 'justify' : undefined,
-  };
+  } as React.CSSProperties;
+
+  /* Mobile-specific user bubble bg — soft warm tint to differentiate from Yulia */
+  const userBubbleBgMobile = dark ? 'rgba(232,112,154,0.12)' : '#F4EBE3';
+  const userBubbleBorderMobile = dark ? 'rgba(232,112,154,0.18)' : '#E8DFD1';
 
   const PROSE = proseClasses(dark);
   const isEmpty = messages.length === 0 && !streamingText && !sending;
@@ -194,17 +204,15 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: desktop ? 40 : 20 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: desktop ? 40 : 22 }}>
         {messages.map((m, i) => {
           const isDeliverable = m.metadata?.type === 'deliverable';
           const deliverableType = m.metadata?.deliverableType as string | undefined;
 
           /* ─── Deliverable card ─────────────────────────── */
           if (isDeliverable && deliverableType) {
-            return (
-              <div key={m.id || i}>
-                {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" accent />}
-                <button
+            const cardInner = (
+              <button
                   onClick={() => onOpenDeliverable?.(m)}
                   type="button"
                   style={{
@@ -248,72 +256,146 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
                     </div>
                   </div>
                 </button>
+            );
+            return (
+              <div key={m.id || i}>
+                {desktop && <Label text="Yulia" />}
+                {!desktop ? (
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <YuliaAvatar dark={dark} />
+                    <div style={{ flex: 1, minWidth: 0 }}>{cardInner}</div>
+                  </div>
+                ) : cardInner}
               </div>
             );
           }
 
           /* ─── User message ─────────────────────────────── */
           if (m.role === 'user') {
+            if (desktop) {
+              return (
+                <div key={m.id || i} style={{
+                  background: userMsgBg,
+                  borderRadius: 10,
+                  padding: '12px 16px',
+                }}>
+                  <Label text="You" />
+                  <div className={PROSE} style={textStyle}>
+                    <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{m.content}</p>
+                  </div>
+                </div>
+              );
+            }
+            /* Mobile: right-aligned warm bubble, no label */
             return (
-              <div key={m.id || i} style={{
-                background: userMsgBg,
-                borderRadius: 10,
-                padding: desktop ? '12px 16px' : '10px 14px',
-              }}>
-                {desktop ? <Label text="You" /> : <SenderLabel name="You" />}
-                <div className={PROSE} style={textStyle}>
-                  <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{m.content}</p>
+              <div key={m.id || i} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <div style={{
+                  maxWidth: '85%',
+                  background: userBubbleBgMobile,
+                  border: `1px solid ${userBubbleBorderMobile}`,
+                  borderRadius: 18,
+                  borderBottomRightRadius: 6,
+                  padding: '10px 14px',
+                }}>
+                  <div className={PROSE} style={textStyle}>
+                    <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{m.content}</p>
+                  </div>
                 </div>
               </div>
             );
           }
 
           /* ─── Assistant message ─────────────────────────── */
-          return (
-            <div key={m.id || i}>
-              {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" accent />}
-              <div className={PROSE} style={textStyle}>
-                <Markdown>{m.content}</Markdown>
+          if (desktop) {
+            return (
+              <div key={m.id || i}>
+                <Label text="Yulia" />
+                <div className={PROSE} style={textStyle}>
+                  <Markdown>{m.content}</Markdown>
+                </div>
+                {m.created_at && (
+                  <p style={{ fontSize: 10, color: timestampColor, margin: '3px 0 0' }}>
+                    {formatTimestamp(m.created_at)}
+                  </p>
+                )}
               </div>
-              {m.created_at && (
-                <p style={{ fontSize: 10, color: timestampColor, margin: '3px 0 0' }}>
-                  {formatTimestamp(m.created_at)}
-                </p>
-              )}
+            );
+          }
+          /* Mobile: avatar + text, no label */
+          return (
+            <div key={m.id || i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <YuliaAvatar dark={dark} />
+              <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
+                <div className={PROSE} style={textStyle}>
+                  <Markdown>{m.content}</Markdown>
+                </div>
+              </div>
             </div>
           );
         })}
 
         {/* ─── Streaming message ─────────────────────────── */}
         {streamingText && (
-          <div>
-            {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" accent />}
-            <div className={PROSE} style={textStyle}>
-              <Markdown>{streamingText}</Markdown>
-              <span style={{
-                display: 'inline-block', width: 5, height: 5, borderRadius: '50%',
-                background: dotColor, marginLeft: 3, verticalAlign: 'middle',
-                animation: 'dotPulse 1.4s ease infinite',
-              }} />
+          desktop ? (
+            <div>
+              <Label text="Yulia" />
+              <div className={PROSE} style={textStyle}>
+                <Markdown>{streamingText}</Markdown>
+                <span style={{
+                  display: 'inline-block', width: 5, height: 5, borderRadius: '50%',
+                  background: dotColor, marginLeft: 3, verticalAlign: 'middle',
+                  animation: 'dotPulse 1.4s ease infinite',
+                }} />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <YuliaAvatar dark={dark} />
+              <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
+                <div className={PROSE} style={textStyle}>
+                  <Markdown>{streamingText}</Markdown>
+                  <span style={{
+                    display: 'inline-block', width: 5, height: 5, borderRadius: '50%',
+                    background: dotColor, marginLeft: 3, verticalAlign: 'middle',
+                    animation: 'dotPulse 1.4s ease infinite',
+                  }} />
+                </div>
+              </div>
+            </div>
+          )
         )}
 
         {/* ─── Typing indicator ──────────────────────────── */}
         {sending && !streamingText && (
-          <div>
-            {desktop ? <Label text="Yulia" /> : <SenderLabel name="Yulia" accent />}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
-              <div style={{ display: 'flex', gap: 4 }}>
-                <span style={{ width: 5, height: 5, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite' }} />
-                <span style={{ width: 5, height: 5, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite 0.15s' }} />
-                <span style={{ width: 5, height: 5, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite 0.3s' }} />
+          desktop ? (
+            <div>
+              <Label text="Yulia" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite' }} />
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite 0.15s' }} />
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite 0.3s' }} />
+                </div>
+                {activeTool && (
+                  <span style={{ fontSize: 12, color: dark ? '#888' : '#999', fontWeight: 500 }}>{activeTool}...</span>
+                )}
               </div>
-              {activeTool && (
-                <span style={{ fontSize: 12, color: dark ? '#888' : '#999', fontWeight: 500 }}>{activeTool}...</span>
-              )}
             </div>
-          </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <YuliaAvatar dark={dark} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite' }} />
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite 0.15s' }} />
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite 0.3s' }} />
+                </div>
+                {activeTool && (
+                  <span style={{ fontSize: 13, color: dark ? '#888' : '#999', fontWeight: 500 }}>{activeTool}...</span>
+                )}
+              </div>
+            </div>
+          )
         )}
 
         {/* ─── Error ─────────────────────────────────────── */}

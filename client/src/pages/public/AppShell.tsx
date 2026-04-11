@@ -1534,17 +1534,17 @@ export default function AppShell() {
                   visible mismatch between sidebar/journey cards and the body. */}
 
               {activeTab === 'home' ? (
-              <div className="relative z-10 flex-1 flex flex-col" style={{ padding: !isMobile ? '16px' : '0' }}>
+              <div className="relative z-10 flex-1 flex flex-col" style={{ padding: !isMobile ? '16px' : '12px' }}>
                 {/* ═══ HOME PAGE ═══ Floating card matches canvas/journey style */}
                 <div
                   className="flex-1 flex flex-col"
                   style={{
                     background: dark ? '#1A1C1E' : '#FFFFFF',
-                    border: !isMobile ? (dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9') : 'none',
-                    borderRadius: !isMobile ? 14 : 0,
-                    boxShadow: !isMobile ? (dark
+                    border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
+                    borderRadius: !isMobile ? 14 : 18,
+                    boxShadow: dark
                       ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
-                      : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)') : 'none',
+                      : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
                     overflow: 'hidden',
                   }}
                 >
