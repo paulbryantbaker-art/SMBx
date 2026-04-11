@@ -2,7 +2,7 @@ import { useState, useEffect, useLayoutEffect, useCallback } from 'react';
 
 type ThemePref = 'light' | 'dark' | 'system';
 const STORAGE_KEY = 'smbx-theme';
-const LIGHT_COLOR = '#F8F6F2';
+const LIGHT_COLOR = '#151617'; // body is always dark — JS keeps it dark in both modes
 const DARK_COLOR = '#151617';
 
 function getSystemDark() {
@@ -58,10 +58,11 @@ function applyDark(isDark: boolean, isManual: boolean) {
 
 export function useDarkMode() {
   const [pref, setPref] = useState<ThemePref>(() => {
-    if (typeof window === 'undefined') return 'dark';
-    // Default to dark unless the user has explicitly chosen light
+    if (typeof window === 'undefined') return 'light';
+    // Default to light mode — floating elements (sidebar, canvas, journey,
+    // bars) are light. Body + chat pane are always dark via forced CSS.
     const stored = localStorage.getItem(STORAGE_KEY) as ThemePref | null;
-    return stored || 'dark';
+    return stored || 'light';
   });
 
   const [dark, setDarkResolved] = useState(() => resolve(pref));

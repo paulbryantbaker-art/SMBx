@@ -14,19 +14,19 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <script>
-      // Resolve dark mode before first paint — prevents flash
-      // Default to dark mode unless the user has explicitly chosen light.
+      // Resolve dark mode before first paint — prevents flash.
+      // Default to light mode (floating elements light). Body is always
+      // dark via forced CSS, so Safari toolbar is #151617 regardless.
       (function() {
         var stored = localStorage.getItem('smbx-theme'); // 'light' | 'dark' | null
-        var isDark = stored !== 'light'; // default dark
+        var isDark = stored === 'dark';
         if (isDark) {
           document.documentElement.classList.add('dark');
           document.documentElement.style.colorScheme = 'dark';
         }
-        // Override theme-color to match the resolved mode (meta fallback)
-        var color = isDark ? '#151617' : '#F8F6F2';
+        // Body is always dark — keep Safari toolbar matching it
         var metas = document.querySelectorAll('meta[name="theme-color"]');
-        metas.forEach(function(m) { m.setAttribute('content', color); });
+        metas.forEach(function(m) { m.setAttribute('content', '#151617'); });
         // Favicon: dark X for light mode, white X for dark mode
         function setFavicon(dark) {
           var link = document.querySelector('link[rel="icon"]');
