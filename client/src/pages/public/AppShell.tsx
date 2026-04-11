@@ -46,6 +46,12 @@ import { MobileSellPage } from '../../components/mobile/MobileSellPage';
 import { MobileJourneySheet } from '../../components/mobile/MobileJourneySheet';
 import { MobileWorkspaceSheet } from '../../components/mobile/MobileWorkspaceSheet';
 import { MobileLivePulse } from '../../components/mobile/MobileLivePulse';
+import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
+import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
+import { MobileIntegratePage } from '../../components/mobile/MobileIntegratePage';
+import { MobileAdvisorsPage } from '../../components/mobile/MobileAdvisorsPage';
+import { MobileHowItWorksPage } from '../../components/mobile/MobileHowItWorksPage';
+import { MobilePricingPage } from '../../components/mobile/MobilePricingPage';
 
 /* Minimal skeleton for lazy Below pages */
 function BelowSkeleton() {
@@ -2328,50 +2334,72 @@ export default function AppShell() {
         </MobileWorkspaceSheet>
       )}
 
-      {isMobile && mobileJourneyOpen && mobileJourneyOpen !== 'sell' && (
-        <MobileJourneySheet
-          open={true}
+      {/* All 6 dedicated mobile journey pages — full mobile-native rewrites */}
+      {isMobile && (
+        <MobileBuyPage
+          open={mobileJourneyOpen === 'buy'}
           onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
           dark={dark}
-          eyebrow={
-            mobileJourneyOpen === 'how-it-works' ? 'How it works' :
-            mobileJourneyOpen === 'advisors' ? 'Advisors' :
-            mobileJourneyOpen.charAt(0).toUpperCase() + mobileJourneyOpen.slice(1)
-          }
-          topBarTitle={
-            mobileJourneyOpen === 'buy'          ? 'Kill 100 bad deals' :
-            mobileJourneyOpen === 'raise'        ? 'Get the capital. Keep the company.' :
-            mobileJourneyOpen === 'integrate'    ? 'Make the deal pay' :
-            mobileJourneyOpen === 'advisors'     ? 'Win the pitch' :
-            mobileJourneyOpen === 'how-it-works' ? 'How Yulia runs your deal' :
-            mobileJourneyOpen === 'pricing'      ? 'Investment bank power' :
-            ''
-          }
-          ctaLabel="Talk to Yulia"
-          ctaSubLabel="Pre-fills your next conversation"
-          onCTA={() => {
-            const prefillMap: Record<string, string> = {
-              buy: "I want to buy a business — ",
-              raise: "I need to raise capital — ",
-              integrate: "I just closed an acquisition — ",
-              advisors: "I'm an M&A advisor / broker — ",
-              'how-it-works': "Walk me through how you actually run a deal end-to-end.",
-              pricing: "How much does Yulia cost for my situation?",
-            };
-            const dest = mobileJourneyOpen!;
+          onTalkToYulia={(prefill) => {
             setMobileJourneyOpen(null);
-            setTimeout(() => fillHomeInput(prefillMap[dest] || ''), 350);
+            if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
           }}
-        >
-          <Suspense fallback={<BelowSkeleton />}>
-            {mobileJourneyOpen === 'buy'          && <BuyBelow dark={dark} />}
-            {mobileJourneyOpen === 'raise'        && <RaiseBelow dark={dark} />}
-            {mobileJourneyOpen === 'integrate'    && <IntegrateBelow dark={dark} />}
-            {mobileJourneyOpen === 'advisors'     && <AdvisorsBelow dark={dark} />}
-            {mobileJourneyOpen === 'how-it-works' && <HowItWorksBelow dark={dark} />}
-            {mobileJourneyOpen === 'pricing'      && <PricingBelow dark={dark} />}
-          </Suspense>
-        </MobileJourneySheet>
+        />
+      )}
+      {isMobile && (
+        <MobileRaisePage
+          open={mobileJourneyOpen === 'raise'}
+          onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
+          dark={dark}
+          onTalkToYulia={(prefill) => {
+            setMobileJourneyOpen(null);
+            if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
+          }}
+        />
+      )}
+      {isMobile && (
+        <MobileIntegratePage
+          open={mobileJourneyOpen === 'integrate'}
+          onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
+          dark={dark}
+          onTalkToYulia={(prefill) => {
+            setMobileJourneyOpen(null);
+            if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
+          }}
+        />
+      )}
+      {isMobile && (
+        <MobileAdvisorsPage
+          open={mobileJourneyOpen === 'advisors'}
+          onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
+          dark={dark}
+          onTalkToYulia={(prefill) => {
+            setMobileJourneyOpen(null);
+            if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
+          }}
+        />
+      )}
+      {isMobile && (
+        <MobileHowItWorksPage
+          open={mobileJourneyOpen === 'how-it-works'}
+          onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
+          dark={dark}
+          onTalkToYulia={(prefill) => {
+            setMobileJourneyOpen(null);
+            if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
+          }}
+        />
+      )}
+      {isMobile && (
+        <MobilePricingPage
+          open={mobileJourneyOpen === 'pricing'}
+          onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
+          dark={dark}
+          onTalkToYulia={(prefill) => {
+            setMobileJourneyOpen(null);
+            if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
+          }}
+        />
       )}
 
       {/* ═══ MOBILE CANVAS DRAWER (right side) ═══ */}

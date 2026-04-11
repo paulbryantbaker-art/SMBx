@@ -2,11 +2,26 @@ import { useState, useEffect, useLayoutEffect, useCallback } from 'react';
 
 type ThemePref = 'light' | 'dark' | 'system';
 const STORAGE_KEY = 'smbx-theme';
-// Body is always the medium charcoal back layer — never changes with theme.
-// The floating cards (sidebar, canvas, journey) flip between white and
-// near-black based on the user's toggle, floating on this constant body.
-const LIGHT_COLOR = '#2A2C2E';
-const DARK_COLOR = '#2A2C2E';
+// Desktop: body is always medium charcoal (#2A2C2E) — the "table" floating
+// cards (sidebar, canvas, journey) sit on. Provides the visual hierarchy
+// where the cards float on the body.
+//
+// Mobile: body matches the chat home edge-to-edge — white in light mode,
+// near-black in dark mode. This is what the iOS Safari toolbar reads, so
+// the toolbar matches the visible page color regardless of theme.
+const DESKTOP_BG = '#2A2C2E';
+const MOBILE_LIGHT = '#FFFFFF';
+const MOBILE_DARK  = '#151617';
+
+function isMobileViewport(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(max-width: 767px)').matches;
+}
+
+function bodyColorFor(isDark: boolean): string {
+  if (!isMobileViewport()) return DESKTOP_BG;
+  return isDark ? MOBILE_DARK : MOBILE_LIGHT;
+}
 
 function getSystemDark() {
   return window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -20,7 +35,7 @@ function resolve(pref: ThemePref): boolean {
 
 function applyDark(isDark: boolean, isManual: boolean) {
   const root = document.documentElement;
-  const color = isDark ? DARK_COLOR : LIGHT_COLOR;
+  const color = bodyColorFor(isDark);
 
   // Smooth transition during toggle
   root.classList.add('theme-transition');
@@ -32,7 +47,7 @@ function applyDark(isDark: boolean, isManual: boolean) {
   // Native UI: scrollbars, form controls, over-scroll
   root.style.colorScheme = isDark ? 'dark' : 'light';
 
-  // Safari toolbar via theme-color meta tags
+  // Safari toolbar via theme-color meta tags — must match the actual body color
   const metas = document.querySelectorAll('meta[name="theme-color"]');
   if (isManual) {
     metas.forEach(m => {
@@ -40,11 +55,7 @@ function applyDark(isDark: boolean, isManual: boolean) {
       m.setAttribute('content', color);
     });
   } else {
-    metas.forEach(m => {
-      const media = m.getAttribute('media') || '';
-      if (media.includes('dark')) m.setAttribute('content', DARK_COLOR);
-      else m.setAttribute('content', LIGHT_COLOR);
-    });
+    metas.forEach(m => m.setAttribute('content', color));
   }
 
   // Safari reads body/html bg for toolbar — must override !important from CSS
@@ -54,9 +65,6 @@ function applyDark(isDark: boolean, isManual: boolean) {
   // Update color-scheme meta tag
   const csMeta = document.querySelector('meta[name="color-scheme"]') as HTMLMetaElement | null;
   if (csMeta) csMeta.content = isDark ? 'dark' : 'light';
-
-  // Background layers are now position:absolute (not fixed) so Safari
-  // reads body/html bg for toolbar, not the background layers.
 }
 
 export function useDarkMode() {
@@ -81,6 +89,16 @@ export function useDarkMode() {
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);
   }, [pref]);
+
+  // Re-apply body bg + meta theme-color when the viewport crosses the
+  // mobile breakpoint (rotation, window resize, browser zoom).
+  // This is what makes the iOS Safari toolbar match the actual page color.
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 767px)');
+    const handler = () => applyDark(dark, pref !== 'system');
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, [dark, pref]);
 
   const setDark = useCallback((wantDark: boolean) => {
     const newPref: ThemePref = wantDark ? 'dark' : 'light';

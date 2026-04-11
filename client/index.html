@@ -14,19 +14,42 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <script>
-      // Resolve dark mode before first paint — prevents flash.
-      // Default to light mode (floating elements light). Body is always
-      // dark via forced CSS, so Safari toolbar is #151617 regardless.
+      // Resolve dark mode + body color before first paint to prevent any flash
+      // and to make the iOS Safari toolbar match the visible page color.
+      //
+      // Mobile (<=767px): body matches the chat home edge-to-edge.
+      //   - Light mode: body is white (#FFFFFF)
+      //   - Dark mode:  body is near-black (#151617)
+      // Desktop: body is medium charcoal (#2A2C2E) so floating cards float visually.
       (function() {
         var stored = localStorage.getItem('smbx-theme'); // 'light' | 'dark' | null
         var isDark = stored === 'dark';
+        var isMobile = window.matchMedia('(max-width: 767px)').matches;
+
         if (isDark) {
           document.documentElement.classList.add('dark');
           document.documentElement.style.colorScheme = 'dark';
         }
-        // Body is always #2A2C2E (medium charcoal) — Safari toolbar matches it
+
+        var color = isMobile
+          ? (isDark ? '#151617' : '#FFFFFF')
+          : '#2A2C2E';
+
         var metas = document.querySelectorAll('meta[name="theme-color"]');
-        metas.forEach(function(m) { m.setAttribute('content', '#2A2C2E'); });
+        metas.forEach(function(m) { m.setAttribute('content', color); });
+
+        // Set the body/html bg directly so the very first paint matches.
+        document.documentElement.style.backgroundColor = color;
+        // Body element doesn't exist yet at this point in the head, so we set it
+        // when the body is parsed via a one-shot observer.
+        if (document.body) {
+          document.body.style.backgroundColor = color;
+        } else {
+          document.addEventListener('DOMContentLoaded', function() {
+            document.body.style.backgroundColor = color;
+          });
+        }
+
         // Favicon: dark X for light mode, white X for dark mode
         function setFavicon(dark) {
           var link = document.querySelector('link[rel="icon"]');
