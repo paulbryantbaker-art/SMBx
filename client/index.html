@@ -10,27 +10,23 @@
     <meta property="og:description" content="AI deal advisory from valuation to close. Sell, buy, raise capital, or integrate. Start free." />
     <meta property="og:type" content="website" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#151617" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#151617" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#151617" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <script>
       // Resolve dark mode before first paint — prevents flash
-      // Three states: 'light', 'dark', or null (follow OS)
+      // Default to dark mode unless the user has explicitly chosen light.
       (function() {
         var stored = localStorage.getItem('smbx-theme'); // 'light' | 'dark' | null
-        var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var isDark = stored === 'dark' || (!stored && systemDark);
+        var isDark = stored !== 'light'; // default dark
         if (isDark) {
           document.documentElement.classList.add('dark');
           document.documentElement.style.colorScheme = 'dark';
         }
-        // Only override theme-color when user has a manual preference
-        if (stored) {
-          var color = '#151617'; // always dark back layer
-          var metas = document.querySelectorAll('meta[name="theme-color"]');
-          metas.forEach(function(m) { m.setAttribute('content', color); });
-        }
+        // Override theme-color to match the resolved mode (meta fallback)
+        var color = isDark ? '#151617' : '#F8F6F2';
+        var metas = document.querySelectorAll('meta[name="theme-color"]');
+        metas.forEach(function(m) { m.setAttribute('content', color); });
         // Favicon: dark X for light mode, white X for dark mode
         function setFavicon(dark) {
           var link = document.querySelector('link[rel="icon"]');

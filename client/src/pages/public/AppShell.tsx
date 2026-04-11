@@ -1793,9 +1793,6 @@ export default function AppShell() {
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
               )}
 
-              {/* Chat pane always renders in dark mode — matches the
-                  dark body back layer regardless of theme preference. */}
-              <div className="dark">
               <ChatMessages
                 messages={messages}
                 streamingText={streamingText}
@@ -1812,9 +1809,8 @@ export default function AppShell() {
                   handleSend(fill);
                 }}
                 desktop={!isMobile}
-                dark={true}
+                dark={dark}
               />
-              </div>
 
               {user && authChat.paywallData && authChat.activeDealId && (
                 <div className="px-4 mb-4">
@@ -1852,11 +1848,9 @@ export default function AppShell() {
           {/* Tool views now render as canvas tabs */}
         </div>
 
-        {/* ════ CHATDOCK — chat mode, pinned at bottom, aligned with sidebar/canvas ════
-            Wrapped in .dark scope so the dock renders with dark mode styling
-            regardless of the user's theme preference — matches the dark body. */}
+        {/* ════ CHATDOCK — chat mode, pinned at bottom, aligned with sidebar/canvas ════ */}
         {showDock && viewState === 'chat' && (
-          <div className="dark shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
+          <div className="shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
             <ChatDock
               ref={dockRef}
               onSend={handleSend}
