@@ -1,205 +1,397 @@
-import { ScrollReveal, StaggerContainer, StaggerItem, MagneticButton, GlowingOrb } from './animations';
-import { darkClasses } from './darkHelpers';
 import { goToChat } from './chatBridge';
-import { AdvisorROICalc } from './LandingCalculators';
 import usePageMeta from '../../hooks/usePageMeta';
+import { CapacitySlider, SynergyBuilder } from './AdvisorTools';
+import {
+  HookHeader,
+  StoryBlock,
+  SlowVsFast,
+  SectionHeader,
+  PageCTA,
+} from './storyBlocks';
 
 export default function AdvisorsBelow({ dark }: { dark: boolean }) {
-  const dc = darkClasses(dark);
-
   usePageMeta({
-    title: 'For M&A Advisors & Business Brokers | AI Deal Intelligence — smbx.ai',
-    description: 'Your back office, on demand. CIM in 2 hours. Valuation in 5 minutes. Manage 15-20 deals simultaneously. White-label AI deal intelligence for brokers, M&A advisors, CPAs, and attorneys.',
+    title: 'Win the pitch. Win the deal. Get paid. · Advisors with smbx.ai',
+    description:
+      'For M&A advisors, brokers, fundless sponsors, and PE deal teams. Win more pitches with a Baseline at the first meeting. Kill bad deals before LOI. Triple your engagements without adding partners.',
     canonical: 'https://smbx.ai/advisors',
     faqs: [
-      { question: 'Will my clients know I\'m using AI?', answer: 'Only if you tell them. Every document carries your branding. White-label on Enterprise. Your clients see your work product.' },
-      { question: 'Is client data secure?', answer: 'Every client engagement is siloed. No cross-client data access. No model training on client data. Encrypted at rest and in transit. Full fiduciary compliance.' },
-      { question: 'How fast can I generate a CIM?', answer: 'About 2 hours from client financials to deal-ready document. The same CIM that takes most practices 40 hours.' },
+      {
+        question: 'How does Yulia help advisors win client pitches?',
+        answer:
+          'You walk into the first meeting with a real Baseline — comp data, add-back schedule, defensible multiple range — instead of "we\'ll come back in two weeks." First-meeting Baselines lift advisory engagement conversion from ~35% to ~62% in the practices we work with.',
+      },
+      {
+        question: 'Can I white-label Yulia for my clients?',
+        answer:
+          'Yes, on the Enterprise tier. Every document carries your branding. Client data is siloed — no cross-client access, no model training on client data. Full fiduciary compliance.',
+      },
+      {
+        question: 'How fast can I generate a CIM?',
+        answer:
+          'About 4 hours of partner review time, vs. 60-80 hours of analyst time at most practices. Yulia drafts the CIM from verified financials; you review, refine, and ship. Same quality, 15× faster cycle.',
+      },
+      {
+        question: 'Will my clients know I\'m using AI?',
+        answer:
+          'Only if you tell them. Every document carries your branding. Yulia is your back office, not your front office. Your relationships, your judgment, your fees.',
+      },
     ],
   });
 
-  const handleCTA = goToChat;
+  const headingColor = dark ? '#f9f9fc' : '#0f1012';
+  const bodyColor = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
+  const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
+  const accent = dark ? '#E8709A' : '#D44A78';
+  const innerBg = dark ? 'rgba(255,255,255,0.04)' : 'white';
+  const border = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
 
-  const timeStats = [
-    { icon: 'description', label: 'CIM generation', before: '40 hrs', after: '2 hrs' },
-    { icon: 'analytics', label: 'Business valuation', before: '1 week', after: '5 min' },
-    { icon: 'folder_managed', label: 'Deals managed simultaneously', before: '3-5', after: '15-20' },
-    { icon: 'groups', label: 'Buyer outreach list', before: '1 month', after: '1 day' },
+  const jobs = [
+    {
+      n: '01',
+      title: 'Win the pitch.',
+      preNum: '35%',
+      postNum: '62%',
+      preLabel: 'first-meeting conversion',
+      postLabel: 'with a Baseline in hand',
+      body:
+        'Prospects don\'t buy "we\'ll come back to you in two weeks." They buy a number. Yulia builds the Baseline live during the pitch meeting — comp set, add-back schedule, defensible range. The prospect signs because the work is already credible.',
+    },
+    {
+      n: '02',
+      title: 'Kill the bad deals.',
+      preNum: '6 weeks',
+      postNum: '1 day',
+      preLabel: 'to recognize a dead deal',
+      postLabel: 'with The Rundown',
+      body:
+        'Six weeks of LOI back-and-forth before everyone realizes the deal won\'t pencil is a 1-partner-week of dead time per failed deal. The Rundown™ scores the target buyer pool in 24 hours — bad fits killed before the teaser sends. 70% reduction in dead-deal time.',
+    },
+    {
+      n: '03',
+      title: 'Make the killer pitch.',
+      preNum: '60-80 hrs',
+      postNum: '4 hrs',
+      preLabel: 'partner time per CIM',
+      postLabel: 'partner review of Yulia draft',
+      body:
+        'Yulia drafts the CIM from verified financials. You review, refine, and ship. Buyer outreach list: ranked by sector fit, transaction history, capital availability — 100+ targets in a day. Outreach launches three weeks earlier per deal.',
+    },
+    {
+      n: '04',
+      title: 'Find the synergy.',
+      preNum: '+0.0×',
+      postNum: '+0.4×',
+      preLabel: 'multiple lift on close',
+      postLabel: 'with synergy thesis baked into CIM',
+      body:
+        'Yulia builds a synergy capture model into the CIM — cost takeout, cross-sell, working capital release, year-by-year. The buyer underwrites the lift before signing the LOI. Higher LOIs because the upside is already on the page. On a $1.2M average fee, that\'s ~$48K more per deal.',
+    },
   ];
 
   const advisorTypes = [
-    { icon: 'storefront', title: 'Business brokers', desc: 'CIM in 2 hours. Valuation at your first meeting. Buyer list scored before you start outreach.' },
-    { icon: 'account_balance', title: 'M&A advisors', desc: 'Deal materials for every engagement. DD coordination across simultaneous transactions.' },
-    { icon: 'calculate', title: 'CPAs', desc: 'When your client asks "what\'s my business worth?" — answer in the same meeting.' },
-    { icon: 'gavel', title: 'Attorneys', desc: 'Financial context for every deal you advise on. Working capital analysis before closing surprises.' },
-    { icon: 'real_estate_agent', title: 'Wealth managers', desc: 'When a client\'s biggest asset is their business, you need deal intelligence, not just financial planning.' },
-    { icon: 'search', title: 'Search fund advisors', desc: 'Help your searchers find, evaluate, and close faster.' },
+    {
+      icon: 'storefront',
+      tier: 'Boutique',
+      title: 'Sell-side M&A advisors',
+      desc: 'Run 3× the engagements with the same partner team. White-label CIMs. First-meeting Baselines.',
+      size: '$5M-$300M EV',
+    },
+    {
+      icon: 'business',
+      tier: 'Mid-market',
+      title: 'Independent sponsors',
+      desc: 'Build the cap stack in one afternoon. Source LPs from a structured deck. Close in 4-5 months.',
+      size: '$50M-$500M EV',
+    },
+    {
+      icon: 'account_balance',
+      tier: '$1B PE',
+      title: 'PE funds & deal teams',
+      desc: 'Eight times the inbound CIM throughput. Same analysts, same thesis, more shots on goal.',
+      size: '$100M-$1B EV',
+    },
+    {
+      icon: 'search',
+      tier: 'Search funds',
+      title: 'Search fund advisors & principals',
+      desc: 'Help searchers find, screen, and close faster. The Rundown on every target. Capital stack on every short-list deal.',
+      size: '$5M-$50M EBITDA',
+    },
+    {
+      icon: 'real_estate_agent',
+      tier: 'Family office',
+      title: 'Family office deal teams',
+      desc: 'Multi-deal portfolio view. Shared diligence library. Synergy modeling across the existing book.',
+      size: '$25M-$500M EV',
+    },
+    {
+      icon: 'gavel',
+      tier: 'Legal & tax',
+      title: 'Attorneys & CPAs',
+      desc: 'Financial context for every deal you advise on. Working capital analysis before closing surprises. Add-back schedules at the partner meeting.',
+      size: 'all sizes',
+    },
   ];
 
   return (
-    <div className={dark ? 'bg-transparent text-[#f9f9fc]' : 'bg-transparent text-[#1a1c1e]'}>
+    <div className="bg-transparent" style={{ color: headingColor }}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
-        {/* ═══ 1. HERO — TIME SAVINGS ═══ */}
+        {/* ═══ Hook ═══ */}
+        <HookHeader
+          eyebrow="advisors"
+          headline={
+            <>
+              Win the pitch. <br />
+              Win the deal. <em className="not-italic" style={{ color: accent }}>Get paid.</em>
+            </>
+          }
+          sub={
+            <>
+              Show the Baseline at the first meeting. Kill bad deals before LOI. Make the killer CIM. Find the synergy
+              the buyer hadn't priced in. <strong>Triple your book without adding partners.</strong>
+            </>
+          }
+          dark={dark}
+        />
+
+        {/* ═══ Story ═══ */}
+        <StoryBlock
+          byline="Reese & Hammond*"
+          role="Boutique sell-side M&A advisory · 4 partners"
+          dealLine="$80M-$300M EV mandates · sell-side · upper middle market"
+          body={
+            <>
+              <p>
+                Reese & Hammond ran a 4-partner sell-side practice. Average mandate: <strong style={{ color: headingColor }}>$80-300M EV.</strong>{' '}
+                Average fee: <strong style={{ color: headingColor }}>$1.2M.</strong> The partners were good at relationships, good at
+                negotiation, and bottlenecked everywhere else.
+              </p>
+              <p className="mt-4">
+                The bottleneck wasn't relationships. It was production. Each CIM took 60-80 partner hours. Each buyer
+                research cycle took 40 hours. They could carry 8 active mandates, max. At a 50% close rate and a $1.2M
+                average fee, that's <strong style={{ color: headingColor }}>$4.8M of annual revenue</strong> with a 60% margin
+                — analysts and overhead ate the rest.
+              </p>
+              <p className="mt-4">
+                Then the math changed at the front of the funnel. Yulia builds the Baseline live during the first
+                prospect meeting. The conversion from prospect to engagement went from <strong style={{ color: accent }}>35% to 62%</strong> —
+                because prospects could feel the work was already real.
+              </p>
+              <p className="mt-4">
+                Then the CIM cycle compressed. <strong style={{ color: accent }}>4 hours of partner review</strong> instead
+                of 60-80 hours of partner work. Yulia drafted from verified financials, the partner reviewed and refined.
+                Same quality, 15× the throughput.
+              </p>
+              <p className="mt-4">
+                Then the synergy thesis went into every CIM. Buyers were underwriting cost takeout, cross-sell, and WC
+                release before they signed the LOI — and signing at higher multiples. Average close multiple lifted
+                <strong style={{ color: accent }}> +0.4×</strong> across the portfolio.
+              </p>
+              <p className="mt-4">
+                Twelve months later: <strong style={{ color: accent }}>22 active mandates, 60% close rate, $1.25M average fee, 78% margin.</strong>
+                {' '}<strong style={{ color: accent }}>$16.5M revenue. 3.4× the prior year.</strong> Same four partners.
+              </p>
+              <p className="mt-4 text-base italic" style={{ color: mutedColor }}>
+                The scarce resource was always partner time. Yulia gives it back.
+              </p>
+            </>
+          }
+          kpis={[
+            { label: 'Pre-Yulia annual', value: '$4.8M', sub: '8 mandates · 50% · 60% margin' },
+            { label: 'Post-Yulia annual', value: '$16.5M', sub: '22 mandates · 60% · 78% margin' },
+            { label: 'Same 4 partners', value: '3.4×', sub: 'revenue, no headcount added' },
+          ]}
+          dark={dark}
+        />
+
+        {/* ═══ The 4 Jobs — editorial ═══ */}
         <section className="mb-28">
-          <ScrollReveal>
-            <div className="flex items-center gap-2 mb-8">
-              <span className="inline-block px-3 py-1 bg-[#D44A78]/10 text-[#D44A78] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Advisors</span>
-              <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-[#2f3133] text-[#dadadc]/80' : 'bg-[#f3f3f6] text-[#5d5e61]'}`}>Brokers & Professionals</span>
-            </div>
-          </ScrollReveal>
-
-          <ScrollReveal y={40} delay={0.1}>
-            <h1 className="font-headline font-black text-5xl md:text-7xl tracking-tighter leading-[0.9] mb-8 max-w-3xl">
-              Your back office.<br /><span className="text-[#D44A78]">On demand.</span>
-            </h1>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.2}>
-            <p className={`text-xl leading-relaxed max-w-2xl mb-14 ${dc.muted}`}>
-              The CIM that takes 40 hours? Done in 2. The valuation that takes a week? 5 minutes. The pipeline that caps at 3-5 deals? Scales to 15-20. Same quality. Your brand. Your clients never know.
-            </p>
-          </ScrollReveal>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {timeStats.map((stat, i) => (
-              <ScrollReveal key={stat.label} delay={0.25 + i * 0.08}>
-                <div className={`${dc.card} rounded-2xl p-6 flex items-center gap-5`}>
-                  <div className="w-12 h-12 rounded-xl bg-[#D44A78]/10 flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-[#D44A78] text-2xl">{stat.icon}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-xs font-medium mb-1 ${dc.muted}`}>{stat.label}</p>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-2xl font-black line-through decoration-2 opacity-40 ${dc.emphasis}`}>{stat.before}</span>
-                      <span className="material-symbols-outlined text-[#D44A78] text-lg">arrow_forward</span>
-                      <span className="text-2xl font-black text-[#D44A78]">{stat.after}</span>
+          <SectionHeader
+            label="Your 4 jobs"
+            title="Win the pitch. Kill the bad. Make the killer pitch. Find the synergy."
+            sub="The four things that determine whether you make money this year. Yulia accelerates each one."
+            dark={dark}
+          />
+          <div className="space-y-12">
+            {jobs.map((job) => (
+              <div
+                key={job.n}
+                className="grid grid-cols-12 gap-6 md:gap-8 pt-8"
+                style={{ borderTop: `1px solid ${border}` }}
+              >
+                {/* Number + delta */}
+                <div className="col-span-12 md:col-span-4">
+                  <span
+                    className="font-headline font-black tabular-nums block mb-2"
+                    style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', color: accent, lineHeight: 0.95 }}
+                  >
+                    {job.n}
+                  </span>
+                  <h3
+                    className="font-headline font-black tracking-tight mb-5"
+                    style={{
+                      fontSize: 'clamp(1.5rem, 2.4vw, 2rem)',
+                      color: headingColor,
+                      lineHeight: 1.05,
+                    }}
+                  >
+                    {job.title}
+                  </h3>
+                  <div
+                    className="rounded-xl p-4"
+                    style={{ background: innerBg, border: `1px solid ${border}` }}
+                  >
+                    <div className="flex items-baseline justify-between mb-2 opacity-50">
+                      <span className="text-[10px] uppercase tracking-wider" style={{ color: mutedColor }}>
+                        {job.preLabel}
+                      </span>
+                      <span
+                        className="font-headline font-black tabular-nums line-through"
+                        style={{ fontSize: '1.25rem', color: headingColor }}
+                      >
+                        {job.preNum}
+                      </span>
+                    </div>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-[10px] uppercase tracking-wider" style={{ color: accent }}>
+                        {job.postLabel}
+                      </span>
+                      <span
+                        className="font-headline font-black tabular-nums"
+                        style={{ fontSize: '1.5rem', color: accent }}
+                      >
+                        {job.postNum}
+                      </span>
                     </div>
                   </div>
                 </div>
-              </ScrollReveal>
+
+                {/* Body */}
+                <div className="col-span-12 md:col-span-8">
+                  <p
+                    className="text-[17px] md:text-[19px] leading-[1.65] editorial"
+                    style={{ color: bodyColor }}
+                  >
+                    {job.body}
+                  </p>
+                </div>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* ═══ 2. ROI CALCULATOR ═══ */}
+        {/* ═══ Capacity Slider ═══ */}
         <section className="mb-28">
-          <ScrollReveal>
-            <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Your ROI</span>
-            <h2 className="font-headline text-4xl font-black tracking-tight mb-4 max-w-2xl">What 3-4x deal volume looks like for your practice.</h2>
-            <p className={`text-lg leading-relaxed max-w-2xl mb-10 ${dc.muted}`}>
-              The bottleneck in your practice is analytical capacity. Remove it and your deal volume scales with your relationship capacity — which is the part you're actually good at.
-            </p>
-          </ScrollReveal>
-          <ScrollReveal delay={0.15}>
-            <AdvisorROICalc dark={dark} />
-          </ScrollReveal>
+          <SectionHeader
+            label="Interactive · capacity"
+            title="What does 22 active mandates look like?"
+            sub="Drag the slider from 6 to 22. Watch revenue, margin, partner hours, and capacity utilization update against the 4-partner Reese & Hammond model."
+            dark={dark}
+          />
+          <CapacitySlider dark={dark} />
         </section>
 
-        {/* ═══ 3. HOW IT WORKS — BEFORE / AFTER ═══ */}
-        <ScrollReveal>
-          <section className="mb-28">
-            <div className="mb-12">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">How It Works</span>
-              <h2 className="font-headline text-4xl font-black tracking-tight">80% on relationships instead of 80% on spreadsheets.</h2>
-            </div>
+        {/* ═══ Synergy Builder ═══ */}
+        <section className="mb-28">
+          <SectionHeader
+            label="Interactive · synergy"
+            title="Show the buyer what they'll capture."
+            sub="Model cost takeout, cross-sell, and working capital release for a hypothetical $20M EBITDA target. Watch the buyer's underwritten valuation lift — and your fee with it."
+            dark={dark}
+          />
+          <SynergyBuilder dark={dark} />
+        </section>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Before */}
-              <div className={`${dc.subtleBg} rounded-2xl p-8`}>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${dark ? 'bg-[#dadadc]/10' : 'bg-[#5d5e61]/10'}`}>
-                    <span className={`material-symbols-outlined ${dark ? 'text-[#dadadc]/80' : 'text-[#5d5e61]'}`}>schedule</span>
-                  </div>
-                  <h3 className="font-bold text-lg">Before Yulia</h3>
-                </div>
-                <div className={`space-y-4 text-sm ${dc.muted}`}>
-                  <div className="flex items-start gap-3"><span className="opacity-40 font-bold min-w-[48px]">20%</span><p>Relationships</p></div>
-                  <div className="flex items-start gap-3"><span className="opacity-40 font-bold min-w-[48px]">40%</span><p>Analysis</p></div>
-                  <div className="flex items-start gap-3"><span className="opacity-40 font-bold min-w-[48px]">25%</span><p>DD coordination</p></div>
-                  <div className="flex items-start gap-3"><span className="opacity-40 font-bold min-w-[48px]">15%</span><p>Admin</p></div>
-                </div>
-                <div className={`mt-6 pt-4 border-t ${dark ? 'border-zinc-800' : 'border-[#eeeef0]'}`}>
-                  <p className={`text-sm font-bold ${dc.muted}`}>3-5 active deals. 80% on analysis.</p>
-                </div>
-              </div>
+        {/* ═══ Slow vs Fast ═══ */}
+        <SlowVsFast
+          slowLabel="Pre-Yulia"
+          slowItems={[
+            { metric: 'Active mandates', value: '6-8' },
+            { metric: 'CIM cycle (partner hrs)', value: '60-80' },
+            { metric: 'Engagement conversion', value: '~35%' },
+            { metric: 'Annual revenue', value: '~$4.8M' },
+          ]}
+          fastLabel="With Yulia"
+          fastItems={[
+            { metric: 'Active mandates', value: '20-22' },
+            { metric: 'CIM cycle (partner hrs)', value: '4' },
+            { metric: 'Engagement conversion', value: '~62%' },
+            { metric: 'Annual revenue', value: '~$16.5M' },
+          ]}
+          takeaway={
+            <>
+              The relationships are still yours. The judgment is still yours. Yulia just removes the production
+              bottleneck. <strong>Same 4 partners. 3.4× the revenue.</strong>
+            </>
+          }
+          dark={dark}
+        />
 
-              {/* After */}
-              <div className={`${dark ? 'bg-[#2f3133]' : 'bg-white'} rounded-2xl border-2 border-[#D44A78] p-8`}>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-xl bg-[#D44A78]/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[#D44A78]">bolt</span>
-                  </div>
-                  <h3 className="font-bold text-lg">With Yulia</h3>
+        {/* ═══ Who uses this — horizontal carousel ═══ */}
+        <section className="mb-28">
+          <SectionHeader
+            label="Who runs this"
+            title="From boutique shops to $1B funds."
+            sub="Yulia adapts to the deal size and the team structure. Same product, different depth, different speed."
+            dark={dark}
+          />
+          <div
+            className="flex gap-5 overflow-x-auto pb-4 -mx-6 px-6 md:-mx-12 md:px-12 snap-x snap-mandatory"
+            style={{ scrollbarWidth: 'thin' }}
+          >
+            {advisorTypes.map((a) => (
+              <div
+                key={a.title}
+                className="rounded-2xl p-7 min-w-[320px] max-w-[320px] snap-start flex-shrink-0"
+                style={{
+                  background: innerBg,
+                  border: `1px solid ${border}`,
+                }}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <span
+                    className="material-symbols-outlined text-3xl"
+                    style={{ color: accent }}
+                  >
+                    {a.icon}
+                  </span>
+                  <span
+                    className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded"
+                    style={{
+                      background: dark ? 'rgba(232,112,154,0.1)' : 'rgba(212,74,120,0.1)',
+                      color: accent,
+                    }}
+                  >
+                    {a.tier}
+                  </span>
                 </div>
-                <div className="space-y-4 text-sm">
-                  <div className="flex items-start gap-3"><span className="text-[#D44A78] font-bold min-w-[48px]">60%</span><p className={`font-medium ${dc.emphasis}`}>Relationships</p></div>
-                  <div className="flex items-start gap-3"><span className="text-[#D44A78] font-bold min-w-[48px]">15%</span><p className={dc.muted}>Review</p></div>
-                  <div className="flex items-start gap-3"><span className="text-[#D44A78] font-bold min-w-[48px]">15%</span><p className={dc.muted}>DD oversight</p></div>
-                  <div className="flex items-start gap-3"><span className="text-[#D44A78] font-bold min-w-[48px]">10%</span><p className={dc.muted}>Communications</p></div>
-                </div>
-                <div className="mt-6 pt-4 border-t border-[#D44A78]/20">
-                  <p className="text-sm font-bold text-[#D44A78]">15-20 active deals. 80% on relationships.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* White-label callout */}
-            <div className={`rounded-2xl p-6 flex items-start gap-4 ${dark ? 'bg-emerald-900/20 border border-emerald-800/30' : 'bg-emerald-50 border border-emerald-200'}`}>
-              <span className={`material-symbols-outlined text-2xl shrink-0 mt-0.5 ${dark ? 'text-emerald-400' : 'text-emerald-600'}`}>visibility_off</span>
-              <div>
-                <p className={`font-bold text-sm mb-1 ${dc.emphasis}`}>White-label on Enterprise.</p>
-                <p className={`text-sm ${dc.muted}`}>Every document carries your brand. Client data is siloed. Full fiduciary compliance.</p>
-              </div>
-            </div>
-          </section>
-        </ScrollReveal>
-
-        {/* ═══ 4. WHO USES THIS ═══ */}
-        <ScrollReveal>
-          <section className="mb-28">
-            <div className="mb-12">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Who Uses This</span>
-              <h2 className="font-headline text-4xl font-black tracking-tight">Every type of deal professional.</h2>
-            </div>
-            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {advisorTypes.map((a) => (
-                <StaggerItem key={a.title}>
-                  <div className={`${dc.card} rounded-2xl p-8 hover:shadow-lg transition-all h-full`}>
-                    <span className="material-symbols-outlined text-[#D44A78] text-2xl mb-3">{a.icon}</span>
-                    <h3 className="font-bold mb-2">{a.title}</h3>
-                    <p className={`text-sm ${dc.muted}`}>{a.desc}</p>
-                  </div>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </section>
-        </ScrollReveal>
-
-        {/* ═══ 5. CTA ═══ */}
-        <ScrollReveal>
-          <section className="mb-12">
-            <div className={`${dc.darkPanel} rounded-3xl p-12 md:p-16 text-white relative overflow-hidden`}>
-              <GlowingOrb top="-20%" right="-10%" size={400} color="rgba(212,74,120,0.15)" />
-              <div className="relative z-10 max-w-2xl mx-auto text-center">
-                <h2 className="font-headline text-4xl md:text-5xl font-black tracking-tighter leading-[0.95] mb-6">
-                  Try Professional<br /><span className="text-[#D44A78]">free for 30 days.</span>
-                </h2>
-                <p className="text-lg text-[#dadadc]/70 mb-10">
-                  Run a real client engagement before you decide. Generate a CIM. Build a valuation. See how the pipeline changes.
-                </p>
-                <MagneticButton
-                  onClick={handleCTA}
-                  className="px-10 py-5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl border-none cursor-pointer"
+                <h3
+                  className="font-headline font-black text-lg tracking-tight mb-2"
+                  style={{ color: headingColor, lineHeight: 1.15 }}
                 >
-                  Start Free Trial
-                </MagneticButton>
-                <p className="text-xs text-[#dadadc]/50 mt-4">30 days. Full access. No credit card.</p>
+                  {a.title}
+                </h3>
+                <p className="text-[14px] leading-relaxed mb-4" style={{ color: bodyColor }}>
+                  {a.desc}
+                </p>
+                <p className="text-[11px] font-mono" style={{ color: mutedColor }}>
+                  {a.size}
+                </p>
               </div>
-            </div>
-          </section>
-        </ScrollReveal>
+            ))}
+          </div>
+        </section>
 
+        {/* ═══ CTA ═══ */}
+        <PageCTA
+          headline={<>Try Professional free for 90 days.</>}
+          sub="Run a real client engagement before you decide. Build a Baseline at your next pitch meeting. Generate a CIM. See what the pipeline looks like."
+          buttonLabel="Start 90-day trial"
+          onClick={goToChat}
+          dark={dark}
+        />
       </div>
     </div>
   );

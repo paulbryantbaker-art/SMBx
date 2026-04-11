@@ -1,276 +1,254 @@
-import { ScrollReveal, StaggerContainer, StaggerItem, AnimatedTimeline, TiltCard, MagneticButton, GlowingOrb } from './animations';
-import { darkClasses } from './darkHelpers';
 import { goToChat } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
+import { Day180Calendar } from './Day180Calendar';
+import {
+  HookHeader,
+  StoryBlock,
+  SlowVsFast,
+  SectionHeader,
+  PageCTA,
+} from './storyBlocks';
 
 export default function IntegrateBelow({ dark }: { dark: boolean }) {
-  const dc = darkClasses(dark);
-
   usePageMeta({
-    title: 'Post-Acquisition Integration | 180-Day Value Creation Plan — smbx.ai',
-    description: 'Structured 180-day integration framework. Day 0 protocols, milestone tracking, employee & customer retention monitoring. AI-guided post-close execution.',
+    title: 'The deal closed. Now make it pay. · Integrate with smbx.ai',
+    description:
+      'Hit your model in year 1. Refi at a higher multiple in year 2. The 180-day post-close playbook from Anna J — search fund principal, $90M acquisition, 2.7× MOIC in 18 months.',
     canonical: 'https://smbx.ai/integrate',
     faqs: [
       {
-        question: 'What is a post-acquisition integration plan and why does it matter?',
-        answer: 'A post-acquisition integration plan is a structured 180-day framework that covers Day 0 protocols, employee retention, customer retention, and operational milestones. Without one, execution is unstructured and value is destroyed in the first 90 days.',
+        question: 'What happens in the first 180 days after closing an acquisition?',
+        answer:
+          "Day 0-14 is stabilization: meet every employee, contact top customers, shadow every role, change nothing operationally. Day 15-30 is quick wins: pricing reviews, financial reporting setup, knowledge documentation. Day 30-90 is strengthening: critical hires, system upgrades, seller transition. Day 90-180 is acceleration: growth initiatives, KPI dashboards, refi prep. The plan is the difference between hitting the deal model and tripping a covenant.",
       },
       {
-        question: 'What should happen in the first 14 days after closing an acquisition?',
-        answer: 'The first 14 days focus on stabilization: meet every employee individually, contact top customers personally, shadow every role for at least 2 hours, extract tribal knowledge from the seller daily, and change nothing operationally. Your job in the Day 0 protocol is to listen and understand before making changes.',
+        question: "What's the biggest risk in year 1 of an acquisition?",
+        answer:
+          'Senior debt covenant trips. Most upper middle market acquisitions close at 1.30-1.50× DSCR with a 1.20× minimum covenant. A 14-20% EBITDA dip in year 1 — common during transition — drops you below the covenant and triggers default. The fix is continuous monitoring: customer health, employee retention, EBITDA build-back, covenant headroom. Yulia tracks all four daily.',
       },
       {
-        question: 'How does smbx.ai help with post-close integration?',
-        answer: 'Yulia builds a personalized 180-day value creation plan from your deal financials and due diligence findings. She continuously monitors employee retention, customer retention, revenue vs. deal model projections, and covenant compliance — flagging issues before they become problems.',
+        question: 'When can I refinance after an acquisition?',
+        answer:
+          'Year 2 is typical. By month 18, you should have demonstrated EBITDA growth, paid down 10-15% of senior debt, and proven the deal thesis. A refi at a higher multiple captures the multiple expansion as equity value — often doubling the sponsor equity check on a successful 18-month hold.',
       },
       {
-        question: 'What are the most common post-acquisition integration mistakes?',
-        answer: 'The biggest integration mistakes include changing too much too fast, cutting costs before understanding them, ignoring employee concerns, losing key customers during transition, fighting with the seller post-close, under-investing in the business, and failing to set up financial reporting on Day 1.',
+        question: 'How does Yulia help with post-close integration?',
+        answer:
+          'Yulia builds a personalized 180-day plan from your deal financials and DD findings. She monitors customer retention, employee retention, revenue vs deal model, EBITDA build-back, and covenant headroom — flagging issues before they become problems. Every recommendation is tied to a KPI and a deadline.',
       },
     ],
   });
 
+  const headingColor = dark ? '#f9f9fc' : '#0f1012';
+  const bodyColor = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
+  const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
+  const accent = dark ? '#E8709A' : '#D44A78';
+  const innerBg = dark ? 'rgba(255,255,255,0.04)' : 'white';
+  const border = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
+
   const mistakes = [
     {
-      num: '01',
-      title: 'Changing too much too fast',
-      desc: 'The business works. Don\u2019t break it trying to improve it in month one.',
+      n: '01',
+      title: 'Changing too much, too fast.',
+      consequence:
+        'Three of eight senior engineers walk in month one. Cost to replace each at market: $180K + 4 months of ramp. Real cost: ~$2.4M of disrupted client work and one missed contract renewal.',
     },
     {
-      num: '02',
-      title: 'Cutting costs before understanding them',
-      desc: 'That \u201Cunnecessary\u201D contractor might be the only person who knows how the HVAC system works.',
+      n: '02',
+      title: 'Cutting "unnecessary" costs before understanding them.',
+      consequence:
+        '$4,200/month contractor terminated — turns out he was the only person who knew the legacy CRM integration. Tribal knowledge cost when he walks: $180K of consulting fees and a six-week customer onboarding outage.',
     },
     {
-      num: '03',
-      title: 'Ignoring employee concerns',
-      desc: 'Your employees are scared. They\u2019re googling \u201Cwhat happens when a business gets sold.\u201D Address it personally, early.',
+      n: '03',
+      title: 'Ignoring employee fear in week one.',
+      consequence:
+        '47% of employees google "what happens when a business gets sold" in the first 14 days. The ones who get answered stay. The ones who don\'t start interviewing. Each unforced departure in year 1 costs ~1× annual salary in productivity loss.',
     },
     {
-      num: '04',
-      title: 'Losing key customers',
-      desc: 'Your competitors know there\u2019s a transition. They\u2019re calling your customers this week.',
+      n: '04',
+      title: 'Losing top customers during transition.',
+      consequence:
+        'Your competitors know there\'s a transition and they\'re calling your top 20 this week. One lost top-10 customer at $800K ARR is 7.3% of EBITDA — and tips your DSCR from 1.40× to 1.30×. Two lost = covenant trip.',
     },
     {
-      num: '05',
-      title: 'Fighting with the seller',
-      desc: 'The seller knows things you don\u2019t. Treat them well even when the earnout creates tension.',
+      n: '05',
+      title: 'Fighting with the seller post-close.',
+      consequence:
+        'The seller knows the customers, the systems, and the unwritten rules. Treat them well even when the earnout creates tension. Sellers who exit angry take key relationships with them — and the buyer eats the customer churn.',
     },
     {
-      num: '06',
-      title: 'Under-investing in the business',
-      desc: 'The worst buyers squeeze margins immediately. The best invest in growth and reap returns in Years 2\u20135.',
+      n: '06',
+      title: 'Squeezing margins instead of investing in growth.',
+      consequence:
+        'Year-1 cost cuts juice EBITDA by 8-12%. Year-3 you\'re looking at a flat business with no upgrade path and no buyer interest. Best operators reinvest 15-20% of free cash flow into growth in years 1-2.',
     },
-  ];
-
-  const monitorItems = [
-    { icon: 'trending_up', title: 'Revenue vs. deal model', desc: 'Are you hitting the projections that justified the price?' },
-    { icon: 'group', title: 'Customer retention', desc: 'Have you lost any of the top 20 customers since close?' },
-    { icon: 'badge', title: 'Employee retention', desc: 'Are key employees staying through transition?' },
-    { icon: 'account_balance_wallet', title: 'Cash flow vs. debt service', desc: 'Is the business generating enough to service acquisition debt?' },
-    { icon: 'checklist', title: 'Integration milestones', desc: 'Are Day 30/60/90 objectives on track?' },
-    { icon: 'handshake', title: 'Seller transition', desc: 'Is knowledge transfer happening on schedule?' },
+    {
+      n: '07',
+      title: 'No financial reporting on Day 1.',
+      consequence:
+        'You can\'t hit a model you can\'t see. Monthly P&L, weekly cash flow, daily revenue — set up before you change a single thing. Every week without reporting is a week of decisions made on instinct against a debt service clock.',
+    },
   ];
 
   return (
-    <div className={dark ? 'bg-transparent text-[#f9f9fc]' : 'bg-transparent text-[#1a1c1e]'}>
+    <div className="bg-transparent" style={{ color: headingColor }}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
-        {/* ═══ 1. HERO + 7 MISTAKES ═══ */}
-        <section className="mb-24">
-          <ScrollReveal>
-            <div className="flex items-center gap-2 mb-8">
-              <span className="inline-block px-3 py-1 bg-[#D44A78]/10 text-[#D44A78] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Integrate</span>
-              <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-[#2f3133] text-[#dadadc]/80' : 'bg-[#f3f3f6] text-[#5d5e61]'}`}>Post-Acquisition</span>
-            </div>
-          </ScrollReveal>
+        {/* ═══ Hook ═══ */}
+        <HookHeader
+          eyebrow="integrate"
+          headline={
+            <>
+              The deal closed. <br />
+              Now make it <em className="not-italic" style={{ color: accent }}>pay</em>.
+            </>
+          }
+          sub={
+            <>
+              Anna closed a $90M acquisition at $11M EBITDA. Year 1: <strong style={{ color: headingColor }}>$13.4M EBITDA</strong>.
+              Year-2 refi: sponsor equity went from $20M to <strong style={{ color: accent }}>$54M</strong>. <strong>2.7× MOIC in 18 months.</strong>
+            </>
+          }
+          dark={dark}
+        />
 
-          <ScrollReveal y={40} delay={0.1}>
-            <div className="mb-8">
-              <h1 className="font-headline font-black text-5xl md:text-7xl tracking-tighter leading-[0.9] mb-8 max-w-4xl">
-                The 7 mistakes that destroy post-acquisition value.
-              </h1>
-              <p className={`text-xl editorial max-w-2xl ${dc.muted}`}>
-                The deal closed. The wire hit. Now what? Most buyers wing it. They change too much too fast, cut costs before understanding them, and lose their best employees in month one. Here's the playbook that prevents all of it.
+        {/* ═══ Anna's Story ═══ */}
+        <StoryBlock
+          byline="Anna J.*"
+          role="Search fund principal — first acquisition"
+          dealLine="$90M EV · $11M EBITDA · IT services · Atlanta · 240 employees"
+          body={
+            <>
+              <p>
+                Anna had spent two years searching. When the wire hit, she took operational control of a 240-person
+                IT services firm with $48M of revenue and a debt covenant that left her 14% of EBITDA headroom
+                before things got bad.
               </p>
-            </div>
-          </ScrollReveal>
+              <p className="mt-4">
+                The cap stack: <strong style={{ color: headingColor }}>$50M senior</strong> at SOFR+475,{' '}
+                <strong style={{ color: headingColor }}>$20M mezz</strong> at 12% + 3% PIK,{' '}
+                <strong style={{ color: headingColor }}>$20M sponsor equity</strong>. Senior covenant: minimum DSCR 1.20×.
+                Closing DSCR: <strong style={{ color: headingColor }}>1.40×</strong>. A 14% EBITDA dip would trip her into default.
+              </p>
+              <p className="mt-4">
+                Sixty percent of search fund principals miss year-1 plan in the first 90 days. The math is unforgiving.
+              </p>
+              <p className="mt-4">
+                Day 0, Anna opened a Yulia conversation and didn't close it. Yulia built the 180-day plan from her DD
+                report and her cap stack model. Customer health scoring deployed Day 14. Pricing memo shipped Day 45
+                (6.5% lift on contract renewals). Three unprofitable accounts terminated Day 60 (revenue −$1.1M, gross
+                margin <strong style={{ color: accent }}>+$340K</strong>). New head of customer success hired Day 120.
+              </p>
+              <p className="mt-4">
+                By Day 90, EBITDA was annualized at $11.7M (+6%). By Day 180, it was tracking <strong style={{ color: accent }}>$13.4M</strong> —
+                a 22% lift in 6 months without adding headcount or changing the product. The senior bank moved DSCR
+                cushion from 1.40× to 1.55×.
+              </p>
+              <p className="mt-4">
+                Year-2 refi at <strong style={{ color: accent }}>9× × $13.4M = $120.6M</strong>. After the senior paydown
+                and the value creation, Anna's $20M sponsor equity was worth ~$54M. <strong style={{ color: accent }}>2.7× MOIC in 18 months.</strong>
+              </p>
+              <p className="mt-4 text-base italic" style={{ color: mutedColor }}>
+                The deal model was real. Yulia made it real.
+              </p>
+            </>
+          }
+          kpis={[
+            { label: 'Closing EBITDA · DSCR', value: '$11M · 1.40×', sub: '14% covenant headroom' },
+            { label: 'Day-180 EBITDA', value: '$13.4M', sub: '+22% in 6 months' },
+            { label: '18-month sponsor MOIC', value: '2.7×', sub: '$20M → $54M equity value' },
+          ]}
+          dark={dark}
+        />
 
-          {/* 7 Mistakes — dark panel */}
-          <ScrollReveal delay={0.2}>
-            <div className={`rounded-3xl p-10 md:p-16 text-white ${dc.darkPanel}`}>
-              <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                {mistakes.map((mistake) => (
-                  <StaggerItem key={mistake.num}>
-                    <div className="border-t border-white/15 pt-6 h-full">
-                      <span className="text-[#D44A78] font-black text-2xl mb-3 block">{mistake.num}</span>
-                      <h4 className="font-bold mb-2">{mistake.title}</h4>
-                      <p className="text-sm text-[#dadadc]/70">{mistake.desc}</p>
-                    </div>
-                  </StaggerItem>
-                ))}
-              </StaggerContainer>
-
-              {/* Mistake #7 — full-width accent card */}
-              <TiltCard>
-                <div className="bg-[#D44A78] rounded-2xl p-8 text-white">
-                  <span className="font-black text-2xl mb-3 block">07</span>
-                  <h4 className="font-bold text-lg mb-2">No financial reporting on Day 1</h4>
-                  <p className="text-sm text-white/80">
-                    If you can't measure it, you can't manage it. Monthly P&L, weekly cash flow, daily revenue — set up before you change a single thing.
-                  </p>
-                </div>
-              </TiltCard>
-            </div>
-          </ScrollReveal>
+        {/* ═══ Day 180 Calendar — hero interactive ═══ */}
+        <section className="mb-28">
+          <SectionHeader
+            label="The 180-day plan"
+            title="Day by day. Drag the marker."
+            sub="Ten milestones across Anna's first 180 days. For each: what she did, what Yulia recommended, and the KPI that moved."
+            dark={dark}
+          />
+          <Day180Calendar dark={dark} />
         </section>
 
-        {/* ═══ 2. 180-DAY FRAMEWORK — AnimatedTimeline ═══ */}
-        <section className="mb-24">
-          <ScrollReveal>
-            <div className="mb-12">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">The Framework</span>
-              <h2 className="text-4xl font-headline font-black tracking-tight mb-4">Four phases. 180 days. Every milestone tracked.</h2>
-            </div>
-          </ScrollReveal>
-          <AnimatedTimeline>
-            {/* Phase 1: Stabilize */}
-            <div className="pl-10 pb-8 relative">
-              <div className="absolute left-0 top-0 w-[10px] h-[10px] rounded-full bg-[#D44A78]" />
-              <ScrollReveal>
-                <div className={`rounded-2xl p-8 hover:shadow-lg transition-all ${dc.card}`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[#D44A78] font-bold text-xs uppercase tracking-widest">Phase 01</span>
-                    <span className="text-[10px] bg-[#D44A78]/10 text-[#D44A78] px-2 py-1 rounded font-bold">Day 0-14</span>
-                  </div>
-                  <h3 className="text-2xl font-headline font-black mb-3">Stabilize</h3>
-                  <p className={`text-sm leading-relaxed mb-5 ${dc.muted}`}>
-                    Meet every employee individually. Call your top 10 customers. Shadow every role. Extract everything the seller knows. Change nothing.
+        {/* ═══ The 7 mistakes — editorial numbered list ═══ */}
+        <section className="mb-28">
+          <SectionHeader
+            label="What kills year 1"
+            title="The 7 mistakes that destroy post-close value."
+            sub="Each one has a dollar consequence. The full set is what tips a 1.40× DSCR into a 1.15× covenant trip."
+            dark={dark}
+          />
+          <div className="space-y-6">
+            {mistakes.map((m) => (
+              <div
+                key={m.n}
+                className="grid grid-cols-12 gap-4 md:gap-8 py-6"
+                style={{ borderTop: `1px solid ${border}` }}
+              >
+                <div className="col-span-2 md:col-span-1">
+                  <span
+                    className="font-headline font-black tabular-nums"
+                    style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', color: accent, lineHeight: 1 }}
+                  >
+                    {m.n}
+                  </span>
+                </div>
+                <div className="col-span-10 md:col-span-11">
+                  <h3
+                    className="font-headline font-black mb-2 tracking-tight"
+                    style={{
+                      fontSize: 'clamp(1.25rem, 2vw, 1.75rem)',
+                      color: headingColor,
+                      lineHeight: 1.15,
+                    }}
+                  >
+                    {m.title}
+                  </h3>
+                  <p className="text-[15px] md:text-[16px] leading-relaxed" style={{ color: bodyColor }}>
+                    {m.consequence}
                   </p>
-                  <div className={`h-1.5 rounded-full overflow-hidden ${dark ? 'bg-zinc-700' : 'bg-[#f3f3f6]'}`}>
-                    <div className="h-full bg-[#D44A78] rounded-full transition-all duration-700" style={{ width: '25%' }} />
-                  </div>
-                  <p className={`text-xs mt-2 ${dc.muted}`}>25% complete</p>
                 </div>
-              </ScrollReveal>
-            </div>
-
-            {/* Phase 2: Quick Wins */}
-            <div className="pl-10 pb-8 relative">
-              <div className="absolute left-0 top-0 w-[10px] h-[10px] rounded-full bg-[#D44A78]" />
-              <ScrollReveal delay={0.1}>
-                <div className={`rounded-2xl p-8 hover:shadow-lg transition-all ${dc.card}`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[#D44A78] font-bold text-xs uppercase tracking-widest">Phase 02</span>
-                    <span className="text-[10px] bg-[#D44A78]/10 text-[#D44A78] px-2 py-1 rounded font-bold">Day 15-30</span>
-                  </div>
-                  <h3 className="text-2xl font-headline font-black mb-3">Quick Wins</h3>
-                  <p className={`text-sm leading-relaxed mb-5 ${dc.muted}`}>
-                    Raise prices where the market supports it. Set up financial reporting. Document the processes that only exist in the seller's head.
-                  </p>
-                  <div className={`h-1.5 rounded-full overflow-hidden ${dark ? 'bg-zinc-700' : 'bg-[#f3f3f6]'}`}>
-                    <div className="h-full bg-[#D44A78] rounded-full transition-all duration-700" style={{ width: '50%' }} />
-                  </div>
-                  <p className={`text-xs mt-2 ${dc.muted}`}>50% complete</p>
-                </div>
-              </ScrollReveal>
-            </div>
-
-            {/* Phase 3: Strengthen */}
-            <div className="pl-10 pb-8 relative">
-              <div className="absolute left-0 top-0 w-[10px] h-[10px] rounded-full bg-[#D44A78]" />
-              <ScrollReveal delay={0.2}>
-                <div className={`rounded-2xl p-8 hover:shadow-lg transition-all ${dc.card}`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[#D44A78] font-bold text-xs uppercase tracking-widest">Phase 03</span>
-                    <span className="text-[10px] bg-[#D44A78]/10 text-[#D44A78] px-2 py-1 rounded font-bold">Day 30-90</span>
-                  </div>
-                  <h3 className="text-2xl font-headline font-black mb-3">Strengthen</h3>
-                  <p className={`text-sm leading-relaxed mb-5 ${dc.muted}`}>
-                    Hire for critical gaps. Implement the technology the business should have had. Complete seller transition.
-                  </p>
-                  <div className={`h-1.5 rounded-full overflow-hidden ${dark ? 'bg-zinc-700' : 'bg-[#f3f3f6]'}`}>
-                    <div className="h-full bg-[#D44A78] rounded-full transition-all duration-700" style={{ width: '75%' }} />
-                  </div>
-                  <p className={`text-xs mt-2 ${dc.muted}`}>75% complete</p>
-                </div>
-              </ScrollReveal>
-            </div>
-
-            {/* Phase 4: Accelerate */}
-            <div className="pl-10 pb-8 relative">
-              <div className="absolute left-0 top-0 w-[10px] h-[10px] rounded-full bg-[#D44A78]" />
-              <ScrollReveal delay={0.3}>
-                <div className={`rounded-2xl p-8 hover:shadow-lg transition-all ${dc.card}`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[#D44A78] font-bold text-xs uppercase tracking-widest">Phase 04</span>
-                    <span className="text-[10px] bg-[#D44A78]/10 text-[#D44A78] px-2 py-1 rounded font-bold">Day 90-180</span>
-                  </div>
-                  <h3 className="text-2xl font-headline font-black mb-3">Accelerate</h3>
-                  <p className={`text-sm leading-relaxed mb-5 ${dc.muted}`}>
-                    Launch growth initiatives. Establish KPI dashboard. Evaluate add-on acquisitions.
-                  </p>
-                  <div className={`h-1.5 rounded-full overflow-hidden ${dark ? 'bg-zinc-700' : 'bg-[#f3f3f6]'}`}>
-                    <div className="h-full bg-[#D44A78] rounded-full transition-all duration-700" style={{ width: '100%' }} />
-                  </div>
-                  <p className={`text-xs mt-2 ${dc.muted}`}>100% complete</p>
-                </div>
-              </ScrollReveal>
-            </div>
-          </AnimatedTimeline>
-        </section>
-
-        {/* ═══ 3. WHAT YULIA MONITORS — 2x3 card grid ═══ */}
-        <section className="mb-24">
-          <ScrollReveal>
-            <div className="mb-12">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Live Monitoring</span>
-              <h2 className="text-4xl font-headline font-black tracking-tight mb-4">What Yulia watches so you don't have to.</h2>
-            </div>
-          </ScrollReveal>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {monitorItems.map((item, i) => (
-              <ScrollReveal key={item.title} delay={i * 0.08}>
-                <div className={`rounded-2xl p-8 h-full hover:shadow-lg transition-all ${dc.card}`}>
-                  <span className="material-symbols-outlined text-[#D44A78] text-2xl mb-4 block">{item.icon}</span>
-                  <h4 className="font-bold text-base mb-2">{item.title}</h4>
-                  <p className={`text-sm leading-relaxed ${dc.muted}`}>{item.desc}</p>
-                </div>
-              </ScrollReveal>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* ═══ 4. CTA ═══ */}
-        <ScrollReveal>
-          <section className="mb-12">
-            <div className={`rounded-3xl p-12 md:p-16 text-white relative overflow-hidden ${dc.darkPanel}`}>
-              <GlowingOrb top="-80px" right="-60px" />
-              <GlowingOrb bottom="-100px" right="30%" delay={2} size={240} />
-              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-                <div>
-                  <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Get Started</span>
-                  <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95] mb-6">
-                    Just closed? Tell Yulia about the deal.
-                  </h2>
-                  <p className="text-lg text-[#dadadc]/70">
-                    She'll build your 180-day plan from what due diligence actually revealed. Not a template — your plan.
-                  </p>
-                </div>
-                <div className="flex flex-col items-center lg:items-end gap-4">
-                  <MagneticButton
-                    onClick={goToChat}
-                    className="px-10 py-5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl w-full lg:w-auto text-center border-none cursor-pointer"
-                  >
-                    Build Your Integration Plan
-                  </MagneticButton>
-                  <p className="text-xs text-[#dadadc]/70">Free analysis -- No account required -- Your data stays yours</p>
-                </div>
-              </div>
-            </div>
-          </section>
-        </ScrollReveal>
+        {/* ═══ Slow vs Fast ═══ */}
+        <SlowVsFast
+          slowLabel="Winging it"
+          slowItems={[
+            { metric: 'Buyers who miss year-1 plan', value: '~60%' },
+            { metric: 'Avg EBITDA dip in year 1', value: '−14%' },
+            { metric: 'Time to first financial close', value: '60-90 days' },
+            { metric: 'Customer health visibility', value: 'monthly at best' },
+          ]}
+          fastLabel="With Yulia"
+          fastItems={[
+            { metric: 'Anna year-1 plan adherence', value: '+22%' },
+            { metric: 'Year-1 EBITDA growth', value: '+22%' },
+            { metric: 'Time to first financial close', value: '30 days' },
+            { metric: 'Customer health visibility', value: 'continuous' },
+          ]}
+          takeaway={
+            <>
+              The plan isn't a binder. It's a daily conversation with someone who's watching the numbers
+              while you're running the business. <strong>Year 1 is when the deal model becomes real — or doesn't.</strong>
+            </>
+          }
+          dark={dark}
+        />
 
+        {/* ═══ CTA ═══ */}
+        <PageCTA
+          headline={<>Build your 180-day plan.</>}
+          sub="Bring Yulia your deal financials and your DD report. She'll build the day-by-day plan, monitor the KPIs, and force decisions before the cliff."
+          buttonLabel="Build my plan"
+          onClick={goToChat}
+          dark={dark}
+        />
       </div>
     </div>
   );

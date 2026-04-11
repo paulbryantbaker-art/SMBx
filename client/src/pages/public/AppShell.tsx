@@ -1564,16 +1564,12 @@ export default function AppShell() {
                           <LogoHero height={52} dark={dark} />
                         </div>
                       )}
-                      <h1 className={`font-headline font-extrabold tracking-tighter ${isMobile ? 'text-[42px] leading-[1.02] mb-12' : 'text-[50px] leading-[1.05]'}`}>
-                        <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>Selling</span> your business,<br/>
-                        <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>buying</span> one, or{' '}
-                        <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>raising</span> capital?
+                      <h1 className={`font-headline font-black tracking-[-0.04em] ${isMobile ? 'text-[44px] leading-[0.95] mb-8' : 'text-[64px] leading-[0.95] mb-4'}`}>
+                        AI that makes <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>M&amp;A</span><br/>
+                        faster and easier.
                       </h1>
                       <p className={`mx-auto font-medium ${isMobile ? 'text-[17px] leading-[1.5] max-w-sm' : 'text-xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                        Yulia handles the numbers, the documents, and the strategy<br className="hidden md:inline" /> — all by just talking to her.
-                      </p>
-                      <p className={`mx-auto font-medium ${isMobile ? 'text-[14px] max-w-xs' : 'text-base'} ${dark ? 'text-zinc-500' : 'text-[#636467]/70'}`}>
-                        The analytical rigor of a $500K bank engagement. Through a conversation.
+                        Sell, buy, raise, or integrate — by talking to Yulia.
                       </p>
 
                       {/* Desktop: input + micro-copy */}

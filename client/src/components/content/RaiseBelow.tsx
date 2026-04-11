@@ -1,185 +1,301 @@
-import {
-  ScrollReveal, StaggerContainer, StaggerItem,
-  AnimatedTimeline, MagneticButton, GlowingOrb, StatBar,
-} from './animations';
-import { darkClasses } from './darkHelpers';
-import { bridgeToYulia, goToChat } from './chatBridge';
-import { LandingCapTableCalc } from './LandingCalculators';
+import { useState } from 'react';
+import { goToChat } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
+import { ConversationTyping } from './animations';
+import { StackBuilder, AudiencePicker, type Audience } from './StackBuilder';
+import {
+  HookHeader,
+  StoryBlock,
+  SlowVsFast,
+  SectionHeader,
+  PageCTA,
+} from './storyBlocks';
 
 export default function RaiseBelow({ dark }: { dark: boolean }) {
-  const dc = darkClasses(dark);
+  const [audience, setAudience] = useState<Audience>('sponsor');
 
   usePageMeta({
-    title: 'Raise Capital | Dilution Modeling & Capital Structure — smbx.ai',
-    description: 'You raise $2M at a $10M pre-money. You own 83%. After liquidation preferences, you get 50% at a $5M exit — not 83%. Model every structure before you sign.',
+    title: 'Get the capital. Keep the company. · Raise with smbx.ai',
+    description:
+      'Model every stack: senior, unitranche, mezz, equity, seller rollover. Live cost of capital, DSCR, and founder retention. For owner-operators raising growth capital and sponsors raising for an acquisition.',
     canonical: 'https://smbx.ai/raise',
     faqs: [
       {
-        question: 'What does 83% ownership actually mean after liquidation preferences?',
-        answer: 'Ownership percentage and proceeds percentage are not the same thing. If you raise $2M at a $10M pre-money valuation with 1x participating preferred, the investor gets their $2M back first (liquidation preference) then shares pro rata in what remains. At a $5M exit your 83% ownership translates to 50% of proceeds. At $20M you get 75%. The preferences compress your returns at every exit below the post-money valuation.',
+        question: 'Should I raise debt, equity, or a blend for my growth capital?',
+        answer:
+          'It depends on your DSCR headroom and your exit horizon. If you can service the debt comfortably (DSCR > 1.4×) and you expect a 5-year exit, debt almost always preserves more upside than equity. If you need flexibility, longer runway, or strategic LP value, equity has a place. Yulia models all the structures side by side against your verified financials.',
       },
       {
-        question: 'How does the dilution and cap table calculator work?',
-        answer: 'The cap table calculator lets you input pre-money valuation, investment amount, and liquidation preferences to model what founders actually receive at different exit values. It accounts for participating preferred equity and liquidation waterfalls so you see the real math behind your ownership percentage before signing a term sheet.',
+        question: 'What is a typical capital stack for an upper middle market acquisition?',
+        answer:
+          'For a $150-300M EV deal at $15-25M EBITDA in 2024-2025: 40-50% senior debt at SOFR+400-500, 15-25% unitranche or 2nd lien, 10-15% mezzanine, 15-25% sponsor equity, 5-10% seller rollover. Total leverage typically 5.5-6.5× EBITDA. Yulia builds the stack against current market rates and live debt-fund quotes.',
       },
       {
-        question: 'What capital structures can I model for raising capital?',
-        answer: 'smbx.ai models six capital structures: equity financing (dilutive but fast), debt financing (SBA is cheapest, personal guarantee required), mezzanine (subordinated debt with equity kickers), revenue-based financing (no dilution, higher total cost), ESOP (tax-advantaged employee transfer with Section 1042 benefits), and ROBS (retirement funds as equity, no penalties). Each is modeled with dilution impact and founder retention.',
+        question: 'How does an independent sponsor raise the equity for a deal?',
+        answer:
+          'Independent sponsors raise deal-by-deal: identify the target, source the senior debt, negotiate the unitranche/mezz, then pitch LPs on the equity tranche with the full cap stack already modeled. Yulia compresses the cap stack build from weeks to one afternoon and generates the LP pitch deck from the same numbers.',
+      },
+      {
+        question: 'How much can I borrow on my business?',
+        answer:
+          'Senior leverage in 2024-2025 is typically 3.5-4.5× EBITDA for asset-light services and 4.5-5.5× for asset-heavy distribution and manufacturing. Adding unitranche or 2nd lien can push total leverage to 5.5-6.5× if DSCR clears 1.20× minimum. Personal guarantees apply on SBA 7(a) but not on conventional bank or fund debt at this size.',
       },
     ],
   });
 
-  const structures = [
-    { icon: 'pie_chart', name: 'Equity', line: 'Dilutive but fast. Best when you have a clear exit horizon and investors who add strategic value.' },
-    { icon: 'account_balance', name: 'Debt', line: 'No dilution. SBA is the cheapest path. Personal guarantee required.' },
-    { icon: 'layers', name: 'Mezzanine', line: 'Subordinated debt with equity kickers. PE roll-up territory.' },
-    { icon: 'sync_alt', name: 'Revenue-Based', line: 'Repay as you earn. No dilution, no personal guarantee, higher total cost.' },
-    { icon: 'diversity_3', name: 'ESOP', line: 'Tax-advantaged transfer to employees. Powerful §1042 benefits. Complex setup.' },
-    { icon: 'savings', name: 'ROBS', line: 'Retirement funds as equity. No penalties. Your retirement is now your business — for better or worse.' },
-  ];
+  const headingColor = dark ? '#f9f9fc' : '#0f1012';
+  const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
+  const accent = dark ? '#E8709A' : '#D44A78';
 
   return (
-    <div className={dark ? 'bg-transparent text-[#f9f9fc]' : 'bg-transparent text-[#1a1c1e]'}>
+    <div className="bg-transparent" style={{ color: headingColor }}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
-        {/* ═══ 1. HERO ═══ */}
-        <section className="mb-24">
-          <ScrollReveal>
-            <div className="flex items-center gap-2 mb-8">
-              <span className="inline-block px-3 py-1 bg-[#D44A78]/10 text-[#D44A78] text-[10px] font-black uppercase tracking-[0.2em] rounded-sm">Raise</span>
-              <span className={`inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm ${dark ? 'bg-[#2f3133] text-[#dadadc]/80' : 'bg-[#f3f3f6] text-[#5d5e61]'}`}>Capital</span>
-            </div>
-          </ScrollReveal>
+        {/* ═══ Hook ═══ */}
+        <HookHeader
+          eyebrow="raise"
+          headline={
+            <>
+              Get the capital. <br />
+              <em className="not-italic" style={{ color: accent }}>Keep</em> the company.
+            </>
+          }
+          sub={
+            <>
+              $1B in dry powder is chasing your deal. Take the slice that doesn't cost you the upside. Yulia models every
+              stack — senior, unitranche, mezz, equity, seller rollover — against your real EBITDA and live market rates.
+            </>
+          }
+          dark={dark}
+        />
 
-          <ScrollReveal y={40} delay={0.1}>
-            <h1 className="font-headline font-black text-5xl md:text-7xl tracking-tighter leading-[0.9] mb-8 max-w-4xl">
-              83% ownership doesn't mean{' '}
-              <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>83% of the money.</span>
-            </h1>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.2}>
-            <p className={`text-xl leading-relaxed max-w-2xl mb-10 ${dc.muted}`}>
-              You raise $2M at a $10M pre-money. You own 83%. After 1x liquidation preferences, a $5M exit pays you 50% — not 83%. The preferences eat your upside at every exit below $50M, and most founders don't model this until after the term sheet is signed.
-            </p>
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.3}>
-            <StatBar
-              stats={[
-                { label: 'Average dilution founders underestimate', value: 22, suffix: '%' },
-                { label: 'Founders who model their waterfall pre-term sheet', value: 14, suffix: '%' },
-                { label: 'Capital structures most never consider', value: 4 },
-              ]}
-              className="max-w-3xl"
-            />
-          </ScrollReveal>
-
-          <ScrollReveal delay={0.35}>
-            <p className={`font-bold text-2xl border-l-4 border-[#D44A78] pl-6 italic mt-12 max-w-xl ${dc.emphasis}`}>
-              The term sheet you sign today determines what you keep in five years. Model it first.
-            </p>
-          </ScrollReveal>
+        {/* ═══ Audience Picker ═══ */}
+        <section className="mb-20">
+          <p className="text-[10px] font-bold uppercase tracking-[0.24em] mb-4" style={{ color: accent }}>
+            Pick your path
+          </p>
+          <AudiencePicker value={audience} onChange={setAudience} dark={dark} />
         </section>
 
-        {/* ═══ 2. CAP TABLE CALCULATOR ═══ */}
-        <section className="mb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-            <ScrollReveal className="lg:col-span-5">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Dilution Calculator</span>
-              <h2 className="text-4xl font-headline font-black tracking-tight mb-6">Run your actual numbers. See what you keep.</h2>
-              <p className={`leading-relaxed editorial ${dc.muted}`}>
-                Most founders don't model their liquidation waterfall until after the term sheet is signed. By then it's too late to negotiate. Plug in your pre-money, raise amount, and preference structure — see what you actually take home at every exit value.
-              </p>
-            </ScrollReveal>
-            <ScrollReveal delay={0.15} className="lg:col-span-7">
-              <LandingCapTableCalc dark={dark} />
-            </ScrollReveal>
-          </div>
+        {/* ═══ Story (audience-conditional) ═══ */}
+        {audience === 'owner' ? (
+          <StoryBlock
+            byline="James L.*"
+            role="Owner — third-party logistics (3PL)"
+            dealLine="$92M revenue · $15M EBITDA · Pacific Northwest · 11 yrs"
+            body={
+              <>
+                <p>
+                  James needed <strong style={{ color: headingColor }}>$40M of growth capital</strong> for a fleet expansion
+                  and a regional acquisition. He had three offers on the table and one nagging question: which one would
+                  let him keep the most of his company?
+                </p>
+                <p className="mt-4">
+                  <strong style={{ color: headingColor }}>Offer A — PE growth equity.</strong> $40M for 33% post-money at an
+                  $80M pre-money valuation. 1× participating preferred. Standard 5-year exit horizon.
+                </p>
+                <p className="mt-4">
+                  <strong style={{ color: headingColor }}>Offer B — Senior + mezz blend.</strong> $25M senior at SOFR+450,
+                  $15M mezz at 12% + 2% PIK. No dilution. Personal guarantee on the senior tranche.
+                </p>
+                <p className="mt-4">
+                  <strong style={{ color: headingColor }}>Offer C — SBA 7(a) + seller note on the acquisition target.</strong>{' '}
+                  Smaller raise, slower deployment. Cheapest cost of capital but slowest velocity.
+                </p>
+                <p className="mt-4">
+                  Yulia modeled all three against a 5-year exit at <strong style={{ color: headingColor }}>$250M</strong>{' '}
+                  (a conservative 12.5× on a projected $20M EBITDA after the expansion):
+                </p>
+                <p className="mt-4">
+                  <strong style={{ color: accent }}>PE path:</strong> 66.7% ownership × $210M residual after the $40M
+                  liquidation preference = <strong style={{ color: accent }}>$140M to James.</strong>
+                </p>
+                <p className="mt-4">
+                  <strong style={{ color: accent }}>Debt-mezz path:</strong> $250M exit minus ~$60M total debt service
+                  payoff (principal + cumulative interest) = <strong style={{ color: accent }}>$190M to James.</strong>
+                </p>
+                <p className="mt-4">
+                  Delta: <strong style={{ color: accent }}>$50M.</strong> James took the debt-mezz blend. He still owns 100%
+                  of the company. He'll likely refinance into a cheaper facility in year 2 once EBITDA settles.
+                </p>
+                <p className="mt-4 text-base italic" style={{ color: mutedColor }}>
+                  Both paths fund the deal. Only one keeps the company.
+                </p>
+              </>
+            }
+            kpis={[
+              { label: 'PE path · 5-yr exit', value: '$140M', sub: '66.7% × $210M residual' },
+              { label: 'Debt-mezz path', value: '$190M', sub: 'after ~$60M debt payoff' },
+              { label: 'Capital preserved', value: '+$50M', sub: 'and James still owns 100%' },
+            ]}
+            dark={dark}
+          />
+        ) : (
+          <StoryBlock
+            byline="Ed K.*"
+            role="Independent sponsor — fundless"
+            dealLine="$180M acquisition · $20M EBITDA · specialty chemicals distribution"
+            body={
+              <>
+                <p>
+                  Ed had <strong style={{ color: headingColor }}>$25M of committed LP capital</strong>, a target under LOI,
+                  and the part of the deal every fundless sponsor dreads: the cap stack.
+                </p>
+                <p className="mt-4">
+                  $180M enterprise value. $20M EBITDA. Specialty chemicals distribution — asset-heavy, recurring contracts,
+                  the kind of business banks and credit funds love.
+                </p>
+                <p className="mt-4">
+                  Yulia built the full stack in <strong style={{ color: accent }}>one afternoon</strong>:
+                </p>
+                <p className="mt-4">
+                  <strong style={{ color: headingColor }}>$80M senior</strong> at SOFR+450 (4× senior leverage on EBITDA — bank-acceptable for distribution).{' '}
+                  <strong style={{ color: headingColor }}>$40M unitranche</strong> at 10% (pushes total to 6× — aggressive but doable in current market).{' '}
+                  <strong style={{ color: headingColor }}>$25M mezz</strong> at 13% cash + 3% PIK + 5% warrants.{' '}
+                  <strong style={{ color: headingColor }}>$25M sponsor equity</strong> (his $25M LP commitment, fully deployed).{' '}
+                  <strong style={{ color: headingColor }}>$10M seller rollover</strong> (ongoing 5.5% stake — keeps the founder
+                  motivated through transition).
+                </p>
+                <p className="mt-4">
+                  Year-1 cash debt service: $14.85M. EBITDA: $20M. Year-1 DSCR:{' '}
+                  <strong style={{ color: accent }}>1.35×</strong> — clears the senior covenant minimum of 1.20× with cushion.
+                </p>
+                <p className="mt-4">
+                  Yulia modeled three alternative stacks (more equity / less mezz, all-senior at lower leverage, ESOP-light
+                  for tax purposes). She also surfaced two mezz funds from Ed's existing LP base who'd already committed to
+                  similar deals. Closed in <strong style={{ color: accent }}>4.5 months</strong> — vs. the 9-11 months that
+                  most independent sponsors quote for first deals at this size.
+                </p>
+                <p className="mt-4 text-base italic" style={{ color: mutedColor }}>
+                  Cap stack is the part where deals die. Yulia builds it in an afternoon.
+                </p>
+              </>
+            }
+            kpis={[
+              { label: 'Total cap stack built', value: '$180M', sub: '5 layers, modeled in 1 afternoon' },
+              { label: 'Year-1 DSCR', value: '1.35×', sub: 'comfortable above 1.20× minimum' },
+              { label: 'Time to close', value: '4.5 mo', sub: 'vs. 9-11 mo industry average' },
+            ]}
+            dark={dark}
+          />
+        )}
+
+        {/* ═══ Stack Builder ═══ */}
+        <section className="mb-28">
+          <SectionHeader
+            label="Step 1 · The Stack"
+            title="Drag the layers. Watch the math."
+            sub={
+              audience === 'owner'
+                ? 'Five layers of capital. Move any slider, the others rebalance. The read-out shows your blended cost of capital, year-1 DSCR, and how much of the company you keep.'
+                : 'Five layers of capital. Move any slider, the others rebalance. The read-out shows your blended cost of capital, year-1 DSCR, and your sponsor equity check.'
+            }
+            dark={dark}
+          />
+          <StackBuilder dark={dark} audience={audience} ev={180} ebitda={20} />
         </section>
 
-        {/* ═══ 3. CAPITAL STRUCTURES — 2x3 grid ═══ */}
-        <section className="mb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-            <ScrollReveal className="lg:col-span-5">
-              <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Capital Structures</span>
-              <h2 className="text-4xl font-headline font-black tracking-tight mb-6">Six ways to fund your deal. Here's which one fits.</h2>
-              <p className={`leading-relaxed editorial ${dc.muted}`}>
-                Equity isn't the only option. Depending on your deal size, cash flow, and exit timeline, debt, mezzanine, or revenue-based financing might preserve more ownership. Yulia models all six and shows you the math.
-              </p>
-            </ScrollReveal>
-            <div className="lg:col-span-7">
-              <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {structures.map((s) => (
-                  <StaggerItem key={s.name}>
-                    <div className={`rounded-2xl p-5 h-full ${dc.card}`}>
-                      <span className="material-symbols-rounded text-[#D44A78] text-2xl mb-3 block">{s.icon}</span>
-                      <h3 className={`font-bold text-base mb-2 ${dc.emphasis}`}>{s.name}</h3>
-                      <p className={`text-sm leading-relaxed ${dc.muted}`}>{s.line}</p>
+        {/* ═══ Slow vs Fast ═══ */}
+        <SlowVsFast
+          slowLabel="Conventional raise"
+          slowItems={[
+            { metric: 'Time to model the stack', value: '5-9 weeks' },
+            { metric: 'Lender meetings before terms', value: '8-15' },
+            { metric: 'Stacks compared side by side', value: '1-2' },
+            { metric: 'Time to close (sponsor first deal)', value: '9-11 months' },
+          ]}
+          fastLabel="With Yulia"
+          fastItems={[
+            { metric: 'Time to model the stack', value: '1 afternoon' },
+            { metric: 'Lender meetings before terms', value: '3-5' },
+            { metric: 'Stacks compared side by side', value: '7+' },
+            { metric: 'Time to close (sponsor first deal)', value: '4-5 months' },
+          ]}
+          takeaway={
+            <>
+              Cap stacks die in the modeling phase, not the closing phase. Yulia compresses the modeling from weeks
+              to hours. <strong>The deal you'd have walked away from is the deal you close.</strong>
+            </>
+          }
+          dark={dark}
+        />
+
+        {/* ═══ Yulia Says ═══ */}
+        <section className="mb-28">
+          <SectionHeader
+            label="Yulia says"
+            title="From 'I need capital' to a modeled stack."
+            dark={dark}
+          />
+          <div
+            className="rounded-2xl p-6 md:p-10 max-w-3xl"
+            style={{ background: '#0f1012', border: `1px solid rgba(255,255,255,0.06)` }}
+          >
+            <ConversationTyping
+              messages={[
+                {
+                  type: 'user',
+                  content: (
+                    <div className="bg-white/5 border border-white/10 p-4 rounded-2xl rounded-tr-none text-white text-[15px] leading-relaxed">
+                      Closing on a $180M specialty chemicals distributor. $20M EBITDA. Have $25M LP equity committed.
+                      Need to fill the rest. Where do I start?
                     </div>
-                  </StaggerItem>
-                ))}
-              </StaggerContainer>
-            </div>
+                  ),
+                },
+                {
+                  type: 'ai',
+                  content: (
+                    <div className="flex gap-3 items-start mt-4">
+                      <div className="w-8 h-8 rounded-full bg-[#D44A78] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                        Y
+                      </div>
+                      <div className="bg-white/10 p-4 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed">
+                        Asset-heavy distribution → senior debt is your friend. At 4× leverage you can borrow $80M cheap.
+                        Add a $40M unitranche to push total leverage to 6× (still defensible for chemicals distribution).
+                        That leaves $35M to fill — your $25M equity plus $10M of seller rollover. Want me to add a $25M
+                        mezz tranche and reduce your equity check, or hold it tight?
+                      </div>
+                    </div>
+                  ),
+                },
+                {
+                  type: 'user',
+                  content: (
+                    <div className="bg-white/5 border border-white/10 p-4 rounded-2xl rounded-tr-none text-white text-[15px] leading-relaxed mt-4">
+                      Add the mezz. Show me DSCR at both versions.
+                    </div>
+                  ),
+                },
+                {
+                  type: 'ai',
+                  content: (
+                    <div className="flex gap-3 items-start mt-4">
+                      <div className="w-8 h-8 rounded-full bg-[#D44A78] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                        Y
+                      </div>
+                      <div className="bg-white/10 p-4 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed">
+                        Without mezz: $14M cash debt service → DSCR <span className="text-[#8ff9a8] font-bold">1.43×</span>.
+                        With $25M mezz at 13% + 3% PIK: $14.85M cash → DSCR <span className="text-[#8ff9a8] font-bold">1.35×</span>.
+                        Both clear the 1.20× covenant. The mezz cuts your equity check from $35M to $25M but adds $750K
+                        of annual PIK accrual against the senior covenant. <strong>Recommendation: take the mezz, but
+                        negotiate a 1.15× DSCR step-down in year 2.</strong>
+                      </div>
+                    </div>
+                  ),
+                },
+              ]}
+            />
           </div>
         </section>
 
-        {/* ═══ 4. YOUR RAISE PROCESS — 5-step timeline ═══ */}
-        <section className="mb-24">
-          <ScrollReveal>
-            <span className="text-[#D44A78] font-bold uppercase tracking-widest text-xs block mb-3">Your Raise Process</span>
-            <h2 className="text-4xl font-headline font-black tracking-tight mb-4">Five stages. One outcome: you keep what's yours.</h2>
-            <p className={`text-lg max-w-2xl mb-12 ${dc.muted}`}>
-              Whether you're raising a seed round, SBA financing, or a PE growth equity check — the sequence is the same. Yulia runs each stage.
-            </p>
-          </ScrollReveal>
-
-          <AnimatedTimeline>
-            {[
-              { num: '1', title: 'Define the capital need', desc: 'How much, what for, and what the business can service. Yulia models your capacity before you approach anyone.', free: true },
-              { num: '2', title: 'Model every structure', desc: 'Equity, debt, mezzanine, RBF, ESOP, ROBS — side by side with dilution impact and founder retention at each exit.' },
-              { num: '3', title: 'Build investor materials', desc: 'Pitch deck, financial package, and cap table — generated from your verified numbers, not templates.' },
-              { num: '4', title: 'Negotiate the term sheet', desc: 'Yulia red-flags toxic terms, models counter-offers, and shows you what each clause costs over 5 years.' },
-              { num: '5', title: 'Close and deploy', desc: 'Closing checklist, funds flow, board setup, and a 90-day deployment plan so the capital hits the business — not overhead.' },
-            ].map((step) => (
-              <div key={step.num} className="pl-10 pb-8 relative">
-                <div className={`absolute left-0 top-0 w-[10px] h-[10px] rounded-full ${step.free ? 'bg-[#006630]' : 'bg-[#D44A78]'}`} />
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-bold">{step.title}</h4>
-                  {step.free && <span className={`text-[9px] px-2 py-0.5 rounded font-bold ${dark ? 'bg-[#006630]/20 text-[#006630]' : 'bg-[#006630]/10 text-[#006630]'}`}>FREE</span>}
-                </div>
-                <p className={`text-sm ${dc.muted}`}>{step.desc}</p>
-              </div>
-            ))}
-          </AnimatedTimeline>
-        </section>
-
-        {/* ═══ 5. CTA ═══ */}
-        <ScrollReveal>
-          <section className="mb-12 relative">
-            <GlowingOrb size={300} color="rgba(212,74,120,0.15)" top="-100px" right="-80px" />
-            <div className={`rounded-3xl p-12 md:p-16 text-center relative z-10 ${dc.darkPanel} text-white`}>
-              <h2 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-[0.95] mb-4">
-                Model your raise before you{' '}
-                <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>sign anything.</span>
-              </h2>
-              <p className="text-lg text-[#dadadc]/60 max-w-xl mx-auto mb-8">
-                Tell Yulia how much you need and what it's for. She'll model every structure and show you what you actually keep.
-              </p>
-              <div className="flex flex-col items-center gap-4">
-                <MagneticButton
-                  onClick={() => bridgeToYulia("I'm raising capital for a business acquisition. Help me model the capital structure and understand my dilution.")}
-                  className="px-10 py-5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-black text-lg hover:scale-105 transition-all shadow-xl border-none cursor-pointer"
-                >
-                  Model Your Raise
-                </MagneticButton>
-                <p className="text-xs text-[#dadadc]/70">Free capital needs assessment · No account required · Your data stays yours</p>
-              </div>
-            </div>
-          </section>
-        </ScrollReveal>
-
+        {/* ═══ CTA ═══ */}
+        <PageCTA
+          headline={<>Build your stack.</>}
+          sub="Tell Yulia what you're financing and how much you need. She'll model every structure against current market rates and your real DSCR — in one conversation."
+          buttonLabel="Build my stack"
+          onClick={goToChat}
+          dark={dark}
+        />
       </div>
     </div>
   );
