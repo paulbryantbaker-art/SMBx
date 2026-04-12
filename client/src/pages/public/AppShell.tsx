@@ -844,6 +844,10 @@ export default function AppShell() {
   // New chat — same-level within chat, replace history
   const handleNewChat = useCallback(() => {
     if (user) authChat.newConversation();
+    // Clear any open mobile sheets/drawers so we land on clean chat
+    setMobileWorkspaceOpen(null);
+    setMobileJourneyOpen(null);
+    setLearnDrawerOpen(false);
     setViewState('chat');
     navigate('/chat', { replace: true });
   }, [user, authChat, navigate]);
@@ -2176,14 +2180,38 @@ export default function AppShell() {
           onOpenChange={setIsMobileSidebarOpen}
           dark={dark}
           isLoggedIn={!!user}
-          /* Only show chat history when signed in — anonymous users have no persisted history. */
+          onHomeTap={() => {
+            setMobileWorkspaceOpen(null);
+            setMobileJourneyOpen(null);
+            setLearnDrawerOpen(false);
+            setViewState('landing');
+            setActiveTab('home');
+            navigate('/');
+          }}
+          /* Only show chat history when signed in — anonymous users have no persisted history.
+             Filter out junk titles (Hello, New conversation, etc.) — if no real
+             content exists yet, show the journey type or a date-based label. */
           chats={user
-            ? (allConversations || []).slice(0, 12).map((c: any) => ({
-                id: c.id,
-                title: c.business_name || c.title || 'Untitled',
-                subtitle: c.journey || undefined,
-                active: c.id === activeConvId,
-              }))
+            ? (allConversations || [])
+                .filter((c: any) => {
+                  // Filter out conversations with no meaningful content
+                  const title = c.business_name || c.title || '';
+                  const isJunk = !title || /^(hello|hi|hey|new conversation|untitled)$/i.test(title.trim());
+                  // Keep it if it has a real title or a journey tag
+                  return !isJunk || c.journey;
+                })
+                .slice(0, 12)
+                .map((c: any) => {
+                  const rawTitle = c.business_name || c.title || '';
+                  const isJunk = !rawTitle || /^(hello|hi|hey|new conversation|untitled)$/i.test(rawTitle.trim());
+                  const journeyLabel = c.journey ? c.journey.charAt(0).toUpperCase() + c.journey.slice(1) : null;
+                  return {
+                    id: c.id,
+                    title: isJunk ? (journeyLabel ? `${journeyLabel} deal` : 'Recent chat') : rawTitle,
+                    subtitle: c.journey || undefined,
+                    active: c.id === activeConvId,
+                  };
+                })
             : []
           }
           userName={user?.display_name}

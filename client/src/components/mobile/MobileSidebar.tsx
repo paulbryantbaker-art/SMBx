@@ -55,6 +55,7 @@ interface Props {
   isLoggedIn: boolean;
 
   // Actions
+  onHomeTap: () => void;
   onNewChat: () => void;
   onChatTap: (id: number) => void;
   onWorkspaceTap: (tool: WorkspaceTool) => void;
@@ -91,6 +92,7 @@ export function MobileSidebar({
   userName,
   userEmail,
   isLoggedIn,
+  onHomeTap,
   onNewChat,
   onChatTap,
   onWorkspaceTap,
@@ -175,6 +177,24 @@ export function MobileSidebar({
             >
               <span className="material-symbols-outlined text-[20px]">edit_square</span>
               New conversation
+            </button>
+            {/* Home button — always visible so users can get back to the hero */}
+            <button
+              onClick={() => {
+                onHomeTap();
+                onOpenChange(false);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[14px] font-medium transition-all active:scale-[0.985] mt-2"
+              style={{
+                background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)',
+                color: headingC,
+                border: 'none',
+                cursor: 'pointer',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <span className="material-symbols-outlined text-[18px]" style={{ color: mutedC }}>home</span>
+              Home
             </button>
           </div>
 
