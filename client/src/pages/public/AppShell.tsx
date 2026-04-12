@@ -1660,6 +1660,12 @@ export default function AppShell() {
                                   className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
                                   placeholder="Tell me about your business..."
                                   type="text"
+                                  autoComplete="off"
+                                  autoCorrect="off"
+                                  autoCapitalize="sentences"
+                                  spellCheck={false}
+                                  data-form-type="other"
+                                  name="yulia-chat-desktop"
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
                                       handleSend((e.target as HTMLInputElement).value.trim());
@@ -1749,6 +1755,12 @@ export default function AppShell() {
                             className={`bg-transparent border-none focus:ring-0 flex-1 py-3 text-base outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
                             placeholder="Tell me about your business..."
                             type="text"
+                            autoComplete="off"
+                            autoCorrect="off"
+                            autoCapitalize="sentences"
+                            spellCheck={false}
+                            data-form-type="other"
+                            name="yulia-chat-input"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
                                 handleSend((e.target as HTMLInputElement).value.trim());
