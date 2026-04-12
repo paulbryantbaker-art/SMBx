@@ -1659,13 +1659,13 @@ export default function AppShell() {
                                   ref={homeInputRef}
                                   className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
                                   placeholder="Tell me about your business..."
-                                  type="text"
+                                  type="search"
                                   autoComplete="off"
-                                  autoCorrect="off"
-                                  autoCapitalize="sentences"
-                                  spellCheck={false}
+                                  data-1p-ignore="true"
+                                  data-lpignore="true"
                                   data-form-type="other"
                                   name="yulia-chat-desktop"
+                                  enterKeyHint="send"
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
                                       handleSend((e.target as HTMLInputElement).value.trim());
@@ -1746,23 +1746,36 @@ export default function AppShell() {
                       )}
 
                       <div className="px-4" style={{ touchAction: 'auto' }}>
-                      {/* Gradient-glow input — no + tools popup on mobile (StarterChips replace it) */}
+                      {/* Gradient-glow input with + button for file uploads / utilities */}
+                      <form autoComplete="off" onSubmit={(e) => e.preventDefault()} role="presentation" data-form-type="other">
                       <div className="relative group">
                         <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'}`} />
-                        <div className={`relative rounded-full flex items-center p-2 pl-4 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
+                        <div className={`relative rounded-full flex items-center p-2 pl-3 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
+                          {/* + button — opens tools/upload drawer */}
+                          <button
+                            type="button"
+                            aria-label="Attach files or tools"
+                            onClick={() => setHomeToolsOpen(p => !p)}
+                            className={`h-9 w-9 rounded-full flex items-center justify-center mr-2 transition-all active:scale-95 cursor-pointer border-none ${dark ? 'bg-zinc-800 text-zinc-300' : 'bg-[#f3f3f6] text-[#D44A78]'}`}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: homeToolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
+                              <path d="M12 5v14" /><path d="M5 12h14" />
+                            </svg>
+                          </button>
                           <input
                             ref={homeInputMobileRef}
                             className={`bg-transparent border-none focus:ring-0 flex-1 py-3 text-base outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
                             placeholder="Tell me about your business..."
-                            type="text"
+                            type="search"
                             autoComplete="off"
-                            autoCorrect="off"
-                            autoCapitalize="sentences"
-                            spellCheck={false}
+                            data-1p-ignore="true"
+                            data-lpignore="true"
                             data-form-type="other"
-                            name="yulia-chat-input"
+                            name="yulia-chat-mobile"
+                            enterKeyHint="send"
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
+                                e.preventDefault();
                                 handleSend((e.target as HTMLInputElement).value.trim());
                                 (e.target as HTMLInputElement).value = '';
                               }
@@ -1779,6 +1792,7 @@ export default function AppShell() {
                           </button>
                         </div>
                       </div>
+                      </form>
                       <p className={`text-xs font-medium text-center mt-3 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
                         Free analysis · No account required · Your data stays yours
                       </p>
