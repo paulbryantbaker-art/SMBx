@@ -180,11 +180,12 @@ export function MobileSidebar({
 
           {/* Scrollable sections */}
           <div className="flex-1 overflow-y-auto px-5 pb-4 mobile-scroll">
-            {/* CHATS */}
+            {/* CHATS — only when logged in (anonymous users have no persisted history) */}
+            {isLoggedIn && (
             <Section label="Chats" sectionColor={sectionC} mutedColor={mutedC}>
               {chats.length === 0 ? (
                 <EmptyState
-                  text="No conversations yet. Start one above."
+                  text="Your conversations will show up here."
                   mutedColor={mutedC}
                 />
               ) : (
@@ -216,6 +217,7 @@ export function MobileSidebar({
                 ))
               )}
             </Section>
+            )}
 
             {/* WORKSPACE — only when logged in. Each item launches a full-screen tool sheet. */}
             {isLoggedIn ? (
@@ -296,97 +298,136 @@ export function MobileSidebar({
               </Section>
             )}
 
-            {/* LEARN */}
-            <Section label="How Yulia helps" sectionColor={sectionC} mutedColor={mutedC}>
-              {LEARN_ITEMS.map((item, i) => (
-                <motion.button
-                  key={item.id}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: i * 0.04, ease: [0.32, 0.72, 0, 1] }}
-                  onClick={() => {
-                    onLearnTap(item.id);
-                    onOpenChange(false);
-                  }}
-                  className="w-full text-left px-3 py-3 rounded-xl mb-1 active:scale-[0.985] transition-transform"
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    WebkitTapHighlightColor: 'transparent',
-                  }}
-                >
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="font-headline font-black text-[15px] tracking-tight" style={{ color: headingC }}>
-                      {item.label}
-                    </span>
-                    <span className="material-symbols-outlined text-[14px]" style={{ color: mutedC }}>
-                      arrow_outward
-                    </span>
-                  </div>
-                  <p className="text-[12px] mt-0.5" style={{ color: mutedC }}>
-                    {item.desc}
-                  </p>
-                </motion.button>
-              ))}
-            </Section>
+            {/* LEARN — only when logged out (logged-in users already chose Yulia) */}
+            {!isLoggedIn && (
+              <Section label="How Yulia helps" sectionColor={sectionC} mutedColor={mutedC}>
+                {LEARN_ITEMS.map((item, i) => (
+                  <motion.button
+                    key={item.id}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: i * 0.04, ease: [0.32, 0.72, 0, 1] }}
+                    onClick={() => {
+                      onLearnTap(item.id);
+                      onOpenChange(false);
+                    }}
+                    className="w-full text-left px-3 py-3 rounded-xl mb-1 active:scale-[0.985] transition-transform"
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      WebkitTapHighlightColor: 'transparent',
+                    }}
+                  >
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="font-headline font-black text-[15px] tracking-tight" style={{ color: headingC }}>
+                        {item.label}
+                      </span>
+                      <span className="material-symbols-outlined text-[14px]" style={{ color: mutedC }}>
+                        arrow_outward
+                      </span>
+                    </div>
+                    <p className="text-[12px] mt-0.5" style={{ color: mutedC }}>
+                      {item.desc}
+                    </p>
+                  </motion.button>
+                ))}
+              </Section>
+            )}
           </div>
 
-          {/* Bottom: profile + settings + dark mode */}
+          {/* Bottom: profile + settings + dark mode (logged in)
+              OR sign-in CTA + dark mode (logged out) */}
           <div
             className="px-5 py-4 shrink-0"
             style={{ borderTop: `1px solid ${ruleC}` }}
           >
-            <div className="flex items-center gap-3 mb-3">
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-[14px] shrink-0"
-                style={{
-                  background: pinkC,
-                  color: 'white',
-                }}
-              >
-                {(userName?.[0] || userEmail?.[0] || '?').toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-[14px] truncate" style={{ color: headingC }}>
-                  {userName || 'Welcome'}
-                </p>
-                <p className="text-[11px] truncate" style={{ color: mutedC }}>
-                  {userEmail || 'Sign in to save your work'}
-                </p>
-              </div>
-            </div>
+            {isLoggedIn ? (
+              <>
+                {/* Logged in: profile bar + Profile/Settings/Dark mode */}
+                <div className="flex items-center gap-3 mb-3">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-[14px] shrink-0"
+                    style={{
+                      background: pinkC,
+                      color: 'white',
+                    }}
+                  >
+                    {(userName?.[0] || userEmail?.[0] || '?').toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[14px] truncate" style={{ color: headingC }}>
+                      {userName || 'Account'}
+                    </p>
+                    <p className="text-[11px] truncate" style={{ color: mutedC }}>
+                      {userEmail || ''}
+                    </p>
+                  </div>
+                </div>
 
-            <div className="flex items-center gap-2">
-              <BottomButton
-                icon="person"
-                label="Profile"
-                onClick={() => {
-                  onProfileTap();
-                  onOpenChange(false);
-                }}
-                bodyColor={bodyC}
-                bg={dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)'}
-              />
-              <BottomButton
-                icon="settings"
-                label="Settings"
-                onClick={() => {
-                  onSettingsTap();
-                  onOpenChange(false);
-                }}
-                bodyColor={bodyC}
-                bg={dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)'}
-              />
-              <BottomButton
-                icon={dark ? 'light_mode' : 'dark_mode'}
-                label=""
-                onClick={onDarkModeToggle}
-                bodyColor={bodyC}
-                bg={dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)'}
-                ariaLabel="Toggle dark mode"
-              />
-            </div>
+                <div className="flex items-center gap-2">
+                  <BottomButton
+                    icon="person"
+                    label="Profile"
+                    onClick={() => {
+                      onProfileTap();
+                      onOpenChange(false);
+                    }}
+                    bodyColor={bodyC}
+                    bg={dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)'}
+                  />
+                  <BottomButton
+                    icon="settings"
+                    label="Settings"
+                    onClick={() => {
+                      onSettingsTap();
+                      onOpenChange(false);
+                    }}
+                    bodyColor={bodyC}
+                    bg={dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)'}
+                  />
+                  <BottomButton
+                    icon={dark ? 'light_mode' : 'dark_mode'}
+                    label=""
+                    onClick={onDarkModeToggle}
+                    bodyColor={bodyC}
+                    bg={dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)'}
+                    ariaLabel="Toggle dark mode"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Logged out: sign-in CTA + dark mode toggle */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      onSignIn();
+                      onOpenChange(false);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 h-11 rounded-full text-[13px] font-bold text-white transition-all active:scale-[0.985]"
+                    style={{
+                      background: pinkC,
+                      border: 'none',
+                      cursor: 'pointer',
+                      WebkitTapHighlightColor: 'transparent',
+                      boxShadow: `0 8px 24px -8px ${pinkC}88`,
+                    }}
+                  >
+                    <span className="material-symbols-outlined text-[16px]">login</span>
+                    Sign in
+                  </button>
+                  <BottomButton
+                    icon={dark ? 'light_mode' : 'dark_mode'}
+                    label=""
+                    onClick={onDarkModeToggle}
+                    bodyColor={bodyC}
+                    bg={dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)'}
+                    ariaLabel="Toggle dark mode"
+                  />
+                </div>
+              </>
+            )}
           </div>
         </Drawer.Content>
       </Drawer.Portal>

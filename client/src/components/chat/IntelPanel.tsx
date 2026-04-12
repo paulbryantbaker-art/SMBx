@@ -118,32 +118,40 @@ export default function IntelPanel({ isFullscreen }: IntelPanelProps) {
   return (
     <div style={{ padding: isFullscreen ? '24px 40px' : 20 }}>
       <div style={{ maxWidth: isFullscreen ? 900 : undefined, margin: isFullscreen ? '0 auto' : undefined }}>
-      {/* FRED Economic Indicators */}
-      <div className="mb-6">
-        <h2 className="text-[11px] font-bold text-[#6E6A63] uppercase tracking-wide m-0 mb-2">Economic Indicators</h2>
-        {fredLoading ? (
-          <div className="grid grid-cols-2 gap-2">
-            {[1,2,3,4].map(i => (
-              <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-xl p-3">
-                <div className="h-2.5 bg-[#EBE7DF] rounded w-2/3 mb-1.5" />
-                <div className="h-5 bg-[#EBE7DF] rounded w-1/2" />
+      {/* FRED Economic Indicators — defensively filter out incomplete rows */}
+      {(() => {
+        const validFred = (fredData || []).filter(
+          (ind) => ind && ind.name && ind.value !== null && ind.value !== undefined,
+        );
+        if (!fredLoading && validFred.length === 0) return null;
+        return (
+          <div className="mb-6">
+            <h2 className="text-[11px] font-bold text-[#6E6A63] uppercase tracking-wide m-0 mb-2">Economic Indicators</h2>
+            {fredLoading ? (
+              <div className="grid grid-cols-2 gap-2">
+                {[1,2,3,4].map(i => (
+                  <div key={i} className="animate-pulse bg-[#FAFAFA] rounded-xl p-3">
+                    <div className="h-2.5 bg-[#EBE7DF] rounded w-2/3 mb-1.5" />
+                    <div className="h-5 bg-[#EBE7DF] rounded w-1/2" />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-2">
-            {fredData.slice(0, 6).map(ind => (
-              <div key={ind.series_id} className="bg-[#FAFAFA] rounded-xl p-3">
-                <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5 truncate">{ind.name}</p>
-                <p className="text-base font-bold text-[#0D0D0D] m-0">
-                  {ind.value !== null ? `${ind.value}${ind.units === 'percent' ? '%' : ''}` : '—'}
-                </p>
-                {ind.date && <p className="text-[9px] text-[#A9A49C] m-0 mt-0.5">{ind.date}</p>}
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {validFred.slice(0, 6).map(ind => (
+                  <div key={ind.series_id} className="bg-[#FAFAFA] rounded-xl p-3">
+                    <p className="text-[10px] text-[#A9A49C] m-0 mb-0.5 truncate">{ind.name}</p>
+                    <p className="text-base font-bold text-[#0D0D0D] m-0">
+                      {`${ind.value}${ind.units === 'percent' ? '%' : ''}`}
+                    </p>
+                    {ind.date && <p className="text-[9px] text-[#A9A49C] m-0 mt-0.5">{ind.date}</p>}
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </div>
+        );
+      })()}
 
       {/* Tabs */}
       <div className="flex gap-1 mb-5 bg-[#EBE7DF] rounded-xl p-1">

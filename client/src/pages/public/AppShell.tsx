@@ -45,7 +45,6 @@ import { StarterChips } from '../../components/mobile/StarterChips';
 import { MobileSellPage } from '../../components/mobile/MobileSellPage';
 import { MobileJourneySheet } from '../../components/mobile/MobileJourneySheet';
 import { MobileWorkspaceSheet } from '../../components/mobile/MobileWorkspaceSheet';
-import { MobileLivePulse } from '../../components/mobile/MobileLivePulse';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
 import { MobileIntegratePage } from '../../components/mobile/MobileIntegratePage';
@@ -1577,36 +1576,17 @@ export default function AppShell() {
                         </div>
                       )}
                       {isMobile && (
-                        <>
-                          {/* Yulia status indicator — Grok-style live dot */}
-                          <div className="flex items-center justify-center gap-2 mb-4">
-                            <span
-                              className="inline-block w-1.5 h-1.5 rounded-full animate-pulse-dot"
-                              style={{
-                                background: dark ? '#E8709A' : '#D44A78',
-                                boxShadow: `0 0 10px ${dark ? '#E8709A' : '#D44A78'}`,
-                              }}
-                            />
-                            <span
-                              className="text-[10px] font-bold uppercase tracking-[0.2em] font-mono"
-                              style={{ color: dark ? 'rgba(218,218,220,0.6)' : '#7c7d80' }}
-                            >
-                              Yulia · senior M&amp;A advisor
-                            </span>
-                          </div>
-                          <div className="flex justify-center mb-10">
-                            <LogoHero height={42} dark={dark} />
-                          </div>
-                        </>
+                        <div className="flex justify-center mb-10">
+                          <LogoHero height={42} dark={dark} />
+                        </div>
                       )}
                       <h1 className={`font-headline font-black tracking-[-0.04em] ${isMobile ? 'text-[42px] leading-[0.95] mb-6' : 'text-[64px] leading-[0.95] mb-4'}`}>
                         AI that makes <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>M&amp;A</span><br/>
                         faster and easier.
                       </h1>
-                      <p className={`mx-auto font-medium ${isMobile ? 'text-[16px] leading-[1.5] max-w-xs' : 'text-xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                        Sell, buy, raise, or integrate — by talking to Yulia.
+                      <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[280px]' : 'text-xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                        Sell, buy, raise, or integrate easily just by talking to Yulia, your M&amp;A deal advisor.
                       </p>
-                      {isMobile && <MobileLivePulse dark={dark} />}
 
                       {/* Desktop: input + micro-copy */}
                       {!isMobile && (
@@ -1711,50 +1691,10 @@ export default function AppShell() {
                       />
 
                       <div className="px-4">
-                      {/* Tool popup (drops UP from input) */}
-                      <div ref={homeToolsRef} className={`home-tools-popup ${homeToolsOpen ? 'open' : ''}`} style={{ bottom: 'calc(100% + 8px)', left: 16, right: 16 }}>
-                        <div className="px-4 pt-3 pb-2">
-                          <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)' }}>Start with Yulia</span>
-                        </div>
-                        {HOME_TOOLS.filter(t => t.group === 'journey').map(t => (
-                          <button key={t.label} className="home-tp-item" onClick={() => fillHomeInput(t.fill)} type="button">
-                            {t.icon}
-                            <div>
-                              <div className={`text-[15px] font-semibold leading-[1.3] ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}>{t.label}</div>
-                              <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
-                            </div>
-                          </button>
-                        ))}
-                        <div className="mx-4 my-1" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}` }} />
-                        <div className="px-4 pt-2 pb-1">
-                          <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)' }}>Tools</span>
-                        </div>
-                        {HOME_TOOLS.filter(t => t.group === 'tool').map(t => (
-                          <button key={t.label} className="home-tp-item" onClick={() => fillHomeInput(t.fill)} type="button">
-                            {t.icon}
-                            <div>
-                              <div className={`text-[15px] font-semibold leading-[1.3] ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}>{t.label}</div>
-                              <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                      {/* Gradient-glow input */}
+                      {/* Gradient-glow input — no + tools popup on mobile (StarterChips replace it) */}
                       <div className="relative group">
                         <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'}`} />
-                        <div className={`relative rounded-full flex items-center p-2 pl-3 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
-                          <button
-                            ref={homePlusMobileRef}
-                            type="button"
-                            aria-label="Tools menu"
-                            aria-expanded={homeToolsOpen}
-                            onClick={() => setHomeToolsOpen(p => !p)}
-                            className={`h-9 w-9 rounded-full flex items-center justify-center mr-2 transition-all active:scale-95 cursor-pointer border-none ${dark ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700' : 'bg-[#f3f3f6] text-[#D44A78] hover:bg-[#e3bdc3]/40'}`}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: homeToolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
-                              <path d="M12 5v14" /><path d="M5 12h14" />
-                            </svg>
-                          </button>
+                        <div className={`relative rounded-full flex items-center p-2 pl-4 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
                           <input
                             ref={homeInputMobileRef}
                             className={`bg-transparent border-none focus:ring-0 flex-1 py-3 text-base outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
@@ -1837,8 +1777,10 @@ export default function AppShell() {
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
               )}
 
-              {/* Chat pane is always dark — matches the always-dark body. */}
-              <div className="force-chat-dark">
+              {/* Chat pane respects the user's theme on mobile (was always-dark
+                  when desktop body was forced charcoal; now mobile body matches
+                  the chat pane edge-to-edge so we want the actual theme to apply). */}
+              <div className={dark ? 'force-chat-dark' : ''}>
               <ChatMessages
                 messages={messages}
                 streamingText={streamingText}
@@ -1855,7 +1797,7 @@ export default function AppShell() {
                   handleSend(fill);
                 }}
                 desktop={!isMobile}
-                dark={true}
+                dark={dark}
               />
               </div>
 
@@ -1896,9 +1838,9 @@ export default function AppShell() {
         </div>
 
         {/* ════ CHATDOCK — chat mode, pinned at bottom, aligned with sidebar/canvas ════
-            Uses force-chat-dark so the pill is always dark-mode styled. */}
+            Pill respects the user's theme — light pill in light mode, dark pill in dark mode. */}
         {showDock && viewState === 'chat' && (
-          <div className="force-chat-dark shrink-0 px-4 pt-2" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
+          <div className={`${dark ? 'force-chat-dark' : ''} shrink-0 px-4 pt-2`} style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
             <ChatDock
               ref={dockRef}
               onSend={handleSend}
@@ -2234,12 +2176,16 @@ export default function AppShell() {
           onOpenChange={setIsMobileSidebarOpen}
           dark={dark}
           isLoggedIn={!!user}
-          chats={(allConversations || []).slice(0, 12).map((c: any) => ({
-            id: c.id,
-            title: c.business_name || c.title || 'Untitled',
-            subtitle: c.journey || undefined,
-            active: c.id === activeConvId,
-          }))}
+          /* Only show chat history when signed in — anonymous users have no persisted history. */
+          chats={user
+            ? (allConversations || []).slice(0, 12).map((c: any) => ({
+                id: c.id,
+                title: c.business_name || c.title || 'Untitled',
+                subtitle: c.journey || undefined,
+                active: c.id === activeConvId,
+              }))
+            : []
+          }
           userName={user?.display_name}
           userEmail={user?.email}
           onNewChat={handleNewChat}
