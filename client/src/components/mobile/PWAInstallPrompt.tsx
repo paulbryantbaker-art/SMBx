@@ -1,19 +1,17 @@
 /**
  * PWAInstallPrompt.tsx
  *
- * Organic PWA install prompt that shows at the conversion moment — when
- * the user creates an account or logs in for the first time. Not before.
+ * Full-screen interstitial that shows as a STEP in the signup/login flow.
+ * NOT optional, NOT delayed. This is how users set up the app.
  *
- * Rules:
- *   - Only shows on mobile (no need on desktop)
- *   - Only shows when NOT already running in standalone mode
- *   - Only shows when the user is logged in (has an account)
- *   - Only shows once per 14-day window (dismissable, respects localStorage)
- *   - Detects iOS vs Android and shows the right instructions
- *   - Feels like part of the onboarding, not a browser popup
+ * Framing: "smbx.ai works best as an app. It takes 10 seconds."
+ * The user must acknowledge ("I've added it" or "Skip for now").
  *
- * Design: a small card that slides in below the chat area, matching
- * the Grok+Canva aesthetic. Pink accent, minimal, no logo spam.
+ * Shows only when:
+ *   - User is on mobile
+ *   - User just logged in or signed up
+ *   - App is NOT already running in standalone mode
+ *   - User hasn't completed this step yet (localStorage flag)
  */
 
 import { useState, useEffect } from 'react';
@@ -21,20 +19,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const PINK = '#D44A78';
 const PINK_DARK = '#E8709A';
-const STORAGE_KEY = 'smbx-pwa-prompted';
-const COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+const STORAGE_KEY = 'smbx-pwa-installed';
 
 /** Is the app already running as an installed PWA (standalone)? */
 function isStandalone(): boolean {
   if (typeof window === 'undefined') return false;
-  // iOS: navigator.standalone
   if ((navigator as any).standalone === true) return true;
-  // Android / desktop: display-mode media query
   if (window.matchMedia('(display-mode: standalone)').matches) return true;
   return false;
 }
 
-/** Is the device iOS (for Apple-specific install instructions)? */
+/** Is the device iOS? */
 function isIOS(): boolean {
   if (typeof navigator === 'undefined') return false;
   return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -47,85 +42,62 @@ function isMobileDevice(): boolean {
   return window.matchMedia('(max-width: 767px)').matches;
 }
 
-/** Should we show the prompt? (all conditions met) */
-function shouldShow(isLoggedIn: boolean): boolean {
-  if (!isMobileDevice()) return false;
-  if (isStandalone()) return false;
-  if (!isLoggedIn) return false;
-
-  // Check cooldown
-  try {
-    const lastPrompted = localStorage.getItem(STORAGE_KEY);
-    if (lastPrompted) {
-      const elapsed = Date.now() - parseInt(lastPrompted, 10);
-      if (elapsed < COOLDOWN_MS) return false;
-    }
-  } catch { /* localStorage unavailable */ }
-
-  return true;
-}
-
 interface Props {
   isLoggedIn: boolean;
   dark: boolean;
-  /** Delay in ms before the prompt slides in (give the user a moment to orient) */
-  delayMs?: number;
 }
 
-export function PWAInstallPrompt({ isLoggedIn, dark, delayMs = 3000 }: Props) {
+export function PWAInstallPrompt({ isLoggedIn, dark }: Props) {
   const [visible, setVisible] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-  // Android: capture the beforeinstallprompt event
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   // Listen for the Android install prompt event
   useEffect(() => {
     const handler = (e: Event) => {
-      e.preventDefault(); // Prevent auto-show
+      e.preventDefault();
       setDeferredPrompt(e);
     };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  // Show with delay after conditions are met
+  // Show when conditions are met
   useEffect(() => {
-    if (!shouldShow(isLoggedIn) || dismissed) {
-      setVisible(false);
-      return;
-    }
-    const timer = setTimeout(() => setVisible(true), delayMs);
-    return () => clearTimeout(timer);
-  }, [isLoggedIn, dismissed, delayMs]);
+    if (!isMobileDevice()) return;
+    if (isStandalone()) return;
+    if (!isLoggedIn) return;
 
-  const handleDismiss = () => {
-    setDismissed(true);
+    // Check if user already completed this step
+    try {
+      if (localStorage.getItem(STORAGE_KEY) === 'done') return;
+    } catch { /* ignore */ }
+
+    setVisible(true);
+  }, [isLoggedIn]);
+
+  const handleComplete = () => {
     setVisible(false);
     try {
-      localStorage.setItem(STORAGE_KEY, String(Date.now()));
+      localStorage.setItem(STORAGE_KEY, 'done');
     } catch { /* ignore */ }
   };
 
-  const handleInstall = async () => {
+  const handleInstallAndroid = async () => {
     if (deferredPrompt) {
-      // Android: trigger native install
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        handleDismiss();
-      }
+      if (outcome === 'accepted') handleComplete();
       setDeferredPrompt(null);
     }
-    // iOS: the card shows instructions — no programmatic install
   };
 
   // Colors
   const pinkC    = dark ? PINK_DARK : PINK;
+  const bg       = dark ? '#151617' : '#FFFFFF';
   const headingC = dark ? '#f9f9fc' : '#0f1012';
   const bodyC    = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedC   = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
-  const cardBg   = dark ? '#1f2123' : '#ffffff';
-  const border   = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
+  const stepBg   = dark ? '#1f2123' : '#f5f5f7';
 
   const ios = isIOS();
 
@@ -133,146 +105,189 @@ export function PWAInstallPrompt({ isLoggedIn, dark, delayMs = 3000 }: Props) {
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 60 }}
-          transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
-          className="fixed left-4 right-4 z-[90]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+          className="fixed inset-0 z-[200] flex flex-col"
           style={{
-            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)',
+            background: bg,
+            paddingTop: 'env(safe-area-inset-top, 0px)',
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
           }}
         >
-          <div
-            className="rounded-2xl p-5 relative"
-            style={{
-              background: cardBg,
-              border: `1px solid ${border}`,
-              boxShadow: dark
-                ? '0 16px 48px -12px rgba(0,0,0,0.6), 0 4px 12px rgba(0,0,0,0.3)'
-                : '0 16px 48px -12px rgba(15,16,18,0.12), 0 4px 12px rgba(15,16,18,0.06)',
-            }}
-          >
-            {/* Close button */}
-            <button
-              onClick={handleDismiss}
-              className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center"
+          {/* Content — centered vertically */}
+          <div className="flex-1 flex flex-col items-center justify-center px-8 py-12">
+            {/* App icon */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.15, duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+              className="w-20 h-20 rounded-[22px] flex items-center justify-center mb-8"
               style={{
-                background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.05)',
-                border: 'none',
-                cursor: 'pointer',
-                WebkitTapHighlightColor: 'transparent',
+                background: dark ? 'rgba(232,112,154,0.10)' : 'rgba(212,74,120,0.08)',
+                border: `2px solid ${dark ? 'rgba(232,112,154,0.25)' : 'rgba(212,74,120,0.20)'}`,
+                boxShadow: `0 12px 32px -10px ${pinkC}44`,
               }}
-              aria-label="Dismiss"
             >
-              <span className="material-symbols-outlined text-[14px]" style={{ color: mutedC }}>
-                close
-              </span>
-            </button>
+              <img
+                src="/x.png"
+                alt="smbx.ai"
+                className="w-12 h-12 object-contain"
+                draggable={false}
+              />
+            </motion.div>
 
-            <div className="flex items-start gap-4 pr-6">
-              {/* App icon */}
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                style={{
-                  background: dark ? 'rgba(232,112,154,0.10)' : 'rgba(212,74,120,0.08)',
-                  border: `1px solid ${dark ? 'rgba(232,112,154,0.20)' : 'rgba(212,74,120,0.16)'}`,
-                }}
-              >
-                <img
-                  src="/x.png"
-                  alt="smbx.ai"
-                  className="w-7 h-7 object-contain"
-                  draggable={false}
-                />
-              </div>
+            {/* Title */}
+            <motion.h1
+              initial={{ y: 16, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.25, duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+              className="font-headline font-black tracking-[-0.03em] text-center mb-3"
+              style={{
+                fontSize: 'clamp(1.75rem, 7vw, 2.5rem)',
+                color: headingC,
+                lineHeight: 1,
+              }}
+            >
+              One quick step.
+            </motion.h1>
 
-              <div className="flex-1 min-w-0">
-                <h3
-                  className="font-headline font-black text-[15px] tracking-tight mb-1"
-                  style={{ color: headingC }}
-                >
-                  Add smbx.ai to your home screen
-                </h3>
-                <p className="text-[12px] leading-relaxed mb-3" style={{ color: bodyC }}>
-                  {ios
-                    ? 'Get the full app experience — no browser bar, instant access, runs like a native app.'
-                    : 'Install smbx.ai for instant access, no browser chrome, and native-app performance.'
-                  }
-                </p>
+            <motion.p
+              initial={{ y: 12, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.35, duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+              className="text-center mb-10 max-w-xs"
+              style={{ color: bodyC, fontSize: 16, lineHeight: 1.5 }}
+            >
+              Add smbx.ai to your home screen for the full app experience — no browser bar, instant access, runs like a native app.
+            </motion.p>
 
-                {ios ? (
-                  /* iOS: manual instructions */
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2.5">
-                      <span
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
-                        style={{ background: pinkC, color: 'white' }}
-                      >
-                        1
-                      </span>
-                      <p className="text-[12px]" style={{ color: bodyC }}>
-                        Tap <span className="material-symbols-outlined text-[14px] align-middle" style={{ color: pinkC }}>ios_share</span>{' '}
-                        <strong>Share</strong> in Safari's bottom bar
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <span
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
-                        style={{ background: pinkC, color: 'white' }}
-                      >
-                        2
-                      </span>
-                      <p className="text-[12px]" style={{ color: bodyC }}>
-                        Tap <strong>"Add to Home Screen"</strong>
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <span
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
-                        style={{ background: pinkC, color: 'white' }}
-                      >
-                        3
-                      </span>
-                      <p className="text-[12px]" style={{ color: bodyC }}>
-                        Done — smbx.ai runs like a native app
-                      </p>
-                    </div>
+            {/* Steps */}
+            <motion.div
+              initial={{ y: 16, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.45, duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+              className="w-full max-w-sm space-y-3 mb-10"
+            >
+              {ios ? (
+                /* iOS instructions */
+                <>
+                  <div
+                    className="flex items-center gap-4 rounded-2xl p-4"
+                    style={{ background: stepBg }}
+                  >
+                    <span
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-[14px] font-black shrink-0"
+                      style={{ background: pinkC, color: 'white' }}
+                    >
+                      1
+                    </span>
+                    <p className="text-[15px] font-medium" style={{ color: headingC }}>
+                      Tap{' '}
+                      <span className="material-symbols-outlined text-[18px] align-middle" style={{ color: pinkC }}>
+                        ios_share
+                      </span>{' '}
+                      <strong>Share</strong> in the bar below
+                    </p>
                   </div>
-                ) : (
-                  /* Android: native install button */
+                  <div
+                    className="flex items-center gap-4 rounded-2xl p-4"
+                    style={{ background: stepBg }}
+                  >
+                    <span
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-[14px] font-black shrink-0"
+                      style={{ background: pinkC, color: 'white' }}
+                    >
+                      2
+                    </span>
+                    <p className="text-[15px] font-medium" style={{ color: headingC }}>
+                      Scroll down and tap <strong>"Add to Home Screen"</strong>
+                    </p>
+                  </div>
+                  <div
+                    className="flex items-center gap-4 rounded-2xl p-4"
+                    style={{ background: stepBg }}
+                  >
+                    <span
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-[14px] font-black shrink-0"
+                      style={{ background: pinkC, color: 'white' }}
+                    >
+                      3
+                    </span>
+                    <p className="text-[15px] font-medium" style={{ color: headingC }}>
+                      Tap <strong>"Add"</strong> — that's it, 10 seconds
+                    </p>
+                  </div>
+                </>
+              ) : (
+                /* Android: single button */
+                <div className="text-center">
                   <button
-                    onClick={handleInstall}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-bold text-white transition-all active:scale-[0.97]"
+                    onClick={handleInstallAndroid}
+                    className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-[16px] font-bold text-white transition-all active:scale-[0.97]"
                     style={{
                       background: pinkC,
                       border: 'none',
                       cursor: 'pointer',
                       WebkitTapHighlightColor: 'transparent',
-                      boxShadow: `0 6px 20px -6px ${pinkC}88`,
+                      boxShadow: `0 12px 32px -10px ${pinkC}88`,
                     }}
                   >
-                    <span className="material-symbols-outlined text-[16px]">download</span>
-                    Install app
+                    <span className="material-symbols-outlined text-[20px]">download</span>
+                    Install smbx.ai
                   </button>
-                )}
+                  <p className="text-[13px] mt-3" style={{ color: mutedC }}>
+                    One tap — Chrome handles the rest.
+                  </p>
+                </div>
+              )}
+            </motion.div>
 
-                {/* Dismiss link */}
-                <button
-                  onClick={handleDismiss}
-                  className="block mt-3 text-[11px] font-medium"
-                  style={{
-                    color: mutedC,
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 0,
-                    WebkitTapHighlightColor: 'transparent',
-                  }}
-                >
-                  Maybe later
-                </button>
-              </div>
-            </div>
+            {/* Time estimate */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              className="text-[12px] text-center"
+              style={{ color: mutedC }}
+            >
+              Takes about 10 seconds. Your data and conversations are already saved.
+            </motion.p>
+          </div>
+
+          {/* Bottom actions */}
+          <div
+            className="shrink-0 px-8 pb-4"
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}
+          >
+            <button
+              onClick={handleComplete}
+              className="w-full py-4 rounded-2xl text-[15px] font-bold transition-all active:scale-[0.985] mb-3"
+              style={{
+                background: pinkC,
+                color: 'white',
+                border: 'none',
+                cursor: 'pointer',
+                WebkitTapHighlightColor: 'transparent',
+                boxShadow: `0 8px 24px -8px ${pinkC}88`,
+              }}
+            >
+              {ios ? "I've added it — let's go" : "I've installed it"}
+            </button>
+            <button
+              onClick={handleComplete}
+              className="w-full py-3 rounded-xl text-[13px] font-medium transition-all active:scale-[0.985]"
+              style={{
+                background: 'transparent',
+                color: mutedC,
+                border: 'none',
+                cursor: 'pointer',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              Skip for now
+            </button>
           </div>
         </motion.div>
       )}

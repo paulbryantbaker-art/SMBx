@@ -1784,10 +1784,10 @@ export default function AppShell() {
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
               )}
 
-              {/* Chat pane respects the user's theme on mobile (was always-dark
-                  when desktop body was forced charcoal; now mobile body matches
-                  the chat pane edge-to-edge so we want the actual theme to apply). */}
-              <div className={dark ? 'force-chat-dark' : ''}>
+              {/* Chat pane: on DESKTOP body is always dark charcoal, so chat must
+                  always be force-dark. On MOBILE, body matches the theme (white in
+                  light mode, dark in dark mode), so we only force dark when dark===true. */}
+              <div className={(!isMobile || dark) ? 'force-chat-dark' : ''}>
               <ChatMessages
                 messages={messages}
                 streamingText={streamingText}
@@ -1804,7 +1804,7 @@ export default function AppShell() {
                   handleSend(fill);
                 }}
                 desktop={!isMobile}
-                dark={dark}
+                dark={!isMobile ? true : dark}
               />
               </div>
 
@@ -1845,9 +1845,10 @@ export default function AppShell() {
         </div>
 
         {/* ════ CHATDOCK — chat mode, pinned at bottom, aligned with sidebar/canvas ════
-            Pill respects the user's theme — light pill in light mode, dark pill in dark mode. */}
+            Desktop: always forced dark (body is dark charcoal).
+            Mobile: respects theme (light pill in light mode, dark in dark mode). */}
         {showDock && viewState === 'chat' && (
-          <div className={`${dark ? 'force-chat-dark' : ''} shrink-0 px-4 pt-2`} style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
+          <div className={`${(!isMobile || dark) ? 'force-chat-dark' : ''} shrink-0 px-4 pt-2`} style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
             <ChatDock
               ref={dockRef}
               onSend={handleSend}
@@ -2462,12 +2463,11 @@ export default function AppShell() {
         </button>
       )}
 
-      {/* ═══ PWA INSTALL PROMPT — shows at conversion moment ═══ */}
+      {/* ═══ PWA INSTALL — full-screen interstitial after signup/login ═══ */}
       {isMobile && (
         <PWAInstallPrompt
           isLoggedIn={!!user}
           dark={dark}
-          delayMs={4000}
         />
       )}
 
