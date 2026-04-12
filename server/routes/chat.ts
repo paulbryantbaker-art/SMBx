@@ -765,6 +765,9 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
     return res.status(400).json({ error: 'Message content is required' });
   }
 
+  // Declare outside try so it's accessible in catch (avoids TDZ crash)
+  let clientDisconnected = false;
+
   try {
     // Verify ownership
     const [conv] = await sql`
@@ -833,8 +836,7 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
     res.setHeader('X-User-Message-Id', String(userMsg.id));
     res.flushHeaders(); // Send headers immediately
 
-    // Detect client disconnect
-    let clientDisconnected = false;
+    // Detect client disconnect (variable declared above try block to avoid TDZ in catch)
     res.on('close', () => { clientDisconnected = true; });
 
     // SSE heartbeat — keep connection alive through proxies (every 15s)
