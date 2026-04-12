@@ -955,17 +955,32 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
     }
   } catch (err: any) {
     if (clientDisconnected || res.writableEnded || res.destroyed) return;
-    console.error('Chat error:', err.message, err.stack);
+    console.error('\n========== AUTHENTICATED CHAT ERROR ==========');
+    console.error('Message:', err.message);
+    console.error('Status:', err.status);
+    console.error('Code:', err.code);
+    console.error('Stack:', err.stack?.substring(0, 500));
+    console.error('==============================================\n');
 
-    // If headers already sent (SSE started), send error event
+    // Show the REAL error to the user (not a generic message) so we can debug
+    const userError = err.status === 429
+      ? 'Rate limited — too many requests. Wait a moment and try again.'
+      : err.status === 401
+      ? 'Authentication expired. Please sign in again.'
+      : err.status === 529
+      ? 'Anthropic API is overloaded. Try again in a few seconds.'
+      : err.message?.includes('ANTHROPIC_API_KEY')
+      ? 'API key is not configured on the server.'
+      : `Error: ${err.message || 'Unknown error'}. Please try again.`;
+
     if (res.headersSent) {
       if (!res.writableEnded) {
-        res.write(`data: ${JSON.stringify({ type: 'error', error: 'Something went wrong. Please try again.' })}\n\n`);
+        res.write(`data: ${JSON.stringify({ type: 'error', error: userError })}\n\n`);
         res.write('data: [DONE]\n\n');
         res.end();
       }
     } else {
-      res.status(500).json({ error: 'Something went wrong. Please try again.' });
+      res.status(500).json({ error: userError });
     }
   }
 });
