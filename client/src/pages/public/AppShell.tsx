@@ -2511,11 +2511,12 @@ export default function AppShell() {
         </button>
       )}
 
-      {/* ═══ PWA LOCK — full-screen interstitial. Logged-in mobile users
-          MUST be in standalone PWA mode to use the app. Install or sign out. ═══ */}
+      {/* ═══ PWA LOCK — only fires when user enters chat, NOT when browsing.
+          This prevents the lock from blocking the entire site on mobile. ═══ */}
       {isMobile && (
         <PWAInstallPrompt
           isLoggedIn={!!user}
+          isInChat={viewState === 'chat'}
           dark={dark}
           onSignOut={() => {
             // Sign out and go back to the anonymous browsing experience

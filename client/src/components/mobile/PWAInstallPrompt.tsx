@@ -46,11 +46,12 @@ function isMobileDevice(): boolean {
 
 interface Props {
   isLoggedIn: boolean;
+  isInChat: boolean;  // Only lock when actually using chat, not when browsing
   dark: boolean;
   onSignOut?: () => void;
 }
 
-export function PWAInstallPrompt({ isLoggedIn, dark, onSignOut }: Props) {
+export function PWAInstallPrompt({ isLoggedIn, isInChat, dark, onSignOut }: Props) {
   const [visible, setVisible] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
@@ -64,17 +65,23 @@ export function PWAInstallPrompt({ isLoggedIn, dark, onSignOut }: Props) {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  // LOCK: on mobile, logged-in users MUST be in standalone mode.
-  // This runs on every render so it catches both fresh signups and
-  // returning users who somehow ended up in a browser tab.
+  // LOCK: only fires when the user is ACTIVELY using the app (in chat),
+  // NOT when browsing the landing/marketing pages. This prevents the lock
+  // from blocking the entire site when someone is just visiting.
   useEffect(() => {
-    if (!isMobileDevice()) { setVisible(false); return; }
-    if (isStandalone())    { setVisible(false); return; }
-    if (!isLoggedIn)       { setVisible(false); return; }
+    if (!isMobileDevice())  { setVisible(false); return; }
+    if (isStandalone())     { setVisible(false); return; }
+    if (!isLoggedIn)        { setVisible(false); return; }
+    if (!isInChat)          { setVisible(false); return; }
 
-    // User is logged in on mobile but NOT in standalone PWA → lock.
+    // Check if already completed
+    try {
+      if (localStorage.getItem(STORAGE_KEY) === 'done') { setVisible(false); return; }
+    } catch { /* ignore */ }
+
+    // User is logged in, in chat, on mobile, NOT in standalone → lock.
     setVisible(true);
-  }, [isLoggedIn]);
+  }, [isLoggedIn, isInChat]);
 
   // "I've added it" — check if we're now in standalone
   const handleConfirm = () => {
