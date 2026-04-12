@@ -1551,7 +1551,7 @@ export default function AppShell() {
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
-            <div key={activeTab} style={{ position: 'relative', animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { display: 'flex', flexDirection: 'column' as const, minHeight: '100dvh' } : { minHeight: '100dvh' }) }}>
+            <div key={activeTab} style={{ position: 'relative', animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { display: 'flex', flexDirection: 'column' as const, height: '100dvh', maxHeight: '100dvh', overflow: 'hidden' } : { minHeight: '100dvh' }) }}>
 
               {/* No background layer here — body (#E8DFC9 warm beige in index.css)
                   provides the back-layer color. Adding an absolute-positioned div
