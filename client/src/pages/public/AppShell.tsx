@@ -1578,8 +1578,8 @@ export default function AppShell() {
                   }}
                 >
                 <main className="flex-1 flex flex-col relative">
-                  {/* Top cluster — centered on desktop; tighter rhythm on mobile */}
-                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? 'shrink-0 pt-[10vh]' : 'flex-1 justify-center'}`}>
+                  {/* Top cluster — Fibonacci: content in upper 61.8%, input in lower 38.2% */}
+                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? 'flex-[1.618] justify-center' : 'flex-1 justify-center'}`}>
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl' : 'max-w-3xl space-y-6'}`}>
                       {!isMobile && (
                         <div className="mb-10 flex justify-center">
@@ -1726,8 +1726,7 @@ export default function AppShell() {
                     </div>
                   </div>
 
-                  {/* Flex spacer — fills remaining space between cluster and pill zone */}
-                  {isMobile && <div className="flex-1" aria-hidden />}
+                  {/* On mobile the golden-ratio flex (1.618 vs 1) handles spacing — no extra spacer needed */}
 
                   {/* Mobile bottom zone: starter chips + pill + trust line pinned near the bottom.
                       Safe-area padding clears the home indicator */}
