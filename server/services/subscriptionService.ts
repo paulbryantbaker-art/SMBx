@@ -110,16 +110,29 @@ export async function getUserPlan(userId: number): Promise<Plan> {
   if (process.env.TEST_MODE === 'true' || process.env.DEV_NO_PAYWALL === 'true') {
     return 'enterprise';
   }
-  const [user] = await sql`SELECT plan, trial_ends_at FROM users WHERE id = ${userId}`;
-  if (!user) return 'free';
+  try {
+    const [user] = await sql`SELECT plan, trial_ends_at FROM users WHERE id = ${userId}`;
+    if (!user) return 'free';
 
-  // Early-access trial: grants Professional until trial_ends_at
-  if (user.trial_ends_at && new Date(user.trial_ends_at) > new Date()) {
-    const basePlan = (user.plan as Plan) || 'free';
-    return PLAN_RANK[basePlan] >= PLAN_RANK.professional ? basePlan : 'professional';
+    // Early-access trial: grants Professional until trial_ends_at
+    if (user.trial_ends_at && new Date(user.trial_ends_at) > new Date()) {
+      const basePlan = (user.plan as Plan) || 'free';
+      return PLAN_RANK[basePlan] >= PLAN_RANK.professional ? basePlan : 'professional';
+    }
+
+    return (user.plan as Plan) || 'free';
+  } catch (err: any) {
+    // Defensive: if the 'plan' column doesn't exist yet (migration not applied),
+    // fall back to checking the subscriptions table or default to 'free'
+    if (err.message?.includes('column') && err.message?.includes('plan')) {
+      console.warn('getUserPlan: "plan" column missing from users table — falling back to free. Run migrations.');
+      try {
+        const [sub] = await sql`SELECT plan FROM subscriptions WHERE user_id = ${userId} AND status IN ('active', 'trialing') ORDER BY created_at DESC LIMIT 1`;
+        return (sub?.plan as Plan) || 'free';
+      } catch { return 'free'; }
+    }
+    throw err;
   }
-
-  return (user.plan as Plan) || 'free';
 }
 
 /** Check if user's plan meets or exceeds a required plan */
