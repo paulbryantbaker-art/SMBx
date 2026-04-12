@@ -672,109 +672,134 @@ function DealGroupRow({
       {/* Chapter timeline */}
       {expanded && deal.conversations.length > 1 && (
         <div className="ml-5 mt-1 mb-2">
-          {deal.conversations.map((c, i) => {
-            const isActive = c.id === activeConversationId;
-            const isCompleted = c.gate_status === 'completed';
-            const isLast = i === deal.conversations.length - 1;
-            const [showSummary, setShowSummary] = useState(false);
-
-            return (
-              <div key={c.id} className="flex gap-0">
-                {/* Timeline spine */}
-                <div className="flex flex-col items-center w-5 shrink-0">
-                  {/* Dot */}
-                  <div
-                    className="w-2.5 h-2.5 rounded-full shrink-0 mt-[7px]"
-                    style={{
-                      background: isActive ? pinkColor
-                        : isCompleted ? (dark ? 'rgba(218,218,220,0.35)' : 'rgba(15,16,18,0.20)')
-                        : (dark ? 'rgba(255,255,255,0.12)' : 'rgba(15,16,18,0.08)'),
-                      border: isActive ? `2px solid ${pinkColor}` : 'none',
-                      boxShadow: isActive ? `0 0 0 3px ${pinkColor}22` : 'none',
-                    }}
-                  />
-                  {/* Connector line */}
-                  {!isLast && (
-                    <div
-                      className="w-px flex-1 min-h-[16px]"
-                      style={{
-                        background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.06)',
-                      }}
-                    />
-                  )}
-                </div>
-
-                {/* Chapter content */}
-                <button
-                  onClick={() => onChatTap(c.id)}
-                  className="flex-1 text-left px-2 py-1.5 rounded-lg transition-all active:scale-[0.985] min-w-0"
-                  style={{
-                    background: isActive ? tintBg : 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    WebkitTapHighlightColor: 'transparent',
-                  }}
-                >
-                  <div className="flex items-center gap-1.5">
-                    {isCompleted && (
-                      <span className="material-symbols-outlined text-[11px]" style={{ color: dark ? 'rgba(218,218,220,0.4)' : 'rgba(15,16,18,0.3)' }}>
-                        check
-                      </span>
-                    )}
-                    <span
-                      className="truncate text-[12px] font-medium"
-                      style={{ color: isActive ? headingColor : isCompleted ? mutedColor : headingColor }}
-                    >
-                      {c.title?.replace(' ✓', '')}
-                    </span>
-                    {c.gate_label && (
-                      <span
-                        className="text-[9px] font-mono shrink-0 px-1 py-0.5 rounded"
-                        style={{
-                          background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)',
-                          color: mutedColor,
-                        }}
-                      >
-                        {c.gate_label}
-                      </span>
-                    )}
-                  </div>
-                  {/* Summary preview — tap the info icon to toggle */}
-                  {c.summary && (
-                    <div className="mt-0.5">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setShowSummary(!showSummary); }}
-                        className="text-[10px] flex items-center gap-0.5"
-                        style={{
-                          color: pinkColor,
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          padding: 0,
-                          WebkitTapHighlightColor: 'transparent',
-                        }}
-                      >
-                        <span className="material-symbols-outlined text-[11px]">
-                          {showSummary ? 'expand_less' : 'info'}
-                        </span>
-                        {showSummary ? 'Hide' : 'Summary'}
-                      </button>
-                      {showSummary && (
-                        <p
-                          className="text-[11px] leading-relaxed mt-1 pr-1"
-                          style={{ color: mutedColor }}
-                        >
-                          {c.summary}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </button>
-              </div>
-            );
-          })}
+          {deal.conversations.map((c, i) => (
+            <ChapterTimelineItem
+              key={c.id}
+              chapter={c}
+              isActive={c.id === activeConversationId}
+              isLast={i === deal.conversations.length - 1}
+              onTap={() => onChatTap(c.id)}
+              pinkColor={pinkColor}
+              headingColor={headingColor}
+              mutedColor={mutedColor}
+              tintBg={tintBg}
+              dark={dark}
+            />
+          ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function ChapterTimelineItem({
+  chapter: c,
+  isActive,
+  isLast,
+  onTap,
+  pinkColor,
+  headingColor,
+  mutedColor,
+  tintBg,
+  dark,
+}: {
+  chapter: ConvoItem;
+  isActive: boolean;
+  isLast: boolean;
+  onTap: () => void;
+  pinkColor: string;
+  headingColor: string;
+  mutedColor: string;
+  tintBg: string;
+  dark: boolean;
+}) {
+  const [showSummary, setShowSummary] = useState(false);
+  const isCompleted = c.gate_status === 'completed';
+
+  return (
+    <div className="flex gap-0">
+      {/* Timeline spine */}
+      <div className="flex flex-col items-center w-5 shrink-0">
+        <div
+          className="w-2.5 h-2.5 rounded-full shrink-0 mt-[7px]"
+          style={{
+            background: isActive ? pinkColor
+              : isCompleted ? (dark ? 'rgba(218,218,220,0.35)' : 'rgba(15,16,18,0.20)')
+              : (dark ? 'rgba(255,255,255,0.12)' : 'rgba(15,16,18,0.08)'),
+            border: isActive ? `2px solid ${pinkColor}` : 'none',
+            boxShadow: isActive ? `0 0 0 3px ${pinkColor}22` : 'none',
+          }}
+        />
+        {!isLast && (
+          <div
+            className="w-px flex-1 min-h-[16px]"
+            style={{ background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.06)' }}
+          />
+        )}
+      </div>
+
+      {/* Chapter content */}
+      <button
+        onClick={onTap}
+        className="flex-1 text-left px-2 py-1.5 rounded-lg transition-all active:scale-[0.985] min-w-0"
+        style={{
+          background: isActive ? tintBg : 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          WebkitTapHighlightColor: 'transparent',
+        }}
+      >
+        <div className="flex items-center gap-1.5">
+          {isCompleted && (
+            <span className="material-symbols-outlined text-[11px]" style={{ color: dark ? 'rgba(218,218,220,0.4)' : 'rgba(15,16,18,0.3)' }}>
+              check
+            </span>
+          )}
+          <span
+            className="truncate text-[12px] font-medium"
+            style={{ color: isActive ? headingColor : isCompleted ? mutedColor : headingColor }}
+          >
+            {c.title?.replace(' ✓', '')}
+          </span>
+          {c.gate_label && (
+            <span
+              className="text-[9px] font-mono shrink-0 px-1 py-0.5 rounded"
+              style={{
+                background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)',
+                color: mutedColor,
+              }}
+            >
+              {c.gate_label}
+            </span>
+          )}
+        </div>
+        {c.summary && (
+          <div className="mt-0.5">
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowSummary(!showSummary); }}
+              className="text-[10px] flex items-center gap-0.5"
+              style={{
+                color: pinkColor,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 0,
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <span className="material-symbols-outlined text-[11px]">
+                {showSummary ? 'expand_less' : 'info'}
+              </span>
+              {showSummary ? 'Hide' : 'Summary'}
+            </button>
+            {showSummary && (
+              <p className="text-[11px] leading-relaxed mt-1 pr-1" style={{ color: mutedColor }}>
+                {c.summary}
+              </p>
+            )}
+          </div>
+        )}
+      </button>
     </div>
   );
 }

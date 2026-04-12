@@ -75,7 +75,7 @@ export function MobileJourneySheet({
     : scrolled ? 'rgba(254,254,254,0.85)' : 'transparent';
 
   return (
-    <Drawer.Root open={open} onOpenChange={onOpenChange} shouldScaleBackground snapPoints={[0.35, 0.95]}>
+    <Drawer.Root open={open} onOpenChange={onOpenChange} shouldScaleBackground snapPoints={[0.35, 0.95]} fadeFromIndex={0}>
       <Drawer.Portal>
         <Drawer.Overlay
           className="fixed inset-0 z-[100]"
@@ -87,7 +87,6 @@ export function MobileJourneySheet({
             background: bg,
             borderTopLeftRadius: 28,
             borderTopRightRadius: 28,
-            maxHeight: '95vh',
             paddingTop: 0,
             boxShadow: '0 -20px 60px -20px rgba(0,0,0,0.6)',
           }}
