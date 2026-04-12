@@ -46,6 +46,7 @@ import { MobileSellPage } from '../../components/mobile/MobileSellPage';
 import { MobileJourneySheet } from '../../components/mobile/MobileJourneySheet';
 import { MobileWorkspaceSheet } from '../../components/mobile/MobileWorkspaceSheet';
 import { isStandalone } from '../../lib/pwa';
+import { NextActionsCards } from '../../components/mobile/NextActionsCards';
 import { PWAInstallPrompt } from '../../components/mobile/PWAInstallPrompt';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
@@ -1614,6 +1615,24 @@ export default function AppShell() {
                             Yulia guides the entire M&amp;A process from beginning to end, empowering your team with superior deal intelligence, at the speed&nbsp;of&nbsp;AI.
                           </p>
                         </>
+                      )}
+
+                      {/* Next actions cards — logged-in users see Yulia's suggestions */}
+                      {user && (
+                        <div className={`w-full ${isMobile ? 'mt-4' : 'mt-6 max-w-xl mx-auto'}`}>
+                          <NextActionsCards
+                            dark={dark}
+                            onAction={(prefill) => {
+                              if (isMobile) {
+                                fillHomeInput(prefill);
+                              } else {
+                                const ref = homeInputRef.current;
+                                if (ref) { ref.value = prefill; ref.focus(); }
+                              }
+                            }}
+                            authHeaders={authHeaders}
+                          />
+                        </div>
                       )}
 
                       {/* Desktop: input + micro-copy */}
