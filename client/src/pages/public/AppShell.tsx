@@ -2463,11 +2463,18 @@ export default function AppShell() {
         </button>
       )}
 
-      {/* ═══ PWA INSTALL — full-screen interstitial after signup/login ═══ */}
+      {/* ═══ PWA LOCK — full-screen interstitial. Logged-in mobile users
+          MUST be in standalone PWA mode to use the app. Install or sign out. ═══ */}
       {isMobile && (
         <PWAInstallPrompt
           isLoggedIn={!!user}
           dark={dark}
+          onSignOut={() => {
+            // Sign out and go back to the anonymous browsing experience
+            fetch('/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(() => {});
+            localStorage.removeItem('smbx-token');
+            window.location.href = '/';
+          }}
         />
       )}
 

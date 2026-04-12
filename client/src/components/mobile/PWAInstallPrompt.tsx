@@ -1,17 +1,19 @@
 /**
  * PWAInstallPrompt.tsx
  *
- * Full-screen interstitial that shows as a STEP in the signup/login flow.
- * NOT optional, NOT delayed. This is how users set up the app.
+ * PWA LOCK — full-screen interstitial that BLOCKS the mobile app for
+ * authenticated users who are NOT in standalone PWA mode.
  *
- * Framing: "smbx.ai works best as an app. It takes 10 seconds."
- * The user must acknowledge ("I've added it" or "Skip for now").
+ * The app is designed as a PWA. On mobile, logged-in users must install
+ * it to their home screen. There is no "skip" — the only options are:
+ *   1. Follow the install steps → "I've added it — let's go"
+ *   2. Sign out and browse the marketing pages in the browser
  *
- * Shows only when:
- *   - User is on mobile
- *   - User just logged in or signed up
- *   - App is NOT already running in standalone mode
- *   - User hasn't completed this step yet (localStorage flag)
+ * This runs on EVERY render so it catches both fresh signups and returning
+ * users who somehow opened the app in a browser tab instead of the PWA.
+ *
+ * Desktop users are never locked (desktop doesn't need standalone mode).
+ * Anonymous users are never locked (they're browsing, not using the app).
  */
 
 import { useState, useEffect } from 'react';
@@ -45,9 +47,10 @@ function isMobileDevice(): boolean {
 interface Props {
   isLoggedIn: boolean;
   dark: boolean;
+  onSignOut?: () => void;
 }
 
-export function PWAInstallPrompt({ isLoggedIn, dark }: Props) {
+export function PWAInstallPrompt({ isLoggedIn, dark, onSignOut }: Props) {
   const [visible, setVisible] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
@@ -61,21 +64,24 @@ export function PWAInstallPrompt({ isLoggedIn, dark }: Props) {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  // Show when conditions are met
+  // LOCK: on mobile, logged-in users MUST be in standalone mode.
+  // This runs on every render so it catches both fresh signups and
+  // returning users who somehow ended up in a browser tab.
   useEffect(() => {
-    if (!isMobileDevice()) return;
-    if (isStandalone()) return;
-    if (!isLoggedIn) return;
+    if (!isMobileDevice()) { setVisible(false); return; }
+    if (isStandalone())    { setVisible(false); return; }
+    if (!isLoggedIn)       { setVisible(false); return; }
 
-    // Check if user already completed this step
-    try {
-      if (localStorage.getItem(STORAGE_KEY) === 'done') return;
-    } catch { /* ignore */ }
-
+    // User is logged in on mobile but NOT in standalone PWA → lock.
     setVisible(true);
   }, [isLoggedIn]);
 
-  const handleComplete = () => {
+  // "I've added it" — check if we're now in standalone
+  const handleConfirm = () => {
+    // On iOS, the user can't switch to standalone without closing Safari
+    // and opening from the home screen icon. So "I've added it" means
+    // they claim to have done it — trust them, set the flag, and they'll
+    // get the real standalone check on next launch.
     setVisible(false);
     try {
       localStorage.setItem(STORAGE_KEY, 'done');
@@ -86,7 +92,7 @@ export function PWAInstallPrompt({ isLoggedIn, dark }: Props) {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') handleComplete();
+      if (outcome === 'accepted') handleConfirm();
       setDeferredPrompt(null);
     }
   };
@@ -256,13 +262,13 @@ export function PWAInstallPrompt({ isLoggedIn, dark }: Props) {
             </motion.p>
           </div>
 
-          {/* Bottom actions */}
+          {/* Bottom actions — NO SKIP. Install or sign out. */}
           <div
             className="shrink-0 px-8 pb-4"
             style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)' }}
           >
             <button
-              onClick={handleComplete}
+              onClick={handleConfirm}
               className="w-full py-4 rounded-2xl text-[15px] font-bold transition-all active:scale-[0.985] mb-3"
               style={{
                 background: pinkC,
@@ -275,19 +281,21 @@ export function PWAInstallPrompt({ isLoggedIn, dark }: Props) {
             >
               {ios ? "I've added it — let's go" : "I've installed it"}
             </button>
-            <button
-              onClick={handleComplete}
-              className="w-full py-3 rounded-xl text-[13px] font-medium transition-all active:scale-[0.985]"
-              style={{
-                background: 'transparent',
-                color: mutedC,
-                border: 'none',
-                cursor: 'pointer',
-                WebkitTapHighlightColor: 'transparent',
-              }}
-            >
-              Skip for now
-            </button>
+            {onSignOut && (
+              <button
+                onClick={onSignOut}
+                className="w-full py-3 rounded-xl text-[13px] font-medium transition-all active:scale-[0.985]"
+                style={{
+                  background: 'transparent',
+                  color: mutedC,
+                  border: 'none',
+                  cursor: 'pointer',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                Sign out and browse instead
+              </button>
+            )}
           </div>
         </motion.div>
       )}
