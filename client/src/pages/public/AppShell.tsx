@@ -1590,18 +1590,31 @@ export default function AppShell() {
                           <LogoHero height={42} dark={dark} />
                         </div>
                       )}
-                      <h1 className={`font-headline font-black tracking-[-0.04em] ${isMobile ? 'text-[42px] leading-[0.95] mb-6' : 'text-[64px] leading-[0.95] mb-4'}`}>
-                        {user
-                          ? <>AI that makes <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>M&amp;A</span><br/>faster and easier.</>
-                          : <>Close deals <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>faster</span><br/>and smarter.</>
-                        }
-                      </h1>
-                      <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[300px]' : 'text-xl max-w-2xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                        {user
-                          ? 'Sell, buy, raise, or integrate — by talking to Yulia.'
-                          : 'Yulia guides the entire M&A process from beginning to end, empowering your team with superior deal intelligence, at the speed of AI.'
-                        }
-                      </p>
+                      {user ? (
+                        /* ─── Logged in: personal greeting + next steps ─── */
+                        <>
+                          <h1 className={`font-headline font-black tracking-[-0.04em] ${isMobile ? 'text-[36px] leading-[1] mb-4' : 'text-[52px] leading-[1] mb-4'}`}>
+                            Welcome back,{' '}
+                            <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>
+                              {user.display_name?.split(' ')[0] || 'there'}
+                            </span>!
+                          </h1>
+                          <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[300px]' : 'text-lg max-w-xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                            Here's how we can keep moving forward — tell me what you're working on and I'll pick up where we left off.
+                          </p>
+                        </>
+                      ) : (
+                        /* ─── Not logged in: landing page hook ─── */
+                        <>
+                          <h1 className={`font-headline font-black tracking-[-0.04em] ${isMobile ? 'text-[42px] leading-[0.95] mb-6' : 'text-[64px] leading-[0.95] mb-4'}`}>
+                            Close deals <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>faster</span><br/>
+                            and smarter.
+                          </h1>
+                          <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[300px]' : 'text-xl max-w-2xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                            Yulia guides the entire M&amp;A process from beginning to end, empowering your team with superior deal intelligence, at the speed of AI.
+                          </p>
+                        </>
+                      )}
 
                       {/* Desktop: input + micro-copy */}
                       {!isMobile && (
