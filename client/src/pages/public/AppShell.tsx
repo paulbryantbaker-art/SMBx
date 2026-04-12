@@ -1591,11 +1591,16 @@ export default function AppShell() {
                         </div>
                       )}
                       <h1 className={`font-headline font-black tracking-[-0.04em] ${isMobile ? 'text-[42px] leading-[0.95] mb-6' : 'text-[64px] leading-[0.95] mb-4'}`}>
-                        AI that makes <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>M&amp;A</span><br/>
-                        faster and easier.
+                        {user
+                          ? <>AI that makes <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>M&amp;A</span><br/>faster and easier.</>
+                          : <>Close deals <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>faster</span><br/>and smarter.</>
+                        }
                       </h1>
-                      <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[280px]' : 'text-xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                        Sell, buy, raise, or integrate easily just by talking to Yulia, your M&amp;A deal advisor.
+                      <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[300px]' : 'text-xl max-w-2xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                        {user
+                          ? 'Sell, buy, raise, or integrate — by talking to Yulia.'
+                          : 'Yulia guides the entire M&A process from beginning to end, empowering your team with superior deal intelligence, at the speed of AI.'
+                        }
                       </p>
 
                       {/* Desktop: input + micro-copy */}
