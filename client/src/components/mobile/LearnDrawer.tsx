@@ -86,7 +86,7 @@ export function LearnDrawer({ open, onOpenChange, dark, onPick }: Props) {
   const pinkC    = dark ? PINK_DARK : PINK;
 
   return (
-    <Drawer.Root open={open} onOpenChange={onOpenChange} shouldScaleBackground snapPoints={[0.35, 0.95]} fadeFromIndex={0}>
+    <Drawer.Root open={open} onOpenChange={onOpenChange} shouldScaleBackground>
       <Drawer.Portal>
         <Drawer.Overlay
           className="fixed inset-0 z-[100]"
@@ -98,6 +98,7 @@ export function LearnDrawer({ open, onOpenChange, dark, onPick }: Props) {
             background: bg,
             borderTopLeftRadius: 28,
             borderTopRightRadius: 28,
+            maxHeight: '92vh',
             paddingBottom: 'env(safe-area-inset-bottom, 0px)',
             boxShadow: '0 -20px 60px -20px rgba(0,0,0,0.6)',
           }}

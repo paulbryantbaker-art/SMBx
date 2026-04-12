@@ -592,21 +592,42 @@ chatRouter.post('/conversations', async (req, res) => {
 chatRouter.post('/conversations/general', requireAuth, async (req, res) => {
   const userId = (req as any).userId;
   try {
-    // Find existing general conversation
-    const [existing] = await sql`
-      SELECT id, title, is_general, created_at, updated_at
-      FROM conversations
-      WHERE user_id = ${userId} AND is_general = true AND is_archived = false
-      ORDER BY updated_at DESC LIMIT 1
-    `;
+    // Find existing general conversation (is_general column may not exist yet)
+    let existing;
+    try {
+      [existing] = await sql`
+        SELECT id, title, is_general, created_at, updated_at
+        FROM conversations
+        WHERE user_id = ${userId} AND is_general = true AND is_archived = false
+        ORDER BY updated_at DESC LIMIT 1
+      `;
+    } catch {
+      // is_general column doesn't exist yet — find by title fallback
+      [existing] = await sql`
+        SELECT id, title, created_at, updated_at
+        FROM conversations
+        WHERE user_id = ${userId} AND title = 'General Q&A' AND is_archived = false
+        ORDER BY updated_at DESC LIMIT 1
+      `;
+    }
     if (existing) return res.json(existing);
 
     // Create new general conversation
-    const [conv] = await sql`
-      INSERT INTO conversations (user_id, title, is_general)
-      VALUES (${userId}, ${'General Q&A'}, true)
-      RETURNING id, user_id, title, is_general, is_archived, created_at, updated_at
-    `;
+    let conv;
+    try {
+      [conv] = await sql`
+        INSERT INTO conversations (user_id, title, is_general)
+        VALUES (${userId}, ${'General Q&A'}, true)
+        RETURNING id, user_id, title, is_general, is_archived, created_at, updated_at
+      `;
+    } catch {
+      // is_general column doesn't exist — create without it
+      [conv] = await sql`
+        INSERT INTO conversations (user_id, title)
+        VALUES (${userId}, ${'General Q&A'})
+        RETURNING id, user_id, title, is_archived, created_at, updated_at
+      `;
+    }
     return res.status(201).json(conv);
   } catch (err: any) {
     console.error('General conversation error:', err.message);
@@ -688,17 +709,33 @@ chatRouter.get('/conversations/grouped', requireAuth, async (req, res) => {
       ORDER BY updated_at DESC
     `;
 
-    // Fetch all non-archived conversations with message counts
-    const convos = await sql`
-      SELECT c.id, c.title, c.deal_id, c.gate_status, c.gate_label,
-             c.summary, c.is_general, c.created_at, c.updated_at,
-             COALESCE(c.message_count, 0) as message_count,
-             d.journey_type as journey, d.current_gate, d.business_name, d.industry
-      FROM conversations c
-      LEFT JOIN deals d ON c.deal_id = d.id
-      WHERE c.user_id = ${userId} AND c.is_archived = false
-      ORDER BY c.updated_at DESC
-    `;
+    // Fetch all non-archived conversations
+    // Defensive: is_general and message_count may not exist if migration 056 hasn't run
+    let convos;
+    try {
+      convos = await sql`
+        SELECT c.id, c.title, c.deal_id, c.gate_status, c.gate_label,
+               c.summary, c.is_general, c.created_at, c.updated_at,
+               COALESCE(c.message_count, 0) as message_count,
+               d.journey_type as journey, d.current_gate, d.business_name, d.industry
+        FROM conversations c
+        LEFT JOIN deals d ON c.deal_id = d.id
+        WHERE c.user_id = ${userId} AND c.is_archived = false
+        ORDER BY c.updated_at DESC
+      `;
+    } catch {
+      // Fallback without new columns
+      convos = await sql`
+        SELECT c.id, c.title, c.deal_id, c.gate_status, c.gate_label,
+               c.summary, c.created_at, c.updated_at,
+               false as is_general, 0 as message_count,
+               d.journey_type as journey, d.current_gate, d.business_name, d.industry
+        FROM conversations c
+        LEFT JOIN deals d ON c.deal_id = d.id
+        WHERE c.user_id = ${userId} AND c.is_archived = false
+        ORDER BY c.updated_at DESC
+      `;
+    }
 
     // Group conversations by deal
     const dealMap = new Map<number, any>();

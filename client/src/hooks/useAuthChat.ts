@@ -101,16 +101,18 @@ export function useAuthChat(user: User | null) {
   // Load conversation list (flat for backward compat + grouped for new sidebar)
   const loadConversations = useCallback(async () => {
     if (!user) return;
+    // Flat list — critical, must work
     try {
-      const [flatRes, groupedRes] = await Promise.all([
-        fetch('/api/chat/conversations', { headers: authHeaders() }),
-        fetch('/api/chat/conversations/grouped', { headers: authHeaders() }),
-      ]);
-      if (flatRes.ok) setConversations(await flatRes.json());
-      if (groupedRes.ok) setGrouped(await groupedRes.json());
+      const res = await fetch('/api/chat/conversations', { headers: authHeaders() });
+      if (res.ok) setConversations(await res.json());
     } catch (err) {
       console.error('Failed to load conversations:', err);
     }
+    // Grouped — nice-to-have, fails silently if migration hasn't run
+    try {
+      const res = await fetch('/api/chat/conversations/grouped', { headers: authHeaders() });
+      if (res.ok) setGrouped(await res.json());
+    } catch { /* non-critical */ }
   }, [user]);
 
   useEffect(() => {
