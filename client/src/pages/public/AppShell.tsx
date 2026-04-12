@@ -45,6 +45,7 @@ import { StarterChips } from '../../components/mobile/StarterChips';
 import { MobileSellPage } from '../../components/mobile/MobileSellPage';
 import { MobileJourneySheet } from '../../components/mobile/MobileJourneySheet';
 import { MobileWorkspaceSheet } from '../../components/mobile/MobileWorkspaceSheet';
+import { PWAInstallPrompt } from '../../components/mobile/PWAInstallPrompt';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
 import { MobileIntegratePage } from '../../components/mobile/MobileIntegratePage';
@@ -2459,6 +2460,15 @@ export default function AppShell() {
         >
           <span className="material-symbols-outlined text-[22px]">menu</span>
         </button>
+      )}
+
+      {/* ═══ PWA INSTALL PROMPT — shows at conversion moment ═══ */}
+      {isMobile && (
+        <PWAInstallPrompt
+          isLoggedIn={!!user}
+          dark={dark}
+          delayMs={4000}
+        />
       )}
 
       {/* Floating logo removed — X logo now lives in sidebar permanently */}

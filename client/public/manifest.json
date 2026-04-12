@@ -1,21 +1,44 @@
 {
-  "name": "smbx.ai",
-  "short_name": "smbx",
-  "description": "AI-powered deal intelligence for business acquisitions",
+  "name": "smbx.ai — AI Deal Intelligence",
+  "short_name": "smbx.ai",
+  "description": "AI that makes M&A faster and easier. Sell, buy, raise, or integrate — by talking to Yulia.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#f9f9fc",
+  "orientation": "any",
+  "background_color": "#FFFFFF",
   "theme_color": "#D44A78",
+  "categories": ["business", "finance", "productivity"],
   "icons": [
     {
       "src": "/x.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/x.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New conversation",
+      "short_name": "Chat",
+      "url": "/chat",
+      "icons": [{ "src": "/x.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Sell my business",
+      "short_name": "Sell",
+      "url": "/sell"
+    },
+    {
+      "name": "Buy a business",
+      "short_name": "Buy",
+      "url": "/buy"
     }
   ]
 }
