@@ -1611,7 +1611,7 @@ export default function AppShell() {
                             and smarter.
                           </h1>
                           <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[300px]' : 'text-xl max-w-2xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                            Yulia guides the entire M&amp;A process from beginning to end, empowering your team with superior deal intelligence, at the speed of AI.
+                            Yulia guides the entire M&amp;A process from beginning to end, empowering your team with superior deal intelligence, at the speed&nbsp;of&nbsp;AI.
                           </p>
                         </>
                       )}
