@@ -1480,10 +1480,10 @@ export default function AppShell() {
       startX = t.clientX;
       startY = t.clientY;
       startT = Date.now();
-      // Track swipes that start INSIDE the safe zone (40-120px from edges)
-      // This avoids fighting iOS edge back-swipe which lives in 0-30px
+      // Track swipes that start in the left half of the screen (opens sidebar)
+      // Avoids iOS edge back-swipe zone (0-20px) but allows the rest of left half
       const w = window.innerWidth;
-      trackable = (startX > 40 && startX < 120) || (startX > w - 120 && startX < w - 40);
+      trackable = (startX > 20 && startX < w * 0.5);
     };
 
     const onEnd = (e: TouchEvent) => {
@@ -1493,12 +1493,9 @@ export default function AppShell() {
       const dx = t.clientX - startX;
       const dy = t.clientY - startY;
       const dt = Date.now() - startT;
-      if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) || dt > 600) return;
-      // Only left-edge swipe on mobile — opens the sidebar via Vaul.
-      // Right-edge swipe is KILLED to avoid fighting iOS Safari back/forward.
-      // Also: on the home page, swipe-back does nothing (no history to go back to).
-      if (dx > 0 && startX < 120 && !isMobileSidebarOpen) {
-        // Open sidebar from left edge swipe
+      if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) || dt > 600) return;
+      // Swipe right from left half → open sidebar
+      if (dx > 0 && !isMobileSidebarOpen) {
         setIsMobileSidebarOpen(true);
       }
     };
