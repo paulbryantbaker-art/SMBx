@@ -14,6 +14,7 @@
 import { Drawer } from 'vaul';
 import { type ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import { isStandalone } from '../../lib/pwa';
 
 const PINK = '#D44A78';
 const PINK_DARK = '#E8709A';
@@ -318,8 +319,8 @@ export function MobileSidebar({
               </Section>
             )}
 
-            {/* LEARN — only when logged out (logged-in users already chose Yulia) */}
-            {!isLoggedIn && (
+            {/* LEARN — only in browser when logged out. NEVER in PWA. */}
+            {!isLoggedIn && !isStandalone() && (
               <Section label="How Yulia helps" sectionColor={sectionC} mutedColor={mutedC}>
                 {LEARN_ITEMS.map((item, i) => (
                   <motion.button

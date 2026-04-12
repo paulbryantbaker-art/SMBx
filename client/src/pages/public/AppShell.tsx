@@ -45,6 +45,7 @@ import { StarterChips } from '../../components/mobile/StarterChips';
 import { MobileSellPage } from '../../components/mobile/MobileSellPage';
 import { MobileJourneySheet } from '../../components/mobile/MobileJourneySheet';
 import { MobileWorkspaceSheet } from '../../components/mobile/MobileWorkspaceSheet';
+import { isStandalone } from '../../lib/pwa';
 import { PWAInstallPrompt } from '../../components/mobile/PWAInstallPrompt';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
@@ -493,6 +494,8 @@ export default function AppShell() {
   const [learnDrawerOpen, setLearnDrawerOpen] = useState(false);
   const [mobileJourneyOpen, setMobileJourneyOpen] = useState<LearnDest | null>(null);
   const [mobileWorkspaceOpen, setMobileWorkspaceOpen] = useState<WorkspaceTool | null>(null);
+  // PWA standalone detection — when true, strip all marketing/journey content
+  const isPWA = isStandalone();
   // Mobile canvas overlay visibility — separate from canvasTabs.length so tabs persist
   // when user navigates back to chat
   const [mobileCanvasVisible, setMobileCanvasVisible] = useState(false);
@@ -1690,12 +1693,14 @@ export default function AppShell() {
                       className="shrink-0 relative z-10 chat-pill-mobile-container"
                       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}
                     >
-                      {/* New mobile starter chips — pre-fill conversations + open LearnDrawer */}
-                      <StarterChips
-                        dark={dark}
-                        onChipTap={(fill) => fillHomeInput(fill)}
-                        onLearnTap={() => setLearnDrawerOpen(true)}
-                      />
+                      {/* Starter chips — journey starters in browser, action starters in PWA */}
+                      {!isPWA && (
+                        <StarterChips
+                          dark={dark}
+                          onChipTap={(fill) => fillHomeInput(fill)}
+                          onLearnTap={() => setLearnDrawerOpen(true)}
+                        />
+                      )}
 
                       <div className="px-4" style={{ touchAction: 'auto' }}>
                       {/* Gradient-glow input — no + tools popup on mobile (StarterChips replace it) */}
@@ -2241,8 +2246,8 @@ export default function AppShell() {
         />
       )}
 
-      {/* ═══ NEW MOBILE LEARN DRAWER — bottom sheet from "How can Yulia help me?" ═══ */}
-      {isMobile && (
+      {/* ═══ NEW MOBILE LEARN DRAWER — browser only, NOT in PWA ═══ */}
+      {isMobile && !isPWA && (
         <LearnDrawer
           open={learnDrawerOpen}
           onOpenChange={setLearnDrawerOpen}
@@ -2251,8 +2256,8 @@ export default function AppShell() {
         />
       )}
 
-      {/* ═══ NEW MOBILE JOURNEY SHEETS — full-screen drawers per journey ═══ */}
-      {isMobile && (
+      {/* ═══ MOBILE JOURNEY SHEETS — browser only, stripped from PWA ═══ */}
+      {isMobile && !isPWA && (
         <MobileSellPage
           open={mobileJourneyOpen === 'sell'}
           onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
@@ -2312,72 +2317,66 @@ export default function AppShell() {
         </MobileWorkspaceSheet>
       )}
 
-      {/* All 6 dedicated mobile journey pages — full mobile-native rewrites */}
-      {isMobile && (
-        <MobileBuyPage
-          open={mobileJourneyOpen === 'buy'}
-          onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
-          dark={dark}
-          onTalkToYulia={(prefill) => {
-            setMobileJourneyOpen(null);
-            if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
-          }}
-        />
-      )}
-      {isMobile && (
-        <MobileRaisePage
-          open={mobileJourneyOpen === 'raise'}
-          onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
-          dark={dark}
-          onTalkToYulia={(prefill) => {
-            setMobileJourneyOpen(null);
-            if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
-          }}
-        />
-      )}
-      {isMobile && (
-        <MobileIntegratePage
-          open={mobileJourneyOpen === 'integrate'}
-          onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
-          dark={dark}
-          onTalkToYulia={(prefill) => {
-            setMobileJourneyOpen(null);
-            if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
-          }}
-        />
-      )}
-      {isMobile && (
-        <MobileAdvisorsPage
-          open={mobileJourneyOpen === 'advisors'}
-          onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
-          dark={dark}
-          onTalkToYulia={(prefill) => {
-            setMobileJourneyOpen(null);
-            if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
-          }}
-        />
-      )}
-      {isMobile && (
-        <MobileHowItWorksPage
-          open={mobileJourneyOpen === 'how-it-works'}
-          onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
-          dark={dark}
-          onTalkToYulia={(prefill) => {
-            setMobileJourneyOpen(null);
-            if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
-          }}
-        />
-      )}
-      {isMobile && (
-        <MobilePricingPage
-          open={mobileJourneyOpen === 'pricing'}
-          onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
-          dark={dark}
-          onTalkToYulia={(prefill) => {
-            setMobileJourneyOpen(null);
-            if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
-          }}
-        />
+      {/* All 7 mobile journey pages — browser only, stripped from PWA.
+          By the time the user is in PWA, they're signed up and don't need
+          marketing content. The journey pages live in the browser experience. */}
+      {isMobile && !isPWA && (
+        <>
+          <MobileBuyPage
+            open={mobileJourneyOpen === 'buy'}
+            onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
+            dark={dark}
+            onTalkToYulia={(prefill) => {
+              setMobileJourneyOpen(null);
+              if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
+            }}
+          />
+          <MobileRaisePage
+            open={mobileJourneyOpen === 'raise'}
+            onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
+            dark={dark}
+            onTalkToYulia={(prefill) => {
+              setMobileJourneyOpen(null);
+              if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
+            }}
+          />
+          <MobileIntegratePage
+            open={mobileJourneyOpen === 'integrate'}
+            onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
+            dark={dark}
+            onTalkToYulia={(prefill) => {
+              setMobileJourneyOpen(null);
+              if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
+            }}
+          />
+          <MobileAdvisorsPage
+            open={mobileJourneyOpen === 'advisors'}
+            onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
+            dark={dark}
+            onTalkToYulia={(prefill) => {
+              setMobileJourneyOpen(null);
+              if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
+            }}
+          />
+          <MobileHowItWorksPage
+            open={mobileJourneyOpen === 'how-it-works'}
+            onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
+            dark={dark}
+            onTalkToYulia={(prefill) => {
+              setMobileJourneyOpen(null);
+              if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
+            }}
+          />
+          <MobilePricingPage
+            open={mobileJourneyOpen === 'pricing'}
+            onOpenChange={(o) => !o && setMobileJourneyOpen(null)}
+            dark={dark}
+            onTalkToYulia={(prefill) => {
+              setMobileJourneyOpen(null);
+              if (prefill) setTimeout(() => fillHomeInput(prefill), 350);
+            }}
+          />
+        </>
       )}
 
       {/* ═══ MOBILE CANVAS DRAWER (right side) — DISABLED on mobile.
