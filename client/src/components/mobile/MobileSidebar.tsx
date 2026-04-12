@@ -12,7 +12,7 @@
  */
 
 import { Drawer } from 'vaul';
-import { type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { isStandalone } from '../../lib/pwa';
 
@@ -39,7 +39,19 @@ export interface ConvoItem {
   id: number;
   title: string;
   subtitle?: string;
+  summary?: string;
+  gate_label?: string;
+  gate_status?: string;
   active?: boolean;
+}
+
+export interface DealGroupItem {
+  id: number;
+  journey_type: string | null;
+  current_gate: string | null;
+  business_name: string | null;
+  industry: string | null;
+  conversations: ConvoItem[];
 }
 
 interface Props {
@@ -47,17 +59,22 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   dark: boolean;
 
-  // Data feeds
+  // Data feeds — deal-first model
+  dealGroups: DealGroupItem[];
+  generalChats: ConvoItem[];
+  /** @deprecated use dealGroups + generalChats */
   chats: ConvoItem[];
 
   // Profile
   userName?: string | null;
   userEmail?: string | null;
   isLoggedIn: boolean;
+  activeConversationId?: number | null;
 
   // Actions
   onHomeTap: () => void;
-  onNewChat: () => void;
+  onNewDeal: () => void;
+  onGeneralChat: () => void;
   onChatTap: (id: number) => void;
   onWorkspaceTap: (tool: WorkspaceTool) => void;
   onLearnTap: (dest: LearnDest) => void;
@@ -65,6 +82,8 @@ interface Props {
   onSettingsTap: () => void;
   onSignIn: () => void;
   onDarkModeToggle: () => void;
+  /** @deprecated alias for onNewDeal */
+  onNewChat?: () => void;
 }
 
 const LEARN_ITEMS: { id: LearnDest; label: string; desc: string }[] = [
@@ -89,12 +108,16 @@ export function MobileSidebar({
   open,
   onOpenChange,
   dark,
+  dealGroups,
+  generalChats,
   chats,
   userName,
   userEmail,
   isLoggedIn,
+  activeConversationId,
   onHomeTap,
-  onNewChat,
+  onNewDeal,
+  onGeneralChat,
   onChatTap,
   onWorkspaceTap,
   onLearnTap,
@@ -102,7 +125,9 @@ export function MobileSidebar({
   onSettingsTap,
   onSignIn,
   onDarkModeToggle,
+  onNewChat,
 }: Props) {
+  const handleNewDeal = onNewDeal || onNewChat || (() => {});
   // Color tokens — Grok-style dark with pink-tinted accents
   const bg        = dark ? '#151617' : '#fefefe';
   const headingC  = dark ? '#f9f9fc' : '#0f1012';
@@ -163,7 +188,7 @@ export function MobileSidebar({
 
             <button
               onClick={() => {
-                onNewChat();
+                handleNewDeal();
                 onOpenChange(false);
               }}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-[15px] transition-all active:scale-[0.98]"
@@ -176,8 +201,8 @@ export function MobileSidebar({
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
-              <span className="material-symbols-outlined text-[20px]">edit_square</span>
-              New conversation
+              <span className="material-symbols-outlined text-[20px]">add_business</span>
+              New deal
             </button>
             {/* Home button — always visible so users can get back to the hero */}
             <button
@@ -201,43 +226,54 @@ export function MobileSidebar({
 
           {/* Scrollable sections */}
           <div className="flex-1 overflow-y-auto px-5 pb-4 mobile-scroll">
-            {/* CHATS — only when logged in (anonymous users have no persisted history) */}
+            {/* DEALS — deal-first sidebar, logged in only */}
             {isLoggedIn && (
-            <Section label="Chats" sectionColor={sectionC} mutedColor={mutedC}>
-              {chats.length === 0 ? (
-                <EmptyState
-                  text="Your conversations will show up here."
-                  mutedColor={mutedC}
-                />
-              ) : (
-                chats.slice(0, 12).map((c) => (
+              <>
+                {dealGroups.length > 0 ? (
+                  <Section label="Active deals" sectionColor={sectionC} mutedColor={mutedC}>
+                    {dealGroups.map((deal) => (
+                      <DealGroupRow
+                        key={deal.id}
+                        deal={deal}
+                        activeConversationId={activeConversationId ?? null}
+                        onChatTap={(id) => { onChatTap(id); onOpenChange(false); }}
+                        headingColor={headingC}
+                        mutedColor={mutedC}
+                        pinkColor={pinkC}
+                        tintBg={tintBg}
+                        ruleColor={ruleC}
+                        dark={dark}
+                      />
+                    ))}
+                  </Section>
+                ) : (
+                  <Section label="Deals" sectionColor={sectionC} mutedColor={mutedC}>
+                    <EmptyState
+                      text="Start a conversation to create your first deal."
+                      mutedColor={mutedC}
+                    />
+                  </Section>
+                )}
+
+                {/* General Q&A */}
+                <Section label="General" sectionColor={sectionC} mutedColor={mutedC}>
                   <DrawerItem
-                    key={c.id}
-                    onTap={() => {
-                      onChatTap(c.id);
-                      onOpenChange(false);
-                    }}
+                    onTap={() => { onGeneralChat(); onOpenChange(false); }}
                     headingColor={headingC}
                     mutedColor={mutedC}
                     pinkColor={pinkC}
                     tintBg={tintBg}
-                    active={c.active}
+                    active={generalChats.some(c => c.id === activeConversationId)}
                   >
-                    <span className="material-symbols-outlined text-[16px] shrink-0" style={{ color: c.active ? pinkC : mutedC }}>
-                      {c.active ? 'chat_bubble' : 'chat_bubble_outline'}
+                    <span className="material-symbols-outlined text-[16px] shrink-0" style={{ color: mutedC }}>
+                      forum
                     </span>
                     <span className="flex-1 truncate text-[14px] font-medium" style={{ color: headingC }}>
-                      {c.title}
+                      General Q&A
                     </span>
-                    {c.subtitle && (
-                      <span className="text-[10px] font-mono shrink-0" style={{ color: mutedC }}>
-                        {c.subtitle}
-                      </span>
-                    )}
                   </DrawerItem>
-                ))
-              )}
-            </Section>
+                </Section>
+              </>
             )}
 
             {/* WORKSPACE — only when logged in. Each item launches a full-screen tool sheet. */}
@@ -523,6 +559,223 @@ function EmptyState({ text, mutedColor }: { text: string; mutedColor: string }) 
     >
       {text}
     </p>
+  );
+}
+
+const JOURNEY_ICONS: Record<string, string> = {
+  sell: 'storefront',
+  buy: 'shopping_bag',
+  raise: 'trending_up',
+  pmi: 'merge',
+};
+
+const JOURNEY_LABELS: Record<string, string> = {
+  sell: 'Sell',
+  buy: 'Buy',
+  raise: 'Raise',
+  pmi: 'Integrate',
+};
+
+function DealGroupRow({
+  deal,
+  activeConversationId,
+  onChatTap,
+  headingColor,
+  mutedColor,
+  pinkColor,
+  tintBg,
+  ruleColor,
+  dark,
+}: {
+  deal: DealGroupItem;
+  activeConversationId: number | null;
+  onChatTap: (id: number) => void;
+  headingColor: string;
+  mutedColor: string;
+  pinkColor: string;
+  tintBg: string;
+  ruleColor: string;
+  dark: boolean;
+}) {
+  const [expanded, setExpanded] = useState(() =>
+    deal.conversations.some(c => c.id === activeConversationId)
+  );
+
+  const dealLabel = deal.business_name || deal.industry || 'Untitled deal';
+  const journeyIcon = JOURNEY_ICONS[deal.journey_type || ''] || 'business_center';
+  const journeyLabel = JOURNEY_LABELS[deal.journey_type || ''] || '';
+  const gateLabel = deal.current_gate || '';
+  const hasActive = deal.conversations.some(c => c.id === activeConversationId);
+
+  // Auto-expand if active conversation is in this deal
+  useEffect(() => {
+    if (hasActive && !expanded) setExpanded(true);
+  }, [hasActive]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="mb-1">
+      {/* Deal header — tap to expand/collapse */}
+      <button
+        onClick={() => {
+          if (deal.conversations.length === 1) {
+            // Single conversation: just navigate
+            onChatTap(deal.conversations[0].id);
+          } else {
+            setExpanded(!expanded);
+          }
+        }}
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all active:scale-[0.985]"
+        style={{
+          background: hasActive ? tintBg : 'transparent',
+          border: hasActive ? `1px solid ${pinkColor}22` : '1px solid transparent',
+          cursor: 'pointer',
+          WebkitTapHighlightColor: 'transparent',
+        }}
+      >
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+          style={{
+            background: hasActive
+              ? (dark ? 'rgba(232,112,154,0.15)' : 'rgba(212,74,120,0.10)')
+              : (dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)'),
+          }}
+        >
+          <span
+            className="material-symbols-outlined text-[16px]"
+            style={{ color: hasActive ? pinkColor : mutedColor }}
+          >
+            {journeyIcon}
+          </span>
+        </div>
+        <div className="flex-1 min-w-0 text-left">
+          <p className="text-[13px] font-bold truncate" style={{ color: headingColor }}>
+            {dealLabel}
+          </p>
+          <p className="text-[10px]" style={{ color: mutedColor }}>
+            {[journeyLabel, gateLabel].filter(Boolean).join(' · ')}
+            {deal.conversations.length > 1 && ` · ${deal.conversations.length} chapters`}
+          </p>
+        </div>
+        {deal.conversations.length > 1 && (
+          <span
+            className="material-symbols-outlined text-[14px] shrink-0 transition-transform"
+            style={{
+              color: mutedColor,
+              transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+            }}
+          >
+            expand_more
+          </span>
+        )}
+      </button>
+
+      {/* Chapter timeline */}
+      {expanded && deal.conversations.length > 1 && (
+        <div className="ml-5 mt-1 mb-2">
+          {deal.conversations.map((c, i) => {
+            const isActive = c.id === activeConversationId;
+            const isCompleted = c.gate_status === 'completed';
+            const isLast = i === deal.conversations.length - 1;
+            const [showSummary, setShowSummary] = useState(false);
+
+            return (
+              <div key={c.id} className="flex gap-0">
+                {/* Timeline spine */}
+                <div className="flex flex-col items-center w-5 shrink-0">
+                  {/* Dot */}
+                  <div
+                    className="w-2.5 h-2.5 rounded-full shrink-0 mt-[7px]"
+                    style={{
+                      background: isActive ? pinkColor
+                        : isCompleted ? (dark ? 'rgba(218,218,220,0.35)' : 'rgba(15,16,18,0.20)')
+                        : (dark ? 'rgba(255,255,255,0.12)' : 'rgba(15,16,18,0.08)'),
+                      border: isActive ? `2px solid ${pinkColor}` : 'none',
+                      boxShadow: isActive ? `0 0 0 3px ${pinkColor}22` : 'none',
+                    }}
+                  />
+                  {/* Connector line */}
+                  {!isLast && (
+                    <div
+                      className="w-px flex-1 min-h-[16px]"
+                      style={{
+                        background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.06)',
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* Chapter content */}
+                <button
+                  onClick={() => onChatTap(c.id)}
+                  className="flex-1 text-left px-2 py-1.5 rounded-lg transition-all active:scale-[0.985] min-w-0"
+                  style={{
+                    background: isActive ? tintBg : 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  <div className="flex items-center gap-1.5">
+                    {isCompleted && (
+                      <span className="material-symbols-outlined text-[11px]" style={{ color: dark ? 'rgba(218,218,220,0.4)' : 'rgba(15,16,18,0.3)' }}>
+                        check
+                      </span>
+                    )}
+                    <span
+                      className="truncate text-[12px] font-medium"
+                      style={{ color: isActive ? headingColor : isCompleted ? mutedColor : headingColor }}
+                    >
+                      {c.title?.replace(' ✓', '')}
+                    </span>
+                    {c.gate_label && (
+                      <span
+                        className="text-[9px] font-mono shrink-0 px-1 py-0.5 rounded"
+                        style={{
+                          background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)',
+                          color: mutedColor,
+                        }}
+                      >
+                        {c.gate_label}
+                      </span>
+                    )}
+                  </div>
+                  {/* Summary preview — tap the info icon to toggle */}
+                  {c.summary && (
+                    <div className="mt-0.5">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setShowSummary(!showSummary); }}
+                        className="text-[10px] flex items-center gap-0.5"
+                        style={{
+                          color: pinkColor,
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          padding: 0,
+                          WebkitTapHighlightColor: 'transparent',
+                        }}
+                      >
+                        <span className="material-symbols-outlined text-[11px]">
+                          {showSummary ? 'expand_less' : 'info'}
+                        </span>
+                        {showSummary ? 'Hide' : 'Summary'}
+                      </button>
+                      {showSummary && (
+                        <p
+                          className="text-[11px] leading-relaxed mt-1 pr-1"
+                          style={{ color: mutedColor }}
+                        >
+                          {c.summary}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 

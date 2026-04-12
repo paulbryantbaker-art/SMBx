@@ -15,6 +15,7 @@ import PipelinePanel from '../../components/chat/PipelinePanel';
 import DataRoom from '../../components/chat/DataRoom';
 import SettingsPanel from '../../components/chat/SettingsPanel';
 import GateProgress from '../../components/chat/GateProgress';
+import { ChapterStrip } from '../../components/shared/ChapterStrip';
 import PaywallCard from '../../components/chat/PaywallCard';
 import Canvas from '../../components/chat/Canvas';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
@@ -846,7 +847,7 @@ export default function AppShell() {
     if (window.location.pathname !== urlMap[tab]) navigate(urlMap[tab]);
   }, [navigate, viewState]);
 
-  // New chat — same-level within chat, replace history
+  // New deal — starts a fresh conversation that becomes a deal when Yulia identifies one
   const handleNewChat = useCallback(() => {
     if (user) authChat.newConversation();
     // Clear any open mobile sheets/drawers so we land on clean chat
@@ -1009,6 +1010,12 @@ export default function AppShell() {
         openCanvasTab('markdown', detail.title || 'Analysis', {
           content: detail.content,
         });
+      }
+      // Chapter started — Yulia created a new chapter, switch to it
+      else if (action.type === 'chapter_started' && action.newConversationId) {
+        authChat.selectConversation(action.newConversationId);
+        authChat.loadConversations();
+        navigate(`/chat/${action.newConversationId}`, { replace: true });
       }
     };
 
@@ -1390,17 +1397,17 @@ export default function AppShell() {
       {/* Divider */}
       <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`} />
 
-      {/* Chats section */}
+      {/* Deals section */}
       <div className="flex flex-col items-center gap-1 w-full px-2">
-        <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Chats</span>
+        <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Deals</span>
         {user && (
         <button
           onClick={() => { handleNewChat(); }}
           className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer transition-all ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5'}`}
-          title="New Chat"
+          title="New Deal"
           type="button"
         >
-          <span className="material-symbols-outlined text-[20px]">add_comment</span>
+          <span className="material-symbols-outlined text-[20px]">add_business</span>
           <span className="text-[9px] font-semibold">New</span>
         </button>
         )}
@@ -1411,11 +1418,11 @@ export default function AppShell() {
               ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
               : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
           }`}
-          title="Chat History"
+          title="All Deals"
           type="button"
         >
-          <span className="material-symbols-outlined text-[20px]">forum</span>
-          <span className="text-[9px] font-semibold">History</span>
+          <span className="material-symbols-outlined text-[20px]">business_center</span>
+          <span className="text-[9px] font-semibold">All</span>
         </button>
       </div>
 
@@ -1847,6 +1854,29 @@ export default function AppShell() {
                 ...(isMobile ? { paddingTop: 48 } : {}),
               }}
             >
+              {/* Chapter strip — shows deal's conversation chapters as horizontal timeline */}
+              {user && authChat.grouped && authChat.activeDealId && (() => {
+                const dealGroup = authChat.grouped.deals.find(d => d.id === authChat.activeDealId);
+                if (!dealGroup || dealGroup.conversations.length < 2) return null;
+                return (
+                  <ChapterStrip
+                    chapters={dealGroup.conversations.map((c: any) => ({
+                      id: c.id,
+                      title: c.title || 'Chapter',
+                      gate_label: c.gate_label,
+                      gate_status: c.gate_status,
+                      summary: c.summary,
+                    }))}
+                    activeChapterId={activeConvId}
+                    onChapterTap={(id) => {
+                      authChat.selectConversation(id);
+                      navigate(`/chat/${id}`, { replace: true });
+                    }}
+                    dark={dark}
+                  />
+                );
+              })()}
+
               {user && authChat.activeDealId && (
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
               )}
@@ -2259,39 +2289,50 @@ export default function AppShell() {
             setActiveTab('home');
             navigate('/');
           }}
-          /* Only show chat history when signed in — anonymous users have no persisted history.
-             Filter out junk titles (Hello, New conversation, etc.) — if no real
-             content exists yet, show the journey type or a date-based label. */
-          chats={user
-            ? (allConversations || [])
-                .filter((c: any) => {
-                  // Filter out conversations with no meaningful content
-                  const title = c.business_name || c.title || '';
-                  const isJunk = !title || /^(hello|hi|hey|new conversation|untitled)$/i.test(title.trim());
-                  // Keep it if it has a real title or a journey tag
-                  return !isJunk || c.journey;
-                })
-                .slice(0, 12)
-                .map((c: any) => {
-                  const rawTitle = c.business_name || c.title || '';
-                  const isJunk = !rawTitle || /^(hello|hi|hey|new conversation|untitled)$/i.test(rawTitle.trim());
-                  const journeyLabel = c.journey ? c.journey.charAt(0).toUpperCase() + c.journey.slice(1) : null;
-                  return {
-                    id: c.id,
-                    title: isJunk ? (journeyLabel ? `${journeyLabel} deal` : 'Recent chat') : rawTitle,
-                    subtitle: c.journey || undefined,
-                    active: c.id === activeConvId,
-                  };
-                })
+          dealGroups={user && authChat.grouped
+            ? authChat.grouped.deals.map(d => ({
+                id: d.id,
+                journey_type: d.journey_type,
+                current_gate: d.current_gate,
+                business_name: d.business_name,
+                industry: d.industry,
+                conversations: d.conversations.map((c: any) => ({
+                  id: c.id,
+                  title: c.title || 'Conversation',
+                  summary: c.summary || undefined,
+                  gate_label: c.gate_label || undefined,
+                  gate_status: c.gate_status || undefined,
+                  active: c.id === activeConvId,
+                })),
+              }))
             : []
           }
+          generalChats={user && authChat.grouped
+            ? authChat.grouped.general.map((c: any) => ({
+                id: c.id,
+                title: c.title || 'General Q&A',
+                active: c.id === activeConvId,
+              }))
+            : []
+          }
+          chats={[]}
+          activeConversationId={activeConvId}
           userName={user?.display_name}
           userEmail={user?.email}
+          onNewDeal={handleNewChat}
           onNewChat={handleNewChat}
-          onChatTap={(_id) => {
+          onChatTap={(id) => {
             setMobileCanvasVisible(false);
             setViewState('chat');
-            navigate('/chat');
+            if (user) authChat.selectConversation(id);
+            navigate(`/chat/${id}`);
+          }}
+          onGeneralChat={async () => {
+            const id = await authChat.openGeneral();
+            if (id) {
+              setViewState('chat');
+              navigate(`/chat/${id}`);
+            }
           }}
           onWorkspaceTap={(tool) => setMobileWorkspaceOpen(tool)}
           onLearnTap={(dest) => setMobileJourneyOpen(dest)}

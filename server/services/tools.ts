@@ -20,7 +20,7 @@ const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require', prepare: false
 export const TOOL_DEFINITIONS: Tool[] = [
   {
     name: 'create_deal',
-    description: 'Create a new deal for the current user. Call this when the user indicates they want to sell, buy, raise capital, or handle post-acquisition integration.',
+    description: 'Create a new deal for the current user. Call this PROACTIVELY within the first 2-3 messages when the user mentions a real business or transaction. Don\'t wait for explicit "I want to sell" — if they share financials, mention their company, or describe a deal situation, create the deal immediately. Infer the journey type from context.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -312,6 +312,18 @@ export const TOOL_DEFINITIONS: Tool[] = [
       required: ['dealId', 'deliverableId', 'recipientEmail'],
     },
   },
+  {
+    name: 'start_new_chapter',
+    description: 'Start a new conversation chapter within the current deal. Call this when: (1) the topic shifts significantly (e.g., from valuation to LOI negotiation), (2) the conversation is getting very long (40+ exchanges), or (3) a major milestone is reached. This summarizes the current conversation, archives it, and creates a fresh chapter. The user stays in the same deal with full context carry-forward.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        reason: { type: 'string', description: 'Brief reason for starting a new chapter (e.g., "Moving to LOI negotiation", "Conversation getting long, archiving for context")' },
+        newChapterTitle: { type: 'string', description: 'Title for the new chapter (e.g., "LOI Negotiation", "Due Diligence Review")' },
+      },
+      required: ['reason'],
+    },
+  },
 ];
 
 // ─── Tool Execution ────────────────────────────────────────
@@ -374,6 +386,8 @@ export async function executeTool(
         return await requestReviewTool(input, userId);
       case 'share_document':
         return await shareDocumentTool(input, userId);
+      case 'start_new_chapter':
+        return await startNewChapter(input, userId, conversationId);
       default:
         return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
@@ -381,6 +395,57 @@ export async function executeTool(
     console.error(`Tool ${toolName} error:`, err.message);
     return JSON.stringify({ error: err.message });
   }
+}
+
+async function startNewChapter(input: Record<string, any>, userId: number, conversationId: number): Promise<string> {
+  const { reason, newChapterTitle } = input;
+
+  // Get the current conversation's deal
+  const [conv] = await sql`SELECT deal_id FROM conversations WHERE id = ${conversationId} AND user_id = ${userId} LIMIT 1`;
+  if (!conv?.deal_id) {
+    return JSON.stringify({ error: 'No deal linked to this conversation. Cannot start a chapter without a deal.' });
+  }
+
+  const dealId = conv.deal_id;
+  const [deal] = await sql`SELECT current_gate, business_name FROM deals WHERE id = ${dealId} LIMIT 1`;
+
+  // Import and run the gate conversation service for summarization + archival
+  const { summarizeGateConversation, gateCompletionTitle } = await import('./gateSummaryService.js');
+
+  // Summarize current conversation
+  const summary = await summarizeGateConversation(conversationId, deal?.current_gate || 'ongoing').catch(() => null);
+
+  // Archive current conversation with summary
+  const archiveTitle = newChapterTitle
+    ? `${newChapterTitle} (archived)`
+    : gateCompletionTitle(deal?.current_gate || 'chapter', deal?.business_name);
+
+  await sql`
+    UPDATE conversations
+    SET gate_status = 'completed',
+        title = ${archiveTitle},
+        summary = ${summary},
+        updated_at = NOW()
+    WHERE id = ${conversationId}
+  `;
+
+  // Create new conversation for the new chapter
+  const title = newChapterTitle || `${deal?.business_name || 'Deal'} — continued`;
+  const [newConvo] = await sql`
+    INSERT INTO conversations (user_id, title, deal_id, gate_status, gate_label, created_at, updated_at)
+    VALUES (${userId}, ${title}, ${dealId}, 'active', ${deal?.current_gate}, NOW(), NOW())
+    RETURNING id, title
+  `;
+
+  return JSON.stringify({
+    success: true,
+    newConversationId: newConvo.id,
+    newChapterTitle: newConvo.title,
+    archivedConversationId: conversationId,
+    summary: summary ? summary.substring(0, 200) + '...' : null,
+    reason,
+    canvas_action: { type: 'chapter_started', newConversationId: newConvo.id },
+  });
 }
 
 async function createDeal(input: Record<string, any>, userId: number, conversationId: number): Promise<string> {
@@ -392,8 +457,8 @@ async function createDeal(input: Record<string, any>, userId: number, conversati
     RETURNING id, journey_type, current_gate
   `;
 
-  // Link conversation to deal
-  await sql`UPDATE conversations SET deal_id = ${deal.id} WHERE id = ${conversationId}`;
+  // Link conversation to deal and clear general flag (this is now a deal conversation)
+  await sql`UPDATE conversations SET deal_id = ${deal.id}, is_general = false WHERE id = ${conversationId}`;
 
   return JSON.stringify({ success: true, dealId: deal.id, journeyType, gate: initialGate });
 }

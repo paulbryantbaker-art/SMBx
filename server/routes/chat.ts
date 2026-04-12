@@ -39,6 +39,7 @@ import { buildAnonymousPrompt } from '../services/promptBuilder.js';
 import { getFirstGate } from '../../shared/gateRegistry.js';
 import { upsertCompanyProfile, upsertBuyerThesis, getBuyerDemandSignals } from '../services/knowledgeGraphService.js';
 import { checkAnonymousGateAdvancement, advanceAnonymousGate } from '../services/gateService.js';
+import { generateConversationTitle } from '../services/conversationNamer.js';
 import { generateValueReadinessReport } from '../services/generators/valueReadinessReport.js';
 import { generateThesisDocument } from '../services/generators/thesisDocument.js';
 import { generateSdeAnalysis } from '../services/generators/sdeAnalysis.js';
@@ -113,6 +114,42 @@ async function ensureConversationColumns() {
     console.error('Column migration warning:', err.message);
     _columnsEnsured = true; // Don't retry on every request
   }
+}
+
+// ─── Conversation garbage collection ────────────────────────
+// Deletes abandoned conversations: <3 messages, no deal, >24h old.
+// Runs once on server startup, can also be called by worker.
+let _gcRan = false;
+export async function garbageCollectConversations(): Promise<number> {
+  try {
+    const result = await sql`
+      DELETE FROM conversations
+      WHERE id IN (
+        SELECT c.id
+        FROM conversations c
+        LEFT JOIN (
+          SELECT conversation_id, COUNT(*) as cnt
+          FROM messages GROUP BY conversation_id
+        ) m ON c.id = m.conversation_id
+        WHERE (m.cnt IS NULL OR m.cnt < 3)
+          AND c.deal_id IS NULL
+          AND COALESCE(c.is_general, false) = false
+          AND c.created_at < NOW() - INTERVAL '24 hours'
+      )
+    `;
+    const count = result.count ?? 0;
+    if (count > 0) console.log(`🗑️  GC: deleted ${count} abandoned conversations`);
+    return Number(count);
+  } catch (err: any) {
+    console.error('Conversation GC error:', err.message);
+    return 0;
+  }
+}
+
+// Fire-and-forget on startup
+if (!_gcRan) {
+  _gcRan = true;
+  garbageCollectConversations();
 }
 
 export const chatRouter = Router();
@@ -319,6 +356,14 @@ chatRouter.post('/message', async (req, res) => {
       res.write(`data: ${JSON.stringify({ type: 'message_stop', conversationId: convId })}\n\n`);
       res.write('data: [DONE]\n\n');
       res.end();
+    }
+
+    // ─── AI conversation naming (fire-and-forget) ─────────
+    if (fullText) {
+      const nameMsgs = [{ role: 'user', content: message }, { role: 'assistant', content: fullText }];
+      generateConversationTitle(nameMsgs).then(async (title) => {
+        if (title) await sql`UPDATE conversations SET title = ${title} WHERE id = ${convId}`;
+      }).catch(() => {});
     }
 
     // ─── Post-streaming hook (fire-and-forget) ───────────────
@@ -542,6 +587,33 @@ chatRouter.post('/conversations', async (req, res) => {
   }
 });
 
+// ─── Find or create general (non-deal) conversation ────────
+
+chatRouter.post('/conversations/general', requireAuth, async (req, res) => {
+  const userId = (req as any).userId;
+  try {
+    // Find existing general conversation
+    const [existing] = await sql`
+      SELECT id, title, is_general, created_at, updated_at
+      FROM conversations
+      WHERE user_id = ${userId} AND is_general = true AND is_archived = false
+      ORDER BY updated_at DESC LIMIT 1
+    `;
+    if (existing) return res.json(existing);
+
+    // Create new general conversation
+    const [conv] = await sql`
+      INSERT INTO conversations (user_id, title, is_general)
+      VALUES (${userId}, ${'General Q&A'}, true)
+      RETURNING id, user_id, title, is_general, is_archived, created_at, updated_at
+    `;
+    return res.status(201).json(conv);
+  } catch (err: any) {
+    console.error('General conversation error:', err.message);
+    return res.status(500).json({ error: 'Failed to create general conversation' });
+  }
+});
+
 // ─── Migrate anonymous session conversations to authenticated user ──
 
 chatRouter.post('/conversations/migrate-session', requireAuth, async (req, res) => {
@@ -597,6 +669,87 @@ chatRouter.get('/conversations', async (req, res) => {
   } catch (err: any) {
     console.error('List conversations error:', err.message);
     return res.status(500).json({ error: 'Failed to list conversations' });
+  }
+});
+
+// ─── List conversations grouped by deal ────────────────────
+// Returns { deals: [...], general: [...] } for the new sidebar.
+// Each deal group has the deal metadata + its conversations.
+
+chatRouter.get('/conversations/grouped', requireAuth, async (req, res) => {
+  try {
+    const userId = (req as any).userId;
+
+    // Fetch all active deals for this user
+    const deals = await sql`
+      SELECT id, journey_type, current_gate, league, business_name, industry, status, updated_at
+      FROM deals
+      WHERE user_id = ${userId} AND status = 'active'
+      ORDER BY updated_at DESC
+    `;
+
+    // Fetch all non-archived conversations with message counts
+    const convos = await sql`
+      SELECT c.id, c.title, c.deal_id, c.gate_status, c.gate_label,
+             c.summary, c.is_general, c.created_at, c.updated_at,
+             COALESCE(c.message_count, 0) as message_count,
+             d.journey_type as journey, d.current_gate, d.business_name, d.industry
+      FROM conversations c
+      LEFT JOIN deals d ON c.deal_id = d.id
+      WHERE c.user_id = ${userId} AND c.is_archived = false
+      ORDER BY c.updated_at DESC
+    `;
+
+    // Group conversations by deal
+    const dealMap = new Map<number, any>();
+    for (const d of deals) {
+      dealMap.set(d.id, {
+        id: d.id,
+        journey_type: d.journey_type,
+        current_gate: d.current_gate,
+        league: d.league,
+        business_name: d.business_name,
+        industry: d.industry,
+        status: d.status,
+        updated_at: d.updated_at,
+        conversations: [] as any[],
+      });
+    }
+
+    const general: any[] = [];
+    const orphaned: any[] = []; // convos linked to inactive/missing deals
+
+    for (const c of convos) {
+      if (c.is_general) {
+        general.push(c);
+      } else if (c.deal_id && dealMap.has(c.deal_id)) {
+        dealMap.get(c.deal_id)!.conversations.push(c);
+      } else if (c.deal_id) {
+        orphaned.push(c); // deal might be archived
+      } else {
+        general.push(c); // no deal = general
+      }
+    }
+
+    // Sort deals by most recent conversation activity
+    const sortedDeals = [...dealMap.values()].sort((a, b) => {
+      const aTime = a.conversations.length > 0
+        ? new Date(a.conversations[0].updated_at).getTime()
+        : new Date(a.updated_at).getTime();
+      const bTime = b.conversations.length > 0
+        ? new Date(b.conversations[0].updated_at).getTime()
+        : new Date(b.updated_at).getTime();
+      return bTime - aTime;
+    });
+
+    return res.json({
+      deals: sortedDeals,
+      general,
+      orphaned: orphaned.length > 0 ? orphaned : undefined,
+    });
+  } catch (err: any) {
+    console.error('Grouped conversations error:', err.message);
+    return res.status(500).json({ error: 'Failed to load grouped conversations' });
   }
 });
 
@@ -771,7 +924,7 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
   try {
     // Verify ownership
     const [conv] = await sql`
-      SELECT id, title, deal_id FROM conversations
+      SELECT id, title, deal_id, is_general FROM conversations
       WHERE id = ${convId} AND user_id = ${userId} LIMIT 1
     `;
     if (!conv) return res.status(404).json({ error: 'Conversation not found' });
@@ -783,10 +936,12 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
       RETURNING id, role, content, metadata, created_at
     `;
 
-    // Auto-title on first message
+    // Placeholder title on first message (AI renames in post-processing)
+    let needsAiTitle = false;
     if (conv.title === 'New conversation') {
       const shortTitle = content.trim().substring(0, 60) + (content.trim().length > 60 ? '...' : '');
       await sql`UPDATE conversations SET title = ${shortTitle}, updated_at = NOW() WHERE id = ${convId}`;
+      needsAiTitle = true;
     }
 
     // Load context
@@ -799,8 +954,10 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
       deal = d || null;
     }
 
-    // Also check for any active deal for this user (if conversation isn't linked yet)
-    if (!deal) {
+    // Auto-link to active deal — but NOT if conversation is marked as general Q&A.
+    // General conversations stay unlinked so they group correctly in the sidebar.
+    // Yulia can still create a deal via create_deal tool if the conversation evolves.
+    if (!deal && !conv.is_general) {
       const [activeDeal] = await sql`
         SELECT * FROM deals WHERE user_id = ${userId} AND status = 'active'
         ORDER BY updated_at DESC LIMIT 1
@@ -882,10 +1039,19 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
 
       // Re-load deal — the create_deal tool may have linked one during the agentic loop
       if (!deal) {
-        const [freshConv] = await sql`SELECT deal_id FROM conversations WHERE id = ${convId} LIMIT 1`;
+        const [freshConv] = await sql`SELECT deal_id, is_general FROM conversations WHERE id = ${convId} LIMIT 1`;
         if (freshConv?.deal_id) {
           const [d] = await sql`SELECT * FROM deals WHERE id = ${freshConv.deal_id} AND user_id = ${userId} LIMIT 1`;
           deal = d || null;
+        }
+
+        // If 5+ messages and still no deal, auto-mark as general conversation.
+        // This means the conversation is Q&A, not deal-specific.
+        if (!deal && !freshConv?.is_general) {
+          const [{ count }] = await sql`SELECT COUNT(*) as count FROM messages WHERE conversation_id = ${convId}`;
+          if (Number(count) >= 5) {
+            await sql`UPDATE conversations SET is_general = true WHERE id = ${convId} AND deal_id IS NULL`;
+          }
         }
       }
 
@@ -893,6 +1059,21 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
       if (!clientDisconnected && !res.writableEnded) {
         res.write(`data: ${JSON.stringify({ type: 'done', message: assistantMsg, dealId: deal?.id || null, conversationId: convId })}\n\n`);
       }
+
+      // ─── AI conversation naming (fire-and-forget) ─────────
+      if (needsAiTitle) {
+        generateConversationTitle(
+          [...messages, { role: 'assistant', content: assistantText }],
+          deal ? { business_name: deal.business_name, journey_type: deal.journey_type, industry: deal.industry } : null,
+        ).then(async (title) => {
+          if (title) {
+            await sql`UPDATE conversations SET title = ${title} WHERE id = ${convId}`;
+          }
+        }).catch(() => {});
+      }
+
+      // Update message_count cache
+      sql`UPDATE conversations SET message_count = (SELECT COUNT(*) FROM messages WHERE conversation_id = ${convId}) WHERE id = ${convId}`.catch(() => {});
 
       // Extract fields from conversation and update deal, then check gate advancement
       if (deal) {
@@ -948,6 +1129,30 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
         }
       }
     }
+
+    // ─── Periodic summarization for long conversations (fire-and-forget) ───
+    // When a conversation hits 50+ messages, summarize and store on the conversation
+    // record so future system prompts stay within token limits.
+    setImmediate(async () => {
+      try {
+        const [{ count }] = await sql`SELECT COUNT(*) as count FROM messages WHERE conversation_id = ${convId}`;
+        if (Number(count) >= 50) {
+          const [existing] = await sql`SELECT summary FROM conversations WHERE id = ${convId} LIMIT 1`;
+          // Only summarize if we haven't already (summary would be from gate advance or prior summarization)
+          if (!existing?.summary) {
+            const { summarizeGateConversation } = await import('../services/gateSummaryService.js');
+            const gateName = deal?.current_gate || 'ongoing';
+            const summary = await summarizeGateConversation(convId, gateName);
+            if (summary) {
+              await sql`UPDATE conversations SET summary = ${summary} WHERE id = ${convId}`;
+              console.log(`📝 Periodic summary generated for conversation ${convId} (${count} messages)`);
+            }
+          }
+        }
+      } catch (e: any) {
+        console.error('Periodic summarization error:', e.message);
+      }
+    });
 
     if (!clientDisconnected && !res.writableEnded) {
       res.write('data: [DONE]\n\n');

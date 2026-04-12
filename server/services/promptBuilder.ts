@@ -394,9 +394,30 @@ export async function buildSystemPrompt(
     `;
     const totalDeals = allDeals.length + participantDeals.length;
     if (totalDeals > 1) {
-      const dealList = allDeals.map((d: any) => `  - [${d.id}] ${d.business_name || 'Unnamed'} (${d.journey_type.toUpperCase()} @ ${d.current_gate})`).join('\n');
+      // Enrich owned deals with their latest chapter summary for cross-reference
+      const ownedIds = allDeals.map((d: any) => d.id);
+      let latestSummaries = new Map<number, string>();
+      if (ownedIds.length > 0) {
+        try {
+          const summaries = await sql`
+            SELECT DISTINCT ON (deal_id) deal_id, summary
+            FROM conversations
+            WHERE deal_id = ANY(${ownedIds}) AND summary IS NOT NULL
+            ORDER BY deal_id, updated_at DESC
+          `;
+          for (const s of summaries as any[]) {
+            latestSummaries.set(s.deal_id, s.summary);
+          }
+        } catch { /* non-critical */ }
+      }
+
+      const dealList = allDeals.map((d: any) => {
+        const summary = latestSummaries.get(d.id);
+        const summarySnippet = summary ? `\n    Last context: ${summary.substring(0, 150)}` : '';
+        return `  - [${d.id}] ${d.business_name || 'Unnamed'} (${d.journey_type.toUpperCase()} @ ${d.current_gate}, ${d.league || 'unclassified'})${summarySnippet}`;
+      }).join('\n');
       const partList = participantDeals.map((d: any) => `  - [${d.id}] ${d.business_name || 'Unnamed'} (${d.journey_type.toUpperCase()}, role: ${d.role})`).join('\n');
-      layers.push(`\n## PORTFOLIO AWARENESS\nThis user has ${totalDeals} active deals. You have the list_user_deals and switch_deal_context tools — use them proactively.\n\nOwned deals:\n${dealList}${partList ? `\n\nParticipant deals:\n${partList}` : ''}\n\nIf the user appears to be managing multiple deals (broker, advisor, PE firm, family office), adapt your communication style to be more institutional and portfolio-oriented. Use the list_user_deals tool to provide cross-deal insights when relevant.`);
+      layers.push(`\n## PORTFOLIO AWARENESS\nThis user has ${totalDeals} active deals. You have the list_user_deals and switch_deal_context tools — use them proactively.\n\nOwned deals:\n${dealList}${partList ? `\n\nParticipant deals:\n${partList}` : ''}\n\nWhen working on one deal, reference other deals in the portfolio when relevant (e.g., "Your HVAC multiple compares favorably to the MSP deal"). Cross-deal insights make you more valuable than a single-deal advisor.`);
     }
   } catch { /* portfolio check is non-critical */ }
 
@@ -417,6 +438,18 @@ export async function buildSystemPrompt(
       if (completedGates.length > 0) {
         const summaryLines = completedGates.map((g: any) => `- **${g.title}**: ${g.summary}`).join('\n');
         layers.push(`\n## PREVIOUS GATE SUMMARIES\nThe user has already completed these gates. Do NOT re-ask questions already covered.\n${summaryLines}`);
+      }
+    } catch { /* non-critical */ }
+
+    // Layer 3a++: Current conversation summary (for long conversations with 50+ messages)
+    // This captures context from earlier in the same conversation that may have scrolled
+    // out of the message history window (last 50 messages).
+    try {
+      const [currentConv] = await sql`
+        SELECT summary FROM conversations WHERE id = ${conversationId} AND summary IS NOT NULL LIMIT 1
+      `;
+      if (currentConv?.summary) {
+        layers.push(`\n## EARLIER IN THIS CONVERSATION\n${currentConv.summary}\n(This summarizes earlier messages. The recent messages follow in the conversation history.)`);
       }
     } catch { /* non-critical */ }
 

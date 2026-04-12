@@ -62,18 +62,81 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
       return true;
     });
 
-    // 2. For each deal, determine the next action
+    // 2. Load chapter summaries for all active deals (for smarter action descriptions)
+    const dealIds = allDeals.map((d: any) => d.id);
+    let chapterMap = new Map<number, { title: string; summary: string; gate_label: string }[]>();
+    if (dealIds.length > 0) {
+      try {
+        const chapters = await sql`
+          SELECT deal_id, title, summary, gate_label
+          FROM conversations
+          WHERE deal_id = ANY(${dealIds}) AND gate_status = 'completed' AND summary IS NOT NULL
+          ORDER BY updated_at ASC
+        `;
+        for (const ch of chapters as any[]) {
+          if (!chapterMap.has(ch.deal_id)) chapterMap.set(ch.deal_id, []);
+          chapterMap.get(ch.deal_id)!.push({ title: ch.title, summary: ch.summary, gate_label: ch.gate_label });
+        }
+      } catch { /* non-critical */ }
+    }
+
+    // 2b. Load active conversation info (last message time, message count)
+    let activeConvMap = new Map<number, { id: number; title: string; message_count: number; updated_at: string }>();
+    if (dealIds.length > 0) {
+      try {
+        const activeConvs = await sql`
+          SELECT deal_id, id, title, COALESCE(message_count, 0) as message_count, updated_at
+          FROM conversations
+          WHERE deal_id = ANY(${dealIds}) AND gate_status = 'active' AND is_archived = false
+          ORDER BY updated_at DESC
+        `;
+        for (const c of activeConvs as any[]) {
+          if (!activeConvMap.has(c.deal_id)) {
+            activeConvMap.set(c.deal_id, { id: c.id, title: c.title, message_count: Number(c.message_count), updated_at: c.updated_at });
+          }
+        }
+      } catch { /* non-critical */ }
+    }
+
+    // 3. For each deal, determine the next action using deal state + chapter context
     for (const deal of allDeals as any[]) {
       const name = deal.business_name || deal.industry || 'Untitled deal';
       const journey = deal.journey_type;
       const gate = deal.current_gate;
       const financials = deal.financials || {};
+      const chapters = chapterMap.get(deal.id) || [];
+      const activeConv = activeConvMap.get(deal.id);
 
       // Check what's missing for gate advancement
       const missing = getMissingForGate(gate, deal, financials);
 
-      if (missing.length > 0) {
-        // There are blocking items — surface the most important one
+      // Build context-aware description using chapter summaries
+      const lastChapter = chapters.length > 0 ? chapters[chapters.length - 1] : null;
+      const chapterContext = lastChapter
+        ? ` Last completed: ${lastChapter.title?.replace(' ✓', '')}.`
+        : '';
+
+      // Stale deal detection: if last activity was >7 days ago, nudge
+      const lastActivity = activeConv?.updated_at ? new Date(activeConv.updated_at) : new Date(deal.updated_at);
+      const daysSinceActivity = Math.floor((Date.now() - lastActivity.getTime()) / 86400000);
+      const isStale = daysSinceActivity > 7;
+
+      if (isStale && missing.length > 0) {
+        // Stale deal with pending items — higher urgency nudge
+        actions.push({
+          id: `deal-${deal.id}-stale`,
+          dealId: deal.id,
+          dealName: name,
+          journeyType: journey,
+          currentGate: gate,
+          icon: 'schedule',
+          title: `${name} — pick up where you left off`,
+          description: `${daysSinceActivity} days since last activity.${chapterContext} ${missing[0].label}.`,
+          cta: 'Resume',
+          priority: 3,
+          prefill: missing[0].prefill,
+        });
+      } else if (missing.length > 0) {
         const topMissing = missing[0];
         actions.push({
           id: `deal-${deal.id}-gate`,
@@ -83,7 +146,7 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           currentGate: gate,
           icon: journeyIcon(journey),
           title: `${name} — ${gateLabel(gate)}`,
-          description: `${topMissing.label}${missing.length > 1 ? ` (+${missing.length - 1} more)` : ''}`,
+          description: `${topMissing.label}${missing.length > 1 ? ` (+${missing.length - 1} more)` : ''}${chapterContext}`,
           cta: topMissing.cta,
           priority: gatePriority(gate),
           prefill: topMissing.prefill,
@@ -98,9 +161,9 @@ nextActionsRouter.get('/user/next-actions', async (req, res) => {
           currentGate: gate,
           icon: 'arrow_circle_right',
           title: `${name} — ready to advance`,
-          description: `${gateLabel(gate)} is complete. Ready to move to ${nextGateLabel(gate)}.`,
+          description: `${gateLabel(gate)} is complete.${chapterContext} Move to ${nextGateLabel(gate)}.`,
           cta: 'Continue',
-          priority: 1, // Urgent — user can advance right now
+          priority: 1,
           prefill: `Let's advance my ${name} deal to the next stage.`,
         });
       }

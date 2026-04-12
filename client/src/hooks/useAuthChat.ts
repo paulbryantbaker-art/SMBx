@@ -20,8 +20,27 @@ export interface Conversation {
   gate_status?: string;
   gate_label?: string | null;
   summary?: string;
+  is_general?: boolean;
+  message_count?: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface DealGroup {
+  id: number;
+  journey_type: string | null;
+  current_gate: string | null;
+  league: string | null;
+  business_name: string | null;
+  industry: string | null;
+  status: string;
+  updated_at: string;
+  conversations: Conversation[];
+}
+
+export interface GroupedConversations {
+  deals: DealGroup[];
+  general: Conversation[];
 }
 
 // Human-readable tool names for UX
@@ -44,10 +63,12 @@ const _hmr = (import.meta.hot?.data ?? {}) as {
   messages?: AuthMessage[];
   activeDealId?: number | null;
   currentGate?: string;
+  grouped?: GroupedConversations | null;
 };
 
 export function useAuthChat(user: User | null) {
   const [conversations, setConversations] = useState<Conversation[]>(_hmr.conversations ?? []);
+  const [grouped, setGrouped] = useState<GroupedConversations | null>(_hmr.grouped ?? null);
   const [activeConversationId, setActiveConversationId] = useState<number | null>(_hmr.activeConversationId ?? null);
   const [messages, setMessages] = useState<AuthMessage[]>(_hmr.messages ?? []);
   const [sending, setSending] = useState(false);
@@ -66,8 +87,9 @@ export function useAuthChat(user: User | null) {
       import.meta.hot.data.messages = messages;
       import.meta.hot.data.activeDealId = activeDealId;
       import.meta.hot.data.currentGate = currentGate;
+      import.meta.hot.data.grouped = grouped;
     }
-  }, [conversations, activeConversationId, messages, activeDealId, currentGate]);
+  }, [conversations, activeConversationId, messages, activeDealId, currentGate, grouped]);
 
   // Clean up in-flight requests on unmount
   useEffect(() => {
@@ -76,12 +98,16 @@ export function useAuthChat(user: User | null) {
     };
   }, []);
 
-  // Load conversation list
+  // Load conversation list (flat for backward compat + grouped for new sidebar)
   const loadConversations = useCallback(async () => {
     if (!user) return;
     try {
-      const res = await fetch('/api/chat/conversations', { headers: authHeaders() });
-      if (res.ok) setConversations(await res.json());
+      const [flatRes, groupedRes] = await Promise.all([
+        fetch('/api/chat/conversations', { headers: authHeaders() }),
+        fetch('/api/chat/conversations/grouped', { headers: authHeaders() }),
+      ]);
+      if (flatRes.ok) setConversations(await flatRes.json());
+      if (groupedRes.ok) setGrouped(await groupedRes.json());
     } catch (err) {
       console.error('Failed to load conversations:', err);
     }
@@ -124,6 +150,24 @@ export function useAuthChat(user: User | null) {
       setConversations(prev => [conv, ...prev]);
       setActiveConversationId(conv.id);
       setMessages([]);
+      return conv.id;
+    } catch {
+      return null;
+    }
+  }, [user]);
+
+  // Open or create the general (non-deal) conversation
+  const openGeneral = useCallback(async (): Promise<number | null> => {
+    if (!user) return null;
+    try {
+      const res = await fetch('/api/chat/conversations/general', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      });
+      if (!res.ok) return null;
+      const conv = await res.json();
+      setActiveConversationId(conv.id);
+      // Messages will load via the activeConversationId effect
       return conv.id;
     } catch {
       return null;
@@ -380,6 +424,7 @@ export function useAuthChat(user: User | null) {
 
   return {
     conversations,
+    grouped,
     activeConversationId,
     messages,
     sending,
@@ -392,6 +437,7 @@ export function useAuthChat(user: User | null) {
     selectConversation,
     newConversation,
     createConversation,
+    openGeneral,
     setPaywallData,
     setActiveConversationId,
     loadConversations,
