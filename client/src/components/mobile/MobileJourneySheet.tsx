@@ -88,7 +88,7 @@ export function MobileJourneySheet({
             borderTopLeftRadius: 28,
             borderTopRightRadius: 28,
             height: '94vh',
-            paddingTop: 0,
+            paddingTop: 'env(safe-area-inset-top, 0px)',
             boxShadow: '0 -20px 60px -20px rgba(0,0,0,0.6)',
           }}
         >

@@ -1475,15 +1475,18 @@ export default function AppShell() {
     let startT = 0;
     let trackable = false;
 
+    const pwa = isPWA;
+
     const onStart = (e: TouchEvent) => {
       const t = e.touches[0];
       startX = t.clientX;
       startY = t.clientY;
       startT = Date.now();
-      // Track swipes that start in the left half of the screen (opens sidebar)
-      // Avoids iOS edge back-swipe zone (0-20px) but allows the rest of left half
+      // In PWA: track from anywhere in left half (no browser back-swipe to conflict with)
+      // In browser: avoid 0-30px iOS edge zone, track 30px to 50% of screen
       const w = window.innerWidth;
-      trackable = (startX > 20 && startX < w * 0.5);
+      const minX = pwa ? 0 : 30;
+      trackable = (startX >= minX && startX < w * 0.5);
     };
 
     const onEnd = (e: TouchEvent) => {
@@ -1493,9 +1496,9 @@ export default function AppShell() {
       const dx = t.clientX - startX;
       const dy = t.clientY - startY;
       const dt = Date.now() - startT;
-      if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) || dt > 600) return;
-      // Swipe right from left half → open sidebar
-      if (dx > 0 && !isMobileSidebarOpen) {
+      // Require horizontal dominant swipe: 40px min, mostly horizontal, under 600ms
+      if (dx < 40 || Math.abs(dy) > Math.abs(dx) * 1.2 || dt > 600) return;
+      if (!isMobileSidebarOpen) {
         setIsMobileSidebarOpen(true);
       }
     };
@@ -1506,7 +1509,7 @@ export default function AppShell() {
       document.removeEventListener('touchstart', onStart);
       document.removeEventListener('touchend', onEnd);
     };
-  }, [isMobile, isMobileSidebarOpen, isMobileCanvasDrawerOpen]);
+  }, [isMobile, isMobileSidebarOpen, isMobileCanvasDrawerOpen, isPWA]);
 
   return (
     <div
@@ -1559,7 +1562,7 @@ export default function AppShell() {
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
-            <div key={activeTab} style={{ position: activeTab === 'home' ? 'fixed' as const : 'relative' as const, animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { inset: 0, display: 'flex', flexDirection: 'column' as const, overflow: 'hidden', overscrollBehavior: 'none' as const, touchAction: 'none' as const } : { minHeight: '100dvh' }) }}>
+            <div key={activeTab} style={{ position: activeTab === 'home' ? 'fixed' as const : 'relative' as const, animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { inset: 0, display: 'flex', flexDirection: 'column' as const, overflow: 'hidden', overscrollBehavior: 'none' as const, touchAction: 'pan-x' as const } : { minHeight: '100dvh' }) }}>
 
               {/* No background layer here — body (#E8DFC9 warm beige in index.css)
                   provides the back-layer color. Adding an absolute-positioned div
