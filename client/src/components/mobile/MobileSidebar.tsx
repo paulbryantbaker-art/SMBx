@@ -77,11 +77,11 @@ const LEARN_ITEMS: { id: LearnDest; label: string; desc: string }[] = [
 ];
 
 const WORKSPACE_ITEMS: { id: WorkspaceTool; label: string; desc: string; icon: string }[] = [
-  { id: 'documents', label: 'Documents', desc: 'Tax returns, P&Ls, contracts',          icon: 'description'    },
-  { id: 'library',   label: 'Library',   desc: 'Generated CIMs, term sheets, memos',     icon: 'menu_book'     },
-  { id: 'analysis',  label: 'Analysis',  desc: 'Open models, valuations, scenarios',     icon: 'analytics'     },
-  { id: 'sourcing',  label: 'Sourcing',  desc: 'Acquisition targets, scored & ranked',   icon: 'travel_explore' },
-  { id: 'pipeline',  label: 'Pipeline',  desc: 'Active deals across all your journeys',  icon: 'view_kanban'   },
+  { id: 'documents', label: 'Data Room',      desc: 'Uploaded files, shared access, NDA gates',      icon: 'lock'           },
+  { id: 'library',   label: 'Deliverables',   desc: 'CIMs, valuations, term sheets Yulia built',     icon: 'auto_awesome'   },
+  { id: 'analysis',  label: 'Market Intel',   desc: 'Census, SBA, comps, economic indicators',       icon: 'analytics'      },
+  { id: 'sourcing',  label: 'Sourcing',       desc: 'Acquisition targets, scored & ranked',           icon: 'travel_explore' },
+  { id: 'pipeline',  label: 'Pipeline',       desc: 'Active deals across all your journeys',          icon: 'view_kanban'    },
 ];
 
 export function MobileSidebar({

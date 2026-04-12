@@ -1482,10 +1482,10 @@ export default function AppShell() {
       const dy = t.clientY - startY;
       const dt = Date.now() - startT;
       if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) || dt > 600) return;
-      if (dx > 0 && startX < 120 && !isMobileSidebarOpen && !isMobileCanvasDrawerOpen) {
+      // Only left-edge swipe on mobile — opens the sidebar via Vaul.
+      // Right-edge swipe is KILLED to avoid fighting iOS Safari back/forward.
+      if (dx > 0 && startX < 120 && !isMobileSidebarOpen) {
         setIsMobileSidebarOpen(true);
-      } else if (dx < 0 && startX > window.innerWidth - 120 && !isMobileSidebarOpen && !isMobileCanvasDrawerOpen) {
-        setIsMobileCanvasDrawerOpen(true);
       }
     };
 
@@ -2269,23 +2269,23 @@ export default function AppShell() {
           onOpenChange={(o) => !o && setMobileWorkspaceOpen(null)}
           dark={dark}
           icon={
-            mobileWorkspaceOpen === 'documents' ? 'description' :
-            mobileWorkspaceOpen === 'library'   ? 'menu_book' :
+            mobileWorkspaceOpen === 'documents' ? 'lock' :
+            mobileWorkspaceOpen === 'library'   ? 'auto_awesome' :
             mobileWorkspaceOpen === 'analysis'  ? 'analytics' :
             mobileWorkspaceOpen === 'sourcing'  ? 'travel_explore' :
             'view_kanban'
           }
           title={
-            mobileWorkspaceOpen === 'documents' ? 'Documents' :
-            mobileWorkspaceOpen === 'library'   ? 'Library' :
-            mobileWorkspaceOpen === 'analysis'  ? 'Analysis' :
+            mobileWorkspaceOpen === 'documents' ? 'Data Room' :
+            mobileWorkspaceOpen === 'library'   ? 'Deliverables' :
+            mobileWorkspaceOpen === 'analysis'  ? 'Market Intel' :
             mobileWorkspaceOpen === 'sourcing'  ? 'Sourcing' :
             'Pipeline'
           }
           subtitle={
-            mobileWorkspaceOpen === 'documents' ? 'Tax returns, P&Ls, contracts' :
-            mobileWorkspaceOpen === 'library'   ? 'Generated CIMs, term sheets, memos' :
-            mobileWorkspaceOpen === 'analysis'  ? 'Open models, valuations, scenarios' :
+            mobileWorkspaceOpen === 'documents' ? 'Uploaded files, shared access, NDA gates' :
+            mobileWorkspaceOpen === 'library'   ? 'CIMs, valuations, term sheets Yulia built' :
+            mobileWorkspaceOpen === 'analysis'  ? 'Census, SBA, comps, economic indicators' :
             mobileWorkspaceOpen === 'sourcing'  ? 'Acquisition targets, scored & ranked' :
             'Active deals across all your journeys'
           }
@@ -2376,8 +2376,11 @@ export default function AppShell() {
         />
       )}
 
-      {/* ═══ MOBILE CANVAS DRAWER (right side) ═══ */}
-      {isMobile && isMobileCanvasDrawerOpen && (
+      {/* ═══ MOBILE CANVAS DRAWER (right side) — DISABLED on mobile.
+          The left sidebar's Workspace section replaces it. Keeping the code
+          but gating it so it never renders on mobile. Desktop canvas drawer
+          is separate and unaffected. ═══ */}
+      {false && isMobile && isMobileCanvasDrawerOpen && (
         <>
           <div
             className="fixed inset-0 z-[60] bg-black/40"
