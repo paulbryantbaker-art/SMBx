@@ -63,7 +63,11 @@
       })();
     </script>
     <link rel="icon" type="image/png" href="/X.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/pwa-icon-180.png" />
+    <!-- PWA icon: dark variant (white X on near-black) — works best on
+         dark home screens which are the majority. iOS PWAs don't support
+         light/dark icon switching; this is set at install time.
+         Light variant (pwa-icon-180.png) exists for future use. -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/pwa-icon-180-dark.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
