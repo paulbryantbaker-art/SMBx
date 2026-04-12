@@ -1551,7 +1551,7 @@ export default function AppShell() {
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
-            <div key={activeTab} style={{ position: 'relative', animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { display: 'flex', flexDirection: 'column' as const, height: '100dvh', maxHeight: '100dvh', overflow: 'hidden' } : { minHeight: '100dvh' }) }}>
+            <div key={activeTab} style={{ position: activeTab === 'home' ? 'fixed' as const : 'relative' as const, animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { inset: 0, display: 'flex', flexDirection: 'column' as const, overflow: 'hidden', overscrollBehavior: 'none' as const, touchAction: 'none' as const } : { minHeight: '100dvh' }) }}>
 
               {/* No background layer here — body (#E8DFC9 warm beige in index.css)
                   provides the back-layer color. Adding an absolute-positioned div
@@ -1697,7 +1697,7 @@ export default function AppShell() {
                         onLearnTap={() => setLearnDrawerOpen(true)}
                       />
 
-                      <div className="px-4">
+                      <div className="px-4" style={{ touchAction: 'auto' }}>
                       {/* Gradient-glow input — no + tools popup on mobile (StarterChips replace it) */}
                       <div className="relative group">
                         <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'}`} />

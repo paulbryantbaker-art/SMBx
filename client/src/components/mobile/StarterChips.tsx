@@ -74,8 +74,9 @@ export function StarterChips({ dark, onChipTap, onLearnTap }: Props) {
           paddingRight: 16,
           scrollSnapType: 'x mandatory',
           WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none',           /* Firefox */
-          msOverflowStyle: 'none',          /* IE/Edge */
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          touchAction: 'pan-x',  /* Allow horizontal scroll even when parent has touch-action:none */
         }}
       >
         {CHIPS.map((chip, i) => (
