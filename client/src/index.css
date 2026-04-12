@@ -916,8 +916,11 @@ button:active:not(:disabled), [role="button"]:active {
 .mobile-scroll-x {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;  /* IE/Edge */
 }
 .mobile-scroll-x::-webkit-scrollbar {
+  display: none;             /* Chrome/Safari — fully hidden */
   height: 0;
   background: transparent;
 }

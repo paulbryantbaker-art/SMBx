@@ -74,6 +74,8 @@ export function StarterChips({ dark, onChipTap, onLearnTap }: Props) {
           paddingRight: 16,
           scrollSnapType: 'x mandatory',
           WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',           /* Firefox */
+          msOverflowStyle: 'none',          /* IE/Edge */
         }}
       >
         {CHIPS.map((chip, i) => (

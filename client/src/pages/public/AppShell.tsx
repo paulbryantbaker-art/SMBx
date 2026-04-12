@@ -1484,7 +1484,9 @@ export default function AppShell() {
       if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) || dt > 600) return;
       // Only left-edge swipe on mobile — opens the sidebar via Vaul.
       // Right-edge swipe is KILLED to avoid fighting iOS Safari back/forward.
+      // Also: on the home page, swipe-back does nothing (no history to go back to).
       if (dx > 0 && startX < 120 && !isMobileSidebarOpen) {
+        // Open sidebar from left edge swipe
         setIsMobileSidebarOpen(true);
       }
     };
