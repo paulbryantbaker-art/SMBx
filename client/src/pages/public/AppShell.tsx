@@ -1755,8 +1755,8 @@ export default function AppShell() {
                   {isMobile && createPortal(
                     <div
                       id="mobile-home-pill-portal"
-                      className="fixed left-0 right-0 bottom-0 z-10"
-                      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+                      className="fixed left-0 right-0 bottom-0 z-10 overflow-hidden"
+                      style={{ paddingTop: 8, paddingBottom: 'env(safe-area-inset-bottom)' }}
                     >
                       {/* Starter chips — journey starters in browser, action starters in PWA */}
                       {!isPWA && (
