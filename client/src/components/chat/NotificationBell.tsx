@@ -1,3 +1,8 @@
+/**
+ * NotificationBell — bell icon with unread badge + dropdown panel.
+ * Polls every 30s. Clicking a notification navigates to its action_url.
+ * Dark-mode aware. Works on both mobile and desktop.
+ */
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { authHeaders } from '../../hooks/useAuth';
 
@@ -12,19 +17,26 @@ interface Notification {
   created_at: string;
 }
 
-const TYPE_ICONS: Record<string, string> = {
-  gate_advance: '#D44A78',
-  deliverable_ready: '#16a34a',
-  invitation: '#2563eb',
-  comment: '#7c3aed',
-  nudge: '#D44A78',
-  system: '#6E6A63',
+const TYPE_META: Record<string, { color: string; icon: string }> = {
+  gate_advance:     { color: '#D44A78', icon: 'arrow_circle_right' },
+  deliverable_ready:{ color: '#16a34a', icon: 'description' },
+  review_request:   { color: '#f59e0b', icon: 'rate_review' },
+  review_approved:  { color: '#16a34a', icon: 'check_circle' },
+  review_changes:   { color: '#ef4444', icon: 'edit_note' },
+  new_document:     { color: '#2563eb', icon: 'upload_file' },
+  deal_comment:     { color: '#7c3aed', icon: 'chat' },
+  share_viewed:     { color: '#6366f1', icon: 'visibility' },
+  thesis_match:     { color: '#D44A78', icon: 'travel_explore' },
+  new_listing_match:{ color: '#D44A78', icon: 'storefront' },
+  invitation:       { color: '#2563eb', icon: 'person_add' },
+  nudge:            { color: '#D44A78', icon: 'notifications_active' },
+  system:           { color: '#6E6A63', icon: 'info' },
 };
 
 function timeAgo(date: string): string {
   const ms = Date.now() - new Date(date).getTime();
   const mins = Math.floor(ms / 60000);
-  if (mins < 1) return 'just now';
+  if (mins < 1) return 'now';
   if (mins < 60) return `${mins}m`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h`;
@@ -32,7 +44,12 @@ function timeAgo(date: string): string {
   return `${days}d`;
 }
 
-export default function NotificationBell() {
+interface Props {
+  dark?: boolean;
+  onNavigate?: (url: string) => void;
+}
+
+export default function NotificationBell({ dark = false, onNavigate }: Props) {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -50,22 +67,25 @@ export default function NotificationBell() {
   }, []);
 
   useEffect(() => { fetchNotifications(); }, [fetchNotifications]);
-
-  // Poll every 30 seconds
   useEffect(() => {
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
-  // Close dropdown on outside click
+  // Close on outside click/tap
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
+    if (!open) return;
+    const handler = (e: MouseEvent | TouchEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
-    if (open) document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
   }, [open]);
 
   const markAsRead = async (notifId: number) => {
@@ -92,70 +112,131 @@ export default function NotificationBell() {
     } catch { /* ignore */ }
   };
 
+  const handleNotificationClick = (n: Notification) => {
+    if (!n.read_at) markAsRead(n.id);
+    if (n.action_url && onNavigate) {
+      onNavigate(n.action_url);
+      setOpen(false);
+    }
+  };
+
+  // Colors
+  const bg = dark ? '#1f2123' : '#fff';
+  const headerBg = dark ? '#1a1c1e' : '#fafafa';
+  const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const textC = dark ? '#f0f0f3' : '#0f1012';
+  const mutedC = dark ? 'rgba(218,218,220,0.5)' : '#9ea0a5';
+  const unreadBg = dark ? 'rgba(232,112,154,0.08)' : '#FFF8F5';
+  const unreadHover = dark ? 'rgba(232,112,154,0.12)' : '#FFF3ED';
+  const readHover = dark ? 'rgba(255,255,255,0.04)' : '#fafaf8';
+
   return (
     <div className="relative" ref={dropdownRef}>
+      {/* Bell button */}
       <button
         onClick={() => { setOpen(!open); if (!open) fetchNotifications(); }}
-        className="relative flex items-center justify-center w-9 h-9 rounded-full bg-transparent border-0 cursor-pointer text-[#6E6A63] hover:bg-[#F5F5F5] transition-colors"
+        className="relative flex items-center justify-center w-10 h-10 rounded-full border-0 cursor-pointer transition-all active:scale-95"
+        style={{
+          background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)',
+          WebkitTapHighlightColor: 'transparent',
+        }}
+        aria-label="Notifications"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" />
-        </svg>
+        <span className="material-symbols-outlined text-[20px]" style={{ color: dark ? 'rgba(218,218,220,0.7)' : '#636467' }}>
+          notifications
+        </span>
         {unreadCount > 0 && (
-          <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-[#D44A78] text-white text-[9px] font-bold flex items-center justify-center">
+          <span
+            className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white px-1"
+            style={{ background: '#D44A78' }}
+          >
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
+      {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-border overflow-hidden z-50" style={{ maxHeight: '24rem' }}>
+        <div
+          className="absolute right-0 top-full mt-2 w-[min(340px,90vw)] rounded-2xl overflow-hidden z-50"
+          style={{
+            background: bg,
+            border: `1px solid ${borderC}`,
+            boxShadow: dark
+              ? '0 8px 32px rgba(0,0,0,0.5)'
+              : '0 8px 32px rgba(0,0,0,0.08)',
+            maxHeight: '70vh',
+          }}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
-            <span className="text-sm font-semibold text-[#0D0D0D]">Notifications</span>
+          <div
+            className="flex items-center justify-between px-4 py-3"
+            style={{ background: headerBg, borderBottom: `1px solid ${borderC}` }}
+          >
+            <span className="text-[13px] font-bold" style={{ color: textC }}>Notifications</span>
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                className="text-[11px] font-semibold text-[#D44A78] bg-transparent border-0 cursor-pointer hover:underline"
+                className="text-[11px] font-semibold border-0 cursor-pointer bg-transparent"
+                style={{ color: '#D44A78', WebkitTapHighlightColor: 'transparent' }}
               >
                 Mark all read
               </button>
             )}
           </div>
 
-          {/* Notifications list */}
-          <div className="overflow-y-auto" style={{ maxHeight: '20rem' }}>
+          {/* List */}
+          <div className="overflow-y-auto" style={{ maxHeight: 'calc(70vh - 48px)' }}>
             {notifications.length === 0 ? (
-              <div className="p-6 text-center">
-                <p className="text-sm text-[#A9A49C] m-0">No notifications yet</p>
+              <div className="py-10 text-center">
+                <span className="material-symbols-outlined text-[28px] mb-2 block" style={{ color: mutedC }}>
+                  notifications_none
+                </span>
+                <p className="text-[13px] m-0" style={{ color: mutedC }}>All caught up</p>
               </div>
             ) : (
-              notifications.map(n => (
-                <button
-                  key={n.id}
-                  onClick={() => { if (!n.read_at) markAsRead(n.id); }}
-                  className={`w-full text-left px-4 py-3 border-0 cursor-pointer transition-colors ${
-                    n.read_at ? 'bg-white hover:bg-[#FAFAF8]' : 'bg-[#FFF8F5] hover:bg-[#FFF3ED]'
-                  }`}
-                  style={{ borderBottom: '1px solid #F5F5F5' }}
-                >
-                  <div className="flex items-start gap-2.5">
-                    <div
-                      className="w-2 h-2 rounded-full shrink-0 mt-1.5"
-                      style={{ backgroundColor: n.read_at ? 'rgba(0,0,0,0.08)' : (TYPE_ICONS[n.type] || '#6E6A63') }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-[13px] m-0 leading-snug ${n.read_at ? 'text-[#6E6A63]' : 'text-[#0D0D0D] font-medium'}`}>
-                        {n.title}
-                      </p>
-                      {n.body && (
-                        <p className="text-[11px] text-[#A9A49C] m-0 mt-0.5 line-clamp-2">{n.body}</p>
-                      )}
+              notifications.map(n => {
+                const meta = TYPE_META[n.type] || TYPE_META.system;
+                return (
+                  <button
+                    key={n.id}
+                    onClick={() => handleNotificationClick(n)}
+                    className="w-full text-left px-4 py-3 border-0 cursor-pointer transition-colors"
+                    style={{
+                      background: n.read_at ? 'transparent' : unreadBg,
+                      borderBottom: `1px solid ${borderC}`,
+                      WebkitTapHighlightColor: 'transparent',
+                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = n.read_at ? readHover : unreadHover; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = n.read_at ? 'transparent' : unreadBg; }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span
+                        className="material-symbols-outlined text-[18px] mt-0.5 shrink-0"
+                        style={{ color: n.read_at ? mutedC : meta.color }}
+                      >
+                        {meta.icon}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] m-0 leading-snug" style={{
+                          color: n.read_at ? mutedC : textC,
+                          fontWeight: n.read_at ? 400 : 600,
+                        }}>
+                          {n.title}
+                        </p>
+                        {n.body && (
+                          <p className="text-[11px] m-0 mt-0.5 line-clamp-2" style={{ color: mutedC }}>
+                            {n.body}
+                          </p>
+                        )}
+                      </div>
+                      <span className="text-[10px] shrink-0 mt-0.5" style={{ color: mutedC }}>
+                        {timeAgo(n.created_at)}
+                      </span>
                     </div>
-                    <span className="text-[10px] text-[#A9A49C] shrink-0">{timeAgo(n.created_at)}</span>
-                  </div>
-                </button>
-              ))
+                  </button>
+                );
+              })
             )}
           </div>
         </div>

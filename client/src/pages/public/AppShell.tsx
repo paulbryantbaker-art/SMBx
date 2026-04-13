@@ -15,6 +15,7 @@ import PipelinePanel from '../../components/chat/PipelinePanel';
 import DataRoom from '../../components/chat/DataRoom';
 import SettingsPanel from '../../components/chat/SettingsPanel';
 import GateProgress from '../../components/chat/GateProgress';
+import NotificationBell from '../../components/chat/NotificationBell';
 import PaywallCard from '../../components/chat/PaywallCard';
 import Canvas from '../../components/chat/Canvas';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
@@ -1441,8 +1442,20 @@ export default function AppShell() {
       {/* Spacer to push admin/account to bottom */}
       <div className="flex-1" />
 
-      {/* Bottom: Theme + Admin + Account */}
+      {/* Bottom: Notifications + Theme + Admin + Account */}
       <div className="flex flex-col items-center gap-1 mt-auto pt-4">
+        {/* Notifications — logged in only */}
+        {user && (
+          <div className="mb-1">
+            <NotificationBell
+              dark={dark}
+              onNavigate={(url) => {
+                setViewState('chat');
+                navigate(url);
+              }}
+            />
+          </div>
+        )}
         {/* Theme toggle — always visible (logged in or out) */}
         <button
           onClick={() => setDark(!dark)}
@@ -2665,8 +2678,9 @@ export default function AppShell() {
         </>
       )}
 
-      {/* ═══ MOBILE FLOATING HAMBURGER (left) ═══ */}
+      {/* ═══ MOBILE FLOATING HEADER — hamburger (left) + bell (right) ═══ */}
       {isMobile && (
+        <>
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
           className="fixed z-[55] w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#E8709A] active:scale-90"
@@ -2676,6 +2690,18 @@ export default function AppShell() {
         >
           <span className="material-symbols-outlined text-[22px]">menu</span>
         </button>
+        {user && (
+          <div className="fixed z-[55]" style={{ top: 'calc(env(safe-area-inset-top) + 12px)', right: 16 }}>
+            <NotificationBell
+              dark={true}
+              onNavigate={(url) => {
+                setViewState('chat');
+                navigate(url);
+              }}
+            />
+          </div>
+        )}
+        </>
       )}
 
       {/* ═══ PWA LOCK — only fires when user enters chat, NOT when browsing.
