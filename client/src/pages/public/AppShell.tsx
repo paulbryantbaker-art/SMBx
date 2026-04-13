@@ -1760,7 +1760,7 @@ export default function AppShell() {
                       )}
 
                       <div className="px-4 relative" style={{ touchAction: 'auto' }}>
-                      {/* Mobile tool popup (rises above pill) */}
+                      {/* Mobile + popup (rises above pill) */}
                       {homeToolsOpen && (
                         <div
                           ref={homeToolsRef}
@@ -1770,48 +1770,111 @@ export default function AppShell() {
                             background: dark ? '#1f2123' : '#fff',
                             border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
                             boxShadow: dark ? '0 -8px 32px rgba(0,0,0,0.5)' : '0 -8px 32px rgba(0,0,0,0.08)',
-                            maxHeight: '50vh',
+                            maxHeight: '55vh',
                             overflowY: 'auto',
                           }}
                         >
-                          <div className="px-4 pt-3 pb-2">
-                            <span className="text-[11px] font-bold tracking-[0.15em] uppercase" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)' }}>Quick starts</span>
-                          </div>
-                          {HOME_TOOLS.filter(t => t.group === 'journey').map(t => (
-                            <button
-                              key={t.label}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-left active:scale-[0.98] transition-transform border-none cursor-pointer"
-                              style={{ background: 'transparent', WebkitTapHighlightColor: 'transparent' }}
-                              onClick={() => { fillHomeInput(t.fill); setHomeToolsOpen(false); }}
-                              type="button"
-                            >
-                              <span className="text-[18px]">{t.icon}</span>
-                              <div>
-                                <p className="text-[14px] font-semibold" style={{ color: dark ? '#f0f0f3' : '#1a1c1e' }}>{t.label}</p>
-                                <p className="text-[12px]" style={{ color: dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)' }}>{t.desc}</p>
+                          {user ? (
+                            /* ── Logged-in: Yulia guidance + file uploads ── */
+                            <>
+                              <div className="px-4 pt-3 pb-2">
+                                <span className="text-[11px] font-bold tracking-[0.15em] uppercase" style={{ color: dark ? 'rgba(232,112,154,0.6)' : 'rgba(212,74,120,0.5)' }}>Yulia suggests</span>
                               </div>
-                            </button>
-                          ))}
-                          <div className="mx-4 my-1" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }} />
-                          <div className="px-4 pt-2 pb-1">
-                            <span className="text-[11px] font-bold tracking-[0.15em] uppercase" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)' }}>Tools</span>
-                          </div>
-                          {HOME_TOOLS.filter(t => t.group === 'tool').map(t => (
-                            <button
-                              key={t.label}
-                              className="w-full flex items-center gap-3 px-4 py-3 text-left active:scale-[0.98] transition-transform border-none cursor-pointer"
-                              style={{ background: 'transparent', WebkitTapHighlightColor: 'transparent' }}
-                              onClick={() => { fillHomeInput(t.fill); setHomeToolsOpen(false); }}
-                              type="button"
-                            >
-                              <span className="text-[18px]">{t.icon}</span>
-                              <div>
-                                <p className="text-[14px] font-semibold" style={{ color: dark ? '#f0f0f3' : '#1a1c1e' }}>{t.label}</p>
-                                <p className="text-[12px]" style={{ color: dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)' }}>{t.desc}</p>
+                              {[
+                                { icon: 'auto_awesome', label: 'Continue where we left off', desc: 'Resume your most recent deal conversation', fill: "Let's pick up where we left off" },
+                                { icon: 'add_business', label: 'Start a new deal', desc: 'Sell, buy, raise, or integrate', fill: '' },
+                                { icon: 'analytics', label: 'Run a valuation', desc: 'Multi-methodology estimate with defensible range', fill: 'I need a business valuation — ' },
+                                { icon: 'fact_check', label: 'Check SBA eligibility', desc: 'DSCR, equity injection, amortization', fill: "Can this deal get SBA financing? " },
+                              ].map(t => (
+                                <button
+                                  key={t.label}
+                                  className="w-full flex items-center gap-3 px-4 py-3 text-left active:scale-[0.98] transition-transform border-none cursor-pointer"
+                                  style={{ background: 'transparent', WebkitTapHighlightColor: 'transparent' }}
+                                  onClick={() => {
+                                    if (t.label === 'Start a new deal') {
+                                      handleNewChat();
+                                    } else {
+                                      fillHomeInput(t.fill);
+                                    }
+                                    setHomeToolsOpen(false);
+                                  }}
+                                  type="button"
+                                >
+                                  <span className="material-symbols-outlined text-[20px]" style={{ color: dark ? '#E8709A' : '#D44A78' }}>{t.icon}</span>
+                                  <div>
+                                    <p className="text-[14px] font-semibold" style={{ color: dark ? '#f0f0f3' : '#1a1c1e' }}>{t.label}</p>
+                                    <p className="text-[12px]" style={{ color: dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)' }}>{t.desc}</p>
+                                  </div>
+                                </button>
+                              ))}
+                              <div className="mx-4 my-1" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }} />
+                              <div className="px-4 pt-2 pb-1">
+                                <span className="text-[11px] font-bold tracking-[0.15em] uppercase" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)' }}>Add files</span>
                               </div>
-                            </button>
-                          ))}
-                          <div className="h-2" />
+                              {[
+                                { icon: 'upload_file', label: 'Upload financials', desc: 'P&L, tax return, balance sheet', fill: 'I want to upload my financials for analysis' },
+                                { icon: 'description', label: 'Upload a document', desc: 'LOI, lease, contract, or any deal doc', fill: 'I have a document to upload — ' },
+                                { icon: 'photo_library', label: 'From Photos', desc: 'Snap a receipt, invoice, or statement', fill: 'I want to upload a photo of a document' },
+                              ].map(t => (
+                                <button
+                                  key={t.label}
+                                  className="w-full flex items-center gap-3 px-4 py-3 text-left active:scale-[0.98] transition-transform border-none cursor-pointer"
+                                  style={{ background: 'transparent', WebkitTapHighlightColor: 'transparent' }}
+                                  onClick={() => { fillHomeInput(t.fill); setHomeToolsOpen(false); }}
+                                  type="button"
+                                >
+                                  <span className="material-symbols-outlined text-[20px]" style={{ color: dark ? 'rgba(218,218,220,0.5)' : 'rgba(0,0,0,0.35)' }}>{t.icon}</span>
+                                  <div>
+                                    <p className="text-[14px] font-semibold" style={{ color: dark ? '#f0f0f3' : '#1a1c1e' }}>{t.label}</p>
+                                    <p className="text-[12px]" style={{ color: dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)' }}>{t.desc}</p>
+                                  </div>
+                                </button>
+                              ))}
+                              <div className="h-2" />
+                            </>
+                          ) : (
+                            /* ── Anonymous: journey quick starts + tools ── */
+                            <>
+                              <div className="px-4 pt-3 pb-2">
+                                <span className="text-[11px] font-bold tracking-[0.15em] uppercase" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)' }}>Quick starts</span>
+                              </div>
+                              {HOME_TOOLS.filter(t => t.group === 'journey').map(t => (
+                                <button
+                                  key={t.label}
+                                  className="w-full flex items-center gap-3 px-4 py-3 text-left active:scale-[0.98] transition-transform border-none cursor-pointer"
+                                  style={{ background: 'transparent', WebkitTapHighlightColor: 'transparent' }}
+                                  onClick={() => { fillHomeInput(t.fill); setHomeToolsOpen(false); }}
+                                  type="button"
+                                >
+                                  <span className="text-[18px]">{t.icon}</span>
+                                  <div>
+                                    <p className="text-[14px] font-semibold" style={{ color: dark ? '#f0f0f3' : '#1a1c1e' }}>{t.label}</p>
+                                    <p className="text-[12px]" style={{ color: dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)' }}>{t.desc}</p>
+                                  </div>
+                                </button>
+                              ))}
+                              <div className="mx-4 my-1" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }} />
+                              <div className="px-4 pt-2 pb-1">
+                                <span className="text-[11px] font-bold tracking-[0.15em] uppercase" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)' }}>Tools</span>
+                              </div>
+                              {HOME_TOOLS.filter(t => t.group === 'tool').map(t => (
+                                <button
+                                  key={t.label}
+                                  className="w-full flex items-center gap-3 px-4 py-3 text-left active:scale-[0.98] transition-transform border-none cursor-pointer"
+                                  style={{ background: 'transparent', WebkitTapHighlightColor: 'transparent' }}
+                                  onClick={() => { fillHomeInput(t.fill); setHomeToolsOpen(false); }}
+                                  type="button"
+                                >
+                                  <span className="text-[18px]">{t.icon}</span>
+                                  <div>
+                                    <p className="text-[14px] font-semibold" style={{ color: dark ? '#f0f0f3' : '#1a1c1e' }}>{t.label}</p>
+                                    <p className="text-[12px]" style={{ color: dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)' }}>{t.desc}</p>
+                                  </div>
+                                </button>
+                              ))}
+                              <div className="h-2" />
+                            </>
+                          )}
                         </div>
                       )}
                       {/* Gradient-glow input with + button for file uploads / utilities */}
