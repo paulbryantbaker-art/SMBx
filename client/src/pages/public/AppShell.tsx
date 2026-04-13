@@ -642,6 +642,26 @@ export default function AppShell() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  // iOS PWA keyboard-dismiss recovery — when the software keyboard closes,
+  // iOS sometimes leaves the layout viewport scrolled, stranding the portaled
+  // position:fixed pill a few dozen pixels above the screen edge. Force a
+  // scroll reset after any focus loss to kick iOS back to y=0. Mobile only.
+  useEffect(() => {
+    if (!isMobile) return;
+    const recover = () => {
+      // Double RAF so iOS finishes its own scroll recovery first, then we override.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        });
+      });
+    };
+    window.addEventListener('focusout', recover);
+    return () => window.removeEventListener('focusout', recover);
+  }, [isMobile]);
+
   // Home hero tool popup (+ button menu with journey shortcuts + tools)
   // Declared AFTER isMobile because fillHomeInput depends on it (TDZ safety)
   const [homeToolsOpen, setHomeToolsOpen] = useState(false);
