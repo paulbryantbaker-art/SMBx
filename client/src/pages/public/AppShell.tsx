@@ -647,23 +647,35 @@ export default function AppShell() {
   // Replaces useAppHeight's #app-root transform hack on mobile (which created a fixed-
   // positioning containing block that stranded the pill after keyboard dismissal).
   // Desktop keeps useAppHeight's behavior untouched.
+  //
+  // Threshold: iOS visualViewport drifts by small amounts during navigation / auth
+  // transitions / status-bar state changes (typically 20–60px). Any "keyboard" shorter
+  // than 120px is treated as drift — real software keyboards are always >= ~250px —
+  // so the pill stays at the screen bottom instead of getting stranded mid-air after
+  // login when visualViewport reports slightly smaller than innerHeight.
   useEffect(() => {
     if (!isMobile) return;
     const vv = window.visualViewport;
     if (!vv) return;
     const root = document.documentElement;
+    const KEYBOARD_MIN = 120;
     const update = () => {
-      const inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      const diff = window.innerHeight - vv.height - vv.offsetTop;
+      const inset = diff > KEYBOARD_MIN ? diff : 0;
       root.style.setProperty('--kb-inset-bottom', inset + 'px');
     };
     update();
     vv.addEventListener('resize', update);
     vv.addEventListener('scroll', update);
     window.addEventListener('resize', update);
+    window.addEventListener('focusout', update);
+    window.addEventListener('pageshow', update);
     return () => {
       vv.removeEventListener('resize', update);
       vv.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
+      window.removeEventListener('focusout', update);
+      window.removeEventListener('pageshow', update);
       root.style.removeProperty('--kb-inset-bottom');
     };
   }, [isMobile]);
