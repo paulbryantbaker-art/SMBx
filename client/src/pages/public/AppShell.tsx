@@ -642,43 +642,6 @@ export default function AppShell() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // Mobile-only: track the iOS visual viewport and publish --kb-inset-bottom on <html>
-  // so the portaled chat pill can ride the top of the keyboard via `bottom: var(...)`.
-  // Replaces useAppHeight's #app-root transform hack on mobile (which created a fixed-
-  // positioning containing block that stranded the pill after keyboard dismissal).
-  // Desktop keeps useAppHeight's behavior untouched.
-  //
-  // Threshold: iOS visualViewport drifts by small amounts during navigation / auth
-  // transitions / status-bar state changes (typically 20–60px). Any "keyboard" shorter
-  // than 120px is treated as drift — real software keyboards are always >= ~250px —
-  // so the pill stays at the screen bottom instead of getting stranded mid-air after
-  // login when visualViewport reports slightly smaller than innerHeight.
-  useEffect(() => {
-    if (!isMobile) return;
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const root = document.documentElement;
-    const KEYBOARD_MIN = 120;
-    const update = () => {
-      const diff = window.innerHeight - vv.height - vv.offsetTop;
-      const inset = diff > KEYBOARD_MIN ? diff : 0;
-      root.style.setProperty('--kb-inset-bottom', inset + 'px');
-    };
-    update();
-    vv.addEventListener('resize', update);
-    vv.addEventListener('scroll', update);
-    window.addEventListener('resize', update);
-    window.addEventListener('focusout', update);
-    window.addEventListener('pageshow', update);
-    return () => {
-      vv.removeEventListener('resize', update);
-      vv.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
-      window.removeEventListener('focusout', update);
-      window.removeEventListener('pageshow', update);
-      root.style.removeProperty('--kb-inset-bottom');
-    };
-  }, [isMobile]);
   // Home hero tool popup (+ button menu with journey shortcuts + tools)
   // Declared AFTER isMobile because fillHomeInput depends on it (TDZ safety)
   const [homeToolsOpen, setHomeToolsOpen] = useState(false);
@@ -1780,16 +1743,15 @@ export default function AppShell() {
 
                   {/* On mobile the golden-ratio flex (1.618 vs 1) handles spacing — no extra spacer needed */}
 
-                  {/* Mobile bottom zone: portaled to document.body + rides the visual viewport
-                      via --kb-inset-bottom so the pill stays just above the iOS keyboard and
-                      returns cleanly to the screen edge when it dismisses. */}
+                  {/* Mobile bottom zone: portaled to document.body, plain position:fixed.
+                      Trusts the browser to handle keyboard via `interactive-widget=resizes-content`
+                      in the viewport meta — no JS tracking of visualViewport (that was fighting
+                      the browser's own layout-viewport management and stranding the pill on
+                      keyboard dismiss). Matches Grok PWA's approach. */}
                   {isMobile && createPortal(
                     <div
-                      className="fixed left-0 right-0 z-10 overflow-hidden"
-                      style={{
-                        bottom: 'var(--kb-inset-bottom, 0px)',
-                        paddingBottom: 'max(env(safe-area-inset-bottom) - var(--kb-inset-bottom, 0px), 0px)',
-                      }}
+                      className="fixed left-0 right-0 bottom-0 z-10 overflow-hidden"
+                      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
                     >
                       {/* Starter chips — journey starters in browser, action starters in PWA */}
                       {!isPWA && (
@@ -2020,9 +1982,9 @@ export default function AppShell() {
               position: 'fixed',
               left: 0,
               right: 0,
-              bottom: 'var(--kb-inset-bottom, 0px)',
+              bottom: 0,
               zIndex: 10,
-              paddingBottom: 'max(env(safe-area-inset-bottom) - var(--kb-inset-bottom, 0px), 0px)',
+              paddingBottom: 'env(safe-area-inset-bottom)',
               touchAction: 'manipulation',
             }}
           >
