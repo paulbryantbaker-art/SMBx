@@ -860,8 +860,8 @@ export default function AppShell() {
   }, [navigate, viewState]);
 
   // New deal — starts a fresh conversation that becomes a deal when Yulia identifies one
-  const handleNewChat = useCallback(() => {
-    if (user) authChat.newConversation();
+  const handleNewChat = useCallback(async () => {
+    if (user) await authChat.newConversation();
     // Clear any open mobile sheets/drawers so we land on clean chat
     setMobileWorkspaceOpen(null);
     setMobileJourneyOpen(null);

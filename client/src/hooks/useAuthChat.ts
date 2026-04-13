@@ -195,11 +195,20 @@ export function useAuthChat(user: User | null) {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      // Ensure we have a conversation
+      // Resume existing conversation or create new one.
+      // Key behavior: don't create a new conversation every message.
+      // Find the most recent active conversation and continue it.
       let convId = activeConversationId;
       if (!convId) {
-        convId = await createConversation();
-        if (!convId) throw new Error('Failed to create conversation');
+        // Check if we have an existing conversation to resume
+        const mostRecent = conversations[0]; // sorted by updated_at DESC
+        if (mostRecent) {
+          convId = mostRecent.id;
+          setActiveConversationId(convId);
+        } else {
+          convId = await createConversation();
+          if (!convId) throw new Error('Failed to create conversation');
+        }
       }
 
       const res = await fetch(`/api/chat/conversations/${convId}/messages`, {
@@ -415,14 +424,18 @@ export function useAuthChat(user: User | null) {
     setPaywallData(null);
   }, []);
 
-  // Start fresh (new conversation)
-  const newConversation = useCallback(() => {
-    setActiveConversationId(null);
+  // Start fresh — creates a new conversation immediately so the next
+  // sendMessage won't resume an existing one. Used by "New Deal" button.
+  const newConversation = useCallback(async () => {
     setMessages([]);
     setPaywallData(null);
     setActiveDealId(null);
     setCurrentGate(undefined);
-  }, []);
+    // Create the conversation now so sendMessage doesn't resume an old one
+    const id = await createConversation();
+    if (id) setActiveConversationId(id);
+    else setActiveConversationId(null);
+  }, [createConversation]);
 
   return {
     conversations,
