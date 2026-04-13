@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { trackEvent } from '../../lib/analytics';
@@ -1735,10 +1736,11 @@ export default function AppShell() {
 
                   {/* On mobile the golden-ratio flex (1.618 vs 1) handles spacing — no extra spacer needed */}
 
-                  {/* Mobile bottom zone: fixed-pinned to viewport bottom (bypasses flex chain).
-                      Using position:fixed guarantees the pill hugs the physical screen bottom on iOS PWA —
-                      flex-chain `absolute bottom:0` was getting confined shorter than viewport height. */}
-                  {isMobile && (
+                  {/* Mobile bottom zone: portaled to document.body so ancestor transforms
+                      (#app-root's translateY for keyboard handling, future backdrop-filter
+                      glass effects, etc.) cannot create a containing block that yanks the
+                      fixed pill off the viewport bottom. */}
+                  {isMobile && createPortal(
                     <div
                       className="fixed left-0 right-0 bottom-0 z-10 overflow-hidden"
                       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
@@ -1806,7 +1808,8 @@ export default function AppShell() {
                         </p>
                       )}
                       </div>
-                    </div>
+                    </div>,
+                    document.body
                   )}
                 </main>
                 </div>
@@ -1944,19 +1947,14 @@ export default function AppShell() {
           {/* Tool views now render as canvas tabs */}
         </div>
 
-        {/* ════ CHATDOCK — chat mode, pinned at bottom, aligned with sidebar/canvas ════
-            Desktop: always forced dark (body is dark charcoal).
-            Mobile: respects theme (light pill in light mode, dark in dark mode). */}
-        {showDock && viewState === 'chat' && (
+        {/* ════ CHATDOCK — chat mode ════
+            Desktop: flex sibling at bottom of chat column, forced dark.
+            Mobile: portaled to document.body so ancestor transforms (keyboard handling,
+            future backdrop-filter glass, etc.) can't yank the fixed pill off the viewport. */}
+        {showDock && viewState === 'chat' && !isMobile && (
           <div
-            className={`${(!isMobile || dark) ? 'force-chat-dark' : ''} ${isMobile ? 'px-3 pt-1' : 'shrink-0 px-4 pt-2'}`}
-            style={{
-              paddingBottom: isMobile ? 'env(safe-area-inset-bottom)' : 16,
-              touchAction: 'manipulation',
-              ...(isMobile
-                ? { position: 'fixed' as const, left: 0, right: 0, bottom: 0, zIndex: 10 }
-                : {}),
-            }}
+            className="force-chat-dark shrink-0 px-4 pt-2"
+            style={{ paddingBottom: 16, touchAction: 'manipulation' }}
           >
             <ChatDock
               ref={dockRef}
@@ -1968,6 +1966,31 @@ export default function AppShell() {
               disabled={sending}
             />
           </div>
+        )}
+        {showDock && viewState === 'chat' && isMobile && createPortal(
+          <div
+            className={`${dark ? 'force-chat-dark' : ''} px-3 pt-1`}
+            style={{
+              position: 'fixed',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 10,
+              paddingBottom: 'env(safe-area-inset-bottom)',
+              touchAction: 'manipulation',
+            }}
+          >
+            <ChatDock
+              ref={dockRef}
+              onSend={handleSend}
+              onFileUpload={user ? handleFileUpload : undefined}
+              variant="hero"
+              rows={1}
+              placeholder="Reply to Yulia..."
+              disabled={sending}
+            />
+          </div>,
+          document.body
         )}
 
         </div>{/* end chat column */}
