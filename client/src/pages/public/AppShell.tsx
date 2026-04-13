@@ -1740,7 +1740,7 @@ export default function AppShell() {
                   {isMobile && (
                     <div
                       className="shrink-0 relative z-10 chat-pill-mobile-container"
-                      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}
+                      style={{ paddingBottom: 4 }}
                     >
                       {/* Starter chips — journey starters in browser, action starters in PWA */}
                       {!isPWA && (
@@ -1945,7 +1945,7 @@ export default function AppShell() {
             Desktop: always forced dark (body is dark charcoal).
             Mobile: respects theme (light pill in light mode, dark in dark mode). */}
         {showDock && viewState === 'chat' && (
-          <div className={`${(!isMobile || dark) ? 'force-chat-dark' : ''} shrink-0 px-4 pt-2`} style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))', touchAction: 'manipulation' }}>
+          <div className={`${(!isMobile || dark) ? 'force-chat-dark' : ''} shrink-0 px-4 pt-2`} style={{ paddingBottom: isMobile ? 4 : 16, touchAction: 'manipulation' }}>
             <ChatDock
               ref={dockRef}
               onSend={handleSend}
