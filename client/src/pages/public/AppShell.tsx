@@ -1752,7 +1752,7 @@ export default function AppShell() {
                     <div
                       id="mobile-home-pill-portal"
                       className="fixed left-0 right-0 bottom-0 z-10 overflow-hidden"
-                      style={{ paddingBottom: isPWA ? 0 : 'env(safe-area-inset-bottom)' }}
+                      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
                     >
                       {/* Starter chips — journey starters in browser, action starters in PWA */}
                       {!isPWA && (
@@ -1986,7 +1986,7 @@ export default function AppShell() {
               right: 0,
               bottom: 0,
               zIndex: 10,
-              paddingBottom: 0,
+              paddingBottom: 'env(safe-area-inset-bottom)',
               touchAction: 'manipulation',
             }}
           >
