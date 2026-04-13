@@ -1761,7 +1761,7 @@ export default function AppShell() {
                   {isMobile && (
                     <div
                       className="absolute left-0 right-0 bottom-0 z-10 chat-pill-mobile-container"
-                      style={{ paddingBottom: 'max(4px, calc(env(safe-area-inset-bottom, 0px) - 12px))' }}
+                      style={{ paddingBottom: 0 }}
                     >
                       {/* Starter chips — journey starters in browser, action starters in PWA */}
                       {!isPWA && (
@@ -1772,7 +1772,7 @@ export default function AppShell() {
                         />
                       )}
 
-                      <div className="px-4 relative" style={{ touchAction: 'auto' }}>
+                      <div className="px-4 relative" style={{ touchAction: 'auto', paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
                       {/* Mobile + popup (rises above pill) */}
                       {homeToolsOpen && (
                         <div
