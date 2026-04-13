@@ -1479,11 +1479,11 @@ export default function AppShell() {
 
   /* ═══ RENDER ═══ */
 
-  // ─── Mobile swipe to open sidebar (browser only, NOT PWA) ───
-  // In PWA, iOS has its own back-swipe that conflicts with custom swipe handlers.
-  // PWA users use the hamburger button instead.
+  // ─── Mobile swipe to open sidebar ───
+  // PWA: swipe from anywhere in left 50% (no browser nav to conflict with)
+  // Browser: swipe from 30-30% zone (avoid iOS back-swipe at 0-30px)
   useEffect(() => {
-    if (!isMobile || isPWA) return;
+    if (!isMobile) return;
     let startX = 0;
     let startY = 0;
     let startT = 0;
@@ -1500,8 +1500,11 @@ export default function AppShell() {
       const dx = t.clientX - startX;
       const dy = t.clientY - startY;
       const dt = Date.now() - startT;
-      // Only track swipes starting in left 30% of screen, 30px+ from edge (avoid iOS back)
-      if (startX < 30 || startX > window.innerWidth * 0.3) return;
+      const w = window.innerWidth;
+      // PWA: anywhere in left half. Browser: 30px-30% to avoid iOS edge gesture.
+      const minX = isPWA ? 0 : 30;
+      const maxX = isPWA ? w * 0.5 : w * 0.3;
+      if (startX < minX || startX > maxX) return;
       if (dx < 50 || Math.abs(dy) > Math.abs(dx) || dt > 500) return;
       if (!isMobileSidebarOpen) {
         setIsMobileSidebarOpen(true);
@@ -1740,13 +1743,11 @@ export default function AppShell() {
                     </div>
                   </div>
 
-                  {/* On mobile the golden-ratio flex (1.618 vs 1) handles spacing — no extra spacer needed */}
-
-                  {/* Mobile bottom zone: starter chips + pill + trust line pinned near the bottom.
-                      Safe-area padding clears the home indicator */}
+                  {/* Mobile bottom zone: pill anchored to bottom like Grok/Claude.
+                      Absolute-positioned so it stays at the bottom regardless of content. */}
                   {isMobile && (
                     <div
-                      className="shrink-0 relative z-10 chat-pill-mobile-container"
+                      className="absolute left-0 right-0 bottom-0 z-10 chat-pill-mobile-container"
                       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}
                     >
                       {/* Starter chips — journey starters in browser, action starters in PWA */}
@@ -1806,9 +1807,11 @@ export default function AppShell() {
                         </div>
                       </div>
                       </form>
-                      <p className={`text-xs font-medium text-center mt-3 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
-                        Free analysis · No account required · Your data stays yours
-                      </p>
+                      {!user && (
+                        <p className={`text-xs font-medium text-center mt-3 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
+                          Free analysis · No account required · Your data stays yours
+                        </p>
+                      )}
                       </div>
                     </div>
                   )}
