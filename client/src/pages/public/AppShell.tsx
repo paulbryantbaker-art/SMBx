@@ -15,7 +15,7 @@ import PipelinePanel from '../../components/chat/PipelinePanel';
 import DataRoom from '../../components/chat/DataRoom';
 import SettingsPanel from '../../components/chat/SettingsPanel';
 import GateProgress from '../../components/chat/GateProgress';
-import NotificationBell from '../../components/chat/NotificationBell';
+import { ChapterStrip } from '../../components/shared/ChapterStrip';
 import PaywallCard from '../../components/chat/PaywallCard';
 import Canvas from '../../components/chat/Canvas';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
@@ -495,7 +495,7 @@ export default function AppShell() {
   // Mobile rebuild state — LearnDrawer + journey sheets + workspace tool sheets
   const [learnDrawerOpen, setLearnDrawerOpen] = useState(false);
   const [mobileJourneyOpen, setMobileJourneyOpen] = useState<LearnDest | null>(null);
-  const [mobileWorkspaceStack, setMobileWorkspaceStack] = useState<WorkspaceTool[]>([]);
+  const [mobileWorkspaceOpen, setMobileWorkspaceOpen] = useState<WorkspaceTool | null>(null);
   // PWA standalone detection — when true, strip all marketing/journey content
   const isPWA = isStandalone();
   // Mobile canvas overlay visibility — separate from canvasTabs.length so tabs persist
@@ -642,19 +642,6 @@ export default function AppShell() {
   const [homeToolsOpen, setHomeToolsOpen] = useState(false);
   const homeInputRef = useRef<HTMLInputElement>(null);
   const homeInputMobileRef = useRef<HTMLInputElement>(null);
-  // Track keyboard open on mobile home to fix input positioning
-  const [mobileKeyboardOpen, setMobileKeyboardOpen] = useState(false);
-  useEffect(() => {
-    if (!isMobile) return;
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const check = () => {
-      const shrinkage = window.innerHeight - vv.height;
-      setMobileKeyboardOpen(shrinkage > 100);
-    };
-    vv.addEventListener('resize', check);
-    return () => vv.removeEventListener('resize', check);
-  }, [isMobile]);
   const homeToolsRef = useRef<HTMLDivElement>(null);
   const homePlusRef = useRef<HTMLButtonElement>(null);
   const homePlusMobileRef = useRef<HTMLButtonElement>(null);
@@ -861,10 +848,10 @@ export default function AppShell() {
   }, [navigate, viewState]);
 
   // New deal — starts a fresh conversation that becomes a deal when Yulia identifies one
-  const handleNewChat = useCallback(async () => {
-    if (user) await authChat.newConversation();
+  const handleNewChat = useCallback(() => {
+    if (user) authChat.newConversation();
     // Clear any open mobile sheets/drawers so we land on clean chat
-    setMobileWorkspaceStack([]);
+    setMobileWorkspaceOpen(null);
     setMobileJourneyOpen(null);
     setLearnDrawerOpen(false);
     setViewState('chat');
@@ -1442,20 +1429,8 @@ export default function AppShell() {
       {/* Spacer to push admin/account to bottom */}
       <div className="flex-1" />
 
-      {/* Bottom: Notifications + Theme + Admin + Account */}
+      {/* Bottom: Theme + Admin + Account */}
       <div className="flex flex-col items-center gap-1 mt-auto pt-4">
-        {/* Notifications — logged in only */}
-        {user && (
-          <div className="mb-1">
-            <NotificationBell
-              dark={dark}
-              onNavigate={(url) => {
-                setViewState('chat');
-                navigate(url);
-              }}
-            />
-          </div>
-        )}
         {/* Theme toggle — always visible (logged in or out) */}
         <button
           onClick={() => setDark(!dark)}
@@ -1492,34 +1467,38 @@ export default function AppShell() {
 
   /* ═══ RENDER ═══ */
 
-  // ─── Mobile swipe to open sidebar ───
-  // PWA: swipe from anywhere in left 50% (no browser nav to conflict with)
-  // Browser: swipe from 30-30% zone (avoid iOS back-swipe at 0-30px)
+  // ─── Mobile swipe gestures with edge guard (gestures from inside viewport, not edges) ───
   useEffect(() => {
     if (!isMobile) return;
     let startX = 0;
     let startY = 0;
     let startT = 0;
+    let trackable = false;
 
     const onStart = (e: TouchEvent) => {
       const t = e.touches[0];
       startX = t.clientX;
       startY = t.clientY;
       startT = Date.now();
+      // Track swipes that start INSIDE the safe zone (40-120px from edges)
+      // This avoids fighting iOS edge back-swipe which lives in 0-30px
+      const w = window.innerWidth;
+      trackable = (startX > 40 && startX < 120) || (startX > w - 120 && startX < w - 40);
     };
 
     const onEnd = (e: TouchEvent) => {
+      if (!trackable) return;
+      trackable = false;
       const t = e.changedTouches[0];
       const dx = t.clientX - startX;
       const dy = t.clientY - startY;
       const dt = Date.now() - startT;
-      const w = window.innerWidth;
-      // PWA: anywhere in left half. Browser: 30px-30% to avoid iOS edge gesture.
-      const minX = isPWA ? 0 : 30;
-      const maxX = isPWA ? w * 0.5 : w * 0.3;
-      if (startX < minX || startX > maxX) return;
-      if (dx < 50 || Math.abs(dy) > Math.abs(dx) || dt > 500) return;
-      if (!isMobileSidebarOpen) {
+      if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) || dt > 600) return;
+      // Only left-edge swipe on mobile — opens the sidebar via Vaul.
+      // Right-edge swipe is KILLED to avoid fighting iOS Safari back/forward.
+      // Also: on the home page, swipe-back does nothing (no history to go back to).
+      if (dx > 0 && startX < 120 && !isMobileSidebarOpen) {
+        // Open sidebar from left edge swipe
         setIsMobileSidebarOpen(true);
       }
     };
@@ -1530,7 +1509,7 @@ export default function AppShell() {
       document.removeEventListener('touchstart', onStart);
       document.removeEventListener('touchend', onEnd);
     };
-  }, [isMobile, isMobileSidebarOpen, isPWA]);
+  }, [isMobile, isMobileSidebarOpen, isMobileCanvasDrawerOpen]);
 
   return (
     <div
@@ -1570,7 +1549,7 @@ export default function AppShell() {
           className="flex flex-col min-w-0"
           style={{
             background: 'transparent',
-            ...(!isMobile && (viewState === 'chat' || (viewState === 'landing' && !!user))
+            ...(!isMobile && viewState === 'chat'
               ? { width: chatWidth, flexShrink: 0 }
               : { flex: 1 }),
           }}
@@ -1583,7 +1562,7 @@ export default function AppShell() {
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
-            <div key={activeTab} style={{ position: (activeTab === 'home' && !(!isMobile && user)) ? 'fixed' as const : 'relative' as const, animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...((activeTab === 'home' && !(!isMobile && user)) ? { inset: 0, display: 'flex', flexDirection: 'column' as const, overflow: 'hidden', overscrollBehavior: 'none' as const, touchAction: 'pan-x' as const } : { minHeight: '100dvh', display: 'flex', flexDirection: 'column' as const, flex: 1 }) }}>
+            <div key={activeTab} style={{ position: activeTab === 'home' ? 'fixed' as const : 'relative' as const, animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { inset: 0, display: 'flex', flexDirection: 'column' as const, overflow: 'hidden', overscrollBehavior: 'none' as const, touchAction: 'none' as const } : { minHeight: '100dvh' }) }}>
 
               {/* No background layer here — body (#E8DFC9 warm beige in index.css)
                   provides the back-layer color. Adding an absolute-positioned div
@@ -1606,10 +1585,8 @@ export default function AppShell() {
                   }}
                 >
                 <main className="flex-1 flex flex-col relative">
-                  {/* Top cluster — Fibonacci: content in upper 61.8%, input in lower 38.2%.
-                      When keyboard is open on mobile, collapse to min content so input
-                      sits just above keyboard instead of floating in the middle. */}
-                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? (mobileKeyboardOpen ? 'flex-none' : 'flex-[1.618] justify-center') : 'flex-1 justify-center'}`}>
+                  {/* Top cluster — Fibonacci: content in upper 61.8%, input in lower 38.2% */}
+                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? 'flex-[1.618] justify-center' : 'flex-1 justify-center'}`}>
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl' : 'max-w-3xl space-y-6'}`}>
                       {!isMobile && (
                         <div className="mb-10 flex justify-center">
@@ -1756,12 +1733,14 @@ export default function AppShell() {
                     </div>
                   </div>
 
-                  {/* Mobile bottom zone: pill anchored to bottom like Grok/Claude.
-                      Absolute-positioned so it stays at the bottom regardless of content. */}
+                  {/* On mobile the golden-ratio flex (1.618 vs 1) handles spacing — no extra spacer needed */}
+
+                  {/* Mobile bottom zone: starter chips + pill + trust line pinned near the bottom.
+                      Safe-area padding clears the home indicator */}
                   {isMobile && (
                     <div
-                      className="absolute left-0 right-0 bottom-0 z-10 chat-pill-mobile-container"
-                      style={{ paddingBottom: 0 }}
+                      className="shrink-0 relative z-10 chat-pill-mobile-container"
+                      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}
                     >
                       {/* Starter chips — journey starters in browser, action starters in PWA */}
                       {!isPWA && (
@@ -1772,124 +1751,7 @@ export default function AppShell() {
                         />
                       )}
 
-                      <div className="px-4 relative" style={{ touchAction: 'auto' }}>
-                      {/* Mobile + popup (rises above pill) */}
-                      {homeToolsOpen && (
-                        <div
-                          ref={homeToolsRef}
-                          className="absolute left-4 right-4 z-20 rounded-2xl overflow-hidden"
-                          style={{
-                            bottom: 'calc(100% + 8px)',
-                            background: dark ? '#1f2123' : '#fff',
-                            border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
-                            boxShadow: dark ? '0 -8px 32px rgba(0,0,0,0.5)' : '0 -8px 32px rgba(0,0,0,0.08)',
-                            maxHeight: '55vh',
-                            overflowY: 'auto',
-                          }}
-                        >
-                          {user ? (
-                            /* ── Logged-in: Yulia guidance + file uploads ── */
-                            <>
-                              <div className="px-4 pt-3 pb-2">
-                                <span className="text-[11px] font-bold tracking-[0.15em] uppercase" style={{ color: dark ? 'rgba(232,112,154,0.6)' : 'rgba(212,74,120,0.5)' }}>Yulia suggests</span>
-                              </div>
-                              {[
-                                { icon: 'auto_awesome', label: 'Continue where we left off', desc: 'Resume your most recent deal conversation', fill: "Let's pick up where we left off" },
-                                { icon: 'add_business', label: 'Start a new deal', desc: 'Sell, buy, raise, or integrate', fill: '' },
-                                { icon: 'analytics', label: 'Run a valuation', desc: 'Multi-methodology estimate with defensible range', fill: 'I need a business valuation — ' },
-                                { icon: 'fact_check', label: 'Check SBA eligibility', desc: 'DSCR, equity injection, amortization', fill: "Can this deal get SBA financing? " },
-                              ].map(t => (
-                                <button
-                                  key={t.label}
-                                  className="w-full flex items-center gap-3 px-4 py-3 text-left active:scale-[0.98] transition-transform border-none cursor-pointer"
-                                  style={{ background: 'transparent', WebkitTapHighlightColor: 'transparent' }}
-                                  onClick={() => {
-                                    if (t.label === 'Start a new deal') {
-                                      handleNewChat();
-                                    } else {
-                                      fillHomeInput(t.fill);
-                                    }
-                                    setHomeToolsOpen(false);
-                                  }}
-                                  type="button"
-                                >
-                                  <span className="material-symbols-outlined text-[20px]" style={{ color: dark ? '#E8709A' : '#D44A78' }}>{t.icon}</span>
-                                  <div>
-                                    <p className="text-[14px] font-semibold" style={{ color: dark ? '#f0f0f3' : '#1a1c1e' }}>{t.label}</p>
-                                    <p className="text-[12px]" style={{ color: dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)' }}>{t.desc}</p>
-                                  </div>
-                                </button>
-                              ))}
-                              <div className="mx-4 my-1" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }} />
-                              <div className="px-4 pt-2 pb-1">
-                                <span className="text-[11px] font-bold tracking-[0.15em] uppercase" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)' }}>Add files</span>
-                              </div>
-                              {[
-                                { icon: 'upload_file', label: 'Upload financials', desc: 'P&L, tax return, balance sheet', fill: 'I want to upload my financials for analysis' },
-                                { icon: 'description', label: 'Upload a document', desc: 'LOI, lease, contract, or any deal doc', fill: 'I have a document to upload — ' },
-                                { icon: 'photo_library', label: 'From Photos', desc: 'Snap a receipt, invoice, or statement', fill: 'I want to upload a photo of a document' },
-                              ].map(t => (
-                                <button
-                                  key={t.label}
-                                  className="w-full flex items-center gap-3 px-4 py-3 text-left active:scale-[0.98] transition-transform border-none cursor-pointer"
-                                  style={{ background: 'transparent', WebkitTapHighlightColor: 'transparent' }}
-                                  onClick={() => { fillHomeInput(t.fill); setHomeToolsOpen(false); }}
-                                  type="button"
-                                >
-                                  <span className="material-symbols-outlined text-[20px]" style={{ color: dark ? 'rgba(218,218,220,0.5)' : 'rgba(0,0,0,0.35)' }}>{t.icon}</span>
-                                  <div>
-                                    <p className="text-[14px] font-semibold" style={{ color: dark ? '#f0f0f3' : '#1a1c1e' }}>{t.label}</p>
-                                    <p className="text-[12px]" style={{ color: dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)' }}>{t.desc}</p>
-                                  </div>
-                                </button>
-                              ))}
-                              <div className="h-2" />
-                            </>
-                          ) : (
-                            /* ── Anonymous: journey quick starts + tools ── */
-                            <>
-                              <div className="px-4 pt-3 pb-2">
-                                <span className="text-[11px] font-bold tracking-[0.15em] uppercase" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)' }}>Quick starts</span>
-                              </div>
-                              {HOME_TOOLS.filter(t => t.group === 'journey').map(t => (
-                                <button
-                                  key={t.label}
-                                  className="w-full flex items-center gap-3 px-4 py-3 text-left active:scale-[0.98] transition-transform border-none cursor-pointer"
-                                  style={{ background: 'transparent', WebkitTapHighlightColor: 'transparent' }}
-                                  onClick={() => { fillHomeInput(t.fill); setHomeToolsOpen(false); }}
-                                  type="button"
-                                >
-                                  <span className="text-[18px]">{t.icon}</span>
-                                  <div>
-                                    <p className="text-[14px] font-semibold" style={{ color: dark ? '#f0f0f3' : '#1a1c1e' }}>{t.label}</p>
-                                    <p className="text-[12px]" style={{ color: dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)' }}>{t.desc}</p>
-                                  </div>
-                                </button>
-                              ))}
-                              <div className="mx-4 my-1" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }} />
-                              <div className="px-4 pt-2 pb-1">
-                                <span className="text-[11px] font-bold tracking-[0.15em] uppercase" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)' }}>Tools</span>
-                              </div>
-                              {HOME_TOOLS.filter(t => t.group === 'tool').map(t => (
-                                <button
-                                  key={t.label}
-                                  className="w-full flex items-center gap-3 px-4 py-3 text-left active:scale-[0.98] transition-transform border-none cursor-pointer"
-                                  style={{ background: 'transparent', WebkitTapHighlightColor: 'transparent' }}
-                                  onClick={() => { fillHomeInput(t.fill); setHomeToolsOpen(false); }}
-                                  type="button"
-                                >
-                                  <span className="text-[18px]">{t.icon}</span>
-                                  <div>
-                                    <p className="text-[14px] font-semibold" style={{ color: dark ? '#f0f0f3' : '#1a1c1e' }}>{t.label}</p>
-                                    <p className="text-[12px]" style={{ color: dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)' }}>{t.desc}</p>
-                                  </div>
-                                </button>
-                              ))}
-                              <div className="h-2" />
-                            </>
-                          )}
-                        </div>
-                      )}
+                      <div className="px-4" style={{ touchAction: 'auto' }}>
                       {/* Gradient-glow input with + button for file uploads / utilities */}
                       <form autoComplete="off" onSubmit={(e) => e.preventDefault()} role="presentation" data-form-type="other">
                       <div className="relative group">
@@ -1937,20 +1799,9 @@ export default function AppShell() {
                         </div>
                       </div>
                       </form>
-                      {!user && (
-                        <p className={`text-xs font-medium text-center mt-3 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
-                          Free analysis · No account required · Your data stays yours
-                        </p>
-                      )}
-                      {/* Safe-area spacer — background extends to bottom edge, input clears home indicator */}
-                      <div
-                        style={{
-                          height: 'env(safe-area-inset-bottom, 4px)',
-                          marginLeft: -16,
-                          marginRight: -16,
-                          background: dark ? '#151617' : '#fefefe',
-                        }}
-                      />
+                      <p className={`text-xs font-medium text-center mt-3 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
+                        Free analysis · No account required · Your data stays yours
+                      </p>
                       </div>
                     </div>
                   )}
@@ -2003,6 +1854,29 @@ export default function AppShell() {
                 ...(isMobile ? { paddingTop: 48 } : {}),
               }}
             >
+              {/* Chapter strip — shows deal's conversation chapters as horizontal timeline */}
+              {user && authChat.grouped && authChat.activeDealId && (() => {
+                const dealGroup = authChat.grouped.deals.find(d => d.id === authChat.activeDealId);
+                if (!dealGroup || dealGroup.conversations.length < 2) return null;
+                return (
+                  <ChapterStrip
+                    chapters={dealGroup.conversations.map((c: any) => ({
+                      id: c.id,
+                      title: c.title || 'Chapter',
+                      gate_label: c.gate_label,
+                      gate_status: c.gate_status,
+                      summary: c.summary,
+                    }))}
+                    activeChapterId={activeConvId}
+                    onChapterTap={(id) => {
+                      authChat.selectConversation(id);
+                      navigate(`/chat/${id}`, { replace: true });
+                    }}
+                    dark={dark}
+                  />
+                );
+              })()}
+
               {user && authChat.activeDealId && (
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
               )}
@@ -2087,7 +1961,7 @@ export default function AppShell() {
         </div>{/* end chat column */}
 
         {/* ════ RESIZE HANDLE — vertical dots on the canvas card edge ════ */}
-        {!isMobile && (viewState === 'chat' || (viewState === 'landing' && !!user)) && (
+        {!isMobile && viewState === 'chat' && (
           <div
             className="resize-handle group"
             onMouseDown={handleResizeStart}
@@ -2121,8 +1995,8 @@ export default function AppShell() {
           </div>
         )}
 
-        {/* ════ DESKTOP CANVAS PANEL — tabbed, always visible on desktop for logged-in ════ */}
-        {!isMobile && (viewState === 'chat' || (viewState === 'landing' && !!user)) && (
+        {/* ════ DESKTOP CANVAS PANEL — tabbed, always visible on desktop ════ */}
+        {!isMobile && viewState === 'chat' && (
           <div
             className="flex min-w-0"
             style={{
@@ -2408,7 +2282,7 @@ export default function AppShell() {
           dark={dark}
           isLoggedIn={!!user}
           onHomeTap={() => {
-            setMobileWorkspaceStack([]);
+            setMobileWorkspaceOpen(null);
             setMobileJourneyOpen(null);
             setLearnDrawerOpen(false);
             setViewState('landing');
@@ -2416,30 +2290,21 @@ export default function AppShell() {
             navigate('/');
           }}
           dealGroups={user && authChat.grouped
-            ? authChat.grouped.deals.map(d => {
-                // Filter out junk conversations (Hello, Hi, Help, etc.)
-                const JUNK = /^(hello|hi|hey|help|new conversation|untitled|test)\.{0,3}$/i;
-                const validConvos = d.conversations.filter((c: any) => {
-                  const t = (c.title || '').trim();
-                  // Keep if: has a real title, is the active conversation, or has a summary
-                  return !JUNK.test(t) || c.id === activeConvId || c.summary;
-                });
-                return {
-                  id: d.id,
-                  journey_type: d.journey_type,
-                  current_gate: d.current_gate,
-                  business_name: d.business_name,
-                  industry: d.industry,
-                  conversations: (validConvos.length > 0 ? validConvos : d.conversations.slice(0, 1)).map((c: any) => ({
-                    id: c.id,
-                    title: c.title || 'Conversation',
-                    summary: c.summary || undefined,
-                    gate_label: c.gate_label || undefined,
-                    gate_status: c.gate_status || undefined,
-                    active: c.id === activeConvId,
-                  })),
-                };
-              })
+            ? authChat.grouped.deals.map(d => ({
+                id: d.id,
+                journey_type: d.journey_type,
+                current_gate: d.current_gate,
+                business_name: d.business_name,
+                industry: d.industry,
+                conversations: d.conversations.map((c: any) => ({
+                  id: c.id,
+                  title: c.title || 'Conversation',
+                  summary: c.summary || undefined,
+                  gate_label: c.gate_label || undefined,
+                  gate_status: c.gate_status || undefined,
+                  active: c.id === activeConvId,
+                })),
+              }))
             : []
           }
           generalChats={user && authChat.grouped
@@ -2469,10 +2334,7 @@ export default function AppShell() {
               navigate(`/chat/${id}`);
             }
           }}
-          onWorkspaceTap={(tool) => setMobileWorkspaceStack(prev => {
-            const without = prev.filter(t => t !== tool);
-            return [...without, tool];
-          })}
+          onWorkspaceTap={(tool) => setMobileWorkspaceOpen(tool)}
           onLearnTap={(dest) => setMobileJourneyOpen(dest)}
           onProfileTap={() => {
             if (user) openCanvasTab('settings', 'Settings');
@@ -2512,45 +2374,51 @@ export default function AppShell() {
         />
       )}
 
-      {/* ═══ MOBILE WORKSPACE SHEETS — Apple Wallet stacking ═══ */}
-      {isMobile && mobileWorkspaceStack.map((tool, i) => {
-        const META: Record<string, { icon: string; title: string; subtitle: string }> = {
-          documents: { icon: 'lock',           title: 'Data Room',    subtitle: 'Uploaded files, shared access, NDA gates' },
-          library:   { icon: 'auto_awesome',   title: 'Deliverables', subtitle: 'CIMs, valuations, term sheets Yulia built' },
-          analysis:  { icon: 'analytics',      title: 'Market Intel', subtitle: 'Census, SBA, comps, economic indicators' },
-          sourcing:  { icon: 'travel_explore', title: 'Sourcing',     subtitle: 'Acquisition targets, scored & ranked' },
-          pipeline:  { icon: 'view_kanban',    title: 'Pipeline',     subtitle: 'Active deals across all your journeys' },
-        };
-        const m = META[tool] || META.pipeline;
-        return (
-          <MobileWorkspaceSheet
-            key={tool}
-            open={true}
-            onOpenChange={(o) => { if (!o) setMobileWorkspaceStack(prev => prev.filter(t => t !== tool)); }}
-            dark={dark}
-            icon={m.icon}
-            title={m.title}
-            subtitle={m.subtitle}
-            zIndex={101 + i * 2}
-          >
-            {user ? (
-              <>
-                {tool === 'documents' && <DataRoom dealId={null} onViewDeliverable={() => {}} />}
-                {tool === 'library'   && <DocumentLibrary />}
-                {tool === 'analysis'  && <IntelPanel isFullscreen />}
-                {tool === 'sourcing'  && <SourcingPanel isFullscreen />}
-                {tool === 'pipeline'  && <PipelinePanel isFullscreen />}
-              </>
-            ) : (
-              <div className="px-6 py-12 text-center">
-                <p className="text-sm" style={{ color: dark ? 'rgba(218,218,220,0.6)' : '#7c7d80' }}>
-                  Sign in to access this workspace.
-                </p>
-              </div>
-            )}
-          </MobileWorkspaceSheet>
-        );
-      })}
+      {/* ═══ NEW MOBILE WORKSPACE SHEETS ═══ */}
+      {isMobile && mobileWorkspaceOpen && (
+        <MobileWorkspaceSheet
+          open={true}
+          onOpenChange={(o) => !o && setMobileWorkspaceOpen(null)}
+          dark={dark}
+          icon={
+            mobileWorkspaceOpen === 'documents' ? 'lock' :
+            mobileWorkspaceOpen === 'library'   ? 'auto_awesome' :
+            mobileWorkspaceOpen === 'analysis'  ? 'analytics' :
+            mobileWorkspaceOpen === 'sourcing'  ? 'travel_explore' :
+            'view_kanban'
+          }
+          title={
+            mobileWorkspaceOpen === 'documents' ? 'Data Room' :
+            mobileWorkspaceOpen === 'library'   ? 'Deliverables' :
+            mobileWorkspaceOpen === 'analysis'  ? 'Market Intel' :
+            mobileWorkspaceOpen === 'sourcing'  ? 'Sourcing' :
+            'Pipeline'
+          }
+          subtitle={
+            mobileWorkspaceOpen === 'documents' ? 'Uploaded files, shared access, NDA gates' :
+            mobileWorkspaceOpen === 'library'   ? 'CIMs, valuations, term sheets Yulia built' :
+            mobileWorkspaceOpen === 'analysis'  ? 'Census, SBA, comps, economic indicators' :
+            mobileWorkspaceOpen === 'sourcing'  ? 'Acquisition targets, scored & ranked' :
+            'Active deals across all your journeys'
+          }
+        >
+          {user ? (
+            <>
+              {mobileWorkspaceOpen === 'documents' && <DataRoom dealId={null} onViewDeliverable={() => {}} />}
+              {mobileWorkspaceOpen === 'library'   && <DocumentLibrary />}
+              {mobileWorkspaceOpen === 'analysis'  && <IntelPanel isFullscreen />}
+              {mobileWorkspaceOpen === 'sourcing'  && <SourcingPanel isFullscreen />}
+              {mobileWorkspaceOpen === 'pipeline'  && <PipelinePanel isFullscreen />}
+            </>
+          ) : (
+            <div className="px-6 py-12 text-center">
+              <p className="text-sm" style={{ color: dark ? 'rgba(218,218,220,0.6)' : '#7c7d80' }}>
+                Sign in to access this workspace.
+              </p>
+            </div>
+          )}
+        </MobileWorkspaceSheet>
+      )}
 
       {/* All 7 mobile journey pages — browser only, stripped from PWA.
           By the time the user is in PWA, they're signed up and don't need
@@ -2684,9 +2552,8 @@ export default function AppShell() {
         </>
       )}
 
-      {/* ═══ MOBILE FLOATING HEADER — hamburger (left) + bell (right) ═══ */}
+      {/* ═══ MOBILE FLOATING HAMBURGER (left) ═══ */}
       {isMobile && (
-        <>
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
           className="fixed z-[55] w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#E8709A] active:scale-90"
@@ -2696,18 +2563,6 @@ export default function AppShell() {
         >
           <span className="material-symbols-outlined text-[22px]">menu</span>
         </button>
-        {user && (
-          <div className="fixed z-[55]" style={{ top: 'calc(env(safe-area-inset-top) + 12px)', right: 16 }}>
-            <NotificationBell
-              dark={true}
-              onNavigate={(url) => {
-                setViewState('chat');
-                navigate(url);
-              }}
-            />
-          </div>
-        )}
-        </>
       )}
 
       {/* ═══ PWA LOCK — only fires when user enters chat, NOT when browsing.

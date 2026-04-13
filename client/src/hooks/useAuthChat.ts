@@ -101,18 +101,16 @@ export function useAuthChat(user: User | null) {
   // Load conversation list (flat for backward compat + grouped for new sidebar)
   const loadConversations = useCallback(async () => {
     if (!user) return;
-    // Flat list — critical, must work
     try {
-      const res = await fetch('/api/chat/conversations', { headers: authHeaders() });
-      if (res.ok) setConversations(await res.json());
+      const [flatRes, groupedRes] = await Promise.all([
+        fetch('/api/chat/conversations', { headers: authHeaders() }),
+        fetch('/api/chat/conversations/grouped', { headers: authHeaders() }),
+      ]);
+      if (flatRes.ok) setConversations(await flatRes.json());
+      if (groupedRes.ok) setGrouped(await groupedRes.json());
     } catch (err) {
       console.error('Failed to load conversations:', err);
     }
-    // Grouped — nice-to-have, fails silently if migration hasn't run
-    try {
-      const res = await fetch('/api/chat/conversations/grouped', { headers: authHeaders() });
-      if (res.ok) setGrouped(await res.json());
-    } catch { /* non-critical */ }
   }, [user]);
 
   useEffect(() => {
@@ -195,20 +193,11 @@ export function useAuthChat(user: User | null) {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      // Resume existing conversation or create new one.
-      // Key behavior: don't create a new conversation every message.
-      // Find the most recent active conversation and continue it.
+      // Ensure we have a conversation
       let convId = activeConversationId;
       if (!convId) {
-        // Check if we have an existing conversation to resume
-        const mostRecent = conversations[0]; // sorted by updated_at DESC
-        if (mostRecent) {
-          convId = mostRecent.id;
-          setActiveConversationId(convId);
-        } else {
-          convId = await createConversation();
-          if (!convId) throw new Error('Failed to create conversation');
-        }
+        convId = await createConversation();
+        if (!convId) throw new Error('Failed to create conversation');
       }
 
       const res = await fetch(`/api/chat/conversations/${convId}/messages`, {
@@ -424,18 +413,14 @@ export function useAuthChat(user: User | null) {
     setPaywallData(null);
   }, []);
 
-  // Start fresh — creates a new conversation immediately so the next
-  // sendMessage won't resume an existing one. Used by "New Deal" button.
-  const newConversation = useCallback(async () => {
+  // Start fresh (new conversation)
+  const newConversation = useCallback(() => {
+    setActiveConversationId(null);
     setMessages([]);
     setPaywallData(null);
     setActiveDealId(null);
     setCurrentGate(undefined);
-    // Create the conversation now so sendMessage doesn't resume an old one
-    const id = await createConversation();
-    if (id) setActiveConversationId(id);
-    else setActiveConversationId(null);
-  }, [createConversation]);
+  }, []);
 
   return {
     conversations,

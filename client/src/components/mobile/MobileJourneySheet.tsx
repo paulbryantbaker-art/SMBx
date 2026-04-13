@@ -85,11 +85,11 @@ export function MobileJourneySheet({
           className="fixed left-0 right-0 bottom-0 z-[101] outline-none flex flex-col"
           style={{
             background: bg,
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
-            height: '95vh',
-            paddingTop: 'env(safe-area-inset-top, 0px)',
-            boxShadow: '0 -12px 40px -12px rgba(0,0,0,0.4)',
+            borderTopLeftRadius: 28,
+            borderTopRightRadius: 28,
+            height: '94vh',
+            paddingTop: 0,
+            boxShadow: '0 -20px 60px -20px rgba(0,0,0,0.6)',
           }}
         >
           <Drawer.Title className="sr-only">{topBarTitle}</Drawer.Title>
@@ -97,24 +97,39 @@ export function MobileJourneySheet({
             {eyebrow} — Yulia journey page
           </Drawer.Description>
 
-          {/* Drag handle — tight, subtle */}
-          <div className="flex justify-center pt-2 pb-1 shrink-0 relative z-20">
+          {/* Drag handle */}
+          <div className="flex justify-center pt-3 pb-2 shrink-0 relative z-20">
             <div
-              className="w-9 h-1 rounded-full"
-              style={{ background: dark ? 'rgba(255,255,255,0.20)' : 'rgba(15,16,18,0.15)' }}
+              className="w-12 h-1.5 rounded-full"
+              style={{ background: dark ? 'rgba(255,255,255,0.18)' : 'rgba(15,16,18,0.18)' }}
             />
           </div>
 
-          {/* Top bar — eyebrow + title on scroll, no X button */}
+          {/* Sticky top bar — fades in on scroll */}
           <div
-            className="shrink-0 flex items-center gap-2.5 px-5 py-2 transition-all"
+            className="sticky top-0 z-10 flex items-center px-4 py-3 transition-all"
             style={{
               background: topBarBg,
-              backdropFilter: scrolled ? 'blur(16px) saturate(180%)' : 'none',
+              backdropFilter: scrolled ? 'blur(12px) saturate(180%)' : 'none',
               borderBottom: scrolled ? `1px solid ${ruleC}` : '1px solid transparent',
             }}
           >
-            <div className="flex-1 min-w-0">
+            <button
+              onClick={() => onOpenChange(false)}
+              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+              style={{
+                background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.05)',
+                border: 'none',
+                cursor: 'pointer',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+              aria-label="Close"
+            >
+              <span className="material-symbols-outlined text-[18px]" style={{ color: bodyC }}>
+                close
+              </span>
+            </button>
+            <div className="flex-1 text-center">
               <p
                 className="text-[10px] font-bold uppercase tracking-[0.22em]"
                 style={{ color: pinkC }}
@@ -123,13 +138,14 @@ export function MobileJourneySheet({
               </p>
               {scrolled && (
                 <p
-                  className="font-headline font-black text-[14px] tracking-tight mt-0.5 truncate"
+                  className="font-headline font-black text-[14px] tracking-tight mt-0.5"
                   style={{ color: headingC }}
                 >
                   {topBarTitle}
                 </p>
               )}
             </div>
+            <div className="w-9 h-9 shrink-0" />
           </div>
 
           {/* Scrollable content */}
