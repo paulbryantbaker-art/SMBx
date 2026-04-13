@@ -1,13 +1,13 @@
 /**
  * MobileWorkspaceSheet.tsx
  *
- * Full-screen Vaul drawer that hosts any in-app workspace tool on mobile.
- * Documents (Data Room), Library, Pipeline, Sourcing, Analysis, Settings —
- * any of the chat-side panels render inside this wrapper.
+ * Premium bottom drawer for workspace tools on mobile.
+ * Drag handle at top, no close button — pull down to dismiss.
+ * Opens at 95vh consistently. Clean, minimal header.
  *
- * Same Vaul + drag-handle + scroll-aware top bar pattern as MobileJourneySheet,
- * but tuned for tool/panel content (no bottom CTA, no eyebrow tag, no story
- * narrative).
+ * Design: Grok-minimal, warm charcoal, Sora headlines.
+ * No X button. Drag handle is tight and subtle.
+ * Title bar gains blur + border on scroll.
  */
 
 import { Drawer } from 'vaul';
@@ -20,13 +20,9 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   dark: boolean;
-  /** The tool icon (material-symbols name) shown in the top bar */
   icon: string;
-  /** The tool title shown in the top bar */
   title: string;
-  /** Optional sub-line under the title */
   subtitle?: string;
-  /** The tool component */
   children: ReactNode;
 }
 
@@ -50,19 +46,18 @@ export function MobileWorkspaceSheet({
   }, [open]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    setScrolled(e.currentTarget.scrollTop > 16);
+    setScrolled(e.currentTarget.scrollTop > 8);
   };
 
-  // Color tokens
-  const bg          = dark ? '#151617' : '#fefefe';
-  const headingC    = dark ? '#f9f9fc' : '#0f1012';
-  const bodyC       = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
-  const mutedC      = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
-  const ruleC       = dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.08)';
-  const pinkC       = dark ? PINK_DARK : PINK;
-  const topBarBg    = dark
-    ? scrolled ? 'rgba(21,22,23,0.85)' : 'rgba(21,22,23,1)'
-    : scrolled ? 'rgba(254,254,254,0.85)' : 'rgba(254,254,254,1)';
+  const bg       = dark ? '#151617' : '#fefefe';
+  const headingC = dark ? '#f9f9fc' : '#0f1012';
+  const mutedC   = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
+  const ruleC    = dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.08)';
+  const pinkC    = dark ? PINK_DARK : PINK;
+  const handleC  = dark ? 'rgba(255,255,255,0.20)' : 'rgba(15,16,18,0.15)';
+  const topBarBg = dark
+    ? scrolled ? 'rgba(21,22,23,0.92)' : bg
+    : scrolled ? 'rgba(254,254,254,0.92)' : bg;
 
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange} shouldScaleBackground>
@@ -75,72 +70,49 @@ export function MobileWorkspaceSheet({
           className="fixed left-0 right-0 bottom-0 z-[101] outline-none flex flex-col"
           style={{
             background: bg,
-            borderTopLeftRadius: 28,
-            borderTopRightRadius: 28,
-            height: '94vh',
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16,
+            height: '95vh',
             paddingTop: 'env(safe-area-inset-top, 0px)',
-            boxShadow: '0 -20px 60px -20px rgba(0,0,0,0.6)',
+            boxShadow: '0 -12px 40px -12px rgba(0,0,0,0.4)',
           }}
         >
           <Drawer.Title className="sr-only">{title}</Drawer.Title>
-          <Drawer.Description className="sr-only">
-            {subtitle || title}
-          </Drawer.Description>
+          <Drawer.Description className="sr-only">{subtitle || title}</Drawer.Description>
 
-          {/* Drag handle */}
-          <div className="flex justify-center pt-3 pb-2 shrink-0 relative z-20">
+          {/* Drag handle — tight, subtle, centered */}
+          <div className="flex justify-center pt-2 pb-1 shrink-0">
             <div
-              className="w-12 h-1.5 rounded-full"
-              style={{ background: dark ? 'rgba(255,255,255,0.18)' : 'rgba(15,16,18,0.18)' }}
+              className="w-9 h-1 rounded-full"
+              style={{ background: handleC }}
             />
           </div>
 
-          {/* Top bar — always shows icon + title, gains border + blur on scroll */}
+          {/* Title bar — icon + title, blur on scroll */}
           <div
-            className="sticky top-0 z-10 flex items-center px-4 py-3 transition-all"
+            className="shrink-0 flex items-center gap-2.5 px-5 py-2 transition-all"
             style={{
               background: topBarBg,
-              backdropFilter: scrolled ? 'blur(12px) saturate(180%)' : 'none',
+              backdropFilter: scrolled ? 'blur(16px) saturate(180%)' : 'none',
               borderBottom: scrolled ? `1px solid ${ruleC}` : '1px solid transparent',
             }}
           >
-            <button
-              onClick={() => onOpenChange(false)}
-              className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-              style={{
-                background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.05)',
-                border: 'none',
-                cursor: 'pointer',
-                WebkitTapHighlightColor: 'transparent',
-              }}
-              aria-label="Close"
-            >
-              <span className="material-symbols-outlined text-[18px]" style={{ color: bodyC }}>
-                close
-              </span>
-            </button>
-            <div className="flex-1 text-center px-3">
-              <div className="flex items-center justify-center gap-2">
-                <span
-                  className="material-symbols-outlined text-[16px]"
-                  style={{ color: pinkC }}
-                >
-                  {icon}
-                </span>
-                <p
-                  className="font-headline font-black text-[15px] tracking-tight"
-                  style={{ color: headingC }}
-                >
-                  {title}
-                </p>
-              </div>
+            <span className="material-symbols-outlined text-[18px]" style={{ color: pinkC }}>
+              {icon}
+            </span>
+            <div className="flex-1 min-w-0">
+              <p
+                className="font-headline font-black text-[15px] tracking-[-0.02em] truncate"
+                style={{ color: headingC, lineHeight: 1.2 }}
+              >
+                {title}
+              </p>
               {subtitle && !scrolled && (
-                <p className="text-[11px] mt-0.5" style={{ color: mutedC }}>
+                <p className="text-[11px] truncate" style={{ color: mutedC }}>
                   {subtitle}
                 </p>
               )}
             </div>
-            <div className="w-9 h-9 shrink-0" />
           </div>
 
           {/* Scrollable content */}
