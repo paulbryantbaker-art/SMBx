@@ -1735,10 +1735,11 @@ export default function AppShell() {
 
                   {/* On mobile the golden-ratio flex (1.618 vs 1) handles spacing — no extra spacer needed */}
 
-                  {/* Mobile bottom zone: absolute-pinned to bottom edge like Grok */}
+                  {/* Mobile bottom zone: absolute-pinned to bottom edge like Grok.
+                      overflow-hidden clips the pill's rounded bottom corners at the viewport edge. */}
                   {isMobile && (
                     <div
-                      className="absolute left-0 right-0 bottom-0 z-10"
+                      className="absolute left-0 right-0 bottom-0 z-10 overflow-hidden"
                     >
                       {/* Starter chips — journey starters in browser, action starters in PWA */}
                       {!isPWA && (
@@ -1749,7 +1750,7 @@ export default function AppShell() {
                         />
                       )}
 
-                      <div className={isPWA ? 'px-3 pb-2' : 'px-4 pb-3'} style={{ touchAction: 'auto', background: dark ? '#151617' : '#fefefe' }}>
+                      <div className={isPWA ? 'px-3' : 'px-4'} style={{ touchAction: 'auto' }}>
                       {/* Gradient-glow input with + button for file uploads / utilities */}
                       <form autoComplete="off" onSubmit={(e) => e.preventDefault()} role="presentation" data-form-type="other">
                       <div className="relative group">
