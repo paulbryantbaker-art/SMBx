@@ -1756,7 +1756,7 @@ export default function AppShell() {
                     <div
                       id="mobile-home-pill-portal"
                       className="fixed left-0 right-0 bottom-0 z-10 overflow-hidden"
-                      style={{ paddingTop: 8, paddingBottom: 'env(safe-area-inset-bottom)' }}
+                      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
                     >
                       {/* Starter chips — journey starters in browser, action starters in PWA */}
                       {!isPWA && (
@@ -1768,10 +1768,11 @@ export default function AppShell() {
                       )}
 
                       <div className={isPWA ? 'px-3' : 'px-4'} style={{ touchAction: 'auto' }}>
-                      {/* Gradient-glow input with + button for file uploads / utilities */}
+                      {/* Mobile pill — no gradient halo. The -inset-1 blur glow was being
+                          clipped by the portal wrapper's overflow:hidden (which is load-bearing
+                          for iOS PWA positioning), creating uneven shading. Solid pill only. */}
                       <form autoComplete="off" onSubmit={(e) => e.preventDefault()} role="presentation" data-form-type="other">
-                      <div className="relative group">
-                        <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'}`} />
+                      <div className="relative">
                         <div className={`relative rounded-full flex items-center p-2 pl-3 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
                           {/* + button — opens tools/upload drawer */}
                           <button
