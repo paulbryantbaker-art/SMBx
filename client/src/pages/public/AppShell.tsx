@@ -1759,7 +1759,61 @@ export default function AppShell() {
                         />
                       )}
 
-                      <div className="px-4" style={{ touchAction: 'auto' }}>
+                      <div className="px-4 relative" style={{ touchAction: 'auto' }}>
+                      {/* Mobile tool popup (rises above pill) */}
+                      {homeToolsOpen && (
+                        <div
+                          ref={homeToolsRef}
+                          className="absolute left-4 right-4 z-20 rounded-2xl overflow-hidden"
+                          style={{
+                            bottom: 'calc(100% + 8px)',
+                            background: dark ? '#1f2123' : '#fff',
+                            border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
+                            boxShadow: dark ? '0 -8px 32px rgba(0,0,0,0.5)' : '0 -8px 32px rgba(0,0,0,0.08)',
+                            maxHeight: '50vh',
+                            overflowY: 'auto',
+                          }}
+                        >
+                          <div className="px-4 pt-3 pb-2">
+                            <span className="text-[11px] font-bold tracking-[0.15em] uppercase" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)' }}>Quick starts</span>
+                          </div>
+                          {HOME_TOOLS.filter(t => t.group === 'journey').map(t => (
+                            <button
+                              key={t.label}
+                              className="w-full flex items-center gap-3 px-4 py-3 text-left active:scale-[0.98] transition-transform border-none cursor-pointer"
+                              style={{ background: 'transparent', WebkitTapHighlightColor: 'transparent' }}
+                              onClick={() => { fillHomeInput(t.fill); setHomeToolsOpen(false); }}
+                              type="button"
+                            >
+                              <span className="text-[18px]">{t.icon}</span>
+                              <div>
+                                <p className="text-[14px] font-semibold" style={{ color: dark ? '#f0f0f3' : '#1a1c1e' }}>{t.label}</p>
+                                <p className="text-[12px]" style={{ color: dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)' }}>{t.desc}</p>
+                              </div>
+                            </button>
+                          ))}
+                          <div className="mx-4 my-1" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'}` }} />
+                          <div className="px-4 pt-2 pb-1">
+                            <span className="text-[11px] font-bold tracking-[0.15em] uppercase" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)' }}>Tools</span>
+                          </div>
+                          {HOME_TOOLS.filter(t => t.group === 'tool').map(t => (
+                            <button
+                              key={t.label}
+                              className="w-full flex items-center gap-3 px-4 py-3 text-left active:scale-[0.98] transition-transform border-none cursor-pointer"
+                              style={{ background: 'transparent', WebkitTapHighlightColor: 'transparent' }}
+                              onClick={() => { fillHomeInput(t.fill); setHomeToolsOpen(false); }}
+                              type="button"
+                            >
+                              <span className="text-[18px]">{t.icon}</span>
+                              <div>
+                                <p className="text-[14px] font-semibold" style={{ color: dark ? '#f0f0f3' : '#1a1c1e' }}>{t.label}</p>
+                                <p className="text-[12px]" style={{ color: dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)' }}>{t.desc}</p>
+                              </div>
+                            </button>
+                          ))}
+                          <div className="h-2" />
+                        </div>
+                      )}
                       {/* Gradient-glow input with + button for file uploads / utilities */}
                       <form autoComplete="off" onSubmit={(e) => e.preventDefault()} role="presentation" data-form-type="other">
                       <div className="relative group">
