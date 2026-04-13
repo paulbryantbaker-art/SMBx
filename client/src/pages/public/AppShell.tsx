@@ -642,26 +642,6 @@ export default function AppShell() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // iOS PWA keyboard-dismiss recovery — when the software keyboard closes,
-  // iOS sometimes leaves the layout viewport scrolled, stranding the portaled
-  // position:fixed pill a few dozen pixels above the screen edge. Force a
-  // scroll reset after any focus loss to kick iOS back to y=0. Mobile only.
-  useEffect(() => {
-    if (!isMobile) return;
-    const recover = () => {
-      // Double RAF so iOS finishes its own scroll recovery first, then we override.
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          window.scrollTo(0, 0);
-          document.documentElement.scrollTop = 0;
-          document.body.scrollTop = 0;
-        });
-      });
-    };
-    window.addEventListener('focusout', recover);
-    return () => window.removeEventListener('focusout', recover);
-  }, [isMobile]);
-
   // Home hero tool popup (+ button menu with journey shortcuts + tools)
   // Declared AFTER isMobile because fillHomeInput depends on it (TDZ safety)
   const [homeToolsOpen, setHomeToolsOpen] = useState(false);
@@ -1788,11 +1768,10 @@ export default function AppShell() {
                       )}
 
                       <div className={isPWA ? 'px-3' : 'px-4'} style={{ touchAction: 'auto' }}>
-                      {/* Mobile pill — no gradient halo. The -inset-1 blur glow was being
-                          clipped by the portal wrapper's overflow:hidden (which is load-bearing
-                          for iOS PWA positioning), creating uneven shading. Solid pill only. */}
+                      {/* Gradient-glow input with + button for file uploads / utilities */}
                       <form autoComplete="off" onSubmit={(e) => e.preventDefault()} role="presentation" data-form-type="other">
-                      <div className="relative">
+                      <div className="relative group">
+                        <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'}`} />
                         <div className={`relative rounded-full flex items-center p-2 pl-3 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
                           {/* + button — opens tools/upload drawer */}
                           <button
