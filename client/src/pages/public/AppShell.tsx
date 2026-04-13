@@ -2500,7 +2500,7 @@ export default function AppShell() {
         />
       )}
 
-      {/* ═══ NEW MOBILE WORKSPACE SHEETS ═══ */}
+      {/* ═══ MOBILE WORKSPACE SHEET ═══ */}
       {isMobile && mobileWorkspaceOpen && (
         <MobileWorkspaceSheet
           open={true}
