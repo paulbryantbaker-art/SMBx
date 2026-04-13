@@ -494,31 +494,6 @@ export default function AppShell() {
     return () => root.classList.remove('chat-mode');
   }, [isChat]);
 
-  // Mobile-only: track the iOS visual viewport directly and publish --kb-inset-bottom
-  // so the portaled chat pill can ride the top of the keyboard via `bottom: var(...)`.
-  // Replaces useAppHeight's #app-root transform hack on mobile (which created a fixed-
-  // positioning containing block that caused the pill to get stranded after keyboard
-  // dismissal). Desktop keeps useAppHeight's behavior untouched.
-  useEffect(() => {
-    if (!isMobile) return;
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const root = document.documentElement;
-    const update = () => {
-      const inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      root.style.setProperty('--kb-inset-bottom', inset + 'px');
-    };
-    update();
-    vv.addEventListener('resize', update);
-    vv.addEventListener('scroll', update);
-    window.addEventListener('resize', update);
-    return () => {
-      vv.removeEventListener('resize', update);
-      vv.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
-      root.style.removeProperty('--kb-inset-bottom');
-    };
-  }, [isMobile]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isMobileCanvasDrawerOpen, setIsMobileCanvasDrawerOpen] = useState(false);
   // Mobile rebuild state — LearnDrawer + journey sheets + workspace tool sheets
@@ -666,6 +641,32 @@ export default function AppShell() {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
+
+  // Mobile-only: track the iOS visual viewport and publish --kb-inset-bottom on <html>
+  // so the portaled chat pill can ride the top of the keyboard via `bottom: var(...)`.
+  // Replaces useAppHeight's #app-root transform hack on mobile (which created a fixed-
+  // positioning containing block that stranded the pill after keyboard dismissal).
+  // Desktop keeps useAppHeight's behavior untouched.
+  useEffect(() => {
+    if (!isMobile) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const root = document.documentElement;
+    const update = () => {
+      const inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      root.style.setProperty('--kb-inset-bottom', inset + 'px');
+    };
+    update();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    window.addEventListener('resize', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+      root.style.removeProperty('--kb-inset-bottom');
+    };
+  }, [isMobile]);
   // Home hero tool popup (+ button menu with journey shortcuts + tools)
   // Declared AFTER isMobile because fillHomeInput depends on it (TDZ safety)
   const [homeToolsOpen, setHomeToolsOpen] = useState(false);
