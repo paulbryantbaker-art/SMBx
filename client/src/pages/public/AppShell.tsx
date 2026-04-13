@@ -495,7 +495,7 @@ export default function AppShell() {
   // Mobile rebuild state — LearnDrawer + journey sheets + workspace tool sheets
   const [learnDrawerOpen, setLearnDrawerOpen] = useState(false);
   const [mobileJourneyOpen, setMobileJourneyOpen] = useState<LearnDest | null>(null);
-  const [mobileWorkspaceOpen, setMobileWorkspaceOpen] = useState<WorkspaceTool | null>(null);
+  const [mobileWorkspaceStack, setMobileWorkspaceStack] = useState<WorkspaceTool[]>([]);
   // PWA standalone detection — when true, strip all marketing/journey content
   const isPWA = isStandalone();
   // Mobile canvas overlay visibility — separate from canvasTabs.length so tabs persist
@@ -864,7 +864,7 @@ export default function AppShell() {
   const handleNewChat = useCallback(async () => {
     if (user) await authChat.newConversation();
     // Clear any open mobile sheets/drawers so we land on clean chat
-    setMobileWorkspaceOpen(null);
+    setMobileWorkspaceStack([]);
     setMobileJourneyOpen(null);
     setLearnDrawerOpen(false);
     setViewState('chat');
@@ -1570,7 +1570,7 @@ export default function AppShell() {
           className="flex flex-col min-w-0"
           style={{
             background: 'transparent',
-            ...(!isMobile && viewState === 'chat'
+            ...(!isMobile && (viewState === 'chat' || (viewState === 'landing' && !!user))
               ? { width: chatWidth, flexShrink: 0 }
               : { flex: 1 }),
           }}
@@ -1583,7 +1583,7 @@ export default function AppShell() {
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
-            <div key={activeTab} style={{ position: activeTab === 'home' ? 'fixed' as const : 'relative' as const, animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { inset: 0, display: 'flex', flexDirection: 'column' as const, overflow: 'hidden', overscrollBehavior: 'none' as const, touchAction: 'pan-x' as const } : { minHeight: '100dvh' }) }}>
+            <div key={activeTab} style={{ position: (activeTab === 'home' && !(!isMobile && user)) ? 'fixed' as const : 'relative' as const, animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...((activeTab === 'home' && !(!isMobile && user)) ? { inset: 0, display: 'flex', flexDirection: 'column' as const, overflow: 'hidden', overscrollBehavior: 'none' as const, touchAction: 'pan-x' as const } : { minHeight: '100dvh', display: 'flex', flexDirection: 'column' as const, flex: 1 }) }}>
 
               {/* No background layer here — body (#E8DFC9 warm beige in index.css)
                   provides the back-layer color. Adding an absolute-positioned div
@@ -1772,7 +1772,7 @@ export default function AppShell() {
                         />
                       )}
 
-                      <div className="px-4 relative" style={{ touchAction: 'auto', paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
+                      <div className="px-4 relative" style={{ touchAction: 'auto' }}>
                       {/* Mobile + popup (rises above pill) */}
                       {homeToolsOpen && (
                         <div
@@ -1942,6 +1942,15 @@ export default function AppShell() {
                           Free analysis · No account required · Your data stays yours
                         </p>
                       )}
+                      {/* Safe-area spacer — background extends to bottom edge, input clears home indicator */}
+                      <div
+                        style={{
+                          height: 'env(safe-area-inset-bottom, 4px)',
+                          marginLeft: -16,
+                          marginRight: -16,
+                          background: dark ? '#151617' : '#fefefe',
+                        }}
+                      />
                       </div>
                     </div>
                   )}
@@ -2078,7 +2087,7 @@ export default function AppShell() {
         </div>{/* end chat column */}
 
         {/* ════ RESIZE HANDLE — vertical dots on the canvas card edge ════ */}
-        {!isMobile && viewState === 'chat' && (
+        {!isMobile && (viewState === 'chat' || (viewState === 'landing' && !!user)) && (
           <div
             className="resize-handle group"
             onMouseDown={handleResizeStart}
@@ -2112,8 +2121,8 @@ export default function AppShell() {
           </div>
         )}
 
-        {/* ════ DESKTOP CANVAS PANEL — tabbed, always visible on desktop ════ */}
-        {!isMobile && viewState === 'chat' && (
+        {/* ════ DESKTOP CANVAS PANEL — tabbed, always visible on desktop for logged-in ════ */}
+        {!isMobile && (viewState === 'chat' || (viewState === 'landing' && !!user)) && (
           <div
             className="flex min-w-0"
             style={{
@@ -2399,7 +2408,7 @@ export default function AppShell() {
           dark={dark}
           isLoggedIn={!!user}
           onHomeTap={() => {
-            setMobileWorkspaceOpen(null);
+            setMobileWorkspaceStack([]);
             setMobileJourneyOpen(null);
             setLearnDrawerOpen(false);
             setViewState('landing');
@@ -2460,7 +2469,10 @@ export default function AppShell() {
               navigate(`/chat/${id}`);
             }
           }}
-          onWorkspaceTap={(tool) => setMobileWorkspaceOpen(tool)}
+          onWorkspaceTap={(tool) => setMobileWorkspaceStack(prev => {
+            const without = prev.filter(t => t !== tool);
+            return [...without, tool];
+          })}
           onLearnTap={(dest) => setMobileJourneyOpen(dest)}
           onProfileTap={() => {
             if (user) openCanvasTab('settings', 'Settings');
@@ -2500,51 +2512,45 @@ export default function AppShell() {
         />
       )}
 
-      {/* ═══ MOBILE WORKSPACE SHEET ═══ */}
-      {isMobile && mobileWorkspaceOpen && (
-        <MobileWorkspaceSheet
-          open={true}
-          onOpenChange={(o) => !o && setMobileWorkspaceOpen(null)}
-          dark={dark}
-          icon={
-            mobileWorkspaceOpen === 'documents' ? 'lock' :
-            mobileWorkspaceOpen === 'library'   ? 'auto_awesome' :
-            mobileWorkspaceOpen === 'analysis'  ? 'analytics' :
-            mobileWorkspaceOpen === 'sourcing'  ? 'travel_explore' :
-            'view_kanban'
-          }
-          title={
-            mobileWorkspaceOpen === 'documents' ? 'Data Room' :
-            mobileWorkspaceOpen === 'library'   ? 'Deliverables' :
-            mobileWorkspaceOpen === 'analysis'  ? 'Market Intel' :
-            mobileWorkspaceOpen === 'sourcing'  ? 'Sourcing' :
-            'Pipeline'
-          }
-          subtitle={
-            mobileWorkspaceOpen === 'documents' ? 'Uploaded files, shared access, NDA gates' :
-            mobileWorkspaceOpen === 'library'   ? 'CIMs, valuations, term sheets Yulia built' :
-            mobileWorkspaceOpen === 'analysis'  ? 'Census, SBA, comps, economic indicators' :
-            mobileWorkspaceOpen === 'sourcing'  ? 'Acquisition targets, scored & ranked' :
-            'Active deals across all your journeys'
-          }
-        >
-          {user ? (
-            <>
-              {mobileWorkspaceOpen === 'documents' && <DataRoom dealId={null} onViewDeliverable={() => {}} />}
-              {mobileWorkspaceOpen === 'library'   && <DocumentLibrary />}
-              {mobileWorkspaceOpen === 'analysis'  && <IntelPanel isFullscreen />}
-              {mobileWorkspaceOpen === 'sourcing'  && <SourcingPanel isFullscreen />}
-              {mobileWorkspaceOpen === 'pipeline'  && <PipelinePanel isFullscreen />}
-            </>
-          ) : (
-            <div className="px-6 py-12 text-center">
-              <p className="text-sm" style={{ color: dark ? 'rgba(218,218,220,0.6)' : '#7c7d80' }}>
-                Sign in to access this workspace.
-              </p>
-            </div>
-          )}
-        </MobileWorkspaceSheet>
-      )}
+      {/* ═══ MOBILE WORKSPACE SHEETS — Apple Wallet stacking ═══ */}
+      {isMobile && mobileWorkspaceStack.map((tool, i) => {
+        const META: Record<string, { icon: string; title: string; subtitle: string }> = {
+          documents: { icon: 'lock',           title: 'Data Room',    subtitle: 'Uploaded files, shared access, NDA gates' },
+          library:   { icon: 'auto_awesome',   title: 'Deliverables', subtitle: 'CIMs, valuations, term sheets Yulia built' },
+          analysis:  { icon: 'analytics',      title: 'Market Intel', subtitle: 'Census, SBA, comps, economic indicators' },
+          sourcing:  { icon: 'travel_explore', title: 'Sourcing',     subtitle: 'Acquisition targets, scored & ranked' },
+          pipeline:  { icon: 'view_kanban',    title: 'Pipeline',     subtitle: 'Active deals across all your journeys' },
+        };
+        const m = META[tool] || META.pipeline;
+        return (
+          <MobileWorkspaceSheet
+            key={tool}
+            open={true}
+            onOpenChange={(o) => { if (!o) setMobileWorkspaceStack(prev => prev.filter(t => t !== tool)); }}
+            dark={dark}
+            icon={m.icon}
+            title={m.title}
+            subtitle={m.subtitle}
+            zIndex={101 + i * 2}
+          >
+            {user ? (
+              <>
+                {tool === 'documents' && <DataRoom dealId={null} onViewDeliverable={() => {}} />}
+                {tool === 'library'   && <DocumentLibrary />}
+                {tool === 'analysis'  && <IntelPanel isFullscreen />}
+                {tool === 'sourcing'  && <SourcingPanel isFullscreen />}
+                {tool === 'pipeline'  && <PipelinePanel isFullscreen />}
+              </>
+            ) : (
+              <div className="px-6 py-12 text-center">
+                <p className="text-sm" style={{ color: dark ? 'rgba(218,218,220,0.6)' : '#7c7d80' }}>
+                  Sign in to access this workspace.
+                </p>
+              </div>
+            )}
+          </MobileWorkspaceSheet>
+        );
+      })}
 
       {/* All 7 mobile journey pages — browser only, stripped from PWA.
           By the time the user is in PWA, they're signed up and don't need

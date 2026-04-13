@@ -2,12 +2,10 @@
  * MobileWorkspaceSheet.tsx
  *
  * Premium bottom drawer for workspace tools on mobile.
- * Drag handle at top, no close button — pull down to dismiss.
- * Opens at 95vh consistently. Clean, minimal header.
+ * Opens at 95%, can be dragged to 35% peek, pull further to dismiss.
+ * No close button — drag handle only.
  *
- * Design: Grok-minimal, warm charcoal, Sora headlines.
- * No X button. Drag handle is tight and subtle.
- * Title bar gains blur + border on scroll.
+ * Supports z-index stacking for Apple Wallet pattern.
  */
 
 import { Drawer } from 'vaul';
@@ -24,6 +22,8 @@ interface Props {
   title: string;
   subtitle?: string;
   children: ReactNode;
+  /** For stacking multiple drawers (Apple Wallet pattern) */
+  zIndex?: number;
 }
 
 export function MobileWorkspaceSheet({
@@ -34,13 +34,16 @@ export function MobileWorkspaceSheet({
   title,
   subtitle,
   children,
+  zIndex,
 }: Props) {
   const [scrolled, setScrolled] = useState(false);
+  const [activeSnap, setActiveSnap] = useState<number | string | null>(0.95);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) {
       setScrolled(false);
+      setActiveSnap(0.95);
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
     }
   }, [open]);
@@ -48,6 +51,10 @@ export function MobileWorkspaceSheet({
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     setScrolled(e.currentTarget.scrollTop > 8);
   };
+
+  const isPeeked = activeSnap === 0.35;
+  const overlayZ = (zIndex ?? 101) - 1;
+  const contentZ = zIndex ?? 101;
 
   const bg       = dark ? '#151617' : '#fefefe';
   const headingC = dark ? '#f9f9fc' : '#0f1012';
@@ -60,35 +67,44 @@ export function MobileWorkspaceSheet({
     : scrolled ? 'rgba(254,254,254,0.92)' : bg;
 
   return (
-    <Drawer.Root open={open} onOpenChange={onOpenChange} shouldScaleBackground>
+    <Drawer.Root
+      open={open}
+      onOpenChange={onOpenChange}
+      shouldScaleBackground
+      snapPoints={[0.35, 0.95]}
+      activeSnapPoint={activeSnap}
+      setActiveSnapPoint={setActiveSnap}
+      fadeFromIndex={1}
+    >
       <Drawer.Portal>
         <Drawer.Overlay
-          className="fixed inset-0 z-[100]"
-          style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)' }}
+          className="fixed inset-0"
+          style={{
+            background: 'rgba(0,0,0,0.55)',
+            backdropFilter: 'blur(8px)',
+            zIndex: overlayZ,
+          }}
         />
         <Drawer.Content
-          className="fixed left-0 right-0 bottom-0 z-[101] outline-none flex flex-col"
+          className="fixed left-0 right-0 bottom-0 outline-none flex flex-col"
           style={{
             background: bg,
             borderTopLeftRadius: 16,
             borderTopRightRadius: 16,
-            height: '95vh',
             paddingTop: 'env(safe-area-inset-top, 0px)',
             boxShadow: '0 -12px 40px -12px rgba(0,0,0,0.4)',
+            zIndex: contentZ,
           }}
         >
           <Drawer.Title className="sr-only">{title}</Drawer.Title>
           <Drawer.Description className="sr-only">{subtitle || title}</Drawer.Description>
 
-          {/* Drag handle — tight, subtle, centered */}
+          {/* Drag handle */}
           <div className="flex justify-center pt-2 pb-1 shrink-0">
-            <div
-              className="w-9 h-1 rounded-full"
-              style={{ background: handleC }}
-            />
+            <div className="w-9 h-1 rounded-full" style={{ background: handleC }} />
           </div>
 
-          {/* Title bar — icon + title, blur on scroll */}
+          {/* Title bar */}
           <div
             className="shrink-0 flex items-center gap-2.5 px-5 py-2 transition-all"
             style={{
@@ -107,7 +123,7 @@ export function MobileWorkspaceSheet({
               >
                 {title}
               </p>
-              {subtitle && !scrolled && (
+              {subtitle && !scrolled && !isPeeked && (
                 <p className="text-[11px] truncate" style={{ color: mutedC }}>
                   {subtitle}
                 </p>
@@ -115,12 +131,13 @@ export function MobileWorkspaceSheet({
             </div>
           </div>
 
-          {/* Scrollable content */}
+          {/* Scrollable content — hidden when peeked at 35% */}
           <div
             ref={scrollRef}
             onScroll={handleScroll}
-            className="flex-1 overflow-y-auto mobile-scroll"
+            className="flex-1 mobile-scroll"
             style={{
+              overflowY: isPeeked ? 'hidden' : 'auto',
               overscrollBehavior: 'contain',
               WebkitOverflowScrolling: 'touch',
               paddingBottom: 'env(safe-area-inset-bottom, 0px)',
