@@ -1748,7 +1748,7 @@ export default function AppShell() {
                   {isMobile && (
                     <div
                       className="absolute left-0 right-0 bottom-0 z-10 chat-pill-mobile-container"
-                      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}
+                      style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}
                     >
                       {/* Starter chips — journey starters in browser, action starters in PWA */}
                       {!isPWA && (
