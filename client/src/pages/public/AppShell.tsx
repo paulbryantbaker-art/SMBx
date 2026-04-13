@@ -1749,7 +1749,7 @@ export default function AppShell() {
                         />
                       )}
 
-                      <div className={isPWA ? 'px-3' : 'px-4'} style={{ touchAction: 'auto' }}>
+                      <div className={isPWA ? 'px-3 pb-2' : 'px-4 pb-3'} style={{ touchAction: 'auto', background: dark ? '#151617' : '#fefefe' }}>
                       {/* Gradient-glow input with + button for file uploads / utilities */}
                       <form autoComplete="off" onSubmit={(e) => e.preventDefault()} role="presentation" data-form-type="other">
                       <div className="relative group">
