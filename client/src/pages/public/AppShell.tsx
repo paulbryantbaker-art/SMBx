@@ -467,6 +467,69 @@ const JOURNEY_COLORS: Record<string, string> = {
   pmi: '#8F6BD4',
 };
 
+/* ═══ DEBUG: mobile pill position readout — TEMPORARY, remove after diagnosis ═══ */
+function DockDebugReadout() {
+  const [info, setInfo] = useState('');
+  useEffect(() => {
+    const update = () => {
+      const vv = window.visualViewport;
+      const pill = document.getElementById('mobile-chat-dock-portal');
+      const pillRect = pill?.getBoundingClientRect();
+      const cs = pill ? window.getComputedStyle(pill) : null;
+      const html = document.documentElement;
+      const htmlCS = window.getComputedStyle(html);
+      const appHeightVar = htmlCS.getPropertyValue('--app-height').trim();
+      const kbVar = htmlCS.getPropertyValue('--kb-inset-bottom').trim();
+      const htmlCM = html.classList.contains('chat-mode') ? 'Y' : 'N';
+      const std = window.matchMedia('(display-mode: standalone)').matches ? 'Y' : 'N';
+      const parts = [
+        `iH:${window.innerHeight}`,
+        `vvH:${vv ? Math.round(vv.height) : '-'}`,
+        `vvT:${vv ? Math.round(vv.offsetTop) : '-'}`,
+        `pT:${pillRect ? Math.round(pillRect.top) : '-'}`,
+        `pB:${pillRect ? Math.round(pillRect.bottom) : '-'}`,
+        `pPB:${cs ? cs.paddingBottom : '-'}`,
+        `cm:${htmlCM}`,
+        `std:${std}`,
+        `ah:${appHeightVar || '-'}`,
+        `kb:${kbVar || '-'}`,
+      ];
+      setInfo(parts.join(' '));
+    };
+    update();
+    const t = setInterval(update, 500);
+    const vv = window.visualViewport;
+    vv?.addEventListener('resize', update);
+    vv?.addEventListener('scroll', update);
+    window.addEventListener('resize', update);
+    window.addEventListener('focusout', update);
+    return () => {
+      clearInterval(t);
+      vv?.removeEventListener('resize', update);
+      vv?.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+      window.removeEventListener('focusout', update);
+    };
+  }, []);
+  return (
+    <div
+      style={{
+        fontFamily: 'ui-monospace,Menlo,monospace',
+        fontSize: 9,
+        lineHeight: 1.3,
+        padding: '2px 6px',
+        background: 'rgba(255,230,0,0.95)',
+        color: '#000',
+        borderRadius: 4,
+        marginBottom: 4,
+        wordBreak: 'break-all',
+      }}
+    >
+      {info}
+    </div>
+  );
+}
+
 /* ═══ COMPONENT ═══ */
 
 export default function AppShell() {
@@ -1977,6 +2040,7 @@ export default function AppShell() {
         )}
         {showDock && viewState === 'chat' && isMobile && createPortal(
           <div
+            id="mobile-chat-dock-portal"
             className={`${dark ? 'force-chat-dark' : ''} px-3 pt-1`}
             style={{
               position: 'fixed',
@@ -1988,6 +2052,8 @@ export default function AppShell() {
               touchAction: 'manipulation',
             }}
           >
+            <DockDebugReadout />
+
             <ChatDock
               ref={dockRef}
               onSend={handleSend}
