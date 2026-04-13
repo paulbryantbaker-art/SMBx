@@ -1632,18 +1632,15 @@ export default function AppShell() {
                         </>
                       )}
 
-                      {/* Next actions cards — logged-in users see Yulia's suggestions */}
-                      {user && (
-                        <div className={`w-full ${isMobile ? 'mt-4' : 'mt-6 max-w-xl mx-auto'}`}>
+                      {/* Next actions cards — logged-in users see Yulia's suggestions.
+                          Desktop only — mobile keeps Grok-like simplicity (greeting + pill, no cards). */}
+                      {user && !isMobile && (
+                        <div className="w-full mt-6 max-w-xl mx-auto">
                           <NextActionsCards
                             dark={dark}
                             onAction={(prefill) => {
-                              if (isMobile) {
-                                fillHomeInput(prefill);
-                              } else {
-                                const ref = homeInputRef.current;
-                                if (ref) { ref.value = prefill; ref.focus(); }
-                              }
+                              const ref = homeInputRef.current;
+                              if (ref) { ref.value = prefill; ref.focus(); }
                             }}
                             authHeaders={authHeaders}
                           />
@@ -1741,7 +1738,12 @@ export default function AppShell() {
                     </div>
                   </div>
 
-                  {/* On mobile the golden-ratio flex (1.618 vs 1) handles spacing — no extra spacer needed */}
+                  {/* Golden-ratio spacer — content above takes 1.618 units, this empty
+                      spacer takes 1 unit. Content lands in the upper 61.8% of the card,
+                      breathing room in the lower 38.2%, and the portaled pill floats over
+                      the bottom of that breathing room. Grok-like simplicity. Mobile only;
+                      desktop has content centered and its own in-flow hero pill. */}
+                  {isMobile && <div className="flex-1" aria-hidden />}
 
                   {/* ╔══════════════════════════════════════════════════════════════════════╗
                       ║ iOS PWA mobile home pill — LOAD-BEARING SETUP, see                   ║
