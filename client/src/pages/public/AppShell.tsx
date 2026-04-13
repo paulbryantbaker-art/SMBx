@@ -1735,12 +1735,10 @@ export default function AppShell() {
 
                   {/* On mobile the golden-ratio flex (1.618 vs 1) handles spacing — no extra spacer needed */}
 
-                  {/* Mobile bottom zone: starter chips + pill + trust line pinned near the bottom.
-                      Safe-area padding clears the home indicator */}
+                  {/* Mobile bottom zone: absolute-pinned to bottom edge like Grok */}
                   {isMobile && (
                     <div
-                      className="shrink-0 relative z-10 chat-pill-mobile-container"
-                      style={{ paddingBottom: 4 }}
+                      className="absolute left-0 right-0 bottom-0 z-10"
                     >
                       {/* Starter chips — journey starters in browser, action starters in PWA */}
                       {!isPWA && (
