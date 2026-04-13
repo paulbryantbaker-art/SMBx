@@ -1558,7 +1558,7 @@ export default function AppShell() {
         <div
           ref={scrollRef}
           className={isChat ? 'flex-1 overflow-y-auto min-h-0 bg-transparent' : 'flex-1 bg-transparent'}
-          style={isChat ? { WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', paddingBottom: 'env(safe-area-inset-bottom)' } as any : { paddingBottom: 'env(safe-area-inset-bottom)' } as any}
+          style={isChat ? { WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', paddingBottom: 'env(safe-area-inset-bottom)' } as any : {} as any}
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
