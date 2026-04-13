@@ -1751,7 +1751,7 @@ export default function AppShell() {
                         />
                       )}
 
-                      <div className="px-4" style={{ touchAction: 'auto' }}>
+                      <div className={isPWA ? 'px-3' : 'px-4'} style={{ touchAction: 'auto' }}>
                       {/* Gradient-glow input with + button for file uploads / utilities */}
                       <form autoComplete="off" onSubmit={(e) => e.preventDefault()} role="presentation" data-form-type="other">
                       <div className="relative group">
@@ -1799,9 +1799,11 @@ export default function AppShell() {
                         </div>
                       </div>
                       </form>
-                      <p className={`text-xs font-medium text-center mt-3 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
-                        Free analysis · No account required · Your data stays yours
-                      </p>
+                      {!isPWA && !user && (
+                        <p className={`text-xs font-medium text-center mt-3 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
+                          Free analysis · No account required · Your data stays yours
+                        </p>
+                      )}
                       </div>
                     </div>
                   )}
@@ -1945,7 +1947,7 @@ export default function AppShell() {
             Desktop: always forced dark (body is dark charcoal).
             Mobile: respects theme (light pill in light mode, dark in dark mode). */}
         {showDock && viewState === 'chat' && (
-          <div className={`${(!isMobile || dark) ? 'force-chat-dark' : ''} shrink-0 px-4 pt-2`} style={{ paddingBottom: isMobile ? 4 : 16, touchAction: 'manipulation' }}>
+          <div className={`${(!isMobile || dark) ? 'force-chat-dark' : ''} shrink-0 ${isMobile ? 'px-3 pt-1' : 'px-4 pt-2'}`} style={{ paddingBottom: isMobile ? 4 : 16, touchAction: 'manipulation' }}>
             <ChatDock
               ref={dockRef}
               onSend={handleSend}

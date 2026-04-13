@@ -260,12 +260,13 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
             return (
               <div key={m.id || i}>
                 {desktop && <Label text="Yulia" />}
-                {!desktop ? (
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                {!desktop && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
                     <YuliaAvatar dark={dark} />
-                    <div style={{ flex: 1, minWidth: 0 }}>{cardInner}</div>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#D44A78', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>Yulia</span>
                   </div>
-                ) : cardInner}
+                )}
+                {cardInner}
               </div>
             );
           }
@@ -321,14 +322,15 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
               </div>
             );
           }
-          /* Mobile: avatar + text, no label */
+          /* Mobile: label above, full width */
           return (
-            <div key={m.id || i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-              <YuliaAvatar dark={dark} />
-              <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
-                <div className={PROSE} style={textStyle}>
-                  <Markdown>{m.content}</Markdown>
-                </div>
+            <div key={m.id || i}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                <YuliaAvatar dark={dark} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#D44A78', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>Yulia</span>
+              </div>
+              <div className={PROSE} style={textStyle}>
+                <Markdown>{m.content}</Markdown>
               </div>
             </div>
           );
@@ -349,9 +351,12 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
               </div>
             </div>
           ) : (
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-              <YuliaAvatar dark={dark} />
-              <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                <YuliaAvatar dark={dark} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#D44A78', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>Yulia</span>
+              </div>
+              <div style={{ minWidth: 0 }}>
                 <div className={PROSE} style={textStyle}>
                   <Markdown>{streamingText}</Markdown>
                   <span style={{
