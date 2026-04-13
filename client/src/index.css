@@ -67,16 +67,6 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
    flip to white when the user toggles light mode. */
 html, body {
   width: 100%;
-  /* ╔═══════════════════════════════════════════════════════════════════╗
-     ║ LOAD-BEARING for iOS PWA chat pill — DO NOT REMOVE                ║
-     ║ See memory/architecture_ios_pwa_pill.md for full context.         ║
-     ║ Without the 3-layer min-height, iOS gives PWA different viewport  ║
-     ║ heights per page (873pt home / 932pt chat same device) and the    ║
-     ║ bottom ~60pt becomes unreachable by position:fixed bottom:0.      ║
-     ╚═══════════════════════════════════════════════════════════════════╝ */
-  min-height: 100vh;
-  min-height: 100lvh;
-  min-height: -webkit-fill-available;
   background-color: #2A2C2E !important;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
@@ -86,6 +76,23 @@ html, body {
 #root {
   width: 100%;
   min-height: 100dvh;
+}
+
+/* ╔═══════════════════════════════════════════════════════════════════╗
+   ║ LOAD-BEARING for iOS PWA chat pill — STANDALONE MODE ONLY.        ║
+   ║ See memory/architecture_ios_pwa_pill.md for full context.         ║
+   ║ Without this in PWA standalone, iOS gives different viewport      ║
+   ║ heights per page (873pt home / 932pt chat same device) and the    ║
+   ║ bottom ~60pt becomes unreachable by position:fixed bottom:0.      ║
+   ║ Gated to display-mode:standalone so non-PWA Safari keeps natural  ║
+   ║ viewport behavior (otherwise the URL-bar toolbar tint misreads).  ║
+   ╚═══════════════════════════════════════════════════════════════════╝ */
+@media (display-mode: standalone) {
+  html, body {
+    min-height: 100vh;
+    min-height: 100lvh;
+    min-height: -webkit-fill-available;
+  }
 }
 #app-root {
   width: 100%;

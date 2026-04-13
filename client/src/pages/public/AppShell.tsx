@@ -1593,8 +1593,9 @@ export default function AppShell() {
                   }}
                 >
                 <main className="flex-1 flex flex-col relative">
-                  {/* Top cluster — Fibonacci: content in upper 61.8%, input in lower 38.2% */}
-                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? 'flex-[1.618] justify-center' : 'flex-1 justify-center'}`}>
+                  {/* Content centered in its allocation — golden-ratio split happens via the
+                      flex-1 spacer below (content = 1.618, spacer = 1). */}
+                  <div className="flex flex-col items-center px-6 relative z-10 flex-[1.618] justify-center">
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl' : 'max-w-3xl space-y-6'}`}>
                       {!isMobile && (
                         <div className="mb-10 flex justify-center">
@@ -2003,16 +2004,22 @@ export default function AppShell() {
               touchAction: 'manipulation',
             }}
           >
-
-            <ChatDock
-              ref={dockRef}
-              onSend={handleSend}
-              onFileUpload={user ? handleFileUpload : undefined}
-              variant="hero"
-              rows={1}
-              placeholder="Reply to Yulia..."
-              disabled={sending}
-            />
+            {/* Pink gradient halo for depth — matches the home mobile pill.
+                Wrapped in .relative group so the absolute glow positions to the pill rect. */}
+            <div className="relative group">
+              <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'} pointer-events-none`} />
+              <div className="relative">
+                <ChatDock
+                  ref={dockRef}
+                  onSend={handleSend}
+                  onFileUpload={user ? handleFileUpload : undefined}
+                  variant="hero"
+                  rows={1}
+                  placeholder="Reply to Yulia..."
+                  disabled={sending}
+                />
+              </div>
+            </div>
           </div>,
           document.body
         )}
