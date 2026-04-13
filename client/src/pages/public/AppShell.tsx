@@ -1743,11 +1743,15 @@ export default function AppShell() {
 
                   {/* On mobile the golden-ratio flex (1.618 vs 1) handles spacing — no extra spacer needed */}
 
-                  {/* Mobile bottom zone: portaled to document.body, plain position:fixed.
-                      Trusts the browser to handle keyboard via `interactive-widget=resizes-content`
-                      in the viewport meta — no JS tracking of visualViewport (that was fighting
-                      the browser's own layout-viewport management and stranding the pill on
-                      keyboard dismiss). Matches Grok PWA's approach. */}
+                  {/* ╔══════════════════════════════════════════════════════════════════════╗
+                      ║ iOS PWA mobile home pill — LOAD-BEARING SETUP, see                   ║
+                      ║ memory/architecture_ios_pwa_pill.md before modifying.                ║
+                      ║ Portaled to document.body + position:fixed bottom:0 +                ║
+                      ║ env(safe-area-inset-bottom) padding. No JS viewport tracking —       ║
+                      ║ trust interactive-widget=resizes-content in the viewport meta.       ║
+                      ║ The min-height:100lvh/-webkit-fill-available trio in index.css is    ║
+                      ║ what makes bottom:0 actually reach the screen edge on iOS standalone.║
+                      ╚══════════════════════════════════════════════════════════════════════╝ */}
                   {isMobile && createPortal(
                     <div
                       id="mobile-home-pill-portal"
@@ -1959,7 +1963,14 @@ export default function AppShell() {
         {/* ════ CHATDOCK — chat mode ════
             Desktop: flex sibling at bottom of chat column, forced dark.
             Mobile: portaled to document.body so ancestor transforms (keyboard handling,
-            future backdrop-filter glass, etc.) can't yank the fixed pill off the viewport. */}
+            future backdrop-filter glass, etc.) can't yank the fixed pill off the viewport.
+
+            ╔══════════════════════════════════════════════════════════════════════╗
+            ║ iOS PWA mobile chat dock — LOAD-BEARING SETUP, see                   ║
+            ║ memory/architecture_ios_pwa_pill.md before modifying.                ║
+            ║ Same rules as the home pill: portal + fixed bottom:0 + safe-area     ║
+            ║ padding + no JS viewport tracking.                                   ║
+            ╚══════════════════════════════════════════════════════════════════════╝ */}
         {showDock && viewState === 'chat' && !isMobile && (
           <div
             className="force-chat-dark shrink-0 px-4 pt-2"
