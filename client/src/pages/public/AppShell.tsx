@@ -15,7 +15,6 @@ import PipelinePanel from '../../components/chat/PipelinePanel';
 import DataRoom from '../../components/chat/DataRoom';
 import SettingsPanel from '../../components/chat/SettingsPanel';
 import GateProgress from '../../components/chat/GateProgress';
-import { ChapterStrip } from '../../components/shared/ChapterStrip';
 import PaywallCard from '../../components/chat/PaywallCard';
 import Canvas from '../../components/chat/Canvas';
 import InlineSignupCard from '../../components/chat/InlineSignupCard';
@@ -1480,37 +1479,30 @@ export default function AppShell() {
 
   /* ═══ RENDER ═══ */
 
-  // ─── Mobile swipe gestures with edge guard (gestures from inside viewport, not edges) ───
+  // ─── Mobile swipe to open sidebar (browser only, NOT PWA) ───
+  // In PWA, iOS has its own back-swipe that conflicts with custom swipe handlers.
+  // PWA users use the hamburger button instead.
   useEffect(() => {
-    if (!isMobile) return;
+    if (!isMobile || isPWA) return;
     let startX = 0;
     let startY = 0;
     let startT = 0;
-    let trackable = false;
-
-    const pwa = isPWA;
 
     const onStart = (e: TouchEvent) => {
       const t = e.touches[0];
       startX = t.clientX;
       startY = t.clientY;
       startT = Date.now();
-      // In PWA: track from anywhere in left half (no browser back-swipe to conflict with)
-      // In browser: avoid 0-30px iOS edge zone, track 30px to 50% of screen
-      const w = window.innerWidth;
-      const minX = pwa ? 0 : 30;
-      trackable = (startX >= minX && startX < w * 0.5);
     };
 
     const onEnd = (e: TouchEvent) => {
-      if (!trackable) return;
-      trackable = false;
       const t = e.changedTouches[0];
       const dx = t.clientX - startX;
       const dy = t.clientY - startY;
       const dt = Date.now() - startT;
-      // Require horizontal dominant swipe: 40px min, mostly horizontal, under 600ms
-      if (dx < 40 || Math.abs(dy) > Math.abs(dx) * 1.2 || dt > 600) return;
+      // Only track swipes starting in left 30% of screen, 30px+ from edge (avoid iOS back)
+      if (startX < 30 || startX > window.innerWidth * 0.3) return;
+      if (dx < 50 || Math.abs(dy) > Math.abs(dx) || dt > 500) return;
       if (!isMobileSidebarOpen) {
         setIsMobileSidebarOpen(true);
       }
@@ -1522,7 +1514,7 @@ export default function AppShell() {
       document.removeEventListener('touchstart', onStart);
       document.removeEventListener('touchend', onEnd);
     };
-  }, [isMobile, isMobileSidebarOpen, isMobileCanvasDrawerOpen, isPWA]);
+  }, [isMobile, isMobileSidebarOpen, isPWA]);
 
   return (
     <div
@@ -1869,29 +1861,6 @@ export default function AppShell() {
                 ...(isMobile ? { paddingTop: 48 } : {}),
               }}
             >
-              {/* Chapter strip — shows deal's conversation chapters as horizontal timeline */}
-              {user && authChat.grouped && authChat.activeDealId && (() => {
-                const dealGroup = authChat.grouped.deals.find(d => d.id === authChat.activeDealId);
-                if (!dealGroup || dealGroup.conversations.length < 2) return null;
-                return (
-                  <ChapterStrip
-                    chapters={dealGroup.conversations.map((c: any) => ({
-                      id: c.id,
-                      title: c.title || 'Chapter',
-                      gate_label: c.gate_label,
-                      gate_status: c.gate_status,
-                      summary: c.summary,
-                    }))}
-                    activeChapterId={activeConvId}
-                    onChapterTap={(id) => {
-                      authChat.selectConversation(id);
-                      navigate(`/chat/${id}`, { replace: true });
-                    }}
-                    dark={dark}
-                  />
-                );
-              })()}
-
               {user && authChat.activeDealId && (
                 <GateProgress dealId={authChat.activeDealId} currentGate={authChat.currentGate} />
               )}
@@ -2305,21 +2274,30 @@ export default function AppShell() {
             navigate('/');
           }}
           dealGroups={user && authChat.grouped
-            ? authChat.grouped.deals.map(d => ({
-                id: d.id,
-                journey_type: d.journey_type,
-                current_gate: d.current_gate,
-                business_name: d.business_name,
-                industry: d.industry,
-                conversations: d.conversations.map((c: any) => ({
-                  id: c.id,
-                  title: c.title || 'Conversation',
-                  summary: c.summary || undefined,
-                  gate_label: c.gate_label || undefined,
-                  gate_status: c.gate_status || undefined,
-                  active: c.id === activeConvId,
-                })),
-              }))
+            ? authChat.grouped.deals.map(d => {
+                // Filter out junk conversations (Hello, Hi, Help, etc.)
+                const JUNK = /^(hello|hi|hey|help|new conversation|untitled|test)\.{0,3}$/i;
+                const validConvos = d.conversations.filter((c: any) => {
+                  const t = (c.title || '').trim();
+                  // Keep if: has a real title, is the active conversation, or has a summary
+                  return !JUNK.test(t) || c.id === activeConvId || c.summary;
+                });
+                return {
+                  id: d.id,
+                  journey_type: d.journey_type,
+                  current_gate: d.current_gate,
+                  business_name: d.business_name,
+                  industry: d.industry,
+                  conversations: (validConvos.length > 0 ? validConvos : d.conversations.slice(0, 1)).map((c: any) => ({
+                    id: c.id,
+                    title: c.title || 'Conversation',
+                    summary: c.summary || undefined,
+                    gate_label: c.gate_label || undefined,
+                    gate_status: c.gate_status || undefined,
+                    active: c.id === activeConvId,
+                  })),
+                };
+              })
             : []
           }
           generalChats={user && authChat.grouped
