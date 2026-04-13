@@ -1558,7 +1558,7 @@ export default function AppShell() {
         <div
           ref={scrollRef}
           className={isChat ? 'flex-1 overflow-y-auto min-h-0 bg-transparent' : 'flex-1 bg-transparent'}
-          style={isChat ? { WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', paddingBottom: 'env(safe-area-inset-bottom)' } as any : {} as any}
+          style={isChat ? { WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', paddingBottom: isMobile ? 'calc(env(safe-area-inset-bottom) + 76px)' : 'env(safe-area-inset-bottom)' } as any : {} as any}
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
@@ -1735,11 +1735,13 @@ export default function AppShell() {
 
                   {/* On mobile the golden-ratio flex (1.618 vs 1) handles spacing — no extra spacer needed */}
 
-                  {/* Mobile bottom zone: absolute-pinned to bottom edge like Grok.
-                      overflow-hidden clips the pill's rounded bottom corners at the viewport edge. */}
+                  {/* Mobile bottom zone: fixed-pinned to viewport bottom (bypasses flex chain).
+                      Using position:fixed guarantees the pill hugs the physical screen bottom on iOS PWA —
+                      flex-chain `absolute bottom:0` was getting confined shorter than viewport height. */}
                   {isMobile && (
                     <div
-                      className="absolute left-0 right-0 bottom-0 z-10 overflow-hidden"
+                      className="fixed left-0 right-0 bottom-0 z-10 overflow-hidden"
+                      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
                     >
                       {/* Starter chips — journey starters in browser, action starters in PWA */}
                       {!isPWA && (
@@ -1946,7 +1948,16 @@ export default function AppShell() {
             Desktop: always forced dark (body is dark charcoal).
             Mobile: respects theme (light pill in light mode, dark in dark mode). */}
         {showDock && viewState === 'chat' && (
-          <div className={`${(!isMobile || dark) ? 'force-chat-dark' : ''} shrink-0 ${isMobile ? 'px-3 pt-1' : 'px-4 pt-2'}`} style={{ paddingBottom: isMobile ? 4 : 16, touchAction: 'manipulation' }}>
+          <div
+            className={`${(!isMobile || dark) ? 'force-chat-dark' : ''} ${isMobile ? 'px-3 pt-1' : 'shrink-0 px-4 pt-2'}`}
+            style={{
+              paddingBottom: isMobile ? 'env(safe-area-inset-bottom)' : 16,
+              touchAction: 'manipulation',
+              ...(isMobile
+                ? { position: 'fixed' as const, left: 0, right: 0, bottom: 0, zIndex: 10 }
+                : {}),
+            }}
+          >
             <ChatDock
               ref={dockRef}
               onSend={handleSend}
