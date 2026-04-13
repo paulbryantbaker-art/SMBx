@@ -959,11 +959,19 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
   let clientDisconnected = false;
 
   try {
-    // Verify ownership
-    const [conv] = await sql`
-      SELECT id, title, deal_id, is_general FROM conversations
-      WHERE id = ${convId} AND user_id = ${userId} LIMIT 1
-    `;
+    // Verify ownership (is_general may not exist yet if migration 056 hasn't run)
+    let conv;
+    try {
+      [conv] = await sql`
+        SELECT id, title, deal_id, is_general FROM conversations
+        WHERE id = ${convId} AND user_id = ${userId} LIMIT 1
+      `;
+    } catch {
+      [conv] = await sql`
+        SELECT id, title, deal_id, false as is_general FROM conversations
+        WHERE id = ${convId} AND user_id = ${userId} LIMIT 1
+      `;
+    }
     if (!conv) return res.status(404).json({ error: 'Conversation not found' });
 
     // Save user message
@@ -1076,19 +1084,20 @@ chatRouter.post('/conversations/:id/messages', requireAuth, async (req, res) => 
 
       // Re-load deal — the create_deal tool may have linked one during the agentic loop
       if (!deal) {
-        const [freshConv] = await sql`SELECT deal_id, is_general FROM conversations WHERE id = ${convId} LIMIT 1`;
+        const [freshConv] = await sql`SELECT deal_id FROM conversations WHERE id = ${convId} LIMIT 1`;
         if (freshConv?.deal_id) {
           const [d] = await sql`SELECT * FROM deals WHERE id = ${freshConv.deal_id} AND user_id = ${userId} LIMIT 1`;
           deal = d || null;
         }
 
         // If 5+ messages and still no deal, auto-mark as general conversation.
-        // This means the conversation is Q&A, not deal-specific.
-        if (!deal && !freshConv?.is_general) {
-          const [{ count }] = await sql`SELECT COUNT(*) as count FROM messages WHERE conversation_id = ${convId}`;
-          if (Number(count) >= 5) {
-            await sql`UPDATE conversations SET is_general = true WHERE id = ${convId} AND deal_id IS NULL`;
-          }
+        if (!deal) {
+          try {
+            const [{ count }] = await sql`SELECT COUNT(*) as count FROM messages WHERE conversation_id = ${convId}`;
+            if (Number(count) >= 5) {
+              await sql`UPDATE conversations SET is_general = true WHERE id = ${convId} AND deal_id IS NULL`;
+            }
+          } catch { /* is_general column may not exist yet */ }
         }
       }
 

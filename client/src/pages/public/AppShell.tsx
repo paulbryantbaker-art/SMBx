@@ -642,6 +642,19 @@ export default function AppShell() {
   const [homeToolsOpen, setHomeToolsOpen] = useState(false);
   const homeInputRef = useRef<HTMLInputElement>(null);
   const homeInputMobileRef = useRef<HTMLInputElement>(null);
+  // Track keyboard open on mobile home to fix input positioning
+  const [mobileKeyboardOpen, setMobileKeyboardOpen] = useState(false);
+  useEffect(() => {
+    if (!isMobile) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const check = () => {
+      const shrinkage = window.innerHeight - vv.height;
+      setMobileKeyboardOpen(shrinkage > 100);
+    };
+    vv.addEventListener('resize', check);
+    return () => vv.removeEventListener('resize', check);
+  }, [isMobile]);
   const homeToolsRef = useRef<HTMLDivElement>(null);
   const homePlusRef = useRef<HTMLButtonElement>(null);
   const homePlusMobileRef = useRef<HTMLButtonElement>(null);
@@ -1585,8 +1598,10 @@ export default function AppShell() {
                   }}
                 >
                 <main className="flex-1 flex flex-col relative">
-                  {/* Top cluster — Fibonacci: content in upper 61.8%, input in lower 38.2% */}
-                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? 'flex-[1.618] justify-center' : 'flex-1 justify-center'}`}>
+                  {/* Top cluster — Fibonacci: content in upper 61.8%, input in lower 38.2%.
+                      When keyboard is open on mobile, collapse to min content so input
+                      sits just above keyboard instead of floating in the middle. */}
+                  <div className={`flex flex-col items-center px-6 relative z-10 ${isMobile ? (mobileKeyboardOpen ? 'flex-none' : 'flex-[1.618] justify-center') : 'flex-1 justify-center'}`}>
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl' : 'max-w-3xl space-y-6'}`}>
                       {!isMobile && (
                         <div className="mb-10 flex justify-center">
