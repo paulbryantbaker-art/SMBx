@@ -81,17 +81,22 @@ html, body {
   width: 100%;
 }
 
-/* Chat mode: constrained viewport for keyboard handling */
-html.chat-mode {
-  overflow: hidden;
-}
-html.chat-mode #root {
-  height: var(--app-height, 100dvh);
-  min-height: 0;
-  overflow: hidden;
-}
-html.chat-mode #app-root {
-  height: 100%;
+/* Chat mode: constrained viewport for keyboard handling.
+   Desktop only — on mobile the portaled pill rides visualViewport via
+   --kb-inset-bottom, and constraining html/#root can trap the iOS layout
+   viewport in its keyboard-dismissed-but-not-fully-restored state. */
+@media (min-width: 768px) {
+  html.chat-mode {
+    overflow: hidden;
+  }
+  html.chat-mode #root {
+    height: var(--app-height, 100dvh);
+    min-height: 0;
+    overflow: hidden;
+  }
+  html.chat-mode #app-root {
+    height: 100%;
+  }
 }
 html.dark {
   --ink: #f0f0f2;

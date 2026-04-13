@@ -481,7 +481,9 @@ export default function AppShell() {
   const [activeTab, setActiveTab] = useState<TabId>(() => pathToTab(location));
 
   // Toggle chat-mode class on <html> — landing pages use natural body scroll,
-  // chat mode uses constrained viewport for keyboard handling
+  // chat mode uses constrained viewport for keyboard handling. The CSS rules keyed
+  // on `html.chat-mode` are gated to desktop only in index.css — on mobile we rely
+  // on the portaled pill + visualViewport-driven --kb-inset-bottom to handle keyboard.
   useEffect(() => {
     const root = document.documentElement;
     if (isChat) {
@@ -491,6 +493,32 @@ export default function AppShell() {
     }
     return () => root.classList.remove('chat-mode');
   }, [isChat]);
+
+  // Mobile-only: track the iOS visual viewport directly and publish --kb-inset-bottom
+  // so the portaled chat pill can ride the top of the keyboard via `bottom: var(...)`.
+  // Replaces useAppHeight's #app-root transform hack on mobile (which created a fixed-
+  // positioning containing block that caused the pill to get stranded after keyboard
+  // dismissal). Desktop keeps useAppHeight's behavior untouched.
+  useEffect(() => {
+    if (!isMobile) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const root = document.documentElement;
+    const update = () => {
+      const inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      root.style.setProperty('--kb-inset-bottom', inset + 'px');
+    };
+    update();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    window.addEventListener('resize', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+      root.style.removeProperty('--kb-inset-bottom');
+    };
+  }, [isMobile]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isMobileCanvasDrawerOpen, setIsMobileCanvasDrawerOpen] = useState(false);
   // Mobile rebuild state — LearnDrawer + journey sheets + workspace tool sheets
@@ -1526,7 +1554,10 @@ export default function AppShell() {
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)',
         overscrollBehaviorX: 'contain',
-        ...(appOffset ? { transform: `translateY(${appOffset}px)` } : {}),
+        // Desktop: keyboard-lift transform from useAppHeight. Mobile: never apply —
+        // portaled pill uses --kb-inset-bottom instead, and a transformed ancestor
+        // would create a containing block that broke position:fixed.
+        ...(!isMobile && appOffset ? { transform: `translateY(${appOffset}px)` } : {}),
       }}
     >
       {/* Desktop sidebar — fixed 80px icon rail */}
@@ -1736,14 +1767,16 @@ export default function AppShell() {
 
                   {/* On mobile the golden-ratio flex (1.618 vs 1) handles spacing — no extra spacer needed */}
 
-                  {/* Mobile bottom zone: portaled to document.body so ancestor transforms
-                      (#app-root's translateY for keyboard handling, future backdrop-filter
-                      glass effects, etc.) cannot create a containing block that yanks the
-                      fixed pill off the viewport bottom. */}
+                  {/* Mobile bottom zone: portaled to document.body + rides the visual viewport
+                      via --kb-inset-bottom so the pill stays just above the iOS keyboard and
+                      returns cleanly to the screen edge when it dismisses. */}
                   {isMobile && createPortal(
                     <div
-                      className="fixed left-0 right-0 bottom-0 z-10 overflow-hidden"
-                      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+                      className="fixed left-0 right-0 z-10 overflow-hidden"
+                      style={{
+                        bottom: 'var(--kb-inset-bottom, 0px)',
+                        paddingBottom: 'max(env(safe-area-inset-bottom) - var(--kb-inset-bottom, 0px), 0px)',
+                      }}
                     >
                       {/* Starter chips — journey starters in browser, action starters in PWA */}
                       {!isPWA && (
@@ -1974,9 +2007,9 @@ export default function AppShell() {
               position: 'fixed',
               left: 0,
               right: 0,
-              bottom: 0,
+              bottom: 'var(--kb-inset-bottom, 0px)',
               zIndex: 10,
-              paddingBottom: 'env(safe-area-inset-bottom)',
+              paddingBottom: 'max(env(safe-area-inset-bottom) - var(--kb-inset-bottom, 0px), 0px)',
               touchAction: 'manipulation',
             }}
           >
