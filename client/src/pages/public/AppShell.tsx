@@ -1570,7 +1570,22 @@ export default function AppShell() {
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
-            <div key={activeTab} style={{ position: activeTab === 'home' ? 'fixed' as const : 'relative' as const, animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease', pointerEvents: morphing ? 'none' as const : undefined, ...(activeTab === 'home' ? { top: 0, right: 0, bottom: 0, left: isMobile ? 0 : 104, display: 'flex', flexDirection: 'column' as const, overflow: 'hidden', overscrollBehavior: 'none' as const, touchAction: isMobile ? 'none' as const : undefined } : { minHeight: '100dvh' }) }}>
+            <div key={activeTab} style={{
+              /* HOME desktop: position:fixed full-viewport wrapper (unchanged).
+                 HOME mobile: natural flow (relative + minHeight) so iOS computes the same
+                 ICB as the chat page, which normalizes the portaled pill's bottom anchor
+                 (home was reporting iH=873, chat iH=932 — the fixed wrapper was the cause).
+                 Other tabs: relative with minHeight. */
+              position: (activeTab === 'home' && !isMobile) ? 'fixed' as const : 'relative' as const,
+              animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease',
+              pointerEvents: morphing ? 'none' as const : undefined,
+              ...(activeTab === 'home' && !isMobile
+                ? { top: 0, right: 0, bottom: 0, left: 104, display: 'flex', flexDirection: 'column' as const, overflow: 'hidden', overscrollBehavior: 'none' as const }
+                : activeTab === 'home' && isMobile
+                ? { minHeight: '100dvh', display: 'flex', flexDirection: 'column' as const, overflow: 'hidden', overscrollBehavior: 'none' as const, touchAction: 'none' as const }
+                : { minHeight: '100dvh' }
+              ),
+            }}>
 
               {/* No background layer here — body (#E8DFC9 warm beige in index.css)
                   provides the back-layer color. Adding an absolute-positioned div
