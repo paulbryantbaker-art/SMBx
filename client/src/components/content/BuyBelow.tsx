@@ -50,7 +50,8 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
 
   const headingColor = dark ? '#f9f9fc' : '#0f1012';
   const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
-  const accent = dark ? '#E8709A' : '#D44A78';
+  // Journey=buy accent (teal). Inline <em> flourishes + HookHeader eyebrow.
+  const accent = dark ? '#52A8A8' : '#3E8E8E';
 
   return (
     <div className="bg-transparent" style={{ color: headingColor }}>
@@ -71,6 +72,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
             </>
           }
           dark={dark}
+          accent={accent}
         />
 
         {/* ═══ Yulia Says — leads ═══ */}
