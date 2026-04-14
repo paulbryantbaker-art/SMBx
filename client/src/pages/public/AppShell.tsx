@@ -624,6 +624,17 @@ export default function AppShell() {
   const [canvasTabs, setCanvasTabs] = useState<CanvasTab[]>([]);
   const [activeCanvasTabId, setActiveCanvasTabId] = useState<string | null>(null);
   const activeCanvasTab = canvasTabs.find(t => t.id === activeCanvasTabId) || null;
+  // Side-by-side split — a second tab pinned alongside the active one.
+  // Desktop only; clears automatically when the split tab closes or when
+  // the active tab is the same as the split tab.
+  const [splitTabId, setSplitTabId] = useState<string | null>(null);
+  const splitTab = canvasTabs.find(t => t.id === splitTabId) || null;
+  // Auto-clear invalid split (tab closed, or equals active)
+  useEffect(() => {
+    if (!splitTabId) return;
+    if (splitTabId === activeCanvasTabId) { setSplitTabId(null); return; }
+    if (!canvasTabs.find(t => t.id === splitTabId)) setSplitTabId(null);
+  }, [splitTabId, activeCanvasTabId, canvasTabs]);
   // Auto-hide mobile canvas overlay when all tabs are closed
   useEffect(() => {
     if (canvasTabs.length === 0) setMobileCanvasVisible(false);
@@ -2455,21 +2466,47 @@ export default function AppShell() {
                     tabs={canvasTabs}
                     activeTabId={activeCanvasTabId}
                     onSelect={setActiveCanvasTabId}
-                    onClose={closeCanvasTab}
+                    onClose={(id) => { if (splitTabId === id) setSplitTabId(null); closeCanvasTab(id); }}
                     dark={dark}
+                    splitTabId={splitTabId}
+                    onSplit={(id) => { if (id !== activeCanvasTabId) setSplitTabId(id); }}
+                    onUnsplit={() => setSplitTabId(null)}
                   />
-                  {/* Floating contextual toolbar — only when the active tab has real actions */}
-                  {activeCanvasTab && (() => {
+                  {/* Floating contextual toolbar — only when the active tab has real actions (single-tab mode) */}
+                  {activeCanvasTab && !splitTab && (() => {
                     const actions = getToolbarActionsFor(activeCanvasTab);
                     return actions.length > 0 ? <CanvasToolbar actions={actions} dark={dark} /> : null;
                   })()}
-                  {/* All tabs mounted, only active visible */}
-                  <div className="flex-1 overflow-y-auto relative">
-                    {canvasTabs.map(tab => (
-                      <div key={tab.id} className="absolute inset-0 overflow-y-auto" style={{ display: tab.id === activeCanvasTabId ? 'block' : 'none' }}>
-                        {renderCanvasTabContent(tab)}
+                  {/* Body — all tabs mounted, visibility determined by active + split.
+                      In split mode, the active tab owns the left half and the split tab the right. */}
+                  <div className="flex-1 relative" style={{ display: splitTab ? 'flex' : 'block', minHeight: 0 }}>
+                    {splitTab ? (
+                      <>
+                        <div style={{
+                          flex: 1, minWidth: 0, minHeight: 0,
+                          position: 'relative',
+                          borderRight: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9',
+                          overflow: 'hidden',
+                        }}>
+                          <div className="absolute inset-0 overflow-y-auto">
+                            {activeCanvasTab && renderCanvasTabContent(activeCanvasTab)}
+                          </div>
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0, minHeight: 0, position: 'relative', overflow: 'hidden' }}>
+                          <div className="absolute inset-0 overflow-y-auto">
+                            {renderCanvasTabContent(splitTab)}
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="absolute inset-0 overflow-y-auto">
+                        {canvasTabs.map(tab => (
+                          <div key={tab.id} className="absolute inset-0 overflow-y-auto" style={{ display: tab.id === activeCanvasTabId ? 'block' : 'none' }}>
+                            {renderCanvasTabContent(tab)}
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
                 </>
               ) : !user ? (

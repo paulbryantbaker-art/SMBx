@@ -22,6 +22,10 @@ interface Props {
   onSelect: (tabId: string) => void;
   onClose: (tabId: string) => void;
   dark?: boolean;
+  /** Side-by-side split controls (desktop only) */
+  splitTabId?: string | null;
+  onSplit?: (tabId: string) => void;
+  onUnsplit?: () => void;
 }
 
 const TAB_ICONS: Record<string, string> = {
@@ -40,7 +44,7 @@ const TAB_ICONS: Record<string, string> = {
   analytics: 'analytics',
 };
 
-export default function CanvasTabStrip({ tabs, activeTabId, onSelect, onClose, dark = false }: Props) {
+export default function CanvasTabStrip({ tabs, activeTabId, onSelect, onClose, dark = false, splitTabId, onSplit, onUnsplit }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Scroll the active tab into view when it changes
@@ -87,6 +91,7 @@ export default function CanvasTabStrip({ tabs, activeTabId, onSelect, onClose, d
       >
         {tabs.map(tab => {
           const isActive = tab.id === activeTabId;
+          const isSplit = splitTabId === tab.id;
           return (
             <div
               key={tab.id}
@@ -156,6 +161,51 @@ export default function CanvasTabStrip({ tabs, activeTabId, onSelect, onClose, d
               >
                 {tab.label}
               </span>
+              {/* Split toggle — only shown for non-active, non-split tabs on hover. */}
+              {onSplit && !isActive && !isSplit && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onSplit(tab.id); }}
+                  aria-label={`Open ${tab.label} side-by-side`}
+                  title="Open side-by-side"
+                  className="canvas-tabstrip-split"
+                  type="button"
+                  style={{
+                    width: 16, height: 16, padding: 0, marginRight: 2,
+                    borderRadius: '50%', border: 'none', background: 'transparent',
+                    color: 'currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', opacity: 0, transition: 'opacity 0.12s ease, background 0.12s ease',
+                    flexShrink: 0,
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 13 }}>splitscreen</span>
+                </button>
+              )}
+              {/* Split badge on the currently-split tab */}
+              {isSplit && onUnsplit && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onUnsplit(); }}
+                  aria-label="Exit split view"
+                  title="Exit split"
+                  type="button"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 3,
+                    padding: '1px 6px 1px 4px',
+                    borderRadius: 999,
+                    border: 'none',
+                    background: dark ? 'rgba(232,112,154,0.16)' : 'rgba(212,74,120,0.08)',
+                    color: accent,
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontSize: 9.5, fontWeight: 800,
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 10 }}>close</span>
+                  Split
+                </button>
+              )}
               <button
                 onClick={(e) => { e.stopPropagation(); onClose(tab.id); }}
                 aria-label={`Close ${tab.label}`}
@@ -190,6 +240,8 @@ export default function CanvasTabStrip({ tabs, activeTabId, onSelect, onClose, d
         .canvas-tabstrip-scroll::-webkit-scrollbar { display: none; }
         .canvas-tabstrip-tab:hover { background: ${dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.04)'} !important; }
         .canvas-tabstrip-tab:hover .canvas-tabstrip-close { opacity: 0.7; }
+        .canvas-tabstrip-tab:hover .canvas-tabstrip-split { opacity: 0.55; }
+        .canvas-tabstrip-split:hover { opacity: 1 !important; background: ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(15,16,18,0.08)'} !important; }
         .canvas-tabstrip-close:hover { opacity: 1 !important; background: ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(15,16,18,0.08)'} !important; }
         .canvas-tabstrip-tab:focus-visible { outline: 2px solid ${accent}; outline-offset: -2px; }
       `}</style>
