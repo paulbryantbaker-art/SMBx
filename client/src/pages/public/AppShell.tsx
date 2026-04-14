@@ -43,6 +43,7 @@ import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const MobileSellStory = lazy(() => import('../../components/mobile/MobileSellStory'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
+const MobileBuyStory = lazy(() => import('../../components/mobile/MobileBuyStory'));
 const RaiseBelow = lazy(() => import('../../components/content/RaiseBelow'));
 const IntegrateBelow = lazy(() => import('../../components/content/IntegrateBelow'));
 const HowItWorksBelow = lazy(() => import('../../components/content/HowItWorksBelow'));
@@ -2284,7 +2285,7 @@ export default function AppShell() {
                 >
                   <Suspense fallback={<BelowSkeleton />}>
                     {activeTab === 'sell' ? (isMobile ? <MobileSellStory dark={dark} /> : <SellBelow dark={dark} />) :
-                     activeTab === 'buy' ? <BuyBelow dark={dark} /> :
+                     activeTab === 'buy' ? (isMobile ? <MobileBuyStory dark={dark} /> : <BuyBelow dark={dark} />) :
                      activeTab === 'raise' ? <RaiseBelow dark={dark} /> :
                      activeTab === 'how-it-works' ? <HowItWorksBelow dark={dark} /> :
                      activeTab === 'integrate' ? <IntegrateBelow dark={dark} /> :
