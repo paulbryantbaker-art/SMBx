@@ -49,7 +49,6 @@ import { MobileJourneySheet } from '../../components/mobile/MobileJourneySheet';
 import { MobileWorkspaceSheet } from '../../components/mobile/MobileWorkspaceSheet';
 import { isStandalone } from '../../lib/pwa';
 import { NextActionsCards } from '../../components/mobile/NextActionsCards';
-import { PWAInstallPrompt } from '../../components/mobile/PWAInstallPrompt';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
 import { MobileIntegratePage } from '../../components/mobile/MobileIntegratePage';
@@ -2608,21 +2607,9 @@ export default function AppShell() {
         </button>
       )}
 
-      {/* ═══ PWA LOCK — only fires when user enters chat, NOT when browsing.
-          This prevents the lock from blocking the entire site on mobile. ═══ */}
-      {isMobile && (
-        <PWAInstallPrompt
-          isLoggedIn={!!user}
-          isInChat={viewState === 'chat'}
-          dark={dark}
-          onSignOut={() => {
-            // Sign out and go back to the anonymous browsing experience
-            fetch('/api/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).catch(() => {});
-            localStorage.removeItem('smbx-token');
-            window.location.href = '/';
-          }}
-        />
-      )}
+      {/* PWA install lock removed — users can install to home screen if they want,
+          but we no longer force it. Too many downsides: share-links break, first-run
+          friction, Apple nerfs PWAs anyway. See memory/feedback_lean_into_ios.md. */}
 
       {/* Floating logo removed — X logo now lives in sidebar permanently */}
 
