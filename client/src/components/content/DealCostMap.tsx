@@ -48,9 +48,9 @@ function ibFee(evMillions: number): number {
 /* In-house analyst team — annual loaded cost */
 const ANALYST_TEAM_ANNUAL = 1.7; // $M
 
-/* Yulia tiers — annual cost */
-const YULIA_PRO_ANNUAL = 0.001788;       // $1,788
-const YULIA_ENTERPRISE_ANNUAL = 0.011988; // $11,988
+/* Yulia tiers — annual cost (post-Sprint 14B-7 pricing) */
+const YULIA_MULTI_ANNUAL = 0.002388;      // $2,388 — Multi-deal $199/mo × 12
+const YULIA_FIRM_ANNUAL = 0.023988;       // $23,988 — Firm $1,999/mo × 12
 
 /** Stops for the slider — discrete deal sizes that ladder cleanly */
 const STOPS = [5, 10, 25, 50, 100, 200, 350, 500, 750, 1000, 1500, 2000];
@@ -75,12 +75,12 @@ export function DealCostMap({ dark }: { dark: boolean }) {
   const ev = STOPS[stopIndex];
   const ib = ibFee(ev);
   const analystTeam = ANALYST_TEAM_ANNUAL;
-  const yuliaPro = YULIA_PRO_ANNUAL;
-  const yuliaEnt = YULIA_ENTERPRISE_ANNUAL;
+  const yuliaMulti = YULIA_MULTI_ANNUAL;
+  const yuliaFirm = YULIA_FIRM_ANNUAL;
 
-  // Spread = IB fee / Yulia Pro annual
-  const spreadVsIB = useMemo(() => Math.round(ib / yuliaPro), [ib, yuliaPro]);
-  const spreadVsAnalyst = useMemo(() => Math.round(analystTeam / yuliaPro), [analystTeam, yuliaPro]);
+  // Spread = IB fee / Yulia Multi-deal annual
+  const spreadVsIB = useMemo(() => Math.round(ib / yuliaMulti), [ib, yuliaMulti]);
+  const spreadVsAnalyst = useMemo(() => Math.round(analystTeam / yuliaMulti), [analystTeam, yuliaMulti]);
 
   // Colors
   const bg = dark ? '#0f1012' : '#f9f7f1';
@@ -227,13 +227,13 @@ export function DealCostMap({ dark }: { dark: boolean }) {
             className="font-headline font-black tabular-nums tracking-tight mb-2 relative"
             style={{ fontSize: 'clamp(2rem, 3.5vw, 2.75rem)', lineHeight: 0.95 }}
           >
-            $1,788
+            $2,388
           </p>
           <p className="text-[11px] mb-3 opacity-80 relative">
-            Per year · Professional · flat
+            Per year · Multi-deal · flat
           </p>
           <p className="text-[12px] leading-relaxed opacity-90 relative">
-            $149/month, regardless of deal size. Or $999/month for a team on Enterprise — $11,988/yr loaded with white-label and API.
+            $199/month, regardless of deal size. Or $1,999/month for the whole firm on the Firm plan — $23,988/yr loaded, unlimited seats and SSO.
           </p>
         </div>
       </div>
@@ -261,7 +261,7 @@ export function DealCostMap({ dark }: { dark: boolean }) {
             {spreadVsIB.toLocaleString()}×
           </motion.p>
           <p className="text-sm mt-2" style={{ color: bodyColor }}>
-            For every dollar Yulia costs, the IB on this deal costs <strong>{spreadVsIB.toLocaleString()}</strong>.
+            For every dollar Yulia costs this year, the IB on this deal charges <strong>{spreadVsIB.toLocaleString()}</strong> at close.
           </p>
         </div>
         <div>
@@ -275,7 +275,7 @@ export function DealCostMap({ dark }: { dark: boolean }) {
             {spreadVsAnalyst.toLocaleString()}×
           </p>
           <p className="text-sm mt-2" style={{ color: bodyColor }}>
-            Same per year as a single analyst's first-week onboarding cost.
+            A five-person analyst pod runs <strong>{spreadVsAnalyst.toLocaleString()}×</strong> Yulia's annual cost. Yulia runs the same analysis deterministically, in seconds, no headcount.
           </p>
         </div>
       </div>
