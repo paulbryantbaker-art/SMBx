@@ -33,6 +33,7 @@ import DealMessagesPanel from '../../components/documents/DealMessagesPanel';
 import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/CanvasToolbar';
 import CanvasTabStrip from '../../components/canvas/CanvasTabStrip';
 import DesktopAccountMenu from '../../components/desktop/DesktopAccountMenu';
+import DealWorkspace from '../../components/desktop/DealWorkspace';
 import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
@@ -229,7 +230,7 @@ const HOME_TOOLS: HomeToolItem[] = [
 /* ═══ TYPES ═══ */
 
 export type TabId = 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'how-it-works' | 'advisors' | 'pricing';
-export type ViewState = 'landing' | 'chat' | 'pipeline' | 'dataroom' | 'settings' | 'seller-dashboard' | 'buyer-pipeline' | 'documents' | 'analytics';
+export type ViewState = 'landing' | 'chat' | 'pipeline' | 'dataroom' | 'settings' | 'seller-dashboard' | 'buyer-pipeline' | 'documents' | 'analytics' | 'deal';
 
 /* ═══ PAGE COPY ═══ */
 
@@ -454,6 +455,7 @@ function pathToTab(path: string): TabId {
 
 function pathToViewState(path: string): ViewState {
   if (path === '/chat' || path.startsWith('/chat/')) return 'chat';
+  if (path.startsWith('/deal/')) return 'deal';
   if (path === '/pipeline') return 'pipeline';
   if (path === '/dataroom') return 'dataroom';
   if (path === '/settings') return 'settings';
@@ -462,6 +464,14 @@ function pathToViewState(path: string): ViewState {
   if (path === '/documents') return 'documents';
   if (path === '/analytics') return 'analytics';
   return 'landing';
+}
+
+function getInitialDealId(path: string): number | null {
+  if (path.startsWith('/deal/')) {
+    const id = parseInt(path.split('/')[2], 10);
+    return Number.isNaN(id) ? null : id;
+  }
+  return null;
 }
 
 function getInitialConversationId(path: string): number | null {
@@ -489,6 +499,7 @@ export default function AppShell() {
   // Core state
   const [viewState, setViewState] = useState<ViewState>(() => pathToViewState(location));
   const isChat = viewState === 'chat';
+  const [workspaceDealId, setWorkspaceDealId] = useState<number | null>(() => getInitialDealId(location));
   const { appOffset } = useAppHeight(isChat);   // Only constrain viewport in chat mode
   const [activeTab, setActiveTab] = useState<TabId>(() => pathToTab(location));
 
@@ -770,6 +781,17 @@ export default function AppShell() {
   useEffect(() => {
     const tab = pathToTab(location);
     if (tab !== activeTab && viewState === 'landing') setActiveTab(tab);
+    // /deal/:id is the one path-derived viewState we promote authoritatively so
+    // deep-links, back-button, and `navigate('/deal/...')` all converge.
+    const nextDealId = getInitialDealId(location);
+    if (location.startsWith('/deal/')) {
+      if (viewState !== 'deal') setViewState('deal');
+      if (nextDealId !== workspaceDealId) setWorkspaceDealId(nextDealId);
+    } else if (viewState === 'deal') {
+      // Leaving the workspace via back/forward — settle into chat or landing
+      setViewState(pathToViewState(location));
+      setWorkspaceDealId(null);
+    }
   }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // iOS Safari bfcache recovery — when the user swipes back to a cached page,
@@ -1599,7 +1621,53 @@ export default function AppShell() {
         )}
         {/* No header bar — sidebar handles navigation, floating buttons handle actions */}
 
+        {/* ════ DEAL WORKSPACE — /deal/:id on desktop. Replaces the chat+canvas split. ════ */}
+        {!isMobile && viewState === 'deal' && (() => {
+          const ws = authChat.grouped?.deals.find(d => d.id === workspaceDealId);
+          const wsDeal = ws ? {
+            id: ws.id,
+            business_name: ws.business_name,
+            journey_type: ws.journey_type,
+            current_gate: ws.current_gate,
+            industry: ws.industry,
+            league: ws.league,
+            updated_at: ws.updated_at,
+            status: ws.status,
+            conversations: ws.conversations?.map((c: any) => ({ id: c.id, title: c.title, updated_at: c.updated_at })),
+          } : null;
+          return (
+            <div className="flex-1 flex min-h-0 bg-transparent">
+              <DealWorkspace
+                deal={wsDeal}
+                dark={dark}
+                currentUserEmail={user?.email}
+                onContinueChat={(convId) => {
+                  authChat.selectConversation(convId);
+                  setViewState('chat');
+                  navigate(`/chat/${convId}`);
+                }}
+                onOpenDeliverable={(id, label) => {
+                  setViewState('chat');
+                  navigate('/chat');
+                  openCanvasTab('deliverable', label, { deliverableId: id });
+                }}
+                onOpenDataRoom={(dId) => {
+                  if (ws?.conversations?.[0]?.id) {
+                    authChat.selectConversation(ws.conversations[0].id);
+                  }
+                  setViewState('chat');
+                  navigate('/chat');
+                  openCanvasTab('dataroom', 'Data Room');
+                  void dId;
+                }}
+                onBack={() => { setViewState('chat'); navigate('/chat'); }}
+              />
+            </div>
+          );
+        })()}
+
         {/* Main row: chat + canvas split */}
+        {!(viewState === 'deal' && !isMobile) && (
         <div className="flex-1 flex min-h-0 bg-transparent">
         {/* Chat column — transparent, lets the back layer show through */}
         <div
@@ -2292,7 +2360,9 @@ export default function AppShell() {
           </div>
         )}
 
-        </div>{/* end main row */}
+        </div>
+        )}
+        {/* end main row + end !(deal && desktop) wrapper */}
 
         {/* ════ MOBILE CANVAS OVERLAY ════ */}
         {canvasTabs.length > 0 && isMobile && mobileCanvasVisible && (

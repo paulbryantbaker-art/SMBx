@@ -109,6 +109,7 @@ function isShellPath(path: string): boolean {
   const shellExact = ['/', '/sell', '/buy', '/raise', '/integrate', '/how-it-works', '/advisors', '/enterprise', '/pricing', '/pipeline', '/dataroom', '/settings', '/chat'];
   if (shellExact.includes(path)) return true;
   if (path.startsWith('/chat/')) return true;
+  if (path.startsWith('/deal/')) return true;
   return false;
 }
 
