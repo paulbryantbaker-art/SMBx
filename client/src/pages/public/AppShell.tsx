@@ -47,6 +47,7 @@ const MobileBuyStory = lazy(() => import('../../components/mobile/MobileBuyStory
 const RaiseBelow = lazy(() => import('../../components/content/RaiseBelow'));
 const MobileRaiseStory = lazy(() => import('../../components/mobile/MobileRaiseStory'));
 const IntegrateBelow = lazy(() => import('../../components/content/IntegrateBelow'));
+const MobileIntegrateStory = lazy(() => import('../../components/mobile/MobileIntegrateStory'));
 const HowItWorksBelow = lazy(() => import('../../components/content/HowItWorksBelow'));
 const AdvisorsBelow = lazy(() => import('../../components/content/AdvisorsBelow'));
 const PricingBelow = lazy(() => import('../../components/content/PricingBelow'));
@@ -2289,7 +2290,7 @@ export default function AppShell() {
                      activeTab === 'buy' ? (isMobile ? <MobileBuyStory dark={dark} /> : <BuyBelow dark={dark} />) :
                      activeTab === 'raise' ? (isMobile ? <MobileRaiseStory dark={dark} /> : <RaiseBelow dark={dark} />) :
                      activeTab === 'how-it-works' ? <HowItWorksBelow dark={dark} /> :
-                     activeTab === 'integrate' ? <IntegrateBelow dark={dark} /> :
+                     activeTab === 'integrate' ? (isMobile ? <MobileIntegrateStory dark={dark} /> : <IntegrateBelow dark={dark} />) :
                      activeTab === 'advisors' ? <AdvisorsBelow dark={dark} /> :
                      activeTab === 'pricing' ? <PricingBelow dark={dark} /> : null}
                   </Suspense>
