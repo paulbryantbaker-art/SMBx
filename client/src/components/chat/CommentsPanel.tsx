@@ -120,8 +120,8 @@ export default function CommentsPanel({ deliverableId, onClose }: CommentsPanelP
 
         {!loading && displayed.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-sm text-[#A9A49C]">No comments yet</p>
-            <p className="text-xs text-[rgba(0,0,0,0.06)] mt-1">Add a comment to start a discussion</p>
+            <p className="text-sm font-semibold text-[#0D0D0D]">No comments yet</p>
+            <p className="text-xs text-[#6E6A63] mt-1">Ask a question or leave a note for your team.</p>
           </div>
         )}
 

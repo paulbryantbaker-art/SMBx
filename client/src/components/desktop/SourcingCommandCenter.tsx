@@ -439,9 +439,13 @@ function BoardView({
                 fontFamily: "'Inter', system-ui, sans-serif",
                 fontSize: 11,
                 color: muted,
-                fontStyle: 'italic',
+                lineHeight: 1.5,
               }}>
-                No theses here
+                {i === 0 ? 'Intel brief starts each thesis' :
+                 i === 1 ? 'Candidates land here next' :
+                 i === 2 ? 'Enrichment scores websites' :
+                 i === 3 ? 'A/B/C/D tiering happens here' :
+                 'Outreach pipeline'}
               </div>
             )}
           </div>
