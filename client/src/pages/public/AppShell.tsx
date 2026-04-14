@@ -2626,18 +2626,10 @@ export default function AppShell() {
         </>
       )}
 
-      {/* ═══ MOBILE FLOATING HAMBURGER (left) ═══ */}
-      {isMobile && (
-        <button
-          onClick={() => setIsMobileSidebarOpen(true)}
-          className="fixed z-[55] w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer shadow-lg bg-[#1a1c1e] text-[#E8709A] active:scale-90"
-          style={{ top: 'calc(env(safe-area-inset-top) + 12px)', left: 16 }}
-          type="button"
-          aria-label="Open menu"
-        >
-          <span className="material-symbols-outlined text-[22px]">menu</span>
-        </button>
-      )}
+      {/* Mobile hamburger removed per Wallet-home plan — deals live on the home
+          surface, not in a drawer menu. Admin actions (sign out, theme toggle,
+          etc.) will move into Yulia chat commands over time. See
+          memory/feedback_lean_into_ios.md for the philosophy. */}
 
       {/* PWA install lock removed — users can install to home screen if they want,
           but we no longer force it. Too many downsides: share-links break, first-run
