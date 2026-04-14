@@ -115,6 +115,10 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
     const avgStale = active.length > 0
       ? Math.round(active.reduce((sum, d) => sum + daysSince(d.updated_at), 0) / active.length)
       : 0;
+    // Recent activity: top 5 active deals sorted by most-recent updated_at
+    const recentMoves = [...active]
+      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+      .slice(0, 5);
     return {
       total: active.length,
       allTotal: deals.length,
@@ -129,8 +133,23 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
       byStage,
       stuck,
       active,
+      recentMoves,
     };
   }, [deals]);
+
+  function formatRelative(iso: string): string {
+    const d = daysSince(iso);
+    if (d === 0) {
+      const ms = Date.now() - new Date(iso).getTime();
+      const hrs = Math.floor(ms / (1000 * 60 * 60));
+      if (hrs < 1) return 'just now';
+      return `${hrs}h ago`;
+    }
+    if (d === 1) return '1d ago';
+    if (d < 7) return `${d}d ago`;
+    if (d < 30) return `${Math.floor(d / 7)}w ago`;
+    return `${Math.floor(d / 30)}mo ago`;
+  }
 
   /* ─── Palette ─── */
   const heading = dark ? '#F0F0F3' : '#1A1C1E';
@@ -222,6 +241,64 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
           dark={dark}
         />
       </div>
+
+      {/* Recently moved — horizontal activity strip using existing updated_at */}
+      {stats.recentMoves.length > 0 && (
+        <div style={{ ...cardStyle, marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <h3 style={sectionHeadStyle(muted)}>Recently moved</h3>
+            <span style={{
+              fontFamily: "'Inter', system-ui, sans-serif",
+              fontSize: 11, fontWeight: 600, color: muted,
+            }}>
+              Most recent activity across your book
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {stats.recentMoves.map(d => {
+              const journeyC = JOURNEY_COLORS[(d.journey_type || 'sell').toLowerCase()] || pink;
+              return (
+                <button
+                  key={d.id}
+                  onClick={() => onOpenDeal(d.id)}
+                  type="button"
+                  className="portfolio-recent-row"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '8px 12px',
+                    borderRadius: 8,
+                    border: 'none',
+                    background: 'transparent',
+                    color: heading,
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    transition: 'background 120ms ease',
+                  }}
+                >
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: journeyC, flexShrink: 0 }} />
+                  <span style={{
+                    flex: 1, minWidth: 0,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {d.business_name}
+                  </span>
+                  <span style={{ fontSize: 11, color: muted, fontWeight: 600, flexShrink: 0 }}>
+                    {d.current_gate || 'New'}
+                  </span>
+                  <span style={{ fontSize: 11, color: muted, fontWeight: 500, flexShrink: 0, minWidth: 64, textAlign: 'right' }}>
+                    {formatRelative(d.updated_at)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Middle row — breakdowns */}
       <div style={{
@@ -360,7 +437,8 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
       )}
 
       <style>{`
-        .portfolio-stuck-row:hover { background: ${dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.03)'} !important; }
+        .portfolio-stuck-row:hover,
+        .portfolio-recent-row:hover { background: ${dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.03)'} !important; }
       `}</style>
     </div>
   );
