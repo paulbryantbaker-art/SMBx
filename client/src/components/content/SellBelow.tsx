@@ -11,6 +11,7 @@ import {
   SectionHeader,
   SignOffChain,
   PageCTA,
+  JourneyProvider,
 } from './storyBlocks';
 
 export default function SellBelow({ dark }: { dark: boolean }) {
@@ -64,7 +65,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
   const accent = dark ? '#E8709A' : '#D44A78';
 
   return (
-    <div className="bg-transparent" style={{ color: headingColor }}>
+    <JourneyProvider value="sell"><div className="bg-transparent" style={{ color: headingColor }}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
         {/* ═══ Hook — repositioned for brokers as the dominant audience ═══ */}
@@ -338,6 +339,6 @@ export default function SellBelow({ dark }: { dark: boolean }) {
           dark={dark}
         />
       </div>
-    </div>
+    </div></JourneyProvider>
   );
 }

@@ -8,6 +8,7 @@ import {
   SectionHeader,
   SignOffChain,
   PageCTA,
+  JourneyProvider,
 } from './storyBlocks';
 
 export default function AdvisorsBelow({ dark }: { dark: boolean }) {
@@ -141,7 +142,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
   ];
 
   return (
-    <div className="bg-transparent" style={{ color: headingColor }}>
+    <JourneyProvider value="brand"><div className="bg-transparent" style={{ color: headingColor }}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
         {/* ═══ Hook ═══ */}
@@ -446,6 +447,6 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           dark={dark}
         />
       </div>
-    </div>
+    </div></JourneyProvider>
   );
 }
