@@ -171,23 +171,19 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
           gap: desktop ? 20 : 14,
           padding: desktop ? '48px 24px' : '32px 20px',
         }}>
-          {/* Yulia avatar, not the X logo — this is her speaking */}
-          <div style={{
-            width: desktop ? 48 : 44,
-            height: desktop ? 48 : 44,
-            borderRadius: '50%',
-            background: `linear-gradient(135deg, #D44A78, #E8709A)`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontFamily: 'Sora, system-ui',
-            fontSize: desktop ? 18 : 16,
-            fontWeight: 800,
-            boxShadow: '0 4px 12px rgba(212,74,120,0.24)',
-          }}>
-            Y
-          </div>
+          {/* Faded X brand mark — quieter than a pink avatar in an empty state,
+              keeps the smbx identity visible without shouting. */}
+          <img
+            src={dark ? '/X-white.png' : '/X.png'}
+            alt="smbx.ai"
+            draggable={false}
+            style={{
+              height: desktop ? 40 : 36,
+              width: desktop ? 40 : 36,
+              objectFit: 'contain',
+              opacity: dark ? 0.32 : 0.22,
+            }}
+          />
 
           <p style={{
             fontFamily: 'Sora, system-ui',
