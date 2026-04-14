@@ -53,7 +53,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
       {
         question: 'Are deal professionals really free?',
         answer:
-          'Yes. Verified M&A advisors, brokers, attorneys, CPAs, real estate brokers, wealth managers, and appraisers get full Pro features for free, forever. Your sellers pay their own subscription if they engage the platform directly. Yulia recognizes you in conversation and switches to peer-to-peer mode automatically.',
+          'Yes. Verified M&A advisors, brokers, attorneys, CPAs, real estate brokers, wealth managers, and appraisers get full Pro features for free, forever. Your sellers pay their own subscription if they engage the platform directly. Tell Yulia you are a deal pro at the start of the conversation and she works with you peer-to-peer — no retail onboarding, no hand-holding, just the tooling.',
       },
     ],
   });

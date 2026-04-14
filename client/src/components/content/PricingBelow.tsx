@@ -28,7 +28,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
       {
         question: "I'm an attorney, CPA, or other deal professional. What do I pay?",
         answer:
-          'Nothing. Verified deal professionals — attorneys, CPAs, real estate brokers, wealth managers, appraisers, insurance brokers, estate planners — get full Pro features for free, forever. Your clients pay their own subscription if they engage the platform directly. When you tell Yulia you are advising on a deal, she switches to peer-to-peer mode automatically.',
+          'Nothing. Verified deal professionals — attorneys, CPAs, real estate brokers, wealth managers, appraisers, insurance brokers, estate planners — get full Pro features for free, forever. Your clients pay their own subscription if they engage the platform directly. Tell Yulia you are a deal pro at the start of the conversation and she works with you peer-to-peer — no retail onboarding, no hand-holding, just the tooling.',
       },
       {
         question: "Why does the Pro tier cost so much less than what an IB would charge?",
@@ -129,7 +129,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
         'Multi-deal portfolio view',
         'White-label outputs (your brand)',
         'Up to 10 active deals',
-        'Shared DD library',
+        'Priority support',
       ],
       cta: 'Start 90-day trial',
       ctaPlan: undefined as string | undefined,
@@ -143,7 +143,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
       protagonist: 'Sub-$1B PE & multi-MD shops',
       features: [
         'Unlimited users + unlimited deals',
-        'API for pipeline integration',
+        'Single sign-on (SAML)',
         'Dedicated CSM + onboarding',
         'SOC 2 / SLA / contract terms',
         'Quarterly business reviews',
@@ -511,7 +511,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                 <p className="text-[16px] md:text-[17px] leading-relaxed mb-5" style={{ color: 'rgba(218,218,220,0.85)' }}>
                   Attorneys, CPAs, real estate brokers, wealth managers, appraisers, rep & warranty insurance brokers,
                   estate planners — full Professional features, free forever. White-label outputs that carry your firm's brand.
-                  Multi-client deal view. Yulia switches to peer-to-peer mode the moment you tell her you're advising.
+                  Multi-client deal view. Tell Yulia you're an advisor at the start and she'll work with you peer-to-peer.
                 </p>
                 <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(218,218,220,0.55)' }}>
                   The catch: when your client engages the platform directly to manage their own deal, they get a 14-day trial
@@ -564,7 +564,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                     Tell Yulia what you do
                   </button>
                   <p className="text-[10px] text-center mt-3" style={{ color: 'rgba(218,218,220,0.4)' }}>
-                    Yulia will recognize you in conversation. No application form.
+                    Tell Yulia you're a deal pro when you start. No application form.
                   </p>
                 </div>
               </div>
@@ -668,8 +668,8 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                   <>
                     <strong>Nothing.</strong> Verified deal professionals — attorneys, CPAs, real estate brokers, wealth managers,
                     appraisers, insurance brokers, estate planners — get full Professional features for free, forever. Your clients
-                    pay their own subscription if they engage the platform directly. Yulia recognizes you in conversation and switches
-                    to peer-to-peer mode automatically.
+                    pay their own subscription if they engage the platform directly. Tell Yulia you're a deal pro at the start of
+                    the conversation and she works with you peer-to-peer — no retail onboarding, no hand-holding, just the tooling.
                   </>
                 ),
               },
