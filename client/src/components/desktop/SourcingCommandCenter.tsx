@@ -71,19 +71,23 @@ export default function SourcingCommandCenter({ dark }: Props) {
   const [view, setView] = useState<View>(() => (localStorage.getItem('smbx-sourcing-view') as View) || 'list');
   const [theses, setTheses] = useState<Thesis[] | null>(null);
   const [portfolios, setPortfolios] = useState<Record<number, Portfolio>>({});
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => { localStorage.setItem('smbx-sourcing-view', view); }, [view]);
 
   const fetchTheses = useCallback(async () => {
+    setError(null);
     try {
       const res = await fetch('/api/sourcing/theses', { headers: authHeaders() });
       if (res.ok) {
         const data: Thesis[] = await res.json();
         setTheses(Array.isArray(data) ? data : []);
       } else {
+        setError("Couldn't load theses — try again?");
         setTheses([]);
       }
     } catch {
+      setError("Couldn't load theses — try again?");
       setTheses([]);
     }
   }, []);
@@ -219,10 +223,35 @@ export default function SourcingCommandCenter({ dark }: Props) {
 
       {/* Body */}
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-        {view === 'list' && (
+        {error && view === 'board' && (
+          <div style={{
+            padding: 48,
+            textAlign: 'center',
+            color: muted,
+            fontFamily: "'Inter', system-ui, sans-serif",
+            fontSize: 13,
+          }}>
+            {error}{' '}
+            <button
+              onClick={fetchTheses}
+              type="button"
+              style={{
+                background: 'none',
+                border: 'none',
+                color: pink,
+                cursor: 'pointer',
+                fontWeight: 700,
+                padding: 0,
+              }}
+            >
+              retry
+            </button>
+          </div>
+        )}
+        {!error && view === 'list' && (
           <SourcingPanel isFullscreen={false} />
         )}
-        {view === 'board' && (
+        {!error && view === 'board' && (
           <BoardView
             theses={theses}
             portfolios={portfolios}
@@ -288,7 +317,7 @@ function BoardView({
   onSwitchToList: () => void;
 }) {
   if (!theses) {
-    return <div style={{ padding: 32, color: muted, fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13 }}>Loading theses…</div>;
+    return <BoardSkeleton dark={dark} borderC={borderC} />;
   }
   if (theses.length === 0) {
     return (
@@ -487,6 +516,70 @@ function ThesisCard({
           {portfolio?.stage_progress?.pct ? `${Math.round(portfolio.stage_progress.pct)}%` : thesis.status}
         </span>
       </div>
+    </div>
+  );
+}
+
+function BoardSkeleton({ dark, borderC }: { dark: boolean; borderC: string }) {
+  const sk = dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.05)';
+  const colBg = dark ? 'rgba(255,255,255,0.02)' : 'rgba(15,16,18,0.015)';
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: `repeat(${STAGES.length}, minmax(220px, 1fr))`,
+      gap: 12,
+      padding: 16,
+      minHeight: 300,
+    }}>
+      {STAGES.map((_, i) => (
+        <div
+          key={i}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 280,
+            background: colBg,
+            border: `1px solid ${borderC}`,
+            borderRadius: 12,
+            overflow: 'hidden',
+          }}
+        >
+          <div style={{
+            padding: '12px 12px 10px',
+            borderBottom: `1px solid ${borderC}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+          }}>
+            <div style={{ width: 60, height: 10, background: sk, borderRadius: 4, animation: 'sourcingSkel 1.4s ease-in-out infinite' }} />
+            <div style={{ marginLeft: 'auto', width: 22, height: 14, background: sk, borderRadius: 999, animation: 'sourcingSkel 1.4s ease-in-out infinite' }} />
+          </div>
+          <div style={{ padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {Array.from({ length: i === 0 ? 3 : i === 1 ? 2 : 1 }).map((_, j) => (
+              <div
+                key={j}
+                style={{
+                  padding: 12,
+                  borderRadius: 10,
+                  border: `1px solid ${borderC}`,
+                  background: dark ? '#1A1C1E' : '#FFFFFF',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                }}
+              >
+                <div style={{ width: '75%', height: 11, background: sk, borderRadius: 4, animation: 'sourcingSkel 1.4s ease-in-out infinite' }} />
+                <div style={{ width: '55%', height: 9, background: sk, borderRadius: 4, animation: 'sourcingSkel 1.4s ease-in-out infinite' }} />
+                <div style={{ display: 'flex', gap: 6, marginTop: 2, paddingTop: 8, borderTop: `1px solid ${borderC}` }}>
+                  <div style={{ width: 50, height: 10, background: sk, borderRadius: 4, animation: 'sourcingSkel 1.4s ease-in-out infinite' }} />
+                  <div style={{ marginLeft: 'auto', width: 28, height: 10, background: sk, borderRadius: 4, animation: 'sourcingSkel 1.4s ease-in-out infinite' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+      <style>{`@keyframes sourcingSkel { 0%,100% { opacity: 0.5 } 50% { opacity: 0.9 } }`}</style>
     </div>
   );
 }
