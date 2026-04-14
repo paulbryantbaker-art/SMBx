@@ -49,6 +49,7 @@ import { MobileJourneySheet } from '../../components/mobile/MobileJourneySheet';
 import { MobileWorkspaceSheet } from '../../components/mobile/MobileWorkspaceSheet';
 import { isStandalone } from '../../lib/pwa';
 import { NextActionsCards } from '../../components/mobile/NextActionsCards';
+import { DealStack } from '../../components/mobile/DealStack';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
 import { MobileIntegratePage } from '../../components/mobile/MobileIntegratePage';
@@ -1569,8 +1570,38 @@ export default function AppShell() {
                   }}
                 >
                 <main className="flex-1 flex flex-col relative">
-                  {/* Content centered in its allocation — golden-ratio split happens via the
-                      flex-1 spacer below (content = 1.618, spacer = 1). */}
+                  {/* Mobile + logged-in + has deals → Wallet-style deal stack.
+                      Replaces the greeting block with glanceable portfolio state.
+                      Desktop + logged-out always see the hero/greeting block. */}
+                  {isMobile && user && authChat.grouped && authChat.grouped.deals.length > 0 ? (
+                    <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+                      <div className="flex justify-center pt-6">
+                        <LogoHero height={32} dark={dark} />
+                      </div>
+                      <DealStack
+                        deals={authChat.grouped.deals.map(d => ({
+                          id: d.id,
+                          business_name: d.business_name,
+                          journey_type: d.journey_type,
+                          current_gate: d.current_gate,
+                          industry: d.industry,
+                          league: d.league,
+                          updated_at: d.updated_at,
+                          status: d.status,
+                        }))}
+                        onDealTap={(dealId) => {
+                          const deal = authChat.grouped?.deals.find(d => d.id === dealId);
+                          const latestConv = deal?.conversations[0];
+                          if (latestConv) {
+                            authChat.selectConversation(latestConv.id);
+                            navigate(`/chat/${latestConv.id}`);
+                            setViewState('chat');
+                          }
+                        }}
+                        dark={dark}
+                      />
+                    </div>
+                  ) : (
                   <div className="flex flex-col items-center px-6 relative z-10 flex-[1.618] justify-center">
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl' : 'max-w-3xl space-y-6'}`}>
                       {!isMobile && (
@@ -1714,13 +1745,14 @@ export default function AppShell() {
                       )}
                     </div>
                   </div>
+                  )}
 
                   {/* Golden-ratio spacer — content above takes 1.618 units, this empty
                       spacer takes 1 unit. Content lands in the upper 61.8% of the card,
                       breathing room in the lower 38.2%, and the portaled pill floats over
-                      the bottom of that breathing room. Grok-like simplicity. Mobile only;
-                      desktop has content centered and its own in-flow hero pill. */}
-                  {isMobile && <div className="flex-1" aria-hidden />}
+                      the bottom of that breathing room. Grok-like simplicity. Mobile only,
+                      and only when NOT showing the deal stack (stack manages its own scroll). */}
+                  {isMobile && !(user && authChat.grouped && authChat.grouped.deals.length > 0) && <div className="flex-1" aria-hidden />}
 
                   {/* ╔══════════════════════════════════════════════════════════════════════╗
                       ║ iOS PWA mobile home pill — LOAD-BEARING SETUP, see                   ║
