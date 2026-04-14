@@ -499,10 +499,21 @@ export default function PipelineTable({ dark, onOpenDeal, onNewDeal }: Props) {
       </div>
 
       <style>{`
-        .pipeline-table tbody tr { cursor: pointer; transition: background 80ms ease; }
-        .pipeline-table tbody tr:hover { background: ${rowHover}; }
+        .pipeline-table tbody tr {
+          cursor: pointer;
+          transition: background 80ms ease, box-shadow 120ms ease;
+          box-shadow: inset 2px 0 0 var(--row-journey, transparent);
+        }
+        .pipeline-table tbody tr:hover {
+          background: ${rowHover};
+          box-shadow: inset 4px 0 0 var(--row-journey, ${pink});
+        }
         .pipeline-table tbody tr:hover .pipeline-row-actions { opacity: 1; }
-        .pipeline-table tbody tr:focus-visible { outline: 2px solid ${pink}; outline-offset: -2px; }
+        .pipeline-table tbody tr:focus-visible {
+          outline: 2px solid ${pink};
+          outline-offset: -2px;
+          box-shadow: inset 4px 0 0 var(--row-journey, ${pink});
+        }
         @media (max-width: 980px) {
           .pipeline-table .pipeline-col-last { display: none; }
           .pipeline-table td.pipeline-col-last { display: none; }
@@ -618,9 +629,14 @@ function PipelineRow({
   return (
     <tr
       tabIndex={0}
+      role="button"
+      aria-label={`Open ${deal.business_name || 'deal'}`}
       onClick={onOpenDeal}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpenDeal(); } }}
-      style={{ borderBottom: `1px solid ${borderC}` }}
+      style={{
+        borderBottom: `1px solid ${borderC}`,
+        ['--row-journey' as any]: color,
+      }}
     >
       <td style={{ padding: `${rowPadY}px 16px`, minWidth: 0 }}>
         <div style={{ fontWeight: 700, color: heading, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
