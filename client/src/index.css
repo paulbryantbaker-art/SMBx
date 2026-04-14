@@ -94,6 +94,17 @@ html, body {
     min-height: -webkit-fill-available;
   }
 }
+
+/* iOS PWA standalone: block the browser's native swipe-to-back gesture so
+   the custom sidebar swipe handler is the only thing responding to left-edge
+   horizontal swipes. pan-y permits vertical scrolling; horizontal gestures
+   are handled exclusively by our JS touchstart/touchend handlers. Scoped to
+   standalone + mobile width so browser Safari retains normal back-swipe. */
+@media (display-mode: standalone) and (max-width: 767px) {
+  html, body {
+    touch-action: pan-y;
+  }
+}
 #app-root {
   width: 100%;
 }
