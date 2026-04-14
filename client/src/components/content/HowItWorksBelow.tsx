@@ -10,9 +10,9 @@ import {
 
 export default function HowItWorksBelow({ dark }: { dark: boolean }) {
   usePageMeta({
-    title: 'The methodology · smbx.ai',
+    title: 'How Yulia runs a deal · smbx.ai',
     description:
-      'The deal operating system behind Yulia. Six engines, 22 enforced gates, one audited workflow. For evaluators, advisors, attorneys, and CPAs running due diligence on a conversation-first M&A platform.',
+      'Watch the operating system run on a real sentence. Six engines, 22 enforced gates, one audited workflow from first message to close. The fastest way to understand smbx is to see it in motion.',
     canonical: 'https://smbx.ai/how-it-works',
     ogImage: 'https://smbx.ai/og-how.png',
     breadcrumbs: [
@@ -136,18 +136,18 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
 
         {/* ═══ Hook ═══ */}
         <HookHeader
-          eyebrow="the methodology"
+          eyebrow="how it works"
           headline={
             <>
-              The operating system<br />
-              behind every <em className="not-italic" style={{ color: accent }}>conversation</em>.
+              Watch Yulia run<br />
+              a <em className="not-italic" style={{ color: accent }}>real deal</em>.
             </>
           }
           sub={
             <>
-              Six engines. 22 enforced gates. One audited workflow from first sentence to close. This page is for
-              evaluators — the attorneys, CPAs, advisors, and firm-level buyers who need to see the methodology before
-              they trust a deal to it. If you're here to sell, buy, raise, or integrate, those pages are the faster path.
+              Six engines. 22 enforced gates. One audited workflow from first message to close.
+              The fastest way to understand smbx is to watch it in motion — so that's what this page is.
+              Type a sentence, pick a preset, or read on for the methodology underneath.
             </>
           }
           dark={dark}
@@ -436,12 +436,12 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
 
         {/* ═══ CTA ═══ */}
         <PageCTA
-          headline={<>Evaluating Yulia for your practice?</>}
-          sub="The methodology is above. The engines are above. The audit chain is above. The only thing left is a real deal. Bring Yulia a conversation — a mandate you\u2019re pitching, a target you\u2019re screening, or a structure you\u2019re modeling — and see the chain run end-to-end."
-          buttonLabel="Talk to Yulia"
+          headline={<>Now run it on your deal.</>}
+          sub="The demo above is scripted. The one you start in chat is real. Tell Yulia what you're working on — selling a business, buying one, raising capital, or integrating a close — and watch the same chain run against your numbers. No signup. No credit card. Stop whenever you want."
+          buttonLabel="Start a conversation"
           onClick={() =>
             bridgeToYulia(
-              "I'm evaluating Yulia for my practice. Walk me through how you'd run a real [sell-side mandate / buy-side thesis / capital raise / post-close integration] — I want to see the gates, the engines invoked, and what lands in the audit trail."
+              "I just watched the How It Works demo. Run the same chain on my situation: [describe your deal, target, or capital need]. Pull the comps, build the model, and show me the gates you'd open."
             )
           }
           dark={dark}
