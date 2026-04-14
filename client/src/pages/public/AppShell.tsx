@@ -633,16 +633,30 @@ export default function AppShell() {
   const [activeCanvasTabId, setActiveCanvasTabId] = useState<string | null>(null);
   const activeCanvasTab = canvasTabs.find(t => t.id === activeCanvasTabId) || null;
   // Side-by-side split — a second tab pinned alongside the active one.
-  // Desktop only; clears automatically when the split tab closes or when
-  // the active tab is the same as the split tab.
-  const [splitTabId, setSplitTabId] = useState<string | null>(null);
+  // Desktop only. Persists across reload via localStorage; auto-clears
+  // when the split tab closes or matches the active tab.
+  const [splitTabId, setSplitTabIdState] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('smbx-split-tab-id') || null;
+  });
+  const setSplitTabId = useCallback((v: string | null) => {
+    setSplitTabIdState(v);
+    if (typeof window === 'undefined') return;
+    if (v) localStorage.setItem('smbx-split-tab-id', v);
+    else localStorage.removeItem('smbx-split-tab-id');
+  }, []);
   const splitTab = canvasTabs.find(t => t.id === splitTabId) || null;
-  // Auto-clear invalid split (tab closed, or equals active)
+  // Auto-clear invalid split (tab closed, or equals active). Only clears
+  // the "missing tab" case once canvasTabs has rehydrated from the server
+  // (length > 0) — otherwise the split evaporates on every reload before
+  // the tab-restore request lands.
   useEffect(() => {
     if (!splitTabId) return;
     if (splitTabId === activeCanvasTabId) { setSplitTabId(null); return; }
-    if (!canvasTabs.find(t => t.id === splitTabId)) setSplitTabId(null);
-  }, [splitTabId, activeCanvasTabId, canvasTabs]);
+    if (canvasTabs.length > 0 && !canvasTabs.find(t => t.id === splitTabId)) {
+      setSplitTabId(null);
+    }
+  }, [splitTabId, activeCanvasTabId, canvasTabs, setSplitTabId]);
   // Auto-hide mobile canvas overlay when all tabs are closed
   useEffect(() => {
     if (canvasTabs.length === 0) setMobileCanvasVisible(false);
