@@ -65,16 +65,24 @@ export function HookHeader({
   sub,
   dark,
   journey,
+  align = 'center',
 }: {
   eyebrow: string;
   headline: ReactNode;
   sub: ReactNode;
   dark: boolean;
   journey?: Journey;
+  /**
+   * Hero alignment. Default 'center' matches the home hero and gives every
+   * journey page the same marketing-page opening. Use 'left' to revert to
+   * editorial newspaper flow.
+   */
+  align?: 'left' | 'center';
 }) {
   const accent = useJourneyAccent(journey, dark);
+  const isCenter = align === 'center';
   return (
-    <header className="mb-20">
+    <header className={`mb-20 ${isCenter ? 'text-center' : ''}`}>
       <motion.p
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -103,7 +111,7 @@ export function HookHeader({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
-        className="max-w-2xl text-[19px] md:text-[21px] leading-[1.55]"
+        className={`text-[19px] md:text-[21px] leading-[1.55] ${isCenter ? 'max-w-2xl mx-auto' : 'max-w-2xl'}`}
         style={{ color: dark ? 'rgba(218,218,220,0.78)' : '#5d5e61' }}
       >
         {sub}
