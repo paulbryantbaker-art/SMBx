@@ -36,6 +36,7 @@ import DesktopAccountMenu from '../../components/desktop/DesktopAccountMenu';
 import DealWorkspace from '../../components/desktop/DealWorkspace';
 import PipelineTable from '../../components/desktop/PipelineTable';
 import SourcingCommandCenter from '../../components/desktop/SourcingCommandCenter';
+import PortfolioAnalytics from '../../components/desktop/PortfolioAnalytics';
 import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
@@ -1220,6 +1221,16 @@ export default function AppShell() {
       case 'buyer-pipeline':
         return <BuyerPipeline />;
       case 'analytics':
+        // Desktop gets a proper portfolio analytics grid; mobile falls back
+        // to the older AnalyticsView composition.
+        if (!isMobile) {
+          return (
+            <PortfolioAnalytics
+              dark={dark}
+              onOpenDeal={(dealId: number) => { setViewState('deal'); navigate(`/deal/${dealId}`); }}
+            />
+          );
+        }
         return (
           <AnalyticsView
             onOpenConversation={(convId: number) => { authChat.selectConversation(convId); setViewState('chat'); navigate(`/chat/${convId}`); }}
@@ -1502,6 +1513,7 @@ export default function AppShell() {
           { type: 'dataroom', icon: 'lock', label: 'Data Rm' },
           { type: 'pipeline', icon: 'view_kanban', label: 'Pipeline' },
           { type: 'sourcing', icon: 'search', label: 'Sourcing' },
+          { type: 'analytics', icon: 'monitoring', label: 'Insights' },
         ]).map(item => {
           const isActive = activeCanvasTabId === item.type;
           return (
