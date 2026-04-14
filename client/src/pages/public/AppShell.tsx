@@ -2096,8 +2096,13 @@ export default function AppShell() {
                           on mobile home (not just browser). */}
                       <DealContextChips
                         dark={dark}
-                        hasDeals={!!(user && isMobile && authChat.grouped)}
-                        onChipTap={(fill) => fillHomeInput(fill)}
+                        onNavigate={(path) => {
+                          const tab = (path.replace('/', '') || 'home') as TabId;
+                          setActiveTab(tab);
+                          setViewState('landing');
+                          navigate(path);
+                          setHomeToolsOpen(false);
+                        }}
                       />
 
                       <div className={isPWA ? 'px-3' : 'px-4'} style={{ touchAction: 'auto' }}>
@@ -2147,6 +2152,72 @@ export default function AppShell() {
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
                           </button>
                         </div>
+                        {/* Mobile + popup — chat-starter prefills (job previously carried by chips) */}
+                        {homeToolsOpen && (
+                          <div
+                            onClick={(e) => { if (e.target === e.currentTarget) setHomeToolsOpen(false); }}
+                            style={{ position: 'fixed', inset: 0, background: 'rgba(15,16,18,0.35)', zIndex: 70 }}
+                            aria-hidden
+                          >
+                            <div
+                              role="menu"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                position: 'fixed',
+                                left: 12, right: 12,
+                                bottom: 'calc(env(safe-area-inset-bottom) + 84px)',
+                                background: dark ? '#1a1c1e' : '#ffffff',
+                                borderRadius: 20,
+                                border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(15,16,18,0.08)',
+                                boxShadow: '0 20px 48px rgba(0,0,0,0.25)',
+                                padding: 8,
+                                maxHeight: '62vh',
+                                overflowY: 'auto',
+                              }}
+                            >
+                              <div style={{ padding: '10px 14px 6px' }}>
+                                <span style={{
+                                  fontFamily: "'Sora', system-ui, sans-serif",
+                                  fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase',
+                                  color: dark ? 'rgba(240,240,243,0.55)' : '#7c7d80',
+                                }}>Start with Yulia</span>
+                              </div>
+                              {[
+                                { icon: 'sell',               label: 'Sell my business',     fill: 'I want to sell my business — ' },
+                                { icon: 'shopping_cart',      label: 'Buy a business',       fill: 'I want to buy a business — ' },
+                                { icon: 'savings',            label: 'Raise capital',        fill: 'I need to raise capital — ' },
+                                { icon: 'merge',              label: 'Just closed a deal',   fill: 'I just closed an acquisition — ' },
+                                { icon: 'workspace_premium',  label: "I'm an advisor",       fill: "I'm an M&A advisor / broker / CPA / attorney — " },
+                                { icon: 'auto_awesome',       label: 'Ask anything',         fill: '' },
+                              ].map(item => (
+                                <button
+                                  key={item.label}
+                                  onClick={() => { setHomeToolsOpen(false); fillHomeInput(item.fill); }}
+                                  type="button"
+                                  style={{
+                                    display: 'flex', alignItems: 'center', gap: 12,
+                                    padding: '12px 14px',
+                                    width: '100%', borderRadius: 12, border: 'none',
+                                    background: 'transparent', color: dark ? '#f0f0f3' : '#1a1c1e',
+                                    fontFamily: "'Inter', system-ui, sans-serif",
+                                    fontSize: 15, fontWeight: 600, textAlign: 'left',
+                                    cursor: 'pointer',
+                                    WebkitTapHighlightColor: 'transparent',
+                                  }}
+                                >
+                                  <span
+                                    className="material-symbols-outlined"
+                                    style={{ fontSize: 20, color: dark ? '#E8709A' : '#D44A78', fontVariationSettings: "'FILL' 1" }}
+                                    aria-hidden
+                                  >
+                                    {item.icon}
+                                  </span>
+                                  {item.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                       </form>
                       {!isPWA && !user && (
