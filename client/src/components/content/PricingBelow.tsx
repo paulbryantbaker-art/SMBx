@@ -370,7 +370,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                   }}
                 >
                   Start 90-day trial
-                  <span className="material-symbols-outlined text-base">arrow_forward</span>
+                  <span aria-hidden className="material-symbols-outlined text-base">arrow_forward</span>
                 </button>
               </div>
 
@@ -623,6 +623,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                     {job.bullets.map((b) => (
                       <li key={b} className="flex items-start gap-3">
                         <span
+                          aria-hidden
                           className="material-symbols-outlined text-base shrink-0 mt-1"
                           style={{ color: accent }}
                         >

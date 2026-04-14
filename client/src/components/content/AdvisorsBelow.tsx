@@ -449,9 +449,9 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
 
         {/* ═══ CTA ═══ */}
         <PageCTA
-          headline={<>Try Professional free for 90 days.</>}
-          sub="Run a real client engagement before you decide. Build a Baseline at your next pitch meeting. Generate a CIM. See what the pipeline looks like."
-          buttonLabel="Start 90-day trial"
+          headline={<>Win your next pitch.</>}
+          sub="Run a real client engagement before you commit. Walk into your next pitch with a defensible Baseline. Draft a CIM from the seller's P&L in four hours. See the pipeline view. Verified deal pros — attorneys, CPAs, brokers — stay free, forever."
+          buttonLabel="Start now — free"
           onClick={goToChat}
           dark={dark}
         />
