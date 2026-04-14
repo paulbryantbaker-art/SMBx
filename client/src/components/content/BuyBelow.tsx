@@ -45,6 +45,16 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
         answer:
           'A traditional CIM screen takes 4-6 hours of analyst time: read, model, draft an IC memo. The Rundown takes 8 seconds. Same dimensions, same logic, different velocity. You move from screening 5 deals a week to screening 100 a morning — and you spend the saved time on the 1-in-100 deal that actually pays.',
       },
+      {
+        question: 'How accurate is the 8-second verdict compared to full diligence?',
+        answer:
+          'The Rundown is a screen, not a diligence report. It reliably identifies the 60-70% of deals that shouldn\u2019t make it past first read — customer concentration above 35%, DSCR below 1.1×, owner wages hiding real EBITDA, single-vendor dependency. For the deals it scores "pursue," you still run full diligence. The value is filtering, not final judgment: you stop burning hours on deals the math says don\u2019t work.',
+      },
+      {
+        question: 'What data does Yulia need to run The Rundown?',
+        answer:
+          'Minimum: industry, revenue, EBITDA or SDE, and ask price. Ideal: customer concentration, growth rate over the last 3 years, owner wages, whether the business is recurring or project-based, and any debt already in place. Missing data gets flagged — Yulia scores what\u2019s there and tells you which dimension is unknown, so you know what to ask for next.',
+      },
     ],
   });
 

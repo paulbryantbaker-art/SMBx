@@ -42,6 +42,16 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
         answer:
           'Only if you tell them. Every document carries your branding. Yulia is your back office, not your front office. Your relationships, your judgment, your fees.',
       },
+      {
+        question: 'What does the economics look like for a solo advisor versus a team?',
+        answer:
+          'Solo advisors typically handle 6-8 active mandates; Yulia unlocks 18-22 because each mandate needs hours not weeks of analyst work. On a $12-18M average close-fee practice, that\u2019s a $4-10M revenue difference at roughly the same partner hours. For teams, Yulia replaces the junior analyst workload — more mandates per partner without proportional hires. Either way the margin profile moves from ~60% to ~78%.',
+      },
+      {
+        question: 'Are verified deal professionals really free, forever?',
+        answer:
+          'Yes. Verified M&A advisors, brokers, attorneys, CPAs, real estate brokers, wealth managers, and appraisers get full Professional features free — forever. Your clients pay their own subscription if they engage the platform directly. Tell Yulia you\u2019re a deal pro at the start of the conversation and she works with you peer-to-peer — no retail onboarding, no hand-holding.',
+      },
     ],
   });
 

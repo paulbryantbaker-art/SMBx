@@ -42,6 +42,16 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
         answer:
           'Yulia builds a personalized 180-day plan from your deal financials and DD findings. She monitors customer retention, employee retention, revenue vs deal model, EBITDA build-back, and covenant headroom — flagging issues before they become problems. Every recommendation is tied to a KPI and a deadline.',
       },
+      {
+        question: 'What should I NOT change in the first 30 days?',
+        answer:
+          'Pricing to large customers, compensation for retained employees, operating procedures the team relies on daily, vendor relationships that carry institutional knowledge. The cost of disruption in month one is almost always higher than the short-term economic upside. Move fast on systems and reporting; move slowly on anything customers and employees feel.',
+      },
+      {
+        question: 'How do I know if I\u2019m hitting the deal model on schedule?',
+        answer:
+          'You need monthly financials within 7 days of month-end, weekly cash flow, and a working capital dashboard — all set up in week 1. Compare each month to the deal model line-by-line. EBITDA variance above 10% in either direction is a signal: investigate before month 3. Most buyers who miss year 1 miss because they didn\u2019t have reporting until month 4, by which point the variance is already a covenant problem.',
+      },
     ],
   });
 

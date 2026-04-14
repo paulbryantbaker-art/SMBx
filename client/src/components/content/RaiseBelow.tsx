@@ -46,6 +46,16 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
         answer:
           'Senior leverage in 2024-2025 is typically 3.5-4.5× EBITDA for asset-light services and 4.5-5.5× for asset-heavy distribution and manufacturing. Adding unitranche or 2nd lien can push total leverage to 5.5-6.5× if DSCR clears 1.20× minimum. Personal guarantees apply on SBA 7(a) but not on conventional bank or fund debt at this size.',
       },
+      {
+        question: 'What is a seller rollover and why include one in the stack?',
+        answer:
+          'A seller rollover is equity the seller keeps in the deal — typically 5-15% of purchase consideration, sometimes structured as preferred or common. It aligns the seller through transition (they still benefit from upside), softens personal-guarantee asks on the buyer side, and often gets lenders comfortable at slightly higher senior leverage. It can also defer tax on the rolled portion, which sellers like.',
+      },
+      {
+        question: 'How is raising growth capital different from raising for an acquisition?',
+        answer:
+          'Growth capital means you\u2019re an operating owner funding expansion (new location, product line, working capital headroom) — lenders look at your historical cash flow against pro-forma investment return. Acquisition capital funds a specific target — lenders look at the target\u2019s cash flow, the purchase multiple, and whether your stack services the debt in year 1. Yulia models both, but the inputs and the questions lenders ask are different.',
+      },
     ],
   });
 
