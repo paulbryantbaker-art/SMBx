@@ -34,6 +34,7 @@ import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/Canva
 import CanvasTabStrip from '../../components/canvas/CanvasTabStrip';
 import DesktopAccountMenu from '../../components/desktop/DesktopAccountMenu';
 import DealWorkspace from '../../components/desktop/DealWorkspace';
+import PipelineTable from '../../components/desktop/PipelineTable';
 import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
@@ -1177,6 +1178,17 @@ export default function AppShell() {
   const renderCanvasTabContent = (tab: { id: string; type: string; label: string; props?: Record<string, any> }) => {
     switch (tab.type) {
       case 'pipeline':
+        // Desktop gets the operator-grade PipelineTable. Mobile keeps the
+        // existing card-grid PipelinePanel which is touch-tuned.
+        if (!isMobile) {
+          return (
+            <PipelineTable
+              dark={dark}
+              onOpenDeal={(dealId: number) => { setViewState('deal'); navigate(`/deal/${dealId}`); }}
+              onNewDeal={() => { authChat.newConversation(); setViewState('chat'); navigate('/chat'); }}
+            />
+          );
+        }
         return (
           <PipelinePanel
             onOpenConversation={(convId: number) => { authChat.selectConversation(convId); setViewState('chat'); navigate(`/chat/${convId}`); }}
