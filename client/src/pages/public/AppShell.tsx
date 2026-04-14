@@ -53,6 +53,7 @@ import { NextActionsCards } from '../../components/mobile/NextActionsCards';
 import { DealStack, filterRealDeals } from '../../components/mobile/DealStack';
 import { ArtifactSheet } from '../../components/mobile/ArtifactSheet';
 import { AccountSheet } from '../../components/mobile/AccountSheet';
+import { SignInSheet } from '../../components/mobile/SignInSheet';
 import { DealContextChips } from '../../components/mobile/DealContextChips';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
@@ -918,6 +919,8 @@ export default function AppShell() {
 
   // Mobile account sheet state — replaces the hamburger for user/settings access.
   const [accountSheetOpen, setAccountSheetOpen] = useState(false);
+  // Mobile sign-in sheet — shown when logged-out users tap the top-right login icon.
+  const [signInSheetOpen, setSignInSheetOpen] = useState(false);
 
   // Handler: open deliverable from chat message click.
   // Desktop → canvas tab. Mobile → Vaul ArtifactSheet.
@@ -2519,6 +2522,16 @@ export default function AppShell() {
         />
       )}
 
+      {/* ═══ MOBILE SIGN-IN SHEET — top-right login icon opens this for guests ═══ */}
+      {isMobile && !user && (
+        <SignInSheet
+          open={signInSheetOpen}
+          onOpenChange={setSignInSheetOpen}
+          dark={dark}
+          onSignIn={() => { window.location.href = '/login'; }}
+        />
+      )}
+
       {/* ═══ MOBILE ARTIFACT SHEET — Vaul full-screen viewer for Yulia deliverables ═══ */}
       {isMobile && (
         <ArtifactSheet
@@ -2799,6 +2812,39 @@ export default function AppShell() {
           }}
         >
           {(user.display_name || user.email || 'Y').trim().charAt(0).toUpperCase()}
+        </button>
+      )}
+
+      {/* Logged-out mirror: iOS-convention login icon top-right → SignInSheet.
+          Same placement as the avatar so users find the account affordance in
+          the same spot regardless of auth state. */}
+      {isMobile && !user && (
+        <button
+          onClick={() => setSignInSheetOpen(true)}
+          type="button"
+          aria-label="Sign in"
+          className="active:scale-90"
+          style={{
+            position: 'fixed',
+            top: 'calc(env(safe-area-inset-top) + 12px)',
+            right: 16,
+            zIndex: 55,
+            width: 36,
+            height: 36,
+            borderRadius: '50%',
+            background: dark ? '#1f2123' : '#ffffff',
+            color: dark ? '#E8709A' : '#D44A78',
+            border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)'}`,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: dark ? 'none' : '0 1px 4px rgba(26,28,30,0.06)',
+            transition: 'transform 120ms',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>person</span>
         </button>
       )}
 
