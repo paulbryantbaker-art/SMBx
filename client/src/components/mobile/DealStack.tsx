@@ -1,38 +1,34 @@
 /**
- * DealStack — the mobile home portfolio surface.
+ * DealStack — Wallet-physics mobile portfolio surface.
  *
- * Renders a Wallet-aesthetic vertical list of <DealCard>s sorted by
- * urgency > stage progression > recency. Top card is the hero;
- * subsequent cards scroll below. Empty state invites first deal.
+ * Top card is the one that needs attention most (urgency > stage > recency).
+ * Up to 3 "peek" cards sit below it showing just their gradient header band
+ * + business name + stage pill. Tap a peek → it lifts to top with a shared-
+ * element transition. Swipe up on the top card → cycle to the next deal.
+ * Remaining deals (5+) are reachable via "View all N deals" below the peek
+ * stack.
  *
- * Mobile only. Desktop uses the Pipeline canvas panel.
+ * Honors prefers-reduced-motion (falls back to a plain vertical list).
+ * Haptic ticks on transitions (no-op on iOS Safari).
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { DealCard, daysSince, deriveUrgency, type DealCardData, type Urgency } from './DealCard';
+import { tick, thud } from '../../lib/haptics';
 
 /* ═══ SORT WEIGHTS ═══ */
 
-/** Urgency priority — lower number = shown first. */
 const URGENCY_RANK: Record<Urgency, number> = {
   'stuck': 0,
   'needs-you': 1,
   'on-track': 2,
 };
 
-/**
- * Stage progression rank — later stages first within the same urgency band.
- * Close-to-close deals are more urgent than early-stage ones when everything
- * else is equal. S5/B5/R5 (closing) → highest. Sourcing/intake → lowest.
- */
 const GATE_RANK: Record<string, number> = {
-  // Sell journey
   S5: 0, S4: 1, S3: 2, S2: 3, S1: 4, S0: 5,
-  // Buy journey
   B5: 0, B4: 1, B3: 2, B2: 3, B1: 4, B0: 5,
-  // Raise journey
   R5: 0, R4: 1, R3: 2, R2: 3, R1: 4, R0: 5,
-  // PMI journey
   PMI3: 0, PMI2: 1, PMI1: 2, PMI0: 3,
 };
 
@@ -41,14 +37,6 @@ function gateRank(gate: string | null): number {
   return GATE_RANK[gate] ?? 99;
 }
 
-/**
- * Filter out drafts / placeholder deals so the stack only shows real,
- * user-owned pipeline. A deal is "real" when it has a business_name —
- * that's the minimum signal that the user actually told Yulia about a
- * business, not just tapped something and bounced. Without this filter,
- * empty draft rows show nudges like "Sharpen your acquisition thesis"
- * even though the user hasn't defined one — card overclaims state.
- */
 export function filterRealDeals(deals: DealCardData[]): DealCardData[] {
   return deals.filter(d => d.business_name && d.business_name.trim().length > 0);
 }
@@ -58,67 +46,177 @@ export function sortDeals(deals: DealCardData[]): DealCardData[] {
     const ua = URGENCY_RANK[deriveUrgency(a)];
     const ub = URGENCY_RANK[deriveUrgency(b)];
     if (ua !== ub) return ua - ub;
-
     const ga = gateRank(a.current_gate);
     const gb = gateRank(b.current_gate);
     if (ga !== gb) return ga - gb;
-
-    // Recency tiebreaker — most recently updated first
     return daysSince(a.updated_at) - daysSince(b.updated_at);
   });
 }
+
+/* ═══ WALLET LAYOUT CONSTANTS ═══ */
+
+const PEEK_HEIGHT = 44; // matches DealCard peek variant
+const PEEK_GAP = 10;
+const MAX_PEEK = 3;
 
 /* ═══ PROPS ═══ */
 
 interface DealStackProps {
   deals: DealCardData[];
   onDealTap: (dealId: number) => void;
-  /** Called when the user taps one of the empty-state journey buttons.
-   *  The fill string is a prefill for the chat pill ("I want to sell my business — "). */
+  /** Fill string for the home pill when user taps an empty-state path. */
   onStartFirstDeal?: (fill: string) => void;
+  /** Called when user long-presses the top card — future quick-actions sheet. */
+  onDealLongPress?: (dealId: number) => void;
+  /** Highlight a newly-created deal with a subtle pulse for 5s. */
+  justCreatedDealId?: number | null;
   dark?: boolean;
 }
 
 /* ═══ COMPONENT ═══ */
 
-export function DealStack({ deals, onDealTap, onStartFirstDeal, dark = false }: DealStackProps) {
+export function DealStack({ deals, onDealTap, onStartFirstDeal, onDealLongPress, justCreatedDealId, dark = false }: DealStackProps) {
+  const reduceMotion = useReducedMotion();
   const sorted = useMemo(() => sortDeals(filterRealDeals(deals)), [deals]);
+  const [topId, setTopId] = useState<number | null>(null);
+
+  // Re-pin the top card when the sorted order changes. Default is the #0 (most
+  // urgent). If user has manually promoted a card via peek-tap, keep it on top
+  // until the sort changes.
+  useEffect(() => {
+    if (sorted.length === 0) { setTopId(null); return; }
+    const found = topId != null && sorted.find(d => d.id === topId);
+    if (!found) setTopId(sorted[0].id);
+  }, [sorted, topId]);
 
   if (sorted.length === 0) {
     return <EmptyStack onStart={onStartFirstDeal} dark={dark} />;
   }
 
+  // Compute ordered slice for rendering: [topCard, ...peekCards, ...rest]
+  const topIdx = topId != null ? sorted.findIndex(d => d.id === topId) : 0;
+  const topCard = sorted[topIdx >= 0 ? topIdx : 0];
+  const peekPool = sorted.filter(d => d.id !== topCard.id);
+  const peekCards = peekPool.slice(0, MAX_PEEK);
+  const overflowCount = Math.max(0, sorted.length - 1 - MAX_PEEK);
+
+  // Cycle to next deal (swipe commit)
+  const cycleNext = () => {
+    if (peekCards.length === 0) return;
+    thud();
+    setTopId(peekCards[0].id);
+  };
+
+  // Promote a peek card to top (tap on peek)
+  const promote = (id: number) => {
+    tick();
+    setTopId(id);
+  };
+
+  // REDUCED MOTION — fallback to a plain list without peek/swipe animations
+  if (reduceMotion) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '16px 16px 140px' }}>
+        {sorted.map((deal) => (
+          <DealCard
+            key={deal.id}
+            deal={deal}
+            dark={dark}
+            onTap={() => onDealTap(deal.id)}
+            onLongPress={onDealLongPress ? () => onDealLongPress(deal.id) : undefined}
+            urgency={deal.id === justCreatedDealId ? 'needs-you' : undefined}
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12,
-        padding: '16px 16px 120px 16px', // bottom padding clears the portaled pill
-        width: '100%',
-      }}
-    >
-      {sorted.map((deal) => (
-        <DealCard
-          key={deal.id}
-          deal={deal}
-          dark={dark}
-          stackIndex={0}
-          onTap={() => onDealTap(deal.id)}
-        />
-      ))}
+    <div style={{ padding: '16px 16px 140px' }}>
+      {/* Top card — full DealCard with swipe + long-press + justCreated pulse */}
+      <motion.div
+        key="top"
+        layout
+        drag="y"
+        dragConstraints={{ top: -200, bottom: 0 }}
+        dragElastic={{ top: 0.6, bottom: 0 }}
+        onDragEnd={(_, info) => {
+          if (info.offset.y < -80 && peekCards.length > 0) cycleNext();
+        }}
+        transition={{ type: 'spring', stiffness: 360, damping: 32 }}
+        style={{ originY: 0 }}
+      >
+        <motion.div
+          layoutId={`deal-${topCard.id}`}
+          transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+          className={topCard.id === justCreatedDealId ? 'deal-just-created' : undefined}
+        >
+          <DealCard
+            deal={topCard}
+            dark={dark}
+            onTap={() => onDealTap(topCard.id)}
+            onLongPress={onDealLongPress ? () => onDealLongPress(topCard.id) : undefined}
+          />
+        </motion.div>
+      </motion.div>
+
+      {/* Peek cards */}
+      <div style={{ marginTop: PEEK_GAP, display: 'flex', flexDirection: 'column', gap: PEEK_GAP }}>
+        <AnimatePresence initial={false}>
+          {peekCards.map((deal) => (
+            <motion.div
+              key={deal.id}
+              layoutId={`deal-${deal.id}`}
+              initial={{ opacity: 0, y: -8, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.96 }}
+              transition={{ type: 'spring', stiffness: 360, damping: 32 }}
+              style={{ height: PEEK_HEIGHT }}
+            >
+              <DealCard
+                deal={deal}
+                dark={dark}
+                peek
+                onTap={() => promote(deal.id)}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Overflow indicator */}
+      {overflowCount > 0 && (
+        <div
+          style={{
+            marginTop: 14,
+            textAlign: 'center',
+            fontFamily: 'Inter, system-ui',
+            fontSize: 12,
+            fontWeight: 600,
+            color: dark ? 'rgba(240,240,243,0.5)' : 'rgba(26,28,30,0.5)',
+          }}
+        >
+          + {overflowCount} more
+        </div>
+      )}
+
+      {/* Just-created pulse animation — one-off subtle highlight */}
+      <style>{`
+        @keyframes dealJustCreated {
+          0%   { box-shadow: 0 0 0 0 rgba(212,74,120,0.5); }
+          50%  { box-shadow: 0 0 0 18px rgba(212,74,120,0); }
+          100% { box-shadow: 0 0 0 0 rgba(212,74,120,0); }
+        }
+        .deal-just-created > button > div {
+          animation: dealJustCreated 1.6s ease-out 2;
+        }
+      `}</style>
     </div>
   );
 }
 
 /* ═══ EMPTY STATE ═══ */
 
-/**
- * Empty state — a "card-shaped" invitation that matches the Wallet aesthetic
- * of the stack, instead of a generic "nothing here" illustration. Reads as
- * the first, blank, tap-able card the user will ever see. When they act on
- * it, a real DealCard will take its place.
- */
 function EmptyStack({ onStart, dark }: { onStart?: (fill: string) => void; dark: boolean }) {
   const headingColor = dark ? '#F0F0F3' : '#1A1C1E';
   const mutedColor = dark ? 'rgba(240,240,243,0.62)' : 'rgba(26,28,30,0.62)';
@@ -134,7 +232,6 @@ function EmptyStack({ onStart, dark }: { onStart?: (fill: string) => void; dark:
 
   return (
     <div style={{ padding: '16px 16px 140px' }}>
-      {/* Card-shaped onboarding entry — same 20px radius as DealCard */}
       <div
         style={{
           borderRadius: 20,
@@ -146,7 +243,6 @@ function EmptyStack({ onStart, dark }: { onStart?: (fill: string) => void; dark:
             : '0 8px 28px rgba(26,28,30,0.08), 0 2px 6px rgba(26,28,30,0.04)',
         }}
       >
-        {/* Gradient header band — matches DealCard journey color band */}
         <div
           style={{
             height: 56,

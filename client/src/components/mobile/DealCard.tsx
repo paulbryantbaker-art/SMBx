@@ -136,12 +136,15 @@ interface DealCardProps {
   urgency?: Urgency;
   /** Override derived next-action copy */
   nextAction?: string;
+  /** Peek mode — render only the gradient header band + business name (~44px tall).
+   *  Used for cards behind the top of the stack in Wallet-physics mode. */
+  peek?: boolean;
 }
 
 /* ═══ COMPONENT ═══ */
 
 export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function DealCard(
-  { deal, onTap, onLongPress, dark = false, stackIndex = 0, urgency: urgencyProp, nextAction: nextActionProp },
+  { deal, onTap, onLongPress, dark = false, stackIndex = 0, urgency: urgencyProp, nextAction: nextActionProp, peek = false },
   ref,
 ) {
   const journey = (deal.journey_type || 'sell').toLowerCase();
@@ -178,6 +181,77 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
     pressTimer = setTimeout(() => onLongPress(), 500);
   };
   const endPress = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
+
+  // ══ PEEK VARIANT — just the gradient header band with business name overlaid.
+  // Used for cards behind the top of the stack. ~44px tall, keeps stacking feel.
+  if (peek) {
+    return (
+      <button
+        ref={ref}
+        onClick={onTap}
+        type="button"
+        style={{
+          width: '100%',
+          padding: 0,
+          border: 'none',
+          background: 'transparent',
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+          textAlign: 'left',
+          WebkitTapHighlightColor: 'transparent',
+        }}
+        aria-label={`${business} — ${gateLabel}. Tap to bring to front.`}
+      >
+        <div
+          style={{
+            height: 44,
+            borderRadius: 14,
+            overflow: 'hidden',
+            background: `linear-gradient(135deg, ${journeyColor} 0%, ${mix(journeyColor, '#ffffff', 0.25)} 100%)`,
+            border: `1px solid ${surfaceBorder}`,
+            boxShadow: dark ? '0 2px 8px rgba(0,0,0,0.3)' : '0 2px 8px rgba(26,28,30,0.06)',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 14px',
+            gap: 10,
+          }}
+        >
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: URGENCY_COLOR[urgency],
+            boxShadow: '0 0 0 2px rgba(255,255,255,0.9)',
+            flexShrink: 0,
+          }} />
+          <span style={{
+            color: 'rgba(255,255,255,0.95)',
+            fontFamily: 'Sora, system-ui',
+            fontSize: 14,
+            fontWeight: 700,
+            letterSpacing: '-0.01em',
+            flex: 1,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}>
+            {business}
+          </span>
+          <span style={{
+            color: 'rgba(255,255,255,0.88)',
+            fontFamily: 'Inter, system-ui',
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: '0.02em',
+            background: 'rgba(255,255,255,0.18)',
+            padding: '3px 8px',
+            borderRadius: 999,
+            flexShrink: 0,
+          }}>
+            {gateLabel}
+          </span>
+        </div>
+      </button>
+    );
+  }
 
   return (
     <button
