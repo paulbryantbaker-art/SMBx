@@ -34,11 +34,12 @@ interface SidebarProps {
   onNewConversation?: () => void;
 }
 
+// Warm-family palette — teal for buy, ochre for raise, plum for pmi (brand pink for sell).
 const JOURNEY_COLORS: Record<string, string> = {
   sell: '#D44A78',
-  buy: '#4E8FD4',
-  raise: '#6B8F4E',
-  pmi: '#8F6BD4',
+  buy: '#3E8E8E',
+  raise: '#C99A3E',
+  pmi: '#8F4A7A',
 };
 
 function formatShortTime(iso: string): string {

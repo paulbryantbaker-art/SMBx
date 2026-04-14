@@ -41,6 +41,18 @@ function gateRank(gate: string | null): number {
   return GATE_RANK[gate] ?? 99;
 }
 
+/**
+ * Filter out drafts / placeholder deals so the stack only shows real,
+ * user-owned pipeline. A deal is "real" when it has a business_name —
+ * that's the minimum signal that the user actually told Yulia about a
+ * business, not just tapped something and bounced. Without this filter,
+ * empty draft rows show nudges like "Sharpen your acquisition thesis"
+ * even though the user hasn't defined one — card overclaims state.
+ */
+export function filterRealDeals(deals: DealCardData[]): DealCardData[] {
+  return deals.filter(d => d.business_name && d.business_name.trim().length > 0);
+}
+
 export function sortDeals(deals: DealCardData[]): DealCardData[] {
   return [...deals].sort((a, b) => {
     const ua = URGENCY_RANK[deriveUrgency(a)];
@@ -68,7 +80,7 @@ interface DealStackProps {
 /* ═══ COMPONENT ═══ */
 
 export function DealStack({ deals, onDealTap, onStartFirstDeal, dark = false }: DealStackProps) {
-  const sorted = useMemo(() => sortDeals(deals), [deals]);
+  const sorted = useMemo(() => sortDeals(filterRealDeals(deals)), [deals]);
 
   if (sorted.length === 0) {
     return <EmptyStack onStart={onStartFirstDeal} dark={dark} />;

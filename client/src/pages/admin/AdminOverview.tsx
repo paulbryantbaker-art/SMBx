@@ -32,11 +32,12 @@ const GREEN = '#34A853';
 const BLUE = '#4E8FD4';
 const YELLOW = '#FBBC04';
 
+// Warm-family journey palette — see AppShell JOURNEY_COLORS
 const JOURNEY_COLORS: Record<string, string> = {
   sell: TERRA,
-  buy: BLUE,
-  raise: '#6B8F4E',
-  pmi: '#8F6BD4',
+  buy: '#3E8E8E',   // teal (replaces tech-blue)
+  raise: '#C99A3E', // ochre
+  pmi: '#8F4A7A',   // plum
 };
 
 const PLAN_COLORS: Record<string, string> = {

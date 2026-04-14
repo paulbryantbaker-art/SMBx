@@ -14,10 +14,10 @@ import { forwardRef, type CSSProperties } from 'react';
 /* ═══ COLOR + LABEL MAPS ═══ */
 
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#D44A78',
-  buy: '#4E8FD4',
-  raise: '#6B8F4E',
-  pmi: '#8F6BD4',
+  sell: '#D44A78', // brand pink — unchanged
+  buy: '#3E8E8E',  // muted teal — warmer counterpoint than tech-blue
+  raise: '#C99A3E', // warm ochre — reads as capital / gold
+  pmi: '#8F4A7A',  // plum — warmer purple, rhymes with brand pink
 };
 
 const JOURNEY_LABEL: Record<string, string> = {
