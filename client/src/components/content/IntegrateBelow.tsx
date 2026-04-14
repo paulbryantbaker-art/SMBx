@@ -139,7 +139,7 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
           This playbook works at any scale. Whether you just closed a $90M acquisition like Anna, a $15M search-fund target, or
           a $3M SBA deal, the risks are the same — covenant headroom, employee flight, customer churn, reporting gaps.
           The fix is the same too: a day-by-day plan, relentless monitoring, and decisions audited before they ship.
-          <strong style={{ color: accent }}> Free for verified deal professionals — attorneys, CPAs, sponsors.</strong>
+          <strong style={{ color: accent }}> The attorneys, CPAs, and lender counsel on your deal run free when they join the workflow.</strong>
         </p>
 
         {/* ═══ Anna's Story ═══ */}
@@ -323,7 +323,7 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
         {/* ═══ CTA ═══ */}
         <PageCTA
           headline={<>Build your 180-day plan.</>}
-          sub="Whether you just closed a $3M SBA deal or a $90M search-fund acquisition, the risks are the same: covenant headroom, employee flight, customer churn, reporting gaps. Bring Yulia your deal financials and your DD report — she'll build the day-by-day plan, monitor the KPIs, and force decisions before the cliff."
+          sub="Whether you just closed a $3M SBA deal or a $90M search-fund acquisition, the risks are the same: covenant headroom, employee flight, customer churn, reporting gaps. Bring Yulia your deal financials and your DD report — she'll build the day-by-day plan, monitor the KPIs, and force decisions before the cliff. Your attorney, CPA, and deal counsel run free when they join the integration workflow."
           buttonLabel="Build my plan"
           onClick={() =>
             bridgeToYulia(

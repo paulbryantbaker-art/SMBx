@@ -362,8 +362,8 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
         <PageCTA
           headline={audience === 'owner' ? <>Protect your equity.</> : <>Complete your stack.</>}
           sub={audience === 'owner'
-            ? "Tell Yulia what you're financing and how much you need. She'll model senior debt, mezz, and seller note side-by-side against PE equity — so you can see exactly what each option costs in founder ownership."
-            : "Tell Yulia the deal, the LP commitments, and the gap. She'll build the five-layer stack, model DSCR at proposed leverage, and draft the LP pitch from the same numbers — in one conversation."
+            ? "Tell Yulia what you're financing and how much you need. She'll model senior debt, mezz, and seller note side-by-side against PE equity — so you can see exactly what each option costs in founder ownership. Your attorney, CPA, and lender counsel run free when they join the deal."
+            : "Tell Yulia the deal, the LP commitments, and the gap. She'll build the five-layer stack, model DSCR at proposed leverage, and draft the LP pitch from the same numbers — in one conversation. Your deal counsel and CPA run free when they join the workflow."
           }
           buttonLabel={audience === 'owner' ? 'Model my options' : 'Build my stack'}
           onClick={() => bridgeToYulia(

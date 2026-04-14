@@ -321,7 +321,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
         {/* ═══ CTA ═══ */}
         <PageCTA
           headline={<>Run The Rundown on a deal.</>}
-          sub="Bring Yulia a listing URL, a CIM excerpt, or a one-line description — from a $1M SBA target to a $500M sponsor deal. She returns a verdict in eight seconds and a cap-stack model in two minutes."
+          sub="Bring Yulia a listing URL, a CIM excerpt, or a one-line description — from a $1M SBA target to a $500M sponsor deal. She returns a verdict in eight seconds and a cap-stack model in two minutes. Your attorney, CPA, and appraiser run free when they join the deal — they're on your deal, not their own book."
           buttonLabel="Run The Rundown"
           onClick={() =>
             bridgeToYulia(

@@ -271,7 +271,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           <span className="font-bold" style={{ color: accent }}>Anna J.</span> runs Professional.{' '}
           <span className="font-bold" style={{ color: accent }}>Reese & Hammond</span> runs Practice for the partners.{' '}
           <span className="font-bold" style={{ color: accent }}>Ed K.'s</span> deal team runs Firm. The bulge bracket ones run Institutional.
-          And every attorney, CPA, broker, and wealth manager on the platform runs free, forever.
+          And every attorney, CPA, real-estate broker, appraiser, and wealth manager who joins a deal workflow runs free — they\u2019re on someone else\u2019s deal, not their own book.
         </p>
 
         {/* ═══ ChatGPT vs Yulia — the actual differentiator ═══ */}
@@ -664,13 +664,14 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                 ),
               },
               {
-                q: "I'm an attorney, CPA, or other deal professional. What do I pay?",
+                q: "I'm an attorney, CPA, appraiser, or other service professional. What do I pay?",
                 a: (
                   <>
-                    <strong>Nothing.</strong> Verified deal professionals — attorneys, CPAs, real estate brokers, wealth managers,
-                    appraisers, insurance brokers, estate planners — get full Professional features for free, forever. Your clients
-                    pay their own subscription if they engage the platform directly. Tell Yulia you're a deal pro at the start of
-                    the conversation and she works with you peer-to-peer — no retail onboarding, no hand-holding, just the tooling.
+                    <strong>Nothing when you're on someone else's deal.</strong> Attorneys, CPAs, real-estate brokers, wealth
+                    managers, appraisers, insurance brokers, and estate planners run free on any deal workflow their client
+                    brings them onto — it's your client's deal, not your book. Tell Yulia you're a service professional on the
+                    deal and she works with you peer-to-peer. M&amp;A advisors, brokers, sponsors, and PE deal teams (the
+                    practices that run <em>their own</em> deals on Yulia) use the advisor plans — see the tier cards above.
                   </>
                 ),
               },

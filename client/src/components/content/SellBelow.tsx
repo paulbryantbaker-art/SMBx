@@ -53,7 +53,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
       {
         question: 'Are deal professionals really free?',
         answer:
-          'Yes. Verified M&A advisors, brokers, attorneys, CPAs, real estate brokers, wealth managers, and appraisers get full Pro features for free, forever. Your sellers pay their own subscription if they engage the platform directly. Tell Yulia you are a deal pro at the start of the conversation and she works with you peer-to-peer — no retail onboarding, no hand-holding, just the tooling.',
+          'The service professionals who join your deal — attorneys, CPAs, real estate brokers, wealth managers, and appraisers — run free on the platform. They\u2019re on your deal, not their own book. M&A advisors and business brokers pay for the platform themselves (that\u2019s the product running their practice); see the pricing page for advisor plans. Sellers pay their own subscription if they engage Yulia directly.',
       },
     ],
   });
@@ -93,7 +93,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
         >
           Built for brokers, M&amp;A advisors, search funders, and family-office deal teams running sell-side mandates — and for business owners
           preparing for their first buyer conversation. Most owners discover their business is worth 20–50% more than their CPA's rule of thumb.
-          Most brokers win the mandate they would have lost walking in empty-handed. <strong style={{ color: accent }}>Verified deal professionals are free, forever.</strong>
+          Most brokers win the mandate they would have lost walking in empty-handed. <strong style={{ color: accent }}>The attorneys, CPAs, and appraisers on your deal run free — they're on your deal, not their own book.</strong>
         </p>
 
         {/* ═══ Multiple Map — leads (cool, sexy, click-to-position) ═══ */}
@@ -333,7 +333,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
         {/* ═══ CTA ═══ */}
         <PageCTA
           headline={<>Get the number before the meeting.</>}
-          sub="Tell Yulia about the business. She'll build the Baseline, find the Blind Equity, and hand you the add-back schedule to walk in with — whether you're a broker pitching for the mandate or an owner meeting a buyer. Verified deal professionals are free, forever."
+          sub="Tell Yulia about the business. She'll build the Baseline, find the Blind Equity, and hand you the add-back schedule to walk in with — whether you're a broker pitching for the mandate or an owner meeting a buyer. Your CPA, attorney, and appraiser run free when they join the deal."
           buttonLabel="Run a Baseline"
           onClick={() => bridgeToYulia(
             "Run a Baseline on a business. It's in [industry] with about $XM EBITDA. Walk me through the Multiple Map and the add-back schedule."

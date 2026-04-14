@@ -48,9 +48,9 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           'Solo advisors typically handle 6-8 active mandates; Yulia unlocks 18-22 because each mandate needs hours not weeks of analyst work. On a $12-18M average close-fee practice, that\u2019s a $4-10M revenue difference at roughly the same partner hours. For teams, Yulia replaces the junior analyst workload — more mandates per partner without proportional hires. Either way the margin profile moves from ~60% to ~78%.',
       },
       {
-        question: 'Are verified deal professionals really free, forever?',
+        question: 'What does Yulia cost for an advisory practice?',
         answer:
-          'Yes. Verified M&A advisors, brokers, fundless sponsors, search-fund advisors, family-office deal teams, and small PE shops get full Professional features free — forever. Your clients pay their own subscription if they engage the platform directly. Tell Yulia you\u2019re a deal pro at the start of the conversation and she works with you peer-to-peer — no retail onboarding, no hand-holding. (Attorneys, CPAs, and other service professionals also run free when they appear on a deal workflow — they just aren\u2019t the primary audience of this page.)',
+          'Advisors pay for the platform — we\u2019re the tool your practice runs on. Plans scale with the team and the deal cadence; see the pricing page for the current tiers. Start free, upgrade when the math works. What IS free: attorneys, CPAs, appraisers, and other professional services who join your deal workflow. They\u2019re on your deal, not their own book — no seat charge, no subscription. Tell Yulia you\u2019re a deal pro at the start of the conversation and she works with you peer-to-peer.',
       },
     ],
   });
@@ -176,29 +176,28 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           accent={accent}
         />
 
-        {/* ═══ Free-for-pros callout — the biggest value prop for this audience,
-             surfaced above the fold instead of buried in the FAQ. ═══ */}
+        {/* ═══ How the pricing works for advisors — honest and direct. ═══ */}
         <div
           className="rounded-2xl mb-20 p-6 md:p-8 max-w-4xl"
           style={{
-            background: dark ? 'rgba(232,112,154,0.10)' : 'rgba(212,74,120,0.06)',
-            border: dark ? '1px solid rgba(232,112,154,0.24)' : '1px solid rgba(212,74,120,0.18)',
+            background: dark ? 'rgba(232,112,154,0.08)' : 'rgba(212,74,120,0.05)',
+            border: dark ? '1px solid rgba(232,112,154,0.22)' : '1px solid rgba(212,74,120,0.16)',
           }}
         >
           <div
             className="text-[10px] font-bold uppercase mb-3"
             style={{ color: accent, letterSpacing: '0.18em' }}
           >
-            smbx.ai · verified deal professionals
+            smbx.ai · advisor pricing
           </div>
           <p
             className="text-[16px] md:text-[17px] leading-relaxed"
             style={{ color: headingColor }}
           >
-            <strong>Free. Forever.</strong> M&amp;A advisors, brokers, fundless sponsors, search-fund advisors, family-office
-            deal teams, and small PE shops get full Professional features at no cost, for as long as you use the platform.
-            Your clients pay their own subscription if they engage directly — we don't make it free for them through you.
-            No trial clock. No per-deal fees. Your relationships stay yours.
+            You pay for the platform. Your clients don't — unless they engage Yulia directly.
+            The attorneys, CPAs, appraisers, and other professional services who join your deal workflow run free
+            (they're on your deal, not their own book). See the pricing page for current advisor plans — start free,
+            upgrade when the math works.
           </p>
         </div>
 
@@ -486,7 +485,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
         {/* ═══ CTA ═══ */}
         <PageCTA
           headline={<>Win your next pitch.</>}
-          sub="Verified M&A advisors, brokers, fundless sponsors, search-fund advisors, and PE deal teams stay free, forever. Run a real client engagement before you commit. Walk in with a defensible Baseline. Draft a CIM in four hours. See the pipeline. Your relationships stay yours."
+          sub="Start free. Run a real client engagement before you commit. Walk in with a defensible Baseline. Draft a CIM in four hours. See the pipeline. The attorneys, CPAs, and appraisers who join your deal run free — they're on your deal, not their own book. Your relationships stay yours."
           buttonLabel="Start now — free"
           onClick={() =>
             bridgeToYulia(
