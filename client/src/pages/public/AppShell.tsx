@@ -770,6 +770,22 @@ export default function AppShell() {
     if (tab !== activeTab && viewState === 'landing') setActiveTab(tab);
   }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // iOS Safari bfcache recovery — when the user swipes back to a cached page,
+  // React state is restored from the snapshot (not re-derived from localStorage).
+  // If they signed in/out between snapshots, the UI lies. Force a soft reload
+  // when bfcache restore is detected so the auth + chat hooks re-read the
+  // current source of truth.
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        // Hard reload: cheap, correct, prevents the "swipe back → signed out" illusion.
+        window.location.reload();
+      }
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, []);
+
   // Browser back/forward
   useEffect(() => {
     const onPopState = (e: PopStateEvent) => {
@@ -2601,7 +2617,8 @@ export default function AppShell() {
           open={signInSheetOpen}
           onOpenChange={setSignInSheetOpen}
           dark={dark}
-          onSignIn={() => { window.location.href = '/login'; }}
+          onSignIn={() => navigate('/login')}
+          onSignUp={() => navigate('/signup')}
         />
       )}
 
