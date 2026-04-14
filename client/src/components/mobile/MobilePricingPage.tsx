@@ -44,9 +44,11 @@ export function MobilePricingPage({ open, onOpenChange, dark, onTalkToYulia }: P
         callout={
           <>
             <strong style={{ color: pinkC }}>Free</strong> · unlimited Yulia chat + 1 deliverable.{' '}
-            <strong style={{ color: headingC }}>$49/mo Starter</strong> · unlimited deliverables.{' '}
-            <strong style={{ color: headingC }}>$149/mo Pro</strong> · adds CIM, deal room, sourcing.{' '}
-            <strong style={{ color: headingC }}>$999/mo Enterprise</strong> · everything, multi-seat.
+            <strong style={{ color: headingC }}>$49 Single deal</strong>.{' '}
+            <strong style={{ color: headingC }}>$199 Multi-deal</strong> (most chosen).{' '}
+            <strong style={{ color: headingC }}>$399 Team</strong> · 5 seats.{' '}
+            <strong style={{ color: headingC }}>$1,999 Firm</strong> · unlimited seats + SSO.{' '}
+            <strong style={{ color: headingC }}>$6,999 Institutional</strong> · API + SLA.
           </>
         }
       />

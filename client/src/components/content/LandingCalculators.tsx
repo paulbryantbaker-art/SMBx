@@ -506,7 +506,7 @@ export function AdvisorROICalc({ dark }: { dark?: boolean }) {
   const currentRevenue = dealsPerYear * avgCommission;
   const withYulia = Math.round(dealsPerYear * 3.5) * avgCommission; // 3-4x leverage
   const gain = withYulia - currentRevenue;
-  const cost = 149 * 12; // annual Professional cost
+  const cost = 199 * 12; // annual Multi-deal cost
 
   const fmt = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : `$${(n / 1_000).toFixed(0)}K`;
 
@@ -541,7 +541,7 @@ export function AdvisorROICalc({ dark }: { dark?: boolean }) {
       <MagneticButton
         onClick={() => bridgeToYulia(
           `I'm an advisor closing ${dealsPerYear} deals per year at ${fmt(avgCommission)} average commission. ` +
-          `I'd like to try the Professional plan and see how Yulia can help me scale my practice.`
+          `I'd like to try the Multi-deal plan and see how Yulia can help me scale my practice.`
         )}
         className="w-full mt-4 px-6 py-3.5 bg-gradient-to-r from-[#D44A78] to-[#E8709A] text-white rounded-full font-bold text-sm hover:scale-[1.02] transition-all shadow-md border-none cursor-pointer"
       >
@@ -573,8 +573,8 @@ export function CostSavingsCalc({ dark }: { dark?: boolean }) {
     : 200_000 + (dealSize - 3_000_000) * 0.04;
   const advisoryTotal = advisoryRetainer + advisorySuccess;
 
-  // smbx: $149/mo × 12 months avg deal
-  const smbxTotal = 149 * 12;
+  // smbx: $199/mo Multi-deal × 12 months
+  const smbxTotal = 199 * 12;
   const savings = ibTotal - smbxTotal;
 
   const fmt = (n: number) => n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : `$${(n / 1_000).toFixed(0)}K`;
@@ -603,7 +603,7 @@ export function CostSavingsCalc({ dark }: { dark?: boolean }) {
             <span className={`font-bold text-lg tabular-nums line-through ${dark ? 'text-[#dadadc]/40' : 'text-[#5d5e61]/40'}`}>{fmt(advisoryTotal)}</span>
           </div>
           <div className="flex justify-between items-center p-4 rounded-xl bg-[#D44A78]/10 border border-[#D44A78]/20">
-            <span className="text-sm font-bold text-[#D44A78]">smbx.ai Professional</span>
+            <span className="text-sm font-bold text-[#D44A78]">smbx.ai Multi-deal</span>
             <span className="font-black text-lg tabular-nums text-[#D44A78]">${smbxTotal.toLocaleString()}/yr</span>
           </div>
         </div>
