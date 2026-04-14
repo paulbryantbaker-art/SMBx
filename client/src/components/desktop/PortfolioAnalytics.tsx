@@ -186,41 +186,75 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
 
   return (
     <div style={{ padding: 20, overflowY: 'auto', height: '100%' }}>
-      {/* Top row — KPI cards */}
+      {/* Hero KPI — Pipeline value as the dominant stat, secondary metrics
+          live as a row of pill-style metadata below. Kills the 4-identical-
+          cards AI-slop pattern while keeping the same data surface. */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: 16,
+        ...cardStyle,
+        padding: '28px 32px',
         marginBottom: 20,
+        position: 'relative',
+        overflow: 'hidden',
       }}>
-        <KpiCard
-          label="Pipeline value"
-          value={formatMoney(stats.totalValue)}
-          hint={`${stats.total} active ${stats.total === 1 ? 'deal' : 'deals'}`}
-          accent={pink}
-          dark={dark}
-        />
-        <KpiCard
-          label="Needs your attention"
-          value={`${stats.stuckCount + stats.needsYouCount}`}
-          hint={stats.stuckCount > 0 ? `${stats.stuckCount} stuck · ${formatMoney(stats.stuckValue)} at risk` : `${stats.needsYouCount} waiting`}
-          accent={stats.stuckCount > 0 ? '#D44A4A' : '#C99A3E'}
-          dark={dark}
-        />
-        <KpiCard
-          label="Avg time in motion"
-          value={`${stats.avgAge}d`}
-          hint={stats.avgStale > 7 ? `Last activity ~${stats.avgStale}d ago` : `Cooking steadily`}
-          accent="#3E8E8E"
-          dark={dark}
-        />
-        <KpiCard
-          label="Archived"
-          value={`${stats.archived}`}
-          hint={stats.archived === 0 ? 'Clean book' : 'Closed or paused'}
-          accent={muted}
-          dark={dark}
-        />
+        <div aria-hidden style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, height: 3,
+          background: `linear-gradient(to right, ${pink}, transparent 88%)`,
+        }} />
+        <div style={{ display: 'flex', alignItems: 'flex-end', flexWrap: 'wrap', gap: 32 }}>
+          <div style={{ minWidth: 240 }}>
+            <div style={{
+              fontFamily: "'Sora', system-ui, sans-serif",
+              fontSize: 10, fontWeight: 800,
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              color: muted, marginBottom: 8,
+            }}>
+              Pipeline value
+            </div>
+            <div style={{
+              fontFamily: "'Sora', system-ui, sans-serif",
+              fontSize: 'clamp(36px, 5vw, 56px)',
+              fontWeight: 800, letterSpacing: '-0.03em',
+              color: heading, lineHeight: 1,
+            }}>
+              {formatMoney(stats.totalValue)}
+            </div>
+            <div style={{
+              marginTop: 10,
+              fontFamily: "'Inter', system-ui, sans-serif",
+              fontSize: 13, color: body,
+            }}>
+              Across <strong style={{ color: heading }}>{stats.total}</strong> active {stats.total === 1 ? 'deal' : 'deals'}
+              {stats.stuckCount + stats.needsYouCount > 0 && (
+                <> · <span style={{ color: stats.stuckCount > 0 ? '#D44A4A' : '#C99A3E', fontWeight: 600 }}>{stats.stuckCount + stats.needsYouCount} need attention</span></>
+              )}
+            </div>
+          </div>
+          {/* Secondary metrics — inline pills, not cards */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, flex: 1 }}>
+            <SecondaryStat
+              label="Needs attention"
+              value={`${stats.stuckCount + stats.needsYouCount}`}
+              sub={stats.stuckCount > 0 ? `${formatMoney(stats.stuckValue)} at risk` : stats.needsYouCount > 0 ? `${stats.needsYouCount} waiting` : 'All clear'}
+              tone={stats.stuckCount > 0 ? '#D44A4A' : stats.needsYouCount > 0 ? '#C99A3E' : '#2F7A4E'}
+              dark={dark}
+            />
+            <SecondaryStat
+              label="Avg time in motion"
+              value={`${stats.avgAge}d`}
+              sub={stats.avgStale > 7 ? `Last activity ~${stats.avgStale}d ago` : 'Cooking steadily'}
+              tone="#3E8E8E"
+              dark={dark}
+            />
+            <SecondaryStat
+              label="Archived"
+              value={`${stats.archived}`}
+              sub={stats.archived === 0 ? 'Clean book' : 'Closed or paused'}
+              tone={muted}
+              dark={dark}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Middle row — breakdowns */}
@@ -378,46 +412,41 @@ function sectionHeadStyle(muted: string): React.CSSProperties {
   };
 }
 
-function KpiCard({
-  label, value, hint, accent, dark,
-}: { label: string; value: string; hint: string; accent: string; dark: boolean }) {
+function SecondaryStat({
+  label, value, sub, tone, dark,
+}: { label: string; value: string; sub: string; tone: string; dark: boolean }) {
   const heading = dark ? '#F0F0F3' : '#1A1C1E';
   const muted = dark ? 'rgba(240,240,243,0.55)' : '#6B6C6F';
-  const borderC = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
+  const border = dark ? 'rgba(255,255,255,0.06)' : '#E5E1D9';
   return (
     <div style={{
-      background: dark ? '#151617' : '#FFFFFF',
-      border: `1px solid ${borderC}`,
-      borderRadius: 14,
-      padding: 20,
-      position: 'relative',
-      overflow: 'hidden',
-      boxShadow: dark
-        ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
-        : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 2,
+      padding: '10px 14px 10px 16px',
+      borderRadius: 12,
+      background: dark ? 'rgba(255,255,255,0.02)' : 'rgba(15,16,18,0.015)',
+      border: `1px solid ${border}`,
+      borderLeft: `3px solid ${tone}`,
+      minWidth: 150,
     }}>
-      <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, height: 3, width: '100%', background: accent, opacity: 0.75 }} />
-      <div style={{
+      <span style={{
         fontFamily: "'Sora', system-ui, sans-serif",
-        fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
-        color: muted, marginBottom: 6,
-      }}>
-        {label}
-      </div>
-      <div style={{
+        fontSize: 9, fontWeight: 800,
+        letterSpacing: '0.08em', textTransform: 'uppercase',
+        color: muted,
+      }}>{label}</span>
+      <span style={{
         fontFamily: "'Sora', system-ui, sans-serif",
-        fontSize: 28, fontWeight: 800, letterSpacing: '-0.02em',
-        color: heading, lineHeight: 1.1,
-      }}>
-        {value}
-      </div>
-      <div style={{
-        marginTop: 6,
+        fontSize: 22, fontWeight: 800,
+        letterSpacing: '-0.02em',
+        color: heading,
+        lineHeight: 1.1,
+      }}>{value}</span>
+      <span style={{
         fontFamily: "'Inter', system-ui, sans-serif",
-        fontSize: 12, color: muted, lineHeight: 1.4,
-      }}>
-        {hint}
-      </div>
+        fontSize: 11, color: muted,
+      }}>{sub}</span>
     </div>
   );
 }
