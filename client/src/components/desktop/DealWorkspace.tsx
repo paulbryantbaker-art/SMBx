@@ -89,13 +89,21 @@ const cardChrome = (dark: boolean): React.CSSProperties => ({
   minWidth: 0,
 });
 
+const LS_DW_TAB = 'smbx-deal-workspace-tab';
+
 export default function DealWorkspace({
   deal, dark, currentUserEmail,
   onContinueChat, onOpenDeliverable, onOpenDataRoom, onBack,
 }: Props) {
-  const [centerTab, setCenterTab] = useState<CenterTab>('overview');
+  const [centerTab, setCenterTab] = useState<CenterTab>(() => {
+    const saved = typeof window !== 'undefined' ? (localStorage.getItem(LS_DW_TAB) as CenterTab) : null;
+    return saved === 'documents' || saved === 'team' || saved === 'overview' ? saved : 'overview';
+  });
   const [deliverables, setDeliverables] = useState<Deliverable[] | null>(null);
   const [deliverablesError, setDeliverablesError] = useState<string | null>(null);
+  const [deliverablesRefresh, setDeliverablesRefresh] = useState(0);
+
+  useEffect(() => { localStorage.setItem(LS_DW_TAB, centerTab); }, [centerTab]);
 
   const primaryConvId = deal?.conversations?.[0]?.id ?? null;
   const dealId = deal?.id ?? null;
@@ -115,7 +123,7 @@ export default function DealWorkspace({
       })
       .catch(err => { if (!cancelled) setDeliverablesError(err.message || 'Couldn\u2019t load artifacts'); });
     return () => { cancelled = true; };
-  }, [dealId]);
+  }, [dealId, deliverablesRefresh]);
 
   /* ───────── Not found ───────── */
   if (!deal) {
@@ -475,13 +483,40 @@ export default function DealWorkspace({
               marginBottom: 8,
             }}>Recent artifacts</div>
             {!deliverables && !deliverablesError && (
-              <div style={{ fontSize: 12, color: muted, fontFamily: "'Inter', system-ui, sans-serif", padding: '8px 0' }}>
-                Loading…
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {[0, 1, 2].map(i => (
+                  <div
+                    key={i}
+                    style={{
+                      height: 44,
+                      borderRadius: 10,
+                      background: dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.04)',
+                      border: `1px solid ${border}`,
+                      animation: 'dwSkel 1.4s ease-in-out infinite',
+                    }}
+                  />
+                ))}
               </div>
             )}
             {deliverablesError && (
               <div style={{ fontSize: 12, color: muted, fontFamily: "'Inter', system-ui, sans-serif", padding: '8px 0' }}>
-                Couldn&rsquo;t load artifacts.
+                Couldn&rsquo;t load artifacts.{' '}
+                <button
+                  onClick={() => setDeliverablesRefresh(n => n + 1)}
+                  type="button"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: journeyColor,
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    padding: 0,
+                    fontFamily: 'inherit',
+                    fontSize: 'inherit',
+                  }}
+                >
+                  Try again
+                </button>
               </div>
             )}
             {deliverables && deliverables.length === 0 && (
@@ -533,6 +568,7 @@ export default function DealWorkspace({
       <style>{`
         .deal-workspace-conv:hover { background: ${dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.03)'} !important; }
         .deal-workspace-back:hover { background: ${dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.04)'} !important; }
+        @keyframes dwSkel { 0%,100% { opacity: 0.5 } 50% { opacity: 0.9 } }
         @media (max-width: 1180px) {
           .deal-workspace-grid {
             grid-template-columns: minmax(320px, 380px) minmax(440px, 1fr) !important;
