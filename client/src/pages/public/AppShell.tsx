@@ -31,7 +31,8 @@ import SourcingPanel from '../../components/chat/SourcingPanel';
 import IntelPanel from '../../components/chat/IntelPanel';
 import DealMessagesPanel from '../../components/documents/DealMessagesPanel';
 import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/CanvasToolbar';
-import FloatingTabBar from '../../components/canvas/FloatingTabBar';
+import CanvasTabStrip from '../../components/canvas/CanvasTabStrip';
+import DesktopAccountMenu from '../../components/desktop/DesktopAccountMenu';
 import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
@@ -57,6 +58,7 @@ import { AccountSheet } from '../../components/mobile/AccountSheet';
 import { SignInSheet } from '../../components/mobile/SignInSheet';
 import { DealActionsSheet } from '../../components/mobile/DealActionsSheet';
 import { ToastHost } from '../../components/mobile/ToastHost';
+import { showToast } from '../../lib/toast';
 import { HelpSheet } from '../../components/mobile/HelpSheet';
 import { ConfirmHost } from '../../components/mobile/ConfirmHost';
 import { DealContextChips } from '../../components/mobile/DealContextChips';
@@ -1112,36 +1114,38 @@ export default function AppShell() {
   }, [openCanvasTab]);
 
   // ─── Canvas Toolbar Actions — context-aware floating toolbar ──
+  // Only ship actions that actually do something. Phantom buttons erode trust.
   const getToolbarActionsFor = (tab: { id: string; type: string; label: string; props?: Record<string, any> }): ToolbarAction[] => {
+    const shareCurrent = (label: string) => {
+      const url = window.location.href;
+      const nav: any = navigator;
+      if (typeof nav.share === 'function') {
+        nav.share({ title: label, url }).catch(() => {});
+        return;
+      }
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url)
+          .then(() => showToast('Link copied', { tone: 'success' }))
+          .catch(() => showToast('Couldn\u2019t copy link', { tone: 'error' }));
+      }
+    };
     switch (tab.type) {
       case 'deliverable':
         return [
-          { id: 'edit', label: 'Edit', icon: 'edit', onClick: () => { /* TODO: open editor */ } },
           { id: 'export', label: 'Export', icon: 'download', onClick: () => {
             const id = tab.props?.deliverableId;
             if (id) window.open(`/api/deliverables/${id}/export?format=pdf`, '_blank');
-          }, divider: true },
-          { id: 'share', label: 'Share', icon: 'share', onClick: () => { /* TODO: share modal */ } },
-        ];
-      case 'model':
-        return [
-          { id: 'reset', label: 'Reset', icon: 'restart_alt', onClick: () => { /* TODO: reset model */ } },
-          { id: 'compare', label: 'Compare', icon: 'compare_arrows', onClick: () => { /* TODO: compare scenarios */ }, divider: true },
-          { id: 'export', label: 'Export', icon: 'download', onClick: () => { /* TODO: export model */ } },
+          } },
+          { id: 'share', label: 'Share', icon: 'share', onClick: () => shareCurrent(tab.label), divider: true },
         ];
       case 'markdown':
         return [
           { id: 'copy', label: 'Copy', icon: 'content_copy', onClick: () => {
             if (tab.props?.content) navigator.clipboard.writeText(tab.props.content);
           } },
-          { id: 'export', label: 'Export', icon: 'download', onClick: () => { /* TODO: export markdown */ }, divider: true },
         ];
-      case 'dataroom':
-        return [
-          { id: 'upload', label: 'Upload', icon: 'upload_file', onClick: () => { /* TODO: trigger upload */ }, primary: true },
-          { id: 'invite', label: 'Invite', icon: 'person_add', onClick: () => { /* TODO: invite */ }, divider: true },
-        ];
-      // Panels with their own internal controls (Library, Pipeline, Sourcing, Settings) — no floating toolbar
+      // Panels with their own internal controls (Library, Pipeline, Sourcing, Settings, Models, Dataroom)
+      // — no floating toolbar. Model export/reset/compare ship in Sprint 5 (Model Canvas upgrade).
       default:
         return [];
     }
@@ -2228,7 +2232,15 @@ export default function AppShell() {
             >
               {canvasTabs.length > 0 ? (
                 <>
-                  {/* Floating toolbar — appears for tab types that need actions */}
+                  {/* Always-visible tab strip — every open tab is recognizable at a glance */}
+                  <CanvasTabStrip
+                    tabs={canvasTabs}
+                    activeTabId={activeCanvasTabId}
+                    onSelect={setActiveCanvasTabId}
+                    onClose={closeCanvasTab}
+                    dark={dark}
+                  />
+                  {/* Floating contextual toolbar — only when the active tab has real actions */}
                   {activeCanvasTab && (() => {
                     const actions = getToolbarActionsFor(activeCanvasTab);
                     return actions.length > 0 ? <CanvasToolbar actions={actions} dark={dark} /> : null;
@@ -2241,21 +2253,6 @@ export default function AppShell() {
                       </div>
                     ))}
                   </div>
-                  {/* Floating tab bar — content tabs only, hover-near to show */}
-                  {(() => {
-                    const PANEL_TYPES = new Set(['pipeline', 'dataroom', 'documents', 'sourcing', 'settings', 'seller-dashboard', 'buyer-pipeline']);
-                    const contentTabs = canvasTabs.filter(t => !PANEL_TYPES.has(t.type));
-                    return (
-                      <FloatingTabBar
-                        tabs={contentTabs}
-                        activeTabId={activeCanvasTabId}
-                        onSelect={setActiveCanvasTabId}
-                        onClose={closeCanvasTab}
-                        containerRef={canvasCardRef}
-                        dark={dark}
-                      />
-                    );
-                  })()}
                 </>
               ) : !user ? (
                 /* Logged-out: render the active journey page in the canvas */
@@ -2600,12 +2597,25 @@ export default function AppShell() {
         />
       )}
 
-      {/* ═══ MOBILE HELP SHEET — Yulia overview + M&A glossary ═══ */}
-      {isMobile && (
-        <HelpSheet
-          open={helpSheetOpen}
-          onOpenChange={setHelpSheetOpen}
+      {/* ═══ HELP SHEET — Yulia overview + M&A glossary. Mobile: bottom sheet. Desktop: same sheet for now,
+           will upgrade to centered modal in Sprint 10 polish. ═══ */}
+      <HelpSheet
+        open={helpSheetOpen}
+        onOpenChange={setHelpSheetOpen}
+        dark={dark}
+      />
+
+      {/* ═══ DESKTOP ACCOUNT MENU — top-right avatar (signed-in) / Sign-in pill (signed-out) / skeleton (loading) ═══ */}
+      {!isMobile && (
+        <DesktopAccountMenu
+          loading={authLoading}
+          user={user}
           dark={dark}
+          onSignIn={() => navigate('/login')}
+          onToggleDark={() => setDark(!dark)}
+          onOpenSettings={() => openCanvasTab('settings', 'Settings')}
+          onOpenHelp={() => setHelpSheetOpen(true)}
+          onSignOut={handleLogout}
         />
       )}
 
@@ -2620,11 +2630,12 @@ export default function AppShell() {
         />
       )}
 
-      {/* ═══ MOBILE TOAST HOST — singleton, lifts above the portaled chat pill ═══ */}
-      {isMobile && <ToastHost />}
+      {/* ═══ TOAST HOST — singleton, lifts above the portaled mobile chat pill (120px) or desktop floor (24px) ═══ */}
+      <ToastHost bottomOffset={isMobile ? 110 : 24} />
 
-      {/* ═══ MOBILE CONFIRM HOST — singleton sheet for destructive-action confirms ═══ */}
-      {isMobile && <ConfirmHost dark={dark} />}
+      {/* ═══ CONFIRM HOST — singleton, desktop + mobile. Renders as Vaul bottom sheet either way for now;
+           Sprint 10 polish will upgrade to a centered modal on desktop. ═══ */}
+      <ConfirmHost dark={dark} />
 
       {/* ═══ MOBILE DEAL ACTIONS SHEET — long-press on a deal card opens this ═══ */}
       {isMobile && user && (
