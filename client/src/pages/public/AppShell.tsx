@@ -51,6 +51,7 @@ import { isStandalone } from '../../lib/pwa';
 import { NextActionsCards } from '../../components/mobile/NextActionsCards';
 import { DealStack, filterRealDeals } from '../../components/mobile/DealStack';
 import { ArtifactSheet } from '../../components/mobile/ArtifactSheet';
+import { AccountSheet } from '../../components/mobile/AccountSheet';
 import { DealContextChips } from '../../components/mobile/DealContextChips';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
@@ -906,6 +907,9 @@ export default function AppShell() {
     content: string;
     type: string;
   } | null>(null);
+
+  // Mobile account sheet state — replaces the hamburger for user/settings access.
+  const [accountSheetOpen, setAccountSheetOpen] = useState(false);
 
   // Handler: open deliverable from chat message click.
   // Desktop → canvas tab. Mobile → Vaul ArtifactSheet.
@@ -2444,6 +2448,22 @@ export default function AppShell() {
         />
       )}
 
+      {/* ═══ MOBILE ACCOUNT SHEET — replaces the hamburger menu ═══ */}
+      {isMobile && user && (
+        <AccountSheet
+          open={accountSheetOpen}
+          onOpenChange={setAccountSheetOpen}
+          dark={dark}
+          user={{
+            display_name: user.display_name,
+            email: user.email,
+            plan: (user as any).plan,
+          }}
+          onToggleDark={() => setDark(!dark)}
+          onSignOut={handleLogout}
+        />
+      )}
+
       {/* ═══ MOBILE ARTIFACT SHEET — Vaul full-screen viewer for Yulia deliverables ═══ */}
       {isMobile && (
         <ArtifactSheet
@@ -2680,9 +2700,38 @@ export default function AppShell() {
       )}
 
       {/* Mobile hamburger removed per Wallet-home plan — deals live on the home
-          surface, not in a drawer menu. Admin actions (sign out, theme toggle,
-          etc.) will move into Yulia chat commands over time. See
-          memory/feedback_lean_into_ios.md for the philosophy. */}
+          surface, not in a drawer menu. Account actions (sign out, dark mode,
+          subscription, settings) now accessible via the top-right avatar button
+          below → AccountSheet (Vaul). Only rendered when user is logged in. */}
+      {isMobile && user && (
+        <button
+          onClick={() => setAccountSheetOpen(true)}
+          type="button"
+          aria-label="Account"
+          className="active:scale-90"
+          style={{
+            position: 'fixed',
+            top: 'calc(env(safe-area-inset-top) + 12px)',
+            right: 16,
+            zIndex: 55,
+            width: 36,
+            height: 36,
+            borderRadius: '50%',
+            background: `linear-gradient(135deg, ${dark ? '#E8709A' : '#D44A78'}, #E8709A)`,
+            color: '#fff',
+            border: 'none',
+            cursor: 'pointer',
+            fontFamily: 'Sora, system-ui',
+            fontSize: 14,
+            fontWeight: 800,
+            boxShadow: '0 4px 12px rgba(212,74,120,0.28)',
+            transition: 'transform 120ms',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        >
+          {(user.display_name || user.email || 'Y').trim().charAt(0).toUpperCase()}
+        </button>
+      )}
 
       {/* PWA install lock removed — users can install to home screen if they want,
           but we no longer force it. Too many downsides: share-links break, first-run
