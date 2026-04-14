@@ -379,7 +379,7 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
               fontWeight: 700,
               letterSpacing: '0.02em',
               color: journeyColor,
-              background: hexWithAlpha(journeyColor, dark ? 0.18 : 0.10),
+              background: hexWithAlpha(journeyColor, dark ? 0.22 : 0.10),
               padding: '4px 10px',
               borderRadius: 999,
               whiteSpace: 'nowrap',

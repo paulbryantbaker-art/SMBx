@@ -89,6 +89,14 @@ export function DealStack({ deals, onDealTap, onStartFirstDeal, onDealLongPress,
     if (!found) setTopId(sorted[0].id);
   }, [sorted, topId]);
 
+  // Auto-promote a just-created deal to the top of the stack so the user sees
+  // their just-created card in the hero spot, with the pulse animation.
+  useEffect(() => {
+    if (justCreatedDealId != null && sorted.find(d => d.id === justCreatedDealId)) {
+      setTopId(justCreatedDealId);
+    }
+  }, [justCreatedDealId, sorted]);
+
   if (sorted.length === 0) {
     return <EmptyStack onStart={onStartFirstDeal} dark={dark} />;
   }

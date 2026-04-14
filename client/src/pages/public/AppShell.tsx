@@ -54,6 +54,7 @@ import { DealStack, filterRealDeals } from '../../components/mobile/DealStack';
 import { ArtifactSheet } from '../../components/mobile/ArtifactSheet';
 import { AccountSheet } from '../../components/mobile/AccountSheet';
 import { SignInSheet } from '../../components/mobile/SignInSheet';
+import { DealActionsSheet } from '../../components/mobile/DealActionsSheet';
 import { DealContextChips } from '../../components/mobile/DealContextChips';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
@@ -921,6 +922,28 @@ export default function AppShell() {
   const [accountSheetOpen, setAccountSheetOpen] = useState(false);
   // Mobile sign-in sheet — shown when logged-out users tap the top-right login icon.
   const [signInSheetOpen, setSignInSheetOpen] = useState(false);
+  // Mobile deal actions sheet — opened by long-press on a deal card.
+  const [dealActionsTargetId, setDealActionsTargetId] = useState<number | null>(null);
+
+  // Just-created deal highlight — when the user finishes a journey-page CTA
+  // and a new deal appears in their stack, that card pulses for ~6s on return
+  // to home. Closes the loop "your action just became portfolio state."
+  const prevDealIdsRef = useRef<Set<number>>(new Set());
+  const [justCreatedDealId, setJustCreatedDealId] = useState<number | null>(null);
+  useEffect(() => {
+    if (!authChat.grouped) return;
+    const currentIds = new Set(authChat.grouped.deals.map(d => d.id));
+    if (prevDealIdsRef.current.size > 0) {
+      const newIds = [...currentIds].filter(id => !prevDealIdsRef.current.has(id));
+      if (newIds.length > 0) {
+        setJustCreatedDealId(newIds[0]);
+        const t = setTimeout(() => setJustCreatedDealId(null), 6000);
+        prevDealIdsRef.current = currentIds;
+        return () => clearTimeout(t);
+      }
+    }
+    prevDealIdsRef.current = currentIds;
+  }, [authChat.grouped]);
 
   // Handler: open deliverable from chat message click.
   // Desktop → canvas tab. Mobile → Vaul ArtifactSheet.
@@ -1635,6 +1658,8 @@ export default function AppShell() {
                           }
                         }}
                         onStartFirstDeal={(fill) => fillHomeInput(fill)}
+                        onDealLongPress={(dealId) => setDealActionsTargetId(dealId)}
+                        justCreatedDealId={justCreatedDealId}
                         dark={dark}
                       />
                     </div>
@@ -2529,6 +2554,27 @@ export default function AppShell() {
           onOpenChange={setSignInSheetOpen}
           dark={dark}
           onSignIn={() => { window.location.href = '/login'; }}
+        />
+      )}
+
+      {/* ═══ MOBILE DEAL ACTIONS SHEET — long-press on a deal card opens this ═══ */}
+      {isMobile && user && (
+        <DealActionsSheet
+          open={dealActionsTargetId !== null}
+          onOpenChange={(o) => { if (!o) setDealActionsTargetId(null); }}
+          dark={dark}
+          dealName={(() => {
+            const d = authChat.grouped?.deals.find(x => x.id === dealActionsTargetId);
+            return d?.business_name || null;
+          })()}
+          onShare={typeof navigator !== 'undefined' && (navigator as any).share ? () => {
+            const d = authChat.grouped?.deals.find(x => x.id === dealActionsTargetId);
+            if (!d) return;
+            (navigator as any).share({
+              title: d.business_name || 'smbx.ai deal',
+              url: window.location.origin + '/chat',
+            }).catch(() => {});
+          } : undefined}
         />
       )}
 

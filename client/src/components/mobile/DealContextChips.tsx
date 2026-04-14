@@ -29,11 +29,11 @@ const JOURNEY_CHIPS: ChipSpec[] = [
   { icon: 'workspace_premium', label: "I'm an advisor", fill: "I'm an M&A advisor / broker / CPA / attorney — " },
 ];
 
-const NEW_DEAL_CHIP: ChipSpec = {
-  icon: 'add',
-  label: 'Start a new deal',
-  fill: 'I want to start a new deal — ',
-};
+const ACTIVE_PORTFOLIO_CHIPS: ChipSpec[] = [
+  { icon: 'add', label: 'New deal', fill: 'I want to start a new deal — ' },
+  { icon: 'search', label: 'Find a deal', fill: 'Help me find a deal in my portfolio — ' },
+  { icon: 'auto_awesome', label: 'Ask anything', fill: '' },
+];
 
 interface Props {
   dark: boolean;
@@ -47,7 +47,7 @@ export function DealContextChips({ dark, hasDeals, onChipTap }: Props) {
   const chipBd = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
   const chipText = dark ? 'rgba(240,240,243,0.92)' : '#1a1c1e';
 
-  const chips = hasDeals ? [NEW_DEAL_CHIP] : JOURNEY_CHIPS;
+  const chips = hasDeals ? ACTIVE_PORTFOLIO_CHIPS : JOURNEY_CHIPS;
 
   return (
     <div

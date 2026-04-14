@@ -43,14 +43,30 @@ export function AccountSheet({
   onOpenSupport,
 }: Props) {
   const [scrolled, setScrolled] = useState(false);
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!open) {
       setScrolled(false);
+      setConfirmingSignOut(false);
+      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
     }
   }, [open]);
+
+  const handleSignOutTap = () => {
+    if (!confirmingSignOut) {
+      setConfirmingSignOut(true);
+      // Auto-cancel confirmation after 4s if user doesn't follow through
+      confirmTimerRef.current = setTimeout(() => setConfirmingSignOut(false), 4000);
+      return;
+    }
+    if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+    onOpenChange(false);
+    onSignOut();
+  };
 
   const bg = dark ? '#151617' : '#fefefe';
   const headingC = dark ? '#f9f9fc' : '#0f1012';
@@ -219,32 +235,33 @@ export function AccountSheet({
               />
             )}
 
-            {/* Sign out — destructive, visual break above */}
+            {/* Sign out — destructive, two-tap confirm to prevent thumb slips */}
             <div style={{ height: 6 }} />
             <button
-              onClick={() => { onOpenChange(false); onSignOut(); }}
+              onClick={handleSignOutTap}
               type="button"
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 12,
                 padding: '14px 16px',
-                background: rowBg,
-                border: `1px solid ${rowBd}`,
+                background: confirmingSignOut ? dangerC : rowBg,
+                border: `1px solid ${confirmingSignOut ? dangerC : rowBd}`,
                 borderRadius: 14,
                 cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
-                color: dangerC,
+                color: confirmingSignOut ? '#fff' : dangerC,
                 fontFamily: 'Inter, system-ui',
                 fontSize: 15,
                 fontWeight: 700,
                 textAlign: 'left',
+                transition: 'background 180ms, color 180ms, border-color 180ms',
               }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: 20, color: dangerC }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 20, color: confirmingSignOut ? '#fff' : dangerC }}>
                 logout
               </span>
-              Sign out
+              {confirmingSignOut ? 'Tap again to sign out' : 'Sign out'}
             </button>
           </div>
         </Drawer.Content>
