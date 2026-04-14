@@ -37,6 +37,7 @@ import DealWorkspace from '../../components/desktop/DealWorkspace';
 import PipelineTable from '../../components/desktop/PipelineTable';
 import SourcingCommandCenter from '../../components/desktop/SourcingCommandCenter';
 import PortfolioAnalytics from '../../components/desktop/PortfolioAnalytics';
+import CommandPalette, { type CommandItem } from '../../components/desktop/CommandPalette';
 import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
@@ -469,6 +470,84 @@ function pathToViewState(path: string): ViewState {
   return 'landing';
 }
 
+/* ─── Command-palette item builder ──────────────────────────── */
+
+interface BuildCommandArgs {
+  user: any;
+  deals: Array<{ id: number; business_name: string | null; journey_type: string | null; industry: string | null }>;
+  dark: boolean;
+  onOpenDeal: (id: number) => void;
+  onOpenCanvasTab: (type: string, label: string) => void;
+  onNewDeal: () => void;
+  onGoToChat: () => void;
+  onGoToHome: () => void;
+  onGoToJourney: (tab: TabId) => void;
+  onToggleDark: () => void;
+  onOpenHelp: () => void;
+  onSignIn: () => void;
+  onSignOut: () => void;
+}
+
+function buildCommandItems(a: BuildCommandArgs): CommandItem[] {
+  const items: CommandItem[] = [];
+  const JOURNEY_DOT: Record<string, string> = {
+    sell: '#D44A78', buy: '#3E8E8E', raise: '#C99A3E', pmi: '#8F4A7A',
+  };
+
+  // Deals — each open into workspace
+  for (const d of a.deals) {
+    if (!d.business_name) continue;
+    items.push({
+      id: `deal-${d.id}`,
+      label: d.business_name,
+      hint: d.industry || d.journey_type || undefined,
+      group: 'Deals',
+      dot: JOURNEY_DOT[(d.journey_type || 'sell').toLowerCase()] || '#D44A78',
+      keywords: `${d.business_name} ${d.industry || ''} ${d.journey_type || ''}`,
+      onSelect: () => a.onOpenDeal(d.id),
+    });
+  }
+
+  // Actions
+  if (a.user) {
+    items.push({ id: 'new-deal', label: 'New deal', icon: 'add_business', shortcut: '⌘N', group: 'Actions', onSelect: a.onNewDeal });
+  }
+  items.push({ id: 'toggle-dark', label: a.dark ? 'Switch to light mode' : 'Switch to dark mode', icon: a.dark ? 'light_mode' : 'dark_mode', shortcut: '⌘⇧D', group: 'Actions', onSelect: a.onToggleDark });
+  items.push({ id: 'help', label: 'Help & glossary', icon: 'help_outline', group: 'Actions', onSelect: a.onOpenHelp });
+  if (a.user) {
+    items.push({ id: 'sign-out', label: 'Sign out', icon: 'logout', group: 'Actions', onSelect: a.onSignOut });
+  } else {
+    items.push({ id: 'sign-in', label: 'Sign in', icon: 'login', group: 'Actions', onSelect: a.onSignIn });
+  }
+
+  // Tools — authenticated only
+  if (a.user) {
+    items.push({ id: 'tool-pipeline', label: 'Pipeline', icon: 'view_kanban', group: 'Tools', onSelect: () => a.onOpenCanvasTab('pipeline', 'Pipeline') });
+    items.push({ id: 'tool-library', label: 'Document library', icon: 'folder_open', keywords: 'documents library deliverables', group: 'Tools', onSelect: () => a.onOpenCanvasTab('documents', 'Library') });
+    items.push({ id: 'tool-dataroom', label: 'Data room', icon: 'lock', keywords: 'data room files', group: 'Tools', onSelect: () => a.onOpenCanvasTab('dataroom', 'Data Rm') });
+    items.push({ id: 'tool-sourcing', label: 'Sourcing', icon: 'search', keywords: 'sourcing find businesses prospects', group: 'Tools', onSelect: () => a.onOpenCanvasTab('sourcing', 'Sourcing') });
+    items.push({ id: 'tool-analytics', label: 'Portfolio insights', icon: 'monitoring', keywords: 'analytics insights portfolio dashboard', group: 'Tools', onSelect: () => a.onOpenCanvasTab('analytics', 'Insights') });
+    items.push({ id: 'tool-settings', label: 'Settings', icon: 'settings', group: 'Tools', onSelect: () => a.onOpenCanvasTab('settings', 'Settings') });
+  }
+
+  // Navigation
+  items.push({ id: 'nav-home', label: 'Home', icon: 'home', group: 'Go to', onSelect: a.onGoToHome });
+  items.push({ id: 'nav-chat', label: 'Chat with Yulia', icon: 'chat', group: 'Go to', onSelect: a.onGoToChat });
+  ([
+    { id: 'sell' as TabId, label: 'Sell a business' },
+    { id: 'buy' as TabId, label: 'Buy a business' },
+    { id: 'raise' as TabId, label: 'Raise capital' },
+    { id: 'integrate' as TabId, label: 'Post-acquisition integration' },
+    { id: 'advisors' as TabId, label: 'For advisors' },
+    { id: 'how-it-works' as TabId, label: 'How it works' },
+    { id: 'pricing' as TabId, label: 'Pricing' },
+  ]).forEach(j => {
+    items.push({ id: `nav-${j.id}`, label: j.label, icon: 'arrow_forward', group: 'Go to', onSelect: () => a.onGoToJourney(j.id) });
+  });
+
+  return items;
+}
+
 function getInitialDealId(path: string): number | null {
   if (path.startsWith('/deal/')) {
     const id = parseInt(path.split('/')[2], 10);
@@ -813,6 +892,46 @@ export default function AppShell() {
     return () => window.removeEventListener('pageshow', onPageShow);
   }, []);
 
+  // ─── Desktop keyboard shortcuts ───
+  // ⌘K / Ctrl+K       → command palette
+  // ⌘/ / Ctrl+/       → focus chat composer (sends a focus event any input can listen for)
+  // ⌘⇧D / Ctrl+Shift+D → toggle dark mode
+  // ⌘N / Ctrl+N       → new deal (authenticated only)
+  useEffect(() => {
+    if (isMobile) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (!mod) return;
+      // Ignore while typing inside contentEditable that isn't the palette
+      const target = e.target as HTMLElement | null;
+      const isTyping = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+      if (e.key === 'k' || e.key === 'K') {
+        e.preventDefault();
+        setCommandOpen(o => !o);
+        return;
+      }
+      if (e.key === '/' && !isTyping) {
+        e.preventDefault();
+        try { window.dispatchEvent(new CustomEvent('smbx:focus-composer')); } catch {}
+        return;
+      }
+      if ((e.key === 'd' || e.key === 'D') && e.shiftKey) {
+        e.preventDefault();
+        setDark(!dark);
+        return;
+      }
+      if ((e.key === 'n' || e.key === 'N') && user && !isTyping) {
+        e.preventDefault();
+        authChat.newConversation();
+        setViewState('chat');
+        navigate('/chat');
+        return;
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isMobile, user, dark, setDark, navigate, authChat]);
+
   // Browser back/forward
   useEffect(() => {
     const onPopState = (e: PopStateEvent) => {
@@ -975,6 +1094,9 @@ export default function AppShell() {
   const [helpSheetOpen, setHelpSheetOpen] = useState(false);
   // Mobile expanded deal stack — opened from "See all N deals" indicator.
   const [stackExpandedOpen, setStackExpandedOpen] = useState(false);
+
+  // Desktop ⌘K command palette — global fuzzy launcher.
+  const [commandOpen, setCommandOpen] = useState(false);
 
   // Just-created deal highlight — when the user finishes a journey-page CTA
   // and a new deal appears in their stack, that card pulses for ~6s on return
@@ -2702,6 +2824,30 @@ export default function AppShell() {
         onOpenChange={setHelpSheetOpen}
         dark={dark}
       />
+
+      {/* ═══ DESKTOP COMMAND PALETTE — ⌘K fuzzy launcher ═══ */}
+      {!isMobile && (
+        <CommandPalette
+          open={commandOpen}
+          onOpenChange={setCommandOpen}
+          dark={dark}
+          items={buildCommandItems({
+            user,
+            deals: (authChat.grouped?.deals ?? []) as any[],
+            dark,
+            onOpenDeal: (id) => { setViewState('deal'); navigate(`/deal/${id}`); },
+            onOpenCanvasTab: (type, label) => openCanvasTab(type, label),
+            onNewDeal: () => { authChat.newConversation(); setViewState('chat'); navigate('/chat'); },
+            onGoToChat: () => { setViewState('chat'); navigate('/chat'); },
+            onGoToHome: () => { setViewState('landing'); setActiveTab('home'); navigate('/'); },
+            onGoToJourney: (tab) => { setViewState('landing'); setActiveTab(tab); navigate(`/${tab}`); },
+            onToggleDark: () => setDark(!dark),
+            onOpenHelp: () => setHelpSheetOpen(true),
+            onSignIn: () => navigate('/login'),
+            onSignOut: handleLogout,
+          })}
+        />
+      )}
 
       {/* ═══ DESKTOP ACCOUNT MENU — top-right avatar (signed-in) / Sign-in pill (signed-out) / skeleton (loading) ═══ */}
       {!isMobile && (
