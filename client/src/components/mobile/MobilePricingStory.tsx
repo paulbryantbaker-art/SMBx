@@ -179,14 +179,14 @@ export default function MobilePricingStory({ dark }: Props) {
       eyebrow="Pricing"
       headline={
         <>
-          AI in a harness.<br />
-          Priced like <em className="not-italic" style={{ color: accent }}>software.</em>
+          Close faster.<br />
+          Pay <em className="not-italic" style={{ color: accent }}>less</em> doing it.
         </>
       }
       sub={
         <>
-          Every tier published. No "Talk to sales." <strong style={{ color: headingColor }}>Everyone starts free.</strong>{' '}
-          You pay when Yulia is doing the work of an analyst pod for a fraction of what seat licenses used to cost.
+          <strong style={{ color: headingColor }}>Everyone starts free.</strong>{' '}
+          When Yulia is doing the work, pick the tier that fits. Six prices, all published. Cancel any time.
         </>
       }
       callout={
@@ -237,18 +237,17 @@ export default function MobilePricingStory({ dark }: Props) {
       }
 
       story={{
-        name: 'Market benchmarks',
-        role: 'AI-native knowledge-work products · not legacy M&A SaaS',
+        name: 'One subscription',
+        role: 'Everything Yulia does · one flat rate',
         body: (
           <>
-            We priced against Harvey ($100-200/seat), Legora, Hebbia ($300-400/seat), Rilla ($200/rep),
-            Spellbook ($150/seat), and Devin ($500/seat) — AI-native products that wrap LLM capability in a
-            domain-specific workflow. <strong style={{ color: accent }}>Not DealCloud or Intapp</strong> — those
-            are 15-year-old CRMs with AI duct-taped on, priced at $30k-100k/year minimums. Our Institutional
-            tier is roughly 1/5th of their entry quote.
+            Unlimited Baselines, deal scores, capital stacks, CIMs, 180-day plans, and all 10 interactive
+            financial models. Attorneys, CPAs, appraisers, and wealth managers who join your deal run{' '}
+            <strong style={{ color: accent }}>free</strong>. Annual billing gets two months free.
+            No sales call. No multi-year lock-in.
           </>
         ),
-        outcome: 'Priced like Cursor with a domain wrapper, not like DealCloud with a chatbot',
+        outcome: 'Start free · upgrade when it pays · cancel any time',
       }}
 
       kpis={[
@@ -257,7 +256,7 @@ export default function MobilePricingStory({ dark }: Props) {
         { value: 'Free',   label: 'service pros on someone else\u2019s deal' },
       ]}
 
-      takeaway={<>If $6,999/mo is too much for your fund, Firm at $1,999 is the right door. Sales calls close sales, not reveal prices.</>}
+      takeaway={<>Start free. Upgrade when Yulia saves you a week of work. Walk if she doesn't.</>}
 
       ctaLabel="Start free"
       ctaSub="No card · one full deliverable, yours to keep"
@@ -318,42 +317,6 @@ export default function MobilePricingStory({ dark }: Props) {
         </div>
       </section>
 
-      {/* ─── The line ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
-        <div
-          style={{
-            fontFamily: 'Sora, system-ui',
-            fontSize: 10,
-            fontWeight: 800,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: accent,
-            marginBottom: 12,
-          }}
-        >
-          The line · what Yulia can't do
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <LineCard
-            q="Substitute for my investment banker or attorney?"
-            a="No. Yulia is the analytical engine + workflow OS. Your IB is your fiduciary; your attorney signs. Bring both."
-            accent={accent}
-            dark={dark}
-          />
-          <LineCard
-            q="Take a success fee on my deal?"
-            a="No. Flat-rate software subscription. Not a registered broker-dealer. Never a percentage of any transaction."
-            accent={accent}
-            dark={dark}
-          />
-          <LineCard
-            q="Certify my financials or give a QoE?"
-            a='No. Yulia builds the add-back schedule. Your accountant signs it. "She does the homework. Your attorney does the calls."'
-            accent={accent}
-            dark={dark}
-          />
-        </div>
-      </section>
     </MobileJourneyStory>
   );
 }
@@ -439,36 +402,3 @@ function TierCard({
   );
 }
 
-function LineCard({
-  q, a, accent, dark,
-}: {
-  q: string;
-  a: string;
-  accent: string;
-  dark: boolean;
-}) {
-  const headingC = dark ? '#f9f9fc' : '#0f1012';
-  const bodyC = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
-  const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
-  const cardBg = dark ? '#1a1c1e' : '#ffffff';
-
-  return (
-    <div
-      style={{
-        padding: '14px 16px',
-        borderRadius: 12,
-        background: cardBg,
-        border: `1px solid ${borderC}`,
-        fontFamily: 'Inter, system-ui',
-      }}
-    >
-      <p style={{ margin: 0, fontSize: 13.5, fontWeight: 800, color: headingC, lineHeight: 1.3, marginBottom: 6 }}>
-        {q}
-      </p>
-      <p style={{ margin: 0, fontSize: 13, color: bodyC, lineHeight: 1.5 }}>
-        <span style={{ color: accent, fontWeight: 700 }}>The line: </span>
-        {a}
-      </p>
-    </div>
-  );
-}
