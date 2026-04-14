@@ -10,9 +10,9 @@ import {
 
 export default function PricingBelow({ dark }: { dark: boolean }) {
   usePageMeta({
-    title: 'Investment bank power. For everyone. · smbx.ai pricing',
+    title: 'Priced fairly. Every tier published. · smbx.ai pricing',
     description:
-      'Yulia gives everyone investment bank power, knowledge, and guidance. 5-tier subscription from Free to Institutional. Verified deal professionals — attorneys, CPAs, brokers — free forever.',
+      'AI in a harness, priced like software — not like a law firm. Six tiers from Free to Institutional, all published, none hidden. Service professionals (attorneys, CPAs, appraisers) run free on any deal their client brings them onto.',
     canonical: 'https://smbx.ai/pricing',
     ogImage: 'https://smbx.ai/og-pricing.png',
     breadcrumbs: [
@@ -21,19 +21,24 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
     ],
     faqs: [
       {
+        question: 'Why these prices? What are you benchmarking against?',
+        answer:
+          'AI-native knowledge-work products — Harvey for legal ($100-200/seat), Hebbia for finance research ($300-400/seat), Rilla for sales coaching ($200/rep), Spellbook for contract review ($150/seat). We are priced in that band for individuals and teams, deliberately under the incumbent M&A software stack (DealCloud, Intapp, iDeals — all $30k-100k annual minimums with implementation fees). AI in a harness, priced like software, not like a law firm.',
+      },
+      {
         question: 'Is Yulia a substitute for my M&A advisor or investment bank?',
         answer:
           "No. Yulia is the analytical engine and the workflow operating system. Your IB is the relationship engine, your fiduciary, and your seat at the closing table. Yulia routes your CIM to your attorney for review with focus areas. Your attorney signs off; the document state advances. The buyer's lawyer can ask where any number came from and the answer is in the audit log. Bring both — they do different jobs.",
       },
       {
-        question: "I'm an attorney, CPA, or other deal professional. What do I pay?",
+        question: "I'm an attorney, CPA, appraiser, or other service professional. What do I pay?",
         answer:
-          'Nothing. Verified deal professionals — attorneys, CPAs, real estate brokers, wealth managers, appraisers, insurance brokers, estate planners — get full Pro features for free, forever. Your clients pay their own subscription if they engage the platform directly. Tell Yulia you are a deal pro at the start of the conversation and she works with you peer-to-peer — no retail onboarding, no hand-holding, just the tooling.',
+          "Nothing when you're on someone else's deal. Attorneys, CPAs, real-estate brokers, wealth managers, appraisers, rep & warranty insurance brokers, and estate planners run free on any deal workflow their client brings them onto — it's your client's deal, not your book. M&A advisors, brokers, fundless sponsors, and PE deal teams who run their own deals on Yulia use the Team or Firm plans.",
       },
       {
-        question: "Why does the Pro tier cost so much less than what an IB would charge?",
+        question: "Why do you publish every price, including Institutional?",
         answer:
-          'Yulia is software, not headcount. The math an IB analyst pod runs is the same math Yulia runs — comps, models, CIM drafts, capital stacks, after-tax modeling. The cost difference is the labor, the office, the recruiting pipeline, and the fee model. Yulia is a flat subscription. The IB is people. You can run both at once.',
+          "Because hiding the Institutional price is what Intapp and DealCloud do, and we are not that. Every tier is published. Every feature delta is published. If $6,999 per month is too much for your fund, you are not an institutional buyer and the Firm plan at $1,999 is the right door. Sales calls should close sales, not reveal prices.",
       },
       {
         question: 'Can Yulia give me legal advice on my term sheet?',
@@ -55,7 +60,9 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
 
   const handleCTA = (plan?: string) => {
     if (plan === 'firm') {
-      bridgeToYulia("I'm interested in the Firm plan for our team.");
+      bridgeToYulia("I'd like to set up the Firm plan ($1,999/mo) for our team. We have multiple deal pros and want unlimited seats.");
+    } else if (plan === 'institutional') {
+      bridgeToYulia("I'd like to set up the Institutional plan ($6,999/mo). We need SSO, API access, and a dedicated CSM.");
     } else {
       goToChat();
     }
@@ -69,22 +76,26 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
   const innerBg = dark ? 'rgba(255,255,255,0.04)' : 'white';
   const border = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
 
-  /* ───────── Hero tier (Professional) ───────── */
-  const proFeatures = [
-    'CIM generated from your verified financials — 25-40 pages, not a template',
-    'The Rundown™ — 7-dimension deal scoring in 8 seconds',
-    'Stack Builder for live capital structure modeling',
-    'Buyers, lenders, and advisors identified, ranked, and scored',
+  /* ───────── Hero tier (Multi-deal — sweet spot per market research) ───────── */
+  const heroFeatures = [
+    'Unlimited Baseline, Rundown™, and capital stack models',
+    'CIM generation from verified financials — 25-40 pages, not a template',
+    'Blind Equity™ add-back schedule with source-line citations',
+    '180-day post-close integration plans from your DD report',
     'Document state machine — draft → review → approved → executed',
     'Yulia routes documents to your attorney with focus areas',
     'Every action audited in the deal log (chain of custody)',
-    'Full deal room — your CPA, attorney, broker, lender all in one place',
-    '180-day post-close integration plan from your DD report',
     'After-tax modeling on asset vs stock sale, earnouts, escrows',
+    'All 10 interactive financial models',
+    'Full deal room — your CPA, attorney, broker, lender all in one place',
   ];
 
-  /* ───────── Other tiers ───────── */
-  const otherTiers = [
+  /* ───────── Six tiers — all published, no "talk to us" ─────────
+     Market-benchmarked against AI-native knowledge-work products:
+     Harvey ($100-200), Hebbia ($300-400), Rilla ($200), Spellbook ($150),
+     EvenUp ($500-2k), Devin ($500/seat). Published like Cursor, not hidden
+     like Intapp. */
+  const tiers = [
     {
       key: 'free',
       name: 'Free',
@@ -102,71 +113,71 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
       tone: 'light' as const,
     },
     {
-      key: 'starter',
-      name: 'Starter',
+      key: 'single',
+      name: 'Single deal',
       price: '$49',
-      sub: '/mo · single deal',
-      protagonist: 'For your first close',
+      sub: '/mo',
+      protagonist: 'Your first close',
       features: [
-        'Real SDE & EBITDA normalization',
-        'Add-back schedule',
-        'Deal scoring',
-        'SBA eligibility & DSCR',
-        'Sector market intelligence',
+        'One active deal at a time',
+        'SDE & EBITDA normalization, add-backs',
+        'Deal scoring + SBA eligibility',
+        'Sector comp multiples and benchmarks',
+        'PDF exports with your name on them',
       ],
       cta: 'Start for $49',
       ctaPlan: undefined as string | undefined,
       tone: 'light' as const,
     },
     {
-      key: 'practice',
-      name: 'Practice',
-      price: '$1,499',
-      sub: '/mo · for the team',
-      protagonist: 'Reese & Hammond runs this',
+      key: 'team',
+      name: 'Team',
+      price: '$399',
+      sub: '/mo · up to 5 seats',
+      protagonist: 'Small deal teams & indie sponsors',
       features: [
-        'Everything in Professional × 5 seats',
+        'Everything in Multi-deal × 5 seats',
         'Multi-deal portfolio view',
         'White-label outputs (your brand)',
         'Up to 10 active deals',
-        'Priority support',
+        'Priority email support',
       ],
-      cta: 'Start 90-day trial',
+      cta: 'Start Team',
       ctaPlan: undefined as string | undefined,
       tone: 'light' as const,
     },
     {
       key: 'firm',
       name: 'Firm',
-      price: '$4,999',
-      sub: '/mo · mid-market firms',
-      protagonist: 'Sub-$1B PE & multi-MD shops',
+      price: '$1,999',
+      sub: '/mo · unlimited seats',
+      protagonist: 'Advisory firms & small PE shops',
       features: [
         'Unlimited users + unlimited deals',
         'Single sign-on (SAML)',
-        'Dedicated CSM + onboarding',
-        'SOC 2 / SLA / contract terms',
-        'Quarterly business reviews',
+        'Dedicated onboarding (2 weeks)',
+        'SOC 2 report + contract terms',
+        'Quarterly business review',
       ],
-      cta: 'Talk to us',
+      cta: 'Start Firm',
       ctaPlan: 'firm' as string | undefined,
       tone: 'light' as const,
     },
     {
       key: 'institutional',
       name: 'Institutional',
-      price: '$9,999',
+      price: '$6,999',
       sub: '/mo · $1B+ funds & bulge bracket',
-      protagonist: 'Self-serve, no sales call',
+      protagonist: 'Full stack, SLA, API',
       features: [
         'Unlimited users + unlimited deals',
-        'SSO / SAML',
+        'SSO / SAML + advanced RBAC',
         'Full API + webhooks',
-        'Priority engineering support',
-        'White-glove onboarding',
+        'Dedicated CSM + priority engineering',
+        'White-glove onboarding + custom SLA',
       ],
       cta: 'Start Institutional',
-      ctaPlan: undefined as string | undefined,
+      ctaPlan: 'institutional' as string | undefined,
       tone: 'dark' as const,
     },
   ];
@@ -249,14 +260,15 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           eyebrow="pricing"
           headline={
             <>
-              Yulia gives everyone <br />
-              investment bank <em className="not-italic" style={{ color: accent }}>power.</em>
+              AI in a harness. <br />
+              Priced like <em className="not-italic" style={{ color: accent }}>software.</em>
             </>
           }
           sub={
             <>
-              Knowledge, models, drafting, guidance — and the workflow that closes the deal. <strong style={{ color: headingColor }}>Everyone starts free.</strong>{' '}
-              You only pay when you've decided Yulia is doing the work of an analyst pod for the price of a Slack subscription.
+              Every tier published. No "Talk to sales." <strong style={{ color: headingColor }}>Everyone starts free.</strong>{' '}
+              You pay when Yulia is doing the work of an analyst pod for a fraction of what seat licenses used to cost —
+              and not a dollar sooner.
             </>
           }
           dark={dark}
@@ -267,11 +279,12 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           className="text-[14px] md:text-[15px] leading-relaxed mb-16 max-w-3xl"
           style={{ color: mutedColor }}
         >
-          <span className="font-bold" style={{ color: accent }}>Mark D.</span> ran Free until he was ready, then upgraded.{' '}
-          <span className="font-bold" style={{ color: accent }}>Anna J.</span> runs Professional.{' '}
-          <span className="font-bold" style={{ color: accent }}>Reese & Hammond</span> runs Practice for the partners.{' '}
-          <span className="font-bold" style={{ color: accent }}>Ed K.'s</span> deal team runs Firm. The bulge bracket ones run Institutional.
-          And every attorney, CPA, real-estate broker, appraiser, and wealth manager who joins a deal workflow runs free — they\u2019re on someone else\u2019s deal, not their own book.
+          <span className="font-bold" style={{ color: accent }}>Mark D.</span> ran Free until he was ready, then upgraded to Multi-deal.{' '}
+          <span className="font-bold" style={{ color: accent }}>Anna J.</span> runs Multi-deal.{' '}
+          <span className="font-bold" style={{ color: accent }}>Reese &amp; Hammond</span> runs Team for the four partners.{' '}
+          <span className="font-bold" style={{ color: accent }}>Ed K.'s</span> sponsor shop runs Firm. The $1B+ funds run Institutional.
+          And every attorney, CPA, real-estate broker, appraiser, and wealth manager who joins a deal workflow runs free —
+          they're on someone else's deal, not their own book.
         </p>
 
         {/* ═══ ChatGPT vs Yulia — the actual differentiator ═══ */}
@@ -290,16 +303,16 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           <DealCostMap dark={dark} />
         </section>
 
-        {/* ═══ Tier cards — Pro hero + 5 smaller ═══ */}
+        {/* ═══ Tier cards — Multi-deal hero + 5 others ═══ */}
         <section className="mb-12">
           <SectionHeader
             label="Pick your tier"
-            title="One hero plan. Five on-ramps."
-            sub="Most owners, individual buyers, and indie sponsors land on Professional. The other tiers are entry doors and team upgrades."
+            title="Six tiers. Every price published."
+            sub="Most active operators land on Multi-deal. The other five are on-ramps and team upgrades. If it says $6,999, it costs $6,999 — no sales call required."
             dark={dark}
           />
 
-          {/* Professional — wide hero */}
+          {/* Multi-deal — wide hero (market sweet spot: Harvey/Legora individual band) */}
           <div
             className="rounded-3xl p-8 md:p-12 mb-6 relative overflow-hidden"
             style={{
@@ -321,7 +334,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                   className="text-[10px] font-bold uppercase tracking-[0.22em] mb-3"
                   style={{ color: accent }}
                 >
-                  Most chosen tier
+                  Most chosen · Market sweet spot
                 </p>
                 <h3
                   className="font-headline font-black tracking-[-0.02em] mb-3"
@@ -331,9 +344,9 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                     lineHeight: 0.95,
                   }}
                 >
-                  Professional
+                  Multi-deal
                 </h3>
-                <div className="flex items-baseline gap-2 mb-4">
+                <div className="flex items-baseline gap-2 mb-2">
                   <span
                     className="font-headline font-black tabular-nums tracking-tight"
                     style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', color: accent, lineHeight: 1 }}
@@ -344,13 +357,18 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                     / month
                   </span>
                 </div>
+                <p className="text-[12px] mb-4" style={{ color: mutedColor }}>
+                  or <span style={{ color: headingColor, fontWeight: 600 }}>$1,990/year</span> — two months free
+                </p>
                 <p className="text-sm mb-6" style={{ color: mutedColor }}>
-                  Full deal execution · 90-day free trial · cancel anytime
+                  Unlimited deals · cancel anytime · no card required to start
                 </p>
 
                 <p className="text-[14px] leading-relaxed mb-6" style={{ color: bodyColor }}>
-                  Anna J. runs Professional. Mark D. upgraded into it after his free Baseline.
-                  The default tier for most engaged owners, individual buyers, and indie sponsors running 1-5 deals.
+                  Anna J. runs Multi-deal. Mark D. upgraded into it after his free Baseline.
+                  The default tier for engaged owners, individual buyers, and indie sponsors running
+                  more than one deal at a time. Priced in the same band as Harvey and Legora — without
+                  the law-firm overhead.
                 </p>
 
                 <button
@@ -369,7 +387,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                     (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
                   }}
                 >
-                  Start 90-day trial
+                  Start Multi-deal
                   <span aria-hidden className="material-symbols-outlined text-base">arrow_forward</span>
                 </button>
               </div>
@@ -382,7 +400,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                   What you get
                 </p>
                 <ul className="space-y-2.5">
-                  {proFeatures.map((f) => (
+                  {heroFeatures.map((f) => (
                     <li key={f} className="flex items-start gap-3">
                       <span
                         className="material-symbols-outlined text-base shrink-0 mt-1"
@@ -402,7 +420,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
 
           {/* Other tiers — 5 cards in a responsive grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-            {otherTiers.map((t) => {
+            {tiers.map((t) => {
               const isDark = t.tone === 'dark';
               return (
                 <div
@@ -472,7 +490,13 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           </div>
         </section>
 
-        {/* ═══ Pro · Free callout ═══ */}
+        {/* Annual pricing microcopy — right under the tier grid */}
+        <p className="text-center text-[13px] mt-6 mb-6" style={{ color: mutedColor }}>
+          Annual billing on any paid tier: <span style={{ color: headingColor, fontWeight: 600 }}>2 months free</span>.
+          Team, Firm, and Institutional: month-to-month or annual — no multi-year lock-in.
+        </p>
+
+        {/* ═══ Service pros free — policy callout, not a tier ═══ */}
         <section className="mb-20">
           <div
             className="rounded-2xl p-8 md:p-12 relative overflow-hidden"
@@ -496,7 +520,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                   className="text-[10px] font-bold uppercase tracking-[0.24em] mb-4"
                   style={{ color: accent }}
                 >
-                  Pro · Free · forever
+                  Service professionals · free · forever
                 </p>
                 <h3
                   className="font-headline font-black tracking-[-0.02em] mb-5"
@@ -505,17 +529,18 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                     lineHeight: 1,
                   }}
                 >
-                  Are you a deal professional?<br />
+                  Are you on someone else's deal?<br />
                   <em className="not-italic" style={{ color: accent }}>Yulia is free for you.</em>
                 </h3>
                 <p className="text-[16px] md:text-[17px] leading-relaxed mb-5" style={{ color: 'rgba(218,218,220,0.85)' }}>
-                  Attorneys, CPAs, real estate brokers, wealth managers, appraisers, rep & warranty insurance brokers,
-                  estate planners — full Professional features, free forever. White-label outputs that carry your firm's brand.
-                  Multi-client deal view. Tell Yulia you're an advisor at the start and she'll work with you peer-to-peer.
+                  Attorneys, CPAs, real-estate brokers, wealth managers, appraisers, rep &amp; warranty insurance brokers,
+                  estate planners — free on any deal workflow your client brings you onto. Full feature access, white-label
+                  outputs under your firm's brand, peer-to-peer tone from Yulia. No seat fee, ever.
                 </p>
                 <p className="text-[13px] leading-relaxed" style={{ color: 'rgba(218,218,220,0.55)' }}>
-                  The catch: when your client engages the platform directly to manage their own deal, they get a 14-day trial
-                  and then need their own subscription. We make it free for you. We don't make it free for them through you.
+                  The line: service pros are free when invited to a client's deal. M&amp;A advisors, brokers, fundless
+                  sponsors, search-fund principals, and PE deal teams who run their own deals on the platform use the
+                  Team or Firm tier above — they are on their own book, not someone else's.
                 </p>
               </div>
 
