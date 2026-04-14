@@ -1,4 +1,4 @@
-import { goToChat } from './chatBridge';
+import { bridgeToYulia } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { ConversationTyping } from './animations';
 import { LandingSBACalc } from './LandingCalculators';
@@ -215,7 +215,11 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
             oneLiner="Score any deal in 8 seconds. Pursue, negotiate, or kill."
             definition="Seven dimensions: financial performance, market position, owner dependency, customer concentration, growth trajectory, bankability (DSCR at proposed structure), and operational risk. Each dimension gets 0-100 with a one-line justification. The composite picks the verdict."
             example="A $24M EBITDA cybersecurity SaaS at 18× ask, NRR 132%, 32% YoY: composite 83/100 → PURSUE. A $58M EBITDA defense manufacturer at 9.5× ask, 71% DoD concentration, 11% CAGR: composite 71/100 → NEGOTIATE."
-            onCTA={() => goToChat()}
+            onCTA={() =>
+              bridgeToYulia(
+                "Run The Rundown on a deal I'm evaluating. It's a [industry] business at roughly $XM revenue / $XM EBITDA, asking around $XM. Score it across the seven dimensions and tell me pursue, negotiate, or kill."
+              )
+            }
             ctaLabel="Run The Rundown on a deal"
             dark={dark}
           />
@@ -317,9 +321,13 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
         {/* ═══ CTA ═══ */}
         <PageCTA
           headline={<>Run The Rundown on a deal.</>}
-          sub="Bring Yulia a listing URL, a CIM excerpt, or a one-line description. She returns a verdict in eight seconds and a cap-stack model in two minutes."
+          sub="Bring Yulia a listing URL, a CIM excerpt, or a one-line description — from a $1M SBA target to a $500M sponsor deal. She returns a verdict in eight seconds and a cap-stack model in two minutes."
           buttonLabel="Run The Rundown"
-          onClick={goToChat}
+          onClick={() =>
+            bridgeToYulia(
+              "Run The Rundown on a deal I'm evaluating. It's a [industry] business at roughly $XM revenue / $XM EBITDA, asking around $XM. Score it across the seven dimensions and tell me pursue, negotiate, or kill."
+            )
+          }
           dark={dark}
         />
       </div>
