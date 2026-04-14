@@ -67,40 +67,41 @@ export default function SellBelow({ dark }: { dark: boolean }) {
     <div className="bg-transparent" style={{ color: headingColor }}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
-        {/* ═══ Hook — repositioned for brokers as the dominant audience ═══ */}
+        {/* ═══ Hook — balanced for brokers AND owner-sellers ═══ */}
         <HookHeader
           eyebrow="sell"
           headline={
             <>
               Walk in with the <em className="not-italic" style={{ color: accent }}>number.</em><br />
-              Win the mandate.
+              Own the negotiation.
             </>
           }
           sub={
             <>
-              Sarah's seller thought <strong style={{ color: headingColor }}>$90M</strong>. Sarah walked in with a defensible{' '}
-              <strong style={{ color: accent }}>$155M</strong> Baseline in 90 seconds. She won the mandate over two other brokers who said
-              "we'll come back to you in two weeks." Closed at $154.8M. <strong style={{ color: headingColor }}>Fee: $2.7M.</strong>
+              Sarah's seller thought <strong style={{ color: headingColor }}>$90M</strong>. She walked into the first meeting with a defensible{' '}
+              <strong style={{ color: accent }}>$155M</strong> Baseline in 90 seconds — the same math the buyer's IB was going to run anyway.
+              Closed at $154.8M. Whether you're a broker winning the mandate or an owner sitting across from a buyer, the side with the number wins.
             </>
           }
           dark={dark}
         />
 
-        {/* ═══ Audience connector ═══ */}
+        {/* ═══ Audience connector — both paths, equally valid ═══ */}
         <p
           className="text-[14px] md:text-[15px] leading-relaxed mb-16 max-w-3xl"
           style={{ color: mutedColor }}
         >
-          Built for the brokers, M&amp;A advisors, search funders, and family-office deal teams running sell-side mandates day in, day out.
-          Owners can run their own Baseline too — most discover their business is worth 20-50% more than the rule of thumb. <strong style={{ color: accent }}>Verified deal professionals are free, forever.</strong>
+          Built for brokers, M&amp;A advisors, search funders, and family-office deal teams running sell-side mandates — and for business owners
+          preparing for their first buyer conversation. Most owners discover their business is worth 20–50% more than their CPA's rule of thumb.
+          Most brokers win the mandate they would have lost walking in empty-handed. <strong style={{ color: accent }}>Verified deal professionals are free, forever.</strong>
         </p>
 
         {/* ═══ Multiple Map — leads (cool, sexy, click-to-position) ═══ */}
         <section className="mb-28">
           <SectionHeader
             label="Step 1 · The Multiple Map"
-            title="See where your seller lands in their comp set."
-            sub="Pick the industry. Click the chart to place the pin. The position tells you whether the seller is in the premium zone, the middle, or the bottom — and what's holding them back from the next half-turn of multiple. Bring the chart to the pitch."
+            title="See where the business lands in its comp set."
+            sub="Pick the industry. Click the chart to place the pin. The position shows whether the business is in the premium zone, the middle, or the bottom — and what's holding it back from the next half-turn of multiple. Bring the chart to the pitch or the negotiation table."
             dark={dark}
           />
           <MultipleMap dark={dark} ebitda={18} />
@@ -111,7 +112,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
           <SectionHeader
             label="Step 2 · Baseline™"
             title="Run the number now."
-            sub="Pick the industry, drag in the revenue, watch the multiple range pull from the 2024-2025 mid-market consensus. You'll have a defensible Baseline range in 30 seconds — the same math the buyer's IB will run."
+            sub="Pick the industry, drag in the revenue, watch the multiple range pull from the 2024-2025 mid-market consensus. You'll have a defensible Baseline range in 30 seconds — the same math the buyer's investment bank will run."
             dark={dark}
           />
           <BaselineCalculator dark={dark} />
@@ -127,12 +128,12 @@ export default function SellBelow({ dark }: { dark: boolean }) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <BrandedTermCard
               term="Baseline"
-              oneLiner="The number you walk into the pitch with."
-              definition="The seller's industry comp multiple, applied to their real EBITDA, adjusted for the levers buyers actually price: customer concentration, growth, owner dependency, recurring revenue. Not a rule of thumb — the same math the buyer's IB will run."
+              oneLiner="The number you walk into the meeting with."
+              definition="The industry comp multiple, applied to real EBITDA, adjusted for the levers buyers actually price: customer concentration, growth, owner dependency, recurring revenue. Not a rule of thumb — the same math the buyer's investment bank will run."
               example="A $18M EBITDA specialty distributor at the 75th percentile of its comp set: 8.6× Baseline = $155M. A naive 5× rule of thumb says $90M. The difference is the comp set you cite at the first meeting."
               onCTA={() =>
                 bridgeToYulia(
-                  "Run a Baseline for my next sell-side prospect. The business is in [industry] with about $XM EBITDA."
+                  "Run a Baseline on a business I'm looking at. It's in [industry] with about $XM EBITDA. Walk me through the multiple range and the add-back schedule."
                 )
               }
               ctaLabel="Run a Baseline"
@@ -140,12 +141,12 @@ export default function SellBelow({ dark }: { dark: boolean }) {
             />
             <BrandedTermCard
               term="Blind Equity"
-              oneLiner="The earnings hiding in your seller's tax return."
+              oneLiner="The earnings hiding in the tax return."
               definition="The gap between reported EBITDA and real EBITDA. Above-market rent to the owner's real-estate LLC, family compensation above market, one-time legal/litigation, personal vehicles & phones, discontinued product line losses. Legitimate add-backs the CPA optimized away for tax savings — and that move the multiple at the negotiation table."
-              example="Mark's reported EBITDA was $16.2M. Sarah ran the P&L through Yulia and surfaced $1.8M of Blind Equity across 5 categories. Real EBITDA: $18M. At his 8.6× Baseline, that $1.8M of hidden EBITDA is worth $15.5M to the seller — and Sarah's success fee scales with it."
+              example="Mark's reported EBITDA was $16.2M. The P&L run through Yulia surfaced $1.8M of Blind Equity across 5 categories. Real EBITDA: $18M. At an 8.6× Baseline, that $1.8M of hidden EBITDA is worth $15.5M at the table — whether it's a broker's success fee or an owner's check at close."
               onCTA={() =>
                 bridgeToYulia(
-                  "Find the Blind Equity in this deal. Walk me through the add-backs the seller's CPA missed."
+                  "Find the Blind Equity in this deal. Walk me through the add-backs that were optimized away for tax savings."
                 )
               }
               ctaLabel="Find Blind Equity"
@@ -331,10 +332,12 @@ export default function SellBelow({ dark }: { dark: boolean }) {
 
         {/* ═══ CTA ═══ */}
         <PageCTA
-          headline={<>Run a Baseline for your next pitch.</>}
-          sub="Tell Yulia about the seller. She'll build the Baseline, find the Blind Equity, and hand you the add-back schedule to walk into the meeting with. Verified brokers and deal pros are free, forever."
+          headline={<>Get the number before the meeting.</>}
+          sub="Tell Yulia about the business. She'll build the Baseline, find the Blind Equity, and hand you the add-back schedule to walk in with — whether you're a broker pitching for the mandate or an owner meeting a buyer. Verified deal professionals are free, forever."
           buttonLabel="Run a Baseline"
-          onClick={goToChat}
+          onClick={() => bridgeToYulia(
+            "Run a Baseline on a business. It's in [industry] with about $XM EBITDA. Walk me through the Multiple Map and the add-back schedule."
+          )}
           dark={dark}
         />
       </div>
