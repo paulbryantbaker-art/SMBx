@@ -5,6 +5,8 @@
  */
 
 import { Drawer } from 'vaul';
+import { confirm } from '../../lib/confirm';
+import { showToast } from '../../lib/toast';
 
 interface Props {
   open: boolean;
@@ -111,7 +113,22 @@ export function DealActionsSheet({ open, onOpenChange, dark, dealName, onPin, on
 
             {onArchive && (
               <button
-                onClick={() => { onOpenChange(false); onArchive(); }}
+                onClick={async () => {
+                  onOpenChange(false);
+                  const ok = await confirm({
+                    title: `Archive ${dealName || 'this deal'}?`,
+                    body: 'It\u2019ll move out of your active stack. You can find archived deals later under "Show: All".',
+                    confirmLabel: 'Archive',
+                    cancelLabel: 'Keep',
+                    destructive: true,
+                  });
+                  if (!ok) return;
+                  onArchive();
+                  showToast(`${dealName || 'Deal'} archived`, {
+                    tone: 'success',
+                    action: { label: 'Undo', handler: () => { /* TODO when archive is undoable */ } },
+                  });
+                }}
                 type="button"
                 style={{
                   display: 'flex', alignItems: 'center', gap: 12,

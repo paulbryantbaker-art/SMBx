@@ -58,6 +58,7 @@ import { SignInSheet } from '../../components/mobile/SignInSheet';
 import { DealActionsSheet } from '../../components/mobile/DealActionsSheet';
 import { ToastHost } from '../../components/mobile/ToastHost';
 import { HelpSheet } from '../../components/mobile/HelpSheet';
+import { ConfirmHost } from '../../components/mobile/ConfirmHost';
 import { DealContextChips } from '../../components/mobile/DealContextChips';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
@@ -2606,6 +2607,9 @@ export default function AppShell() {
 
       {/* ═══ MOBILE TOAST HOST — singleton, lifts above the portaled chat pill ═══ */}
       {isMobile && <ToastHost />}
+
+      {/* ═══ MOBILE CONFIRM HOST — singleton sheet for destructive-action confirms ═══ */}
+      {isMobile && <ConfirmHost dark={dark} />}
 
       {/* ═══ MOBILE DEAL ACTIONS SHEET — long-press on a deal card opens this ═══ */}
       {isMobile && user && (
