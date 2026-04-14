@@ -88,7 +88,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
 
         {/* ═══ Audience connector ═══ */}
         <p
-          className="text-[13px] md:text-[14px] leading-relaxed mb-16 max-w-3xl"
+          className="text-[14px] md:text-[15px] leading-relaxed mb-16 max-w-3xl"
           style={{ color: mutedColor }}
         >
           Built for the brokers, M&amp;A advisors, search funders, and family-office deal teams running sell-side mandates day in, day out.

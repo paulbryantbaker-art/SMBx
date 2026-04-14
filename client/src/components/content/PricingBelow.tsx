@@ -264,7 +264,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
 
         {/* ═══ Connector — protagonists ═══ */}
         <p
-          className="text-[13px] md:text-[14px] leading-relaxed mb-16 max-w-3xl"
+          className="text-[14px] md:text-[15px] leading-relaxed mb-16 max-w-3xl"
           style={{ color: mutedColor }}
         >
           <span className="font-bold" style={{ color: accent }}>Mark D.</span> ran Free until he was ready, then upgraded.{' '}
