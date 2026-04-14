@@ -1867,10 +1867,11 @@ export default function AppShell() {
                       />
 
                       <div className={isPWA ? 'px-3' : 'px-4'} style={{ touchAction: 'auto' }}>
-                      {/* Gradient-glow input with + button for file uploads / utilities */}
+                      {/* Mobile pill — no gradient halo. Safari's bottom toolbar abuts
+                          the pill and visually slices any blur halo. Solid pill only;
+                          the inner border + shadow provide enough depth. */}
                       <form autoComplete="off" onSubmit={(e) => e.preventDefault()} role="presentation" data-form-type="other">
-                      <div className="relative group">
-                        <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'}`} />
+                      <div className="relative">
                         <div className={`relative rounded-full flex items-center p-2 pl-3 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
                           {/* + button — opens tools/upload drawer */}
                           <button
@@ -2146,22 +2147,19 @@ export default function AppShell() {
               touchAction: 'manipulation',
             }}
           >
-            {/* Pink gradient halo for depth — matches the home mobile pill.
-                Wrapped in .relative group so the absolute glow positions to the pill rect. */}
-            <div className="relative group">
-              <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'} pointer-events-none`} />
-              <div className="relative">
-                <ChatDock
-                  ref={dockRef}
-                  onSend={handleSend}
-                  onFileUpload={user ? handleFileUpload : undefined}
-                  variant="hero"
-                  rows={1}
-                  placeholder="Reply to Yulia..."
-                  disabled={sending}
-                />
-              </div>
-            </div>
+            {/* No halo on the chat pill — Safari's bottom toolbar abuts the pill
+                and visually slices the blur. The pill's own border + box-shadow
+                (in .dock-hero-pill CSS) provide enough depth without the bleed.
+                Home pill keeps its halo because it sits in a clean viewport edge. */}
+            <ChatDock
+              ref={dockRef}
+              onSend={handleSend}
+              onFileUpload={user ? handleFileUpload : undefined}
+              variant="hero"
+              rows={1}
+              placeholder="Reply to Yulia..."
+              disabled={sending}
+            />
           </div>,
           document.body
         )}
