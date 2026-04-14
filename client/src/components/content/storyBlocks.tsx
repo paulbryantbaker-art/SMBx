@@ -29,12 +29,16 @@ export function HookHeader({
   headline,
   sub,
   dark,
+  accent,
 }: {
   eyebrow: string;
   headline: ReactNode;
   sub: ReactNode;
   dark: boolean;
+  /** Optional per-page accent override. Defaults to brand pink. */
+  accent?: string;
 }) {
+  const accentColor = accent ?? (dark ? PINK_DARK : PINK);
   return (
     <header className="mb-20">
       <motion.p
@@ -42,9 +46,9 @@ export function HookHeader({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="text-[11px] font-bold uppercase tracking-[0.24em] mb-6"
-        style={{ color: dark ? PINK_DARK : PINK }}
+        style={{ color: accentColor }}
       >
-        <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: dark ? PINK_DARK : PINK }} />
+        <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: accentColor }} />
         smbx.ai · faster, easier M&amp;A · {eyebrow}
       </motion.p>
 
