@@ -73,7 +73,9 @@ export function sortDeals(deals: DealCardData[]): DealCardData[] {
 interface DealStackProps {
   deals: DealCardData[];
   onDealTap: (dealId: number) => void;
-  onStartFirstDeal?: () => void;
+  /** Called when the user taps one of the empty-state journey buttons.
+   *  The fill string is a prefill for the chat pill ("I want to sell my business — "). */
+  onStartFirstDeal?: (fill: string) => void;
   dark?: boolean;
 }
 
@@ -111,68 +113,119 @@ export function DealStack({ deals, onDealTap, onStartFirstDeal, dark = false }: 
 
 /* ═══ EMPTY STATE ═══ */
 
-function EmptyStack({ onStart, dark }: { onStart?: () => void; dark: boolean }) {
+/**
+ * Empty state — a "card-shaped" invitation that matches the Wallet aesthetic
+ * of the stack, instead of a generic "nothing here" illustration. Reads as
+ * the first, blank, tap-able card the user will ever see. When they act on
+ * it, a real DealCard will take its place.
+ */
+function EmptyStack({ onStart, dark }: { onStart?: (fill: string) => void; dark: boolean }) {
   const headingColor = dark ? '#F0F0F3' : '#1A1C1E';
-  const mutedColor = dark ? 'rgba(240,240,243,0.55)' : 'rgba(26,28,30,0.55)';
+  const mutedColor = dark ? 'rgba(240,240,243,0.62)' : 'rgba(26,28,30,0.62)';
+  const fadeColor = dark ? 'rgba(240,240,243,0.35)' : 'rgba(26,28,30,0.35)';
+  const cardBg = dark ? '#1A1C1E' : '#FFFFFF';
+  const cardBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+
+  const paths = [
+    { icon: 'sell', label: 'Sell a business', fill: 'I want to sell my business — ' },
+    { icon: 'shopping_cart', label: 'Buy a business', fill: 'I want to buy a business — ' },
+    { icon: 'savings', label: 'Raise capital', fill: 'I need to raise capital — ' },
+  ];
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        padding: '48px 24px 140px',
-        minHeight: '60dvh',
-      }}
-    >
-      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#D44A78" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 20, opacity: 0.7 }}>
-        <rect x="3" y="7" width="18" height="13" rx="2" />
-        <path d="M7 7V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2" />
-      </svg>
-      <h2 style={{
-        margin: 0,
-        fontFamily: 'Sora, system-ui',
-        fontSize: 22,
-        fontWeight: 800,
-        letterSpacing: '-0.02em',
-        color: headingColor,
-        marginBottom: 8,
-      }}>
-        Your pipeline lives here
-      </h2>
-      <p style={{
-        margin: 0,
-        maxWidth: 280,
-        fontFamily: 'Inter, system-ui',
-        fontSize: 15,
-        lineHeight: 1.5,
-        color: mutedColor,
-        marginBottom: 24,
-      }}>
-        Sell, buy, raise, or integrate — tell Yulia what you're working on and the deal will appear as a card.
-      </p>
-      {onStart && (
-        <button
-          onClick={onStart}
-          type="button"
+    <div style={{ padding: '16px 16px 140px' }}>
+      {/* Card-shaped onboarding entry — same 20px radius as DealCard */}
+      <div
+        style={{
+          borderRadius: 20,
+          overflow: 'hidden',
+          background: cardBg,
+          border: `1px solid ${cardBorder}`,
+          boxShadow: dark
+            ? '0 8px 28px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.2)'
+            : '0 8px 28px rgba(26,28,30,0.08), 0 2px 6px rgba(26,28,30,0.04)',
+        }}
+      >
+        {/* Gradient header band — matches DealCard journey color band */}
+        <div
           style={{
-            padding: '12px 20px',
-            borderRadius: 999,
-            border: 'none',
-            background: '#D44A78',
-            color: '#fff',
-            fontFamily: 'Inter, system-ui',
-            fontSize: 14,
-            fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: '0 6px 18px rgba(212,74,120,0.35)',
+            height: 56,
+            background: 'linear-gradient(135deg, #D44A78 0%, #E8709A 60%, #C99A3E 100%)',
+            position: 'relative',
           }}
         >
-          Start your first deal
-        </button>
-      )}
+          <div style={{ position: 'absolute', inset: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{
+              color: 'rgba(255,255,255,0.95)',
+              fontFamily: 'Sora, system-ui',
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+            }}>
+              Your first deal
+            </span>
+          </div>
+        </div>
+
+        <div style={{ padding: '16px 16px 18px' }}>
+          <h2 style={{
+            margin: 0,
+            fontFamily: 'Sora, system-ui',
+            fontSize: 20,
+            fontWeight: 800,
+            letterSpacing: '-0.02em',
+            color: headingColor,
+            lineHeight: 1.15,
+          }}>
+            What are you working on?
+          </h2>
+          <p style={{
+            margin: '6px 0 16px',
+            fontFamily: 'Inter, system-ui',
+            fontSize: 13,
+            lineHeight: 1.45,
+            color: mutedColor,
+            fontWeight: 500,
+          }}>
+            Tell Yulia about a business you're selling, buying, raising for, or integrating — it'll appear here as a card.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {paths.map((p) => (
+              <button
+                key={p.label}
+                onClick={() => onStart?.(p.fill)}
+                type="button"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '12px 14px',
+                  borderRadius: 14,
+                  background: 'transparent',
+                  border: `1px solid ${cardBorder}`,
+                  cursor: 'pointer',
+                  WebkitTapHighlightColor: 'transparent',
+                  textAlign: 'left',
+                  fontFamily: 'Inter, system-ui',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: headingColor,
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#D44A78' }}>
+                  {p.icon}
+                </span>
+                <span style={{ flex: 1 }}>{p.label}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={fadeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 6 15 12 9 18" />
+                </svg>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

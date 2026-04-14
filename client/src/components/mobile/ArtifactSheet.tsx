@@ -10,7 +10,8 @@
  */
 
 import { Drawer } from 'vaul';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import Markdown from 'react-markdown';
 
 interface Props {
   open: boolean;
@@ -199,15 +200,16 @@ export function ArtifactSheet({
             </button>
           </div>
 
-          {/* Scrollable body */}
+          {/* Scrollable body — markdown rendering for Yulia deliverables */}
           <div
             ref={scrollRef}
             onScroll={handleScroll}
+            className="artifact-sheet-prose"
             style={{
               flex: 1,
               overflowY: 'auto',
               WebkitOverflowScrolling: 'touch',
-              padding: '18px 18px 24px',
+              padding: '18px 18px 32px',
               color: bodyC,
               fontFamily: 'Inter, system-ui',
               fontSize: 15,
@@ -215,6 +217,27 @@ export function ArtifactSheet({
             }}
           >
             {children}
+            <style>{`
+              .artifact-sheet-prose h1 { font-family: Sora, system-ui; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; color: ${headingC}; margin: 0 0 12px; line-height: 1.2; }
+              .artifact-sheet-prose h2 { font-family: Sora, system-ui; font-size: 19px; font-weight: 700; letter-spacing: -0.015em; color: ${headingC}; margin: 24px 0 8px; line-height: 1.25; }
+              .artifact-sheet-prose h3 { font-family: Sora, system-ui; font-size: 16px; font-weight: 700; color: ${headingC}; margin: 18px 0 6px; line-height: 1.3; }
+              .artifact-sheet-prose h4 { font-family: Inter, system-ui; font-size: 14px; font-weight: 700; color: ${headingC}; margin: 14px 0 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+              .artifact-sheet-prose p { margin: 0 0 14px; }
+              .artifact-sheet-prose ul, .artifact-sheet-prose ol { margin: 0 0 14px; padding-left: 22px; }
+              .artifact-sheet-prose li { margin-bottom: 6px; }
+              .artifact-sheet-prose li::marker { color: ${pinkC}; }
+              .artifact-sheet-prose strong { color: ${headingC}; font-weight: 700; }
+              .artifact-sheet-prose em { color: ${bodyC}; }
+              .artifact-sheet-prose code { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; font-size: 13px; background: ${chipBg}; color: ${headingC}; padding: 2px 6px; border-radius: 6px; }
+              .artifact-sheet-prose pre { background: ${chipBg}; border: 1px solid ${borderC}; border-radius: 10px; padding: 12px; overflow-x: auto; font-size: 13px; }
+              .artifact-sheet-prose pre code { background: transparent; padding: 0; }
+              .artifact-sheet-prose blockquote { border-left: 3px solid ${pinkC}; padding: 4px 12px; margin: 12px 0; color: ${mutedC}; font-style: italic; }
+              .artifact-sheet-prose table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+              .artifact-sheet-prose th, .artifact-sheet-prose td { border-bottom: 1px solid ${borderC}; padding: 8px 10px; text-align: left; }
+              .artifact-sheet-prose th { font-family: Sora, system-ui; font-weight: 700; color: ${headingC}; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+              .artifact-sheet-prose hr { border: none; border-top: 1px solid ${borderC}; margin: 18px 0; }
+              .artifact-sheet-prose a { color: ${pinkC}; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+            `}</style>
           </div>
 
           {/* Footer actions */}

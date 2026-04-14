@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
+import Markdown from 'react-markdown';
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { trackEvent } from '../../lib/analytics';
@@ -1605,7 +1606,7 @@ export default function AppShell() {
                   {/* Mobile + logged-in + has deals → Wallet-style deal stack.
                       Replaces the greeting block with glanceable portfolio state.
                       Desktop + logged-out always see the hero/greeting block. */}
-                  {isMobile && user && authChat.grouped && filterRealDeals(authChat.grouped.deals).length > 0 ? (
+                  {isMobile && user && authChat.grouped ? (
                     <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
                       <div className="flex justify-center pt-6">
                         <LogoHero height={32} dark={dark} />
@@ -1630,6 +1631,7 @@ export default function AppShell() {
                             setViewState('chat');
                           }
                         }}
+                        onStartFirstDeal={(fill) => fillHomeInput(fill)}
                         dark={dark}
                       />
                     </div>
@@ -1784,7 +1786,7 @@ export default function AppShell() {
                       breathing room in the lower 38.2%, and the portaled pill floats over
                       the bottom of that breathing room. Grok-like simplicity. Mobile only,
                       and only when NOT showing the deal stack (stack manages its own scroll). */}
-                  {isMobile && !(user && authChat.grouped && filterRealDeals(authChat.grouped.deals).length > 0) && <div className="flex-1" aria-hidden />}
+                  {isMobile && !(user && authChat.grouped) && <div className="flex-1" aria-hidden />}
 
                   {/* ╔══════════════════════════════════════════════════════════════════════╗
                       ║ iOS PWA mobile home pill — LOAD-BEARING SETUP, see                   ║
@@ -1806,7 +1808,7 @@ export default function AppShell() {
                           on mobile home (not just browser). */}
                       <DealContextChips
                         dark={dark}
-                        hasDeals={!!(user && authChat.grouped && filterRealDeals(authChat.grouped.deals).length > 0)}
+                        hasDeals={!!(user && isMobile && authChat.grouped)}
                         onChipTap={(fill) => fillHomeInput(fill)}
                       />
 
@@ -1916,6 +1918,49 @@ export default function AppShell() {
                 ...(isMobile ? { paddingTop: 48 } : {}),
               }}
             >
+              {/* Mobile scope indicator — tells the user which deal this chat is about.
+                  Small, unobtrusive, tappable to return to the stack. Replaces the
+                  chapter strip we hid on mobile. */}
+              {isMobile && user && authChat.grouped && authChat.activeDealId && (() => {
+                const deal = authChat.grouped.deals.find(d => d.id === authChat.activeDealId);
+                if (!deal || !deal.business_name) return null;
+                const journey = (deal.journey_type || 'sell').toLowerCase();
+                const color = JOURNEY_COLORS[journey] || '#D44A78';
+                return (
+                  <button
+                    onClick={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); }}
+                    type="button"
+                    style={{
+                      alignSelf: 'center',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '6px 12px 6px 8px',
+                      marginBottom: 10,
+                      borderRadius: 999,
+                      border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                      background: dark ? '#1F2123' : '#FFFFFF',
+                      color: dark ? '#F0F0F3' : '#1A1C1E',
+                      fontFamily: 'Inter, system-ui',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      WebkitTapHighlightColor: 'transparent',
+                      boxShadow: dark ? 'none' : '0 1px 2px rgba(0,0,0,0.04)',
+                    }}
+                    aria-label={`Scoped to ${deal.business_name}. Tap to return to deals.`}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.55 }}>
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                    <span style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {deal.business_name}
+                    </span>
+                  </button>
+                );
+              })()}
+
               {/* Chapter strip — shows deal's conversation chapters as horizontal timeline.
                   Desktop only — on mobile the DealStack + single-conversation-per-card
                   model replaces this; a horizontal breadcrumb above the chat feels like
@@ -2494,13 +2539,27 @@ export default function AppShell() {
             }).catch(() => {});
           } : undefined}
         >
-          {artifactSheet?.content && (
+          {artifactSheet?.content ? (
+            <Markdown>{artifactSheet.content}</Markdown>
+          ) : (
             <div style={{
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              fontFamily: 'Inter, system-ui',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '48px 24px',
+              minHeight: 320,
+              textAlign: 'center',
+              gap: 12,
+              color: dark ? 'rgba(240,240,243,0.55)' : 'rgba(26,28,30,0.55)',
             }}>
-              {artifactSheet.content}
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <p style={{ margin: 0, fontSize: 14 }}>
+                Yulia hasn't written this yet.
+              </p>
             </div>
           )}
         </ArtifactSheet>

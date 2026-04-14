@@ -146,22 +146,69 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
       WebkitUserSelect: 'text',
     } as React.CSSProperties}>
 
-      {/* ─── Empty state: help area ─── */}
+      {/* ─── Empty state — warmer, tighter, contextual Yulia-voice opener ─── */}
       {isEmpty && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: desktop ? 300 : 200, gap: 16, padding: '40px 20px' }}>
-          <img src={dark ? '/X-white.png' : '/X.png'} alt="smbx.ai" draggable={false} style={{ height: 32, width: 32, objectFit: 'contain', opacity: dark ? 0.25 : 0.15 }} />
-          <p style={{ fontSize: 14, color: mutedColor, textAlign: 'center', margin: 0, lineHeight: 1.6, maxWidth: 360 }}>
-            Drop any files here to upload, or just start typing to chat with Yulia.
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: desktop ? 320 : 240,
+          gap: desktop ? 20 : 14,
+          padding: desktop ? '48px 24px' : '32px 20px',
+        }}>
+          {/* Yulia avatar, not the X logo — this is her speaking */}
+          <div style={{
+            width: desktop ? 48 : 44,
+            height: desktop ? 48 : 44,
+            borderRadius: '50%',
+            background: `linear-gradient(135deg, #D44A78, #E8709A)`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            fontFamily: 'Sora, system-ui',
+            fontSize: desktop ? 18 : 16,
+            fontWeight: 800,
+            boxShadow: '0 4px 12px rgba(212,74,120,0.24)',
+          }}>
+            Y
+          </div>
+
+          <p style={{
+            fontFamily: 'Sora, system-ui',
+            fontSize: desktop ? 18 : 17,
+            fontWeight: 700,
+            letterSpacing: '-0.01em',
+            color: dark ? '#F0F0F3' : '#1A1C1E',
+            textAlign: 'center',
+            margin: 0,
+            lineHeight: 1.3,
+            maxWidth: 340,
+          }}>
+            What are you working on?
           </p>
 
-          {/* Expandable shortcuts */}
+          <p style={{
+            fontSize: desktop ? 14 : 13,
+            color: mutedColor,
+            textAlign: 'center',
+            margin: 0,
+            lineHeight: 1.5,
+            maxWidth: 320,
+            fontWeight: 500,
+          }}>
+            Tell me about a business you're selling, buying, raising for, or integrating. I'll take it from there.
+          </p>
+
+          {/* Shortcuts — expandable still, but labelled as "ways to start" */}
           <button
             onClick={() => setHelpExpanded(h => !h)}
             className="bg-transparent border-none cursor-pointer"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 500, color: '#D44A78', fontFamily: 'inherit', padding: '4px 8px', borderRadius: 8 }}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#D44A78', fontFamily: 'inherit', padding: '6px 12px', borderRadius: 999, marginTop: 4 }}
             type="button"
           >
-            Quick starts
+            Ways to start
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: helpExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}>
               <polyline points="6 9 12 15 18 9" />
             </svg>
