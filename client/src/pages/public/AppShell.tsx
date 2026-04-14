@@ -1472,46 +1472,11 @@ export default function AppShell() {
 
   /* ═══ RENDER ═══ */
 
-  // ─── Mobile swipe gestures with edge guard (gestures from inside viewport, not edges) ───
-  useEffect(() => {
-    if (!isMobile) return;
-    let startX = 0;
-    let startY = 0;
-    let startT = 0;
-    let trackable = false;
-
-    const onStart = (e: TouchEvent) => {
-      const t = e.touches[0];
-      startX = t.clientX;
-      startY = t.clientY;
-      startT = Date.now();
-      // Track swipes that start in the left edge zone (0-40px). iOS PWA's
-      // native swipe-to-back is blocked by touch-action: pan-y on html/body,
-      // so we can safely own the full edge-swipe gesture on standalone PWA.
-      trackable = startX < 40;
-    };
-
-    const onEnd = (e: TouchEvent) => {
-      if (!trackable) return;
-      trackable = false;
-      const t = e.changedTouches[0];
-      const dx = t.clientX - startX;
-      const dy = t.clientY - startY;
-      const dt = Date.now() - startT;
-      if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) || dt > 600) return;
-      // Only rightward (positive dx) swipes from the left edge open the sidebar.
-      if (dx > 0 && !isMobileSidebarOpen) {
-        setIsMobileSidebarOpen(true);
-      }
-    };
-
-    document.addEventListener('touchstart', onStart, { passive: true });
-    document.addEventListener('touchend', onEnd, { passive: true });
-    return () => {
-      document.removeEventListener('touchstart', onStart);
-      document.removeEventListener('touchend', onEnd);
-    };
-  }, [isMobile, isMobileSidebarOpen, isMobileCanvasDrawerOpen]);
+  // Custom mobile swipe gestures removed — we lean into iOS's native
+  // swipe-from-left-edge = history.back() gesture instead of fighting it.
+  // The sidebar is opened via the hamburger button (explicit, accessible,
+  // no gesture conflict). See memory/architecture_ios_pwa_pill.md for the
+  // philosophy: work WITH the platform, not AGAINST it.
 
   return (
     <div
