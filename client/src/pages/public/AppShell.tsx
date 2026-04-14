@@ -481,7 +481,7 @@ const JOURNEY_COLORS: Record<string, string> = {
 
 export default function AppShell() {
   const [location, navigate] = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const [dark, setDark] = useDarkMode();
 
   // Core state
@@ -2900,11 +2900,35 @@ export default function AppShell() {
           surface, not in a drawer menu. Account actions (sign out, dark mode,
           subscription, settings) now accessible via the top-right avatar button
           below → AccountSheet (Vaul). Only rendered when user is logged in. */}
-      {isMobile && user && (
+      {/* Top-right account affordance — three states:
+          1. Loading auth: small skeleton circle (don't show login or avatar yet).
+          2. Logged in: pink gradient avatar with first initial → AccountSheet.
+          3. Logged out: pill-shaped "Sign in" with person icon → SignInSheet.
+          The logged-out version is visually distinct from the avatar (pill, not circle,
+          + label) so users can tell auth state at a glance. */}
+      {isMobile && authLoading && (
+        <div
+          aria-hidden
+          style={{
+            position: 'fixed',
+            top: 'calc(env(safe-area-inset-top) + 12px)',
+            right: 16,
+            zIndex: 55,
+            width: 36, height: 36,
+            borderRadius: '50%',
+            background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+            animation: 'authIconPulse 1.4s ease-in-out infinite',
+          }}
+        >
+          <style>{`@keyframes authIconPulse { 0%,100% { opacity:0.55; } 50% { opacity:1; } }`}</style>
+        </div>
+      )}
+
+      {isMobile && !authLoading && user && (
         <button
           onClick={() => setAccountSheetOpen(true)}
           type="button"
-          aria-label="Account"
+          aria-label={`Account — signed in as ${user.display_name || user.email}`}
           className="active:scale-90"
           style={{
             position: 'fixed',
@@ -2930,36 +2954,37 @@ export default function AppShell() {
         </button>
       )}
 
-      {/* Logged-out mirror: iOS-convention login icon top-right → SignInSheet.
-          Same placement as the avatar so users find the account affordance in
-          the same spot regardless of auth state. */}
-      {isMobile && !user && (
+      {isMobile && !authLoading && !user && (
         <button
           onClick={() => setSignInSheetOpen(true)}
           type="button"
           aria-label="Sign in"
-          className="active:scale-90"
+          className="active:scale-95"
           style={{
             position: 'fixed',
             top: 'calc(env(safe-area-inset-top) + 12px)',
             right: 16,
             zIndex: 55,
-            width: 36,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
             height: 36,
-            borderRadius: '50%',
+            padding: '0 12px 0 10px',
+            borderRadius: 999,
             background: dark ? '#1f2123' : '#ffffff',
             color: dark ? '#E8709A' : '#D44A78',
             border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)'}`,
             cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            fontFamily: 'Inter, system-ui',
+            fontSize: 13,
+            fontWeight: 700,
             boxShadow: dark ? 'none' : '0 1px 4px rgba(26,28,30,0.06)',
             transition: 'transform 120ms',
             WebkitTapHighlightColor: 'transparent',
           }}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>person</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>login</span>
+          Sign in
         </button>
       )}
 
