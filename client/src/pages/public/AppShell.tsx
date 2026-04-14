@@ -41,6 +41,7 @@ import CommandPalette, { type CommandItem } from '../../components/desktop/Comma
 import DesktopFooter from '../../components/desktop/DesktopFooter';
 import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
+const MobileSellStory = lazy(() => import('../../components/mobile/MobileSellStory'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
 const RaiseBelow = lazy(() => import('../../components/content/RaiseBelow'));
 const IntegrateBelow = lazy(() => import('../../components/content/IntegrateBelow'));
@@ -2260,7 +2261,7 @@ export default function AppShell() {
                   }}
                 >
                   <Suspense fallback={<BelowSkeleton />}>
-                    {activeTab === 'sell' ? <SellBelow dark={dark} /> :
+                    {activeTab === 'sell' ? (isMobile ? <MobileSellStory dark={dark} /> : <SellBelow dark={dark} />) :
                      activeTab === 'buy' ? <BuyBelow dark={dark} /> :
                      activeTab === 'raise' ? <RaiseBelow dark={dark} /> :
                      activeTab === 'how-it-works' ? <HowItWorksBelow dark={dark} /> :
