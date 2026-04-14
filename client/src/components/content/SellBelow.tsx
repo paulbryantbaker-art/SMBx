@@ -19,6 +19,11 @@ export default function SellBelow({ dark }: { dark: boolean }) {
     description:
       'Walk into your sell-side pitch with the Baseline already in hand. Show the seller their real number at the first meeting. Win mandates the other brokers lose. Free for verified deal professionals.',
     canonical: 'https://smbx.ai/sell',
+    ogImage: 'https://smbx.ai/og-sell.png',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://smbx.ai/' },
+      { name: 'Sell a business', url: 'https://smbx.ai/sell' },
+    ],
     faqs: [
       {
         question: 'How does Yulia help me win sell-side pitches?',

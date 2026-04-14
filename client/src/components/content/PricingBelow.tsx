@@ -14,6 +14,11 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
     description:
       'Yulia gives everyone investment bank power, knowledge, and guidance. 5-tier subscription from Free to Institutional. Verified deal professionals — attorneys, CPAs, brokers — free forever.',
     canonical: 'https://smbx.ai/pricing',
+    ogImage: 'https://smbx.ai/og-pricing.png',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://smbx.ai/' },
+      { name: 'Pricing', url: 'https://smbx.ai/pricing' },
+    ],
     faqs: [
       {
         question: 'Is Yulia a substitute for my M&A advisor or investment bank?',

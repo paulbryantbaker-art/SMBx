@@ -16,6 +16,11 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
     description:
       'Hit your model in year 1. Refi at a higher multiple in year 2. The 180-day post-close playbook from Anna J — search fund principal, $90M acquisition, 2.7× MOIC in 18 months.',
     canonical: 'https://smbx.ai/integrate',
+    ogImage: 'https://smbx.ai/og-integrate.png',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://smbx.ai/' },
+      { name: 'Post-acquisition integration', url: 'https://smbx.ai/integrate' },
+    ],
     faqs: [
       {
         question: 'What happens in the first 180 days after closing an acquisition?',

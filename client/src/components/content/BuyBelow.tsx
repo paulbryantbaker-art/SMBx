@@ -19,6 +19,11 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
     description:
       'Score every deal in 8 seconds. Kill the losers, find the one that pays. The Rundown™ runs 7 dimensions on any deal — for SBA buyers to $1B funds. AI deal intelligence for acquirers.',
     canonical: 'https://smbx.ai/buy',
+    ogImage: 'https://smbx.ai/og-buy.png',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://smbx.ai/' },
+      { name: 'Buy a business', url: 'https://smbx.ai/buy' },
+    ],
     faqs: [
       {
         question: 'How do I screen acquisition targets fast?',

@@ -20,6 +20,11 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
     description:
       'Model every stack: senior, unitranche, mezz, equity, seller rollover. Live cost of capital, DSCR, and founder retention. For owner-operators raising growth capital and sponsors raising for an acquisition.',
     canonical: 'https://smbx.ai/raise',
+    ogImage: 'https://smbx.ai/og-raise.png',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://smbx.ai/' },
+      { name: 'Raise capital', url: 'https://smbx.ai/raise' },
+    ],
     faqs: [
       {
         question: 'Should I raise debt, equity, or a blend for my growth capital?',

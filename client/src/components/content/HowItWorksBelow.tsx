@@ -16,6 +16,11 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
     description:
       'Six engines, 22 enforced gates, one conversation. From first sentence to 180 days post-close. See how Yulia runs upper middle market M&A end-to-end.',
     canonical: 'https://smbx.ai/how-it-works',
+    ogImage: 'https://smbx.ai/og-how.png',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://smbx.ai/' },
+      { name: 'How it works', url: 'https://smbx.ai/how-it-works' },
+    ],
     faqs: [
       {
         question: 'How is Yulia different from ChatGPT for M&A?',

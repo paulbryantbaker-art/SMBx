@@ -16,6 +16,11 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
     description:
       'For M&A advisors, brokers, fundless sponsors, and PE deal teams. Win more pitches with a Baseline at the first meeting. Kill bad deals before LOI. Triple your engagements without adding partners.',
     canonical: 'https://smbx.ai/advisors',
+    ogImage: 'https://smbx.ai/og-advisors.png',
+    breadcrumbs: [
+      { name: 'Home', url: 'https://smbx.ai/' },
+      { name: 'For advisors', url: 'https://smbx.ai/advisors' },
+    ],
     faqs: [
       {
         question: 'How does Yulia help advisors win client pitches?',
