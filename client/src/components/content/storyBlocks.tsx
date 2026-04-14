@@ -339,13 +339,13 @@ export function SlowVsFast({
         The way it's been &nbsp;→&nbsp; with Yulia
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-0">
-        {/* Slow side — 5 cols */}
+      <div className="grid grid-cols-1 md:grid-cols-11 gap-8 md:gap-8">
+        {/* Slow side — 5 of 11 cols (symmetric with fast side) */}
         <motion.div
           initial={{ opacity: 0, x: -16 }}
           animate={inView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="md:col-span-5 md:pr-12"
+          className="md:col-span-5"
         >
           <p
             className="text-xs font-bold uppercase tracking-[0.18em] mb-6 opacity-50"
@@ -380,12 +380,12 @@ export function SlowVsFast({
           <div className="w-px h-full" style={{ background: ruleColor }} />
         </div>
 
-        {/* Fast side — 6 cols */}
+        {/* Fast side — 5 of 11 cols (symmetric with slow side) */}
         <motion.div
           initial={{ opacity: 0, x: 16 }}
           animate={inView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          className="md:col-span-6 md:pl-12"
+          className="md:col-span-5"
         >
           <p
             className="text-xs font-bold uppercase tracking-[0.18em] mb-6"
