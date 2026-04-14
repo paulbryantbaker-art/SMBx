@@ -50,6 +50,7 @@ const IntegrateBelow = lazy(() => import('../../components/content/IntegrateBelo
 const MobileIntegrateStory = lazy(() => import('../../components/mobile/MobileIntegrateStory'));
 const HowItWorksBelow = lazy(() => import('../../components/content/HowItWorksBelow'));
 const AdvisorsBelow = lazy(() => import('../../components/content/AdvisorsBelow'));
+const MobileAdvisorsStory = lazy(() => import('../../components/mobile/MobileAdvisorsStory'));
 const PricingBelow = lazy(() => import('../../components/content/PricingBelow'));
 
 // Mobile rebuild — Claude+ pattern
@@ -2291,7 +2292,7 @@ export default function AppShell() {
                      activeTab === 'raise' ? (isMobile ? <MobileRaiseStory dark={dark} /> : <RaiseBelow dark={dark} />) :
                      activeTab === 'how-it-works' ? <HowItWorksBelow dark={dark} /> :
                      activeTab === 'integrate' ? (isMobile ? <MobileIntegrateStory dark={dark} /> : <IntegrateBelow dark={dark} />) :
-                     activeTab === 'advisors' ? <AdvisorsBelow dark={dark} /> :
+                     activeTab === 'advisors' ? (isMobile ? <MobileAdvisorsStory dark={dark} /> : <AdvisorsBelow dark={dark} />) :
                      activeTab === 'pricing' ? <PricingBelow dark={dark} /> : null}
                   </Suspense>
                   {!isMobile ? (
