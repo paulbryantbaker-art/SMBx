@@ -32,14 +32,32 @@ const DIMENSIONS: Dimension[] = [
 type DealPreset = {
   id: string;
   title: string;
+  /** Buyer-type badge shown alongside the preset so a reader can self-identify. */
+  buyerType: 'SBA' | 'Search' | 'Sponsor' | 'PE';
   blurb: string;
   scores: Record<string, { value: number; note: string }>;
 };
 
 const PRESETS: DealPreset[] = [
   {
+    id: 'hvac-smb',
+    title: 'Regional HVAC services · Midwest',
+    buyerType: 'SBA',
+    blurb: '$7.2M revenue · $1.1M EBITDA · 4.2× ask · 38% commercial / 62% residential · 9% YoY · 22 yrs operating',
+    scores: {
+      financial:     { value: 74, note: '15% EBITDA margin · stable 3-yr trend · moderate working-capital need' },
+      market:        { value: 79, note: 'Dense service territory · 140 recurring maintenance contracts' },
+      ownerDep:      { value: 52, note: 'Owner holds master HVAC license · 12-month earnout + license transfer plan' },
+      concentration: { value: 81, note: 'No customer > 4% of revenue · top-10 = 18%' },
+      growth:        { value: 72, note: '9% YoY · steady, price-driven · commercial book growing faster than residential' },
+      bankability:   { value: 84, note: 'SBA 7(a) eligible · asset-backed · DSCR 1.42× at 10% down + 10-yr term' },
+      opsRisk:       { value: 68, note: '11 technicians retained long-term · dispatcher is a key person' },
+    },
+  },
+  {
     id: 'cyber-saas',
     title: 'Cybersecurity SaaS · Boston',
+    buyerType: 'PE',
     blurb: '$88M ARR · $24M EBITDA · 18× ask · NRR 132% · top-10 = 16% · 32% YoY · 9 yrs operating',
     scores: {
       financial:     { value: 92, note: 'Rule of 40 = 64 — top decile · 27% EBITDA margin' },
@@ -54,6 +72,7 @@ const PRESETS: DealPreset[] = [
   {
     id: 'dental-dso',
     title: 'Multi-site dental DSO · Southeast',
+    buyerType: 'Sponsor',
     blurb: '$260M revenue · $44M EBITDA · 12.5× ask · 38 locations · 14% CAGR · 11 yrs operating',
     scores: {
       financial:     { value: 81, note: 'Margins steady at 17%, M&A-driven EBITDA growth' },
@@ -68,6 +87,7 @@ const PRESETS: DealPreset[] = [
   {
     id: 'defense-mfg',
     title: 'Specialty defense manufacturing · Texas',
+    buyerType: 'PE',
     blurb: '$410M revenue · $58M EBITDA · 9.5× ask · DoD prime contracts · 11% CAGR · 22 yrs operating',
     scores: {
       financial:     { value: 75, note: 'Stable 14% margins, capex-heavy, lumpy quarter-to-quarter' },
@@ -176,23 +196,49 @@ export function LiveRundown({ dark }: { dark: boolean }) {
         </div>
       </div>
 
+      {/* Affordance — set expectations BEFORE the buttons (previously was at the bottom) */}
+      <p
+        className="text-[12px] leading-relaxed mb-4"
+        style={{ color: mutedColor }}
+      >
+        Pick a deal scaled to your buyer profile. These four preview scores are pre-computed for instant replay —
+        Yulia runs the live version on any deal you bring her (listing URL, CIM excerpt, or one-line description).
+      </p>
+
       {/* Preset selector */}
       <div className="flex flex-wrap gap-2 mb-5">
-        {PRESETS.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => setPresetId(p.id)}
-            className="text-xs font-bold px-4 py-2.5 rounded-full transition-all"
-            style={{
-              background: p.id === presetId ? accent : (dark ? 'rgba(255,255,255,0.06)' : 'white'),
-              color: p.id === presetId ? 'white' : headingColor,
-              border: `1px solid ${p.id === presetId ? accent : border}`,
-              cursor: 'pointer',
-            }}
-          >
-            {p.title}
-          </button>
-        ))}
+        {PRESETS.map((p) => {
+          const active = p.id === presetId;
+          return (
+            <button
+              key={p.id}
+              onClick={() => setPresetId(p.id)}
+              className="text-xs font-bold px-4 py-2.5 rounded-full transition-all inline-flex items-center gap-2"
+              style={{
+                background: active ? accent : (dark ? 'rgba(255,255,255,0.06)' : 'white'),
+                color: active ? 'white' : headingColor,
+                border: `1px solid ${active ? accent : border}`,
+                cursor: 'pointer',
+              }}
+            >
+              <span
+                style={{
+                  padding: '1px 6px',
+                  borderRadius: 999,
+                  fontSize: 9,
+                  fontWeight: 800,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  background: active ? 'rgba(255,255,255,0.22)' : (dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.06)'),
+                  color: active ? 'white' : mutedColor,
+                }}
+              >
+                {p.buyerType}
+              </span>
+              {p.title}
+            </button>
+          );
+        })}
       </div>
 
       {/* Selected deal blurb */}
@@ -335,10 +381,6 @@ export function LiveRundown({ dark }: { dark: boolean }) {
         )}
       </AnimatePresence>
 
-      <p className="text-xs mt-5" style={{ color: mutedColor }}>
-        Public preview uses pre-baked scores. Yulia runs the live version on any deal you bring her — paste a listing URL,
-        a CIM excerpt, or a one-line description.
-      </p>
     </div>
   );
 }
