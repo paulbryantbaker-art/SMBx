@@ -48,7 +48,8 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
   const headingColor = dark ? '#f9f9fc' : '#0f1012';
   const bodyColor = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
-  const accent = dark ? '#E8709A' : '#D44A78';
+  // Journey=pmi accent (plum). Inline <em>/<strong> flourishes + HookHeader eyebrow.
+  const accent = dark ? '#AE6D9A' : '#8F4A7A';
   const innerBg = dark ? 'rgba(255,255,255,0.04)' : 'white';
   const border = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
 
@@ -117,6 +118,7 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
             </>
           }
           dark={dark}
+          accent={accent}
         />
 
         {/* ═══ Anna's Story ═══ */}
