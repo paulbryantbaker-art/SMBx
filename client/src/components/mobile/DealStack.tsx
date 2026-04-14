@@ -69,6 +69,8 @@ interface DealStackProps {
   onStartFirstDeal?: (fill: string) => void;
   /** Called when user long-presses the top card — future quick-actions sheet. */
   onDealLongPress?: (dealId: number) => void;
+  /** Called when the user taps the "+ N more" indicator to see all deals. */
+  onSeeAll?: () => void;
   /** Highlight a newly-created deal with a subtle pulse for 5s. */
   justCreatedDealId?: number | null;
   /** While true, render skeletons instead of cards (initial fetch in flight). */
@@ -78,7 +80,7 @@ interface DealStackProps {
 
 /* ═══ COMPONENT ═══ */
 
-export function DealStack({ deals, onDealTap, onStartFirstDeal, onDealLongPress, justCreatedDealId, loading = false, dark = false }: DealStackProps) {
+export function DealStack({ deals, onDealTap, onStartFirstDeal, onDealLongPress, onSeeAll, justCreatedDealId, loading = false, dark = false }: DealStackProps) {
   const reduceMotion = useReducedMotion();
   const sorted = useMemo(() => sortDeals(filterRealDeals(deals)), [deals]);
   const [topId, setTopId] = useState<number | null>(null);
@@ -200,20 +202,30 @@ export function DealStack({ deals, onDealTap, onStartFirstDeal, onDealLongPress,
         </AnimatePresence>
       </div>
 
-      {/* Overflow indicator */}
+      {/* Overflow indicator → tap to expand to full searchable/filterable list */}
       {overflowCount > 0 && (
-        <div
+        <button
+          onClick={onSeeAll}
+          type="button"
           style={{
             marginTop: 14,
+            display: 'block',
+            width: '100%',
+            padding: '10px 14px',
+            border: 'none',
+            background: 'transparent',
             textAlign: 'center',
             fontFamily: 'Inter, system-ui',
-            fontSize: 12,
-            fontWeight: 600,
-            color: dark ? 'rgba(240,240,243,0.5)' : 'rgba(26,28,30,0.5)',
+            fontSize: 13,
+            fontWeight: 700,
+            color: dark ? '#E8709A' : '#D44A78',
+            cursor: 'pointer',
+            WebkitTapHighlightColor: 'transparent',
+            borderRadius: 12,
           }}
         >
-          + {overflowCount} more
-        </div>
+          See all {sorted.length} deals →
+        </button>
       )}
 
       {/* First-time gesture hint overlay (once per device, dismissable) */}
