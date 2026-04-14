@@ -1,4 +1,4 @@
-import { goToChat } from './chatBridge';
+import { goToChat, bridgeToYulia } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { CapacitySlider, SynergyBuilder } from './AdvisorTools';
 import {
@@ -42,6 +42,16 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
         question: 'Will my clients know I\'m using AI?',
         answer:
           'Only if you tell them. Every document carries your branding. Yulia is your back office, not your front office. Your relationships, your judgment, your fees.',
+      },
+      {
+        question: 'What does the economics look like for a solo M&A advisor versus a team?',
+        answer:
+          'Solo advisors typically handle 6-8 active mandates; Yulia unlocks 18-22 because each mandate needs hours not weeks of analyst work. On a $12-18M avg close fee practice, that\u2019s a $4-10M revenue difference at roughly the same partner hours. For teams, Yulia replaces the junior analyst workload — more mandates per partner without proportional hires. Either way the margin profile moves from ~60% to ~78%.',
+      },
+      {
+        question: 'Are verified deal professionals really free, forever?',
+        answer:
+          'Yes. Verified M&A advisors, brokers, attorneys, CPAs, real estate brokers, wealth managers, and appraisers get full Professional features free — forever. Your clients pay their own subscription if they engage the platform directly. Yulia recognizes deal pros in conversation and switches to peer-to-peer mode automatically — no hand-holding, no retail onboarding, just the tooling.',
       },
     ],
   });
@@ -443,7 +453,9 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           headline={<>Try Professional free for 90 days.</>}
           sub="Run a real client engagement before you decide. Build a Baseline at your next pitch meeting. Generate a CIM. See what the pipeline looks like."
           buttonLabel="Start 90-day trial"
-          onClick={goToChat}
+          onClick={() => bridgeToYulia(
+            "I run an M&A advisory practice and want to see how Yulia fits. We currently handle about X active mandates, typical deal size $XM-$XM EBITDA, and most engagements run [X] weeks from pitch to close."
+          )}
           dark={dark}
         />
       </div>

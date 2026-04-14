@@ -1,5 +1,5 @@
 import { ScrollReveal } from './animations';
-import { goToChat } from './chatBridge';
+import { goToChat, bridgeToYulia } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { LandingSBACalc } from './LandingCalculators';
 import { ChatGPTvsYulia } from './ChatGPTvsYulia';
@@ -42,6 +42,16 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
         question: 'What does deal intelligence mean?',
         answer:
           'Financial analysis + market data + industry benchmarks + workflow management. Unlike deal listings or general AI, deal intelligence is purpose-built for evaluating, structuring, routing, signing, and closing transactions. The chain of custody is the differentiator.',
+      },
+      {
+        question: 'What are the six engines that run under the hood?',
+        answer:
+          'Financial Extraction normalizes P&Ls and tax returns. Market Intelligence pulls live comp multiples and recent deal activity. Legal Auditor keeps counsel in the loop on every term change. Deal Modeling runs valuation, cap stacks, and DSCR in real time. Cap Table handles dilution, rollovers, and exit waterfalls. Document Generator drafts CIMs, LOIs, IC memos, and board packages from verified numbers. Each engine is deterministic and leaves an audit trail.',
+      },
+      {
+        question: 'Is Yulia a substitute for my lawyer, CPA, or investment banker?',
+        answer:
+          'No. Yulia is the deal operating system that makes your advisors faster and your decisions defensible. Every term sheet still routes to counsel. Every tax position still routes to your CPA. Every major transaction still benefits from a banker\u2019s relationships. What Yulia replaces is the analyst pod — the modeling, drafting, memo-writing, and state-tracking that used to take weeks and $250-500K of professional fees.',
       },
     ],
   });
@@ -439,7 +449,9 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
           headline={<>Describe your deal. Watch the intelligence run.</>}
           sub="Tell Yulia about your business, a deal you're evaluating, or capital you need to raise. Ninety seconds in, you'll see what she does. No signup. No card."
           buttonLabel="Talk to Yulia"
-          onClick={goToChat}
+          onClick={() => bridgeToYulia(
+            "Walk me through how you'd run a deal. I'm working on a [sell-side / buy-side / raise / post-close integration] mandate — roughly $XM EBITDA, [industry]."
+          )}
           dark={dark}
         />
       </div>

@@ -335,7 +335,9 @@ export default function SellBelow({ dark }: { dark: boolean }) {
           headline={<>Run a Baseline for your next pitch.</>}
           sub="Tell Yulia about the seller. She'll build the Baseline, find the Blind Equity, and hand you the add-back schedule to walk into the meeting with. Verified brokers and deal pros are free, forever."
           buttonLabel="Run a Baseline"
-          onClick={goToChat}
+          onClick={() => bridgeToYulia(
+            "Run a Baseline for my next sell-side prospect. The business is in [industry] with about $XM EBITDA. Walk me through the Multiple Map and the add-back schedule."
+          )}
           dark={dark}
         />
       </div>

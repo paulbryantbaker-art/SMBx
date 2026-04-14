@@ -1,4 +1,4 @@
-import { goToChat } from './chatBridge';
+import { goToChat, bridgeToYulia } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { Day180Calendar } from './Day180Calendar';
 import {
@@ -42,6 +42,16 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
         question: 'How does Yulia help with post-close integration?',
         answer:
           'Yulia builds a personalized 180-day plan from your deal financials and DD findings. She monitors customer retention, employee retention, revenue vs deal model, EBITDA build-back, and covenant headroom — flagging issues before they become problems. Every recommendation is tied to a KPI and a deadline.',
+      },
+      {
+        question: 'What should I NOT change in the first 30 days?',
+        answer:
+          'Pricing to large customers, compensation for retained employees, operating procedures the team relies on daily, vendor relationships that carry institutional knowledge. The cost of disruption in the first month is almost always higher than the short-term economic upside. Move fast on systems and reporting; move slowly on anything customers and employees feel.',
+      },
+      {
+        question: 'How do I know if I\u2019m hitting the deal model on schedule?',
+        answer:
+          'You need monthly financials within 7 days of month-end, weekly cash flow, and a working capital dashboard — set up in week 1. Compare each month to the deal model line-by-line. EBITDA variance above 10% in either direction is a signal: investigate before month 3. The 60% of buyers who miss year 1 usually miss because they didn\u2019t have reporting until month 4, by which point the variance is already a covenant problem.',
       },
     ],
   });
@@ -298,7 +308,9 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
           headline={<>Build your 180-day plan.</>}
           sub="Bring Yulia your deal financials and your DD report. She'll build the day-by-day plan, monitor the KPIs, and force decisions before the cliff."
           buttonLabel="Build my plan"
-          onClick={goToChat}
+          onClick={() => bridgeToYulia(
+            "Build my 180-day integration plan. I just closed on a [business type] with about $XM EBITDA. Key risks I'm watching: [customer concentration / key employees / working capital / other]."
+          )}
           dark={dark}
         />
       </div>

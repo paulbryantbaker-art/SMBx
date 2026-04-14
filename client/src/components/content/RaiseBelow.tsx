@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { goToChat } from './chatBridge';
+import { goToChat, bridgeToYulia } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { ConversationTyping } from './animations';
 import { StackBuilder, AudiencePicker, type Audience } from './StackBuilder';
@@ -46,6 +46,16 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
         question: 'How much can I borrow on my business?',
         answer:
           'Senior leverage in 2024-2025 is typically 3.5-4.5× EBITDA for asset-light services and 4.5-5.5× for asset-heavy distribution and manufacturing. Adding unitranche or 2nd lien can push total leverage to 5.5-6.5× if DSCR clears 1.20× minimum. Personal guarantees apply on SBA 7(a) but not on conventional bank or fund debt at this size.',
+      },
+      {
+        question: 'What does a seller-rollover tranche look like and why include one?',
+        answer:
+          'A seller rollover is equity the seller keeps in the deal — typically 5-15% of purchase consideration, sometimes structured as preferred or common. It aligns the seller through transition (they still benefit from upside), softens personal-guarantee asks on the buyer side, and often gets lenders comfortable at slightly higher senior leverage. It also can defer tax on the rolled portion, which sellers like.',
+      },
+      {
+        question: 'How is raising growth capital different from raising for an acquisition?',
+        answer:
+          'Growth capital typically means you\u2019re an operating owner funding expansion (a new location, a product line, working capital headroom) — lenders look at your historical cash flow against pro-forma investment return. Acquisition capital funds a specific target — lenders look at the target\u2019s cash flow, the purchase multiple, and whether your stack services the debt in year 1. Yulia models both, but the inputs and the questions lenders ask are different.',
       },
     ],
   });
@@ -346,7 +356,9 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
           headline={<>Build your stack.</>}
           sub="Tell Yulia what you're financing and how much you need. She'll model every structure against current market rates and your real DSCR — in one conversation."
           buttonLabel="Build my stack"
-          onClick={goToChat}
+          onClick={() => bridgeToYulia(
+            "Model a capital stack for me. I need to finance approximately $XM for [growth / an acquisition / refinancing]. Current EBITDA around $XM. Walk me through senior, unitranche, mezz, seller note, and equity options."
+          )}
           dark={dark}
         />
       </div>
