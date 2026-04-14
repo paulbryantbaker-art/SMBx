@@ -7,34 +7,71 @@
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* ─── Global tactile button feedback (applies everywhere) ─── */
-button {
-  transition: transform 0.12s ease, background-color 0.18s ease, color 0.18s ease, opacity 0.15s ease, box-shadow 0.18s ease;
-}
-button:active:not(:disabled) {
-  transform: scale(0.97);
+/* ─── Global tactile button feedback (applies to EVERY button, everywhere) ───
+   - scale(0.94) is pronounced enough to feel through a trackpad
+   - transition-duration on press is 40ms so the push-down is snappy
+   - transition-duration on release is 160ms so it springs back like a real button
+   - !important beats any inline transform styles (e.g. framer-motion, inline
+     onMouseEnter handlers, other CSS utilities)
+   - also applies to <a role="button">, links with class .btn, and
+     [role="button"] — anything user-interactive that should feel clickable.
+*/
+button,
+a[role="button"],
+[role="button"],
+a.btn,
+.btn {
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 0.18s ease,
+              color 0.18s ease,
+              opacity 0.15s ease,
+              box-shadow 0.18s ease,
+              filter 0.15s ease;
 }
 
-/* Marketing CTA: hover lifts, press pushes through. Shadow softens on press to
-   reinforce the "going in" feel. */
+button:active:not(:disabled):not([aria-disabled="true"]),
+a[role="button"]:active:not([aria-disabled="true"]),
+[role="button"]:active:not([aria-disabled="true"]),
+a.btn:active,
+.btn:active:not(:disabled) {
+  transform: scale(0.94) !important;
+  transition-duration: 40ms;
+  filter: brightness(0.94);
+}
+
+/* Marketing CTA: hover lifts, press pushes through harder. Softer shadow on
+   press reinforces the "going in" feel. */
 .cta-press {
-  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease, background-color 0.18s ease;
   will-change: transform;
 }
 .cta-press:hover:not(:disabled) {
   transform: translateY(-2px);
 }
 .cta-press:active:not(:disabled) {
-  transform: translateY(1px) scale(0.98) !important;
+  transform: translateY(1px) scale(0.96) !important;
   box-shadow: 0 2px 8px -4px rgba(0,0,0,0.3) !important;
-  transition-duration: 0.06s;
+  transition-duration: 40ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  button { transition: none; }
-  button:active:not(:disabled) { transform: none; }
+  button,
+  a[role="button"],
+  [role="button"],
+  a.btn,
+  .btn {
+    transition: none;
+  }
+  button:active:not(:disabled),
+  a[role="button"]:active,
+  [role="button"]:active,
+  .btn:active {
+    transform: none !important;
+    filter: none;
+  }
   .cta-press:hover:not(:disabled),
-  .cta-press:active:not(:disabled) { transform: none !important; }
+  .cta-press:active:not(:disabled) {
+    transform: none !important;
+  }
 }
 
 /* Stitch editorial utilities */
