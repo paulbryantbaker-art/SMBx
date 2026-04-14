@@ -274,37 +274,41 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
             ))}
           </div>
 
-          {/* Author vs Auditor split */}
+          {/* Author vs Auditor — editorial treatment, no dark panel breaking rhythm */}
           <div
-            className="mt-12 rounded-2xl p-8 grid grid-cols-1 md:grid-cols-2 gap-10"
-            style={{ background: '#0f1012', color: '#f9f9fc' }}
+            className="mt-16 pt-10 grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16"
+            style={{ borderTop: `1px solid ${border}` }}
           >
             <div>
-              <div className="flex items-center gap-3 mb-3">
-                <span className="material-symbols-outlined text-2xl" style={{ color: accent }}>
-                  edit_note
-                </span>
-                <h4 className="font-headline font-black text-lg">Author Mode</h4>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                  Creative
-                </span>
-              </div>
-              <p className="text-[14px] leading-relaxed" style={{ color: 'rgba(218,218,220,0.78)' }}>
-                Generates CIMs, IC memos, board decks, valuation narratives, market summaries. Synthesizes from multiple sources. The Yulia who writes the documents that close deals.
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] mb-3" style={{ color: accent }}>
+                Author mode · creative
+              </p>
+              <h4
+                className="font-headline font-black tracking-tight mb-3 flex items-center gap-2"
+                style={{ fontSize: '1.375rem', color: headingColor, lineHeight: 1.15 }}
+              >
+                <span aria-hidden className="material-symbols-outlined text-xl" style={{ color: accent }}>edit_note</span>
+                She writes the documents that close.
+              </h4>
+              <p className="text-[15px] leading-relaxed" style={{ color: bodyColor }}>
+                CIMs, IC memos, board decks, valuation narratives, market summaries. Synthesizes from multiple sources.
+                Every sentence traceable to the number it came from.
               </p>
             </div>
             <div>
-              <div className="flex items-center gap-3 mb-3">
-                <span className="material-symbols-outlined text-2xl" style={{ color: accent }}>
-                  fact_check
-                </span>
-                <h4 className="font-headline font-black text-lg">Auditor Mode</h4>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                  Forensic
-                </span>
-              </div>
-              <p className="text-[14px] leading-relaxed" style={{ color: 'rgba(218,218,220,0.78)' }}>
-                Verifies add-backs, extracts contract clauses, reviews tax returns. Only cites from your documents — never hallucinates. Returns "NOT FOUND" when information is missing.
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] mb-3" style={{ color: accent }}>
+                Auditor mode · forensic
+              </p>
+              <h4
+                className="font-headline font-black tracking-tight mb-3 flex items-center gap-2"
+                style={{ fontSize: '1.375rem', color: headingColor, lineHeight: 1.15 }}
+              >
+                <span aria-hidden className="material-symbols-outlined text-xl" style={{ color: accent }}>fact_check</span>
+                She refuses to guess.
+              </h4>
+              <p className="text-[15px] leading-relaxed" style={{ color: bodyColor }}>
+                Verifies add-backs, extracts contract clauses, reviews tax returns. Only cites what's in your documents —
+                never hallucinates. Returns "NOT FOUND" when the answer isn't there.
               </p>
             </div>
           </div>
