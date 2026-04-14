@@ -35,6 +35,7 @@ import CanvasTabStrip from '../../components/canvas/CanvasTabStrip';
 import DesktopAccountMenu from '../../components/desktop/DesktopAccountMenu';
 import DealWorkspace from '../../components/desktop/DealWorkspace';
 import PipelineTable from '../../components/desktop/PipelineTable';
+import SourcingCommandCenter from '../../components/desktop/SourcingCommandCenter';
 import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
@@ -1208,6 +1209,9 @@ export default function AppShell() {
           <DocumentLibrary onViewDeliverable={(id: number) => { openCanvasTab('deliverable', `Document #${id}`, { deliverableId: id }); }} />
         );
       case 'sourcing':
+        // Desktop: Command Center with stage-distribution header + list/board toggle.
+        // Mobile: existing SourcingPanel (single-column view).
+        if (!isMobile) return <SourcingCommandCenter dark={dark} />;
         return <SourcingPanel isFullscreen={false} />;
       case 'settings':
         return <SettingsPanel user={user!} onLogout={handleLogout} isFullscreen={false} />;
