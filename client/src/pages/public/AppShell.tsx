@@ -3001,8 +3001,10 @@ export default function AppShell() {
         />
       )}
 
-      {/* ═══ DESKTOP ACCOUNT MENU — top-right avatar (signed-in) / Sign-in pill (signed-out) / skeleton (loading) ═══ */}
-      {!isMobile && (
+      {/* ═══ DESKTOP ACCOUNT MENU — top-right avatar menu for signed-in users only.
+           Signed-out users sign in from the sidebar rail — no redundant top-right
+           sign-in pill on desktop. Mobile keeps its own top-right flow. ═══ */}
+      {!isMobile && user && (
         <DesktopAccountMenu
           loading={authLoading}
           user={user}
