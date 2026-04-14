@@ -90,6 +90,7 @@ export function StoryBlock({
   body,
   kpis,
   dark,
+  accent: accentOverride,
 }: {
   byline: string;          // "Mark D.*"
   role: string;            // "Owner — specialty industrial distribution"
@@ -97,6 +98,8 @@ export function StoryBlock({
   body: ReactNode;         // Running editorial text with <strong> for emphasis
   kpis: { label: string; value: string; sub?: string }[];  // 3 KPIs
   dark: boolean;
+  /** Optional per-page accent override. Defaults to brand pink. */
+  accent?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
@@ -105,7 +108,7 @@ export function StoryBlock({
   const bodyColor = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const ruleColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
-  const accent = dark ? PINK_DARK : PINK;
+  const accent = accentOverride ?? (dark ? PINK_DARK : PINK);
 
   return (
     <section ref={ref} className="mb-28">
@@ -205,6 +208,7 @@ export function BrandedTermCard({
   ctaLabel = 'Talk to Yulia',
   variant = 'light',
   dark,
+  accent: accentOverride,
 }: {
   term: string;            // "Baseline" — no trademark, that's added separately
   trademark?: string;
@@ -215,6 +219,8 @@ export function BrandedTermCard({
   ctaLabel?: string;
   variant?: 'light' | 'dark';
   dark: boolean;
+  /** Optional per-page accent override. Defaults to brand pink. */
+  accent?: string;
 }) {
   const isDark = variant === 'dark';
   const bg = isDark ? '#0f1012' : (dark ? '#1a1c1e' : '#f9f7f1');
@@ -222,7 +228,7 @@ export function BrandedTermCard({
   const headingColor = isDark || dark ? '#f9f9fc' : '#0f1012';
   const bodyColor = isDark || dark ? 'rgba(218,218,220,0.78)' : '#3c3d40';
   const mutedColor = isDark || dark ? 'rgba(218,218,220,0.5)' : '#7c7d80';
-  const accent = dark || isDark ? PINK_DARK : PINK;
+  const accent = accentOverride ?? (dark || isDark ? PINK_DARK : PINK);
 
   return (
     <div
@@ -314,6 +320,7 @@ export function SlowVsFast({
   fastItems,
   takeaway,
   dark,
+  accent: accentOverride,
 }: {
   slowLabel: string;
   slowItems: { metric: string; value: string }[];
@@ -321,6 +328,8 @@ export function SlowVsFast({
   fastItems: { metric: string; value: string }[];
   takeaway: ReactNode;
   dark: boolean;
+  /** Optional per-page accent override. Defaults to brand pink. */
+  accent?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
@@ -328,7 +337,7 @@ export function SlowVsFast({
   const headingColor = dark ? '#f9f9fc' : '#0f1012';
   const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const ruleColor = dark ? 'rgba(255,255,255,0.1)' : 'rgba(15,16,18,0.12)';
-  const accent = dark ? PINK_DARK : PINK;
+  const accent = accentOverride ?? (dark ? PINK_DARK : PINK);
 
   return (
     <section ref={ref} className="mb-28">
@@ -445,11 +454,14 @@ export function SignOffChain({
   steps,
   bottomNote,
   dark,
+  accent: accentOverride,
 }: {
   intro: ReactNode;
   steps: { label: string; yulia: string; chain: string }[];
   bottomNote: ReactNode;
   dark: boolean;
+  /** Optional per-page accent override. Defaults to brand pink. */
+  accent?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
@@ -458,7 +470,7 @@ export function SignOffChain({
   const bodyColor = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const ruleColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
-  const accent = dark ? PINK_DARK : PINK;
+  const accent = accentOverride ?? (dark ? PINK_DARK : PINK);
 
   return (
     <section ref={ref} className="mb-28">
@@ -554,13 +566,16 @@ export function SectionHeader({
   title,
   sub,
   dark,
+  accent: accentOverride,
 }: {
   label: string;
   title: ReactNode;
   sub?: ReactNode;
   dark: boolean;
+  /** Optional per-page accent override. Defaults to brand pink. */
+  accent?: string;
 }) {
-  const accent = dark ? PINK_DARK : PINK;
+  const accent = accentOverride ?? (dark ? PINK_DARK : PINK);
   const headingColor = dark ? '#f9f9fc' : '#0f1012';
   const mutedColor = dark ? 'rgba(218,218,220,0.7)' : '#5d5e61';
   return (
@@ -603,14 +618,17 @@ export function PageCTA({
   buttonLabel,
   onClick,
   dark,
+  accent: accentOverride,
 }: {
   headline: ReactNode;
   sub: string;
   buttonLabel: string;
   onClick: () => void;
   dark: boolean;
+  /** Optional per-page accent override. Defaults to brand pink. */
+  accent?: string;
 }) {
-  const accent = dark ? PINK_DARK : PINK;
+  const accent = accentOverride ?? (dark ? PINK_DARK : PINK);
   return (
     <section className="mb-12 mt-12">
       <div
