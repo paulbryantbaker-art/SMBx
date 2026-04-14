@@ -373,22 +373,16 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
 
                 <button
                   onClick={() => handleCTA()}
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm text-white transition-all"
+                  className="cta-press group inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm text-white"
                   style={{
                     background: accent,
                     border: 'none',
                     cursor: 'pointer',
                     boxShadow: `0 10px 30px -10px ${accent}aa`,
                   }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-                  }}
                 >
                   Start Multi-deal
-                  <span aria-hidden className="material-symbols-outlined text-base">arrow_forward</span>
+                  <span aria-hidden className="material-symbols-outlined text-base transition-transform group-hover:translate-x-0.5 group-active:translate-x-1">arrow_forward</span>
                 </button>
               </div>
 
@@ -579,7 +573,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                         "I'm a deal professional. I'd like to use Yulia for my client work."
                       )
                     }
-                    className="w-full py-3 rounded-full text-sm font-bold text-white transition-all"
+                    className="cta-press w-full py-3 rounded-full text-sm font-bold text-white"
                     style={{
                       background: accent,
                       border: 'none',

@@ -14,9 +14,27 @@ button {
 button:active:not(:disabled) {
   transform: scale(0.97);
 }
+
+/* Marketing CTA: hover lifts, press pushes through. Shadow softens on press to
+   reinforce the "going in" feel. */
+.cta-press {
+  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease, background-color 0.18s ease;
+  will-change: transform;
+}
+.cta-press:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+.cta-press:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98) !important;
+  box-shadow: 0 2px 8px -4px rgba(0,0,0,0.3) !important;
+  transition-duration: 0.06s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   button { transition: none; }
   button:active:not(:disabled) { transform: none; }
+  .cta-press:hover:not(:disabled),
+  .cta-press:active:not(:disabled) { transform: none !important; }
 }
 
 /* Stitch editorial utilities */

@@ -295,11 +295,11 @@ export function BrandedTermCard({
       {onCTA && (
         <button
           onClick={onCTA}
-          className="text-sm font-bold inline-flex items-center gap-2 group"
+          className="text-sm font-bold inline-flex items-center gap-2 group transition-transform active:scale-[0.96]"
           style={{ color: accent, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
         >
           {ctaLabel}
-          <span className="material-symbols-outlined text-base transition-transform group-hover:translate-x-0.5">
+          <span className="material-symbols-outlined text-base transition-transform group-hover:translate-x-0.5 group-active:translate-x-1">
             arrow_forward
           </span>
         </button>
@@ -662,22 +662,16 @@ export function PageCTA({
           <div className="flex flex-wrap items-center gap-6">
             <button
               onClick={onClick}
-              className="group inline-flex items-center gap-3 px-7 py-4 rounded-full font-bold text-base text-white transition-all"
+              className="cta-press group inline-flex items-center gap-3 px-7 py-4 rounded-full font-bold text-base text-white"
               style={{
                 background: accent,
                 border: 'none',
                 cursor: 'pointer',
                 boxShadow: `0 10px 30px -10px ${accent}aa`,
               }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-              }}
             >
               {buttonLabel}
-              <span className="material-symbols-outlined text-lg transition-transform group-hover:translate-x-0.5">
+              <span className="material-symbols-outlined text-lg transition-transform group-hover:translate-x-0.5 group-active:translate-x-1">
                 arrow_forward
               </span>
             </button>
