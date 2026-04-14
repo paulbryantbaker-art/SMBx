@@ -1031,6 +1031,28 @@ export default function AppShell() {
     handleSend(text);
   }, [handleSend]);
 
+  // ─── ?message= query param handler ───
+  // bridgeToYulia() from the journey-page CTAs navigates to /chat?message=X.
+  // On mount, if that query param is present, send the message to Yulia and
+  // strip the param from the URL so a reload doesn't re-fire the send.
+  const didProcessMessageParamRef = useRef(false);
+  useEffect(() => {
+    if (didProcessMessageParamRef.current) return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const msg = params.get('message');
+      if (msg && msg.trim()) {
+        didProcessMessageParamRef.current = true;
+        // Strip ?message= from URL before firing the send so reload doesn't re-send.
+        const clean = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, '', clean);
+        // Let the component finish its first render + handleSend useCallback settle,
+        // then fire the send. A rAF is enough — no need for setTimeout.
+        requestAnimationFrame(() => handleSend(msg));
+      }
+    } catch { /* noop */ }
+  }, [handleSend]);
+
   // Back to landing
   const handleBack = useCallback(() => {
     setHeroFocused(false);
@@ -2391,10 +2413,6 @@ export default function AppShell() {
                   if (last) anonChat.sendMessage(last.content);
                 } : undefined}
                 onOpenDeliverable={handleOpenDeliverable}
-                onShortcutClick={(fill) => {
-                  dockRef.current?.clear();
-                  handleSend(fill);
-                }}
                 desktop={!isMobile}
                 dark={!isMobile ? true : dark}
               />

@@ -1,18 +1,6 @@
-import { useState } from 'react';
 import Markdown from 'react-markdown';
 import type { AnonMessage } from '../../hooks/useAnonymousChat';
 import { DELIVERABLE_LABELS } from '../chat/Canvas';
-
-/* ─── Shortcut tools for the empty-state help area ─── */
-const SHORTCUT_TOOLS = [
-  { group: 'journey', label: 'Sell my business', desc: 'Valuation, packaging, buyer matching', fill: 'I want to sell my business — ' },
-  { group: 'journey', label: 'Buy a business', desc: 'Thesis, sourcing, diligence, structuring', fill: 'I want to buy a business — ' },
-  { group: 'tool', label: 'Business valuation', desc: 'Multi-methodology estimate', fill: 'I need a business valuation — I own a ' },
-  { group: 'tool', label: 'SBA loan check', desc: 'Eligibility and DSCR analysis', fill: "Can this deal get SBA financing? I'm looking at a " },
-  { group: 'tool', label: 'Capital structure', desc: 'SBA, seller note, equity, mezzanine', fill: 'Help me figure out financing for a ' },
-  { group: 'tool', label: 'Search for a business', desc: 'Define criteria, evaluate opportunities', fill: "Help me find a business — I'm looking for " },
-  { group: 'tool', label: 'Post-acquisition help', desc: '100-day plan, integration, synergies', fill: "I just acquired a business and need help with " },
-] as const;
 
 interface ChatMessagesProps {
   messages: AnonMessage[];
@@ -22,7 +10,6 @@ interface ChatMessagesProps {
   error?: string | null;
   onRetry?: () => void;
   onOpenDeliverable?: (message: AnonMessage) => void;
-  onShortcutClick?: (fill: string) => void;
   desktop?: boolean;
   dark?: boolean;
 }
@@ -100,18 +87,12 @@ function proseClasses(dark: boolean) {
   ].join(' ');
 }
 
-export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, onShortcutClick, desktop, dark = false }: ChatMessagesProps) {
-  const [helpExpanded, setHelpExpanded] = useState(false);
-
+export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, desktop, dark = false }: ChatMessagesProps) {
   /* ─── Dark-aware colors ─── */
   const textColor = dark
     ? (desktop ? '#e2e8f0' : '#f0f0f2')
     : (desktop ? '#1e293b' : '#1A1A1A');
   const mutedColor = dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
-  const subtleColor = dark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)';
-  const itemLabelColor = dark ? '#e0e0e0' : '#0D0D0D';
-  const itemDescColor = dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
-  const hoverBg = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
   const userMsgBg = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
   const cardBg = dark ? '#2a2c2e' : '#fff';
   const cardBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
@@ -205,59 +186,14 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
             textAlign: 'center',
             margin: 0,
             lineHeight: 1.5,
-            maxWidth: 320,
+            maxWidth: 340,
             fontWeight: 500,
           }}>
-            Tell me about a business you're selling, buying, raising for, or integrating. I'll take it from there.
+            Tell me about a business you're selling, buying, raising for, or integrating —
+            or tap the <span style={{ color: '#D44A78', fontWeight: 700 }}>+</span> in the pill below for a starter prompt.
           </p>
-
-          {/* Shortcuts — expandable still, but labelled as "ways to start" */}
-          <button
-            onClick={() => setHelpExpanded(h => !h)}
-            className="bg-transparent border-none cursor-pointer"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: '#D44A78', fontFamily: 'inherit', padding: '6px 12px', borderRadius: 999, marginTop: 4 }}
-            type="button"
-          >
-            Ways to start
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: helpExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}>
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-
-          {helpExpanded && (
-            <div style={{ width: '100%', maxWidth: 440, display: 'flex', flexDirection: 'column', gap: 4, animation: 'fadeIn 0.2s ease' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: subtleColor, padding: '8px 12px 4px', marginTop: 4 }}>Journeys</div>
-              {SHORTCUT_TOOLS.filter(t => t.group === 'journey').map(tool => (
-                <button
-                  key={tool.label}
-                  onClick={() => onShortcutClick?.(tool.fill)}
-                  className="bg-transparent border-none cursor-pointer"
-                  style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '8px 12px', borderRadius: 10, fontFamily: 'inherit', textAlign: 'left', transition: 'background 0.15s' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                  type="button"
-                >
-                  <span style={{ fontSize: 14, fontWeight: 500, color: itemLabelColor }}>{tool.label}</span>
-                  <span style={{ fontSize: 12, color: itemDescColor }}>{tool.desc}</span>
-                </button>
-              ))}
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: subtleColor, padding: '12px 12px 4px' }}>Tools</div>
-              {SHORTCUT_TOOLS.filter(t => t.group === 'tool').map(tool => (
-                <button
-                  key={tool.label}
-                  onClick={() => onShortcutClick?.(tool.fill)}
-                  className="bg-transparent border-none cursor-pointer"
-                  style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '8px 12px', borderRadius: 10, fontFamily: 'inherit', textAlign: 'left', transition: 'background 0.15s' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = hoverBg)}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                  type="button"
-                >
-                  <span style={{ fontSize: 14, fontWeight: 500, color: itemLabelColor }}>{tool.label}</span>
-                  <span style={{ fontSize: 12, color: itemDescColor }}>{tool.desc}</span>
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Ways-to-start accordion retired — the + button in the ChatDock pill
+              is the canonical starter surface. Avoids duplicate affordances. */}
         </div>
       )}
 
