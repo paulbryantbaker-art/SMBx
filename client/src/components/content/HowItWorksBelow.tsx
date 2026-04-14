@@ -1,6 +1,7 @@
 import { ScrollReveal } from './animations';
 import { bridgeToYulia } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
+import { LiveClassifier } from './LiveClassifier';
 import {
   HookHeader,
   SectionHeader,
@@ -154,86 +155,16 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
           accent={accent}
         />
 
-        {/* ═══ The conversation demo — kept structure, sexier deal ═══ */}
+        {/* ═══ Live classifier — the page's signature interactive demo ═══ */}
         <ScrollReveal>
           <section className="mb-28">
-            <div
-              className="rounded-3xl p-8 md:p-12"
-              style={{
-                background: '#0f1012',
-                border: `1px solid rgba(255,255,255,0.06)`,
-              }}
+            <LiveClassifier dark={dark} accent={accent} />
+            <p
+              className="text-center mt-4 text-[12px]"
+              style={{ color: mutedColor }}
             >
-              <div className="max-w-4xl mx-auto space-y-6">
-                {/* User opens with a serious deal */}
-                <div className="flex gap-3 items-start justify-end">
-                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl rounded-tr-none text-white text-[15px] leading-relaxed max-w-[80%]">
-                    I run a specialty insurance brokerage in Connecticut. ~$52M revenue, $14M EBITDA, 95% retention, focused on middle-market commercial auto and cyber. Considering a partial liquidity event with PE.
-                  </div>
-                </div>
-                {/* Yulia classifies + pulls comps */}
-                <div className="flex gap-3 items-start">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ background: accent }}>Y</div>
-                  <div className="bg-white/10 p-5 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed max-w-[80%]">
-                    Specialty insurance brokerage at $14M EBITDA — I know this market well. Let me pull the comps and recent transactions while we talk.
-                    <span className="block mt-3 text-[#dadadc]/60 text-xs italic">
-                      Classifying: NAICS 524210 · Specialty insurance brokerage · upper middle market · Gate S0 → S2 (you have enough data) · pulling 2024-2025 comp set + recent deal multiples...
-                    </span>
-                  </div>
-                </div>
-                {/* Yulia delivers the Baseline */}
-                <div className="flex gap-3 items-start">
-                  <div className="w-8 shrink-0" />
-                  <div className="bg-white/10 p-5 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed max-w-[80%]">
-                    Specialty insurance brokerage at $10-25M EBITDA trades <span className="text-[#ffb2bf] font-bold">11-14× in the 2024-2025 set</span>, with the top quartile (95%+ retention, defensible niche) at 13-15×. Your 95% retention puts you above median.
-                    <span className="block mt-3 font-semibold">
-                      Conservative Baseline: $14M × 12.5× = <span className="text-[#ffb2bf]">$175M</span>. Top of range: $14M × 14.5× = <span className="text-[#ffb2bf]">$203M</span>.
-                    </span>
-                  </div>
-                </div>
-                {/* Three data cards */}
-                <div className="flex gap-3 items-start">
-                  <div className="w-8 shrink-0" />
-                  <div className="grid grid-cols-3 gap-3 max-w-[80%]">
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                      <p className="text-[9px] text-[#dadadc]/60 uppercase font-bold mb-1">EBITDA</p>
-                      <p className="text-lg font-black text-white">$14M</p>
-                    </div>
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                      <p className="text-[9px] text-[#dadadc]/60 uppercase font-bold mb-1">Multiple range</p>
-                      <p className="text-lg font-black text-white">12.5–14.5×</p>
-                    </div>
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                      <p className="text-[9px] text-[#dadadc]/60 uppercase font-bold mb-1">Baseline</p>
-                      <p className="text-lg font-black text-[#ffb2bf]">$175–203M</p>
-                    </div>
-                  </div>
-                </div>
-                {/* User asks about partial liquidity */}
-                <div className="flex gap-3 items-start justify-end">
-                  <div className="bg-white/5 border border-white/10 p-5 rounded-2xl rounded-tr-none text-white text-[15px] leading-relaxed max-w-[80%]">
-                    What does a partial liquidity event with PE actually look like at this size?
-                  </div>
-                </div>
-                {/* Yulia models the structure */}
-                <div className="flex gap-3 items-start">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ background: accent }}>Y</div>
-                  <div className="bg-white/10 p-5 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed max-w-[80%]">
-                    Most common structure for your size: PE buys 60-70% for cash + rollover. You take{' '}
-                    <span className="text-[#ffb2bf] font-bold">$110-140M off the table day one</span> and keep 30-40% rollover for the second bite. PE buyer underwrites a 5-year exit at 1.8-2.2× their entry — meaning your rollover could be worth{' '}
-                    <span className="text-[#ffb2bf] font-bold">$80-150M at exit</span>.
-                    <span className="block mt-3 font-semibold">
-                      Total proceeds across both bites: $190-290M, depending on growth and exit multiple. Want me to model 3 scenarios — conservative, base, aggressive — and show you the after-tax math?
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="max-w-4xl mx-auto mt-10 pt-8 border-t border-white/10 text-center">
-                <p className="text-[#dadadc]/60 text-sm">
-                  90 seconds. No signup. No credit card. Yulia is already pulling comps, modeling the structure, and queuing the next questions — she will keep going until the picture is complete.
-                </p>
-              </div>
-            </div>
+              ~4 seconds here · ~90 seconds with your real numbers · no signup, no card
+            </p>
           </section>
         </ScrollReveal>
 
