@@ -14,45 +14,10 @@
  */
 
 import { motion, useInView } from 'framer-motion';
-import { createContext, useContext, useRef, type ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 
 const PINK = '#D44A78';
 const PINK_DARK = '#E8709A';
-
-/* ════════════════════════════════════════════════════════════
-   Journey palette — each journey carries its own accent so the
-   pages inherit the same color system as DealCards, Workspace
-   header rails, and Pipeline chips. `brand` defaults to smbx pink
-   for cross-cutting pages (advisors, how-it-works, pricing).
-   ════════════════════════════════════════════════════════════ */
-export type Journey = 'sell' | 'buy' | 'raise' | 'pmi' | 'brand';
-
-const JOURNEY_ACCENTS: Record<Journey, { light: string; dark: string }> = {
-  sell:  { light: '#D44A78', dark: '#E8709A' },
-  buy:   { light: '#3E8E8E', dark: '#52A8A8' },
-  raise: { light: '#C99A3E', dark: '#DDB25E' },
-  pmi:   { light: '#8F4A7A', dark: '#AE6D9A' },
-  brand: { light: '#D44A78', dark: '#E8709A' },
-};
-
-export function resolveAccent(journey: Journey | undefined, dark: boolean): string {
-  const pair = JOURNEY_ACCENTS[journey || 'brand'];
-  return dark ? pair.dark : pair.light;
-}
-
-/* Context — each Below page wraps its tree in <JourneyProvider value="sell">
-   so the nested blocks inherit the journey without every call-site needing
-   a journey prop. Individual blocks can still override via their journey prop. */
-const JourneyContext = createContext<Journey>('brand');
-
-export function JourneyProvider({ value, children }: { value: Journey; children: ReactNode }) {
-  return <JourneyContext.Provider value={value}>{children}</JourneyContext.Provider>;
-}
-
-export function useJourneyAccent(override: Journey | undefined, dark: boolean): string {
-  const fromContext = useContext(JourneyContext);
-  return resolveAccent(override || fromContext, dark);
-}
 
 /* ════════════════════════════════════════════════════════════
    HookHeader — eyebrow + dominant headline + subhead
@@ -64,33 +29,22 @@ export function HookHeader({
   headline,
   sub,
   dark,
-  journey,
-  align = 'center',
 }: {
   eyebrow: string;
   headline: ReactNode;
   sub: ReactNode;
   dark: boolean;
-  journey?: Journey;
-  /**
-   * Hero alignment. Default 'center' matches the home hero and gives every
-   * journey page the same marketing-page opening. Use 'left' to revert to
-   * editorial newspaper flow.
-   */
-  align?: 'left' | 'center';
 }) {
-  const accent = useJourneyAccent(journey, dark);
-  const isCenter = align === 'center';
   return (
-    <header className={`mb-20 ${isCenter ? 'text-center' : ''}`}>
+    <header className="mb-20">
       <motion.p
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="text-[11px] font-bold uppercase tracking-[0.24em] mb-6"
-        style={{ color: accent }}
+        style={{ color: dark ? PINK_DARK : PINK }}
       >
-        <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: accent }} />
+        <span className="inline-block w-1.5 h-1.5 rounded-full mr-2 align-middle" style={{ background: dark ? PINK_DARK : PINK }} />
         smbx.ai · faster, easier M&amp;A · {eyebrow}
       </motion.p>
 
@@ -111,7 +65,7 @@ export function HookHeader({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
-        className={`text-[19px] md:text-[21px] leading-[1.55] ${isCenter ? 'max-w-2xl mx-auto' : 'max-w-2xl'}`}
+        className="max-w-2xl text-[19px] md:text-[21px] leading-[1.55]"
         style={{ color: dark ? 'rgba(218,218,220,0.78)' : '#5d5e61' }}
       >
         {sub}
@@ -132,7 +86,6 @@ export function StoryBlock({
   body,
   kpis,
   dark,
-  journey,
 }: {
   byline: string;          // "Mark D.*"
   role: string;            // "Owner — specialty industrial distribution"
@@ -140,7 +93,6 @@ export function StoryBlock({
   body: ReactNode;         // Running editorial text with <strong> for emphasis
   kpis: { label: string; value: string; sub?: string }[];  // 3 KPIs
   dark: boolean;
-  journey?: Journey;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
@@ -149,7 +101,7 @@ export function StoryBlock({
   const bodyColor = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const ruleColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
-  const accent = useJourneyAccent(journey, dark);
+  const accent = dark ? PINK_DARK : PINK;
 
   return (
     <section ref={ref} className="mb-28">
@@ -249,7 +201,6 @@ export function BrandedTermCard({
   ctaLabel = 'Talk to Yulia',
   variant = 'light',
   dark,
-  journey,
 }: {
   term: string;            // "Baseline" — no trademark, that's added separately
   trademark?: string;
@@ -260,7 +211,6 @@ export function BrandedTermCard({
   ctaLabel?: string;
   variant?: 'light' | 'dark';
   dark: boolean;
-  journey?: Journey;
 }) {
   const isDark = variant === 'dark';
   const bg = isDark ? '#0f1012' : (dark ? '#1a1c1e' : '#f9f7f1');
@@ -268,7 +218,7 @@ export function BrandedTermCard({
   const headingColor = isDark || dark ? '#f9f9fc' : '#0f1012';
   const bodyColor = isDark || dark ? 'rgba(218,218,220,0.78)' : '#3c3d40';
   const mutedColor = isDark || dark ? 'rgba(218,218,220,0.5)' : '#7c7d80';
-  const accent = useJourneyAccent(journey, dark || isDark);
+  const accent = dark || isDark ? PINK_DARK : PINK;
 
   return (
     <div
@@ -360,7 +310,6 @@ export function SlowVsFast({
   fastItems,
   takeaway,
   dark,
-  journey,
 }: {
   slowLabel: string;
   slowItems: { metric: string; value: string }[];
@@ -368,7 +317,6 @@ export function SlowVsFast({
   fastItems: { metric: string; value: string }[];
   takeaway: ReactNode;
   dark: boolean;
-  journey?: Journey;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
@@ -376,7 +324,7 @@ export function SlowVsFast({
   const headingColor = dark ? '#f9f9fc' : '#0f1012';
   const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const ruleColor = dark ? 'rgba(255,255,255,0.1)' : 'rgba(15,16,18,0.12)';
-  const accent = useJourneyAccent(journey, dark);
+  const accent = dark ? PINK_DARK : PINK;
 
   return (
     <section ref={ref} className="mb-28">
@@ -493,13 +441,11 @@ export function SignOffChain({
   steps,
   bottomNote,
   dark,
-  journey,
 }: {
   intro: ReactNode;
   steps: { label: string; yulia: string; chain: string }[];
   bottomNote: ReactNode;
   dark: boolean;
-  journey?: Journey;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
@@ -508,7 +454,7 @@ export function SignOffChain({
   const bodyColor = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const ruleColor = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
-  const accent = useJourneyAccent(journey, dark);
+  const accent = dark ? PINK_DARK : PINK;
 
   return (
     <section ref={ref} className="mb-28">
@@ -604,22 +550,17 @@ export function SectionHeader({
   title,
   sub,
   dark,
-  journey,
-  align = 'left',
 }: {
   label: string;
   title: ReactNode;
   sub?: ReactNode;
   dark: boolean;
-  journey?: Journey;
-  /** Hero/section alignment. Every journey page uses 'left' for consistency. */
-  align?: 'left' | 'center';
 }) {
+  const accent = dark ? PINK_DARK : PINK;
   const headingColor = dark ? '#f9f9fc' : '#0f1012';
   const mutedColor = dark ? 'rgba(218,218,220,0.7)' : '#5d5e61';
-  const alignClass = align === 'center' ? 'text-center mx-auto' : '';
   return (
-    <div className={`mb-12 ${alignClass}`}>
+    <div className="mb-12">
       <p
         className="text-[10px] font-bold uppercase tracking-[0.24em] mb-4"
         style={{ color: accent }}
@@ -637,7 +578,7 @@ export function SectionHeader({
       </h2>
       {sub && (
         <p
-          className={`text-[17px] md:text-[19px] leading-[1.55] ${align === 'center' ? 'max-w-2xl mx-auto' : 'max-w-2xl'}`}
+          className="max-w-2xl text-[17px] md:text-[19px] leading-[1.55]"
           style={{ color: mutedColor }}
         >
           {sub}
@@ -658,16 +599,14 @@ export function PageCTA({
   buttonLabel,
   onClick,
   dark,
-  journey,
 }: {
   headline: ReactNode;
   sub: string;
   buttonLabel: string;
   onClick: () => void;
   dark: boolean;
-  journey?: Journey;
 }) {
-  const accent = useJourneyAccent(journey, dark);
+  const accent = dark ? PINK_DARK : PINK;
   return (
     <section className="mb-12 mt-12">
       <div

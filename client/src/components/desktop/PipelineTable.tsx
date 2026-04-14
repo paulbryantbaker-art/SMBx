@@ -499,8 +499,8 @@ export default function PipelineTable({ dark, onOpenDeal, onNewDeal }: Props) {
       </div>
 
       <style>{`
-        .pipeline-table tbody tr { cursor: pointer; transition: background 80ms ease; position: relative; }
-        .pipeline-table tbody tr:hover { background: ${rowHover}; box-shadow: inset 3px 0 0 var(--row-journey-color, transparent); }
+        .pipeline-table tbody tr { cursor: pointer; transition: background 80ms ease; }
+        .pipeline-table tbody tr:hover { background: ${rowHover}; }
         .pipeline-table tbody tr:hover .pipeline-row-actions { opacity: 1; }
         .pipeline-table tbody tr:focus-visible { outline: 2px solid ${pink}; outline-offset: -2px; }
         @media (max-width: 980px) {
@@ -620,13 +620,7 @@ function PipelineRow({
       tabIndex={0}
       onClick={onOpenDeal}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpenDeal(); } }}
-      style={{
-        borderBottom: `1px solid ${borderC}`,
-        // Journey-color left accent strip — visible on hover only (via CSS).
-        // The CSS variable lets us do this per-row without per-row <style>.
-        ['--row-journey-color' as any]: color,
-      }}
-      className="pipeline-row-journey"
+      style={{ borderBottom: `1px solid ${borderC}` }}
     >
       <td style={{ padding: `${rowPadY}px 16px`, minWidth: 0 }}>
         <div style={{ fontWeight: 700, color: heading, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

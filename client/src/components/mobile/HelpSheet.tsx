@@ -6,7 +6,6 @@
 
 import { Drawer } from 'vaul';
 import { useEffect, useRef, useState } from 'react';
-import * as Dialog from '@radix-ui/react-dialog';
 
 interface Props {
   open: boolean;
@@ -40,7 +39,6 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
   const [scrolled, setScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState('');
-  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
 
   useEffect(() => {
     if (!open) {
@@ -49,12 +47,6 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
     }
   }, [open]);
-
-  useEffect(() => {
-    const onResize = () => setIsDesktop(window.innerWidth >= 768);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
 
   const bg = dark ? '#151617' : '#fefefe';
   const headingC = dark ? '#f9f9fc' : '#0f1012';
@@ -70,202 +62,6 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
     g.full?.toLowerCase().includes(filter.toLowerCase()) ||
     g.definition.toLowerCase().includes(filter.toLowerCase())
   );
-
-  // Body content — reused between mobile (Vaul drawer) and desktop (Radix modal).
-  const bodyContent = (
-    <>
-      {/* "How Yulia works" */}
-      <section style={{ marginBottom: 24 }}>
-        <h3 style={{
-          margin: '0 0 8px',
-          fontFamily: 'Sora, system-ui',
-          fontSize: 15,
-          fontWeight: 700,
-          color: headingC,
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-        }}>
-          How Yulia works
-        </h3>
-        <p style={{
-          margin: 0,
-          fontFamily: 'Inter, system-ui',
-          fontSize: 14,
-          lineHeight: 1.55,
-          color: bodyC,
-        }}>
-          Yulia is your M&amp;A deal intelligence — one chat that carries your whole deal across every stage from sourcing through closing. Tell her about a business, drop in a P&amp;L, ask anything. She'll create a deal card for it and remember everything between sessions. Each card on your home represents a deal she's tracking for you. Tap a card to scope the chat to that deal; tap the pill at the bottom for a general conversation.
-        </p>
-      </section>
-
-      {/* Glossary */}
-      <section>
-        <h3 style={{
-          margin: '0 0 10px',
-          fontFamily: 'Sora, system-ui',
-          fontSize: 15,
-          fontWeight: 700,
-          color: headingC,
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-        }}>
-          M&amp;A glossary
-        </h3>
-        <input
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          placeholder="Search terms…"
-          type="search"
-          style={{
-            width: '100%',
-            padding: '10px 12px',
-            borderRadius: 10,
-            border: `1px solid ${borderC}`,
-            background: rowBg,
-            color: headingC,
-            fontFamily: 'Inter, system-ui',
-            fontSize: 14,
-            outline: 'none',
-            marginBottom: 10,
-          }}
-        />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {filtered.map((g) => (
-            <div
-              key={g.term}
-              style={{
-                padding: '12px 14px',
-                borderRadius: 12,
-                background: rowBg,
-                border: `1px solid ${borderC}`,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
-                <span style={{
-                  fontFamily: 'Sora, system-ui',
-                  fontSize: 13,
-                  fontWeight: 800,
-                  color: pinkC,
-                  letterSpacing: '0.02em',
-                }}>
-                  {g.term}
-                </span>
-                {g.full && (
-                  <span style={{
-                    fontFamily: 'Inter, system-ui',
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: mutedC,
-                  }}>
-                    {g.full}
-                  </span>
-                )}
-              </div>
-              <p style={{
-                margin: 0,
-                fontFamily: 'Inter, system-ui',
-                fontSize: 13,
-                lineHeight: 1.5,
-                color: bodyC,
-              }}>
-                {g.definition}
-              </p>
-            </div>
-          ))}
-          {filtered.length === 0 && (
-            <p style={{
-              fontSize: 13,
-              color: mutedC,
-              fontStyle: 'italic',
-              padding: '12px 0',
-              textAlign: 'center',
-            }}>
-              No matches.
-            </p>
-          )}
-        </div>
-      </section>
-    </>
-  );
-
-  // Desktop: centered Radix modal.
-  if (isDesktop) {
-    return (
-      <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Portal>
-          <Dialog.Overlay style={{
-            position: 'fixed', inset: 0,
-            background: 'rgba(15,16,18,0.45)', zIndex: 100,
-            animation: 'helpOverlayIn 120ms ease',
-          }} />
-          <Dialog.Content
-            aria-label="Help and glossary"
-            style={{
-              position: 'fixed',
-              top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 'min(560px, calc(100vw - 32px))',
-              maxHeight: '80vh',
-              background: bg,
-              border: `1px solid ${borderC}`,
-              borderRadius: 16,
-              boxShadow: dark
-                ? '0 1px 2px rgba(0,0,0,0.4), 0 24px 48px rgba(0,0,0,0.5)'
-                : '0 1px 2px rgba(60,55,45,0.08), 0 24px 48px rgba(60,55,45,0.18)',
-              zIndex: 110,
-              outline: 'none',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              animation: 'helpContentIn 160ms ease',
-            }}
-          >
-            <header style={{ padding: '18px 22px', borderBottom: `1px solid ${borderC}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Dialog.Title asChild>
-                <h2 style={{
-                  margin: 0,
-                  fontFamily: 'Sora, system-ui',
-                  fontSize: 18, fontWeight: 800,
-                  letterSpacing: '-0.02em',
-                  color: headingC,
-                }}>
-                  Help &amp; glossary
-                </h2>
-              </Dialog.Title>
-              <Dialog.Close asChild>
-                <button
-                  type="button"
-                  aria-label="Close"
-                  style={{
-                    width: 30, height: 30, padding: 0,
-                    borderRadius: 8,
-                    border: `1px solid ${borderC}`,
-                    background: 'transparent',
-                    color: bodyC,
-                    cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
-                </button>
-              </Dialog.Close>
-            </header>
-            <div
-              ref={scrollRef}
-              onScroll={(e) => setScrolled((e.currentTarget as HTMLDivElement).scrollTop > 8)}
-              style={{ flex: 1, overflowY: 'auto', padding: '18px 22px 24px' }}
-            >
-              {bodyContent}
-            </div>
-            <style>{`
-              @keyframes helpOverlayIn { from { opacity: 0 } to { opacity: 1 } }
-              @keyframes helpContentIn { from { opacity: 0; transform: translate(-50%, calc(-50% + 6px)) scale(0.98); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
-            `}</style>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
-    );
-  }
 
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange} shouldScaleBackground>
@@ -311,7 +107,7 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
             </Drawer.Title>
           </div>
 
-          {/* Scrollable body (shared with desktop modal) */}
+          {/* Scrollable body */}
           <div
             ref={scrollRef}
             onScroll={(e) => setScrolled((e.currentTarget as HTMLDivElement).scrollTop > 8)}
@@ -322,7 +118,117 @@ export function HelpSheet({ open, onOpenChange, dark }: Props) {
               padding: '16px 18px calc(20px + env(safe-area-inset-bottom))',
             }}
           >
-            {bodyContent}
+            {/* "How Yulia works" */}
+            <section style={{ marginBottom: 24 }}>
+              <h3 style={{
+                margin: '0 0 8px',
+                fontFamily: 'Sora, system-ui',
+                fontSize: 15,
+                fontWeight: 700,
+                color: headingC,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+              }}>
+                How Yulia works
+              </h3>
+              <p style={{
+                margin: 0,
+                fontFamily: 'Inter, system-ui',
+                fontSize: 14,
+                lineHeight: 1.55,
+                color: bodyC,
+              }}>
+                Yulia is your M&amp;A deal intelligence — one chat that carries your whole deal across every stage from sourcing through closing. Tell her about a business, drop in a P&amp;L, ask anything. She'll create a deal card for it and remember everything between sessions. Each card on your home represents a deal she's tracking for you. Tap a card to scope the chat to that deal; tap the pill at the bottom for a general conversation.
+              </p>
+            </section>
+
+            {/* Glossary */}
+            <section>
+              <h3 style={{
+                margin: '0 0 10px',
+                fontFamily: 'Sora, system-ui',
+                fontSize: 15,
+                fontWeight: 700,
+                color: headingC,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+              }}>
+                M&amp;A glossary
+              </h3>
+              <input
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                placeholder="Search terms…"
+                type="search"
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: 10,
+                  border: `1px solid ${borderC}`,
+                  background: rowBg,
+                  color: headingC,
+                  fontFamily: 'Inter, system-ui',
+                  fontSize: 14,
+                  outline: 'none',
+                  marginBottom: 10,
+                }}
+              />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {filtered.map((g) => (
+                  <div
+                    key={g.term}
+                    style={{
+                      padding: '12px 14px',
+                      borderRadius: 12,
+                      background: rowBg,
+                      border: `1px solid ${borderC}`,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
+                      <span style={{
+                        fontFamily: 'Sora, system-ui',
+                        fontSize: 13,
+                        fontWeight: 800,
+                        color: pinkC,
+                        letterSpacing: '0.02em',
+                      }}>
+                        {g.term}
+                      </span>
+                      {g.full && (
+                        <span style={{
+                          fontFamily: 'Inter, system-ui',
+                          fontSize: 11,
+                          fontWeight: 500,
+                          color: mutedC,
+                        }}>
+                          {g.full}
+                        </span>
+                      )}
+                    </div>
+                    <p style={{
+                      margin: 0,
+                      fontFamily: 'Inter, system-ui',
+                      fontSize: 13,
+                      lineHeight: 1.5,
+                      color: bodyC,
+                    }}>
+                      {g.definition}
+                    </p>
+                  </div>
+                ))}
+                {filtered.length === 0 && (
+                  <p style={{
+                    fontSize: 13,
+                    color: mutedC,
+                    fontStyle: 'italic',
+                    padding: '12px 0',
+                    textAlign: 'center',
+                  }}>
+                    No matches.
+                  </p>
+                )}
+              </div>
+            </section>
           </div>
         </Drawer.Content>
       </Drawer.Portal>

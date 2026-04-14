@@ -6,7 +6,6 @@ import {
   HookHeader,
   SectionHeader,
   PageCTA,
-  JourneyProvider,
 } from './storyBlocks';
 
 export default function PricingBelow({ dark }: { dark: boolean }) {
@@ -242,7 +241,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
   ];
 
   return (
-    <JourneyProvider value="brand"><div className="bg-transparent" style={{ color: headingColor }}>
+    <div className="bg-transparent" style={{ color: headingColor }}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
         {/* ═══ Hook ═══ */}
@@ -751,12 +750,10 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           headline={<>Run Yulia free. Pay only if she's worth it.</>}
           sub="Run your first deliverable free — Baseline, Rundown, or capital stack model. If Yulia doesn't surface something your team missed, keep it and walk. No card on file."
           buttonLabel="Start free"
-          onClick={() => bridgeToYulia(
-            "I'd like to try Yulia free. My role is [buyer / seller / advisor / sponsor] and I'm working on [a sell-side mandate / a buy-side thesis / raising capital / post-close integration]."
-          )}
+          onClick={goToChat}
           dark={dark}
         />
       </div>
-    </div></JourneyProvider>
+    </div>
   );
 }

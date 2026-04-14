@@ -11,7 +11,6 @@ import {
   SectionHeader,
   SignOffChain,
   PageCTA,
-  JourneyProvider,
 } from './storyBlocks';
 
 export default function SellBelow({ dark }: { dark: boolean }) {
@@ -65,7 +64,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
   const accent = dark ? '#E8709A' : '#D44A78';
 
   return (
-    <JourneyProvider value="sell"><div className="bg-transparent" style={{ color: headingColor }}>
+    <div className="bg-transparent" style={{ color: headingColor }}>
       <div className="pt-12 pb-24 px-6 md:px-12 max-w-6xl mx-auto">
 
         {/* ═══ Hook — repositioned for brokers as the dominant audience ═══ */}
@@ -335,12 +334,10 @@ export default function SellBelow({ dark }: { dark: boolean }) {
           headline={<>Run a Baseline for your next pitch.</>}
           sub="Tell Yulia about the seller. She'll build the Baseline, find the Blind Equity, and hand you the add-back schedule to walk into the meeting with. Verified brokers and deal pros are free, forever."
           buttonLabel="Run a Baseline"
-          onClick={() => bridgeToYulia(
-            "Run a Baseline for my next sell-side prospect. The business is in [industry] with about $XM EBITDA. Walk me through the Multiple Map and the add-back schedule."
-          )}
+          onClick={goToChat}
           dark={dark}
         />
       </div>
-    </div></JourneyProvider>
+    </div>
   );
 }

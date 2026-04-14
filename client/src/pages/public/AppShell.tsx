@@ -34,12 +34,10 @@ import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/Canva
 import CanvasTabStrip from '../../components/canvas/CanvasTabStrip';
 import DesktopAccountMenu from '../../components/desktop/DesktopAccountMenu';
 import DealWorkspace from '../../components/desktop/DealWorkspace';
-import DesktopHomeDeals from '../../components/desktop/DesktopHomeDeals';
 import PipelineTable from '../../components/desktop/PipelineTable';
 import SourcingCommandCenter from '../../components/desktop/SourcingCommandCenter';
 import PortfolioAnalytics from '../../components/desktop/PortfolioAnalytics';
 import CommandPalette, { type CommandItem } from '../../components/desktop/CommandPalette';
-import ShortcutCheatsheet from '../../components/desktop/ShortcutCheatsheet';
 import DesktopFooter from '../../components/desktop/DesktopFooter';
 import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
@@ -487,7 +485,6 @@ interface BuildCommandArgs {
   onGoToJourney: (tab: TabId) => void;
   onToggleDark: () => void;
   onOpenHelp: () => void;
-  onOpenCheatsheet: () => void;
   onSignIn: () => void;
   onSignOut: () => void;
 }
@@ -518,7 +515,6 @@ function buildCommandItems(a: BuildCommandArgs): CommandItem[] {
   }
   items.push({ id: 'toggle-dark', label: a.dark ? 'Switch to light mode' : 'Switch to dark mode', icon: a.dark ? 'light_mode' : 'dark_mode', shortcut: '⌘⇧D', group: 'Actions', onSelect: a.onToggleDark });
   items.push({ id: 'help', label: 'Help & glossary', icon: 'help_outline', group: 'Actions', onSelect: a.onOpenHelp });
-  items.push({ id: 'shortcuts', label: 'Keyboard shortcuts', icon: 'keyboard', shortcut: '?', group: 'Actions', onSelect: a.onOpenCheatsheet });
   if (a.user) {
     items.push({ id: 'sign-out', label: 'Sign out', icon: 'logout', group: 'Actions', onSelect: a.onSignOut });
   } else {
@@ -916,16 +912,11 @@ export default function AppShell() {
   useEffect(() => {
     if (isMobile) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      const isTyping = !!target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
-      // ? opens the shortcut cheatsheet (any time, when not typing)
-      if (e.key === '?' && !isTyping && !e.metaKey && !e.ctrlKey) {
-        e.preventDefault();
-        setCheatsheetOpen(o => !o);
-        return;
-      }
       const mod = e.metaKey || e.ctrlKey;
       if (!mod) return;
+      // Ignore while typing inside contentEditable that isn't the palette
+      const target = e.target as HTMLElement | null;
+      const isTyping = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
       if (e.key === 'k' || e.key === 'K') {
         e.preventDefault();
         setCommandOpen(o => !o);
@@ -1118,8 +1109,6 @@ export default function AppShell() {
 
   // Desktop ⌘K command palette — global fuzzy launcher.
   const [commandOpen, setCommandOpen] = useState(false);
-  // Desktop ? keyboard cheatsheet
-  const [cheatsheetOpen, setCheatsheetOpen] = useState(false);
 
   // Just-created deal highlight — when the user finishes a journey-page CTA
   // and a new deal appears in their stack, that card pulses for ~6s on return
@@ -1740,9 +1729,14 @@ export default function AppShell() {
             <span className="text-[9px] font-semibold">Admin</span>
           </button>
         )}
-        {/* Account moved to top-right (DesktopAccountMenu) — top-right is the
-            canonical identity surface across web apps. Sidebar is for tools
-            and navigation, not for "who am I". */}
+        <button
+          onClick={() => { if (user) { openCanvasTab('settings', 'Settings'); } else window.location.href = '/login'; }}
+          className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
+          type="button"
+        >
+          <span className="material-symbols-outlined text-[22px]">{user ? 'person' : 'login'}</span>
+          <span className="text-[9px] font-semibold">{user ? 'Account' : 'Sign In'}</span>
+        </button>
       </div>
     </aside>
   );
@@ -2102,19 +2096,8 @@ export default function AppShell() {
                           on mobile home (not just browser). */}
                       <DealContextChips
                         dark={dark}
-                        hasDeals={!!(user && isMobile && authChat.grouped && (authChat.grouped.deals ?? []).some(d => d.business_name))}
-                        onChipSelect={(action) => {
-                          if (action.kind === 'nav') {
-                            // Journey navigation — empty portfolio users tap a
-                            // chip to open the full mobile story for that journey.
-                            const tab = (action.path.replace('/', '') || 'home') as TabId;
-                            setActiveTab(tab);
-                            setViewState('landing');
-                            navigate(action.path);
-                          } else {
-                            fillHomeInput(action.fill);
-                          }
-                        }}
+                        hasDeals={!!(user && isMobile && authChat.grouped)}
+                        onChipTap={(fill) => fillHomeInput(fill)}
                       />
 
                       <div className={isPWA ? 'px-3' : 'px-4'} style={{ touchAction: 'auto' }}>
@@ -2164,105 +2147,6 @@ export default function AppShell() {
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
                           </button>
                         </div>
-                        {/* Mobile tool popup — opens above the pill when + is tapped */}
-                        {isMobile && homeToolsOpen && (
-                          <div
-                            onClick={(e) => { if (e.target === e.currentTarget) setHomeToolsOpen(false); }}
-                            style={{
-                              position: 'fixed',
-                              inset: 0,
-                              background: 'rgba(15,16,18,0.35)',
-                              zIndex: 70,
-                            }}
-                            aria-hidden
-                          >
-                            <div
-                              onClick={(e) => e.stopPropagation()}
-                              style={{
-                                position: 'fixed',
-                                left: 12,
-                                right: 12,
-                                bottom: 'calc(env(safe-area-inset-bottom) + 84px)',
-                                background: dark ? '#1a1c1e' : '#ffffff',
-                                borderRadius: 20,
-                                border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(15,16,18,0.08)',
-                                boxShadow: '0 20px 48px rgba(0,0,0,0.25)',
-                                padding: 8,
-                                maxHeight: '62vh',
-                                overflowY: 'auto',
-                              }}
-                              role="menu"
-                            >
-                              <div style={{ padding: '10px 14px 6px' }}>
-                                <span style={{
-                                  fontFamily: "'Sora', system-ui, sans-serif",
-                                  fontSize: 10, fontWeight: 800,
-                                  letterSpacing: '0.14em', textTransform: 'uppercase',
-                                  color: dark ? 'rgba(240,240,243,0.55)' : '#7c7d80',
-                                }}>Start with Yulia</span>
-                              </div>
-                              {HOME_TOOLS.filter(t => t.group === 'journey').map(t => (
-                                <button
-                                  key={t.label}
-                                  onClick={() => { setHomeToolsOpen(false); fillHomeInput(t.fill); }}
-                                  type="button"
-                                  style={{
-                                    display: 'flex', alignItems: 'flex-start', gap: 12,
-                                    padding: '12px 14px',
-                                    borderRadius: 12,
-                                    border: 'none',
-                                    background: 'transparent',
-                                    width: '100%',
-                                    textAlign: 'left',
-                                    cursor: 'pointer',
-                                    fontFamily: "'Inter', system-ui, sans-serif",
-                                    color: dark ? '#f0f0f3' : '#1a1c1e',
-                                  }}
-                                >
-                                  <span style={{ flexShrink: 0, color: dark ? '#E8709A' : '#D44A78', width: 20, height: 20, marginTop: 2 }}>{t.icon}</span>
-                                  <span style={{ flex: 1, minWidth: 0 }}>
-                                    <span style={{ display: 'block', fontSize: 15, fontWeight: 600 }}>{t.label}</span>
-                                    <span style={{ display: 'block', fontSize: 13, color: dark ? 'rgba(240,240,243,0.55)' : '#7c7d80', marginTop: 2, lineHeight: 1.4 }}>{t.desc}</span>
-                                  </span>
-                                </button>
-                              ))}
-                              <div style={{ height: 1, margin: '6px 16px', background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.06)' }} />
-                              <div style={{ padding: '6px 14px 6px' }}>
-                                <span style={{
-                                  fontFamily: "'Sora', system-ui, sans-serif",
-                                  fontSize: 10, fontWeight: 800,
-                                  letterSpacing: '0.14em', textTransform: 'uppercase',
-                                  color: dark ? 'rgba(240,240,243,0.55)' : '#7c7d80',
-                                }}>Tools</span>
-                              </div>
-                              {HOME_TOOLS.filter(t => t.group === 'tool').map(t => (
-                                <button
-                                  key={t.label}
-                                  onClick={() => { setHomeToolsOpen(false); fillHomeInput(t.fill); }}
-                                  type="button"
-                                  style={{
-                                    display: 'flex', alignItems: 'flex-start', gap: 12,
-                                    padding: '12px 14px',
-                                    borderRadius: 12,
-                                    border: 'none',
-                                    background: 'transparent',
-                                    width: '100%',
-                                    textAlign: 'left',
-                                    cursor: 'pointer',
-                                    fontFamily: "'Inter', system-ui, sans-serif",
-                                    color: dark ? '#f0f0f3' : '#1a1c1e',
-                                  }}
-                                >
-                                  <span style={{ flexShrink: 0, color: dark ? '#E8709A' : '#D44A78', width: 20, height: 20, marginTop: 2 }}>{t.icon}</span>
-                                  <span style={{ flex: 1, minWidth: 0 }}>
-                                    <span style={{ display: 'block', fontSize: 15, fontWeight: 600 }}>{t.label}</span>
-                                    <span style={{ display: 'block', fontSize: 13, color: dark ? 'rgba(240,240,243,0.55)' : '#7c7d80', marginTop: 2, lineHeight: 1.4 }}>{t.desc}</span>
-                                  </span>
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
                       </div>
                       </form>
                       {!isPWA && !user && (
@@ -2660,25 +2544,18 @@ export default function AppShell() {
                   </Suspense>
                 </div>
               ) : (
-                /* Logged-in: render "Today" deal overview in the canvas panel.
-                   Closes the P1 from the critique rounds — deals were not visible
-                   on the primary home surface until now. */
-                <DesktopHomeDeals
-                  dark={dark}
-                  deals={(authChat.grouped?.deals ?? []).map(d => ({
-                    id: d.id,
-                    business_name: d.business_name,
-                    journey_type: d.journey_type,
-                    current_gate: d.current_gate,
-                    industry: d.industry,
-                    league: d.league,
-                    updated_at: d.updated_at,
-                    status: d.status,
-                  }))}
-                  onOpenDeal={(id) => { setViewState('deal'); navigate(`/deal/${id}`); }}
-                  onSeeAll={() => openCanvasTab('pipeline', 'Pipeline')}
-                  onNewDeal={() => { authChat.newConversation(); setViewState('chat'); navigate('/chat'); }}
-                />
+                /* Logged-in empty state */
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 24 }}>
+                  <img
+                    src={dark ? '/G3D.png' : '/G3L.png'}
+                    alt="smbx.ai"
+                    draggable={false}
+                    style={{ height: 48, objectFit: 'contain', opacity: 0.35 }}
+                  />
+                  <p className="font-body text-[15px] font-medium" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)', margin: 0 }}>
+                    Ask Yulia to open a tool
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -2999,15 +2876,6 @@ export default function AppShell() {
         dark={dark}
       />
 
-      {/* ═══ DESKTOP KEYBOARD CHEATSHEET — `?` opens it ═══ */}
-      {!isMobile && (
-        <ShortcutCheatsheet
-          open={cheatsheetOpen}
-          onOpenChange={setCheatsheetOpen}
-          dark={dark}
-        />
-      )}
-
       {/* ═══ DESKTOP COMMAND PALETTE — ⌘K fuzzy launcher ═══ */}
       {!isMobile && (
         <CommandPalette
@@ -3026,7 +2894,6 @@ export default function AppShell() {
             onGoToJourney: (tab) => { setViewState('landing'); setActiveTab(tab); navigate(`/${tab}`); },
             onToggleDark: () => setDark(!dark),
             onOpenHelp: () => setHelpSheetOpen(true),
-            onOpenCheatsheet: () => setCheatsheetOpen(true),
             onSignIn: () => navigate('/login'),
             onSignOut: handleLogout,
           })}
