@@ -51,7 +51,8 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
 
   const headingColor = dark ? '#f9f9fc' : '#0f1012';
   const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
-  const accent = dark ? '#E8709A' : '#D44A78';
+  // Journey=raise accent (ochre). Inline <em> flourishes + HookHeader eyebrow.
+  const accent = dark ? '#DDB25E' : '#C99A3E';
 
   return (
     <div className="bg-transparent" style={{ color: headingColor }}>
@@ -73,6 +74,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
             </>
           }
           dark={dark}
+          accent={accent}
         />
 
         {/* ═══ Audience Picker ═══ */}
