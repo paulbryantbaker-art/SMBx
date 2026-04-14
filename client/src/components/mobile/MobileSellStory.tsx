@@ -13,6 +13,7 @@
 import { bridgeToYulia } from '../content/chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { BaselineCalculator } from '../content/LandingCalculators';
+import { MultipleMap } from '../content/MultipleMap';
 import { MobileJourneyStory } from './MobileJourneyStory';
 
 const PINK = '#D44A78';
@@ -54,6 +55,12 @@ export default function MobileSellStory({ dark }: Props) {
 
   const accent = dark ? PINK_DARK : PINK;
   const headingColor = dark ? '#f9f9fc' : '#0f1012';
+  // Shared palette for the child sections composed into MobileJourneyStory
+  const headingC = headingColor;
+  const bodyC = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
+  const mutedC = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
+  const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
+  const cardBg = dark ? '#1a1c1e' : '#ffffff';
 
   return (
     <MobileJourneyStory
@@ -114,6 +121,308 @@ export default function MobileSellStory({ dark }: Props) {
           "Run a Baseline for my next sell-side prospect. The business is in [industry] with about $XM EBITDA. Walk me through the Multiple Map and the add-back schedule."
         )
       }
-    />
+    >
+      {/* ─── Second interactive: Multiple Map ─── */}
+      <section style={{ padding: '14px 16px 22px' }}>
+        <div
+          style={{
+            padding: '0 6px 10px',
+            fontFamily: 'Sora, system-ui',
+            fontSize: 10,
+            fontWeight: 800,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: accent,
+          }}
+        >
+          Multiple Map · where your seller lands
+        </div>
+        <div
+          style={{
+            borderRadius: 16,
+            border: `1px solid ${borderC}`,
+            background: cardBg,
+            overflow: 'hidden',
+          }}
+        >
+          <MultipleMap dark={dark} ebitda={18} />
+        </div>
+      </section>
+
+      {/* ─── Baseline + Blind Equity — two branded terms stacked ─── */}
+      <section style={{ padding: '8px 16px 22px' }}>
+        <div
+          style={{
+            padding: '0 6px 10px',
+            fontFamily: 'Sora, system-ui',
+            fontSize: 10,
+            fontWeight: 800,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: accent,
+          }}
+        >
+          The two numbers your buyer cares about
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <CompactTermCard
+            term="Baseline"
+            oneLiner="The number you walk into the pitch with."
+            body={<>
+              Industry comp multiple × real EBITDA, adjusted for the levers that move price: customer concentration,
+              growth, owner dependency, recurring revenue. The same math the buyer's IB will run.
+            </>}
+            example="$18M EBITDA × 8.6× Baseline = $155M. Rule of thumb says $90M. The difference is the comp set you cite at the first meeting."
+            accent={accent}
+            dark={dark}
+          />
+          <CompactTermCard
+            term="Blind Equity"
+            oneLiner="The earnings hiding in your seller's tax return."
+            body={<>
+              The gap between reported EBITDA and real EBITDA. Above-market rent to an owner LLC, family comp above
+              market, one-time legal fees, personal vehicles, discontinued product losses — legitimate add-backs the
+              CPA optimized away.
+            </>}
+            example="Mark's reported EBITDA was $16.2M. Sarah surfaced $1.8M across 5 categories. Real EBITDA: $18M. At 8.6× Baseline, that $1.8M is worth $15.5M to the seller."
+            accent={accent}
+            dark={dark}
+          />
+        </div>
+      </section>
+
+      {/* ─── Compact comparison: the way it's been → with Yulia ─── */}
+      <section style={{ padding: '8px 22px 22px' }}>
+        <div
+          style={{
+            fontFamily: 'Sora, system-ui',
+            fontSize: 10,
+            fontWeight: 800,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: mutedC,
+            marginBottom: 14,
+          }}
+        >
+          The way it's been → with Yulia
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <CompactComparison
+            label="At the first meeting"
+            slow="&quot;We'll come back to you in two weeks.&quot;"
+            fast="Defensible Baseline in 90 seconds."
+            dark={dark}
+            accent={accent}
+          />
+          <CompactComparison
+            label="Engagement conversion"
+            slow="~35%"
+            fast="~62%"
+            dark={dark}
+            accent={accent}
+          />
+          <CompactComparison
+            label="Time to produce the first draft"
+            slow="2 weeks of analyst time"
+            fast="90 seconds of Yulia"
+            dark={dark}
+            accent={accent}
+          />
+        </div>
+      </section>
+
+      {/* ─── Sign-off chain compact ─── */}
+      <section style={{ padding: '8px 22px 22px' }}>
+        <div
+          style={{
+            fontFamily: 'Sora, system-ui',
+            fontSize: 10,
+            fontWeight: 800,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: accent,
+            marginBottom: 12,
+          }}
+        >
+          Yulia runs the workflow
+        </div>
+        <div
+          style={{
+            padding: '14px 16px',
+            borderRadius: 14,
+            background: cardBg,
+            border: `1px solid ${borderC}`,
+            fontFamily: 'Inter, system-ui',
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: 14,
+              lineHeight: 1.55,
+              color: bodyC,
+            }}
+          >
+            Yulia <strong style={{ color: headingC }}>drafts</strong> the Baseline, <strong style={{ color: headingC }}>routes</strong> to counsel and CPA for review,{' '}
+            <strong style={{ color: headingC }}>waits</strong> for sign-off, <strong style={{ color: headingC }}>executes</strong> the send-out, and <strong style={{ color: headingC }}>logs</strong>{' '}
+            every decision in the audit trail. The buyer's lawyer can ask where any number came from — the answer is in the database.
+          </p>
+        </div>
+      </section>
+    </MobileJourneyStory>
+  );
+}
+
+/* ───────── Subcomponents used in the children slot ───────── */
+
+function CompactTermCard({
+  term, oneLiner, body, example, accent, dark,
+}: {
+  term: string;
+  oneLiner: string;
+  body: React.ReactNode;
+  example: string;
+  accent: string;
+  dark: boolean;
+}) {
+  const headingC = dark ? '#f9f9fc' : '#0f1012';
+  const bodyC = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
+  const mutedC = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
+  const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
+  const cardBg = dark ? '#1a1c1e' : '#ffffff';
+  const exampleBg = dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.04)';
+
+  return (
+    <div
+      style={{
+        padding: '18px 16px',
+        borderRadius: 14,
+        background: cardBg,
+        border: `1px solid ${borderC}`,
+        fontFamily: 'Inter, system-ui',
+      }}
+    >
+      <div
+        style={{
+          display: 'inline-flex',
+          alignItems: 'baseline',
+          gap: 4,
+          marginBottom: 6,
+        }}
+      >
+        <span
+          style={{
+            fontFamily: 'Sora, system-ui',
+            fontSize: 20,
+            fontWeight: 800,
+            letterSpacing: '-0.02em',
+            color: headingC,
+          }}
+        >
+          {term}
+        </span>
+        <span style={{ fontSize: 10, fontWeight: 700, color: accent }}>™</span>
+      </div>
+      <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: headingC, lineHeight: 1.35, marginBottom: 10 }}>
+        {oneLiner}
+      </p>
+      <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.55, color: bodyC, marginBottom: 10 }}>
+        {body}
+      </p>
+      <div
+        style={{
+          padding: '10px 12px',
+          borderRadius: 10,
+          background: exampleBg,
+          fontSize: 12,
+          lineHeight: 1.5,
+          color: bodyC,
+        }}
+      >
+        <span
+          style={{
+            display: 'block',
+            fontFamily: 'Sora, system-ui',
+            fontSize: 9,
+            fontWeight: 800,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: mutedC,
+            marginBottom: 4,
+          }}
+        >
+          Example
+        </span>
+        {example}
+      </div>
+    </div>
+  );
+}
+
+function CompactComparison({
+  label, slow, fast, dark, accent,
+}: {
+  label: string;
+  slow: string;
+  fast: string;
+  dark: boolean;
+  accent: string;
+}) {
+  const headingC = dark ? '#f9f9fc' : '#0f1012';
+  const mutedC = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
+  const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
+
+  return (
+    <div
+      style={{
+        padding: '12px 14px',
+        borderRadius: 12,
+        border: `1px solid ${borderC}`,
+        fontFamily: 'Inter, system-ui',
+      }}
+    >
+      <div
+        style={{
+          fontFamily: 'Sora, system-ui',
+          fontSize: 10,
+          fontWeight: 800,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: mutedC,
+          marginBottom: 8,
+        }}
+      >
+        {label}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span
+          style={{
+            flex: 1,
+            fontSize: 13,
+            color: mutedC,
+            textDecoration: 'line-through',
+            textDecorationThickness: 1.5,
+          }}
+          dangerouslySetInnerHTML={{ __html: slow }}
+        />
+        <span
+          className="material-symbols-outlined"
+          aria-hidden
+          style={{ fontSize: 16, color: accent, flexShrink: 0 }}
+        >
+          arrow_forward
+        </span>
+        <span
+          style={{
+            flex: 1,
+            fontSize: 13.5,
+            fontWeight: 700,
+            color: headingC,
+            textAlign: 'right',
+          }}
+          dangerouslySetInnerHTML={{ __html: fast }}
+        />
+      </div>
+    </div>
   );
 }

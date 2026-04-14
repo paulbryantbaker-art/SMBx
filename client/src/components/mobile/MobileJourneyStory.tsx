@@ -78,6 +78,16 @@ interface Props {
   ctaLabel: string;
   ctaSub?: string;
   onCTA: () => void;
+
+  /**
+   * Escape hatch: additional sections rendered between `secondary` and
+   * `takeaway`. Use this to add page-specific content (extra interactives,
+   * term cards, compact comparisons, workflow chains) without forcing the
+   * primitive to know about every section shape. Each section inside
+   * `children` should manage its own vertical padding to preserve the
+   * Fibonacci rhythm (~14–22px top/bottom per section).
+   */
+  children?: ReactNode;
 }
 
 export function MobileJourneyStory({
@@ -89,6 +99,7 @@ export function MobileJourneyStory({
   secondary, secondaryLabel,
   takeaway,
   ctaLabel, ctaSub, onCTA,
+  children,
 }: Props) {
   const accent = dark ? JOURNEY_ACCENTS[journey].dark : JOURNEY_ACCENTS[journey].light;
   const accentSoft = dark
@@ -390,6 +401,9 @@ export function MobileJourneyStory({
           </div>
         </section>
       )}
+
+      {/* ─── 5b. EXTRA SECTIONS — page-specific content composed via children ─── */}
+      {children}
 
       {/* ─── 6. TAKEAWAY (0.236) — closing line ─── */}
       {takeaway && (
