@@ -1,4 +1,4 @@
-import { goToChat } from './chatBridge';
+import { bridgeToYulia } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { CapacitySlider, SynergyBuilder } from './AdvisorTools';
 import {
@@ -50,7 +50,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
       {
         question: 'Are verified deal professionals really free, forever?',
         answer:
-          'Yes. Verified M&A advisors, brokers, attorneys, CPAs, real estate brokers, wealth managers, and appraisers get full Professional features free — forever. Your clients pay their own subscription if they engage the platform directly. Tell Yulia you\u2019re a deal pro at the start of the conversation and she works with you peer-to-peer — no retail onboarding, no hand-holding.',
+          'Yes. Verified M&A advisors, brokers, fundless sponsors, search-fund advisors, family-office deal teams, and small PE shops get full Professional features free — forever. Your clients pay their own subscription if they engage the platform directly. Tell Yulia you\u2019re a deal pro at the start of the conversation and she works with you peer-to-peer — no retail onboarding, no hand-holding. (Attorneys, CPAs, and other service professionals also run free when they appear on a deal workflow — they just aren\u2019t the primary audience of this page.)',
       },
     ],
   });
@@ -105,48 +105,51 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
     },
   ];
 
+  // Advisors page audience = deal pros and brokers only. Attorneys / CPAs /
+  // real-estate brokers / wealth managers get free access when they appear on
+  // a deal workflow but they aren't the audience of THIS page.
   const advisorTypes = [
     {
       icon: 'storefront',
       tier: 'Boutique',
       title: 'Sell-side M&A advisors',
-      desc: 'Run 3× the engagements with the same partner team. White-label CIMs. First-meeting Baselines.',
+      desc: 'Run 3× the engagements with the same partner team. White-label CIMs. First-meeting Baselines. Multi-client pipeline view.',
       size: '$5M-$300M EV',
     },
     {
       icon: 'business',
       tier: 'Mid-market',
-      title: 'Independent sponsors',
-      desc: 'Build the cap stack in one afternoon. Source LPs from a structured deck. Close in 4-5 months.',
-      size: '$50M-$500M EV',
+      title: 'Business brokers',
+      desc: 'Walk into every listing with a defensible value range and an add-back schedule. Sellers sign, buyers underwrite, fees scale.',
+      size: '$1M-$25M EV',
     },
     {
       icon: 'account_balance',
-      tier: '$1B PE',
-      title: 'PE funds & deal teams',
-      desc: 'Eight times the inbound CIM throughput. Same analysts, same thesis, more shots on goal.',
-      size: '$100M-$1B EV',
+      tier: 'Fundless',
+      title: 'Independent sponsors',
+      desc: 'Build the cap stack in one afternoon. Draft the LP pitch from the modeled stack. Close in 4-5 months instead of 9-11.',
+      size: '$50M-$500M EV',
     },
     {
       icon: 'search',
-      tier: 'Search funds',
-      title: 'Search fund advisors & principals',
-      desc: 'Help searchers find, screen, and close faster. The Rundown on every target. Capital stack on every short-list deal.',
+      tier: 'Search',
+      title: 'Search-fund advisors & principals',
+      desc: 'Screen 10× more targets. The Rundown on every candidate before teaser. Cap stack on every short-list deal. Close faster.',
       size: '$5M-$50M EBITDA',
     },
     {
-      icon: 'real_estate_agent',
-      tier: 'Family office',
-      title: 'Family office deal teams',
-      desc: 'Multi-deal portfolio view. Shared diligence library. Synergy modeling across the existing book.',
-      size: '$25M-$500M EV',
+      icon: 'groups',
+      tier: 'PE',
+      title: 'PE deal teams',
+      desc: 'CIM throughput 8×. Same analysts, same thesis, more shots on goal. Thesis clarity in the first 48 hours of a new CIM.',
+      size: '$100M-$1B EV',
     },
     {
-      icon: 'gavel',
-      tier: 'Legal & tax',
-      title: 'Attorneys & CPAs',
-      desc: 'Financial context for every deal you advise on. Working capital analysis before closing surprises. Add-back schedules at the partner meeting.',
-      size: 'all sizes',
+      icon: 'handshake',
+      tier: 'Family office',
+      title: 'Family-office deal teams',
+      desc: 'Multi-deal portfolio view across the existing book. Synergy modeling at the next acquisition. One platform for every pipeline stage.',
+      size: '$25M-$500M EV',
     },
   ];
 
@@ -170,7 +173,34 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
             </>
           }
           dark={dark}
+          accent={accent}
         />
+
+        {/* ═══ Free-for-pros callout — the biggest value prop for this audience,
+             surfaced above the fold instead of buried in the FAQ. ═══ */}
+        <div
+          className="rounded-2xl mb-20 p-6 md:p-8 max-w-4xl"
+          style={{
+            background: dark ? 'rgba(232,112,154,0.10)' : 'rgba(212,74,120,0.06)',
+            border: dark ? '1px solid rgba(232,112,154,0.24)' : '1px solid rgba(212,74,120,0.18)',
+          }}
+        >
+          <div
+            className="text-[10px] font-bold uppercase mb-3"
+            style={{ color: accent, letterSpacing: '0.18em' }}
+          >
+            smbx.ai · verified deal professionals
+          </div>
+          <p
+            className="text-[16px] md:text-[17px] leading-relaxed"
+            style={{ color: headingColor }}
+          >
+            <strong>Free. Forever.</strong> M&amp;A advisors, brokers, fundless sponsors, search-fund advisors, family-office
+            deal teams, and small PE shops get full Professional features at no cost, for as long as you use the platform.
+            Your clients pay their own subscription if they engage directly — we don't make it free for them through you.
+            No trial clock. No per-deal fees. Your relationships stay yours.
+          </p>
+        </div>
 
         {/* ═══ Story ═══ */}
         <StoryBlock
@@ -220,6 +250,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
             { label: 'Same 4 partners', value: '3.4×', sub: 'revenue, no headcount added' },
           ]}
           dark={dark}
+          accent={accent}
         />
 
         {/* ═══ The 4 Jobs — editorial ═══ */}
@@ -229,6 +260,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
             title="Win the pitch. Kill the bad. Make the killer pitch. Find the synergy."
             sub="The four things that determine whether you make money this year. Yulia accelerates each one."
             dark={dark}
+            accent={accent}
           />
           <div className="space-y-12">
             {jobs.map((job) => (
@@ -303,8 +335,9 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           <SectionHeader
             label="Interactive · capacity"
             title="What does 22 active mandates look like?"
-            sub="Drag the slider from 6 to 22. Watch revenue, margin, partner hours, and capacity utilization update against the 4-partner Reese & Hammond model."
+            sub="The constraint on an advisory practice isn't relationships or judgment — it's partner production hours. Drag from 6 to 22 mandates and watch how Yulia rebalances your economics (revenue, margin, partner hours, utilization) without adding headcount."
             dark={dark}
+            accent={accent}
           />
           <CapacitySlider dark={dark} />
         </section>
@@ -314,8 +347,9 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           <SectionHeader
             label="Interactive · synergy"
             title="Show the buyer what they'll capture."
-            sub="Model cost takeout, cross-sell, and working capital release for a hypothetical $20M EBITDA target. Watch the buyer's underwritten valuation lift — and your fee with it."
+            sub="A synergy thesis on page 1 of the CIM changes LOI economics. Model the cost takeout, cross-sell, and working-capital release your buyer will actually execute — then watch the valuation (and your fee) lift before anyone signs."
             dark={dark}
+            accent={accent}
           />
           <SynergyBuilder dark={dark} />
         </section>
@@ -343,24 +377,25 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
             </>
           }
           dark={dark}
+          accent={accent}
         />
 
-        {/* ═══ Who uses this — horizontal carousel ═══ */}
+        {/* ═══ Who uses this — responsive grid (was horizontal carousel) ═══ */}
         <section className="mb-28">
           <SectionHeader
             label="Who runs this"
             title="From boutique shops to $1B funds."
             sub="Yulia adapts to the deal size and the team structure. Same product, different depth, different speed."
             dark={dark}
+            accent={accent}
           />
           <div
-            className="flex gap-5 overflow-x-auto pb-4 -mx-6 px-6 md:-mx-12 md:px-12 snap-x snap-mandatory"
-            style={{ scrollbarWidth: 'thin' }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
           >
             {advisorTypes.map((a) => (
               <div
                 key={a.title}
-                className="rounded-2xl p-7 min-w-[320px] max-w-[320px] snap-start flex-shrink-0"
+                className="rounded-2xl p-7"
                 style={{
                   background: innerBg,
                   border: `1px solid ${border}`,
@@ -445,15 +480,21 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
             </>
           }
           dark={dark}
+          accent={accent}
         />
 
         {/* ═══ CTA ═══ */}
         <PageCTA
           headline={<>Win your next pitch.</>}
-          sub="Run a real client engagement before you commit. Walk into your next pitch with a defensible Baseline. Draft a CIM from the seller's P&L in four hours. See the pipeline view. Verified deal pros — attorneys, CPAs, brokers — stay free, forever."
+          sub="Verified M&A advisors, brokers, fundless sponsors, search-fund advisors, and PE deal teams stay free, forever. Run a real client engagement before you commit. Walk in with a defensible Baseline. Draft a CIM in four hours. See the pipeline. Your relationships stay yours."
           buttonLabel="Start now — free"
-          onClick={goToChat}
+          onClick={() =>
+            bridgeToYulia(
+              "I run an M&A advisory practice. Help me understand how Yulia fits. We handle roughly [X] active mandates in [industry] at $[Y]M-$[Z]M EV, with engagements running [N] weeks pitch-to-close."
+            )
+          }
           dark={dark}
+          accent={accent}
         />
       </div>
     </div>
