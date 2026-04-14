@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { goToChat } from './chatBridge';
+import { bridgeToYulia } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { ConversationTyping } from './animations';
 import { StackBuilder, AudiencePicker, type Audience } from './StackBuilder';
@@ -147,6 +147,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
               { label: 'Capital preserved', value: '+$50M', sub: 'and James still owns 100%' },
             ]}
             dark={dark}
+            accent={accent}
           />
         ) : (
           <StoryBlock
@@ -195,6 +196,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
               { label: 'Time to close', value: '4.5 mo', sub: 'vs. 9-11 mo industry average' },
             ]}
             dark={dark}
+            accent={accent}
           />
         )}
 
@@ -209,6 +211,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
                 : 'Five layers of capital. Move any slider, the others rebalance. The read-out shows your blended cost of capital, year-1 DSCR, and your sponsor equity check.'
             }
             dark={dark}
+            accent={accent}
           />
           <StackBuilder dark={dark} audience={audience} ev={180} ebitda={20} />
         </section>
@@ -236,6 +239,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
             </>
           }
           dark={dark}
+          accent={accent}
         />
 
         {/* ═══ Yulia Says ═══ */}
@@ -244,6 +248,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
             label="Yulia says"
             title="From 'I need capital' to a modeled stack."
             dark={dark}
+            accent={accent}
           />
           <div
             className="rounded-2xl p-6 md:p-10 max-w-3xl"
@@ -264,7 +269,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
                   type: 'ai',
                   content: (
                     <div className="flex gap-3 items-start mt-4">
-                      <div className="w-8 h-8 rounded-full bg-[#D44A78] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ background: accent }}>
                         Y
                       </div>
                       <div className="bg-white/10 p-4 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed">
@@ -288,7 +293,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
                   type: 'ai',
                   content: (
                     <div className="flex gap-3 items-start mt-4">
-                      <div className="w-8 h-8 rounded-full bg-[#D44A78] flex items-center justify-center text-white text-xs font-bold shrink-0">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ background: accent }}>
                         Y
                       </div>
                       <div className="bg-white/10 p-4 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed">
@@ -350,15 +355,24 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
             </>
           }
           dark={dark}
+          accent={accent}
         />
 
         {/* ═══ CTA ═══ */}
         <PageCTA
-          headline={<>Build your stack.</>}
-          sub="Tell Yulia what you're financing and how much you need. She'll model every structure against current market rates and your real DSCR — in one conversation."
-          buttonLabel="Build my stack"
-          onClick={goToChat}
+          headline={audience === 'owner' ? <>Protect your equity.</> : <>Complete your stack.</>}
+          sub={audience === 'owner'
+            ? "Tell Yulia what you're financing and how much you need. She'll model senior debt, mezz, and seller note side-by-side against PE equity — so you can see exactly what each option costs in founder ownership."
+            : "Tell Yulia the deal, the LP commitments, and the gap. She'll build the five-layer stack, model DSCR at proposed leverage, and draft the LP pitch from the same numbers — in one conversation."
+          }
+          buttonLabel={audience === 'owner' ? 'Model my options' : 'Build my stack'}
+          onClick={() => bridgeToYulia(
+            audience === 'owner'
+              ? "I own a business with about $XM revenue / $XM EBITDA in [industry]. I need to raise $XM for [growth / refi / acquisition]. Model senior debt, mezz, and seller note against PE equity so I can see what each option costs me in ownership."
+              : "I'm a sponsor closing on a $XM acquisition at $XM EBITDA. I have $XM of LP equity committed. Help me build the five-layer cap stack — senior, unitranche, mezz, sponsor equity, seller rollover — against current market rates and model year-1 DSCR."
+          )}
           dark={dark}
+          accent={accent}
         />
       </div>
     </div>
