@@ -70,15 +70,21 @@ interface DealStackProps {
   onDealLongPress?: (dealId: number) => void;
   /** Highlight a newly-created deal with a subtle pulse for 5s. */
   justCreatedDealId?: number | null;
+  /** While true, render skeletons instead of cards (initial fetch in flight). */
+  loading?: boolean;
   dark?: boolean;
 }
 
 /* ═══ COMPONENT ═══ */
 
-export function DealStack({ deals, onDealTap, onStartFirstDeal, onDealLongPress, justCreatedDealId, dark = false }: DealStackProps) {
+export function DealStack({ deals, onDealTap, onStartFirstDeal, onDealLongPress, justCreatedDealId, loading = false, dark = false }: DealStackProps) {
   const reduceMotion = useReducedMotion();
   const sorted = useMemo(() => sortDeals(filterRealDeals(deals)), [deals]);
   const [topId, setTopId] = useState<number | null>(null);
+
+  if (loading) {
+    return <SkeletonStack dark={dark} />;
+  }
 
   // Re-pin the top card when the sorted order changes. Default is the #0 (most
   // urgent). If user has manually promoted a card via peek-tap, keep it on top
@@ -217,6 +223,66 @@ export function DealStack({ deals, onDealTap, onStartFirstDeal, onDealLongPress,
         }
         .deal-just-created > button > div {
           animation: dealJustCreated 1.6s ease-out 2;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/* ═══ LOADING SKELETON ═══ */
+
+function SkeletonStack({ dark }: { dark: boolean }) {
+  const cardBg = dark ? '#1A1C1E' : '#FFFFFF';
+  const cardBorder = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const shimmer = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+  const shimmerHi = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
+
+  return (
+    <div style={{ padding: '16px 16px 140px' }}>
+      {/* Top card skeleton */}
+      <div
+        style={{
+          borderRadius: 20,
+          overflow: 'hidden',
+          background: cardBg,
+          border: `1px solid ${cardBorder}`,
+          boxShadow: dark ? '0 8px 28px rgba(0,0,0,0.4)' : '0 8px 28px rgba(26,28,30,0.08)',
+        }}
+      >
+        <div className="deal-skeleton-shimmer" style={{ height: 56, background: `linear-gradient(135deg, ${shimmer}, ${shimmerHi})` }} />
+        <div style={{ padding: '14px 16px 16px' }}>
+          <div className="deal-skeleton-shimmer" style={{ width: '60%', height: 18, borderRadius: 6, background: shimmer, marginBottom: 12 }} />
+          <div className="deal-skeleton-shimmer" style={{ width: '40%', height: 12, borderRadius: 6, background: shimmer, marginBottom: 14 }} />
+          <div className="deal-skeleton-shimmer" style={{ width: '85%', height: 13, borderRadius: 6, background: shimmer }} />
+        </div>
+      </div>
+
+      {/* Peek skeletons */}
+      <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {[0, 1, 2].map(i => (
+          <div
+            key={i}
+            className="deal-skeleton-shimmer"
+            style={{
+              height: 44,
+              borderRadius: 14,
+              background: `linear-gradient(135deg, ${shimmer}, ${shimmerHi})`,
+              border: `1px solid ${cardBorder}`,
+              opacity: 1 - i * 0.18,
+            }}
+          />
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes dealSkeletonShimmer {
+          0%   { opacity: 0.55; }
+          50%  { opacity: 1; }
+          100% { opacity: 0.55; }
+        }
+        .deal-skeleton-shimmer { animation: dealSkeletonShimmer 1.6s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .deal-skeleton-shimmer { animation: none; }
         }
       `}</style>
     </div>

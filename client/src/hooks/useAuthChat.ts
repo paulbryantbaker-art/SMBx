@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { authHeaders, type User } from './useAuth';
+import { showToast } from '../lib/toast';
 
 export interface AuthMessage {
   id: number;
@@ -97,6 +98,10 @@ export function useAuthChat(user: User | null) {
       abortRef.current?.abort();
     };
   }, []);
+
+  // Stable ref to sendMessage so error-toast retry handlers can call the
+  // current implementation without closing over a stale function.
+  const sendMessageRef = useRef<((content: string) => Promise<void>) | null>(null);
 
   // Load conversation list (flat for backward compat + grouped for new sidebar)
   const loadConversations = useCallback(async () => {
@@ -392,6 +397,11 @@ export function useAuthChat(user: User | null) {
           : err.message?.includes('try again')
             ? err.message
             : 'Something went wrong. Please try again.';
+        // Bottom toast with one-tap retry
+        showToast("Couldn't send your message", {
+          tone: 'error',
+          action: { label: 'Retry', handler: () => sendMessageRef.current?.(content) },
+        });
         setMessages(prev => [...prev, {
           id: Date.now() + 1,
           role: 'assistant' as const,
@@ -406,6 +416,10 @@ export function useAuthChat(user: User | null) {
       abortRef.current = null;
     }
   }, [user, activeConversationId, createConversation, loadConversations]);
+
+  // Keep the ref pointing at the latest sendMessage so toast retry handlers
+  // never call a stale implementation.
+  useEffect(() => { sendMessageRef.current = sendMessage; }, [sendMessage]);
 
   // Select a conversation
   const selectConversation = useCallback((id: number) => {

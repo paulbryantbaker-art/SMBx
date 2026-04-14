@@ -44,18 +44,32 @@ const DELIVERABLE_ICONS: Record<string, string> = {
 };
 
 /* ─── Yulia avatar dot — small accent for mobile assistant messages ──── */
-function YuliaAvatar({ dark }: { dark: boolean }) {
+function YuliaAvatar({ dark, pulsing = false }: { dark: boolean; pulsing?: boolean }) {
   return (
-    <div style={{
-      width: 24, height: 24, borderRadius: '50%',
-      background: 'linear-gradient(135deg, #D44A78 0%, #E8709A 100%)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      flexShrink: 0,
-      boxShadow: dark
-        ? '0 1px 2px rgba(0,0,0,0.4)'
-        : '0 1px 2px rgba(212,74,120,0.18)',
-    }}>
+    <div
+      className={pulsing ? 'yulia-avatar-pulse' : undefined}
+      style={{
+        width: 24, height: 24, borderRadius: '50%',
+        background: 'linear-gradient(135deg, #D44A78 0%, #E8709A 100%)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+        boxShadow: dark
+          ? '0 1px 2px rgba(0,0,0,0.4)'
+          : '0 1px 2px rgba(212,74,120,0.18)',
+      }}
+    >
       <span style={{ color: '#fff', fontSize: 11, fontWeight: 800, letterSpacing: '-0.02em', fontFamily: "'Sora', system-ui, sans-serif" }}>Y</span>
+      <style>{`
+        @keyframes yuliaAvatarPulse {
+          0%   { transform: scale(1);     box-shadow: 0 0 0 0 rgba(212,74,120,0.45); }
+          70%  { transform: scale(1.06);  box-shadow: 0 0 0 8px rgba(212,74,120,0); }
+          100% { transform: scale(1);     box-shadow: 0 0 0 0 rgba(212,74,120,0); }
+        }
+        .yulia-avatar-pulse { animation: yuliaAvatarPulse 1.6s ease-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .yulia-avatar-pulse { animation: none; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -400,7 +414,7 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
           ) : (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-                <YuliaAvatar dark={dark} />
+                <YuliaAvatar dark={dark} pulsing />
                 <span style={{ fontSize: 11, fontWeight: 700, color: '#D44A78', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>Yulia</span>
               </div>
               <div style={{ minWidth: 0 }}>
@@ -435,15 +449,26 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
             </div>
           ) : (
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              <YuliaAvatar dark={dark} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <YuliaAvatar dark={dark} pulsing />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
                 <div style={{ display: 'flex', gap: 4 }}>
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite' }} />
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite 0.15s' }} />
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: dotColor, animation: 'dotPulse 1.4s ease infinite 0.3s' }} />
                 </div>
                 {activeTool && (
-                  <span style={{ fontSize: 13, color: dark ? '#888' : '#999', fontWeight: 500 }}>{activeTool}...</span>
+                  <span style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: '#D44A78',
+                    background: dark ? 'rgba(232,112,154,0.10)' : 'rgba(212,74,120,0.08)',
+                    border: `1px solid ${dark ? 'rgba(232,112,154,0.20)' : 'rgba(212,74,120,0.16)'}`,
+                    padding: '3px 8px',
+                    borderRadius: 999,
+                    fontFamily: 'Inter, system-ui',
+                  }}>
+                    {activeTool}…
+                  </span>
                 )}
               </div>
             </div>

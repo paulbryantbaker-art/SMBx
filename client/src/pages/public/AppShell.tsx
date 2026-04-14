@@ -55,6 +55,7 @@ import { ArtifactSheet } from '../../components/mobile/ArtifactSheet';
 import { AccountSheet } from '../../components/mobile/AccountSheet';
 import { SignInSheet } from '../../components/mobile/SignInSheet';
 import { DealActionsSheet } from '../../components/mobile/DealActionsSheet';
+import { ToastHost } from '../../components/mobile/ToastHost';
 import { DealContextChips } from '../../components/mobile/DealContextChips';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
@@ -1632,13 +1633,14 @@ export default function AppShell() {
                   {/* Mobile + logged-in + has deals → Wallet-style deal stack.
                       Replaces the greeting block with glanceable portfolio state.
                       Desktop + logged-out always see the hero/greeting block. */}
-                  {isMobile && user && authChat.grouped ? (
+                  {isMobile && user ? (
                     <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
                       <div className="flex justify-center pt-6">
                         <LogoHero height={32} dark={dark} />
                       </div>
                       <DealStack
-                        deals={authChat.grouped.deals.map(d => ({
+                        loading={!authChat.grouped}
+                        deals={(authChat.grouped?.deals ?? []).map(d => ({
                           id: d.id,
                           business_name: d.business_name,
                           journey_type: d.journey_type,
@@ -2556,6 +2558,9 @@ export default function AppShell() {
           onSignIn={() => { window.location.href = '/login'; }}
         />
       )}
+
+      {/* ═══ MOBILE TOAST HOST — singleton, lifts above the portaled chat pill ═══ */}
+      {isMobile && <ToastHost />}
 
       {/* ═══ MOBILE DEAL ACTIONS SHEET — long-press on a deal card opens this ═══ */}
       {isMobile && user && (
