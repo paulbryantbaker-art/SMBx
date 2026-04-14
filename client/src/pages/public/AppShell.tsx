@@ -34,6 +34,7 @@ import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/Canva
 import CanvasTabStrip from '../../components/canvas/CanvasTabStrip';
 import DesktopAccountMenu from '../../components/desktop/DesktopAccountMenu';
 import DealWorkspace from '../../components/desktop/DealWorkspace';
+import DesktopHomeDeals from '../../components/desktop/DesktopHomeDeals';
 import PipelineTable from '../../components/desktop/PipelineTable';
 import SourcingCommandCenter from '../../components/desktop/SourcingCommandCenter';
 import PortfolioAnalytics from '../../components/desktop/PortfolioAnalytics';
@@ -2544,18 +2545,25 @@ export default function AppShell() {
                   </Suspense>
                 </div>
               ) : (
-                /* Logged-in empty state */
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 24 }}>
-                  <img
-                    src={dark ? '/G3D.png' : '/G3L.png'}
-                    alt="smbx.ai"
-                    draggable={false}
-                    style={{ height: 48, objectFit: 'contain', opacity: 0.35 }}
-                  />
-                  <p className="font-body text-[15px] font-medium" style={{ color: dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)', margin: 0 }}>
-                    Ask Yulia to open a tool
-                  </p>
-                </div>
+                /* Logged-in: render "Today" deal overview in the canvas panel.
+                   Closes the P1 from the critique rounds — deals were not visible
+                   on the primary home surface until now. */
+                <DesktopHomeDeals
+                  dark={dark}
+                  deals={(authChat.grouped?.deals ?? []).map(d => ({
+                    id: d.id,
+                    business_name: d.business_name,
+                    journey_type: d.journey_type,
+                    current_gate: d.current_gate,
+                    industry: d.industry,
+                    league: d.league,
+                    updated_at: d.updated_at,
+                    status: d.status,
+                  }))}
+                  onOpenDeal={(id) => { setViewState('deal'); navigate(`/deal/${id}`); }}
+                  onSeeAll={() => openCanvasTab('pipeline', 'Pipeline')}
+                  onNewDeal={() => { authChat.newConversation(); setViewState('chat'); navigate('/chat'); }}
+                />
               )}
             </div>
           </div>
