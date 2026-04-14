@@ -38,6 +38,7 @@ import PipelineTable from '../../components/desktop/PipelineTable';
 import SourcingCommandCenter from '../../components/desktop/SourcingCommandCenter';
 import PortfolioAnalytics from '../../components/desktop/PortfolioAnalytics';
 import CommandPalette, { type CommandItem } from '../../components/desktop/CommandPalette';
+import DesktopFooter from '../../components/desktop/DesktopFooter';
 import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
@@ -2185,9 +2186,22 @@ export default function AppShell() {
                      activeTab === 'advisors' ? <AdvisorsBelow dark={dark} /> :
                      activeTab === 'pricing' ? <PricingBelow dark={dark} /> : null}
                   </Suspense>
-                  <footer className={`py-12 flex justify-center ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`}>
-                    <LogoIcon height={44} dark={dark} />
-                  </footer>
+                  {!isMobile ? (
+                    <DesktopFooter
+                      dark={dark}
+                      onTalkToYulia={() => { setViewState('chat'); navigate('/chat'); }}
+                      onNavigate={(path) => {
+                        const t = pathToTab(path);
+                        setActiveTab(t);
+                        setViewState('landing');
+                        navigate(path);
+                      }}
+                    />
+                  ) : (
+                    <footer className={`py-12 flex justify-center ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`}>
+                      <LogoIcon height={44} dark={dark} />
+                    </footer>
+                  )}
                 </div>
               </div>
               ) : null}

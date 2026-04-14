@@ -62,6 +62,39 @@
         });
       })();
     </script>
+    <!-- Site-wide Organization + SoftwareApplication schema. Per-page
+         FAQPage / BreadcrumbList are injected by usePageMeta. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://smbx.ai/#organization",
+          "name": "smbx.ai",
+          "url": "https://smbx.ai/",
+          "logo": "https://smbx.ai/G3L.png",
+          "description": "AI deal intelligence for business acquisitions, sales, capital raises, and post-merger integration."
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://smbx.ai/#software",
+          "name": "smbx.ai",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "description": "Chat-first M&A deal intelligence platform. Sell, buy, raise capital, or integrate — guided end-to-end by Yulia, an AI deal advisor.",
+          "offers": {
+            "@type": "AggregateOffer",
+            "priceCurrency": "USD",
+            "lowPrice": "0",
+            "highPrice": "999",
+            "offerCount": "4"
+          },
+          "provider": { "@id": "https://smbx.ai/#organization" }
+        }
+      ]
+    }
+    </script>
     <link rel="icon" type="image/png" href="/X.png" />
     <!-- PWA icon: dark variant (white X on near-black) — works best on
          dark home screens which are the majority. iOS PWAs don't support
