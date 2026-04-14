@@ -39,6 +39,7 @@ import PipelineTable from '../../components/desktop/PipelineTable';
 import SourcingCommandCenter from '../../components/desktop/SourcingCommandCenter';
 import PortfolioAnalytics from '../../components/desktop/PortfolioAnalytics';
 import CommandPalette, { type CommandItem } from '../../components/desktop/CommandPalette';
+import ShortcutCheatsheet from '../../components/desktop/ShortcutCheatsheet';
 import DesktopFooter from '../../components/desktop/DesktopFooter';
 import { ModelRenderer } from '../../components/models';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
@@ -486,6 +487,7 @@ interface BuildCommandArgs {
   onGoToJourney: (tab: TabId) => void;
   onToggleDark: () => void;
   onOpenHelp: () => void;
+  onOpenCheatsheet: () => void;
   onSignIn: () => void;
   onSignOut: () => void;
 }
@@ -516,6 +518,7 @@ function buildCommandItems(a: BuildCommandArgs): CommandItem[] {
   }
   items.push({ id: 'toggle-dark', label: a.dark ? 'Switch to light mode' : 'Switch to dark mode', icon: a.dark ? 'light_mode' : 'dark_mode', shortcut: '⌘⇧D', group: 'Actions', onSelect: a.onToggleDark });
   items.push({ id: 'help', label: 'Help & glossary', icon: 'help_outline', group: 'Actions', onSelect: a.onOpenHelp });
+  items.push({ id: 'shortcuts', label: 'Keyboard shortcuts', icon: 'keyboard', shortcut: '?', group: 'Actions', onSelect: a.onOpenCheatsheet });
   if (a.user) {
     items.push({ id: 'sign-out', label: 'Sign out', icon: 'logout', group: 'Actions', onSelect: a.onSignOut });
   } else {
@@ -913,11 +916,16 @@ export default function AppShell() {
   useEffect(() => {
     if (isMobile) return;
     const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isTyping = !!target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+      // ? opens the shortcut cheatsheet (any time, when not typing)
+      if (e.key === '?' && !isTyping && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setCheatsheetOpen(o => !o);
+        return;
+      }
       const mod = e.metaKey || e.ctrlKey;
       if (!mod) return;
-      // Ignore while typing inside contentEditable that isn't the palette
-      const target = e.target as HTMLElement | null;
-      const isTyping = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
       if (e.key === 'k' || e.key === 'K') {
         e.preventDefault();
         setCommandOpen(o => !o);
@@ -1110,6 +1118,8 @@ export default function AppShell() {
 
   // Desktop ⌘K command palette — global fuzzy launcher.
   const [commandOpen, setCommandOpen] = useState(false);
+  // Desktop ? keyboard cheatsheet
+  const [cheatsheetOpen, setCheatsheetOpen] = useState(false);
 
   // Just-created deal highlight — when the user finishes a journey-page CTA
   // and a new deal appears in their stack, that card pulses for ~6s on return
@@ -1730,14 +1740,9 @@ export default function AppShell() {
             <span className="text-[9px] font-semibold">Admin</span>
           </button>
         )}
-        <button
-          onClick={() => { if (user) { openCanvasTab('settings', 'Settings'); } else window.location.href = '/login'; }}
-          className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
-          type="button"
-        >
-          <span className="material-symbols-outlined text-[22px]">{user ? 'person' : 'login'}</span>
-          <span className="text-[9px] font-semibold">{user ? 'Account' : 'Sign In'}</span>
-        </button>
+        {/* Account moved to top-right (DesktopAccountMenu) — top-right is the
+            canonical identity surface across web apps. Sidebar is for tools
+            and navigation, not for "who am I". */}
       </div>
     </aside>
   );
@@ -2884,6 +2889,15 @@ export default function AppShell() {
         dark={dark}
       />
 
+      {/* ═══ DESKTOP KEYBOARD CHEATSHEET — `?` opens it ═══ */}
+      {!isMobile && (
+        <ShortcutCheatsheet
+          open={cheatsheetOpen}
+          onOpenChange={setCheatsheetOpen}
+          dark={dark}
+        />
+      )}
+
       {/* ═══ DESKTOP COMMAND PALETTE — ⌘K fuzzy launcher ═══ */}
       {!isMobile && (
         <CommandPalette
@@ -2902,6 +2916,7 @@ export default function AppShell() {
             onGoToJourney: (tab) => { setViewState('landing'); setActiveTab(tab); navigate(`/${tab}`); },
             onToggleDark: () => setDark(!dark),
             onOpenHelp: () => setHelpSheetOpen(true),
+            onOpenCheatsheet: () => setCheatsheetOpen(true),
             onSignIn: () => navigate('/login'),
             onSignOut: handleLogout,
           })}
