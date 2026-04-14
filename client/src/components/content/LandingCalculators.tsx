@@ -142,7 +142,7 @@ export function BaselineCalculator({ dark }: { dark?: boolean }) {
       />
 
       <div className={`mt-6 pt-6 ${dark ? 'border-t border-zinc-700' : 'border-t border-[#eeeef0]'}`}>
-        <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-4">
           <ResultCard label="Est. EBITDA" value={fmt(ebitda)} dark={dark} />
           <ResultCard
             label="Multiple range"
@@ -454,7 +454,7 @@ export function LandingCapTableCalc({ dark }: { dark?: boolean }) {
         onChange={setLiquidationPref} label="Liquidation Preference" displayValue={`${liquidationPref}x`} dark={dark} />
 
       <div className={`mt-6 pt-6 ${dark ? 'border-t border-zinc-700' : 'border-t border-[#eeeef0]'}`}>
-        <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-4">
           <ResultCard label="Your Ownership" value={`${(founderPct * 100).toFixed(1)}%`} highlight dark={dark} />
           <ResultCard label="Investor" value={`${(investorPct * 100).toFixed(1)}%`} dark={dark} />
           <ResultCard label="Post-Money" value={fmt(postMoney)} dark={dark} />
