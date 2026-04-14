@@ -56,6 +56,7 @@ import { AccountSheet } from '../../components/mobile/AccountSheet';
 import { SignInSheet } from '../../components/mobile/SignInSheet';
 import { DealActionsSheet } from '../../components/mobile/DealActionsSheet';
 import { ToastHost } from '../../components/mobile/ToastHost';
+import { HelpSheet } from '../../components/mobile/HelpSheet';
 import { DealContextChips } from '../../components/mobile/DealContextChips';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
@@ -925,6 +926,8 @@ export default function AppShell() {
   const [signInSheetOpen, setSignInSheetOpen] = useState(false);
   // Mobile deal actions sheet — opened by long-press on a deal card.
   const [dealActionsTargetId, setDealActionsTargetId] = useState<number | null>(null);
+  // Mobile help sheet — opened from AccountSheet, SignInSheet, or chat empty state.
+  const [helpSheetOpen, setHelpSheetOpen] = useState(false);
 
   // Just-created deal highlight — when the user finishes a journey-page CTA
   // and a new deal appears in their stack, that card pulses for ~6s on return
@@ -2546,6 +2549,16 @@ export default function AppShell() {
           }}
           onToggleDark={() => setDark(!dark)}
           onSignOut={handleLogout}
+          onOpenSupport={() => { setAccountSheetOpen(false); setHelpSheetOpen(true); }}
+        />
+      )}
+
+      {/* ═══ MOBILE HELP SHEET — Yulia overview + M&A glossary ═══ */}
+      {isMobile && (
+        <HelpSheet
+          open={helpSheetOpen}
+          onOpenChange={setHelpSheetOpen}
+          dark={dark}
         />
       )}
 

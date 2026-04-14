@@ -15,6 +15,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { DealCard, daysSince, deriveUrgency, type DealCardData, type Urgency } from './DealCard';
+import { DealStackHints } from './DealStackHints';
 import { tick, thud } from '../../lib/haptics';
 
 /* ═══ SORT WEIGHTS ═══ */
@@ -170,6 +171,7 @@ export function DealStack({ deals, onDealTap, onStartFirstDeal, onDealLongPress,
             dark={dark}
             onTap={() => onDealTap(topCard.id)}
             onLongPress={onDealLongPress ? () => onDealLongPress(topCard.id) : undefined}
+            showMoreButton={!!onDealLongPress}
           />
         </motion.div>
       </motion.div>
@@ -213,6 +215,9 @@ export function DealStack({ deals, onDealTap, onStartFirstDeal, onDealLongPress,
           + {overflowCount} more
         </div>
       )}
+
+      {/* First-time gesture hint overlay (once per device, dismissable) */}
+      <DealStackHints hasTopCard={!!topCard} dark={dark} />
 
       {/* Just-created pulse animation — one-off subtle highlight */}
       <style>{`

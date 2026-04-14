@@ -129,6 +129,9 @@ interface DealCardProps {
   deal: DealCardData;
   onTap?: () => void;
   onLongPress?: () => void;
+  /** Visible "more" button (⋯) shown in top-right of body — discoverable
+   *  alternative to long-press. Wired to onLongPress when both provided. */
+  showMoreButton?: boolean;
   dark?: boolean;
   /** 0 = top of stack, 1 = second, 2 = third... affects scale/opacity/offset */
   stackIndex?: number;
@@ -144,7 +147,7 @@ interface DealCardProps {
 /* ═══ COMPONENT ═══ */
 
 export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function DealCard(
-  { deal, onTap, onLongPress, dark = false, stackIndex = 0, urgency: urgencyProp, nextAction: nextActionProp, peek = false },
+  { deal, onTap, onLongPress, showMoreButton = false, dark = false, stackIndex = 0, urgency: urgencyProp, nextAction: nextActionProp, peek = false },
   ref,
 ) {
   const journey = (deal.journey_type || 'sell').toLowerCase();
@@ -386,6 +389,33 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
             }}>
               {gateLabel}
             </span>
+            {showMoreButton && onLongPress && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onLongPress(); }}
+                type="button"
+                aria-label="Quick actions"
+                style={{
+                  width: 28, height: 28,
+                  marginLeft: 4,
+                  border: 'none',
+                  borderRadius: '50%',
+                  background: 'transparent',
+                  color: mutedColor,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="5" cy="12" r="2" />
+                  <circle cx="12" cy="12" r="2" />
+                  <circle cx="19" cy="12" r="2" />
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* Meta row */}
