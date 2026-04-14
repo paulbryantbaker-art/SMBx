@@ -50,6 +50,7 @@ import { MobileWorkspaceSheet } from '../../components/mobile/MobileWorkspaceShe
 import { isStandalone } from '../../lib/pwa';
 import { NextActionsCards } from '../../components/mobile/NextActionsCards';
 import { DealStack } from '../../components/mobile/DealStack';
+import { DealContextChips } from '../../components/mobile/DealContextChips';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
 import { MobileIntegratePage } from '../../components/mobile/MobileIntegratePage';
@@ -1769,14 +1770,14 @@ export default function AppShell() {
                       className="fixed left-0 right-0 bottom-0 z-10"
                       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
                     >
-                      {/* Starter chips — journey starters in browser, action starters in PWA */}
-                      {!isPWA && (
-                        <StarterChips
-                          dark={dark}
-                          onChipTap={(fill) => fillHomeInput(fill)}
-                          onLearnTap={() => setLearnDrawerOpen(true)}
-                        />
-                      )}
+                      {/* Context-aware chip row — journey chips when empty portfolio,
+                          single "Start a new deal" chip when user has deals. Always shown
+                          on mobile home (not just browser). */}
+                      <DealContextChips
+                        dark={dark}
+                        hasDeals={!!(user && authChat.grouped && authChat.grouped.deals.length > 0)}
+                        onChipTap={(fill) => fillHomeInput(fill)}
+                      />
 
                       <div className={isPWA ? 'px-3' : 'px-4'} style={{ touchAction: 'auto' }}>
                       {/* Gradient-glow input with + button for file uploads / utilities */}
