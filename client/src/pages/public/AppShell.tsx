@@ -2164,6 +2164,105 @@ export default function AppShell() {
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
                           </button>
                         </div>
+                        {/* Mobile tool popup — opens above the pill when + is tapped */}
+                        {isMobile && homeToolsOpen && (
+                          <div
+                            onClick={(e) => { if (e.target === e.currentTarget) setHomeToolsOpen(false); }}
+                            style={{
+                              position: 'fixed',
+                              inset: 0,
+                              background: 'rgba(15,16,18,0.35)',
+                              zIndex: 70,
+                            }}
+                            aria-hidden
+                          >
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                position: 'fixed',
+                                left: 12,
+                                right: 12,
+                                bottom: 'calc(env(safe-area-inset-bottom) + 84px)',
+                                background: dark ? '#1a1c1e' : '#ffffff',
+                                borderRadius: 20,
+                                border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(15,16,18,0.08)',
+                                boxShadow: '0 20px 48px rgba(0,0,0,0.25)',
+                                padding: 8,
+                                maxHeight: '62vh',
+                                overflowY: 'auto',
+                              }}
+                              role="menu"
+                            >
+                              <div style={{ padding: '10px 14px 6px' }}>
+                                <span style={{
+                                  fontFamily: "'Sora', system-ui, sans-serif",
+                                  fontSize: 10, fontWeight: 800,
+                                  letterSpacing: '0.14em', textTransform: 'uppercase',
+                                  color: dark ? 'rgba(240,240,243,0.55)' : '#7c7d80',
+                                }}>Start with Yulia</span>
+                              </div>
+                              {HOME_TOOLS.filter(t => t.group === 'journey').map(t => (
+                                <button
+                                  key={t.label}
+                                  onClick={() => { setHomeToolsOpen(false); fillHomeInput(t.fill); }}
+                                  type="button"
+                                  style={{
+                                    display: 'flex', alignItems: 'flex-start', gap: 12,
+                                    padding: '12px 14px',
+                                    borderRadius: 12,
+                                    border: 'none',
+                                    background: 'transparent',
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    cursor: 'pointer',
+                                    fontFamily: "'Inter', system-ui, sans-serif",
+                                    color: dark ? '#f0f0f3' : '#1a1c1e',
+                                  }}
+                                >
+                                  <span style={{ flexShrink: 0, color: dark ? '#E8709A' : '#D44A78', width: 20, height: 20, marginTop: 2 }}>{t.icon}</span>
+                                  <span style={{ flex: 1, minWidth: 0 }}>
+                                    <span style={{ display: 'block', fontSize: 15, fontWeight: 600 }}>{t.label}</span>
+                                    <span style={{ display: 'block', fontSize: 13, color: dark ? 'rgba(240,240,243,0.55)' : '#7c7d80', marginTop: 2, lineHeight: 1.4 }}>{t.desc}</span>
+                                  </span>
+                                </button>
+                              ))}
+                              <div style={{ height: 1, margin: '6px 16px', background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.06)' }} />
+                              <div style={{ padding: '6px 14px 6px' }}>
+                                <span style={{
+                                  fontFamily: "'Sora', system-ui, sans-serif",
+                                  fontSize: 10, fontWeight: 800,
+                                  letterSpacing: '0.14em', textTransform: 'uppercase',
+                                  color: dark ? 'rgba(240,240,243,0.55)' : '#7c7d80',
+                                }}>Tools</span>
+                              </div>
+                              {HOME_TOOLS.filter(t => t.group === 'tool').map(t => (
+                                <button
+                                  key={t.label}
+                                  onClick={() => { setHomeToolsOpen(false); fillHomeInput(t.fill); }}
+                                  type="button"
+                                  style={{
+                                    display: 'flex', alignItems: 'flex-start', gap: 12,
+                                    padding: '12px 14px',
+                                    borderRadius: 12,
+                                    border: 'none',
+                                    background: 'transparent',
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    cursor: 'pointer',
+                                    fontFamily: "'Inter', system-ui, sans-serif",
+                                    color: dark ? '#f0f0f3' : '#1a1c1e',
+                                  }}
+                                >
+                                  <span style={{ flexShrink: 0, color: dark ? '#E8709A' : '#D44A78', width: 20, height: 20, marginTop: 2 }}>{t.icon}</span>
+                                  <span style={{ flex: 1, minWidth: 0 }}>
+                                    <span style={{ display: 'block', fontSize: 15, fontWeight: 600 }}>{t.label}</span>
+                                    <span style={{ display: 'block', fontSize: 13, color: dark ? 'rgba(240,240,243,0.55)' : '#7c7d80', marginTop: 2, lineHeight: 1.4 }}>{t.desc}</span>
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                       </form>
                       {!isPWA && !user && (
