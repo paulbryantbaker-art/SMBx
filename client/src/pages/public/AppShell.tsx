@@ -781,11 +781,22 @@ export default function AppShell() {
   }, [homeToolsOpen]);
   const fillHomeInput = useCallback((text: string) => {
     const ref = isMobile ? homeInputMobileRef : homeInputRef;
-    if (ref.current) {
-      ref.current.value = text;
-      ref.current.focus();
-    }
+    // Close the popup first so the backdrop unmounts and the pill isn't covered.
     setHomeToolsOpen(false);
+    // Defer the value-set + focus to the next frame so it happens AFTER the
+    // popup's unmount and any focus-restoration the browser does. Without
+    // this, focus can bounce back to the popup trigger button and the
+    // virtual keyboard never opens on mobile.
+    requestAnimationFrame(() => {
+      const el = ref.current;
+      if (!el) return;
+      el.value = text;
+      // Fire an input event so anything watching the value (React controlled
+      // inputs elsewhere, autofill checks, etc.) sees it.
+      try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch {}
+      el.focus();
+      try { el.setSelectionRange(text.length, text.length); } catch {}
+    });
   }, [isMobile]);
   // Chat hooks (always called for hook order)
   const anonChat = useAnonymousChat();

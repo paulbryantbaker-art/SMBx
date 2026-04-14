@@ -25,11 +25,13 @@ interface JourneyChip {
 }
 
 const JOURNEY_CHIPS: JourneyChip[] = [
-  { icon: 'sell',                 label: 'Sell',     path: '/sell',     light: '#D44A78', dark: '#E8709A' },
-  { icon: 'shopping_cart',        label: 'Buy',      path: '/buy',      light: '#3E8E8E', dark: '#52A8A8' },
-  { icon: 'savings',              label: 'Raise',    path: '/raise',    light: '#C99A3E', dark: '#DDB25E' },
-  { icon: 'merge',                label: 'Integrate', path: '/integrate', light: '#8F4A7A', dark: '#AE6D9A' },
-  { icon: 'workspace_premium',    label: 'Advisors', path: '/advisors', light: '#D44A78', dark: '#E8709A' },
+  { icon: 'sell',                 label: 'Sell',      path: '/sell',         light: '#D44A78', dark: '#E8709A' },
+  { icon: 'shopping_cart',        label: 'Buy',       path: '/buy',          light: '#3E8E8E', dark: '#52A8A8' },
+  { icon: 'savings',              label: 'Raise',     path: '/raise',        light: '#C99A3E', dark: '#DDB25E' },
+  { icon: 'merge',                label: 'Integrate', path: '/integrate',    light: '#8F4A7A', dark: '#AE6D9A' },
+  { icon: 'workspace_premium',    label: 'Advisors',  path: '/advisors',     light: '#D44A78', dark: '#E8709A' },
+  { icon: 'help_outline',         label: 'How it works', path: '/how-it-works', light: '#D44A78', dark: '#E8709A' },
+  { icon: 'paid',                 label: 'Pricing',   path: '/pricing',      light: '#D44A78', dark: '#E8709A' },
 ];
 
 interface Props {
