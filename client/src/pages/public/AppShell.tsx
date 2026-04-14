@@ -785,16 +785,23 @@ export default function AppShell() {
     return () => window.removeEventListener('popstate', onPopState);
   }, [user, canvasMarkdown, viewingDeliverable]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-scroll on new messages — instant on first entry, smooth after
+  // Auto-scroll on new messages. Use direct scrollTop on the scroll container
+  // instead of scrollIntoView — iOS Safari's scrollIntoView inside flex+overflow
+  // containers is unreliable, which was hiding newly sent user messages below
+  // the visible area.
   const chatEnteredAt = useRef(0);
   useEffect(() => {
     if (viewState === 'chat') chatEnteredAt.current = Date.now();
   }, [viewState]);
   useEffect(() => {
-    if (viewState === 'chat') {
-      const justEntered = Date.now() - chatEnteredAt.current < 1500;
-      messagesEndRef.current?.scrollIntoView({ behavior: justEntered ? 'instant' as ScrollBehavior : 'smooth' });
-    }
+    if (viewState !== 'chat' || !scrollRef.current) return;
+    const el = scrollRef.current;
+    const justEntered = Date.now() - chatEnteredAt.current < 1500;
+    const doScroll = () => {
+      el.scrollTo({ top: el.scrollHeight, behavior: justEntered ? 'instant' as ScrollBehavior : 'smooth' });
+    };
+    // Two rAFs: first for React paint, second for iOS to settle layout.
+    requestAnimationFrame(() => requestAnimationFrame(doScroll));
   }, [messages, streamingText, viewState]);
 
   // Reset scroll to top when landing page renders or tab changes
@@ -1792,7 +1799,7 @@ export default function AppShell() {
                     <div
                       id="mobile-home-pill-portal"
                       className="fixed left-0 right-0 bottom-0 z-10"
-                      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+                      style={{ paddingTop: 12, paddingBottom: 'env(safe-area-inset-bottom)' }}
                     >
                       {/* Context-aware chip row — journey chips when empty portfolio,
                           single "Start a new deal" chip when user has deals. Always shown
@@ -1909,8 +1916,11 @@ export default function AppShell() {
                 ...(isMobile ? { paddingTop: 48 } : {}),
               }}
             >
-              {/* Chapter strip — shows deal's conversation chapters as horizontal timeline */}
-              {user && authChat.grouped && authChat.activeDealId && (() => {
+              {/* Chapter strip — shows deal's conversation chapters as horizontal timeline.
+                  Desktop only — on mobile the DealStack + single-conversation-per-card
+                  model replaces this; a horizontal breadcrumb above the chat feels like
+                  noise when the user just tapped into a scoped chat. */}
+              {!isMobile && user && authChat.grouped && authChat.activeDealId && (() => {
                 const dealGroup = authChat.grouped.deals.find(d => d.id === authChat.activeDealId);
                 if (!dealGroup || dealGroup.conversations.length < 2) return null;
                 return (
@@ -2026,7 +2036,7 @@ export default function AppShell() {
         {showDock && viewState === 'chat' && isMobile && createPortal(
           <div
             id="mobile-chat-dock-portal"
-            className={`${dark ? 'force-chat-dark' : ''} px-3 pt-1`}
+            className={`${dark ? 'force-chat-dark' : ''} px-3 pt-3`}
             style={{
               position: 'fixed',
               left: 0,
