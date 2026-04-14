@@ -66,29 +66,49 @@ export function deriveUrgency(deal: DealCardData): Urgency {
   return 'on-track';
 }
 
-/** Generate a one-line action nudge from deal state. Yulia will replace this eventually. */
+/**
+ * Generate a one-line action nudge from deal state. Yulia-voice: action verbs
+ * first, concrete next step, under 60 chars. Staleness escalation overrides
+ * stage-specific copy when the deal has gone quiet.
+ */
 export function deriveNextAction(deal: DealCardData): string {
   const g = deal.current_gate || '';
   const stale = daysSince(deal.updated_at);
-  if (stale >= 14) return `Quiet ${stale} days — pick it back up`;
-  if (g.startsWith('S')) {
-    if (g === 'S0') return 'Finish intake — Yulia needs financials';
-    if (g === 'S1') return 'Upload P&L or tax return';
-    if (g === 'S2') return 'Review ValueLens range';
-    if (g === 'S3') return 'CIM draft pending review';
-    if (g === 'S4') return 'Buyer outreach in motion';
-    if (g === 'S5') return 'Closing docs queued';
-  }
-  if (g.startsWith('B')) {
-    if (g === 'B0') return 'Sharpen your thesis';
-    if (g === 'B1') return 'Sourcing active — check candidates';
-    if (g === 'B2') return 'Valuation in progress';
-    if (g === 'B3') return 'DD work outstanding';
-    if (g === 'B4') return 'Structure the LOI';
-    if (g === 'B5') return 'Closing docs queued';
-  }
-  if (g.startsWith('R')) return 'Raise in progress — check LP outreach';
-  if (g.startsWith('PMI')) return 'Integration checkpoint due';
+
+  // Staleness escalation — dominant signal when a deal has been quiet
+  if (stale >= 21) return `Pick up where you left off — ${stale} days quiet`;
+  if (stale >= 14) return `${stale} days quiet — Yulia is ready when you are`;
+
+  // SELL journey
+  if (g === 'S0') return 'Tell Yulia about the business to start';
+  if (g === 'S1') return 'Upload a P&L or tax return';
+  if (g === 'S2') return 'Your ValueLens range is ready — open it';
+  if (g === 'S3') return 'CIM draft is waiting for your review';
+  if (g === 'S4') return 'Matched buyers are in motion';
+  if (g === 'S5') return 'Closing docs are queued';
+
+  // BUY journey
+  if (g === 'B0') return 'Sharpen your acquisition thesis';
+  if (g === 'B1') return 'New candidates surfaced — review them';
+  if (g === 'B2') return 'Valuation in progress';
+  if (g === 'B3') return 'Due diligence items need your attention';
+  if (g === 'B4') return 'Structure the LOI with Yulia';
+  if (g === 'B5') return 'Closing docs are queued';
+
+  // RAISE journey
+  if (g === 'R0') return 'Tell Yulia what you\u2019re raising';
+  if (g === 'R1') return 'Financial package is taking shape';
+  if (g === 'R2') return 'Investor materials ready to review';
+  if (g === 'R3') return 'LP outreach is live';
+  if (g === 'R4') return 'Term sheet negotiations active';
+  if (g === 'R5') return 'Closing docs are queued';
+
+  // PMI journey
+  if (g === 'PMI0') return 'Day\u00a00 checklist is open';
+  if (g === 'PMI1') return 'Stabilization in progress';
+  if (g === 'PMI2') return 'Assessment findings are ready';
+  if (g === 'PMI3') return 'Optimization plan in motion';
+
   return 'Tap to continue with Yulia';
 }
 
@@ -188,9 +208,16 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
           borderRadius: 20,
           overflow: 'hidden',
           background: bg,
-          border: `1px solid ${surfaceBorder}`,
+          // Urgency-tinted outline — subtle on on-track, stronger on stuck/needs-you
+          border: urgency === 'on-track'
+            ? `1px solid ${surfaceBorder}`
+            : `1.5px solid ${hexWithAlpha(URGENCY_COLOR[urgency], dark ? 0.45 : 0.35)}`,
           boxShadow: stackIndex === 0
-            ? (dark ? '0 8px 28px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.2)' : '0 8px 28px rgba(26,28,30,0.10), 0 2px 6px rgba(26,28,30,0.06)')
+            ? (urgency === 'stuck'
+                ? `0 8px 28px ${hexWithAlpha(URGENCY_COLOR.stuck, 0.18)}, 0 2px 6px rgba(26,28,30,0.06)`
+                : urgency === 'needs-you'
+                  ? `0 8px 28px ${hexWithAlpha(URGENCY_COLOR['needs-you'], 0.16)}, 0 2px 6px rgba(26,28,30,0.06)`
+                  : (dark ? '0 8px 28px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.2)' : '0 8px 28px rgba(26,28,30,0.10), 0 2px 6px rgba(26,28,30,0.06)'))
             : (dark ? '0 2px 8px rgba(0,0,0,0.3)' : '0 2px 8px rgba(26,28,30,0.05)'),
         }}
       >
@@ -223,14 +250,34 @@ export const DealCard = forwardRef<HTMLButtonElement, DealCardProps>(function De
               }}>
                 {URGENCY_LABEL[urgency]}
               </span>
-              <span style={{
-                width: 8, height: 8, borderRadius: '50%',
-                background: URGENCY_COLOR[urgency],
-                boxShadow: `0 0 0 2px rgba(255,255,255,0.9)`,
-              }} />
+              <span
+                className={urgency !== 'on-track' ? 'deal-urgency-pulse' : undefined}
+                style={{
+                  width: 8, height: 8, borderRadius: '50%',
+                  background: URGENCY_COLOR[urgency],
+                  boxShadow: `0 0 0 2px rgba(255,255,255,0.9)`,
+                  ['--pulse-color' as string]: hexWithAlpha(URGENCY_COLOR[urgency], 0.6),
+                }}
+              />
             </span>
           </div>
         </div>
+
+        {/* Local keyframes for the urgency-dot pulse — scoped to this component
+            via the deal-urgency-pulse class so it doesn't leak. */}
+        <style>{`
+          @keyframes dealUrgencyPulse {
+            0%   { box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 0 var(--pulse-color, rgba(212,74,74,0.6)); }
+            70%  { box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 8px rgba(0,0,0,0); }
+            100% { box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 0 rgba(0,0,0,0); }
+          }
+          .deal-urgency-pulse {
+            animation: dealUrgencyPulse 2s ease-out infinite;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .deal-urgency-pulse { animation: none; }
+          }
+        `}</style>
 
         {/* Body */}
         <div style={{ padding: '14px 16px 16px' }}>
