@@ -1,8 +1,6 @@
 import { ScrollReveal } from './animations';
-import { goToChat } from './chatBridge';
+import { bridgeToYulia } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
-import { LandingSBACalc } from './LandingCalculators';
-import { ChatGPTvsYulia } from './ChatGPTvsYulia';
 import {
   HookHeader,
   SectionHeader,
@@ -12,9 +10,9 @@ import {
 
 export default function HowItWorksBelow({ dark }: { dark: boolean }) {
   usePageMeta({
-    title: 'How Yulia runs your deal · smbx.ai',
+    title: 'The methodology · smbx.ai',
     description:
-      'Six engines, 22 enforced gates, one conversation. From first sentence to 180 days post-close. See how Yulia runs upper middle market M&A end-to-end.',
+      'The deal operating system behind Yulia. Six engines, 22 enforced gates, one audited workflow. For evaluators, advisors, attorneys, and CPAs running due diligence on a conversation-first M&A platform.',
     canonical: 'https://smbx.ai/how-it-works',
     ogImage: 'https://smbx.ai/og-how.png',
     breadcrumbs: [
@@ -91,48 +89,43 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
     },
   ];
 
-  /* ───────── 6 engines as numbered editorial ───────── */
+  /* ───────── 6 engines — one strong claim each. Names + claims are the trust
+     capital; specific implementation detail lives under the hood. ───────── */
   const engines = [
     {
       n: '01',
       title: 'Financial Extraction',
-      desc:
-        'Pulls exact numbers from your tax returns and P&Ls. Never rounds. Never estimates. Cites the source line.',
+      desc: 'Pulls exact numbers from tax returns and P&Ls. Never rounds. Cites every source line.',
       icon: 'description',
     },
     {
       n: '02',
       title: 'Market Intelligence',
-      desc:
-        'Live data on what is selling, at what multiples, in your sector and geography. Census CBP + BDS, SBA 7(a) lending stats, NAICS benchmarks, internal market heat scoring. Not training data — current market.',
+      desc: 'Live comp multiples and recent deal activity in your sector. Not training data — current market.',
       icon: 'travel_explore',
     },
     {
       n: '03',
       title: 'Legal Auditor',
-      desc:
-        'Reviews your documents and only cites what is actually there. Returns "NOT FOUND" if it cannot verify a claim. The same engine that powers the document state machine.',
+      desc: 'Only cites what\u2019s actually in your documents. Returns "NOT FOUND" rather than guess.',
       icon: 'policy',
     },
     {
       n: '04',
       title: 'Deal Modeling',
-      desc:
-        'SBA, DSCR, IRR, MOIC, sensitivity, capital stack composition — deterministic math, not AI guesses. The Stack Builder and the cost-of-capital engine run on this.',
+      desc: 'DSCR, IRR, MOIC, cap-stack composition, sensitivity. Deterministic math, not AI guesses.',
       icon: 'calculate',
     },
     {
       n: '05',
       title: 'Cap Table & Waterfall',
-      desc:
-        'Models ownership, dilution, and liquidation waterfall across multiple rounds and exit scenarios. The same engine that powers the partial-liquidity scenarios on the Raise page.',
+      desc: 'Ownership, dilution, and liquidation waterfall across rounds and exit scenarios.',
       icon: 'account_tree',
     },
     {
       n: '06',
       title: 'Document Generator',
-      desc:
-        'CIMs, LOIs, term sheets, IC memos, board packages, working capital schedules — drafted from your verified numbers. Routed through the sign-off chain. Logged in the audit trail.',
+      desc: 'CIMs, LOIs, IC memos, board packages — drafted from verified numbers, routed through sign-off, logged forever.',
       icon: 'draw',
     },
   ];
@@ -143,19 +136,22 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
 
         {/* ═══ Hook ═══ */}
         <HookHeader
-          eyebrow="how it works"
+          eyebrow="the methodology"
           headline={
             <>
-              How Yulia <em className="not-italic" style={{ color: accent }}>runs</em> your deal.
+              The operating system<br />
+              behind every <em className="not-italic" style={{ color: accent }}>conversation</em>.
             </>
           }
           sub={
             <>
-              Six engines. 22 enforced gates. One conversation from first sentence to 180 days post-close.
-              No signup. No sales call. Watch the methodology work in real time on a real upper middle market deal.
+              Six engines. 22 enforced gates. One audited workflow from first sentence to close. This page is for
+              evaluators — the attorneys, CPAs, advisors, and firm-level buyers who need to see the methodology before
+              they trust a deal to it. If you're here to sell, buy, raise, or integrate, those pages are the faster path.
             </>
           }
           dark={dark}
+          accent={accent}
         />
 
         {/* ═══ The conversation demo — kept structure, sexier deal ═══ */}
@@ -177,7 +173,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
                 </div>
                 {/* Yulia classifies + pulls comps */}
                 <div className="flex gap-3 items-start">
-                  <div className="w-8 h-8 rounded-full bg-[#D44A78] flex items-center justify-center text-white text-xs font-bold shrink-0">Y</div>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ background: accent }}>Y</div>
                   <div className="bg-white/10 p-5 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed max-w-[80%]">
                     Specialty insurance brokerage at $14M EBITDA — I know this market well. Let me pull the comps and recent transactions while we talk.
                     <span className="block mt-3 text-[#dadadc]/60 text-xs italic">
@@ -221,7 +217,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
                 </div>
                 {/* Yulia models the structure */}
                 <div className="flex gap-3 items-start">
-                  <div className="w-8 h-8 rounded-full bg-[#D44A78] flex items-center justify-center text-white text-xs font-bold shrink-0">Y</div>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ background: accent }}>Y</div>
                   <div className="bg-white/10 p-5 rounded-2xl rounded-tl-none text-white text-[15px] leading-relaxed max-w-[80%]">
                     Most common structure for your size: PE buys 60-70% for cash + rollover. You take{' '}
                     <span className="text-[#ffb2bf] font-bold">$110-140M off the table day one</span> and keep 30-40% rollover for the second bite. PE buyer underwrites a 5-year exit at 1.8-2.2× their entry — meaning your rollover could be worth{' '}
@@ -248,6 +244,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
             title="22 gates. Yulia won't let you skip steps."
             sub="Each journey has specific gates with completion triggers Yulia verifies from your conversation and your data. The gates prevent the mistakes that kill deals."
             dark={dark}
+            accent={accent}
           />
 
           <div className="space-y-8">
@@ -306,8 +303,9 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
           <SectionHeader
             label="Under the hood"
             title="Six engines running behind one conversation."
-            sub="Each engine is purpose-built for one job. Yulia chooses which to invoke based on the conversation. You only see the answers."
+            sub="Each engine is purpose-built for one job. Yulia invokes whichever the conversation needs — you only see the answers. The implementation details stay under the hood; what matters is that every answer is deterministic, cited, and auditable."
             dark={dark}
+            accent={accent}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
@@ -381,21 +379,12 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
           </div>
         </section>
 
-        {/* ═══ Try it yourself — interactive ═══ */}
-        <section className="mb-28">
-          <SectionHeader
-            label="Try it yourself"
-            title="The same engines that power Yulia. Run them now."
-            sub="Adjust the EBITDA, multiple, and structure. Watch the DSCR react. This is a real model — not a demo."
-            dark={dark}
-          />
-          <LandingSBACalc dark={dark} />
-        </section>
-
-        {/* ═══ ChatGPT vs Yulia — the actual differentiator ═══ */}
-        <section className="mb-28">
-          <ChatGPTvsYulia dark={dark} />
-        </section>
+        {/* (Intentionally removed on the methodology page:)
+            - Interactive SBA calculator — lives on /buy and /raise where it's
+              active to the user's actual decision, not a reprise here.
+            - ChatGPT vs Yulia comparison — lives on /pricing where the
+              decision-tension moment actually matters. Keeping it once makes
+              it hit; duplicating it dilutes. */}
 
         {/* ═══ Sign-off chain ═══ */}
         <SignOffChain
@@ -437,19 +426,26 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
           ]}
           bottomNote={
             <>
-              This is what the marketing means when it says "Yulia runs your deal." It is not a metaphor. It is the workflow. ChatGPT cannot do step 2 onward. We can.
+              When the buyer's lawyer asks "where did that number come from?" three years later, the answer is in the
+              database with the reviewer's signature. That's not a feature. That's the operating system.
             </>
           }
           dark={dark}
+          accent={accent}
         />
 
         {/* ═══ CTA ═══ */}
         <PageCTA
-          headline={<>Describe your deal. Watch the intelligence run.</>}
-          sub="Tell Yulia about your business, a deal you're evaluating, or capital you need to raise. Ninety seconds in, you'll see what she does. No signup. No card."
+          headline={<>Evaluating Yulia for your practice?</>}
+          sub="The methodology is above. The engines are above. The audit chain is above. The only thing left is a real deal. Bring Yulia a conversation — a mandate you\u2019re pitching, a target you\u2019re screening, or a structure you\u2019re modeling — and see the chain run end-to-end."
           buttonLabel="Talk to Yulia"
-          onClick={goToChat}
+          onClick={() =>
+            bridgeToYulia(
+              "I'm evaluating Yulia for my practice. Walk me through how you'd run a real [sell-side mandate / buy-side thesis / capital raise / post-close integration] — I want to see the gates, the engines invoked, and what lands in the audit trail."
+            )
+          }
           dark={dark}
+          accent={accent}
         />
       </div>
     </div>
