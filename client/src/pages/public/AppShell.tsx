@@ -2102,8 +2102,19 @@ export default function AppShell() {
                           on mobile home (not just browser). */}
                       <DealContextChips
                         dark={dark}
-                        hasDeals={!!(user && isMobile && authChat.grouped)}
-                        onChipTap={(fill) => fillHomeInput(fill)}
+                        hasDeals={!!(user && isMobile && authChat.grouped && (authChat.grouped.deals ?? []).some(d => d.business_name))}
+                        onChipSelect={(action) => {
+                          if (action.kind === 'nav') {
+                            // Journey navigation — empty portfolio users tap a
+                            // chip to open the full mobile story for that journey.
+                            const tab = (action.path.replace('/', '') || 'home') as TabId;
+                            setActiveTab(tab);
+                            setViewState('landing');
+                            navigate(action.path);
+                          } else {
+                            fillHomeInput(action.fill);
+                          }
+                        }}
                       />
 
                       <div className={isPWA ? 'px-3' : 'px-4'} style={{ touchAction: 'auto' }}>
