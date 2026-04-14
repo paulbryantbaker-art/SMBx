@@ -53,6 +53,7 @@ const MobileHowStory = lazy(() => import('../../components/mobile/MobileHowStory
 const AdvisorsBelow = lazy(() => import('../../components/content/AdvisorsBelow'));
 const MobileAdvisorsStory = lazy(() => import('../../components/mobile/MobileAdvisorsStory'));
 const PricingBelow = lazy(() => import('../../components/content/PricingBelow'));
+const MobilePricingStory = lazy(() => import('../../components/mobile/MobilePricingStory'));
 
 // Mobile rebuild — Claude+ pattern
 import { MobileSidebar, type LearnDest, type WorkspaceTool } from '../../components/mobile/MobileSidebar';
@@ -2294,7 +2295,7 @@ export default function AppShell() {
                      activeTab === 'how-it-works' ? (isMobile ? <MobileHowStory dark={dark} /> : <HowItWorksBelow dark={dark} />) :
                      activeTab === 'integrate' ? (isMobile ? <MobileIntegrateStory dark={dark} /> : <IntegrateBelow dark={dark} />) :
                      activeTab === 'advisors' ? (isMobile ? <MobileAdvisorsStory dark={dark} /> : <AdvisorsBelow dark={dark} />) :
-                     activeTab === 'pricing' ? <PricingBelow dark={dark} /> : null}
+                     activeTab === 'pricing' ? (isMobile ? <MobilePricingStory dark={dark} /> : <PricingBelow dark={dark} />) : null}
                   </Suspense>
                   {!isMobile ? (
                     <DesktopFooter
