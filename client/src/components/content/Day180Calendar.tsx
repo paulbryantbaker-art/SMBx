@@ -106,7 +106,7 @@ const MILESTONES: Milestone[] = [
   },
 ];
 
-export function Day180Calendar({ dark }: { dark: boolean }) {
+export function Day180Calendar({ dark, accent: accentOverride }: { dark: boolean; accent?: string }) {
   const [day, setDay] = useState(0);
 
   // Snap to nearest milestone
@@ -122,7 +122,7 @@ export function Day180Calendar({ dark }: { dark: boolean }) {
   const headingColor = dark ? '#f9f9fc' : '#0f1012';
   const bodyColor = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
-  const accent = dark ? PINK_DARK : PINK;
+  const accent = accentOverride ?? (dark ? PINK_DARK : PINK);
 
   return (
     <div

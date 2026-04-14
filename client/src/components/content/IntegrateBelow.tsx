@@ -1,4 +1,4 @@
-import { goToChat } from './chatBridge';
+import { bridgeToYulia } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { Day180Calendar } from './Day180Calendar';
 import {
@@ -131,6 +131,17 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
           accent={accent}
         />
 
+        {/* ═══ Audience connector — post-close risk is scale-agnostic ═══ */}
+        <p
+          className="text-[14px] md:text-[15px] leading-relaxed mb-16 max-w-3xl"
+          style={{ color: mutedColor }}
+        >
+          This playbook works at any scale. Whether you just closed a $90M acquisition like Anna, a $15M search-fund target, or
+          a $3M SBA deal, the risks are the same — covenant headroom, employee flight, customer churn, reporting gaps.
+          The fix is the same too: a day-by-day plan, relentless monitoring, and decisions audited before they ship.
+          <strong style={{ color: accent }}> Free for verified deal professionals — attorneys, CPAs, sponsors.</strong>
+        </p>
+
         {/* ═══ Anna's Story ═══ */}
         <StoryBlock
           byline="Anna J.*"
@@ -178,6 +189,7 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
             { label: '18-month sponsor MOIC', value: '2.7×', sub: '$20M → $54M equity value' },
           ]}
           dark={dark}
+          accent={accent}
         />
 
         {/* ═══ Day 180 Calendar — hero interactive ═══ */}
@@ -187,8 +199,9 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
             title="Day by day. Drag the marker."
             sub="Ten milestones across Anna's first 180 days. For each: what she did, what Yulia recommended, and the KPI that moved."
             dark={dark}
+            accent={accent}
           />
-          <Day180Calendar dark={dark} />
+          <Day180Calendar dark={dark} accent={accent} />
         </section>
 
         {/* ═══ The 7 mistakes — editorial numbered list ═══ */}
@@ -198,6 +211,7 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
             title="The 7 mistakes that destroy post-close value."
             sub="Each one has a dollar consequence. The full set is what tips a 1.40× DSCR into a 1.15× covenant trip."
             dark={dark}
+            accent={accent}
           />
           <div className="space-y-6">
             {mistakes.map((m) => (
@@ -257,6 +271,7 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
             </>
           }
           dark={dark}
+          accent={accent}
         />
 
         {/* ═══ Sign-off chain ═══ */}
@@ -302,15 +317,21 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
             </>
           }
           dark={dark}
+          accent={accent}
         />
 
         {/* ═══ CTA ═══ */}
         <PageCTA
           headline={<>Build your 180-day plan.</>}
-          sub="Bring Yulia your deal financials and your DD report. She'll build the day-by-day plan, monitor the KPIs, and force decisions before the cliff."
+          sub="Whether you just closed a $3M SBA deal or a $90M search-fund acquisition, the risks are the same: covenant headroom, employee flight, customer churn, reporting gaps. Bring Yulia your deal financials and your DD report — she'll build the day-by-day plan, monitor the KPIs, and force decisions before the cliff."
           buttonLabel="Build my plan"
-          onClick={goToChat}
+          onClick={() =>
+            bridgeToYulia(
+              "Build my 180-day integration plan. I just closed a [deal type] acquisition of about $XM revenue / $XM EBITDA. Key risks I'm watching: [customer concentration / key employees / working capital / covenant headroom]. Walk me through the day-by-day."
+            )
+          }
           dark={dark}
+          accent={accent}
         />
       </div>
     </div>
