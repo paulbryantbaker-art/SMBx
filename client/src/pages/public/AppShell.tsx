@@ -802,26 +802,19 @@ export default function AppShell() {
   }, [homeToolsOpen]);
   const fillHomeInput = useCallback((text: string) => {
     const ref = isMobile ? homeInputMobileRef : homeInputRef;
-    const el = ref.current;
-    if (!el) return;
-    // iOS Safari is strict about two things:
-    //   1. Setting input.value directly is overridden on next React render
-    //      unless we use the native HTMLInputElement setter so React's
-    //      synthetic-event system notices and our binding doesn't undo it.
-    //   2. focus() to open the virtual keyboard must happen inside the
-    //      user-gesture scope — no rAF, setTimeout, or microtask gap.
-    // Order: focus → native setter → input event → popup close.
-    el.focus();
-    try {
-      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-      if (setter) setter.call(el, text);
-      else el.value = text;
-    } catch {
-      el.value = text;
-    }
-    try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch {}
-    try { el.setSelectionRange(text.length, text.length); } catch {}
+    // Close the popup first so the pill isn't covered by the backdrop.
     setHomeToolsOpen(false);
+    // Defer to next frame so the popup unmounts before we set + focus.
+    // The home pill input is UNCONTROLLED (no React value binding) so
+    // direct el.value assignment is the canonical write. This is the
+    // pattern that worked before Sprint 14 — restored verbatim.
+    requestAnimationFrame(() => {
+      const el = ref.current;
+      if (!el) return;
+      el.value = text;
+      el.focus();
+      try { el.setSelectionRange(text.length, text.length); } catch {}
+    });
   }, [isMobile]);
   // Chat hooks (always called for hook order)
   const anonChat = useAnonymousChat();

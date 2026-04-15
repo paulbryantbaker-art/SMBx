@@ -223,41 +223,23 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
   }, [value, disabled, onSend]);
 
   /* Fill input from tool popup.
-     iOS Safari is strict about two things:
-       1. Setting an input.value directly is overridden on the next React
-          render unless we use the native HTMLTextAreaElement setter to
-          notify React's synthetic-event system.
-       2. focus() to open the virtual keyboard must happen inside the
-          user-gesture call stack — no rAF, setTimeout, or microtask gap.
-     We do both, in this order:
-       focus → native setter → input event → state update → popup close. */
+     The textarea is React-controlled (value={value}) — setValue is the
+     canonical write. Direct DOM mutation interferes with React's
+     reconciler. Pattern: state-set → close popup → defer focus + resize
+     to next frame so the popup unmounts first. */
   const fillInput = useCallback((text: string) => {
-    const el = inputRef.current;
-    setTwActive(false);
-    setTwText('');
-    if (el) {
-      // 1. Focus FIRST while still in the user-gesture scope (iOS keyboard open)
-      el.focus();
-      // 2. Use the native setter so React notices the change and our
-      //    controlled-component binding doesn't immediately overwrite it
-      try {
-        const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
-        if (setter) setter.call(el, text);
-        else el.value = text;
-      } catch {
-        el.value = text;
-      }
-      // 3. Synthesize the input event so React onChange fires and updates state
-      try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch {}
-      // 4. Resize the textarea + position caret at end
-      el.style.height = 'auto';
-      el.style.height = Math.min(el.scrollHeight, 140) + 'px';
-      try { el.setSelectionRange(text.length, text.length); } catch {}
-    }
-    // 5. State sync (belt-and-suspenders — handleChange should already have
-    //    fired, but if it didn't we still get the value into React state)
     setValue(text);
     setToolsOpen(false);
+    setTwActive(false);
+    setTwText('');
+    requestAnimationFrame(() => {
+      const el = inputRef.current;
+      if (!el) return;
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+      el.focus();
+      try { el.setSelectionRange(text.length, text.length); } catch {}
+    });
   }, []);
 
   /* Handle tool click — either fill or upload */
