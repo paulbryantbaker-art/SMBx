@@ -114,22 +114,27 @@ export function DealCostMap({ dark }: { dark: boolean }) {
   const spreadVsIB = useMemo(() => Math.round(ib / yulia.annual), [ib, yulia.annual]);
   const spreadVsAnalyst = useMemo(() => Math.round(team.cost / yulia.annual), [team.cost, yulia.annual]);
 
-  // Colors — component is embedded inside an immersive SectionBand on
-  // /pricing. Outer bg sits slightly raised off the immersive backdrop
-  // (not identical to #0f1012 or we'd merge on dark mode; not cream or
-  // we'd clash with the dark stage on light mode).
-  const bg = dark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.06)';
-  const innerBg = dark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.10)';
-  const border = dark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.14)';
-  const headingColor = '#f9f9fc';                         // always light — inside immersive band
-  const bodyColor = 'rgba(218,218,220,0.85)';
-  const mutedColor = 'rgba(218,218,220,0.55)';
+  // Colors — component lives inside an immersive SectionBand on /pricing.
+  // Apple-cinematic pattern: a light "sheet of paper" floating on a dark
+  // stage. Outer card is solid white + hairline + soft drop shadow; inner
+  // cards are warm off-white. Text is ink dark. Single accent (pink) stays.
+  const bg = '#ffffff';
+  const innerBg = '#f6f5f2';                              // warm off-white
+  const border = 'rgba(15,16,18,0.08)';
+  const innerBorder = 'rgba(15,16,18,0.06)';
+  const headingColor = '#0f1012';
+  const bodyColor = '#3c3d40';
+  const mutedColor = '#6e6a63';
   const accent = dark ? PINK_DARK : PINK;
 
   return (
     <div
       className="rounded-2xl p-6 md:p-8"
-      style={{ background: bg, border: `1px solid ${border}` }}
+      style={{
+        background: bg,
+        border: `1px solid ${border}`,
+        boxShadow: '0 24px 60px -24px rgba(0,0,0,0.45)',
+      }}
     >
       <div className="mb-6">
         <p
@@ -187,7 +192,7 @@ export function DealCostMap({ dark }: { dark: boolean }) {
         {/* Hire an IB */}
         <div
           className="rounded-xl p-6 relative overflow-hidden"
-          style={{ background: innerBg, border: `1px solid ${border}` }}
+          style={{ background: innerBg, border: `1px solid ${innerBorder}` }}
         >
           <p className="text-[10px] font-semibold uppercase tracking-[0.08em] mb-2" style={{ color: mutedColor }}>
             01 · Hire an investment bank
@@ -219,7 +224,7 @@ export function DealCostMap({ dark }: { dark: boolean }) {
         {/* In-house analyst team */}
         <div
           className="rounded-xl p-6"
-          style={{ background: innerBg, border: `1px solid ${border}` }}
+          style={{ background: innerBg, border: `1px solid ${innerBorder}` }}
         >
           <p className="text-[10px] font-semibold uppercase tracking-[0.08em] mb-2" style={{ color: mutedColor }}>
             02 · Hire an analyst team
@@ -295,8 +300,8 @@ export function DealCostMap({ dark }: { dark: boolean }) {
       <div
         className="rounded-xl p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6"
         style={{
-          background: dark ? 'rgba(255,255,255,0.04)' : 'white',
-          border: `1px solid ${border}`,
+          background: innerBg,
+          border: `1px solid ${innerBorder}`,
         }}
       >
         <div>
