@@ -1,7 +1,13 @@
 /**
  * Floating contextual toolbar for canvas tabs.
- * Sits above the active canvas card with pill actions, Canva-style.
- * Each canvas tab type can register its own actions.
+ *
+ * Top-center Apple Glass pill, Canva-inspired. Always floats over the
+ * canvas content (never pushes it). Active canvas registers its actions
+ * via getToolbarActionsFor(tab) in AppShell; when a tab has no actions
+ * the toolbar hides gracefully instead of rendering an empty pill.
+ *
+ * Paired with FloatingCanvasTabBar at the bottom — the two bars form
+ * the floating chrome for the desktop canvas panel.
  */
 import { type ReactNode } from 'react';
 
@@ -25,14 +31,20 @@ export default function CanvasToolbar({ actions, dark = false }: CanvasToolbarPr
 
   return (
     <div
-      className="absolute top-3 left-1/2 -translate-x-1/2 z-20"
+      className="absolute left-1/2 -translate-x-1/2 z-20"
       style={{
-        background: dark ? '#1A1C1E' : '#FFFFFF',
-        border: dark ? '1px solid #2A2C2E' : '1px solid #E5E1D9',
-        borderRadius: 100,
+        top: 16,
+        // Apple Glass — translucent + backdrop-filter. Matches the bottom
+        // FloatingCanvasTabBar so the two floating pills read as one
+        // coordinated chrome system.
+        background: dark ? 'rgba(20,22,24,0.72)' : 'rgba(255,255,255,0.82)',
+        backdropFilter: 'blur(18px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(18px) saturate(180%)',
+        border: dark ? '1px solid rgba(255,255,255,0.10)' : '1px solid rgba(15,16,18,0.08)',
+        borderRadius: 999,
         boxShadow: dark
-          ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3)'
-          : '0 1px 2px rgba(60,55,45,0.08), 0 4px 12px rgba(60,55,45,0.08)',
+          ? '0 12px 32px -12px rgba(0,0,0,0.6)'
+          : '0 12px 32px -12px rgba(0,0,0,0.2)',
         padding: '6px 8px',
         display: 'flex',
         alignItems: 'center',

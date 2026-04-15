@@ -31,7 +31,7 @@ import SourcingPanel from '../../components/chat/SourcingPanel';
 import IntelPanel from '../../components/chat/IntelPanel';
 import DealMessagesPanel from '../../components/documents/DealMessagesPanel';
 import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/CanvasToolbar';
-import CanvasTabStrip from '../../components/canvas/CanvasTabStrip';
+import FloatingCanvasTabBar from '../../components/canvas/FloatingCanvasTabBar';
 import DesktopAccountMenu from '../../components/desktop/DesktopAccountMenu';
 import DealWorkspace from '../../components/desktop/DealWorkspace';
 import PipelineTable from '../../components/desktop/PipelineTable';
@@ -2675,24 +2675,13 @@ export default function AppShell() {
             >
               {canvasTabs.length > 0 ? (
                 <>
-                  {/* Always-visible tab strip — every open tab is recognizable at a glance */}
-                  <CanvasTabStrip
-                    tabs={canvasTabs}
-                    activeTabId={activeCanvasTabId}
-                    onSelect={setActiveCanvasTabId}
-                    onClose={(id) => { if (splitTabId === id) setSplitTabId(null); closeCanvasTab(id); }}
-                    dark={dark}
-                    splitTabId={splitTabId}
-                    onSplit={(id) => { if (id !== activeCanvasTabId) setSplitTabId(id); }}
-                    onUnsplit={() => setSplitTabId(null)}
-                  />
-                  {/* Floating contextual toolbar — only when the active tab has real actions (single-tab mode) */}
-                  {activeCanvasTab && !splitTab && (() => {
-                    const actions = getToolbarActionsFor(activeCanvasTab);
-                    return actions.length > 0 ? <CanvasToolbar actions={actions} dark={dark} /> : null;
-                  })()}
-                  {/* Body — all tabs mounted, visibility determined by active + split.
-                      In split mode, the active tab owns the left half and the split tab the right. */}
+                  {/* Canvas content — full height. Both floating pills (top
+                      CanvasToolbar, bottom FloatingCanvasTabBar) are absolute-
+                      positioned OVER the content. Scrollable region gets
+                      top/bottom padding so content isn't occluded by the
+                      pills. In split mode the tab bar still floats at the
+                      bottom; the top toolbar hides (multi-tab actions get
+                      complicated — simpler to defer to single-tab context). */}
                   <div className="flex-1 relative" style={{ display: splitTab ? 'flex' : 'block', minHeight: 0 }}>
                     {splitTab ? (
                       <>
@@ -2702,25 +2691,46 @@ export default function AppShell() {
                           borderRight: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9',
                           overflow: 'hidden',
                         }}>
-                          <div className="absolute inset-0 overflow-y-auto">
+                          <div className="absolute inset-0 overflow-y-auto" style={{ paddingBottom: 80 }}>
                             {activeCanvasTab && renderCanvasTabContent(activeCanvasTab)}
                           </div>
                         </div>
                         <div style={{ flex: 1, minWidth: 0, minHeight: 0, position: 'relative', overflow: 'hidden' }}>
-                          <div className="absolute inset-0 overflow-y-auto">
+                          <div className="absolute inset-0 overflow-y-auto" style={{ paddingBottom: 80 }}>
                             {renderCanvasTabContent(splitTab)}
                           </div>
                         </div>
                       </>
                     ) : (
-                      <div className="absolute inset-0 overflow-y-auto">
+                      <div className="absolute inset-0 overflow-y-auto" style={{ paddingTop: (activeCanvasTab && getToolbarActionsFor(activeCanvasTab).length > 0) ? 72 : 0, paddingBottom: 80 }}>
                         {canvasTabs.map(tab => (
-                          <div key={tab.id} className="absolute inset-0 overflow-y-auto" style={{ display: tab.id === activeCanvasTabId ? 'block' : 'none' }}>
+                          <div key={tab.id} className="absolute inset-0 overflow-y-auto" style={{ display: tab.id === activeCanvasTabId ? 'block' : 'none', paddingTop: (getToolbarActionsFor(tab).length > 0) ? 72 : 0, paddingBottom: 80 }}>
                             {renderCanvasTabContent(tab)}
                           </div>
                         ))}
                       </div>
                     )}
+
+                    {/* Top floating editor toolbar — absolute over content.
+                        Only renders when the active tab registers actions;
+                        hides gracefully for panels with internal controls. */}
+                    {activeCanvasTab && !splitTab && (() => {
+                      const actions = getToolbarActionsFor(activeCanvasTab);
+                      return actions.length > 0 ? <CanvasToolbar actions={actions} dark={dark} /> : null;
+                    })()}
+
+                    {/* Bottom floating tab bar — Canva/Excel-style pill.
+                        Replaces the old top-of-card CanvasTabStrip. */}
+                    <FloatingCanvasTabBar
+                      tabs={canvasTabs}
+                      activeTabId={activeCanvasTabId}
+                      onSelect={setActiveCanvasTabId}
+                      onClose={(id) => { if (splitTabId === id) setSplitTabId(null); closeCanvasTab(id); }}
+                      dark={dark}
+                      splitTabId={splitTabId}
+                      onSplit={(id) => { if (id !== activeCanvasTabId) setSplitTabId(id); }}
+                      onUnsplit={() => setSplitTabId(null)}
+                    />
                   </div>
                 </>
               ) : !user ? (
