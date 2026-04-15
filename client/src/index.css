@@ -620,10 +620,10 @@ html.dark .glass-panel {
 .dock-textarea-bg { background: #F5F5F3; }
 .dark .dock-textarea-bg { background: rgba(255,255,255,0.06); }
 /* Dock plus button */
-.dock-plus-btn { background: #fff; }
-.dock-plus-btn:hover { background: #F5F5F5; }
-.dark .dock-plus-btn { background: rgba(255,255,255,0.08); }
-.dark .dock-plus-btn:hover { background: rgba(255,255,255,0.14); }
+.dock-plus-btn { background: #fff; color: rgba(0,0,0,0.6); }
+.dock-plus-btn:hover { background: #F5F5F5; color: rgba(0,0,0,0.85); }
+.dark .dock-plus-btn { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+.dark .dock-plus-btn:hover { background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.95); }
 
 /* Home chat input — focus border */
 .home-input-wrap { transition: border-color 200ms; }

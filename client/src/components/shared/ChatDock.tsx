@@ -338,13 +338,12 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             aria-label={uploading ? 'Uploading…' : onFileUpload ? 'Attach a file' : 'Open starter options'}
             aria-expanded={!onFileUpload ? toolsOpen : undefined}
             disabled={uploading}
-            className="flex items-center justify-center cursor-pointer active:scale-95"
+            className="dock-plus-btn flex items-center justify-center cursor-pointer active:scale-95"
             style={{
               width: 44, height: 44,
               borderRadius: '50%',
-              background: 'rgba(0,0,0,0.04)',
-              color: 'rgba(0,0,0,0.55)',
-              border: '1px solid rgba(0,0,0,0.06)',
+              border: '1.5px solid rgba(0,0,0,0.10)',
+              color: 'currentColor',
               transition: 'all .2s',
               flexShrink: 0,
             }}
