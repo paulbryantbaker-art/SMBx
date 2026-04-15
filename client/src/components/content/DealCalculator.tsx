@@ -105,21 +105,27 @@ export function DealCalculator({ dark, accent: accentOverride }: Props) {
     };
   }, [ev, multiple, equityPct, growth]);
 
-  // Colors
-  const innerBg = 'rgba(255,255,255,0.06)';
-  const innerBorder = 'rgba(255,255,255,0.14)';
-  const headingColor = '#f9f9fc';
-  const bodyColor = 'rgba(218,218,220,0.85)';
-  const mutedColor = 'rgba(218,218,220,0.55)';
-  const accent = accentOverride ?? (dark ? '#52A8A8' : '#3E8E8E'); // buy teal
+  // Colors — the calc sits INSIDE an immersive dark SectionBand, so the
+  // whole thing reads as a light "sheet of paper" on a dark stage
+  // (Apple's cinematic move). Sub-cards are soft grey; the teal "return"
+  // card is the one accented moment that stops the eye.
+  const outerBg = '#ffffff';
+  const outerBorder = 'rgba(15,16,18,0.08)';
+  const innerBg = '#f6f5f2';                        // warm off-white
+  const innerBorder = 'rgba(15,16,18,0.06)';
+  const headingColor = '#0f1012';
+  const bodyColor = '#3c3d40';
+  const mutedColor = '#6e6a63';
+  const accent = accentOverride ?? '#3E8E8E';        // /buy teal (single variant — card is always light)
   const sbaEligible = math.dscr >= 1.25;
 
   return (
     <div
       className="rounded-2xl p-6 md:p-8"
       style={{
-        background: 'rgba(255,255,255,0.04)',
-        border: `1px solid ${innerBorder}`,
+        background: outerBg,
+        border: `1px solid ${outerBorder}`,
+        boxShadow: '0 24px 60px -24px rgba(0,0,0,0.45)',
       }}
     >
       <div className="mb-6">
@@ -224,9 +230,9 @@ export function DealCalculator({ dark, accent: accentOverride }: Props) {
           className="text-[11px] font-semibold uppercase px-3 py-1.5 rounded-full"
           style={{
             letterSpacing: '0.08em',
-            background: sbaEligible ? `${accent}22` : 'rgba(255,180,120,0.12)',
-            color: sbaEligible ? accent : '#ffb478',
-            border: `1px solid ${sbaEligible ? `${accent}55` : 'rgba(255,180,120,0.35)'}`,
+            background: sbaEligible ? `${accent}22` : 'rgba(200,106,46,0.10)',
+            color: sbaEligible ? accent : '#c86a2e',
+            border: `1px solid ${sbaEligible ? `${accent}55` : 'rgba(200,106,46,0.30)'}`,
           }}
         >
           {sbaEligible ? 'SBA eligible · DSCR ≥ 1.25' : 'Stress · DSCR below SBA minimum'}
@@ -272,7 +278,7 @@ export function DealCalculator({ dark, accent: accentOverride }: Props) {
             label="Year-1 DSCR"
             valueKey={math.dscr.toFixed(2)}
             value={math.dscr === Infinity ? 'n/a' : `${math.dscr.toFixed(2)}×`}
-            color={sbaEligible ? accent : '#ffb478'}
+            color={sbaEligible ? accent : '#c86a2e'}
             mutedColor={mutedColor}
           />
         </div>
@@ -410,7 +416,7 @@ export function DealCalculator({ dark, accent: accentOverride }: Props) {
             className="font-headline font-black tabular-nums tracking-tight"
             style={{
               fontSize: 'clamp(2rem, 4vw, 3rem)',
-              color: math.y1FCF >= 0 ? headingColor : '#ffb478',
+              color: math.y1FCF >= 0 ? headingColor : '#c86a2e',
               lineHeight: 0.95,
             }}
           >
