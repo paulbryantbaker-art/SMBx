@@ -1,44 +1,33 @@
-import { useState, type FormEvent } from 'react';
+/**
+ * Signup — Google-only sign-up.
+ *
+ * See Login.tsx for context. Email/password removed because it had
+ * reliability issues on mobile. Google auth handles the account
+ * creation on first sign-in; this page just guides the user there.
+ */
+
 import Logo from '../../components/public/Logo';
 
 interface SignupProps {
-  onRegister: (displayName: string, email: string, password: string) => Promise<void>;
+  /** @deprecated email/password form removed — kept for API compatibility. */
+  onRegister?: (displayName: string, email: string, password: string) => Promise<void>;
   onGoogleLogin: () => void;
   onNavigateLogin: () => void;
 }
 
-export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: SignupProps) {
-  const [displayName, setDisplayName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSubmitting(true);
-    try {
-      await onRegister(displayName, email, password);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
+export default function Signup({ onGoogleLogin, onNavigateLogin }: SignupProps) {
   return (
-    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#F8F6F2]">
+    <div className="flex justify-center items-center min-h-dvh px-5 bg-[#F9F9FC]">
       <div className="w-full max-w-[400px] bg-white rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.06)]">
         <div className="flex flex-col items-center mb-7">
           <Logo linked={false} height={32} />
-          <p className="text-sm text-[#7A766E] mt-2 m-0">Create your account</p>
+          <p className="text-sm text-[#6e6a63] mt-2 m-0">Create your account</p>
         </div>
 
         <button
           type="button"
           onClick={onGoogleLogin}
-          className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-white border border-[#FAFAFA] rounded-xl text-[15px] text-[#0D0D0D] font-medium cursor-pointer transition-colors hover:border-[#0D0D0D]"
+          className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-white border border-[rgba(15,16,18,0.08)] rounded-xl text-[15px] text-[#0f1012] font-medium cursor-pointer transition-colors hover:border-[#0f1012]"
         >
           <svg width="18" height="18" viewBox="0 0 18 18">
             <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
@@ -49,54 +38,11 @@ export default function Signup({ onRegister, onGoogleLogin, onNavigateLogin }: S
           Continue with Google
         </button>
 
-        <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-[#FAFAFA]" />
-          <span className="text-[13px] text-[#7A766E] whitespace-nowrap">or continue with email</span>
-          <div className="flex-1 h-px bg-[#FAFAFA]" />
-        </div>
+        <p className="text-center text-[13px] text-[#6e6a63] mt-6 mb-0 leading-relaxed">
+          One click. Your Google account creates your smbx.ai account — no forms, no password to manage, no verification email.
+        </p>
 
-        <form onSubmit={handleSubmit} noValidate>
-          {error && (
-            <div className="bg-[#FEF2F2] text-[#B91C1C] px-3.5 py-2.5 rounded-xl text-sm mb-4">{error}</div>
-          )}
-
-          <label className="block text-sm font-medium text-[#0D0D0D] mb-1.5">Name</label>
-          <input
-            type="text"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Your name"
-            className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#D44A78]"
-          />
-
-          <label className="block text-sm font-medium text-[#0D0D0D] mb-1.5">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#D44A78]"
-          />
-
-          <label className="block text-sm font-medium text-[#0D0D0D] mb-1.5">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Create a password"
-            className="w-full px-3.5 py-2.5 text-[15px] border border-[#FAFAFA] rounded-xl outline-none mb-4 bg-white text-[#0D0D0D] focus:border-[#D44A78]"
-          />
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-3 bg-[#D44A78] text-white border-none rounded-full text-[15px] font-semibold cursor-pointer mt-1 hover:bg-[#B03860] transition-colors disabled:opacity-50"
-          >
-            {submitting ? 'Creating account...' : 'Create account'}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-[#7A766E] mt-6 m-0">
+        <p className="text-center text-sm text-[#6e6a63] mt-6 m-0">
           Already have an account?{' '}
           <button
             type="button"
