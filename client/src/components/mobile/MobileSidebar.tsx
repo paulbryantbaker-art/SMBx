@@ -12,7 +12,7 @@
  */
 
 import { Drawer } from 'vaul';
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { isStandalone } from '../../lib/pwa';
 import CanvasPicker, { type PickerTab, type DealMeta } from '../canvas/CanvasPicker';
@@ -149,6 +149,18 @@ export function MobileSidebar({
   onNewChat,
 }: Props) {
   const handleNewDeal = onNewDeal || onNewChat || (() => {});
+
+  // Search — local filter over dealGroups by business_name.
+  const [searchQuery, setSearchQuery] = useState('');
+  const filteredDealGroups = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return dealGroups;
+    return dealGroups.filter(d =>
+      (d.business_name || '').toLowerCase().includes(q) ||
+      (d.industry || '').toLowerCase().includes(q)
+    );
+  }, [dealGroups, searchQuery]);
+
   // Color tokens — Grok-style dark with pink-tinted accents
   const bg        = dark ? '#151617' : '#fefefe';
   const headingC  = dark ? '#f9f9fc' : '#0f1012';
@@ -243,6 +255,50 @@ export function MobileSidebar({
               <span className="material-symbols-outlined text-[18px]" style={{ color: mutedC }}>home</span>
               Home
             </button>
+
+            {/* Search — Notion-pattern filter for the deals/docs tree below.
+                Filters deal group rows by business_name locally. Does not
+                call the backend yet — that's a follow-up once we have a
+                dedicated search endpoint. */}
+            {isLoggedIn && (
+              <div
+                className="mt-3 flex items-center gap-2 px-3 py-2 rounded-xl"
+                style={{
+                  background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.04)',
+                  border: `1px solid ${ruleC}`,
+                }}
+              >
+                <span className="material-symbols-outlined text-[16px]" style={{ color: mutedC }}>search</span>
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Find a deal or document"
+                  className="flex-1 bg-transparent border-none outline-none text-[14px]"
+                  style={{ color: headingC, fontFamily: "'Inter', system-ui, sans-serif" }}
+                  autoComplete="off"
+                  data-1p-ignore="true"
+                  data-lpignore="true"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    type="button"
+                    aria-label="Clear search"
+                    className="flex items-center justify-center"
+                    style={{
+                      width: 20, height: 20, borderRadius: 10,
+                      border: 'none', background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)',
+                      color: mutedC, cursor: 'pointer', flexShrink: 0,
+                    }}
+                  >
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Scrollable sections */}
@@ -250,9 +306,13 @@ export function MobileSidebar({
             {/* DEALS — deal-first sidebar, logged in only */}
             {isLoggedIn && (
               <>
-                {dealGroups.length > 0 ? (
-                  <Section label="Active deals" sectionColor={sectionC} mutedColor={mutedC}>
-                    {dealGroups.map((deal) => (
+                {filteredDealGroups.length > 0 ? (
+                  <Section
+                    label={searchQuery ? `Matches (${filteredDealGroups.length})` : 'Deals'}
+                    sectionColor={sectionC}
+                    mutedColor={mutedC}
+                  >
+                    {filteredDealGroups.map((deal) => (
                       <DealGroupRow
                         key={deal.id}
                         deal={deal}

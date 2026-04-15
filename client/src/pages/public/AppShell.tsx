@@ -3480,6 +3480,56 @@ export default function AppShell() {
         </div>
       )}
 
+      {/* ═══ MOBILE HAMBURGER — Apple Glass pill, top-left.
+           Opens MobileSidebar drawer containing the full deals-and-docs
+           page tree (Notion pattern). Logged-in only — logged-out mobile
+           users see the journey/marketing surfaces and don't need the
+           drawer. Badge shows total deal count when > 0. */}
+      {isMobile && !authLoading && user && (
+        <button
+          onClick={() => setIsMobileSidebarOpen(true)}
+          type="button"
+          aria-label="Open deals and documents"
+          className="active:scale-90"
+          style={{
+            position: 'fixed',
+            top: 'calc(env(safe-area-inset-top) + 12px)',
+            left: 16,
+            zIndex: 55,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            height: 36,
+            padding: '0 12px 0 10px',
+            borderRadius: 999,
+            // Apple Glass — translucent + backdrop blur
+            background: dark ? 'rgba(26,28,30,0.72)' : 'rgba(255,255,255,0.82)',
+            backdropFilter: 'blur(18px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(18px) saturate(180%)',
+            color: dark ? '#F0F0F3' : '#0f1012',
+            border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(15,16,18,0.08)'}`,
+            cursor: 'pointer',
+            fontFamily: "'Inter', system-ui, sans-serif",
+            fontSize: 13,
+            fontWeight: 600,
+            boxShadow: dark
+              ? '0 4px 14px rgba(0,0,0,0.45)'
+              : '0 4px 14px rgba(60,55,45,0.14)',
+            transition: 'transform 120ms',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="4" y1="7" x2="20" y2="7" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="17" x2="14" y2="17" />
+          </svg>
+          <span style={{ letterSpacing: '-0.005em' }}>
+            {(authChat.grouped?.deals?.length ?? 0) > 0 ? `${authChat.grouped!.deals.length}` : 'Deals'}
+          </span>
+        </button>
+      )}
+
       {isMobile && !authLoading && user && (
         <button
           onClick={() => setAccountSheetOpen(true)}
