@@ -1,6 +1,12 @@
 # smbx.ai — Complete UI & Brand Style Guide
-## For marketing materials, LinkedIn content, presentations, documents, and all external assets
+## For logo rules, brand voice, and copy patterns
 ## Last updated: April 4, 2026
+
+> ⚠ **For the current visual system** (colors, type, spacing, motion, materials,
+> editorial primitives, anti-slop rules, LinkedIn document patterns), see
+> **`DESIGN_LANGUAGE.md`** in the same repo root. It supersedes this document for
+> anything visual. This doc remains authoritative for **logo asset rules, brand
+> voice, and written copy patterns** — those have not changed.
 
 ---
 
