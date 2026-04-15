@@ -6,6 +6,7 @@ import {
   HookHeader,
   SectionHeader,
   PageCTA,
+  SectionBand,
 } from './storyBlocks';
 
 /* Inline SVG check — avoids Material Symbols slop. */
@@ -264,8 +265,8 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           dark={dark}
         />
 
-        {/* ═══ The Deal Cost Map ═══ */}
-        <section className="mb-24">
+        {/* ═══ The Deal Cost Map — cinematic anchor (full-bleed immersive band) ═══ */}
+        <SectionBand tone="immersive" dark={dark}>
           <SectionHeader
             label="The math"
             title="Three ways to pay for the same work."
@@ -273,7 +274,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
             dark={dark}
           />
           <DealCostMap dark={dark} />
-        </section>
+        </SectionBand>
 
         {/* ═══ Tier cards with Annual/Monthly toggle ═══ */}
         <section className="mb-10">

@@ -114,13 +114,16 @@ export function DealCostMap({ dark }: { dark: boolean }) {
   const spreadVsIB = useMemo(() => Math.round(ib / yulia.annual), [ib, yulia.annual]);
   const spreadVsAnalyst = useMemo(() => Math.round(team.cost / yulia.annual), [team.cost, yulia.annual]);
 
-  // Colors
-  const bg = dark ? '#0f1012' : '#f9f7f1';
-  const innerBg = dark ? 'rgba(255,255,255,0.04)' : 'white';
-  const border = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
-  const headingColor = dark ? '#f9f9fc' : '#0f1012';
-  const bodyColor = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
-  const mutedColor = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
+  // Colors — component is embedded inside an immersive SectionBand on
+  // /pricing. Outer bg sits slightly raised off the immersive backdrop
+  // (not identical to #0f1012 or we'd merge on dark mode; not cream or
+  // we'd clash with the dark stage on light mode).
+  const bg = dark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.06)';
+  const innerBg = dark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.10)';
+  const border = dark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.14)';
+  const headingColor = '#f9f9fc';                         // always light — inside immersive band
+  const bodyColor = 'rgba(218,218,220,0.85)';
+  const mutedColor = 'rgba(218,218,220,0.55)';
   const accent = dark ? PINK_DARK : PINK;
 
   return (
