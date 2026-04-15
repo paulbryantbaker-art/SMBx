@@ -15,6 +15,7 @@ import { Drawer } from 'vaul';
 import { useState, useEffect, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { isStandalone } from '../../lib/pwa';
+import CanvasPicker, { type PickerTab, type DealMeta } from '../canvas/CanvasPicker';
 
 const PINK = '#D44A78';
 const PINK_DARK = '#E8709A';
@@ -87,6 +88,16 @@ interface Props {
   onDarkModeToggle: () => void;
   /** @deprecated alias for onNewDeal */
   onNewChat?: () => void;
+
+  // Document picker (Dia-style grouped doc list, mobile equivalent of the
+  // desktop right-side picker). Optional — only renders when the parent
+  // passes canvasTabs + handlers.
+  canvasTabs?: PickerTab[];
+  activeCanvasTabId?: string | null;
+  splitCanvasTabId?: string | null;
+  pickerDeals?: DealMeta[];
+  onCanvasTabSelect?: (tabId: string) => void;
+  onCanvasTabClose?: (tabId: string) => void;
 }
 
 const LEARN_ITEMS: { id: LearnDest; label: string; desc: string }[] = [
@@ -119,6 +130,12 @@ export function MobileSidebar({
   isLoggedIn,
   inAppMode = false,
   activeConversationId,
+  canvasTabs = [],
+  activeCanvasTabId = null,
+  splitCanvasTabId = null,
+  pickerDeals = [],
+  onCanvasTabSelect,
+  onCanvasTabClose,
   onHomeTap,
   onNewDeal,
   onGeneralChat,
@@ -356,6 +373,28 @@ export function MobileSidebar({
                     arrow_forward
                   </span>
                 </button>
+              </Section>
+            )}
+
+            {/* DOCUMENTS — Dia-style grouped open-doc picker. Only renders for
+                logged-in users (anon has no docs yet) and only when at least
+                one doc is open. Mirrors the desktop right-side picker; this
+                is the mobile equivalent the user opens via the hamburger. */}
+            {isLoggedIn && canvasTabs.length > 0 && (
+              <Section label="Documents" sectionColor={sectionC} mutedColor={mutedC}>
+                <CanvasPicker
+                  embedded
+                  tabs={canvasTabs}
+                  activeTabId={activeCanvasTabId}
+                  splitTabId={splitCanvasTabId}
+                  onSelect={(id) => {
+                    onCanvasTabSelect?.(id);
+                    onOpenChange(false);
+                  }}
+                  onClose={(id) => onCanvasTabClose?.(id)}
+                  deals={pickerDeals}
+                  dark={dark}
+                />
               </Section>
             )}
 

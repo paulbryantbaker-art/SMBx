@@ -3000,6 +3000,22 @@ export default function AppShell() {
           dark={dark}
           isLoggedIn={!!user}
           inAppMode={viewState === 'chat'}
+          canvasTabs={canvasTabs}
+          activeCanvasTabId={activeCanvasTabId}
+          splitCanvasTabId={splitTabId}
+          pickerDeals={(authChat.grouped?.deals ?? []).map((d: any) => ({
+            id: d.id,
+            name: d.business_name || `Deal ${d.id}`,
+            journey: (d.journey_type || '').toLowerCase(),
+          }))}
+          onCanvasTabSelect={(id) => {
+            setActiveCanvasTabId(id);
+            setMobileCanvasVisible(true);
+          }}
+          onCanvasTabClose={(id) => {
+            if (splitTabId === id) setSplitTabId(null);
+            closeCanvasTab(id);
+          }}
           onHomeTap={() => {
             setMobileWorkspaceOpen(null);
             setMobileJourneyOpen(null);

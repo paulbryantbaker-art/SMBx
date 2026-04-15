@@ -44,8 +44,12 @@ interface Props {
   onClose: (tabId: string) => void;
   deals: DealMeta[];
   dark: boolean;
-  collapsed: boolean;
-  onToggleCollapsed: () => void;
+  /** Desktop chrome props — collapse + resize. Ignored in embedded mode. */
+  collapsed?: boolean;
+  onToggleCollapsed?: () => void;
+  /** When true, render only the inner picker (no outer aside, no resize,
+      no collapse). For mobile MobileSidebar embedding. */
+  embedded?: boolean;
 }
 
 const TAB_ICONS: Record<string, string> = {
@@ -72,7 +76,7 @@ const UNCATEGORIZED_KEY = '__uncategorized__';
 
 export default function CanvasPicker({
   tabs, activeTabId, splitTabId, onSelect, onSplit, onUnsplit, onClose,
-  deals, dark, collapsed, onToggleCollapsed,
+  deals, dark, collapsed = false, onToggleCollapsed, embedded = false,
 }: Props) {
   // Collapse state per deal group. Keyed by dealId-as-string. Persisted to
   // localStorage so the picker remembers between sessions.
@@ -85,6 +89,41 @@ export default function CanvasPicker({
   useEffect(() => {
     try { localStorage.setItem('canvas_picker_groups_collapsed', JSON.stringify(groupCollapsed)); } catch { /* noop */ }
   }, [groupCollapsed]);
+
+  // Resizable width — drag handle on left edge. Persisted. Min 200, max 480.
+  const MIN_W = 200, MAX_W = 480, DEFAULT_W = 260;
+  const [width, setWidth] = useState<number>(() => {
+    try {
+      const raw = localStorage.getItem('canvas_picker_width');
+      const v = raw ? parseInt(raw, 10) : DEFAULT_W;
+      if (Number.isFinite(v) && v >= MIN_W && v <= MAX_W) return v;
+      return DEFAULT_W;
+    } catch { return DEFAULT_W; }
+  });
+  const startDrag = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startW = width;
+    const onMove = (ev: MouseEvent) => {
+      // Handle is on the LEFT edge — dragging left grows, right shrinks.
+      const delta = startX - ev.clientX;
+      const next = Math.max(MIN_W, Math.min(MAX_W, startW + delta));
+      setWidth(next);
+    };
+    const onUp = (ev: MouseEvent) => {
+      const delta = startX - ev.clientX;
+      const next = Math.max(MIN_W, Math.min(MAX_W, startW + delta));
+      try { localStorage.setItem('canvas_picker_width', String(next)); } catch { /* noop */ }
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  };
 
   const toggleGroup = (key: string) => {
     setGroupCollapsed(p => ({ ...p, [key]: !p[key] }));
@@ -117,10 +156,16 @@ export default function CanvasPicker({
   const chipHover = dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.03)';
   const accent = dark ? '#E8709A' : '#D44A78';
 
-  if (collapsed) {
+  if (!embedded && collapsed) {
+    // Entire rail is clickable to expand — easier discovery than a small
+    // chevron button. Hover state telegraphs interactivity.
     return (
-      <aside
-        aria-label="Documents picker (collapsed)"
+      <button
+        onClick={onToggleCollapsed}
+        aria-label="Expand documents picker"
+        title="Expand documents picker"
+        type="button"
+        className="canvas-picker-rail"
         style={{
           width: 40,
           flexShrink: 0,
@@ -128,29 +173,28 @@ export default function CanvasPicker({
           border: `1px solid ${border}`,
           borderRadius: 14,
           marginLeft: 12,
+          padding: '12px 0',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          padding: '12px 0',
           gap: 10,
+          cursor: 'pointer',
+          transition: 'background 0.15s ease, border-color 0.15s ease',
+          fontFamily: 'inherit',
         }}
       >
-        <button
-          onClick={onToggleCollapsed}
-          aria-label="Expand documents picker"
-          title="Expand"
-          type="button"
+        <span
+          aria-hidden
           style={{
             width: 28, height: 28, borderRadius: 8,
-            border: 'none', background: 'transparent',
-            color: bodyC, cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: bodyC,
           }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
-        </button>
+        </span>
         {docTabs.length > 0 && (
           <span
             aria-hidden
@@ -168,59 +212,99 @@ export default function CanvasPicker({
             {docTabs.length} DOC{docTabs.length === 1 ? '' : 'S'}
           </span>
         )}
-      </aside>
+        <style>{`
+          .canvas-picker-rail:hover {
+            background: ${dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.02)'} !important;
+            border-color: ${accent}55 !important;
+          }
+        `}</style>
+      </button>
     );
   }
 
+  // Standalone (default): outer aside chrome + resize handle on left edge.
+  // Embedded: just the inner content (no panel, no resize, no header — the
+  //   parent provides its own framing, e.g. MobileSidebar's <Section>).
   return (
     <aside
       aria-label="Documents picker"
       style={{
-        width: 260,
+        position: 'relative',
+        width: embedded ? '100%' : width,
         flexShrink: 0,
-        background: pageBg,
-        border: `1px solid ${border}`,
-        borderRadius: 14,
-        marginLeft: 12,
+        background: embedded ? 'transparent' : pageBg,
+        border: embedded ? 'none' : `1px solid ${border}`,
+        borderRadius: embedded ? 0 : 14,
+        marginLeft: embedded ? 0 : 12,
         display: 'flex',
         flexDirection: 'column',
         minHeight: 0,
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
-      {/* Header */}
-      <div
-        style={{
-          padding: '10px 12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: `1px solid ${border}`,
-          background: sectionBg,
-          flexShrink: 0,
-        }}
-      >
-        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: mutedC }}>
-          Documents
-        </span>
-        <button
-          onClick={onToggleCollapsed}
-          aria-label="Collapse documents picker"
-          title="Collapse"
-          type="button"
+      {/* Resize handle — desktop only. Hidden in embedded mode. 6px wide
+          target on the LEFT edge so the user has somewhere obvious to grab. */}
+      {!embedded && (
+        <div
+          onMouseDown={startDrag}
+          aria-label="Resize documents picker"
+          role="separator"
+          aria-orientation="vertical"
+          className="canvas-picker-resize"
           style={{
-            width: 24, height: 24, borderRadius: 6,
-            border: 'none', background: 'transparent',
-            color: bodyC, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            position: 'absolute',
+            top: 0, bottom: 0, left: -3,
+            width: 6,
+            cursor: 'col-resize',
+            zIndex: 2,
           }}
-          className="canvas-picker-header-btn"
+        />
+      )}
+
+      {/* Header — hidden in embedded mode (parent provides label) */}
+      {!embedded && (
+        <div
+          style={{
+            padding: '10px 12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: `1px solid ${border}`,
+            background: sectionBg,
+            flexShrink: 0,
+          }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
-      </div>
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: mutedC }}>
+            Documents
+          </span>
+          <button
+            onClick={onToggleCollapsed}
+            aria-label="Collapse documents picker"
+            title="Collapse documents picker"
+            type="button"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              padding: '4px 8px',
+              borderRadius: 6,
+              border: 'none',
+              background: 'transparent',
+              color: bodyC,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              fontSize: 11,
+              fontWeight: 600,
+            }}
+            className="canvas-picker-header-btn"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+            <span style={{ letterSpacing: '0.04em' }}>Hide</span>
+          </button>
+        </div>
+      )}
 
       {/* Groups */}
       <div className="canvas-picker-scroll" style={{ flex: 1, overflowY: 'auto', padding: '6px 6px 12px' }}>
@@ -420,6 +504,17 @@ export default function CanvasPicker({
         .canvas-picker-row-close:hover { opacity: 1 !important; background: ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.06)'} !important; }
         .canvas-picker-row-split:hover { opacity: 1 !important; background: ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.06)'} !important; }
         .canvas-picker-header-btn:hover { background: ${chipHover} !important; }
+        .canvas-picker-resize::before {
+          content: '';
+          position: absolute;
+          top: 0; bottom: 0; left: 2px;
+          width: 2px;
+          background: transparent;
+          transition: background 0.15s ease;
+        }
+        .canvas-picker-resize:hover::before {
+          background: ${accent};
+        }
       `}</style>
     </aside>
   );
