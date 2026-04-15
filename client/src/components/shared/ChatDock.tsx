@@ -222,19 +222,26 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
     onSend(t);
   }, [value, disabled, onSend]);
 
-  /* Fill input from tool popup */
+  /* Fill input from tool popup.
+     iOS Safari rejects programmatic focus() outside the user-gesture scope,
+     so we focus + size the textarea synchronously inside the click handler.
+     setValue still re-renders, but the focus we already grabbed stays put. */
   const fillInput = useCallback((text: string) => {
+    const el = inputRef.current;
+    if (el) {
+      // SYNC: focus + value + resize all happen in the user-gesture scope so
+      // iOS opens the virtual keyboard and the popup-close re-render doesn't
+      // bounce focus back to the trigger button.
+      el.focus();
+      el.value = text;
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+      try { el.setSelectionRange(text.length, text.length); } catch {}
+    }
     setValue(text);
     setToolsOpen(false);
     setTwActive(false);
     setTwText('');
-    requestAnimationFrame(() => {
-      if (inputRef.current) {
-        inputRef.current.style.height = 'auto';
-        inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 140) + 'px';
-        inputRef.current.focus();
-      }
-    });
   }, []);
 
   /* Handle tool click — either fill or upload */
