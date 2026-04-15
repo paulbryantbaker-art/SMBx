@@ -802,18 +802,26 @@ export default function AppShell() {
   }, [homeToolsOpen]);
   const fillHomeInput = useCallback((text: string) => {
     const ref = isMobile ? homeInputMobileRef : homeInputRef;
-    // Close the popup first so the pill isn't covered by the backdrop.
-    setHomeToolsOpen(false);
-    // Defer to next frame so the popup unmounts before we set + focus.
-    // The home pill input is UNCONTROLLED (no React value binding) so
-    // direct el.value assignment is the canonical write. This is the
-    // pattern that worked before Sprint 14 — restored verbatim.
-    requestAnimationFrame(() => {
-      const el = ref.current;
-      if (!el) return;
+    // Set the value SYNCHRONOUSLY before closing the popup. The input is
+    // uncontrolled so direct el.value works. Setting before close means
+    // the value is already written by the time the popup unmounts —
+    // doesn't depend on rAF/setTimeout/React commit timing on mobile.
+    const el = ref.current;
+    if (el) {
       el.value = text;
-      el.focus();
-      try { el.setSelectionRange(text.length, text.length); } catch {}
+      // Fire input event so any listeners see the change.
+      try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch {}
+    }
+    setHomeToolsOpen(false);
+    // Focus on next frame so popup unmount completes first. Don't gate
+    // populate on focus succeeding — value is already set above.
+    requestAnimationFrame(() => {
+      const el2 = ref.current;
+      if (!el2) return;
+      // Re-set in case React's render cycle wiped it
+      if (el2.value !== text) el2.value = text;
+      el2.focus();
+      try { el2.setSelectionRange(text.length, text.length); } catch {}
     });
   }, [isMobile]);
   // Chat hooks (always called for hook order)
