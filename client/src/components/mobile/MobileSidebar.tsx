@@ -69,6 +69,9 @@ interface Props {
   userName?: string | null;
   userEmail?: string | null;
   isLoggedIn: boolean;
+  /** True when user is in chat/app mode (landing→chat morph). Swaps the
+      sidebar from marketing (Learn) to in-app (Workspace-only). */
+  inAppMode?: boolean;
   activeConversationId?: number | null;
 
   // Actions
@@ -114,6 +117,7 @@ export function MobileSidebar({
   userName,
   userEmail,
   isLoggedIn,
+  inAppMode = false,
   activeConversationId,
   onHomeTap,
   onNewDeal,
@@ -355,8 +359,10 @@ export function MobileSidebar({
               </Section>
             )}
 
-            {/* LEARN — only in browser when logged out. NEVER in PWA. */}
-            {!isLoggedIn && !isStandalone() && (
+            {/* LEARN — only in browser when logged out and NOT in chat mode.
+                When anon user morphs into chat (landing → chat), Learn is
+                hidden because they've already crossed into the app. NEVER in PWA. */}
+            {!isLoggedIn && !inAppMode && !isStandalone() && (
               <Section label="How Yulia helps" sectionColor={sectionC} mutedColor={mutedC}>
                 {LEARN_ITEMS.map((item, i) => (
                   <motion.button

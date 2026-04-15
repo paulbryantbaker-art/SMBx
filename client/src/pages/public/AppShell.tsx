@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react'
 import { createPortal } from 'react-dom';
 import Markdown from 'react-markdown';
 import { useLocation } from 'wouter';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { trackEvent } from '../../lib/analytics';
 import { useAuth, authHeaders } from '../../hooks/useAuth';
 import { useAnonymousChat, type AnonMessage } from '../../hooks/useAnonymousChat';
@@ -1032,7 +1032,11 @@ export default function AppShell() {
 
   // Subscription model — no wallet balance needed
 
-  // Send handler — morph from landing to chat
+  // Send handler — morph from landing to chat.
+  // Sequence: fire morphing=true (triggers morphOut keyframe on the landing
+  // wrapper), wait one animation frame + ~240ms, then flip viewState so the
+  // landing unmounts and chat fades in. Sidebar morphs in parallel via
+  // AnimatePresence. Reduced-motion shortens the delay to ~60ms.
   const handleSend = useCallback((content: string) => {
     if (viewState === 'landing') {
       if (user) authChat.sendMessage(content);
@@ -1042,9 +1046,16 @@ export default function AppShell() {
       if (!user && activeTab === 'home') {
         setActiveTab('sell');
       }
-      // Instant swap to chat mode — the journey card stays visible in the canvas position
-      setViewState('chat');
+      // Deliberate morph: give the landing wrapper time to play morphOut
+      // before unmounting. The chat view's own fade-in picks up the handoff.
+      const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      const holdMs = reducedMotion ? 0 : 240;
+      setMorphing(true);
       if (window.location.pathname !== '/chat') navigate('/chat');
+      window.setTimeout(() => {
+        setViewState('chat');
+        setMorphing(false);
+      }, holdMs);
       return;
     }
     if (user) authChat.sendMessage(content);
@@ -1675,76 +1686,101 @@ export default function AppShell() {
         </button>
       </div>
 
-      {/* Explore section — marketing pages, hidden when logged in */}
-      {!user && (
-      <>
-      <div className="flex flex-col items-center gap-1 w-full px-2">
-        <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Explore</span>
-        {([
-          { id: 'sell' as TabId, icon: 'storefront', label: 'Sell' },
-          { id: 'buy' as TabId, icon: 'shopping_bag', label: 'Buy' },
-          { id: 'raise' as TabId, icon: 'trending_up', label: 'Raise' },
-          { id: 'integrate' as TabId, icon: 'merge', label: 'Integrate' },
-          { id: 'advisors' as TabId, icon: 'handshake', label: 'Advisors' },
-          { id: 'how-it-works' as TabId, icon: 'help_outline', label: 'How' },
-          { id: 'pricing' as TabId, icon: 'sell', label: 'Pricing' },
-        ]).map(item => {
-          const isActive = activeTab === item.id && viewState === 'landing';
-          return (
-            <button
-              key={item.id}
-              onClick={() => handleTabClick(item.id)}
-              className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
-                isActive
-                  ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
-                  : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
-              }`}
-              title={item.label}
-              type="button"
-            >
-              <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-              <span className="text-[9px] font-semibold">{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Divider */}
-      <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`} />
-      </>
-      )}
-
-      {/* Tools section — logged-in user features */}
-      {user && (
-      <div className="flex flex-col items-center gap-1 w-full px-2">
-        <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Tools</span>
-        {([
-          { type: 'documents', icon: 'folder_open', label: 'Library' },
-          { type: 'dataroom', icon: 'lock', label: 'Data Rm' },
-          { type: 'pipeline', icon: 'view_kanban', label: 'Pipeline' },
-          { type: 'sourcing', icon: 'search', label: 'Sourcing' },
-          { type: 'analytics', icon: 'monitoring', label: 'Insights' },
-        ]).map(item => {
-          const isActive = activeCanvasTabId === item.type;
-          return (
-            <button
-              key={item.type}
-              onClick={() => openCanvasTab(item.type, item.label)}
-              className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
-                isActive
-                  ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
-                  : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
-              }`}
-              title={item.label}
-              type="button"
-            >
-              <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-              <span className="text-[9px] font-semibold">{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
-      )}
+      {/* Sidebar mode morph — Explore (marketing) ↔ Tools (in-app).
+          Keyed on viewState, not user. Anon user who chats transitions
+          into the in-app sidebar; clicking a gated tool routes to login. */}
+      {(() => {
+        const sidebarMode: 'explore' | 'tools' =
+          (viewState === 'landing' && !user) ? 'explore' : 'tools';
+        return (
+          <AnimatePresence mode="wait" initial={false}>
+            {sidebarMode === 'explore' ? (
+              <motion.div
+                key="explore"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                className="w-full"
+              >
+                <div className="flex flex-col items-center gap-1 w-full px-2">
+                  <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Explore</span>
+                  {([
+                    { id: 'sell' as TabId, icon: 'storefront', label: 'Sell' },
+                    { id: 'buy' as TabId, icon: 'shopping_bag', label: 'Buy' },
+                    { id: 'raise' as TabId, icon: 'trending_up', label: 'Raise' },
+                    { id: 'integrate' as TabId, icon: 'merge', label: 'Integrate' },
+                    { id: 'advisors' as TabId, icon: 'handshake', label: 'Advisors' },
+                    { id: 'how-it-works' as TabId, icon: 'help_outline', label: 'How' },
+                    { id: 'pricing' as TabId, icon: 'sell', label: 'Pricing' },
+                  ]).map(item => {
+                    const isActive = activeTab === item.id && viewState === 'landing';
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleTabClick(item.id)}
+                        className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
+                          isActive
+                            ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
+                            : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
+                        }`}
+                        title={item.label}
+                        type="button"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                        <span className="text-[9px] font-semibold">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="tools"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                className="w-full"
+              >
+                <div className="flex flex-col items-center gap-1 w-full px-2">
+                  <span className={`text-[9px] font-bold uppercase tracking-widest mb-2 ${dark ? 'text-zinc-500' : 'text-[#5a4044]'}`}>Tools</span>
+                  {([
+                    { type: 'documents', icon: 'folder_open', label: 'Library' },
+                    { type: 'dataroom', icon: 'lock', label: 'Data Rm' },
+                    { type: 'pipeline', icon: 'view_kanban', label: 'Pipeline' },
+                    { type: 'sourcing', icon: 'search', label: 'Sourcing' },
+                    { type: 'analytics', icon: 'monitoring', label: 'Insights' },
+                  ]).map(item => {
+                    const isActive = activeCanvasTabId === item.type;
+                    const gated = !user;  // anon user — tool opens but gates on load
+                    return (
+                      <button
+                        key={item.type}
+                        onClick={() => {
+                          if (gated) { navigate('/login'); return; }
+                          openCanvasTab(item.type, item.label);
+                        }}
+                        className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
+                          isActive
+                            ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
+                            : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
+                        }`}
+                        title={gated ? `${item.label} · sign in to unlock` : item.label}
+                        type="button"
+                        style={gated ? { opacity: 0.55 } : undefined}
+                      >
+                        <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                        <span className="text-[9px] font-semibold">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        );
+      })()}
 
       {/* Divider */}
       <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`} />
@@ -2361,12 +2397,15 @@ export default function AppShell() {
             </div>
           )}
 
-          {/* ════ CHAT MODE ════ */}
+          {/* ════ CHAT MODE ════
+              Fade-in picks up immediately after landing's morphOut completes.
+              Subtle upward drift makes the chat feel like it "rises in" under
+              the departing landing. 0.3s + spring ease matches morphOut rhythm. */}
           {viewState === 'chat' && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               style={{
                 display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
                 minHeight: '100%',
@@ -2879,9 +2918,19 @@ export default function AppShell() {
           from { opacity: 0; transform: scale(0.92); }
           to { opacity: 1; transform: scale(1); }
         }
+        /* Premium morph-out — overrides the fade-only version in index.css.
+           Subtle downward-to-up compression with scale and a hair of blur
+           signals "this view is clearing away" without being showy. */
         @keyframes morphOut {
-          from { opacity: 1; transform: translateY(0); }
-          to { opacity: 0; transform: translateY(28px); }
+          0%   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+          60%  { opacity: 0.4; transform: translateY(-6px) scale(0.992); filter: blur(0); }
+          100% { opacity: 0; transform: translateY(-10px) scale(0.985); filter: blur(2px); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          /* Under reduced-motion the handleSend handler passes holdMs=0,
+             so morphOut never actually plays. Belt-and-suspenders: suppress
+             the animation itself too. */
+          @keyframes morphOut { 0%, 100% { opacity: 1; transform: none; filter: none; } }
         }
         @keyframes slideInLeft {
           from { transform: translateX(-100%); }
@@ -2908,6 +2957,7 @@ export default function AppShell() {
           onOpenChange={setIsMobileSidebarOpen}
           dark={dark}
           isLoggedIn={!!user}
+          inAppMode={viewState === 'chat'}
           onHomeTap={() => {
             setMobileWorkspaceOpen(null);
             setMobileJourneyOpen(null);
