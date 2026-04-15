@@ -40,7 +40,11 @@ export function ConfirmSheet({
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const bg = dark ? '#151617' : '#fefefe';
+  // Apple Glass variant (used on the bottom-sheet Drawer.Content below).
+  // The desktop modal variant at line ~73 keeps the opaque bg since modals
+  // over the full viewport read better without translucency.
+  const bg = dark ? 'rgba(21,22,23,0.82)' : 'rgba(254,254,254,0.88)';
+  const bgSolid = dark ? '#151617' : '#fefefe';
   const headingC = dark ? '#f9f9fc' : '#0f1012';
   const bodyC = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
@@ -70,7 +74,7 @@ export function ConfirmSheet({
               top: '50%', left: '50%',
               transform: 'translate(-50%, -50%)',
               width: 'min(440px, calc(100vw - 32px))',
-              background: bg,
+              background: bgSolid,
               border: `1px solid ${borderC}`,
               borderRadius: 16,
               boxShadow: dark
@@ -171,8 +175,11 @@ export function ConfirmSheet({
             position: 'fixed', bottom: 0, left: 0, right: 0,
             maxHeight: '50dvh',
             background: bg,
+            backdropFilter: 'blur(18px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(18px) saturate(180%)',
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
+            borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.06)'}`,
             display: 'flex',
             flexDirection: 'column',
             zIndex: 120,

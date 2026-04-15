@@ -9,10 +9,14 @@ import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { dismissToast, subscribeToasts, type ToastSpec } from '../../lib/toast';
 
+// Apple Glass tone palette — translucent toast over content rather than
+// a solid opaque block. Darker alpha for info, colored tints for success/
+// error so the tone still reads at a glance. backdrop-filter below does
+// the heavy lifting.
 const TONE_BG: Record<string, string> = {
-  info: '#1A1C1E',
-  success: '#2F7A4E',
-  error: '#9E3232',
+  info: 'rgba(26,28,30,0.82)',
+  success: 'rgba(47,122,78,0.85)',
+  error: 'rgba(158,50,50,0.85)',
 };
 
 interface Props {
@@ -48,6 +52,9 @@ export function ToastHost({ bottomOffset = 110 }: Props) {
             padding: '12px 16px',
             borderRadius: 14,
             background: TONE_BG[toast.tone],
+            backdropFilter: 'blur(18px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(18px) saturate(180%)',
+            border: '1px solid rgba(255,255,255,0.10)',
             color: '#FFFFFF',
             fontFamily: 'Inter, system-ui',
             fontSize: 14,

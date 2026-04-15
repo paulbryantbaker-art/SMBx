@@ -20,7 +20,8 @@ interface Props {
 }
 
 export function DealActionsSheet({ open, onOpenChange, dark, dealName, onPin, onMute, onShare, onArchive }: Props) {
-  const bg = dark ? '#151617' : '#fefefe';
+  // Apple Glass — translucent bottom sheet; backdrop-blur on the content.
+  const bg = dark ? 'rgba(21,22,23,0.82)' : 'rgba(254,254,254,0.88)';
   const headingC = dark ? '#f9f9fc' : '#0f1012';
   const mutedC = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
@@ -43,8 +44,11 @@ export function DealActionsSheet({ open, onOpenChange, dark, dealName, onPin, on
             position: 'fixed', bottom: 0, left: 0, right: 0,
             maxHeight: '50dvh',
             background: bg,
+            backdropFilter: 'blur(18px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(18px) saturate(180%)',
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
+            borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.06)'}`,
             display: 'flex',
             flexDirection: 'column',
             zIndex: 100,
