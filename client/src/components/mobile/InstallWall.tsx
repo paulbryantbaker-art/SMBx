@@ -21,9 +21,11 @@
  * usePwaDeepLink hook wired in AppShell.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const DEEP_LINK_KEY = 'pwa_install_target';
+const AUTH_FRESH_KEY = 'smbx_auth_fresh';
+const AUTH_FRESH_TTL_MS = 5 * 60 * 1000; // 5 minutes
 export const PWA_DEEP_LINK_KEY = DEEP_LINK_KEY;
 
 interface Props {
@@ -42,6 +44,23 @@ export default function InstallWall({ dark, userName }: Props) {
       }
     } catch { /* noop */ }
   }, []);
+
+  // Detect a "fresh auth" window — user just signed up/logged in. Changes
+  // the headline + sub to read as a celebration + clear next step rather
+  // than a neutral "welcome back." Flag is set by the Google OAuth
+  // callback in App.tsx and expires after 5 minutes.
+  const [isFreshAuth] = useState(() => {
+    try {
+      const raw = localStorage.getItem(AUTH_FRESH_KEY);
+      if (!raw) return false;
+      const ts = parseInt(raw, 10);
+      if (!Number.isFinite(ts)) return false;
+      const fresh = Date.now() - ts < AUTH_FRESH_TTL_MS;
+      // Clear so it only shows once
+      if (fresh) localStorage.removeItem(AUTH_FRESH_KEY);
+      return fresh;
+    } catch { return false; }
+  });
 
   const pageBg = dark ? '#0f1012' : '#F9F9FC';
   const cardBg = dark ? 'rgba(26,28,30,0.82)' : 'rgba(255,255,255,0.88)';
@@ -83,7 +102,23 @@ export default function InstallWall({ dark, userName }: Props) {
         }}
       />
 
-      {/* Headline */}
+      {/* Headline — celebratory on fresh auth, neutral on return visits */}
+      {isFreshAuth && (
+        <p
+          style={{
+            margin: 0,
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: accent,
+            marginBottom: 10,
+          }}
+        >
+          <span aria-hidden style={{ marginRight: 6 }}>✓</span>
+          Account created
+        </p>
+      )}
       <h1
         style={{
           margin: 0,
@@ -98,7 +133,9 @@ export default function InstallWall({ dark, userName }: Props) {
           marginBottom: 12,
         }}
       >
-        {userName ? `Welcome back, ${userName.split(' ')[0]}.` : 'One more step.'}
+        {isFreshAuth
+          ? (userName ? `You're in, ${userName.split(' ')[0]}.` : "You're in.")
+          : (userName ? `Welcome back, ${userName.split(' ')[0]}.` : 'One more step.')}
       </h1>
 
       {/* Subhead */}
@@ -113,8 +150,9 @@ export default function InstallWall({ dark, userName }: Props) {
           marginBottom: 28,
         }}
       >
-        smbx.ai runs as an installed app on your phone — for notifications on
-        deal movement, faster loading, and no browser chrome in your way.
+        {isFreshAuth
+          ? 'One more step — install smbx.ai to start your first deal. Takes about 10 seconds.'
+          : 'smbx.ai runs as an installed app on your phone — for notifications on deal movement, faster loading, and no browser chrome in your way.'}
       </p>
 
       {/* Instructions card — Apple Glass material */}

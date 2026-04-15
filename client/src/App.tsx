@@ -146,6 +146,13 @@ export default function App() {
               sessionStorage.removeItem('smbx_anon_session');
             }
             await migrateSessionConversations();
+            // Set a short-lived flag so the InstallWall (mobile Safari) can
+            // show a celebratory "Account created" state instead of the
+            // neutral "Welcome back" greeting. 5-minute TTL keeps it from
+            // showing on unrelated page loads.
+            try {
+              localStorage.setItem('smbx_auth_fresh', String(Date.now()));
+            } catch { /* noop */ }
             navigate('/chat');
           } catch (err: any) {
             console.error('Google login error:', err.message);
