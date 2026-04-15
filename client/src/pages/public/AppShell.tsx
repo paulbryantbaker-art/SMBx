@@ -1638,7 +1638,15 @@ export default function AppShell() {
       {/* Logo — X mark, always visible */}
       <div className="flex flex-col items-center mb-3" ref={sidebarLogoRef as any}>
         <button
-          onClick={() => {
+          onClick={(e) => {
+            // Trigger the shimmy spin — runs to completion even after release
+            const img = e.currentTarget.querySelector('.sidebar-x-img') as HTMLImageElement | null;
+            if (img) {
+              img.classList.remove('spinning');
+              // Force reflow so a repeated click re-triggers the animation
+              void img.offsetWidth;
+              img.classList.add('spinning');
+            }
             if (user) {
               setViewState('chat'); navigate('/chat');
             } else {
@@ -1649,7 +1657,15 @@ export default function AppShell() {
           title={user ? 'Chat' : 'Home'}
           type="button"
         >
-          <img src={dark ? '/X-white.png' : '/X.png'} alt="smbx.ai" width={42} height={42} className="sidebar-x-img" style={{ display: 'block' }} />
+          <img
+            src={dark ? '/X-white.png' : '/X.png'}
+            alt="smbx.ai"
+            width={42}
+            height={42}
+            className="sidebar-x-img"
+            style={{ display: 'block' }}
+            onAnimationEnd={(e) => e.currentTarget.classList.remove('spinning')}
+          />
         </button>
       </div>
 
@@ -2802,12 +2818,16 @@ export default function AppShell() {
         .sidebar-x-btn:hover .sidebar-x-img {
           transform: scale(1.08);
         }
-        .sidebar-x-btn:active .sidebar-x-img {
+        /* Spin runs to completion via the .spinning class added on click
+           and removed on onAnimationEnd — :active wouldn't complete because
+           the mouse releases before the 600ms animation finishes. */
+        .sidebar-x-img.spinning {
           animation: xSpin 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
         }
         @keyframes xSpin {
           from { transform: rotate(0deg) scale(1.08); }
-          to { transform: rotate(360deg) scale(1.08); }
+          50%  { transform: rotate(180deg) scale(1.14); }
+          to   { transform: rotate(360deg) scale(1.08); }
         }
 
         /* Sidebar icon buttons: subtle press feedback with brief flash */

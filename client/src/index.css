@@ -39,6 +39,26 @@ a.btn:active,
   filter: brightness(0.94);
 }
 
+/* ─── Run-to-completion click feedback ───
+   :active only fires while the mouse is held down. Fast clicks release
+   before 40ms, so the press animation never visibly plays. A global
+   JS listener (in main.tsx) adds .just-clicked on mousedown/touchstart,
+   removes it onAnimationEnd. This runs the 240ms "punch" curve to
+   completion regardless of how fast the user clicks.
+*/
+.just-clicked {
+  animation: clickPunch 240ms cubic-bezier(0.34, 1.2, 0.64, 1) !important;
+}
+@keyframes clickPunch {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(0.92); filter: brightness(0.9); }
+  65%  { transform: scale(1.02); filter: brightness(1.02); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .just-clicked { animation: none !important; }
+}
+
 /* Marketing CTA: hover lifts, press pushes through harder. Softer shadow on
    press reinforces the "going in" feel. */
 .cta-press {
