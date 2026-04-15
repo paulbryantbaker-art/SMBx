@@ -41,8 +41,6 @@ type Tier = {
   eyebrow?: string;    // small caption ABOVE price (never competes with name)
   inherits?: TierKey;  // what tier this builds on
   deltaFeatures: string[]; // only the delta from `inherits`; full list if no inheritance
-  cta: string;
-  ctaPlan?: string;
   hero?: boolean;
 };
 
@@ -60,7 +58,6 @@ const TIERS: Tier[] = [
       'Real Baseline range, 7-factor readiness',
       'Email required after first deliverable',
     ],
-    cta: 'Start free',
   },
   {
     key: 'single',
@@ -77,7 +74,6 @@ const TIERS: Tier[] = [
       'Sector comp multiples + benchmarks',
       'PDF exports with your name on them',
     ],
-    cta: 'Start Single',
   },
   {
     key: 'multi',
@@ -97,7 +93,6 @@ const TIERS: Tier[] = [
       'All 10 interactive financial models',
       'Full deal room — CPA, attorney, broker, lender',
     ],
-    cta: 'Start Multi-deal',
   },
   {
     key: 'team',
@@ -114,7 +109,6 @@ const TIERS: Tier[] = [
       'Up to 10 active deals concurrently',
       'Priority email support',
     ],
-    cta: 'Start Team',
   },
   {
     key: 'firm',
@@ -131,8 +125,6 @@ const TIERS: Tier[] = [
       'SOC 2 report + contract terms',
       'Quarterly business review',
     ],
-    cta: 'Start Firm',
-    ctaPlan: 'firm',
   },
   {
     key: 'institutional',
@@ -149,8 +141,6 @@ const TIERS: Tier[] = [
       'Custom SLA',
       'White-glove onboarding',
     ],
-    cta: 'Start Institutional',
-    ctaPlan: 'institutional',
   },
 ];
 
@@ -226,16 +216,6 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
 
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');
 
-  const handleCTA = (plan?: string) => {
-    if (plan === 'firm') {
-      bridgeToYulia("I'd like to set up the Firm plan ($1,999/mo) for our team. We have multiple deal pros and want unlimited seats.");
-    } else if (plan === 'institutional') {
-      bridgeToYulia("I'd like to set up the Institutional plan ($6,999/mo). We need SSO, API access, and a dedicated CSM.");
-    } else {
-      goToChat();
-    }
-  };
-
   // Colors
   const headingColor = dark ? '#f9f9fc' : '#0f1012';
   const bodyColor = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
@@ -277,8 +257,8 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
           sub={
             <>
               <strong style={{ color: headingColor }}>Everyone starts free.</strong>{' '}
-              Six prices, all published. No sales call. No multi-year lock-in.
-              Service pros on someone else’s deal run free.
+              Yulia picks the right tier during chat — no forms, no sales call.
+              Every price published anyway. Service pros on someone else’s deal run free.
             </>
           }
           dark={dark}
@@ -298,11 +278,50 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
         {/* ═══ Tier cards with Annual/Monthly toggle ═══ */}
         <section className="mb-10">
           <SectionHeader
-            label="Pick your tier"
-            title="Six tiers. Every price published."
-            sub="Each tier builds on the one before it. If it says $6,999, it costs $6,999 — no sales call required."
+            label="The six tiers"
+            title="Yulia picks the right one for you."
+            sub="Tell her what you’re working on — she reads your situation and routes you to the tier that fits. Every price published anyway, so you can sanity-check her pick."
             dark={dark}
           />
+
+          {/* Primary CTA — "Let Yulia pick". This is the action the page wants.
+              The tier cards below are information, not decisions. */}
+          <div
+            className="rounded-2xl p-5 md:p-6 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+            style={{
+              background: dark ? 'rgba(232,112,154,0.08)' : 'rgba(212,74,120,0.06)',
+              border: `1px solid ${dark ? 'rgba(232,112,154,0.25)' : 'rgba(212,74,120,0.2)'}`,
+            }}
+          >
+            <div className="flex-1">
+              <p
+                className="text-[11px] font-semibold mb-1"
+                style={{ color: accent, letterSpacing: '0.06em' }}
+              >
+                The short version
+              </p>
+              <p className="text-[16px] md:text-[17px] leading-snug" style={{ color: headingColor }}>
+                <strong>You don’t pick. Yulia picks.</strong>{' '}
+                <span style={{ color: bodyColor }}>
+                  Start the conversation. She asks a few questions, reads your deal, and tells you which tier fits.
+                  Move up or down any time.
+                </span>
+              </p>
+            </div>
+            <button
+              onClick={() => bridgeToYulia('What tier should I be on? Here’s what I’m working on: ')}
+              className="cta-press shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-[14px] text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+              style={{
+                background: accent,
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: `0 10px 30px -12px ${accent}aa`,
+              }}
+            >
+              Let Yulia pick
+              <span aria-hidden>→</span>
+            </button>
+          </div>
 
           {/* Annual/Monthly toggle */}
           <div className="flex justify-center mb-8">
@@ -401,7 +420,7 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                     </p>
                   )}
 
-                  <ul className="space-y-2 flex-1 mb-5">
+                  <ul className="space-y-2 flex-1">
                     {t.deltaFeatures.map((f) => (
                       <li key={f} className="flex items-start gap-2">
                         <Check color={accent} />
@@ -411,20 +430,6 @@ export default function PricingBelow({ dark }: { dark: boolean }) {
                       </li>
                     ))}
                   </ul>
-
-                  <button
-                    onClick={() => handleCTA(t.ctaPlan)}
-                    className="cta-press w-full py-2.5 rounded-full text-[13px] font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                    style={{
-                      background: isHero ? accent : 'transparent',
-                      color: isHero ? '#fff' : headingColor,
-                      border: isHero ? 'none' : `1.5px solid ${border}`,
-                      cursor: 'pointer',
-                      boxShadow: isHero ? `0 8px 24px -12px ${accent}aa` : 'none',
-                    }}
-                  >
-                    {t.cta}
-                  </button>
                 </div>
               );
             })}

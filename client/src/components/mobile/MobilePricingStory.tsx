@@ -7,7 +7,7 @@
  */
 
 import { useState } from 'react';
-import { bridgeToYulia, goToChat } from '../content/chatBridge';
+import { bridgeToYulia } from '../content/chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { MobileJourneyStory } from './MobileJourneyStory';
 
@@ -51,8 +51,6 @@ type Tier = {
   eyebrow?: string;
   inherits?: TierKey;
   deltaFeatures: string[];
-  cta: string;
-  ctaPlan?: string;
   hero?: boolean;
 };
 
@@ -69,7 +67,6 @@ const TIERS: Tier[] = [
       'One full deliverable, yours to keep',
       'Real Baseline range, 7-factor readiness',
     ],
-    cta: 'Start free',
   },
   {
     key: 'single',
@@ -86,7 +83,6 @@ const TIERS: Tier[] = [
       'Sector comps + benchmarks',
       'PDF exports with your name',
     ],
-    cta: 'Start Single',
   },
   {
     key: 'multi',
@@ -105,7 +101,6 @@ const TIERS: Tier[] = [
       'All 10 financial models',
       'Full deal room',
     ],
-    cta: 'Start Multi-deal',
   },
   {
     key: 'team',
@@ -122,7 +117,6 @@ const TIERS: Tier[] = [
       'Up to 10 active deals',
       'Priority email support',
     ],
-    cta: 'Start Team',
   },
   {
     key: 'firm',
@@ -139,8 +133,6 @@ const TIERS: Tier[] = [
       'SOC 2 + contract terms',
       'Quarterly business review',
     ],
-    cta: 'Start Firm',
-    ctaPlan: 'firm',
   },
   {
     key: 'inst',
@@ -157,8 +149,6 @@ const TIERS: Tier[] = [
       'Custom SLA',
       'White-glove onboarding',
     ],
-    cta: 'Start Institutional',
-    ctaPlan: 'institutional',
   },
 ];
 
@@ -185,11 +175,46 @@ const FAQS: { q: string; a: string }[] = [
   },
 ];
 
-/* Cost comparison stops — mobile equivalent of the desktop DealCostMap. */
-const COST_STOPS: { ev: string; ib: string; team: string; yulia: string; spread: string }[] = [
-  { ev: '$10M',  ib: '~$225K',  team: '$1.7M/yr', yulia: '$2,388/yr', spread: '~94×' },
-  { ev: '$100M', ib: '~$1.85M', team: '$1.7M/yr', yulia: '$2,388/yr', spread: '~775×' },
-  { ev: '$1B',   ib: '~$8.5M',  team: '$1.7M/yr', yulia: '$2,388/yr', spread: '~3,560×' },
+/* Cost comparison stops — mobile equivalent of the desktop DealCostMap.
+   Team cost scales with deal complexity; Yulia tier also scales (Multi-deal
+   for solo operators, Firm for advisory/PE at $1B+). Numbers derived from
+   the same piecewise model in DealCostMap.tsx. */
+const COST_STOPS: {
+  ev: string;
+  ib: string;
+  team: string;
+  teamShape: string;
+  yulia: string;
+  yuliaTier: string;
+  spread: string;
+}[] = [
+  {
+    ev: '$10M',
+    ib: '~$310K',
+    team: '~$400K/yr',
+    teamShape: 'Solo banker + 1 analyst',
+    yulia: '$2,388/yr',
+    yuliaTier: 'Multi-deal',
+    spread: '~130×',
+  },
+  {
+    ev: '$100M',
+    ib: '~$2.0M',
+    team: '~$1.1M/yr',
+    teamShape: 'VP + 1 associate + 2 analysts',
+    yulia: '$2,388/yr',
+    yuliaTier: 'Multi-deal',
+    spread: '~840×',
+  },
+  {
+    ev: '$1B',
+    ib: '~$11.75M',
+    team: '~$1.7M/yr',
+    teamShape: 'VP + 2 associates + 2 analysts',
+    yulia: '$23,988/yr',
+    yuliaTier: 'Firm',
+    spread: '~490×',
+  },
 ];
 
 export default function MobilePricingStory({ dark }: Props) {
@@ -216,16 +241,6 @@ export default function MobilePricingStory({ dark }: Props) {
   const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
   const cardBg = dark ? '#1a1c1e' : '#ffffff';
   const ruleC = dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.06)';
-
-  const handleCTA = (plan?: string) => {
-    if (plan === 'firm') {
-      bridgeToYulia("I'd like to set up the Firm plan ($1,999/mo) for our team.");
-    } else if (plan === 'institutional') {
-      bridgeToYulia("I'd like to set up the Institutional plan ($6,999/mo).");
-    } else {
-      goToChat();
-    }
-  };
 
   const tierByKey = (k: TierKey) => TIERS.find((t) => t.key === k)!;
 
@@ -256,7 +271,8 @@ export default function MobilePricingStory({ dark }: Props) {
       sub={
         <>
           <strong style={{ color: headingC }}>Everyone starts free.</strong>{' '}
-          Six prices, all published. Cancel any time. Service pros on someone else’s deal run free.
+          Yulia picks the right tier during chat. Every price published anyway.
+          Cancel any time. Service pros on someone else’s deal run free.
         </>
       }
 
@@ -314,8 +330,8 @@ export default function MobilePricingStory({ dark }: Props) {
             }}
           >
             <CostRow label="Investment bank" value={cost.ib} sub="one-time success fee" headingC={headingC} mutedC={mutedC} bodyC={bodyC} ruleC={ruleC} />
-            <CostRow label="In-house analyst team" value={cost.team} sub="VP + 2 associates + 2 analysts, loaded" headingC={headingC} mutedC={mutedC} bodyC={bodyC} ruleC={ruleC} />
-            <CostRow label="Run Yulia" value={cost.yulia} sub="Multi-deal · flat · unlimited deals" accentBg={accent} isAccent headingC={headingC} mutedC={mutedC} bodyC={bodyC} ruleC={ruleC} />
+            <CostRow label="In-house analyst team" value={cost.team} sub={`${cost.teamShape}, loaded`} headingC={headingC} mutedC={mutedC} bodyC={bodyC} ruleC={ruleC} />
+            <CostRow label="Run Yulia" value={cost.yulia} sub={`${cost.yuliaTier} tier · flat at this deal size`} accentBg={accent} isAccent headingC={headingC} mutedC={mutedC} bodyC={bodyC} ruleC={ruleC} />
           </div>
 
           {/* Spread headline */}
@@ -408,7 +424,51 @@ export default function MobilePricingStory({ dark }: Props) {
         </div>
       </section>
 
-      {/* ─── Tier ladder ─── */}
+      {/* ─── "Let Yulia pick" — the action the page actually wants ─── */}
+      <section style={{ padding: '2px 16px 14px' }}>
+        <div
+          style={{
+            padding: '14px 16px',
+            borderRadius: 14,
+            background: dark ? 'rgba(232,112,154,0.08)' : 'rgba(212,74,120,0.06)',
+            border: `1px solid ${dark ? 'rgba(232,112,154,0.25)' : 'rgba(212,74,120,0.2)'}`,
+            fontFamily: 'Inter, system-ui',
+          }}
+        >
+          <p style={{ margin: 0, fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', color: accent, marginBottom: 6 }}>
+            The short version
+          </p>
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: headingC }}>
+            <strong>You don’t pick. Yulia picks.</strong>{' '}
+            <span style={{ color: bodyC }}>
+              Start chat. She asks a few questions, reads your deal, tells you the tier. Move up or down any time.
+            </span>
+          </p>
+          <button
+            type="button"
+            onClick={() => bridgeToYulia('What tier should I be on? Here’s what I’m working on: ')}
+            className="cta-press"
+            style={{
+              marginTop: 12,
+              width: '100%',
+              padding: 12,
+              borderRadius: 999,
+              background: accent,
+              color: '#fff',
+              border: 'none',
+              fontSize: 13,
+              fontWeight: 800,
+              fontFamily: 'inherit',
+              cursor: 'pointer',
+              boxShadow: `0 10px 30px -12px ${accent}aa`,
+            }}
+          >
+            Let Yulia pick →
+          </button>
+        </div>
+      </section>
+
+      {/* ─── Tier ladder — informational only. No per-tier CTAs. ─── */}
       <section style={{ padding: '6px 16px 18px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {TIERS.map((t) => {
@@ -421,7 +481,6 @@ export default function MobilePricingStory({ dark }: Props) {
                 prevName={prev?.name}
                 priceMain={main}
                 priceSub={sub}
-                onClick={() => handleCTA(t.ctaPlan)}
                 accent={accent}
                 dark={dark}
                 headingC={headingC}
@@ -602,13 +661,12 @@ function CostRow({
 }
 
 function TierCard({
-  tier, prevName, priceMain, priceSub, onClick, accent, dark, headingC, bodyC, mutedC, borderC, ruleC, cardBg,
+  tier, prevName, priceMain, priceSub, accent, dark, headingC, bodyC, mutedC, borderC, ruleC, cardBg,
 }: {
   tier: Tier;
   prevName?: string;
   priceMain: string;
   priceSub: string;
-  onClick: () => void;
   accent: string;
   dark: boolean;
   headingC: string;
@@ -696,7 +754,7 @@ function TierCard({
         </p>
       )}
 
-      <ul style={{ margin: '0 0 12px', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 5 }}>
+      <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 5 }}>
         {tier.deltaFeatures.map((f) => (
           <li key={f} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
             <Check color={accent} />
@@ -704,27 +762,6 @@ function TierCard({
           </li>
         ))}
       </ul>
-
-      <button
-        type="button"
-        onClick={onClick}
-        className="cta-press"
-        style={{
-          width: '100%',
-          padding: 10,
-          borderRadius: 999,
-          background: isHero ? accent : 'transparent',
-          color: isHero ? '#fff' : headingC,
-          border: isHero ? 'none' : `1.5px solid ${borderC}`,
-          fontSize: 12.5,
-          fontWeight: 800,
-          fontFamily: 'inherit',
-          cursor: 'pointer',
-          boxShadow: isHero ? `0 8px 24px -12px ${accent}aa` : 'none',
-        }}
-      >
-        {tier.cta}
-      </button>
     </div>
   );
 }
