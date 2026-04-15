@@ -74,10 +74,11 @@ interface Props {
   // TAKEAWAY (0.236)
   takeaway?: ReactNode;
 
-  // CTA (0.146)
-  ctaLabel: string;
+  // CTA (0.146) — optional; pages can omit when other CTAs (e.g. embedded
+  // panels, the global chat starter pill) already cover the conversion paths.
+  ctaLabel?: string;
   ctaSub?: string;
-  onCTA: () => void;
+  onCTA?: () => void;
 
   /**
    * Escape hatch: additional sections rendered between `secondary` and
@@ -426,7 +427,8 @@ export function MobileJourneyStory({
         </section>
       )}
 
-      {/* ─── 7. CTA (0.146) — sticky ─── */}
+      {/* ─── 7. CTA (0.146) — sticky · optional ─── */}
+      {ctaLabel && onCTA && (
       <div
         style={{
           position: 'sticky',
@@ -483,6 +485,7 @@ export function MobileJourneyStory({
           </p>
         )}
       </div>
+      )}
     </div>
   );
 }

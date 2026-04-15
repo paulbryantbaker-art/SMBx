@@ -98,10 +98,10 @@ export function DealCostMap({ dark }: { dark: boolean }) {
     >
       <div className="mb-6">
         <p
-          className="text-[10px] font-bold uppercase tracking-[0.22em] mb-2"
-          style={{ color: accent }}
+          className="text-[11px] font-semibold mb-2"
+          style={{ color: accent, letterSpacing: '0.04em' }}
         >
-          Interactive · drag the deal size
+          Drag to size your deal
         </p>
         <h3
           className="font-headline font-black text-2xl md:text-3xl tracking-tight"
@@ -109,18 +109,15 @@ export function DealCostMap({ dark }: { dark: boolean }) {
         >
           Three ways to pay for the same work.
         </h3>
-        <p className="text-sm mt-2" style={{ color: mutedColor }}>
-          The math an IB analyst team runs is the same math Yulia runs. The cost isn't.
-        </p>
       </div>
 
       {/* Slider */}
       <div className="mb-10">
         <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: mutedColor }}>
-            Your deal · Enterprise Value
+          <span className="text-[11px] font-semibold" style={{ color: mutedColor, letterSpacing: '0.04em' }}>
+            Enterprise value
           </span>
-          <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: accent }}>
+          <span className="text-[11px] font-semibold" style={{ color: accent, letterSpacing: '0.04em' }}>
             {tierLabelFor(ev)}
           </span>
         </div>
@@ -142,7 +139,7 @@ export function DealCostMap({ dark }: { dark: boolean }) {
           className="w-full"
           style={{ accentColor: accent }}
         />
-        <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider mt-2" style={{ color: mutedColor }}>
+        <div className="flex justify-between text-[10px] font-semibold tabular-nums mt-2" style={{ color: mutedColor, letterSpacing: '0.02em' }}>
           <span>$5M</span>
           <span>$100M</span>
           <span>$500M</span>
@@ -157,7 +154,7 @@ export function DealCostMap({ dark }: { dark: boolean }) {
           className="rounded-xl p-6 relative overflow-hidden"
           style={{ background: innerBg, border: `1px solid ${border}` }}
         >
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] mb-2" style={{ color: mutedColor }}>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] mb-2" style={{ color: mutedColor }}>
             01 · Hire an investment bank
           </p>
           <motion.p
@@ -189,7 +186,7 @@ export function DealCostMap({ dark }: { dark: boolean }) {
           className="rounded-xl p-6"
           style={{ background: innerBg, border: `1px solid ${border}` }}
         >
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] mb-2" style={{ color: mutedColor }}>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] mb-2" style={{ color: mutedColor }}>
             02 · Hire an analyst team
           </p>
           <p
@@ -220,7 +217,7 @@ export function DealCostMap({ dark }: { dark: boolean }) {
             className="absolute -top-12 -right-12 w-40 h-40 rounded-full pointer-events-none"
             style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.18), transparent 60%)' }}
           />
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] mb-2 opacity-90 relative">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] mb-2 opacity-90 relative">
             03 · Run Yulia
           </p>
           <p
@@ -247,7 +244,7 @@ export function DealCostMap({ dark }: { dark: boolean }) {
         }}
       >
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] mb-2" style={{ color: mutedColor }}>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] mb-2" style={{ color: mutedColor }}>
             Spread vs IB fee
           </p>
           <motion.p
@@ -265,7 +262,7 @@ export function DealCostMap({ dark }: { dark: boolean }) {
           </p>
         </div>
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.22em] mb-2" style={{ color: mutedColor }}>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.08em] mb-2" style={{ color: mutedColor }}>
             Spread vs in-house analyst team
           </p>
           <p

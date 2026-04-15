@@ -1154,6 +1154,27 @@ body.has-vaul-drawer-open {
   }
 }
 
+/* ═══ PRICING PAGE ═══
+   Polish utilities for the pricing page: subtle card hover,
+   hidden native disclosure markers on <details>, and consistent
+   vertical rhythm for tier + FAQ accordions. Scoped via classes so
+   they don't leak to other <details> elements in the app. */
+.pricing-accordion summary::-webkit-details-marker { display: none; }
+.pricing-accordion summary { list-style: none; }
+
+.pricing-tier-card {
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 180ms ease,
+              box-shadow 220ms ease;
+}
+.pricing-tier-card:hover {
+  transform: translateY(-2px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pricing-tier-card { transition: none; }
+  .pricing-tier-card:hover { transform: none; }
+}
+
 /* ═══ PRINT STYLES ═══ */
 @media print {
   body { background: white !important; }

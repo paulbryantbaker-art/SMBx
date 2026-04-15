@@ -1,12 +1,12 @@
 /**
  * MobilePricingStory — mobile-native rendering of /pricing.
  *
- * Fibonacci layout. Vertical 6-tier ladder (Free / Single / Multi / Team /
- * Firm / Institutional) with the Multi-deal tier elevated as the "sweet
- * spot" highlight. Service-pros-free policy as an honest callout, not a
- * phantom tier. Pink accent.
+ * Vertical 6-tier ladder with inheritance ("Everything in X, plus..."),
+ * annual/monthly toggle, compact 3-stop cost comparison, FAQ accordion,
+ * and service-pros callout demoted to a one-line policy strip.
  */
 
+import { useState } from 'react';
 import { bridgeToYulia, goToChat } from '../content/chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { MobileJourneyStory } from './MobileJourneyStory';
@@ -18,13 +18,39 @@ interface Props {
   dark: boolean;
 }
 
+/* Inline SVG check — no Material Symbols slop. */
+function Check({ color, size = 13 }: { color: string; size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden
+      style={{ flexShrink: 0, marginTop: 3 }}
+    >
+      <path
+        d="M3 8.5L6.5 12L13 4.5"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+type TierKey = 'free' | 'single' | 'multi' | 'team' | 'firm' | 'inst';
+
 type Tier = {
-  key: string;
+  key: TierKey;
   name: string;
-  price: string;
-  sub: string;
-  protagonist: string;
-  features: string[];
+  monthly: number;
+  annual: number;
+  priceSuffix: string;
+  eyebrow?: string;
+  inherits?: TierKey;
+  deltaFeatures: string[];
   cta: string;
   ctaPlan?: string;
   hero?: boolean;
@@ -34,10 +60,11 @@ const TIERS: Tier[] = [
   {
     key: 'free',
     name: 'Free',
-    price: '$0',
-    sub: 'Forever',
-    protagonist: 'Everyone starts here',
-    features: [
+    monthly: 0,
+    annual: 0,
+    priceSuffix: 'forever',
+    eyebrow: 'Start here',
+    deltaFeatures: [
       'Unlimited Yulia conversation',
       'One full deliverable, yours to keep',
       'Real Baseline range, 7-factor readiness',
@@ -47,44 +74,51 @@ const TIERS: Tier[] = [
   {
     key: 'single',
     name: 'Single deal',
-    price: '$49',
-    sub: '/mo · one active deal',
-    protagonist: 'Your first close',
-    features: [
+    monthly: 49,
+    annual: 490,
+    priceSuffix: '/mo',
+    eyebrow: 'Your first close',
+    inherits: 'free',
+    deltaFeatures: [
+      'One active deal',
       'SDE & EBITDA normalization',
       'Deal scoring + SBA eligibility',
       'Sector comps + benchmarks',
       'PDF exports with your name',
     ],
-    cta: 'Start for $49',
+    cta: 'Start Single',
   },
   {
     key: 'multi',
     name: 'Multi-deal',
-    price: '$199',
-    sub: '/mo · unlimited deals',
-    protagonist: 'Market sweet spot',
+    monthly: 199,
+    annual: 1990,
+    priceSuffix: '/mo',
+    eyebrow: 'Most chosen',
     hero: true,
-    features: [
-      'Unlimited Baseline, Rundown™, stack models',
-      'CIM generation from verified financials',
-      'Blind Equity™ add-back schedule',
+    inherits: 'single',
+    deltaFeatures: [
+      'Unlimited active deals',
+      'CIM generation',
+      'Blind Equity™ add-backs',
       '180-day post-close plans',
-      'Document state machine · sign-off chain',
-      'All 10 interactive financial models',
+      'All 10 financial models',
+      'Full deal room',
     ],
     cta: 'Start Multi-deal',
   },
   {
     key: 'team',
     name: 'Team',
-    price: '$399',
-    sub: '/mo · up to 5 seats',
-    protagonist: 'Small teams & indie sponsors',
-    features: [
-      'Everything in Multi-deal × 5 seats',
-      'Multi-deal portfolio view',
-      'White-label outputs (your brand)',
+    monthly: 399,
+    annual: 3990,
+    priceSuffix: '/mo · 5 seats',
+    eyebrow: 'Small teams & indie sponsors',
+    inherits: 'multi',
+    deltaFeatures: [
+      '5 seats included',
+      'Portfolio view',
+      'White-label outputs',
       'Up to 10 active deals',
       'Priority email support',
     ],
@@ -93,14 +127,16 @@ const TIERS: Tier[] = [
   {
     key: 'firm',
     name: 'Firm',
-    price: '$1,999',
-    sub: '/mo · unlimited seats',
-    protagonist: 'Advisory firms & small PE',
-    features: [
-      'Unlimited users + unlimited deals',
-      'Single sign-on (SAML)',
+    monthly: 1999,
+    annual: 19990,
+    priceSuffix: '/mo · unlimited seats',
+    eyebrow: 'Advisory firms & small PE',
+    inherits: 'team',
+    deltaFeatures: [
+      'Unlimited seats + deals',
+      'SSO (SAML)',
       'Dedicated onboarding',
-      'SOC 2 report + contract terms',
+      'SOC 2 + contract terms',
       'Quarterly business review',
     ],
     cta: 'Start Firm',
@@ -109,19 +145,51 @@ const TIERS: Tier[] = [
   {
     key: 'inst',
     name: 'Institutional',
-    price: '$6,999',
-    sub: '/mo · $1B+ funds',
-    protagonist: 'Full stack · SLA · API',
-    features: [
-      'Unlimited users + unlimited deals',
-      'SSO / SAML + advanced RBAC',
+    monthly: 6999,
+    annual: 69990,
+    priceSuffix: '/mo',
+    eyebrow: '$1B+ funds · bulge bracket',
+    inherits: 'firm',
+    deltaFeatures: [
+      'Advanced RBAC',
       'Full API + webhooks',
-      'Dedicated CSM + priority engineering',
-      'Custom SLA + white-glove onboarding',
+      'Dedicated CSM',
+      'Custom SLA',
+      'White-glove onboarding',
     ],
     cta: 'Start Institutional',
     ctaPlan: 'institutional',
   },
+];
+
+const FAQS: { q: string; a: string }[] = [
+  {
+    q: 'Is there really a free tier?',
+    a: 'Yes. Unlimited Yulia chat plus one full deliverable, yours to keep. Email required after the first deliverable. No card.',
+  },
+  {
+    q: 'Which tier should I start with?',
+    a: 'Running more than one deal at a time? Multi-deal ($199). First close? Single deal ($49). Small team? Team. Firm? Firm. $1B+ fund? Institutional. Move up or down any time.',
+  },
+  {
+    q: "What does my attorney or CPA pay?",
+    a: "Nothing. Service professionals run free on any deal their client brings them onto. Full access, white-label outputs.",
+  },
+  {
+    q: 'Can I cancel?',
+    a: 'Any time. No multi-year lock-in on any tier.',
+  },
+  {
+    q: 'Does Yulia take a success fee?',
+    a: 'No. Flat-rate subscription, period. Never a percentage of a transaction.',
+  },
+];
+
+/* Cost comparison stops — mobile equivalent of the desktop DealCostMap. */
+const COST_STOPS: { ev: string; ib: string; team: string; yulia: string; spread: string }[] = [
+  { ev: '$10M',  ib: '~$225K',  team: '$1.7M/yr', yulia: '$2,388/yr', spread: '~94×' },
+  { ev: '$100M', ib: '~$1.85M', team: '$1.7M/yr', yulia: '$2,388/yr', spread: '~775×' },
+  { ev: '$1B',   ib: '~$8.5M',  team: '$1.7M/yr', yulia: '$2,388/yr', spread: '~3,560×' },
 ];
 
 export default function MobilePricingStory({ dark }: Props) {
@@ -135,32 +203,19 @@ export default function MobilePricingStory({ dark }: Props) {
       { name: 'Home', url: 'https://smbx.ai/' },
       { name: 'Pricing', url: 'https://smbx.ai/pricing' },
     ],
-    faqs: [
-      {
-        question: 'Why these prices? What are you benchmarking against?',
-        answer:
-          'AI-native knowledge-work products — Harvey ($100-200/seat), Hebbia ($300-400/seat), Rilla ($200/rep), Spellbook ($150/seat). We\u2019re in that band for individuals and teams, deliberately under the legacy M&A stack (DealCloud, Intapp — $30k+/yr minimums).',
-      },
-      {
-        question: "I'm an attorney or CPA on my client's deal. What do I pay?",
-        answer:
-          "Nothing. Service professionals run free on any deal workflow their client brings them onto — it's your client's deal, not your book.",
-      },
-      {
-        question: 'Why publish every price?',
-        answer:
-          'Because hiding the Institutional price is what the incumbents do, and we\u2019re not that. Every tier published. Every feature delta published. Sales calls should close sales, not reveal prices.',
-      },
-    ],
+    faqs: FAQS.map((f) => ({ question: f.q, answer: f.a })),
   });
 
+  const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');
+  const [stop, setStop] = useState(1); // default $100M
+
   const accent = dark ? PINK_DARK : PINK;
-  const headingColor = dark ? '#f9f9fc' : '#0f1012';
+  const headingC = dark ? '#f9f9fc' : '#0f1012';
   const bodyC = dark ? 'rgba(218,218,220,0.85)' : '#3c3d40';
   const mutedC = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
   const borderC = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
   const cardBg = dark ? '#1a1c1e' : '#ffffff';
-  const headingC = headingColor;
+  const ruleC = dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.06)';
 
   const handleCTA = (plan?: string) => {
     if (plan === 'firm') {
@@ -171,6 +226,21 @@ export default function MobilePricingStory({ dark }: Props) {
       goToChat();
     }
   };
+
+  const tierByKey = (k: TierKey) => TIERS.find((t) => t.key === k)!;
+
+  const displayPrice = (t: Tier) => {
+    if (t.monthly === 0) return { main: '$0', sub: t.priceSuffix };
+    if (billing === 'annual') {
+      return {
+        main: `$${Math.round(t.annual / 12).toLocaleString()}`,
+        sub: `${t.priceSuffix} · billed $${t.annual.toLocaleString()}/yr`,
+      };
+    }
+    return { main: `$${t.monthly.toLocaleString()}`, sub: t.priceSuffix };
+  };
+
+  const cost = COST_STOPS[stop];
 
   return (
     <MobileJourneyStory
@@ -185,54 +255,92 @@ export default function MobilePricingStory({ dark }: Props) {
       }
       sub={
         <>
-          <strong style={{ color: headingColor }}>Everyone starts free.</strong>{' '}
-          When Yulia is doing the work, pick the tier that fits. Six prices, all published. Cancel any time.
-        </>
-      }
-      callout={
-        <>
-          <strong style={{ color: accent }}>6 tiers · all published.</strong>{' '}
-          Annual = 2 months free on any paid tier.
+          <strong style={{ color: headingC }}>Everyone starts free.</strong>{' '}
+          Six prices, all published. Cancel any time. Service pros on someone else’s deal run free.
         </>
       }
 
-      primaryInteractiveLabel="Pick your tier"
+      primaryInteractiveLabel="The math"
       primaryInteractive={
-        <div
-          style={{
-            padding: 0,
-            background: 'transparent',
-            fontFamily: 'Inter, system-ui',
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {TIERS.map((t) => (
-              <TierCard
-                key={t.key}
-                tier={t}
-                onClick={() => handleCTA(t.ctaPlan)}
-                accent={accent}
-                dark={dark}
-                headingC={headingC}
-                bodyC={bodyC}
-                mutedC={mutedC}
-                borderC={borderC}
-                cardBg={cardBg}
-              />
-            ))}
-          </div>
-          <p
+        <div style={{ fontFamily: 'Inter, system-ui' }}>
+          {/* Stops picker */}
+          <div
+            role="tablist"
+            aria-label="Deal size"
             style={{
-              textAlign: 'center',
-              marginTop: 12,
-              fontSize: 12,
-              color: mutedC,
-              lineHeight: 1.5,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 4,
+              padding: 4,
+              borderRadius: 999,
+              background: dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.04)',
+              border: `1px solid ${borderC}`,
+              marginBottom: 14,
             }}
           >
-            Annual billing on any paid tier:{' '}
-            <strong style={{ color: headingC }}>2 months free</strong>.
-          </p>
+            {COST_STOPS.map((s, i) => {
+              const active = i === stop;
+              return (
+                <button
+                  key={s.ev}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setStop(i)}
+                  style={{
+                    padding: '8px 0',
+                    borderRadius: 999,
+                    background: active ? (dark ? '#f9f9fc' : '#0f1012') : 'transparent',
+                    color: active ? (dark ? '#0f1012' : '#f9f9fc') : mutedC,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    fontFamily: 'inherit',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {s.ev}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Three-row cost strip */}
+          <div
+            style={{
+              borderRadius: 14,
+              background: cardBg,
+              border: `1px solid ${borderC}`,
+              overflow: 'hidden',
+            }}
+          >
+            <CostRow label="Investment bank" value={cost.ib} sub="one-time success fee" headingC={headingC} mutedC={mutedC} bodyC={bodyC} ruleC={ruleC} />
+            <CostRow label="In-house analyst team" value={cost.team} sub="VP + 2 associates + 2 analysts, loaded" headingC={headingC} mutedC={mutedC} bodyC={bodyC} ruleC={ruleC} />
+            <CostRow label="Run Yulia" value={cost.yulia} sub="Multi-deal · flat · unlimited deals" accentBg={accent} isAccent headingC={headingC} mutedC={mutedC} bodyC={bodyC} ruleC={ruleC} />
+          </div>
+
+          {/* Spread headline */}
+          <div style={{ textAlign: 'center', marginTop: 14 }}>
+            <p style={{ margin: 0, fontSize: 11, fontWeight: 600, letterSpacing: '0.04em', color: mutedC }}>
+              Spread vs IB
+            </p>
+            <p
+              style={{
+                margin: '4px 0 0',
+                fontFamily: 'Sora, system-ui',
+                fontSize: 44,
+                fontWeight: 900,
+                color: accent,
+                letterSpacing: '-0.02em',
+                lineHeight: 1,
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {cost.spread}
+            </p>
+            <p style={{ margin: '6px 0 0', fontSize: 12, color: bodyC, lineHeight: 1.4 }}>
+              Yulia is flat-rate software, not a broker-dealer. For closings you still want bankers and lawyers.
+            </p>
+          </div>
         </div>
       }
 
@@ -243,77 +351,185 @@ export default function MobilePricingStory({ dark }: Props) {
           <>
             Unlimited Baselines, deal scores, capital stacks, CIMs, 180-day plans, and all 10 interactive
             financial models. Attorneys, CPAs, appraisers, and wealth managers who join your deal run{' '}
-            <strong style={{ color: accent }}>free</strong>. Annual billing gets two months free.
-            No sales call. No multi-year lock-in.
+            <strong style={{ color: accent }}>free</strong>. No sales call. No multi-year lock-in.
           </>
         ),
         outcome: 'Start free · upgrade when it pays · cancel any time',
       }}
 
-      kpis={[
-        { value: '$49',    label: 'entry tier · paid · anyone can start' },
-        { value: '$6,999', label: 'top tier · published · no sales call' },
-        { value: 'Free',   label: 'service pros on someone else\u2019s deal' },
-      ]}
-
-      takeaway={<>Start free. Upgrade when Yulia saves you a week of work. Walk if she doesn't.</>}
-
-      ctaLabel="Start free"
-      ctaSub="No card · one full deliverable, yours to keep"
-      onCTA={() => goToChat()}
+      takeaway={<>Start free. Upgrade when the work pays off.</>}
     >
-      {/* ─── Service pros free callout ─── */}
-      <section style={{ padding: '14px 16px 22px' }}>
+      {/* ─── Annual/Monthly toggle ─── */}
+      <section style={{ padding: '8px 16px 12px' }}>
+        <div
+          role="tablist"
+          aria-label="Billing period"
+          style={{
+            display: 'inline-flex',
+            padding: 4,
+            borderRadius: 999,
+            background: dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.04)',
+            border: `1px solid ${borderC}`,
+            margin: '0 auto',
+            width: '100%',
+            justifyContent: 'center',
+          }}
+        >
+          {(['monthly', 'annual'] as const).map((opt) => {
+            const active = billing === opt;
+            return (
+              <button
+                key={opt}
+                role="tab"
+                aria-selected={active}
+                onClick={() => setBilling(opt)}
+                style={{
+                  flex: 1,
+                  padding: '8px 16px',
+                  borderRadius: 999,
+                  background: active ? (dark ? '#f9f9fc' : '#0f1012') : 'transparent',
+                  color: active ? (dark ? '#0f1012' : '#f9f9fc') : mutedC,
+                  border: 'none',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  fontFamily: 'Inter, system-ui',
+                  cursor: 'pointer',
+                }}
+              >
+                {opt === 'monthly' ? 'Monthly' : 'Annual'}
+                {opt === 'annual' && (
+                  <span style={{ marginLeft: 6, fontSize: 10, color: accent, letterSpacing: '0.04em', textTransform: 'uppercase', fontWeight: 800 }}>
+                    2 mo free
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ─── Tier ladder ─── */}
+      <section style={{ padding: '6px 16px 18px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {TIERS.map((t) => {
+            const prev = t.inherits ? tierByKey(t.inherits) : null;
+            const { main, sub } = displayPrice(t);
+            return (
+              <TierCard
+                key={t.key}
+                tier={t}
+                prevName={prev?.name}
+                priceMain={main}
+                priceSub={sub}
+                onClick={() => handleCTA(t.ctaPlan)}
+                accent={accent}
+                dark={dark}
+                headingC={headingC}
+                bodyC={bodyC}
+                mutedC={mutedC}
+                borderC={borderC}
+                ruleC={ruleC}
+                cardBg={cardBg}
+              />
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ─── Service pros policy strip (demoted from second hero) ─── */}
+      <section style={{ padding: '6px 16px 18px' }}>
         <div
           style={{
-            padding: '18px',
-            borderRadius: 16,
-            background: '#0f1012',
-            color: '#f9f9fc',
-            border: '1px solid rgba(255,255,255,0.08)',
+            padding: '14px 16px',
+            borderRadius: 14,
+            background: cardBg,
+            border: `1px solid ${borderC}`,
             fontFamily: 'Inter, system-ui',
           }}
         >
-          <p
-            style={{
-              margin: 0,
-              fontSize: 10,
-              fontWeight: 800,
-              letterSpacing: '0.2em',
-              color: accent,
-              textTransform: 'uppercase',
-              marginBottom: 10,
-            }}
-          >
-            Service professionals · free · forever
+          <p style={{ margin: 0, fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', color: accent, marginBottom: 6 }}>
+            Policy · service professionals
           </p>
-          <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: '#f9f9fc', lineHeight: 1.15, marginBottom: 10 }}>
-            On someone else's deal?{' '}
-            <span style={{ color: accent }}>Yulia is free for you.</span>
-          </p>
-          <p style={{ margin: 0, fontSize: 14, color: 'rgba(218,218,220,0.85)', lineHeight: 1.5, marginBottom: 12 }}>
-            Attorneys, CPAs, real-estate brokers, wealth managers, appraisers, RWI brokers, estate planners — free on
-            any deal workflow your client brings you onto. Full feature access, white-label outputs.
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5, color: headingC }}>
+            <strong>On someone else’s deal? Yulia is free for you.</strong>{' '}
+            <span style={{ color: bodyC }}>
+              Attorneys, CPAs, brokers, appraisers, wealth managers — full access, white-label, no seat fee.
+            </span>
           </p>
           <button
             type="button"
             onClick={() => bridgeToYulia("I'm a deal professional. I'd like to use Yulia for my client work.")}
             className="cta-press"
             style={{
+              marginTop: 12,
               width: '100%',
-              padding: '12px',
+              padding: 11,
               borderRadius: 999,
-              background: accent,
-              color: '#fff',
-              border: 'none',
+              background: 'transparent',
+              color: accent,
+              border: `1.5px solid ${accent}`,
               fontSize: 13,
-              fontWeight: 800,
+              fontWeight: 700,
               fontFamily: 'inherit',
               cursor: 'pointer',
             }}
           >
-            Tell Yulia what you do
+            Tell Yulia what you do →
           </button>
+        </div>
+      </section>
+
+      {/* ─── FAQ accordion ─── */}
+      <section style={{ padding: '6px 16px 22px' }}>
+        <p style={{ margin: 0, fontSize: 11, fontWeight: 600, letterSpacing: '0.06em', color: accent, marginBottom: 10 }}>
+          Questions
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {FAQS.map((f, i) => (
+            <details
+              key={i}
+              className="pricing-accordion"
+              style={{
+                borderRadius: 12,
+                background: cardBg,
+                border: `1px solid ${borderC}`,
+                overflow: 'hidden',
+                fontFamily: 'Inter, system-ui',
+              }}
+            >
+              <summary
+                style={{
+                  cursor: 'pointer',
+                  padding: '12px 14px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 12,
+                }}
+              >
+                <span style={{ fontSize: 14, fontWeight: 600, color: headingC, lineHeight: 1.3 }}>
+                  {f.q}
+                </span>
+                <span
+                  aria-hidden
+                  style={{ fontSize: 18, color: accent, fontWeight: 800, lineHeight: 1, flexShrink: 0 }}
+                >
+                  +
+                </span>
+              </summary>
+              <div
+                style={{
+                  padding: '4px 14px 14px',
+                  fontSize: 13,
+                  lineHeight: 1.55,
+                  color: bodyC,
+                  borderTop: `1px solid ${ruleC}`,
+                }}
+              >
+                <p style={{ margin: '12px 0 0' }}>{f.a}</p>
+              </div>
+            </details>
+          ))}
         </div>
       </section>
 
@@ -323,10 +539,75 @@ export default function MobilePricingStory({ dark }: Props) {
 
 /* ───────── Subcomponents ───────── */
 
+function CostRow({
+  label, value, sub, isAccent, accentBg, headingC, mutedC, bodyC, ruleC,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  isAccent?: boolean;
+  accentBg?: string;
+  headingC: string;
+  mutedC: string;
+  bodyC: string;
+  ruleC: string;
+}) {
+  return (
+    <div
+      style={{
+        padding: '14px 16px',
+        borderBottom: isAccent ? 'none' : `1px solid ${ruleC}`,
+        background: isAccent ? accentBg : 'transparent',
+        color: isAccent ? '#fff' : headingC,
+      }}
+    >
+      <p
+        style={{
+          margin: 0,
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: '0.04em',
+          color: isAccent ? 'rgba(255,255,255,0.85)' : mutedC,
+          marginBottom: 4,
+        }}
+      >
+        {label}
+      </p>
+      <p
+        style={{
+          margin: 0,
+          fontFamily: 'Sora, system-ui',
+          fontSize: 26,
+          fontWeight: 900,
+          letterSpacing: '-0.01em',
+          color: isAccent ? '#fff' : headingC,
+          lineHeight: 1,
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {value}
+      </p>
+      <p
+        style={{
+          margin: '4px 0 0',
+          fontSize: 12,
+          color: isAccent ? 'rgba(255,255,255,0.78)' : bodyC,
+          lineHeight: 1.4,
+        }}
+      >
+        {sub}
+      </p>
+    </div>
+  );
+}
+
 function TierCard({
-  tier, onClick, accent, dark, headingC, bodyC, mutedC, borderC, cardBg,
+  tier, prevName, priceMain, priceSub, onClick, accent, dark, headingC, bodyC, mutedC, borderC, ruleC, cardBg,
 }: {
   tier: Tier;
+  prevName?: string;
+  priceMain: string;
+  priceSub: string;
   onClick: () => void;
   accent: string;
   dark: boolean;
@@ -334,58 +615,103 @@ function TierCard({
   bodyC: string;
   mutedC: string;
   borderC: string;
+  ruleC: string;
   cardBg: string;
 }) {
-  const isHero = tier.hero;
+  const isHero = !!tier.hero;
   return (
     <div
       style={{
-        padding: '18px',
+        padding: 18,
         borderRadius: 14,
-        background: isHero ? (dark ? '#1f1416' : '#fef0f4') : cardBg,
+        background: cardBg,
         border: isHero ? `2px solid ${accent}` : `1px solid ${borderC}`,
         fontFamily: 'Inter, system-ui',
       }}
     >
+      {/* Eyebrow — subtle, low tracking */}
       <p
         style={{
           margin: 0,
-          fontSize: 10,
-          fontWeight: 800,
-          letterSpacing: '0.16em',
-          color: accent,
-          textTransform: 'uppercase',
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: '0.02em',
+          color: isHero ? accent : mutedC,
           marginBottom: 6,
         }}
       >
-        {isHero ? 'Most chosen · market sweet spot' : tier.protagonist}
+        {isHero ? 'Most chosen' : tier.eyebrow}
       </p>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 6 }}>
-        <p style={{ margin: 0, fontFamily: 'Sora, system-ui', fontSize: 22, fontWeight: 900, color: headingC, letterSpacing: '-0.02em' }}>
-          {tier.name}
+
+      {/* Name — primary (stacked above price; never shares a row) */}
+      <p
+        style={{
+          margin: 0,
+          fontFamily: 'Sora, system-ui',
+          fontSize: 22,
+          fontWeight: 900,
+          color: headingC,
+          letterSpacing: '-0.02em',
+          lineHeight: 1,
+          marginBottom: 8,
+        }}
+      >
+        {tier.name}
+      </p>
+
+      {/* Price — stacked below */}
+      <div style={{ marginBottom: 12 }}>
+        <p
+          style={{
+            margin: 0,
+            fontFamily: 'Sora, system-ui',
+            fontSize: 28,
+            fontWeight: 900,
+            color: headingC,
+            letterSpacing: '-0.02em',
+            lineHeight: 1,
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
+          {priceMain}
         </p>
-        <p style={{ margin: 0, fontFamily: 'Sora, system-ui', fontSize: 22, fontWeight: 900, color: isHero ? accent : headingC, letterSpacing: '-0.01em' }}>
-          {tier.price}
-          <span style={{ fontSize: 11, fontWeight: 600, color: mutedC, marginLeft: 4 }}>{tier.sub}</span>
+        <p style={{ margin: '4px 0 0', fontSize: 12, color: mutedC, lineHeight: 1.4 }}>
+          {priceSub}
         </p>
       </div>
-      <ul style={{ margin: '8px 0 12px', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 5 }}>
-        {tier.features.map((f) => (
+
+      {/* Inheritance line */}
+      {prevName && (
+        <p
+          style={{
+            margin: 0,
+            fontSize: 12,
+            color: bodyC,
+            paddingBottom: 10,
+            marginBottom: 8,
+            borderBottom: `1px solid ${ruleC}`,
+          }}
+        >
+          Everything in <strong style={{ color: headingC }}>{prevName}</strong>, plus:
+        </p>
+      )}
+
+      <ul style={{ margin: '0 0 12px', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 5 }}>
+        {tier.deltaFeatures.map((f) => (
           <li key={f} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-            <span className="material-symbols-outlined" aria-hidden style={{ fontSize: 13, color: accent, marginTop: 3, flexShrink: 0 }}>
-              check
-            </span>
+            <Check color={accent} />
             <span style={{ fontSize: 13, color: bodyC, lineHeight: 1.4 }}>{f}</span>
           </li>
         ))}
       </ul>
+
       <button
         type="button"
         onClick={onClick}
         className="cta-press"
         style={{
           width: '100%',
-          padding: '10px',
+          padding: 10,
           borderRadius: 999,
           background: isHero ? accent : 'transparent',
           color: isHero ? '#fff' : headingC,
@@ -394,6 +720,7 @@ function TierCard({
           fontWeight: 800,
           fontFamily: 'inherit',
           cursor: 'pointer',
+          boxShadow: isHero ? `0 8px 24px -12px ${accent}aa` : 'none',
         }}
       >
         {tier.cta}
@@ -401,4 +728,3 @@ function TierCard({
     </div>
   );
 }
-
