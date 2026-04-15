@@ -59,15 +59,25 @@ interface ChatDockProps {
   onInputFocus?: () => void;
   /** Called when hero textarea loses focus — includes whether input has content */
   onInputBlur?: (hasContent: boolean) => void;
+  /** Mobile viewport. When true AND onFileUpload is undefined (logged out),
+      the + button and its starter-prefill popup are hidden. Prevents a
+      potential customer from seeing the mobile starter popup that doesn't
+      reliably populate the input. In-app (logged in) the + still shows and
+      opens the file picker. */
+  isMobile?: boolean;
 }
 
 /* ═══ COMPONENT ═══ */
 
 const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
-  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock', rows, typewriterHints, typewriterPrefix = '', onInputFocus, onInputBlur },
+  { onSend, onFileUpload, disabled, placeholder = "Tell Yulia about your deal...", variant = 'dock', rows, typewriterHints, typewriterPrefix = '', onInputFocus, onInputBlur, isMobile = false },
   ref,
 ) {
   const isHero = variant === 'hero';
+  // Hide the + button on mobile when logged out — the starter popup doesn't
+  // reliably populate the input on mobile; in-app users keep it for file
+  // upload.
+  const showPlusButton = !(isMobile && !onFileUpload);
   const [value, setValue] = useState('');
   const [toolsOpen, setToolsOpen] = useState(false);
   const [attachment, setAttachment] = useState<{ name: string; size: string } | null>(null);
@@ -336,9 +346,13 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             gap: 8,
           }}
         >
-          {/* + button — always visible.
+          {/* + button.
               Signed-in (onFileUpload provided): opens native file picker.
-              Signed-out (no onFileUpload): opens starter-prefills popup. */}
+              Signed-out + desktop: opens starter-prefills popup.
+              Signed-out + mobile: HIDDEN (starter popup doesn't reliably
+              populate the input on mobile; don't ship a broken affordance
+              to a potential customer). */}
+          {showPlusButton && (
           <button
             ref={plusRef}
             type="button"
@@ -370,6 +384,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               </svg>
             )}
           </button>
+          )}
 
           {/* Attachment chip — visible after a file is uploaded; click X to remove */}
           {attachment && (
@@ -452,9 +467,10 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           `}</style>
         </div>
 
-        {/* Starter-prefill popup — shown only when not signed-in (no onFileUpload).
-            Mirrors the mobile + popup. Drops UP from the pill. */}
-        {!onFileUpload && (
+        {/* Starter-prefill popup — shown only when not signed-in (no onFileUpload)
+            AND the + button is visible (desktop only — see showPlusButton).
+            Drops UP from the pill. */}
+        {!onFileUpload && showPlusButton && (
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`} style={{ bottom: 'calc(100% + 12px)' }}>
             <div className="px-4 pt-3 pb-2">
               <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(0,0,0,0.35)' }}>Start with Yulia</span>

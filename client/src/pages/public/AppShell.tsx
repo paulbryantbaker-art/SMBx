@@ -2225,8 +2225,15 @@ export default function AppShell() {
                           the inner border + shadow provide enough depth. */}
                       <form autoComplete="off" onSubmit={(e) => e.preventDefault()} role="presentation" data-form-type="other">
                       <div className="relative">
-                        <div className={`relative rounded-full flex items-center p-2 pl-3 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
-                          {/* + button — opens tools/upload drawer */}
+                        <div className={`relative rounded-full flex items-center p-2 ${user ? 'pl-3' : 'pl-5'} ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
+                          {/* + button — opens tools/upload drawer.
+                              HIDDEN for logged-out mobile users: the starter
+                              popup doesn't reliably populate the input the
+                              way it does on desktop, so rather than ship a
+                              broken affordance to a potential customer we
+                              hide it. In-app (logged-in) users keep the +
+                              for file upload / tool access. */}
+                          {user && (
                           <button
                             type="button"
                             aria-label="Attach files or tools"
@@ -2237,6 +2244,7 @@ export default function AppShell() {
                               <path d="M12 5v14" /><path d="M5 12h14" />
                             </svg>
                           </button>
+                          )}
                           <input
                             ref={homeInputMobileRef}
                             className={`bg-transparent border-none focus:ring-0 flex-1 py-3 text-base outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
@@ -2266,8 +2274,10 @@ export default function AppShell() {
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
                           </button>
                         </div>
-                        {/* Mobile + popup — chat-starter prefills (job previously carried by chips) */}
-                        {homeToolsOpen && (
+                        {/* Mobile + popup — chat-starter prefills (job previously carried by chips).
+                            Only renders for logged-in users (see the gate on
+                            the + button above). */}
+                        {user && homeToolsOpen && (
                           <div
                             onClick={(e) => { if (e.target === e.currentTarget) setHomeToolsOpen(false); }}
                             style={{ position: 'fixed', inset: 0, background: 'rgba(15,16,18,0.35)', zIndex: 70 }}
@@ -2565,6 +2575,7 @@ export default function AppShell() {
               rows={1}
               placeholder="Reply to Yulia..."
               disabled={sending}
+              isMobile={isMobile}
             />
           </div>
         )}
@@ -2594,6 +2605,7 @@ export default function AppShell() {
               rows={1}
               placeholder="Reply to Yulia..."
               disabled={sending}
+              isMobile={isMobile}
             />
           </div>,
           document.body
