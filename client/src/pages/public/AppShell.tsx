@@ -32,6 +32,7 @@ import IntelPanel from '../../components/chat/IntelPanel';
 import DealMessagesPanel from '../../components/documents/DealMessagesPanel';
 import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/CanvasToolbar';
 import CanvasPicker from '../../components/canvas/CanvasPicker';
+import InstallWall, { PWA_DEEP_LINK_KEY } from '../../components/mobile/InstallWall';
 import DealWorkspace from '../../components/desktop/DealWorkspace';
 import PipelineTable from '../../components/desktop/PipelineTable';
 import SourcingCommandCenter from '../../components/desktop/SourcingCommandCenter';
@@ -1866,6 +1867,33 @@ export default function AppShell() {
   // no gesture conflict). See memory/architecture_ios_pwa_pill.md for the
   // philosophy: work WITH the platform, not AGAINST it.
 
+  // ─── PWA deep-link restore ───
+  // When a user hits the InstallWall on a specific URL (e.g., /deal/42),
+  // the wall stores that pathname in localStorage. On first PWA launch
+  // after install, we read it here, navigate once, and clear it.
+  const pwaRestoredRef = useRef(false);
+  useEffect(() => {
+    if (pwaRestoredRef.current) return;
+    if (!isPWA) return;
+    try {
+      const target = localStorage.getItem(PWA_DEEP_LINK_KEY);
+      if (target && target !== window.location.pathname) {
+        localStorage.removeItem(PWA_DEEP_LINK_KEY);
+        pwaRestoredRef.current = true;
+        navigate(target);
+      }
+    } catch { /* noop */ }
+  }, [isPWA, navigate]);
+
+  // ─── PWA install gate ───
+  // Mobile + logged in + NOT in PWA standalone → full-screen InstallWall.
+  // Marketing, journey pages, login, signup, and anon chat all remain
+  // accessible in mobile Safari. The wall only fires for authenticated
+  // users — once you have an account, smbx runs inside the installed PWA.
+  if (isMobile && user && !isPWA) {
+    return <InstallWall dark={dark} userName={user.display_name || user.email || null} />;
+  }
+
   return (
     <div
       id="app-root"
@@ -3480,55 +3508,10 @@ export default function AppShell() {
         </div>
       )}
 
-      {/* ═══ MOBILE HAMBURGER — Apple Glass pill, top-left.
-           Opens MobileSidebar drawer containing the full deals-and-docs
-           page tree (Notion pattern). Logged-in only — logged-out mobile
-           users see the journey/marketing surfaces and don't need the
-           drawer. Badge shows total deal count when > 0. */}
-      {isMobile && !authLoading && user && (
-        <button
-          onClick={() => setIsMobileSidebarOpen(true)}
-          type="button"
-          aria-label="Open deals and documents"
-          className="active:scale-90"
-          style={{
-            position: 'fixed',
-            top: 'calc(env(safe-area-inset-top) + 12px)',
-            left: 16,
-            zIndex: 55,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            height: 36,
-            padding: '0 12px 0 10px',
-            borderRadius: 999,
-            // Apple Glass — translucent + backdrop blur
-            background: dark ? 'rgba(26,28,30,0.72)' : 'rgba(255,255,255,0.82)',
-            backdropFilter: 'blur(18px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(18px) saturate(180%)',
-            color: dark ? '#F0F0F3' : '#0f1012',
-            border: `1px solid ${dark ? 'rgba(255,255,255,0.10)' : 'rgba(15,16,18,0.08)'}`,
-            cursor: 'pointer',
-            fontFamily: "'Inter', system-ui, sans-serif",
-            fontSize: 13,
-            fontWeight: 600,
-            boxShadow: dark
-              ? '0 4px 14px rgba(0,0,0,0.45)'
-              : '0 4px 14px rgba(60,55,45,0.14)',
-            transition: 'transform 120ms',
-            WebkitTapHighlightColor: 'transparent',
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <line x1="4" y1="7" x2="20" y2="7" />
-            <line x1="4" y1="12" x2="20" y2="12" />
-            <line x1="4" y1="17" x2="14" y2="17" />
-          </svg>
-          <span style={{ letterSpacing: '-0.005em' }}>
-            {(authChat.grouped?.deals?.length ?? 0) > 0 ? `${authChat.grouped!.deals.length}` : 'Deals'}
-          </span>
-        </button>
-      )}
+      {/* Mobile hamburger removed — logged-in mobile users are inside
+          the PWA where the Notion-style home surface itself IS the page
+          tree (no drawer needed). Logged-out mobile users see marketing
+          surfaces with no hamburger by design. */}
 
       {isMobile && !authLoading && user && (
         <button
