@@ -74,6 +74,34 @@ a.btn:active,
   }
 }
 
+/* ─── Global keyboard focus ring (applies to every interactive element) ───
+   Visible, consistent, non-distracting. Uses the brand accent so the focus
+   indicator is tonally part of the UI rather than the browser's yellow default.
+   :focus-visible (not :focus) — mouse clicks do NOT trigger, only keyboard /
+   programmatic focus. The --focus-ring var lets individual components
+   override (e.g. contrasting focus on colored backgrounds). */
+:root {
+  --focus-ring: #D44A78;
+  --focus-ring-offset: 2px;
+}
+html.dark {
+  --focus-ring: #E8709A;
+}
+*:focus { outline: none; }
+*:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: inherit;
+}
+/* Elements with built-in focus-visible treatment (handled inline) opt out */
+.no-focus-ring:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  /* Let native form-control rings show their browser defaults OR component-specific styling */
+  outline-offset: 0;
+}
+
 /* Stitch editorial utilities */
 .editorial-spacing { margin-top: 160px; margin-bottom: 160px; }
 .editorial-margin { margin-top: 160px; margin-bottom: 160px; }
