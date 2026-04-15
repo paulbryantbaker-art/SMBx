@@ -2057,8 +2057,10 @@ export default function AppShell() {
                         <>
                           <div className="w-full max-w-3xl mx-auto mt-8">
                             <div className="relative group">
-                              <div className={`absolute -inset-1 bg-gradient-to-r from-[#D44A78] to-[#E8709A] rounded-full blur transition duration-1000 ${dark ? 'opacity-40 group-hover:opacity-60' : 'opacity-[0.18] group-hover:opacity-[0.28]'}`} />
-                              <div className={`relative rounded-full flex items-center p-2 pl-4 ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
+                              {/* De-slopped: no gradient halo. Single hairline border +
+                                  soft shadow. Focus-within gets a subtle accent ring.
+                                  Closer to Grok's flat clarity than Canva-lux glow. */}
+                              <div className={`relative rounded-full flex items-center p-2 pl-4 transition-shadow ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-lg focus-within:shadow-[0_0_0_2px_rgba(232,112,154,0.28)]' : 'bg-white border border-[rgba(15,16,18,0.08)] shadow-md focus-within:shadow-[0_0_0_2px_rgba(212,74,120,0.22)]'}`}>
                                 {/* + Tools button */}
                                 <button
                                   ref={homePlusRef}

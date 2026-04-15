@@ -11,6 +11,7 @@ import {
   SectionHeader,
   SignOffChain,
   PageCTA,
+  SectionBand,
 } from './storyBlocks';
 
 export default function SellBelow({ dark }: { dark: boolean }) {
@@ -285,50 +286,52 @@ export default function SellBelow({ dark }: { dark: boolean }) {
         </section>
 
         {/* ═══ Sign-off chain — broker workflow ═══ */}
-        <SignOffChain
-          intro={
-            <>
-              Sarah doesn't just win the pitch. She runs the deal. After Mark signs the engagement, Yulia drafts the
-              CIM from the verified financials, routes the add-back schedule to Mark's CPA for verification, holds the
-              CIM in queue until both sign off, sends the teaser to the ranked buyer pool, and logs every version of
-              every document. When the buyer's QoE firm asks for line-item provenance three months later, the answer
-              is in the audit log. Sarah keeps her relationships, her judgment, and her fee.
-            </>
-          }
-          steps={[
-            {
-              label: 'Draft',
-              yulia: 'Yulia drafts the CIM + add-back schedule + buyer outreach',
-              chain: 'From the verified financials Sarah uploaded. 4 hours of partner review instead of 60-80.',
-            },
-            {
-              label: 'Route',
-              yulia: "Routes the add-back schedule to Mark's CPA",
-              chain: 'request_review with focus_areas: "Confirm rent above-market, family comp, one-time legal."',
-            },
-            {
-              label: 'Wait',
-              yulia: "Holds the CIM in 'review' until CPA + Mark sign off",
-              chain: 'Two-stage review chain. State machine advances on approvals. CPA notes attached.',
-            },
-            {
-              label: 'Execute',
-              yulia: 'Sends teaser to ranked buyer pool, CIM behind NDA',
-              chain: 'share_document with watermark, NDA gate, view tracking. Sarah notified on every view.',
-            },
-            {
-              label: 'Log',
-              yulia: 'Chain of custody for the QoE conversation 3 months out',
-              chain: "Buyer's QoE asks for line-item source. Audit log answers in 30 seconds.",
-            },
-          ]}
-          bottomNote={
-            <>
-              The relationship with Mark is still Sarah's. The judgment calls are still Sarah's. The $2.7M fee is still Sarah's. Yulia just removes the production bottleneck and gives the deal a chain of custody that survives the buyer's lawyer, the buyer's QoE, and the buyer's senior bank.
-            </>
-          }
-          dark={dark}
-        />
+        <SectionBand tone="alt" dark={dark}>
+          <SignOffChain
+            intro={
+              <>
+                Sarah doesn't just win the pitch. She runs the deal. After Mark signs the engagement, Yulia drafts the
+                CIM from the verified financials, routes the add-back schedule to Mark's CPA for verification, holds the
+                CIM in queue until both sign off, sends the teaser to the ranked buyer pool, and logs every version of
+                every document. When the buyer's QoE firm asks for line-item provenance three months later, the answer
+                is in the audit log. Sarah keeps her relationships, her judgment, and her fee.
+              </>
+            }
+            steps={[
+              {
+                label: 'Draft',
+                yulia: 'Yulia drafts the CIM + add-back schedule + buyer outreach',
+                chain: 'From the verified financials Sarah uploaded. 4 hours of partner review instead of 60-80.',
+              },
+              {
+                label: 'Route',
+                yulia: "Routes the add-back schedule to Mark's CPA",
+                chain: 'request_review with focus_areas: "Confirm rent above-market, family comp, one-time legal."',
+              },
+              {
+                label: 'Wait',
+                yulia: "Holds the CIM in 'review' until CPA + Mark sign off",
+                chain: 'Two-stage review chain. State machine advances on approvals. CPA notes attached.',
+              },
+              {
+                label: 'Execute',
+                yulia: 'Sends teaser to ranked buyer pool, CIM behind NDA',
+                chain: 'share_document with watermark, NDA gate, view tracking. Sarah notified on every view.',
+              },
+              {
+                label: 'Log',
+                yulia: 'Chain of custody for the QoE conversation 3 months out',
+                chain: "Buyer's QoE asks for line-item source. Audit log answers in 30 seconds.",
+              },
+            ]}
+            bottomNote={
+              <>
+                The relationship with Mark is still Sarah's. The judgment calls are still Sarah's. The $2.7M fee is still Sarah's. Yulia just removes the production bottleneck and gives the deal a chain of custody that survives the buyer's lawyer, the buyer's QoE, and the buyer's senior bank.
+              </>
+            }
+            dark={dark}
+          />
+        </SectionBand>
 
         {/* ═══ CTA ═══ */}
         <PageCTA

@@ -7,6 +7,7 @@ import {
   SectionHeader,
   SignOffChain,
   PageCTA,
+  SectionBand,
 } from './storyBlocks';
 
 export default function HowItWorksBelow({ dark }: { dark: boolean }) {
@@ -322,52 +323,54 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               it hit; duplicating it dilutes. */}
 
         {/* ═══ Sign-off chain ═══ */}
-        <SignOffChain
-          intro={
-            <>
-              The methodology and the engines are the brain. The sign-off chain is what makes Yulia run the deal —
-              instead of just describing it. Every consequential action is gated on the sign-off chain. She drafts,
-              routes to your attorney with focus areas, holds the document in queue until your attorney attests,
-              transmits to the counterparty, logs the audit trail. The buyer's lawyer can ask where any number came
-              from three years from now and the answer is in the database.
-            </>
-          }
-          steps={[
-            {
-              label: 'Draft',
-              yulia: 'Yulia drafts the LOI, CIM, term sheet, IC memo',
-              chain: 'From your verified numbers. Every number cited to the source.',
-            },
-            {
-              label: 'Route',
-              yulia: 'Routes to your attorney + CPA with focus areas',
-              chain: 'request_review with specific sections to review and questions to answer.',
-            },
-            {
-              label: 'Wait',
-              yulia: 'Holds in queue until both sign off and attest',
-              chain: 'Document state machine: draft → review → approved → agreed.',
-            },
-            {
-              label: 'Execute',
-              yulia: 'Transmits to the counterparty from your account',
-              chain: 'share_document with the right access level, watermark, expiration.',
-            },
-            {
-              label: 'Log',
-              yulia: 'Every action audited forever',
-              chain: 'deal_activity_log + SHA-256 hash on legal docs at execution.',
-            },
-          ]}
-          bottomNote={
-            <>
-              When the buyer's lawyer asks "where did that number come from?" three years later, the answer is in the
-              database with the reviewer's signature. That's not a feature. That's the operating system.
-            </>
-          }
-          dark={dark}
-          accent={accent}
-        />
+        <SectionBand tone="alt" dark={dark}>
+          <SignOffChain
+            intro={
+              <>
+                The methodology and the engines are the brain. The sign-off chain is what makes Yulia run the deal —
+                instead of just describing it. Every consequential action is gated on the sign-off chain. She drafts,
+                routes to your attorney with focus areas, holds the document in queue until your attorney attests,
+                transmits to the counterparty, logs the audit trail. The buyer's lawyer can ask where any number came
+                from three years from now and the answer is in the database.
+              </>
+            }
+            steps={[
+              {
+                label: 'Draft',
+                yulia: 'Yulia drafts the LOI, CIM, term sheet, IC memo',
+                chain: 'From your verified numbers. Every number cited to the source.',
+              },
+              {
+                label: 'Route',
+                yulia: 'Routes to your attorney + CPA with focus areas',
+                chain: 'request_review with specific sections to review and questions to answer.',
+              },
+              {
+                label: 'Wait',
+                yulia: 'Holds in queue until both sign off and attest',
+                chain: 'Document state machine: draft → review → approved → agreed.',
+              },
+              {
+                label: 'Execute',
+                yulia: 'Transmits to the counterparty from your account',
+                chain: 'share_document with the right access level, watermark, expiration.',
+              },
+              {
+                label: 'Log',
+                yulia: 'Every action audited forever',
+                chain: 'deal_activity_log + SHA-256 hash on legal docs at execution.',
+              },
+            ]}
+            bottomNote={
+              <>
+                When the buyer's lawyer asks "where did that number come from?" three years later, the answer is in the
+                database with the reviewer's signature. That's not a feature. That's the operating system.
+              </>
+            }
+            dark={dark}
+            accent={accent}
+          />
+        </SectionBand>
 
         {/* ═══ CTA ═══ */}
         <PageCTA

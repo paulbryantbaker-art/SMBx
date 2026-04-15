@@ -8,6 +8,7 @@ import {
   SectionHeader,
   SignOffChain,
   PageCTA,
+  SectionBand,
 } from './storyBlocks';
 
 export default function AdvisorsBelow({ dark }: { dark: boolean }) {
@@ -435,52 +436,54 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
         </section>
 
         {/* ═══ Sign-off chain ═══ */}
-        <SignOffChain
-          intro={
-            <>
-              Reese & Hammond don't just draft CIMs faster. They run the entire deal chain on Yulia.
-              Every CIM is drafted by Yulia, reviewed by the partner, routed to the seller's CPA for
-              add-back verification, signed off, sent to the buyer pool with watermarks, and logged.
-              When the buyer's QoE firm calls three months later asking for line-item provenance,
-              the answer is in the audit log — not in someone's email. <strong>And every attorney,
-              CPA, and broker on the deal runs the platform free.</strong>
-            </>
-          }
-          steps={[
-            {
-              label: 'Draft',
-              yulia: 'Yulia drafts the CIM, teaser, buyer outreach',
-              chain: '4 hours of partner review instead of 60-80 hours of partner work.',
-            },
-            {
-              label: 'Route',
-              yulia: "Routes draft to the seller's CPA + counsel",
-              chain: 'request_review with focus_areas. Both pros free on the platform.',
-            },
-            {
-              label: 'Wait',
-              yulia: 'Holds CIM in review until both pros sign off',
-              chain: 'Two-stage review chain. State machine advances on both approvals.',
-            },
-            {
-              label: 'Execute',
-              yulia: 'Sends teaser to ranked buyer pool, CIM behind NDA',
-              chain: 'share_document with watermark, NDA gate, view tracking, sharer notified on view.',
-            },
-            {
-              label: 'Log',
-              yulia: 'Chain of custody for the QoE conversation 3 months out',
-              chain: "Buyer's QoE asks for line-item source. Audit log answers in 30 seconds.",
-            },
-          ]}
-          bottomNote={
-            <>
-              The relationships are still yours. The judgment is still yours. The fee is still yours. Yulia just removes the production bottleneck and gives you a chain of custody that survives the buyer's lawyer, the buyer's QoE, and the buyer's senior bank.
-            </>
-          }
-          dark={dark}
-          accent={accent}
-        />
+        <SectionBand tone="alt" dark={dark}>
+          <SignOffChain
+            intro={
+              <>
+                Reese & Hammond don't just draft CIMs faster. They run the entire deal chain on Yulia.
+                Every CIM is drafted by Yulia, reviewed by the partner, routed to the seller's CPA for
+                add-back verification, signed off, sent to the buyer pool with watermarks, and logged.
+                When the buyer's QoE firm calls three months later asking for line-item provenance,
+                the answer is in the audit log — not in someone's email. <strong>And every attorney,
+                CPA, and broker on the deal runs the platform free.</strong>
+              </>
+            }
+            steps={[
+              {
+                label: 'Draft',
+                yulia: 'Yulia drafts the CIM, teaser, buyer outreach',
+                chain: '4 hours of partner review instead of 60-80 hours of partner work.',
+              },
+              {
+                label: 'Route',
+                yulia: "Routes draft to the seller's CPA + counsel",
+                chain: 'request_review with focus_areas. Both pros free on the platform.',
+              },
+              {
+                label: 'Wait',
+                yulia: 'Holds CIM in review until both pros sign off',
+                chain: 'Two-stage review chain. State machine advances on both approvals.',
+              },
+              {
+                label: 'Execute',
+                yulia: 'Sends teaser to ranked buyer pool, CIM behind NDA',
+                chain: 'share_document with watermark, NDA gate, view tracking, sharer notified on view.',
+              },
+              {
+                label: 'Log',
+                yulia: 'Chain of custody for the QoE conversation 3 months out',
+                chain: "Buyer's QoE asks for line-item source. Audit log answers in 30 seconds.",
+              },
+            ]}
+            bottomNote={
+              <>
+                The relationships are still yours. The judgment is still yours. The fee is still yours. Yulia just removes the production bottleneck and gives you a chain of custody that survives the buyer's lawyer, the buyer's QoE, and the buyer's senior bank.
+              </>
+            }
+            dark={dark}
+            accent={accent}
+          />
+        </SectionBand>
 
         {/* ═══ CTA ═══ */}
         <PageCTA

@@ -1,257 +1,202 @@
 /**
- * Stitch Design System Tokens
- * Synthesized from Stitch "V11.1 Content Only" screens
- * Material Design 3 inspired palette with terracotta accent
+ * Design tokens — canonical source for smbx.ai journey pages.
+ *
+ * Aesthetic targets (from CLAUDE.md):
+ *  - Desktop: Grok + Canva (AI-chat restraint + creative canvas confidence)
+ *  - Mobile:  Grok + Apple Glass (AI-chat restraint + iOS glass materials)
+ *
+ * Typography: Sora for headlines (800–900, tight tracking),
+ *             Inter for body (400–600, comfortable leading).
+ *
+ * Accent:     pink is punctuation, not wallpaper. Reserved for eyebrows,
+ *             key metrics, interactive elements. Neutrals do the rest.
  */
 
-/* ─── Font ─── */
-export const font = "'Inter', system-ui, -apple-system, sans-serif";
-export const mono = "'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', ui-monospace, monospace";
+/* ─── Palette ───
+   Single accent with light/dark variants. Neutrals are warm enough to
+   feel human but cool enough to not compete with the pink. */
+export const palette = {
+  // Brand accent (single color, two theme values)
+  pinkLight: '#D44A78',
+  pinkDark:  '#E8709A',
+  pinkHover: '#B03860',
 
-/* ─── Colors ─── */
-export const color = {
-  // Text
-  text: '#1a1c1c',           // Primary text (near-black, warm)
-  textSecondary: '#5c5c5c',  // Secondary text
-  textMuted: '#88726c',      // Muted/outline (warm gray-brown)
-  textSubtle: '#dbc1ba',     // Very light warm text
+  // Journey accents (per-page override — pass as `accent` prop)
+  buyTeal:    '#3E8E8E',
+  buyTealDark:'#52A8A8',
+  raiseGold:  '#C99A3E',
+  raiseGoldDark: '#DDB25E',
+  pmiPlum:    '#8F4A7A',
+  pmiPlumDark:'#AE6D9A',
 
-  // Accent
-  accent: '#99462d',         // Terracotta (primary accent)
-  accentLight: '#fd9576',    // Lighter terracotta
-  accentVeryLight: '#ffdbd1',// Faintest terracotta
+  // Neutrals (light theme)
+  ink:        '#0f1012',  // strongest text
+  inkSoft:    '#1a1c1e',  // card bg dark-mode / alt text
+  body:       '#3c3d40',  // primary body text light-mode
+  muted:      '#6e6a63',  // secondary text light-mode
+  hairline:   'rgba(15,16,18,0.08)',  // card borders light-mode
+  rule:       'rgba(15,16,18,0.06)',  // internal rules light-mode
+  pageLight:  '#F9F9FC',  // page bg light-mode
+  cardLight:  '#ffffff',  // card bg light-mode
+  altLight:   '#f4f4f7',  // alt section bg light-mode (info → info alt)
 
-  // Surfaces (light → dark progression)
-  bg: '#f9f9f9',             // Page background
-  surface: '#f9f9f9',        // Same as bg
-  surfaceLow: '#f3f3f3',     // Section alt background
-  surfaceMid: '#eeeeee',     // Card hover / active states
-  surfaceHigh: '#e8e8e8',    // Stronger emphasis
-  surfaceHighest: '#e2e2e2', // Strongest surface
-  surfaceDim: '#dadada',     // Dividers
-  white: '#ffffff',          // Cards, inputs
-
-  // Dark surfaces
-  dark: '#2f3131',           // Dark section background
-  darkDeep: '#1a1c1c',       // Deep dark (code blocks)
-
-  // Borders
-  border: 'rgba(0,0,0,0.06)',
-  borderStrong: 'rgba(0,0,0,0.12)',
-
-  // Semantic
-  error: '#ba1a1a',
-  success: '#00685d',        // Teal
-  successLight: '#85f6e4',   // Light teal
+  // Neutrals (dark theme)
+  pageDark:   '#1A1C1E',  // page bg dark-mode
+  cardDark:   '#1a1c1e',  // card bg dark-mode (same as page — flat)
+  altDark:    '#151617',  // alt section bg dark-mode
+  immersive:  '#0f1012',  // deepest bg — CTA / immersive sections (both themes)
+  bodyDark:   'rgba(218,218,220,0.85)',
+  mutedDark:  'rgba(218,218,220,0.55)',
+  hairlineDark: 'rgba(255,255,255,0.08)',
+  ruleDark:   'rgba(255,255,255,0.06)',
 } as const;
 
-/* ─── Radius ─── */
+/** Resolves accent + supporting neutrals for a theme. */
+export function resolveTheme(dark: boolean, accentOverride?: string) {
+  const accent = accentOverride ?? (dark ? palette.pinkDark : palette.pinkLight);
+  return {
+    accent,
+    headingColor: dark ? '#f9f9fc' : palette.ink,
+    bodyColor:    dark ? palette.bodyDark : palette.body,
+    mutedColor:   dark ? palette.mutedDark : palette.muted,
+    cardBg:       dark ? palette.cardDark : palette.cardLight,
+    altBg:        dark ? palette.altDark : palette.altLight,
+    pageBg:       dark ? palette.pageDark : palette.pageLight,
+    immersiveBg:  palette.immersive,
+    border:       dark ? palette.hairlineDark : palette.hairline,
+    rule:         dark ? palette.ruleDark : palette.rule,
+  };
+}
+
+/* ─── Typography ───
+   Sora for display, Inter for body. `clamp()` on mobile body so sizes
+   stay comfortable from iPhone SE to Pro Max. */
+export const font = {
+  display: "'Sora', system-ui, sans-serif",
+  body:    "'Inter', system-ui, sans-serif",
+  mono:    "'SF Mono', 'Fira Code', ui-monospace, monospace",
+} as const;
+
+export const type = {
+  // Headlines — compressed, confident
+  hookHeadline: {
+    fontFamily: font.display,
+    fontWeight: 900,
+    fontSize: 'clamp(2.5rem, 7vw, 5.75rem)',
+    lineHeight: 0.92,
+    letterSpacing: '-0.04em',
+  },
+  sectionHeadline: {
+    fontFamily: font.display,
+    fontWeight: 900,
+    fontSize: 'clamp(2rem, 4.5vw, 3.5rem)',
+    lineHeight: 1,
+    letterSpacing: '-0.025em',
+  },
+  cardHeadline: {
+    fontFamily: font.display,
+    fontWeight: 900,
+    fontSize: '1.75rem',
+    lineHeight: 1,
+    letterSpacing: '-0.02em',
+  },
+
+  // Body — Inter, comfortable leading, mobile clamp
+  hookBody: {
+    fontFamily: font.body,
+    fontSize: 'clamp(17px, 2vw, 21px)',
+    lineHeight: 1.55,
+    fontWeight: 400,
+  },
+  sectionBody: {
+    fontFamily: font.body,
+    fontSize: 'clamp(16px, 1.5vw, 19px)',
+    lineHeight: 1.55,
+    fontWeight: 400,
+  },
+  body: {
+    fontFamily: font.body,
+    fontSize: 'clamp(14px, 3.6vw, 16px)',
+    lineHeight: 1.5,
+    fontWeight: 400,
+  },
+  caption: {
+    fontFamily: font.body,
+    fontSize: 13,
+    lineHeight: 1.5,
+    fontWeight: 400,
+  },
+
+  // Eyebrow variants — kills the monoculture
+  hookEyebrow: {
+    fontFamily: font.body,
+    fontSize: 11,
+    fontWeight: 700,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.2em',
+  },
+  sectionEyebrow: {
+    fontFamily: font.body,
+    fontSize: 11,
+    fontWeight: 600,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.08em',
+  },
+} as const;
+
+/* ─── Spacing + rhythm ─── */
+export const space = {
+  sectionY: 'clamp(64px, 10vw, 128px)',
+  cardP: 'clamp(20px, 3vw, 32px)',
+  maxContent: 1152,
+  maxProse: 896,
+} as const;
+
+/* ─── Radii ─── */
 export const radius = {
   sm: 8,
-  md: 16,     // 1rem — default
-  lg: 24,     // 1.5rem
-  xl: 32,     // 2rem
-  xxl: 48,    // 3rem
+  md: 14,
+  lg: 20,
+  xl: 28,
   full: 9999,
 } as const;
 
-/* ─── Shadows ─── */
-export const shadow = {
-  subtle: '0 10px 48px -12px rgba(26, 28, 28, 0.04)',
-  card: '0 4px 12px rgba(0,0,0,0.05)',
-  hover: '0 16px 32px -8px rgba(26, 28, 28, 0.08)',
+/* ─── Motion ─── */
+export const motion = {
+  spring: [0.22, 1, 0.36, 1] as [number, number, number, number],
+  fast: 0.18,
+  base: 0.3,
+  slow: 0.6,
 } as const;
 
-/* ─── Spacing ─── */
-export const spacing = {
-  sectionY: 160,     // Section vertical padding
-  sectionX: 48,      // Section horizontal padding
-  maxWidth: 896,     // Content max-width (prose)
-  maxWidthWide: 1152,// Wide content max-width
-  maxWidthFull: 1280,// Full content max-width
+/* ─── Materials ───
+   Apple Glass on mobile. Backdrop blur + saturate. Flat fallback on
+   Android (the rgba under the blur is the fallback). */
+export const material = {
+  glass: (dark: boolean) => ({
+    background: dark ? 'rgba(20,22,24,0.72)' : 'rgba(255,255,255,0.72)',
+    backdropFilter: 'blur(14px) saturate(180%)',
+    WebkitBackdropFilter: 'blur(14px) saturate(180%)',
+    border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(15,16,18,0.08)',
+  }),
+  eyebrowPill: (dark: boolean, accent: string) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '4px 10px',
+    borderRadius: 999,
+    background: dark ? `${accent}22` : `${accent}14`,
+    backdropFilter: 'blur(10px) saturate(150%)',
+    WebkitBackdropFilter: 'blur(10px) saturate(150%)',
+    border: `1px solid ${accent}33`,
+  }),
 } as const;
 
-/* ─── Typography Presets ─── */
-export const type = {
-  hero: {
-    fontSize: 'clamp(40px, 5.5vw, 64px)',
-    fontWeight: 800 as const,
-    lineHeight: 1.08,
-    letterSpacing: '-0.025em',
-    color: color.text,
-    fontFamily: font,
-  },
-  h2: {
-    fontSize: 'clamp(32px, 4.5vw, 48px)',
-    fontWeight: 800 as const,
-    lineHeight: 1.15,
-    letterSpacing: '-0.025em',
-    color: color.text,
-    fontFamily: font,
-  },
-  h3: {
-    fontSize: 28,
-    fontWeight: 700 as const,
-    color: color.text,
-    fontFamily: font,
-  },
-  h4: {
-    fontSize: 20,
-    fontWeight: 700 as const,
-    color: color.text,
-    fontFamily: font,
-  },
-  body: {
-    fontSize: 18,
-    color: color.textSecondary,
-    lineHeight: 1.75,
-    margin: 0 as const,
-    fontFamily: font,
-  },
-  bodyLarge: {
-    fontSize: 20,
-    color: color.textSecondary,
-    lineHeight: 1.75,
-    margin: 0 as const,
-    fontFamily: font,
-  },
-  bodyStrong: {
-    fontSize: 20,
-    color: color.text,
-    fontWeight: 500 as const,
-    lineHeight: 1.75,
-    margin: 0 as const,
-    fontFamily: font,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: 700 as const,
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.1em',
-    color: color.textMuted,
-    fontFamily: font,
-  },
-  small: {
-    fontSize: 15,
-    color: color.textSecondary,
-    lineHeight: 1.65,
-    margin: 0 as const,
-    fontFamily: font,
-  },
-  caption: {
-    fontSize: 13,
-    color: color.textMuted,
-    lineHeight: 1.5,
-    fontFamily: font,
-  },
-} as const;
-
-/* ─── Section Presets ─── */
-export const section = {
-  default: {
-    paddingTop: spacing.sectionY,
-    paddingBottom: spacing.sectionY,
-    paddingLeft: spacing.sectionX,
-    paddingRight: spacing.sectionX,
-  },
-  alt: {
-    paddingTop: spacing.sectionY,
-    paddingBottom: spacing.sectionY,
-    paddingLeft: spacing.sectionX,
-    paddingRight: spacing.sectionX,
-    backgroundColor: color.surfaceLow,
-    borderTop: `1px solid ${color.border}`,
-    borderBottom: `1px solid ${color.border}`,
-  },
-  dark: {
-    paddingTop: spacing.sectionY,
-    paddingBottom: spacing.sectionY,
-    paddingLeft: spacing.sectionX,
-    paddingRight: spacing.sectionX,
-    backgroundColor: color.dark,
-    color: '#fff',
-  },
-} as const;
-
-/* ─── Card Presets ─── */
-export const card = {
-  default: {
-    padding: 32,
-    border: `1px solid ${color.border}`,
-    backgroundColor: color.white,
-    borderRadius: radius.md,
-    transition: 'box-shadow 0.3s',
-  },
-  highlighted: {
-    padding: 32,
-    border: `2px solid ${color.text}`,
-    backgroundColor: color.white,
-    borderRadius: radius.md,
-    transition: 'box-shadow 0.3s',
-  },
-  data: {
-    backgroundColor: color.darkDeep,
-    borderRadius: radius.md,
-    padding: 40,
-    fontFamily: mono,
-    fontSize: 15,
-    lineHeight: 1.8,
-    color: '#D1D5DB',
-  },
-} as const;
-
-/* ─── Button Presets ─── */
-export const button = {
-  primary: {
-    backgroundColor: color.text,
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 700 as const,
-    padding: '18px 48px',
-    borderRadius: radius.full,
-    border: 'none',
-    cursor: 'pointer',
-    fontFamily: font,
-    transition: 'opacity 0.2s',
-  },
-  primaryLight: {
-    backgroundColor: '#fff',
-    color: color.text,
-    fontSize: 16,
-    fontWeight: 700 as const,
-    padding: '18px 48px',
-    borderRadius: radius.full,
-    border: 'none',
-    cursor: 'pointer',
-    fontFamily: font,
-    transition: 'opacity 0.2s',
-  },
-  accent: {
-    backgroundColor: color.accent,
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 700 as const,
-    padding: '18px 48px',
-    borderRadius: radius.full,
-    border: 'none',
-    cursor: 'pointer',
-    fontFamily: font,
-    transition: 'opacity 0.2s',
-  },
-} as const;
-
-/* ─── Hover Handlers ─── */
-export const hover = {
-  cardIn: (e: React.MouseEvent) => {
-    e.currentTarget.style.boxShadow = shadow.hover;
-  },
-  cardOut: (e: React.MouseEvent) => {
-    e.currentTarget.style.boxShadow = 'none';
-  },
-  btnIn: (e: React.MouseEvent) => {
-    (e.target as HTMLElement).style.opacity = '0.85';
-  },
-  btnOut: (e: React.MouseEvent) => {
-    (e.target as HTMLElement).style.opacity = '1';
-  },
-};
+/* ─── Section rhythm helper ───
+   Alternating light/dark bands give journey pages the cinematic cadence
+   the critique flagged as missing (Apple's move). */
+export type BandTone = 'info' | 'immersive' | 'alt';
+export function bandBg(tone: BandTone, dark: boolean): string {
+  if (tone === 'immersive') return palette.immersive;
+  if (tone === 'alt') return dark ? palette.altDark : palette.altLight;
+  return dark ? palette.pageDark : palette.pageLight;
+}

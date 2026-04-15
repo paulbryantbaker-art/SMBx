@@ -14,10 +14,58 @@
  */
 
 import { motion, useInView } from 'framer-motion';
-import { useRef, type ReactNode } from 'react';
+import { useRef, type ReactNode, type CSSProperties } from 'react';
+import { palette, bandBg, space, type BandTone } from './tokens';
 
-const PINK = '#D44A78';
-const PINK_DARK = '#E8709A';
+const PINK = palette.pinkLight;
+const PINK_DARK = palette.pinkDark;
+
+/* ════════════════════════════════════════════════════════════
+   SectionBand — full-bleed background wrapper for cinematic rhythm.
+   Alternating light/immersive bands give journey pages the cadence
+   the critique flagged as missing (Apple's section move).
+   ════════════════════════════════════════════════════════════ */
+export function SectionBand({
+  tone = 'info',
+  dark,
+  children,
+  fullBleed = true,
+  style,
+  className,
+}: {
+  tone?: BandTone;
+  dark: boolean;
+  children: ReactNode;
+  /** If true, bg extends edge-to-edge. If false, bg only covers content width. */
+  fullBleed?: boolean;
+  style?: CSSProperties;
+  className?: string;
+}) {
+  const bg = bandBg(tone, dark);
+  const isImmersive = tone === 'immersive';
+  return (
+    <div
+      className={className}
+      style={{
+        background: bg,
+        color: isImmersive ? '#f9f9fc' : undefined,
+        // Full-bleed trick: when the section lives inside a max-width container
+        // but we want the bg to extend edge-to-edge.
+        marginLeft: fullBleed ? 'calc(-1 * (100vw - 100%) / 2)' : undefined,
+        marginRight: fullBleed ? 'calc(-1 * (100vw - 100%) / 2)' : undefined,
+        paddingLeft: fullBleed ? 'calc((100vw - 100%) / 2 + 24px)' : 0,
+        paddingRight: fullBleed ? 'calc((100vw - 100%) / 2 + 24px)' : 0,
+        paddingTop: 'clamp(48px, 8vw, 96px)',
+        paddingBottom: 'clamp(48px, 8vw, 96px)',
+        ...style,
+      }}
+    >
+      <div style={{ maxWidth: space.maxContent, marginLeft: 'auto', marginRight: 'auto' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 /* ════════════════════════════════════════════════════════════
    HookHeader — eyebrow + dominant headline + subhead
@@ -580,9 +628,12 @@ export function SectionHeader({
   const mutedColor = dark ? 'rgba(218,218,220,0.7)' : '#5d5e61';
   return (
     <div className="mb-12">
+      {/* Section eyebrow — low-tracking variant. The "hook" eyebrow
+          (0.24em + dot) lives in HookHeader; sections use a quieter
+          voice so the page reads as a document, not a repeating slogan. */}
       <p
-        className="text-[10px] font-bold uppercase tracking-[0.24em] mb-4"
-        style={{ color: accent }}
+        className="text-[11px] font-semibold uppercase mb-4"
+        style={{ color: accent, letterSpacing: '0.08em' }}
       >
         {label}
       </p>
@@ -631,23 +682,17 @@ export function PageCTA({
   const accent = accentOverride ?? (dark ? PINK_DARK : PINK);
   return (
     <section className="mb-12 mt-12">
+      {/* Ring-accent CTA — Framer-inspired. No blurred halo. The accent
+          lives in the hairline ring + the button fill, not a soft glow
+          behind the content. Cinematic without being Canva-lux. */}
       <div
         className="rounded-3xl p-10 md:p-16 relative overflow-hidden"
         style={{
-          background: dark ? '#0f1012' : '#0f1012',
-          border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'transparent'}`,
+          background: palette.immersive,
+          border: `1px solid ${accent}55`,
+          boxShadow: `inset 0 0 0 1px ${accent}18, 0 24px 48px -24px rgba(0,0,0,0.45)`,
         }}
       >
-        {/* Soft glow */}
-        <div
-          aria-hidden
-          className="absolute -top-32 -right-32 w-96 h-96 rounded-full pointer-events-none"
-          style={{
-            background: `radial-gradient(circle, ${accent}33, transparent 60%)`,
-            filter: 'blur(20px)',
-          }}
-        />
-
         <div className="relative z-10 max-w-3xl">
           <h2
             className="font-headline font-black text-white tracking-[-0.03em] leading-[0.98] mb-5"
@@ -662,18 +707,16 @@ export function PageCTA({
           <div className="flex flex-wrap items-center gap-6">
             <button
               onClick={onClick}
-              className="cta-press group inline-flex items-center gap-3 px-7 py-4 rounded-full font-bold text-base text-white"
+              className="cta-press group inline-flex items-center gap-3 px-7 py-4 rounded-full font-bold text-base text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               style={{
                 background: accent,
                 border: 'none',
                 cursor: 'pointer',
-                boxShadow: `0 10px 30px -10px ${accent}aa`,
+                boxShadow: `0 10px 24px -12px ${accent}aa`,
               }}
             >
               {buttonLabel}
-              <span className="material-symbols-outlined text-lg transition-transform group-hover:translate-x-0.5 group-active:translate-x-1">
-                arrow_forward
-              </span>
+              <span aria-hidden className="inline-block transition-transform group-hover:translate-x-0.5 group-active:translate-x-1">→</span>
             </button>
             <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
               Free · No account required · Your data stays yours

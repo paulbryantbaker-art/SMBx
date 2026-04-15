@@ -120,6 +120,9 @@ export function MobileJourneyStory({
     <div style={{ paddingBottom: 120 /* clear sticky CTA */ }}>
       {/* ─── 1. HERO (1.618) — anchor ─── */}
       <section style={{ padding: '38px 22px 36px' }}>
+        {/* Apple Glass eyebrow pill — backdrop-filter blur + saturate.
+            Flat accentSoft was the Android fallback already; now iOS gets
+            the translucent material that was promised by "Apple Glass". */}
         <div
           style={{
             display: 'inline-flex',
@@ -129,6 +132,8 @@ export function MobileJourneyStory({
             borderRadius: 999,
             background: accentSoft,
             border: `1px solid ${accentBorder}`,
+            backdropFilter: 'blur(10px) saturate(150%)',
+            WebkitBackdropFilter: 'blur(10px) saturate(150%)',
             marginBottom: 22,
           }}
         >
@@ -166,7 +171,7 @@ export function MobileJourneyStory({
           style={{
             margin: 0,
             fontFamily: 'Inter, system-ui',
-            fontSize: 16,
+            fontSize: 'clamp(15px, 4vw, 17px)',
             lineHeight: 1.55,
             color: bodyC,
             fontWeight: 500,
@@ -279,7 +284,7 @@ export function MobileJourneyStory({
             style={{
               margin: 0,
               fontFamily: 'Inter, system-ui',
-              fontSize: 15,
+              fontSize: 'clamp(14px, 3.8vw, 16px)',
               lineHeight: 1.65,
               color: bodyC,
             }}
@@ -413,7 +418,7 @@ export function MobileJourneyStory({
             style={{
               margin: 0,
               fontFamily: 'Sora, system-ui',
-              fontSize: 18,
+              fontSize: 'clamp(17px, 4.5vw, 19px)',
               fontWeight: 800,
               letterSpacing: '-0.015em',
               lineHeight: 1.3,
@@ -427,7 +432,10 @@ export function MobileJourneyStory({
         </section>
       )}
 
-      {/* ─── 7. CTA (0.146) — sticky · optional ─── */}
+      {/* ─── 7. CTA (0.146) — sticky · optional ───
+          Apple Glass material: translucent bg + backdrop-blur + saturate.
+          Gradient fade stays as a safe fallback on browsers without
+          backdrop-filter support. The top 1px line anchors it visually. */}
       {ctaLabel && onCTA && (
       <div
         style={{
@@ -435,10 +443,11 @@ export function MobileJourneyStory({
           bottom: 0,
           left: 0,
           right: 0,
-          padding: '12px 16px calc(env(safe-area-inset-bottom) + 14px)',
-          background: dark
-            ? 'linear-gradient(to top, #151617 72%, rgba(21,22,23,0))'
-            : 'linear-gradient(to top, #ffffff 72%, rgba(255,255,255,0))',
+          padding: '14px 16px calc(env(safe-area-inset-bottom) + 14px)',
+          background: dark ? 'rgba(20,22,24,0.72)' : 'rgba(255,255,255,0.72)',
+          backdropFilter: 'blur(18px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(18px) saturate(180%)',
+          borderTop: `1px solid ${borderC}`,
           zIndex: 5,
         }}
       >
