@@ -113,13 +113,21 @@ html.dark {
   outline-offset: var(--focus-ring-offset);
   border-radius: inherit;
 }
-/* Elements with built-in focus-visible treatment (handled inline) opt out */
-.no-focus-ring:focus-visible,
+/* Text inputs / textareas / selects have their own visual focus state via the
+   typing caret and the surrounding pill border — adding a pink ring on top
+   reads as an aggressive "you clicked here" state when the user is just
+   typing. Strip it. (Components that DO want a ring on focus can use the
+   --focus-ring var on their wrapper.) */
+input:focus,
 input:focus-visible,
+textarea:focus,
 textarea:focus-visible,
-select:focus-visible {
-  /* Let native form-control rings show their browser defaults OR component-specific styling */
-  outline-offset: 0;
+select:focus,
+select:focus-visible,
+.no-focus-ring:focus,
+.no-focus-ring:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Stitch editorial utilities */
