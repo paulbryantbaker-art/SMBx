@@ -28,6 +28,37 @@
 import { useState, useMemo } from 'react';
 import { DealStack, filterRealDeals } from './DealStack';
 
+/* ═══ Pipeline bucketing ═══
+   Group deals into sections that match how deal operators mentally slice
+   their portfolio. Buckets are journey-agnostic (apply to sell/buy/raise/
+   PMI alike) and use gate number as the axis:
+   - Active:    late gates (close-adjacent). S4-5, B4-5, R4-5, PMI3.
+   - In motion: middle gates. S2-3, B2-3, R2-3, PMI1-2.
+   - Reviewing: early gates + ungated. S0-1, B0-1, R0-1, PMI0, null.
+   - Archived:  status-based, irrespective of gate.
+   Empty buckets collapse (don't render the header).
+*/
+type Bucket = 'active' | 'motion' | 'reviewing' | 'archived';
+
+function bucketOf(deal: { current_gate: string | null; status?: string | null }): Bucket {
+  const status = (deal.status || '').toLowerCase();
+  if (status === 'archived' || status === 'closed' || status === 'dropped') return 'archived';
+  const g = deal.current_gate || '';
+  // Late gates across all journeys
+  if (/^(S4|S5|B4|B5|R4|R5|PMI3)$/.test(g)) return 'active';
+  // Middle gates
+  if (/^(S2|S3|B2|B3|R2|R3|PMI1|PMI2)$/.test(g)) return 'motion';
+  // Everything else — early or unset
+  return 'reviewing';
+}
+
+const BUCKET_META: Record<Bucket, { label: string; sub: string }> = {
+  active: { label: 'Active', sub: 'In diligence, LOI, or closing' },
+  motion: { label: 'In motion', sub: 'Valuation, negotiation, packaging' },
+  reviewing: { label: 'Reviewing', sub: 'Early-stage or not yet qualified' },
+  archived: { label: 'Archived', sub: 'Closed or dropped' },
+};
+
 const JOURNEY_COLORS: Record<string, { light: string; dark: string }> = {
   sell: { light: '#D44A78', dark: '#E8709A' },
   buy: { light: '#3E8E8E', dark: '#52A8A8' },
@@ -103,6 +134,23 @@ export default function MobileNotionHome({
       })
       .slice(0, 5);
   }, [realDeals]);
+
+  // Pipeline buckets — only render a section when it has ≥1 deal.
+  const buckets = useMemo(() => {
+    const out: Record<Bucket, DealItem[]> = { active: [], motion: [], reviewing: [], archived: [] };
+    for (const d of realDeals) out[bucketOf(d)].push(d);
+    // Within a bucket, sort by most-recently updated first
+    for (const k of Object.keys(out) as Bucket[]) {
+      out[k].sort((a, b) => {
+        const ta = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+        const tb = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+        return tb - ta;
+      });
+    }
+    return out;
+  }, [realDeals]);
+  const bucketOrder: Bucket[] = ['active', 'motion', 'reviewing', 'archived'];
+  const visibleBuckets = bucketOrder.filter(b => buckets[b].length > 0);
 
   // Theme
   const pageBg = dark ? '#0f1012' : '#F9F9FC';
@@ -290,62 +338,64 @@ export default function MobileNotionHome({
           </section>
         )}
 
-        {/* ALL DEALS — Notion-style expandable page-tree */}
-        <section style={{ padding: '10px 16px 20px' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'baseline',
-              justifyContent: 'space-between',
-              marginBottom: 10,
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-                color: sectionLabel,
-              }}
-            >
-              All deals
-            </p>
-            {realDeals.length > 0 && (
-              <span style={{ fontSize: 11, fontWeight: 600, color: muted }}>
-                {realDeals.length}
-              </span>
-            )}
-          </div>
-
-          {realDeals.length === 0 ? (
+        {/* PIPELINE BUCKETS — Notion-style expandable page-tree, grouped
+            by pipeline stage. Each bucket is a collapsible section; empty
+            buckets don't render at all. Within each bucket, deals sort by
+            most-recently updated. */}
+        {realDeals.length === 0 ? (
+          <section style={{ padding: '10px 16px 20px' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
+              <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: sectionLabel }}>
+                All deals
+              </p>
+            </div>
             <EmptyState
               muted={muted}
               heading={heading}
               onStart={() => onStartFirstDeal('I want to sell my business — ')}
               accent={accent}
             />
-          ) : (
-            <div>
-              {realDeals.map((deal) => (
-                <DealTreeRow
-                  key={deal.id}
-                  deal={deal}
-                  dark={dark}
-                  activeConversationId={activeConversationId}
-                  onDealTap={onDealTap}
-                  onConversationTap={onConversationTap}
-                  heading={heading}
-                  body={body}
-                  muted={muted}
-                  border={border}
-                  rowHover={rowHover}
-                />
-              ))}
-            </div>
-          )}
-        </section>
+          </section>
+        ) : (
+          visibleBuckets.map((bucket) => {
+            const items = buckets[bucket];
+            const meta = BUCKET_META[bucket];
+            return (
+              <section key={bucket} style={{ padding: '10px 16px 12px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: sectionLabel }}>
+                      {meta.label}
+                    </p>
+                    <p style={{ margin: '2px 0 0', fontSize: 11, color: muted, fontWeight: 500 }}>
+                      {meta.sub}
+                    </p>
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: muted }}>
+                    {items.length}
+                  </span>
+                </div>
+                <div>
+                  {items.map((deal) => (
+                    <DealTreeRow
+                      key={deal.id}
+                      deal={deal}
+                      dark={dark}
+                      activeConversationId={activeConversationId}
+                      onDealTap={onDealTap}
+                      onConversationTap={onConversationTap}
+                      heading={heading}
+                      body={body}
+                      muted={muted}
+                      border={border}
+                      rowHover={rowHover}
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })
+        )}
       </div>
 
       <style>{`
