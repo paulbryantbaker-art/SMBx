@@ -317,17 +317,65 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             display: 'flex',
             alignItems: 'center',
             borderRadius: 100,
-            padding: '6px 8px 6px 24px',
-            gap: 12,
+            padding: '6px 8px 6px 8px',
+            gap: 8,
           }}
         >
-          {/* Search icon */}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.25)" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
+          {/* + button — opens native file picker. accept list synced with backend. */}
+          {onFileUpload && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              aria-label={uploading ? 'Uploading…' : 'Attach a file'}
+              disabled={uploading}
+              className="flex items-center justify-center cursor-pointer active:scale-95"
+              style={{
+                width: 44, height: 44,
+                borderRadius: '50%',
+                background: 'rgba(0,0,0,0.04)',
+                color: 'rgba(0,0,0,0.55)',
+                border: '1px solid rgba(0,0,0,0.06)',
+                transition: 'all .2s',
+                flexShrink: 0,
+              }}
+            >
+              {uploading ? (
+                <div className="w-4 h-4 border-2 border-[#D44A78] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              )}
+            </button>
+          )}
+
+          {/* Attachment chip — visible after a file is uploaded; click X to remove */}
+          {attachment && (
+            <div
+              className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F5F5F5] rounded-full"
+              style={{ flexShrink: 0, maxWidth: 200 }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D44A78" strokeWidth="2" strokeLinecap="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <span className="text-[12px] font-medium text-[#1a1c1e] truncate">{attachment.name}</span>
+              <button
+                onClick={() => setAttachment(null)}
+                className="bg-transparent border-none cursor-pointer p-0 ml-0.5 flex-shrink-0"
+                style={{ color: 'rgba(0,0,0,0.35)' }}
+                type="button"
+                aria-label="Remove attachment"
+              >
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
 
           {/* Input area with typewriter */}
-          <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', paddingLeft: onFileUpload || attachment ? 0 : 16 }}>
             {showTypewriter && twText && (
               <div
                 className="absolute pointer-events-none select-none"
