@@ -2682,6 +2682,15 @@ export default function AppShell() {
                       pills. In split mode the tab bar still floats at the
                       bottom; the top toolbar hides (multi-tab actions get
                       complicated — simpler to defer to single-tab context). */}
+                  {(() => {
+                    // Document-type tabs drive whether the bottom pill renders.
+                    // Module tabs (documents/dataroom/pipeline/etc.) never show
+                    // a chip — so paddingBottom is only needed when there's an
+                    // actual document chip floating over the canvas.
+                    const DOCUMENT_TYPES = new Set(['deliverable', 'markdown', 'model', 'deal-messages', 'comparison']);
+                    const hasDocumentChips = canvasTabs.some(t => DOCUMENT_TYPES.has(t.type));
+                    const padB = hasDocumentChips ? 80 : 0;
+                    return (
                   <div className="flex-1 relative" style={{ display: splitTab ? 'flex' : 'block', minHeight: 0 }}>
                     {splitTab ? (
                       <>
@@ -2691,20 +2700,20 @@ export default function AppShell() {
                           borderRight: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9',
                           overflow: 'hidden',
                         }}>
-                          <div className="absolute inset-0 overflow-y-auto" style={{ paddingBottom: 80 }}>
+                          <div className="absolute inset-0 overflow-y-auto" style={{ paddingBottom: padB }}>
                             {activeCanvasTab && renderCanvasTabContent(activeCanvasTab)}
                           </div>
                         </div>
                         <div style={{ flex: 1, minWidth: 0, minHeight: 0, position: 'relative', overflow: 'hidden' }}>
-                          <div className="absolute inset-0 overflow-y-auto" style={{ paddingBottom: 80 }}>
+                          <div className="absolute inset-0 overflow-y-auto" style={{ paddingBottom: padB }}>
                             {renderCanvasTabContent(splitTab)}
                           </div>
                         </div>
                       </>
                     ) : (
-                      <div className="absolute inset-0 overflow-y-auto" style={{ paddingTop: (activeCanvasTab && getToolbarActionsFor(activeCanvasTab).length > 0) ? 72 : 0, paddingBottom: 80 }}>
+                      <div className="absolute inset-0 overflow-y-auto" style={{ paddingTop: (activeCanvasTab && getToolbarActionsFor(activeCanvasTab).length > 0) ? 72 : 0, paddingBottom: padB }}>
                         {canvasTabs.map(tab => (
-                          <div key={tab.id} className="absolute inset-0 overflow-y-auto" style={{ display: tab.id === activeCanvasTabId ? 'block' : 'none', paddingTop: (getToolbarActionsFor(tab).length > 0) ? 72 : 0, paddingBottom: 80 }}>
+                          <div key={tab.id} className="absolute inset-0 overflow-y-auto" style={{ display: tab.id === activeCanvasTabId ? 'block' : 'none', paddingTop: (getToolbarActionsFor(tab).length > 0) ? 72 : 0, paddingBottom: padB }}>
                             {renderCanvasTabContent(tab)}
                           </div>
                         ))}
@@ -2720,18 +2729,34 @@ export default function AppShell() {
                     })()}
 
                     {/* Bottom floating tab bar — Canva/Excel-style pill.
-                        Replaces the old top-of-card CanvasTabStrip. */}
-                    <FloatingCanvasTabBar
-                      tabs={canvasTabs}
-                      activeTabId={activeCanvasTabId}
-                      onSelect={setActiveCanvasTabId}
-                      onClose={(id) => { if (splitTabId === id) setSplitTabId(null); closeCanvasTab(id); }}
-                      dark={dark}
-                      splitTabId={splitTabId}
-                      onSplit={(id) => { if (id !== activeCanvasTabId) setSplitTabId(id); }}
-                      onUnsplit={() => setSplitTabId(null)}
-                    />
+                        Only shows DOCUMENT-level canvases (deliverable,
+                        markdown, model, deal-messages, comparison). Module
+                        panels (Library, Data Room, Pipeline, Sourcing,
+                        Insights, Settings) live in the left sidebar — they
+                        are WHERE you are in the app, not a document you
+                        have open. Filtering keeps the tab bar meaning
+                        clear: each chip = an actual document you can
+                        read/edit. */}
+                    {(() => {
+                      const DOCUMENT_TYPES = new Set(['deliverable', 'markdown', 'model', 'deal-messages', 'comparison']);
+                      const documentTabs = canvasTabs.filter(t => DOCUMENT_TYPES.has(t.type));
+                      if (documentTabs.length === 0) return null;
+                      return (
+                        <FloatingCanvasTabBar
+                          tabs={documentTabs}
+                          activeTabId={activeCanvasTabId}
+                          onSelect={setActiveCanvasTabId}
+                          onClose={(id) => { if (splitTabId === id) setSplitTabId(null); closeCanvasTab(id); }}
+                          dark={dark}
+                          splitTabId={splitTabId}
+                          onSplit={(id) => { if (id !== activeCanvasTabId) setSplitTabId(id); }}
+                          onUnsplit={() => setSplitTabId(null)}
+                        />
+                      );
+                    })()}
                   </div>
+                    );
+                  })()}
                 </>
               ) : !user ? (
                 /* Logged-out: render the active journey page in the canvas */
