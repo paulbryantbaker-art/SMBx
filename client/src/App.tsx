@@ -123,7 +123,7 @@ export default function App() {
   const handleGoogleLogin = useCallback(() => {
     const clientId = (window as any).__GOOGLE_CLIENT_ID;
     if (!clientId) {
-      setGoogleError('Google Sign-In is not configured yet. Please use email/password to create an account.');
+      setGoogleError('Google Sign-In is not configured yet. Please try again in a moment or contact support if the issue persists.');
       return;
     }
     const google = (window as any).google;
