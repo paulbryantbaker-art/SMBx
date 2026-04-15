@@ -32,7 +32,6 @@ import IntelPanel from '../../components/chat/IntelPanel';
 import DealMessagesPanel from '../../components/documents/DealMessagesPanel';
 import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/CanvasToolbar';
 import CanvasPicker from '../../components/canvas/CanvasPicker';
-import DesktopAccountMenu from '../../components/desktop/DesktopAccountMenu';
 import DealWorkspace from '../../components/desktop/DealWorkspace';
 import PipelineTable from '../../components/desktop/PipelineTable';
 import SourcingCommandCenter from '../../components/desktop/SourcingCommandCenter';
@@ -3161,21 +3160,9 @@ export default function AppShell() {
         />
       )}
 
-      {/* ═══ DESKTOP ACCOUNT MENU — top-right avatar menu for signed-in users only.
-           Signed-out users sign in from the sidebar rail — no redundant top-right
-           sign-in pill on desktop. Mobile keeps its own top-right flow. ═══ */}
-      {!isMobile && user && (
-        <DesktopAccountMenu
-          loading={authLoading}
-          user={user}
-          dark={dark}
-          onSignIn={() => navigate('/login')}
-          onToggleDark={() => setDark(!dark)}
-          onOpenSettings={() => openCanvasTab('settings', 'Settings')}
-          onOpenHelp={() => setHelpSheetOpen(true)}
-          onSignOut={handleLogout}
-        />
-      )}
+      {/* Desktop top-right account menu removed — fully redundant with the
+          left sidebar's bottom rail (Theme · Admin · Account buttons). One
+          source of truth for account actions on desktop. */}
 
       {/* ═══ MOBILE SIGN-IN SHEET — top-right login icon opens this for guests ═══ */}
       {isMobile && !user && (
