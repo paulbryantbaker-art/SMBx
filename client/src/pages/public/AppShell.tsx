@@ -59,7 +59,7 @@ const PricingBelow = lazy(() => import('../../components/content/PricingBelow'))
 const MobilePricingStory = lazy(() => import('../../components/mobile/MobilePricingStory'));
 
 // Mobile rebuild — Claude+ pattern
-import { MobileSidebar, type LearnDest, type WorkspaceTool } from '../../components/mobile/MobileSidebar';
+import { type LearnDest, type WorkspaceTool } from '../../components/mobile/mobileTypes';
 import { LearnDrawer } from '../../components/mobile/LearnDrawer';
 import { StarterChips } from '../../components/mobile/StarterChips';
 import { MobileSellPage } from '../../components/mobile/MobileSellPage';
@@ -610,7 +610,7 @@ export default function AppShell() {
     return () => root.classList.remove('chat-mode');
   }, [isChat]);
 
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  // isMobileSidebarOpen removed — MobileSidebar deleted in dead-code sweep.
   const [isMobileCanvasDrawerOpen, setIsMobileCanvasDrawerOpen] = useState(false);
   // Mobile rebuild state — LearnDrawer + journey sheets + workspace tool sheets
   const [learnDrawerOpen, setLearnDrawerOpen] = useState(false);
@@ -1109,7 +1109,6 @@ export default function AppShell() {
   // Tab click — push so swipe-back returns to where user came from
   const handleTabClick = useCallback((tab: TabId) => {
     setActiveTab(tab);
-    setIsMobileSidebarOpen(false);
     // If user has already engaged (in chat mode), keep them in chat mode and just
     // change the canvas content. Don't snap back to landing.
     // Exception: clicking "home" while in chat mode → go back to landing/home
@@ -3076,99 +3075,13 @@ export default function AppShell() {
         }
       `}</style>
 
-      {/* ═══ NEW MOBILE SIDEBAR — Vaul-powered, Claude+ pattern ═══ */}
-      {isMobile && (
-        <MobileSidebar
-          open={isMobileSidebarOpen}
-          onOpenChange={setIsMobileSidebarOpen}
-          dark={dark}
-          isLoggedIn={!!user}
-          inAppMode={viewState === 'chat'}
-          canvasTabs={canvasTabs}
-          activeCanvasTabId={activeCanvasTabId}
-          splitCanvasTabId={splitTabId}
-          pickerDeals={(authChat.grouped?.deals ?? []).map((d: any) => ({
-            id: d.id,
-            name: d.business_name || `Deal ${d.id}`,
-            journey: (d.journey_type || '').toLowerCase(),
-          }))}
-          onCanvasTabSelect={(id) => {
-            setActiveCanvasTabId(id);
-            setMobileCanvasVisible(true);
-          }}
-          onCanvasTabClose={(id) => {
-            if (splitTabId === id) setSplitTabId(null);
-            closeCanvasTab(id);
-          }}
-          onHomeTap={() => {
-            setMobileWorkspaceOpen(null);
-            setMobileJourneyOpen(null);
-            setLearnDrawerOpen(false);
-            setViewState('landing');
-            setActiveTab('home');
-            navigate('/');
-          }}
-          dealGroups={user && authChat.grouped
-            ? authChat.grouped.deals.map(d => ({
-                id: d.id,
-                journey_type: d.journey_type,
-                current_gate: d.current_gate,
-                business_name: d.business_name,
-                industry: d.industry,
-                conversations: d.conversations.map((c: any) => ({
-                  id: c.id,
-                  title: c.title || 'Conversation',
-                  summary: c.summary || undefined,
-                  gate_label: c.gate_label || undefined,
-                  gate_status: c.gate_status || undefined,
-                  active: c.id === activeConvId,
-                })),
-              }))
-            : []
-          }
-          generalChats={user && authChat.grouped
-            ? authChat.grouped.general.map((c: any) => ({
-                id: c.id,
-                title: c.title || 'General Q&A',
-                active: c.id === activeConvId,
-              }))
-            : []
-          }
-          chats={[]}
-          activeConversationId={activeConvId}
-          userName={user?.display_name}
-          userEmail={user?.email}
-          onNewDeal={handleNewChat}
-          onNewChat={handleNewChat}
-          onChatTap={(id) => {
-            setMobileCanvasVisible(false);
-            setViewState('chat');
-            if (user) authChat.selectConversation(id);
-            navigate(`/chat/${id}`);
-          }}
-          onGeneralChat={async () => {
-            const id = await authChat.openGeneral();
-            if (id) {
-              setViewState('chat');
-              navigate(`/chat/${id}`);
-            }
-          }}
-          onWorkspaceTap={(tool) => setMobileWorkspaceOpen(tool)}
-          onLearnTap={(dest) => setMobileJourneyOpen(dest)}
-          onProfileTap={() => {
-            if (user) openCanvasTab('settings', 'Settings');
-            else window.location.href = '/login';
-          }}
-          onSettingsTap={() => {
-            if (user) openCanvasTab('settings', 'Settings');
-            else window.location.href = '/login';
-          }}
-          onSignIn={() => { window.location.href = '/login'; }}
-          onDarkModeToggle={() => setDark(!dark)}
-        />
-      )}
+      {/* MobileSidebar render removed — component deleted in dead-code
+          sweep. Its responsibilities moved to: MobileNotionHome (deals
+          tree), AccountSheet (account actions), MobileCanvasHeader
+          (breadcrumb + ⋯ doc actions). No hamburger in the PWA-only
+          architecture. See memory/architecture_pwa_only.md. */}
 
-      {/* ═══ MOBILE ACCOUNT SHEET — replaces the hamburger menu ═══ */}
+      {/* ═══ MOBILE ACCOUNT SHEET — the account destination on mobile ═══ */}
       {isMobile && user && (
         <AccountSheet
           open={accountSheetOpen}

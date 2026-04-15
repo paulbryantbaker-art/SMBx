@@ -13,7 +13,7 @@
 
 import { Drawer } from 'vaul';
 import { motion } from 'framer-motion';
-import type { LearnDest } from './MobileSidebar';
+import type { LearnDest } from './mobileTypes';
 
 const PINK = '#D44A78';
 const PINK_DARK = '#E8709A';

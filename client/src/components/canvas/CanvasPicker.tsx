@@ -48,7 +48,7 @@ interface Props {
   collapsed?: boolean;
   onToggleCollapsed?: () => void;
   /** When true, render only the inner picker (no outer aside, no resize,
-      no collapse). For mobile MobileSidebar embedding. */
+      no collapse). Reserved for future embedding — parent provides framing. */
   embedded?: boolean;
 }
 
@@ -224,7 +224,7 @@ export default function CanvasPicker({
 
   // Standalone (default): outer aside chrome + resize handle on left edge.
   // Embedded: just the inner content (no panel, no resize, no header — the
-  //   parent provides its own framing, e.g. MobileSidebar's <Section>).
+  //   parent provides its own framing (reserved for future embedding).
   return (
     <aside
       aria-label="Documents picker"

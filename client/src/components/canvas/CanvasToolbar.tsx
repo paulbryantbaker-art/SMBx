@@ -6,8 +6,8 @@
  * via getToolbarActionsFor(tab) in AppShell; when a tab has no actions
  * the toolbar hides gracefully instead of rendering an empty pill.
  *
- * Paired with FloatingCanvasTabBar at the bottom — the two bars form
- * the floating chrome for the desktop canvas panel.
+ * Paired with the right-side CanvasPicker panel — together they form
+ * the chrome around the active canvas content.
  */
 import { type ReactNode } from 'react';
 
@@ -35,8 +35,7 @@ export default function CanvasToolbar({ actions, dark = false }: CanvasToolbarPr
       style={{
         top: 16,
         // Apple Glass — translucent + backdrop-filter. Matches the bottom
-        // FloatingCanvasTabBar so the two floating pills read as one
-        // coordinated chrome system.
+        // right-side CanvasPicker so the chrome reads as one coordinated system.
         background: dark ? 'rgba(20,22,24,0.72)' : 'rgba(255,255,255,0.82)',
         backdropFilter: 'blur(18px) saturate(180%)',
         WebkitBackdropFilter: 'blur(18px) saturate(180%)',
