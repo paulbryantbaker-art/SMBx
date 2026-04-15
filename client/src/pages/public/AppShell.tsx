@@ -34,6 +34,7 @@ import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/Canva
 import CanvasPicker from '../../components/canvas/CanvasPicker';
 import InstallWall, { PWA_DEEP_LINK_KEY } from '../../components/mobile/InstallWall';
 import MobileNotionHome from '../../components/mobile/MobileNotionHome';
+import MobileCanvasHeader from '../../components/mobile/MobileCanvasHeader';
 import DealWorkspace from '../../components/desktop/DealWorkspace';
 import PipelineTable from '../../components/desktop/PipelineTable';
 import SourcingCommandCenter from '../../components/desktop/SourcingCommandCenter';
@@ -2841,11 +2842,56 @@ export default function AppShell() {
               animation: 'slideUpIn 0.3s ease',
               overscrollBehavior: 'contain',
               touchAction: 'manipulation',
-              paddingTop: 'calc(env(safe-area-inset-top) + 64px)', // clear floating hamburger
+              paddingTop: 'env(safe-area-inset-top)',
               paddingBottom: 'env(safe-area-inset-bottom)',
             }}
           >
-            {/* Active tab content — no header, swipe back to return to chat */}
+            {/* Breadcrumb header — sticky Apple Glass, back + deal › doc + ⋯ */}
+            {activeCanvasTab && (() => {
+              const dealId = activeCanvasTab.props?.dealId ?? authChat.activeDealId;
+              const deal = authChat.grouped?.deals.find(d => d.id === dealId);
+              const dealName = deal?.business_name || null;
+              const journey = (deal?.journey_type || '').toLowerCase();
+              const accentMap: Record<string, string> = {
+                sell: dark ? '#E8709A' : '#D44A78',
+                buy: dark ? '#52A8A8' : '#3E8E8E',
+                raise: dark ? '#DDB25E' : '#C99A3E',
+                pmi: dark ? '#AE6D9A' : '#8F4A7A',
+                integrate: dark ? '#AE6D9A' : '#8F4A7A',
+              };
+              const accent = accentMap[journey] || (dark ? '#E8709A' : '#D44A78');
+              return (
+                <MobileCanvasHeader
+                  dark={dark}
+                  dealName={dealName}
+                  docTitle={activeCanvasTab.label}
+                  accentColor={accent}
+                  onBack={() => setMobileCanvasVisible(false)}
+                  onDealTap={dealId ? () => {
+                    // Close overlay and return to home (deal tree is there)
+                    setMobileCanvasVisible(false);
+                    setViewState('landing');
+                    setActiveTab('home');
+                    navigate('/');
+                  } : undefined}
+                  onCopyLink={typeof navigator !== 'undefined' && navigator.clipboard ? () => {
+                    try {
+                      navigator.clipboard.writeText(window.location.href);
+                      showToast('Link copied', { tone: 'success' });
+                    } catch { showToast('Couldn\u2019t copy link', { tone: 'error' }); }
+                  } : undefined}
+                  onShare={typeof navigator !== 'undefined' && (navigator as any).share ? () => {
+                    try {
+                      (navigator as any).share({
+                        title: activeCanvasTab.label,
+                        url: window.location.href,
+                      }).catch(() => {});
+                    } catch { /* noop */ }
+                  } : undefined}
+                />
+              );
+            })()}
+            {/* Active tab content — below the sticky header */}
             <div
               className="flex-1 overflow-y-auto"
               style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
