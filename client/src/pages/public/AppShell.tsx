@@ -33,6 +33,7 @@ import DealMessagesPanel from '../../components/documents/DealMessagesPanel';
 import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/CanvasToolbar';
 import CanvasPicker from '../../components/canvas/CanvasPicker';
 import InstallWall, { PWA_DEEP_LINK_KEY } from '../../components/mobile/InstallWall';
+import MobileNotionHome from '../../components/mobile/MobileNotionHome';
 import DealWorkspace from '../../components/desktop/DealWorkspace';
 import PipelineTable from '../../components/desktop/PipelineTable';
 import SourcingCommandCenter from '../../components/desktop/SourcingCommandCenter';
@@ -2036,38 +2037,48 @@ export default function AppShell() {
                       Replaces the greeting block with glanceable portfolio state.
                       Desktop + logged-out always see the hero/greeting block. */}
                   {isMobile && user ? (
-                    <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-                      <div className="flex justify-center pt-6">
-                        <LogoHero height={32} dark={dark} />
-                      </div>
-                      <DealStack
-                        loading={!authChat.grouped}
-                        deals={(authChat.grouped?.deals ?? []).map(d => ({
-                          id: d.id,
-                          business_name: d.business_name,
-                          journey_type: d.journey_type,
-                          current_gate: d.current_gate,
-                          industry: d.industry,
-                          league: d.league,
-                          updated_at: d.updated_at,
-                          status: d.status,
-                        }))}
-                        onDealTap={(dealId) => {
-                          const deal = authChat.grouped?.deals.find(d => d.id === dealId);
-                          const latestConv = deal?.conversations[0];
-                          if (latestConv) {
-                            authChat.selectConversation(latestConv.id);
-                            navigate(`/chat/${latestConv.id}`);
-                            setViewState('chat');
-                          }
-                        }}
-                        onStartFirstDeal={(fill) => fillHomeInput(fill)}
-                        onDealLongPress={(dealId) => setDealActionsTargetId(dealId)}
-                        onSeeAll={() => setStackExpandedOpen(true)}
-                        justCreatedDealId={justCreatedDealId}
-                        dark={dark}
-                      />
-                    </div>
+                    <MobileNotionHome
+                      dark={dark}
+                      loading={!authChat.grouped}
+                      userName={user.display_name || user.email || null}
+                      deals={(authChat.grouped?.deals ?? []).map(d => ({
+                        id: d.id,
+                        business_name: d.business_name,
+                        journey_type: d.journey_type,
+                        current_gate: d.current_gate,
+                        industry: d.industry,
+                        league: d.league,
+                        updated_at: d.updated_at,
+                        status: d.status,
+                        conversations: (d.conversations || []).map((c: any) => ({
+                          id: c.id,
+                          title: c.title || 'Conversation',
+                          summary: c.summary || undefined,
+                          gate_label: c.gate_label,
+                          active: c.id === authChat.activeConversationId,
+                        })),
+                      }))}
+                      activeConversationId={authChat.activeConversationId ?? null}
+                      justCreatedDealId={justCreatedDealId}
+                      onDealTap={(dealId) => {
+                        const deal = authChat.grouped?.deals.find(d => d.id === dealId);
+                        const latestConv = deal?.conversations[0];
+                        if (latestConv) {
+                          authChat.selectConversation(latestConv.id);
+                          navigate(`/chat/${latestConv.id}`);
+                          setViewState('chat');
+                        }
+                      }}
+                      onDealLongPress={(dealId) => setDealActionsTargetId(dealId)}
+                      onConversationTap={(convId) => {
+                        authChat.selectConversation(convId);
+                        navigate(`/chat/${convId}`);
+                        setViewState('chat');
+                      }}
+                      onSeeAll={() => setStackExpandedOpen(true)}
+                      onStartFirstDeal={(fill) => fillHomeInput(fill)}
+                      onAccountTap={() => setAccountSheetOpen(true)}
+                    />
                   ) : (
                   <div className="flex flex-col items-center px-6 relative z-10 flex-[1.618] justify-center">
                     <div className={`w-full text-center ${isMobile ? 'max-w-4xl' : 'max-w-3xl space-y-6'}`}>
