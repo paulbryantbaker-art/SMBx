@@ -295,11 +295,16 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
 
   return (
     <div className={isHero ? '' : 'shrink-0 border-t dock-outer'} style={isHero ? undefined : { padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
-      {/* Hidden file input */}
+      {/* Hidden file input — broad allowlist matched to server/routes/chat.ts.
+          Google Docs and Office 365 docs are usually shared as URLs; users can
+          paste those directly into the chat input and Yulia fetches the
+          content. The accept list covers everything that actually gets
+          uploaded as a file: documents (PDF/Word/text), spreadsheets
+          (Excel/CSV), presentations (PowerPoint), and images. */}
       <input
         ref={fileInputRef}
         type="file"
-        accept=".pdf,.xlsx,.xls,.csv"
+        accept=".pdf,.doc,.docx,.txt,.rtf,.md,.xlsx,.xls,.csv,.pptx,.ppt,.png,.jpg,.jpeg,.webp,.gif,.heic,.json"
         onChange={handleFileUpload}
         className="hidden"
       />

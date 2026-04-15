@@ -64,14 +64,29 @@ const upload = multer({
       cb(null, `${crypto.randomUUID()}${ext}`);
     },
   }),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB — covers most CIM PDFs and pitch decks
   fileFilter: (_req, file, cb) => {
-    const allowed = ['.pdf', '.xlsx', '.xls', '.csv'];
+    // Broad allowlist — covers deal-adjacent file types. Google Docs and
+    // Office 365 docs are typically shared via URL, not uploaded — users
+    // paste those into the chat input and Yulia fetches. This list covers
+    // everything that actually gets uploaded as a file.
+    const allowed = [
+      // Documents
+      '.pdf', '.doc', '.docx', '.txt', '.rtf', '.md',
+      // Spreadsheets
+      '.xlsx', '.xls', '.csv',
+      // Presentations
+      '.pptx', '.ppt',
+      // Images (CIM pages scanned, signed docs, whiteboard photos)
+      '.png', '.jpg', '.jpeg', '.webp', '.gif', '.heic',
+      // Data
+      '.json',
+    ];
     const ext = path.extname(file.originalname).toLowerCase();
     if (allowed.includes(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Only PDF, XLSX, XLS, and CSV files are allowed'));
+      cb(new Error('File type not supported — try PDF, Word, Excel, PowerPoint, or an image'));
     }
   },
 });

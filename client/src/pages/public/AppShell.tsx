@@ -802,22 +802,19 @@ export default function AppShell() {
   }, [homeToolsOpen]);
   const fillHomeInput = useCallback((text: string) => {
     const ref = isMobile ? homeInputMobileRef : homeInputRef;
-    // Close the popup first so the backdrop unmounts and the pill isn't covered.
+    const el = ref.current;
+    if (!el) return;
+    // Critical on iOS Safari: focus() + value-set must happen SYNCHRONOUSLY
+    // inside the click handler's user-gesture scope. If we defer via rAF or
+    // setTimeout, iOS refuses to open the virtual keyboard (no user gesture)
+    // and refuses to focus an off-screen input. The popup unmounts on the
+    // same tick via setHomeToolsOpen(false) below, but the focus we already
+    // grabbed stays on the pill input.
+    el.focus();
+    el.value = text;
+    try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch {}
+    try { el.setSelectionRange(text.length, text.length); } catch {}
     setHomeToolsOpen(false);
-    // Defer the value-set + focus to the next frame so it happens AFTER the
-    // popup's unmount and any focus-restoration the browser does. Without
-    // this, focus can bounce back to the popup trigger button and the
-    // virtual keyboard never opens on mobile.
-    requestAnimationFrame(() => {
-      const el = ref.current;
-      if (!el) return;
-      el.value = text;
-      // Fire an input event so anything watching the value (React controlled
-      // inputs elsewhere, autofill checks, etc.) sees it.
-      try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch {}
-      el.focus();
-      try { el.setSelectionRange(text.length, text.length); } catch {}
-    });
   }, [isMobile]);
   // Chat hooks (always called for hook order)
   const anonChat = useAnonymousChat();
