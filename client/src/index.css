@@ -608,14 +608,18 @@ html.dark .glass-panel {
 .dark .home-dock-card textarea::placeholder {
   color: rgba(255,255,255,0.4) !important;
 }
-.dark .home-tools-popup {
+.dark .home-tools-popup,
+.force-chat-dark .home-tools-popup {
   background: #2f3133;
   border-color: rgba(255,255,255,0.08);
   box-shadow: 0 4px 24px rgba(0,0,0,.4);
 }
-.dark .home-tp-item:hover { background: rgba(255,255,255,0.06); }
-.dark .home-tp-item:active { background: rgba(255,255,255,0.1); }
-.dark .home-tp-item .text-\[15px\].font-semibold { color: #f0f0f3; }
+.dark .home-tp-item:hover,
+.force-chat-dark .home-tp-item:hover { background: rgba(255,255,255,0.06); }
+.dark .home-tp-item:active,
+.force-chat-dark .home-tp-item:active { background: rgba(255,255,255,0.1); }
+.dark .home-tp-item .text-\[15px\].font-semibold,
+.force-chat-dark .home-tp-item .text-\[15px\].font-semibold { color: #f0f0f3; }
 /* Dock textarea inner bg */
 .dock-textarea-bg { background: #F5F5F3; }
 .dark .dock-textarea-bg { background: rgba(255,255,255,0.06); }

@@ -222,23 +222,32 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
     onSend(t);
   }, [value, disabled, onSend]);
 
-  /* Fill input from tool popup.
-     The textarea is React-controlled (value={value}) — setValue is the
-     canonical write. Direct DOM mutation interferes with React's
-     reconciler. Pattern: state-set → close popup → defer focus + resize
-     to next frame so the popup unmounts first. */
+  /* Fill input from tool popup. Belt-and-suspenders for iOS Safari:
+     update both React state (setValue) AND the DOM value directly. If one
+     gets clobbered by React reconciliation timing or a popup unmount race,
+     the other paints. Also kill typewriter immediately so the placeholder
+     overlay can't mask the new value. */
   const fillInput = useCallback((text: string) => {
-    setValue(text);
-    setToolsOpen(false);
     setTwActive(false);
     setTwText('');
-    requestAnimationFrame(() => {
-      const el = inputRef.current;
-      if (!el) return;
+    setValue(text);
+    setToolsOpen(false);
+    // Immediate DOM write — covers cases where React's render hasn't
+    // committed yet but the user is already looking at the pill.
+    const el = inputRef.current;
+    if (el) {
+      el.value = text;
       el.style.height = 'auto';
       el.style.height = Math.min(el.scrollHeight, 140) + 'px';
-      el.focus();
-      try { el.setSelectionRange(text.length, text.length); } catch {}
+    }
+    // Deferred re-write + focus — covers cases where React's render commits
+    // BETWEEN our DOM write and the user's next interaction, wiping the value.
+    requestAnimationFrame(() => {
+      const el2 = inputRef.current;
+      if (!el2) return;
+      if (el2.value !== text) el2.value = text;
+      el2.focus();
+      try { el2.setSelectionRange(text.length, text.length); } catch {}
     });
   }, []);
 
