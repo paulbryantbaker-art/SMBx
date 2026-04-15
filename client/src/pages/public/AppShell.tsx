@@ -634,7 +634,56 @@ export default function AppShell() {
   }
   const [canvasTabs, setCanvasTabs] = useState<CanvasTab[]>([]);
   const [activeCanvasTabId, setActiveCanvasTabId] = useState<string | null>(null);
+
+  // ─── Recent document tracking (Option B: engagement-centric) ───
+  // Fires a POST to /api/doc-views when the user activates a document-type
+  // canvas tab. The backend UPSERTs on (user, docType, docId) so a single
+  // row per doc is kept forever; opened_at bumps on every activation.
+  // Cross-session Recent Documents list on the mobile home pulls from this.
+  const DOC_TAB_TYPES = new Set(['deliverable', 'markdown', 'model', 'deal-messages', 'comparison']);
+  interface RecentDocView {
+    doc_type: string;
+    doc_id: string;
+    label: string | null;
+    deal_id: number | null;
+    opened_at: string;
+  }
+  const [recentDocs, setRecentDocs] = useState<RecentDocView[]>([]);
+  const loadRecentDocs = useCallback(async () => {
+    if (!user) { setRecentDocs([]); return; }
+    try {
+      const res = await fetch('/api/doc-views/recent?limit=8', { headers: authHeaders() });
+      if (!res.ok) return;
+      const data = await res.json();
+      setRecentDocs(Array.isArray(data.views) ? data.views : []);
+    } catch { /* noop */ }
+  }, [user]);
+  useEffect(() => { loadRecentDocs(); }, [loadRecentDocs]);
   const activeCanvasTab = canvasTabs.find(t => t.id === activeCanvasTabId) || null;
+
+  // Record a doc view when the user activates a document-type canvas tab.
+  // Debounced: a 500ms delay avoids spamming the endpoint if the user is
+  // rapidly switching tabs (A → B → A → B). The endpoint is an UPSERT so
+  // any missed events in flight are harmless.
+  useEffect(() => {
+    if (!user || !activeCanvasTab) return;
+    if (!DOC_TAB_TYPES.has(activeCanvasTab.type)) return;
+    const dealId = (activeCanvasTab.props?.dealId ?? null) as number | null;
+    const label = activeCanvasTab.label;
+    const docId = activeCanvasTab.id;
+    const docType = activeCanvasTab.type;
+    const t = setTimeout(() => {
+      fetch('/api/doc-views', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ docType, docId, label, dealId }),
+      }).then(r => {
+        if (r.ok) loadRecentDocs();
+      }).catch(() => { /* noop */ });
+    }, 500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, activeCanvasTabId]);
   // Side-by-side split — a second tab pinned alongside the active one.
   // Desktop only. Persists across reload via localStorage; auto-clears
   // when the split tab closes or matches the active tab.
@@ -2060,6 +2109,28 @@ export default function AppShell() {
                       }))}
                       activeConversationId={authChat.activeConversationId ?? null}
                       justCreatedDealId={justCreatedDealId}
+                      recentDocs={recentDocs}
+                      onRecentDocTap={(doc) => {
+                        // If the doc's canvas tab is still open, just
+                        // activate it. Otherwise, for deliverables, reopen
+                        // via openCanvasTab. Other types: best-effort
+                        // re-activation by id.
+                        const existing = canvasTabs.find(t => t.id === doc.doc_id);
+                        if (existing) {
+                          setActiveCanvasTabId(doc.doc_id);
+                          setMobileCanvasVisible(true);
+                          return;
+                        }
+                        if (doc.doc_type === 'deliverable') {
+                          // doc_id format: 'deliverable-<id>'
+                          const m = /deliverable-(\d+)/.exec(doc.doc_id);
+                          if (m) {
+                            const id = parseInt(m[1], 10);
+                            openCanvasTab('deliverable', doc.label || `Document #${id}`, { deliverableId: id, dealId: doc.deal_id });
+                            setMobileCanvasVisible(true);
+                          }
+                        }
+                      }}
                       onDealTap={(dealId) => {
                         const deal = authChat.grouped?.deals.find(d => d.id === dealId);
                         const latestConv = deal?.conversations[0];

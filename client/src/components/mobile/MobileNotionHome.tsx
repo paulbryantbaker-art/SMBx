@@ -88,6 +88,14 @@ interface DealItem {
   conversations: ConvoItem[];
 }
 
+export interface RecentDoc {
+  doc_type: string;
+  doc_id: string;
+  label: string | null;
+  deal_id: number | null;
+  opened_at: string;
+}
+
 interface Props {
   dark: boolean;
   loading: boolean;
@@ -95,10 +103,12 @@ interface Props {
   deals: DealItem[];
   activeConversationId: number | null;
   justCreatedDealId?: number | null;
+  recentDocs?: RecentDoc[];
 
   onDealTap: (dealId: number) => void;
   onDealLongPress?: (dealId: number) => void;
   onConversationTap: (convId: number) => void;
+  onRecentDocTap?: (doc: RecentDoc) => void;
   onSeeAll: () => void;
   onStartFirstDeal: (fill: string) => void;
   onAccountTap: () => void;
@@ -112,9 +122,11 @@ export default function MobileNotionHome({
   deals,
   activeConversationId,
   justCreatedDealId,
+  recentDocs = [],
   onDealTap,
   onDealLongPress,
   onConversationTap,
+  onRecentDocTap,
   onSeeAll,
   onStartFirstDeal,
   onAccountTap,
@@ -335,6 +347,103 @@ export default function MobileNotionHome({
               justCreatedDealId={justCreatedDealId}
               dark={dark}
             />
+          </section>
+        )}
+
+        {/* RECENT DOCUMENTS — engagement-centric (last N docs the user
+            actually opened). Only renders when there are any. Sourced from
+            the user_doc_views table via GET /api/doc-views/recent. */}
+        {recentDocs.length > 0 && (
+          <section style={{ padding: '4px 16px 14px' }}>
+            <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: sectionLabel, marginBottom: 8 }}>
+              Recent documents
+            </p>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+              {recentDocs.map((doc) => {
+                const dealMeta = doc.deal_id != null
+                  ? deals.find(d => d.id === doc.deal_id)
+                  : undefined;
+                const j = (dealMeta?.journey_type || '').toLowerCase();
+                const docAccent = JOURNEY_COLORS[j]
+                  ? (dark ? JOURNEY_COLORS[j].dark : JOURNEY_COLORS[j].light)
+                  : (dark ? DEFAULT_ACCENT.dark : DEFAULT_ACCENT.light);
+                return (
+                  <li key={`${doc.doc_type}-${doc.doc_id}`} style={{ marginBottom: 1 }}>
+                    <button
+                      type="button"
+                      onClick={() => onRecentDocTap?.(doc)}
+                      className="mobile-notion-recent-doc"
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        padding: '8px 8px 8px 4px',
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                        textAlign: 'left',
+                        borderRadius: 8,
+                        minWidth: 0,
+                      }}
+                    >
+                      <span
+                        aria-hidden
+                        style={{
+                          width: 22, height: 22, flexShrink: 0,
+                          borderRadius: 6,
+                          background: `${docAccent}14`,
+                          color: docAccent,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                      </span>
+                      <span
+                        style={{
+                          flex: 1,
+                          minWidth: 0,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          fontSize: 13.5,
+                          fontWeight: 500,
+                          color: heading,
+                          letterSpacing: '-0.005em',
+                        }}
+                        title={doc.label || doc.doc_id}
+                      >
+                        {doc.label || doc.doc_id}
+                      </span>
+                      {dealMeta?.business_name && (
+                        <span
+                          style={{
+                            flexShrink: 0,
+                            fontSize: 11,
+                            color: muted,
+                            maxWidth: 90,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {dealMeta.business_name}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            <style>{`
+              .mobile-notion-recent-doc:hover { background: ${rowHover} !important; }
+            `}</style>
           </section>
         )}
 
