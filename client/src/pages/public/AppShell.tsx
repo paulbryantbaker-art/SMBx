@@ -2076,7 +2076,23 @@ export default function AppShell() {
                         setViewState('chat');
                       }}
                       onSeeAll={() => setStackExpandedOpen(true)}
-                      onStartFirstDeal={(fill) => fillHomeInput(fill)}
+                      onStartFirstDeal={(fill) => {
+                        // Logged-in mobile users see MobileNotionHome, not
+                        // the home pill portal — homeInputMobileRef is null
+                        // for them. Route the prefill into ChatDock instead
+                        // (which is already rendered at the bottom, or
+                        // becomes visible once viewState flips to 'chat').
+                        // If we're still on landing, flip to chat first so
+                        // ChatDock mounts.
+                        if (viewState !== 'chat') {
+                          setViewState('chat');
+                          navigate('/chat');
+                          // Wait for ChatDock to mount, then prefill + focus
+                          setTimeout(() => dockRef.current?.setValue(fill), 120);
+                        } else {
+                          dockRef.current?.setValue(fill);
+                        }
+                      }}
                       onAccountTap={() => setAccountSheetOpen(true)}
                     />
                   ) : (

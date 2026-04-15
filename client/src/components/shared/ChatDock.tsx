@@ -38,6 +38,10 @@ function shuffle<T>(arr: T[]): T[] {
 export interface ChatDockHandle {
   clear: () => void;
   focus: () => void;
+  /** Pre-fill the input with text, place caret at end, and focus. Used by
+      MobileNotionHome's "Start your first deal" and by starter-prompt
+      clicks so the user can continue typing immediately. */
+  setValue: (text: string) => void;
 }
 
 /* ═══ PROPS ═══ */
@@ -219,6 +223,16 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
     focus() {
       setTimeout(() => inputRef.current?.focus(), 100);
     },
+    setValue(text: string) {
+      setValue(text);
+      setToolsOpen(false);
+      requestAnimationFrame(() => {
+        const el = inputRef.current;
+        if (!el) return;
+        el.focus();
+        try { el.setSelectionRange(text.length, text.length); } catch { /* noop */ }
+      });
+    },
   }), []);
 
   /* Send */
@@ -347,24 +361,29 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           }}
         >
           {/* + button.
-              Signed-in (onFileUpload provided): opens native file picker.
-              Signed-out + desktop: opens starter-prefills popup.
-              Signed-out + mobile: HIDDEN (starter popup doesn't reliably
-              populate the input on mobile; don't ship a broken affordance
-              to a potential customer). */}
+              - Desktop signed-in (onFileUpload present): file picker
+              - Desktop signed-out: starter popup
+              - Mobile signed-out: HIDDEN (starter popup was unreliable)
+              - Mobile signed-in: ALWAYS starter popup. The on-screen empty
+                state tells users to "tap + for a starter prompt" and
+                matches the Notion pattern. File upload is one of the
+                options inside the popup, not the primary + action. */}
           {showPlusButton && (
           <button
             ref={plusRef}
             type="button"
             onClick={() => {
-              if (onFileUpload) {
+              // Mobile: always starter popup (file upload is in the popup).
+              // Desktop with onFileUpload: direct file picker.
+              // Desktop without: starter popup.
+              if (!isMobile && onFileUpload) {
                 fileInputRef.current?.click();
               } else {
                 setToolsOpen(p => !p);
               }
             }}
-            aria-label={uploading ? 'Uploading…' : onFileUpload ? 'Attach a file' : 'Open starter options'}
-            aria-expanded={!onFileUpload ? toolsOpen : undefined}
+            aria-label={uploading ? 'Uploading…' : (!isMobile && onFileUpload) ? 'Attach a file' : 'Open starter options'}
+            aria-expanded={(isMobile || !onFileUpload) ? toolsOpen : undefined}
             disabled={uploading}
             className="dock-plus-btn flex items-center justify-center cursor-pointer active:scale-95"
             style={{
@@ -379,7 +398,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             {uploading ? (
               <div className="w-4 h-4 border-2 border-[#D44A78] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
             ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transform: !onFileUpload && toolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transform: (isMobile || !onFileUpload) && toolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             )}
@@ -467,11 +486,38 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           `}</style>
         </div>
 
-        {/* Starter-prefill popup — shown only when not signed-in (no onFileUpload)
-            AND the + button is visible (desktop only — see showPlusButton).
-            Drops UP from the pill. */}
-        {!onFileUpload && showPlusButton && (
+        {/* Starter-prefill popup.
+            Shows when: desktop signed-out OR any mobile (signed-in or out).
+            Desktop signed-in uses direct file picker instead — no popup.
+            Drops UP from the pill. When signed-in (onFileUpload present) and
+            on mobile, prepends an "Attach a file" row so file upload is
+            accessible without hijacking the primary + action. */}
+        {showPlusButton && (isMobile || !onFileUpload) && (
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`} style={{ bottom: 'calc(100% + 12px)' }}>
+            {/* File upload — only on mobile + signed-in (desktop signed-in
+                uses direct + click; signed-out has no upload capability). */}
+            {isMobile && onFileUpload && (
+              <>
+                <div className="px-4 pt-3 pb-2">
+                  <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(0,0,0,0.35)' }}>Attach</span>
+                </div>
+                <button
+                  className="home-tp-item"
+                  onClick={() => { setToolsOpen(false); fileInputRef.current?.click(); }}
+                  type="button"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#D44A78' }}>
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" style={{ display: 'none' }} />
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                  </svg>
+                  <div>
+                    <div className="text-[15px] font-semibold leading-[1.3] text-[#1a1c1e]">Attach a file</div>
+                    <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: 'rgba(0,0,0,0.45)' }}>PDF, Word, Excel, images — Yulia reads it</div>
+                  </div>
+                </button>
+                <div className="mx-4 my-1" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }} />
+              </>
+            )}
             <div className="px-4 pt-3 pb-2">
               <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: 'rgba(0,0,0,0.35)' }}>Start with Yulia</span>
             </div>
