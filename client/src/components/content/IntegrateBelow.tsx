@@ -193,8 +193,8 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
           accent={accent}
         />
 
-        {/* ═══ Day 180 Calendar — hero interactive ═══ */}
-        <section className="mb-28">
+        {/* ═══ Day 180 Calendar — cinematic anchor (full-bleed immersive band) ═══ */}
+        <SectionBand tone="immersive" dark={dark}>
           <SectionHeader
             label="The 180-day plan"
             title="Day by day. Drag the marker."
@@ -203,7 +203,7 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
             accent={accent}
           />
           <Day180Calendar dark={dark} accent={accent} />
-        </section>
+        </SectionBand>
 
         {/* ═══ The 7 mistakes — editorial numbered list ═══ */}
         <section className="mb-28">

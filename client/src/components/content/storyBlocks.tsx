@@ -14,11 +14,16 @@
  */
 
 import { motion, useInView } from 'framer-motion';
-import { useRef, type ReactNode, type CSSProperties } from 'react';
-import { palette, bandBg, space, type BandTone } from './tokens';
+import { useRef, useState, type ReactNode, type CSSProperties } from 'react';
+import { palette, bandBg, space, motion as motionTokens, type BandTone } from './tokens';
 
 const PINK = palette.pinkLight;
 const PINK_DARK = palette.pinkDark;
+
+/** Shared scroll-reveal props for section-level motion. Kept as constants
+    so every primitive inherits the exact same rhythm. */
+const REVEAL_SECTION = motionTokens.reveal.section;
+const REVEAL_MOBILE = motionTokens.reveal.mobileSection;
 
 /* ════════════════════════════════════════════════════════════
    SectionBand — full-bleed background wrapper for cinematic rhythm.
@@ -30,6 +35,7 @@ export function SectionBand({
   dark,
   children,
   fullBleed = true,
+  reveal = true,
   style,
   className,
 }: {
@@ -38,32 +44,36 @@ export function SectionBand({
   children: ReactNode;
   /** If true, bg extends edge-to-edge. If false, bg only covers content width. */
   fullBleed?: boolean;
+  /** Scroll-triggered reveal. Opt out with reveal={false} for above-the-fold. */
+  reveal?: boolean;
   style?: CSSProperties;
   className?: string;
 }) {
   const bg = bandBg(tone, dark);
   const isImmersive = tone === 'immersive';
-  return (
-    <div
-      className={className}
-      style={{
-        background: bg,
-        color: isImmersive ? '#f9f9fc' : undefined,
-        // Full-bleed trick: when the section lives inside a max-width container
-        // but we want the bg to extend edge-to-edge.
-        marginLeft: fullBleed ? 'calc(-1 * (100vw - 100%) / 2)' : undefined,
-        marginRight: fullBleed ? 'calc(-1 * (100vw - 100%) / 2)' : undefined,
-        paddingLeft: fullBleed ? 'calc((100vw - 100%) / 2 + 24px)' : 0,
-        paddingRight: fullBleed ? 'calc((100vw - 100%) / 2 + 24px)' : 0,
-        paddingTop: 'clamp(48px, 8vw, 96px)',
-        paddingBottom: 'clamp(48px, 8vw, 96px)',
-        ...style,
-      }}
-    >
-      <div style={{ maxWidth: space.maxContent, marginLeft: 'auto', marginRight: 'auto' }}>
-        {children}
-      </div>
+  const outerStyle: CSSProperties = {
+    background: bg,
+    color: isImmersive ? '#f9f9fc' : undefined,
+    marginLeft: fullBleed ? 'calc(-1 * (100vw - 100%) / 2)' : undefined,
+    marginRight: fullBleed ? 'calc(-1 * (100vw - 100%) / 2)' : undefined,
+    paddingLeft: fullBleed ? 'calc((100vw - 100%) / 2 + 24px)' : 0,
+    paddingRight: fullBleed ? 'calc((100vw - 100%) / 2 + 24px)' : 0,
+    paddingTop: 'clamp(48px, 8vw, 96px)',
+    paddingBottom: 'clamp(48px, 8vw, 96px)',
+    ...style,
+  };
+  const content = (
+    <div style={{ maxWidth: space.maxContent, marginLeft: 'auto', marginRight: 'auto' }}>
+      {children}
     </div>
+  );
+  if (!reveal) {
+    return <div className={className} style={outerStyle}>{content}</div>;
+  }
+  return (
+    <motion.div className={className} style={outerStyle} {...REVEAL_SECTION}>
+      {content}
+    </motion.div>
   );
 }
 
@@ -279,9 +289,10 @@ export function BrandedTermCard({
   const accent = accentOverride ?? (dark || isDark ? PINK_DARK : PINK);
 
   return (
-    <div
+    <motion.div
       className="rounded-2xl p-8 md:p-10 relative overflow-hidden"
       style={{ background: bg, border: `1px solid ${border}` }}
+      {...REVEAL_SECTION}
     >
       {/* Subtle accent corner */}
       <div
@@ -293,8 +304,8 @@ export function BrandedTermCard({
       />
 
       <p
-        className="text-[10px] font-bold uppercase tracking-[0.22em] mb-3"
-        style={{ color: accent }}
+        className="text-[10px] font-semibold uppercase mb-3"
+        style={{ color: accent, letterSpacing: '0.08em' }}
       >
         smbx.ai product
       </p>
@@ -352,7 +363,7 @@ export function BrandedTermCard({
           </span>
         </button>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -627,7 +638,7 @@ export function SectionHeader({
   const headingColor = dark ? '#f9f9fc' : '#0f1012';
   const mutedColor = dark ? 'rgba(218,218,220,0.7)' : '#5d5e61';
   return (
-    <div className="mb-12">
+    <motion.div className="mb-12" {...REVEAL_SECTION}>
       {/* Section eyebrow — low-tracking variant. The "hook" eyebrow
           (0.24em + dot) lives in HookHeader; sections use a quieter
           voice so the page reads as a document, not a repeating slogan. */}
@@ -654,7 +665,7 @@ export function SectionHeader({
           {sub}
         </p>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -685,13 +696,14 @@ export function PageCTA({
       {/* Ring-accent CTA — Framer-inspired. No blurred halo. The accent
           lives in the hairline ring + the button fill, not a soft glow
           behind the content. Cinematic without being Canva-lux. */}
-      <div
+      <motion.div
         className="rounded-3xl p-10 md:p-16 relative overflow-hidden"
         style={{
           background: palette.immersive,
           border: `1px solid ${accent}55`,
           boxShadow: `inset 0 0 0 1px ${accent}18, 0 24px 48px -24px rgba(0,0,0,0.45)`,
         }}
+        {...REVEAL_SECTION}
       >
         <div className="relative z-10 max-w-3xl">
           <h2
@@ -723,7 +735,103 @@ export function PageCTA({
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   JargonTerm — tooltip definition for branded terms.
+   Baseline™, Blind Equity™, Rundown™ are opaque on first read.
+   This wraps the term with a dashed underline + hover/focus tooltip
+   so first-time readers get the definition inline without bouncing.
+   ════════════════════════════════════════════════════════════ */
+export function JargonTerm({
+  term,
+  definition,
+  dark,
+  accent: accentOverride,
+  children,
+}: {
+  term: string;
+  definition: string;
+  dark: boolean;
+  accent?: string;
+  /** The rendered text. Defaults to `term` — override when the surrounding
+      copy has slightly different formatting (e.g., trademark glyph). */
+  children?: ReactNode;
+}) {
+  const accent = accentOverride ?? (dark ? PINK_DARK : PINK);
+  const tooltipBg = dark ? '#0f1012' : '#0f1012';
+  const tooltipFg = '#f9f9fc';
+  const [open, setOpen] = useState(false);
+  return (
+    <span
+      tabIndex={0}
+      role="button"
+      aria-label={`${term}: ${definition}`}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={() => setOpen(false)}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') setOpen(false);
+        if (e.key === 'Enter' || e.key === ' ') setOpen((v) => !v);
+      }}
+      style={{
+        position: 'relative',
+        display: 'inline',
+        cursor: 'help',
+        borderBottom: `1px dashed ${accent}80`,
+        outline: 'none',
+        color: 'inherit',
+      }}
+    >
+      {children ?? term}
+      {open && (
+        <motion.span
+          role="tooltip"
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.18 }}
+          style={{
+            position: 'absolute',
+            bottom: 'calc(100% + 10px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            minWidth: 220,
+            maxWidth: 320,
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: tooltipBg,
+            color: tooltipFg,
+            fontSize: 12,
+            fontWeight: 400,
+            lineHeight: 1.5,
+            fontFamily: "'Inter', system-ui, sans-serif",
+            boxShadow: `inset 0 0 0 1px ${accent}40, 0 12px 28px -12px rgba(0,0,0,0.5)`,
+            zIndex: 50,
+            pointerEvents: 'none',
+            whiteSpace: 'normal',
+            textAlign: 'left',
+          }}
+        >
+          <span
+            style={{
+              display: 'block',
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: accent,
+              marginBottom: 4,
+            }}
+          >
+            {term}
+          </span>
+          {definition}
+        </motion.span>
+      )}
+    </span>
   );
 }

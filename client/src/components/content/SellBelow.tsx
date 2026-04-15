@@ -97,8 +97,8 @@ export default function SellBelow({ dark }: { dark: boolean }) {
           Most brokers win the mandate they would have lost walking in empty-handed. <strong style={{ color: accent }}>The attorneys, CPAs, and appraisers on your deal run free — they're on your deal, not their own book.</strong>
         </p>
 
-        {/* ═══ Multiple Map — leads (cool, sexy, click-to-position) ═══ */}
-        <section className="mb-28">
+        {/* ═══ Multiple Map — cinematic anchor (full-bleed immersive band) ═══ */}
+        <SectionBand tone="immersive" dark={dark}>
           <SectionHeader
             label="Step 1 · The Multiple Map"
             title="See where the business lands in its comp set."
@@ -106,7 +106,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
             dark={dark}
           />
           <MultipleMap dark={dark} ebitda={18} />
-        </section>
+        </SectionBand>
 
         {/* ═══ Baseline Calculator — second ═══ */}
         <section className="mb-28">

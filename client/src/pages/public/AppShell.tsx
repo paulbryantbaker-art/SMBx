@@ -40,6 +40,7 @@ import PortfolioAnalytics from '../../components/desktop/PortfolioAnalytics';
 import CommandPalette, { type CommandItem } from '../../components/desktop/CommandPalette';
 import DesktopFooter from '../../components/desktop/DesktopFooter';
 import { ModelRenderer } from '../../components/models';
+import { ScrollProgressBar } from '../../components/content/animations';
 const SellBelow = lazy(() => import('../../components/content/SellBelow'));
 const MobileSellStory = lazy(() => import('../../components/mobile/MobileSellStory'));
 const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
@@ -2325,6 +2326,10 @@ export default function AppShell() {
                     overflow: 'hidden',
                   }}
                 >
+                  {/* Scroll progress bar — visible on journey/marketing routes only.
+                      Gives continuous feedback on the long editorial pages. Reduced-
+                      motion users see nothing (CSS suppresses it). */}
+                  <ScrollProgressBar />
                   <Suspense fallback={<BelowSkeleton />}>
                     {activeTab === 'sell' ? (isMobile ? <MobileSellStory dark={dark} /> : <SellBelow dark={dark} />) :
                      activeTab === 'buy' ? (isMobile ? <MobileBuyStory dark={dark} /> : <BuyBelow dark={dark} />) :

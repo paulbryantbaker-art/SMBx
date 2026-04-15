@@ -161,12 +161,60 @@ export const radius = {
   full: 9999,
 } as const;
 
-/* ─── Motion ─── */
+/* ─── Motion ───
+   Scroll-reveal choreography lives here so every primitive stays in sync.
+   Intensity: apple-leaning — subtle y-translate, half-second fade, spring
+   ease. Reduced-motion automatically suppressed by framer-motion. */
 export const motion = {
   spring: [0.22, 1, 0.36, 1] as [number, number, number, number],
   fast: 0.18,
   base: 0.3,
   slow: 0.6,
+
+  /* Reveal variants — import and spread on a motion.div. */
+  reveal: {
+    /** Whole section fades + slides up. Applied on SectionBand/SectionHeader. */
+    section: {
+      initial: { opacity: 0, y: 16 },
+      whileInView: { opacity: 1, y: 0 },
+      viewport: { once: true, margin: '-10%' },
+      transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+    },
+    /** Stagger container — children reveal in sequence. */
+    staggerContainer: {
+      initial: 'hidden' as const,
+      whileInView: 'visible' as const,
+      viewport: { once: true, margin: '-10%' },
+      variants: {
+        hidden: {},
+        visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+      },
+    },
+    /** Child inside a stagger container. */
+    item: {
+      variants: {
+        hidden: { opacity: 0, y: 12 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+        },
+      },
+    },
+    /** Mobile-tuned reveal — shorter y-translate for smaller viewport. */
+    mobileSection: {
+      initial: { opacity: 0, y: 10 },
+      whileInView: { opacity: 1, y: 0 },
+      viewport: { once: true, margin: '-5%' },
+      transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+    },
+  },
+
+  /* Scroll progress bar — thin top-of-viewport indicator. */
+  progressBar: {
+    height: 2,
+    zIndex: 100,
+  },
 } as const;
 
 /* ─── Materials ───

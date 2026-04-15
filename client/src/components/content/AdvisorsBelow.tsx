@@ -330,8 +330,8 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           </div>
         </section>
 
-        {/* ═══ Capacity Slider ═══ */}
-        <section className="mb-28">
+        {/* ═══ Capacity Slider — cinematic anchor (full-bleed immersive band) ═══ */}
+        <SectionBand tone="immersive" dark={dark}>
           <SectionHeader
             label="Interactive · capacity"
             title="What does 22 active mandates look like?"
@@ -340,7 +340,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
             accent={accent}
           />
           <CapacitySlider dark={dark} />
-        </section>
+        </SectionBand>
 
         {/* ═══ Synergy Builder ═══ */}
         <section className="mb-28">

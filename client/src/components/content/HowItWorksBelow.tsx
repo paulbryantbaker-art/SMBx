@@ -156,18 +156,17 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
           accent={accent}
         />
 
-        {/* ═══ Live classifier — the page's signature interactive demo ═══ */}
-        <ScrollReveal>
-          <section className="mb-28">
-            <LiveClassifier dark={dark} accent={accent} />
-            <p
-              className="text-center mt-4 text-[12px]"
-              style={{ color: mutedColor }}
-            >
-              ~4 seconds here · ~90 seconds with your real numbers · no signup, no card
-            </p>
-          </section>
-        </ScrollReveal>
+        {/* ═══ Live classifier — cinematic anchor (full-bleed immersive band).
+             SectionBand has reveal built in; ScrollReveal is now redundant. ═══ */}
+        <SectionBand tone="immersive" dark={dark}>
+          <LiveClassifier dark={dark} accent={accent} />
+          <p
+            className="text-center mt-4 text-[12px]"
+            style={{ color: 'rgba(218,218,220,0.55)' }}
+          >
+            ~4 seconds here · ~90 seconds with your real numbers · no signup, no card
+          </p>
+        </SectionBand>
 
         {/* ═══ The 22 gates — editorial, not card grid ═══ */}
         <section className="mb-28">

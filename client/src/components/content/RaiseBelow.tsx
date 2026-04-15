@@ -202,7 +202,8 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
         )}
 
         {/* ═══ Stack Builder ═══ */}
-        <section className="mb-28">
+        {/* ═══ Stack Builder — cinematic anchor (full-bleed immersive band) ═══ */}
+        <SectionBand tone="immersive" dark={dark}>
           <SectionHeader
             label="Step 1 · The Stack"
             title="Drag the layers. Watch the math."
@@ -215,7 +216,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
             accent={accent}
           />
           <StackBuilder dark={dark} audience={audience} ev={180} ebitda={20} />
-        </section>
+        </SectionBand>
 
         {/* ═══ Slow vs Fast ═══ */}
         <SlowVsFast

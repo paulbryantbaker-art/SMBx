@@ -226,8 +226,8 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
           />
         </section>
 
-        {/* ═══ Live Rundown interactive ═══ */}
-        <section className="mb-28">
+        {/* ═══ Live Rundown — cinematic anchor (full-bleed immersive band) ═══ */}
+        <SectionBand tone="immersive" dark={dark}>
           <SectionHeader
             label="Try it live"
             title="Pick a deal. Watch The Rundown run."
@@ -235,7 +235,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
             dark={dark}
           />
           <LiveRundown dark={dark} />
-        </section>
+        </SectionBand>
 
         {/* ═══ Slow vs Fast ═══ */}
         <SlowVsFast

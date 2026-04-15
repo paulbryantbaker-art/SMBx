@@ -24,6 +24,10 @@
  */
 
 import { type ReactNode } from 'react';
+import { motion } from 'framer-motion';
+import { motion as motionTokens } from '../content/tokens';
+
+const MOBILE_REVEAL = motionTokens.reveal.mobileSection;
 
 export type JourneyKey = 'sell' | 'buy' | 'raise' | 'pmi' | 'brand';
 
@@ -204,7 +208,7 @@ export function MobileJourneyStory({
 
       {/* ─── 2. INTERACTIVE 1 (1.000) — first tactile surface ─── */}
       {primaryInteractive && (
-        <section style={{ padding: '24px 16px 28px' }}>
+        <motion.section style={{ padding: '24px 16px 28px' }} {...MOBILE_REVEAL}>
           {primaryInteractiveLabel && (
             <div
               style={{
@@ -231,12 +235,12 @@ export function MobileJourneyStory({
           >
             {primaryInteractive}
           </div>
-        </section>
+        </motion.section>
       )}
 
       {/* ─── 3. STORY (0.618) — character + outcome ─── */}
       {story && (
-        <section style={{ padding: '22px 22px 22px' }}>
+        <motion.section style={{ padding: '22px 22px 22px' }} {...MOBILE_REVEAL}>
           <div
             style={{
               display: 'inline-flex',
@@ -323,12 +327,12 @@ export function MobileJourneyStory({
               {story.outcome}
             </span>
           </div>
-        </section>
+        </motion.section>
       )}
 
       {/* ─── 4. PROOF KPIs (0.382) — 3 tile strip ─── */}
       {kpis && kpis.length > 0 && (
-        <section style={{ padding: '14px 22px 20px' }}>
+        <motion.section style={{ padding: '14px 22px 20px' }} {...MOBILE_REVEAL}>
           <div
             style={{
               display: 'grid',
@@ -373,12 +377,12 @@ export function MobileJourneyStory({
               </div>
             ))}
           </div>
-        </section>
+        </motion.section>
       )}
 
       {/* ─── 5. SECONDARY (0.382) — second demo or branded term card ─── */}
       {secondary && (
-        <section style={{ padding: '16px 16px 22px' }}>
+        <motion.section style={{ padding: '16px 16px 22px' }} {...MOBILE_REVEAL}>
           {secondaryLabel && (
             <div
               style={{
@@ -405,7 +409,7 @@ export function MobileJourneyStory({
           >
             {secondary}
           </div>
-        </section>
+        </motion.section>
       )}
 
       {/* ─── 5b. EXTRA SECTIONS — page-specific content composed via children ─── */}
@@ -413,7 +417,7 @@ export function MobileJourneyStory({
 
       {/* ─── 6. TAKEAWAY (0.236) — closing line ─── */}
       {takeaway && (
-        <section style={{ padding: '14px 22px 32px' }}>
+        <motion.section style={{ padding: '14px 22px 32px' }} {...MOBILE_REVEAL}>
           <p
             style={{
               margin: 0,
@@ -429,7 +433,7 @@ export function MobileJourneyStory({
           >
             {takeaway}
           </p>
-        </section>
+        </motion.section>
       )}
 
       {/* ─── 7. CTA (0.146) — sticky · optional ───

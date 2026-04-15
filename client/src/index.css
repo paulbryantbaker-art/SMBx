@@ -503,10 +503,14 @@ html.dark .glass-panel {
   padding: 12px;
 }
 
-/* Tool popup — drops UP from dock */
+/* Tool popup — drops UP from dock.
+   Apple Glass material: translucent bg + backdrop-blur + saturate.
+   Matches the mobile sticky CTA pattern for aesthetic consistency. */
 .home-tools-popup {
   position: absolute; left: 0; right: 0; bottom: calc(100% + 10px);
-  background: #fff; border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82); border-radius: 24px;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow: 0 4px 16px rgba(0,0,0,.06);
   padding: 4px 6px 8px;
   opacity: 0; transform: translateY(8px) scale(0.97);
@@ -610,7 +614,9 @@ html.dark .glass-panel {
 }
 .dark .home-tools-popup,
 .force-chat-dark .home-tools-popup {
-  background: #2f3133;
+  background: rgba(26, 28, 30, 0.82);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-color: rgba(255,255,255,0.08);
   box-shadow: 0 4px 24px rgba(0,0,0,.4);
 }
@@ -937,16 +943,24 @@ button:active:not(:disabled), [role="button"]:active {
   opacity: 0;
 }
 
-/* Scroll progress bar */
+/* Scroll progress bar — thin line at top of viewport, anchored left.
+   Width 100% + transform-origin left + scaleX 0→1 gives smooth progress
+   tracking. Mounts on journey/marketing routes only (not chat). */
 .scroll-progress-bar {
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
+  width: 100%;
   height: 2px;
-  background: #D44A78;
+  background: linear-gradient(to right, #D44A78, #E8709A);
   z-index: 100;
   transform-origin: left;
   will-change: transform;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-progress-bar { display: none; }
 }
 
 /* Conversation typing animation */
