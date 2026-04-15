@@ -60,6 +60,10 @@ export function SectionBand({
     paddingRight: fullBleed ? 'calc((100vw - 100%) / 2 + 24px)' : 0,
     paddingTop: 'clamp(48px, 8vw, 96px)',
     paddingBottom: 'clamp(48px, 8vw, 96px)',
+    // Match the `mb-28` (7rem / 112px) rhythm on regular <section> blocks so
+    // the next section doesn't visually glue to the band's edge. Without this
+    // the colored band ends and the next eyebrow sits right on the seam.
+    marginBottom: 'clamp(64px, 10vw, 112px)',
     ...style,
   };
   const content = (
