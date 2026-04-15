@@ -82,8 +82,8 @@ export default function PortfolioAnalytics({ dark, onOpenDeal }: Props) {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data: Deal[] = await r.json();
       setDeals(Array.isArray(data) ? data.filter(d => d.business_name && d.business_name.trim()) : []);
-    } catch (e: any) {
-      setError(e?.message || 'Couldn\u2019t load portfolio');
+    } catch {
+      setError('Couldn\u2019t load your portfolio');
     }
   }, []);
 

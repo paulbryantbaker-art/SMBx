@@ -121,7 +121,7 @@ export default function DealWorkspace({
         const list: Deliverable[] = Array.isArray(data) ? data : (data?.deliverables || []);
         setDeliverables(list);
       })
-      .catch(err => { if (!cancelled) setDeliverablesError(err.message || 'Couldn\u2019t load artifacts'); });
+      .catch(() => { if (!cancelled) setDeliverablesError('Couldn\u2019t load artifacts'); });
     return () => { cancelled = true; };
   }, [dealId, deliverablesRefresh]);
 

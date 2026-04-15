@@ -146,8 +146,8 @@ export default function PipelineTable({ dark, onOpenDeal, onNewDeal }: Props) {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: PipelineDeal[] = await res.json();
       setDeals(Array.isArray(data) ? data : []);
-    } catch (e: any) {
-      setError(e?.message || 'Couldn\u2019t load deals');
+    } catch {
+      setError('Couldn\u2019t load your deals');
     }
   }, []);
 
