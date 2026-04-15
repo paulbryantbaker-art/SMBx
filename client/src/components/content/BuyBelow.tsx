@@ -3,6 +3,7 @@ import usePageMeta from '../../hooks/usePageMeta';
 import { ConversationTyping } from './animations';
 import { LandingSBACalc } from './LandingCalculators';
 import { LiveRundown } from './LiveRundown';
+import { DealCalculator } from './DealCalculator';
 import {
   HookHeader,
   StoryBlock,
@@ -226,16 +227,30 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
           />
         </section>
 
-        {/* ═══ Live Rundown — cinematic anchor (full-bleed immersive band) ═══ */}
+        {/* ═══ Deal Calculator — cinematic anchor (full-bleed immersive band).
+             Works for ANY deal — buyer types their own numbers into the
+             sliders. The Rundown stays below as the qualitative scoring
+             demo on three preset cases. ═══ */}
         <SectionBand tone="immersive" dark={dark}>
           <SectionHeader
-            label="Try it live"
-            title="Pick a deal. Watch The Rundown run."
-            sub="Three real deal preview cases. Hit run — the seven dimensions reveal one at a time, then the verdict lands."
+            label="Model any deal"
+            title="Four sliders. Your deal, in five years."
+            sub="Drag the enterprise value, entry multiple, equity down, and growth rate. Watch your year-1 DSCR, year-5 equity, MOIC, and IRR update live. SBA eligibility flags when DSCR crosses 1.25×."
+            dark={dark}
+          />
+          <DealCalculator dark={dark} />
+        </SectionBand>
+
+        {/* ═══ Live Rundown — qualitative scoring on three preset cases ═══ */}
+        <section className="mb-28">
+          <SectionHeader
+            label="Preset cases"
+            title="Or watch The Rundown run on a real deal."
+            sub="Three deals across verticals. Hit run — the seven Rundown dimensions reveal one at a time, then the pursue / negotiate / kill verdict lands."
             dark={dark}
           />
           <LiveRundown dark={dark} />
-        </SectionBand>
+        </section>
 
         {/* ═══ Slow vs Fast ═══ */}
         <SlowVsFast

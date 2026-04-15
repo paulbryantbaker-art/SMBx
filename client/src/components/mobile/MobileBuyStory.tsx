@@ -12,6 +12,7 @@
 import { bridgeToYulia } from '../content/chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { LiveRundown } from '../content/LiveRundown';
+import { DealCalculator } from '../content/DealCalculator';
 import { MobileJourneyStory } from './MobileJourneyStory';
 
 const TEAL = '#3E8E8E';
@@ -83,8 +84,11 @@ export default function MobileBuyStory({ dark }: Props) {
         </>
       }
 
-      primaryInteractiveLabel="The Rundown™ · live"
-      primaryInteractive={<LiveRundown dark={dark} />}
+      primaryInteractiveLabel="The deal, in four sliders"
+      primaryInteractive={<DealCalculator dark={dark} accent={accent} />}
+
+      secondaryLabel="The Rundown™ · preset cases"
+      secondary={<LiveRundown dark={dark} />}
 
       story={{
         name: 'Priya S.',
