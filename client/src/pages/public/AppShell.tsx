@@ -804,14 +804,21 @@ export default function AppShell() {
     const ref = isMobile ? homeInputMobileRef : homeInputRef;
     const el = ref.current;
     if (!el) return;
-    // Critical on iOS Safari: focus() + value-set must happen SYNCHRONOUSLY
-    // inside the click handler's user-gesture scope. If we defer via rAF or
-    // setTimeout, iOS refuses to open the virtual keyboard (no user gesture)
-    // and refuses to focus an off-screen input. The popup unmounts on the
-    // same tick via setHomeToolsOpen(false) below, but the focus we already
-    // grabbed stays on the pill input.
+    // iOS Safari is strict about two things:
+    //   1. Setting input.value directly is overridden on next React render
+    //      unless we use the native HTMLInputElement setter so React's
+    //      synthetic-event system notices and our binding doesn't undo it.
+    //   2. focus() to open the virtual keyboard must happen inside the
+    //      user-gesture scope — no rAF, setTimeout, or microtask gap.
+    // Order: focus → native setter → input event → popup close.
     el.focus();
-    el.value = text;
+    try {
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+      if (setter) setter.call(el, text);
+      else el.value = text;
+    } catch {
+      el.value = text;
+    }
     try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch {}
     try { el.setSelectionRange(text.length, text.length); } catch {}
     setHomeToolsOpen(false);
