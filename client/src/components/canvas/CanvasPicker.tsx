@@ -309,10 +309,32 @@ export default function CanvasPicker({
       {/* Groups */}
       <div className="canvas-picker-scroll" style={{ flex: 1, overflowY: 'auto', padding: '6px 6px 12px' }}>
         {groups.size === 0 && (
-          <p style={{ textAlign: 'center', padding: '24px 12px', fontSize: 13, color: mutedC, margin: 0, lineHeight: 1.5 }}>
-            No documents open.<br />
-            Ask Yulia to generate one.
-          </p>
+          <div style={{ padding: '32px 12px', textAlign: 'center' }}>
+            <div
+              aria-hidden
+              style={{
+                width: 40, height: 40, borderRadius: 12,
+                margin: '0 auto 12px',
+                background: dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.03)',
+                border: `1px solid ${border}`,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: mutedC,
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+            </div>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: headingC, marginBottom: 4 }}>
+              No documents yet
+            </p>
+            <p style={{ margin: 0, fontSize: 12, color: mutedC, lineHeight: 1.5, maxWidth: 200, marginInline: 'auto' }}>
+              Ask Yulia for a Baseline, CIM, or capital stack — it'll show up here.
+            </p>
+          </div>
         )}
 
         {Array.from(groups.entries()).map(([key, group]) => {
