@@ -197,6 +197,20 @@ export default function MobileNotionHome({
           >
             {workspaceLabel}
           </span>
+          {/* Discoverability chevron — signals the pill opens a menu. */}
+          <svg
+            aria-hidden
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={muted}
+            strokeWidth="2"
+            strokeLinecap="round"
+            style={{ flexShrink: 0, marginLeft: -2 }}
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
         </button>
 
         {onMenuTap && (
