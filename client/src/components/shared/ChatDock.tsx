@@ -496,7 +496,8 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               ref={plusRef}
               onClick={() => setToolsOpen(prev => !prev)}
               className="flex items-center justify-center dock-plus-btn cursor-pointer active:scale-95"
-              style={{ width: 38, height: 38, borderRadius: 12, border: '1.5px solid rgba(0,0,0,0.06)', transition: 'all .2s', color: 'rgba(0,0,0,0.4)' }}
+              aria-label={toolsOpen ? 'Close tools' : 'Open tools'}
+              style={{ width: 44, height: 44, borderRadius: 12, border: '1.5px solid rgba(0,0,0,0.06)', transition: 'all .2s', color: 'rgba(0,0,0,0.4)' }}
               type="button"
             >
               {uploading ? (
@@ -510,8 +511,9 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             <button
               onClick={send}
               className="flex items-center justify-center border-none cursor-pointer active:scale-95"
+              aria-label="Send message"
               style={{
-                width: 42, height: 42, borderRadius: '50%',
+                width: 44, height: 44, borderRadius: '50%',
                 background: hasContent && !disabled ? '#D44A78' : '#D8D8DA',
                 color: hasContent && !disabled ? '#fff' : 'rgba(0,0,0,0.3)',
                 transition: 'all .2s',

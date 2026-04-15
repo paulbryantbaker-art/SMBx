@@ -86,8 +86,9 @@ export function StarterChips({ dark, onChipTap, onLearnTap }: Props) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 + i * 0.05, ease: [0.32, 0.72, 0, 1] }}
             onClick={() => onChipTap(chip.fill)}
-            className="flex items-center gap-1.5 px-4 h-10 rounded-full shrink-0 active:scale-[0.96] transition-transform"
+            className="flex items-center gap-1.5 px-4 rounded-full shrink-0 active:scale-[0.96] transition-transform"
             style={{
+              minHeight: 44,
               background: chipBg,
               border: `1px solid ${chipBd}`,
               color: bodyC,
