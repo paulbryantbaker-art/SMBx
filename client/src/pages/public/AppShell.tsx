@@ -340,16 +340,16 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
   },
   advisors: {
     overline: 'FOR ADVISORS & BROKERS',
-    headline: '12 listings. 480 hours.',
-    terraWord: '480 hours.',
-    tagline: 'The average M&A advisor spends 40 hours per listing on analytical work alone. That\u2019s 480 hours a year that could be spent closing deals instead of building spreadsheets.',
+    headline: 'Win the pitch. Win the deal. Get paid.',
+    terraWord: 'Get paid.',
+    tagline: 'You are a team of one. Yulia is a team of three.',
     chips: [
-      'Package a new listing for my client',
+      'First draft of this CIM by Friday',
+      'Build a buyer list better than Grata',
       'Pre-screen a buyer for SBA eligibility',
-      "Map a market for my client's buy mandate",
-      'Generate a CIM from raw financials',
+      'Run a Baseline for my pitch tomorrow',
     ],
-    placeholder: "Tell Yulia about the deal you're working on...",
+    placeholder: "Paste a CIM. Describe a mandate.",
   },
   pricing: {
     overline: 'Pricing',
@@ -2049,7 +2049,7 @@ export default function AppShell() {
         <div
           ref={scrollRef}
           className={isChat ? 'flex-1 overflow-y-auto min-h-0 bg-transparent' : 'flex-1 bg-transparent'}
-          style={isChat ? { WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', paddingBottom: isMobile ? 'calc(env(safe-area-inset-bottom) + 76px)' : 'env(safe-area-inset-bottom)' } as any : {} as any}
+          style={isChat ? { WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', paddingBottom: isMobile ? 'calc(env(safe-area-inset-bottom) + 104px)' : 'env(safe-area-inset-bottom)' } as any : {} as any}
         >
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
