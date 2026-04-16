@@ -35,7 +35,7 @@ import CanvasPicker from '../../components/canvas/CanvasPicker';
 import InstallWall, { PWA_DEEP_LINK_KEY } from '../../components/mobile/InstallWall';
 import MobileNotionHome from '../../components/mobile/MobileNotionHome';
 import MobileCanvasHeader from '../../components/mobile/MobileCanvasHeader';
-import MobileChatDrawer, { type ChatDrawerSnap } from '../../components/mobile/MobileChatDrawer';
+// MobileChatDrawer removed — mobile chat is full-screen (iMessage pattern).
 import DealWorkspace from '../../components/desktop/DealWorkspace';
 import PipelineTable from '../../components/desktop/PipelineTable';
 import SourcingCommandCenter from '../../components/desktop/SourcingCommandCenter';
@@ -824,9 +824,7 @@ export default function AppShell() {
   const [heroFocused, setHeroFocused] = useState(false); // tracks when hero input is focused — controls logo position
   const [chatWidth, setChatWidth] = useState(520); // resizable chat column width
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop sidebar collapse
-  // Mobile chat drawer snap point (Apple Maps pattern: 0.15 / 0.6 / 1).
-  // Externally controlled so we can expand to 0.6 when a deal is tapped.
-  const [chatDrawerSnap, setChatDrawerSnap] = useState<ChatDrawerSnap>(0.15);
+  // (chatDrawerSnap state removed — mobile is full-screen chat now.)
   const [pickerCollapsed, setPickerCollapsed] = useState<boolean>(() => {
     try { return localStorage.getItem('canvas_picker_collapsed') === '1'; } catch { return false; }
   });
@@ -1107,16 +1105,8 @@ export default function AppShell() {
       if (!user && activeTab === 'home') {
         setActiveTab('sell');
       }
-      // Mobile + logged-in: drawer IS the chat surface. Don't flip viewState
-      // or navigate — that would render the chat view in the background AS
-      // WELL as the drawer, double-rendering the conversation. Just expand
-      // the drawer to 0.6 so the response is readable.
-      if (isMobile && user) {
-        setChatDrawerSnap(0.6);
-        return;
-      }
-      // Desktop / logged-out: the original morph flow — landing fades out,
-      // chat view fades in.
+      // Morph from landing → chat. Same code path for desktop AND mobile —
+      // mobile = full-screen chat (iMessage pattern), no drawer.
       const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
       const holdMs = reducedMotion ? 0 : 240;
       setMorphing(true);
@@ -1129,7 +1119,7 @@ export default function AppShell() {
     }
     if (user) authChat.sendMessage(content);
     else anonChat.sendMessage(content, activeTab);
-  }, [viewState, user, authChat, anonChat, navigate, activeTab, isMobile]);
+  }, [viewState, user, authChat, anonChat, navigate, activeTab]);
 
   // Chip click
   const handleChipClick = useCallback((text: string) => {
@@ -2152,30 +2142,37 @@ export default function AppShell() {
                         }
                       }}
                       onDealTap={(dealId) => {
+                        // Full-screen chat (iMessage pattern). Select the
+                        // latest conversation for this deal and navigate
+                        // to /chat — the chat view fades in over home.
                         const deal = authChat.grouped?.deals.find(d => d.id === dealId);
                         const latestConv = deal?.conversations[0];
                         if (latestConv) {
                           authChat.selectConversation(latestConv.id);
-                          // Stay on home (background) and expand the chat
-                          // drawer to 0.6 so the conversation is readable
-                          // without leaving the Notion home view.
-                          setChatDrawerSnap(0.6);
+                          setViewState('chat');
+                          navigate(`/chat/${latestConv.id}`);
                         }
                       }}
                       onDealLongPress={(dealId) => setDealActionsTargetId(dealId)}
                       onConversationTap={(convId) => {
                         authChat.selectConversation(convId);
-                        setChatDrawerSnap(0.6);
+                        setViewState('chat');
+                        navigate(`/chat/${convId}`);
                       }}
                       onSeeAll={() => setStackExpandedOpen(true)}
                       onStartFirstDeal={(fill) => {
-                        // Drawer is always mounted on logged-in mobile.
-                        // Just expand it to 0.6 and prefill the input —
-                        // no view switching, no chat empty-state hop.
-                        setChatDrawerSnap(0.6);
-                        // ChatDock is already rendered inside the drawer
-                        // at peek (0.15); setValue works immediately.
-                        dockRef.current?.setValue(fill);
+                        // Navigate to chat view, prefill the dock so the
+                        // user can edit/send. dockRef is bound to the
+                        // mobile chat dock portal which stays mounted
+                        // across the morph.
+                        setViewState('chat');
+                        navigate('/chat');
+                        // setValue after the navigation tick so the dock
+                        // mounted in the new view picks it up.
+                        requestAnimationFrame(() => {
+                          dockRef.current?.setValue(fill);
+                          dockRef.current?.focus();
+                        });
                       }}
                       onAccountTap={() => setAccountSheetOpen(true)}
                     />
@@ -2555,11 +2552,9 @@ export default function AppShell() {
               Fade-in picks up immediately after landing's morphOut completes.
               Subtle upward drift makes the chat feel like it "rises in" under
               the departing landing. 0.3s + spring ease matches morphOut rhythm.
-
-              Mobile + logged-in: the MobileChatDrawer below is the chat surface;
-              this background block is suppressed so the conversation doesn't
-              double-render (drawer + background). */}
-          {viewState === 'chat' && !(isMobile && user) && (
+              Same render for desktop and mobile — mobile = full-screen chat
+              (iMessage pattern). The drawer experiment was reverted. */}
+          {viewState === 'chat' && (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2567,51 +2562,14 @@ export default function AppShell() {
               style={{
                 display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
                 minHeight: '100%',
-                ...(isMobile ? { paddingTop: 48 } : {}),
+                // Mobile chat: clear the fixed top bar (back arrow + deal
+                // name) which is portaled separately. ~44px content +
+                // safe-area-inset-top, with 8px breathing room.
+                ...(isMobile ? { paddingTop: 'calc(env(safe-area-inset-top, 0px) + 60px)' } : {}),
               }}
             >
-              {/* Mobile scope indicator — tells the user which deal this chat is about.
-                  Small, unobtrusive, tappable to return to the stack. Replaces the
-                  chapter strip we hid on mobile. */}
-              {isMobile && user && authChat.grouped && authChat.activeDealId && (() => {
-                const deal = authChat.grouped.deals.find(d => d.id === authChat.activeDealId);
-                if (!deal || !deal.business_name) return null;
-                const journey = (deal.journey_type || 'sell').toLowerCase();
-                const color = JOURNEY_COLORS[journey] || '#D44A78';
-                return (
-                  <button
-                    onClick={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); }}
-                    type="button"
-                    style={{
-                      alignSelf: 'center',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '6px 12px 6px 8px',
-                      marginBottom: 10,
-                      borderRadius: 999,
-                      border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
-                      background: dark ? '#1F2123' : '#FFFFFF',
-                      color: dark ? '#F0F0F3' : '#1A1C1E',
-                      fontFamily: 'Inter, system-ui',
-                      fontSize: 12,
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      WebkitTapHighlightColor: 'transparent',
-                      boxShadow: dark ? 'none' : '0 1px 2px rgba(0,0,0,0.04)',
-                    }}
-                    aria-label={`Scoped to ${deal.business_name}. Tap to return to deals.`}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.55 }}>
-                      <polyline points="15 18 9 12 15 6" />
-                    </svg>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
-                    <span style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {deal.business_name}
-                    </span>
-                  </button>
-                );
-              })()}
+              {/* Mobile scope indicator removed — the fixed top bar (back
+                  arrow + deal name) above replaces it. */}
 
               {/* Chapter strip — shows deal's conversation chapters as horizontal timeline.
                   Desktop only — on mobile the DealStack + single-conversation-per-card
@@ -2728,59 +2686,95 @@ export default function AppShell() {
             />
           </div>
         )}
-        {/* MOBILE CHAT — Apple Maps drawer pattern for logged-in users.
-            Three snap points: 0.15 peek, 0.6 active, 1.0 full read.
-            Background (MobileNotionHome) stays interactive at 0.15.
-            Logged-out anon users keep the simple bottom pill. */}
-        {showDock && isMobile && user && createPortal(
-          <MobileChatDrawer
-            dark={dark}
-            snap={chatDrawerSnap}
-            onSnapChange={setChatDrawerSnap}
-            isEmpty={messages.length === 0 && !streamingText}
-            greeting={
-              <>
-                <span style={{ fontWeight: 700, color: dark ? '#F0F0F3' : '#0f1012' }}>
-                  Hi{user.display_name ? `, ${user.display_name.split(' ')[0]}` : ''}.
-                </span>{' '}
-                Tell me about a business you're buying, selling, raising for, or closing — or tap{' '}
-                <span style={{ color: '#D44A78', fontWeight: 700 }}>+</span> for starters.
-              </>
-            }
-            pill={
-              <ChatDock
-                ref={dockRef}
-                onSend={handleSend}
-                onFileUpload={handleFileUpload}
-                variant="hero"
-                rows={1}
-                placeholder="Reply to Yulia..."
-                disabled={sending}
-                isMobile={isMobile}
-              />
-            }
-            messages={
-              <div className={`${dark ? 'force-chat-dark' : ''} px-3 py-2`}>
-                <ChatMessages
-                  messages={messages}
-                  streamingText={streamingText}
-                  sending={sending}
-                  activeTool={activeTool}
-                  error={null}
-                  onOpenDeliverable={handleOpenDeliverable}
-                  desktop={false}
-                  dark={dark}
-                  userName={user.display_name || user.email || null}
-                  hideEmptyState
-                />
-              </div>
-            }
-          />,
+        {/* MOBILE CHAT TOP BAR — back arrow + deal name. Full-screen chat
+            pattern (iMessage / WhatsApp / Claude app). Portaled to body
+            so position:fixed top:0 isn't broken by ancestor transforms.
+            Only on mobile + chat view + logged-in (anon already has the
+            sign-in chrome elsewhere). */}
+        {isMobile && user && viewState === 'chat' && createPortal(
+          <div
+            id="mobile-chat-topbar"
+            style={{
+              position: 'fixed',
+              top: 0, left: 0, right: 0,
+              zIndex: 20,
+              paddingTop: 'env(safe-area-inset-top, 0px)',
+              background: dark ? 'rgba(20,22,24,0.92)' : 'rgba(255,255,255,0.96)',
+              backdropFilter: 'blur(18px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(18px) saturate(180%)',
+              borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.06)'}`,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44 }}>
+              <button
+                type="button"
+                onClick={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); }}
+                aria-label="Back to deals"
+                style={{
+                  width: 40, height: 40, borderRadius: 999,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'transparent', border: 'none',
+                  color: dark ? '#F0F0F3' : '#1A1C1E',
+                  cursor: 'pointer',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+                className="active:scale-95"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+              {(() => {
+                if (!authChat.grouped || !authChat.activeDealId) {
+                  return (
+                    <span style={{
+                      fontFamily: 'Sora, system-ui',
+                      fontSize: 15, fontWeight: 700,
+                      color: dark ? '#F0F0F3' : '#1A1C1E',
+                      letterSpacing: '-0.01em',
+                    }}>Yulia</span>
+                  );
+                }
+                const deal = authChat.grouped.deals.find(d => d.id === authChat.activeDealId);
+                if (!deal || !deal.business_name) {
+                  return (
+                    <span style={{
+                      fontFamily: 'Sora, system-ui',
+                      fontSize: 15, fontWeight: 700,
+                      color: dark ? '#F0F0F3' : '#1A1C1E',
+                    }}>Yulia</span>
+                  );
+                }
+                const journey = (deal.journey_type || 'sell').toLowerCase();
+                const color = JOURNEY_COLORS[journey] || '#D44A78';
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                    <span style={{
+                      fontFamily: 'Sora, system-ui',
+                      fontSize: 15, fontWeight: 700,
+                      color: dark ? '#F0F0F3' : '#1A1C1E',
+                      letterSpacing: '-0.01em',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}>{deal.business_name}</span>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>,
           document.body
         )}
-        {showDock && isMobile && !user && viewState === 'chat' && createPortal(
+
+        {/* MOBILE CHAT PILL — canonical position:fixed bottom:0 portal.
+            Same proven pattern as the anon home pill (AppShell.tsx:2349).
+            Renders for: any logged-in mobile user (home OR chat), AND for
+            anon users in chat view. Anon home gets its own pill+chips
+            block higher up in the landing render. */}
+        {showDock && isMobile && (user || viewState === 'chat') && createPortal(
           <div
-            id="mobile-chat-dock-portal-anon"
+            id="mobile-chat-dock-portal"
             className={`chat-pill-mobile-container ${dark ? 'force-chat-dark' : ''} px-3 pt-3`}
             style={{
               position: 'fixed',
@@ -2792,9 +2786,10 @@ export default function AppShell() {
             <ChatDock
               ref={dockRef}
               onSend={handleSend}
+              onFileUpload={user ? handleFileUpload : undefined}
               variant="hero"
               rows={1}
-              placeholder="Reply to Yulia..."
+              placeholder={user ? 'Reply to Yulia...' : 'Tell Yulia what you\'re working on...'}
               disabled={sending}
               isMobile={isMobile}
             />
