@@ -130,7 +130,10 @@ export default function MobileDealListHome({
   const muted = dark ? 'rgba(218,218,220,0.55)' : '#6e6a63';
   const sectionLabel = dark ? 'rgba(218,218,220,0.45)' : '#9ea0a5';
   const border = dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.06)';
-  const glassBg = dark ? 'rgba(20,22,24,0.72)' : 'rgba(255,255,255,0.82)';
+  // Home top bar: solid, matches page background exactly. Glass here created a
+  // shade mismatch against the solid #F9F9FC content below because blur over
+  // the body rendered as a different effective color.
+  const headerBg = pageBg;
   const accent = dark ? '#E8709A' : '#D44A78';
 
   const firstInitial = (userName || 'Y').trim().charAt(0).toUpperCase();
@@ -147,7 +150,7 @@ export default function MobileDealListHome({
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
-      {/* Top bar — Glass. Right-aligned icons only (bell + account). */}
+      {/* Top bar — solid, matches page bg exactly. Right-aligned icons (bell + account). */}
       <div
         style={{
           position: 'sticky',
@@ -161,9 +164,7 @@ export default function MobileDealListHome({
           alignItems: 'center',
           justifyContent: 'flex-end',
           gap: 6,
-          background: glassBg,
-          backdropFilter: 'blur(18px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(18px) saturate(180%)',
+          background: headerBg,
           borderBottom: `1px solid ${border}`,
         }}
       >

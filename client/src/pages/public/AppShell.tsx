@@ -2213,7 +2213,7 @@ export default function AppShell() {
                           <LogoHero height={42} dark={dark} />
                         </div>
                       )}
-                      {user ? (
+                      {user && !authLoading ? (
                         /* ─── Logged in: personal greeting + next steps ─── */
                         <>
                           <h1 className={`font-headline font-black tracking-[-0.04em] ${isMobile ? 'text-[36px] leading-[1] mb-4' : 'text-[52px] leading-[1] mb-4'}`}>
@@ -2229,12 +2229,43 @@ export default function AppShell() {
                       ) : (
                         /* ─── Not logged in: landing page hook ─── */
                         <>
-                          <h1 className={`font-headline font-black tracking-[-0.045em] ${isMobile ? 'text-[44px] leading-[1] mb-6' : 'text-[88px] leading-[0.92] mb-6'}`}>
-                            90% of what an <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>investment bank</span> does.
+                          <h1
+                            className={`font-headline font-black tracking-[-0.045em] ${isMobile ? 'text-[48px] leading-[1] mb-6' : 'text-[88px] leading-[0.94] mb-6'}`}
+                            style={{ textWrap: 'balance' } as React.CSSProperties}
+                          >
+                            A deal team for <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>every deal</span>.
                           </h1>
                           <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[340px]' : 'text-xl max-w-2xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                            The analyst. The associate. The VP. For every deal. <span className={`font-bold ${dark ? 'text-white' : 'text-[#1a1c1e]'}`}>$149 a month</span>.
+                            The analyst. The associate. The VP. For <span className={`font-bold ${dark ? 'text-white' : 'text-[#1a1c1e]'}`}>$149 a month</span>.
                           </p>
+
+                          {/* Segment chip row — desktop only, logged-out only.
+                              Tier 1 practitioners + principal seller get a "this is for me"
+                              lane beside the chat pill. Each chip pre-fills the input so
+                              Yulia can respond with segment-specific context on message 1. */}
+                          {!isMobile && (
+                            <div className="flex flex-wrap justify-center gap-2 mt-10 mb-2 max-w-2xl mx-auto">
+                              {[
+                                { label: "I'm an M&A advisor",         fill: "I'm an M&A advisor — " },
+                                { label: "I'm an independent sponsor", fill: "I'm an independent sponsor — " },
+                                { label: "I'm a searcher",             fill: "I'm a searcher — " },
+                                { label: "I'm a business owner",       fill: "I'm a business owner — " },
+                              ].map(chip => (
+                                <button
+                                  key={chip.label}
+                                  type="button"
+                                  onClick={() => fillHomeInput(chip.fill)}
+                                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-[0.97] cursor-pointer border ${
+                                    dark
+                                      ? 'bg-zinc-900/60 border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600'
+                                      : 'bg-white border-[rgba(15,16,18,0.10)] text-[#1a1c1e] hover:border-[#D44A78]/50 hover:bg-[#D44A78]/5'
+                                  }`}
+                                >
+                                  {chip.label}
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </>
                       )}
 
@@ -2583,12 +2614,20 @@ export default function AppShell() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               style={{
-                display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+                display: 'flex', flexDirection: 'column',
+                // Mobile: messages start at the top of the chat canvas and flow
+                // downward (Claude pattern). Desktop keeps bottom-anchored flex.
+                justifyContent: isMobile ? 'flex-start' : 'flex-end',
                 minHeight: '100%',
-                // Mobile chat: clear the fixed top bar (back arrow + deal
-                // name) which is portaled separately. ~44px content +
-                // safe-area-inset-top, with 8px breathing room.
-                ...(isMobile ? { paddingTop: 'calc(env(safe-area-inset-top, 0px) + 148px)' } : {}),
+                // Mobile chat: clear the portaled fixed top bar. Padding matches
+                // which chrome is actually mounted: 148pt when a deal is active
+                // (header + surface toggle + chapter picker), 60pt for the simple
+                // "Yulia" header on exploring/pre-deal chats.
+                ...(isMobile ? {
+                  paddingTop: (authChat.grouped?.deals.find(d => d.id === authChat.activeDealId)?.business_name
+                    ? 'calc(env(safe-area-inset-top, 0px) + 148px)'
+                    : 'calc(env(safe-area-inset-top, 0px) + 60px)'),
+                } : {}),
               }}
             >
               {/* Mobile scope indicator removed — the fixed top bar (back
