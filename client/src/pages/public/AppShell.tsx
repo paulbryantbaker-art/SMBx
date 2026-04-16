@@ -345,7 +345,7 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
     tagline: 'You are a team of one. Yulia is a team of three.',
     chips: [
       'First draft of this CIM by Friday',
-      'Build a buyer list better than Grata',
+      'Build a buyer list in an afternoon',
       'Pre-screen a buyer for SBA eligibility',
       'Run a Baseline for my pitch tomorrow',
     ],
@@ -1094,6 +1094,23 @@ export default function AppShell() {
       scrollRef.current.scrollTop = 0;
     }
   }, [viewState, activeTab]);
+
+  // iMessage-style swipe-to-dismiss-keyboard — any touch drag on the chat
+  // scroll container dismisses an active keyboard. Covers both pull-down to
+  // dismiss and general "scroll to dismiss" gestures. Mobile only.
+  useEffect(() => {
+    if (!isMobile) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const onTouchMove = () => {
+      const active = document.activeElement as HTMLElement | null;
+      if (active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT')) {
+        active.blur();
+      }
+    };
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    return () => el.removeEventListener('touchmove', onTouchMove);
+  }, [isMobile]);
 
   // Subscription model — no wallet balance needed
 
@@ -2216,7 +2233,7 @@ export default function AppShell() {
                             90% of what an <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>investment bank</span> does.
                           </h1>
                           <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[340px]' : 'text-xl max-w-2xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                            The analyst, associate, and VP you couldn&rsquo;t afford to hire. For <span className={`font-bold ${dark ? 'text-white' : 'text-[#1a1c1e]'}`}>$149 a month</span>.
+                            The analyst. The associate. The VP. For every deal. <span className={`font-bold ${dark ? 'text-white' : 'text-[#1a1c1e]'}`}>$149 a month</span>.
                           </p>
                         </>
                       )}
