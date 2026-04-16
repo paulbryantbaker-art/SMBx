@@ -2327,18 +2327,18 @@ export default function AppShell() {
                       breathing room in the lower 38.2%, and the portaled pill floats over
                       the bottom of that breathing room. Grok-like simplicity. Mobile only,
                       and only when NOT showing the deal stack (stack manages its own scroll). */}
-                  {isMobile && !(user && authChat.grouped) && <div className="flex-1" aria-hidden />}
+                  {isMobile && !user && !authLoading && <div className="flex-1" aria-hidden />}
 
                   {/* ╔══════════════════════════════════════════════════════════════════════╗
-                      ║ iOS PWA mobile home pill — LOAD-BEARING SETUP, see                   ║
-                      ║ memory/architecture_ios_pwa_pill.md before modifying.                ║
-                      ║ Portaled to document.body + position:fixed bottom:0 +                ║
-                      ║ env(safe-area-inset-bottom) padding. No JS viewport tracking —       ║
-                      ║ trust interactive-widget=resizes-content in the viewport meta.       ║
-                      ║ The min-height:100lvh/-webkit-fill-available trio in index.css is    ║
-                      ║ what makes bottom:0 actually reach the screen edge on iOS standalone.║
+                      ║ iOS mobile home pill — LOGGED-OUT ONLY.                              ║
+                      ║ Logged-in PWA users see MobileNotionHome above, which has its own    ║
+                      ║ empty state ("Start your first deal") that transitions to chat mode  ║
+                      ║ where ChatDock renders at the bottom. This portal is marketing-      ║
+                      ║ surface chrome — journey chips + the "Tell me about your business"   ║
+                      ║ input for anonymous users browsing in Safari.                        ║
+                      ║ See memory/architecture_ios_pwa_pill.md for positioning rules.       ║
                       ╚══════════════════════════════════════════════════════════════════════╝ */}
-                  {isMobile && createPortal(
+                  {isMobile && !user && !authLoading && createPortal(
                     <div
                       id="mobile-home-pill-portal"
                       className="chat-pill-mobile-container fixed left-0 right-0 bottom-0 z-10"
