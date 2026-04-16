@@ -33,7 +33,7 @@ import DealMessagesPanel from '../../components/documents/DealMessagesPanel';
 import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/CanvasToolbar';
 import CanvasPicker from '../../components/canvas/CanvasPicker';
 import InstallWall, { PWA_DEEP_LINK_KEY } from '../../components/mobile/InstallWall';
-import MobileNotionHome from '../../components/mobile/MobileNotionHome';
+import MobileDealListHome from '../../components/mobile/MobileDealListHome';
 import MobileCanvasHeader from '../../components/mobile/MobileCanvasHeader';
 // MobileChatDrawer removed — mobile chat is full-screen (iMessage pattern).
 import DealWorkspace from '../../components/desktop/DealWorkspace';
@@ -2096,14 +2096,14 @@ export default function AppShell() {
                       Desktop + logged-out always see the hero/greeting block. */}
                   {/* Auth-aware mobile home split:
                       - authLoading: show nothing (avoid flash of journey chips)
-                      - user set: MobileNotionHome (logged-in home surface)
+                      - user set: MobileDealListHome (logged-in home surface)
                       - user null + !authLoading: logged-out hero + chips */}
                   {isMobile && authLoading ? (
                     <div className="flex-1 flex items-center justify-center" style={{ opacity: 0.3 }}>
                       <img src={dark ? '/X-white.png' : '/X.png'} alt="" style={{ height: 36, objectFit: 'contain' }} />
                     </div>
                   ) : isMobile && user ? (
-                    <MobileNotionHome
+                    <MobileDealListHome
                       dark={dark}
                       loading={!authChat.grouped}
                       userName={user.display_name || user.email || null}
@@ -2212,11 +2212,11 @@ export default function AppShell() {
                       ) : (
                         /* ─── Not logged in: landing page hook ─── */
                         <>
-                          <h1 className={`font-headline font-black tracking-[-0.04em] ${isMobile ? 'text-[40px] leading-[1] mb-6' : 'text-[64px] leading-[0.98] mb-4'}`}>
+                          <h1 className={`font-headline font-black tracking-[-0.045em] ${isMobile ? 'text-[44px] leading-[1] mb-6' : 'text-[88px] leading-[0.92] mb-6'}`}>
                             90% of what an <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>investment bank</span> does.
                           </h1>
-                          <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[320px]' : 'text-xl max-w-2xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                            Everything that doesn&rsquo;t require a license. You keep the judgment. Yulia does the work.
+                          <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[340px]' : 'text-xl max-w-2xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                            The analyst, associate, and VP you couldn&rsquo;t afford to hire. For <span className={`font-bold ${dark ? 'text-white' : 'text-[#1a1c1e]'}`}>$149 a month</span>.
                           </p>
                         </>
                       )}
@@ -2261,7 +2261,7 @@ export default function AppShell() {
                                 <input
                                   ref={homeInputRef}
                                   className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
-                                  placeholder="Tell me about your business..."
+                                  placeholder="Paste a CIM. Describe a deal."
                                   type="search"
                                   autoComplete="off"
                                   data-1p-ignore="true"
@@ -2395,7 +2395,7 @@ export default function AppShell() {
                           <input
                             ref={homeInputMobileRef}
                             className={`bg-transparent border-none focus:ring-0 flex-1 py-3 text-base outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
-                            placeholder="Tell me about your business..."
+                            placeholder="Paste a CIM. Describe a deal."
                             type="search"
                             autoComplete="off"
                             data-1p-ignore="true"
