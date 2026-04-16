@@ -118,6 +118,24 @@ export default function MobileChatDrawer({
     return () => el.removeEventListener('focusin', onFocusIn);
   }, [activeSnap, onSnapChange]);
 
+  // Lock background scroll when the drawer is expanded past peek. At 0.15
+  // the background is fully interactive (Apple Maps pattern). At >= 0.6
+  // the drawer is the active surface; the visible portion of the home
+  // shouldn't scroll under your thumb when you're trying to scroll
+  // through messages.
+  useEffect(() => {
+    const lock = activeSnap >= 0.6;
+    if (!lock) return;
+    const prevOverflow = document.body.style.overflow;
+    const prevTouch = document.body.style.touchAction;
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.touchAction = prevTouch;
+    };
+  }, [activeSnap]);
+
   const showExpandedContent = activeSnap >= 0.6;
   const drawerBg = dark ? 'rgba(20,22,24,0.92)' : 'rgba(255,255,255,0.96)';
   const handleC = dark ? 'rgba(255,255,255,0.22)' : 'rgba(15,16,18,0.18)';
