@@ -90,7 +90,7 @@ function proseClasses(dark: boolean) {
   ].join(' ');
 }
 
-export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, desktop, dark = false }: ChatMessagesProps) {
+export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, desktop, dark = false, userName }: ChatMessagesProps) {
   /* ─── Dark-aware colors ─── */
   const textColor = dark
     ? (desktop ? '#e2e8f0' : '#f0f0f2')
