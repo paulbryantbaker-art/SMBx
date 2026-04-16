@@ -2719,7 +2719,12 @@ export default function AppShell() {
             />
           </div>
         )}
-        {showDock && viewState === 'chat' && isMobile && createPortal(
+        {/* ChatDock on mobile — always visible for logged-in users (on BOTH
+            landing/home and chat views). This is the "Notion at top, chat at
+            bottom" pattern: the pill is the permanent AI surface. For logged-
+            out users, the home-pill-portal (gated on !user) provides the
+            anonymous equivalent. */}
+        {showDock && isMobile && (viewState === 'chat' || user) && createPortal(
           // Apply .chat-pill-mobile-container so padding-bottom rides
           // env(keyboard-inset-height) on iOS 17+. Falls back to
           // env(safe-area-inset-bottom) when keyboard-inset-height isn't
