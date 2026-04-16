@@ -35,6 +35,7 @@ import CanvasPicker from '../../components/canvas/CanvasPicker';
 import InstallWall, { PWA_DEEP_LINK_KEY } from '../../components/mobile/InstallWall';
 import MobileNotionHome from '../../components/mobile/MobileNotionHome';
 import MobileCanvasHeader from '../../components/mobile/MobileCanvasHeader';
+import MobileChatDrawer, { type ChatDrawerSnap } from '../../components/mobile/MobileChatDrawer';
 import DealWorkspace from '../../components/desktop/DealWorkspace';
 import PipelineTable from '../../components/desktop/PipelineTable';
 import SourcingCommandCenter from '../../components/desktop/SourcingCommandCenter';
@@ -823,6 +824,9 @@ export default function AppShell() {
   const [heroFocused, setHeroFocused] = useState(false); // tracks when hero input is focused — controls logo position
   const [chatWidth, setChatWidth] = useState(520); // resizable chat column width
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop sidebar collapse
+  // Mobile chat drawer snap point (Apple Maps pattern: 0.15 / 0.6 / 1).
+  // Externally controlled so we can expand to 0.6 when a deal is tapped.
+  const [chatDrawerSnap, setChatDrawerSnap] = useState<ChatDrawerSnap | null>(0.15);
   const [pickerCollapsed, setPickerCollapsed] = useState<boolean>(() => {
     try { return localStorage.getItem('canvas_picker_collapsed') === '1'; } catch { return false; }
   });
@@ -2144,15 +2148,16 @@ export default function AppShell() {
                         const latestConv = deal?.conversations[0];
                         if (latestConv) {
                           authChat.selectConversation(latestConv.id);
-                          navigate(`/chat/${latestConv.id}`);
-                          setViewState('chat');
+                          // Stay on home (background) and expand the chat
+                          // drawer to 0.6 so the conversation is readable
+                          // without leaving the Notion home view.
+                          setChatDrawerSnap(0.6);
                         }
                       }}
                       onDealLongPress={(dealId) => setDealActionsTargetId(dealId)}
                       onConversationTap={(convId) => {
                         authChat.selectConversation(convId);
-                        navigate(`/chat/${convId}`);
-                        setViewState('chat');
+                        setChatDrawerSnap(0.6);
                       }}
                       onSeeAll={() => setStackExpandedOpen(true)}
                       onStartFirstDeal={(fill) => {
@@ -2719,38 +2724,59 @@ export default function AppShell() {
             />
           </div>
         )}
-        {/* ChatDock on mobile — always visible for logged-in users (on BOTH
-            landing/home and chat views). This is the "Notion at top, chat at
-            bottom" pattern: the pill is the permanent AI surface. For logged-
-            out users, the home-pill-portal (gated on !user) provides the
-            anonymous equivalent. */}
-        {showDock && isMobile && (viewState === 'chat' || user) && createPortal(
-          // Apply .chat-pill-mobile-container so padding-bottom rides
-          // env(keyboard-inset-height) on iOS 17+. Falls back to
-          // env(safe-area-inset-bottom) when keyboard-inset-height isn't
-          // available. Previous inline paddingBottom shadowed the class
-          // and lost the keyboard-aware behavior — chat pill could hide
-          // behind the iOS form-assistant toolbar mid-typing.
+        {/* MOBILE CHAT — Apple Maps drawer pattern for logged-in users.
+            Three snap points: 0.15 peek, 0.6 active, 1.0 full read.
+            Background (MobileNotionHome) stays interactive at 0.15.
+            Logged-out anon users keep the simple bottom pill. */}
+        {showDock && isMobile && user && createPortal(
+          <MobileChatDrawer
+            dark={dark}
+            snap={chatDrawerSnap}
+            onSnapChange={setChatDrawerSnap}
+            pill={
+              <ChatDock
+                ref={dockRef}
+                onSend={handleSend}
+                onFileUpload={handleFileUpload}
+                variant="hero"
+                rows={1}
+                placeholder="Reply to Yulia..."
+                disabled={sending}
+                isMobile={isMobile}
+              />
+            }
+            messages={
+              <div className={`${dark ? 'force-chat-dark' : ''} px-3 py-2`}>
+                <ChatMessages
+                  messages={messages}
+                  streamingText={streamingText}
+                  sending={sending}
+                  activeTool={activeTool}
+                  error={null}
+                  onOpenDeliverable={handleOpenDeliverable}
+                  desktop={false}
+                  dark={dark}
+                  userName={user.display_name || user.email || null}
+                />
+              </div>
+            }
+          />,
+          document.body
+        )}
+        {showDock && isMobile && !user && viewState === 'chat' && createPortal(
           <div
-            id="mobile-chat-dock-portal"
+            id="mobile-chat-dock-portal-anon"
             className={`chat-pill-mobile-container ${dark ? 'force-chat-dark' : ''} px-3 pt-3`}
             style={{
               position: 'fixed',
-              left: 0,
-              right: 0,
-              bottom: 0,
+              left: 0, right: 0, bottom: 0,
               zIndex: 10,
               touchAction: 'manipulation',
             }}
           >
-            {/* No halo on the chat pill — Safari's bottom toolbar abuts the pill
-                and visually slices the blur. The pill's own border + box-shadow
-                (in .dock-hero-pill CSS) provide enough depth without the bleed.
-                Home pill keeps its halo because it sits in a clean viewport edge. */}
             <ChatDock
               ref={dockRef}
               onSend={handleSend}
-              onFileUpload={user ? handleFileUpload : undefined}
               variant="hero"
               rows={1}
               placeholder="Reply to Yulia..."
