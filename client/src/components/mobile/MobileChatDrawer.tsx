@@ -1,60 +1,56 @@
 /**
- * MobileChatDrawer — Apple Maps + iMessage drawer (hand-rolled, simplified).
+ * MobileChatDrawer — Apple Maps drawer (canonical iOS PWA pattern).
  *
- * Vaul looked promising but its persistent non-modal snap-point + dismissible=false
- * mode has rendering issues we couldn't reliably work around (CSS not exported,
- * snap-points-overlay quirks). For this exact use case — a permanently mounted
- * 3-snap drawer that lives over a Notion home — a focused hand-rolled drawer is
- * more robust than fighting a general-purpose library.
+ * REWRITE NOTES — read memory/architecture_ios_pwa_pill.md before changing:
  *
- * Snap points (fractions of visualViewport height):
- *   - 0.15 (peek)   — drag handle + input pill. Background interactive.
- *   - 0.60 (active) — messages + input. Half-screen reveal.
- *   - 1.00 (full)   — chat takeover.
+ *   1. Tailwind `fixed left-0 right-0 bottom-0 z-40` on the outer (NOT
+ *      inline-style position:fixed). Tailwind utility wins over inline
+ *      style consistency issues we hit before. Same pattern that the
+ *      anonymous chat-pill portal uses (AppShell.tsx:2349) — proven.
  *
- * What this fixes vs. the previous hand-rolled build:
+ *   2. Height in CSS units — `lvh` (largest viewport height). NOT JS
+ *      visualViewport tracking. The memory explicitly lists JS viewport
+ *      tracking as a failed attempt: "fights the browser's own
+ *      layout-viewport management." With viewport meta
+ *      `interactive-widget=resizes-content`, position:fixed bottom:0
+ *      naturally tracks the keyboard.
  *
- *   1. visualViewport.height (NOT innerHeight). The drawer shrinks WITH the
- *      iOS soft keyboard, never extends under it.
+ *   3. NO `chat-pill-mobile-container` className inside the drawer — that
+ *      class adds `padding-bottom: env(keyboard-inset-height)` which
+ *      double-counts keyboard inset when the drawer's bottom is already
+ *      keyboard-aware via interactive-widget.
  *
- *   2. iOS-safe body scroll lock. When at snap >= 0.6, body becomes
- *      position:fixed with top:-scrollY. Preserves scroll position on
- *      release, no overflow:hidden iOS jump-to-top, AND children with
- *      position:fixed (the drawer itself) stay correctly placed.
+ *   4. NO body scroll lock with position:fixed top:-y. That fought the
+ *      drawer's own positioning. Instead, prevent background scroll via
+ *      `touchAction: 'none'` on the body when expanded — a CSS-only
+ *      lock that doesn't reposition anything.
  *
- *   3. Drag from the full chrome (handle + header), not just the pill.
- *      Bigger hit area + reachable at full snap (safe-area-inset-top
- *      padding ensures the handle clears the iOS status bar).
+ *   5. Drag handle + header strip both grab pointer events. When the
+ *      drawer is at full snap, paddingTop picks up safe-area-inset-top
+ *      so the handle clears the iOS status bar / Dynamic Island.
  *
- *   4. Overscroll-from-top → drawer drag. Pulling DOWN on the messages
- *      list when it's already scrolled to the top drags the drawer down
- *      (the iMessage interactive-keyboard-dismiss pattern). Below the
- *      mid snap, also blurs the input so the keyboard follows.
+ *   6. Overscroll-from-top → drawer drag (iMessage interactive keyboard
+ *      dismiss): pulling down on a scrolled-to-top message list drags
+ *      the drawer down + blurs the input.
  *
- *   5. Scroll-to-bottom on input focus. iOS auto-scrolls focused inputs
- *      into view; double-rAF then forcibly snap to scrollHeight so the
- *      latest message stays in view.
- *
- *   6. Empty-state greeting slot. Caller passes `greeting` + `isEmpty`;
- *      we render a small one-liner inside the messages container, NOT a
- *      page-feel hero.
+ * Snap points:
+ *   - 0.15 (peek)   — handle + pill visible. Background interactive.
+ *   - 0.60 (active) — messages + input. Half-screen.
+ *   - 1.00 (full)   — full takeover.
  */
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { motion, useMotionValue, animate } from 'framer-motion';
+import { useEffect, useRef, type ReactNode } from 'react';
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 
 export type ChatDrawerSnap = 0.15 | 0.6 | 1;
 const SNAPS: ChatDrawerSnap[] = [0.15, 0.6, 1];
 
 interface Props {
   dark: boolean;
-  /** Externally-controlled snap. */
   snap: ChatDrawerSnap;
   onSnapChange: (snap: ChatDrawerSnap) => void;
   pill: ReactNode;
   messages: ReactNode;
-  /** Optional one-liner greeting shown when messages are empty. Sits at
-      the top of the (otherwise empty) messages area. NOT a giant hero. */
   greeting?: ReactNode;
   isEmpty?: boolean;
   header?: ReactNode;
@@ -63,11 +59,6 @@ interface Props {
 function nearestSnap(fraction: number): ChatDrawerSnap {
   return SNAPS.reduce((best, s) =>
     Math.abs(s - fraction) < Math.abs(best - fraction) ? s : best, SNAPS[0]);
-}
-
-function getViewportHeight(): number {
-  if (typeof window === 'undefined') return 800;
-  return window.visualViewport?.height ?? window.innerHeight;
 }
 
 function blurFocusedInput() {
@@ -81,120 +72,103 @@ function blurFocusedInput() {
 export default function MobileChatDrawer({
   dark, snap, onSnapChange, pill, messages, greeting, isEmpty, header,
 }: Props) {
-  const [vh, setVh] = useState(getViewportHeight);
+  // Drawer height as a CSS percentage of viewport. The motion value drives
+  // both the snap target AND the live drag, so the spring animation feels
+  // continuous with the gesture. Stored as a fraction (0..1); converted to
+  // CSS calc() below so the browser does the lvh math, not us.
+  const fractionMV = useMotionValue<number>(snap);
 
-  // Track viewport height — visualViewport.resize fires on iOS keyboard
-  // show/hide; window resize is the desktop fallback.
+  // Sync external snap → fraction. animate() cancels previous run on cleanup.
   useEffect(() => {
-    const update = () => setVh(getViewportHeight());
-    window.addEventListener('resize', update);
-    window.visualViewport?.addEventListener('resize', update);
-    window.visualViewport?.addEventListener('scroll', update);
-    return () => {
-      window.removeEventListener('resize', update);
-      window.visualViewport?.removeEventListener('resize', update);
-      window.visualViewport?.removeEventListener('scroll', update);
-    };
-  }, []);
-
-  // Drawer height = snap fraction × current viewport.
-  // Minimum peek must fit handle + pill, else the input clips. Iterate
-  // a sane minimum (110px) so on tall iPhones the pill is always reachable.
-  const heightFor = (s: ChatDrawerSnap) => Math.max(110, s * vh);
-
-  const heightMV = useMotionValue(heightFor(snap));
-
-  // Snap or vh changed → re-animate height. NO re-entrancy guard — every
-  // change cancels the previous animation (cleanup) and starts fresh.
-  useEffect(() => {
-    const controls = animate(heightMV, heightFor(snap), {
+    const controls = animate(fractionMV, snap, {
       type: 'spring',
       stiffness: 380,
       damping: 36,
     });
     return () => controls.stop();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [snap, vh]);
+  }, [snap, fractionMV]);
 
-  // ─── iOS-safe body scroll lock ───
-  // Lock when the drawer is at 0.6 or 1.0. position:fixed on body
-  // preserves scroll position, doesn't trigger the iOS overflow:hidden
-  // jump-to-top bug, and doesn't conflict with our drawer (which is
-  // position:fixed bottom:0 — its own positioning is independent).
-  const lockedScrollYRef = useRef<number | null>(null);
+  // ─── CSS-only background scroll lock ───
+  // touch-action:none on the body prevents touch-driven scrolling without
+  // repositioning the document or affecting the drawer's own positioning.
+  // Lifted when drawer is at peek so the user can scroll the Notion home.
   useEffect(() => {
     const shouldLock = snap >= 0.6;
-    if (shouldLock && lockedScrollYRef.current === null) {
-      const y = window.scrollY;
-      lockedScrollYRef.current = y;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${y}px`;
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.width = '100%';
-    } else if (!shouldLock && lockedScrollYRef.current !== null) {
-      const y = lockedScrollYRef.current;
-      lockedScrollYRef.current = null;
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
-      window.scrollTo(0, y);
-    }
+    if (!shouldLock) return;
+    const prevTouch = document.body.style.touchAction;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.touchAction = 'none';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.touchAction = prevTouch;
+      document.body.style.overflow = prevOverflow;
+    };
   }, [snap]);
 
-  // ─── Drag from chrome (handle OR header) ───
-  // The whole top of the drawer is draggable, not just a tiny pill.
-  // Manual pointer events with velocity-based snap projection.
-  const dragStateRef = useRef<{
-    startY: number; startH: number;
-    lastY: number; lastT: number; velY: number;
+  // ─── Drag from drawer chrome (handle + header) ───
+  // Manual pointer events. Tracks Y delta + velocity, projects to nearest
+  // snap on release. Operates on fraction (0..1) for CSS-driven height.
+  const dragRef = useRef<{
     pointerId: number;
+    startY: number;
+    startFrac: number;
+    lastY: number;
+    lastT: number;
+    velY: number;  // px/ms (POSITIVE = down)
+    height: number; // viewport height in px sampled at drag start
   } | null>(null);
 
   const onChromePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.preventDefault();
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    dragStateRef.current = {
+    dragRef.current = {
+      pointerId: e.pointerId,
       startY: e.clientY,
-      startH: heightMV.get(),
+      startFrac: fractionMV.get(),
       lastY: e.clientY,
       lastT: performance.now(),
       velY: 0,
-      pointerId: e.pointerId,
+      // window.innerHeight is the layout viewport — stable, doesn't shift
+      // mid-drag from keyboard quirks. Samples once per drag.
+      height: window.innerHeight,
     };
   };
 
   const onChromePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const s = dragStateRef.current;
+    const s = dragRef.current;
     if (!s || s.pointerId !== e.pointerId) return;
     const now = performance.now();
     const dt = Math.max(1, now - s.lastT);
     s.velY = (e.clientY - s.lastY) / dt;
     s.lastY = e.clientY;
     s.lastT = now;
-    const delta = e.clientY - s.startY; // positive = drag down (shrink)
-    const next = Math.max(110, Math.min(vh, s.startH - delta));
-    heightMV.set(next);
+    const deltaY = e.clientY - s.startY; // positive = drag down (shrink)
+    const deltaFrac = deltaY / s.height;
+    const next = Math.max(0, Math.min(1, s.startFrac - deltaFrac));
+    fractionMV.set(next);
   };
 
   const onChromePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    const s = dragStateRef.current;
+    const s = dragRef.current;
     if (!s || s.pointerId !== e.pointerId) return;
     try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch { /* noop */ }
-    const projected = heightMV.get() - s.velY * 1000 * 0.18;
-    const fraction = Math.max(0, Math.min(1, projected / vh));
-    const next = nearestSnap(fraction);
+    // Project current fraction forward by 180ms of velocity (in fraction/sec).
+    const velFrac = (s.velY * 1000) / s.height; // fraction/sec, positive = shrinking
+    const projected = fractionMV.get() - velFrac * 0.18;
+    const next = nearestSnap(Math.max(0, Math.min(1, projected)));
     onSnapChange(next);
     if (next < 0.6) blurFocusedInput();
-    dragStateRef.current = null;
+    dragRef.current = null;
   };
 
-  // ─── Overscroll-from-top: drag drawer when messages scrolled to top ───
-  const messagesScrollRef = useRef<HTMLDivElement>(null);
+  // ─── Overscroll-from-top: messages → drawer drag ───
+  const messagesRef = useRef<HTMLDivElement>(null);
   const overscrollRef = useRef<{
-    pointerId: number; startY: number; startH: number; armed: boolean;
+    pointerId: number;
+    startY: number;
+    startFrac: number;
+    height: number;
+    armed: boolean;
   } | null>(null);
 
   const onMessagesPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -202,7 +176,8 @@ export default function MobileChatDrawer({
     overscrollRef.current = {
       pointerId: e.pointerId,
       startY: e.clientY,
-      startH: heightMV.get(),
+      startFrac: fractionMV.get(),
+      height: window.innerHeight,
       armed: false,
     };
   };
@@ -210,7 +185,7 @@ export default function MobileChatDrawer({
   const onMessagesPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const s = overscrollRef.current;
     if (!s || s.pointerId !== e.pointerId) return;
-    const el = messagesScrollRef.current;
+    const el = messagesRef.current;
     if (!el) return;
     const deltaY = e.clientY - s.startY;
     if (!s.armed) {
@@ -225,16 +200,16 @@ export default function MobileChatDrawer({
       }
     }
     e.preventDefault();
-    const next = Math.max(110, Math.min(vh, s.startH - deltaY));
-    heightMV.set(next);
+    const deltaFrac = deltaY / s.height;
+    const next = Math.max(0, Math.min(1, s.startFrac - deltaFrac));
+    fractionMV.set(next);
   };
 
   const onMessagesPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     const s = overscrollRef.current;
     if (!s || s.pointerId !== e.pointerId) return;
     if (s.armed) {
-      const fraction = Math.max(0, Math.min(1, heightMV.get() / vh));
-      const next = nearestSnap(fraction);
+      const next = nearestSnap(Math.max(0, Math.min(1, fractionMV.get())));
       onSnapChange(next);
     }
     overscrollRef.current = null;
@@ -253,7 +228,7 @@ export default function MobileChatDrawer({
       if (snap < 0.6) onSnapChange(0.6);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          const list = messagesScrollRef.current;
+          const list = messagesRef.current;
           if (list) list.scrollTop = list.scrollHeight;
         });
       });
@@ -262,16 +237,22 @@ export default function MobileChatDrawer({
     return () => el.removeEventListener('focusin', onFocusIn);
   }, [snap, onSnapChange]);
 
-  const showExpandedContent = snap >= 0.6;
+  const showExpanded = snap >= 0.6;
   const drawerBg = dark ? 'rgba(20,22,24,0.94)' : 'rgba(255,255,255,0.97)';
   const handleC = dark ? 'rgba(255,255,255,0.22)' : 'rgba(15,16,18,0.18)';
   const border = dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)';
   const headingC = dark ? '#F0F0F3' : '#0f1012';
   const mutedC = dark ? 'rgba(218,218,220,0.55)' : '#7c7d80';
 
+  // CSS height: max(140px, fraction × 100lvh).
+  // - 140px floor guarantees handle + pill always fit at peek.
+  // - lvh (largest viewport height) is iOS-stable: doesn't oscillate with
+  //   the URL bar like vh, doesn't shrink with the keyboard like dvh.
+  // - useTransform reads the motion value each frame and re-renders style.
+  const heightStyle = useTransform(fractionMV, (f) => `max(140px, calc(${f} * 100lvh))`);
+
   // Top padding picks up safe-area when expanded so the handle clears the
-  // iOS status bar / Dynamic Island. At peek the drawer is well below the
-  // safe area, so the padding is unnecessary.
+  // iOS status bar / Dynamic Island. At peek the drawer is well below it.
   const handlePadTop = snap === 1
     ? 'calc(env(safe-area-inset-top, 0px) + 10px)'
     : '10px';
@@ -280,14 +261,9 @@ export default function MobileChatDrawer({
     <motion.div
       role="region"
       aria-label="Chat with Yulia"
-      className="mobile-chat-drawer"
+      className="mobile-chat-drawer fixed left-0 right-0 bottom-0 z-40 flex flex-col"
       style={{
-        position: 'fixed',
-        left: 0,
-        right: 0,
-        bottom: 0,
-        height: heightMV,
-        zIndex: 40,
+        height: heightStyle,
         background: drawerBg,
         backdropFilter: 'blur(22px) saturate(180%)',
         WebkitBackdropFilter: 'blur(22px) saturate(180%)',
@@ -297,14 +273,13 @@ export default function MobileChatDrawer({
         boxShadow: dark
           ? '0 -16px 40px -16px rgba(0,0,0,0.55)'
           : '0 -16px 40px -16px rgba(15,16,18,0.18)',
-        display: 'flex',
-        flexDirection: 'column',
         overflow: 'hidden',
+        // Keyboard inset so the drawer's bottom edge stays above the
+        // soft keyboard. iOS 17+ supports keyboard-inset-height directly.
+        paddingBottom: 'env(keyboard-inset-height, 0px)',
       }}
     >
-      {/* Drag chrome — handle pill + (when expanded) header.
-          The whole strip captures pointer events so the user can grab
-          anywhere along the top, not just the small visible pill. */}
+      {/* Drag handle strip — captures pointer events for resize. */}
       <div
         onPointerDown={onChromePointerDown}
         onPointerMove={onChromePointerMove}
@@ -336,10 +311,8 @@ export default function MobileChatDrawer({
       </div>
 
       <div ref={drawerBodyRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        {showExpandedContent && header && (
+        {showExpanded && header && (
           <div
-            // Header is also draggable — the user might naturally try to
-            // grab the title strip to dismiss the drawer.
             onPointerDown={onChromePointerDown}
             onPointerMove={onChromePointerMove}
             onPointerUp={onChromePointerUp}
@@ -357,9 +330,9 @@ export default function MobileChatDrawer({
           </div>
         )}
 
-        {showExpandedContent && (
+        {showExpanded && (
           <div
-            ref={messagesScrollRef}
+            ref={messagesRef}
             onPointerDown={onMessagesPointerDown}
             onPointerMove={onMessagesPointerMove}
             onPointerUp={onMessagesPointerUp}
@@ -373,8 +346,6 @@ export default function MobileChatDrawer({
               touchAction: 'pan-y',
             }}
           >
-            {/* Empty-state greeting — small, above the messages, not a
-                full-screen hero. Disappears as soon as messages arrive. */}
             {isEmpty && greeting && (
               <div
                 style={{
@@ -393,11 +364,14 @@ export default function MobileChatDrawer({
           </div>
         )}
 
+        {/* Pill at bottom of drawer. NO chat-pill-mobile-container class —
+            that class adds keyboard-inset padding, which double-counts the
+            inset since the drawer's own padding-bottom already accounts
+            for the keyboard. */}
         <div
-          className="chat-pill-mobile-container"
           style={{
             flexShrink: 0,
-            padding: showExpandedContent ? '8px 12px 0' : '0 12px 6px',
+            padding: showExpanded ? '8px 12px 8px' : '0 12px 8px',
           }}
         >
           {pill}
@@ -406,3 +380,4 @@ export default function MobileChatDrawer({
     </motion.div>
   );
 }
+
