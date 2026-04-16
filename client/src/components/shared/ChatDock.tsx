@@ -360,8 +360,8 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             display: 'flex',
             alignItems: 'center',
             borderRadius: 100,
-            padding: '6px 8px 6px 8px',
-            gap: 8,
+            padding: '4px 6px 4px 6px',
+            gap: 6,
           }}
         >
           {/* + button.
@@ -394,9 +394,9 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             disabled={uploading}
             className="dock-plus-btn flex items-center justify-center cursor-pointer active:scale-95"
             style={{
-              width: 44, height: 44,
+              width: 38, height: 38,
               borderRadius: '50%',
-              border: '1.5px solid rgba(0,0,0,0.10)',
+              border: '1px solid rgba(0,0,0,0.10)',
               color: 'currentColor',
               transition: 'all .2s',
               flexShrink: 0,
@@ -464,8 +464,8 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
               data-form-type="other"
               name="yulia-chat-hero"
               enterKeyHint="send"
-              className="w-full bg-transparent border-none outline-none resize-none text-[17px] text-[#1a1c1e] leading-[1.5] font-normal"
-              style={{ fontFamily: 'inherit', minHeight: '48px', maxHeight: '160px', padding: '12px 0', color: 'rgba(0,0,0,1)' }}
+              className="w-full bg-transparent border-none outline-none resize-none text-[16px] text-[#1a1c1e] leading-[1.4] font-normal"
+              style={{ fontFamily: 'inherit', minHeight: '38px', maxHeight: '140px', padding: '8px 0', color: 'rgba(0,0,0,1)' }}
               rows={1}
             />
           </div>
@@ -475,7 +475,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             onClick={send}
             className="flex items-center justify-center border-none cursor-pointer active:scale-95"
             style={{
-              width: 46, height: 46, borderRadius: '50%',
+              width: 38, height: 38, borderRadius: '50%',
               background: hasContent && !disabled ? '#D44A78' : '#D8D8DA',
               color: hasContent && !disabled ? '#fff' : 'rgba(0,0,0,0.3)',
               transition: 'all .25s ease',
@@ -484,7 +484,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             }}
             type="button"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
           </button>
 
           <style>{`

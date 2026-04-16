@@ -615,7 +615,6 @@ html.dark .glass-panel {
 }
 .dark .home-dock-card:focus-within {
   border-color: rgba(255,255,255,0.2);
-  box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.15), 0 1px 8px rgba(0,0,0,0.3);
 }
 .dark .home-dock-card textarea {
   color: #f0f0f3 !important;
@@ -813,10 +812,10 @@ button:active:not(:disabled), [role="button"]:active {
   transform: scale(0.97);
 }
 
-/* Dock card focus glow */
-.home-dock-card:focus-within {
-  box-shadow: 0 0 0 3px rgba(176, 0, 74,0.08), 0 1px 8px rgba(0,0,0,0.06);
-}
+/* Dock card focus — subtle border darkening only, no pink ring */
+/* (The pink box-shadow halo was the original home-page design; removed per
+   mobile chat polish — see feedback_mobile_design_rules.md and the Grok
+   compact-pill direction.) */
 
 /* Sidebar nav item hover */
 .nav-item-hover {
