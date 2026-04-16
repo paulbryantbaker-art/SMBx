@@ -13,6 +13,7 @@ import {
   SignOffChain,
   PageCTA,
   SectionBand,
+  Reveal,
 } from './storyBlocks';
 
 export default function BuyBelow({ dark }: { dark: boolean }) {
@@ -88,7 +89,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
         />
 
         {/* ═══ Yulia Says — leads ═══ */}
-        <section className="mb-28">
+        <Reveal className="mb-28">
           <SectionHeader
             label="Step 1 · Yulia screens"
             title="Show her a deal. Get the verdict."
@@ -157,7 +158,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
               No signup. No demo data. Yulia is running real comps.
             </p>
           </div>
-        </section>
+        </Reveal>
 
         {/* ═══ The Story ═══ */}
         <StoryBlock
@@ -205,7 +206,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
         />
 
         {/* ═══ The Rundown product ═══ */}
-        <section className="mb-28">
+        <Reveal className="mb-28">
           <SectionHeader
             label="The Rundown™"
             title="Seven dimensions. Eight seconds. One verdict."
@@ -225,7 +226,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
             ctaLabel="Run The Rundown on a deal"
             dark={dark}
           />
-        </section>
+        </Reveal>
 
         {/* ═══ Deal Calculator — cinematic anchor (full-bleed immersive band).
              Works for ANY deal — buyer types their own numbers into the
@@ -242,7 +243,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
         </SectionBand>
 
         {/* ═══ Live Rundown — qualitative scoring on three preset cases ═══ */}
-        <section className="mb-28">
+        <Reveal className="mb-28">
           <SectionHeader
             label="Preset cases"
             title="Or watch The Rundown run on a real deal."
@@ -250,7 +251,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
             dark={dark}
           />
           <LiveRundown dark={dark} />
-        </section>
+        </Reveal>
 
         {/* ═══ Slow vs Fast ═══ */}
         <SlowVsFast
@@ -278,7 +279,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
         />
 
         {/* ═══ SBA / Cap stack ═══ */}
-        <section className="mb-28">
+        <Reveal className="mb-28">
           <SectionHeader
             label="Step 2 · Model the stack"
             title="Can the deal carry its own debt?"
@@ -286,7 +287,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
             dark={dark}
           />
           <LandingSBACalc dark={dark} />
-        </section>
+        </Reveal>
 
         {/* ═══ Sign-off chain ═══ */}
         <SectionBand tone="alt" dark={dark}>

@@ -13,7 +13,7 @@ import { bridgeToYulia } from '../content/chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { LiveRundown } from '../content/LiveRundown';
 import { DealCalculator } from '../content/DealCalculator';
-import { MobileJourneyStory } from './MobileJourneyStory';
+import { MobileJourneyStory, MobileReveal } from './MobileJourneyStory';
 
 const TEAL = '#3E8E8E';
 const TEAL_DARK = '#52A8A8';
@@ -122,7 +122,7 @@ export default function MobileBuyStory({ dark }: Props) {
       }
     >
       {/* ─── The Rundown as a branded term ─── */}
-      <section style={{ padding: '14px 16px 22px' }}>
+      <MobileReveal style={{ padding: '14px 16px 22px' }}>
         <div
           style={{
             padding: '0 6px 10px',
@@ -150,10 +150,10 @@ export default function MobileBuyStory({ dark }: Props) {
           accent={accent}
           dark={dark}
         />
-      </section>
+      </MobileReveal>
 
       {/* ─── Compact comparison: old CIM screen → The Rundown ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
+      <MobileReveal style={{ padding: '8px 22px 22px' }}>
         <div
           style={{
             fontFamily: 'Sora, system-ui',
@@ -190,10 +190,10 @@ export default function MobileBuyStory({ dark }: Props) {
             accent={accent}
           />
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── Sign-off chain compact ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
+      <MobileReveal style={{ padding: '8px 22px 22px' }}>
         <div
           style={{
             fontFamily: 'Sora, system-ui',
@@ -225,7 +225,7 @@ export default function MobileBuyStory({ dark }: Props) {
             The seller's lawyer can ask where any number came from — the answer is in the database.
           </p>
         </div>
-      </section>
+      </MobileReveal>
     </MobileJourneyStory>
   );
 }

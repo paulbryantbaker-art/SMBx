@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { bridgeToYulia } from './chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { CapacitySlider, SynergyBuilder } from './AdvisorTools';
@@ -9,6 +10,7 @@ import {
   SignOffChain,
   PageCTA,
   SectionBand,
+  Reveal,
 } from './storyBlocks';
 
 export default function AdvisorsBelow({ dark }: { dark: boolean }) {
@@ -254,7 +256,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
         />
 
         {/* ═══ The 4 Jobs — editorial ═══ */}
-        <section className="mb-28">
+        <Reveal className="mb-28">
           <SectionHeader
             label="Your 4 jobs"
             title="Win the pitch. Kill the bad. Make the killer pitch. Find the synergy."
@@ -328,7 +330,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
               </div>
             ))}
           </div>
-        </section>
+        </Reveal>
 
         {/* ═══ Capacity Slider — cinematic anchor (full-bleed immersive band) ═══ */}
         <SectionBand tone="immersive" dark={dark}>
@@ -343,7 +345,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
         </SectionBand>
 
         {/* ═══ Synergy Builder ═══ */}
-        <section className="mb-28">
+        <Reveal className="mb-28">
           <SectionHeader
             label="Interactive · synergy"
             title="Show the buyer what they'll capture."
@@ -352,7 +354,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
             accent={accent}
           />
           <SynergyBuilder dark={dark} />
-        </section>
+        </Reveal>
 
         {/* ═══ Slow vs Fast ═══ */}
         <SlowVsFast
@@ -380,8 +382,13 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           accent={accent}
         />
 
-        {/* ═══ Who uses this — responsive grid (was horizontal carousel) ═══ */}
-        <section className="mb-28">
+        {/* ═══ Who uses this — asymmetric editorial grid ═══
+            Six tiles in a 6-col grid with varied widths (4·2 / 3·3 / 2·4)
+            so each row breaks the monoculture of identical card grids. The
+            "feature" tiles (col-span-4) carry a soft accent gradient corner
+            to read as primary; the compact tiles (col-span-2) hold their own
+            without noise. Staggered scroll reveal layers the entrance. */}
+        <Reveal className="mb-28">
           <SectionHeader
             label="Who runs this"
             title="From boutique shops to $1B funds."
@@ -389,51 +396,87 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
             dark={dark}
             accent={accent}
           />
-          <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
-          >
-            {advisorTypes.map((a) => (
-              <div
-                key={a.title}
-                className="rounded-2xl p-7"
-                style={{
-                  background: innerBg,
-                  border: `1px solid ${border}`,
-                }}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <span
-                    className="material-symbols-outlined text-3xl"
-                    style={{ color: accent }}
-                  >
-                    {a.icon}
-                  </span>
-                  <span
-                    className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded"
-                    style={{
-                      background: dark ? 'rgba(232,112,154,0.1)' : 'rgba(212,74,120,0.1)',
-                      color: accent,
-                    }}
-                  >
-                    {a.tier}
-                  </span>
-                </div>
-                <h3
-                  className="font-headline font-black text-lg tracking-tight mb-2"
-                  style={{ color: headingColor, lineHeight: 1.15 }}
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 md:gap-5">
+            {advisorTypes.map((a, i) => {
+              // Asymmetric layout: feature (4-col) / compact (2-col) / split (3·3)
+              // Pattern repeats per row: row1 = 4·2, row2 = 3·3, row3 = 2·4
+              const layout = [
+                'col-span-2 md:col-span-4',  // 1 — feature
+                'col-span-2 md:col-span-2',  // 2 — compact
+                'col-span-2 md:col-span-3',  // 3 — split
+                'col-span-2 md:col-span-3',  // 4 — split
+                'col-span-2 md:col-span-2',  // 5 — compact
+                'col-span-2 md:col-span-4',  // 6 — feature
+              ][i] || 'col-span-2 md:col-span-3';
+              const isFeature = layout.includes('col-span-4');
+              return (
+                <motion.div
+                  key={a.title}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-8%' }}
+                  transition={{ duration: 0.5, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                  className={`${layout} rounded-2xl p-7 relative overflow-hidden transition-transform duration-200 ease-out hover:-translate-y-0.5`}
+                  style={{
+                    background: innerBg,
+                    border: `1px solid ${isFeature ? `${accent}33` : border}`,
+                  }}
                 >
-                  {a.title}
-                </h3>
-                <p className="text-[14px] leading-relaxed mb-4" style={{ color: bodyColor }}>
-                  {a.desc}
-                </p>
-                <p className="text-[11px] font-mono" style={{ color: mutedColor }}>
-                  {a.size}
-                </p>
-              </div>
-            ))}
+                  {isFeature && (
+                    <div
+                      aria-hidden
+                      className="absolute top-0 right-0 w-40 h-40 opacity-[0.07] pointer-events-none"
+                      style={{
+                        background: `radial-gradient(circle at top right, ${accent}, transparent 70%)`,
+                      }}
+                    />
+                  )}
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ color: accent, fontSize: isFeature ? 36 : 28 }}
+                      >
+                        {a.icon}
+                      </span>
+                      <span
+                        className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded"
+                        style={{
+                          background: dark ? 'rgba(232,112,154,0.1)' : 'rgba(212,74,120,0.1)',
+                          color: accent,
+                        }}
+                      >
+                        {a.tier}
+                      </span>
+                    </div>
+                    <h3
+                      className="font-headline font-black tracking-tight mb-2"
+                      style={{
+                        color: headingColor,
+                        lineHeight: 1.15,
+                        fontSize: isFeature ? '1.35rem' : '1.05rem',
+                      }}
+                    >
+                      {a.title}
+                    </h3>
+                    <p
+                      className="leading-relaxed mb-4"
+                      style={{
+                        color: bodyColor,
+                        fontSize: isFeature ? '15px' : '13.5px',
+                      }}
+                    >
+                      {a.desc}
+                    </p>
+                    <p className="text-[11px] font-mono" style={{ color: mutedColor }}>
+                      {a.size}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
-        </section>
+        </Reveal>
 
         {/* ═══ Sign-off chain ═══ */}
         <SectionBand tone="alt" dark={dark}>

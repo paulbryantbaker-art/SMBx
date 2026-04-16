@@ -9,6 +9,7 @@ import {
   SignOffChain,
   PageCTA,
   SectionBand,
+  Reveal,
 } from './storyBlocks';
 
 export default function IntegrateBelow({ dark }: { dark: boolean }) {
@@ -206,7 +207,7 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
         </SectionBand>
 
         {/* ═══ The 7 mistakes — editorial numbered list ═══ */}
-        <section className="mb-28">
+        <Reveal className="mb-28">
           <SectionHeader
             label="What kills year 1"
             title="The 7 mistakes that destroy post-close value."
@@ -247,7 +248,7 @@ export default function IntegrateBelow({ dark }: { dark: boolean }) {
               </div>
             ))}
           </div>
-        </section>
+        </Reveal>
 
         {/* ═══ Slow vs Fast ═══ */}
         <SlowVsFast

@@ -10,7 +10,7 @@
 import { bridgeToYulia } from '../content/chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { BaselineCalculator } from '../content/LandingCalculators';
-import { MobileJourneyStory } from './MobileJourneyStory';
+import { MobileJourneyStory, MobileReveal } from './MobileJourneyStory';
 
 const PINK = '#D44A78';
 const PINK_DARK = '#E8709A';
@@ -118,7 +118,7 @@ export default function MobileAdvisorsStory({ dark }: Props) {
       }
     >
       {/* ─── 4 jobs compact ─── */}
-      <section style={{ padding: '14px 16px 22px' }}>
+      <MobileReveal style={{ padding: '14px 16px 22px' }}>
         <div
           style={{
             padding: '0 6px 10px',
@@ -138,10 +138,10 @@ export default function MobileAdvisorsStory({ dark }: Props) {
           <JobCard n="03" title="Make the killer CIM." detail="4 hours of partner review vs 60-80 partner hours. Same quality." accent={accent} dark={dark} />
           <JobCard n="04" title="Find the synergy." detail="Cost takeout, cross-sell, WC release — priced into every pitch. +0.4× close multiple." accent={accent} dark={dark} />
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── Pricing for advisors — honest & direct ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
+      <MobileReveal style={{ padding: '8px 22px 22px' }}>
         <div
           style={{
             fontFamily: 'Sora, system-ui',
@@ -170,10 +170,10 @@ export default function MobileAdvisorsStory({ dark }: Props) {
             <strong style={{ color: accent }}>run free forever</strong> — they're on your deal, not their own book.
           </p>
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── Compact comparison ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
+      <MobileReveal style={{ padding: '8px 22px 22px' }}>
         <div
           style={{
             fontFamily: 'Sora, system-ui',
@@ -193,10 +193,10 @@ export default function MobileAdvisorsStory({ dark }: Props) {
           <CompactComparison label="Annual revenue, same team" slow="$4.8M" fast="$16.5M" dark={dark} accent={accent} />
           <CompactComparison label="Practice margin" slow="60%" fast="78%" dark={dark} accent={accent} />
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── Sign-off chain compact ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
+      <MobileReveal style={{ padding: '8px 22px 22px' }}>
         <div
           style={{
             fontFamily: 'Sora, system-ui',
@@ -228,7 +228,7 @@ export default function MobileAdvisorsStory({ dark }: Props) {
             number came from three years later — the answer is in the database.
           </p>
         </div>
-      </section>
+      </MobileReveal>
     </MobileJourneyStory>
   );
 }

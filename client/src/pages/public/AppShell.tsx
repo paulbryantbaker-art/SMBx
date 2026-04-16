@@ -1107,8 +1107,16 @@ export default function AppShell() {
       if (!user && activeTab === 'home') {
         setActiveTab('sell');
       }
-      // Deliberate morph: give the landing wrapper time to play morphOut
-      // before unmounting. The chat view's own fade-in picks up the handoff.
+      // Mobile + logged-in: drawer IS the chat surface. Don't flip viewState
+      // or navigate — that would render the chat view in the background AS
+      // WELL as the drawer, double-rendering the conversation. Just expand
+      // the drawer to 0.6 so the response is readable.
+      if (isMobile && user) {
+        setChatDrawerSnap(0.6);
+        return;
+      }
+      // Desktop / logged-out: the original morph flow — landing fades out,
+      // chat view fades in.
       const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
       const holdMs = reducedMotion ? 0 : 240;
       setMorphing(true);
@@ -2546,8 +2554,12 @@ export default function AppShell() {
           {/* ════ CHAT MODE ════
               Fade-in picks up immediately after landing's morphOut completes.
               Subtle upward drift makes the chat feel like it "rises in" under
-              the departing landing. 0.3s + spring ease matches morphOut rhythm. */}
-          {viewState === 'chat' && (
+              the departing landing. 0.3s + spring ease matches morphOut rhythm.
+
+              Mobile + logged-in: the MobileChatDrawer below is the chat surface;
+              this background block is suppressed so the conversation doesn't
+              double-render (drawer + background). */}
+          {viewState === 'chat' && !(isMobile && user) && (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}

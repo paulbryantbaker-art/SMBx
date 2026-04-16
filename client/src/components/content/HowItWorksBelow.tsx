@@ -8,6 +8,7 @@ import {
   SignOffChain,
   PageCTA,
   SectionBand,
+  Reveal,
 } from './storyBlocks';
 
 export default function HowItWorksBelow({ dark }: { dark: boolean }) {
@@ -169,7 +170,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
         </SectionBand>
 
         {/* ═══ The 22 gates — editorial, not card grid ═══ */}
-        <section className="mb-28">
+        <Reveal className="mb-28">
           <SectionHeader
             label="The methodology"
             title="22 gates. Yulia won't let you skip steps."
@@ -227,10 +228,10 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               </div>
             ))}
           </div>
-        </section>
+        </Reveal>
 
         {/* ═══ The 6 engines — numbered editorial ═══ */}
-        <section className="mb-28">
+        <Reveal className="mb-28">
           <SectionHeader
             label="Under the hood"
             title="Six engines running behind one conversation."
@@ -312,7 +313,7 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
               </p>
             </div>
           </div>
-        </section>
+        </Reveal>
 
         {/* (Intentionally removed on the methodology page:)
             - Interactive SBA calculator — lives on /buy and /raise where it's

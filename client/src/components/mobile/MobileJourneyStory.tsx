@@ -23,11 +23,44 @@
  *   7. Sticky CTA      — 0.146  (always-visible, bottom)
  */
 
-import { type ReactNode } from 'react';
+import { type ReactNode, type CSSProperties } from 'react';
 import { motion } from 'framer-motion';
 import { motion as motionTokens } from '../content/tokens';
 
 const MOBILE_REVEAL = motionTokens.reveal.mobileSection;
+
+/**
+ * MobileReveal — drop-in motion.section wrapper for child sections passed
+ * into MobileJourneyStory's `children` slot. Without this, page-specific
+ * sections appear instantly while sibling primitive sections (story, kpis,
+ * secondary, takeaway) animate in — breaking the cinematic continuity.
+ *
+ * Use exactly like a `<section>`. The mobile-tuned reveal (shorter y,
+ * tighter viewport margin) is applied automatically.
+ */
+export function MobileReveal({
+  style, children, delay,
+}: {
+  style?: CSSProperties;
+  children: ReactNode;
+  /** Optional delay (seconds) on top of the base transition. */
+  delay?: number;
+}) {
+  const transition = delay != null
+    ? { ...MOBILE_REVEAL.transition, delay }
+    : MOBILE_REVEAL.transition;
+  return (
+    <motion.section
+      style={style}
+      initial={MOBILE_REVEAL.initial}
+      whileInView={MOBILE_REVEAL.whileInView}
+      viewport={MOBILE_REVEAL.viewport}
+      transition={transition}
+    >
+      {children}
+    </motion.section>
+  );
+}
 
 export type JourneyKey = 'sell' | 'buy' | 'raise' | 'pmi' | 'brand';
 
@@ -126,8 +159,14 @@ export function MobileJourneyStory({
       <section style={{ padding: '38px 22px 36px' }}>
         {/* Apple Glass eyebrow pill — backdrop-filter blur + saturate.
             Flat accentSoft was the Android fallback already; now iOS gets
-            the translucent material that was promised by "Apple Glass". */}
-        <div
+            the translucent material that was promised by "Apple Glass".
+            Mount-time staggered reveal (eyebrow → headline → sub → callout)
+            mirrors the desktop HookHeader rhythm so mobile heroes don't read
+            as a static block. */}
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -154,9 +193,12 @@ export function MobileJourneyStory({
           >
             {eyebrow}
           </span>
-        </div>
+        </motion.div>
 
-        <h1
+        <motion.h1
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.07, ease: [0.22, 1, 0.36, 1] }}
           style={{
             margin: 0,
             fontFamily: 'Sora, system-ui',
@@ -169,9 +211,12 @@ export function MobileJourneyStory({
           }}
         >
           {headline}
-        </h1>
+        </motion.h1>
 
-        <p
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
           style={{
             margin: 0,
             fontFamily: 'Inter, system-ui',
@@ -183,10 +228,13 @@ export function MobileJourneyStory({
           }}
         >
           {sub}
-        </p>
+        </motion.p>
 
         {callout && (
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.24, ease: [0.22, 1, 0.36, 1] }}
             style={{
               padding: '14px 16px',
               borderRadius: 14,
@@ -200,7 +248,7 @@ export function MobileJourneyStory({
             }}
           >
             {callout}
-          </div>
+          </motion.div>
         )}
       </section>
 
@@ -458,6 +506,7 @@ export function MobileJourneyStory({
         <button
           onClick={onCTA}
           type="button"
+          className="mobile-cta-press"
           style={{
             width: '100%',
             padding: '15px 18px',
@@ -476,10 +525,15 @@ export function MobileJourneyStory({
             gap: 8,
             boxShadow: `0 10px 28px -6px ${accent}66`,
             WebkitTapHighlightColor: 'transparent',
+            transition: 'transform 160ms ease-out, box-shadow 160ms ease-out, filter 160ms ease-out',
           }}
         >
           {ctaLabel}
-          <span className="material-symbols-outlined" aria-hidden style={{ fontSize: 18 }}>
+          <span
+            className="material-symbols-outlined cta-arrow"
+            aria-hidden
+            style={{ fontSize: 18, transition: 'transform 200ms ease-out' }}
+          >
             arrow_forward
           </span>
         </button>

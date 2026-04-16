@@ -10,7 +10,7 @@
 import { bridgeToYulia } from '../content/chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { StackBuilder } from '../content/StackBuilder';
-import { MobileJourneyStory } from './MobileJourneyStory';
+import { MobileJourneyStory, MobileReveal } from './MobileJourneyStory';
 
 const OCHRE = '#C99A3E';
 const OCHRE_DARK = '#DDB25E';
@@ -121,7 +121,7 @@ export default function MobileRaiseStory({ dark }: Props) {
       }
     >
       {/* ─── Owner path: James L. compact ─── */}
-      <section style={{ padding: '14px 16px 22px' }}>
+      <MobileReveal style={{ padding: '14px 16px 22px' }}>
         <div
           style={{
             padding: '0 6px 10px',
@@ -184,10 +184,10 @@ export default function MobileRaiseStory({ dark }: Props) {
             </div>
           </div>
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── Compact comparison ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
+      <MobileReveal style={{ padding: '8px 22px 22px' }}>
         <div
           style={{
             fontFamily: 'Sora, system-ui',
@@ -206,10 +206,10 @@ export default function MobileRaiseStory({ dark }: Props) {
           <CompactComparison label="Alternative structures considered" slow="1–2 (what the banker pitches)" fast="5–10 (every viable blend)" dark={dark} accent={accent} />
           <CompactComparison label="Time to close (first fundless deal)" slow="9–11 months" fast="4.5 months" dark={dark} accent={accent} />
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── Sign-off chain compact ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
+      <MobileReveal style={{ padding: '8px 22px 22px' }}>
         <div
           style={{
             fontFamily: 'Sora, system-ui',
@@ -241,7 +241,7 @@ export default function MobileRaiseStory({ dark }: Props) {
             The mezz fund's counsel can ask where any number came from — the answer is in the database.
           </p>
         </div>
-      </section>
+      </MobileReveal>
     </MobileJourneyStory>
   );
 }

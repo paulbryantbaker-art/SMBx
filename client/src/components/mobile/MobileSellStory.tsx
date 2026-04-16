@@ -14,7 +14,7 @@ import { bridgeToYulia } from '../content/chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { BaselineCalculator } from '../content/LandingCalculators';
 import { MultipleMap } from '../content/MultipleMap';
-import { MobileJourneyStory } from './MobileJourneyStory';
+import { MobileJourneyStory, MobileReveal } from './MobileJourneyStory';
 
 const PINK = '#D44A78';
 const PINK_DARK = '#E8709A';
@@ -123,7 +123,7 @@ export default function MobileSellStory({ dark }: Props) {
       }
     >
       {/* ─── Second interactive: Multiple Map ─── */}
-      <section style={{ padding: '14px 16px 22px' }}>
+      <MobileReveal style={{ padding: '14px 16px 22px' }}>
         <div
           style={{
             padding: '0 6px 10px',
@@ -147,10 +147,10 @@ export default function MobileSellStory({ dark }: Props) {
         >
           <MultipleMap dark={dark} ebitda={18} />
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── Baseline + Blind Equity — two branded terms stacked ─── */}
-      <section style={{ padding: '8px 16px 22px' }}>
+      <MobileReveal style={{ padding: '8px 16px 22px' }}>
         <div
           style={{
             padding: '0 6px 10px',
@@ -189,10 +189,10 @@ export default function MobileSellStory({ dark }: Props) {
             dark={dark}
           />
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── Compact comparison: the way it's been → with Yulia ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
+      <MobileReveal style={{ padding: '8px 22px 22px' }}>
         <div
           style={{
             fontFamily: 'Sora, system-ui',
@@ -229,10 +229,10 @@ export default function MobileSellStory({ dark }: Props) {
             accent={accent}
           />
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── Sign-off chain compact ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
+      <MobileReveal style={{ padding: '8px 22px 22px' }}>
         <div
           style={{
             fontFamily: 'Sora, system-ui',
@@ -268,7 +268,7 @@ export default function MobileSellStory({ dark }: Props) {
             every decision in the audit trail. The buyer's lawyer can ask where any number came from — the answer is in the database.
           </p>
         </div>
-      </section>
+      </MobileReveal>
     </MobileJourneyStory>
   );
 }

@@ -26,6 +26,49 @@ const REVEAL_SECTION = motionTokens.reveal.section;
 const REVEAL_MOBILE = motionTokens.reveal.mobileSection;
 
 /* ════════════════════════════════════════════════════════════
+   Reveal — universal scroll-reveal wrapper for editorial blocks.
+   Drop-in replacement for raw <section>/<div> on any block that
+   isn't already wrapped in SectionBand/StoryBlock/SlowVsFast/etc.
+   Default cadence matches REVEAL_SECTION; pass mobile={true} for
+   the compressed mobile variant (shorter y-translate + tighter margin).
+   ════════════════════════════════════════════════════════════ */
+export function Reveal({
+  as = 'section',
+  mobile = false,
+  className,
+  style,
+  children,
+  delay,
+}: {
+  /** HTML element to render. Defaults to <section>. */
+  as?: 'section' | 'div' | 'header' | 'aside' | 'article';
+  /** Use mobile-tuned reveal (shorter y, tighter margin). */
+  mobile?: boolean;
+  className?: string;
+  style?: CSSProperties;
+  children: ReactNode;
+  /** Optional delay (seconds) layered on top of the base transition. */
+  delay?: number;
+}) {
+  const variants = mobile ? REVEAL_MOBILE : REVEAL_SECTION;
+  const base = variants.transition;
+  const transition = delay != null ? { ...base, delay } : base;
+  const MotionTag = (motion as any)[as];
+  return (
+    <MotionTag
+      className={className}
+      style={style}
+      initial={variants.initial}
+      whileInView={variants.whileInView}
+      viewport={variants.viewport}
+      transition={transition}
+    >
+      {children}
+    </MotionTag>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
    SectionBand — full-bleed background wrapper for cinematic rhythm.
    Alternating light/immersive bands give journey pages the cadence
    the critique flagged as missing (Apple's section move).
@@ -358,11 +401,18 @@ export function BrandedTermCard({
       {onCTA && (
         <button
           onClick={onCTA}
-          className="text-sm font-bold inline-flex items-center gap-2 group transition-transform active:scale-[0.96]"
-          style={{ color: accent, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+          className="text-sm font-bold inline-flex items-center gap-2 group transition-[transform,filter] duration-200 ease-out hover:brightness-110 active:scale-[0.96] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-md px-1 -mx-1"
+          style={{
+            color: accent,
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            ['--tw-ring-color' as any]: `${accent}cc`,
+            ['--tw-ring-offset-color' as any]: bg,
+          }}
         >
           {ctaLabel}
-          <span className="material-symbols-outlined text-base transition-transform group-hover:translate-x-0.5 group-active:translate-x-1">
+          <span className="material-symbols-outlined text-base transition-transform duration-200 ease-out group-hover:translate-x-1 group-active:translate-x-1.5">
             arrow_forward
           </span>
         </button>
@@ -723,16 +773,24 @@ export function PageCTA({
           <div className="flex flex-wrap items-center gap-6">
             <button
               onClick={onClick}
-              className="cta-press group inline-flex items-center gap-3 px-7 py-4 rounded-full font-bold text-base text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+              className="cta-press group inline-flex items-center gap-3 px-7 py-4 rounded-full font-bold text-base text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 transition-[box-shadow,filter] duration-200 ease-out hover:brightness-110"
               style={{
                 background: accent,
                 border: 'none',
                 cursor: 'pointer',
-                boxShadow: `0 10px 24px -12px ${accent}aa`,
+                boxShadow: `0 10px 24px -12px ${accent}cc, 0 0 0 0 ${accent}00`,
+                ['--tw-ring-color' as any]: `${accent}cc`,
+                ['--tw-ring-offset-color' as any]: palette.immersive,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = `0 14px 30px -12px ${accent}cc, 0 0 0 6px ${accent}22`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = `0 10px 24px -12px ${accent}cc, 0 0 0 0 ${accent}00`;
               }}
             >
               {buttonLabel}
-              <span aria-hidden className="inline-block transition-transform group-hover:translate-x-0.5 group-active:translate-x-1">→</span>
+              <span aria-hidden className="inline-block transition-transform duration-200 ease-out group-hover:translate-x-1 group-active:translate-x-1.5">→</span>
             </button>
             <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
               Free · No account required · Your data stays yours

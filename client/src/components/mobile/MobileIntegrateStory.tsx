@@ -8,7 +8,7 @@
 import { bridgeToYulia } from '../content/chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { Day180Calendar } from '../content/Day180Calendar';
-import { MobileJourneyStory } from './MobileJourneyStory';
+import { MobileJourneyStory, MobileReveal } from './MobileJourneyStory';
 
 const PLUM = '#8F4A7A';
 const PLUM_DARK = '#AE6D9A';
@@ -116,7 +116,7 @@ export default function MobileIntegrateStory({ dark }: Props) {
       }
     >
       {/* ─── The 7 year-1 mistakes that kill deals (compact top 3) ─── */}
-      <section style={{ padding: '14px 16px 22px' }}>
+      <MobileReveal style={{ padding: '14px 16px 22px' }}>
         <div
           style={{
             padding: '0 6px 10px',
@@ -153,10 +153,10 @@ export default function MobileIntegrateStory({ dark }: Props) {
             dark={dark}
           />
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── Compact comparison ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
+      <MobileReveal style={{ padding: '8px 22px 22px' }}>
         <div
           style={{
             fontFamily: 'Sora, system-ui',
@@ -176,10 +176,10 @@ export default function MobileIntegrateStory({ dark }: Props) {
           <CompactComparison label="Time to first financial close" slow="60–90 days" fast="30 days" dark={dark} accent={accent} />
           <CompactComparison label="Customer health visibility" slow="monthly at best" fast="continuous" dark={dark} accent={accent} />
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── Sign-off chain compact ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
+      <MobileReveal style={{ padding: '8px 22px 22px' }}>
         <div
           style={{
             fontFamily: 'Sora, system-ui',
@@ -211,7 +211,7 @@ export default function MobileIntegrateStory({ dark }: Props) {
             lender's "show me the EBITDA build-back" has an answer.
           </p>
         </div>
-      </section>
+      </MobileReveal>
     </MobileJourneyStory>
   );
 }

@@ -17,7 +17,7 @@
  */
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { motion, useMotionValue, animate, type PanInfo } from 'framer-motion';
+import { motion, useMotionValue, animate } from 'framer-motion';
 
 export type ChatDrawerSnap = 0.15 | 0.6 | 1;
 const SNAPS: ChatDrawerSnap[] = [0.15, 0.6, 1];
@@ -80,23 +80,55 @@ export default function MobileChatDrawer({
     if (snap != null) setInternalSnap(snap);
   }, [snap]);
 
-  // Drag handler — y is delta from where drag started; positive = down (shrink)
-  const dragStartHeightRef = useRef(0);
-  const onDragStart = () => {
-    dragStartHeightRef.current = heightMV.get();
+  // Manual pointer-event drag for the handle. Tracks pointer Y, computes
+  // velocity over a sliding window for snap projection. Avoids
+  // framer-motion's drag system which fights non-trivial constrained
+  // setups (height-based animation rather than translate).
+  const dragStateRef = useRef<{
+    startY: number;
+    startH: number;
+    lastY: number;
+    lastT: number;
+    velY: number;
+    pointerId: number;
+  } | null>(null);
+
+  const onHandlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    dragStateRef.current = {
+      startY: e.clientY,
+      startH: heightMV.get(),
+      lastY: e.clientY,
+      lastT: performance.now(),
+      velY: 0,
+      pointerId: e.pointerId,
+    };
   };
-  const onDrag = (_: PointerEvent | MouseEvent | TouchEvent, info: PanInfo) => {
-    const next = Math.max(40, Math.min(vh, dragStartHeightRef.current - info.offset.y));
+  const onHandlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const s = dragStateRef.current;
+    if (!s || s.pointerId !== e.pointerId) return;
+    const now = performance.now();
+    const dt = Math.max(1, now - s.lastT);
+    s.velY = (e.clientY - s.lastY) / dt; // px/ms
+    s.lastY = e.clientY;
+    s.lastT = now;
+    const delta = e.clientY - s.startY; // positive = drag down (shrink)
+    const next = Math.max(40, Math.min(vh, s.startH - delta));
     heightMV.set(next);
   };
-  const onDragEnd = (_: PointerEvent | MouseEvent | TouchEvent, info: PanInfo) => {
-    // Project where momentum would land
-    const projected = heightMV.get() - info.velocity.y * 0.12;
+  const onHandlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const s = dragStateRef.current;
+    if (!s || s.pointerId !== e.pointerId) return;
+    try { (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); } catch { /* noop */ }
+    // velY in px/ms; convert to px/s for projection then scale
+    const projected = heightMV.get() - s.velY * 1000 * 0.18;
     const fraction = Math.max(0, Math.min(1, projected / vh));
     const next = nearestSnap(fraction);
     setInternalSnap(next);
     onSnapChange?.(next);
     animate(heightMV, next * vh, { type: 'spring', stiffness: 380, damping: 36 });
+    dragStateRef.current = null;
   };
 
   // Auto-expand to 0.6 when an input/textarea inside the drawer is focused
@@ -171,51 +203,36 @@ export default function MobileChatDrawer({
         // scroll inside the drawer.
       }}
     >
-      {/* Drag handle — only the small pill is the drag target. Tap+drag
-          anywhere else on the drawer scrolls / interacts with content. */}
+      {/* Drag handle — manual pointer-event drag. Hit area is the full-
+          width top strip so users can grab anywhere along the top edge,
+          not just the small visible pill. */}
       <div
+        onPointerDown={onHandlePointerDown}
+        onPointerMove={onHandlePointerMove}
+        onPointerUp={onHandlePointerUp}
+        onPointerCancel={onHandlePointerUp}
+        aria-label="Drag to resize drawer"
+        role="separator"
+        aria-orientation="horizontal"
         style={{
           flexShrink: 0,
-          padding: '8px 0 6px',
+          padding: '10px 0 8px',
           display: 'flex',
           justifyContent: 'center',
-          // The strip wrapping the handle does NOT capture touches —
-          // only the handle pill itself does.
-          touchAction: 'pan-y',
+          alignItems: 'center',
+          cursor: 'grab',
+          touchAction: 'none',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
         }}
       >
-        <motion.div
-          drag="y"
-          dragConstraints={{ top: 0, bottom: 0 }}
-          dragElastic={0}
-          dragMomentum={false}
-          onDragStart={onDragStart}
-          onDrag={onDrag}
-          onDragEnd={onDragEnd}
-          aria-label="Drag to resize drawer"
-          role="separator"
-          aria-orientation="horizontal"
+        <div
+          aria-hidden
           style={{
-            // Generous hit area — visually 36×5 but the touch target is
-            // ~120×24 so swipes don't miss. Background transparent so
-            // only the pill is visible.
-            width: 120,
-            height: 24,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'grab',
-            touchAction: 'none',
+            width: 40, height: 5, borderRadius: 999,
+            background: handleC,
           }}
-        >
-          <div
-            aria-hidden
-            style={{
-              width: 36, height: 5, borderRadius: 999,
-              background: handleC,
-            }}
-          />
-        </motion.div>
+        />
       </div>
 
       <div ref={drawerBodyRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>

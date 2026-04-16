@@ -12,6 +12,8 @@ import {
   SignOffChain,
   PageCTA,
   SectionBand,
+  Reveal,
+  JargonTerm,
 } from './storyBlocks';
 
 export default function SellBelow({ dark }: { dark: boolean }) {
@@ -80,7 +82,15 @@ export default function SellBelow({ dark }: { dark: boolean }) {
           sub={
             <>
               Sarah's seller thought <strong style={{ color: headingColor }}>$90M</strong>. She walked into the first meeting with a defensible{' '}
-              <strong style={{ color: accent }}>$155M</strong> Baseline in 90 seconds — the same math the buyer's IB was going to run anyway.
+              <strong style={{ color: accent }}>$155M</strong>{' '}
+              <JargonTerm
+                term="Baseline"
+                definition="The defensible value range — industry comp multiple × real EBITDA, adjusted for customer concentration, growth, owner dependency, and recurring revenue. The same math an investment bank runs."
+                dark={dark}
+              >
+                Baseline
+              </JargonTerm>{' '}
+              in 90 seconds — the same math the buyer's IB was going to run anyway.
               Closed at $154.8M. Whether you're a broker winning the mandate or an owner sitting across from a buyer, the side with the number wins.
             </>
           }
@@ -109,7 +119,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
         </SectionBand>
 
         {/* ═══ Baseline Calculator — second ═══ */}
-        <section className="mb-28">
+        <Reveal className="mb-28">
           <SectionHeader
             label="Step 2 · Baseline™"
             title="Run the number now."
@@ -117,10 +127,10 @@ export default function SellBelow({ dark }: { dark: boolean }) {
             dark={dark}
           />
           <BaselineCalculator dark={dark} />
-        </section>
+        </Reveal>
 
         {/* ═══ The two products ═══ */}
-        <section className="mb-28">
+        <Reveal className="mb-28">
           <SectionHeader
             label="The two numbers your buyer cares about"
             title="The Baseline. The Blind Equity."
@@ -154,7 +164,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
               dark={dark}
             />
           </div>
-        </section>
+        </Reveal>
 
         {/* ═══ The Story — now told from the broker's perspective ═══ */}
         <StoryBlock
@@ -223,7 +233,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
         />
 
         {/* ═══ Yulia Says ═══ */}
-        <section className="mb-28">
+        <Reveal className="mb-28">
           <SectionHeader
             label="Yulia says"
             title="Three turns. Your seller's number, in the meeting."
@@ -283,7 +293,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
               ]}
             />
           </div>
-        </section>
+        </Reveal>
 
         {/* ═══ Sign-off chain — broker workflow ═══ */}
         <SectionBand tone="alt" dark={dark}>

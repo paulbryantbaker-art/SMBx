@@ -10,7 +10,7 @@
 import { bridgeToYulia } from '../content/chatBridge';
 import usePageMeta from '../../hooks/usePageMeta';
 import { LiveClassifier } from '../content/LiveClassifier';
-import { MobileJourneyStory } from './MobileJourneyStory';
+import { MobileJourneyStory, MobileReveal } from './MobileJourneyStory';
 
 const PINK = '#D44A78';
 const PINK_DARK = '#E8709A';
@@ -125,7 +125,7 @@ export default function MobileHowStory({ dark }: Props) {
       }
     >
       {/* ─── The 22 gates compact (by journey) ─── */}
-      <section style={{ padding: '14px 16px 22px' }}>
+      <MobileReveal style={{ padding: '14px 16px 22px' }}>
         <div
           style={{
             padding: '0 6px 10px',
@@ -145,10 +145,10 @@ export default function MobileHowStory({ dark }: Props) {
           <GateRow journey="Raise" count={6} lock="No outreach until the structure clears against DSCR + dilution." accent={accent} dark={dark} />
           <GateRow journey="Integrate" count={4} lock="No 180-day plan until DD findings are real and the deal has closed." accent={accent} dark={dark} />
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── 6 engines compact ─── */}
-      <section style={{ padding: '14px 16px 22px' }}>
+      <MobileReveal style={{ padding: '14px 16px 22px' }}>
         <div
           style={{
             padding: '0 6px 10px',
@@ -201,10 +201,10 @@ export default function MobileHowStory({ dark }: Props) {
             </div>
           ))}
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── Author vs Auditor compact ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
+      <MobileReveal style={{ padding: '8px 22px 22px' }}>
         <div
           style={{
             fontFamily: 'Sora, system-ui',
@@ -234,10 +234,10 @@ export default function MobileHowStory({ dark }: Props) {
             dark={dark}
           />
         </div>
-      </section>
+      </MobileReveal>
 
       {/* ─── Sign-off chain compact ─── */}
-      <section style={{ padding: '8px 22px 22px' }}>
+      <MobileReveal style={{ padding: '8px 22px 22px' }}>
         <div
           style={{
             fontFamily: 'Sora, system-ui',
@@ -269,7 +269,7 @@ export default function MobileHowStory({ dark }: Props) {
             at execution. The buyer's lawyer's "where did that number come from?" has an answer, three years later.
           </p>
         </div>
-      </section>
+      </MobileReveal>
     </MobileJourneyStory>
   );
 }

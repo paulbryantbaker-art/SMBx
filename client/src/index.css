@@ -73,6 +73,17 @@ a.btn:active,
   transition-duration: 40ms;
 }
 
+/* Mobile sticky CTA — no hover (touch-only), just a satisfying press.
+   The arrow inside slides forward 2px on press to reinforce direction. */
+.mobile-cta-press:active:not(:disabled) {
+  transform: scale(0.97) !important;
+  filter: brightness(0.96);
+  transition-duration: 80ms;
+}
+.mobile-cta-press:active:not(:disabled) .cta-arrow {
+  transform: translateX(2px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   button,
   a[role="button"],

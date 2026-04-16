@@ -11,6 +11,7 @@ import {
   SignOffChain,
   PageCTA,
   SectionBand,
+  Reveal,
 } from './storyBlocks';
 
 export default function RaiseBelow({ dark }: { dark: boolean }) {
@@ -89,12 +90,12 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
         />
 
         {/* ═══ Audience Picker ═══ */}
-        <section className="mb-20">
+        <Reveal className="mb-20">
           <p className="text-[10px] font-bold uppercase tracking-[0.24em] mb-4" style={{ color: accent }}>
             Pick your path
           </p>
           <AudiencePicker value={audience} onChange={setAudience} dark={dark} />
-        </section>
+        </Reveal>
 
         {/* ═══ Story (audience-conditional) ═══ */}
         {audience === 'owner' ? (
@@ -245,7 +246,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
         />
 
         {/* ═══ Yulia Says ═══ */}
-        <section className="mb-28">
+        <Reveal className="mb-28">
           <SectionHeader
             label="Yulia says"
             title="From 'I need capital' to a modeled stack."
@@ -311,7 +312,7 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
               ]}
             />
           </div>
-        </section>
+        </Reveal>
 
         {/* ═══ Sign-off chain ═══ */}
         <SectionBand tone="alt" dark={dark}>
