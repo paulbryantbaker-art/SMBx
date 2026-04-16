@@ -2085,7 +2085,15 @@ export default function AppShell() {
                   {/* Mobile + logged-in + has deals → Wallet-style deal stack.
                       Replaces the greeting block with glanceable portfolio state.
                       Desktop + logged-out always see the hero/greeting block. */}
-                  {isMobile && user ? (
+                  {/* Auth-aware mobile home split:
+                      - authLoading: show nothing (avoid flash of journey chips)
+                      - user set: MobileNotionHome (logged-in home surface)
+                      - user null + !authLoading: logged-out hero + chips */}
+                  {isMobile && authLoading ? (
+                    <div className="flex-1 flex items-center justify-center" style={{ opacity: 0.3 }}>
+                      <img src={dark ? '/X-white.png' : '/X.png'} alt="" style={{ height: 36, objectFit: 'contain' }} />
+                    </div>
+                  ) : isMobile && user ? (
                     <MobileNotionHome
                       dark={dark}
                       loading={!authChat.grouped}
@@ -2643,6 +2651,7 @@ export default function AppShell() {
                 onOpenDeliverable={handleOpenDeliverable}
                 desktop={!isMobile}
                 dark={!isMobile ? true : dark}
+                userName={user?.display_name || user?.email || null}
               />
               </div>
 

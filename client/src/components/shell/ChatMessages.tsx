@@ -12,6 +12,9 @@ interface ChatMessagesProps {
   onOpenDeliverable?: (message: AnonMessage) => void;
   desktop?: boolean;
   dark?: boolean;
+  /** When set, personalizes the empty state to "Welcome back, {name}."
+      When null/undefined, shows the anonymous/newcomer copy. */
+  userName?: string | null;
 }
 
 function formatTimestamp(iso: string): string {
@@ -177,7 +180,9 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
             lineHeight: 1.3,
             maxWidth: 340,
           }}>
-            What are you working on?
+            {userName
+              ? `What are you working on, ${userName.split(' ')[0]}?`
+              : "Hi, I'm Yulia."}
           </p>
 
           <p style={{
@@ -189,8 +194,9 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
             maxWidth: 340,
             fontWeight: 500,
           }}>
-            Tell me about a business you're selling, buying, raising for, or integrating —
-            or tap the <span style={{ color: '#D44A78', fontWeight: 700 }}>+</span> in the pill below for a starter prompt.
+            {userName
+              ? <>Tell me what you're working on — or tap the <span style={{ color: '#D44A78', fontWeight: 700 }}>+</span> in the pill below for a starter prompt.</>
+              : <>I'm your AI deal intelligence. Tell me about a business you're selling, buying, raising for, or integrating — I'll take it from there.</>}
           </p>
           {/* Ways-to-start accordion retired — the + button in the ChatDock pill
               is the canonical starter surface. Avoids duplicate affordances. */}
