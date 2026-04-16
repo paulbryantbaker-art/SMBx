@@ -166,36 +166,57 @@ export default function MobileChatDrawer({
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        touchAction: 'none',
+        // touchAction REMOVED from the outer container — children handle
+        // their own touch behavior. Outer 'none' was blocking message
+        // scroll inside the drawer.
       }}
     >
-      {/* Drag handle — Apple Maps-style. Whole top strip is the drag target. */}
-      <motion.div
-        onPointerDown={(e) => (e.currentTarget as any).setPointerCapture?.(e.pointerId)}
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={0}
-        dragMomentum={false}
-        onDragStart={onDragStart}
-        onDrag={onDrag}
-        onDragEnd={onDragEnd}
+      {/* Drag handle — only the small pill is the drag target. Tap+drag
+          anywhere else on the drawer scrolls / interacts with content. */}
+      <div
         style={{
           flexShrink: 0,
           padding: '8px 0 6px',
           display: 'flex',
           justifyContent: 'center',
-          cursor: 'grab',
-          touchAction: 'none',
+          // The strip wrapping the handle does NOT capture touches —
+          // only the handle pill itself does.
+          touchAction: 'pan-y',
         }}
       >
-        <div
-          aria-hidden
+        <motion.div
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={0}
+          dragMomentum={false}
+          onDragStart={onDragStart}
+          onDrag={onDrag}
+          onDragEnd={onDragEnd}
+          aria-label="Drag to resize drawer"
+          role="separator"
+          aria-orientation="horizontal"
           style={{
-            width: 36, height: 5, borderRadius: 999,
-            background: handleC,
+            // Generous hit area — visually 36×5 but the touch target is
+            // ~120×24 so swipes don't miss. Background transparent so
+            // only the pill is visible.
+            width: 120,
+            height: 24,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'grab',
+            touchAction: 'none',
           }}
-        />
-      </motion.div>
+        >
+          <div
+            aria-hidden
+            style={{
+              width: 36, height: 5, borderRadius: 999,
+              background: handleC,
+            }}
+          />
+        </motion.div>
+      </div>
 
       <div ref={drawerBodyRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         {showExpandedContent && header && (
