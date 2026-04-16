@@ -86,6 +86,9 @@ import { MobileIntegratePage } from '../../components/mobile/MobileIntegratePage
 import { MobileAdvisorsPage } from '../../components/mobile/MobileAdvisorsPage';
 import { MobileHowItWorksPage } from '../../components/mobile/MobileHowItWorksPage';
 import { MobilePricingPage } from '../../components/mobile/MobilePricingPage';
+import DealThreadHeader from '../../components/mobile/DealThreadHeader';
+import DealSurfaceToggle, { type DealSurface } from '../../components/mobile/DealSurfaceToggle';
+import ChapterPicker, { type Chapter as DealChapter } from '../../components/mobile/ChapterPicker';
 
 /* Minimal skeleton for lazy Below pages */
 function BelowSkeleton() {
@@ -593,6 +596,8 @@ export default function AppShell() {
 
   // Core state
   const [viewState, setViewState] = useState<ViewState>(() => pathToViewState(location));
+  // Mobile deal surface toggle: Thread (private chat) ↔ Data Room (shared docs).
+  const [mobileDealSurface, setMobileDealSurface] = useState<DealSurface>('thread');
   const isChat = viewState === 'chat';
   const [workspaceDealId, setWorkspaceDealId] = useState<number | null>(() => getInitialDealId(location));
   const { appOffset } = useAppHeight(isChat);   // Only constrain viewport in chat mode
@@ -2207,12 +2212,11 @@ export default function AppShell() {
                       ) : (
                         /* ─── Not logged in: landing page hook ─── */
                         <>
-                          <h1 className={`font-headline font-black tracking-[-0.04em] ${isMobile ? 'text-[42px] leading-[0.95] mb-6' : 'text-[64px] leading-[0.95] mb-4'}`}>
-                            Close deals <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>faster</span><br/>
-                            and smarter.
+                          <h1 className={`font-headline font-black tracking-[-0.04em] ${isMobile ? 'text-[40px] leading-[1] mb-6' : 'text-[64px] leading-[0.98] mb-4'}`}>
+                            90% of what an <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>investment bank</span> does.
                           </h1>
-                          <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[300px]' : 'text-xl max-w-2xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                            Yulia guides the entire M&amp;A process from beginning to end, empowering your team with superior deal intelligence, at the speed&nbsp;of&nbsp;AI.
+                          <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[320px]' : 'text-xl max-w-2xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                            Everything that doesn&rsquo;t require a license. You keep the judgment. Yulia does the work.
                           </p>
                         </>
                       )}
@@ -2567,7 +2571,7 @@ export default function AppShell() {
                 // Mobile chat: clear the fixed top bar (back arrow + deal
                 // name) which is portaled separately. ~44px content +
                 // safe-area-inset-top, with 8px breathing room.
-                ...(isMobile ? { paddingTop: 'calc(env(safe-area-inset-top, 0px) + 60px)' } : {}),
+                ...(isMobile ? { paddingTop: 'calc(env(safe-area-inset-top, 0px) + 148px)' } : {}),
               }}
             >
               {/* Mobile scope indicator removed — the fixed top bar (back
@@ -2688,84 +2692,112 @@ export default function AppShell() {
             />
           </div>
         )}
-        {/* MOBILE CHAT TOP BAR — back arrow + deal name. Full-screen chat
-            pattern (iMessage / WhatsApp / Claude app). Portaled to body
-            so position:fixed top:0 isn't broken by ancestor transforms.
-            Only on mobile + chat view + logged-in (anon already has the
-            sign-in chrome elsewhere). */}
+        {/* MOBILE DEAL CHROME — DealThreadHeader + DealSurfaceToggle + ChapterPicker.
+            Portaled to body so position:fixed top:0 isn't broken by ancestor transforms.
+            Full chrome when there's an active deal; simple Yulia header for exploring /
+            pre-deal chats where no deal is yet scoped. */}
         {isMobile && user && viewState === 'chat' && createPortal(
-          <div
-            id="mobile-chat-topbar"
-            style={{
-              position: 'fixed',
-              top: 0, left: 0, right: 0,
-              zIndex: 20,
-              paddingTop: 'env(safe-area-inset-top, 0px)',
-              background: dark ? 'rgba(20,22,24,0.92)' : 'rgba(255,255,255,0.96)',
-              backdropFilter: 'blur(18px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(18px) saturate(180%)',
-              borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.06)'}`,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44 }}>
-              <button
-                type="button"
-                onClick={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); }}
-                aria-label="Back to deals"
-                style={{
-                  width: 40, height: 40, borderRadius: 999,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'transparent', border: 'none',
-                  color: dark ? '#F0F0F3' : '#1A1C1E',
-                  cursor: 'pointer',
-                  WebkitTapHighlightColor: 'transparent',
-                }}
-                className="active:scale-95"
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-              </button>
-              {(() => {
-                if (!authChat.grouped || !authChat.activeDealId) {
-                  return (
+          (() => {
+            const deal = authChat.grouped?.deals.find(d => d.id === authChat.activeDealId) || null;
+            const hasDeal = !!deal?.business_name;
+
+            if (!hasDeal) {
+              return (
+                <div
+                  id="mobile-chat-topbar"
+                  style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, zIndex: 20,
+                    paddingTop: 'env(safe-area-inset-top, 0px)',
+                    background: dark ? 'rgba(20,22,24,0.92)' : 'rgba(255,255,255,0.96)',
+                    backdropFilter: 'blur(18px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(18px) saturate(180%)',
+                    borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.06)'}`,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44 }}>
+                    <button
+                      type="button"
+                      onClick={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); }}
+                      aria-label="Back"
+                      style={{
+                        width: 40, height: 40, borderRadius: 999,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: 'transparent', border: 'none',
+                        color: dark ? '#F0F0F3' : '#1A1C1E',
+                        cursor: 'pointer',
+                        WebkitTapHighlightColor: 'transparent',
+                      }}
+                      className="active:scale-95"
+                    >
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="15 18 9 12 15 6" />
+                      </svg>
+                    </button>
                     <span style={{
                       fontFamily: 'Sora, system-ui',
                       fontSize: 15, fontWeight: 700,
                       color: dark ? '#F0F0F3' : '#1A1C1E',
                       letterSpacing: '-0.01em',
                     }}>Yulia</span>
-                  );
-                }
-                const deal = authChat.grouped.deals.find(d => d.id === authChat.activeDealId);
-                if (!deal || !deal.business_name) {
-                  return (
-                    <span style={{
-                      fontFamily: 'Sora, system-ui',
-                      fontSize: 15, fontWeight: 700,
-                      color: dark ? '#F0F0F3' : '#1A1C1E',
-                    }}>Yulia</span>
-                  );
-                }
-                const journey = (deal.journey_type || 'sell').toLowerCase();
-                const color = JOURNEY_COLORS[journey] || '#D44A78';
-                return (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
-                    <span style={{
-                      fontFamily: 'Sora, system-ui',
-                      fontSize: 15, fontWeight: 700,
-                      color: dark ? '#F0F0F3' : '#1A1C1E',
-                      letterSpacing: '-0.01em',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}>{deal.business_name}</span>
                   </div>
-                );
-              })()}
-            </div>
-          </div>,
+                </div>
+              );
+            }
+
+            const journey = (deal!.journey_type || 'sell').toLowerCase();
+            const journeyLabel =
+              journey === 'sell' ? 'Seller journey'
+              : journey === 'buy' ? 'Buyer journey'
+              : journey === 'raise' ? 'Raise journey'
+              : journey === 'pmi' ? 'Integration journey'
+              : undefined;
+            const activeConv = deal!.conversations?.find((c: any) => c.id === authChat.activeConversationId);
+            const stageName = activeConv?.gate_label || deal!.current_gate || 'Intake';
+            const chapters: DealChapter[] = (deal!.conversations || []).map((c: any) => ({
+              id: String(c.id),
+              name: c.gate_label || c.title || 'Chapter',
+              status: (c.id === authChat.activeConversationId
+                ? 'current'
+                : c.gate_status === 'completed'
+                  ? 'past'
+                  : 'current') as DealChapter['status'],
+            }));
+
+            return (
+              <div
+                id="mobile-deal-chrome"
+                style={{
+                  position: 'fixed', top: 0, left: 0, right: 0, zIndex: 20,
+                  display: 'flex', flexDirection: 'column',
+                }}
+              >
+                <DealThreadHeader
+                  dark={dark}
+                  dealName={deal!.business_name || 'Deal'}
+                  counterparty={journeyLabel}
+                  stageName={stageName}
+                  notificationCount={0}
+                  onBack={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); }}
+                  onBellClick={() => { /* TODO: cross-deal notifications screen */ }}
+                />
+                <DealSurfaceToggle
+                  dark={dark}
+                  active={mobileDealSurface}
+                  onChange={setMobileDealSurface}
+                />
+                <ChapterPicker
+                  dark={dark}
+                  chapters={chapters}
+                  activeChapterId={authChat.activeConversationId != null ? String(authChat.activeConversationId) : ''}
+                  onChange={(id) => {
+                    const numId = Number(id);
+                    if (Number.isFinite(numId)) authChat.selectConversation(numId);
+                    navigate(`/chat/${id}`, { replace: true });
+                  }}
+                />
+              </div>
+            );
+          })(),
           document.body
         )}
 
