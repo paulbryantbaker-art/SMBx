@@ -72,6 +72,7 @@ import { DealStack, filterRealDeals } from '../../components/mobile/DealStack';
 import { DealStackExpanded } from '../../components/mobile/DealStackExpanded';
 import { ArtifactSheet } from '../../components/mobile/ArtifactSheet';
 import { AccountSheet } from '../../components/mobile/AccountSheet';
+import { WorkspaceSheet } from '../../components/mobile/WorkspaceSheet';
 import { SignInSheet } from '../../components/mobile/SignInSheet';
 import { DealActionsSheet } from '../../components/mobile/DealActionsSheet';
 import { ToastHost } from '../../components/mobile/ToastHost';
@@ -1227,6 +1228,7 @@ export default function AppShell() {
 
   // Mobile account sheet state — replaces the hamburger for user/settings access.
   const [accountSheetOpen, setAccountSheetOpen] = useState(false);
+  const [workspaceSheetOpen, setWorkspaceSheetOpen] = useState(false);
   // Mobile sign-in sheet — shown when logged-out users tap the top-right login icon.
   const [signInSheetOpen, setSignInSheetOpen] = useState(false);
   // Mobile deal actions sheet — opened by long-press on a deal card.
@@ -2174,7 +2176,7 @@ export default function AppShell() {
                           dockRef.current?.focus();
                         });
                       }}
-                      onAccountTap={() => setAccountSheetOpen(true)}
+                      onAccountTap={() => setWorkspaceSheetOpen(true)}
                     />
                   ) : (
                   <div className="flex flex-col items-center px-6 relative z-10 flex-[1.618] justify-center">
@@ -3240,6 +3242,21 @@ export default function AppShell() {
         />
       )}
 
+      {/* ═══ MOBILE WORKSPACE SHEET — workspace switcher. Opens from the
+          workspace pill in MobileNotionHome. Footer row ("Account &
+          settings") chains to the AccountSheet. Removes the redundancy
+          the user flagged where the workspace pill and the top-right
+          avatar both went to the same place. */}
+      {isMobile && user && (
+        <WorkspaceSheet
+          open={workspaceSheetOpen}
+          onOpenChange={setWorkspaceSheetOpen}
+          dark={dark}
+          user={{ display_name: user.display_name, email: user.email }}
+          onOpenAccount={() => setAccountSheetOpen(true)}
+        />
+      )}
+
       {/* ═══ MOBILE EXPANDED DEAL STACK — searchable, filterable, sortable list ═══ */}
       {isMobile && user && (
         <DealStackExpanded
@@ -3625,7 +3642,12 @@ export default function AppShell() {
           tree (no drawer needed). Logged-out mobile users see marketing
           surfaces with no hamburger by design. */}
 
-      {isMobile && !authLoading && user && (
+      {/* Top-right account avatar — HIDDEN on Notion home (viewState=landing
+          + activeTab=home) because the workspace pill there already
+          exposes the same surface. Shown on chat, journey tabs, and
+          any non-home destination so users always have an escape to
+          account settings / sign-out. */}
+      {isMobile && !authLoading && user && !(viewState === 'landing' && activeTab === 'home') && (
         <button
           onClick={() => setAccountSheetOpen(true)}
           type="button"

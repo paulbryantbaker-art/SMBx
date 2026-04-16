@@ -79,6 +79,17 @@ export function useAuthChat(user: User | null) {
   const [currentGate, setCurrentGate] = useState<string | undefined>(_hmr.currentGate);
   const [paywallData, setPaywallData] = useState<any | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  // True while sendMessage is mid-flight. The "load messages on conversation
+  // change" effect MUST skip reload during a send — otherwise when sendMessage
+  // creates a fresh conversation, the resulting setActiveConversationId fires
+  // the effect, which fetches an empty server-side list and wipes the
+  // optimistic user message that was just appended. (User-reported bug:
+  // "I send a message but only see Yulia's response.")
+  const sendingRef = useRef(false);
+  // Tracks which conversation IDs we've already loaded — prevents the reload
+  // effect from re-fetching the SAME conversation when the ID is set after
+  // it was already locally populated.
+  const loadedConvIdRef = useRef<number | null>(null);
 
   // Sync critical state to HMR data so it survives hot reloads
   useEffect(() => {
@@ -122,12 +133,26 @@ export function useAuthChat(user: User | null) {
     if (user) loadConversations();
   }, [user, loadConversations]);
 
-  // Load messages when conversation changes
+  // Load messages when conversation changes.
+  // SKIP when:
+  //   1. sendingRef is true — a send is in flight that may have already
+  //      added an optimistic user message; reloading would wipe it.
+  //   2. We've already loaded this conversation ID locally — prevents
+  //      a re-fetch when sendMessage's createConversation flips the ID.
   useEffect(() => {
     if (!activeConversationId || !user) {
       setMessages([]);
+      loadedConvIdRef.current = null;
       return;
     }
+    if (sendingRef.current) {
+      // The send flow will populate the server with the user message.
+      // Mark this convId as loaded so a future re-render doesn't refetch.
+      loadedConvIdRef.current = activeConversationId;
+      return;
+    }
+    if (loadedConvIdRef.current === activeConversationId) return;
+    loadedConvIdRef.current = activeConversationId;
     (async () => {
       try {
         const res = await fetch(
@@ -154,7 +179,15 @@ export function useAuthChat(user: User | null) {
       const conv = await res.json();
       setConversations(prev => [conv, ...prev]);
       setActiveConversationId(conv.id);
-      setMessages([]);
+      // Mark this conv as already loaded so the activeConversationId-change
+      // effect doesn't re-fetch (and doesn't wipe optimistic messages
+      // appended by an in-flight sendMessage).
+      loadedConvIdRef.current = conv.id;
+      // Only reset messages if no send is in flight. When sendMessage
+      // creates a fresh conversation, it has already appended an optimistic
+      // user message — wiping it here causes "I see Yulia's reply but not
+      // my own message."
+      if (!sendingRef.current) setMessages([]);
       return conv.id;
     } catch {
       return null;
@@ -191,6 +224,7 @@ export function useAuthChat(user: User | null) {
     };
     setMessages(prev => [...prev, tempMsg]);
     setSending(true);
+    sendingRef.current = true;
     setStreamingText('');
 
     let retried = false;
@@ -411,6 +445,7 @@ export function useAuthChat(user: User | null) {
       }
     } finally {
       setSending(false);
+      sendingRef.current = false;
       setStreamingText('');
       setActiveTool(null);
       abortRef.current = null;
