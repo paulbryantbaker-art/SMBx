@@ -826,7 +826,7 @@ export default function AppShell() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop sidebar collapse
   // Mobile chat drawer snap point (Apple Maps pattern: 0.15 / 0.6 / 1).
   // Externally controlled so we can expand to 0.6 when a deal is tapped.
-  const [chatDrawerSnap, setChatDrawerSnap] = useState<ChatDrawerSnap | null>(0.15);
+  const [chatDrawerSnap, setChatDrawerSnap] = useState<ChatDrawerSnap>(0.15);
   const [pickerCollapsed, setPickerCollapsed] = useState<boolean>(() => {
     try { return localStorage.getItem('canvas_picker_collapsed') === '1'; } catch { return false; }
   });
@@ -2737,6 +2737,16 @@ export default function AppShell() {
             dark={dark}
             snap={chatDrawerSnap}
             onSnapChange={setChatDrawerSnap}
+            isEmpty={messages.length === 0 && !streamingText}
+            greeting={
+              <>
+                <span style={{ fontWeight: 700, color: dark ? '#F0F0F3' : '#0f1012' }}>
+                  Hi{user.display_name ? `, ${user.display_name.split(' ')[0]}` : ''}.
+                </span>{' '}
+                Tell me about a business you're buying, selling, raising for, or closing — or tap{' '}
+                <span style={{ color: '#D44A78', fontWeight: 700 }}>+</span> for starters.
+              </>
+            }
             pill={
               <ChatDock
                 ref={dockRef}
