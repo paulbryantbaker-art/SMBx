@@ -15,6 +15,11 @@ interface ChatMessagesProps {
   /** When set, personalizes the empty state to "Welcome back, {name}."
       When null/undefined, shows the anonymous/newcomer copy. */
   userName?: string | null;
+  /** When true, the empty-state hero ("What are you working on?") is
+      suppressed. Use inside the mobile drawer where the hero feels like
+      a duplicate page (the surrounding shell — Notion home, drawer pill —
+      already provides the start affordance). */
+  hideEmptyState?: boolean;
 }
 
 function formatTimestamp(iso: string): string {
@@ -90,7 +95,7 @@ function proseClasses(dark: boolean) {
   ].join(' ');
 }
 
-export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, desktop, dark = false, userName }: ChatMessagesProps) {
+export default function ChatMessages({ messages, streamingText, sending, activeTool, error, onRetry, onOpenDeliverable, desktop, dark = false, userName, hideEmptyState = false }: ChatMessagesProps) {
   /* ─── Dark-aware colors ─── */
   const textColor = dark
     ? (desktop ? '#e2e8f0' : '#f0f0f2')
@@ -144,8 +149,11 @@ export default function ChatMessages({ messages, streamingText, sending, activeT
       WebkitUserSelect: 'text',
     } as React.CSSProperties}>
 
-      {/* ─── Empty state — warmer, tighter, contextual Yulia-voice opener ─── */}
-      {isEmpty && (
+      {/* ─── Empty state — warmer, tighter, contextual Yulia-voice opener ───
+          Suppressed when `hideEmptyState` is set (drawer context — the
+          surrounding Notion home + pill already cover the "start" affordance,
+          and the duplicated hero felt like a separate page). */}
+      {isEmpty && !hideEmptyState && (
         <div style={{
           display: 'flex',
           flexDirection: 'column',

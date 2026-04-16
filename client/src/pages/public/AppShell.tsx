@@ -2761,6 +2761,7 @@ export default function AppShell() {
                   desktop={false}
                   dark={dark}
                   userName={user.display_name || user.email || null}
+                  hideEmptyState
                 />
               </div>
             }
