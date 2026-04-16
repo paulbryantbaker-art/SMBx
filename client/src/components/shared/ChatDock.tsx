@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useImperativeHandle, forwardRef, useMemo } from 'react';
 import { trackEvent } from '../../lib/analytics';
+import { StarterSheet } from '../mobile/StarterSheet';
 
 /* ═══ TOOL ITEMS ═══ */
 
@@ -84,6 +85,9 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
   const showPlusButton = !(isMobile && !onFileUpload);
   const [value, setValue] = useState('');
   const [toolsOpen, setToolsOpen] = useState(false);
+  // Separate state for the mobile Vaul sheet — keeps the desktop dropdown's
+  // toolsOpen logic untouched. Only one is active at a time per platform.
+  const [mobileStarterOpen, setMobileStarterOpen] = useState(false);
   const [attachment, setAttachment] = useState<{ name: string; size: string } | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -373,17 +377,20 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             ref={plusRef}
             type="button"
             onClick={() => {
-              // Mobile: always starter popup (file upload is in the popup).
+              // Mobile: open the StarterSheet (Vaul modal — handles backdrop,
+              // body lock, swipe-down dismiss; same pattern as AccountSheet).
               // Desktop with onFileUpload: direct file picker.
-              // Desktop without: starter popup.
-              if (!isMobile && onFileUpload) {
+              // Desktop without: dropdown popup (legacy).
+              if (isMobile) {
+                setMobileStarterOpen(true);
+              } else if (onFileUpload) {
                 fileInputRef.current?.click();
               } else {
                 setToolsOpen(p => !p);
               }
             }}
             aria-label={uploading ? 'Uploading…' : (!isMobile && onFileUpload) ? 'Attach a file' : 'Open starter options'}
-            aria-expanded={(isMobile || !onFileUpload) ? toolsOpen : undefined}
+            aria-expanded={isMobile ? mobileStarterOpen : (!onFileUpload ? toolsOpen : undefined)}
             disabled={uploading}
             className="dock-plus-btn flex items-center justify-center cursor-pointer active:scale-95"
             style={{
@@ -398,7 +405,7 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
             {uploading ? (
               <div className="w-4 h-4 border-2 border-[#D44A78] border-t-transparent rounded-full" style={{ animation: 'spin 1s linear infinite' }} />
             ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transform: (isMobile || !onFileUpload) && toolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transform: (isMobile ? mobileStarterOpen : (!onFileUpload && toolsOpen)) ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             )}
@@ -487,12 +494,10 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
         </div>
 
         {/* Starter-prefill popup.
-            Shows when: desktop signed-out OR any mobile (signed-in or out).
-            Desktop signed-in uses direct file picker instead — no popup.
-            Drops UP from the pill. When signed-in (onFileUpload present) and
-            on mobile, prepends an "Attach a file" row so file upload is
-            accessible without hijacking the primary + action. */}
-        {showPlusButton && (isMobile || !onFileUpload) && (
+            Desktop only — mobile uses StarterSheet (Vaul modal sheet,
+            same pattern as AccountSheet). Mobile dropdown is suppressed
+            with the !isMobile guard below. */}
+        {showPlusButton && !isMobile && !onFileUpload && (
           <div ref={toolsRef} className={`home-tools-popup ${toolsOpen ? 'open' : ''}`} style={{ bottom: 'calc(100% + 12px)' }}>
             {/* File upload — only on mobile + signed-in (desktop signed-in
                 uses direct + click; signed-out has no upload capability). */}
@@ -696,6 +701,23 @@ const ChatDock = forwardRef<ChatDockHandle, ChatDockProps>(function ChatDock(
           </div>
         </div>
       </div>
+      )}
+
+      {/* StarterSheet — Vaul modal sheet rendered to body via Vaul's Portal.
+          Shown only on mobile when the + button is tapped. Reuses the same
+          TOOLS list and onFileUpload handler so behavior is identical to
+          the legacy popup, but with proper iOS sheet UX (drag handle, swipe
+          down to dismiss, scrim, body lock, scale-back background). Dark
+          mode detected from html.dark (set by DarkModeToggle). */}
+      {isMobile && (
+        <StarterSheet
+          open={mobileStarterOpen}
+          onOpenChange={setMobileStarterOpen}
+          dark={typeof document !== 'undefined' && document.documentElement.classList.contains('dark')}
+          tools={TOOLS}
+          onPick={handleToolClick}
+          onAttachFile={onFileUpload ? () => fileInputRef.current?.click() : undefined}
+        />
       )}
     </div>
   );
