@@ -2333,8 +2333,8 @@ export default function AppShell() {
                   {isMobile && createPortal(
                     <div
                       id="mobile-home-pill-portal"
-                      className="fixed left-0 right-0 bottom-0 z-10"
-                      style={{ paddingTop: 12, paddingBottom: 'env(safe-area-inset-bottom)' }}
+                      className="chat-pill-mobile-container fixed left-0 right-0 bottom-0 z-10"
+                      style={{ paddingTop: 12 }}
                     >
                       {/* Context-aware chip row — journey chips when empty portfolio,
                           single "Start a new deal" chip when user has deals. Always shown
@@ -2711,16 +2711,21 @@ export default function AppShell() {
           </div>
         )}
         {showDock && viewState === 'chat' && isMobile && createPortal(
+          // Apply .chat-pill-mobile-container so padding-bottom rides
+          // env(keyboard-inset-height) on iOS 17+. Falls back to
+          // env(safe-area-inset-bottom) when keyboard-inset-height isn't
+          // available. Previous inline paddingBottom shadowed the class
+          // and lost the keyboard-aware behavior — chat pill could hide
+          // behind the iOS form-assistant toolbar mid-typing.
           <div
             id="mobile-chat-dock-portal"
-            className={`${dark ? 'force-chat-dark' : ''} px-3 pt-3`}
+            className={`chat-pill-mobile-container ${dark ? 'force-chat-dark' : ''} px-3 pt-3`}
             style={{
               position: 'fixed',
               left: 0,
               right: 0,
               bottom: 0,
               zIndex: 10,
-              paddingBottom: 'env(safe-area-inset-bottom)',
               touchAction: 'manipulation',
             }}
           >
