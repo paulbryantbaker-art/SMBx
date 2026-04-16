@@ -2161,21 +2161,13 @@ export default function AppShell() {
                       }}
                       onSeeAll={() => setStackExpandedOpen(true)}
                       onStartFirstDeal={(fill) => {
-                        // Logged-in mobile users see MobileNotionHome, not
-                        // the home pill portal — homeInputMobileRef is null
-                        // for them. Route the prefill into ChatDock instead
-                        // (which is already rendered at the bottom, or
-                        // becomes visible once viewState flips to 'chat').
-                        // If we're still on landing, flip to chat first so
-                        // ChatDock mounts.
-                        if (viewState !== 'chat') {
-                          setViewState('chat');
-                          navigate('/chat');
-                          // Wait for ChatDock to mount, then prefill + focus
-                          setTimeout(() => dockRef.current?.setValue(fill), 120);
-                        } else {
-                          dockRef.current?.setValue(fill);
-                        }
+                        // Drawer is always mounted on logged-in mobile.
+                        // Just expand it to 0.6 and prefill the input —
+                        // no view switching, no chat empty-state hop.
+                        setChatDrawerSnap(0.6);
+                        // ChatDock is already rendered inside the drawer
+                        // at peek (0.15); setValue works immediately.
+                        dockRef.current?.setValue(fill);
                       }}
                       onAccountTap={() => setAccountSheetOpen(true)}
                     />

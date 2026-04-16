@@ -308,7 +308,12 @@ export default function MobileNotionHome({
           flex: 1,
           overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
-          paddingBottom: 24,
+          // Prevent iOS rubber-band overscroll when content is short.
+          // Without this, an empty home (just the "no deals" card) lets
+          // the user pull the page weirdly with nothing to scroll.
+          overscrollBehavior: 'contain',
+          // Reserve room for the chat drawer's peek state (0.15 of vh).
+          paddingBottom: 'calc(15vh + 24px)',
         }}
       >
         {/* RECENTS */}
