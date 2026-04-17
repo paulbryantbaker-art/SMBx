@@ -72,7 +72,10 @@ export default function AppShellInner({
     <div
       style={{
         position: 'relative',
-        height: 'var(--vvh, 100dvh)',
+        /* #app-root already applies paddingTop: env(safe-area-inset-top),
+           so we subtract it here or the tab bar (position:absolute bottom:0)
+           gets pushed below the visible viewport by the status-bar height. */
+        height: 'calc(var(--vvh, 100dvh) - env(safe-area-inset-top, 0px))',
         overflow: 'hidden',
         background: 'var(--bg-app)',
         color: 'var(--text-primary)',
