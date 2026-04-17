@@ -2240,13 +2240,13 @@ export default function AppShell() {
                         /* ─── Not logged in: landing page hook ─── */
                         <>
                           <h1
-                            className={`font-headline font-black tracking-[-0.045em] ${isMobile ? 'text-[48px] leading-[1] mb-6' : 'text-[88px] leading-[0.94] mb-6'}`}
+                            className={`font-headline font-black tracking-[-0.045em] ${isMobile ? 'text-[42px] leading-[1] mb-6' : 'text-[76px] leading-[0.98] mb-6'}`}
                             style={{ textWrap: 'balance' } as React.CSSProperties}
                           >
-                            A deal team for <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>every deal</span>.
+                            Empower your deal team with <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>AI superintelligence</span>.
                           </h1>
-                          <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[340px]' : 'text-xl max-w-2xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                            The analyst. The associate. The VP. For <span className={`font-bold ${dark ? 'text-white' : 'text-[#1a1c1e]'}`}>$149 a month</span>.
+                          <p className={`mx-auto font-medium ${isMobile ? 'text-[16px] leading-[1.5] max-w-[340px]' : 'text-xl max-w-2xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
+                            Close deals faster and smarter with AI for M&amp;A.
                           </p>
 
                           {/* Segment chip row — desktop only, logged-out only.
@@ -2691,6 +2691,10 @@ export default function AppShell() {
                 desktop={!isMobile}
                 dark={!isMobile ? true : dark}
                 userName={user?.display_name || user?.email || null}
+                /* Mobile: home surface already shows the greeting + starter chips;
+                   duplicating the same "What are you working on?" empty state
+                   inside the chat view made the second screen feel pointless. */
+                hideEmptyState={isMobile}
               />
               </div>
 
