@@ -9,7 +9,85 @@
  * Spec source: Glass Grok/Desktop spec (this repo).
  */
 
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
+
+/* ═════════════════════════════════════════════════════════════════════
+   Shared motion hooks — used by every animated mockup.
+   ═════════════════════════════════════════════════════════════════════ */
+
+/** Fires true the first time the element enters the viewport. */
+export function useInView<T extends HTMLElement>(
+  options: IntersectionObserverInit = { rootMargin: '0px 0px -10% 0px', threshold: 0.1 }
+): [React.RefObject<T | null>, boolean] {
+  const ref = useRef<T | null>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) { setInView(true); return; }
+    const observer = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) { setInView(true); observer.disconnect(); return; }
+      }
+    }, options);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  return [ref, inView];
+}
+
+/** Animates a numeric target from 0 to `to` over `duration` ms when
+ *  `active` flips true. Returns the current value. */
+export function useCountUp(to: number, active: boolean, duration = 1200): number {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (!active) return;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) { setValue(to); return; }
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      /* ease-out-expo: decisive entrance, clean settle */
+      const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+      setValue(to * eased);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [to, active, duration]);
+  return value;
+}
+
+/** Parse a currency string like "+$47K" or "$1.1M" into { prefix, value,
+ *  suffix, scale } so useCountUp can animate the numeric portion. */
+function parseCurrency(s: string): { prefix: string; target: number; suffix: string; scale: number } {
+  const match = /^([^\d.\-]*)([\d.,]+)([A-Za-z%]*)$/.exec(s.trim());
+  if (!match) return { prefix: '', target: 0, suffix: s, scale: 1 };
+  const [, prefix, numStr, suffix] = match;
+  const n = parseFloat(numStr.replace(/,/g, ''));
+  const scale = suffix.toLowerCase() === 'm' ? 1e6 : suffix.toLowerCase() === 'k' ? 1e3 : 1;
+  return { prefix, target: n, suffix, scale };
+}
+
+function formatCount(current: number, target: number, suffix: string, prefix: string): string {
+  if (suffix.toLowerCase() === 'm') return `${prefix}${current.toFixed(current < 10 ? 1 : 0)}${suffix}`;
+  if (suffix.toLowerCase() === 'k') return `${prefix}${Math.round(current).toLocaleString()}${suffix}`;
+  if (suffix === '%')                return `${prefix}${Math.round(current)}${suffix}`;
+  /* Plain integer with commas (e.g., $22,000) */
+  if (target >= 1000) return `${prefix}${Math.round(current).toLocaleString()}${suffix}`;
+  return `${prefix}${Math.round(current)}${suffix}`;
+}
+
+/** Count-up a currency-style string to its target value. Returns the
+ *  formatted string at the current animation frame. */
+export function useCountUpString(s: string, active: boolean, duration = 1200): string {
+  const { prefix, target, suffix } = parseCurrency(s);
+  const live = useCountUp(target, active, duration);
+  if (!target) return s;
+  return formatCount(live, target, suffix, prefix);
+}
 
 /* ═════════════════════════════════════════════════════════════════════
    PEEK STACK — home hero right column
@@ -139,8 +217,12 @@ export function AddBackSchedule({
   totalNote?: string;
   totalAmount: string;
 }) {
+  const [ref, inView] = useInView<HTMLDivElement>();
+  const totalLive = useCountUpString(totalAmount, inView, 1400);
+
   return (
     <div
+      ref={ref}
       className="gg-card"
       style={{
         padding: '28px 30px',
@@ -154,11 +236,18 @@ export function AddBackSchedule({
       {lines.map((l, i) => (
         <div
           key={i}
+          className="gg-addback-row"
           style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             padding: '14px 0',
             borderBottom: i === lines.length - 1 ? '0' : '0.5px solid var(--gg-border)',
             gap: 16,
+            /* Stagger rows in after the card enters viewport */
+            ...(inView
+              ? { opacity: 1, transform: 'translateY(0)' }
+              : { opacity: 0, transform: 'translateY(8px)' }),
+            transition: 'opacity 400ms var(--gg-ease-spring), transform 400ms var(--gg-ease-spring)',
+            transitionDelay: `${150 + i * 110}ms`,
           }}
         >
           <div style={{ minWidth: 0 }}>
@@ -167,7 +256,7 @@ export function AddBackSchedule({
               <div style={{ fontSize: 11.5, color: 'var(--gg-text-muted)', marginTop: 2 }}>{l.subtitle}</div>
             )}
           </div>
-          <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 15, letterSpacing: '-0.01em', flexShrink: 0 }}>
+          <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 15, letterSpacing: '-0.01em', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
             {l.amount}
           </div>
         </div>
@@ -182,14 +271,18 @@ export function AddBackSchedule({
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.12)',
           gap: 16,
+          opacity: inView ? 1 : 0,
+          transform: inView ? 'translateY(0)' : 'translateY(12px)',
+          transition: 'opacity 500ms var(--gg-ease-spring), transform 500ms var(--gg-ease-spring)',
+          transitionDelay: `${150 + lines.length * 110 + 40}ms`,
         }}
       >
         <div style={{ minWidth: 0 }}>
           <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 12, letterSpacing: '0.06em', textTransform: 'uppercase', opacity: 0.75 }}>{totalLabel}</div>
           <div style={{ fontSize: 11, opacity: 0.6, marginTop: 2 }}>{totalNote}</div>
         </div>
-        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 28, letterSpacing: '-0.02em', flexShrink: 0 }}>
-          {totalAmount}
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 28, letterSpacing: '-0.02em', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+          {totalLive}
         </div>
       </div>
     </div>
@@ -276,8 +369,10 @@ export function IOIGrid({
   cells: readonly IOICell[];
   footnote?: ReactNode;
 }) {
+  const [ref, inView] = useInView<HTMLDivElement>();
   return (
     <div
+      ref={ref}
       className="gg-card"
       style={{
         padding: 26,
@@ -300,16 +395,31 @@ export function IOIGrid({
               borderColor: c.winner ? 'var(--gg-accent)' : 'var(--gg-border)',
               color: c.winner ? '#fff' : 'var(--gg-text-primary)',
               boxShadow: c.winner ? 'inset 0 0.5px 0 rgba(255,255,255,0.12)' : undefined,
+              /* Stagger each cell in; winner lands last for emphasis */
+              opacity: inView ? 1 : 0,
+              transform: inView ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.96)',
+              transition: 'opacity 500ms var(--gg-ease-spring), transform 500ms var(--gg-ease-spring)',
+              transitionDelay: `${100 + i * 160}ms`,
             }}
           >
             <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 11, letterSpacing: '0.04em', textTransform: 'uppercase', opacity: 0.7, marginBottom: 6 }}>{c.name}</div>
-            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 20, letterSpacing: '-0.015em', marginBottom: 4 }}>{c.price}</div>
+            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 20, letterSpacing: '-0.015em', marginBottom: 4, fontVariantNumeric: 'tabular-nums' }}>{c.price}</div>
             <div style={{ fontSize: 10.5, opacity: 0.7 }}>{c.note}</div>
           </div>
         ))}
       </div>
       {footnote && (
-        <div style={{ marginTop: 16, padding: '14px 16px', background: 'var(--gg-bg-subtle)', borderRadius: 10, fontSize: 12.5, color: 'var(--gg-text-secondary)', lineHeight: 1.55 }}>
+        <div
+          style={{
+            marginTop: 16, padding: '14px 16px',
+            background: 'var(--gg-bg-subtle)',
+            borderRadius: 10, fontSize: 12.5,
+            color: 'var(--gg-text-secondary)', lineHeight: 1.55,
+            opacity: inView ? 1 : 0,
+            transition: 'opacity 500ms var(--gg-ease-spring)',
+            transitionDelay: `${100 + cells.length * 160 + 100}ms`,
+          }}
+        >
           {footnote}
         </div>
       )}
@@ -322,39 +432,60 @@ export function IOIGrid({
    Ring with big number + verdict label.
    ═════════════════════════════════════════════════════════════════════ */
 
-export function ScoreRing({ score = 87, verdict = 'Pursue', band = 'hi' }: {
-  score?: number; verdict?: string; band?: 'hi' | 'med' | 'low';
+export function ScoreRing({ score = 87, verdict = 'Pursue', band = 'hi', size = 120 }: {
+  score?: number; verdict?: string; band?: 'hi' | 'med' | 'low'; size?: number;
 }) {
+  const [ref, inView] = useInView<HTMLDivElement>();
+  const liveScore = useCountUp(score, inView, 1400);
   const ringColor = band === 'hi' ? 'var(--gg-dot-ready)' : band === 'med' ? 'var(--gg-dot-progress)' : 'var(--gg-dot-flag)';
+
+  /* SVG ring — the progress arc draws in via stroke-dashoffset on enter.
+     Circumference = 2πr; dasharray = circumference; dashoffset animates
+     from full (invisible) to fraction proportional to score. */
+  const r = (size - 8) / 2;
+  const cx = size / 2;
+  const cy = size / 2;
+  const circumference = 2 * Math.PI * r;
+  const progress = Math.max(0, Math.min(100, score)) / 100;
+  const dashOffset = inView ? circumference * (1 - progress) : circumference;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-      <div
-        style={{
-          width: 120, height: 120,
-          borderRadius: '50%',
-          border: '3px solid var(--gg-text-primary)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'var(--gg-display)',
-          fontWeight: 800,
-          fontSize: 38,
-          letterSpacing: '-0.025em',
-          background: '#fff',
-          position: 'relative',
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
+    <div ref={ref} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+      <div style={{ position: 'relative', width: size, height: size }}>
+        <svg
+          width={size} height={size}
+          viewBox={`0 0 ${size} ${size}`}
+          style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)', transformOrigin: 'center' }}
+          aria-hidden
+        >
+          {/* Track */}
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--gg-bg-muted)" strokeWidth={4} />
+          {/* Progress arc — draws from 12-o'clock clockwise on inView */}
+          <circle
+            cx={cx} cy={cy} r={r}
+            fill="none"
+            stroke={ringColor}
+            strokeWidth={4}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={dashOffset}
+            style={{ transition: 'stroke-dashoffset 1400ms cubic-bezier(0.22, 1, 0.36, 1)' }}
+          />
+        </svg>
         <div
           style={{
-            position: 'absolute',
-            inset: -3,
-            borderRadius: '50%',
-            border: '3px solid transparent',
-            borderTopColor: ringColor,
-            borderRightColor: ringColor,
-            transform: 'rotate(25deg)',
+            position: 'absolute', inset: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'var(--gg-display)',
+            fontWeight: 800,
+            fontSize: size * 0.3,
+            letterSpacing: '-0.025em',
+            color: 'var(--gg-text-primary)',
+            fontVariantNumeric: 'tabular-nums',
           }}
-        />
-        {score}
+        >
+          {Math.round(liveScore)}
+        </div>
       </div>
       <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--gg-text-muted)' }}>
         {verdict}
@@ -380,6 +511,7 @@ export function CapitalStack({
 }: {
   layers?: readonly StackLayer[];
 }) {
+  const [ref, inView] = useInView<HTMLDivElement>();
   const toneMap: Record<StackLayer['tone'], { bg: string; fg: string }> = {
     ink:   { bg: 'var(--gg-text-primary)',   fg: '#fff' },
     dark:  { bg: 'var(--gg-text-secondary)', fg: '#fff' },
@@ -387,7 +519,7 @@ export function CapitalStack({
     light: { bg: 'var(--gg-border-strong)',  fg: 'var(--gg-text-primary)' },
   };
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 22, background: 'var(--gg-bg-subtle)', borderRadius: 14, border: '0.5px solid var(--gg-border)' }}>
+    <div ref={ref} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 22, background: 'var(--gg-bg-subtle)', borderRadius: 14, border: '0.5px solid var(--gg-border)' }}>
       {layers.map((layer, i) => {
         const t = toneMap[layer.tone];
         return (
@@ -405,7 +537,14 @@ export function CapitalStack({
               textTransform: 'uppercase',
               background: t.bg,
               color: t.fg,
-              width: `${layer.width}%`,
+              /* Width animates from 0 → target on viewport enter. Stagger
+                 from the widest senior layer down so the stack "fills in"
+                 top-to-bottom like capital being layered. */
+              width: inView ? `${layer.width}%` : '0%',
+              transition: 'width 700ms cubic-bezier(0.22, 1, 0.36, 1)',
+              transitionDelay: `${150 + i * 120}ms`,
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
             }}
           >
             <span>{layer.label}</span>
@@ -421,8 +560,11 @@ export function CapitalStack({
    ═════════════════════════════════════════════════════════════════════ */
 
 export function VizBigStat({ value = '$1.1M', label = 'avg hidden value' }: { value?: string; label?: string }) {
+  const [ref, inView] = useInView<HTMLDivElement>();
+  const live = useCountUpString(value, inView, 1400);
   return (
     <div
+      ref={ref}
       style={{
         height: 140,
         borderRadius: 14,
@@ -434,8 +576,8 @@ export function VizBigStat({ value = '$1.1M', label = 'avg hidden value' }: { va
         flexDirection: 'column', gap: 6,
       }}
     >
-      <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 44, letterSpacing: '-0.03em', color: 'var(--gg-text-primary)' }}>
-        {value}
+      <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 44, letterSpacing: '-0.03em', color: 'var(--gg-text-primary)', fontVariantNumeric: 'tabular-nums' }}>
+        {live}
       </div>
       <div style={{ fontFamily: 'var(--gg-display)', fontSize: 10, color: 'var(--gg-text-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 600 }}>
         {label}

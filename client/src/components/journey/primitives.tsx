@@ -683,15 +683,82 @@ export function StatBar({ items }: StatBarProps) {
       gap: 'clamp(16px, 3vw, 40px)',
     }}>
       {items.map((it, i) => (
-        <div key={i}>
-          <div className="gg-stat">{it.value}</div>
-          <div className="gg-body" style={{ marginTop: 6, marginBottom: 0, fontSize: 13, color: 'var(--gg-text-muted)' }}>
-            {it.label}
-          </div>
-        </div>
+        <AnimatedStat key={i} value={it.value} label={it.label} delay={i * 180} />
       ))}
     </div>
   );
+}
+
+/** A single big stat that counts up when its dark section enters viewport.
+ *  Values like "$1.1M" / "30 min" / "3,000 → 1" — numeric prefix animates,
+ *  non-numeric string (e.g. "→ 1") stays literal. Uses useCountUpString
+ *  which only animates if a numeric target is parseable. */
+function AnimatedStat({ value, label, delay }: { value: string; label: string; delay: number }) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) { setInView(true); return; }
+    const obs = new IntersectionObserver(
+      (entries) => { for (const e of entries) if (e.isIntersecting) { setInView(true); obs.disconnect(); return; } },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.1 }
+    );
+    obs.observe(node);
+    return () => obs.disconnect();
+  }, []);
+  /* If value has a multi-segment like "3,000 → 1" the count-up parser won't
+     match — we use a one-shot fade-up reveal instead of count-up. */
+  const hasArrow = /\u2192|\->/.test(value);
+  const live = useCountUpStringLocal(value, inView && !hasArrow, 1400);
+  return (
+    <div
+      ref={ref}
+      style={{
+        opacity: inView ? 1 : 0,
+        transform: inView ? 'translateY(0)' : 'translateY(8px)',
+        transition: 'opacity 500ms var(--gg-ease-spring), transform 500ms var(--gg-ease-spring)',
+        transitionDelay: `${delay}ms`,
+      }}
+    >
+      <div className="gg-stat">{hasArrow ? value : live}</div>
+      <div className="gg-body" style={{ marginTop: 6, marginBottom: 0, fontSize: 13, color: 'var(--gg-text-muted)' }}>
+        {label}
+      </div>
+    </div>
+  );
+}
+
+/** Local copy of the useCountUpString pattern so StatBar doesn't pull in
+ *  mockups.tsx (circular dep). Same semantics: parses a currency string,
+ *  counts up the numeric portion on active=true. */
+function useCountUpStringLocal(s: string, active: boolean, duration = 1200): string {
+  const match = /^([^\d.\-]*)([\d.,]+)([A-Za-z%]*)$/.exec(s.trim());
+  const [value, setValue] = useState(0);
+  const target = match ? parseFloat(match[2].replace(/,/g, '')) : 0;
+  useEffect(() => {
+    if (!match || !active) { if (!active) setValue(0); return; }
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) { setValue(target); return; }
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+      setValue(target * eased);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [active, target, duration, !!match]);
+  if (!match) return s;
+  const [, prefix, , suffix] = match;
+  if (suffix.toLowerCase() === 'm') return `${prefix}${value.toFixed(value < 10 ? 1 : 0)}${suffix}`;
+  if (suffix.toLowerCase() === 'k') return `${prefix}${Math.round(value).toLocaleString()}${suffix}`;
+  if (suffix === '%')                return `${prefix}${Math.round(value)}${suffix}`;
+  if (target >= 1000)                return `${prefix}${Math.round(value).toLocaleString()}${suffix}`;
+  return `${prefix}${Math.round(value)}${suffix}`;
 }
 
 /* ═════════════════════════════════════════════════════════════════════
