@@ -1138,10 +1138,15 @@ export default function AppShell() {
       if (!user && activeTab === 'home') {
         setActiveTab('sell');
       }
-      // Desktop: morph from landing → chat view (historical split-panel pattern).
-      // Mobile: STAY on landing. MobileDealListHome renders ChatMessages inline
-      // once messages arrive — home IS the chat surface (unified / Claude pattern).
-      if (!isMobile) {
+      // Morph from landing → chat view.
+      // - Desktop: historical split-panel pattern (landing fades out, chat fades in).
+      // - Mobile logged-in: STAY on landing so MobileDealListHome can render
+      //   ChatMessages inline — home IS the chat surface for them.
+      // - Mobile logged-out: morph to chat view like desktop. Glass Grok public
+      //   pages have no inline chat surface; without the morph the message
+      //   sends silently and the user sees no response (the bug Paul reported).
+      const shouldMorph = !isMobile || !user;
+      if (shouldMorph) {
         const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
         const holdMs = reducedMotion ? 0 : 240;
         setMorphing(true);
@@ -1162,6 +1167,19 @@ export default function AppShell() {
     dockRef.current?.clear();
     handleSend(text);
   }, [handleSend]);
+
+  // Public-marketing class on <html> so the PWA standalone scroll-lock
+  // (index.css @media display-mode:standalone) can be opted out of on
+  // Glass Grok tall journey pages. Without this, a home-screen-installed
+  // PWA locks body:fixed/overflow:hidden and the marketing pages can't
+  // scroll at all.
+  useEffect(() => {
+    const isPublic = viewState === 'landing' && !user;
+    const root = document.documentElement;
+    if (isPublic) root.classList.add('public-marketing');
+    else root.classList.remove('public-marketing');
+    return () => root.classList.remove('public-marketing');
+  }, [viewState, user]);
 
   // ─── ?message= query param handler ───
   // bridgeToYulia() from the journey-page CTAs navigates to /chat?message=X.
@@ -3398,25 +3416,11 @@ export default function AppShell() {
 
       {/* Floating logo removed — X logo now lives in sidebar permanently */}
 
-      {/* ═══ FLOATING CTA — "Start chatting" ═══
-          Desktop: suppressed on public journey pages — Glass Grok topbar
-          already provides the "Start free" CTA, so a pink gradient pill
-          from legacy chrome would double-up and break brand. Mobile keeps
-          the FAB since mobile journey pages don't have a visible topbar. */}
-      {!user && viewState === 'landing' && activeTab !== 'home' && (
-        isMobile ? (
-          /* Mobile: bottom-right FAB — only on landing pages, not chat */
-          <button
-            onClick={() => handleTabClick('home')}
-            className="fixed z-50 flex items-center gap-2 border-none cursor-pointer text-white font-headline text-[14px] font-bold shadow-xl hover:scale-105 active:scale-95 transition-all duration-200"
-            style={{ bottom: 'calc(24px + env(safe-area-inset-bottom))', right: 16, background: 'linear-gradient(135deg, #D44A78, #E8709A)', borderRadius: '100px', padding: '14px 22px' }}
-            type="button"
-          >
-            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>chat</span>
-            Start chatting
-          </button>
-        ) : null
-      )}
+      {/* Legacy "Start chatting" FAB removed on public journey pages.
+          Desktop + mobile: every Glass Grok page has a chat input in the
+          hero and at the bottom CTA — those are the conversion paths.
+          The old FAB just routed to /home which created a navigation loop
+          from journey pages. Hero chat → morph to /chat is the real path. */}
 
       {/* Dark mode toggle lives in the sidebar (desktop + mobile menu) for all users.
           The floating top-right toggle was removed — it kept overlapping content. */}
