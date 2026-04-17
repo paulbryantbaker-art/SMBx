@@ -2092,9 +2092,17 @@ export default function AppShell() {
               position: (activeTab === 'home' && !isMobile) ? 'fixed' as const : 'relative' as const,
               animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease',
               pointerEvents: morphing ? 'none' as const : undefined,
-              ...(activeTab === 'home' && !isMobile
+              /* Scroll-lock rules:
+                 - Desktop home logged-in: fixed viewport shell (dashboard).
+                 - Mobile home logged-in: viewport-locked with touch-action
+                   none (MobileDealListHome manages its own scroll inside).
+                 - Mobile/desktop home logged-out: Glass Grok home is a
+                   long marketing page — natural scroll. Any overflow
+                   or touch-action block here kills page scroll on mobile.
+                 - Other tabs: always natural scroll. */
+              ...(activeTab === 'home' && !isMobile && user
                 ? { top: 0, right: 0, bottom: 0, left: 104, display: 'flex', flexDirection: 'column' as const, overflow: 'hidden', overscrollBehavior: 'none' as const }
-                : activeTab === 'home' && isMobile
+                : activeTab === 'home' && isMobile && user
                 ? { minHeight: '100dvh', display: 'flex', flexDirection: 'column' as const, overflow: 'hidden', overscrollBehavior: 'none' as const, touchAction: 'none' as const }
                 : { minHeight: '100dvh' }
               ),
@@ -2107,12 +2115,14 @@ export default function AppShell() {
 
               {activeTab === 'home' ? (
               <div className="relative z-10 flex-1 flex flex-col">
-                {/* ═══ HOME PAGE ═══ Glass Grok — canvas is #F2F2F4, no framing card. */}
+                {/* ═══ HOME PAGE ═══ Glass Grok — canvas is #F2F2F4, no framing card.
+                    overflow:hidden only when logged-in (dashboard) — logged-out
+                    Glass Grok home is a tall marketing page that must scroll. */}
                 <div
                   className="flex-1 flex flex-col"
                   style={{
                     background: 'var(--gg-bg-app, #F2F2F4)',
-                    overflow: 'hidden',
+                    overflow: user ? 'hidden' : 'visible',
                   }}
                 >
                 <main className="flex-1 flex flex-col relative">
@@ -3344,7 +3354,11 @@ export default function AppShell() {
         </button>
       )}
 
-      {isMobile && !authLoading && !user && (
+      {/* Mobile Sign in pill. Suppressed on public marketing flows — the
+          Glass Grok nav pill carries the Start free CTA, and adding a
+          floating pink Sign in creates a double CTA stack + brand clash.
+          Kept for chat view (viewState !== 'landing'). */}
+      {isMobile && !authLoading && !user && viewState !== 'landing' && (
         <button
           onClick={() => setSignInSheetOpen(true)}
           type="button"

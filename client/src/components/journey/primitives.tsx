@@ -106,35 +106,198 @@ export function Page({ children, active, onNavigate, onSignIn, onStartFree, ctaL
           </div>
         </div>
       ) : (
-        /* ── Mobile shell (floating nav pill) ── */
-        <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1, position: 'relative' }}>
-          <nav
-            className="gg-nav"
+        /* ── Mobile shell (floating nav pill + slide-down menu) ── */
+        <MobileShell
+          active={active}
+          onNavigate={onNavigate}
+          onSignIn={onSignIn}
+          onStartFree={onStartFree}
+          ctaLabel={ctaLabel}
+        >
+          {children}
+        </MobileShell>
+      )}
+    </div>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   MOBILE SHELL — nav pill + slide-down full-screen menu
+   Hamburger toggles an overlay with every journey page + Sign in.
+   ═════════════════════════════════════════════════════════════════════ */
+
+const MOBILE_NAV: { id: JourneyTab; label: string }[] = [
+  { id: 'sell',         label: 'Sell a business' },
+  { id: 'buy',          label: 'Buy a business' },
+  { id: 'raise',        label: 'Raise capital' },
+  { id: 'integrate',    label: 'Post-close integration' },
+  { id: 'pricing',      label: 'Pricing' },
+  { id: 'how-it-works', label: 'How it works' },
+  { id: 'enterprise',   label: 'Enterprise' },
+];
+
+function MobileShell({ children, active, onNavigate, onSignIn, onStartFree, ctaLabel }: {
+  children: ReactNode;
+  active?: JourneyTab;
+  onNavigate?: (d: JourneyTab) => void;
+  onSignIn?: () => void;
+  onStartFree: () => void;
+  ctaLabel: string;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: globalThis.KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
+
+  const go = (d: JourneyTab) => {
+    setMenuOpen(false);
+    onNavigate?.(d);
+  };
+
+  return (
+    <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1, position: 'relative' }}>
+      <nav
+        className="gg-nav"
+        style={{
+          position: 'absolute',
+          top: 24, left: 16, right: 16,
+          zIndex: 30,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 10px 10px 14px',
+          height: 56,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            type="button"
+            onClick={() => setMenuOpen(v => !v)}
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
             style={{
-              position: 'absolute',
-              top: 24, left: 16, right: 16,
-              zIndex: 30,
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '10px 12px 10px 18px',
-              height: 56,
+              width: 36, height: 36,
+              border: 0, background: 'transparent',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', padding: 0,
+              color: 'var(--gg-text-primary)',
+              borderRadius: 10,
             }}
           >
-            <div className="gg-logo" style={{ fontSize: 18 }}>smbx.ai</div>
-            <button
-              type="button"
-              className="gg-btn gg-btn--primary gg-btn--pill"
-              style={{ padding: '9px 16px', fontSize: 12 }}
-              onClick={onStartFree}
-            >
-              {ctaLabel}
-            </button>
-          </nav>
-          <main style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: 108 }}>
-            {children}
-          </main>
-          <Footer />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              {menuOpen
+                ? <><path d="M6 6l12 12" /><path d="M6 18L18 6" /></>
+                : <><path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" /></>}
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => go('home')}
+            style={{ border: 0, background: 'transparent', padding: 0, cursor: 'pointer' }}
+          >
+            <span className="gg-logo" style={{ fontSize: 18 }}>smbx.ai</span>
+          </button>
+        </div>
+        <button
+          type="button"
+          className="gg-btn gg-btn--primary gg-btn--pill"
+          style={{ padding: '9px 16px', fontSize: 12 }}
+          onClick={onStartFree}
+        >
+          {ctaLabel}
+        </button>
+      </nav>
+
+      {/* Slide-down menu overlay */}
+      {menuOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site navigation"
+          onClick={e => { if (e.target === e.currentTarget) setMenuOpen(false); }}
+          style={{
+            position: 'fixed', inset: 0,
+            zIndex: 40,
+            background: 'rgba(10, 10, 11, 0.35)',
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
+            animation: 'gg-fade-up 200ms var(--gg-ease-spring) both',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: 88, left: 16, right: 16,
+              padding: 8,
+              background: 'var(--gg-bg-card)',
+              border: '0.5px solid var(--gg-border)',
+              borderRadius: 'var(--gg-r-card)',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.18), inset 0 0.5px 0 rgba(255, 255, 255, 1)',
+            }}
+          >
+            {MOBILE_NAV.map(item => {
+              const isActive = active === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => go(item.id)}
+                  aria-current={isActive ? 'page' : undefined}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    width: '100%',
+                    padding: '14px 14px',
+                    background: isActive ? 'var(--gg-bg-muted)' : 'transparent',
+                    border: 0, cursor: 'pointer',
+                    fontFamily: 'var(--gg-body)',
+                    fontSize: 15, fontWeight: 600,
+                    color: 'var(--gg-text-primary)',
+                    borderRadius: 'var(--gg-r-btn)',
+                    textAlign: 'left',
+                  }}
+                >
+                  {item.label}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--gg-text-muted)' }}>
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+                </button>
+              );
+            })}
+            {onSignIn && (
+              <div style={{ marginTop: 8, paddingTop: 8, borderTop: '0.5px solid var(--gg-border)' }}>
+                <button
+                  type="button"
+                  onClick={() => { setMenuOpen(false); onSignIn(); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    width: '100%',
+                    padding: '14px 14px',
+                    background: 'transparent',
+                    border: 0, cursor: 'pointer',
+                    fontFamily: 'var(--gg-body)',
+                    fontSize: 15, fontWeight: 600,
+                    color: 'var(--gg-text-secondary)',
+                    borderRadius: 'var(--gg-r-btn)',
+                    textAlign: 'left',
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
+                  </svg>
+                  Sign in
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
+
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: 108 }}>
+        {children}
+      </main>
+      <Footer />
     </div>
   );
 }
