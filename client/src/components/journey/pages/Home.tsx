@@ -11,10 +11,10 @@
  *  - SMBX_SITE_COPY.md (page 1)
  */
 
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import '../glass.css';
 import { Page, type JourneyTab } from '../primitives';
-import { PeekStack, VizBigStat, VizScoreCard, VizCapitalStack } from '../mockups';
+import { PeekStack } from '../mockups';
 
 /* ─── Rotating placeholder hints ────────────────────────────────────── */
 const ROTATING_HINTS = [
@@ -35,20 +35,39 @@ const SHORTCUTS: { label: string; journey: Journey }[] = [
   { label: 'Just acquired',     journey: 'integrate' },
 ];
 
-/* ─── 3 feature cards under hero ──────────────────────────────────────
-   Middle card (Deal screening) inverts to dark fill for visual rhythm —
-   three identical greys in a row reads templated; one dark in the
-   middle breaks the grid without a color. */
-const FEATURES: {
-  idx: string; heading: string; body: string;
-  viz: 'addback' | 'score' | 'stack';
-  invert: boolean;
+/* ─── Chat starters — each card prefills Yulia with a real prompt ─────
+   Four entry points, one per journey. These replace static feature cards:
+   every "What Yulia does" card is an invitation to actually do it. */
+const CHAT_STARTERS: {
+  label: string;
+  prompt: string;
+  teaser: string;
   journey: Journey;
-  cta: string;
 }[] = [
-  { idx: '01 · Add-backs',       heading: 'Find the money hiding in your tax returns.',            body: 'Pre-LOI earnings quality analysis. Every legitimate add-back identified, documented, and defensible. 20 minutes, not 6 weeks.',         viz: 'addback', invert: false, journey: 'sell',  cta: 'See how sellers use it' },
-  { idx: '02 · Deal screening',  heading: 'Score any deal in 90 seconds on seven dimensions.',     body: 'The Rundown. Concentration, margins, revenue quality, owner dependency, management depth, financial integrity, scalability. Pursue or pass.', viz: 'score',   invert: true,  journey: 'buy',   cta: 'See how buyers use it'  },
-  { idx: '03 · SBA structure',   heading: 'Model SOP 50 10 8 capital stacks under current rules.', body: 'Senior, mezzanine, seller notes with correct standby terms, equity injection requirements. Restructures killed deals into closable ones.',   viz: 'stack',   invert: false, journey: 'raise', cta: 'See how borrowers use it' },
+  {
+    label: 'I want to sell',
+    prompt: 'I’m thinking about selling my business. Walk me through what it might be worth and what I’d keep after tax.',
+    teaser: 'Valuation range, add-backs, after-tax proceeds — in one conversation.',
+    journey: 'sell',
+  },
+  {
+    label: 'I want to buy',
+    prompt: 'I’m evaluating a business to acquire. Score it for me on revenue quality, margins, owner dependency, and concentration.',
+    teaser: 'Score any deal in 90 seconds on seven dimensions. Pursue or pass.',
+    journey: 'buy',
+  },
+  {
+    label: 'I need capital',
+    prompt: 'I need to raise capital. Help me model an SBA structure with senior debt, mezz, and seller notes.',
+    teaser: 'SOP 50 10 8 capital stacks modeled against current rules.',
+    journey: 'raise',
+  },
+  {
+    label: 'I just acquired',
+    prompt: 'I just acquired a business. Help me build a Day-1 integration plan — payroll, systems, first 90 days.',
+    teaser: 'Day 1 after the wire. Checklist, cash model, owner transition.',
+    journey: 'integrate',
+  },
 ];
 
 interface HomeProps {
@@ -126,10 +145,11 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
         className="gg-enter"
         style={{
           position: 'relative',
-          padding: 'clamp(56px, 8vw, 120px) clamp(20px, 5vw, 72px) clamp(48px, 6vw, 88px)',
-          maxWidth: 1520,
+          padding: 'clamp(56px, 8vw, 120px) clamp(20px, 4vw, 88px) clamp(48px, 6vw, 88px)',
+          maxWidth: 1680,
           margin: '0 auto',
           width: '100%',
+          boxSizing: 'border-box',
         }}
       >
         <div className="gg-grid-bg" />
@@ -237,23 +257,39 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
         </div>
       </section>
 
-      {/* ═════ What Yulia does — 3 feature cards ═════ */}
+      {/* ═════ Live valuation demo — interactive ═════ */}
       <section
         style={{
-          padding: 'clamp(40px, 5vw, 80px) clamp(20px, 5vw, 72px) clamp(72px, 8vw, 120px)',
-          maxWidth: 1520, margin: '0 auto', width: '100%',
+          padding: 'clamp(40px, 5vw, 96px) clamp(20px, 4vw, 88px) clamp(40px, 5vw, 96px)',
+          maxWidth: 1680, margin: '0 auto', width: '100%', boxSizing: 'border-box',
         }}
       >
-        <div className="gg-label" style={{ marginBottom: 28 }}>What Yulia does</div>
+        <ValuationDemo onSend={onSend} />
+      </section>
+
+      {/* ═════ Chat starters — prefill Yulia with a real question ═════ */}
+      <section
+        style={{
+          padding: 'clamp(40px, 5vw, 80px) clamp(20px, 4vw, 88px) clamp(72px, 8vw, 120px)',
+          maxWidth: 1680, margin: '0 auto', width: '100%', boxSizing: 'border-box',
+        }}
+      >
+        <div className="gg-label" style={{ marginBottom: 14 }}>Start a conversation</div>
+        <h2 className="gg-h2" style={{ marginBottom: 10, letterSpacing: '-0.02em' }}>
+          Or just ask Yulia.
+        </h2>
+        <p className="gg-body gg-body--sub" style={{ marginBottom: 36, maxWidth: 640 }}>
+          Pick any thread. She picks up where you leave off — with your numbers, your deal, your context.
+        </p>
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: 20,
+            gap: 16,
           }}
         >
-          {FEATURES.map(f => (
-            <FeatureCard key={f.idx} {...f} onClick={() => onNavigateJourney(f.journey)} />
+          {CHAT_STARTERS.map(s => (
+            <ChatStarter key={s.prompt} {...s} onSend={onSend} />
           ))}
         </div>
       </section>
@@ -261,68 +297,274 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
   );
 }
 
-function FeatureCard({ idx, heading, body, viz, invert, cta, onClick }: {
-  idx: string; heading: string; body: string; viz: 'addback' | 'score' | 'stack'; invert?: boolean;
-  cta: string; onClick: () => void;
+/* ══════════════════════════════════════════════════════════════════════
+   VALUATION DEMO — live interactive. Three inputs, live range output,
+   handoff to Yulia chat. The point: the visitor does the thing Yulia
+   does, feels the product, and exits the calculator INTO a conversation
+   with real context prefilled. Not a brochure — a demo.
+   ══════════════════════════════════════════════════════════════════════ */
+
+const REVENUE_BANDS: { label: string; mid: number }[] = [
+  { label: '$1M–$5M',   mid: 3_000_000 },
+  { label: '$5M–$10M',  mid: 7_500_000 },
+  { label: '$10M–$25M', mid: 17_500_000 },
+  { label: '$25M–$50M', mid: 37_500_000 },
+  { label: '$50M+',     mid: 75_000_000 },
+];
+const INDUSTRIES = ['Services', 'Manufacturing', 'Healthcare', 'Technology', 'Construction', 'Retail', 'Other'] as const;
+/* Industry multiple ranges — EBITDA multiples by sector, lightly
+   compressed vs. institutional comps to avoid overclaiming on home. */
+const INDUSTRY_MULT: Record<string, [number, number]> = {
+  Services:      [4.5, 6.5],
+  Manufacturing: [5.0, 7.0],
+  Healthcare:    [6.0, 8.5],
+  Technology:    [6.5, 10.0],
+  Construction:  [3.5, 5.0],
+  Retail:        [3.0, 5.0],
+  Other:         [4.0, 6.0],
+};
+const MARGIN_BANDS: { label: string; pct: number }[] = [
+  { label: 'Thin (<10%)',    pct: 0.07 },
+  { label: 'Healthy (10–20%)', pct: 0.14 },
+  { label: 'Strong (20%+)',  pct: 0.24 },
+];
+
+function fmtMoney(n: number): string {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(n < 10_000_000 ? 1 : 0)}M`;
+  if (n >= 1_000)     return `$${Math.round(n / 1_000)}K`;
+  return `$${Math.round(n)}`;
+}
+
+function ValuationDemo({ onSend }: { onSend: (text: string) => void }) {
+  const [revIdx,    setRevIdx]    = useState<number | null>(null);
+  const [industry,  setIndustry]  = useState<string | null>(null);
+  const [marginIdx, setMarginIdx] = useState<number | null>(null);
+
+  const result = useMemo(() => {
+    if (revIdx === null || industry === null || marginIdx === null) return null;
+    const rev    = REVENUE_BANDS[revIdx].mid;
+    const margin = MARGIN_BANDS[marginIdx].pct;
+    const [mLow, mHigh] = INDUSTRY_MULT[industry];
+    const ebitda = rev * margin;
+    return {
+      ebitda,
+      evLow:  ebitda * mLow,
+      evHigh: ebitda * mHigh,
+      multLow: mLow,
+      multHigh: mHigh,
+    };
+  }, [revIdx, industry, marginIdx]);
+
+  const handoff = () => {
+    if (revIdx === null || industry === null || marginIdx === null || !result) return;
+    const rev = REVENUE_BANDS[revIdx].label;
+    const marginLabel = MARGIN_BANDS[marginIdx].label.toLowerCase();
+    onSend(
+      `I ran the home-page valuation with revenue ${rev}, industry ${industry}, and ${marginLabel} EBITDA margin. ` +
+      `It landed around ${fmtMoney(result.evLow)}–${fmtMoney(result.evHigh)}. ` +
+      `Can you run a real valuation against my actual financials?`
+    );
+  };
+
+  return (
+    <>
+      <div className="gg-label" style={{ marginBottom: 14 }}>Try it — live</div>
+      <h2 className="gg-h2" style={{ marginBottom: 10, letterSpacing: '-0.02em' }}>
+        What’s your business actually worth?
+      </h2>
+      <p className="gg-body gg-body--sub" style={{ marginBottom: 36, maxWidth: 640 }}>
+        A rough range in three picks. Yulia’s real valuation uses your actual tax returns, add-backs, and industry comps.
+      </p>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1.1fr) minmax(0, 1fr)',
+          gap: 32,
+          alignItems: 'start',
+        }}
+      >
+        {/* ── Inputs ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <DemoInput label="Annual revenue"       options={REVENUE_BANDS.map(b => b.label)}  activeIdx={revIdx}    onPick={setRevIdx} />
+          <DemoInput label="Industry"             options={INDUSTRIES as unknown as string[]} activeIdx={industry ? INDUSTRIES.indexOf(industry as typeof INDUSTRIES[number]) : null} onPick={i => setIndustry(INDUSTRIES[i])} />
+          <DemoInput label="EBITDA margin"        options={MARGIN_BANDS.map(m => m.label)}   activeIdx={marginIdx} onPick={setMarginIdx} />
+        </div>
+
+        {/* ── Output card — renders skeleton until all three inputs selected ── */}
+        <div
+          className="gg-card"
+          style={{
+            padding: 32,
+            borderRadius: 22,
+            background: result ? 'var(--gg-accent)' : 'var(--gg-bg-card)',
+            color: result ? '#fff' : 'var(--gg-text-primary)',
+            borderColor: result ? 'var(--gg-accent)' : 'var(--gg-border)',
+            boxShadow: result
+              ? 'inset 0 0.5px 0 rgba(255, 255, 255, 0.12), 0 8px 28px rgba(0, 0, 0, 0.14)'
+              : undefined,
+            transition: 'background 240ms var(--gg-ease-spring), color 240ms var(--gg-ease-spring)',
+            minHeight: 320,
+            display: 'flex', flexDirection: 'column',
+          }}
+        >
+          {!result ? (
+            <>
+              <div className="gg-label" style={{ marginBottom: 14, color: 'var(--gg-text-faint)' }}>Estimated range</div>
+              <div style={{
+                fontFamily: 'var(--gg-display)',
+                fontWeight: 800,
+                fontSize: 'clamp(36px, 4.5vw, 52px)',
+                letterSpacing: '-0.025em',
+                lineHeight: 1.05,
+                color: 'var(--gg-text-faint)',
+                marginBottom: 18,
+              }}>
+                $— – $—
+              </div>
+              <p className="gg-body" style={{ fontSize: 14, color: 'var(--gg-text-muted)', marginTop: 'auto' }}>
+                Pick revenue, industry, and margin to see a range.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="gg-label" style={{ marginBottom: 14, color: 'rgba(255,255,255,0.55)' }}>Estimated enterprise value</div>
+              <div style={{
+                fontFamily: 'var(--gg-display)',
+                fontWeight: 800,
+                fontSize: 'clamp(36px, 4.5vw, 52px)',
+                letterSpacing: '-0.025em',
+                lineHeight: 1.05,
+                marginBottom: 14,
+                fontVariantNumeric: 'tabular-nums',
+              }}>
+                {fmtMoney(result.evLow)} – {fmtMoney(result.evHigh)}
+              </div>
+              <p style={{ fontSize: 14, lineHeight: 1.55, color: 'rgba(255,255,255,0.8)', marginBottom: 8 }}>
+                {fmtMoney(result.ebitda)} EBITDA × {result.multLow.toFixed(1)}–{result.multHigh.toFixed(1)}× industry multiple.
+              </p>
+              <p style={{ fontSize: 13, lineHeight: 1.55, color: 'rgba(255,255,255,0.55)', marginBottom: 24 }}>
+                Industry-pattern estimate. Your real number depends on specific add-backs, concentration, owner dependency, and comp set.
+              </p>
+              <button
+                type="button"
+                onClick={handoff}
+                style={{
+                  marginTop: 'auto',
+                  padding: '13px 20px',
+                  border: 0,
+                  borderRadius: 999,
+                  background: '#fff',
+                  color: 'var(--gg-text-primary)',
+                  fontFamily: 'var(--gg-display)',
+                  fontWeight: 700,
+                  fontSize: 14,
+                  letterSpacing: '-0.005em',
+                  cursor: 'pointer',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  alignSelf: 'flex-start',
+                  transition: 'transform var(--gg-t-feedback) var(--gg-ease-snap)',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+              >
+                Continue this with Yulia
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function DemoInput({ label, options, activeIdx, onPick }: {
+  label: string; options: string[]; activeIdx: number | null; onPick: (i: number) => void;
 }) {
-  const dark = !!invert;
+  return (
+    <div>
+      <div className="gg-label" style={{ marginBottom: 12 }}>{label}</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {options.map((opt, i) => (
+          <button
+            key={opt}
+            type="button"
+            className={`gg-chip${i === activeIdx ? ' active' : ''}`}
+            aria-pressed={i === activeIdx}
+            onClick={() => onPick(i)}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   CHAT STARTER — each card sends a specific question to Yulia, not a
+   navigation to a static journey page. Visitor enters the conversation
+   with real context, which is the whole product.
+   ══════════════════════════════════════════════════════════════════════ */
+
+function ChatStarter({ label, prompt, teaser, onSend }: {
+  label: string; prompt: string; teaser: string; journey: Journey;
+  onSend: (text: string) => void;
+}) {
   return (
     <button
       type="button"
-      onClick={onClick}
-      className="gg-card"
+      onClick={() => onSend(prompt)}
+      className="gg-card gg-card--clickable"
       style={{
-        padding: 32,
-        minHeight: 320,
+        padding: 28,
         display: 'flex', flexDirection: 'column',
-        borderRadius: 22,
-        background: dark ? 'var(--gg-accent)' : 'var(--gg-bg-card)',
-        color: dark ? '#fff' : 'var(--gg-text-primary)',
-        borderColor: dark ? 'var(--gg-accent)' : 'var(--gg-border)',
-        boxShadow: dark
-          ? 'inset 0 0.5px 0 rgba(255, 255, 255, 0.12), 0 6px 24px rgba(0, 0, 0, 0.12)'
-          : undefined,
+        borderRadius: 20,
+        background: 'var(--gg-bg-card)',
         textAlign: 'left',
-        cursor: 'pointer',
         fontFamily: 'var(--gg-body)',
-        transition: 'transform var(--gg-t-snap) var(--gg-ease-snap), box-shadow var(--gg-t-snap) var(--gg-ease-snap)',
+        minHeight: 200,
       }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
     >
-      {viz === 'addback' && <VizBigStat />}
-      {viz === 'score'   && <VizScoreCard />}
-      {viz === 'stack'   && <VizCapitalStack />}
       <div style={{
         fontFamily: 'var(--gg-display)',
         fontWeight: 800,
         fontSize: 11,
         letterSpacing: '0.14em',
         textTransform: 'uppercase',
-        color: dark ? 'rgba(255,255,255,0.55)' : 'var(--gg-text-faint)',
-        marginTop: 24,
-        marginBottom: 12,
-      }}>{idx}</div>
-      <h3
-        className="gg-h3"
-        style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.015em', marginBottom: 12, lineHeight: 1.15, color: dark ? '#fff' : 'var(--gg-text-primary)' }}
-      >
-        {heading}
-      </h3>
-      <p className="gg-body" style={{ marginBottom: 20, fontSize: 14, color: dark ? 'rgba(255,255,255,0.75)' : undefined }}>
-        {body}
+        color: 'var(--gg-text-faint)',
+        marginBottom: 16,
+      }}>
+        {label}
+      </div>
+      <div style={{
+        fontFamily: 'var(--gg-display)',
+        fontWeight: 700,
+        fontSize: 16,
+        letterSpacing: '-0.01em',
+        lineHeight: 1.3,
+        color: 'var(--gg-text-primary)',
+        marginBottom: 14,
+      }}>
+        {prompt.split('.')[0]}.
+      </div>
+      <p className="gg-body" style={{ fontSize: 13.5, lineHeight: 1.55, marginBottom: 20, color: 'var(--gg-text-secondary)' }}>
+        {teaser}
       </p>
       <span style={{
         marginTop: 'auto',
         fontFamily: 'var(--gg-display)',
         fontWeight: 700,
-        fontSize: 13,
+        fontSize: 12.5,
         letterSpacing: '-0.005em',
-        color: dark ? '#fff' : 'var(--gg-text-primary)',
-        display: 'inline-flex', alignItems: 'center', gap: 8,
+        color: 'var(--gg-text-primary)',
+        display: 'inline-flex', alignItems: 'center', gap: 6,
       }}>
-        {cta}
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        Ask Yulia
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M5 12h14M13 6l6 6-6 6" />
         </svg>
       </span>
