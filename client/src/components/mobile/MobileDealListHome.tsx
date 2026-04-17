@@ -14,6 +14,8 @@
  */
 
 import { useMemo } from 'react';
+import type { AnonMessage } from '../../hooks/useAnonymousChat';
+import ChatMessages from '../shell/ChatMessages';
 import { StarterChips } from './StarterChips';
 import { DealCard } from './DealCard';
 
@@ -54,6 +56,16 @@ interface Props {
   justCreatedDealId?: number | null;
   recentDocs?: RecentDoc[];
 
+  // Chat integration — unified mobile surface. When messages are present,
+  // ChatMessages renders inline in place of the greeting / deal list.
+  messages?: AnonMessage[];
+  streamingText?: string;
+  sending?: boolean;
+  activeTool?: string | null;
+  chatError?: string | null;
+  onRetry?: () => void;
+  onOpenDeliverable?: (message: AnonMessage) => void;
+
   onDealTap: (dealId: number) => void;
   onDealLongPress?: (dealId: number) => void;
   onConversationTap: (convId: number) => void;
@@ -89,6 +101,13 @@ export default function MobileDealListHome({
   userName,
   deals,
   activeConversationId: _activeConversationId,
+  messages = [],
+  streamingText = '',
+  sending = false,
+  activeTool,
+  chatError,
+  onRetry,
+  onOpenDeliverable,
   onDealTap,
   onConversationTap: _onConversationTap,
   onSeeAll: _onSeeAll,
@@ -103,6 +122,10 @@ export default function MobileDealListHome({
   onMenuTap: _onMenuTap,
   onDealLongPress: _onDealLongPress,
 }: Props) {
+  // When the user has messages in flight (or streaming), swap the greeting /
+  // deal list for the actual conversation. Keeps the mobile flow on one
+  // surface — no navigation to a separate chat view.
+  const hasActiveChat = messages.length > 0 || !!streamingText;
   const realDeals = useMemo(
     () => deals.filter(d => d.business_name != null && d.business_name.trim().length > 0),
     [deals],
@@ -259,7 +282,21 @@ export default function MobileDealListHome({
           paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 120px)',
         }}
       >
-        {isEmpty ? (
+        {hasActiveChat ? (
+          <ChatMessages
+            messages={messages}
+            streamingText={streamingText}
+            sending={sending}
+            activeTool={activeTool}
+            error={chatError}
+            onRetry={onRetry}
+            onOpenDeliverable={onOpenDeliverable}
+            desktop={false}
+            dark={dark}
+            userName={userName}
+            hideEmptyState={true}
+          />
+        ) : isEmpty ? (
           <div style={{ padding: '56px 0 24px' }}>
             <div style={{ padding: '0 20px', marginBottom: 32 }}>
               <h1

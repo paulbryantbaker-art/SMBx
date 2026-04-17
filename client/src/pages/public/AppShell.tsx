@@ -1128,21 +1128,24 @@ export default function AppShell() {
       if (!user && activeTab === 'home') {
         setActiveTab('sell');
       }
-      // Morph from landing → chat. Same code path for desktop AND mobile —
-      // mobile = full-screen chat (iMessage pattern), no drawer.
-      const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-      const holdMs = reducedMotion ? 0 : 240;
-      setMorphing(true);
-      if (window.location.pathname !== '/chat') navigate('/chat');
-      window.setTimeout(() => {
-        setViewState('chat');
-        setMorphing(false);
-      }, holdMs);
+      // Desktop: morph from landing → chat view (historical split-panel pattern).
+      // Mobile: STAY on landing. MobileDealListHome renders ChatMessages inline
+      // once messages arrive — home IS the chat surface (unified / Claude pattern).
+      if (!isMobile) {
+        const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+        const holdMs = reducedMotion ? 0 : 240;
+        setMorphing(true);
+        if (window.location.pathname !== '/chat') navigate('/chat');
+        window.setTimeout(() => {
+          setViewState('chat');
+          setMorphing(false);
+        }, holdMs);
+      }
       return;
     }
     if (user) authChat.sendMessage(content);
     else anonChat.sendMessage(content, activeTab);
-  }, [viewState, user, authChat, anonChat, navigate, activeTab]);
+  }, [viewState, user, authChat, anonChat, navigate, activeTab, isMobile]);
 
   // Chip click
   const handleChipClick = useCallback((text: string) => {
@@ -2124,6 +2127,16 @@ export default function AppShell() {
                       dark={dark}
                       loading={!authChat.grouped}
                       userName={user.display_name || user.email || null}
+                      messages={messages}
+                      streamingText={streamingText}
+                      sending={sending}
+                      activeTool={activeTool}
+                      chatError={user ? null : anonChat.error}
+                      onRetry={!user ? () => {
+                        const last = anonChat.messages.filter(m => m.role === 'user').pop();
+                        if (last) anonChat.sendMessage(last.content);
+                      } : undefined}
+                      onOpenDeliverable={handleOpenDeliverable}
                       deals={(authChat.grouped?.deals ?? []).map(d => ({
                         id: d.id,
                         business_name: d.business_name,
@@ -2185,14 +2198,9 @@ export default function AppShell() {
                       }}
                       onSeeAll={() => setStackExpandedOpen(true)}
                       onStartFirstDeal={(fill) => {
-                        // Navigate to chat view, prefill the dock so the
-                        // user can edit/send. dockRef is bound to the
-                        // mobile chat dock portal which stays mounted
-                        // across the morph.
-                        setViewState('chat');
-                        navigate('/chat');
-                        // setValue after the navigation tick so the dock
-                        // mounted in the new view picks it up.
+                        // Unified mobile: stay on the home surface and prefill
+                        // the pill. Once the user sends, ChatMessages renders
+                        // inline inside MobileDealListHome — no page transition.
                         requestAnimationFrame(() => {
                           dockRef.current?.setValue(fill);
                           dockRef.current?.focus();
@@ -2200,10 +2208,8 @@ export default function AppShell() {
                       }}
                       onAccountTap={() => setWorkspaceSheetOpen(true)}
                       onLearnTap={() => {
-                        // "How can Yulia help me?" on the home starter row —
-                        // prefill the chat and let Yulia answer in her voice.
-                        setViewState('chat');
-                        navigate('/chat');
+                        // Unified mobile: prefill the pill with the question.
+                        // User sends, Yulia answers inline in the same surface.
                         requestAnimationFrame(() => {
                           dockRef.current?.setValue('How can Yulia help me? ');
                           dockRef.current?.focus();
