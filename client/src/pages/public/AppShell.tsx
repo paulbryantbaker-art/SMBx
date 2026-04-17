@@ -1813,8 +1813,8 @@ export default function AppShell() {
                         onClick={() => handleTabClick(item.id)}
                         className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                           isActive
-                            ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
-                            : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
+                            ? (dark ? 'text-white bg-white/10' : 'text-[#0A0A0B] bg-[#E8E8EB]')
+                            : (dark ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-[#6B6B70] hover:text-[#0A0A0B] hover:bg-[#F5F5F7]')
                         }`}
                         title={item.label}
                         type="button"
@@ -1855,8 +1855,8 @@ export default function AppShell() {
                         }}
                         className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                           isActive
-                            ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
-                            : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
+                            ? (dark ? 'text-white bg-white/10' : 'text-[#0A0A0B] bg-[#E8E8EB]')
+                            : (dark ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-[#6B6B70] hover:text-[#0A0A0B] hover:bg-[#F5F5F7]')
                         }`}
                         title={gated ? `${item.label} · sign in to unlock` : item.label}
                         type="button"
@@ -1883,7 +1883,7 @@ export default function AppShell() {
         {user && (
         <button
           onClick={() => { handleNewChat(); }}
-          className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer transition-all ${dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5'}`}
+          className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer transition-all ${dark ? 'text-white bg-white/10' : 'text-[#0A0A0B] bg-[#E8E8EB]'}`}
           title="New Deal"
           type="button"
         >
@@ -1895,8 +1895,8 @@ export default function AppShell() {
           onClick={() => { setViewState('chat'); navigate('/chat', { replace: viewState === 'chat' }); }}
           className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
             viewState === 'chat'
-              ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
-              : (dark ? 'text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10' : 'text-[#636467] hover:text-[#D44A78] hover:bg-[#D44A78]/5')
+              ? (dark ? 'text-white bg-white/10' : 'text-[#0A0A0B] bg-[#E8E8EB]')
+              : (dark ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-[#6B6B70] hover:text-[#0A0A0B] hover:bg-[#F5F5F7]')
           }`}
           title="All Deals"
           type="button"
@@ -1914,7 +1914,7 @@ export default function AppShell() {
         {/* Theme toggle — always visible (logged in or out) */}
         <button
           onClick={() => setDark(!dark)}
-          className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
+          className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-white' : 'text-[#6B6B70] hover:text-[#0A0A0B]'}`}
           type="button"
           title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
@@ -1925,7 +1925,7 @@ export default function AppShell() {
         {user && (user.role === 'admin' || user.email === 'pbaker@smbx.ai') && (
           <button
             onClick={() => navigate('/admin')}
-            className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
+            className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-white' : 'text-[#6B6B70] hover:text-[#0A0A0B]'}`}
             type="button"
             title="Admin Console"
           >
@@ -1935,7 +1935,7 @@ export default function AppShell() {
         )}
         <button
           onClick={() => { if (user) { openCanvasTab('settings', 'Settings'); } else window.location.href = '/login'; }}
-          className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-rose-500' : 'text-[#636467] hover:text-[#D44A78]'}`}
+          className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-white' : 'text-[#6B6B70] hover:text-[#0A0A0B]'}`}
           type="button"
         >
           <span className="material-symbols-outlined text-[22px]">{user ? 'person' : 'login'}</span>
@@ -3257,7 +3257,7 @@ export default function AppShell() {
                         onClick={() => { setIsMobileCanvasDrawerOpen(false); setActiveCanvasTabId(tab.id); }}
                         className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${
                           tab.id === activeCanvasTabId
-                            ? (dark ? 'text-rose-500 bg-rose-500/10' : 'text-[#D44A78] bg-[#D44A78]/5')
+                            ? (dark ? 'text-white bg-white/10' : 'text-[#0A0A0B] bg-[#E8E8EB]')
                             : (dark ? 'text-zinc-400 hover:text-white bg-transparent' : 'text-[#636467] hover:text-[#1a1c1e] bg-transparent')
                         }`}
                         type="button"
