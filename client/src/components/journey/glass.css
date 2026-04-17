@@ -487,11 +487,15 @@
    topbar) is canonical. Below, the floating nav pill takes over.
    ═══════════════════════════════════════════════════════════════════════ */
 
-.gg-desktop-only { display: none; }
-.gg-mobile-only  { display: initial; }
+/* Force display:none at low specificity loses to inline `display: flex`
+   on the container. Use !important so the media query is authoritative —
+   the Page primitive sets `display: flex` inline for layout when visible,
+   but the shell itself must be invisible below the breakpoint. */
+.gg-desktop-only { display: none !important; }
+.gg-mobile-only  { display: flex !important; }
 @media (min-width: 1024px) {
-  .gg-desktop-only { display: initial; }
-  .gg-mobile-only  { display: none; }
+  .gg-desktop-only { display: flex !important; }
+  .gg-mobile-only  { display: none !important; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -673,6 +677,61 @@
     animation-timeline: view();
     animation-range: entry 0% cover 20%;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION NAV (in-page TOC) — sticky right rail on long journey pages.
+   Desktop only, small footprint. Scroll-spy via IntersectionObserver
+   wires the active state. Auto-hides below 1280px (narrow desktop).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-secnav {
+  display: none;
+}
+@media (min-width: 1280px) {
+  .gg-secnav {
+    display: flex;
+    position: fixed;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-50%);
+    z-index: 15;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    background: var(--gg-glass-strong);
+    backdrop-filter: blur(28px) saturate(1.8);
+    -webkit-backdrop-filter: blur(28px) saturate(1.8);
+    border: 0.5px solid var(--gg-border);
+    border-radius: 14px;
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.9),
+      0 6px 24px rgba(0, 0, 0, 0.06);
+    font-family: var(--gg-display);
+  }
+}
+.gg-secnav__item {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gg-text-muted);
+  background: transparent;
+  border: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  transition: color var(--gg-t-feedback) var(--gg-ease-snap),
+              background var(--gg-t-feedback) var(--gg-ease-snap);
+}
+.gg-secnav__item:hover {
+  color: var(--gg-text-primary);
+  background: var(--gg-bg-subtle);
+}
+.gg-secnav__item.active {
+  color: var(--gg-text-primary);
+  background: var(--gg-bg-muted);
 }
 
 /* Scroll progress bar — sticky 2px strip at the very top of main.
