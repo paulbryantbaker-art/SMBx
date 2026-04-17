@@ -12,7 +12,7 @@
  * sheet. The Apple Music layoutId avatar morph comes in task 20 polish pass.
  */
 
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import type { YuliaState } from '../types';
 import type { AnonMessage } from '../../../hooks/useAnonymousChat';
@@ -94,6 +94,24 @@ export default function YuliaAgent({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  // Auto-scroll the message list to the bottom whenever new content arrives
+  // OR the visible viewport changes (keyboard open/close). Keeps the latest
+  // message visible just above the composer pill.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (state !== 'full') return;
+    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages.length, streamingText, state]);
+  useEffect(() => {
+    if (state !== 'full') return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const handler = () => endRef.current?.scrollIntoView({ block: 'end' });
+    vv.addEventListener('resize', handler);
+    return () => vv.removeEventListener('resize', handler);
+  }, [state]);
+
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     const text = draft.trim();
@@ -156,14 +174,21 @@ export default function YuliaAgent({
   }
 
   if (state === 'full') {
-    // Fullscreen chat — skeleton. Task 20 polish pass fills in the chat render.
+    // Fullscreen chat. Height is pinned to var(--vvh) (visualViewport.height
+    // from AppShell's effect) so when the iOS keyboard opens, this container
+    // shrinks with the visible viewport. Composer at the flex bottom then
+    // sits just above the keyboard, and the message area (flex:1) auto-
+    // scrolls within the remaining space — no webview scroll hack needed.
     return (
       <div
         role="dialog"
         aria-label="Chat with Yulia"
         style={{
           position: 'absolute',
-          inset: 0,
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 'var(--vvh, 100dvh)',
           background: 'var(--bg-app)',
           zIndex: 50,
           display: 'flex',
@@ -201,10 +226,13 @@ export default function YuliaAgent({
         </div>
 
         <div
+          ref={scrollRef}
           style={{
             flex: 1,
             overflowY: 'auto',
-            padding: '12px 20px 80px',
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain',
+            padding: '12px 20px 16px',
             display: 'flex',
             flexDirection: 'column',
             gap: 14,
@@ -323,6 +351,10 @@ export default function YuliaAgent({
               )}
             </div>
           )}
+          {/* Bottom anchor — scrollIntoView target so the latest message
+              stays visible just above the composer pill when the keyboard
+              opens or new messages stream in. */}
+          <div ref={endRef} aria-hidden style={{ height: 1 }} />
         </div>
 
         {/* Full-mode composer — Glass Grok chat input */}
