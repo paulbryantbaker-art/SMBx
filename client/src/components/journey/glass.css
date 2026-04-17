@@ -115,6 +115,19 @@
     inset 0 0.5px 0 rgba(255, 255, 255, 1),
     0 1px 3px rgba(0, 0, 0, 0.03),
     0 4px 16px rgba(0, 0, 0, 0.04);
+  transition:
+    transform var(--gg-t-structural) var(--gg-ease-spring),
+    box-shadow var(--gg-t-structural) var(--gg-ease-spring);
+}
+/* Subtle lift on hover for interactive content cards. Opt out with
+   .gg-card--static if the card shouldn't respond (e.g. large hero
+   mockups where motion feels wrong). */
+.gg-card:not(.gg-card--static):hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 1),
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 6px 20px rgba(0, 0, 0, 0.07);
 }
 .gg-card-hero {
   background: var(--gg-bg-card);
@@ -592,6 +605,19 @@
 .gg-topbar__right {
   display: flex; gap: 10px; align-items: center;
 }
+
+/* Topbar responsive compression. Below 1200px drop font size + tighten
+   padding so 7 links + logo + CTA still fit. Below 1100px, hide the
+   less-primary links (How / Enterprise) — they're reachable via the
+   sidebar. Below 900px the mobile pill nav takes over entirely. */
+@media (max-width: 1200px) {
+  .gg-topbar { padding: 0 20px; }
+  .gg-topbar__link { font-size: 12.5px; padding: 8px 10px; }
+  .gg-topbar__nav { gap: 2px; }
+}
+@media (max-width: 1100px) {
+  .gg-topbar__link[data-tier='secondary'] { display: none; }
+}
 .gg-topbar__signin {
   font-family: var(--gg-body);
   font-size: 13px;
@@ -619,15 +645,62 @@
 }
 .gg-enter { animation: gg-fade-up var(--gg-t-morph) var(--gg-ease-spring) both; }
 
+/* Scroll-driven reveal — pure CSS via animation-timeline:view().
+   Chrome/Edge/Safari: elements fade up as they enter the viewport.
+   Firefox (flag only): element stays visible (no animation, no hiding). */
+@supports (animation-timeline: view()) {
+  .gg-reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: gg-fade-up linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 20%;
+  }
+}
+
+/* Scroll progress bar — sticky 2px strip at the very top of main.
+   Uses scroll-driven animations where supported; otherwise invisible
+   (no JS fallback needed — the bar is a non-critical affordance). */
+.gg-scroll-progress {
+  position: sticky;
+  top: 0;
+  height: 2px;
+  background: transparent;
+  z-index: 10;
+  pointer-events: none;
+}
+.gg-scroll-progress::before {
+  content: '';
+  display: block;
+  height: 100%;
+  background: var(--gg-accent);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+@supports (animation-timeline: scroll()) {
+  .gg-scroll-progress::before {
+    animation: gg-scroll-fill linear;
+    animation-timeline: scroll(root);
+  }
+  @keyframes gg-scroll-fill {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gg-enter,
   .gg-chat,
   .gg-chip,
   .gg-btn,
   .gg-chat__send,
-  .gg-chat__plus {
+  .gg-chat__plus,
+  .gg-card,
+  .gg-reveal,
+  .gg-scroll-progress::before {
     animation: none !important;
     transition: opacity var(--gg-t-feedback) linear !important;
     transform: none !important;
   }
+  .gg-reveal { opacity: 1; }  /* Ensure content is visible. */
 }

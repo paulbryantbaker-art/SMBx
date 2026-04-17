@@ -15,12 +15,17 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <script>
       // Resolve dark mode + body color before first paint to prevent any flash
-      // and to make the iOS Safari toolbar match the visible page color.
+      // and to make the iOS Safari toolbar (and PWA chin / home-indicator
+      // area, which iOS fills with theme-color) match the visible page.
       //
-      // Mobile (<=767px): body matches the chat home edge-to-edge.
-      //   - Light mode: body is white (#FFFFFF)
-      //   - Dark mode:  body is near-black (#151617)
-      // Desktop: body is medium charcoal (#2A2C2E) so floating cards float visually.
+      // Mobile (<=767px): body matches Glass Grok's app canvas edge-to-edge.
+      //   - Light mode: #F2F2F4 (--bg-app — matches internal app + marketing)
+      //   - Dark mode:  #151617 (near-black)
+      // Desktop: body is medium charcoal (#2A2C2E) so floating cards float.
+      //
+      // Prior value #FFFFFF produced a visible white chin below the tab bar
+      // in the iOS PWA — the theme-color + inline body bg overrode the
+      // @media(display-mode: standalone) rule that otherwise paints #F2F2F4.
       (function() {
         var stored = localStorage.getItem('smbx-theme'); // 'light' | 'dark' | null
         var isDark = stored === 'dark';
@@ -32,7 +37,7 @@
         }
 
         var color = isMobile
-          ? (isDark ? '#151617' : '#FFFFFF')
+          ? (isDark ? '#151617' : '#F2F2F4')
           : '#2A2C2E';
 
         var metas = document.querySelectorAll('meta[name="theme-color"]');

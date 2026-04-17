@@ -2010,11 +2010,14 @@ export default function AppShell() {
         ...(!isMobile && appOffset ? { transform: `translateY(${appOffset}px)` } : {}),
       }}
     >
-      {/* Desktop sidebar — fixed 80px icon rail */}
-      {sidebarContent(false)}
+      {/* Desktop sidebar — fixed 80px icon rail.
+          Hidden on public-marketing flows (journey pages for logged-out
+          users); the Glass Grok page primitive renders its own sidebar. */}
+      {!(viewState === 'landing' && !user) && sidebarContent(false)}
 
-      {/* Main canvas — offset by sidebar (16 left + 72 width + 16 gap = 104px) */}
-      <div className={`flex-1 flex flex-col min-w-0 lg:ml-[104px] bg-transparent ${isChat ? 'h-full' : ''}`}>
+      {/* Main canvas — offset by sidebar (16 left + 72 width + 16 gap = 104px).
+          On public marketing, no legacy sidebar → no left offset. */}
+      <div className={`flex-1 flex flex-col min-w-0 ${(viewState === 'landing' && !user) ? '' : 'lg:ml-[104px]'} bg-transparent ${isChat ? 'h-full' : ''}`}>
         {/* Offline banner */}
         {isOffline && (
           <div className="shrink-0 bg-yellow-50 border-b border-yellow-200 px-4 py-2 flex items-center justify-center gap-2 z-30">
@@ -3391,7 +3394,11 @@ export default function AppShell() {
 
       {/* Floating logo removed — X logo now lives in sidebar permanently */}
 
-      {/* ═══ FLOATING CTA — "Start chatting" ═══ */}
+      {/* ═══ FLOATING CTA — "Start chatting" ═══
+          Desktop: suppressed on public journey pages — Glass Grok topbar
+          already provides the "Start free" CTA, so a pink gradient pill
+          from legacy chrome would double-up and break brand. Mobile keeps
+          the FAB since mobile journey pages don't have a visible topbar. */}
       {!user && viewState === 'landing' && activeTab !== 'home' && (
         isMobile ? (
           /* Mobile: bottom-right FAB — only on landing pages, not chat */
@@ -3404,17 +3411,7 @@ export default function AppShell() {
             <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>chat</span>
             Start chatting
           </button>
-        ) : (
-          /* Desktop: pill next to dark mode toggle, top-right */
-          <button
-            onClick={() => handleTabClick('home')}
-            className="fixed z-50 flex items-center gap-2 border-none cursor-pointer text-white font-headline text-[13px] font-bold shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
-            style={{ top: 16, right: 64, background: 'linear-gradient(135deg, #D44A78, #E8709A)', borderRadius: '100px', padding: '9px 20px' }}
-            type="button"
-          >
-            Start chatting
-          </button>
-        )
+        ) : null
       )}
 
       {/* Dark mode toggle lives in the sidebar (desktop + mobile menu) for all users.

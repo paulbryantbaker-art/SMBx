@@ -38,14 +38,16 @@ export interface PageProps {
   ctaLabel?: string;
 }
 
-const TOPBAR_LINKS: { id: JourneyTab; label: string }[] = [
+/* Primary links always visible; secondary hide at narrow desktop widths
+   (<1100px) — still reachable via the sidebar. */
+const TOPBAR_LINKS: { id: JourneyTab; label: string; tier?: 'secondary' }[] = [
   { id: 'sell',         label: 'Sell' },
   { id: 'buy',          label: 'Buy' },
   { id: 'raise',        label: 'Raise' },
   { id: 'integrate',    label: 'Integrate' },
   { id: 'pricing',      label: 'Pricing' },
-  { id: 'how-it-works', label: 'How it works' },
-  { id: 'enterprise',   label: 'Enterprise' },
+  { id: 'how-it-works', label: 'How it works', tier: 'secondary' },
+  { id: 'enterprise',   label: 'Enterprise',   tier: 'secondary' },
 ];
 
 export function Page({ children, active, onNavigate, onSignIn, onStartFree, ctaLabel = 'Start free' }: PageProps) {
@@ -62,13 +64,19 @@ export function Page({ children, active, onNavigate, onSignIn, onStartFree, ctaL
         fontFamily: 'var(--gg-body)',
       }}
     >
-      {/* ── Desktop shell — TopBar only (AppShell provides the sidebar) ── */}
+      {/* ── Desktop shell — Sidebar + TopBar + main + Footer ── */}
       <div className="gg-desktop-only" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-        <TopBar active={active} onNavigate={onNavigate} onSignIn={onSignIn} onStartFree={onStartFree} ctaLabel={ctaLabel} />
-        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          {children}
-        </main>
-        <Footer />
+        <div className="gg-shell">
+          <Sidebar active={active} onNavigate={onNavigate} />
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <TopBar active={active} onNavigate={onNavigate} onSignIn={onSignIn} onStartFree={onStartFree} ctaLabel={ctaLabel} />
+            <div className="gg-scroll-progress" aria-hidden="true" />
+            <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              {children}
+            </main>
+            <Footer />
+          </div>
+        </div>
       </div>
 
       {/* ── Mobile shell (floating nav pill) ─────────────────────── */}
@@ -176,6 +184,7 @@ function TopBar({ active, onNavigate, onSignIn, onStartFree, ctaLabel }: {
             type="button"
             className={`gg-topbar__link${active === l.id ? ' active' : ''}`}
             aria-current={active === l.id ? 'page' : undefined}
+            data-tier={l.tier}
             onClick={() => onNavigate?.(l.id)}
           >
             {l.label}
@@ -397,6 +406,7 @@ export interface SectionProps {
 export function Section({ variant = 'app', label, children, tight }: SectionProps) {
   const cls = [
     'gg-section',
+    'gg-reveal',
     variant === 'tint' ? 'gg-section--tint' : '',
     variant === 'dark' ? 'gg-section--dark' : '',
   ].filter(Boolean).join(' ');

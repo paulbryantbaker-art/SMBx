@@ -236,7 +236,7 @@ export function CIMCover({
         </div>
         <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 26, letterSpacing: '-0.02em', lineHeight: 1.1, color: 'var(--gg-text-primary)', marginBottom: 14 }}>
           {company.split(' ').length > 2
-            ? (<>{company.split(' ').slice(0, 2).join(' ')}<br />{company.split(' ').slice(2).join(' ')}</>)
+            ? (<><span style={{ display: 'block' }}>{company.split(' ').slice(0, 2).join(' ')}</span><span style={{ display: 'block' }}>{company.split(' ').slice(2).join(' ')}</span></>)
             : company}
         </div>
         <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 13, color: 'var(--gg-text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 32 }}>

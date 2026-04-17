@@ -76,24 +76,39 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
         </div>
       </Section>
 
-      {/* 6 structures — responsive 3-col grid */}
+      {/* 6 structures — two featured + four alternatives, same pattern
+          as /sell exit paths. Majority Rollover + Minority Equity are
+          the two most common paths; others are alternatives. */}
       <Section label="The 6 structures">
         <H2>Six ways to get liquidity without losing your business.</H2>
-        <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
-          {STRUCTURES.map(s => (
-            <Card key={s.title} padding={28}>
-              <h3 className="gg-h3" style={{ fontSize: 18, marginBottom: 10 }}>{s.title}</h3>
-              <p className="gg-body" style={{ fontSize: 14, marginBottom: 14 }}>{s.body}</p>
-              <div style={{
-                fontFamily: 'var(--gg-display)', fontWeight: 600, fontSize: 11,
-                color: 'var(--gg-text-muted)', letterSpacing: '0.02em',
-                paddingTop: 14,
-                borderTop: '0.5px dashed var(--gg-border)',
-              }}>
-                Typical: {s.typical}
-              </div>
-            </Card>
-          ))}
+        <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16 }}>
+          {STRUCTURES.map((s, i) => {
+            const featured = i < 2;
+            return (
+              <Card
+                key={s.title}
+                padding={featured ? 32 : 22}
+                style={{
+                  gridColumn: featured ? 'span 2' : 'span 1',
+                  borderColor: featured ? 'var(--gg-text-primary)' : undefined,
+                }}
+              >
+                {featured && (
+                  <div className="gg-label" style={{ marginBottom: 10, fontSize: 10 }}>Most common</div>
+                )}
+                <h3 className="gg-h3" style={{ fontSize: featured ? 20 : 16, marginBottom: 10 }}>{s.title}</h3>
+                <p className="gg-body" style={{ fontSize: featured ? 14 : 13, marginBottom: 14 }}>{s.body}</p>
+                <div style={{
+                  fontFamily: 'var(--gg-display)', fontWeight: 600, fontSize: 11,
+                  color: 'var(--gg-text-muted)', letterSpacing: '0.02em',
+                  paddingTop: 14,
+                  borderTop: '0.5px dashed var(--gg-border)',
+                }}>
+                  Typical: {s.typical}
+                </div>
+              </Card>
+            );
+          })}
         </div>
       </Section>
 

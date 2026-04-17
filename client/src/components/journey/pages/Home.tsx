@@ -35,11 +35,14 @@ const SHORTCUTS: { label: string; journey: Journey }[] = [
   { label: 'Just acquired',     journey: 'integrate' },
 ];
 
-/* ─── 3 feature cards under hero ────────────────────────────────────── */
+/* ─── 3 feature cards under hero ──────────────────────────────────────
+   Middle card (Deal screening) inverts to dark fill for visual rhythm —
+   three identical greys in a row reads templated; one dark in the
+   middle breaks the grid without a color. */
 const FEATURES = [
-  { idx: '01 · Add-backs',       heading: 'Find the money hiding in your tax returns.',            body: 'Pre-LOI earnings quality analysis. Every legitimate add-back identified, documented, and defensible. 20 minutes, not 6 weeks.',         viz: 'addback' as const },
-  { idx: '02 · Deal screening',  heading: 'Score any deal in 90 seconds on seven dimensions.',     body: 'The Rundown. Concentration, margins, revenue quality, owner dependency, management depth, financial integrity, scalability. Pursue or pass.', viz: 'score'   as const },
-  { idx: '03 · SBA structure',   heading: 'Model SOP 50 10 8 capital stacks under current rules.', body: 'Senior, mezzanine, seller notes with correct standby terms, equity injection requirements. Restructures killed deals into closable ones.',   viz: 'stack'   as const },
+  { idx: '01 · Add-backs',       heading: 'Find the money hiding in your tax returns.',            body: 'Pre-LOI earnings quality analysis. Every legitimate add-back identified, documented, and defensible. 20 minutes, not 6 weeks.',         viz: 'addback' as const, invert: false },
+  { idx: '02 · Deal screening',  heading: 'Score any deal in 90 seconds on seven dimensions.',     body: 'The Rundown. Concentration, margins, revenue quality, owner dependency, management depth, financial integrity, scalability. Pursue or pass.', viz: 'score'   as const, invert: true  },
+  { idx: '03 · SBA structure',   heading: 'Model SOP 50 10 8 capital stacks under current rules.', body: 'Senior, mezzanine, seller notes with correct standby terms, equity injection requirements. Restructures killed deals into closable ones.',   viz: 'stack'   as const, invert: false },
 ];
 
 interface HomeProps {
@@ -100,7 +103,7 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
   const heroEyebrow = 'Deal intelligence platform';
   const heroH1 = user && !authLoading
     ? <>Welcome back{firstName ? `, ${firstName}` : ''}.</>
-    : <>The AI<br />deal team.</>;
+    : <><span style={{ display: 'block' }}>The AI</span><span style={{ display: 'block' }}>deal team.</span></>;
   const heroTag = user && !authLoading
     ? 'Pick up where you left off. Tell Yulia what you’re working on.'
     : 'Valuations. CIMs. Deal scoring. Financial models. Due diligence. LOIs. Everything an investment bank delivers — without the retainer.';
@@ -252,9 +255,10 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
   );
 }
 
-function FeatureCard({ idx, heading, body, viz }: {
-  idx: string; heading: string; body: string; viz: 'addback' | 'score' | 'stack';
+function FeatureCard({ idx, heading, body, viz, invert }: {
+  idx: string; heading: string; body: string; viz: 'addback' | 'score' | 'stack'; invert?: boolean;
 }) {
+  const dark = !!invert;
   return (
     <div
       className="gg-card"
@@ -263,6 +267,12 @@ function FeatureCard({ idx, heading, body, viz }: {
         minHeight: 320,
         display: 'flex', flexDirection: 'column',
         borderRadius: 22,
+        background: dark ? 'var(--gg-accent)' : 'var(--gg-bg-card)',
+        color: dark ? '#fff' : 'var(--gg-text-primary)',
+        borderColor: dark ? 'var(--gg-accent)' : 'var(--gg-border)',
+        boxShadow: dark
+          ? 'inset 0 0.5px 0 rgba(255, 255, 255, 0.12), 0 6px 24px rgba(0, 0, 0, 0.12)'
+          : undefined,
       }}
     >
       {viz === 'addback' && <VizBigStat />}
@@ -274,17 +284,17 @@ function FeatureCard({ idx, heading, body, viz }: {
         fontSize: 11,
         letterSpacing: '0.14em',
         textTransform: 'uppercase',
-        color: 'var(--gg-text-faint)',
+        color: dark ? 'rgba(255,255,255,0.55)' : 'var(--gg-text-faint)',
         marginTop: 24,
         marginBottom: 12,
       }}>{idx}</div>
       <h3
         className="gg-h3"
-        style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.015em', marginBottom: 12, lineHeight: 1.15 }}
+        style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.015em', marginBottom: 12, lineHeight: 1.15, color: dark ? '#fff' : 'var(--gg-text-primary)' }}
       >
         {heading}
       </h3>
-      <p className="gg-body" style={{ marginTop: 'auto', marginBottom: 0, fontSize: 14 }}>
+      <p className="gg-body" style={{ marginTop: 'auto', marginBottom: 0, fontSize: 14, color: dark ? 'rgba(255,255,255,0.75)' : undefined }}>
         {body}
       </p>
     </div>

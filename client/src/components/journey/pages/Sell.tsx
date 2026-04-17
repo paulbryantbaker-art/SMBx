@@ -142,7 +142,10 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
       <Section label="Hero 3 · Competitive process">
         <div className="gg-two-col" style={{ alignItems: 'center' }}>
           <div>
-            <H2 variant="block">One buyer gives you a price.<br />Five buyers give you a market.</H2>
+            <H2 variant="block">
+              <span style={{ display: 'block' }}>One buyer gives you a price.</span>
+              <span style={{ display: 'block' }}>Five buyers give you a market.</span>
+            </H2>
             <Body>The competitive process is the single highest-ROI activity in any exit. Most sellers skip it — because it’s logistically complex, because their broker doesn’t have the bandwidth, because they don’t know it’s an option.</Body>
             <Body>Yulia manages the entire process. Buyer identification — strategic, PE, and independent — mapped and scored. Outreach sequencing. IOI comparison matrix that shows not just the headline price, but the terms.</Body>
             <Body>The winning bid in a competitive process is typically <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>15–30% above the initial offer</strong>. On a $50M transaction, that’s $7.5M–$15M more.</Body>
@@ -190,17 +193,33 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
         ]} />
       </Section>
 
-      {/* ═════ Exit paths — 3-col grid ═════ */}
+      {/* ═════ Exit paths — 2-up featured / 4-across alternatives ═════
+           Breaks the 6-card monotony: the two most common paths (Full Sale
+           + Majority Rollover) get 50% width each on top row with a "most
+           common" pill; the four alternatives share the second row. */}
       <Section label="Exit paths">
         <H2>Selling 100% isn’t your only option.</H2>
         <p className="gg-body--sub" style={{ marginBottom: 40 }}>Yulia models every exit structure against your specific numbers. In one conversation.</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-          {EXIT_PATHS.map(p => (
-            <Card key={p.title} padding={24}>
-              <h4 style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 16, letterSpacing: '-0.01em', marginBottom: 10, color: 'var(--gg-text-primary)' }}>{p.title}</h4>
-              <p className="gg-body" style={{ marginBottom: 0, fontSize: 13.5, lineHeight: 1.55 }}>{p.body}</p>
-            </Card>
-          ))}
+        <div style={{ display: ‘grid’, gridTemplateColumns: ‘repeat(4, minmax(0, 1fr))’, gap: 16 }}>
+          {EXIT_PATHS.map((p, i) => {
+            const featured = i < 2;
+            return (
+              <Card
+                key={p.title}
+                padding={featured ? 32 : 22}
+                style={{
+                  gridColumn: featured ? ‘span 2’ : ‘span 1’,
+                  borderColor: featured ? ‘var(--gg-text-primary)’ : undefined,
+                }}
+              >
+                {featured && (
+                  <div className="gg-label" style={{ marginBottom: 10, fontSize: 10 }}>Most common</div>
+                )}
+                <h4 style={{ fontFamily: ‘var(--gg-display)’, fontWeight: 700, fontSize: featured ? 19 : 15, letterSpacing: ‘-0.01em’, marginBottom: 10, color: ‘var(--gg-text-primary)’ }}>{p.title}</h4>
+                <p className="gg-body" style={{ marginBottom: 0, fontSize: featured ? 14 : 13, lineHeight: 1.55 }}>{p.body}</p>
+              </Card>
+            );
+          })}
         </div>
         <div style={{
           marginTop: 24,

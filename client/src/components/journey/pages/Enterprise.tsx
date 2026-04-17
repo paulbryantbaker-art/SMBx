@@ -27,17 +27,23 @@ const USE_CASES = [
     body: 'Direct-investing infrastructure without direct-investing overhead. Every deal scored against the family’s thesis. Capital structure modeling for co-investment opportunities. Portfolio company monitoring with variance alerts.' },
 ];
 
-const ENT_FEATURES = [
-  { title: 'Team workspace',            body: 'Every user sees the deals they own and the deals the firm is running. Role-based permissions. Shared deal vault. Activity feeds across the team.' },
-  { title: 'White-label outputs',       body: 'CIMs, valuations, deal rooms — all branded to your firm. Your logo, your letterhead, your styling. Your client sees your brand. Yulia is your analytical layer.' },
-  { title: '10 seats flat',             body: 'Enterprise covers 10 seats at $2,500/mo flat. Larger teams get custom pricing. Every seat sees the same deal vault with role-based permissions.' },
-  { title: 'SSO integration',           body: 'Okta, Google Workspace, Azure AD. Single sign-on for your entire team.' },
-  { title: 'Single-tenant deployment',  body: 'For family offices, regulated entities, and firms that require isolated infrastructure.' },
-  { title: 'SOC 2 audit trails',        body: 'Complete activity logging. User actions, document access, data changes. Audit-ready.' },
-  { title: 'API access',                body: 'Programmatic access to deal data, deliverables, and workflows. Integrate with your existing systems.' },
-  { title: 'Named account manager',     body: 'Direct line. Quarterly business reviews. Onboarding support for new users.' },
-  { title: '99.9% SLA',                 body: 'Uptime guarantees with defined response times.' },
-  { title: 'Compliance review workflow', body: 'For regulated entities: pre-delivery compliance review on every outbound deliverable.' },
+const FEATURE_CLUSTERS: { cluster: string; items: { title: string; body: string }[] }[] = [
+  { cluster: 'Team & deal collaboration', items: [
+    { title: 'Team workspace',            body: 'Every user sees the deals they own and the deals the firm is running. Role-based permissions. Shared deal vault. Activity feeds across the team.' },
+    { title: 'White-label outputs',       body: 'CIMs, valuations, deal rooms — all branded to your firm. Your logo, your letterhead, your styling. Your client sees your brand. Yulia is your analytical layer.' },
+    { title: '10 seats flat',             body: 'Enterprise covers 10 seats at $2,500/mo flat. Larger teams get custom pricing. Every seat sees the same deal vault with role-based permissions.' },
+  ]},
+  { cluster: 'Infrastructure & security', items: [
+    { title: 'SSO integration',           body: 'Okta, Google Workspace, Azure AD. Single sign-on for your entire team.' },
+    { title: 'Single-tenant deployment',  body: 'For family offices, regulated entities, and firms that require isolated infrastructure.' },
+    { title: 'SOC 2 audit trails',        body: 'Complete activity logging. User actions, document access, data changes. Audit-ready.' },
+    { title: 'API access',                body: 'Programmatic access to deal data, deliverables, and workflows. Integrate with your existing systems.' },
+  ]},
+  { cluster: 'Support & service', items: [
+    { title: 'Named account manager',     body: 'Direct line. Quarterly business reviews. Onboarding support for new users.' },
+    { title: '99.9% SLA',                 body: 'Uptime guarantees with defined response times.' },
+    { title: 'Compliance review workflow', body: 'For regulated entities: pre-delivery compliance review on every outbound deliverable.' },
+  ]},
 ];
 
 const INTEGRATIONS = [
@@ -121,18 +127,30 @@ export default function Enterprise({ onSend, onStartFree: _, onNavigate }: Props
         </CardGrid>
       </Section>
 
-      {/* ─── Features ──────────────────────────────────────────────── */}
+      {/* ─── Features — clustered by theme ─── */}
       <Section label="Features">
         <H2>Built for teams that close deals at scale.</H2>
-        <div style={{ marginBottom: 28 }} />
-        <CardGrid minCol={260}>
-          {ENT_FEATURES.map(f => (
-            <Card key={f.title} padding={20}>
-              <h3 className="gg-h3" style={{ marginBottom: 6, fontSize: 15 }}>{f.title}</h3>
-              <p className="gg-body" style={{ marginBottom: 0, fontSize: 13 }}>{f.body}</p>
-            </Card>
-          ))}
-        </CardGrid>
+        <div style={{ marginBottom: 48 }} />
+        {FEATURE_CLUSTERS.map((cl, ci) => (
+          <div key={cl.cluster} style={{ marginBottom: ci === FEATURE_CLUSTERS.length - 1 ? 0 : 40 }}>
+            <div style={{
+              fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 12,
+              letterSpacing: '0.14em', textTransform: 'uppercase',
+              color: 'var(--gg-text-muted)', marginBottom: 16,
+              paddingBottom: 12, borderBottom: '0.5px solid var(--gg-border)',
+            }}>
+              {cl.cluster}
+            </div>
+            <CardGrid minCol={260}>
+              {cl.items.map(f => (
+                <Card key={f.title} padding={20}>
+                  <h3 className="gg-h3" style={{ marginBottom: 6, fontSize: 15 }}>{f.title}</h3>
+                  <p className="gg-body" style={{ marginBottom: 0, fontSize: 13 }}>{f.body}</p>
+                </Card>
+              ))}
+            </CardGrid>
+          </div>
+        ))}
       </Section>
 
       {/* ─── Integrations + security ───────────────────────────────── */}
