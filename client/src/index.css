@@ -217,6 +217,19 @@ html, body {
   }
 }
 
+/* iOS PWA mobile: lock html/body scroll so iOS rubber-band (body-overshoot
+   on scroll) can't yank the fixed chat pill up and down. Internal scroll
+   containers (.mobile-deal-list-scroll, the chat scrollRef) keep their own
+   overflow:auto + overscroll-behavior:contain. Gated to the PWA standalone
+   mode so marketing pages in Safari are unaffected. */
+@media (max-width: 767px) and (display-mode: standalone) {
+  html, body {
+    overflow: hidden;
+    overscroll-behavior: none;
+    height: 100dvh;
+  }
+}
+
 #app-root {
   width: 100%;
 }
