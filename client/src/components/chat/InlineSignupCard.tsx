@@ -66,7 +66,11 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
       // Show success briefly, then navigate
       setSuccess(true);
       setTimeout(() => {
-        window.location.href = conversationId ? `/chat/${conversationId}` : '/chat';
+        // Route to home so AppShellInner (Glass Grok app shell) mounts.
+        // Direct /chat navigation skips the landing branch on mobile
+        // and renders a blank screen. If we have a conversation to open,
+        // keep /chat/:id (that view works because it has a real convo).
+        window.location.href = conversationId ? `/chat/${conversationId}` : '/';
       }, 600);
     } catch (err: any) {
       setError(err.message);
@@ -116,7 +120,11 @@ export default function InlineSignupCard({ sessionId, onDismiss, canDismiss = tr
 
           setSuccess(true);
           setTimeout(() => {
-            window.location.href = conversationId ? `/chat/${conversationId}` : '/chat';
+            // Route to home so AppShellInner (Glass Grok app shell) mounts.
+        // Direct /chat navigation skips the landing branch on mobile
+        // and renders a blank screen. If we have a conversation to open,
+        // keep /chat/:id (that view works because it has a real convo).
+        window.location.href = conversationId ? `/chat/${conversationId}` : '/';
           }, 600);
         } catch (err: any) {
           setError(err.message);
