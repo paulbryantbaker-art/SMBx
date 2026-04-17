@@ -520,6 +520,98 @@ export function Timeline({ phases }: { phases: readonly TimelinePhase[] }) {
 }
 
 /* ═════════════════════════════════════════════════════════════════════
+   HORIZONTAL TIMELINE — 4- or 5-phase process (desktop layout)
+   Numbered nodes on a dashed baseline. On narrow screens falls back to
+   a vertical stack via the grid-template-columns media query.
+   ═════════════════════════════════════════════════════════════════════ */
+
+export interface HPhase {
+  idx: string;            /* "Phase 1 · Free" or "Day 0 · Before the wire" */
+  name: string;           /* "Understand" */
+  meta?: string;          /* "Months 1–2" */
+  body: string;
+  deliverables?: string;
+}
+
+export function HorizontalTimeline({ phases }: { phases: readonly HPhase[] }) {
+  return (
+    <div className="gg-timeline">
+      <div
+        className="gg-timeline__grid"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${phases.length}, minmax(0, 1fr))`,
+          gap: 24,
+          position: 'relative',
+        }}
+      >
+        {phases.map((p, i) => (
+          <div key={i} style={{ position: 'relative' }}>
+            <div
+              style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: '#fff',
+                border: '1.5px solid var(--gg-text-primary)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 13,
+                color: 'var(--gg-text-primary)',
+                marginBottom: 24,
+                position: 'relative', zIndex: 1,
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {i + 1}
+            </div>
+            <div style={{
+              fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10,
+              letterSpacing: '0.14em', textTransform: 'uppercase',
+              color: 'var(--gg-text-muted)', marginBottom: 6,
+            }}>{p.idx}</div>
+            <div style={{
+              fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 22,
+              letterSpacing: '-0.015em', color: 'var(--gg-text-primary)',
+              marginBottom: 8,
+            }}>{p.name}</div>
+            {p.meta && (
+              <div style={{
+                fontFamily: 'var(--gg-display)', fontSize: 11.5, fontWeight: 600,
+                letterSpacing: '0.04em', color: 'var(--gg-text-muted)',
+                marginBottom: 14,
+              }}>{p.meta}</div>
+            )}
+            <div style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--gg-text-secondary)', marginBottom: 14 }}>
+              {p.body}
+            </div>
+            {p.deliverables && (
+              <div style={{
+                fontSize: 11.5, lineHeight: 1.6, color: 'var(--gg-text-muted)',
+                paddingTop: 14,
+                borderTop: '0.5px dashed var(--gg-border)',
+              }}>
+                <span style={{ color: 'var(--gg-text-primary)', fontWeight: 600 }}>Delivers: </span>
+                {p.deliverables}
+              </div>
+            )}
+          </div>
+        ))}
+        {/* Dashed baseline connecting the nodes (desktop only — lines up at y=56px) */}
+        <div
+          className="gg-desktop-only"
+          style={{
+            position: 'absolute',
+            top: 16, left: 32, right: 32,
+            height: 1,
+            background: 'repeating-linear-gradient(to right, var(--gg-border-strong) 0 4px, transparent 4px 8px)',
+            pointerEvents: 'none',
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
    BOTTOM CTA — mirrors hero, anchors every journey page
    ═════════════════════════════════════════════════════════════════════ */
 
