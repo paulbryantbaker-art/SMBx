@@ -2395,7 +2395,10 @@ export default function AppShell() {
             Renders for: any logged-in mobile user (home OR chat), AND for
             anon users in chat view. Anon home gets its own pill+chips
             block higher up in the landing render. */}
-        {showDock && isMobile && (user || viewState === 'chat') && createPortal(
+        {/* ChatDock portal: hidden for mobile authed users because AppShellInner
+            owns the chat surface via YuliaAgent. Still rendered for anon mobile
+            users (marketing chat) and desktop. */}
+        {showDock && isMobile && !user && viewState === 'chat' && createPortal(
           <div
             id="mobile-chat-dock-portal"
             className={`chat-pill-mobile-container ${dark ? 'force-chat-dark' : ''} px-3 pt-3`}

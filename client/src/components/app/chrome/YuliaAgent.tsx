@@ -83,9 +83,17 @@ export default function YuliaAgent({
   streamingText,
   sending,
   activeTool,
-  onSend: _onSend,
+  onSend,
 }: Props) {
   const [draft, setDraft] = useState('');
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const text = draft.trim();
+    if (!text || sending) return;
+    onSend(text);
+    setDraft('');
+  };
 
   const latestAssistant = messages.filter((m) => m.role === 'assistant').slice(-1)[0];
   const title = sending
@@ -242,6 +250,82 @@ export default function YuliaAgent({
             </div>
           )}
         </div>
+
+        {/* Full-mode composer — Glass Grok chat input */}
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            padding: '8px 12px',
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
+            borderTop: '0.5px solid var(--border)',
+            background: 'var(--bg-card)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            flexShrink: 0,
+          }}
+        >
+          <span
+            aria-hidden
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 10,
+              background: 'rgba(0,0,0,0.04)',
+              color: 'var(--text-primary)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 14,
+              fontWeight: 700,
+              flexShrink: 0,
+            }}
+          >
+            +
+          </span>
+          <input
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Reply to Yulia…"
+            autoFocus
+            style={{
+              flex: 1,
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+              fontFamily: "'Inter', system-ui, sans-serif",
+              fontSize: 15,
+              color: 'var(--text-primary)',
+              minWidth: 0,
+            }}
+          />
+          <button
+            type="submit"
+            disabled={!draft.trim() || sending}
+            aria-label="Send"
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              background: draft.trim() && !sending ? 'var(--accent)' : 'var(--bg-muted)',
+              color: draft.trim() && !sending ? '#fff' : 'var(--text-faint)',
+              border: 'none',
+              cursor: draft.trim() && !sending ? 'pointer' : 'default',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              boxShadow: draft.trim() && !sending ? 'var(--shadow-primary-btn)' : 'none',
+              transition: 'background 0.15s ease',
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 19V5M5 12l7-7 7 7" />
+            </svg>
+          </button>
+        </form>
       </div>
     );
   }
@@ -346,8 +430,6 @@ export default function YuliaAgent({
           </svg>
         )}
       </span>
-      {/* draft state reserved for future inline typing affordance */}
-      <input type="hidden" value={draft} onChange={(e) => setDraft(e.target.value)} />
     </button>
   );
 }
