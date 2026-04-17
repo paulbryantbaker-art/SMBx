@@ -6,11 +6,12 @@ const STORAGE_KEY = 'smbx-theme';
 // cards (sidebar, canvas, journey) sit on. Provides the visual hierarchy
 // where the cards float on the body.
 //
-// Mobile: body matches the chat home edge-to-edge — white in light mode,
-// near-black in dark mode. This is what the iOS Safari toolbar reads, so
-// the toolbar matches the visible page color regardless of theme.
+// Mobile: body matches Glass Grok's app canvas edge-to-edge — light grey in
+// light mode, near-black in dark mode. iOS Safari reads this for the
+// toolbar AND the PWA chin (home-indicator area), so matching --bg-app is
+// what eliminates the visible seam below the tab bar in the installed PWA.
 const DESKTOP_BG = '#2A2C2E';
-const MOBILE_LIGHT = '#FFFFFF';
+const MOBILE_LIGHT = '#F2F2F4';   // matches --bg-app
 const MOBILE_DARK  = '#151617';
 
 function isMobileViewport(): boolean {
