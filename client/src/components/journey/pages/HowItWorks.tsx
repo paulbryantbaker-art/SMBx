@@ -11,7 +11,7 @@
 import { useState } from 'react';
 import {
   Page, Section, H2, Body,
-  Card, BottomCta,
+  Card, BottomCta, SectionNav,
   type JourneyTab,
 } from '../primitives';
 
@@ -84,9 +84,19 @@ const DATA_SOURCES = [
   'IRS Statistics of Income — effective tax rates',
 ];
 
+const SECNAV = [
+  { id: 'the-line',            label: 'The line' },
+  { id: 'ib-comparison',       label: 'IB comparison' },
+  { id: 'the-math',            label: 'The math' },
+  { id: 'the-harness',         label: 'The harness' },
+  { id: 'sample-conversation', label: 'Sample' },
+  { id: 'data-sources',        label: 'Sources' },
+];
+
 export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
   return (
     <Page active="how-it-works" onNavigate={onNavigate} onStartFree={onStartFree}>
+      <SectionNav items={SECNAV} />
       {/* ─── Hero — centered, no peek (explanatory page) ─── */}
       <section
         className="gg-enter"

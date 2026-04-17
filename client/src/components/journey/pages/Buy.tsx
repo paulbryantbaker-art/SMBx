@@ -11,7 +11,7 @@ import { Fragment, useMemo, useState } from 'react';
 import {
   Page, JourneyHero, Section, H2, Body,
   StatBar, Card, BottomCta, AlertBanner,
-  HorizontalTimeline,
+  HorizontalTimeline, SectionNav,
   type JourneyTab,
 } from '../primitives';
 import { ScoreRing, CapitalStack } from '../mockups';
@@ -25,9 +25,20 @@ const CHIPS = [
   'What should I offer?',
 ] as const;
 
+const SECNAV = [
+  { id: 'the-problem',        label: 'Problem' },
+  { id: 'hero-1-the-rundown', label: 'Rundown' },
+  { id: 'hero-2-sba-sop-50-10-8', label: 'SBA' },
+  { id: 'hero-3-stress-test', label: 'Stress test' },
+  { id: 'try-it',             label: 'Try it' },
+  { id: 'the-buy-process',    label: 'Process' },
+  { id: 'by-the-numbers',     label: 'Numbers' },
+];
+
 export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
   return (
     <Page active="buy" onNavigate={onNavigate} onStartFree={onStartFree}>
+      <SectionNav items={SECNAV} />
       <JourneyHero
         eyebrow="Buying a business"
         headline="Screen ten deals in the time it takes to screen one."

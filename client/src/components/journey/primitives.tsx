@@ -445,18 +445,22 @@ export interface SectionProps {
   label?: string;          /* uppercase eyebrow above heading */
   children: ReactNode;
   tight?: boolean;         /* reduces vertical padding */
+  /** Optional anchor id for SectionNav tracking. If omitted, derived from label. */
+  anchor?: string;
 }
 
-export function Section({ variant = 'app', label, children, tight }: SectionProps) {
+export function Section({ variant = 'app', label, children, tight, anchor }: SectionProps) {
   const cls = [
     'gg-section',
     'gg-reveal',
     variant === 'tint' ? 'gg-section--tint' : '',
     variant === 'dark' ? 'gg-section--dark' : '',
   ].filter(Boolean).join(' ');
+  const navId = anchor ?? (label ? label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : undefined);
   return (
     <section
       className={cls}
+      data-secnav-id={navId}
       style={tight ? { paddingTop: 'clamp(32px, 4vw, 56px)', paddingBottom: 'clamp(32px, 4vw, 56px)' } : undefined}
     >
       <div className="gg-section__inner">
@@ -565,6 +569,65 @@ export function Timeline({ phases }: { phases: readonly TimelinePhase[] }) {
         </div>
       ))}
     </div>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   SECTION NAV — in-page TOC for long journey pages
+   Sticky right rail on desktop ≥1280px. Each item scrolls to a
+   Section whose `label` matches. IntersectionObserver tracks the
+   active section.
+   ═════════════════════════════════════════════════════════════════════ */
+
+export interface SectionNavItem { id: string; label: string; }
+
+export function SectionNav({ items }: { items: readonly SectionNavItem[] }) {
+  const [active, setActive] = useState<string | null>(items[0]?.id ?? null);
+
+  useEffect(() => {
+    if (items.length === 0) return;
+    /* Track which section is closest to the top of viewport */
+    const observer = new IntersectionObserver(
+      (entries) => {
+        /* Pick the entry nearest the top that's still intersecting */
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible.length > 0) {
+          const id = (visible[0].target as HTMLElement).dataset.secnavId;
+          if (id) setActive(id);
+        }
+      },
+      { rootMargin: '-96px 0px -60% 0px', threshold: 0 }
+    );
+    items.forEach(item => {
+      const el = document.querySelector(`[data-secnav-id="${item.id}"]`);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [items]);
+
+  const scrollTo = (id: string) => {
+    const el = document.querySelector(`[data-secnav-id="${id}"]`) as HTMLElement | null;
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - 24;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  };
+
+  return (
+    <nav className="gg-secnav" aria-label="Section navigation">
+      {items.map(it => (
+        <button
+          key={it.id}
+          type="button"
+          className={`gg-secnav__item${active === it.id ? ' active' : ''}`}
+          aria-current={active === it.id ? 'location' : undefined}
+          onClick={() => scrollTo(it.id)}
+        >
+          {it.label}
+        </button>
+      ))}
+    </nav>
   );
 }
 

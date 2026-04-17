@@ -12,7 +12,7 @@ import { useMemo, useState } from 'react';
 import {
   Page, JourneyHero, Section, H2, Body,
   Card, BottomCta,
-  HorizontalTimeline,
+  HorizontalTimeline, SectionNav,
   type JourneyTab,
 } from '../primitives';
 
@@ -25,9 +25,19 @@ const CHIPS = [
   'First 30 days priorities',
 ] as const;
 
+const SECNAV = [
+  { id: 'the-stat',                          label: 'Stat' },
+  { id: 'the-180-day-timeline',              label: 'Timeline' },
+  { id: 'hero-1-the-pmi-plan',               label: 'PMI plan' },
+  { id: 'hero-2-key-employee-retention',     label: 'Retention' },
+  { id: 'hero-3-value-creation-tracking',    label: 'Tracking' },
+  { id: 'day-1-generator',                   label: 'Day 1' },
+];
+
 export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
   return (
     <Page active="integrate" onNavigate={onNavigate} onStartFree={onStartFree}>
+      <SectionNav items={SECNAV} />
       <JourneyHero
         eyebrow="Just acquired"
         headline="Day 1 after the wire. 180 employees. Do you have a plan?"

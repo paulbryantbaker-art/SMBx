@@ -15,7 +15,7 @@ import { useMemo, useState } from 'react';
 import {
   Page, JourneyHero, Section, H2, Body,
   StatBar, Card, BottomCta,
-  HorizontalTimeline,
+  HorizontalTimeline, SectionNav,
   type JourneyTab,
 } from '../primitives';
 import { AddBackSchedule, CIMCover, IOIGrid } from '../mockups';
@@ -59,9 +59,21 @@ const EXIT_PATHS = [
   { title: 'Partial Asset Sale',          body: 'Sell a division, license IP, sell-leaseback real estate. Unlock value without a full exit.' },
 ];
 
+const SECNAV = [
+  { id: 'the-problem',                label: 'Problem' },
+  { id: 'hero-1-add-backs',           label: 'Add-backs' },
+  { id: 'hero-2-cim',                 label: 'CIM' },
+  { id: 'hero-3-competitive-process', label: 'Competitive' },
+  { id: 'estimator',                  label: 'Estimator' },
+  { id: 'the-process',                label: 'Process' },
+  { id: 'by-the-numbers',             label: 'Numbers' },
+  { id: 'exit-paths',                 label: 'Exit paths' },
+];
+
 export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
   return (
     <Page active="sell" onNavigate={onNavigate} onStartFree={onStartFree}>
+      <SectionNav items={SECNAV} />
       {/* ═════ Hero — JourneyHero with AddBackSchedule peek ═════ */}
       <JourneyHero
         eyebrow="Selling your business"

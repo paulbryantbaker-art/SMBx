@@ -11,7 +11,7 @@
 import { useMemo, useState } from 'react';
 import {
   Page, JourneyHero, Section, H2, Body,
-  Card, BottomCta,
+  Card, BottomCta, SectionNav,
   type JourneyTab,
 } from '../primitives';
 
@@ -45,9 +45,19 @@ const STRUCTURES = [
     typical: '$10M–$50M distributed, 4–6× EBITDA leverage, 5–7 year term' },
 ];
 
+const SECNAV = [
+  { id: 'the-reframe',                     label: 'Reframe' },
+  { id: 'the-6-structures',                label: 'Structures' },
+  { id: 'sell-vs-raise',                   label: 'Sell vs raise' },
+  { id: 'hero-1-structure-modeling',       label: 'Modeling' },
+  { id: 'hero-2-pitch-deck-data-room',     label: 'Pitch deck' },
+  { id: 'hero-3-investor-targeting',       label: 'Investors' },
+];
+
 export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
   return (
     <Page active="raise" onNavigate={onNavigate} onStartFree={onStartFree}>
+      <SectionNav items={SECNAV} />
       <JourneyHero
         eyebrow="Raising capital"
         headline="You don’t have to sell 100% to get liquidity."
