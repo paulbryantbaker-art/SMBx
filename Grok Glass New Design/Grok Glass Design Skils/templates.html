@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<!--
+  ═══════════════════════════════════════════════════════════════════
+  Glass Grok — slide templates
+  smbx.ai · LinkedIn carousel & marketing PDF templates
+  
+  HOW TO USE:
+  1. This file demonstrates 6 slide templates at 1080×1350 (4:5 portrait).
+  2. Each <div class="slide"> is a complete, self-contained slide.
+  3. To build a carousel: copy the <head> + multiple <div class="slide"> blocks
+     into a new HTML file, adapt the content, render to PDF.
+  4. Every slide has the same canvas size — page-break CSS handles the
+     multi-page PDF output automatically.
+  
+  TEMPLATE INDEX:
+  - Template 01 · Title slide
+  - Template 02 · Pull quote
+  - Template 03 · Hero stat
+  - Template 04 · Numbered list
+  - Template 05 · Comparison (A vs B)
+  - Template 06 · CTA closing
+  ═══════════════════════════════════════════════════════════════════
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Glass Grok — slide templates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens (see tokens.css for the full set) ── */
+:root{
+  --bg-app:#F2F2F4; --bg-card:#FFFFFF; --bg-subtle:#F5F5F7; --bg-muted:#E8E8EB;
+  --text-primary:#0A0A0B; --text-secondary:#3A3A3E; --text-muted:#6B6B70; --text-faint:#9A9A9F;
+  --border:rgba(0,0,0,0.08); --accent:#0A0A0B;
+  --dot-ready:#22A755; --dot-progress:#E8A033; --dot-flag:#DC2626;
+  --display:'Sora',system-ui,sans-serif; --body:'Inter',system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+em,i{font-style:normal;font-weight:600}
+
+html,body{background:#18181B;font-family:var(--body);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+/* ── Canvas sizing for LinkedIn 1080×1350 ──
+   When rendering to PDF, each .slide becomes one page.
+   The @page rule + page-break-after handles pagination. */
+@page { size: 1080px 1350px; margin: 0; }
+
+.slide{
+  width:1080px;
+  height:1350px;
+  background:var(--bg-app);
+  color:var(--text-primary);
+  position:relative;
+  overflow:hidden;
+  page-break-after:always;
+  break-after:page;
+  margin:0 auto 40px; /* 40px gap only visible in browser preview; removed on PDF */
+  box-shadow:0 20px 80px rgba(0,0,0,0.4); /* preview-only */
+}
+.slide:last-child{page-break-after:auto}
+
+/* ── Shared slide chrome ── */
+.slide-head{position:absolute;top:64px;left:64px;right:64px;display:flex;justify-content:space-between;align-items:center}
+.slide-head .logo{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:-0.025em;color:var(--text-primary)}
+.slide-head .marker{font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:0.1em;color:var(--text-faint);text-transform:uppercase}
+
+.slide-foot{position:absolute;bottom:64px;left:64px;right:64px;display:flex;justify-content:space-between;align-items:flex-end}
+.slide-foot .src{font-family:var(--body);font-weight:500;font-size:13px;color:var(--text-faint);line-height:1.5;max-width:640px}
+.slide-foot .page{font-family:var(--display);font-weight:700;font-size:13px;color:var(--text-faint);letter-spacing:0.08em}
+
+/* ── Template-specific styles below ── */
+
+/* Template 01 · Title */
+.t01 .eyebrow{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:0.2em;color:var(--text-muted);text-transform:uppercase;margin-bottom:40px}
+.t01 h1{font-family:var(--display);font-weight:800;font-size:128px;line-height:0.95;letter-spacing:-0.04em;color:var(--text-primary);margin-bottom:44px;max-width:900px}
+.t01 .tag{font-family:var(--body);font-weight:500;font-size:30px;line-height:1.4;color:var(--text-secondary);max-width:820px}
+.t01 .content{position:absolute;top:50%;left:64px;right:64px;transform:translateY(-50%)}
+
+/* Template 02 · Quote */
+.t02 .quote-mark{font-family:var(--display);font-weight:800;font-size:220px;line-height:0.7;color:var(--text-muted);opacity:0.25;margin-bottom:20px}
+.t02 blockquote{font-family:var(--display);font-weight:700;font-size:80px;line-height:1.08;letter-spacing:-0.025em;color:var(--text-primary);max-width:940px;margin-bottom:48px}
+.t02 .attribution{display:flex;gap:20px;align-items:center}
+.t02 .attribution .bar{width:60px;height:3px;background:var(--accent)}
+.t02 .attribution .who{font-family:var(--body);font-weight:600;font-size:22px;color:var(--text-secondary)}
+.t02 .content{position:absolute;top:50%;left:64px;right:64px;transform:translateY(-50%)}
+
+/* Template 03 · Hero stat */
+.t03 .content{position:absolute;top:50%;left:64px;right:64px;transform:translateY(-50%)}
+.t03 .stat-label{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:0.16em;color:var(--text-muted);text-transform:uppercase;margin-bottom:56px}
+.t03 .stat-number{font-family:var(--display);font-weight:800;font-size:320px;line-height:0.85;letter-spacing:-0.06em;color:var(--text-primary);margin-bottom:48px}
+.t03 .stat-unit{font-family:var(--display);font-weight:600;font-size:88px;color:var(--text-muted)}
+.t03 .stat-desc{font-family:var(--body);font-weight:500;font-size:32px;line-height:1.4;color:var(--text-secondary);max-width:880px;margin-top:48px}
+
+/* Template 04 · Numbered list */
+.t04 .content{position:absolute;top:180px;left:64px;right:64px;bottom:180px;display:flex;flex-direction:column}
+.t04 h2{font-family:var(--display);font-weight:800;font-size:64px;line-height:1.05;letter-spacing:-0.025em;color:var(--text-primary);margin-bottom:64px;max-width:920px}
+.t04 .list{display:flex;flex-direction:column;gap:28px}
+.t04 .item{display:flex;gap:32px;padding:28px 36px;background:var(--bg-card);border:0.5px solid var(--border);border-radius:20px;box-shadow:inset 0 0.5px 0 rgba(255,255,255,1),0 1px 3px rgba(0,0,0,0.03)}
+.t04 .item .num{font-family:var(--display);font-weight:800;font-size:36px;color:var(--text-faint);letter-spacing:-0.02em;flex-shrink:0;min-width:52px}
+.t04 .item .body-wrap{flex:1}
+.t04 .item .title{font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:-0.015em;color:var(--text-primary);margin-bottom:6px}
+.t04 .item .desc{font-family:var(--body);font-weight:500;font-size:19px;line-height:1.5;color:var(--text-secondary)}
+
+/* Template 05 · Comparison */
+.t05 .content{position:absolute;top:180px;left:64px;right:64px;bottom:180px;display:flex;flex-direction:column}
+.t05 h2{font-family:var(--display);font-weight:800;font-size:60px;line-height:1.05;letter-spacing:-0.025em;color:var(--text-primary);margin-bottom:56px;max-width:900px}
+.t05 .cmp{display:grid;grid-template-columns:1fr 1fr;gap:24px;flex:1}
+.t05 .col{border-radius:24px;padding:48px 40px;display:flex;flex-direction:column;gap:20px}
+.t05 .col.a{background:var(--bg-card);border:0.5px solid var(--border);color:var(--text-primary);box-shadow:inset 0 0.5px 0 rgba(255,255,255,1),0 1px 3px rgba(0,0,0,0.03)}
+.t05 .col.b{background:var(--accent);color:#fff;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.12)}
+.t05 .col .col-label{font-family:var(--display);font-weight:700;font-size:14px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.7;margin-bottom:8px}
+.t05 .col.a .col-label{color:var(--text-muted)}
+.t05 .col.b .col-label{color:#fff;opacity:0.6}
+.t05 .col .headline{font-family:var(--display);font-weight:800;font-size:42px;letter-spacing:-0.02em;line-height:1.05;margin-bottom:12px}
+.t05 .col .point{font-family:var(--body);font-weight:500;font-size:20px;line-height:1.5;padding-left:24px;position:relative}
+.t05 .col .point::before{content:"";position:absolute;left:0;top:12px;width:10px;height:2px}
+.t05 .col.a .point::before{background:var(--text-muted)}
+.t05 .col.b .point::before{background:#fff;opacity:0.5}
+
+/* Template 06 · CTA */
+.t06 .content{position:absolute;top:50%;left:64px;right:64px;transform:translateY(-50%);text-align:center}
+.t06 .eyebrow{font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:0.22em;color:var(--text-muted);text-transform:uppercase;margin-bottom:40px}
+.t06 h2{font-family:var(--display);font-weight:800;font-size:96px;line-height:1.02;letter-spacing:-0.035em;color:var(--text-primary);margin-bottom:32px;max-width:900px;margin-left:auto;margin-right:auto}
+.t06 .tag{font-family:var(--body);font-weight:500;font-size:26px;line-height:1.5;color:var(--text-secondary);max-width:720px;margin:0 auto 64px}
+.t06 .cta-btn{display:inline-block;padding:26px 52px;background:var(--accent);color:#fff;border-radius:18px;font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:-0.01em;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.15),0 2px 8px rgba(0,0,0,0.15)}
+.t06 .url{font-family:var(--body);font-weight:600;font-size:22px;color:var(--text-muted);margin-top:40px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TEMPLATE 01 · TITLE SLIDE
+     Use for carousel opening. The hook must land immediately.
+     Max 6-8 words in the headline. Subtitle is a single sentence.
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="slide t01">
+  <div class="slide-head">
+    <div class="logo">smbx.ai</div>
+    <div class="marker">01 / 07</div>
+  </div>
+  <div class="content">
+    <div class="eyebrow">Selling your business</div>
+    <h1>The $1.1M hiding in your tax returns.</h1>
+    <div class="tag">Every owner-operated business has it. Most never find it before the sale.</div>
+  </div>
+  <div class="slide-foot">
+    <div></div>
+    <div class="page">→ swipe</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TEMPLATE 02 · PULL QUOTE
+     For a single-sentence punch. Quotes from founders, customers,
+     or authoritative sources. Keep quote under 20 words if possible.
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="slide t02">
+  <div class="slide-head">
+    <div class="logo">smbx.ai</div>
+    <div class="marker">02 / 07</div>
+  </div>
+  <div class="content">
+    <div class="quote-mark">“</div>
+    <blockquote>Reported EBITDA and real EBITDA are almost never the same number.</blockquote>
+    <div class="attribution">
+      <div class="bar"></div>
+      <div class="who">The reality of every M&amp;A transaction</div>
+    </div>
+  </div>
+  <div class="slide-foot">
+    <div></div>
+    <div class="page">→</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TEMPLATE 03 · HERO STAT
+     A single big number tells the whole story. Use when you have
+     one undeniable data point. The number should be readable from
+     a phone in the feed at a glance.
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="slide t03">
+  <div class="slide-head">
+    <div class="logo">smbx.ai</div>
+    <div class="marker">03 / 07</div>
+  </div>
+  <div class="content">
+    <div class="stat-label">Average hidden value found per analysis</div>
+    <div class="stat-number">$1.1M<span class="stat-unit"> avg</span></div>
+    <div class="stat-desc">Across hundreds of pre-LOI add-back analyses. At a 5–6× multiple, that's $5.5M–$6.6M in enterprise value sitting in the financials.</div>
+  </div>
+  <div class="slide-foot">
+    <div class="src">Source: smbx.ai internal data · 2025–2026</div>
+    <div class="page">→</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TEMPLATE 04 · NUMBERED LIST
+     For breakdowns: 3 causes, 4 steps, 5 things to check.
+     Keep to 3-5 items — more than that, split into two slides.
+     Each item: short title + one-sentence description.
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="slide t04">
+  <div class="slide-head">
+    <div class="logo">smbx.ai</div>
+    <div class="marker">04 / 07</div>
+  </div>
+  <div class="content">
+    <h2>Four add-backs every owner misses.</h2>
+    <div class="list">
+      <div class="item">
+        <div class="num">01</div>
+        <div class="body-wrap">
+          <div class="title">Above-market rent to your own LLC</div>
+          <div class="desc">If you own the real estate and charge yourself 20% above market, that difference is normalizable — and usually worth $40K–$80K per year.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="num">02</div>
+        <div class="body-wrap">
+          <div class="title">Owner comp above replacement</div>
+          <div class="desc">A buyer will pay a general manager market wage. Anything you pay yourself beyond that is an add-back.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="num">03</div>
+        <div class="body-wrap">
+          <div class="title">One-time legal and professional</div>
+          <div class="desc">Litigation, one-off acquisitions, systems implementations. Non-recurring is a legitimate normalization.</div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="num">04</div>
+        <div class="body-wrap">
+          <div class="title">Personal expenses on the books</div>
+          <div class="desc">Family auto, phone, travel, meals. Documented, defensible, and typically 3–5% of revenue in owner-operated businesses.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-foot">
+    <div></div>
+    <div class="page">→</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TEMPLATE 05 · COMPARISON
+     Two columns. The winning side goes on the right (column B, black).
+     Use for before/after, old way/new way, without us/with us.
+     Each side gets 3-4 bullet points — tight, punchy, parallel structure.
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="slide t05">
+  <div class="slide-head">
+    <div class="logo">smbx.ai</div>
+    <div class="marker">05 / 07</div>
+  </div>
+  <div class="content">
+    <h2>Two ways to find out what your business is worth.</h2>
+    <div class="cmp">
+      <div class="col a">
+        <div class="col-label">Traditional QofE</div>
+        <div class="headline">$25K–$75K</div>
+        <div class="point">3–6 weeks turnaround</div>
+        <div class="point">Engaged post-LOI · too late to renegotiate</div>
+        <div class="point">Binary output · no scenario modeling</div>
+        <div class="point">One-shot · can't refresh as data changes</div>
+      </div>
+      <div class="col b">
+        <div class="col-label">Yulia · pre-LOI</div>
+        <div class="headline">20 minutes</div>
+        <div class="point">Before you sign · inform the LOI</div>
+        <div class="point">Every add-back documented and defensible</div>
+        <div class="point">Scenarios and sensitivity included</div>
+        <div class="point">Living document · refreshes as you update</div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-foot">
+    <div></div>
+    <div class="page">→</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TEMPLATE 06 · CTA CLOSING
+     The last slide. One clear action. URL visible. No more than
+     ten words on the page. The goal is: visit the site.
+     ═══════════════════════════════════════════════════════════════ -->
+<div class="slide t06">
+  <div class="slide-head">
+    <div class="logo">smbx.ai</div>
+    <div class="marker">07 / 07</div>
+  </div>
+  <div class="content">
+    <div class="eyebrow">Your turn</div>
+    <h2>Find what's hiding in your financials.</h2>
+    <div class="tag">20 minutes with Yulia. Free. No credit card.</div>
+    <a class="cta-btn" href="https://smbx.ai">Start with Yulia →</a>
+    <div class="url">smbx.ai</div>
+  </div>
+</div>
+
+</body>
+</html>

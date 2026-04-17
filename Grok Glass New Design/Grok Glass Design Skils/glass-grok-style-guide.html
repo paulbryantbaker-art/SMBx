@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Glass Grok — smbx.ai Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Canvas */
+  --bg-canvas:#0A0A0B;
+  --bg-panel:#17171A;
+  --bg-panel-2:#1E1F22;
+
+  /* Glass Grok light system (the actual design tokens) */
+  --bg-app:#F2F2F4;
+  --bg-card:#FFFFFF;
+  --bg-subtle:#F5F5F7;
+  --bg-muted:#E8E8EB;
+  --bg-dark:#0A0A0B;
+
+  --glass-light:rgba(255,255,255,0.72);
+  --glass-med:rgba(255,255,255,0.78);
+  --glass-strong:rgba(255,255,255,0.88);
+
+  --text-primary:#0A0A0B;
+  --text-secondary:#3A3A3E;
+  --text-muted:#6B6B70;
+  --text-faint:#9A9A9F;
+
+  --border:rgba(0,0,0,0.08);
+  --border-solid:#E5E5E7;
+  --border-strong:#D1D1D4;
+
+  --accent:#0A0A0B;
+
+  /* Status — content-level only */
+  --dot-ready:#22A755;
+  --dot-progress:#E8A033;
+  --dot-flag:#DC2626;
+  --dot-draft:#9A9A9F;
+
+  --display:'Sora',system-ui,sans-serif;
+  --body:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg-canvas);font-family:var(--body);color:#E8E8EB;-webkit-font-smoothing:antialiased;line-height:1.55}
+
+/* ============ DOC LAYOUT ============ */
+.doc{max-width:1200px;margin:0 auto;padding:64px 40px 120px}
+.hero{padding:0 0 56px;margin-bottom:56px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.hero .kicker{font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.18em;color:#9A9AA0;text-transform:uppercase;margin-bottom:20px}
+.hero h1{font-family:var(--display);font-weight:800;font-size:56px;line-height:1;letter-spacing:-.035em;color:#fff;margin-bottom:20px}
+.hero .lede{font-size:18px;line-height:1.55;color:#B0B0B5;max-width:720px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.hero .meta span{font-size:11.5px;padding:6px 12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:999px;color:#C5C5CA;font-weight:500;font-family:var(--display)}
+
+nav.toc{position:sticky;top:24px;margin-bottom:56px;padding:20px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;backdrop-filter:blur(10px)}
+nav.toc .l{font-family:var(--display);font-weight:700;font-size:10.5px;letter-spacing:.14em;color:#9A9AA0;text-transform:uppercase;margin-bottom:10px}
+nav.toc ol{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;counter-reset:toc}
+nav.toc li{counter-increment:toc;font-size:13px}
+nav.toc li::before{content:counter(toc,decimal-leading-zero) "  ";color:#5A5A60;font-family:var(--mono);font-size:11px;font-weight:600}
+nav.toc a{color:#D8D8DC;text-decoration:none}
+nav.toc a:hover{color:#fff}
+
+section{margin-bottom:88px;scroll-margin-top:40px}
+section>.head{margin-bottom:36px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.08)}
+section>.head .num{font-family:var(--display);font-weight:800;font-size:13px;letter-spacing:.14em;color:#5A5A60;text-transform:uppercase;margin-bottom:12px;font-family:var(--mono)}
+section>.head h2{font-family:var(--display);font-weight:800;font-size:34px;line-height:1.1;letter-spacing:-.025em;color:#fff;margin-bottom:10px}
+section>.head p{font-size:15px;line-height:1.6;color:#9A9AA0;max-width:780px}
+
+h3.subh{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:-.01em;color:#fff;margin:36px 0 16px}
+h3.subh:first-child{margin-top:0}
+
+p.body{font-size:14.5px;line-height:1.65;color:#B0B0B5;margin-bottom:14px;max-width:760px}
+p.body strong{color:#E8E8EB;font-weight:600}
+p.body code, .inline-code{font-family:var(--mono);font-size:12.5px;background:rgba(255,255,255,0.06);padding:2px 7px;border-radius:5px;color:#E8E8EB;border:1px solid rgba(255,255,255,0.06)}
+
+/* ============ SWATCHES ============ */
+.swatch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.swatch{background:var(--bg-panel);border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.06)}
+.swatch .chip{height:80px;border-bottom:1px solid rgba(255,255,255,0.05);position:relative}
+.swatch .meta{padding:14px 16px}
+.swatch .name{font-family:var(--display);font-weight:700;font-size:13.5px;color:#fff;margin-bottom:3px}
+.swatch .hex{font-family:var(--mono);font-size:11px;color:#9A9AA0;margin-bottom:6px}
+.swatch .use{font-size:11.5px;color:#8A8A90;line-height:1.4}
+.swatch .tok{font-family:var(--mono);font-size:10.5px;color:#C5C5CA;margin-top:4px;display:block}
+
+/* Glass chip special */
+.glass-demo{background:linear-gradient(135deg,#F2F2F4 0%,#E0E0E4 100%) !important}
+.glass-demo .overlay{position:absolute;inset:16px;background:var(--glass-light);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:0.5px solid rgba(0,0,0,0.08);border-radius:10px;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.9)}
+
+/* ============ TYPE SPECIMENS ============ */
+.type-grid{display:flex;flex-direction:column;gap:14px}
+.type{background:var(--bg-panel);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:28px 32px;display:grid;grid-template-columns:1fr 240px;gap:32px;align-items:center}
+.type .demo{color:#fff}
+.type .spec{display:flex;flex-direction:column;gap:3px}
+.type .spec .k{font-family:var(--mono);font-size:10.5px;color:#9A9AA0;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.type .spec .v{font-family:var(--mono);font-size:12px;color:#E8E8EB}
+.type .spec .use{font-size:11.5px;color:#8A8A90;margin-top:6px;line-height:1.4}
+
+.type .h1{font-family:var(--display);font-weight:800;font-size:42px;letter-spacing:-.03em;line-height:1.05}
+.type .h2{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:-.02em;line-height:1.1}
+.type .h3{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:-.01em}
+.type .hero-num{font-family:var(--display);font-weight:800;font-size:52px;letter-spacing:-.035em;line-height:1}
+.type .body-lg{font-family:var(--body);font-weight:500;font-size:17px;line-height:1.55}
+.type .body{font-family:var(--body);font-weight:500;font-size:14.5px;line-height:1.65}
+.type .eyebrow{font-family:var(--display);font-weight:700;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#9A9AA0}
+.type .label{font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#E8A033}
+
+/* ============ SPACING SCALE ============ */
+.spacing-row{display:grid;grid-template-columns:120px 100px 1fr 200px;gap:24px;align-items:center;padding:14px 20px;background:var(--bg-panel);border-radius:10px;border:1px solid rgba(255,255,255,0.06);margin-bottom:6px}
+.spacing-row .tok{font-family:var(--mono);font-size:12.5px;color:#E8E8EB;font-weight:600}
+.spacing-row .px{font-family:var(--mono);font-size:12px;color:#9A9AA0}
+.spacing-row .bar{height:16px;background:linear-gradient(90deg,#E8A033,#D4714E 60%);border-radius:3px}
+.spacing-row .use{font-size:11.5px;color:#8A8A90;text-align:right}
+
+/* ============ COMPONENT DEMOS ============ */
+.comp-card{background:#F2F2F4;border-radius:18px;padding:32px;margin-bottom:20px;position:relative;overflow:hidden;min-height:200px}
+.comp-card .comp-label{position:absolute;top:14px;right:16px;font-family:var(--mono);font-size:10px;color:#9A9A9F;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.comp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;margin-bottom:24px}
+
+/* Chat input component */
+.demo-chat{background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:20px;padding:14px 14px 14px 16px;display:flex;align-items:center;gap:10px;box-shadow:inset 0 0.5px 0 rgba(255,255,255,1),0 4px 20px rgba(0,0,0,0.06),0 1px 3px rgba(0,0,0,0.04);max-width:420px;margin:24px 0}
+.demo-chat .plus{width:30px;height:30px;border-radius:10px;background:rgba(0,0,0,0.04);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#0A0A0B;font-size:14px;font-weight:700}
+.demo-chat .field{flex:1;font-size:13.5px;color:#9A9A9F}
+.demo-chat .send{width:32px;height:32px;border-radius:50%;background:#0A0A0B;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.15),0 1px 3px rgba(0,0,0,0.15)}
+
+/* Button demos */
+.demo-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;font-size:12.5px;font-weight:700;font-family:var(--body);margin:4px 8px 4px 0}
+.demo-btn.primary{background:#0A0A0B;color:#fff;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.15)}
+.demo-btn.ghost{background:transparent;color:#0A0A0B;border:0.5px solid rgba(0,0,0,0.12)}
+.demo-btn.pill{border-radius:999px;padding:9px 14px}
+
+.demo-chip{display:inline-flex;background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:999px;padding:7px 12px;font-size:12px;font-weight:600;color:#0A0A0B;margin:4px 6px 4px 0;box-shadow:inset 0 0.5px 0 rgba(255,255,255,1)}
+.demo-chip.active{background:#0A0A0B;color:#fff;border-color:transparent}
+
+/* Status pill */
+.demo-status{display:inline-flex;align-items:center;gap:6px;background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:999px;padding:5px 10px 5px 9px;font-size:10.5px;font-weight:600;color:#3A3A3E;text-transform:uppercase;letter-spacing:.04em;margin:4px 8px 4px 0}
+.demo-status .dot{width:7px;height:7px;border-radius:50%}
+.demo-status .dot.ready{background:#22A755}
+.demo-status .dot.progress{background:#E8A033}
+.demo-status .dot.flag{background:#DC2626}
+.demo-status .dot.draft{background:#9A9A9F}
+
+/* Card demo */
+.demo-card{background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:24px;padding:22px;box-shadow:inset 0 0.5px 0 rgba(255,255,255,1),0 1px 3px rgba(0,0,0,0.03),0 4px 16px rgba(0,0,0,0.04);max-width:400px;color:#0A0A0B}
+.demo-card h4{font-family:var(--display);font-weight:700;font-size:16px;letter-spacing:-.01em;margin-bottom:4px;color:#0A0A0B}
+.demo-card .meta{font-size:11.5px;color:#6B6B70;margin-bottom:14px}
+.demo-card .big{font-family:var(--display);font-weight:800;font-size:30px;color:#0A0A0B;letter-spacing:-.025em;line-height:1;margin-bottom:8px}
+
+/* Glass components — tab bar, mini bar */
+.demo-glass-bg{background:linear-gradient(135deg,#F5F5F7 0%,#E0E0E4 50%,#F0F0F2 100%);position:relative;border-radius:20px;padding:60px 20px 20px;min-height:240px;overflow:hidden}
+.demo-glass-bg::before{content:"";position:absolute;top:12px;left:12px;right:12px;height:140px;background:repeating-linear-gradient(90deg,transparent,transparent 28px,rgba(0,0,0,0.04) 28px,rgba(0,0,0,0.04) 30px),repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(0,0,0,0.04) 28px,rgba(0,0,0,0.04) 30px);border-radius:12px}
+.demo-tab-bar{background:rgba(255,255,255,0.72);backdrop-filter:blur(32px) saturate(1.8);-webkit-backdrop-filter:blur(32px) saturate(1.8);border:0.5px solid rgba(0,0,0,0.08);border-radius:16px;height:64px;display:flex;align-items:center;justify-content:space-around;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.9);position:relative;z-index:1}
+.demo-tab-bar .t{font-family:var(--display);font-size:10px;font-weight:700;color:#0A0A0B;letter-spacing:-.005em}
+.demo-tab-bar .t.dim{color:#9A9A9F;font-weight:500}
+
+.demo-mini-bar{background:rgba(255,255,255,0.78);backdrop-filter:blur(30px) saturate(1.8);-webkit-backdrop-filter:blur(30px) saturate(1.8);border:0.5px solid rgba(0,0,0,0.08);border-radius:17px;padding:8px 12px 8px 8px;display:flex;align-items:center;gap:10px;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.9),0 6px 24px rgba(0,0,0,0.08);position:relative;z-index:1;margin-bottom:10px;max-width:340px}
+.demo-mini-bar::before{content:"";position:absolute;top:0;left:0;width:45%;height:1.5px;background:#0A0A0B;border-radius:0 2px 2px 0}
+.demo-mini-bar .yav{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#3A3A3E,#0A0A0B);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:14px;flex-shrink:0;box-shadow:inset 0 0.5px 0 rgba(255,255,255,0.15)}
+.demo-mini-bar .info{flex:1}
+.demo-mini-bar .t1{font-size:11.5px;font-weight:700;color:#0A0A0B}
+.demo-mini-bar .t2{font-size:10.5px;color:#6B6B70;margin-top:1px}
+
+/* Do/Don't */
+.dd-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:24px}
+@media (max-width:700px){.dd-grid{grid-template-columns:1fr}}
+.dd{padding:22px 24px;border-radius:16px;border:1px solid rgba(255,255,255,0.06);background:var(--bg-panel)}
+.dd.good{border-color:rgba(34,167,85,0.2);background:rgba(34,167,85,0.04)}
+.dd.bad{border-color:rgba(220,38,38,0.2);background:rgba(220,38,38,0.04)}
+.dd .label{font-family:var(--display);font-weight:800;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px}
+.dd.good .label{color:#4ADE80}
+.dd.bad .label{color:#F87171}
+.dd h4{font-family:var(--display);font-weight:700;font-size:15px;color:#fff;margin-bottom:8px;letter-spacing:-.005em}
+.dd p{font-size:13.5px;color:#B0B0B5;line-height:1.55}
+
+/* Callout box */
+.callout{padding:24px 28px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;margin:20px 0;border-left:3px solid #E8A033}
+.callout .ch{font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#E8A033;margin-bottom:8px}
+.callout p{font-size:14px;color:#C5C5CA;line-height:1.6}
+
+/* Code block */
+pre.code{background:#0F0F11;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:18px 22px;font-family:var(--mono);font-size:12.5px;line-height:1.7;color:#E8E8EB;overflow-x:auto;margin:14px 0}
+pre.code .k{color:#E8A033}
+pre.code .v{color:#4ADE80}
+pre.code .c{color:#6B6B70}
+
+/* Logo demos */
+.logo-demo{display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding:32px;background:var(--bg-panel);border-radius:14px;margin-bottom:14px}
+.logo-demo .logo{font-family:var(--display);font-weight:800;letter-spacing:-.025em}
+.logo-demo .logo-xl{font-size:48px;color:#fff}
+.logo-demo .logo-md{font-size:24px;color:#fff}
+.logo-demo .logo-sm{font-size:15px;color:#fff}
+.logo-demo.light{background:#F2F2F4}
+.logo-demo.light .logo{color:#0A0A0B}
+
+/* Footer */
+.foot{padding-top:56px;margin-top:80px;border-top:1px solid rgba(255,255,255,0.08);text-align:center;color:#6B6B70;font-size:13px;font-family:var(--mono)}
+</style>
+</head>
+<body>
+
+<div class="doc">
+
+<!-- HERO -->
+<header class="hero">
+  <div class="kicker">smbx.ai · design system</div>
+  <h1>Glass Grok.</h1>
+  <p class="lede">A monochrome system inspired by Grok's restraint and Apple's Liquid Glass. Greys carry structure. Black carries action. Color only enters through content — status, data, documents. The UI gets out of the way so the work stays readable.</p>
+  <div class="meta">
+    <span>Version 1.0</span>
+    <span>Light mode canonical</span>
+    <span>Mobile-first · iOS Safari PWA</span>
+    <span>Sora + Inter</span>
+  </div>
+</header>
+
+<!-- TOC -->
+<nav class="toc">
+  <div class="l">Contents</div>
+  <ol>
+    <li><a href="#philosophy">Philosophy</a></li>
+    <li><a href="#color">Color</a></li>
+    <li><a href="#type">Typography</a></li>
+    <li><a href="#space">Spacing &amp; radius</a></li>
+    <li><a href="#glass">Glass surfaces</a></li>
+    <li><a href="#components">Components</a></li>
+    <li><a href="#content-color">Content color</a></li>
+    <li><a href="#logo">Logo</a></li>
+    <li><a href="#motion">Motion</a></li>
+    <li><a href="#dos">Do / don't</a></li>
+  </ol>
+</nav>
+
+<!-- PHILOSOPHY -->
+<section id="philosophy">
+  <div class="head">
+    <div class="num">01</div>
+    <h2>Philosophy</h2>
+    <p>Three principles shape every decision. When a question comes up that these don't answer, err toward restraint.</p>
+  </div>
+
+  <h3 class="subh">Chrome is greyscale. Content is where color lives.</h3>
+  <p class="body">A deal scoring dashboard carries meaningful signal: green, amber, red. A financial chart has real data to visualize. A document preview has its own colors and identity. That's where color belongs — in the substance of what the user is looking at. UI chrome — tab bars, buttons, nav, section headings — stays monochrome so the content can speak. This is the Bloomberg Terminal principle, softened for consumer use.</p>
+
+  <h3 class="subh">Glass floats. Content is solid.</h3>
+  <p class="body">Apple's Liquid Glass language is used for <strong>chrome that floats over content</strong>: the tab bar, the Yulia mini bar, the nav pill, icon buttons, sheets, and overlays. Content surfaces — cards, document bodies, hero sections — stay solid white. This keeps readability uncompromised while the navigation layer feels alive and present without fighting for attention.</p>
+
+  <h3 class="subh">Typography carries hierarchy. Not color.</h3>
+  <p class="body">Big numbers are big and black, not colored. Section headers are bold and black, not colored. Active states are darker, not colored. When something needs to feel important, it gets more weight, more size, or more contrast — never a tint. The one exception is the "winning" cell pattern (offer comparison, Blind Equity) where <strong>black fill + white text</strong> signals emphasis without introducing hue.</p>
+
+  <div class="callout">
+    <div class="ch">The one rule</div>
+    <p>If you're about to add a color to solve a hierarchy problem, change the typography or contrast instead. If you genuinely need color, it belongs in the content, not the chrome.</p>
+  </div>
+</section>
+
+<!-- COLOR -->
+<section id="color">
+  <div class="head">
+    <div class="num">02</div>
+    <h2>Color</h2>
+    <p>Eight functional greys, one true black, and four content-level dots. That's the whole palette. Every other decision is structural — weight, contrast, spacing, shadow.</p>
+  </div>
+
+  <h3 class="subh">Background &amp; surfaces</h3>
+  <div class="swatch-grid">
+    <div class="swatch"><div class="chip" style="background:#F2F2F4"></div><div class="meta"><div class="name">App background</div><div class="hex">#F2F2F4</div><div class="use">Main app surface. Cool light grey. The canvas behind everything.</div><code class="tok">--bg-app</code></div></div>
+    <div class="swatch"><div class="chip" style="background:#FFFFFF;border-bottom:1px solid #E5E5E7"></div><div class="meta"><div class="name">Card</div><div class="hex">#FFFFFF</div><div class="use">Solid content cards. Always gets a hairline border.</div><code class="tok">--bg-card</code></div></div>
+    <div class="swatch"><div class="chip" style="background:#F5F5F7"></div><div class="meta"><div class="name">Subtle fill</div><div class="hex">#F5F5F7</div><div class="use">Chip interior, icon button bg, very soft fills.</div><code class="tok">--bg-subtle</code></div></div>
+    <div class="swatch"><div class="chip" style="background:#E8E8EB"></div><div class="meta"><div class="name">Muted fill</div><div class="hex">#E8E8EB</div><div class="use">Deeper fill. Dividers. Placeholder areas.</div><code class="tok">--bg-muted</code></div></div>
+    <div class="swatch glass-demo"><div class="chip glass-demo"><div class="overlay"></div></div><div class="meta"><div class="name">Glass · light</div><div class="hex">rgba(255,255,255,0.72)</div><div class="use">Tab bar, mini bar. Used with blur(32px) saturate(1.8).</div><code class="tok">--glass-light</code></div></div>
+    <div class="swatch"><div class="chip" style="background:#0A0A0B"></div><div class="meta"><div class="name">Accent · true black</div><div class="hex">#0A0A0B</div><div class="use">Primary buttons, active states, hero numbers, text.</div><code class="tok">--accent</code></div></div>
+  </div>
+
+  <h3 class="subh">Text</h3>
+  <div class="swatch-grid">
+    <div class="swatch"><div class="chip" style="background:#0A0A0B"></div><div class="meta"><div class="name">Primary</div><div class="hex">#0A0A0B</div><div class="use">Body copy, headlines, numbers.</div><code class="tok">--text-primary</code></div></div>
+    <div class="swatch"><div class="chip" style="background:#3A3A3E"></div><div class="meta"><div class="name">Secondary</div><div class="hex">#3A3A3E</div><div class="use">Supporting body text, active comparison cells.</div><code class="tok">--text-secondary</code></div></div>
+    <div class="swatch"><div class="chip" style="background:#6B6B70"></div><div class="meta"><div class="name">Muted</div><div class="hex">#6B6B70</div><div class="use">Metadata, captions, section labels.</div><code class="tok">--text-muted</code></div></div>
+    <div class="swatch"><div class="chip" style="background:#9A9A9F"></div><div class="meta"><div class="name">Faint</div><div class="hex">#9A9A9F</div><div class="use">Placeholder text, disabled states.</div><code class="tok">--text-faint</code></div></div>
+  </div>
+
+  <h3 class="subh">Borders</h3>
+  <div class="swatch-grid">
+    <div class="swatch"><div class="chip" style="background:#fff;border-bottom:1px solid rgba(0,0,0,0.08)"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:#9A9AA0">rgba(0,0,0,0.08)</div></div><div class="meta"><div class="name">Hairline</div><div class="hex">rgba(0,0,0,0.08)</div><div class="use">Glass borders, card borders. 0.5px width.</div><code class="tok">--border</code></div></div>
+    <div class="swatch"><div class="chip" style="background:#fff;border-bottom:1px solid #E5E5E7"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:#9A9AA0">#E5E5E7</div></div><div class="meta"><div class="name">Solid</div><div class="hex">#E5E5E7</div><div class="use">Dividers that need to be visible without dashes.</div><code class="tok">--border-solid</code></div></div>
+    <div class="swatch"><div class="chip" style="background:#fff;border-bottom:1px solid #D1D1D4"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:#9A9AA0">#D1D1D4</div></div><div class="meta"><div class="name">Strong</div><div class="hex">#D1D1D4</div><div class="use">Checkbox outlines, unselected controls.</div><code class="tok">--border-strong</code></div></div>
+  </div>
+</section>
+
+<!-- TYPOGRAPHY -->
+<section id="type">
+  <div class="head">
+    <div class="num">03</div>
+    <h2>Typography</h2>
+    <p>Two typefaces. <strong>Sora</strong> for display (headlines, numbers, labels). <strong>Inter</strong> for body. Both from Google Fonts. No third font, no serif, no fallback branding.</p>
+  </div>
+
+  <div class="type-grid">
+    <div class="type">
+      <div class="demo h1">Your deal. One surface.</div>
+      <div class="spec">
+        <span class="k">Display · H1</span>
+        <span class="v">Sora 800 · 42px</span>
+        <span class="v">-0.03em · lh 1.05</span>
+        <div class="use">Page headlines, hero titles</div>
+      </div>
+    </div>
+    <div class="type">
+      <div class="demo h2">Ready for your review</div>
+      <div class="spec">
+        <span class="k">Display · H2</span>
+        <span class="v">Sora 800 · 28px</span>
+        <span class="v">-0.02em · lh 1.1</span>
+        <div class="use">Section headings</div>
+      </div>
+    </div>
+    <div class="type">
+      <div class="demo h3">Baseline Valuation v2</div>
+      <div class="spec">
+        <span class="k">Display · H3</span>
+        <span class="v">Sora 700 · 17px</span>
+        <span class="v">-0.01em · lh 1.2</span>
+        <div class="use">Card titles, subsection heads</div>
+      </div>
+    </div>
+    <div class="type">
+      <div class="demo hero-num">$2.4M – $2.9M</div>
+      <div class="spec">
+        <span class="k">Hero number</span>
+        <span class="v">Sora 800 · 52px</span>
+        <span class="v">-0.035em · lh 1</span>
+        <div class="use">Primary data on hero cards</div>
+      </div>
+    </div>
+    <div class="type">
+      <div class="demo body-lg">Yulia finds the value hiding in your financials, builds the documents that sell the business, and manages the process that gets you to the closing table.</div>
+      <div class="spec">
+        <span class="k">Body · Lead</span>
+        <span class="v">Inter 500 · 17px</span>
+        <span class="v">lh 1.55</span>
+        <div class="use">Hero subheads, lead paragraphs</div>
+      </div>
+    </div>
+    <div class="type">
+      <div class="demo body">Reported EBITDA and real EBITDA are almost never the same number. Your accountant's job is to minimize your taxes.</div>
+      <div class="spec">
+        <span class="k">Body · Default</span>
+        <span class="v">Inter 500 · 14.5px</span>
+        <span class="v">lh 1.65</span>
+        <div class="use">All paragraph copy</div>
+      </div>
+    </div>
+    <div class="type">
+      <div class="demo eyebrow">Selling your business</div>
+      <div class="spec">
+        <span class="k">Eyebrow</span>
+        <span class="v">Sora 700 · 10px</span>
+        <span class="v">0.14em · uppercase</span>
+        <div class="use">Above H1 on journey pages</div>
+      </div>
+    </div>
+    <div class="type">
+      <div class="demo label" style="color:#E8A033">Stage · Valuation</div>
+      <div class="spec">
+        <span class="k">Section label</span>
+        <span class="v">Sora 700 · 10px</span>
+        <span class="v">0.12em · uppercase · muted</span>
+        <div class="use">Precedes section blocks in app</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="ch">Never italic</div>
+    <p>Glass Grok does not use italic type. If emphasis is needed, use <strong>weight</strong> (500 → 600 or 700). <code class="inline-code">&lt;em&gt;</code> inherits but should be styled as bold via CSS override if the browser default is italic.</p>
+  </div>
+</section>
+
+<!-- SPACING & RADIUS -->
+<section id="space">
+  <div class="head">
+    <div class="num">04</div>
+    <h2>Spacing &amp; radius</h2>
+    <p>A 4px base grid. Six radius values. Generous spacing is how Glass Grok feels premium — never crowd.</p>
+  </div>
+
+  <h3 class="subh">Spacing scale</h3>
+  <div>
+    <div class="spacing-row"><div class="tok">space-1</div><div class="px">4px</div><div class="bar" style="width:4px"></div><div class="use">Icon/label gap</div></div>
+    <div class="spacing-row"><div class="tok">space-2</div><div class="px">8px</div><div class="bar" style="width:8px"></div><div class="use">Chip padding, tight clusters</div></div>
+    <div class="spacing-row"><div class="tok">space-3</div><div class="px">12px</div><div class="bar" style="width:12px"></div><div class="use">Card padding (compact)</div></div>
+    <div class="spacing-row"><div class="tok">space-4</div><div class="px">16px</div><div class="bar" style="width:16px"></div><div class="use">Card margin, list row padding</div></div>
+    <div class="spacing-row"><div class="tok">space-5</div><div class="px">20px</div><div class="bar" style="width:20px"></div><div class="use">Screen edge padding</div></div>
+    <div class="spacing-row"><div class="tok">space-6</div><div class="px">24px</div><div class="bar" style="width:24px"></div><div class="use">Card padding (default)</div></div>
+    <div class="spacing-row"><div class="tok">space-7</div><div class="px">28px</div><div class="bar" style="width:28px"></div><div class="use">Section vertical padding (compact)</div></div>
+    <div class="spacing-row"><div class="tok">space-8</div><div class="px">32px</div><div class="bar" style="width:32px"></div><div class="use">Section vertical padding (default)</div></div>
+    <div class="spacing-row"><div class="tok">space-10</div><div class="px">40px</div><div class="bar" style="width:40px"></div><div class="use">Between sections</div></div>
+    <div class="spacing-row"><div class="tok">space-14</div><div class="px">56px</div><div class="bar" style="width:56px"></div><div class="use">Hero vertical padding</div></div>
+  </div>
+
+  <h3 class="subh">Radius scale</h3>
+  <div class="swatch-grid">
+    <div class="swatch"><div class="chip" style="background:#fff;border-bottom:1px solid #E5E5E7"><div style="width:50%;height:50%;margin:15% auto;background:#E8E8EB;border-radius:6px"></div></div><div class="meta"><div class="name">r-small</div><div class="hex">6px</div><div class="use">Tiny controls, chart bars.</div></div></div>
+    <div class="swatch"><div class="chip" style="background:#fff;border-bottom:1px solid #E5E5E7"><div style="width:50%;height:50%;margin:15% auto;background:#E8E8EB;border-radius:10px"></div></div><div class="meta"><div class="name">r-btn</div><div class="hex">10px</div><div class="use">Buttons, small cards, icon tiles.</div></div></div>
+    <div class="swatch"><div class="chip" style="background:#fff;border-bottom:1px solid #E5E5E7"><div style="width:50%;height:50%;margin:15% auto;background:#E8E8EB;border-radius:14px"></div></div><div class="meta"><div class="name">r-card-s</div><div class="hex">14px</div><div class="use">Compact cards.</div></div></div>
+    <div class="swatch"><div class="chip" style="background:#fff;border-bottom:1px solid #E5E5E7"><div style="width:50%;height:50%;margin:15% auto;background:#E8E8EB;border-radius:18px"></div></div><div class="meta"><div class="name">r-card</div><div class="hex">18px</div><div class="use">Standard cards, chat input.</div></div></div>
+    <div class="swatch"><div class="chip" style="background:#fff;border-bottom:1px solid #E5E5E7"><div style="width:50%;height:50%;margin:15% auto;background:#E8E8EB;border-radius:22px"></div></div><div class="meta"><div class="name">r-hero</div><div class="hex">22px</div><div class="use">Hero cards, feature cards.</div></div></div>
+    <div class="swatch"><div class="chip" style="background:#fff;border-bottom:1px solid #E5E5E7"><div style="width:60%;height:40%;margin:20% auto;background:#E8E8EB;border-radius:999px"></div></div><div class="meta"><div class="name">r-pill</div><div class="hex">999px</div><div class="use">Chips, status pills, send button.</div></div></div>
+  </div>
+</section>
+
+<!-- GLASS -->
+<section id="glass">
+  <div class="head">
+    <div class="num">05</div>
+    <h2>Glass surfaces</h2>
+    <p>The signature element. Three ingredients, always together: translucent white background, heavy backdrop blur with saturation, and a specular inset top highlight. Miss any one and it stops reading as glass.</p>
+  </div>
+
+  <h3 class="subh">The recipe</h3>
+<pre class="code"><span class="c">/* Standard glass — tab bar, mini bar, nav pill */</span>
+<span class="k">background</span>: <span class="v">rgba(255, 255, 255, 0.72)</span>;
+<span class="k">backdrop-filter</span>: <span class="v">blur(32px) saturate(1.8)</span>;
+<span class="k">-webkit-backdrop-filter</span>: <span class="v">blur(32px) saturate(1.8)</span>;
+<span class="k">border</span>: <span class="v">0.5px solid rgba(0, 0, 0, 0.08)</span>;
+<span class="k">box-shadow</span>:
+  <span class="c">/* the specular highlight — don't skip this */</span>
+  <span class="k">inset</span> <span class="v">0 0.5px 0 rgba(255, 255, 255, 0.9)</span>,
+  <span class="c">/* outer shadow only on floating chrome */</span>
+  <span class="v">0 6px 24px rgba(0, 0, 0, 0.08)</span>,
+  <span class="v">0 1px 3px rgba(0, 0, 0, 0.05)</span>;</pre>
+
+  <h3 class="subh">Three intensities</h3>
+
+  <div class="demo-glass-bg">
+    <div class="demo-mini-bar">
+      <div class="yav">Y</div>
+      <div class="info">
+        <div class="t1">Drafting add-back schedule</div>
+        <div class="t2">Identified $47K in owner comp…</div>
+      </div>
+    </div>
+    <div class="demo-tab-bar">
+      <div class="t">Deal</div>
+      <div class="t dim">Docs</div>
+      <div class="t dim">Pipeline</div>
+      <div class="t dim">Search</div>
+    </div>
+  </div>
+
+  <div class="swatch-grid">
+    <div class="swatch"><div class="chip glass-demo"><div class="overlay" style="background:rgba(255,255,255,0.72)"></div></div><div class="meta"><div class="name">Standard</div><div class="hex">alpha 0.72</div><div class="use">Tab bar, content that's heavily occluded.</div><code class="tok">--glass-light</code></div></div>
+    <div class="swatch"><div class="chip glass-demo"><div class="overlay" style="background:rgba(255,255,255,0.78)"></div></div><div class="meta"><div class="name">Medium</div><div class="hex">alpha 0.78</div><div class="use">Yulia mini bar. A touch more opaque for readability.</div><code class="tok">--glass-med</code></div></div>
+    <div class="swatch"><div class="chip glass-demo"><div class="overlay" style="background:rgba(255,255,255,0.88)"></div></div><div class="meta"><div class="name">Strong</div><div class="hex">alpha 0.88</div><div class="use">Public nav pill. Needs strong legibility over any page.</div><code class="tok">--glass-strong</code></div></div>
+  </div>
+
+  <div class="callout">
+    <div class="ch">The specular highlight</div>
+    <p>The <code class="inline-code">inset 0 0.5px 0 rgba(255,255,255,0.9)</code> is what makes translucent surfaces read as glass instead of flat overlays. Without it, the surface looks like a tinted pane. With it, the top edge catches light like real glass would. Never skip this line.</p>
+  </div>
+
+  <h3 class="subh">When to use glass</h3>
+  <p class="body">Glass is for <strong>chrome that floats over content</strong>: the tab bar, the Yulia mini bar, the public nav pill, floating CTAs, sheets and popovers, icon buttons inside a topbar over rich content.</p>
+
+  <h3 class="subh">When not to use glass</h3>
+  <p class="body">Content surfaces stay solid. Document bodies, deal cards, stat cards, input fields — all <strong>solid white</strong> with a hairline border and subtle inset top highlight. Glass everywhere becomes noise; solid cards with glass chrome creates the depth.</p>
+</section>
+
+<!-- COMPONENTS -->
+<section id="components">
+  <div class="head">
+    <div class="num">06</div>
+    <h2>Components</h2>
+    <p>The canonical elements. If something you're building doesn't fit one of these patterns, reuse the closest one before inventing.</p>
+  </div>
+
+  <h3 class="subh">Chat input · the conversion element</h3>
+  <div class="comp-card">
+    <div class="comp-label">CHAT INPUT</div>
+    <div class="demo-chat">
+      <div class="plus">+</div>
+      <div class="field">Describe your business…</div>
+      <div class="send">↗</div>
+    </div>
+  </div>
+<pre class="code"><span class="k">background</span>: <span class="v">#fff</span>;
+<span class="k">border</span>: <span class="v">0.5px solid rgba(0,0,0,0.08)</span>;
+<span class="k">border-radius</span>: <span class="v">20px</span>;
+<span class="k">padding</span>: <span class="v">14px 14px 14px 16px</span>;
+<span class="k">box-shadow</span>:
+  <span class="v">inset 0 0.5px 0 rgba(255,255,255,1)</span>,
+  <span class="v">0 4px 20px rgba(0,0,0,0.06)</span>,
+  <span class="v">0 1px 3px rgba(0,0,0,0.04)</span>;</pre>
+
+  <h3 class="subh">Buttons</h3>
+  <div class="comp-card">
+    <div class="comp-label">BUTTONS</div>
+    <button class="demo-btn primary">Start CIM</button>
+    <button class="demo-btn primary pill">Start free</button>
+    <button class="demo-btn ghost">Learn more</button>
+    <button class="demo-btn ghost pill">Open fullscreen</button>
+  </div>
+  <p class="body">Primary is always black <code class="inline-code">#0A0A0B</code>, white text, with <code class="inline-code">inset 0 0.5px 0 rgba(255,255,255,0.15)</code> for a subtle glass-like top edge. Ghost is transparent with a hairline dashed or solid border. Radius is <code class="inline-code">10px</code> for rectangular or <code class="inline-code">999px</code> for pills. Pills are used in floating contexts (nav CTAs, hero CTAs); rectangles are used inside cards.</p>
+
+  <h3 class="subh">Chips</h3>
+  <div class="comp-card">
+    <div class="comp-label">CHIPS</div>
+    <span class="demo-chip">What's my business worth?</span>
+    <span class="demo-chip">Find my add-backs</span>
+    <span class="demo-chip active">Draft my CIM</span>
+  </div>
+  <p class="body">Pill-shape, 0.5px hairline border, white background with inset top highlight. Active chip goes to solid black with white text.</p>
+
+  <h3 class="subh">Status pills</h3>
+  <div class="comp-card">
+    <div class="comp-label">STATUS</div>
+    <span class="demo-status"><span class="dot ready"></span>Ready</span>
+    <span class="demo-status"><span class="dot progress"></span>45%</span>
+    <span class="demo-status"><span class="dot flag"></span>Flag</span>
+    <span class="demo-status"><span class="dot draft"></span>Draft</span>
+  </div>
+  <p class="body">The pill is monochrome (white with hairline border). The <strong>dot</strong> carries the signal — 7px circle in the appropriate content-level color. This is the one place color enters the chrome, and it's scoped to a tiny indicator, not a fill.</p>
+
+  <h3 class="subh">Cards</h3>
+  <div class="comp-card">
+    <div class="comp-label">STANDARD CARD</div>
+    <div class="demo-card">
+      <h4>Baseline Valuation</h4>
+      <div class="meta">v2 · 14 pages · approved 2h ago</div>
+      <div class="big">$2.4M – $2.9M</div>
+      <div style="font-size:11.5px;color:#6B6B70;line-height:1.5">SDE of $695K at 3.5×–4.2× market multiple</div>
+    </div>
+  </div>
+<pre class="code"><span class="k">background</span>: <span class="v">#fff</span>;
+<span class="k">border</span>: <span class="v">0.5px solid rgba(0,0,0,0.08)</span>;
+<span class="k">border-radius</span>: <span class="v">24px</span>;
+<span class="k">padding</span>: <span class="v">22px</span>;
+<span class="k">box-shadow</span>:
+  <span class="v">inset 0 0.5px 0 rgba(255,255,255,1)</span>,
+  <span class="v">0 1px 3px rgba(0,0,0,0.03)</span>,
+  <span class="v">0 4px 16px rgba(0,0,0,0.04)</span>;</pre>
+
+  <h3 class="subh">The Yulia avatar</h3>
+  <p class="body">One piece of character in an otherwise monochrome chrome. Dark charcoal-to-black linear gradient, white "Y", subtle inset top highlight. She reads like polished graphite — present but restrained.</p>
+<pre class="code"><span class="k">background</span>: <span class="v">linear-gradient(135deg, #3A3A3E 0%, #0A0A0B 100%)</span>;
+<span class="k">color</span>: <span class="v">#FFFFFF</span>;
+<span class="k">border-radius</span>: <span class="v">11px</span>; <span class="c">/* for 34px avatar */</span>
+<span class="k">box-shadow</span>:
+  <span class="v">inset 0 0.5px 0 rgba(255,255,255,0.15)</span>,
+  <span class="v">0 1px 3px rgba(0,0,0,0.2)</span>;</pre>
+</section>
+
+<!-- CONTENT COLOR -->
+<section id="content-color">
+  <div class="head">
+    <div class="num">07</div>
+    <h2>Content-level color</h2>
+    <p>The only four colors that are allowed anywhere in the system, and only as content — never as UI accent.</p>
+  </div>
+
+  <div class="swatch-grid">
+    <div class="swatch"><div class="chip" style="background:#22A755"></div><div class="meta"><div class="name">Ready · good</div><div class="hex">#22A755</div><div class="use">Status dot, high fit score band (70+).</div></div></div>
+    <div class="swatch"><div class="chip" style="background:#E8A033"></div><div class="meta"><div class="name">In progress · medium</div><div class="hex">#E8A033</div><div class="use">Status dot, medium fit score band (40–69).</div></div></div>
+    <div class="swatch"><div class="chip" style="background:#DC2626"></div><div class="meta"><div class="name">Flag · critical</div><div class="hex">#DC2626</div><div class="use">Flag indicator. Always paired with a small count pill, never a full background.</div></div></div>
+    <div class="swatch"><div class="chip" style="background:#9A9A9F"></div><div class="meta"><div class="name">Draft · neutral</div><div class="hex">#9A9A9F</div><div class="use">Draft state, pass recommendation.</div></div></div>
+  </div>
+
+  <h3 class="subh">Score band backgrounds</h3>
+  <p class="body">The one case where color gets a light tint behind it — score band pills in sourcing and pipeline views. Each uses a very desaturated tint with darker text:</p>
+  <div style="display:flex;gap:10px;margin:14px 0;flex-wrap:wrap">
+    <div style="padding:6px 14px;background:#DCFCE7;border-radius:999px;font-family:var(--display);font-weight:800;font-size:13px;color:#166534">91</div>
+    <div style="padding:6px 14px;background:#FEF3C7;border-radius:999px;font-family:var(--display);font-weight:800;font-size:13px;color:#92400E">72</div>
+    <div style="padding:6px 14px;background:#F1F1F2;border-radius:999px;font-family:var(--display);font-weight:800;font-size:13px;color:#52525B">45</div>
+    <div style="padding:6px 14px;background:#FEE2E2;border-radius:999px;font-family:var(--display);font-weight:800;font-size:13px;color:#991B1B">3</div>
+  </div>
+<pre class="code"><span class="c">/* high · 70+ */</span>      <span class="k">bg</span>:<span class="v">#DCFCE7</span> · <span class="k">fg</span>:<span class="v">#166534</span>
+<span class="c">/* med · 40–69 */</span>     <span class="k">bg</span>:<span class="v">#FEF3C7</span> · <span class="k">fg</span>:<span class="v">#92400E</span>
+<span class="c">/* low · &lt;40 */</span>       <span class="k">bg</span>:<span class="v">#F1F1F2</span> · <span class="k">fg</span>:<span class="v">#52525B</span>
+<span class="c">/* flag */</span>           <span class="k">bg</span>:<span class="v">#FEE2E2</span> · <span class="k">fg</span>:<span class="v">#991B1B</span></pre>
+
+  <div class="callout">
+    <div class="ch">Nothing else</div>
+    <p>No blue for links. No purple for premium. No amber for CTAs. No gradient backgrounds, no brand accent. These four are the entire content palette. Everything else is grey, black, or white.</p>
+  </div>
+</section>
+
+<!-- LOGO -->
+<section id="logo">
+  <div class="head">
+    <div class="num">08</div>
+    <h2>Logo</h2>
+    <p>The wordmark is plain text. <code class="inline-code">smbx.ai</code> or <code class="inline-code">X</code>. Sora 800, inheriting the surrounding text color. No colored letter, no icon, no SVG variant.</p>
+  </div>
+
+  <div class="logo-demo light">
+    <div class="logo logo-xl">smbx.ai</div>
+    <div class="logo logo-md">smbx.ai</div>
+    <div class="logo logo-sm">smbx.ai</div>
+    <div class="logo logo-xl">X</div>
+  </div>
+
+  <div class="logo-demo">
+    <div class="logo logo-xl">smbx.ai</div>
+    <div class="logo logo-md">smbx.ai</div>
+    <div class="logo logo-sm">smbx.ai</div>
+    <div class="logo logo-xl">X</div>
+  </div>
+
+  <h3 class="subh">Rules</h3>
+  <p class="body">Always lowercase except for the <code class="inline-code">X</code> when used alone as a mark. Letter-spacing <code class="inline-code">-0.025em</code>. Weight <strong>800</strong>. No colored letter — the brand is the word, not a visual device. The logo inherits its color from the containing surface: black on light, white on dark.</p>
+</section>
+
+<!-- MOTION -->
+<section id="motion">
+  <div class="head">
+    <div class="num">09</div>
+    <h2>Motion</h2>
+    <p>Minimal. Quick. Confident. Animations exist to acknowledge an action, not to entertain.</p>
+  </div>
+
+  <h3 class="subh">Timing</h3>
+<pre class="code"><span class="c">/* Instant feedback — chips, buttons, hover states */</span>
+<span class="k">transition</span>: <span class="v">all 150ms cubic-bezier(0.4, 0, 0.2, 1)</span>;
+
+<span class="c">/* Structural — tab switches, sheet open/close, mini bar expand */</span>
+<span class="k">transition</span>: <span class="v">all 300ms cubic-bezier(0.32, 0.72, 0, 1)</span>;
+
+<span class="c">/* Page morph — public → app */</span>
+<span class="k">transition</span>: <span class="v">opacity 400ms ease, transform 400ms cubic-bezier(0.32, 0.72, 0, 1)</span>;</pre>
+
+  <h3 class="subh">Signature motions</h3>
+  <p class="body"><strong>Glass shell frost-in</strong> · the tab bar and mini bar appear by fading up from below with a brief backdrop-filter growth from <code class="inline-code">blur(0px)</code> to <code class="inline-code">blur(32px)</code>. 400ms.</p>
+  <p class="body"><strong>Yulia state change</strong> · full chat → mini bar uses <code class="inline-code">layoutId</code> on the avatar so it morphs between sizes without a fade. 300ms.</p>
+  <p class="body"><strong>Chat input send</strong> · field content lifts up as a user bubble, the input clears instantly. Yulia's response streams in character by character, not word by word.</p>
+  <p class="body"><strong>Reduced motion</strong> · respect <code class="inline-code">prefers-reduced-motion</code>. Keep opacity fades; kill transforms and blurs.</p>
+</section>
+
+<!-- DO / DON'T -->
+<section id="dos">
+  <div class="head">
+    <div class="num">10</div>
+    <h2>Do / don't</h2>
+    <p>The quickest way to learn the system is by contrast.</p>
+  </div>
+
+  <div class="dd-grid">
+    <div class="dd good">
+      <div class="label">Do</div>
+      <h4>Dark text on white card for the baseline number</h4>
+      <p>The emphasis comes from typography weight (Sora 800) and size (30px+). It reads authoritative without borrowing color.</p>
+    </div>
+    <div class="dd bad">
+      <div class="label">Don't</div>
+      <h4>Color the baseline number for emphasis</h4>
+      <p>Terra, blue, any accent hue on the hero number turns content into chrome. Stop. The number is content; it gets its power from being the largest thing on the screen.</p>
+    </div>
+  </div>
+
+  <div class="dd-grid">
+    <div class="dd good">
+      <div class="label">Do</div>
+      <h4>Solid white cards with hairline borders</h4>
+      <p>Content surfaces need to be readable. Solid white with <code class="inline-code">rgba(0,0,0,0.08)</code> border and inset top highlight. Always.</p>
+    </div>
+    <div class="dd bad">
+      <div class="label">Don't</div>
+      <h4>Apply glass to every surface</h4>
+      <p>Glass everywhere becomes visual mud. Glass is for floating chrome. Content is solid. The contrast between the two creates the depth.</p>
+    </div>
+  </div>
+
+  <div class="dd-grid">
+    <div class="dd good">
+      <div class="label">Do</div>
+      <h4>Plain text logo</h4>
+      <p><code class="inline-code">smbx.ai</code> in Sora 800, inheriting surrounding color. The wordmark is the logo.</p>
+    </div>
+    <div class="dd bad">
+      <div class="label">Don't</div>
+      <h4>Color one letter</h4>
+      <p>No terra X. No accent on the X. No gradient on the word. If the containing surface is light, logo is black; if dark, white. Full stop.</p>
+    </div>
+  </div>
+
+  <div class="dd-grid">
+    <div class="dd good">
+      <div class="label">Do</div>
+      <h4>Status dot + dark text</h4>
+      <p>A 7px colored dot carries the signal. The pill itself is white with a hairline border and dark text. Minimal, financial-terminal restraint.</p>
+    </div>
+    <div class="dd bad">
+      <div class="label">Don't</div>
+      <h4>Full green/red/amber pill backgrounds</h4>
+      <p>Fills introduce color into the chrome. Scale up four status types with full color fills and the UI becomes a traffic light. The dot is enough.</p>
+    </div>
+  </div>
+
+  <div class="dd-grid">
+    <div class="dd good">
+      <div class="label">Do</div>
+      <h4>Specular highlight on glass</h4>
+      <p>The <code class="inline-code">inset 0 0.5px 0 rgba(255,255,255,0.9)</code> makes translucent surfaces read as glass. Non-negotiable.</p>
+    </div>
+    <div class="dd bad">
+      <div class="label">Don't</div>
+      <h4>Skip the inner highlight</h4>
+      <p>Without the inset white line on the top edge, your "glass" is just a tinted overlay. The highlight is what sells it.</p>
+    </div>
+  </div>
+
+  <div class="dd-grid">
+    <div class="dd good">
+      <div class="label">Do</div>
+      <h4>Typography carries hierarchy</h4>
+      <p>Big things are big and bold. Small things are small and muted. Active things are darker. Use <strong>weight and size</strong> to signal importance.</p>
+    </div>
+    <div class="dd bad">
+      <div class="label">Don't</div>
+      <h4>Color things to make them "pop"</h4>
+      <p>If you need something to pop, make it bigger, heavier, or darker. Color is a content concern, not a chrome concern.</p>
+    </div>
+  </div>
+</section>
+
+<div class="foot">
+  Glass Grok v1.0 · smbx.ai · generated with this system
+</div>
+
+</div>
+</body>
+</html>

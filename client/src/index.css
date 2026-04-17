@@ -112,11 +112,14 @@ a.btn:active,
    programmatic focus. The --focus-ring var lets individual components
    override (e.g. contrasting focus on colored backgrounds). */
 :root {
-  --focus-ring: #D44A78;
+  /* Glass Grok canonical focus — monochrome, never tinted.
+     Marketing pages (handled by the external agent) may override to --terra
+     if they need brand-aligned focus. */
+  --focus-ring: #0A0A0B;
   --focus-ring-offset: 2px;
 }
 html.dark {
-  --focus-ring: #E8709A;
+  --focus-ring: #FFFFFF;
 }
 *:focus { outline: none; }
 *:focus-visible {
@@ -153,7 +156,9 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
 .zig-zag-container > div:nth-child(even) { flex-direction: row-reverse; }
 
 :root {
-  /* Stitch V2 palette */
+  /* ═══ Stitch V2 palette (marketing pages / external chat) ═══
+     Do not use these for new internal-app work. Internal app uses the
+     Glass Grok tokens below. These remain for marketing compatibility. */
   --ink: #1a1c1e;
   --terra: #D44A78;
   --terra-hover: #90003b;
@@ -162,7 +167,6 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
   --surface: #f9f9fc;
   --tint: #f9f9fc;
   --white: #FFFFFF;
-  /* Backward-compat for authenticated components */
   --cream: #f3f3f6;
   --fill: #FFFFFF;
   --terra-soft: #ffd9de;
@@ -179,20 +183,96 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
   --sans: 'Inter', system-ui, -apple-system, sans-serif;
   --headline: 'Sora', 'Inter', system-ui, sans-serif;
   --serif: 'Sora', sans-serif;
+
+  /* ═══ Glass Grok tokens — internal app (post-morph) ═══
+     Canonical design system. See memory/architecture_glass_grok.md.
+     Chrome is monochrome; color only enters for content. */
+
+  /* Backgrounds */
+  --bg-app: #F2F2F4;         /* app canvas */
+  --bg-card: #FFFFFF;         /* solid content cards */
+  --bg-subtle: #F5F5F7;       /* chip interior, icon button */
+  --bg-muted: #E8E8EB;        /* deeper fill, dividers */
+  --bg-dark: #0A0A0B;         /* dark-inverted surfaces */
+
+  /* Glass (floating chrome only — never on content cards) */
+  --glass-light: rgba(255,255,255,0.72);    /* tab bar */
+  --glass-med: rgba(255,255,255,0.78);      /* mini bar */
+  --glass-strong: rgba(255,255,255,0.88);   /* nav pills */
+
+  /* Text */
+  --text-primary: #0A0A0B;
+  --text-secondary: #3A3A3E;
+  --text-muted: #6B6B70;
+  --text-faint: #9A9A9F;
+  --text-inv: #FFFFFF;
+
+  /* Borders */
+  --gg-border: rgba(0,0,0,0.08);
+  --gg-border-solid: #E5E5E7;
+  --gg-border-strong: #D1D1D4;
+
+  /* Accent (strictly monochrome) */
+  --accent: #0A0A0B;
+  --accent-fill: rgba(10,10,11,0.06);
+
+  /* Content-level status (the ONLY color in the system) */
+  --dot-ready: #22A755;
+  --dot-progress: #E8A033;
+  --dot-flag: #DC2626;
+  --dot-draft: #9A9A9F;
+
+  /* Score band pairs — content-level tint + dark text */
+  --band-high-bg: #DCFCE7;    --band-high-fg: #166534;
+  --band-med-bg: #FEF3C7;     --band-med-fg: #92400E;
+  --band-low-bg: #F1F1F2;     --band-low-fg: #52525B;
+  --band-flag-bg: #FEE2E2;    --band-flag-fg: #991B1B;
+
+  /* Typography (shared with Stitch names but explicit here) */
+  --display: 'Sora', system-ui, -apple-system, sans-serif;
+  --body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Radius scale */
+  --r-small: 6px;
+  --r-btn: 10px;
+  --r-card-s: 14px;
+  --r-card: 18px;
+  --r-card-lg: 22px;
+  --r-hero: 24px;
+  --r-pill: 999px;
+
+  /* Shadows */
+  --shadow-inset-highlight: inset 0 0.5px 0 rgba(255,255,255,1);
+  --shadow-gg-card: 0 1px 3px rgba(0,0,0,0.03), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-glass: inset 0 0.5px 0 rgba(255,255,255,0.9),
+                  0 6px 24px rgba(0,0,0,0.08),
+                  0 1px 3px rgba(0,0,0,0.05);
+  --shadow-primary-btn: inset 0 0.5px 0 rgba(255,255,255,0.15),
+                        0 1px 3px rgba(0,0,0,0.15);
 }
 
 /* ═══ SITE BACKGROUND ═══
-   Body is always a MEDIUM charcoal (#2A2C2E) — the lighter "table"
-   on which darker near-black cards (sidebar, canvas, chat pill)
-   float with strong contrast. This hierarchy is preserved in both
-   light and dark mode: only the sidebar + canvas + journey cards
-   flip to white when the user toggles light mode. */
+   Marketing / external journey pages: medium charcoal (#2A2C2E) with a
+   subtle noise texture — the "table" on which darker near-black cards
+   (sidebar, canvas) float.
+
+   Internal app (PWA standalone, post-morph): Glass Grok --bg-app (#F2F2F4),
+   solid, no noise. See the @media (display-mode: standalone) override below. */
 html, body {
   width: 100%;
   background-color: #2A2C2E !important;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
   background-repeat: repeat;
+}
+
+/* Glass Grok app canvas — installed PWA overrides the marketing charcoal
+   with the monochrome Grok-inspired light grey (--bg-app). No noise. */
+@media (display-mode: standalone) {
+  html, body {
+    background-color: var(--bg-app) !important;
+    background-image: none !important;
+  }
 }
 /* Default: natural document flow for landing/journey pages */
 #root {
