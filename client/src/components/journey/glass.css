@@ -422,7 +422,8 @@
 .gg-section--dark .gg-body--sub { color: #C5C5CA; }
 
 /* Two-column zigzag — the "text + mockup" hero-section pattern.
-   Left/right determined by the optional --reverse class. */
+   Default is 50/50. Asymmetric variants break monotony across the
+   three hero sections on a journey page — no two ratios in a row. */
 .gg-two-col {
   display: grid;
   grid-template-columns: 1fr;
@@ -430,8 +431,51 @@
   align-items: center;
 }
 @media (min-width: 900px) {
-  .gg-two-col { grid-template-columns: 1fr 1fr; gap: 80px; }
+  .gg-two-col             { grid-template-columns: 1fr 1fr;      gap: 80px; }
+  .gg-two-col--55-45      { grid-template-columns: 55fr 45fr;    gap: 72px; }
+  .gg-two-col--60-40      { grid-template-columns: 60fr 40fr;    gap: 64px; }
+  .gg-two-col--40-60      { grid-template-columns: 40fr 60fr;    gap: 64px; }
+  .gg-two-col--45-55      { grid-template-columns: 45fr 55fr;    gap: 72px; }
+  .gg-two-col--70-30      { grid-template-columns: 70fr 30fr;    gap: 56px; }
   .gg-two-col--reverse > *:first-child { order: 2; }
+}
+
+/* Card escape — lets a mockup card break out of its section's left/right
+   padding and gain a slight rotation. The card feels pinned to the page,
+   not the column. Desktop only — mobile keeps containment. */
+@media (min-width: 900px) {
+  .gg-card--escape-right { margin-right: -48px; transform: rotate(1deg); }
+  .gg-card--escape-left  { margin-left:  -48px; transform: rotate(-1deg); }
+  .gg-card--escape-wide  { margin-left:  -24px; margin-right: -24px; }
+  .gg-card--escape-right:hover,
+  .gg-card--escape-left:hover,
+  .gg-card--escape-wide:hover { transform: rotate(0) translateY(-2px); }
+}
+
+/* Big-stat block — a mid-copy inline stat that dominates its paragraph.
+   Used sparingly: one per journey page, at the moment the number IS the
+   story (e.g. "$1.1M average hidden value", "87 / Pursue", "$6.5M delta").
+   Sits in body flow, breaks the rhythm with scale. */
+.gg-bigstat {
+  display: block;
+  font-family: var(--gg-display);
+  font-weight: 800;
+  font-size: clamp(56px, 8vw, 112px);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--gg-text-primary);
+  font-variant-numeric: tabular-nums;
+  margin: clamp(24px, 3vw, 40px) 0 clamp(12px, 1.6vw, 20px);
+}
+.gg-bigstat + .gg-bigstat__cap {
+  display: block;
+  font-family: var(--gg-display);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gg-text-muted);
+  margin-bottom: clamp(16px, 2vw, 24px);
 }
 
 /* Grid background — 64px squares with radial mask fade. Desktop only.

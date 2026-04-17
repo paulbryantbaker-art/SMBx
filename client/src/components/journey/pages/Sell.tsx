@@ -111,32 +111,35 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
         </div>
       </Section>
 
-      {/* ═════ Hero 1 · Add-backs — text left, mockup right ═════ */}
+      {/* ═════ Hero 1 · Add-backs — 55/45 text-first, mockup escapes right ═════ */}
       <Section label="Hero 1 · Add-backs">
-        <div className="gg-two-col" style={{ alignItems: 'center' }}>
+        <div className="gg-two-col gg-two-col--55-45" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">The money hiding in your tax returns.</H2>
             <Body lead>Reported EBITDA and real EBITDA are almost never the same number.</Body>
             <Body>Your accountant’s job is to minimize your taxes. A buyer’s job is to maximize the price they’ll justify to their lender or investment committee. Somewhere between those two numbers is the truth — and the gap is almost always larger than you think.</Body>
-            <Body>Average hidden value across hundreds of analyses: <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>$1.1M</strong>. At a 5–6&times; multiple, that’s <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>$5.5M–$6.6M</strong> in enterprise value sitting in the financials.</Body>
-            <Body>A formal Quality of Earnings analysis costs $25K–$75K and takes 3–6 weeks. Yulia’s pre-LOI analysis takes 20 minutes.</Body>
+            <span className="gg-bigstat">$1.1M</span>
+            <span className="gg-bigstat__cap">Average hidden value · per analysis</span>
+            <Body>At a 5–6&times; multiple, that’s <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>$5.5M–$6.6M</strong> in enterprise value sitting in the financials. A formal QofE costs $25K–$75K and takes 3–6 weeks. Yulia’s pre-LOI analysis takes 20 minutes.</Body>
           </div>
           <div>
-            <AddBackSchedule
-              label="Your analysis · live"
-              heading="What the QofE will find"
-              lines={QOFE_LINES}
-              totalLabel="Total add-backs · pre-QofE"
-              totalNote="At 5.5× · $693K in enterprise value"
-              totalAmount="+$126K"
-            />
+            <div className="gg-card--escape-right">
+              <AddBackSchedule
+                label="Your analysis · live"
+                heading="What the QofE will find"
+                lines={QOFE_LINES}
+                totalLabel="Total add-backs · pre-QofE"
+                totalNote="At 5.5× · $693K in enterprise value"
+                totalAmount="+$126K"
+              />
+            </div>
           </div>
         </div>
       </Section>
 
-      {/* ═════ Hero 2 · CIM — mockup left, text right (reversed) ═════ */}
+      {/* ═════ Hero 2 · CIM — 40/60 mockup dominant, reversed ═════ */}
       <Section variant="tint" label="Hero 2 · CIM">
-        <div className="gg-two-col gg-two-col--reverse" style={{ alignItems: 'center' }}>
+        <div className="gg-two-col gg-two-col--40-60 gg-two-col--reverse" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Your business deserves better than a data dump.</H2>
             <Body>A Confidential Information Memorandum is the single most important document in a sell-side process. It’s what qualified buyers read to decide whether your business is worth their time.</Body>
@@ -150,9 +153,9 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
         </div>
       </Section>
 
-      {/* ═════ Hero 3 · Competitive process — text left, mockup right ═════ */}
+      {/* ═════ Hero 3 · Competitive process — 60/40 text dominant ═════ */}
       <Section label="Hero 3 · Competitive process">
-        <div className="gg-two-col" style={{ alignItems: 'center' }}>
+        <div className="gg-two-col gg-two-col--60-40" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">
               <span style={{ display: 'block' }}>One buyer gives you a price.</span>

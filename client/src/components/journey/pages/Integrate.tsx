@@ -86,9 +86,9 @@ export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
         ]} />
       </Section>
 
-      {/* Hero 1 PMI plan — text left, DD-to-workplan viz right */}
+      {/* Hero 1 PMI plan — 45/55 workplan gets width */}
       <Section variant="tint" label="Hero 1 · The PMI plan">
-        <div className="gg-two-col" style={{ alignItems: 'center' }}>
+        <div className="gg-two-col gg-two-col--45-55" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Your integration plan, generated from your deal data.</H2>
             <Body>Most integration plans are generic templates. Acquisition guides from a consulting firm. The &ldquo;first 100 days playbook&rdquo; that assumes every acquisition is the same acquisition.</Body>
@@ -102,9 +102,9 @@ export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
         </div>
       </Section>
 
-      {/* Hero 2 Key employees — tiles left, text right (reversed) */}
+      {/* Hero 2 Key employees — 40/60 tiles left, text right reversed */}
       <Section label="Hero 2 · Key employee retention">
-        <div className="gg-two-col gg-two-col--reverse" style={{ alignItems: 'center' }}>
+        <div className="gg-two-col gg-two-col--40-60 gg-two-col--reverse" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">The four people who can’t leave in the first 90 days.</H2>
             <Body>Every business has them. The operations manager who holds the processes in her head. The salesperson with the top-five customer relationships. The tech lead who wrote half the systems. The finance person who reconciles accounts nobody else understands.</Body>
@@ -118,9 +118,9 @@ export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
         </div>
       </Section>
 
-      {/* Hero 3 Value creation — text left, KPI variance chart right */}
+      {/* Hero 3 Value creation — 55/45 text, KPI chart tight */}
       <Section variant="tint" label="Hero 3 · Value creation tracking">
-        <div className="gg-two-col" style={{ alignItems: 'center' }}>
+        <div className="gg-two-col gg-two-col--55-45" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">You paid for a thesis. Is it working?</H2>
             <Body>Every acquisition has a thesis. Operational improvements worth $500K. Customer diversification that reduces risk. Geographic expansion into two adjacent markets. Margin improvement from pricing discipline.</Body>

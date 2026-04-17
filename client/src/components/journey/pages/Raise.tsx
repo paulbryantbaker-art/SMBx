@@ -127,9 +127,9 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
         <SellVsRaise onSend={onSend} />
       </Section>
 
-      {/* Hero 1 — Structure modeling. Text left, structure fan right */}
+      {/* Hero 1 Structure modeling — 55/45 text, fan escapes right */}
       <Section label="Hero 1 · Structure modeling">
-        <div className="gg-two-col" style={{ alignItems: 'center' }}>
+        <div className="gg-two-col gg-two-col--55-45" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Every capital structure, modeled in ten minutes.</H2>
             <Body>Your advisor showed you one option. Yulia shows you six &mdash; with the math on each.</Body>
@@ -143,9 +143,9 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
         </div>
       </Section>
 
-      {/* Hero 2 — Pitch deck + data room. Mockup left, text right */}
+      {/* Hero 2 Pitch deck — 40/60 mockup dominant, reversed */}
       <Section variant="tint" label="Hero 2 · Pitch deck + data room">
-        <div className="gg-two-col gg-two-col--reverse" style={{ alignItems: 'center' }}>
+        <div className="gg-two-col gg-two-col--40-60 gg-two-col--reverse" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Investor-ready materials in hours, not weeks.</H2>
             <Body>Capital raises live or die on the materials. The pitch deck is the first impression. The data room is where deals close. Both need to be right.</Body>
@@ -159,9 +159,9 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
         </div>
       </Section>
 
-      {/* Hero 3 — Investor targeting. Text left, investor map right */}
+      {/* Hero 3 Investor targeting — 55/45 text */}
       <Section label="Hero 3 · Investor targeting">
-        <div className="gg-two-col" style={{ alignItems: 'center' }}>
+        <div className="gg-two-col gg-two-col--55-45" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Not every investor fits every deal.</H2>
             <Body>A growth equity firm looking for 40% YoY revenue growth is the wrong investor for a steady 12% grower. A PE firm that only buys majority stakes is wrong for a minority raise. A mezz lender is wrong for a company that can’t service 14% coupon debt.</Body>

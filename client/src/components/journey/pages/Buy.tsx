@@ -84,9 +84,9 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
         </div>
       </Section>
 
-      {/* Hero 1 Rundown — text left, score ring card right */}
+      {/* Hero 1 Rundown — 60/40 text, ScoreRing card tight */}
       <Section label="Hero 1 · The Rundown">
-        <div className="gg-two-col" style={{ alignItems: 'center' }}>
+        <div className="gg-two-col gg-two-col--60-40" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Seven dimensions. Sixty seconds. Pursue or pass.</H2>
             <Body lead>Concentration. Margins. Revenue quality. Owner dependency. Management depth. Financial integrity. Scalability.</Body>
@@ -106,9 +106,9 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
         </div>
       </Section>
 
-      {/* Hero 2 SBA — capital stack left, text right (reversed) */}
+      {/* Hero 2 SBA — 45/55 reversed, capital stack left */}
       <Section variant="tint" label="Hero 2 · SBA SOP 50 10 8">
-        <div className="gg-two-col gg-two-col--reverse" style={{ alignItems: 'center' }}>
+        <div className="gg-two-col gg-two-col--45-55 gg-two-col--reverse" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Your rollover just died. Yulia rebuilds it.</H2>
             <Body>SBA SOP 50 10 8 took effect June 1, 2025. It’s the most disruptive regulatory change in two decades for SMB and lower middle market deals. Forty-one percent of brokers report deal delays. Rollover equity is effectively dead.</Body>
@@ -128,9 +128,9 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
         </div>
       </Section>
 
-      {/* Hero 3 Stress test — text left, DSCR grid right */}
+      {/* Hero 3 Stress test — 45/55, grid gets more room */}
       <Section label="Hero 3 · Stress test">
-        <div className="gg-two-col" style={{ alignItems: 'center' }}>
+        <div className="gg-two-col gg-two-col--45-55" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Know exactly where the deal breaks before you guarantee it.</H2>
             <Body>The personal guarantee is real. The unlimited liability is real. The unwind scenario is real. Most buyers sign anyway because they’ve modeled the base case on a napkin.</Body>
