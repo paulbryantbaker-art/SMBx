@@ -114,11 +114,11 @@ const TIERS: Tier[] = [
     key: 'enterprise',
     name: 'Enterprise',
     monthly: 2500,
-    priceSuffix: '/mo \u00b7 6+ seats',
+    priceSuffix: '/mo \u00b7 10 seats',
     eyebrow: 'Firms & funds',
     inherits: 'team',
     deltaFeatures: [
-      '6+ seats',
+      '10 seats',
       'SSO (Okta, Google, Azure)',
       'Single-tenant option',
       'SOC 2 Type II audit trails',

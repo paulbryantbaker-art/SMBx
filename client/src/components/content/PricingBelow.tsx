@@ -104,11 +104,11 @@ const TIERS: Tier[] = [
     key: 'enterprise',
     name: 'Enterprise',
     monthly: 2500,
-    priceSuffix: '/mo \u00b7 6+ seats',
+    priceSuffix: '/mo \u00b7 10 seats',
     eyebrow: 'Firms & funds',
     inherits: 'team',
     deltaFeatures: [
-      '6+ seats',
+      '10 seats',
       'SSO (Okta, Google, Azure AD)',
       'Single-tenant deployment option',
       'SOC 2 Type II audit trails',
@@ -123,7 +123,7 @@ const MATRIX: MatrixRow[] = [
   // ─── Usage — the only real differentiator between Free / Solo / Pro ───
   { feature: 'Deliverables',         values: { free: '1 total', solo: 'Unlimited', pro: 'Unlimited', team: 'Unlimited', enterprise: 'Unlimited' } },
   { feature: 'Active deals',         values: { free: '1', solo: '1', pro: 'Unlimited', team: 'Unlimited', enterprise: 'Unlimited' } },
-  { feature: 'Seats',                values: { free: '1', solo: '1', pro: '1', team: '5', enterprise: '6+' } },
+  { feature: 'Seats',                values: { free: '1', solo: '1', pro: '1', team: '5', enterprise: '10' } },
   // ─── Hero capabilities — all ✓ on every paid tier, no gating ever ───
   { feature: 'Add-back / QoE Lite analysis',    values: { free: true, solo: true, pro: true, team: true, enterprise: true } },
   { feature: 'Regulatory & structure modeling', values: { free: true, solo: true, pro: true, team: true, enterprise: true } },
@@ -152,7 +152,7 @@ const MATRIX: MatrixRow[] = [
 const FAQS: { q: string; a: string }[] = [
   {
     q: 'How much does smbx.ai cost?',
-    a: 'Five tiers: Free, $79/mo Solo, $199/mo Pro, $499/mo Team (5 seats), $2,500/mo Enterprise (6+ seats). Every price published. No success fees, no take-rate, ever.',
+    a: 'Five tiers: Free, $79/mo Solo, $199/mo Pro, $499/mo Team (5 seats), $2,500/mo Enterprise (10 seats). Every price published. No success fees, no take-rate, ever.',
   },
   {
     q: 'What does the Free tier actually include?',
@@ -171,8 +171,8 @@ const FAQS: { q: string; a: string }[] = [
     a: "Pro is for one practitioner working alone \u2014 an independent sponsor, a solo banker, a searcher. Team is for a 2\u20135 person firm where Yulia becomes the shared team resource. The difference isn't features; it's seats, team workspace, and shared deal vault.",
   },
   {
-    q: 'What if I need 6 seats?',
-    a: "That's Enterprise \u2014 $2,500/mo flat, covers 6+ seats, SSO (Okta/Google/Azure), single-tenant deployment option, SOC 2 Type II audit trails, named account manager, 99.9% SLA, and API access.",
+    q: 'What if I need more than 5 seats?',
+    a: "That's Enterprise \u2014 $2,500/mo flat, covers 10 seats, SSO (Okta/Google/Azure), single-tenant deployment option, SOC 2 Type II audit trails, named account manager, 99.9% SLA, and API access.",
   },
   {
     q: 'Can I try Pro or Team for free?',
