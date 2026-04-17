@@ -64,21 +64,21 @@ export default function MobileAdvisorsStory({ dark }: Props) {
       eyebrow="Advisors"
       headline={
         <>
-          Triple your book.<br />
-          <em className="not-italic" style={{ color: accent }}>Same four partners.</em>
+          <span className="block">Win the pitch.</span>
+          <span className="block">Win the deal.</span>
+          <em className="not-italic block" style={{ color: accent }}>Get paid.</em>
         </>
       }
       sub={
         <>
-          Reese & Hammond went from <strong style={{ color: headingColor }}>$4.8M</strong> to{' '}
-          <strong style={{ color: accent }}>$16.5M</strong> in 12 months. 8 mandates → 22. Same four partners.
-          No new hires. The bottleneck wasn't relationships — it was production.
+          You are a team of one. <strong style={{ color: headingColor }}>Yulia is a team of three.</strong>{' '}
+          First-meeting Baseline. CIM by Friday. Buyer list built in an afternoon.
         </>
       }
       callout={
         <>
-          <strong style={{ color: accent }}>3.4× revenue · 12 months.</strong>{' '}
-          Close rate 50% → 60% · margin 60% → 78%.
+          <strong style={{ color: accent }}>Reese & Hammond:</strong>{' '}
+          $4.8M → $16.5M · 8 mandates → 22 · same 4 partners.
         </>
       }
 
@@ -90,15 +90,13 @@ export default function MobileAdvisorsStory({ dark }: Props) {
         role: 'Boutique sell-side M&A · 4 partners',
         body: (
           <>
-            Each CIM took 60-80 partner hours. Each buyer research cycle took 40. Eight active mandates was the
-            ceiling. Yulia changed two things: the Baseline lands in the first prospect meeting (conversion{' '}
-            <strong style={{ color: accent }}>35% → 62%</strong>), and the CIM cycle compressed to{' '}
-            <strong style={{ color: accent }}>4 hours of partner review</strong> from 60-80 partner hours.
-            Then synergy theses went into every CIM — buyers signed at higher multiples (close multiple{' '}
+            Four partners. No junior bench. $4.8M revenue with a ceiling neither relationships nor weekend work would break. Yulia fixed the first meeting first — the Baseline built live while the prospect watched, conversion ran{' '}
+            <strong style={{ color: accent }}>35% → 62%</strong> inside a quarter. The CIM cycle compressed to{' '}
+            <strong style={{ color: accent }}>4 partner hours</strong> from 60-80. The synergy thesis landed on page 1 of every CIM, and buyers started underwriting the lift (close multiple{' '}
             <strong style={{ color: accent }}>+0.4×</strong>).
           </>
         ),
-        outcome: '8 mandates → 22 · $4.8M → $16.5M · same 4 partners',
+        outcome: '8 → 22 mandates · $4.8M → $16.5M · same 4 partners',
       }}
 
       kpis={[

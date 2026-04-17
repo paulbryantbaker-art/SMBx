@@ -165,14 +165,14 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           eyebrow="advisors"
           headline={
             <>
-              Win the pitch. <br />
-              Win the deal. <em className="not-italic" style={{ color: accent }}>Get paid.</em>
+              <span className="block">Win the pitch.</span>
+              <span className="block">Win the deal.</span>
+              <em className="not-italic block" style={{ color: accent }}>Get paid.</em>
             </>
           }
           sub={
             <>
-              Show the Baseline at the first meeting. Kill bad deals before LOI. Make the killer CIM. Find the synergy
-              the buyer hadn't priced in. <strong>Triple your book without adding partners.</strong>
+              You are a team of one. <strong>Yulia is a team of three.</strong> First-meeting Baseline, CIM by Friday, buyer list built in an afternoon.
             </>
           }
           dark={dark}
@@ -212,37 +212,25 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
           body={
             <>
               <p>
-                Reese & Hammond ran a 4-partner sell-side practice. Average mandate: <strong style={{ color: headingColor }}>$80-300M EV.</strong>{' '}
-                Average fee: <strong style={{ color: headingColor }}>$1.2M.</strong> The partners were good at relationships, good at
-                negotiation, and bottlenecked everywhere else.
+                Four partners. No junior bench. <strong style={{ color: headingColor }}>$4.8M</strong> in annual revenue, and a ceiling that neither relationships nor weekend work would break. Reese & Hammond&rsquo;s problem was never demand. It was production hours.
               </p>
               <p className="mt-4">
-                The bottleneck wasn't relationships. It was production. Each CIM took 60-80 partner hours. Each buyer
-                research cycle took 40 hours. They could carry 8 active mandates, max. At a 50% close rate and a $1.2M
-                average fee, that's <strong style={{ color: headingColor }}>$4.8M of annual revenue</strong> with a 60% margin
-                — analysts and overhead ate the rest.
+                Every CIM: 60-80 partner hours. Every buyer cycle: 40. Eight active mandates was the ceiling. At a 50% close rate and a <strong style={{ color: headingColor }}>$1.2M</strong> average fee, the number held — but only because the partners stopped going to their kids&rsquo; soccer games.
               </p>
               <p className="mt-4">
-                Then the math changed at the front of the funnel. Yulia builds the Baseline live during the first
-                prospect meeting. The conversion from prospect to engagement went from <strong style={{ color: accent }}>35% to 62%</strong> —
-                because prospects could feel the work was already real.
+                Yulia fixed the first meeting first. The Baseline — comp set, add-back schedule, defensible multiple range — built live while the prospect watched. No &ldquo;we&rsquo;ll come back to you in two weeks.&rdquo; Engagement conversion ran <strong style={{ color: accent }}>35% → 62%</strong> inside a quarter. Not because the pitch got better. Because the work was already done.
               </p>
               <p className="mt-4">
-                Then the CIM cycle compressed. <strong style={{ color: accent }}>4 hours of partner review</strong> instead
-                of 60-80 hours of partner work. Yulia drafted from verified financials, the partner reviewed and refined.
-                Same quality, 15× the throughput.
+                The CIM cycle compressed next. Yulia drafted from verified financials; the partner reviewed and refined. What used to take 60-80 hours of their own time shipped in <strong style={{ color: accent }}>4 hours</strong>. Same quality. Fifteen times the cycle.
               </p>
               <p className="mt-4">
-                Then the synergy thesis went into every CIM. Buyers were underwriting cost takeout, cross-sell, and WC
-                release before they signed the LOI — and signing at higher multiples. Average close multiple lifted
-                <strong style={{ color: accent }}> +0.4×</strong> across the portfolio.
+                Then the synergy thesis landed on page 1 of every CIM — cost takeout, cross-sell, working-capital release, priced before the LOI hit the table. Buyers underwrote the lift instead of negotiating it out. Close multiple: <strong style={{ color: accent }}>+0.4×</strong> across the portfolio.
               </p>
               <p className="mt-4">
-                Twelve months later: <strong style={{ color: accent }}>22 active mandates, 60% close rate, $1.25M average fee, 78% margin.</strong>
-                {' '}<strong style={{ color: accent }}>$16.5M revenue. 3.4× the prior year.</strong> Same four partners.
+                Year two looked different. <strong style={{ color: accent }}>22 active mandates. 60% close rate. $16.5M revenue.</strong> Same four partners. No new hires. No lost weekends.
               </p>
               <p className="mt-4 text-base italic" style={{ color: mutedColor }}>
-                The scarce resource was always partner time. Yulia gives it back.
+                The bottleneck was never relationships. It was production hours. Yulia gave them back.
               </p>
             </>
           }

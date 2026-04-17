@@ -73,8 +73,8 @@ export default function MobileHowStory({ dark }: Props) {
       eyebrow="How it works"
       headline={
         <>
-          Watch Yulia run<br />
-          a <em className="not-italic" style={{ color: accent }}>real deal.</em>
+          <span className="block">Watch Yulia run</span>
+          <span className="block">a <em className="not-italic" style={{ color: accent }}>real deal.</em></span>
         </>
       }
       sub={

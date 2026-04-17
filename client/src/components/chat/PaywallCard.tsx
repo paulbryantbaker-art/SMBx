@@ -21,9 +21,17 @@ interface PaywallCardProps {
 }
 
 const PLAN_DISPLAY: Record<string, { name: string; price: string; note: string }> = {
-  starter: { name: 'Starter', price: '$49/month', note: 'Unlimited analysis and document exports' },
-  professional: { name: 'Professional', price: '$149/month', note: 'CIM, deal room, matching, and more' },
-  enterprise: { name: 'Enterprise', price: '$999/month', note: 'Teams, API, white-label, portfolio' },
+  // Solo — for self-funded searchers, principal sellers/buyers, sole-operator brokers
+  solo:       { name: 'Solo',       price: '$79/month',    note: 'One active deal, unlimited deliverables' },
+  // Pro — for IS, search funders, LMM advisors, solo bankers (most-chosen tier)
+  pro:        { name: 'Pro',        price: '$199/month',   note: 'Unlimited parallel deals, every capability' },
+  // Team — boutique firms, small corp dev, small FO direct-investing
+  team:       { name: 'Team',       price: '$499/month',   note: '5 seats, shared workspace, shared deal vault' },
+  // Enterprise — corp dev at serial acquirers, mid-market PE, MFOs, large advisory
+  enterprise: { name: 'Enterprise', price: '$2,500/month', note: 'SSO, single-tenant, SOC 2, 99.9% SLA, API' },
+  // Legacy plan keys mapped forward so existing paywall payloads still render
+  starter:      { name: 'Solo',       price: '$79/month',  note: 'One active deal, unlimited deliverables' },
+  professional: { name: 'Pro',        price: '$199/month', note: 'Unlimited parallel deals, every capability' },
 };
 
 export default function PaywallCard({ paywall, dealId, onUnlocked }: PaywallCardProps) {

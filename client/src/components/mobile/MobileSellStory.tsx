@@ -69,15 +69,15 @@ export default function MobileSellStory({ dark }: Props) {
       eyebrow="Sell"
       headline={
         <>
-          Walk in with the <em className="not-italic" style={{ color: accent }}>number.</em><br />
-          Win the mandate.
+          <span className="block">Walk in with the <em className="not-italic" style={{ color: accent }}>number.</em></span>
+          <span className="block">Own the negotiation.</span>
         </>
       }
       sub={
         <>
-          Sarah's seller thought <strong style={{ color: headingColor }}>$90M</strong>. Sarah walked in with a defensible{' '}
-          <strong style={{ color: accent }}>$155M</strong> Baseline in 90 seconds. She won the mandate over two other brokers
-          who said "we'll come back to you in two weeks."
+          Sarah walked in with a <strong style={{ color: accent }}>$155M</strong> Baseline when her seller thought{' '}
+          <strong style={{ color: headingColor }}>$90M</strong>. Closed at <strong style={{ color: headingColor }}>$154.8M</strong>.
+          The side with the number wins — broker or owner.
         </>
       }
       callout={

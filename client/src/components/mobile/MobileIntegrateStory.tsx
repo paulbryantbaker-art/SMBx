@@ -62,8 +62,8 @@ export default function MobileIntegrateStory({ dark }: Props) {
       eyebrow="Integrate"
       headline={
         <>
-          The deal closed.<br />
-          Now make it <em className="not-italic" style={{ color: accent }}>pay.</em>
+          <span className="block">The deal closed.</span>
+          <span className="block">Now make it <em className="not-italic" style={{ color: accent }}>pay.</em></span>
         </>
       }
       sub={

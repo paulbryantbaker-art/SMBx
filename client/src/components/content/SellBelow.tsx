@@ -75,14 +75,13 @@ export default function SellBelow({ dark }: { dark: boolean }) {
           eyebrow="sell"
           headline={
             <>
-              Walk in with the <em className="not-italic" style={{ color: accent }}>number.</em><br />
-              Own the negotiation.
+              <span className="block">Walk in with the <em className="not-italic" style={{ color: accent }}>number.</em></span>
+              <span className="block">Own the negotiation.</span>
             </>
           }
           sub={
             <>
-              Sarah's seller thought <strong style={{ color: headingColor }}>$90M</strong>. She walked into the first meeting with a defensible{' '}
-              <strong style={{ color: accent }}>$155M</strong>{' '}
+              Sarah walked in with a <strong style={{ color: accent }}>$155M</strong>{' '}
               <JargonTerm
                 term="Baseline"
                 definition="The defensible value range — industry comp multiple × real EBITDA, adjusted for customer concentration, growth, owner dependency, and recurring revenue. The same math an investment bank runs."
@@ -90,8 +89,7 @@ export default function SellBelow({ dark }: { dark: boolean }) {
               >
                 Baseline
               </JargonTerm>{' '}
-              in 90 seconds — the same math the buyer's IB was going to run anyway.
-              Closed at $154.8M. Whether you're a broker winning the mandate or an owner sitting across from a buyer, the side with the number wins.
+              when her seller thought <strong style={{ color: headingColor }}>$90M</strong>. Closed at <strong style={{ color: headingColor }}>$154.8M</strong>. The side with the number wins — whether you&rsquo;re a broker winning the mandate or an owner taking the first call.
             </>
           }
           dark={dark}
@@ -102,9 +100,9 @@ export default function SellBelow({ dark }: { dark: boolean }) {
           className="text-[14px] md:text-[15px] leading-relaxed mb-16 max-w-3xl"
           style={{ color: mutedColor }}
         >
-          Built for brokers, M&amp;A advisors, search funders, and family-office deal teams running sell-side mandates — and for business owners
-          preparing for their first buyer conversation. Most owners discover their business is worth 20–50% more than their CPA's rule of thumb.
-          Most brokers win the mandate they would have lost walking in empty-handed. <strong style={{ color: accent }}>The attorneys, CPAs, and appraisers on your deal run free — they're on your deal, not their own book.</strong>
+          Built for brokers and M&amp;A advisors winning sell-side mandates — and for business owners preparing for their first buyer conversation.
+          Most owners discover their business is worth 20–50% more than their CPA&rsquo;s rule of thumb.
+          Most brokers win the mandate they would have lost walking in empty-handed. <strong style={{ color: accent }}>The attorneys, CPAs, and appraisers on your deal run free — they&rsquo;re on your deal, not their own book.</strong>
         </p>
 
         {/* ═══ Multiple Map — cinematic anchor (full-bleed immersive band) ═══ */}

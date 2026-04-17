@@ -75,8 +75,8 @@ export default function RaiseBelow({ dark }: { dark: boolean }) {
           eyebrow="raise"
           headline={
             <>
-              Get the capital. <br />
-              <em className="not-italic" style={{ color: accent }}>Keep</em> the company.
+              <span className="block">Get the capital.</span>
+              <span className="block"><em className="not-italic" style={{ color: accent }}>Keep</em> the upside.</span>
             </>
           }
           sub={

@@ -64,8 +64,8 @@ export default function MobileRaiseStory({ dark }: Props) {
       eyebrow="Raise"
       headline={
         <>
-          Build the stack.<br />
-          Close the <em className="not-italic" style={{ color: accent }}>deal.</em>
+          <span className="block">Get the capital.</span>
+          <span className="block"><em className="not-italic" style={{ color: accent }}>Keep</em> the upside.</span>
         </>
       }
       sub={

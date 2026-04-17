@@ -44,8 +44,9 @@ export default function Terms() {
           <div>
             <h2 className="font-sans text-xl font-bold text-[#0D0D0D] mb-3 m-0">Payments</h2>
             <p className="m-0">
-              smbx.ai uses a monthly subscription model. Plans start at $49/month and can be
-              canceled anytime. Your subscription covers all features included in your plan tier.
+              smbx.ai uses a monthly subscription model. Plans start at $79/month and can be
+              canceled anytime. Your subscription covers every capability Yulia offers \u2014
+              tiers differ on deal volume, seats, and enterprise infrastructure, not on features.
               No per-deal fees, no success fees, no hidden charges.
             </p>
           </div>

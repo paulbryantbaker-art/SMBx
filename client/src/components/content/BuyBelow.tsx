@@ -80,8 +80,8 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
           }
           sub={
             <>
-              $1B in dry powder doesn't matter if you can't find the one that pays. The Rundown™ scores any deal in 8 seconds —
-              from a $1M SBA listing to a $500M sponsor target. The 99 you kill take seconds. The one that survives is yours to close.
+              The deal that pays is hiding in 99 that don&rsquo;t. The Rundown&trade; scores any deal in 8 seconds —
+              from a $1M SBA listing to a $500M sponsor target. Kill the 99. Close the one.
             </>
           }
           dark={dark}
@@ -193,7 +193,7 @@ export default function BuyBelow({ dark }: { dark: boolean }) {
                 <strong style={{ color: accent }}>$3.2B of deal flow per principal per year.</strong> Same fund, same thesis, eight times the throughput.
               </p>
               <p className="mt-4 text-base italic" style={{ color: mutedColor }}>
-                The unlock isn't "buy faster." It's "kill faster, so you can find the one that pays."
+                The point isn&rsquo;t &ldquo;buy faster.&rdquo; It&rsquo;s &ldquo;kill faster, so you can find the one that pays.&rdquo;
               </p>
             </>
           }

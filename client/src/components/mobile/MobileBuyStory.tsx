@@ -67,13 +67,13 @@ export default function MobileBuyStory({ dark }: Props) {
       eyebrow="Buy"
       headline={
         <>
-          Kill <em className="not-italic" style={{ color: accent }}>100</em><br />
-          bad deals before lunch.
+          <span className="block">Kill <em className="not-italic" style={{ color: accent }}>100</em></span>
+          <span className="block">bad deals before lunch.</span>
         </>
       }
       sub={
         <>
-          $1B in dry powder doesn't matter if you can't find the one that pays. Priya ran <strong style={{ color: headingColor }}>12 CIMs a week</strong>.
+          The deal that pays is hiding in 99 that don&rsquo;t. Priya ran <strong style={{ color: headingColor }}>12 CIMs a week</strong>.
           With Yulia she runs <strong style={{ color: accent }}>300</strong>. Same principal, same fund, no headcount.
         </>
       }

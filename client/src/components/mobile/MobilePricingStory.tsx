@@ -1,9 +1,9 @@
 /**
  * MobilePricingStory — mobile-native rendering of /pricing.
  *
- * Vertical 6-tier ladder with inheritance ("Everything in X, plus..."),
- * annual/monthly toggle, compact 3-stop cost comparison, FAQ accordion,
- * and service-pros callout demoted to a one-line policy strip.
+ * Vertical 5-tier ladder with inheritance ("Everything in X, plus..."),
+ * compact 3-stop cost comparison, FAQ accordion, and service-pros callout
+ * demoted to a one-line policy strip. Annual billing deferred to month 3–6.
  */
 
 import { useState } from 'react';
@@ -40,13 +40,12 @@ function Check({ color, size = 13 }: { color: string; size?: number }) {
   );
 }
 
-type TierKey = 'free' | 'single' | 'multi' | 'team' | 'firm' | 'inst';
+type TierKey = 'free' | 'solo' | 'pro' | 'team' | 'enterprise';
 
 type Tier = {
   key: TierKey;
   name: string;
   monthly: number;
-  annual: number;
   priceSuffix: string;
   eyebrow?: string;
   inherits?: TierKey;
@@ -59,95 +58,71 @@ const TIERS: Tier[] = [
     key: 'free',
     name: 'Free',
     monthly: 0,
-    annual: 0,
     priceSuffix: 'forever',
-    eyebrow: 'Start here',
+    eyebrow: 'Meet Yulia',
     deltaFeatures: [
       'Unlimited Yulia conversation',
-      'One full deliverable, yours to keep',
-      'Real Baseline range, 7-factor readiness',
+      'One full deliverable \u2014 ever',
+      'Every hero capability',
+      'Email required \u00b7 no card',
     ],
   },
   {
-    key: 'single',
-    name: 'Single deal',
-    monthly: 49,
-    annual: 490,
+    key: 'solo',
+    name: 'Solo',
+    monthly: 79,
     priceSuffix: '/mo',
-    eyebrow: 'Your first close',
+    eyebrow: 'Solo operators',
     inherits: 'free',
     deltaFeatures: [
       'One active deal',
-      'SDE & EBITDA normalization',
-      'Deal scoring + SBA eligibility',
-      'Sector comps + benchmarks',
-      'PDF exports with your name',
+      'Unlimited deliverables',
+      'Post-close / PMI workflows',
+      '14-day free trial',
     ],
   },
   {
-    key: 'multi',
-    name: 'Multi-deal',
+    key: 'pro',
+    name: 'Pro',
     monthly: 199,
-    annual: 1990,
     priceSuffix: '/mo',
     eyebrow: 'Most chosen',
     hero: true,
-    inherits: 'single',
+    inherits: 'solo',
     deltaFeatures: [
-      'Unlimited active deals',
-      'CIM generation',
-      'Blind Equity™ add-backs',
-      '180-day post-close plans',
-      'All 10 financial models',
-      'Full deal room',
+      'Unlimited active deals, in parallel',
+      'Full deal pipeline & CRM',
+      'Every add-back, memo, CIM',
+      'No hero capability gated \u2014 ever',
     ],
   },
   {
     key: 'team',
     name: 'Team',
-    monthly: 399,
-    annual: 3990,
-    priceSuffix: '/mo · 5 seats',
-    eyebrow: 'Small teams & indie sponsors',
-    inherits: 'multi',
+    monthly: 499,
+    priceSuffix: '/mo \u00b7 5 seats',
+    eyebrow: 'Small teams',
+    inherits: 'pro',
     deltaFeatures: [
-      '5 seats included',
-      'Portfolio view',
-      'White-label outputs',
-      'Up to 10 active deals',
-      'Priority email support',
+      'Up to 5 seats, under Pro per-seat',
+      'Shared team workspace',
+      'Shared deal vault',
+      'Collaborate on every doc',
     ],
   },
   {
-    key: 'firm',
-    name: 'Firm',
-    monthly: 1999,
-    annual: 19990,
-    priceSuffix: '/mo · unlimited seats',
-    eyebrow: 'Advisory firms & small PE',
+    key: 'enterprise',
+    name: 'Enterprise',
+    monthly: 2500,
+    priceSuffix: '/mo \u00b7 6+ seats',
+    eyebrow: 'Firms & funds',
     inherits: 'team',
     deltaFeatures: [
-      'Unlimited seats + deals',
-      'SSO (SAML)',
-      'Dedicated onboarding',
-      'SOC 2 + contract terms',
-      'Quarterly business review',
-    ],
-  },
-  {
-    key: 'inst',
-    name: 'Institutional',
-    monthly: 6999,
-    annual: 69990,
-    priceSuffix: '/mo',
-    eyebrow: '$1B+ funds · bulge bracket',
-    inherits: 'firm',
-    deltaFeatures: [
-      'Advanced RBAC',
-      'Full API + webhooks',
-      'Dedicated CSM',
-      'Custom SLA',
-      'White-glove onboarding',
+      '6+ seats',
+      'SSO (Okta, Google, Azure)',
+      'Single-tenant option',
+      'SOC 2 Type II audit trails',
+      '99.9% SLA \u00b7 API access',
     ],
   },
 ];
@@ -155,30 +130,30 @@ const TIERS: Tier[] = [
 const FAQS: { q: string; a: string }[] = [
   {
     q: 'Is there really a free tier?',
-    a: 'Yes. Unlimited Yulia chat plus one full deliverable, yours to keep. Email required after the first deliverable. No card.',
+    a: 'Yes. Unlimited Yulia chat plus one deliverable \u2014 ever. Email required. No card. A $99 credit pack is available if you want a second deliverable without committing.',
   },
   {
     q: 'Which tier should I start with?',
-    a: 'Running more than one deal at a time? Multi-deal ($199). First close? Single deal ($49). Small team? Team. Firm? Firm. $1B+ fund? Institutional. Move up or down any time.',
+    a: 'Running parallel deals? Pro ($199). Solo operator or first-time buyer? Solo ($79). A 2\u20135 person firm? Team ($499). Bigger than that? Enterprise ($2,500). Move up or down any time.',
   },
   {
-    q: "What does my attorney or CPA pay?",
-    a: "Nothing. Service professionals run free on any deal their client brings them onto. Full access, white-label outputs.",
+    q: 'Are hero capabilities gated?',
+    a: "No. Every add-back, every CIM, every LOI, every memo \u2014 available on every paid tier. You pay for deal volume, seats, and enterprise infrastructure. Never for Yulia's work.",
   },
   {
-    q: 'Can I cancel?',
-    a: 'Any time. No multi-year lock-in on any tier.',
+    q: 'What does my attorney or CPA pay?',
+    a: "Nothing. Service professionals run free on any deal their client brings them onto. Full access, on your deal workflow.",
   },
   {
     q: 'Does Yulia take a success fee?',
-    a: 'No. Flat-rate subscription, period. Never a percentage of a transaction.',
+    a: 'No. Flat-rate subscription, period. Never a percentage of a transaction. Ever.',
   },
 ];
 
 /* Cost comparison stops — mobile equivalent of the desktop DealCostMap.
-   Team cost scales with deal complexity; Yulia tier also scales (Multi-deal
-   for solo operators, Firm for advisory/PE at $1B+). Numbers derived from
-   the same piecewise model in DealCostMap.tsx. */
+   Team cost scales with deal complexity; Yulia tier also scales (Pro for
+   solo operators and mid-market, Enterprise for advisory/PE at $1B+). Numbers
+   derived from the same piecewise model in DealCostMap.tsx. */
 const COST_STOPS: {
   ev: string;
   ib: string;
@@ -194,8 +169,8 @@ const COST_STOPS: {
     team: '~$400K/yr',
     teamShape: 'Solo banker + 1 analyst',
     yulia: '$2,388/yr',
-    yuliaTier: 'Multi-deal',
-    spread: '~130×',
+    yuliaTier: 'Pro',
+    spread: '~130\u00d7',
   },
   {
     ev: '$100M',
@@ -203,25 +178,25 @@ const COST_STOPS: {
     team: '~$1.1M/yr',
     teamShape: 'VP + 1 associate + 2 analysts',
     yulia: '$2,388/yr',
-    yuliaTier: 'Multi-deal',
-    spread: '~840×',
+    yuliaTier: 'Pro',
+    spread: '~840\u00d7',
   },
   {
     ev: '$1B',
     ib: '~$11.75M',
     team: '~$1.7M/yr',
     teamShape: 'VP + 2 associates + 2 analysts',
-    yulia: '$23,988/yr',
-    yuliaTier: 'Firm',
-    spread: '~490×',
+    yulia: '$30,000/yr',
+    yuliaTier: 'Enterprise',
+    spread: '~390\u00d7',
   },
 ];
 
 export default function MobilePricingStory({ dark }: Props) {
   usePageMeta({
-    title: 'Priced fairly. Every tier published. · smbx.ai pricing',
+    title: 'Priced against the cost of building it yourself. \u00b7 smbx.ai pricing',
     description:
-      'AI in a harness, priced like software — not like a law firm. Six tiers from Free to Institutional, all published, none hidden. Service professionals run free on any deal.',
+      "Five published prices. Free, $79 Solo, $199 Pro, $499 Team, $2,500 Enterprise. Every tier includes every capability. No success fees, ever. Service pros on someone else's deal run free.",
     canonical: 'https://smbx.ai/pricing',
     ogImage: 'https://smbx.ai/og-pricing.png',
     breadcrumbs: [
@@ -231,7 +206,6 @@ export default function MobilePricingStory({ dark }: Props) {
     faqs: FAQS.map((f) => ({ question: f.q, answer: f.a })),
   });
 
-  const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');
   const [stop, setStop] = useState(1); // default $100M
 
   const accent = dark ? PINK_DARK : PINK;
@@ -246,12 +220,6 @@ export default function MobilePricingStory({ dark }: Props) {
 
   const displayPrice = (t: Tier) => {
     if (t.monthly === 0) return { main: '$0', sub: t.priceSuffix };
-    if (billing === 'annual') {
-      return {
-        main: `$${Math.round(t.annual / 12).toLocaleString()}`,
-        sub: `${t.priceSuffix} · billed $${t.annual.toLocaleString()}/yr`,
-      };
-    }
     return { main: `$${t.monthly.toLocaleString()}`, sub: t.priceSuffix };
   };
 
@@ -264,15 +232,14 @@ export default function MobilePricingStory({ dark }: Props) {
       eyebrow="Pricing"
       headline={
         <>
-          Close faster.<br />
-          Pay <em className="not-italic" style={{ color: accent }}>less</em> doing it.
+          <span className="block">Priced against the cost</span>
+          <span className="block">of <em className="not-italic" style={{ color: accent }}>building it yourself</em>.</span>
         </>
       }
       sub={
         <>
-          <strong style={{ color: headingC }}>Everyone starts free.</strong>{' '}
-          Yulia picks the right tier during chat. Every price published anyway.
-          Cancel any time. Service pros on someone else’s deal run free.
+          Not against the cost of not having it. <strong style={{ color: headingC }}>Every tier includes every capability.</strong>{' '}
+          You pay for deal volume, seats, and enterprise infrastructure. Never for Yulia&rsquo;s work.
         </>
       }
 
@@ -375,55 +342,6 @@ export default function MobilePricingStory({ dark }: Props) {
 
       takeaway={<>Start free. Upgrade when the work pays off.</>}
     >
-      {/* ─── Annual/Monthly toggle ─── */}
-      <section style={{ padding: '8px 16px 12px' }}>
-        <div
-          role="tablist"
-          aria-label="Billing period"
-          style={{
-            display: 'inline-flex',
-            padding: 4,
-            borderRadius: 999,
-            background: dark ? 'rgba(255,255,255,0.04)' : 'rgba(15,16,18,0.04)',
-            border: `1px solid ${borderC}`,
-            margin: '0 auto',
-            width: '100%',
-            justifyContent: 'center',
-          }}
-        >
-          {(['monthly', 'annual'] as const).map((opt) => {
-            const active = billing === opt;
-            return (
-              <button
-                key={opt}
-                role="tab"
-                aria-selected={active}
-                onClick={() => setBilling(opt)}
-                style={{
-                  flex: 1,
-                  padding: '8px 16px',
-                  borderRadius: 999,
-                  background: active ? (dark ? '#f9f9fc' : '#0f1012') : 'transparent',
-                  color: active ? (dark ? '#0f1012' : '#f9f9fc') : mutedC,
-                  border: 'none',
-                  fontSize: 13,
-                  fontWeight: 700,
-                  fontFamily: 'Inter, system-ui',
-                  cursor: 'pointer',
-                }}
-              >
-                {opt === 'monthly' ? 'Monthly' : 'Annual'}
-                {opt === 'annual' && (
-                  <span style={{ marginLeft: 6, fontSize: 10, color: accent, letterSpacing: '0.04em', textTransform: 'uppercase', fontWeight: 800 }}>
-                    2 mo free
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
       {/* ─── "Let Yulia pick" — the action the page actually wants ─── */}
       <section style={{ padding: '2px 16px 14px' }}>
         <div

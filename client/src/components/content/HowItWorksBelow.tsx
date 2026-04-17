@@ -142,15 +142,14 @@ export default function HowItWorksBelow({ dark }: { dark: boolean }) {
           eyebrow="how it works"
           headline={
             <>
-              Watch Yulia run<br />
-              a <em className="not-italic" style={{ color: accent }}>real deal</em>.
+              <span className="block">Watch Yulia run</span>
+              <span className="block">a <em className="not-italic" style={{ color: accent }}>real deal</em>.</span>
             </>
           }
           sub={
             <>
               Six engines. 22 enforced gates. One audited workflow from first message to close.
-              The fastest way to understand smbx is to watch it in motion — so that's what this page is.
-              Type a sentence, pick a preset, or read on for the methodology underneath.
+              Type a sentence or pick a preset — the reveal runs in under 5 seconds.
             </>
           }
           dark={dark}
