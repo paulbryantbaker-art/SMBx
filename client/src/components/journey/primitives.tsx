@@ -50,7 +50,28 @@ const TOPBAR_LINKS: { id: JourneyTab; label: string; tier?: 'secondary' }[] = [
   { id: 'enterprise',   label: 'Enterprise',   tier: 'secondary' },
 ];
 
+/** Shared JS-driven viewport detect. CSS media-query gating via
+ *  .gg-desktop-only / .gg-mobile-only was getting overridden on iOS
+ *  PWA in some cases (inline display:flex with !important CSS should
+ *  win, but didn't). JS conditional render is deterministic. */
+function useIsDesktop(breakpoint = 1024) {
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth >= breakpoint
+  );
+  useEffect(() => {
+    const mql = window.matchMedia(`(min-width: ${breakpoint}px)`);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    // Sync after mount in case SSR/initial render was wrong.
+    setIsDesktop(mql.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, [breakpoint]);
+  return isDesktop;
+}
+
 export function Page({ children, active, onNavigate, onSignIn, onStartFree, ctaLabel = 'Start free' }: PageProps) {
+  const isDesktop = useIsDesktop(1024);
+
   return (
     <div
       style={{
@@ -64,54 +85,56 @@ export function Page({ children, active, onNavigate, onSignIn, onStartFree, ctaL
         fontFamily: 'var(--gg-body)',
       }}
     >
-      {/* ── Desktop shell — Sidebar + main + Footer (no topbar per Paul) ── */}
-      <div className="gg-desktop-only" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-        <div className="gg-shell">
-          <Sidebar
-            active={active}
-            onNavigate={onNavigate}
-            onSignIn={onSignIn}
-            onStartFree={onStartFree}
-            ctaLabel={ctaLabel}
-          />
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-            <div className="gg-scroll-progress" aria-hidden="true" />
-            <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              {children}
-            </main>
-            <Footer />
+      {isDesktop ? (
+        /* ── Desktop shell — Sidebar + main + Footer ── */
+        <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
+          <div className="gg-shell">
+            <Sidebar
+              active={active}
+              onNavigate={onNavigate}
+              onSignIn={onSignIn}
+              onStartFree={onStartFree}
+              ctaLabel={ctaLabel}
+            />
+            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              <div className="gg-scroll-progress" aria-hidden="true" />
+              <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                {children}
+              </main>
+              <Footer />
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* ── Mobile shell (floating nav pill) ─────────────────────── */}
-      <div className="gg-mobile-only" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1, position: 'relative' }}>
-        <nav
-          className="gg-nav"
-          style={{
-            position: 'absolute',
-            top: 24, left: 16, right: 16,
-            zIndex: 30,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '10px 12px 10px 18px',
-            height: 56,
-          }}
-        >
-          <div className="gg-logo" style={{ fontSize: 18 }}>smbx.ai</div>
-          <button
-            type="button"
-            className="gg-btn gg-btn--primary gg-btn--pill"
-            style={{ padding: '9px 16px', fontSize: 12 }}
-            onClick={onStartFree}
+      ) : (
+        /* ── Mobile shell (floating nav pill) ── */
+        <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1, position: 'relative' }}>
+          <nav
+            className="gg-nav"
+            style={{
+              position: 'absolute',
+              top: 24, left: 16, right: 16,
+              zIndex: 30,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '10px 12px 10px 18px',
+              height: 56,
+            }}
           >
-            {ctaLabel}
-          </button>
-        </nav>
-        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: 108 }}>
-          {children}
-        </main>
-        <Footer />
-      </div>
+            <div className="gg-logo" style={{ fontSize: 18 }}>smbx.ai</div>
+            <button
+              type="button"
+              className="gg-btn gg-btn--primary gg-btn--pill"
+              style={{ padding: '9px 16px', fontSize: 12 }}
+              onClick={onStartFree}
+            >
+              {ctaLabel}
+            </button>
+          </nav>
+          <main style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: 108 }}>
+            {children}
+          </main>
+          <Footer />
+        </div>
+      )}
     </div>
   );
 }
