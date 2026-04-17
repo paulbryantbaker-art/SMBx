@@ -153,7 +153,11 @@ export default function App() {
             try {
               localStorage.setItem('smbx_auth_fresh', String(Date.now()));
             } catch { /* noop */ }
-            navigate('/chat');
+            // Route to home so AppShellInner (Glass Grok — tab bar + Yulia
+            // pill + deal tab) mounts. /chat is the legacy chat view; on
+            // mobile it renders without the Glass Grok shell, which reads
+            // as a blank screen after login.
+            navigate('/');
           } catch (err: any) {
             console.error('Google login error:', err.message);
             setGoogleError(err.message || 'Google sign-in failed. Please try email/password.');
@@ -178,7 +182,7 @@ export default function App() {
       sessionStorage.removeItem('smbx_anon_session');
     }
     await migrateSessionConversations();
-    navigate('/chat');
+    navigate('/');
   }, [login, migrateSession, navigate]);
 
   const handleRegisterSuccess = useCallback(async (name: string, email: string, password: string) => {
@@ -189,7 +193,7 @@ export default function App() {
       sessionStorage.removeItem('smbx_anon_session');
     }
     await migrateSessionConversations();
-    navigate('/chat');
+    navigate('/');
   }, [register, migrateSession, navigate]);
 
   // Load public config
