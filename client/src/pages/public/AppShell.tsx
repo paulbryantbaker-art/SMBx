@@ -603,6 +603,31 @@ export default function AppShell() {
   const { appOffset } = useAppHeight(isChat);   // Only constrain viewport in chat mode
   const [activeTab, setActiveTab] = useState<TabId>(() => pathToTab(location));
 
+  // Track window.visualViewport.height and expose it as --vvh / --vvs CSS vars.
+  // Why: Safari does NOT honor the `interactive-widget=resizes-content` viewport
+  // meta (Chromium-only), so on iOS PWA the layout viewport stays full-height
+  // when the keyboard opens and `position:fixed bottom:0` sits BEHIND the keyboard.
+  // We position the mobile pill with `top: var(--vvh); transform: translateY(-100%)`
+  // instead — anchored to the actual visible viewport bottom. Pattern from
+  // mattpilott/ios-chat.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const setVVH = () => {
+      const vvh = `${vv.height}px`;
+      // When keyboard visible (small viewport), don't add safe-area padding —
+      // the keyboard has already taken that space. When keyboard hidden
+      // (full viewport), apply safe-area for the home indicator.
+      const vvs = vv.height < 600 ? '0px' : 'env(safe-area-inset-bottom, 0px)';
+      document.body.style.setProperty('--vvh', vvh);
+      document.body.style.setProperty('--vvs', vvs);
+    };
+    vv.addEventListener('resize', setVVH);
+    setVVH();
+    return () => vv.removeEventListener('resize', setVVH);
+  }, []);
+
   // Toggle chat-mode class on <html> — landing pages use natural body scroll,
   // chat mode uses constrained viewport for keyboard handling. The CSS rules keyed
   // on `html.chat-mode` are gated to desktop only in index.css — on mobile we rely
@@ -2871,7 +2896,15 @@ export default function AppShell() {
             className={`chat-pill-mobile-container ${dark ? 'force-chat-dark' : ''} px-3 pt-3`}
             style={{
               position: 'fixed',
-              left: 0, right: 0, bottom: 0,
+              left: 0, right: 0,
+              // Safari doesn't honor interactive-widget=resizes-content, so we
+              // anchor to the visualViewport top via --vvh (set from JS) and
+              // translate the pill up by its own height. This keeps it flush
+              // above the keyboard on iOS PWA. Pattern from mattpilott/ios-chat.
+              top: 'var(--vvh, 100dvh)',
+              transform: 'translateY(-100%)',
+              willChange: 'transform, top',
+              transition: 'top 0.22s cubic-bezier(0.32, 0.72, 0, 1)',
               zIndex: 10,
               touchAction: 'manipulation',
             }}

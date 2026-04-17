@@ -217,16 +217,26 @@ html, body {
   }
 }
 
-/* iOS PWA mobile: lock html/body scroll so iOS rubber-band (body-overshoot
-   on scroll) can't yank the fixed chat pill up and down. Internal scroll
-   containers (.mobile-deal-list-scroll, the chat scrollRef) keep their own
-   overflow:auto + overscroll-behavior:contain. Gated to the PWA standalone
-   mode so marketing pages in Safari are unaffected. */
+/* iOS PWA mobile chat lock — proven pattern (see mattpilott/ios-chat):
+   - html/body fixed to viewport height with overflow:hidden: no rubber-band
+     can yank fixed elements around. Internal scroll containers
+     (.mobile-deal-list-scroll, chat scrollRef) keep their own overflow:auto +
+     overscroll-behavior:contain.
+   - body { touch-action: none }: body stops handling its own gestures so
+     touches are delegated to the internal scroll container. Children default
+     to touch-action:auto so they still scroll.
+   - The mobile chat pill is positioned via top: var(--vvh) / translateY(-100%)
+     (AppShell sets --vvh from window.visualViewport.height) because Safari
+     does NOT honor interactive-widget=resizes-content. See AppShell for the
+     JS side. */
 @media (max-width: 767px) and (display-mode: standalone) {
   html, body {
     overflow: hidden;
     overscroll-behavior: none;
     height: 100dvh;
+  }
+  body {
+    touch-action: none;
   }
 }
 
@@ -1126,8 +1136,10 @@ button:active:not(:disabled), [role="button"]:active {
    memory/architecture_ios_pwa_pill.md. */
 .chat-pill-mobile-container {
   padding-top: 10px;
-  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
-  transition: padding-bottom 240ms cubic-bezier(0.32, 0.72, 0, 1);
+  /* --vvs is set from JS (AppShell): equals env(safe-area-inset-bottom) when
+     the keyboard is hidden, 0 when the keyboard is up (keyboard itself covers
+     the home-indicator safe area). Fallback to env() before JS mounts. */
+  padding-bottom: max(var(--vvs, env(safe-area-inset-bottom, 0px)), 8px);
   background: rgba(255,255,255,0.72);
   backdrop-filter: blur(30px) saturate(180%);
   -webkit-backdrop-filter: blur(30px) saturate(180%);
