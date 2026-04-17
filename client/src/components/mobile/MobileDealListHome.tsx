@@ -13,7 +13,7 @@
  * (Linear + Superhuman + Notion distilled + Apple Glass).
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { AnonMessage } from '../../hooks/useAnonymousChat';
 import ChatMessages from '../shell/ChatMessages';
 import { StarterChips } from './StarterChips';
@@ -126,6 +126,54 @@ export default function MobileDealListHome({
   // deal list for the actual conversation. Keeps the mobile flow on one
   // surface — no navigation to a separate chat view.
   const hasActiveChat = messages.length > 0 || !!streamingText;
+
+  // Scroll container ref — owns the chat behavior inherited from native
+  // messaging apps: auto-scroll to latest, keyboard-aware rescroll, and
+  // swipe-to-dismiss. Kept local so the unified surface is self-contained.
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  // Auto-scroll to the latest message whenever the conversation grows or
+  // streaming text updates. `instant` avoids fighting the user's own scroll.
+  useEffect(() => {
+    if (!hasActiveChat) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'instant' as ScrollBehavior });
+    });
+  }, [messages.length, streamingText, hasActiveChat]);
+
+  // Keyboard open/close shrinks the visible viewport (interactive-widget=
+  // resizes-content). Re-scroll to bottom so the latest message stays visible
+  // above the pill.
+  useEffect(() => {
+    if (!hasActiveChat) return;
+    const el = scrollRef.current;
+    const vv = typeof window !== 'undefined' ? window.visualViewport : null;
+    if (!el || !vv) return;
+    const onResize = () => {
+      requestAnimationFrame(() => {
+        el.scrollTo({ top: el.scrollHeight, behavior: 'instant' as ScrollBehavior });
+      });
+    };
+    vv.addEventListener('resize', onResize);
+    return () => vv.removeEventListener('resize', onResize);
+  }, [hasActiveChat]);
+
+  // iMessage-style: any touch-drag on the message area dismisses the keyboard.
+  // Touchmove is passive so this doesn't block native momentum scroll.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onTouchMove = () => {
+      const active = document.activeElement as HTMLElement | null;
+      if (active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT')) {
+        active.blur();
+      }
+    };
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    return () => el.removeEventListener('touchmove', onTouchMove);
+  }, []);
   const realDeals = useMemo(
     () => deals.filter(d => d.business_name != null && d.business_name.trim().length > 0),
     [deals],
@@ -272,6 +320,7 @@ export default function MobileDealListHome({
 
       {/* Scrollable body */}
       <div
+        ref={scrollRef}
         className="mobile-deal-list-scroll"
         style={{
           flex: 1,
