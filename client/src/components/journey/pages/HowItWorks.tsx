@@ -87,14 +87,28 @@ const DATA_SOURCES = [
 export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
   return (
     <Page active="how-it-works" onNavigate={onNavigate} onStartFree={onStartFree}>
-      {/* ─── Hero ──────────────────────────────────────────────────── */}
-      <Section>
-        <div className="gg-eyebrow" style={{ marginBottom: 16 }}>How it works</div>
-        <h1 className="gg-h1" style={{ marginBottom: 22 }}>90% of what an investment bank does. Everything that doesn\u2019t require a license.</h1>
-        <Body lead style={{ maxWidth: 720 }}>
-          Yulia handles the production work of a deal team &mdash; valuations, CIMs, financial models, deal scoring, due diligence, LOIs, integration plans. You keep the judgment, the relationships, and the authority to sign.
-        </Body>
-      </Section>
+      {/* ─── Hero — centered, no peek (explanatory page) ─── */}
+      <section
+        className="gg-enter"
+        style={{
+          position: 'relative',
+          padding: 'clamp(56px, 8vw, 120px) clamp(20px, 5vw, 72px)',
+          maxWidth: 1520, margin: '0 auto', width: '100%',
+          textAlign: 'center',
+        }}
+      >
+        <div className="gg-grid-bg" />
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 980, margin: '0 auto' }}>
+          <div className="gg-eyebrow gg-eyebrow--plain" style={{ marginBottom: 24, justifyContent: 'center' }}>How it works</div>
+          <h1 className="gg-h1 gg-h1--journey" style={{ marginBottom: 28 }}>
+            <span style={{ display: 'block' }}>90% of what an investment bank does.</span>
+            <span style={{ display: 'block' }}>Everything that doesn\u2019t require a license.</span>
+          </h1>
+          <Body lead style={{ maxWidth: 780, marginLeft: 'auto', marginRight: 'auto' }}>
+            Yulia handles the production work of a deal team &mdash; valuations, CIMs, financial models, deal scoring, due diligence, LOIs, integration plans. You keep the judgment, the relationships, and the authority to sign.
+          </Body>
+        </div>
+      </section>
 
       {/* ─── The line ──────────────────────────────────────────────── */}
       <Section variant="tint" label="The line">

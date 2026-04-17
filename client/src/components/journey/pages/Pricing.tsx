@@ -108,14 +108,25 @@ const FAQS: readonly { q: string; a: string }[] = [
 export default function Pricing({ onSend, onStartFree, onNavigate }: Props) {
   return (
     <Page active="pricing" onNavigate={onNavigate} onStartFree={onStartFree}>
-      {/* ─── Hero ──────────────────────────────────────────────────── */}
-      <Section>
-        <div className="gg-eyebrow" style={{ marginBottom: 16 }}>Pricing</div>
-        <h1 className="gg-h1" style={{ marginBottom: 22 }}>One price. Every capability. Every deal size.</h1>
-        <Body lead style={{ maxWidth: 720 }}>
-          No feature gates. No success fees. No per-deal charges. Pick the tier that matches your team &mdash; every tier does every job.
-        </Body>
-      </Section>
+      {/* ─── Hero — centered info page (no chat, no peek) ─── */}
+      <section
+        className="gg-enter"
+        style={{
+          position: 'relative',
+          padding: 'clamp(56px, 8vw, 120px) clamp(20px, 5vw, 72px)',
+          maxWidth: 1520, margin: '0 auto', width: '100%',
+          textAlign: 'center',
+        }}
+      >
+        <div className="gg-grid-bg" />
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 860, margin: '0 auto' }}>
+          <div className="gg-eyebrow gg-eyebrow--plain" style={{ marginBottom: 24, justifyContent: 'center' }}>Pricing</div>
+          <h1 className="gg-h1 gg-h1--journey" style={{ marginBottom: 28 }}>One price. Every capability. Every deal size.</h1>
+          <Body lead style={{ maxWidth: 720, marginLeft: 'auto', marginRight: 'auto' }}>
+            No feature gates. No success fees. No per-deal charges. Pick the tier that matches your team &mdash; every tier does every job.
+          </Body>
+        </div>
+      </section>
 
       {/* ─── Philosophy ────────────────────────────────────────────── */}
       <Section variant="tint" label="The philosophy">

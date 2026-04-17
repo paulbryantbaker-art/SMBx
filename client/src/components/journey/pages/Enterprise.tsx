@@ -77,20 +77,35 @@ export default function Enterprise({ onSend, onStartFree: _, onNavigate }: Props
       onStartFree={() => onSend('I\u2019m interested in Enterprise. Here\u2019s what our team is solving: ')}
       ctaLabel="Book a demo"
     >
-      {/* ─── Hero ──────────────────────────────────────────────────── */}
-      <Section>
-        <div className="gg-eyebrow" style={{ marginBottom: 16 }}>Enterprise</div>
-        <h1 className="gg-h1" style={{ marginBottom: 22 }}>Your deal team, multiplied.</h1>
-        <Body lead style={{ maxWidth: 720, marginBottom: 28 }}>
-          For firms closing deals at scale. Shared deal vault. Team workspace. White-label outputs. SSO, audit trails, SOC 2 controls. Same Yulia, enterprise infrastructure.
-        </Body>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <a href="#book-demo" className="gg-btn gg-btn--primary">Book a demo &rarr;</a>
-          <button type="button" className="gg-btn gg-btn--ghost" onClick={() => onSend('Tell me what Enterprise includes and whether it\u2019s right for our firm.')}>
-            Ask Yulia
-          </button>
+      {/* ─── Hero — 2-col on desktop (copy + team workspace peek) ─── */}
+      <section
+        className="gg-enter"
+        style={{
+          position: 'relative',
+          padding: 'clamp(48px, 7vw, 96px) clamp(20px, 5vw, 72px)',
+          maxWidth: 1520, margin: '0 auto', width: '100%',
+        }}
+      >
+        <div className="gg-grid-bg" />
+        <div className="gg-two-col" style={{ alignItems: 'center', position: 'relative', zIndex: 1 }}>
+          <div>
+            <div className="gg-eyebrow" style={{ marginBottom: 20 }}>Enterprise</div>
+            <h1 className="gg-h1 gg-h1--journey" style={{ marginBottom: 28 }}>Your deal team, multiplied.</h1>
+            <Body lead style={{ maxWidth: 560, marginBottom: 32 }}>
+              For firms closing deals at scale. Shared deal vault. Team workspace. White-label outputs. SSO, audit trails, SOC 2 controls. Same Yulia, enterprise infrastructure.
+            </Body>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <a href="#book-demo" className="gg-btn gg-btn--primary" style={{ padding: '13px 22px', fontSize: 14 }}>Book a demo &rarr;</a>
+              <button type="button" className="gg-btn gg-btn--ghost" style={{ padding: '13px 22px', fontSize: 14 }} onClick={() => onSend('Tell me what Enterprise includes and whether it\u2019s right for our firm.')}>
+                Ask Yulia
+              </button>
+            </div>
+          </div>
+          <div className="gg-desktop-only">
+            <TeamWorkspaceMock />
+          </div>
         </div>
-      </Section>
+      </section>
 
       {/* ─── Use cases ─────────────────────────────────────────────── */}
       <Section variant="tint" label="Use cases">
@@ -205,6 +220,89 @@ export default function Enterprise({ onSend, onStartFree: _, onNavigate }: Props
         <DemoForm onSend={onSend} />
       </Section>
     </Page>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   TEAM WORKSPACE MOCK — Enterprise hero rightPanel
+   5 user avatars with deal-count badges + shared deal vault preview.
+   ═════════════════════════════════════════════════════════════════════ */
+
+function TeamWorkspaceMock() {
+  const users: { name: string; role: string; deals: number; active: boolean }[] = [
+    { name: 'Maria L.',  role: 'Managing partner', deals: 8, active: true },
+    { name: 'James R.',  role: 'Principal',        deals: 6, active: true },
+    { name: 'Priya V.',  role: 'VP \u00b7 Deals',  deals: 11, active: true },
+    { name: 'Derek S.',  role: 'Associate',        deals: 4, active: false },
+    { name: 'Kai P.',    role: 'Analyst',          deals: 3, active: false },
+  ];
+  const vault: { name: string; meta: string; owner: string; status: 'ready' | 'progress' | 'draft' }[] = [
+    { name: 'Northwest HVAC roll-up',  meta: 'CIM \u00b7 v4 \u00b7 32 pages', owner: 'Maria L.', status: 'ready' },
+    { name: 'Midwest pest acquisition', meta: 'Rundown \u00b7 score 81',      owner: 'Priya V.', status: 'progress' },
+    { name: 'Dallas distribution co',   meta: 'DD checklist \u00b7 147 items', owner: 'James R.', status: 'progress' },
+    { name: 'ESOP feasibility memo',    meta: 'Draft \u00b7 for IC review',    owner: 'Derek S.', status: 'draft' },
+  ];
+  const statusDot = (s: 'ready' | 'progress' | 'draft') =>
+    s === 'ready' ? 'var(--gg-dot-ready)' : s === 'progress' ? 'var(--gg-dot-progress)' : 'var(--gg-dot-draft)';
+  const statusLabel = (s: 'ready' | 'progress' | 'draft') =>
+    s === 'ready' ? 'Ready' : s === 'progress' ? 'In progress' : 'Draft';
+
+  return (
+    <Card padding={28} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>Team \u00b7 Acme Capital</div>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>5 seats \u00b7 32 active deals</div>
+      </div>
+
+      {/* User rail */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 22 }}>
+        {users.map(u => (
+          <div key={u.name} style={{ flex: 1, padding: 10, background: 'var(--gg-bg-subtle)', borderRadius: 10, border: '0.5px solid var(--gg-border)', textAlign: 'center', opacity: u.active ? 1 : 0.65 }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: 9, margin: '0 auto 6px',
+              background: 'linear-gradient(135deg, #3A3A3E, #0A0A0B)',
+              color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 10,
+            }}>
+              {u.name.split(' ').map(s => s[0]).join('')}
+            </div>
+            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 9, color: 'var(--gg-text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 2 }}>{u.role}</div>
+            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 14, fontVariantNumeric: 'tabular-nums' }}>{u.deals}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Shared vault */}
+      <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>
+        Shared deal vault
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {vault.map(d => (
+          <div key={d.name} style={{
+            padding: '12px 14px', borderRadius: 10,
+            background: 'var(--gg-bg-subtle)', border: '0.5px solid var(--gg-border)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+          }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 12.5, letterSpacing: '-0.005em' }}>{d.name}</div>
+              <div style={{ fontSize: 11, color: 'var(--gg-text-muted)', marginTop: 2 }}>{d.meta} \u00b7 {d.owner}</div>
+            </div>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '4px 10px 4px 8px',
+              background: '#fff',
+              border: '0.5px solid var(--gg-border)',
+              borderRadius: 999,
+              flexShrink: 0,
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: statusDot(d.status) }} />
+              <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--gg-text-secondary)' }}>{statusLabel(d.status)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }
 
