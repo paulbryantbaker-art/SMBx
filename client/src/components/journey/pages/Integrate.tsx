@@ -1,16 +1,18 @@
 /**
- * Glass Grok · /integrate
+ * Glass Grok · /integrate (desktop rebuild)
  * ─────────────────────────────────────────────────────────────────────
- * Post-close integration journey. Hero → 75% fail stat → 180-day
- * timeline → 3 capability heroes → Day 1 checklist generator → CTA.
+ * Post-close PMI page. Hero 2-col with Day 0 checklist preview,
+ * horizontal Day 0/30/90/180 timeline, 3 zigzag capability heroes,
+ * interactive Day 1 checklist generator, dark bottom CTA.
  *
- * Spec: Glass Grok/SMBX_SITE_COPY.md (page 5)
+ * Spec: SMBX_SITE_COPY.md (page 5) + desktop spec.
  */
 
 import { useMemo, useState } from 'react';
 import {
   Page, JourneyHero, Section, H2, Body,
-  Card, Timeline, BottomCta,
+  Card, BottomCta,
+  HorizontalTimeline,
   type JourneyTab,
 } from '../primitives';
 
@@ -34,92 +36,96 @@ export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
         chips={CHIPS}
         onSend={onSend}
         onChip={onSend}
+        rightPanel={<Day0ChecklistPreview />}
       />
 
-      <Section label="The stat">
+      {/* The stat */}
+      <Section variant="tint" label="The stat">
         <H2>75% of acquisitions fail to achieve their stated synergies.</H2>
-        <Body>
-          The number comes from Harvard Business Review. Thirty years of research across thousands of deals. The #1 reason, every time: no integration plan.
-        </Body>
-        <Body>Not a bad plan. <strong style={{ color: 'var(--gg-text-primary)' }}>No plan.</strong></Body>
-        <Body>
-          The deal team builds the acquisition thesis, runs diligence, negotiates the price, closes the transaction &mdash; and then hands the business to an operator who starts from a blank page on Day 1. Key employees leave. Customers go silent. The quick wins identified during DD never get captured. By month six, the synergy assumptions that justified the purchase price look like fantasies.
-        </Body>
-        <Body>
-          Every one of those failures was preventable with a plan built from the intelligence the deal team already had.
-        </Body>
-        <Body>Yulia builds that plan. Before the wire hits.</Body>
+        <div className="gg-two-col" style={{ marginTop: 48, alignItems: 'start' }}>
+          <div>
+            <Body>The number comes from Harvard Business Review. Thirty years of research across thousands of deals. The #1 reason, every time: no integration plan.</Body>
+            <Body>Not a bad plan. <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>No plan.</strong></Body>
+            <Body>The deal team builds the acquisition thesis, runs diligence, negotiates the price, closes the transaction &mdash; and then hands the business to an operator who starts from a blank page on Day 1. Key employees leave. Customers go silent.</Body>
+          </div>
+          <div>
+            <Body>The quick wins identified during DD never get captured. By month six, the synergy assumptions that justified the purchase price look like fantasies.</Body>
+            <Body>Every one of those failures was preventable with a plan built from the intelligence the deal team already had.</Body>
+            <Body><strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>Yulia builds that plan. Before the wire hits.</strong></Body>
+          </div>
+        </div>
       </Section>
 
-      {/* ─── 180-day timeline ──────────────────────────────────────── */}
-      <Section variant="tint" label="The 180-day timeline">
+      {/* 180-day timeline */}
+      <Section label="The 180-day timeline">
         <H2>Every deal gets a plan. Calibrated to your specific acquisition.</H2>
-        <div style={{ marginBottom: 28 }} />
-        <Timeline
-          phases={[
-            { label: 'Day 0 \u2014 Before the wire',
-              body: 'IT security protocol. Credential rotation across the top 50 systems. Insurance verification. Legal entity structure confirmed. First communication scripted for every stakeholder group.',
-              deliverables: 'Day 0 checklist (62 items typical) \u00b7 Employee retention list from DD \u00b7 Customer outreach priority ranking \u00b7 Vendor review order \u00b7 Communication templates' },
-            { label: 'Day 30 \u2014 Stabilization',
-              body: 'Every key employee individually contacted. Every top customer reached. Vendor contracts reviewed. Operational baseline established. Quick wins from DD findings prioritized.',
-              deliverables: 'Stabilization scorecard \u00b7 Retention status dashboard \u00b7 Customer health check \u00b7 Cash position \u00b7 First 10 decisions ranked' },
-            { label: 'Day 90 \u2014 Assessment',
-              body: 'Performance against deal model. Variance analysis on every assumption. Thesis confirmation or adjustment. Operational improvements implemented from DD recommendations. Team structure decisions.',
-              deliverables: '90-day report \u00b7 Thesis vs reality analysis \u00b7 Operational improvement tracker \u00b7 Team restructure plan (if needed) \u00b7 Strategic priority reset' },
-            { label: 'Day 180 \u2014 Optimization',
-              body: 'Growth initiatives launched. Add-on targets identified. Platform thesis execution. Performance trajectory confirmed. Full operational control.',
-              deliverables: 'Growth initiative plan \u00b7 Add-on screening \u00b7 Long-term strategic plan \u00b7 Board package \u00b7 Year-end outlook' },
-          ]}
-        />
+        <p className="gg-body--sub" style={{ marginBottom: 48 }}>From Day 0 before the wire through Day 180 optimization.</p>
+        <HorizontalTimeline phases={[
+          { idx: 'Day 0', name: 'Before the wire',
+            body: 'IT security protocol. Credential rotation. Insurance verification. Legal entity confirmed. First communication scripted.',
+            deliverables: 'Day 0 checklist (62 items) \u00b7 Retention list \u00b7 Customer outreach priority \u00b7 Vendor review \u00b7 Comms templates' },
+          { idx: 'Day 30', name: 'Stabilization',
+            body: 'Every key employee contacted. Every top customer reached. Vendor contracts reviewed. Operational baseline established.',
+            deliverables: 'Stabilization scorecard \u00b7 Retention status \u00b7 Customer health \u00b7 Cash position \u00b7 First 10 decisions' },
+          { idx: 'Day 90', name: 'Assessment',
+            body: 'Performance against deal model. Variance analysis. Thesis confirmation. Operational improvements. Team decisions.',
+            deliverables: '90-day report \u00b7 Thesis vs reality \u00b7 Improvement tracker \u00b7 Team restructure plan \u00b7 Priority reset' },
+          { idx: 'Day 180', name: 'Optimization',
+            body: 'Growth initiatives launched. Add-on targets identified. Platform thesis execution. Full operational control.',
+            deliverables: 'Growth plan \u00b7 Add-on screening \u00b7 Long-term plan \u00b7 Board package \u00b7 Year-end outlook' },
+        ]} />
       </Section>
 
-      {/* ─── Hero 1: The PMI plan ──────────────────────────────────── */}
-      <Section label="Hero 1 \u00b7 The PMI plan">
-        <H2>Your integration plan, generated from your deal data.</H2>
-        <Body>
-          Most integration plans are generic templates. Acquisition guide from a consulting firm. The &ldquo;first 100 days playbook&rdquo; that assumes every acquisition is the same acquisition.
-        </Body>
-        <Body>
-          Your acquisition isn\u2019t every acquisition. You did six months of diligence. You know which customers are at risk, which employees are critical, which processes need to be fixed, which systems are held together with spreadsheets, which revenue streams depend on the seller.
-        </Body>
-        <Body>
-          Yulia uses all of that. The DD findings become the 180-day workplan. The risks identified become the Day 1 priorities. The opportunities found become the Day 30&ndash;90 quick wins. The strategic thesis becomes the Day 90&ndash;180 roadmap.
-        </Body>
-        <Body>Every item with an owner, a deadline, and a success metric. Generated in 15 minutes. Executed one day at a time.</Body>
+      {/* Hero 1 PMI plan — text left, DD-to-workplan viz right */}
+      <Section variant="tint" label="Hero 1 \u00b7 The PMI plan">
+        <div className="gg-two-col" style={{ alignItems: 'center' }}>
+          <div>
+            <H2 variant="block">Your integration plan, generated from your deal data.</H2>
+            <Body>Most integration plans are generic templates. Acquisition guides from a consulting firm. The &ldquo;first 100 days playbook&rdquo; that assumes every acquisition is the same acquisition.</Body>
+            <Body>Your acquisition isn\u2019t every acquisition. You did six months of diligence. You know which customers are at risk, which employees are critical, which processes need to be fixed, which revenue streams depend on the seller.</Body>
+            <Body>Yulia uses all of that. The DD findings become the 180-day workplan. The risks become Day 1 priorities. The opportunities become Day 30\u201390 quick wins. The strategic thesis becomes the Day 90\u2013180 roadmap.</Body>
+            <Body><strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>Every item with an owner, a deadline, and a success metric.</strong></Body>
+          </div>
+          <div>
+            <DDToWorkplanMock />
+          </div>
+        </div>
       </Section>
 
-      {/* ─── Hero 2: Key employee retention ────────────────────────── */}
-      <Section variant="tint" label="Hero 2 \u00b7 Key employee retention">
-        <H2>The four people who can\u2019t leave in the first 90 days.</H2>
-        <Body>
-          Every business has them. The operations manager who holds the processes in her head. The salesperson with the top-five customer relationships. The tech lead who wrote half the systems. The finance person who reconciles accounts nobody else understands.
-        </Body>
-        <Body>Yulia identified them during diligence. On Day 1, they get a plan.</Body>
-        <Body>
-          Individual retention conversations in week one. Compensation review where warranted. Role clarity through the transition. Direct line to the new owner. A reason to stay that isn\u2019t just &ldquo;we need you.&rdquo;
-        </Body>
-        <Body>
-          Retention rates on key employees where this gets done: <strong style={{ color: 'var(--gg-text-primary)' }}>95&ndash;100%</strong> at Day 90. Retention rates where it doesn\u2019t: 40&ndash;60%. Losing one of these people in month one can cost you more than the delta in the purchase price.
-        </Body>
+      {/* Hero 2 Key employees — tiles left, text right (reversed) */}
+      <Section label="Hero 2 \u00b7 Key employee retention">
+        <div className="gg-two-col gg-two-col--reverse" style={{ alignItems: 'center' }}>
+          <div>
+            <H2 variant="block">The four people who can\u2019t leave in the first 90 days.</H2>
+            <Body>Every business has them. The operations manager who holds the processes in her head. The salesperson with the top-five customer relationships. The tech lead who wrote half the systems. The finance person who reconciles accounts nobody else understands.</Body>
+            <Body>Yulia identified them during diligence. On Day 1, they get a plan.</Body>
+            <Body>Individual retention conversations in week one. Compensation review where warranted. Role clarity through the transition. Direct line to the new owner.</Body>
+            <Body>Retention rates where this gets done: <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>95\u2013100%</strong> at Day 90. Where it doesn\u2019t: 40\u201360%.</Body>
+          </div>
+          <div>
+            <KeyEmployeesMock />
+          </div>
+        </div>
       </Section>
 
-      {/* ─── Hero 3: Value creation tracking ───────────────────────── */}
-      <Section label="Hero 3 \u00b7 Value creation tracking">
-        <H2>You paid for a thesis. Is it working?</H2>
-        <Body>
-          Every acquisition has a thesis. Operational improvements worth $500K. Customer diversification that reduces risk. Geographic expansion into two adjacent markets. Margin improvement from pricing discipline.
-        </Body>
-        <Body>Most operators never systematically track whether the thesis is working.</Body>
-        <Body>
-          Yulia tracks it. Every thesis assumption becomes a measurable KPI. Monthly progress vs projection. Variance analysis. Early warning on the things that are drifting. Course correction before it shows up in the P&amp;L six months later.
-        </Body>
-        <Body>
-          Your board package writes itself. Your LP update reflects reality. The operational discipline that creates value at PE-backed companies now runs on your Monday morning.
-        </Body>
+      {/* Hero 3 Value creation — text left, KPI variance chart right */}
+      <Section variant="tint" label="Hero 3 \u00b7 Value creation tracking">
+        <div className="gg-two-col" style={{ alignItems: 'center' }}>
+          <div>
+            <H2 variant="block">You paid for a thesis. Is it working?</H2>
+            <Body>Every acquisition has a thesis. Operational improvements worth $500K. Customer diversification that reduces risk. Geographic expansion into two adjacent markets. Margin improvement from pricing discipline.</Body>
+            <Body>Most operators never systematically track whether the thesis is working.</Body>
+            <Body>Yulia tracks it. Every thesis assumption becomes a measurable KPI. Monthly progress vs projection. Variance analysis. Early warning on things drifting. Course correction before it shows up in the P&amp;L six months later.</Body>
+            <Body><strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>Your board package writes itself.</strong> Your LP update reflects reality.</Body>
+          </div>
+          <div>
+            <KPIVarianceMock />
+          </div>
+        </div>
       </Section>
 
-      {/* ─── Interactive: Day 1 checklist generator ────────────────── */}
-      <Section variant="tint" label="Day 1 generator">
+      {/* Interactive Day 1 checklist */}
+      <Section label="Day 1 generator">
         <Day1ChecklistGenerator onSend={onSend} />
       </Section>
 
@@ -134,8 +140,194 @@ export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
 }
 
 /* ═════════════════════════════════════════════════════════════════════
+   DAY 0 CHECKLIST PREVIEW — hero rightPanel
+   ═════════════════════════════════════════════════════════════════════ */
+
+function Day0ChecklistPreview() {
+  const items: { text: string; category: string; done: boolean }[] = [
+    { text: 'Rotate admin credentials \u00b7 top 50 systems', category: 'IT / Security', done: true },
+    { text: 'Disable shared logins',                          category: 'IT / Security', done: true },
+    { text: 'Retention call \u00b7 Ops Manager',              category: 'People',        done: true },
+    { text: 'Retention call \u00b7 Sales Lead',               category: 'People',        done: false },
+    { text: 'Top 10 customer outreach \u00b7 in writing',     category: 'Customers',     done: false },
+    { text: 'Insurance binder confirmed \u2192 +30 days',     category: 'Vendors',       done: true },
+    { text: '13-week cash forecast',                          category: 'Operations',    done: false },
+  ];
+  const done = items.filter(i => i.done).length;
+  return (
+    <Card padding={28} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>Day 0 checklist</div>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 11, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          {done} / 62 items
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {items.map((it, i) => (
+          <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 0', borderBottom: i === items.length - 1 ? 0 : '0.5px solid var(--gg-border)' }}>
+            <div style={{
+              width: 14, height: 14, marginTop: 2, borderRadius: 3,
+              border: '1.5px solid var(--gg-text-primary)',
+              background: it.done ? 'var(--gg-text-primary)' : 'transparent',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              {it.done && (
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              )}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12.5, color: it.done ? 'var(--gg-text-muted)' : 'var(--gg-text-primary)', textDecoration: it.done ? 'line-through' : 'none', fontWeight: 500 }}>{it.text}</div>
+              <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 9, color: 'var(--gg-text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>{it.category}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   DD → WORKPLAN viz
+   ═════════════════════════════════════════════════════════════════════ */
+
+function DDToWorkplanMock() {
+  const dd: { finding: string; action: string; day: string }[] = [
+    { finding: 'Top-3 customers = 47% revenue',    action: 'Diversification sprint',  day: 'Day 30' },
+    { finding: 'Ops manager irreplaceable',        action: 'Retention + SOP transfer', day: 'Day 1' },
+    { finding: 'Margin leak in service contracts', action: 'Pricing audit + reset',    day: 'Day 60' },
+    { finding: 'Tech stack on 2019 stack',         action: 'Upgrade roadmap',          day: 'Day 90' },
+  ];
+  return (
+    <Card padding={28} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>DD \u2192 Workplan</div>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Auto-mapped</div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {dd.map((d, i) => (
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 12, alignItems: 'center' }}>
+            <div style={{ padding: '10px 14px', background: 'var(--gg-bg-subtle)', borderRadius: 10, border: '0.5px solid var(--gg-border)' }}>
+              <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 9, color: 'var(--gg-text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>DD finding</div>
+              <div style={{ fontSize: 12, color: 'var(--gg-text-primary)', lineHeight: 1.4, fontWeight: 500 }}>{d.finding}</div>
+            </div>
+            <div style={{ color: 'var(--gg-text-muted)', fontSize: 14 }}>&rarr;</div>
+            <div style={{ padding: '10px 14px', background: 'var(--gg-accent)', color: '#fff', borderRadius: 10, boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.12)' }}>
+              <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 9, opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>{d.day}</div>
+              <div style={{ fontSize: 12, lineHeight: 1.4, fontWeight: 600 }}>{d.action}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   KEY EMPLOYEES viz
+   ═════════════════════════════════════════════════════════════════════ */
+
+function KeyEmployeesMock() {
+  const people: { name: string; role: string; risk: 'ready' | 'progress' | 'flag' }[] = [
+    { name: 'Maria L.',  role: 'Ops Manager',  risk: 'ready' },
+    { name: 'James R.',  role: 'Sales Lead',   risk: 'ready' },
+    { name: 'Priya V.',  role: 'Tech Lead',    risk: 'progress' },
+    { name: 'Derek S.',  role: 'Finance',      risk: 'flag' },
+  ];
+  const riskColor = (r: 'ready' | 'progress' | 'flag') =>
+    r === 'ready' ? 'var(--gg-dot-ready)' : r === 'progress' ? 'var(--gg-dot-progress)' : 'var(--gg-dot-flag)';
+  const riskLabel = (r: 'ready' | 'progress' | 'flag') =>
+    r === 'ready' ? 'Locked' : r === 'progress' ? 'In progress' : 'At risk';
+  return (
+    <Card padding={28} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>4 people \u00b7 first 90 days</div>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Retention</div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        {people.map(p => (
+          <div key={p.name} style={{ padding: 16, background: 'var(--gg-bg-subtle)', borderRadius: 10, border: '0.5px solid var(--gg-border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 10,
+                background: 'linear-gradient(135deg, #3A3A3E, #0A0A0B)',
+                color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 12,
+              }}>
+                {p.name.split(' ').map(s => s[0]).join('')}
+              </div>
+              <div>
+                <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 12, letterSpacing: '-0.005em' }}>{p.name}</div>
+                <div style={{ fontSize: 10.5, color: 'var(--gg-text-muted)' }}>{p.role}</div>
+              </div>
+            </div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px 4px 8px', background: '#fff', border: '0.5px solid var(--gg-border)', borderRadius: 999 }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: riskColor(p.risk) }} />
+              <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--gg-text-secondary)' }}>{riskLabel(p.risk)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   KPI VARIANCE viz — 6 months projection vs actual
+   ═════════════════════════════════════════════════════════════════════ */
+
+function KPIVarianceMock() {
+  const months = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6'];
+  const projected = [100, 105, 110, 115, 120, 125];
+  const actual    = [98, 104, 112, 118, 117, 122];
+  const max = Math.max(...projected, ...actual);
+  return (
+    <Card padding={28} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>EBITDA \u00b7 thesis vs actual</div>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>6 months</div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, height: 140, marginBottom: 12 }}>
+        {months.map((m, i) => (
+          <div key={m} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: '100%' }}>
+              <div style={{
+                width: 10,
+                height: `${(projected[i] / max) * 100}%`,
+                background: 'var(--gg-bg-muted)',
+                border: '0.5px solid var(--gg-border)',
+                borderRadius: 2,
+              }} />
+              <div style={{
+                width: 10,
+                height: `${(actual[i] / max) * 100}%`,
+                background: actual[i] >= projected[i] ? 'var(--gg-dot-ready)' : 'var(--gg-dot-progress)',
+                borderRadius: 2,
+              }} />
+            </div>
+            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.04em' }}>{m}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'var(--gg-text-muted)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 10, height: 10, background: 'var(--gg-bg-muted)', border: '0.5px solid var(--gg-border)', borderRadius: 2 }} />
+          Projected
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 10, height: 10, background: 'var(--gg-dot-ready)', borderRadius: 2 }} />
+          Actual
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
    DAY 1 CHECKLIST GENERATOR — interactive
-   5 inputs → Day 1 checklist grouped by category.
    ═════════════════════════════════════════════════════════════════════ */
 
 const INDUSTRY_OPTS = ['Services', 'Manufacturing', 'Healthcare', 'Technology', 'Construction', 'Retail'] as const;
@@ -146,41 +338,33 @@ const CUST_REL_OPTS = ['0', '1\u20135', '5\u201320', '20+'] as const;
 interface ChecklistItem {
   category: 'IT / Security' | 'People' | 'Customers' | 'Vendors' | 'Operations';
   text: string;
-  /* gates — hide item unless all conditions are true */
   ifHeadcountGte?: number;
   ifCustRelGte?: number;
   ifMigration?: boolean;
 }
 
 const BASE_ITEMS: ChecklistItem[] = [
-  /* IT / Security — day 0 is about locking down access */
-  { category: 'IT / Security', text: 'Rotate admin credentials across top 50 systems (identity, finance, CRM, email, cloud, VPN)' },
-  { category: 'IT / Security', text: 'Disable shared logins; audit MFA coverage on privileged accounts' },
+  { category: 'IT / Security', text: 'Rotate admin credentials across top 50 systems' },
+  { category: 'IT / Security', text: 'Disable shared logins; audit MFA on privileged accounts' },
   { category: 'IT / Security', text: 'Inventory SaaS subscriptions and ownership contacts' },
-  { category: 'IT / Security', text: 'Run a backup drill on primary data stores; confirm restore works' },
+  { category: 'IT / Security', text: 'Run a backup drill; confirm restore works' },
   { category: 'IT / Security', text: 'Migrate DNS + email control to new ownership', ifMigration: true },
-  { category: 'IT / Security', text: 'Document systems with no MFA or with shared credentials flagged for remediation' },
-  /* People */
-  { category: 'People',       text: 'Individual retention call with each of the top 4 critical employees (this week)' },
+  { category: 'People',       text: 'Individual retention call with each of the top 4 critical employees' },
   { category: 'People',       text: 'All-hands introduction from new ownership within 48 hours' },
-  { category: 'People',       text: 'Confirm payroll runs on the next cycle without interruption' },
-  { category: 'People',       text: 'Review comp plans for sales and management leadership' },
-  { category: 'People',       text: 'Manager-by-manager 1:1 within first 14 days', ifHeadcountGte: 50 },
-  { category: 'People',       text: 'HR systems audit: PTO accruals, benefits, I-9s, e-Verify status', ifHeadcountGte: 50 },
+  { category: 'People',       text: 'Confirm payroll runs on the next cycle' },
+  { category: 'People',       text: 'Manager 1:1 within first 14 days', ifHeadcountGte: 50 },
+  { category: 'People',       text: 'HR audit: PTO, benefits, I-9s, e-Verify', ifHeadcountGte: 50 },
   { category: 'People',       text: 'Union / CBA review (if applicable)', ifHeadcountGte: 200 },
-  /* Customers */
   { category: 'Customers',    text: 'Owner personally calls top 10 customers within first 10 days' },
   { category: 'Customers',    text: 'Review revenue concentration; flag any customer > 15% of revenue' },
-  { category: 'Customers',    text: 'Transition plan for any seller-held customer relationships', ifCustRelGte: 5 },
-  { category: 'Customers',    text: 'Customer-facing communication: continuity messaging in writing' },
-  /* Vendors */
-  { category: 'Vendors',      text: 'Notify key vendors of ownership change; confirm contract assignments' },
-  { category: 'Vendors',      text: 'Insurance: confirm all policies binder through close date + extension' },
-  { category: 'Vendors',      text: 'Banking: open new operating account; transfer balances; reissue checks' },
+  { category: 'Customers',    text: 'Transition plan for seller-held customer relationships', ifCustRelGte: 5 },
+  { category: 'Customers',    text: 'Customer-facing continuity messaging \u2014 in writing' },
+  { category: 'Vendors',      text: 'Notify key vendors of ownership change; confirm assignments' },
+  { category: 'Vendors',      text: 'Insurance: confirm policies binder through close + extension' },
+  { category: 'Vendors',      text: 'Banking: open operating account; transfer balances; reissue checks' },
   { category: 'Vendors',      text: 'Lender / SBA notification if applicable' },
-  /* Operations */
-  { category: 'Operations',   text: 'Establish cash position: 13-week cash forecast through Day 90' },
-  { category: 'Operations',   text: 'Confirm working capital peg settlement and post-close true-up schedule' },
+  { category: 'Operations',   text: '13-week cash forecast through Day 90' },
+  { category: 'Operations',   text: 'Confirm working capital peg settlement schedule' },
   { category: 'Operations',   text: 'Review outstanding AR > 60 days; set collection priorities' },
   { category: 'Operations',   text: 'Confirm monthly close process; identify gaps from DD' },
   { category: 'Operations',   text: 'QBR calendar set with management for days 30 / 60 / 90 / 180' },
@@ -209,9 +393,7 @@ function Day1ChecklistGenerator({ onSend }: { onSend: (text: string) => void }) 
 
   const grouped = useMemo(() => {
     const g: Record<string, ChecklistItem[]> = {};
-    for (const item of items) {
-      (g[item.category] ||= []).push(item);
-    }
+    for (const item of items) (g[item.category] ||= []).push(item);
     return g;
   }, [items]);
 
@@ -222,22 +404,17 @@ function Day1ChecklistGenerator({ onSend }: { onSend: (text: string) => void }) 
   return (
     <>
       <H2>Generate your Day 1 checklist right now.</H2>
-      <Body lead style={{ marginBottom: 28 }}>
-        Five questions. 90 seconds. Customized to your acquisition.
-      </Body>
+      <p className="gg-body--sub" style={{ marginBottom: 40 }}>Five questions. 90 seconds. Customized to your acquisition.</p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 720, marginBottom: 32 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, maxWidth: 1200, marginBottom: 32 }}>
         <ChipRow label="Industry" options={INDUSTRY_OPTS as unknown as string[]}
           active={INDUSTRY_OPTS.indexOf(industry as typeof INDUSTRY_OPTS[number])}
           onPick={i => setIndustry(INDUSTRY_OPTS[i])} />
-        <ChipRow label="Employee count" options={HEADCOUNT_OPTS as unknown as string[]}
-          active={headcountIdx} onPick={setHeadcountIdx} />
-        <ChipRow label="Revenue" options={REVENUE_OPTS as unknown as string[]}
-          active={revenueIdx} onPick={setRevenueIdx} />
-        <ChipRow label="Customer relationships held by seller" options={CUST_REL_OPTS as unknown as string[]}
-          active={custRelIdx} onPick={setCustRelIdx} />
+        <ChipRow label="Employee count" options={HEADCOUNT_OPTS as unknown as string[]} active={headcountIdx} onPick={setHeadcountIdx} />
+        <ChipRow label="Revenue" options={REVENUE_OPTS as unknown as string[]} active={revenueIdx} onPick={setRevenueIdx} />
+        <ChipRow label="Customer relationships held by seller" options={CUST_REL_OPTS as unknown as string[]} active={custRelIdx} onPick={setCustRelIdx} />
         <div>
-          <div className="gg-label" style={{ marginBottom: 10 }}>Systems migration required?</div>
+          <div className="gg-label" style={{ marginBottom: 12 }}>Systems migration required?</div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button type="button" className={`gg-chip${migration ? ' active' : ''}`} aria-pressed={migration} onClick={() => setMigration(true)}>Yes</button>
             <button type="button" className={`gg-chip${!migration ? ' active' : ''}`} aria-pressed={!migration} onClick={() => setMigration(false)}>No</button>
@@ -245,20 +422,20 @@ function Day1ChecklistGenerator({ onSend }: { onSend: (text: string) => void }) 
         </div>
       </div>
 
-      <Card padding={28} style={{ background: 'var(--gg-bg-app)' }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 8 }}>
+      <Card padding={32}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 8 }}>
           <div className="gg-label">Your Day 1 checklist</div>
-          <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 28, fontVariantNumeric: 'tabular-nums' }}>{items.length} items</div>
+          <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 32, fontVariantNumeric: 'tabular-nums' }}>{items.length} items</div>
         </div>
 
         {(Object.keys(grouped) as Array<keyof typeof grouped>).map(cat => (
           <div key={cat as string} style={{ marginBottom: 24 }}>
-            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--gg-text-muted)', marginBottom: 10 }}>
+            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--gg-text-muted)', marginBottom: 12 }}>
               {cat}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {grouped[cat as string].map((item, i) => (
-                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 14, lineHeight: 1.5 }}>
+                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', fontSize: 14, lineHeight: 1.5 }}>
                   <input type="checkbox" style={{ marginTop: 3, accentColor: 'var(--gg-accent)' }} />
                   <span>{item.text}</span>
                 </div>
@@ -268,7 +445,7 @@ function Day1ChecklistGenerator({ onSend }: { onSend: (text: string) => void }) 
         ))}
 
         <p className="gg-body" style={{ marginTop: 20, fontSize: 13, color: 'var(--gg-text-muted)', marginBottom: 16 }}>
-          This is a starting point. Your full PMI plan &mdash; 180 days, customized to your specific deal findings &mdash; starts with a conversation.
+          This is a starting point. Your full PMI plan \u2014 180 days, customized to your specific deal findings \u2014 starts with a conversation.
         </p>
         <button type="button" className="gg-btn gg-btn--primary" onClick={sendToYulia}>
           Tell Yulia about your acquisition &rarr;
@@ -283,7 +460,7 @@ function ChipRow({ label, options, active, onPick }: {
 }) {
   return (
     <div>
-      <div className="gg-label" style={{ marginBottom: 10 }}>{label}</div>
+      <div className="gg-label" style={{ marginBottom: 12 }}>{label}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {options.map((opt, i) => (
           <button
