@@ -2019,13 +2019,13 @@ export default function AppShell() {
       }}
     >
       {/* Desktop sidebar — fixed 80px icon rail.
-          Hidden on public-marketing flows (journey pages for logged-out
-          users); the Glass Grok page primitive renders its own sidebar. */}
-      {!(viewState === 'landing' && !user) && sidebarContent(false)}
+          One sidebar, state-aware: 'explore' mode (Sell/Buy/Raise/…)
+          on public marketing, 'tools' mode (Library/Data Rm/…) in-app.
+          Morph handled inside sidebarContent. */}
+      {sidebarContent(false)}
 
-      {/* Main canvas — offset by sidebar (16 left + 72 width + 16 gap = 104px).
-          On public marketing, no legacy sidebar → no left offset. */}
-      <div className={`flex-1 flex flex-col min-w-0 ${(viewState === 'landing' && !user) ? '' : 'lg:ml-[104px]'} bg-transparent ${isChat ? 'h-full' : ''}`}>
+      {/* Main canvas — offset by sidebar (16 left + 72 width + 16 gap = 104px). */}
+      <div className={`flex-1 flex flex-col min-w-0 lg:ml-[104px] bg-transparent ${isChat ? 'h-full' : ''}`}>
         {/* Offline banner */}
         {isOffline && (
           <div className="shrink-0 bg-yellow-50 border-b border-yellow-200 px-4 py-2 flex items-center justify-center gap-2 z-30">

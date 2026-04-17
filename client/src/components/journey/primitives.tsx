@@ -86,24 +86,17 @@ export function Page({ children, active, onNavigate, onSignIn, onStartFree, ctaL
       }}
     >
       {isDesktop ? (
-        /* ── Desktop shell — Sidebar + main + Footer ── */
-        <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-          <div className="gg-shell">
-            <Sidebar
-              active={active}
-              onNavigate={onNavigate}
-              onSignIn={onSignIn}
-              onStartFree={onStartFree}
-              ctaLabel={ctaLabel}
-            />
-            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <div className="gg-scroll-progress" aria-hidden="true" />
-              <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                {children}
-              </main>
-              <Footer />
-            </div>
-          </div>
+        /* ── Desktop shell — main + Footer only.
+           AppShell's outer sidebar is the canonical nav (Tools / Deals /
+           Account). Previously we rendered a second "Explore / Learn"
+           Glass Grok sidebar here, which stacked two nav rails and
+           clipped the hero to 60% width on wide screens. Dropped. */
+        <div style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0, width: '100%' }}>
+          <div className="gg-scroll-progress" aria-hidden="true" />
+          <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, width: '100%' }}>
+            {children}
+          </main>
+          <Footer />
         </div>
       ) : (
         /* ── Mobile shell (floating nav pill + slide-down menu) ── */
@@ -765,9 +758,19 @@ function useCountUpStringLocal(s: string, active: boolean, duration = 1200): str
    CARD — content surface. Used for exit paths, structures, features, etc.
    ═════════════════════════════════════════════════════════════════════ */
 
-export function Card({ children, padding = 22, style }: { children: ReactNode; padding?: number; style?: React.CSSProperties }) {
+export function Card({ children, padding = 22, style, onClick }: {
+  children: ReactNode; padding?: number; style?: React.CSSProperties; onClick?: () => void;
+}) {
+  const clickable = !!onClick;
   return (
-    <div className="gg-card" style={{ padding, ...style }}>
+    <div
+      className={`gg-card${clickable ? ' gg-card--clickable' : ''}`}
+      role={clickable ? 'button' : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick!(); } } : undefined}
+      style={{ padding, ...style }}
+    >
       {children}
     </div>
   );

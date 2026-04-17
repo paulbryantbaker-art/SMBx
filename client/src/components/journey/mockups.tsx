@@ -89,6 +89,76 @@ export function useCountUpString(s: string, active: boolean, duration = 1200): s
   return formatCount(live, target, suffix, prefix);
 }
 
+/** Scroll-linked parallax offset. Returns a translateY value in px that
+ *  varies with the element's position in viewport. `rate` is how much
+ *  the element moves per pixel of scroll past its start (e.g. 0.12 = 12%
+ *  of scroll distance). Positive = moves up (counter-scroll); negative
+ *  = moves down (with-scroll). Reduced-motion returns 0. */
+export function useParallax<T extends HTMLElement>(rate = 0.1): [React.RefObject<T | null>, number] {
+  const ref = useRef<T | null>(null);
+  const [offset, setOffset] = useState(0);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) return;
+    let raf = 0;
+    const update = () => {
+      const rect = node.getBoundingClientRect();
+      /* Center the reference point: when the element's center is at viewport
+         center, offset is 0. Distance from center drives the translate. */
+      const center = rect.top + rect.height / 2;
+      const vpCenter = window.innerHeight / 2;
+      const delta = (vpCenter - center) * rate;
+      setOffset(delta);
+    };
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => { update(); raf = 0; });
+    };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [rate]);
+  return [ref, offset];
+}
+
+/** Type-on effect — reveals `text` character by character while `active`
+ *  is true. Returns the current substring plus a boolean "done". Used for
+ *  the "live conversation" moment on /how-it-works. */
+export function useTypewriter(text: string, active: boolean, charsPerSecond = 45, startDelay = 0): { shown: string; done: boolean } {
+  const [shown, setShown] = useState('');
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    if (!active) return;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) { setShown(text); setDone(true); return; }
+    setShown('');
+    setDone(false);
+    let cancelled = false;
+    let raf = 0;
+    let startTime = 0;
+    const tick = (now: number) => {
+      if (cancelled) return;
+      if (!startTime) startTime = now;
+      const elapsed = now - startTime - startDelay;
+      if (elapsed < 0) { raf = requestAnimationFrame(tick); return; }
+      const chars = Math.min(text.length, Math.floor((elapsed / 1000) * charsPerSecond));
+      setShown(text.slice(0, chars));
+      if (chars < text.length) raf = requestAnimationFrame(tick);
+      else setDone(true);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => { cancelled = true; if (raf) cancelAnimationFrame(raf); };
+  }, [text, active, charsPerSecond, startDelay]);
+  return { shown, done };
+}
+
 /* ═════════════════════════════════════════════════════════════════════
    PEEK STACK — home hero right column
    Three floating cards at slight rotations: conversation, baseline,

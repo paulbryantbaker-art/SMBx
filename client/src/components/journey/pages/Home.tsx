@@ -39,10 +39,16 @@ const SHORTCUTS: { label: string; journey: Journey }[] = [
    Middle card (Deal screening) inverts to dark fill for visual rhythm —
    three identical greys in a row reads templated; one dark in the
    middle breaks the grid without a color. */
-const FEATURES = [
-  { idx: '01 · Add-backs',       heading: 'Find the money hiding in your tax returns.',            body: 'Pre-LOI earnings quality analysis. Every legitimate add-back identified, documented, and defensible. 20 minutes, not 6 weeks.',         viz: 'addback' as const, invert: false },
-  { idx: '02 · Deal screening',  heading: 'Score any deal in 90 seconds on seven dimensions.',     body: 'The Rundown. Concentration, margins, revenue quality, owner dependency, management depth, financial integrity, scalability. Pursue or pass.', viz: 'score'   as const, invert: true  },
-  { idx: '03 · SBA structure',   heading: 'Model SOP 50 10 8 capital stacks under current rules.', body: 'Senior, mezzanine, seller notes with correct standby terms, equity injection requirements. Restructures killed deals into closable ones.',   viz: 'stack'   as const, invert: false },
+const FEATURES: {
+  idx: string; heading: string; body: string;
+  viz: 'addback' | 'score' | 'stack';
+  invert: boolean;
+  journey: Journey;
+  cta: string;
+}[] = [
+  { idx: '01 · Add-backs',       heading: 'Find the money hiding in your tax returns.',            body: 'Pre-LOI earnings quality analysis. Every legitimate add-back identified, documented, and defensible. 20 minutes, not 6 weeks.',         viz: 'addback', invert: false, journey: 'sell',  cta: 'See how sellers use it' },
+  { idx: '02 · Deal screening',  heading: 'Score any deal in 90 seconds on seven dimensions.',     body: 'The Rundown. Concentration, margins, revenue quality, owner dependency, management depth, financial integrity, scalability. Pursue or pass.', viz: 'score',   invert: true,  journey: 'buy',   cta: 'See how buyers use it'  },
+  { idx: '03 · SBA structure',   heading: 'Model SOP 50 10 8 capital stacks under current rules.', body: 'Senior, mezzanine, seller notes with correct standby terms, equity injection requirements. Restructures killed deals into closable ones.',   viz: 'stack',   invert: false, journey: 'raise', cta: 'See how borrowers use it' },
 ];
 
 interface HomeProps {
@@ -247,7 +253,7 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
           }}
         >
           {FEATURES.map(f => (
-            <FeatureCard key={f.idx} {...f} />
+            <FeatureCard key={f.idx} {...f} onClick={() => onNavigateJourney(f.journey)} />
           ))}
         </div>
       </section>
@@ -255,12 +261,15 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
   );
 }
 
-function FeatureCard({ idx, heading, body, viz, invert }: {
+function FeatureCard({ idx, heading, body, viz, invert, cta, onClick }: {
   idx: string; heading: string; body: string; viz: 'addback' | 'score' | 'stack'; invert?: boolean;
+  cta: string; onClick: () => void;
 }) {
   const dark = !!invert;
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
       className="gg-card"
       style={{
         padding: 32,
@@ -273,7 +282,13 @@ function FeatureCard({ idx, heading, body, viz, invert }: {
         boxShadow: dark
           ? 'inset 0 0.5px 0 rgba(255, 255, 255, 0.12), 0 6px 24px rgba(0, 0, 0, 0.12)'
           : undefined,
+        textAlign: 'left',
+        cursor: 'pointer',
+        fontFamily: 'var(--gg-body)',
+        transition: 'transform var(--gg-t-snap) var(--gg-ease-snap), box-shadow var(--gg-t-snap) var(--gg-ease-snap)',
       }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
     >
       {viz === 'addback' && <VizBigStat />}
       {viz === 'score'   && <VizScoreCard />}
@@ -294,9 +309,23 @@ function FeatureCard({ idx, heading, body, viz, invert }: {
       >
         {heading}
       </h3>
-      <p className="gg-body" style={{ marginTop: 'auto', marginBottom: 0, fontSize: 14, color: dark ? 'rgba(255,255,255,0.75)' : undefined }}>
+      <p className="gg-body" style={{ marginBottom: 20, fontSize: 14, color: dark ? 'rgba(255,255,255,0.75)' : undefined }}>
         {body}
       </p>
-    </div>
+      <span style={{
+        marginTop: 'auto',
+        fontFamily: 'var(--gg-display)',
+        fontWeight: 700,
+        fontSize: 13,
+        letterSpacing: '-0.005em',
+        color: dark ? '#fff' : 'var(--gg-text-primary)',
+        display: 'inline-flex', alignItems: 'center', gap: 8,
+      }}>
+        {cta}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </span>
+    </button>
   );
 }

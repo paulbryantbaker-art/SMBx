@@ -50,13 +50,13 @@ const IOI_CELLS = [
   { name: 'PE roll-up',      price: '$2.7M', note: '$400K earnout' },
 ];
 
-const EXIT_PATHS = [
+const EXIT_PATHS: { title: string; body: string; journey?: JourneyTab; cta?: string }[] = [
   { title: 'Full Sale',                   body: 'Sell 100%. Maximum immediate liquidity. Clean break. Best for owners ready to exit entirely.' },
-  { title: 'Majority Sale with Rollover', body: 'Sell 51–80% to PE or strategic. Cash today. Keep equity for a second bite in 3–5 years.' },
-  { title: 'Minority Equity Raise',       body: 'Sell 20–40% to a growth investor. Access capital without giving up control. Stay in the operator seat.' },
+  { title: 'Majority Sale with Rollover', body: 'Sell 51–80% to PE or strategic. Cash today. Keep equity for a second bite in 3–5 years.',       journey: 'raise', cta: 'Explore raising capital' },
+  { title: 'Minority Equity Raise',       body: 'Sell 20–40% to a growth investor. Access capital without giving up control. Stay in the operator seat.', journey: 'raise', cta: 'Explore minority raises' },
   { title: 'ESOP',                        body: 'Sell to your employees. Significant tax advantages via Section 1042. Stay as chairman. Culture preserved.' },
-  { title: 'Recapitalization',            body: 'Dividend recap with debt. Take $15M–$40M in cash. Retain 100% equity. Keep growing.' },
-  { title: 'Partial Asset Sale',          body: 'Sell a division, license IP, sell-leaseback real estate. Unlock value without a full exit.' },
+  { title: 'Recapitalization',            body: 'Dividend recap with debt. Take $15M–$40M in cash. Retain 100% equity. Keep growing.',           journey: 'raise', cta: 'Model a recap' },
+  { title: 'Partial Asset Sale',          body: 'Sell a division, license IP, sell-leaseback real estate. Unlock value without a full exit.',    journey: 'raise', cta: 'Explore partial monetization' },
 ];
 
 const SECNAV = [
@@ -218,20 +218,39 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16 }}>
           {EXIT_PATHS.map((p, i) => {
             const featured = i < 2;
+            const clickable = !!p.journey && !!onNavigate;
+            const handleClick = clickable ? () => onNavigate!(p.journey!) : undefined;
             return (
               <Card
                 key={p.title}
                 padding={featured ? 32 : 22}
+                onClick={handleClick}
                 style={{
                   gridColumn: featured ? 'span 2' : 'span 1',
                   borderColor: featured ? 'var(--gg-text-primary)' : undefined,
+                  cursor: clickable ? 'pointer' : 'default',
                 }}
               >
                 {featured && (
                   <div className="gg-label" style={{ marginBottom: 10, fontSize: 10 }}>Most common</div>
                 )}
                 <h4 style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: featured ? 19 : 15, letterSpacing: '-0.01em', marginBottom: 10, color: 'var(--gg-text-primary)' }}>{p.title}</h4>
-                <p className="gg-body" style={{ marginBottom: 0, fontSize: featured ? 14 : 13, lineHeight: 1.55 }}>{p.body}</p>
+                <p className="gg-body" style={{ marginBottom: clickable ? 14 : 0, fontSize: featured ? 14 : 13, lineHeight: 1.55 }}>{p.body}</p>
+                {clickable && (
+                  <span style={{
+                    fontFamily: 'var(--gg-display)',
+                    fontWeight: 700,
+                    fontSize: featured ? 12 : 11,
+                    letterSpacing: '-0.005em',
+                    color: 'var(--gg-text-primary)',
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                  }}>
+                    {p.cta}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </span>
+                )}
               </Card>
             );
           })}
