@@ -37,29 +37,17 @@ export default function DealTab({ deal }: Props) {
   const stageLong = GATE_LABEL[stageShort] || 'Getting started';
   const name = deal.business_name || 'Deal';
 
+  /* Page identity lives in the hero card (business name + stage pill + icon
+     + meta). The old <h1> Sora 28px page title repeated the same name one
+     line above the card — removed per /distill. The stage eyebrow becomes
+     the first thing the user sees, setting context without repeating the
+     deal name. Suppress the no-unused-var warning for `name` — HeroCard
+     reads it directly from `deal`. */
+  void name;
+
   return (
     <div style={{ paddingBottom: 8 }}>
-      <h1
-        style={{
-          fontFamily: "'Sora', system-ui, sans-serif",
-          fontWeight: 800,
-          fontSize: 28,
-          letterSpacing: '-0.025em',
-          color: 'var(--text-primary)',
-          padding: '6px 20px 14px',
-          margin: 0,
-          /* Long business names (legal entity names can be 60+ chars) truncate
-             cleanly instead of wrapping into a second line that breaks the
-             stage-label rhythm below. */
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        }}
-        title={name}
-      >
-        {name}
-      </h1>
-
+      <div style={{ height: 8 }} aria-hidden />
       <SectionLabel>Stage · {stageLong}</SectionLabel>
 
       <HeroCard deal={deal} />
