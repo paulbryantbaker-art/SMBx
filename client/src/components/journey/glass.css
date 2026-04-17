@@ -561,8 +561,25 @@
 }
 .gg-sidebar__bottom {
   margin-top: auto;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding-bottom: 4px;
 }
+
+/* Primary-style CTA button at the bottom of the sidebar. Black-filled
+   44×44 circle with an arrow — the "Start free" affordance. */
+.gg-sidebar__cta {
+  width: 44px; height: 44px;
+  border-radius: var(--gg-r-btn);
+  background: var(--gg-accent);
+  color: var(--gg-text-inv);
+  display: flex; align-items: center; justify-content: center;
+  border: 0; padding: 0; cursor: pointer;
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.15),
+    0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform var(--gg-t-feedback) var(--gg-ease-snap);
+}
+.gg-sidebar__cta:hover { transform: translateY(-1px); }
 
 .gg-topbar {
   height: 64px;

@@ -43,20 +43,10 @@ import CommandPalette, { type CommandItem } from '../../components/desktop/Comma
 import DesktopFooter from '../../components/desktop/DesktopFooter';
 import { ModelRenderer } from '../../components/models';
 import { ScrollProgressBar } from '../../components/content/animations';
-const SellBelow = lazy(() => import('../../components/content/SellBelow'));
-const MobileSellStory = lazy(() => import('../../components/mobile/MobileSellStory'));
-const BuyBelow = lazy(() => import('../../components/content/BuyBelow'));
-const MobileBuyStory = lazy(() => import('../../components/mobile/MobileBuyStory'));
-const RaiseBelow = lazy(() => import('../../components/content/RaiseBelow'));
-const MobileRaiseStory = lazy(() => import('../../components/mobile/MobileRaiseStory'));
-const IntegrateBelow = lazy(() => import('../../components/content/IntegrateBelow'));
-const MobileIntegrateStory = lazy(() => import('../../components/mobile/MobileIntegrateStory'));
-const HowItWorksBelow = lazy(() => import('../../components/content/HowItWorksBelow'));
-const MobileHowStory = lazy(() => import('../../components/mobile/MobileHowStory'));
-const AdvisorsBelow = lazy(() => import('../../components/content/AdvisorsBelow'));
-const MobileAdvisorsStory = lazy(() => import('../../components/mobile/MobileAdvisorsStory'));
-const PricingBelow = lazy(() => import('../../components/content/PricingBelow'));
-const MobilePricingStory = lazy(() => import('../../components/mobile/MobilePricingStory'));
+/* Legacy *Below.tsx + Mobile*Story.tsx retired (2026-04-17).
+   Public journey pages now live entirely in components/journey/pages/*.
+   The Glass Grok redesign replaces the old editorial-style pages +
+   mobile-first story scaffolding with a single responsive shell. */
 
 // Glass Grok redesign — new public-site components
 const GlassGrokHome = lazy(() => import('../../components/journey/pages/Home'));

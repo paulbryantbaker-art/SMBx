@@ -64,12 +64,17 @@ export function Page({ children, active, onNavigate, onSignIn, onStartFree, ctaL
         fontFamily: 'var(--gg-body)',
       }}
     >
-      {/* ── Desktop shell — Sidebar + TopBar + main + Footer ── */}
+      {/* ── Desktop shell — Sidebar + main + Footer (no topbar per Paul) ── */}
       <div className="gg-desktop-only" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
         <div className="gg-shell">
-          <Sidebar active={active} onNavigate={onNavigate} />
+          <Sidebar
+            active={active}
+            onNavigate={onNavigate}
+            onSignIn={onSignIn}
+            onStartFree={onStartFree}
+            ctaLabel={ctaLabel}
+          />
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-            <TopBar active={active} onNavigate={onNavigate} onSignIn={onSignIn} onStartFree={onStartFree} ctaLabel={ctaLabel} />
             <div className="gg-scroll-progress" aria-hidden="true" />
             <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               {children}
@@ -115,7 +120,13 @@ export function Page({ children, active, onNavigate, onSignIn, onStartFree, ctaL
    SIDEBAR — 68px icon-only nav, X logo at top
    ═════════════════════════════════════════════════════════════════════ */
 
-function Sidebar({ active, onNavigate }: { active?: JourneyTab; onNavigate?: (d: JourneyTab) => void }) {
+function Sidebar({ active, onNavigate, onSignIn, onStartFree, ctaLabel = 'Start free' }: {
+  active?: JourneyTab;
+  onNavigate?: (d: JourneyTab) => void;
+  onSignIn?: () => void;
+  onStartFree?: () => void;
+  ctaLabel?: string;
+}) {
   const go = (d: JourneyTab) => onNavigate?.(d);
   return (
     <aside className="gg-sidebar">
@@ -140,6 +151,39 @@ function Sidebar({ active, onNavigate }: { active?: JourneyTab; onNavigate?: (d:
       <NavIcon label="How it works" active={active === 'how-it-works'} onClick={() => go('how-it-works')} icon={<><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01" /></>} />
       <NavIcon label="Pricing"      active={active === 'pricing'}      onClick={() => go('pricing')}      icon={<><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" /><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" /></>} />
       <NavIcon label="Enterprise"   active={active === 'enterprise'}   onClick={() => go('enterprise')}   icon={<><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9v.01M9 13v.01M9 17v.01M15 9v.01M15 13v.01M15 17v.01" /></>} />
+
+      {/* Bottom rail — Sign in + primary CTA. Since the topbar is gone,
+          the sidebar carries the conversion paths: Sign in as a small icon,
+          Start free as a vertical primary pill right above the bottom of the
+          rail. Title tooltip carries the full label for accessibility. */}
+      <div className="gg-sidebar__bottom">
+        {onSignIn && (
+          <button
+            type="button"
+            onClick={onSignIn}
+            className="gg-sidebar__item"
+            aria-label="Sign in"
+            title="Sign in"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
+            </svg>
+          </button>
+        )}
+        {onStartFree && (
+          <button
+            type="button"
+            onClick={onStartFree}
+            className="gg-sidebar__cta"
+            aria-label={ctaLabel}
+            title={ctaLabel}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M13 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
+      </div>
     </aside>
   );
 }
