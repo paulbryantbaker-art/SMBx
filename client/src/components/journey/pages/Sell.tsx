@@ -200,7 +200,7 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
       <Section label="Exit paths">
         <H2>Selling 100% isn’t your only option.</H2>
         <p className="gg-body--sub" style={{ marginBottom: 40 }}>Yulia models every exit structure against your specific numbers. In one conversation.</p>
-        <div style={{ display: ‘grid’, gridTemplateColumns: ‘repeat(4, minmax(0, 1fr))’, gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16 }}>
           {EXIT_PATHS.map((p, i) => {
             const featured = i < 2;
             return (
@@ -208,14 +208,14 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
                 key={p.title}
                 padding={featured ? 32 : 22}
                 style={{
-                  gridColumn: featured ? ‘span 2’ : ‘span 1’,
-                  borderColor: featured ? ‘var(--gg-text-primary)’ : undefined,
+                  gridColumn: featured ? 'span 2' : 'span 1',
+                  borderColor: featured ? 'var(--gg-text-primary)' : undefined,
                 }}
               >
                 {featured && (
                   <div className="gg-label" style={{ marginBottom: 10, fontSize: 10 }}>Most common</div>
                 )}
-                <h4 style={{ fontFamily: ‘var(--gg-display)’, fontWeight: 700, fontSize: featured ? 19 : 15, letterSpacing: ‘-0.01em’, marginBottom: 10, color: ‘var(--gg-text-primary)’ }}>{p.title}</h4>
+                <h4 style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: featured ? 19 : 15, letterSpacing: '-0.01em', marginBottom: 10, color: 'var(--gg-text-primary)' }}>{p.title}</h4>
                 <p className="gg-body" style={{ marginBottom: 0, fontSize: featured ? 14 : 13, lineHeight: 1.55 }}>{p.body}</p>
               </Card>
             );
