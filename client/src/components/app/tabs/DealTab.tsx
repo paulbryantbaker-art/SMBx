@@ -18,6 +18,7 @@
  */
 
 import type { AppDeal, StatusKind } from '../types';
+import TermInfo from '../TermInfo';
 
 const GATE_LABEL: Record<string, string> = {
   S0: 'Getting started', S1: 'Financials', S2: 'Valuation', S3: 'Packaging', S4: 'Matching', S5: 'Closing',
@@ -71,7 +72,25 @@ export default function DealTab({ deals, activeDealId, onSelectDeal }: Props) {
 
       <StatsStrip
         stats={[
-          { n: '$47K', l: 'Add-backs' },
+          {
+            n: '$47K',
+            l: (
+              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                Add-backs
+                <TermInfo
+                  term="Add-backs"
+                  definition={
+                    <>
+                      Expenses on the P&amp;L that aren't truly part of running
+                      the business (owner salary beyond market, one-time legal
+                      fees, personal travel). Adding them back shows the true
+                      earnings.
+                    </>
+                  }
+                />
+              </span>
+            ),
+          },
           { n: '60%', l: 'Recurring' },
           { n: String(activeDeal.conversations?.length ?? 0), l: 'Chapters' },
           { n: stageShort, l: 'Gate' },
@@ -80,7 +99,25 @@ export default function DealTab({ deals, activeDealId, onSelectDeal }: Props) {
 
       <SectionLabel>Do next</SectionLabel>
       <DoNextCard
-        title="Generate your CIM"
+        title={
+          <>
+            Generate your{' '}
+            <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+              CIM
+              <TermInfo
+                term="CIM"
+                fullName="CIM · Confidential Information Memorandum"
+                definition={
+                  <>
+                    The 10–15 page marketing document buyers read first.
+                    Financials, story, deal structure — the "business of the
+                    business" one-pager done right.
+                  </>
+                }
+              />
+            </span>
+          </>
+        }
         meta="10–12 page marketing package built from your P&L, add-backs, and story."
         action="Start CIM"
       />
@@ -368,9 +405,41 @@ function HeroCard({ deal }: { deal: AppDeal }) {
           fontSize: 11.5,
           color: 'var(--text-muted)',
           marginBottom: 14,
+          display: 'flex',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          rowGap: 2,
         }}
       >
-        Refined · Adjusted SDE $695K · 3.5×–4.2×
+        <span>Refined · Adjusted&nbsp;</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+          SDE
+          <TermInfo
+            term="SDE"
+            fullName="SDE · Seller's Discretionary Earnings"
+            definition={
+              <>
+                Your business's real profit after adding back the owner's comp
+                and personal expenses. The number buyers actually evaluate.
+              </>
+            }
+          />
+        </span>
+        <span>&nbsp;$695K ·&nbsp;</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+          3.5×–4.2×
+          <TermInfo
+            term="Multiple"
+            fullName="Multiple (3.5×–4.2×)"
+            definition={
+              <>
+                The ratio of sale price to SDE. A 4× multiple on $695K SDE =
+                $2.78M price. Market multiples vary by industry, size, and
+                recurring-revenue mix.
+              </>
+            }
+          />
+        </span>
       </div>
 
       <div
@@ -412,7 +481,7 @@ function HeroCard({ deal }: { deal: AppDeal }) {
 }
 
 /* ─── Stats strip ─── */
-function StatsStrip({ stats }: { stats: Array<{ n: string; l: string }> }) {
+function StatsStrip({ stats }: { stats: Array<{ n: string; l: React.ReactNode }> }) {
   return (
     <div
       style={{
@@ -471,7 +540,7 @@ function DoNextCard({
   meta,
   action,
 }: {
-  title: string;
+  title: React.ReactNode;
   meta: string;
   action: string;
 }) {

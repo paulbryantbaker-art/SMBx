@@ -99,13 +99,23 @@ export default function YuliaAgent({
     setDraft('');
   };
 
+  const hasMessages = messages.length > 0;
   const latestAssistant = messages.filter((m) => m.role === 'assistant').slice(-1)[0];
+  const latestAssistantPreview = latestAssistant?.content?.slice(0, 64);
+
+  /* First-run state (no messages yet): surface an action-inviting prompt so
+     the user understands the bar is tappable. Once a conversation exists,
+     fall back to showing a preview of Yulia's latest message. */
   const title = sending
     ? activeTool || 'Thinking…'
-    : latestAssistant?.content?.slice(0, 64) || 'Ready when you are';
+    : hasMessages
+      ? latestAssistantPreview || 'Continue the conversation'
+      : 'Ask Yulia anything';
   const subtext = streamingText
     ? streamingText.slice(-60)
-    : latestAssistant?.content?.slice(64, 140) || '';
+    : hasMessages
+      ? latestAssistant?.content?.slice(64, 140) || ''
+      : 'Your AI deal partner · tap to chat';
 
   if (state === 'side') {
     return (

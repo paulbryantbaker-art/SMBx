@@ -272,36 +272,44 @@
 
 /* ═══════════════════════════════════════════════════════════════════════
    TYPE SCALE — display and body
+   Desktop spec: bigger and heavier than mobile. H1 88px home / 72px
+   journey, H2 52px section / 44px hero-block, stat 72px.
    ═══════════════════════════════════════════════════════════════════════ */
 
 .gg-h1 {
   font-family: var(--gg-display);
   font-weight: 800;
-  font-size: clamp(34px, 5.2vw, 64px);
-  line-height: 1.02;
-  letter-spacing: -0.035em;
+  font-size: clamp(42px, 7vw, 88px);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
   color: var(--gg-text-primary);
-  /* Glass Grok brand rule: no italic, no line-break hacks. Reflow via size. */
   text-wrap: balance;
 }
 .gg-h1--journey {
-  font-size: clamp(30px, 4.4vw, 48px);
-  letter-spacing: -0.03em;
-  line-height: 1.05;
+  font-size: clamp(36px, 5.6vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.035em;
 }
 .gg-h2 {
   font-family: var(--gg-display);
   font-weight: 800;
-  font-size: clamp(24px, 3vw, 32px);
-  line-height: 1.1;
-  letter-spacing: -0.025em;
+  font-size: clamp(28px, 4.2vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
   color: var(--gg-text-primary);
   text-wrap: balance;
+}
+.gg-h2--block {
+  /* H2 used inside a two-column zigzag (paired with a product mockup);
+     a notch smaller than section-intro H2. */
+  font-size: clamp(28px, 3.2vw, 44px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
 }
 .gg-h3 {
   font-family: var(--gg-display);
   font-weight: 700;
-  font-size: 17px;
+  font-size: 18px;
   letter-spacing: -0.01em;
   line-height: 1.2;
   color: var(--gg-text-primary);
@@ -309,9 +317,9 @@
 .gg-stat {
   font-family: var(--gg-display);
   font-weight: 800;
-  font-size: clamp(44px, 5.5vw, 64px);
-  line-height: 1;
-  letter-spacing: -0.035em;
+  font-size: clamp(52px, 6.5vw, 72px);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
   color: var(--gg-text-primary);
   font-variant-numeric: tabular-nums;
 }
@@ -319,21 +327,44 @@
   font-family: var(--gg-display);
   font-weight: 700;
   font-size: 11px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--gg-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
 }
+/* Line prefix on the eyebrow (small stroke before the label). Present on
+   desktop heroes; auto-shown via CSS without extra markup. */
+.gg-eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+.gg-eyebrow--plain::before { display: none; }
 .gg-body {
   font-family: var(--gg-body);
   font-weight: 500;
-  font-size: 15px;
-  line-height: 1.65;
+  font-size: 16px;
+  line-height: 1.7;
   color: var(--gg-text-secondary);
 }
 .gg-body--lead {
-  font-size: 17px;
+  font-size: 19px;
   line-height: 1.55;
-  color: var(--gg-text-primary);
+  color: var(--gg-text-secondary);
+  font-weight: 500;
+}
+.gg-body--sub {
+  /* Section sub-headline (under H2, before content). */
+  font-family: var(--gg-body);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--gg-text-secondary);
+  max-width: 780px;
 }
 .gg-label {
   font-family: var(--gg-display);
@@ -352,17 +383,22 @@
 
 /* ═══════════════════════════════════════════════════════════════════════
    SECTION RHYTHM — banding without color
+   Desktop: alternating app-grey → white → app-grey → white → dark.
+   Content cap 1360px, padding 72px (clamp on smaller screens).
    ═══════════════════════════════════════════════════════════════════════ */
 
 .gg-section {
-  padding: var(--gg-s10) clamp(20px, 5vw, 56px);
-  border-top: 0.5px solid var(--gg-border);
+  padding: clamp(48px, 6vw, 96px) clamp(20px, 5vw, 72px);
+}
+.gg-section__inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  width: 100%;
 }
 .gg-section--tint { background: var(--gg-bg-card); }
 .gg-section--dark {
   background: var(--gg-accent);
   color: var(--gg-text-inv);
-  border-top-color: transparent;
 }
 .gg-section--dark .gg-h2,
 .gg-section--dark .gg-h3,
@@ -370,6 +406,42 @@
 .gg-section--dark .gg-body { color: #C5C5CA; }
 .gg-section--dark .gg-eyebrow,
 .gg-section--dark .gg-label { color: #9A9AA0; }
+.gg-section--dark .gg-body--sub { color: #C5C5CA; }
+
+/* Two-column zigzag — the "text + mockup" hero-section pattern.
+   Left/right determined by the optional --reverse class. */
+.gg-two-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(32px, 4vw, 64px);
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .gg-two-col { grid-template-columns: 1fr 1fr; gap: 80px; }
+  .gg-two-col--reverse > *:first-child { order: 2; }
+}
+
+/* Grid background — 64px squares with radial mask fade. Desktop only.
+   Applied on hero surfaces to add texture without noise. */
+.gg-grid-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+}
+.gg-hero-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(10, 10, 11, 0.025) 0%, transparent 40%),
+    radial-gradient(circle at 85% 60%, rgba(10, 10, 11, 0.02) 0%, transparent 50%);
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
    STATUS PILLS — dot carries the signal, pill stays monochrome
@@ -395,6 +467,143 @@
 .gg-status__dot--progress { background: var(--gg-dot-progress); }
 .gg-status__dot--flag     { background: var(--gg-dot-flag); }
 .gg-status__dot--draft    { background: var(--gg-dot-draft); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVE VISIBILITY — desktop shell vs mobile pill nav
+   Desktop breakpoint: 1024px. At/above, the app shell (sidebar +
+   topbar) is canonical. Below, the floating nav pill takes over.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-desktop-only { display: none; }
+.gg-mobile-only  { display: initial; }
+@media (min-width: 1024px) {
+  .gg-desktop-only { display: initial; }
+  .gg-mobile-only  { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   APP SHELL — Sidebar (68px) + TopBar (64px) + Main.
+   Sidebar is solid white, icon-only nav. TopBar is glass-strong.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-shell {
+  display: grid;
+  grid-template-columns: 68px 1fr;
+  min-height: 100%;
+  width: 100%;
+}
+.gg-sidebar {
+  background: var(--gg-bg-card);
+  border-right: 0.5px solid var(--gg-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 25;
+}
+.gg-sidebar__mark {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  margin-bottom: 28px;
+}
+.gg-sidebar__group-label {
+  font-family: var(--gg-display);
+  font-weight: 700;
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  color: var(--gg-text-faint);
+  text-transform: uppercase;
+  margin: 10px 0 8px;
+  width: 100%;
+  text-align: center;
+}
+.gg-sidebar__item {
+  width: 44px; height: 44px;
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gg-text-muted);
+  margin-bottom: 4px;
+  cursor: pointer;
+  border: 0; padding: 0; background: transparent;
+  transition:
+    background var(--gg-t-feedback) var(--gg-ease-snap),
+    color      var(--gg-t-feedback) var(--gg-ease-snap);
+}
+.gg-sidebar__item:hover {
+  background: var(--gg-bg-subtle);
+  color: var(--gg-text-primary);
+}
+.gg-sidebar__item.active,
+.gg-sidebar__item[aria-current='page'] {
+  background: var(--gg-bg-muted);
+  color: var(--gg-text-primary);
+}
+.gg-sidebar__sep {
+  width: 32px; height: 0.5px;
+  background: var(--gg-border);
+  margin: 12px 0;
+}
+.gg-sidebar__bottom {
+  margin-top: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+
+.gg-topbar {
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  border-bottom: 0.5px solid var(--gg-border);
+  background: var(--gg-glass-strong);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.gg-topbar__nav {
+  display: flex;
+  gap: 4px;
+}
+.gg-topbar__link {
+  font-family: var(--gg-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gg-text-muted);
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  transition: all var(--gg-t-feedback) var(--gg-ease-snap);
+}
+.gg-topbar__link:hover {
+  color: var(--gg-text-primary);
+  background: var(--gg-bg-subtle);
+}
+.gg-topbar__link.active,
+.gg-topbar__link[aria-current='page'] {
+  color: var(--gg-text-primary);
+  background: var(--gg-bg-muted);
+}
+.gg-topbar__right {
+  display: flex; gap: 10px; align-items: center;
+}
+.gg-topbar__signin {
+  font-family: var(--gg-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gg-text-muted);
+  padding: 8px 14px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.gg-topbar__signin:hover { color: var(--gg-text-primary); }
 
 /* ═══════════════════════════════════════════════════════════════════════
    MOTION — frost-in, morph, reduced-motion
