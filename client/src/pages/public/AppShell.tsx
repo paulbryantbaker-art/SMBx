@@ -33,8 +33,7 @@ import DealMessagesPanel from '../../components/documents/DealMessagesPanel';
 import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/CanvasToolbar';
 import CanvasPicker from '../../components/canvas/CanvasPicker';
 import InstallWall, { PWA_DEEP_LINK_KEY } from '../../components/mobile/InstallWall';
-import MobileDealListHome from '../../components/mobile/MobileDealListHome';
-import MobileCanvasHeader from '../../components/mobile/MobileCanvasHeader';
+import AppShellInner from '../../components/app/AppShellInner';
 // MobileChatDrawer removed — mobile chat is full-screen (iMessage pattern).
 import DealWorkspace from '../../components/desktop/DealWorkspace';
 import PipelineTable from '../../components/desktop/PipelineTable';
@@ -71,8 +70,6 @@ import { MobileJourneySheet } from '../../components/mobile/MobileJourneySheet';
 import { MobileWorkspaceSheet } from '../../components/mobile/MobileWorkspaceSheet';
 import { isStandalone } from '../../lib/pwa';
 import { NextActionsCards } from '../../components/mobile/NextActionsCards';
-import { DealStack, filterRealDeals } from '../../components/mobile/DealStack';
-import { DealStackExpanded } from '../../components/mobile/DealStackExpanded';
 import { ArtifactSheet } from '../../components/mobile/ArtifactSheet';
 import { AccountSheet } from '../../components/mobile/AccountSheet';
 import { WorkspaceSheet } from '../../components/mobile/WorkspaceSheet';
@@ -82,16 +79,12 @@ import { ToastHost } from '../../components/mobile/ToastHost';
 import { showToast } from '../../lib/toast';
 import { HelpSheet } from '../../components/mobile/HelpSheet';
 import { ConfirmHost } from '../../components/mobile/ConfirmHost';
-import { DealContextChips } from '../../components/mobile/DealContextChips';
 import { MobileBuyPage } from '../../components/mobile/MobileBuyPage';
 import { MobileRaisePage } from '../../components/mobile/MobileRaisePage';
 import { MobileIntegratePage } from '../../components/mobile/MobileIntegratePage';
 import { MobileAdvisorsPage } from '../../components/mobile/MobileAdvisorsPage';
 import { MobileHowItWorksPage } from '../../components/mobile/MobileHowItWorksPage';
 import { MobilePricingPage } from '../../components/mobile/MobilePricingPage';
-import DealThreadHeader from '../../components/mobile/DealThreadHeader';
-import DealSurfaceToggle, { type DealSurface } from '../../components/mobile/DealSurfaceToggle';
-import ChapterPicker, { type Chapter as DealChapter } from '../../components/mobile/ChapterPicker';
 
 /* Minimal skeleton for lazy Below pages */
 function BelowSkeleton() {
@@ -599,8 +592,6 @@ export default function AppShell() {
 
   // Core state
   const [viewState, setViewState] = useState<ViewState>(() => pathToViewState(location));
-  // Mobile deal surface toggle: Thread (private chat) ↔ Data Room (shared docs).
-  const [mobileDealSurface, setMobileDealSurface] = useState<DealSurface>('thread');
   const isChat = viewState === 'chat';
   const [workspaceDealId, setWorkspaceDealId] = useState<number | null>(() => getInitialDealId(location));
   const { appOffset } = useAppHeight(isChat);   // Only constrain viewport in chat mode
@@ -1271,9 +1262,6 @@ export default function AppShell() {
   const [dealActionsTargetId, setDealActionsTargetId] = useState<number | null>(null);
   // Mobile help sheet — opened from AccountSheet, SignInSheet, or chat empty state.
   const [helpSheetOpen, setHelpSheetOpen] = useState(false);
-  // Mobile expanded deal stack — opened from "See all N deals" indicator.
-  const [stackExpandedOpen, setStackExpandedOpen] = useState(false);
-
   // Desktop ⌘K command palette — global fuzzy launcher.
   const [commandOpen, setCommandOpen] = useState(false);
 
@@ -2129,103 +2117,51 @@ export default function AppShell() {
                       <img src={dark ? '/X-white.png' : '/X.png'} alt="" style={{ height: 36, objectFit: 'contain' }} />
                     </div>
                   ) : isMobile && user ? (
-                    <MobileDealListHome
-                      dark={dark}
-                      loading={!authChat.grouped}
+                    /* ═══ Glass Grok — internal app (post-morph) ═══
+                        AppShellInner owns the 4-tab architecture (Deal/Docs/
+                        Pipeline/Search) and the Yulia agent 3-state machine.
+                        See memory/architecture_glass_grok.md. */
+                    <AppShellInner
                       userName={user.display_name || user.email || null}
-                      messages={messages}
-                      streamingText={streamingText}
-                      sending={sending}
-                      activeTool={activeTool}
-                      chatError={user ? null : anonChat.error}
-                      onRetry={!user ? () => {
-                        const last = anonChat.messages.filter(m => m.role === 'user').pop();
-                        if (last) anonChat.sendMessage(last.content);
-                      } : undefined}
-                      onOpenDeliverable={handleOpenDeliverable}
-                      deals={(authChat.grouped?.deals ?? []).map(d => ({
+                      userInitial={(user.display_name || user.email || 'Y').trim().charAt(0).toUpperCase()}
+                      deals={(authChat.grouped?.deals ?? []).map((d: any) => ({
                         id: d.id,
                         business_name: d.business_name,
                         journey_type: d.journey_type,
                         current_gate: d.current_gate,
                         industry: d.industry,
-                        league: d.league,
+                        league: d.league ?? null,
                         updated_at: d.updated_at,
                         status: d.status,
                         conversations: (d.conversations || []).map((c: any) => ({
                           id: c.id,
                           title: c.title || 'Conversation',
-                          summary: c.summary || undefined,
-                          gate_label: c.gate_label,
-                          active: c.id === authChat.activeConversationId,
+                          summary: c.summary || null,
+                          gate_label: c.gate_label ?? null,
+                          gate_status: c.gate_status ?? null,
+                          updated_at: c.updated_at ?? null,
                         })),
                       }))}
+                      activeDealId={authChat.activeDealId ?? null}
                       activeConversationId={authChat.activeConversationId ?? null}
-                      justCreatedDealId={justCreatedDealId}
-                      recentDocs={recentDocs}
-                      onRecentDocTap={(doc) => {
-                        // If the doc's canvas tab is still open, just
-                        // activate it. Otherwise, for deliverables, reopen
-                        // via openCanvasTab. Other types: best-effort
-                        // re-activation by id.
-                        const existing = canvasTabs.find(t => t.id === doc.doc_id);
-                        if (existing) {
-                          setActiveCanvasTabId(doc.doc_id);
-                          setMobileCanvasVisible(true);
-                          return;
-                        }
-                        if (doc.doc_type === 'deliverable') {
-                          // doc_id format: 'deliverable-<id>'
-                          const m = /deliverable-(\d+)/.exec(doc.doc_id);
-                          if (m) {
-                            const id = parseInt(m[1], 10);
-                            openCanvasTab('deliverable', doc.label || `Document #${id}`, { deliverableId: id, dealId: doc.deal_id });
-                            setMobileCanvasVisible(true);
-                          }
-                        }
+                      messages={messages}
+                      streamingText={streamingText}
+                      sending={sending}
+                      activeTool={activeTool}
+                      onSend={(text) => handleSend(text)}
+                      onSelectDeal={(dealId) => {
+                        const deal = authChat.grouped?.deals.find((d: any) => d.id === dealId);
+                        const latestConv = deal?.conversations?.[0];
+                        if (latestConv) authChat.selectConversation(latestConv.id);
                       }}
-                      onDealTap={(dealId) => {
-                        // Full-screen chat (iMessage pattern). Select the
-                        // latest conversation for this deal and navigate
-                        // to /chat — the chat view fades in over home.
-                        const deal = authChat.grouped?.deals.find(d => d.id === dealId);
-                        const latestConv = deal?.conversations[0];
-                        if (latestConv) {
-                          authChat.selectConversation(latestConv.id);
-                          setViewState('chat');
-                          navigate(`/chat/${latestConv.id}`);
-                        }
-                      }}
-                      onDealLongPress={(dealId) => setDealActionsTargetId(dealId)}
-                      onConversationTap={(convId) => {
-                        authChat.selectConversation(convId);
-                        setViewState('chat');
-                        navigate(`/chat/${convId}`);
-                      }}
-                      onSeeAll={() => setStackExpandedOpen(true)}
-                      onStartFirstDeal={(fill) => {
-                        // Unified mobile: stay on the home surface and prefill
-                        // the pill. Once the user sends, ChatMessages renders
-                        // inline inside MobileDealListHome — no page transition.
-                        requestAnimationFrame(() => {
-                          dockRef.current?.setValue(fill);
-                          dockRef.current?.focus();
-                        });
-                      }}
+                      onOpenDeliverable={handleOpenDeliverable}
                       onAccountTap={() => setWorkspaceSheetOpen(true)}
-                      onLearnTap={() => {
-                        // Unified mobile: prefill the pill with the question.
-                        // User sends, Yulia answers inline in the same surface.
-                        requestAnimationFrame(() => {
-                          dockRef.current?.setValue('How can Yulia help me? ');
-                          dockRef.current?.focus();
-                        });
-                      }}
+                      onBack={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); }}
                     />
                   ) : (
                     /* ═══ Glass Grok home — logged-out + desktop-logged-in ═══
                         New public site per the Glass Grok design system.
-                        Mobile logged-in users above hit MobileDealListHome;
+                        Mobile logged-in users above hit AppShellInner;
                         everyone else gets the redesigned chat-first hero. */
                     <Suspense fallback={<BelowSkeleton />}>
                       <GlassGrokHome
@@ -2444,115 +2380,6 @@ export default function AppShell() {
             />
           </div>
         )}
-        {/* MOBILE DEAL CHROME — DealThreadHeader + DealSurfaceToggle + ChapterPicker.
-            Portaled to body so position:fixed top:0 isn't broken by ancestor transforms.
-            Full chrome when there's an active deal; simple Yulia header for exploring /
-            pre-deal chats where no deal is yet scoped. */}
-        {isMobile && user && viewState === 'chat' && createPortal(
-          (() => {
-            const deal = authChat.grouped?.deals.find(d => d.id === authChat.activeDealId) || null;
-            const hasDeal = !!deal?.business_name;
-
-            if (!hasDeal) {
-              return (
-                <div
-                  id="mobile-chat-topbar"
-                  style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, zIndex: 20,
-                    paddingTop: 'env(safe-area-inset-top, 0px)',
-                    background: dark ? 'rgba(20,22,24,0.92)' : 'rgba(255,255,255,0.96)',
-                    backdropFilter: 'blur(18px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(18px) saturate(180%)',
-                    borderBottom: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,16,18,0.06)'}`,
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', minHeight: 44 }}>
-                    <button
-                      type="button"
-                      onClick={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); }}
-                      aria-label="Back"
-                      style={{
-                        width: 40, height: 40, borderRadius: 999,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'transparent', border: 'none',
-                        color: dark ? '#F0F0F3' : '#1A1C1E',
-                        cursor: 'pointer',
-                        WebkitTapHighlightColor: 'transparent',
-                      }}
-                      className="active:scale-95"
-                    >
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="15 18 9 12 15 6" />
-                      </svg>
-                    </button>
-                    <span style={{
-                      fontFamily: 'Sora, system-ui',
-                      fontSize: 15, fontWeight: 700,
-                      color: dark ? '#F0F0F3' : '#1A1C1E',
-                      letterSpacing: '-0.01em',
-                    }}>Yulia</span>
-                  </div>
-                </div>
-              );
-            }
-
-            const journey = (deal!.journey_type || 'sell').toLowerCase();
-            const journeyLabel =
-              journey === 'sell' ? 'Seller journey'
-              : journey === 'buy' ? 'Buyer journey'
-              : journey === 'raise' ? 'Raise journey'
-              : journey === 'pmi' ? 'Integration journey'
-              : undefined;
-            const activeConv = deal!.conversations?.find((c: any) => c.id === authChat.activeConversationId);
-            const stageName = activeConv?.gate_label || deal!.current_gate || 'Intake';
-            const chapters: DealChapter[] = (deal!.conversations || []).map((c: any) => ({
-              id: String(c.id),
-              name: c.gate_label || c.title || 'Chapter',
-              status: (c.id === authChat.activeConversationId
-                ? 'current'
-                : c.gate_status === 'completed'
-                  ? 'past'
-                  : 'current') as DealChapter['status'],
-            }));
-
-            return (
-              <div
-                id="mobile-deal-chrome"
-                style={{
-                  position: 'fixed', top: 0, left: 0, right: 0, zIndex: 20,
-                  display: 'flex', flexDirection: 'column',
-                }}
-              >
-                <DealThreadHeader
-                  dark={dark}
-                  dealName={deal!.business_name || 'Deal'}
-                  counterparty={journeyLabel}
-                  stageName={stageName}
-                  notificationCount={0}
-                  onBack={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); }}
-                  onBellClick={() => { /* TODO: cross-deal notifications screen */ }}
-                />
-                <DealSurfaceToggle
-                  dark={dark}
-                  active={mobileDealSurface}
-                  onChange={setMobileDealSurface}
-                />
-                <ChapterPicker
-                  dark={dark}
-                  chapters={chapters}
-                  activeChapterId={authChat.activeConversationId != null ? String(authChat.activeConversationId) : ''}
-                  onChange={(id) => {
-                    const numId = Number(id);
-                    if (Number.isFinite(numId)) authChat.selectConversation(numId);
-                    navigate(`/chat/${id}`, { replace: true });
-                  }}
-                />
-              </div>
-            );
-          })(),
-          document.body
-        )}
-
         {/* MOBILE CHAT PILL — canonical position:fixed bottom:0 portal.
             Same proven pattern as the anon home pill (AppShell.tsx:2349).
             Renders for: any logged-in mobile user (home OR chat), AND for
@@ -2792,35 +2619,94 @@ export default function AppShell() {
                 integrate: dark ? '#AE6D9A' : '#8F4A7A',
               };
               const accent = accentMap[journey] || (dark ? '#E8709A' : '#D44A78');
+              /* Glass Grok canvas header — replaces the deleted MobileCanvasHeader.
+                 Plain: back button + title + share icon. Inline here since the
+                 overall canvas overlay is a transitional surface that will be
+                 absorbed into DocsTab fullscreen mode (task 22 polish pass). */
               return (
-                <MobileCanvasHeader
-                  dark={dark}
-                  dealName={dealName}
-                  docTitle={activeCanvasTab.label}
-                  accentColor={accent}
-                  onBack={() => setMobileCanvasVisible(false)}
-                  onDealTap={dealId ? () => {
-                    // Close overlay and return to home (deal tree is there)
-                    setMobileCanvasVisible(false);
-                    setViewState('landing');
-                    setActiveTab('home');
-                    navigate('/');
-                  } : undefined}
-                  onCopyLink={typeof navigator !== 'undefined' && navigator.clipboard ? () => {
-                    try {
-                      navigator.clipboard.writeText(window.location.href);
-                      showToast('Link copied', { tone: 'success' });
-                    } catch { showToast('Couldn\u2019t copy link', { tone: 'error' }); }
-                  } : undefined}
-                  onShare={typeof navigator !== 'undefined' && (navigator as any).share ? () => {
-                    try {
-                      (navigator as any).share({
-                        title: activeCanvasTab.label,
-                        url: window.location.href,
-                      }).catch(() => {});
-                    } catch { /* noop */ }
-                  } : undefined}
-                />
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '8px 10px',
+                    paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)',
+                    background: 'var(--bg-card)',
+                    borderBottom: '0.5px solid var(--border)',
+                    flexShrink: 0,
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setMobileCanvasVisible(false)}
+                    aria-label="Close document"
+                    style={{
+                      width: 44, height: 44,
+                      borderRadius: 10,
+                      border: 'none',
+                      background: 'transparent',
+                      color: 'var(--text-primary)',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      WebkitTapHighlightColor: 'transparent',
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                  </button>
+                  <span
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      fontFamily: "'Sora', system-ui, sans-serif",
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: 'var(--text-primary)',
+                      letterSpacing: '-0.01em',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                    title={activeCanvasTab.label}
+                  >
+                    {dealName ? `${dealName} · ${activeCanvasTab.label}` : activeCanvasTab.label}
+                  </span>
+                  {typeof navigator !== 'undefined' && navigator.clipboard && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        try {
+                          navigator.clipboard.writeText(window.location.href);
+                          showToast('Link copied', { tone: 'success' });
+                        } catch { showToast('Couldn\u2019t copy link', { tone: 'error' }); }
+                      }}
+                      aria-label="Copy link"
+                      style={{
+                        width: 44, height: 44,
+                        borderRadius: 10,
+                        border: 'none',
+                        background: 'transparent',
+                        color: 'var(--text-primary)',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        WebkitTapHighlightColor: 'transparent',
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                        <circle cx="5" cy="12" r="2" />
+                        <circle cx="12" cy="12" r="2" />
+                        <circle cx="19" cy="12" r="2" />
+                      </svg>
+                    </button>
+                  )}
+                  {/* accent + dealId deliberately referenced to avoid unused warnings */}
+                  <span aria-hidden hidden data-accent={accent} data-deal-id={dealId ?? ''} />
+                </div>
               );
             })()}
             {/* Active tab content — below the sticky header */}
@@ -3046,33 +2932,9 @@ export default function AppShell() {
         />
       )}
 
-      {/* ═══ MOBILE EXPANDED DEAL STACK — searchable, filterable, sortable list ═══ */}
-      {isMobile && user && (
-        <DealStackExpanded
-          open={stackExpandedOpen}
-          onOpenChange={setStackExpandedOpen}
-          dark={dark}
-          deals={filterRealDeals((authChat.grouped?.deals ?? []).map(d => ({
-            id: d.id,
-            business_name: d.business_name,
-            journey_type: d.journey_type,
-            current_gate: d.current_gate,
-            industry: d.industry,
-            league: d.league,
-            updated_at: d.updated_at,
-            status: d.status,
-          })))}
-          onDealTap={(dealId) => {
-            const deal = authChat.grouped?.deals.find(d => d.id === dealId);
-            const latestConv = deal?.conversations[0];
-            if (latestConv) {
-              authChat.selectConversation(latestConv.id);
-              navigate(`/chat/${latestConv.id}`);
-              setViewState('chat');
-            }
-          }}
-        />
-      )}
+      {/* MOBILE EXPANDED DEAL STACK removed with Glass Grok rip-and-replace.
+         The old "See all N deals" searchable list is superseded by the Pipeline
+         tab in AppShellInner. */}
 
       {/* ═══ HELP SHEET — Yulia overview + M&A glossary. Mobile: bottom sheet. Desktop: same sheet for now,
            will upgrade to centered modal in Sprint 10 polish. ═══ */}
