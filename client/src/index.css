@@ -217,25 +217,33 @@ html, body {
   }
 }
 
-/* iOS PWA mobile chat lock — proven pattern (see mattpilott/ios-chat):
-   - html/body fixed to viewport height with overflow:hidden: no rubber-band
-     can yank fixed elements around. Internal scroll containers
-     (.mobile-deal-list-scroll, chat scrollRef) keep their own overflow:auto +
-     overscroll-behavior:contain.
-   - body { touch-action: none }: body stops handling its own gestures so
-     touches are delegated to the internal scroll container. Children default
-     to touch-action:auto so they still scroll.
-   - The mobile chat pill is positioned via top: var(--vvh) / translateY(-100%)
-     (AppShell sets --vvh from window.visualViewport.height) because Safari
-     does NOT honor interactive-widget=resizes-content. See AppShell for the
-     JS side. */
+/* iOS PWA mobile chat lock — position:absolute-inside-sized-body pattern.
+   Safari on iOS PWA does not reliably honor position:fixed bottom:0 relative
+   to the visible viewport when the keyboard is open (position:fixed is bound
+   to the layout viewport = full screen, so bottom:0 sits behind the keyboard).
+   Fix: size BODY to the real visible viewport (window.visualViewport.height,
+   exposed as --vvh by AppShell) and position the pill as absolute:bottom:0
+   inside body. Now the pill sits at body's own bottom edge, which is the
+   actual visible bottom.
+
+   - html: 100dvh + overflow:hidden — pins the document to viewport, no
+     rubber-band.
+   - body: position:relative + height:var(--vvh) + overflow:hidden +
+     touch-action:none — sized to real visible area, hosts the absolute pill,
+     body itself can't scroll or be gestured.
+   - touch-action isn't inherited, so children (.mobile-deal-list-scroll,
+     inputs, etc.) keep their own scroll/touch behavior. */
 @media (max-width: 767px) and (display-mode: standalone) {
-  html, body {
+  html {
+    height: 100dvh;
     overflow: hidden;
     overscroll-behavior: none;
-    height: 100dvh;
   }
   body {
+    position: relative;
+    height: var(--vvh, 100dvh);
+    overflow: hidden;
+    overscroll-behavior: none;
     touch-action: none;
   }
 }

@@ -2895,16 +2895,13 @@ export default function AppShell() {
             id="mobile-chat-dock-portal"
             className={`chat-pill-mobile-container ${dark ? 'force-chat-dark' : ''} px-3 pt-3`}
             style={{
-              position: 'fixed',
-              left: 0, right: 0,
-              // Safari doesn't honor interactive-widget=resizes-content, so we
-              // anchor to the visualViewport top via --vvh (set from JS) and
-              // translate the pill up by its own height. This keeps it flush
-              // above the keyboard on iOS PWA. Pattern from mattpilott/ios-chat.
-              top: 'var(--vvh, 100dvh)',
-              transform: 'translateY(-100%)',
-              willChange: 'transform, top',
-              transition: 'top 0.22s cubic-bezier(0.32, 0.72, 0, 1)',
+              // position:absolute (NOT fixed) because on iOS PWA position:fixed
+              // binds to the layout viewport (full screen, behind keyboard).
+              // Body is sized to var(--vvh) (visualViewport.height) via index.css
+              // — so absolute bottom:0 sits at the real visible bottom, above
+              // the keyboard.
+              position: 'absolute',
+              left: 0, right: 0, bottom: 0,
               zIndex: 10,
               touchAction: 'manipulation',
             }}
