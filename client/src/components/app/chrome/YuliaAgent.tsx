@@ -389,26 +389,29 @@ export default function YuliaAgent({
     );
   }
 
-  // state === 'mini' — the default. Glass strip above the tab bar.
+  // state === 'mini' — the default. Floating Apple Glass pill above the
+  // floating tab bar. iOS 26 Liquid Glass rhythm: two floating pills
+  // stacked with breathing room, not two edge-to-edge strips.
   const miniStyle: CSSProperties = {
     position: 'absolute',
-    left: 9,
-    right: 9,
-    // Sits above the tab bar (74px + safe area + 6px gap).
-    bottom: 'calc(env(safe-area-inset-bottom, 0px) + 86px)',
-    height: 50,
-    padding: '7px 10px 7px 8px',
+    left: 12,
+    right: 12,
+    /* Tab bar bottom = safe-area + 10; tab bar height = 58; 8px gap → 76. */
+    bottom: 'calc(env(safe-area-inset-bottom, 0px) + 76px)',
+    height: 54,
+    padding: '8px 10px 8px 8px',
     display: 'flex',
     alignItems: 'center',
     gap: 10,
     zIndex: 40,
     background: 'var(--glass-med)',
-    backdropFilter: 'blur(30px) saturate(1.8)',
-    WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
+    backdropFilter: 'blur(40px) saturate(1.8)',
+    WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
     border: '0.5px solid var(--border)',
-    borderRadius: 17,
+    /* Full pill — height / 2 for a true capsule feel. */
+    borderRadius: 27,
     boxShadow:
-      'inset 0 0.5px 0 rgba(255,255,255,0.9), 0 6px 24px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05)',
+      'inset 0 0.5px 0 rgba(255,255,255,0.9), 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06)',
     overflow: 'hidden',
     cursor: 'pointer',
     WebkitTapHighlightColor: 'transparent',

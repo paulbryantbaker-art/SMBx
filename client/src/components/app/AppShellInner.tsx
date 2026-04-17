@@ -24,7 +24,7 @@
  * See memory/architecture_glass_grok.md for the full spec.
  */
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import TopBar from './chrome/TopBar';
 import TabBar from './chrome/TabBar';
 import YuliaAgent from './chrome/YuliaAgent';
@@ -32,7 +32,7 @@ import DealTab from './tabs/DealTab';
 import DocsTab from './tabs/DocsTab';
 import PipelineTab from './tabs/PipelineTab';
 import SearchTab from './tabs/SearchTab';
-import type { AppTab, YuliaState, AppShellInnerProps, AppDeal } from './types';
+import type { AppTab, YuliaState, AppShellInnerProps } from './types';
 
 export default function AppShellInner({
   userName,
@@ -47,18 +47,13 @@ export default function AppShellInner({
   chatError,
   onRetry,
   onSend,
-  onSelectDeal: _onSelectDeal,
+  onSelectDeal,
   onOpenDeliverable: _onOpenDeliverable,
   onAccountTap,
   onBack: _onBack,
 }: AppShellInnerProps) {
   const [tab, setTab] = useState<AppTab>('deal');
   const [yuliaState, setYuliaState] = useState<YuliaState>('mini');
-
-  const activeDeal: AppDeal | null = useMemo(() => {
-    if (!activeDealId) return null;
-    return deals.find((d) => d.id === activeDealId) || null;
-  }, [deals, activeDealId]);
 
   // Pipeline tab dims until there's sourcing or watchlist data. For v1,
   // "has deals" is the gate — once the user has any deals, Pipeline is live.
@@ -98,13 +93,29 @@ export default function AppShellInner({
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            /* Reserve room for TabBar (74) + YuliaAgent mini (50) + gap (24). */
+            /* Reserve room for floating TabBar (58 + 10 bottom gap = 68) +
+               floating YuliaAgent mini pill (54 + 8 gap = 62) + top gap (16). */
             paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 148px)',
           }}
         >
-          {tab === 'deal' && <DealTab deal={activeDeal} />}
+          {tab === 'deal' && (
+            <DealTab
+              deals={deals}
+              activeDealId={activeDealId}
+              onSelectDeal={onSelectDeal}
+            />
+          )}
           {tab === 'docs' && <DocsTab />}
-          {tab === 'pipeline' && <PipelineTab />}
+          {tab === 'pipeline' && (
+            <PipelineTab
+              deals={deals}
+              activeDealId={activeDealId}
+              onSelectDeal={(dealId) => {
+                onSelectDeal(dealId);
+                setTab('deal'); // jump to Deal tab after selection
+              }}
+            />
+          )}
           {tab === 'search' && <SearchTab />}
         </main>
       )}

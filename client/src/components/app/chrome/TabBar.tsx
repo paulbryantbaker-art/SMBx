@@ -68,19 +68,25 @@ export default function TabBar({ active, onChange, pipelineDim }: Props) {
       aria-label="App sections"
       style={{
         position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 0,
-        height: 74,
-        padding: '8px 4px 20px',
-        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
+        left: 12,
+        right: 12,
+        /* Floats above the home indicator with breathing room — iOS 26
+           Liquid Glass floating-pill pattern. Not edge-to-edge. */
+        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 10px)',
+        height: 58,
+        padding: '6px 6px',
         display: 'flex',
         zIndex: 30,
+        /* Rounded pill container — full-pill when height × 2 < width,
+           otherwise use a large radius. */
+        borderRadius: 28,
         background: 'var(--glass-light)',
-        backdropFilter: 'blur(32px) saturate(1.8)',
-        WebkitBackdropFilter: 'blur(32px) saturate(1.8)',
-        borderTop: '0.5px solid var(--border)',
-        boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.9)',
+        backdropFilter: 'blur(40px) saturate(1.8)',
+        WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+        border: '0.5px solid var(--border)',
+        /* Stronger shadow for lift + the mandatory specular highlight */
+        boxShadow:
+          'inset 0 0.5px 0 rgba(255,255,255,0.9), 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06)',
       }}
     >
       {TABS.map((t) => {
@@ -98,22 +104,24 @@ export default function TabBar({ active, onChange, pipelineDim }: Props) {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 3,
-              padding: '5px 0',
+              justifyContent: 'center',
+              gap: 2,
+              padding: '4px 0',
               border: 'none',
-              background: 'transparent',
+              borderRadius: 22,
+              background: isActive ? 'rgba(10,10,11,0.06)' : 'transparent',
               cursor: 'pointer',
               color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
               opacity: isDim ? 0.35 : 1,
-              transition: 'color 150ms cubic-bezier(0.4, 0, 0.2, 1), opacity 150ms',
+              transition: 'background 150ms ease, color 150ms ease, opacity 150ms',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
             <span
               aria-hidden
               style={{
-                width: 21,
-                height: 21,
+                width: 20,
+                height: 20,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -125,7 +133,7 @@ export default function TabBar({ active, onChange, pipelineDim }: Props) {
             <span
               style={{
                 fontFamily: "'Sora', system-ui, sans-serif",
-                fontSize: 9,
+                fontSize: 9.5,
                 fontWeight: isActive ? 700 : 600,
                 letterSpacing: '-0.005em',
               }}

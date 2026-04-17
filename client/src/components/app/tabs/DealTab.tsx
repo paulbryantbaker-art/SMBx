@@ -17,7 +17,7 @@
  * --text-primary. No journey tinting in chrome.
  */
 
-import type { AppDeal } from '../types';
+import type { AppDeal, StatusKind } from '../types';
 
 const GATE_LABEL: Record<string, string> = {
   S0: 'Getting started', S1: 'Financials', S2: 'Valuation', S3: 'Packaging', S4: 'Matching', S5: 'Closing',
@@ -26,37 +26,54 @@ const GATE_LABEL: Record<string, string> = {
   PMI0: 'Day zero', PMI1: 'Stabilization', PMI2: 'Assessment', PMI3: 'Optimization',
 };
 
-interface Props {
-  deal: AppDeal | null;
+/** Map a gate code to an urgency-dot kind for the deal switcher tile.
+ *  Early / no-gate → draft (grey). Middle gates → progress (amber). Late
+ *  closing-adjacent gates → ready (green). Status-based close → draft. */
+function urgencyFromGate(gate: string | null, status?: string | null): StatusKind {
+  const s = (status || '').toLowerCase();
+  if (s === 'closed' || s === 'archived' || s === 'dropped') return 'draft';
+  if (!gate) return 'draft';
+  if (/^(S4|S5|B4|B5|R4|R5|PMI3)$/.test(gate)) return 'ready';
+  if (/^(S2|S3|B2|B3|R2|R3|PMI1|PMI2)$/.test(gate)) return 'progress';
+  return 'draft';
 }
 
-export default function DealTab({ deal }: Props) {
-  if (!deal) return <EmptyDealState />;
+interface Props {
+  deals: AppDeal[];
+  activeDealId: number | null;
+  onSelectDeal: (dealId: number) => void;
+}
 
-  const stageShort = deal.current_gate || 'S0';
+export default function DealTab({ deals, activeDealId, onSelectDeal }: Props) {
+  if (deals.length === 0) return <EmptyDealState />;
+
+  const activeDeal: AppDeal =
+    deals.find((d) => d.id === activeDealId) || deals[0];
+
+  const stageShort = activeDeal.current_gate || 'S0';
   const stageLong = GATE_LABEL[stageShort] || 'Getting started';
-  const name = deal.business_name || 'Deal';
-
-  /* Page identity lives in the hero card (business name + stage pill + icon
-     + meta). The old <h1> Sora 28px page title repeated the same name one
-     line above the card — removed per /distill. The stage eyebrow becomes
-     the first thing the user sees, setting context without repeating the
-     deal name. Suppress the no-unused-var warning for `name` — HeroCard
-     reads it directly from `deal`. */
-  void name;
+  const showSwitcher = deals.length > 1;
 
   return (
     <div style={{ paddingBottom: 8 }}>
       <div style={{ height: 8 }} aria-hidden />
       <SectionLabel>Stage · {stageLong}</SectionLabel>
 
-      <HeroCard deal={deal} />
+      {showSwitcher && (
+        <DealSwitcher
+          deals={deals}
+          activeDealId={activeDeal.id}
+          onSelectDeal={onSelectDeal}
+        />
+      )}
+
+      <HeroCard deal={activeDeal} />
 
       <StatsStrip
         stats={[
           { n: '$47K', l: 'Add-backs' },
           { n: '60%', l: 'Recurring' },
-          { n: String(deal.conversations?.length ?? 0), l: 'Chapters' },
+          { n: String(activeDeal.conversations?.length ?? 0), l: 'Chapters' },
           { n: stageShort, l: 'Gate' },
         ]}
       />
@@ -74,6 +91,161 @@ export default function DealTab({ deal }: Props) {
         <ActivityRow status="draft" title="P&L extraction complete" meta="3h ago · 47 add-back candidates" last />
       </div>
     </div>
+  );
+}
+
+/* ─── Deal switcher — horizontal scrolling tiles above the hero card ─── */
+function DealSwitcher({
+  deals,
+  activeDealId,
+  onSelectDeal,
+}: {
+  deals: AppDeal[];
+  activeDealId: number;
+  onSelectDeal: (dealId: number) => void;
+}) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+          padding: '0 20px',
+          marginBottom: 8,
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "'Sora', system-ui, sans-serif",
+            fontWeight: 700,
+            fontSize: 10,
+            letterSpacing: '0.12em',
+            color: 'var(--text-muted)',
+            textTransform: 'uppercase',
+          }}
+        >
+          Your deals · {deals.length}
+        </span>
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          gap: 10,
+          padding: '2px 14px 4px',
+          overflowX: 'auto',
+          scrollSnapType: 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+        }}
+        className="gg-deal-switcher"
+      >
+        {deals.map((d) => (
+          <DealTile
+            key={d.id}
+            deal={d}
+            active={d.id === activeDealId}
+            onTap={() => onSelectDeal(d.id)}
+          />
+        ))}
+        <style>{`.gg-deal-switcher::-webkit-scrollbar { display: none; }`}</style>
+      </div>
+    </div>
+  );
+}
+
+function DealTile({
+  deal,
+  active,
+  onTap,
+}: {
+  deal: AppDeal;
+  active: boolean;
+  onTap: () => void;
+}) {
+  const name = deal.business_name || 'Deal';
+  const stage = deal.current_gate || '—';
+  const urgency = urgencyFromGate(deal.current_gate, deal.status);
+  const dotColor: Record<StatusKind, string> = {
+    ready: 'var(--dot-ready)',
+    progress: 'var(--dot-progress)',
+    flag: 'var(--dot-flag)',
+    draft: 'var(--dot-draft)',
+  };
+  const urgencyLabel: Record<StatusKind, string> = {
+    ready: 'Closing',
+    progress: 'In progress',
+    flag: 'Needs attention',
+    draft: 'Early',
+  };
+  return (
+    <button
+      type="button"
+      onClick={onTap}
+      aria-label={`Switch to ${name} — ${urgencyLabel[urgency]}`}
+      style={{
+        flexShrink: 0,
+        scrollSnapAlign: 'start',
+        width: 152,
+        padding: '10px 12px 12px',
+        borderRadius: 14,
+        border: active ? 'none' : '0.5px solid var(--border)',
+        background: active ? 'var(--accent)' : 'var(--bg-card)',
+        color: active ? '#fff' : 'var(--text-primary)',
+        textAlign: 'left',
+        cursor: 'pointer',
+        boxShadow: active
+          ? 'var(--shadow-primary-btn)'
+          : 'var(--shadow-inset-highlight), var(--shadow-gg-card)',
+        transition: 'background 150ms ease, color 150ms ease, box-shadow 150ms ease',
+        WebkitTapHighlightColor: 'transparent',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 6,
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "'Sora', system-ui, sans-serif",
+          fontWeight: 700,
+          fontSize: 13,
+          letterSpacing: '-0.01em',
+          lineHeight: 1.2,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+        title={name}
+      >
+        {name}
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          fontFamily: "'Inter', system-ui, sans-serif",
+          fontSize: 10.5,
+          fontWeight: 600,
+          color: active ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)',
+          letterSpacing: '0.04em',
+          textTransform: 'uppercase',
+        }}
+      >
+        <span
+          role="img"
+          aria-label={`Status: ${urgencyLabel[urgency]}`}
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: '50%',
+            background: dotColor[urgency],
+            flexShrink: 0,
+          }}
+        />
+        {stage}
+      </div>
+    </button>
   );
 }
 
