@@ -367,7 +367,17 @@ html, body {
   }
   body {
     position: relative;
-    height: var(--vvh, 100dvh);
+    /* Body always fills the ENTIRE screen (100dvh). On iOS PWA standalone
+       dvh is static and equals the full webview, so body reaches screen
+       edge-to-edge. Elements portaled to body with position:absolute
+       bottom:0 sit at the true screen bottom — no "chin" strip of html
+       showing through like when we sized body to var(--vvh) (which iOS
+       can report slightly smaller than the screen).
+
+       --vvh is still exposed as a body-inline custom property by
+       AppShell's visualViewport effect, so components that need keyboard
+       compensation (anon chat composer) can read it directly. */
+    height: 100dvh;
     overflow: hidden;
     overscroll-behavior: none;
     touch-action: none;
