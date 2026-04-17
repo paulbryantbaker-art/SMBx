@@ -33,7 +33,7 @@ export default function AdvisorsBelow({ dark }: { dark: boolean }) {
       {
         question: 'Can I white-label Yulia for my clients?',
         answer:
-          'Yes — available on the Team, Firm, and Institutional tiers. Every document carries your firm\u2019s branding. Client data is siloed — no cross-client access, no model training on client data. Full fiduciary compliance.',
+          'Yes — available on the Team and Enterprise tiers. Every document carries your firm\u2019s branding. Client data is siloed — no cross-client access, no model training on client data. Full fiduciary compliance.',
       },
       {
         question: 'How fast can I generate a CIM?',

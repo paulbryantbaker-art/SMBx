@@ -43,8 +43,8 @@ export function MobilePricingPage({ open, onOpenChange, dark, onTalkToYulia }: P
         }
         callout={
           <>
-            <strong style={{ color: pinkC }}>Six tiers · all published.</strong>{' '}
-            <span style={{ color: headingC }}>Free to $6,999. Annual = 2 months free.</span>
+            <strong style={{ color: pinkC }}>Five tiers · all published.</strong>{' '}
+            <span style={{ color: headingC }}>Free to $2,500/mo. Every tier ships every capability.</span>
           </>
         }
       />

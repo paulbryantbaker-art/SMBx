@@ -65,23 +65,23 @@ function analystTeamAnnual(evMillions: number): { cost: number; shape: string } 
   }
 }
 
-/* Yulia tiers — annual cost (post-Sprint 14B-7 pricing) */
-const YULIA_MULTI_ANNUAL = 0.002388;      // $2,388 — Multi-deal $199/mo × 12
-const YULIA_FIRM_ANNUAL = 0.023988;       // $23,988 — Firm $1,999/mo × 12
-const YULIA_INST_ANNUAL = 0.083988;       // $83,988 — Institutional $6,999/mo × 12
+/* Yulia tiers — annual cost (April 2026 pricing) */
+const YULIA_PRO_ANNUAL = 0.002388;        // $2,388 — Pro $199/mo × 12
+const YULIA_TEAM_ANNUAL = 0.005988;       // $5,988 — Team $499/mo × 12
+const YULIA_ENTERPRISE_ANNUAL = 0.030000; // $30,000 — Enterprise $2,500/mo × 12
 
 /* Recommended Yulia tier for a given deal size — matches the tier Yulia would
    pick for an operator doing this size of deal. Flat across deal sizes; the
    tier shifts with who's running it, not with the deal's EV. We use the
    deal-size proxy here so the visual comparison is honest: solo operator at
-   $10M stays on Multi-deal, a firm running $1B deals is on Firm or higher. */
+   $10M stays on Pro, a firm running $1B deals is on Team or Enterprise. */
 function yuliaTierFor(evMillions: number): { label: string; annual: number; detail: string } {
   if (evMillions <= 250) {
-    return { label: 'Multi-deal', annual: YULIA_MULTI_ANNUAL, detail: '$199/month · flat · unlimited deals' };
+    return { label: 'Pro', annual: YULIA_PRO_ANNUAL, detail: '$199/month · every capability · unlimited deals' };
   } else if (evMillions <= 1000) {
-    return { label: 'Firm', annual: YULIA_FIRM_ANNUAL, detail: '$1,999/month · unlimited seats + SSO' };
+    return { label: 'Team', annual: YULIA_TEAM_ANNUAL, detail: '$499/month · 5 seats · shared workspace' };
   } else {
-    return { label: 'Institutional', annual: YULIA_INST_ANNUAL, detail: '$6,999/month · API + SLA + RBAC' };
+    return { label: 'Enterprise', annual: YULIA_ENTERPRISE_ANNUAL, detail: '$2,500/month · SSO + SOC 2 + API' };
   }
 }
 
