@@ -71,13 +71,15 @@ export default function AppShellInner({
     <div
       style={{
         position: 'relative',
-        /* #app-root already applies paddingTop: env(safe-area-inset-top).
-           Use 100dvh (dynamic viewport height) so the container extends to
-           the actual viewport bottom — --vvh from visualViewport can under-
-           report on iOS PWA and leave a gap below the tab bar. Subtract
-           safe-top to avoid double-counting the status-bar inset. */
-        height: 'calc(100dvh - env(safe-area-inset-top, 0px))',
-        minHeight: 'calc(100dvh - env(safe-area-inset-top, 0px))',
+        /* Fill the flex parent naturally. The ancestor chain is:
+             <main flex-1>  ← parent (fills 100dvh via minHeight up the chain)
+             └─ AppShellInner (this)
+           Using an explicit height: calc(100dvh - safe-top) here left the
+           safe-top amount as dead space BELOW this container inside <main>,
+           which then stacked on the TabBar's bottom offset and produced a
+           ~70pt gap below the tab bar. flex:1 keeps us sized to <main>. */
+        flex: 1,
+        minHeight: 0,
         overflow: 'hidden',
         background: 'var(--bg-app)',
         color: 'var(--text-primary)',

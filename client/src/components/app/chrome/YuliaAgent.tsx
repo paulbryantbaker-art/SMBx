@@ -432,6 +432,7 @@ export default function YuliaAgent({
       type="button"
       onClick={() => onStateChange('full')}
       aria-label="Open chat with Yulia"
+      className="gg-glass-pill is-interactive"
       style={miniStyle}
     >
       {sending && (

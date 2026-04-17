@@ -66,6 +66,7 @@ export default function TabBar({ active, onChange, pipelineDim }: Props) {
     <div
       role="tablist"
       aria-label="App sections"
+      className="gg-glass-pill"
       style={{
         position: 'absolute',
         left: 12,
