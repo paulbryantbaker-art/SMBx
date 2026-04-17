@@ -60,6 +60,13 @@ const MobilePricingStory = lazy(() => import('../../components/mobile/MobilePric
 
 // Glass Grok redesign — new public-site components
 const GlassGrokHome = lazy(() => import('../../components/journey/pages/Home'));
+const GlassGrokSell = lazy(() => import('../../components/journey/pages/Sell'));
+const GlassGrokBuy = lazy(() => import('../../components/journey/pages/Buy'));
+const GlassGrokRaise = lazy(() => import('../../components/journey/pages/Raise'));
+const GlassGrokIntegrate = lazy(() => import('../../components/journey/pages/Integrate'));
+const GlassGrokPricing = lazy(() => import('../../components/journey/pages/Pricing'));
+const GlassGrokHowItWorks = lazy(() => import('../../components/journey/pages/HowItWorks'));
+const GlassGrokEnterprise = lazy(() => import('../../components/journey/pages/Enterprise'));
 
 // Mobile rebuild — Claude+ pattern
 import { type LearnDest, type WorkspaceTool } from '../../components/mobile/mobileTypes';
@@ -245,7 +252,7 @@ const HOME_TOOLS: HomeToolItem[] = [
 
 /* ═══ TYPES ═══ */
 
-export type TabId = 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'how-it-works' | 'advisors' | 'pricing';
+export type TabId = 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'how-it-works' | 'advisors' | 'pricing' | 'enterprise';
 export type ViewState = 'landing' | 'chat' | 'pipeline' | 'dataroom' | 'settings' | 'seller-dashboard' | 'buyer-pipeline' | 'documents' | 'analytics' | 'deal';
 
 /* ═══ PAGE COPY ═══ */
@@ -464,7 +471,8 @@ function pathToTab(path: string): TabId {
   if (path === '/raise') return 'raise';
   if (path === '/integrate') return 'integrate';
   if (path === '/how-it-works') return 'how-it-works';
-  if (path === '/advisors' || path === '/enterprise') return 'advisors';
+  if (path === '/enterprise') return 'enterprise';
+  if (path === '/advisors') return 'advisors';
   if (path === '/pricing') return 'pricing';
   return 'home';
 }
@@ -2181,32 +2189,34 @@ export default function AppShell() {
                 {/* Scroll spacer removed — page is exactly 100dvh, pill sits at bottom of
                     visible viewport with safe-area padding for the home indicator. */}
               </div>
-              ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing'].includes(activeTab) ? (
-              <div className="relative z-10" style={{ padding: !isMobile ? '16px 16px 16px 16px' : '0' }}>
-                {/* Floating card — matches the canvas card style in the workspace */}
+              ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing','enterprise'].includes(activeTab) ? (
+              <div className="relative z-10 flex-1 flex flex-col">
+                {/* Glass Grok journey — canvas is #F2F2F4, no framing card. */}
                 <div
+                  className="flex-1 flex flex-col"
                   style={{
-                    background: dark ? '#151617' : '#FFFFFF',
-                    border: !isMobile ? (dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9') : 'none',
-                    borderRadius: !isMobile ? 14 : 0,
-                    boxShadow: !isMobile ? (dark
-                      ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
-                      : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)') : 'none',
+                    background: 'var(--gg-bg-app, #F2F2F4)',
                     overflow: 'hidden',
                   }}
                 >
-                  {/* Scroll progress bar — visible on journey/marketing routes only.
-                      Gives continuous feedback on the long editorial pages. Reduced-
-                      motion users see nothing (CSS suppresses it). */}
-                  <ScrollProgressBar />
                   <Suspense fallback={<BelowSkeleton />}>
-                    {activeTab === 'sell' ? (isMobile ? <MobileSellStory dark={dark} /> : <SellBelow dark={dark} />) :
-                     activeTab === 'buy' ? (isMobile ? <MobileBuyStory dark={dark} /> : <BuyBelow dark={dark} />) :
-                     activeTab === 'raise' ? (isMobile ? <MobileRaiseStory dark={dark} /> : <RaiseBelow dark={dark} />) :
-                     activeTab === 'how-it-works' ? (isMobile ? <MobileHowStory dark={dark} /> : <HowItWorksBelow dark={dark} />) :
-                     activeTab === 'integrate' ? (isMobile ? <MobileIntegrateStory dark={dark} /> : <IntegrateBelow dark={dark} />) :
-                     activeTab === 'advisors' ? (isMobile ? <MobileAdvisorsStory dark={dark} /> : <AdvisorsBelow dark={dark} />) :
-                     activeTab === 'pricing' ? (isMobile ? <MobilePricingStory dark={dark} /> : <PricingBelow dark={dark} />) : null}
+                    {(() => {
+                      const onGoChat = () => { setViewState('chat'); navigate('/chat'); };
+                      const send = (msg: string) => handleSend(msg);
+                      switch (activeTab) {
+                        case 'sell':         return <GlassGrokSell onSend={send} onStartFree={onGoChat} />;
+                        case 'buy':          return <GlassGrokBuy onSend={send} onStartFree={onGoChat} />;
+                        case 'raise':        return <GlassGrokRaise onSend={send} onStartFree={onGoChat} />;
+                        case 'integrate':    return <GlassGrokIntegrate onSend={send} onStartFree={onGoChat} />;
+                        case 'pricing':      return <GlassGrokPricing onSend={send} onStartFree={onGoChat} />;
+                        case 'how-it-works': return <GlassGrokHowItWorks onSend={send} onStartFree={onGoChat} />;
+                        case 'enterprise':   return <GlassGrokEnterprise onSend={send} onStartFree={onGoChat} />;
+                        /* 'advisors' route temporarily maps to /pricing's tier grid
+                           until the advisors-specific Glass Grok page is written. */
+                        case 'advisors':     return <GlassGrokPricing onSend={send} onStartFree={onGoChat} />;
+                        default:             return null;
+                      }
+                    })()}
                   </Suspense>
                   {!isMobile ? (
                     <DesktopFooter
@@ -2524,21 +2534,24 @@ export default function AppShell() {
                   </div>
                 </>
               ) : !user ? (
-                /* Logged-out: render the active journey page in the canvas */
-                <div className="flex-1 overflow-y-auto relative">
+                /* Logged-out: render the active Glass Grok journey page in the canvas */
+                <div className="flex-1 overflow-y-auto relative" style={{ background: 'var(--gg-bg-app, #F2F2F4)' }}>
                   <Suspense fallback={<BelowSkeleton />}>
                     {(() => {
-                      // Default to 'sell' if activeTab is 'home' (no canvas content for home post-morph)
+                      const onGoChat = () => { setViewState('chat'); navigate('/chat'); };
+                      const send = (msg: string) => handleSend(msg);
+                      /* Default to 'sell' if activeTab is 'home' (no canvas for home post-morph) */
                       const journey = activeTab === 'home' ? 'sell' : activeTab;
                       switch (journey) {
-                        case 'sell': return <SellBelow dark={dark} />;
-                        case 'buy': return <BuyBelow dark={dark} />;
-                        case 'raise': return <RaiseBelow dark={dark} />;
-                        case 'integrate': return <IntegrateBelow dark={dark} />;
-                        case 'advisors': return <AdvisorsBelow dark={dark} />;
-                        case 'how-it-works': return <HowItWorksBelow dark={dark} />;
-                        case 'pricing': return <PricingBelow dark={dark} />;
-                        default: return <SellBelow dark={dark} />;
+                        case 'sell':         return <GlassGrokSell onSend={send} onStartFree={onGoChat} />;
+                        case 'buy':          return <GlassGrokBuy onSend={send} onStartFree={onGoChat} />;
+                        case 'raise':        return <GlassGrokRaise onSend={send} onStartFree={onGoChat} />;
+                        case 'integrate':    return <GlassGrokIntegrate onSend={send} onStartFree={onGoChat} />;
+                        case 'pricing':      return <GlassGrokPricing onSend={send} onStartFree={onGoChat} />;
+                        case 'how-it-works': return <GlassGrokHowItWorks onSend={send} onStartFree={onGoChat} />;
+                        case 'enterprise':   return <GlassGrokEnterprise onSend={send} onStartFree={onGoChat} />;
+                        case 'advisors':     return <GlassGrokPricing onSend={send} onStartFree={onGoChat} />;
+                        default:             return <GlassGrokSell onSend={send} onStartFree={onGoChat} />;
                       }
                     })()}
                   </Suspense>
