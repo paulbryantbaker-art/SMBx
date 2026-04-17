@@ -70,10 +70,12 @@ export default function TabBar({ active, onChange, pipelineDim }: Props) {
         position: 'absolute',
         left: 12,
         right: 12,
-        /* Floats above the home indicator with breathing room — iOS 26
-           Liquid Glass floating-pill pattern. Not edge-to-edge. */
-        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 10px)',
-        height: 58,
+        /* Float the pill just above the home indicator stripe (~5pt from
+           bottom of screen). The 34pt safe-area-inset is overkill for a
+           Liquid-Glass pill — it's designed to hover over the inset zone,
+           not sit above it. 10px clearance keeps the indicator readable. */
+        bottom: 10,
+        height: 54,
         padding: '6px 6px',
         display: 'flex',
         zIndex: 30,

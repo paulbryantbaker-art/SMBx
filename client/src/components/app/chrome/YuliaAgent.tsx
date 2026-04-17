@@ -406,8 +406,8 @@ export default function YuliaAgent({
     position: 'absolute',
     left: 12,
     right: 12,
-    /* Tab bar bottom = safe-area + 10; tab bar height = 58; 8px gap → 76. */
-    bottom: 'calc(env(safe-area-inset-bottom, 0px) + 76px)',
+    /* Tab bar bottom = 10; tab bar height = 54; 8px gap → 72. */
+    bottom: 72,
     height: 54,
     padding: '8px 10px 8px 8px',
     display: 'flex',

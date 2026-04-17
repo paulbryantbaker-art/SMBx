@@ -32,6 +32,7 @@ import DealTab from './tabs/DealTab';
 import DocsTab from './tabs/DocsTab';
 import PipelineTab from './tabs/PipelineTab';
 import SearchTab from './tabs/SearchTab';
+import HelpSheet from './sheets/HelpSheet';
 import type { AppTab, YuliaState, AppShellInnerProps } from './types';
 
 export default function AppShellInner({
@@ -54,6 +55,7 @@ export default function AppShellInner({
 }: AppShellInnerProps) {
   const [tab, setTab] = useState<AppTab>('deal');
   const [yuliaState, setYuliaState] = useState<YuliaState>('mini');
+  const [helpOpen, setHelpOpen] = useState(false);
 
   // Pipeline tab dims until there's sourcing or watchlist data. For v1,
   // "has deals" is the gate — once the user has any deals, Pipeline is live.
@@ -69,10 +71,13 @@ export default function AppShellInner({
     <div
       style={{
         position: 'relative',
-        /* #app-root already applies paddingTop: env(safe-area-inset-top),
-           so we subtract it here or the tab bar (position:absolute bottom:0)
-           gets pushed below the visible viewport by the status-bar height. */
-        height: 'calc(var(--vvh, 100dvh) - env(safe-area-inset-top, 0px))',
+        /* #app-root already applies paddingTop: env(safe-area-inset-top).
+           Use 100dvh (dynamic viewport height) so the container extends to
+           the actual viewport bottom — --vvh from visualViewport can under-
+           report on iOS PWA and leave a gap below the tab bar. Subtract
+           safe-top to avoid double-counting the status-bar inset. */
+        height: 'calc(100dvh - env(safe-area-inset-top, 0px))',
+        minHeight: 'calc(100dvh - env(safe-area-inset-top, 0px))',
         overflow: 'hidden',
         background: 'var(--bg-app)',
         color: 'var(--text-primary)',
@@ -82,7 +87,13 @@ export default function AppShellInner({
       }}
     >
       {/* Top bar — hidden when full chat is open (chat has its own header). */}
-      {!isFull && <TopBar userInitial={userInitial} onAccountTap={onAccountTap} />}
+      {!isFull && (
+        <TopBar
+          userInitial={userInitial}
+          onAccountTap={onAccountTap}
+          onHelpTap={() => setHelpOpen(true)}
+        />
+      )}
 
       {/* Tab content — hidden when full chat is open. */}
       {!isFull && (
@@ -93,9 +104,9 @@ export default function AppShellInner({
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            /* Reserve room for floating TabBar (58 + 10 bottom gap = 68) +
-               floating YuliaAgent mini pill (54 + 8 gap = 62) + top gap (16). */
-            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 148px)',
+            /* Reserve room for floating TabBar (54 + 10 bottom = 64) +
+               floating YuliaAgent mini pill (54 + 8 gap = 62) + top gap (12). */
+            paddingBottom: 138,
           }}
         >
           {tab === 'deal' && (
@@ -103,6 +114,7 @@ export default function AppShellInner({
               deals={deals}
               activeDealId={activeDealId}
               onSelectDeal={onSelectDeal}
+              onOpenHelp={() => setHelpOpen(true)}
             />
           )}
           {tab === 'docs' && <DocsTab />}
@@ -135,6 +147,13 @@ export default function AppShellInner({
 
       {/* Tab bar — hidden when full chat is open. */}
       {!isFull && <TabBar active={tab} onChange={setTab} pipelineDim={pipelineDim} />}
+
+      {/* Help & glossary bottom sheet — opens from TopBar bell + first-run primer. */}
+      <HelpSheet
+        open={helpOpen}
+        onOpenChange={setHelpOpen}
+        onAskYulia={() => setYuliaState('full')}
+      />
     </div>
   );
 }

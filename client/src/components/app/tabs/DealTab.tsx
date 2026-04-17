@@ -43,10 +43,12 @@ interface Props {
   deals: AppDeal[];
   activeDealId: number | null;
   onSelectDeal: (dealId: number) => void;
+  /** Opens the Help & Glossary sheet — wired from the first-run primer. */
+  onOpenHelp?: () => void;
 }
 
-export default function DealTab({ deals, activeDealId, onSelectDeal }: Props) {
-  if (deals.length === 0) return <EmptyDealState />;
+export default function DealTab({ deals, activeDealId, onSelectDeal, onOpenHelp }: Props) {
+  if (deals.length === 0) return <EmptyDealState onOpenHelp={onOpenHelp} />;
 
   const activeDeal: AppDeal =
     deals.find((d) => d.id === activeDealId) || deals[0];
@@ -687,7 +689,12 @@ function ActivityRow({
 }
 
 /* ─── Empty state — no deal yet ─── */
-function EmptyDealState() {
+function EmptyDealState({ onOpenHelp }: { onOpenHelp?: () => void }) {
+  const steps = [
+    'Tell Yulia about your business — revenue, industry, your role.',
+    'Yulia valuates it and produces a baseline report.',
+    'Review, refine, and generate your CIM.',
+  ];
   return (
     <div
       style={{
@@ -696,7 +703,7 @@ function EmptyDealState() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '80px 32px',
+        padding: '56px 24px',
         textAlign: 'center',
         gap: 14,
       }}
@@ -726,6 +733,105 @@ function EmptyDealState() {
       >
         Tell Yulia what you're working on and this tab will fill in with your valuation, progress, and next steps.
       </p>
+
+      {/* How this works — 3-step primer for first-run */}
+      <div
+        style={{
+          marginTop: 10,
+          width: '100%',
+          maxWidth: 340,
+          background: 'var(--bg-card)',
+          border: '0.5px solid var(--border)',
+          borderRadius: 16,
+          padding: '14px 16px',
+          textAlign: 'left',
+          boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.9)',
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "'Sora', system-ui, sans-serif",
+            fontWeight: 700,
+            fontSize: 10,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'var(--text-muted)',
+            marginBottom: 10,
+          }}
+        >
+          How this works
+        </div>
+        <ol
+          style={{
+            listStyle: 'none',
+            margin: 0,
+            padding: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+          }}
+        >
+          {steps.map((s, i) => (
+            <li
+              key={i}
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 10,
+                fontFamily: "'Inter', system-ui, sans-serif",
+                fontSize: 13,
+                lineHeight: 1.5,
+                color: 'var(--text-secondary)',
+              }}
+            >
+              <span
+                aria-hidden
+                style={{
+                  flexShrink: 0,
+                  width: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  background: 'var(--bg-muted)',
+                  color: 'var(--text-primary)',
+                  fontFamily: "'Sora', system-ui, sans-serif",
+                  fontWeight: 700,
+                  fontSize: 11,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {i + 1}
+              </span>
+              <span>{s}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      {onOpenHelp && (
+        <button
+          type="button"
+          onClick={onOpenHelp}
+          style={{
+            marginTop: 2,
+            background: 'transparent',
+            border: 'none',
+            padding: '6px 4px',
+            fontFamily: "'Inter', system-ui, sans-serif",
+            fontSize: 13,
+            fontWeight: 500,
+            color: 'var(--text-secondary)',
+            textDecoration: 'underline',
+            textDecorationColor: 'var(--text-faint)',
+            textUnderlineOffset: 3,
+            cursor: 'pointer',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        >
+          Learn the vocabulary
+        </button>
+      )}
     </div>
   );
 }
