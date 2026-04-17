@@ -778,12 +778,33 @@ export function Card({ children, padding = 22, style }: { children: ReactNode; p
    ═════════════════════════════════════════════════════════════════════ */
 
 export function CardGrid({ children, minCol = 260 }: { children: ReactNode; minCol?: number }) {
+  /* Stagger children in when the grid enters viewport. Sets a
+     --stagger-delay CSS var on each direct child so pure-CSS can
+     handle the animation without wrapping every child. */
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) { setActive(true); return; }
+    const obs = new IntersectionObserver(
+      (entries) => { for (const e of entries) if (e.isIntersecting) { setActive(true); obs.disconnect(); return; } },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.1 }
+    );
+    obs.observe(node);
+    return () => obs.disconnect();
+  }, []);
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: `repeat(auto-fit, minmax(${minCol}px, 1fr))`,
-      gap: 16,
-    }}>
+    <div
+      ref={ref}
+      className={`gg-card-grid${active ? ' gg-card-grid--in' : ''}`}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(auto-fit, minmax(${minCol}px, 1fr))`,
+        gap: 16,
+      }}
+    >
       {children}
     </div>
   );
@@ -899,8 +920,26 @@ export interface HPhase {
 }
 
 export function HorizontalTimeline({ phases }: { phases: readonly HPhase[] }) {
+  /* One-shot IntersectionObserver for the whole timeline; once it enters
+     viewport, phases cascade in 160ms apart — nodes, then labels, then
+     deliverables. Reduced-motion sets active immediately. */
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) { setActive(true); return; }
+    const obs = new IntersectionObserver(
+      (entries) => { for (const e of entries) if (e.isIntersecting) { setActive(true); obs.disconnect(); return; } },
+      { rootMargin: '0px 0px -15% 0px', threshold: 0.1 }
+    );
+    obs.observe(node);
+    return () => obs.disconnect();
+  }, []);
+
   return (
-    <div className="gg-timeline">
+    <div className="gg-timeline" ref={ref}>
       <div
         className="gg-timeline__grid"
         style={{
@@ -911,7 +950,16 @@ export function HorizontalTimeline({ phases }: { phases: readonly HPhase[] }) {
         }}
       >
         {phases.map((p, i) => (
-          <div key={i} style={{ position: 'relative' }}>
+          <div
+            key={i}
+            style={{
+              position: 'relative',
+              opacity: active ? 1 : 0,
+              transform: active ? 'translateY(0)' : 'translateY(16px)',
+              transition: 'opacity 600ms var(--gg-ease-spring), transform 600ms var(--gg-ease-spring)',
+              transitionDelay: `${i * 160}ms`,
+            }}
+          >
             <div
               style={{
                 width: 32, height: 32, borderRadius: '50%',
@@ -924,6 +972,9 @@ export function HorizontalTimeline({ phases }: { phases: readonly HPhase[] }) {
                 position: 'relative', zIndex: 1,
                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                 fontVariantNumeric: 'tabular-nums',
+                transform: active ? 'scale(1)' : 'scale(0.6)',
+                transition: 'transform 500ms cubic-bezier(0.22, 1, 0.36, 1)',
+                transitionDelay: `${i * 160 + 80}ms`,
               }}
             >
               {i + 1}
@@ -960,7 +1011,7 @@ export function HorizontalTimeline({ phases }: { phases: readonly HPhase[] }) {
             )}
           </div>
         ))}
-        {/* Dashed baseline connecting the nodes (desktop only — lines up at y=56px) */}
+        {/* Dashed baseline — draws in left-to-right once the timeline is in view. */}
         <div
           className="gg-desktop-only"
           style={{
@@ -969,6 +1020,10 @@ export function HorizontalTimeline({ phases }: { phases: readonly HPhase[] }) {
             height: 1,
             background: 'repeating-linear-gradient(to right, var(--gg-border-strong) 0 4px, transparent 4px 8px)',
             pointerEvents: 'none',
+            transform: active ? 'scaleX(1)' : 'scaleX(0)',
+            transformOrigin: '0 50%',
+            transition: 'transform 900ms cubic-bezier(0.22, 1, 0.36, 1)',
+            transitionDelay: '80ms',
           }}
         />
       </div>
