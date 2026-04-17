@@ -44,6 +44,8 @@ export default function AppShellInner({
   streamingText,
   sending,
   activeTool,
+  chatError,
+  onRetry,
   onSend,
   onSelectDeal: _onSelectDeal,
   onOpenDeliverable: _onOpenDeliverable,
@@ -116,6 +118,8 @@ export default function AppShellInner({
         sending={sending}
         activeTool={activeTool}
         onSend={onSend}
+        chatError={chatError}
+        onRetry={onRetry}
       />
 
       {/* Tab bar — hidden when full chat is open. */}

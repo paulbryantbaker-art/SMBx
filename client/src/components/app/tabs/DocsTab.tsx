@@ -221,13 +221,22 @@ function DocRow({
   pct?: number;
   last?: boolean;
 }) {
+  /* Resolve an unknown status to 'draft' so a bad upstream value doesn't
+     crash the row. Dot + text label ensure the signal survives colorblind
+     vision per WCAG 1.4.1. */
+  const validStatuses = ['ready', 'progress', 'flag', 'draft'] as const;
+  const resolvedStatus: typeof validStatuses[number] = (validStatuses as readonly string[]).includes(status)
+    ? status
+    : 'draft';
   const dotColor: Record<string, string> = {
     ready: 'var(--dot-ready)',
     progress: 'var(--dot-progress)',
     flag: 'var(--dot-flag)',
     draft: 'var(--dot-draft)',
   };
-  const label = status === 'progress' && pct != null ? `${pct}%` : status[0].toUpperCase() + status.slice(1);
+  const label = resolvedStatus === 'progress' && pct != null
+    ? `${pct}%`
+    : resolvedStatus[0].toUpperCase() + resolvedStatus.slice(1);
   return (
     <div
       style={{
@@ -280,6 +289,8 @@ function DocRow({
         </div>
       </div>
       <span
+        role="img"
+        aria-label={`Status: ${label}`}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -297,7 +308,7 @@ function DocRow({
           flexShrink: 0,
         }}
       >
-        <span aria-hidden style={{ width: 7, height: 7, borderRadius: '50%', background: dotColor[status] }} />
+        <span aria-hidden style={{ width: 7, height: 7, borderRadius: '50%', background: dotColor[resolvedStatus] }} />
         {label}
       </span>
     </div>

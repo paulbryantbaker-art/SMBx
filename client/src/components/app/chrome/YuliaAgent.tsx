@@ -25,6 +25,8 @@ interface Props {
   streamingText: string;
   sending: boolean;
   activeTool?: string | null;
+  chatError?: string | null;
+  onRetry?: () => void;
 
   onSend: (text: string) => void;
 }
@@ -83,6 +85,8 @@ export default function YuliaAgent({
   streamingText,
   sending,
   activeTool,
+  chatError,
+  onRetry,
   onSend,
 }: Props) {
   const [draft, setDraft] = useState('');
@@ -218,6 +222,9 @@ export default function YuliaAgent({
                   fontSize: 14.5,
                   lineHeight: 1.55,
                   color: 'var(--text-primary)',
+                  /* Allow hard breaks in unbroken long strings (URLs, IDs, stack traces) */
+                  overflowWrap: 'anywhere',
+                  wordBreak: 'break-word',
                 }}
               >
                 {m.content}
@@ -231,6 +238,8 @@ export default function YuliaAgent({
                 fontSize: 14.5,
                 lineHeight: 1.55,
                 color: 'var(--text-primary)',
+                overflowWrap: 'anywhere',
+                wordBreak: 'break-word',
               }}
             >
               {streamingText}
@@ -247,6 +256,56 @@ export default function YuliaAgent({
                 }}
               />
               <style>{`@keyframes yulia-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }`}</style>
+            </div>
+          )}
+          {chatError && (
+            <div
+              role="alert"
+              style={{
+                alignSelf: 'stretch',
+                padding: '12px 14px',
+                background: 'var(--band-flag-bg)',
+                border: '0.5px solid var(--border)',
+                borderRadius: 12,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: 'var(--band-flag-fg)',
+                  lineHeight: 1.5,
+                }}
+              >
+                {chatError}
+              </p>
+              {onRetry && (
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  style={{
+                    alignSelf: 'flex-start',
+                    padding: '7px 14px',
+                    background: 'var(--accent)',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 999,
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: 'var(--shadow-primary-btn)',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  Try again
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -412,19 +471,25 @@ export default function YuliaAgent({
       </div>
       <span
         style={{
+          position: 'relative',
           width: 28,
           height: 28,
           borderRadius: '50%',
-          background: sending ? 'rgba(10,10,11,0.08)' : 'var(--accent)',
-          color: sending ? 'var(--text-primary)' : '#fff',
+          background: chatError ? 'var(--band-flag-bg)' : sending ? 'rgba(10,10,11,0.08)' : 'var(--accent)',
+          color: chatError ? 'var(--band-flag-fg)' : sending ? 'var(--text-primary)' : '#fff',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
-          boxShadow: sending ? 'none' : 'var(--shadow-primary-btn)',
+          boxShadow: !chatError && !sending ? 'var(--shadow-primary-btn)' : 'none',
         }}
       >
-        {sending ? <Spinner /> : (
+        {chatError ? (
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-label="Error — tap to retry">
+            <line x1="12" y1="8" x2="12" y2="13" />
+            <circle cx="12" cy="17" r="0.5" fill="currentColor" />
+          </svg>
+        ) : sending ? <Spinner /> : (
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="18 15 12 9 6 15" />
           </svg>

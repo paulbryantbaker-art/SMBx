@@ -54,6 +54,10 @@ export interface AppShellInnerProps {
   sending: boolean;
   activeTool?: string | null;
 
+  // Error surfacing
+  chatError?: string | null;
+  onRetry?: () => void;
+
   // Handlers
   onSend: (text: string) => void;
   onSelectDeal: (dealId: number) => void;

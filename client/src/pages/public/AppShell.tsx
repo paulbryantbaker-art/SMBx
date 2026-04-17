@@ -2166,6 +2166,11 @@ export default function AppShell() {
                       streamingText={streamingText}
                       sending={sending}
                       activeTool={activeTool}
+                      chatError={user ? null : anonChat.error}
+                      onRetry={!user ? () => {
+                        const last = anonChat.messages.filter((m: any) => m.role === 'user').pop();
+                        if (last) anonChat.sendMessage(last.content);
+                      } : undefined}
                       onSend={(text) => handleSend(text)}
                       onSelectDeal={(dealId) => {
                         const deal = authChat.grouped?.deals.find((d: any) => d.id === dealId);

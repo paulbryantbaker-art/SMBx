@@ -48,7 +48,14 @@ export default function DealTab({ deal }: Props) {
           color: 'var(--text-primary)',
           padding: '6px 20px 14px',
           margin: 0,
+          /* Long business names (legal entity names can be 60+ chars) truncate
+             cleanly instead of wrapping into a second line that breaks the
+             stage-label rhythm below. */
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
         }}
+        title={name}
       >
         {name}
       </h1>
@@ -370,6 +377,13 @@ function DoNextCard({
 }
 
 /* ─── Activity row with status dot ─── */
+const STATUS_LABEL: Record<'ready' | 'progress' | 'flag' | 'draft', string> = {
+  ready: 'Ready',
+  progress: 'In progress',
+  flag: 'Needs attention',
+  draft: 'Draft',
+};
+
 function ActivityRow({
   status,
   title,
@@ -381,12 +395,15 @@ function ActivityRow({
   meta: string;
   last?: boolean;
 }) {
+  const resolvedStatus = STATUS_LABEL[status] ? status : 'draft';
   const dotColor: Record<string, string> = {
     ready: 'var(--dot-ready)',
     progress: 'var(--dot-progress)',
     flag: 'var(--dot-flag)',
     draft: 'var(--dot-draft)',
   };
+  const statusLabel = STATUS_LABEL[resolvedStatus];
+
   return (
     <div
       style={{
@@ -394,16 +411,18 @@ function ActivityRow({
         gap: 10,
         padding: '10px 0',
         borderBottom: last ? 'none' : '0.5px solid var(--border)',
+        alignItems: 'flex-start',
       }}
     >
       <span
-        aria-hidden
+        role="img"
+        aria-label={`Status: ${statusLabel}`}
         style={{
           width: 7,
           height: 7,
           borderRadius: '50%',
-          background: dotColor[status],
-          marginTop: 6,
+          background: dotColor[resolvedStatus],
+          marginTop: 7,
           flexShrink: 0,
         }}
       />
@@ -414,6 +433,8 @@ function ActivityRow({
             fontSize: 12.5,
             fontWeight: 500,
             color: 'var(--text-primary)',
+            overflowWrap: 'anywhere',
+            wordBreak: 'break-word',
           }}
         >
           {title}
@@ -425,6 +446,10 @@ function ActivityRow({
             color: 'var(--text-muted)',
           }}
         >
+          {/* Status text pair-up satisfies WCAG 1.4.1 (Use of Color) — color
+             is not the only means of conveying the status signal. */}
+          <span style={{ fontWeight: 600 }}>{statusLabel}</span>
+          <span aria-hidden> · </span>
           {meta}
         </div>
       </div>
