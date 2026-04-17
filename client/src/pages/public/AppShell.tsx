@@ -2199,6 +2199,16 @@ export default function AppShell() {
                         });
                       }}
                       onAccountTap={() => setWorkspaceSheetOpen(true)}
+                      onLearnTap={() => {
+                        // "How can Yulia help me?" on the home starter row —
+                        // prefill the chat and let Yulia answer in her voice.
+                        setViewState('chat');
+                        navigate('/chat');
+                        requestAnimationFrame(() => {
+                          dockRef.current?.setValue('How can Yulia help me? ');
+                          dockRef.current?.focus();
+                        });
+                      }}
                     />
                   ) : (
                   <div className="flex flex-col items-center px-6 relative z-10 flex-[1.618] justify-center">

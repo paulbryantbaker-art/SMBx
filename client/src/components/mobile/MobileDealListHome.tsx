@@ -150,7 +150,10 @@ export default function MobileDealListHome({
         fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
-      {/* Top bar — solid, matches page bg exactly. Right-aligned icons (bell + account). */}
+      {/* Top bar — solid, matches page bg exactly. Right-aligned icons (bell + account).
+          No border-bottom — content and header share the same color so any
+          separator line reads as visual noise. Sticky position keeps icons
+          pinned as the user scrolls. */}
       <div
         style={{
           position: 'sticky',
@@ -165,7 +168,6 @@ export default function MobileDealListHome({
           justifyContent: 'flex-end',
           gap: 6,
           background: headerBg,
-          borderBottom: `1px solid ${border}`,
         }}
       >
         {onBellTap && (
