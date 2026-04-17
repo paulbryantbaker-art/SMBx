@@ -2,7 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+    <!-- NOTE on viewport-fit: Grok/ChatGPT PWAs deliberately OMIT
+         `viewport-fit=cover`. Without it, iOS sizes the webview to the
+         visible area and paints the status-bar + home-indicator safe
+         regions with `theme-color` automatically — no visible "chin."
+         With cover, the webview extends edge-to-edge and html bg fills
+         safe areas; any mismatch shows as a seam. We match the Grok
+         approach. If ever re-enabling cover, compensate with explicit
+         safe-area padding everywhere content ends. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, interactive-widget=resizes-content" />
     <link rel="manifest" href="/manifest.json" />
     <title>Sell or Buy Any Business, Anywhere — smbx.ai</title>
     <meta name="description" content="AI deal advisory from valuation to close. Sell, buy, raise capital, or integrate. Start free." />
@@ -12,7 +20,10 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#2A2C2E" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Status bar: "default" pairs with a light theme-color. iOS paints
+         the status-bar region with theme-color since we dropped
+         viewport-fit=cover, so no PWA chrome conflict. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script>
       // Resolve dark mode + body color before first paint to prevent any flash
       // and to make the iOS Safari toolbar (and PWA chin / home-indicator
