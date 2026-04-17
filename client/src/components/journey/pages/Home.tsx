@@ -18,12 +18,12 @@ import { PeekStack, VizBigStat, VizScoreCard, VizCapitalStack } from '../mockups
 
 /* ─── Rotating placeholder hints ────────────────────────────────────── */
 const ROTATING_HINTS = [
-  'Screen a deal in 90 seconds\u2026',
-  'Find the add-backs hiding in your financials\u2026',
-  'Draft a CIM from a conversation\u2026',
-  'Model an SBA structure under SOP 50 10 8\u2026',
-  'Build your LP update in 20 minutes\u2026',
-  'What\u2019s this business actually worth\u2026',
+  'Screen a deal in 90 seconds…',
+  'Find the add-backs hiding in your financials…',
+  'Draft a CIM from a conversation…',
+  'Model an SBA structure under SOP 50 10 8…',
+  'Build your LP update in 20 minutes…',
+  'What’s this business actually worth…',
 ];
 
 /* ─── Plus-button journey shortcuts ─────────────────────────────────── */
@@ -37,9 +37,9 @@ const SHORTCUTS: { label: string; journey: Journey }[] = [
 
 /* ─── 3 feature cards under hero ────────────────────────────────────── */
 const FEATURES = [
-  { idx: '01 \u00b7 Add-backs',       heading: 'Find the money hiding in your tax returns.',            body: 'Pre-LOI earnings quality analysis. Every legitimate add-back identified, documented, and defensible. 20 minutes, not 6 weeks.',         viz: 'addback' as const },
-  { idx: '02 \u00b7 Deal screening',  heading: 'Score any deal in 90 seconds on seven dimensions.',     body: 'The Rundown. Concentration, margins, revenue quality, owner dependency, management depth, financial integrity, scalability. Pursue or pass.', viz: 'score'   as const },
-  { idx: '03 \u00b7 SBA structure',   heading: 'Model SOP 50 10 8 capital stacks under current rules.', body: 'Senior, mezzanine, seller notes with correct standby terms, equity injection requirements. Restructures killed deals into closable ones.',   viz: 'stack'   as const },
+  { idx: '01 · Add-backs',       heading: 'Find the money hiding in your tax returns.',            body: 'Pre-LOI earnings quality analysis. Every legitimate add-back identified, documented, and defensible. 20 minutes, not 6 weeks.',         viz: 'addback' as const },
+  { idx: '02 · Deal screening',  heading: 'Score any deal in 90 seconds on seven dimensions.',     body: 'The Rundown. Concentration, margins, revenue quality, owner dependency, management depth, financial integrity, scalability. Pursue or pass.', viz: 'score'   as const },
+  { idx: '03 · SBA structure',   heading: 'Model SOP 50 10 8 capital stacks under current rules.', body: 'Senior, mezzanine, seller notes with correct standby terms, equity injection requirements. Restructures killed deals into closable ones.',   viz: 'stack'   as const },
 ];
 
 interface HomeProps {
@@ -102,8 +102,8 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
     ? <>Welcome back{firstName ? `, ${firstName}` : ''}.</>
     : <>The AI<br />deal team.</>;
   const heroTag = user && !authLoading
-    ? 'Pick up where you left off. Tell Yulia what you\u2019re working on.'
-    : 'Valuations. CIMs. Deal scoring. Financial models. Due diligence. LOIs. Everything an investment bank delivers \u2014 without the retainer.';
+    ? 'Pick up where you left off. Tell Yulia what you’re working on.'
+    : 'Valuations. CIMs. Deal scoring. Financial models. Due diligence. LOIs. Everything an investment bank delivers — without the retainer.';
 
   return (
     <Page

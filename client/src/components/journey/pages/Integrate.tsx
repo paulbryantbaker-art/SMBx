@@ -31,8 +31,8 @@ export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
       <JourneyHero
         eyebrow="Just acquired"
         headline="Day 1 after the wire. 180 employees. Do you have a plan?"
-        tagline="Yulia builds the 180-day integration plan from your specific deal data \u2014 risks identified, opportunities found, people to protect. Auto-generated before the wire hits. Executed one day at a time."
-        chatPlaceholder="Tell Yulia about the business you just acquired\u2026"
+        tagline="Yulia builds the 180-day integration plan from your specific deal data — risks identified, opportunities found, people to protect. Auto-generated before the wire hits. Executed one day at a time."
+        chatPlaceholder="Tell Yulia about the business you just acquired…"
         chips={CHIPS}
         onSend={onSend}
         onChip={onSend}
@@ -63,27 +63,27 @@ export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
         <HorizontalTimeline phases={[
           { idx: 'Day 0', name: 'Before the wire',
             body: 'IT security protocol. Credential rotation. Insurance verification. Legal entity confirmed. First communication scripted.',
-            deliverables: 'Day 0 checklist (62 items) \u00b7 Retention list \u00b7 Customer outreach priority \u00b7 Vendor review \u00b7 Comms templates' },
+            deliverables: 'Day 0 checklist (62 items) · Retention list · Customer outreach priority · Vendor review · Comms templates' },
           { idx: 'Day 30', name: 'Stabilization',
             body: 'Every key employee contacted. Every top customer reached. Vendor contracts reviewed. Operational baseline established.',
-            deliverables: 'Stabilization scorecard \u00b7 Retention status \u00b7 Customer health \u00b7 Cash position \u00b7 First 10 decisions' },
+            deliverables: 'Stabilization scorecard · Retention status · Customer health · Cash position · First 10 decisions' },
           { idx: 'Day 90', name: 'Assessment',
             body: 'Performance against deal model. Variance analysis. Thesis confirmation. Operational improvements. Team decisions.',
-            deliverables: '90-day report \u00b7 Thesis vs reality \u00b7 Improvement tracker \u00b7 Team restructure plan \u00b7 Priority reset' },
+            deliverables: '90-day report · Thesis vs reality · Improvement tracker · Team restructure plan · Priority reset' },
           { idx: 'Day 180', name: 'Optimization',
             body: 'Growth initiatives launched. Add-on targets identified. Platform thesis execution. Full operational control.',
-            deliverables: 'Growth plan \u00b7 Add-on screening \u00b7 Long-term plan \u00b7 Board package \u00b7 Year-end outlook' },
+            deliverables: 'Growth plan · Add-on screening · Long-term plan · Board package · Year-end outlook' },
         ]} />
       </Section>
 
       {/* Hero 1 PMI plan — text left, DD-to-workplan viz right */}
-      <Section variant="tint" label="Hero 1 \u00b7 The PMI plan">
+      <Section variant="tint" label="Hero 1 · The PMI plan">
         <div className="gg-two-col" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Your integration plan, generated from your deal data.</H2>
             <Body>Most integration plans are generic templates. Acquisition guides from a consulting firm. The &ldquo;first 100 days playbook&rdquo; that assumes every acquisition is the same acquisition.</Body>
-            <Body>Your acquisition isn\u2019t every acquisition. You did six months of diligence. You know which customers are at risk, which employees are critical, which processes need to be fixed, which revenue streams depend on the seller.</Body>
-            <Body>Yulia uses all of that. The DD findings become the 180-day workplan. The risks become Day 1 priorities. The opportunities become Day 30\u201390 quick wins. The strategic thesis becomes the Day 90\u2013180 roadmap.</Body>
+            <Body>Your acquisition isn’t every acquisition. You did six months of diligence. You know which customers are at risk, which employees are critical, which processes need to be fixed, which revenue streams depend on the seller.</Body>
+            <Body>Yulia uses all of that. The DD findings become the 180-day workplan. The risks become Day 1 priorities. The opportunities become Day 30–90 quick wins. The strategic thesis becomes the Day 90–180 roadmap.</Body>
             <Body><strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>Every item with an owner, a deadline, and a success metric.</strong></Body>
           </div>
           <div>
@@ -93,14 +93,14 @@ export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
       </Section>
 
       {/* Hero 2 Key employees — tiles left, text right (reversed) */}
-      <Section label="Hero 2 \u00b7 Key employee retention">
+      <Section label="Hero 2 · Key employee retention">
         <div className="gg-two-col gg-two-col--reverse" style={{ alignItems: 'center' }}>
           <div>
-            <H2 variant="block">The four people who can\u2019t leave in the first 90 days.</H2>
+            <H2 variant="block">The four people who can’t leave in the first 90 days.</H2>
             <Body>Every business has them. The operations manager who holds the processes in her head. The salesperson with the top-five customer relationships. The tech lead who wrote half the systems. The finance person who reconciles accounts nobody else understands.</Body>
             <Body>Yulia identified them during diligence. On Day 1, they get a plan.</Body>
             <Body>Individual retention conversations in week one. Compensation review where warranted. Role clarity through the transition. Direct line to the new owner.</Body>
-            <Body>Retention rates where this gets done: <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>95\u2013100%</strong> at Day 90. Where it doesn\u2019t: 40\u201360%.</Body>
+            <Body>Retention rates where this gets done: <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>95–100%</strong> at Day 90. Where it doesn’t: 40–60%.</Body>
           </div>
           <div>
             <KeyEmployeesMock />
@@ -109,7 +109,7 @@ export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
       </Section>
 
       {/* Hero 3 Value creation — text left, KPI variance chart right */}
-      <Section variant="tint" label="Hero 3 \u00b7 Value creation tracking">
+      <Section variant="tint" label="Hero 3 · Value creation tracking">
         <div className="gg-two-col" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">You paid for a thesis. Is it working?</H2>
@@ -132,7 +132,7 @@ export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
       <BottomCta
         heading="You closed the deal. Now the work begins."
         subhead="Tell Yulia about the business you just bought. She builds the plan from there."
-        chatPlaceholder="Industry, employee count, what you\u2019re worried about in the first 90 days\u2026"
+        chatPlaceholder="Industry, employee count, what you’re worried about in the first 90 days…"
         onSend={onSend}
       />
     </Page>
@@ -145,12 +145,12 @@ export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
 
 function Day0ChecklistPreview() {
   const items: { text: string; category: string; done: boolean }[] = [
-    { text: 'Rotate admin credentials \u00b7 top 50 systems', category: 'IT / Security', done: true },
+    { text: 'Rotate admin credentials · top 50 systems', category: 'IT / Security', done: true },
     { text: 'Disable shared logins',                          category: 'IT / Security', done: true },
-    { text: 'Retention call \u00b7 Ops Manager',              category: 'People',        done: true },
-    { text: 'Retention call \u00b7 Sales Lead',               category: 'People',        done: false },
-    { text: 'Top 10 customer outreach \u00b7 in writing',     category: 'Customers',     done: false },
-    { text: 'Insurance binder confirmed \u2192 +30 days',     category: 'Vendors',       done: true },
+    { text: 'Retention call · Ops Manager',              category: 'People',        done: true },
+    { text: 'Retention call · Sales Lead',               category: 'People',        done: false },
+    { text: 'Top 10 customer outreach · in writing',     category: 'Customers',     done: false },
+    { text: 'Insurance binder confirmed → +30 days',     category: 'Vendors',       done: true },
     { text: '13-week cash forecast',                          category: 'Operations',    done: false },
   ];
   const done = items.filter(i => i.done).length;
@@ -203,7 +203,7 @@ function DDToWorkplanMock() {
   return (
     <Card padding={28} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
-        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>DD \u2192 Workplan</div>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>DD → Workplan</div>
         <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Auto-mapped</div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -243,7 +243,7 @@ function KeyEmployeesMock() {
   return (
     <Card padding={28} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
-        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>4 people \u00b7 first 90 days</div>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>4 people · first 90 days</div>
         <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Retention</div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -287,7 +287,7 @@ function KPIVarianceMock() {
   return (
     <Card padding={28} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
-        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>EBITDA \u00b7 thesis vs actual</div>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>EBITDA · thesis vs actual</div>
         <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>6 months</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, height: 140, marginBottom: 12 }}>
@@ -331,9 +331,9 @@ function KPIVarianceMock() {
    ═════════════════════════════════════════════════════════════════════ */
 
 const INDUSTRY_OPTS = ['Services', 'Manufacturing', 'Healthcare', 'Technology', 'Construction', 'Retail'] as const;
-const HEADCOUNT_OPTS = ['<50', '50\u2013200', '200\u2013500', '500+'] as const;
-const REVENUE_OPTS = ['<$5M', '$5M\u2013$25M', '$25M\u2013$100M', '$100M+'] as const;
-const CUST_REL_OPTS = ['0', '1\u20135', '5\u201320', '20+'] as const;
+const HEADCOUNT_OPTS = ['<50', '50–200', '200–500', '500+'] as const;
+const REVENUE_OPTS = ['<$5M', '$5M–$25M', '$25M–$100M', '$100M+'] as const;
+const CUST_REL_OPTS = ['0', '1–5', '5–20', '20+'] as const;
 
 interface ChecklistItem {
   category: 'IT / Security' | 'People' | 'Customers' | 'Vendors' | 'Operations';
@@ -358,7 +358,7 @@ const BASE_ITEMS: ChecklistItem[] = [
   { category: 'Customers',    text: 'Owner personally calls top 10 customers within first 10 days' },
   { category: 'Customers',    text: 'Review revenue concentration; flag any customer > 15% of revenue' },
   { category: 'Customers',    text: 'Transition plan for seller-held customer relationships', ifCustRelGte: 5 },
-  { category: 'Customers',    text: 'Customer-facing continuity messaging \u2014 in writing' },
+  { category: 'Customers',    text: 'Customer-facing continuity messaging — in writing' },
   { category: 'Vendors',      text: 'Notify key vendors of ownership change; confirm assignments' },
   { category: 'Vendors',      text: 'Insurance: confirm policies binder through close + extension' },
   { category: 'Vendors',      text: 'Banking: open operating account; transfer balances; reissue checks' },
@@ -445,7 +445,7 @@ function Day1ChecklistGenerator({ onSend }: { onSend: (text: string) => void }) 
         ))}
 
         <p className="gg-body" style={{ marginTop: 20, fontSize: 13, color: 'var(--gg-text-muted)', marginBottom: 16 }}>
-          This is a starting point. Your full PMI plan \u2014 180 days, customized to your specific deal findings \u2014 starts with a conversation.
+          This is a starting point. Your full PMI plan — 180 days, customized to your specific deal findings — starts with a conversation.
         </p>
         <button type="button" className="gg-btn gg-btn--primary" onClick={sendToYulia}>
           Tell Yulia about your acquisition &rarr;

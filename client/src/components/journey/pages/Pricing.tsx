@@ -33,9 +33,9 @@ interface Tier {
 const TIERS: readonly Tier[] = [
   { key: 'free',       name: 'Free',       price: '$0',      priceSuffix: 'forever',           who: 'Trying Yulia out',                                                                                   cta: 'Start free' },
   { key: 'solo',       name: 'Solo',       price: '$79',     priceSuffix: '/mo',               who: 'Solo operators, self-funded searchers, principal sellers/buyers',                                    cta: 'Start Solo' },
-  { key: 'pro',        name: 'Pro',        price: '$199',    priceSuffix: '/mo',               who: 'Practitioners \u2014 IS, search funders, LMM advisors, solo bankers',                                cta: 'Start Pro', highlighted: true },
-  { key: 'team',       name: 'Team',       price: '$499',    priceSuffix: '/mo \u00b7 5 seats', who: 'Boutique firms, small corp dev teams, multi-person family offices',                                 cta: 'Start Team' },
-  { key: 'enterprise', name: 'Enterprise', price: '$2,500',  priceSuffix: '/mo \u00b7 10 seats', who: 'Firms, corp dev at serial acquirers, PE funds, regulated entities',                                cta: 'Talk to Yulia' },
+  { key: 'pro',        name: 'Pro',        price: '$199',    priceSuffix: '/mo',               who: 'Practitioners — IS, search funders, LMM advisors, solo bankers',                                cta: 'Start Pro', highlighted: true },
+  { key: 'team',       name: 'Team',       price: '$499',    priceSuffix: '/mo · 5 seats', who: 'Boutique firms, small corp dev teams, multi-person family offices',                                 cta: 'Start Team' },
+  { key: 'enterprise', name: 'Enterprise', price: '$2,500',  priceSuffix: '/mo · 10 seats', who: 'Firms, corp dev at serial acquirers, PE funds, regulated entities',                                cta: 'Talk to Yulia' },
 ] as const;
 
 interface MatrixRow {
@@ -50,7 +50,7 @@ const MATRIX: readonly MatrixRow[] = [
   /* hero capabilities — all true on every paid tier */
   { feature: 'Add-back / QoE Lite analysis',    values: { free: true, solo: true, pro: true, team: true, enterprise: true } },
   { feature: 'SBA SOP 50 10 8 structure modeling', values: { free: true, solo: true, pro: true, team: true, enterprise: true } },
-  { feature: 'Deal screening \u00b7 The Rundown', values: { free: true, solo: true, pro: true, team: true, enterprise: true } },
+  { feature: 'Deal screening · The Rundown', values: { free: true, solo: true, pro: true, team: true, enterprise: true } },
   { feature: 'CIM / teaser drafting',           values: { free: true, solo: true, pro: true, team: true, enterprise: true } },
   { feature: 'LOI & term sheet drafting',       values: { free: true, solo: true, pro: true, team: true, enterprise: true } },
   { feature: 'Investor memos & LP updates',     values: { free: true, solo: true, pro: true, team: true, enterprise: true } },
@@ -73,32 +73,32 @@ const MATRIX: readonly MatrixRow[] = [
 const CAPABILITY_CARDS = [
   { title: 'Add-back & QoE Lite analysis', body: 'Find the value hiding in financials. Pre-LOI earnings quality analysis. 20 minutes, not 6 weeks.' },
   { title: 'SBA SOP 50 10 8 modeling',     body: 'Model capital stacks under current SBA rules. Rebuild structures the new regulations broke.' },
-  { title: 'Deal screening \u00b7 The Rundown', body: 'Score any deal in 90 seconds on seven dimensions. Pursue or pass before you spend a dollar.' },
-  { title: 'CIM & pitch book drafting',    body: 'Institutional-quality Confidential Information Memorandums. 25\u201340 pages. Strategic narrative.' },
-  { title: 'LOI & term sheet drafting',    body: 'First-draft offer documents from the deal context you\u2019ve built. Attorney-ready.' },
+  { title: 'Deal screening · The Rundown', body: 'Score any deal in 90 seconds on seven dimensions. Pursue or pass before you spend a dollar.' },
+  { title: 'CIM & pitch book drafting',    body: 'Institutional-quality Confidential Information Memorandums. 25–40 pages. Strategic narrative.' },
+  { title: 'LOI & term sheet drafting',    body: 'First-draft offer documents from the deal context you’ve built. Attorney-ready.' },
   { title: 'Investor memos & LP updates',  body: 'IC memos, LP updates, capital partner pitches, board decks. 20 minutes, not 2 days.' },
   { title: 'Due diligence coordination',   body: '147-item DD checklists generated from the specific deal. Cross-party status tracking. Document indexing.' },
 ];
 
 const FAQS: readonly { q: string; a: string }[] = [
-  { q: 'What\u2019s in the Free tier?',
-    a: 'Unlimited chat with Yulia and one deliverable \u2014 ever \u2014 with email registration. No credit card. If you want a second deliverable, you either upgrade to Solo ($79/mo) or buy a $99 credit pack. No time limit on Free; the deliverable cap is total, not monthly.' },
+  { q: 'What’s in the Free tier?',
+    a: 'Unlimited chat with Yulia and one deliverable — ever — with email registration. No credit card. If you want a second deliverable, you either upgrade to Solo ($79/mo) or buy a $99 credit pack. No time limit on Free; the deliverable cap is total, not monthly.' },
   { q: 'What counts as a "deliverable"?',
-    a: 'Any finished document Yulia produces \u2014 an add-back analysis, a CIM draft, a screening memo, an LOI, a deal summary, an LP update. One rendered, downloadable, or shareable artifact.' },
+    a: 'Any finished document Yulia produces — an add-back analysis, a CIM draft, a screening memo, an LOI, a deal summary, an LP update. One rendered, downloadable, or shareable artifact.' },
   { q: 'Why no success fees or take-rates?',
-    a: 'Two reasons. First, smbX does not hold the licenses required to charge success fees \u2014 we sit on the software side of the broker-dealer line under SEC Rule 15(b)(13). Second, success fees would fundamentally change what smbX is: a tool becomes a broker, and we\u2019re not that. Subscription only. Forever.' },
+    a: 'Two reasons. First, smbX does not hold the licenses required to charge success fees — we sit on the software side of the broker-dealer line under SEC Rule 15(b)(13). Second, success fees would fundamentally change what smbX is: a tool becomes a broker, and we’re not that. Subscription only. Forever.' },
   { q: 'What about advisors and brokers? Do you have a special tier?',
     a: 'Advisors and brokers are customers, not competitors. A solo broker uses Solo or Pro. A boutique advisory uses Team. A large middle-market firm uses Enterprise. Same product, different configuration. No separate pricing.' },
   { q: 'Can I try Pro or Team for free?',
-    a: 'Yes \u2014 every paid tier has a 14-day full-feature trial. Credit card required to activate. Cancel inside 14 days and you\u2019re not charged.' },
+    a: 'Yes — every paid tier has a 14-day full-feature trial. Credit card required to activate. Cancel inside 14 days and you’re not charged.' },
   { q: 'What happens after I close a deal?',
-    a: 'Your subscription continues at your current tier. You get 180 days of post-close PMI and portfolio ops support included. Many users stay on permanently \u2014 Yulia becomes the ongoing chief-of-staff for the business they bought.' },
+    a: 'Your subscription continues at your current tier. You get 180 days of post-close PMI and portfolio ops support included. Many users stay on permanently — Yulia becomes the ongoing chief-of-staff for the business they bought.' },
   { q: 'Do you offer annual pricing?',
-    a: 'Not at launch. We introduce annual (16% discount) after we\u2019ve earned it with retention data. Month-to-month, cancel anytime.' },
+    a: 'Not at launch. We introduce annual (16% discount) after we’ve earned it with retention data. Month-to-month, cancel anytime.' },
   { q: 'Why $199 Pro and $499 Team?',
-    a: 'Pro is for one practitioner working alone \u2014 an independent sponsor, a solo banker, a searcher. Team is for a 2\u20135 person firm where Yulia becomes the shared team resource. The difference isn\u2019t features; it\u2019s seats, team workspace, and shared deal vault.' },
+    a: 'Pro is for one practitioner working alone — an independent sponsor, a solo banker, a searcher. Team is for a 2–5 person firm where Yulia becomes the shared team resource. The difference isn’t features; it’s seats, team workspace, and shared deal vault.' },
   { q: 'What if I need more than 5 seats?',
-    a: 'That\u2019s Enterprise \u2014 $2,500/mo flat, covers 10 seats, SSO (Okta/Google/Azure), single-tenant deployment option, SOC 2 Type II audit trails, named account manager, 99.9% SLA, and API access.' },
+    a: 'That’s Enterprise — $2,500/mo flat, covers 10 seats, SSO (Okta/Google/Azure), single-tenant deployment option, SOC 2 Type II audit trails, named account manager, 99.9% SLA, and API access.' },
   { q: 'Is there a student discount?',
     a: 'Yes. Students in M&A or ETA programs at accredited universities can apply for 50% off Pro for the duration of enrollment. Verify via .edu email; manually approved.' },
   { q: 'Can I pause my subscription?',
@@ -132,13 +132,13 @@ export default function Pricing({ onSend, onStartFree, onNavigate }: Props) {
       <Section variant="tint" label="The philosophy">
         <H2>Every tier includes everything Yulia does.</H2>
         <Body>
-          You don\u2019t pay extra to unlock the valuation. You don\u2019t pay extra to unlock the CIM. The deal scoring, the capital stack modeling, the SBA structure work, the investor memos, the LOIs, the integration plans &mdash; it\u2019s all in every paid tier.
+          You don’t pay extra to unlock the valuation. You don’t pay extra to unlock the CIM. The deal scoring, the capital stack modeling, the SBA structure work, the investor memos, the LOIs, the integration plans &mdash; it’s all in every paid tier.
         </Body>
         <Body>
           Tiers scale on deal volume, seats, and enterprise infrastructure. Never on what Yulia can do for the deal in front of you.
         </Body>
         <Body>
-          We do this because the alternative &mdash; charging more to unlock the feature you actually need &mdash; turns a tool into a negotiation. That\u2019s not the business we want. When you\u2019re working a deal, you shouldn\u2019t be thinking about whether the next step costs extra.
+          We do this because the alternative &mdash; charging more to unlock the feature you actually need &mdash; turns a tool into a negotiation. That’s not the business we want. When you’re working a deal, you shouldn’t be thinking about whether the next step costs extra.
         </Body>
         <Body>One subscription. Everything included. Cancel anytime.</Body>
       </Section>
@@ -180,7 +180,7 @@ export default function Pricing({ onSend, onStartFree, onNavigate }: Props) {
                 style={{ width: '100%', justifyContent: 'center' }}
                 onClick={() => {
                   if (t.key === 'enterprise') {
-                    onSend('I\u2019m interested in Enterprise. Here\u2019s what our team is solving: ');
+                    onSend('I’m interested in Enterprise. Here’s what our team is solving: ');
                   } else if (t.key === 'free') {
                     onStartFree();
                   } else {
@@ -194,7 +194,7 @@ export default function Pricing({ onSend, onStartFree, onNavigate }: Props) {
           ))}
         </div>
         <p className="gg-body" style={{ marginTop: 24, fontSize: 13, color: 'var(--gg-text-muted)' }}>
-          Every paid tier has a 14-day opt-out trial. Credit card required to activate. Cancel inside 14 days and you\u2019re not charged.
+          Every paid tier has a 14-day opt-out trial. Credit card required to activate. Cancel inside 14 days and you’re not charged.
         </p>
       </Section>
 
@@ -219,8 +219,8 @@ export default function Pricing({ onSend, onStartFree, onNavigate }: Props) {
                   <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--gg-text-secondary)' }}>{row.feature}</td>
                   {TIERS.map(t => (
                     <td key={t.key} style={{ padding: '12px 12px', textAlign: 'center', fontSize: 13, fontWeight: typeof row.values[t.key] === 'string' ? 600 : 400, color: row.values[t.key] === false ? 'var(--gg-text-faint)' : 'var(--gg-text-primary)' }}>
-                      {row.values[t.key] === true ? '\u2713'
-                        : row.values[t.key] === false ? '\u2014'
+                      {row.values[t.key] === true ? '✓'
+                        : row.values[t.key] === false ? '—'
                         : row.values[t.key]}
                     </td>
                   ))}
@@ -258,8 +258,8 @@ export default function Pricing({ onSend, onStartFree, onNavigate }: Props) {
       {/* ─── Bottom CTA ────────────────────────────────────────────── */}
       <BottomCta
         heading="Start free. No credit card."
-        subhead="Unlimited chat. One deliverable free. Upgrade only when you know it\u2019s worth it."
-        chatPlaceholder="Tell Yulia about your deal\u2026"
+        subhead="Unlimited chat. One deliverable free. Upgrade only when you know it’s worth it."
+        chatPlaceholder="Tell Yulia about your deal…"
         onSend={onSend}
       />
     </Page>

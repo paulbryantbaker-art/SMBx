@@ -34,7 +34,7 @@ export function PeekStack() {
         }}
       >
         <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--gg-dot-ready)' }} />
-        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--gg-text-primary)' }}>Baseline ready \u00b7 22 min</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--gg-text-primary)' }}>Baseline ready · 22 min</span>
       </div>
 
       {/* Conversation card — middle, slight left tilt */}
@@ -66,12 +66,12 @@ export function PeekStack() {
           boxShadow: '0 20px 50px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.04), inset 0 0.5px 0 rgba(255,255,255,1)',
         }}
       >
-        <div className="gg-label" style={{ marginBottom: 8 }}>Baseline \u00b7 draft</div>
+        <div className="gg-label" style={{ marginBottom: 8 }}>Baseline · draft</div>
         <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 30, letterSpacing: '-0.025em', lineHeight: 1, marginBottom: 6 }}>
           $2.4M &ndash; $2.9M
         </div>
         <div style={{ fontSize: 11.5, color: 'var(--gg-text-muted)', marginBottom: 14 }}>
-          SDE $695K \u00b7 3.5&times;\u20134.2&times;
+          SDE $695K · 3.5&times;–4.2&times;
         </div>
         <div style={{ position: 'relative', height: 5, background: 'var(--gg-bg-muted)', borderRadius: 3, marginBottom: 6 }}>
           <div style={{ position: 'absolute', left: '32%', right: '22%', top: 0, bottom: 0, background: 'linear-gradient(90deg, #6B6B70, #0A0A0B)', borderRadius: 3 }} />
@@ -125,11 +125,11 @@ function Bubble({ role, children }: { role: 'user' | 'yulia'; children: ReactNod
 export interface AddBackLine { title: string; subtitle?: string; amount: string; }
 
 export function AddBackSchedule({
-  label = 'Live preview \u00b7 Acme HVAC',
+  label = 'Live preview · Acme HVAC',
   heading = 'Add-back schedule',
   lines,
-  totalLabel = 'Blind Equity\u2122',
-  totalNote = 'Adds ~0.35\u00d7 to multiple on upper band',
+  totalLabel = 'Blind Equity™',
+  totalNote = 'Adds ~0.35× to multiple on upper band',
   totalAmount,
 }: {
   label?: string;
@@ -203,14 +203,14 @@ export function AddBackSchedule({
 
 export function CIMCover({
   company = 'Acme HVAC Services, Inc.',
-  locationLine = 'Dallas, TX \u00b7 Founded 2011',
+  locationLine = 'Dallas, TX · Founded 2011',
   stats = [
     { n: '$4.2M', l: 'Revenue' },
     { n: '$695K', l: 'Adj. SDE' },
     { n: '60%',   l: 'Recurring' },
     { n: '14',    l: 'Technicians' },
   ],
-  prepared = 'Prepared October 2026 \u00b7 32 pages',
+  prepared = 'Prepared October 2026 · 32 pages',
 }: {
   company?: string;
   locationLine?: string;
@@ -267,7 +267,7 @@ export interface IOICell { name: string; price: string; note: string; winner?: b
 
 export function IOIGrid({
   title = 'IOIs received',
-  count = '3 offers \u00b7 active',
+  count = '3 offers · active',
   cells,
   footnote,
 }: {
@@ -372,10 +372,10 @@ export interface StackLayer { label: string; width: number; tone: 'ink' | 'dark'
 
 export function CapitalStack({
   layers = [
-    { label: 'Senior \u00b7 SBA 7(a)',  width: 100, tone: 'ink' },
-    { label: 'Mezz \u00b7 12%',         width: 75,  tone: 'dark' },
-    { label: 'Seller \u00b7 standby',   width: 58,  tone: 'mid' },
-    { label: 'Equity \u00b7 10%',       width: 42,  tone: 'light' },
+    { label: 'Senior · SBA 7(a)',  width: 100, tone: 'ink' },
+    { label: 'Mezz · 12%',         width: 75,  tone: 'dark' },
+    { label: 'Seller · standby',   width: 58,  tone: 'mid' },
+    { label: 'Equity · 10%',       width: 42,  tone: 'light' },
   ] as readonly StackLayer[],
 }: {
   layers?: readonly StackLayer[];
@@ -502,10 +502,10 @@ export function VizCapitalStack() {
       }}
     >
       {([
-        { w: '100%', bg: 'var(--gg-text-primary)',   fg: '#fff',                      label: 'Senior \u00b7 SBA 7(a)' },
-        { w: '75%',  bg: 'var(--gg-text-secondary)', fg: '#fff',                      label: 'Mezz \u00b7 12%' },
-        { w: '58%',  bg: 'var(--gg-text-muted)',     fg: '#fff',                      label: 'Seller \u00b7 standby' },
-        { w: '42%',  bg: 'var(--gg-border-strong)',  fg: 'var(--gg-text-primary)',    label: 'Equity \u00b7 10%' },
+        { w: '100%', bg: 'var(--gg-text-primary)',   fg: '#fff',                      label: 'Senior · SBA 7(a)' },
+        { w: '75%',  bg: 'var(--gg-text-secondary)', fg: '#fff',                      label: 'Mezz · 12%' },
+        { w: '58%',  bg: 'var(--gg-text-muted)',     fg: '#fff',                      label: 'Seller · standby' },
+        { w: '42%',  bg: 'var(--gg-border-strong)',  fg: 'var(--gg-text-primary)',    label: 'Equity · 10%' },
       ] as const).map((l, i) => (
         <div
           key={i}

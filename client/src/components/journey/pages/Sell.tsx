@@ -27,35 +27,35 @@ interface Props {
 }
 
 const CHIPS = [
-  'What\u2019s my business worth?',
+  'What’s my business worth?',
   'Find my hidden add-backs',
   'Draft my CIM',
   'Am I ready to sell?',
 ] as const;
 
 const HERO_LINES = [
-  { title: 'Owner compensation above market', subtitle: '$165K paid \u00b7 $143K benchmark', amount: '+$22,000' },
-  { title: 'Personal vehicles',                 subtitle: '2 F-150s \u00b7 fuel, maintenance, insurance', amount: '+$14,000' },
+  { title: 'Owner compensation above market', subtitle: '$165K paid · $143K benchmark', amount: '+$22,000' },
+  { title: 'Personal vehicles',                 subtitle: '2 F-150s · fuel, maintenance, insurance', amount: '+$14,000' },
   { title: 'Spouse on payroll',                 subtitle: 'Replaceable at market rate',  amount: '+$11,000' },
 ];
 const QOFE_LINES = [
-  { title: 'Above-market rent to own LLC', subtitle: '$84K/yr \u2192 $56K market \u00b7 normalize', amount: '+$28,000' },
-  { title: 'One-time legal (acquisition)',  subtitle: 'Non-recurring \u00b7 2024 only',            amount: '+$41,000' },
-  { title: 'Discretionary consulting',      subtitle: 'Industry research \u00b7 closable',         amount: '+$19,000' },
+  { title: 'Above-market rent to own LLC', subtitle: '$84K/yr → $56K market · normalize', amount: '+$28,000' },
+  { title: 'One-time legal (acquisition)',  subtitle: 'Non-recurring · 2024 only',            amount: '+$41,000' },
+  { title: 'Discretionary consulting',      subtitle: 'Industry research · closable',         amount: '+$19,000' },
   { title: 'Personal expenses on books',    subtitle: 'Auto, phone, meals',                        amount: '+$38,000' },
 ];
 const IOI_CELLS = [
-  { name: 'Family office',   price: '$2.4M', note: '100% cash \u00b7 60 days' },
-  { name: 'Strategic \u00b7 top', price: '$2.9M', note: '85% cash \u00b7 15% rollover', winner: true },
+  { name: 'Family office',   price: '$2.4M', note: '100% cash · 60 days' },
+  { name: 'Strategic · top', price: '$2.9M', note: '85% cash · 15% rollover', winner: true },
   { name: 'PE roll-up',      price: '$2.7M', note: '$400K earnout' },
 ];
 
 const EXIT_PATHS = [
   { title: 'Full Sale',                   body: 'Sell 100%. Maximum immediate liquidity. Clean break. Best for owners ready to exit entirely.' },
-  { title: 'Majority Sale with Rollover', body: 'Sell 51\u201380% to PE or strategic. Cash today. Keep equity for a second bite in 3\u20135 years.' },
-  { title: 'Minority Equity Raise',       body: 'Sell 20\u201340% to a growth investor. Access capital without giving up control. Stay in the operator seat.' },
+  { title: 'Majority Sale with Rollover', body: 'Sell 51–80% to PE or strategic. Cash today. Keep equity for a second bite in 3–5 years.' },
+  { title: 'Minority Equity Raise',       body: 'Sell 20–40% to a growth investor. Access capital without giving up control. Stay in the operator seat.' },
   { title: 'ESOP',                        body: 'Sell to your employees. Significant tax advantages via Section 1042. Stay as chairman. Culture preserved.' },
-  { title: 'Recapitalization',            body: 'Dividend recap with debt. Take $15M\u2013$40M in cash. Retain 100% equity. Keep growing.' },
+  { title: 'Recapitalization',            body: 'Dividend recap with debt. Take $15M–$40M in cash. Retain 100% equity. Keep growing.' },
   { title: 'Partial Asset Sale',          body: 'Sell a division, license IP, sell-leaseback real estate. Unlock value without a full exit.' },
 ];
 
@@ -67,17 +67,17 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
         eyebrow="Selling your business"
         headline="Know what you have. Before anyone else does."
         tagline="Yulia finds the value hiding in your financials, builds the documents that sell your business, and manages the process that gets you to the closing table. From first conversation to wire transfer."
-        chatPlaceholder="Tell Yulia about your business \u2014 industry, revenue\u2026"
+        chatPlaceholder="Tell Yulia about your business — industry, revenue…"
         chips={CHIPS}
         onSend={onSend}
         onChip={onSend}
         rightPanel={
           <AddBackSchedule
-            label="Live preview \u00b7 Acme HVAC"
+            label="Live preview · Acme HVAC"
             heading="Add-back schedule"
             lines={HERO_LINES}
-            totalLabel="Blind Equity\u2122"
-            totalNote="Adds ~0.35\u00d7 to multiple on upper band"
+            totalLabel="Blind Equity™"
+            totalNote="Adds ~0.35× to multiple on upper band"
             totalAmount="+$47K"
           />
         }
@@ -89,33 +89,33 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
         <div className="gg-two-col" style={{ marginTop: 48, alignItems: 'start' }}>
           <div>
             <Body>The number comes from the Exit Planning Institute. Thousands of former owners surveyed. The regrets are almost always the same.</Body>
-            <Body>They weren\u2019t financially prepared. They left hundreds of thousands &mdash; sometimes millions &mdash; on the table. In add-backs they never identified. In tax structures they never modeled. In competitive processes they never ran. They accepted the first offer because they had no way to know if it was fair.</Body>
+            <Body>They weren’t financially prepared. They left hundreds of thousands &mdash; sometimes millions &mdash; on the table. In add-backs they never identified. In tax structures they never modeled. In competitive processes they never ran. They accepted the first offer because they had no way to know if it was fair.</Body>
             <Body><strong style={{ color: 'var(--gg-text-primary)', fontWeight: 600 }}>Most of this was preventable.</strong></Body>
           </div>
           <div>
-            <Body>The owners who sell well share one thing: they knew their numbers before anyone else did. They found the value hiding in their own financials. They prepared the business to look through a buyer\u2019s lens. They ran a process that created competition.</Body>
+            <Body>The owners who sell well share one thing: they knew their numbers before anyone else did. They found the value hiding in their own financials. They prepared the business to look through a buyer’s lens. They ran a process that created competition.</Body>
             <Body>Yulia does all of that. Starting in a conversation.</Body>
           </div>
         </div>
       </Section>
 
       {/* ═════ Hero 1 · Add-backs — text left, mockup right ═════ */}
-      <Section label="Hero 1 \u00b7 Add-backs">
+      <Section label="Hero 1 · Add-backs">
         <div className="gg-two-col" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">The money hiding in your tax returns.</H2>
             <Body lead>Reported EBITDA and real EBITDA are almost never the same number.</Body>
-            <Body>Your accountant\u2019s job is to minimize your taxes. A buyer\u2019s job is to maximize the price they\u2019ll justify to their lender or investment committee. Somewhere between those two numbers is the truth \u2014 and the gap is almost always larger than you think.</Body>
-            <Body>Average hidden value across hundreds of analyses: <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>$1.1M</strong>. At a 5\u20136&times; multiple, that\u2019s <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>$5.5M\u2013$6.6M</strong> in enterprise value sitting in the financials.</Body>
-            <Body>A formal Quality of Earnings analysis costs $25K\u2013$75K and takes 3\u20136 weeks. Yulia\u2019s pre-LOI analysis takes 20 minutes.</Body>
+            <Body>Your accountant’s job is to minimize your taxes. A buyer’s job is to maximize the price they’ll justify to their lender or investment committee. Somewhere between those two numbers is the truth — and the gap is almost always larger than you think.</Body>
+            <Body>Average hidden value across hundreds of analyses: <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>$1.1M</strong>. At a 5–6&times; multiple, that’s <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>$5.5M–$6.6M</strong> in enterprise value sitting in the financials.</Body>
+            <Body>A formal Quality of Earnings analysis costs $25K–$75K and takes 3–6 weeks. Yulia’s pre-LOI analysis takes 20 minutes.</Body>
           </div>
           <div>
             <AddBackSchedule
-              label="Your analysis \u00b7 live"
+              label="Your analysis · live"
               heading="What the QofE will find"
               lines={QOFE_LINES}
-              totalLabel="Total add-backs \u00b7 pre-QofE"
-              totalNote="At 5.5\u00d7 \u00b7 $693K in enterprise value"
+              totalLabel="Total add-backs · pre-QofE"
+              totalNote="At 5.5× · $693K in enterprise value"
               totalAmount="+$126K"
             />
           </div>
@@ -123,14 +123,14 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
       </Section>
 
       {/* ═════ Hero 2 · CIM — mockup left, text right (reversed) ═════ */}
-      <Section variant="tint" label="Hero 2 \u00b7 CIM">
+      <Section variant="tint" label="Hero 2 · CIM">
         <div className="gg-two-col gg-two-col--reverse" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Your business deserves better than a data dump.</H2>
-            <Body>A Confidential Information Memorandum is the single most important document in a sell-side process. It\u2019s what qualified buyers read to decide whether your business is worth their time.</Body>
-            <Body>Most CIMs are data dumps. Revenue tables. Margin charts. An &ldquo;overview&rdquo; section that reads like it was written by someone who\u2019s never visited the business.</Body>
-            <Body>Yulia\u2019s CIM is a strategic narrative. 25\u201340 pages. Your business positioned not as a business to buy, but as a <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>platform to scale</strong>.</Body>
-            <Body>The same company, described two ways, can trade at 4.5&times; or 7&times;. The difference is almost never the business. It\u2019s the CIM.</Body>
+            <Body>A Confidential Information Memorandum is the single most important document in a sell-side process. It’s what qualified buyers read to decide whether your business is worth their time.</Body>
+            <Body>Most CIMs are data dumps. Revenue tables. Margin charts. An &ldquo;overview&rdquo; section that reads like it was written by someone who’s never visited the business.</Body>
+            <Body>Yulia’s CIM is a strategic narrative. 25–40 pages. Your business positioned not as a business to buy, but as a <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>platform to scale</strong>.</Body>
+            <Body>The same company, described two ways, can trade at 4.5&times; or 7&times;. The difference is almost never the business. It’s the CIM.</Body>
           </div>
           <div>
             <CIMCover />
@@ -139,18 +139,18 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
       </Section>
 
       {/* ═════ Hero 3 · Competitive process — text left, mockup right ═════ */}
-      <Section label="Hero 3 \u00b7 Competitive process">
+      <Section label="Hero 3 · Competitive process">
         <div className="gg-two-col" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">One buyer gives you a price.<br />Five buyers give you a market.</H2>
-            <Body>The competitive process is the single highest-ROI activity in any exit. Most sellers skip it \u2014 because it\u2019s logistically complex, because their broker doesn\u2019t have the bandwidth, because they don\u2019t know it\u2019s an option.</Body>
-            <Body>Yulia manages the entire process. Buyer identification \u2014 strategic, PE, and independent \u2014 mapped and scored. Outreach sequencing. IOI comparison matrix that shows not just the headline price, but the terms.</Body>
-            <Body>The winning bid in a competitive process is typically <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>15\u201330% above the initial offer</strong>. On a $50M transaction, that\u2019s $7.5M\u2013$15M more.</Body>
+            <Body>The competitive process is the single highest-ROI activity in any exit. Most sellers skip it — because it’s logistically complex, because their broker doesn’t have the bandwidth, because they don’t know it’s an option.</Body>
+            <Body>Yulia manages the entire process. Buyer identification — strategic, PE, and independent — mapped and scored. Outreach sequencing. IOI comparison matrix that shows not just the headline price, but the terms.</Body>
+            <Body>The winning bid in a competitive process is typically <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>15–30% above the initial offer</strong>. On a $50M transaction, that’s $7.5M–$15M more.</Body>
           </div>
           <div>
             <IOIGrid
               cells={IOI_CELLS}
-              footnote={<><strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>Yulia\u2019s take:</strong> Strategic wins on headline and certainty. After-tax, all three within $180K of each other.</>}
+              footnote={<><strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>Yulia’s take:</strong> Strategic wins on headline and certainty. After-tax, all three within $180K of each other.</>}
             />
           </div>
         </div>
@@ -166,18 +166,18 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
         <H2>How your exit actually works.</H2>
         <p className="gg-body--sub" style={{ marginBottom: 48 }}>Six months to two years. One guided workflow.</p>
         <HorizontalTimeline phases={[
-          { idx: 'Phase 1 \u00b7 Free', name: 'Understand', meta: 'Months 1\u20132',
-            body: 'See your business through a buyer\u2019s lens. Financials normalized. Add-backs found. Value range against your market.',
-            deliverables: 'Preliminary value range \u00b7 Add-back analysis \u00b7 Readiness score \u00b7 Market positioning' },
-          { idx: 'Phase 2', name: 'Optimize', meta: 'Months 3\u201312',
-            body: '$50K improvement in EBITDA at 5\u00d7 = $250K more at closing. Optimization roadmap with dollar impact on every action item.',
-            deliverables: 'Improvement plan \u00b7 Dollar impact per action \u00b7 Progress tracking \u00b7 Milestone projections' },
-          { idx: 'Phase 3', name: 'Prepare', meta: 'Months 6\u201318',
+          { idx: 'Phase 1 · Free', name: 'Understand', meta: 'Months 1–2',
+            body: 'See your business through a buyer’s lens. Financials normalized. Add-backs found. Value range against your market.',
+            deliverables: 'Preliminary value range · Add-back analysis · Readiness score · Market positioning' },
+          { idx: 'Phase 2', name: 'Optimize', meta: 'Months 3–12',
+            body: '$50K improvement in EBITDA at 5× = $250K more at closing. Optimization roadmap with dollar impact on every action item.',
+            deliverables: 'Improvement plan · Dollar impact per action · Progress tracking · Milestone projections' },
+          { idx: 'Phase 3', name: 'Prepare', meta: 'Months 6–18',
             body: 'CIM. Financial exhibits. Buyer targeting. Deal room. Everything a qualified buyer needs to make a decision.',
-            deliverables: 'CIM \u00b7 Blind teaser \u00b7 Buyer universe \u00b7 Deal room \u00b7 Outreach strategy' },
-          { idx: 'Phase 4', name: 'Close', meta: 'Months 12\u201324',
+            deliverables: 'CIM · Blind teaser · Buyer universe · Deal room · Outreach strategy' },
+          { idx: 'Phase 4', name: 'Close', meta: 'Months 12–24',
             body: 'LOI evaluation. Structure modeling. Earnout analysis. Competitive process management. Closing coordination.',
-            deliverables: 'IOI/LOI comparison \u00b7 Deal structure \u00b7 DD coordination \u00b7 Working capital \u00b7 Closing' },
+            deliverables: 'IOI/LOI comparison · Deal structure · DD coordination · Working capital · Closing' },
         ]} />
       </Section>
 
@@ -186,13 +186,13 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
         <StatBar items={[
           { value: '$1.1M',  label: 'Average hidden value found per analysis' },
           { value: '30 min', label: 'Average time to first deliverable' },
-          { value: '4\u20137\u00d7', label: 'Typical preparation premium on enterprise value' },
+          { value: '4–7×', label: 'Typical preparation premium on enterprise value' },
         ]} />
       </Section>
 
       {/* ═════ Exit paths — 3-col grid ═════ */}
       <Section label="Exit paths">
-        <H2>Selling 100% isn\u2019t your only option.</H2>
+        <H2>Selling 100% isn’t your only option.</H2>
         <p className="gg-body--sub" style={{ marginBottom: 40 }}>Yulia models every exit structure against your specific numbers. In one conversation.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
           {EXIT_PATHS.map(p => (
@@ -219,8 +219,8 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
       {/* ═════ Bottom CTA — dark ═════ */}
       <BottomCta
         heading="Tell Yulia about your business."
-        subhead="The first conversation is free. The first deliverable is free. Start when you\u2019re ready."
-        chatPlaceholder="Industry, revenue, what you\u2019re thinking\u2026"
+        subhead="The first conversation is free. The first deliverable is free. Start when you’re ready."
+        chatPlaceholder="Industry, revenue, what you’re thinking…"
         onSend={onSend}
       />
     </Page>
@@ -232,10 +232,10 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
    ═════════════════════════════════════════════════════════════════════ */
 
 const REVENUE_BANDS: { label: string; mid: number }[] = [
-  { label: '$1M\u2013$5M',   mid: 3_000_000 },
-  { label: '$5M\u2013$10M',  mid: 7_500_000 },
-  { label: '$10M\u2013$25M', mid: 17_500_000 },
-  { label: '$25M\u2013$50M', mid: 37_500_000 },
+  { label: '$1M–$5M',   mid: 3_000_000 },
+  { label: '$5M–$10M',  mid: 7_500_000 },
+  { label: '$10M–$25M', mid: 17_500_000 },
+  { label: '$25M–$50M', mid: 37_500_000 },
   { label: '$50M+',          mid: 75_000_000 },
 ];
 const INDUSTRIES = ['Services', 'Manufacturing', 'Healthcare', 'Technology', 'Construction', 'Retail', 'Other'] as const;
@@ -283,7 +283,7 @@ function AddBackEstimator({ onSend }: { onSend: (text: string) => void }) {
     <>
       <H2>How much value is hiding in your financials?</H2>
       <p className="gg-body--sub" style={{ marginBottom: 40 }}>
-        A quick estimate based on industry patterns. Yulia\u2019s real analysis is specific to your numbers.
+        A quick estimate based on industry patterns. Yulia’s real analysis is specific to your numbers.
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 760, marginBottom: 32 }}>
@@ -299,9 +299,9 @@ function AddBackEstimator({ onSend }: { onSend: (text: string) => void }) {
             {fmtMoney(result.addbackLow)} &ndash; {fmtMoney(result.addbackHigh)}
           </div>
           <p className="gg-body" style={{ marginBottom: 8 }}>
-            At a typical 5\u20136&times; multiple, that\u2019s{' '}
+            At a typical 5–6&times; multiple, that’s{' '}
             <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>
-              {fmtMoney(result.evLow)}\u2013{fmtMoney(result.evHigh)}
+              {fmtMoney(result.evLow)}–{fmtMoney(result.evHigh)}
             </strong>{' '}in enterprise value.
           </p>
           <p className="gg-body" style={{ marginTop: 14, fontSize: 13, color: 'var(--gg-text-muted)', marginBottom: 20 }}>

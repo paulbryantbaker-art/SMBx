@@ -26,23 +26,23 @@ const CHIPS = [
 
 const STRUCTURES = [
   { title: 'Majority Sale with Rollover',
-    body: 'Sell 51\u201380%. Significant cash now, rollover equity for the second bite. Common PE structure. Best for owners ready to step back but believe in the next 3\u20135 years of growth.',
-    typical: '15\u201330% rollover, 5\u20137\u00d7 multiple on majority sold' },
+    body: 'Sell 51–80%. Significant cash now, rollover equity for the second bite. Common PE structure. Best for owners ready to step back but believe in the next 3–5 years of growth.',
+    typical: '15–30% rollover, 5–7× multiple on majority sold' },
   { title: 'Minority Equity Raise',
-    body: 'Sell 20\u201340% to a growth investor. Access capital. Retain control. Stay as CEO.',
-    typical: '$5M\u2013$25M raised, investor gets board seat, no operational control' },
+    body: 'Sell 20–40% to a growth investor. Access capital. Retain control. Stay as CEO.',
+    typical: '$5M–$25M raised, investor gets board seat, no operational control' },
   { title: 'ESOP',
-    body: 'Sell to your employees. Strong tax benefits via Section 1042 (S-Corp rollover). Preserves culture. Owner stays as chairman typically 3\u20135 years.',
-    typical: '70\u201380% of fair market value, repurchase obligation over 10 years' },
+    body: 'Sell to your employees. Strong tax benefits via Section 1042 (S-Corp rollover). Preserves culture. Owner stays as chairman typically 3–5 years.',
+    typical: '70–80% of fair market value, repurchase obligation over 10 years' },
   { title: 'Mezzanine Debt',
-    body: 'Junior debt with equity kicker (warrants). Access $5M\u2013$30M without selling equity. Repay over 5\u20137 years.',
-    typical: '12\u201314% rate, 2\u20135% warrants, no dilution if repaid before warrants exercise' },
+    body: 'Junior debt with equity kicker (warrants). Access $5M–$30M without selling equity. Repay over 5–7 years.',
+    typical: '12–14% rate, 2–5% warrants, no dilution if repaid before warrants exercise' },
   { title: 'Convertible Note',
     body: 'Capital that converts to equity at a future valuation event. Dilution deferred. Often used when current valuation is contested.',
-    typical: '6\u201310% interest, conversion cap, 18\u201324 month maturity' },
+    typical: '6–10% interest, conversion cap, 18–24 month maturity' },
   { title: 'Dividend Recapitalization',
     body: 'Lever the business with debt, pay yourself a dividend. Retain 100% equity. Business services the debt.',
-    typical: '$10M\u2013$50M distributed, 4\u20136\u00d7 EBITDA leverage, 5\u20137 year term' },
+    typical: '$10M–$50M distributed, 4–6× EBITDA leverage, 5–7 year term' },
 ];
 
 export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
@@ -50,9 +50,9 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
     <Page active="raise" onNavigate={onNavigate} onStartFree={onStartFree}>
       <JourneyHero
         eyebrow="Raising capital"
-        headline="You don\u2019t have to sell 100% to get liquidity."
-        tagline="Yulia models every capital structure \u2014 minority equity, ESOP, mezzanine, convertible, recap \u2014 against your specific numbers. Builds the investor materials. Targets the right capital partners. In one conversation."
-        chatPlaceholder="Tell Yulia about your business and what you\u2019re trying to accomplish\u2026"
+        headline="You don’t have to sell 100% to get liquidity."
+        tagline="Yulia models every capital structure — minority equity, ESOP, mezzanine, convertible, recap — against your specific numbers. Builds the investor materials. Targets the right capital partners. In one conversation."
+        chatPlaceholder="Tell Yulia about your business and what you’re trying to accomplish…"
         chips={CHIPS}
         onSend={onSend}
         onChip={onSend}
@@ -61,16 +61,16 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
 
       {/* Reframe */}
       <Section variant="tint" label="The reframe">
-        <H2>Most advisors default to &ldquo;sell.&rdquo; That\u2019s not always the answer.</H2>
+        <H2>Most advisors default to &ldquo;sell.&rdquo; That’s not always the answer.</H2>
         <div className="gg-two-col" style={{ marginTop: 48, alignItems: 'start' }}>
           <div>
-            <Body>Selling 100% is one option. It\u2019s also the option most advisors pitch first &mdash; because it generates the largest one-time fee. That doesn\u2019t make it wrong. It just makes it one of several.</Body>
-            <Body>Sell 30% to a PE firm at 6&times; and take $15M off the table. Stay in the operator seat. In 3\u20135 years, you exit the remaining 70% at a higher multiple &mdash; a second bite that\u2019s often larger than the first.</Body>
+            <Body>Selling 100% is one option. It’s also the option most advisors pitch first &mdash; because it generates the largest one-time fee. That doesn’t make it wrong. It just makes it one of several.</Body>
+            <Body>Sell 30% to a PE firm at 6&times; and take $15M off the table. Stay in the operator seat. In 3–5 years, you exit the remaining 70% at a higher multiple &mdash; a second bite that’s often larger than the first.</Body>
             <Body>Run an ESOP. Sell to your employees with significant tax advantages under Section 1042. Keep your culture. Stay as chairman.</Body>
           </div>
           <div>
             <Body>Take $20M in a dividend recap. Keep 100% equity. Leverage the business to deliver personal liquidity without changing who owns it.</Body>
-            <Body>These aren\u2019t exotic structures. They\u2019re standard tools used every day by sophisticated operators. Most owners never hear about them because they never ask someone who isn\u2019t paid on the full-exit transaction.</Body>
+            <Body>These aren’t exotic structures. They’re standard tools used every day by sophisticated operators. Most owners never hear about them because they never ask someone who isn’t paid on the full-exit transaction.</Body>
             <Body><strong style={{ color: 'var(--gg-text-primary)', fontWeight: 600 }}>Yulia has no fee incentive.</strong> She models every path against your specific numbers. You decide which one fits.</Body>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
       </Section>
 
       {/* Hero 1 — Structure modeling. Text left, structure fan right */}
-      <Section label="Hero 1 \u00b7 Structure modeling">
+      <Section label="Hero 1 · Structure modeling">
         <div className="gg-two-col" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Every capital structure, modeled in ten minutes.</H2>
@@ -119,7 +119,7 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
       </Section>
 
       {/* Hero 2 — Pitch deck + data room. Mockup left, text right */}
-      <Section variant="tint" label="Hero 2 \u00b7 Pitch deck + data room">
+      <Section variant="tint" label="Hero 2 · Pitch deck + data room">
         <div className="gg-two-col gg-two-col--reverse" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Investor-ready materials in hours, not weeks.</H2>
@@ -135,13 +135,13 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
       </Section>
 
       {/* Hero 3 — Investor targeting. Text left, investor map right */}
-      <Section label="Hero 3 \u00b7 Investor targeting">
+      <Section label="Hero 3 · Investor targeting">
         <div className="gg-two-col" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Not every investor fits every deal.</H2>
-            <Body>A growth equity firm looking for 40% YoY revenue growth is the wrong investor for a steady 12% grower. A PE firm that only buys majority stakes is wrong for a minority raise. A mezz lender is wrong for a company that can\u2019t service 14% coupon debt.</Body>
+            <Body>A growth equity firm looking for 40% YoY revenue growth is the wrong investor for a steady 12% grower. A PE firm that only buys majority stakes is wrong for a minority raise. A mezz lender is wrong for a company that can’t service 14% coupon debt.</Body>
             <Body>Yulia maps the investor universe against your specific deal. Growth equity, lower middle market PE, family offices direct-investing, mezzanine lenders, SBIC funds. Each scored on thesis alignment with your business size, stage, growth profile, and capital structure needs.</Body>
-            <Body><strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>You contact the ones that fit.</strong> Skip the meetings with the ones that don\u2019t.</Body>
+            <Body><strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>You contact the ones that fit.</strong> Skip the meetings with the ones that don’t.</Body>
           </div>
           <div>
             <InvestorMap />
@@ -151,8 +151,8 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
 
       <BottomCta
         heading="Not every liquidity event is a sale."
-        subhead="Tell Yulia what you\u2019re trying to accomplish. She\u2019ll show you every path."
-        chatPlaceholder="I want liquidity but I\u2019m not sure I want to sell entirely\u2026"
+        subhead="Tell Yulia what you’re trying to accomplish. She’ll show you every path."
+        chatPlaceholder="I want liquidity but I’m not sure I want to sell entirely…"
         onSend={onSend}
       />
     </Page>
@@ -165,14 +165,14 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
 
 function StructurePreview() {
   const rows: { label: string; detail: string; total: string; winner?: boolean }[] = [
-    { label: 'Full sale',       detail: '100% out \u00b7 clean break',          total: '$22.9M after-tax' },
-    { label: 'Minority raise',  detail: '30% sold \u00b7 exit 70% in 5y',       total: '$29.4M after-tax',  winner: true },
-    { label: 'Dividend recap',  detail: '100% equity \u00b7 leverage 4.5\u00d7', total: '$18.4M today + cashflow' },
+    { label: 'Full sale',       detail: '100% out · clean break',          total: '$22.9M after-tax' },
+    { label: 'Minority raise',  detail: '30% sold · exit 70% in 5y',       total: '$29.4M after-tax',  winner: true },
+    { label: 'Dividend recap',  detail: '100% equity · leverage 4.5×', total: '$18.4M today + cashflow' },
   ];
   return (
     <Card padding={28} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>Three paths \u00b7 same business</div>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>Three paths · same business</div>
         <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>$5M EBITDA</div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -200,7 +200,7 @@ function StructurePreview() {
         ))}
       </div>
       <div style={{ marginTop: 14, padding: '12px 14px', background: 'var(--gg-bg-app)', borderRadius: 10, fontSize: 12, color: 'var(--gg-text-muted)', lineHeight: 1.55 }}>
-        <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 600 }}>Yulia\u2019s take:</strong> Minority raise wins by $6.5M after-tax &mdash; but you keep operating for another 5 years.
+        <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 600 }}>Yulia’s take:</strong> Minority raise wins by $6.5M after-tax &mdash; but you keep operating for another 5 years.
       </div>
     </Card>
   );
@@ -222,7 +222,7 @@ function StructureFan() {
   return (
     <Card padding={28} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>Six paths \u00b7 after-tax</div>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>Six paths · after-tax</div>
         <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>5y horizon</div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
@@ -266,8 +266,8 @@ function PitchDeckMock() {
   return (
     <Card padding={28} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
-        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>Pitch deck \u00b7 22 slides</div>
-        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Series A \u00b7 ready</div>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>Pitch deck · 22 slides</div>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Series A · ready</div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
         {slides.map(s => (
@@ -402,7 +402,7 @@ function SellVsRaise({ onSend }: { onSend: (text: string) => void }) {
           <div className="gg-label" style={{ marginBottom: 8 }}>Full Sale (today)</div>
           <div className="gg-stat" style={{ marginBottom: 8, fontSize: 'clamp(36px, 4vw, 48px)' }}>{fmt(result.fullSaleAfterTax)}</div>
           <p className="gg-body" style={{ margin: '0 0 6px', fontSize: 13, color: 'var(--gg-text-muted)' }}>
-            Gross {fmt(result.fullGross)} \u00b7 after-tax (23.8%)
+            Gross {fmt(result.fullGross)} · after-tax (23.8%)
           </p>
           <p className="gg-body" style={{ margin: 0, fontSize: 13, color: 'var(--gg-text-secondary)' }}>You exit. Clean break.</p>
         </Card>

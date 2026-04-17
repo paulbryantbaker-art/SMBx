@@ -62,18 +62,13 @@ export function Page({ children, active, onNavigate, onSignIn, onStartFree, ctaL
         fontFamily: 'var(--gg-body)',
       }}
     >
-      {/* ── Desktop shell ─────────────────────────────────────────── */}
-      <div className="gg-desktop-only" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <div className="gg-shell">
-          <Sidebar active={active} onNavigate={onNavigate} />
-          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-            <TopBar active={active} onNavigate={onNavigate} onSignIn={onSignIn} onStartFree={onStartFree} ctaLabel={ctaLabel} />
-            <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              {children}
-            </main>
-            <Footer />
-          </div>
-        </div>
+      {/* ── Desktop shell — TopBar only (AppShell provides the sidebar) ── */}
+      <div className="gg-desktop-only" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
+        <TopBar active={active} onNavigate={onNavigate} onSignIn={onSignIn} onStartFree={onStartFree} ctaLabel={ctaLabel} />
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          {children}
+        </main>
+        <Footer />
       </div>
 
       {/* ── Mobile shell (floating nav pill) ─────────────────────── */}

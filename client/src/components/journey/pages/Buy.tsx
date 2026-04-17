@@ -32,13 +32,13 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
         eyebrow="Buying a business"
         headline="Screen ten deals in the time it takes to screen one."
         tagline="Yulia scores any deal in 90 seconds on seven dimensions, models the capital stack under current SBA rules, and stress-tests the personal guarantee before you sign. For searchers, sponsors, and buyers."
-        chatPlaceholder="Paste a listing URL, describe a deal, or tell Yulia what you\u2019re looking for\u2026"
+        chatPlaceholder="Paste a listing URL, describe a deal, or tell Yulia what you’re looking for…"
         chips={CHIPS}
         onSend={onSend}
         onChip={onSend}
         rightPanel={
           <Card padding={32} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
-            <div className="gg-label" style={{ marginBottom: 20 }}>Live preview \u00b7 Phoenix pest control</div>
+            <div className="gg-label" style={{ marginBottom: 20 }}>Live preview · Phoenix pest control</div>
             <ScoreRing score={87} verdict="Pursue" band="hi" />
             <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
               {(['Concentration', 'Margins', 'Rev quality', 'Dependency', 'Management', 'Financials', 'Scalability'] as const).map((dim, i) => {
@@ -60,27 +60,27 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
 
       {/* Problem */}
       <Section variant="tint" label="The problem">
-        <H2>3,000 deals screened. 1 closed. That\u2019s the math.</H2>
+        <H2>3,000 deals screened. 1 closed. That’s the math.</H2>
         <div className="gg-two-col" style={{ marginTop: 48, alignItems: 'start' }}>
           <div>
-            <Body>The buy-side funnel hasn\u2019t changed in two decades. Three thousand opportunities to get to one close. Eighteen months of burn rate. Eighty-five thousand dollars in busted diligence on deals that should have been dead before the first phone call.</Body>
+            <Body>The buy-side funnel hasn’t changed in two decades. Three thousand opportunities to get to one close. Eighteen months of burn rate. Eighty-five thousand dollars in busted diligence on deals that should have been dead before the first phone call.</Body>
             <Body>Most of that waste happens in the first filter. Screening a deal properly &mdash; concentration, margins, revenue quality, owner dependency, management depth, financial integrity, scalability &mdash; takes an experienced analyst four hours. Three thousand deals at four hours each is twelve thousand hours.</Body>
           </div>
           <div>
-            <Body>The work that separates good deals from bad deals isn\u2019t complex. It\u2019s the same seven dimensions every PE associate checks instinctively after five hundred reps. But doing it three thousand times, consistently, without fatigue, without falling in love with revenue numbers &mdash; that\u2019s the bottleneck.</Body>
+            <Body>The work that separates good deals from bad deals isn’t complex. It’s the same seven dimensions every PE associate checks instinctively after five hundred reps. But doing it three thousand times, consistently, without fatigue, without falling in love with revenue numbers &mdash; that’s the bottleneck.</Body>
             <Body><strong style={{ color: 'var(--gg-text-primary)', fontWeight: 600 }}>Yulia removes the bottleneck.</strong> Every deal scored the same way. In 90 seconds. Pursue or pass before you spend a dollar.</Body>
           </div>
         </div>
       </Section>
 
       {/* Hero 1 Rundown — text left, score ring card right */}
-      <Section label="Hero 1 \u00b7 The Rundown">
+      <Section label="Hero 1 · The Rundown">
         <div className="gg-two-col" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Seven dimensions. Sixty seconds. Pursue or pass.</H2>
             <Body lead>Concentration. Margins. Revenue quality. Owner dependency. Management depth. Financial integrity. Scalability.</Body>
             <Body>These are the seven things an experienced buyer checks instinctively on every deal. Together they predict close rate and performance better than any single metric.</Body>
-            <Body>Paste a listing URL. Upload a teaser. Type a description. Yulia classifies the business, identifies red flags, scores each dimension 1\u201310, and gives you a total score with a clear recommendation.</Body>
+            <Body>Paste a listing URL. Upload a teaser. Type a description. Yulia classifies the business, identifies red flags, scores each dimension 1–10, and gives you a total score with a clear recommendation.</Body>
             <Body>Across thousands of analyses, deals scoring below 40 died in diligence <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>78%</strong> of the time. Deals scoring above 70 closed and performed as modeled <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>83%</strong> of the time.</Body>
           </div>
           <div>
@@ -96,21 +96,21 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
       </Section>
 
       {/* Hero 2 SBA — capital stack left, text right (reversed) */}
-      <Section variant="tint" label="Hero 2 \u00b7 SBA SOP 50 10 8">
+      <Section variant="tint" label="Hero 2 · SBA SOP 50 10 8">
         <div className="gg-two-col gg-two-col--reverse" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Your rollover just died. Yulia rebuilds it.</H2>
-            <Body>SBA SOP 50 10 8 took effect June 1, 2025. It\u2019s the most disruptive regulatory change in two decades for SMB and lower middle market deals. Forty-one percent of brokers report deal delays. Rollover equity is effectively dead.</Body>
+            <Body>SBA SOP 50 10 8 took effect June 1, 2025. It’s the most disruptive regulatory change in two decades for SMB and lower middle market deals. Forty-one percent of brokers report deal delays. Rollover equity is effectively dead.</Body>
             <Body>Every practitioner trying to close an SBA-financed deal right now is figuring out how to restructure under the new rules. Lawyers charge $1,000 an hour to model scenarios.</Body>
             <Body>Yulia models SOP 50 10 8 structures in 90 seconds. Senior debt, mezzanine, seller notes with correct standby terms, equity injection requirements, SBA 7(a) eligibility. Restructures killed deals into closable ones.</Body>
             <Body>This is the single hardest thing to replicate with ChatGPT and a weekend. The knowledge is specialized, the math is structural, and the rules shift.</Body>
           </div>
           <div>
             <Card padding={32} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
-              <div className="gg-label" style={{ marginBottom: 16 }}>Restructured cap stack \u00b7 $3.2M deal</div>
+              <div className="gg-label" style={{ marginBottom: 16 }}>Restructured cap stack · $3.2M deal</div>
               <CapitalStack />
               <p className="gg-body" style={{ marginTop: 20, marginBottom: 0, fontSize: 12.5, color: 'var(--gg-text-muted)', lineHeight: 1.55 }}>
-                Senior 65% \u00b7 Mezz 12% \u00b7 Seller standby 15% \u00b7 Equity injection 10% (genuine cash per SOP 50 10 8).
+                Senior 65% · Mezz 12% · Seller standby 15% · Equity injection 10% (genuine cash per SOP 50 10 8).
               </p>
             </Card>
           </div>
@@ -118,13 +118,13 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
       </Section>
 
       {/* Hero 3 Stress test — text left, DSCR grid right */}
-      <Section label="Hero 3 \u00b7 Stress test">
+      <Section label="Hero 3 · Stress test">
         <div className="gg-two-col" style={{ alignItems: 'center' }}>
           <div>
             <H2 variant="block">Know exactly where the deal breaks before you guarantee it.</H2>
-            <Body>The personal guarantee is real. The unlimited liability is real. The unwind scenario is real. Most buyers sign anyway because they\u2019ve modeled the base case on a napkin.</Body>
+            <Body>The personal guarantee is real. The unlimited liability is real. The unwind scenario is real. Most buyers sign anyway because they’ve modeled the base case on a napkin.</Body>
             <Body>Yulia stress-tests every deal against the scenarios that actually kill acquisitions. Revenue down 10%, 15%, 25%. Margins compressed 200bps. Largest customer leaves. Interest rates move 150bps. DSCR at every intersection.</Body>
-            <Body>On a $25M acquisition, base-case DSCR of 2.1&times; feels comfortable. At revenue down 25%, it drops to <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>0.9&times;</strong>. That\u2019s your floor.</Body>
+            <Body>On a $25M acquisition, base-case DSCR of 2.1&times; feels comfortable. At revenue down 25%, it drops to <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>0.9&times;</strong>. That’s your floor.</Body>
             <Body>You sign the guarantee knowing exactly where the line is. Not hoping. Knowing.</Body>
           </div>
           <div>
@@ -166,8 +166,8 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
         <H2>How Yulia runs a buy-side deal.</H2>
         <div style={{ marginBottom: 48 }} />
         <HorizontalTimeline phases={[
-          { idx: 'Phase 1 \u00b7 Free', name: 'Thesis',
-            body: 'Define what you\u2019re looking for. Industry, geography, deal size, capital structure, operating vs passive involvement.' },
+          { idx: 'Phase 1 · Free', name: 'Thesis',
+            body: 'Define what you’re looking for. Industry, geography, deal size, capital structure, operating vs passive involvement.' },
           { idx: 'Phase 2', name: 'Screen',
             body: 'The Rundown on every deal that enters the pipeline. Seven dimensions, 90 seconds. Kill the 62% that will never close.' },
           { idx: 'Phase 3', name: 'Model',
@@ -182,7 +182,7 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
       {/* Dark stat bar */}
       <Section variant="dark" label="By the numbers">
         <StatBar items={[
-          { value: '3,000 \u2192 1', label: 'Traditional search funnel' },
+          { value: '3,000 → 1', label: 'Traditional search funnel' },
           { value: '$34K',           label: 'Average busted diligence cost per dead deal' },
           { value: '78%',            label: 'Sub-40 deals that die in diligence' },
         ]} />
@@ -191,7 +191,7 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
       <BottomCta
         heading="Paste a deal. Get a score. Free."
         subhead="The first 3 deals you screen on smbX are free. No credit card."
-        chatPlaceholder="Paste a URL, describe a deal, or tell Yulia what you\u2019re looking for\u2026"
+        chatPlaceholder="Paste a URL, describe a deal, or tell Yulia what you’re looking for…"
         onSend={onSend}
       />
     </Page>
@@ -311,7 +311,7 @@ function DealRundownPreview({ onSend }: { onSend: (text: string) => void }) {
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <input
             type="text"
-            placeholder="Paste a deal URL or describe the business\u2026"
+            placeholder="Paste a deal URL or describe the business…"
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') analyze(); }}
@@ -372,7 +372,7 @@ function DealRundownPreview({ onSend }: { onSend: (text: string) => void }) {
           </div>
 
           <p className="gg-body" style={{ marginBottom: 8, fontSize: 14, color: 'var(--gg-text-muted)' }}>
-            Preview only \u2014 the real Rundown runs the 22 deterministic formulas against verified financials and actual market data. Scores on this page are illustrative, not auditable.
+            Preview only — the real Rundown runs the 22 deterministic formulas against verified financials and actual market data. Scores on this page are illustrative, not auditable.
           </p>
           <button type="button" className="gg-btn gg-btn--primary" onClick={() => onSend(`Run the real Rundown on this deal: ${input}`)} style={{ marginTop: 12 }}>
             Continue in chat &rarr;

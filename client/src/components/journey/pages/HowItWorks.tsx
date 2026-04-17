@@ -35,28 +35,28 @@ const DOESNT = [
   'Hold, transfer, or escrow funds',
   'Guarantee outcomes, prices, or timelines',
   'Charge success fees or take-rates',
-  'Replace your advisor\u2019s judgment',
+  'Replace your advisor’s judgment',
 ];
 
 const IB_ROWS = [
   ['Preliminary valuation range',      '1 week',       '20 minutes'],
-  ['Seller readiness assessment',      '2\u20133 weeks', '15 minutes'],
-  ['Full Quality of Earnings analysis', '3\u20136 weeks', 'refers to specialist'],
-  ['Add-back analysis (pre-LOI)',      '1\u20132 weeks', '15 minutes'],
+  ['Seller readiness assessment',      '2–3 weeks', '15 minutes'],
+  ['Full Quality of Earnings analysis', '3–6 weeks', 'refers to specialist'],
+  ['Add-back analysis (pre-LOI)',      '1–2 weeks', '15 minutes'],
   ['Comparative transaction analysis', '3 days',        '8 minutes'],
-  ['Confidential Information Memorandum', '3\u20134 weeks', '30 minutes'],
+  ['Confidential Information Memorandum', '3–4 weeks', '30 minutes'],
   ['Blind teaser',                     '3 days',        '10 minutes'],
   ['Buyer universe mapping',           '2 weeks',       '20 minutes'],
   ['Outreach strategy & sequencing',   '1 week',        '15 minutes'],
   ['NDA management',                   'ongoing',       'automated'],
-  ['Data room setup & management',     '1\u20132 weeks', '5 minutes'],
+  ['Data room setup & management',     '1–2 weeks', '5 minutes'],
   ['IOI analysis & comparison',        '2 days / IOI',  '5 minutes / IOI'],
   ['Management presentation prep',     '1 week',        '30 minutes'],
   ['LOI analysis & counter-drafting',  '1 week',        '4 minutes'],
-  ['Working capital peg analysis',     '3\u20135 days', '3 minutes'],
-  ['Due diligence coordination',       '8\u201312 weeks', 'automated + oversight'],
-  ['Funds flow & closing coordination', '2\u20133 weeks', 'checklist automated'],
-  ['Total human touch points',         '200\u2013400 hours', 'Your judgment only'],
+  ['Working capital peg analysis',     '3–5 days', '3 minutes'],
+  ['Due diligence coordination',       '8–12 weeks', 'automated + oversight'],
+  ['Funds flow & closing coordination', '2–3 weeks', 'checklist automated'],
+  ['Total human touch points',         '200–400 hours', 'Your judgment only'],
 ];
 
 const YOU_ROWS: [string, string][] = [
@@ -102,7 +102,7 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
           <div className="gg-eyebrow gg-eyebrow--plain" style={{ marginBottom: 24, justifyContent: 'center' }}>How it works</div>
           <h1 className="gg-h1 gg-h1--journey" style={{ marginBottom: 28 }}>
             <span style={{ display: 'block' }}>90% of what an investment bank does.</span>
-            <span style={{ display: 'block' }}>Everything that doesn\u2019t require a license.</span>
+            <span style={{ display: 'block' }}>Everything that doesn’t require a license.</span>
           </h1>
           <Body lead style={{ maxWidth: 780, marginLeft: 'auto', marginRight: 'auto' }}>
             Yulia handles the production work of a deal team &mdash; valuations, CIMs, financial models, deal scoring, due diligence, LOIs, integration plans. You keep the judgment, the relationships, and the authority to sign.
@@ -112,7 +112,7 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
 
       {/* ─── The line ──────────────────────────────────────────────── */}
       <Section variant="tint" label="The line">
-        <H2>What Yulia does. What Yulia doesn\u2019t.</H2>
+        <H2>What Yulia does. What Yulia doesn’t.</H2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, marginTop: 28 }}>
           <Card padding={24}>
             <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 11, color: 'var(--gg-band-hi-fg)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 14 }}>
@@ -121,7 +121,7 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
             <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
               {DOES.map((item, i) => (
                 <li key={i} style={{ paddingLeft: 18, position: 'relative', fontSize: 14, lineHeight: 1.55, color: 'var(--gg-text-secondary)', marginBottom: 10 }}>
-                  <span style={{ position: 'absolute', left: 0, top: 2, color: 'var(--gg-dot-ready)', fontWeight: 800 }}>\u2713</span>
+                  <span style={{ position: 'absolute', left: 0, top: 2, color: 'var(--gg-dot-ready)', fontWeight: 800 }}>✓</span>
                   {item}
                 </li>
               ))}
@@ -129,12 +129,12 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
           </Card>
           <Card padding={24}>
             <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 11, color: 'var(--gg-band-flag-fg)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 14 }}>
-              Yulia doesn\u2019t
+              Yulia doesn’t
             </div>
             <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
               {DOESNT.map((item, i) => (
                 <li key={i} style={{ paddingLeft: 18, position: 'relative', fontSize: 14, lineHeight: 1.55, color: 'var(--gg-text-secondary)', marginBottom: 10 }}>
-                  <span style={{ position: 'absolute', left: 0, top: 2, color: 'var(--gg-dot-flag)', fontWeight: 800 }}>\u2715</span>
+                  <span style={{ position: 'absolute', left: 0, top: 2, color: 'var(--gg-dot-flag)', fontWeight: 800 }}>✕</span>
                   {item}
                 </li>
               ))}
@@ -150,7 +150,7 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
       <Section label="IB comparison">
         <H2>What an investment bank delivers on a $30M sell-side engagement.</H2>
         <Body lead style={{ marginBottom: 28, maxWidth: 720 }}>
-          Yulia produces all of it. The 10% she doesn\u2019t do is where your expertise lives.
+          Yulia produces all of it. The 10% she doesn’t do is where your expertise lives.
         </Body>
         <div style={{ overflowX: 'auto', borderRadius: 'var(--gg-r-card-s)', border: '0.5px solid var(--gg-border)', background: 'var(--gg-bg-card)' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--gg-body)', fontSize: 13 }}>
@@ -173,7 +173,7 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
           </table>
         </div>
 
-        <H2 style={{ marginTop: 48 }}>The 10% Yulia doesn\u2019t do.</H2>
+        <H2 style={{ marginTop: 48 }}>The 10% Yulia doesn’t do.</H2>
         <div style={{ marginTop: 20, overflowX: 'auto', borderRadius: 'var(--gg-r-card-s)', border: '0.5px solid var(--gg-border)', background: 'var(--gg-bg-card)' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--gg-body)', fontSize: 13 }}>
             <tbody>
@@ -187,7 +187,7 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
           </table>
         </div>
         <p className="gg-body" style={{ marginTop: 28, maxWidth: 760 }}>
-          A boutique IB charges $150K retainer plus 4% success fee. Same deliverables from Yulia: $199/month. Not a toy. Institutional quality. The difference isn\u2019t what gets produced &mdash; it\u2019s who produces it and what it costs.
+          A boutique IB charges $150K retainer plus 4% success fee. Same deliverables from Yulia: $199/month. Not a toy. Institutional quality. The difference isn’t what gets produced &mdash; it’s who produces it and what it costs.
         </p>
       </Section>
 
@@ -195,10 +195,10 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
       <Section variant="tint" label="The math">
         <H2>22 deterministic formulas. Not AI estimates.</H2>
         <Body>
-          Large language models hallucinate arithmetic. They compute 2+2=5 with confidence. That\u2019s unacceptable in M&amp;A, where every number is audited and every decision has consequences.
+          Large language models hallucinate arithmetic. They compute 2+2=5 with confidence. That’s unacceptable in M&amp;A, where every number is audited and every decision has consequences.
         </Body>
         <Body>
-          Yulia doesn\u2019t ask an LLM to calculate your SDE. The numbers come from code &mdash; 22 deterministic formulas, same output every time, auditable, reproducible, defensible.
+          Yulia doesn’t ask an LLM to calculate your SDE. The numbers come from code &mdash; 22 deterministic formulas, same output every time, auditable, reproducible, defensible.
         </Body>
         <Body>The LLM handles the narrative. The code handles the math. You can challenge any number and trace it to the formula.</Body>
 
@@ -213,14 +213,14 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
       <Section label="The harness">
         <H2>ChatGPT is the engine. smbX is the harness.</H2>
         <Body>
-          A resourceful practitioner with ChatGPT Plus and a weekend can replicate any one of Yulia\u2019s capabilities. Draft a CIM. Estimate add-backs. Score a deal. Build a capital stack.
+          A resourceful practitioner with ChatGPT Plus and a weekend can replicate any one of Yulia’s capabilities. Draft a CIM. Estimate add-backs. Score a deal. Build a capital stack.
         </Body>
-        <Body>They can do any one of these. They can\u2019t do twelve.</Body>
+        <Body>They can do any one of these. They can’t do twelve.</Body>
         <Body>
-          Building the harness that makes these capabilities fast, reliable, auditable, team-shareable, and integrated with each other is 2&ndash;12 weeks of real engineering work per capability. Multiply by twelve capabilities and you\u2019re at 2+ years of build.
+          Building the harness that makes these capabilities fast, reliable, auditable, team-shareable, and integrated with each other is 2&ndash;12 weeks of real engineering work per capability. Multiply by twelve capabilities and you’re at 2+ years of build.
         </Body>
         <Body>
-          The 80% of shops that don\u2019t have a full-time AI engineer aren\u2019t debating ChatGPT versus smbX. They\u2019re debating &ldquo;do we want to spend 2 years building this ourselves, or pay $199/month.&rdquo;
+          The 80% of shops that don’t have a full-time AI engineer aren’t debating ChatGPT versus smbX. They’re debating &ldquo;do we want to spend 2 years building this ourselves, or pay $199/month.&rdquo;
         </Body>
 
         <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
@@ -238,7 +238,7 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
           </Card>
         </div>
         <p className="gg-body" style={{ marginTop: 24, maxWidth: 760 }}>
-          ChatGPT can do any one of these. smbX does all of them, together, with your deal\u2019s context, at a price you don\u2019t have to defend.
+          ChatGPT can do any one of these. smbX does all of them, together, with your deal’s context, at a price you don’t have to defend.
         </p>
       </Section>
 
@@ -247,7 +247,7 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
         <H2>Ninety seconds with Yulia.</H2>
         <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 680 }}>
           <ChatBubble role="user" paragraphs={[
-            'I\u2019m looking at a pest control company in Phoenix. $1.2M revenue, asking $2.8M. Got the CIM yesterday.',
+            'I’m looking at a pest control company in Phoenix. $1.2M revenue, asking $2.8M. Got the CIM yesterday.',
           ]} />
           <ChatBubble role="yulia" paragraphs={[
             <>Pest control in Phoenix &mdash; a market I know well. At $1.2M revenue, preliminary SDE range is $240K&ndash;$360K depending on owner comp and add-backs. That puts the typical value range at $720K&ndash;$1.26M using industry multiples of 3.0&times;&ndash;3.5&times; SDE.</>,
@@ -255,16 +255,16 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
             <>1. Route density &mdash; Phoenix pest control companies with dense route coverage (&gt;25 stops/day) trade at premium multiples. Low density trades at a discount.</>,
             <>2. Service contract mix &mdash; recurring contract revenue gets 4&times;&ndash;5&times; SDE. One-time service revenue gets 2&times;&ndash;2.5&times;.</>,
             <>3. Owner involvement &mdash; does the owner run routes, manage techs, handle customer relationships, or all three?</>,
-            <>What\u2019s the revenue breakdown between recurring contracts and one-time services?</>,
+            <>What’s the revenue breakdown between recurring contracts and one-time services?</>,
           ]} />
           <ChatBubble role="user" paragraphs={[
             'About 70% recurring contracts. Owner manages everyone, does the estimates, and handles the top 10 commercial accounts.',
           ]} />
           <ChatBubble role="yulia" paragraphs={[
-            <>That\u2019s helpful. The 70% recurring revenue justifies a premium to straight SDE multiples &mdash; call it 4.2&times;&ndash;4.7&times; for the contract portion and 2.5&times; for the one-time. Blended gets you to roughly $1.1M&ndash;$1.4M valuation.</>,
+            <>That’s helpful. The 70% recurring revenue justifies a premium to straight SDE multiples &mdash; call it 4.2&times;&ndash;4.7&times; for the contract portion and 2.5&times; for the one-time. Blended gets you to roughly $1.1M&ndash;$1.4M valuation.</>,
             <>But the owner involvement is the bigger issue. Running the estimates, managing the team, AND holding the top 10 commercial relationships means three separate transition problems. Each takes 12&ndash;18 months to solve properly.</>,
             <>On a $1.2M deal, that owner dependency risk typically discounts multiples by 0.5&times;&ndash;1.0&times;. Fair value probably closes to $900K&ndash;$1.2M.</>,
-            <>Asking $2.8M isn\u2019t an aggressive negotiation position. It\u2019s a different business than the one the fundamentals support.</>,
+            <>Asking $2.8M isn’t an aggressive negotiation position. It’s a different business than the one the fundamentals support.</>,
             <>Want to run the Rundown to get the full scoring? Or should we model what would need to be true for this to make sense at $2.8M?</>,
           ]} />
         </div>
@@ -275,7 +275,7 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
 
       {/* ─── Data sources ──────────────────────────────────────────── */}
       <Section label="Data sources">
-        <H2>Where Yulia\u2019s data comes from.</H2>
+        <H2>Where Yulia’s data comes from.</H2>
         <Body lead style={{ maxWidth: 720 }}>Public sources, cited every time.</Body>
         <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
           {DATA_SOURCES.map(src => (
@@ -293,7 +293,7 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
       <BottomCta
         heading="Start a conversation. See for yourself."
         subhead="Paste a deal, describe a business, ask a question. One deliverable free, no credit card."
-        chatPlaceholder="Ask Yulia anything\u2026"
+        chatPlaceholder="Ask Yulia anything…"
         onSend={onSend}
       />
     </Page>
