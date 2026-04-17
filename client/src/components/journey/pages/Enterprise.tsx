@@ -17,7 +17,7 @@ interface Props { onSend: (text: string) => void; onStartFree: () => void; }
 
 const USE_CASES = [
   { title: 'Lower middle market PE',
-    body: 'Screen add-on targets at 3\u00d7 the volume of traditional sourcing. Exit readiness scoring across the portfolio quarterly. IC memos in 15 minutes. Portfolio monitoring automated. Replaces $40K\u2013$120K/year in DealCloud and sourcing tool spend.' },
+    body: 'Screen add-on targets at 3\u00d7 the volume of traditional sourcing. Exit readiness scoring across the portfolio quarterly. IC memos in 15 minutes. Portfolio monitoring automated. Consolidates $40K\u2013$120K/year in deal-management and sourcing tool spend.' },
   { title: 'Boutique M&A advisory',
     body: 'Turn every analyst hour into an associate hour. CIM production 4\u20136 weeks \u2192 48 hours. Valuation turnaround same-day. Deals under $8M EBITDA become profitable engagements again. 47 brokers across 23 firms are delivering the output that used to require 85.' },
   { title: 'Corp dev at serial acquirers',
@@ -29,7 +29,7 @@ const USE_CASES = [
 const ENT_FEATURES = [
   { title: 'Team workspace',            body: 'Every user sees the deals they own and the deals the firm is running. Role-based permissions. Shared deal vault. Activity feeds across the team.' },
   { title: 'White-label outputs',       body: 'CIMs, valuations, deal rooms \u2014 all branded to your firm. Your logo, your letterhead, your styling. Your client sees your brand. Yulia is your analytical layer.' },
-  { title: '10 seats, scale to 50',     body: '10 seats included. Custom pricing above 10 up to 50. Enterprise-scale negotiation beyond that.' },
+  { title: '10 seats flat',             body: 'Enterprise covers 10 seats at $2,500/mo flat. Larger teams get custom pricing. Every seat sees the same deal vault with role-based permissions.' },
   { title: 'SSO integration',           body: 'Okta, Google Workspace, Azure AD. Single sign-on for your entire team.' },
   { title: 'Single-tenant deployment',  body: 'For family offices, regulated entities, and firms that require isolated infrastructure.' },
   { title: 'SOC 2 audit trails',        body: 'Complete activity logging. User actions, document access, data changes. Audit-ready.' },
@@ -60,12 +60,12 @@ const SECURITY = [
 ];
 
 const ROI_ROWS = [
-  ['Deal management / CRM',               '$30K\u2013$80K',   'Yes'],
-  ['Sourcing (Grata/Sourcescrub)',         '$20K\u2013$60K',   'Partial'],
-  ['Data room (Datasite/Firmex)',          '$15K\u2013$40K',   'Yes'],
-  ['Financial modeling analyst hours',     '$100K\u2013$200K', 'Partial'],
-  ['Document generation (Rogo/Hebbia)',    '$24K\u2013$75K',   'Yes'],
-  ['Portfolio monitoring tools',           '$20K\u2013$50K',   'Yes'],
+  ['Deal management / CRM',             '$30K\u2013$80K',   'Yes'],
+  ['Sourcing & target databases',        '$20K\u2013$60K',   'Partial'],
+  ['Virtual data room',                  '$15K\u2013$40K',   'Yes'],
+  ['Financial modeling analyst hours',   '$100K\u2013$200K', 'Partial'],
+  ['AI document generation tooling',     '$24K\u2013$75K',   'Yes'],
+  ['Portfolio monitoring tools',         '$20K\u2013$50K',   'Yes'],
 ];
 
 export default function Enterprise({ onSend, onStartFree: _ }: Props) {

@@ -171,7 +171,7 @@ function fmt(n: number): string {
 
 const TAX_LT_GAINS = 0.238;      /* 20% + 3.8% NIIT */
 const SALE_MULTIPLE = 6;
-const GROWTH_RATE = 0.10;        /* 10% EBITDA growth/yr, base case */
+const GROWTH_RATE = 0.08;        /* 8% EBITDA growth/yr — LMM base case. */
 
 function SellVsRaise({ onSend }: { onSend: (text: string) => void }) {
   const [ebitda, setEbitda] = useState(5);          /* in $M */
@@ -282,10 +282,10 @@ function SellVsRaise({ onSend }: { onSend: (text: string) => void }) {
         </div>
       </div>
 
-      <p className="gg-body" style={{ marginTop: 24, fontSize: 14, color: 'var(--gg-text-muted)' }}>
-        This is a simple comparison. Yulia models all six structures with after-tax math, ownership implications, and control trade-offs.
+      <p className="gg-body" style={{ marginTop: 24, fontSize: 13, color: 'var(--gg-text-muted)' }}>
+        Simplified preview. 6&times; exit multiple, 8% EBITDA growth, 23.8% LTCG + NIIT. Nominal dollars \u2014 no discounting, no transaction costs, no rollover equity modeled. Yulia\u2019s real analysis uses your financials, realistic growth, and all six structures.
       </p>
-      <button type="button" className="gg-btn gg-btn--primary" onClick={sendToYulia} style={{ marginTop: 8 }}>
+      <button type="button" className="gg-btn gg-btn--primary" onClick={sendToYulia} style={{ marginTop: 12 }}>
         Get the full analysis &rarr;
       </button>
     </>

@@ -166,9 +166,15 @@ export default function Pricing({ onSend, onStartFree }: Props) {
                 type="button"
                 className={`gg-btn${t.highlighted ? ' gg-btn--primary' : ' gg-btn--ghost'}`}
                 style={{ width: '100%', justifyContent: 'center' }}
-                onClick={() => t.key === 'enterprise'
-                  ? onSend('I\u2019m interested in Enterprise. Here\u2019s what our team is solving: ')
-                  : onStartFree()}
+                onClick={() => {
+                  if (t.key === 'enterprise') {
+                    onSend('I\u2019m interested in Enterprise. Here\u2019s what our team is solving: ');
+                  } else if (t.key === 'free') {
+                    onStartFree();
+                  } else {
+                    onSend(`I want to start on ${t.name} (${t.price}${t.priceSuffix}).`);
+                  }
+                }}
               >
                 {t.cta}
               </button>

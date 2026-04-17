@@ -288,10 +288,13 @@ function DealRundownPreview({ onSend }: { onSend: (text: string) => void }) {
             ))}
           </div>
 
-          <p className="gg-body" style={{ marginBottom: 20, fontSize: 14, color: 'var(--gg-text-muted)' }}>
-            Want the full analysis? Yulia writes the deal memo, models the capital stack, and flags every risk.
+          <p className="gg-body" style={{ marginBottom: 8, fontSize: 14, color: 'var(--gg-text-muted)' }}>
+            Preview only \u2014 the real Rundown runs the 22 deterministic formulas against verified financials and actual market data. Scores on this page are illustrative, not auditable.
           </p>
-          <button type="button" className="gg-btn gg-btn--primary" onClick={() => onSend(`Give me the full Rundown on this deal: ${input}`)}>
+          <p className="gg-body" style={{ marginBottom: 20, fontSize: 14, color: 'var(--gg-text-muted)' }}>
+            Want the real score? Yulia writes the deal memo, models the capital stack, and flags every risk.
+          </p>
+          <button type="button" className="gg-btn gg-btn--primary" onClick={() => onSend(`Run the real Rundown on this deal: ${input}`)}>
             Continue in chat &rarr;
           </button>
         </Card>

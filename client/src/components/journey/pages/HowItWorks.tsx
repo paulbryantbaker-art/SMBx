@@ -231,32 +231,27 @@ export default function HowItWorks({ onSend, onStartFree }: Props) {
       <Section variant="tint" label="Sample conversation">
         <H2>Ninety seconds with Yulia.</H2>
         <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 680 }}>
-          <ChatBubble role="user">I\u2019m looking at a pest control company in Phoenix. $1.2M revenue, asking $2.8M. Got the CIM yesterday.</ChatBubble>
-          <ChatBubble role="yulia">
-            Pest control in Phoenix &mdash; a market I know well. At $1.2M revenue, preliminary SDE range is $240K&ndash;$360K depending on owner comp and add-backs. That puts the typical value range at $720K&ndash;$1.26M using industry multiples of 3.0&times;&ndash;3.5&times; SDE.
-            <br /><br />
-            The asking price of $2.8M is more than 2&times; above that range. Before diving deeper, three specific things to check:
-            <br /><br />
-            1. Route density &mdash; Phoenix pest control companies with dense route coverage (&gt;25 stops/day) trade at premium multiples. Low density trades at a discount.
-            <br /><br />
-            2. Service contract mix &mdash; recurring contract revenue gets 4&times;&ndash;5&times; SDE. One-time service revenue gets 2&times;&ndash;2.5&times;.
-            <br /><br />
-            3. Owner involvement &mdash; does the owner run routes, manage techs, handle customer relationships, or all three?
-            <br /><br />
-            What\u2019s the revenue breakdown between recurring contracts and one-time services?
-          </ChatBubble>
-          <ChatBubble role="user">About 70% recurring contracts. Owner manages everyone, does the estimates, and handles the top 10 commercial accounts.</ChatBubble>
-          <ChatBubble role="yulia">
-            That\u2019s helpful. The 70% recurring revenue justifies a premium to straight SDE multiples &mdash; call it 4.2&times;&ndash;4.7&times; for the contract portion and 2.5&times; for the one-time. Blended gets you to roughly $1.1M&ndash;$1.4M valuation.
-            <br /><br />
-            But the owner involvement is the bigger issue. Running the estimates, managing the team, AND holding the top 10 commercial relationships means three separate transition problems. Each takes 12&ndash;18 months to solve properly.
-            <br /><br />
-            On a $1.2M deal, that owner dependency risk typically discounts multiples by 0.5&times;&ndash;1.0&times;. Fair value probably closes to $900K&ndash;$1.2M.
-            <br /><br />
-            Asking $2.8M isn\u2019t an aggressive negotiation position. It\u2019s a different business than the one the fundamentals support.
-            <br /><br />
-            Want to run the Rundown to get the full scoring? Or should we model what would need to be true for this to make sense at $2.8M?
-          </ChatBubble>
+          <ChatBubble role="user" paragraphs={[
+            'I\u2019m looking at a pest control company in Phoenix. $1.2M revenue, asking $2.8M. Got the CIM yesterday.',
+          ]} />
+          <ChatBubble role="yulia" paragraphs={[
+            <>Pest control in Phoenix &mdash; a market I know well. At $1.2M revenue, preliminary SDE range is $240K&ndash;$360K depending on owner comp and add-backs. That puts the typical value range at $720K&ndash;$1.26M using industry multiples of 3.0&times;&ndash;3.5&times; SDE.</>,
+            <>The asking price of $2.8M is more than 2&times; above that range. Before diving deeper, three specific things to check:</>,
+            <>1. Route density &mdash; Phoenix pest control companies with dense route coverage (&gt;25 stops/day) trade at premium multiples. Low density trades at a discount.</>,
+            <>2. Service contract mix &mdash; recurring contract revenue gets 4&times;&ndash;5&times; SDE. One-time service revenue gets 2&times;&ndash;2.5&times;.</>,
+            <>3. Owner involvement &mdash; does the owner run routes, manage techs, handle customer relationships, or all three?</>,
+            <>What\u2019s the revenue breakdown between recurring contracts and one-time services?</>,
+          ]} />
+          <ChatBubble role="user" paragraphs={[
+            'About 70% recurring contracts. Owner manages everyone, does the estimates, and handles the top 10 commercial accounts.',
+          ]} />
+          <ChatBubble role="yulia" paragraphs={[
+            <>That\u2019s helpful. The 70% recurring revenue justifies a premium to straight SDE multiples &mdash; call it 4.2&times;&ndash;4.7&times; for the contract portion and 2.5&times; for the one-time. Blended gets you to roughly $1.1M&ndash;$1.4M valuation.</>,
+            <>But the owner involvement is the bigger issue. Running the estimates, managing the team, AND holding the top 10 commercial relationships means three separate transition problems. Each takes 12&ndash;18 months to solve properly.</>,
+            <>On a $1.2M deal, that owner dependency risk typically discounts multiples by 0.5&times;&ndash;1.0&times;. Fair value probably closes to $900K&ndash;$1.2M.</>,
+            <>Asking $2.8M isn\u2019t an aggressive negotiation position. It\u2019s a different business than the one the fundamentals support.</>,
+            <>Want to run the Rundown to get the full scoring? Or should we model what would need to be true for this to make sense at $2.8M?</>,
+          ]} />
         </div>
         <p className="gg-body" style={{ marginTop: 24, maxWidth: 680, fontSize: 14, color: 'var(--gg-text-muted)' }}>
           This is one conversation. The real ones run hours or days. Yulia remembers everything. Every number is auditable. Every document is ready when you need it.
@@ -318,18 +313,21 @@ function FormulaGroupCard({ group, items }: { group: string; items: string[] }) 
   );
 }
 
-function ChatBubble({ role, children }: { role: 'user' | 'yulia'; children: React.ReactNode }) {
+function ChatBubble({ role, paragraphs }: { role: 'user' | 'yulia'; paragraphs: React.ReactNode[] }) {
+  const body = paragraphs.map((p, i) => (
+    <p key={i} style={{ margin: i === 0 ? 0 : '10px 0 0', padding: 0 }}>{p}</p>
+  ));
   if (role === 'user') {
     return (
       <div style={{ alignSelf: 'flex-end', maxWidth: '80%', background: 'var(--gg-bg-muted)', border: '0.5px solid var(--gg-border)', padding: '12px 16px', borderRadius: '16px 16px 4px 16px', fontSize: 14, lineHeight: 1.6 }}>
-        {children}
+        {body}
       </div>
     );
   }
   return (
     <div style={{ display: 'flex', gap: 12, maxWidth: '92%' }}>
       <div className="gg-yulia" style={{ width: 32, height: 32, borderRadius: 10, fontSize: 13, flexShrink: 0 }}>Y</div>
-      <div style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--gg-text-secondary)' }}>{children}</div>
+      <div style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--gg-text-secondary)' }}>{body}</div>
     </div>
   );
 }
