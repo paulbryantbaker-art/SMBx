@@ -366,21 +366,39 @@ html, body {
     overscroll-behavior: none;
   }
   body {
-    position: relative;
-    /* Body always fills the ENTIRE screen (100dvh). On iOS PWA standalone
-       dvh is static and equals the full webview, so body reaches screen
-       edge-to-edge. Elements portaled to body with position:absolute
-       bottom:0 sit at the true screen bottom — no "chin" strip of html
-       showing through like when we sized body to var(--vvh) (which iOS
-       can report slightly smaller than the screen).
+    /* Anchor body to the actual visible viewport via position:fixed +
+       inset:0. This is the only iOS-PWA-reliable way to make body cover
+       the home-indicator safe-area region edge-to-edge — CSS viewport
+       units (100vh / 100dvh / 100lvh) can all report values that exclude
+       the safe-area-inset-bottom on iOS PWA standalone, leaving a
+       visible "chin" strip of html showing through. Grok/ChatGPT PWAs
+       have no chin because their body covers the entire webview.
 
-       --vvh is still exposed as a body-inline custom property by
-       AppShell's visualViewport effect, so components that need keyboard
+       --vvh (from AppShell's visualViewport effect) is still exposed as
+       a body-inline custom property, so components that need keyboard
        compensation (anon chat composer) can read it directly. */
-    height: 100dvh;
+    position: fixed;
+    inset: 0;
     overflow: hidden;
     overscroll-behavior: none;
     touch-action: none;
+  }
+
+  /* PUBLIC MARKETING EXCEPTION.
+     AppShell adds `public-marketing` to html.classList when a logged-out
+     user is on a Glass Grok journey / home route. The PWA scroll-lock
+     above is correct for the chat + dashboard flows but lethal for
+     marketing pages that must scroll many screens. Unlock here: let the
+     document scroll naturally, body flows in normal position. */
+  html.public-marketing,
+  html.public-marketing body {
+    position: static !important;
+    inset: auto !important;
+    height: auto !important;
+    min-height: 100dvh;
+    overflow: visible !important;
+    overscroll-behavior: auto !important;
+    touch-action: auto !important;
   }
 }
 
