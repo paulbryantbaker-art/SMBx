@@ -8,13 +8,14 @@
  * Spec: SMBX_SITE_COPY.md (page 5) + desktop spec.
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Page, JourneyHero, Section, H2, Body,
   Card, BottomCta,
   HorizontalTimeline, SectionNav,
   type JourneyTab,
 } from '../primitives';
+import { useInView } from '../mockups';
 
 interface Props { onSend: (text: string) => void; onStartFree: () => void; onNavigate?: (d: JourneyTab) => void; }
 
@@ -163,39 +164,76 @@ function Day0ChecklistPreview() {
     { text: 'Insurance binder confirmed → +30 days',     category: 'Vendors',       done: true },
     { text: '13-week cash forecast',                          category: 'Operations',    done: false },
   ];
-  const done = items.filter(i => i.done).length;
+  const [ref, inView] = useInView<HTMLDivElement>();
+  /* Self-tick: items marked done in the data self-check in sequence after
+     the card enters viewport, as if the plan is being executed live.
+     `checkedCount` is what we show in the header — animates from 0 up to
+     the real "done" count. */
+  const doneTargets = items.map(it => it.done);
+  const realDone = doneTargets.filter(Boolean).length;
+  const [checkedCount, setCheckedCount] = useState(0);
+  useEffect(() => {
+    if (!inView) return;
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) { setCheckedCount(realDone); return; }
+    setCheckedCount(0);
+    const timers: number[] = [];
+    let cursor = 0;
+    items.forEach((it, i) => {
+      if (!it.done) return;
+      cursor += 1;
+      const myIdx = cursor;
+      timers.push(window.setTimeout(() => setCheckedCount(myIdx), 500 + i * 260));
+    });
+    return () => { timers.forEach(clearTimeout); };
+  }, [inView, realDone]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
-    <Card padding={28} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
+    <div
+      ref={ref}
+      className="gg-card"
+      style={{
+        padding: 28,
+        boxShadow: '0 30px 60px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04), inset 0 0.5px 0 rgba(255,255,255,1)',
+      }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
         <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>Day 0 checklist</div>
-        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 11, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-          {done} / 62 items
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 11, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', fontVariantNumeric: 'tabular-nums' }}>
+          {checkedCount} / 62 items
         </div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {items.map((it, i) => (
-          <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 0', borderBottom: i === items.length - 1 ? 0 : '0.5px solid var(--gg-border)' }}>
-            <div style={{
-              width: 14, height: 14, marginTop: 2, borderRadius: 3,
-              border: '1.5px solid var(--gg-text-primary)',
-              background: it.done ? 'var(--gg-text-primary)' : 'transparent',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
-            }}>
-              {it.done && (
-                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-              )}
+        {items.map((it, i) => {
+          /* Map this item to its tick order: cumulative count of `done` items
+             up to and including this index. If checkedCount >= that, show ticked. */
+          const tickOrder = items.slice(0, i + 1).filter(x => x.done).length;
+          const ticked = it.done && checkedCount >= tickOrder;
+          return (
+            <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 0', borderBottom: i === items.length - 1 ? 0 : '0.5px solid var(--gg-border)' }}>
+              <div style={{
+                width: 14, height: 14, marginTop: 2, borderRadius: 3,
+                border: '1.5px solid var(--gg-text-primary)',
+                background: ticked ? 'var(--gg-text-primary)' : 'transparent',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+                transition: 'background 260ms var(--gg-ease-spring)',
+              }}>
+                {ticked && (
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                )}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12.5, color: ticked ? 'var(--gg-text-muted)' : 'var(--gg-text-primary)', textDecoration: ticked ? 'line-through' : 'none', fontWeight: 500, transition: 'color 260ms var(--gg-ease-spring)' }}>{it.text}</div>
+                <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 9, color: 'var(--gg-text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>{it.category}</div>
+              </div>
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12.5, color: it.done ? 'var(--gg-text-muted)' : 'var(--gg-text-primary)', textDecoration: it.done ? 'line-through' : 'none', fontWeight: 500 }}>{it.text}</div>
-              <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 9, color: 'var(--gg-text-faint)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>{it.category}</div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
-    </Card>
+    </div>
   );
 }
 

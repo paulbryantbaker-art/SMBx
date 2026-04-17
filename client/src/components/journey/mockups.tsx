@@ -495,6 +495,62 @@ export function ScoreRing({ score = 87, verdict = 'Pursue', band = 'hi', size = 
 }
 
 /* ═════════════════════════════════════════════════════════════════════
+   RUNDOWN BARS — the 7-dimension bar list used on /buy hero + Hero 1.
+   Bars animate their widths from 0 → target on viewport enter with a
+   left-to-right stagger, mimicking a live scoring pass.
+   ═════════════════════════════════════════════════════════════════════ */
+
+export interface RundownDim { label: string; score: number; }
+
+export function RundownBars({
+  dims = [
+    { label: 'Concentration', score: 8 },
+    { label: 'Margins',       score: 9 },
+    { label: 'Rev quality',   score: 9 },
+    { label: 'Dependency',    score: 6 },
+    { label: 'Management',    score: 7 },
+    { label: 'Financials',    score: 9 },
+    { label: 'Scalability',   score: 9 },
+  ] as readonly RundownDim[],
+}: {
+  dims?: readonly RundownDim[];
+}) {
+  const [ref, inView] = useInView<HTMLDivElement>();
+  return (
+    <div ref={ref} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {dims.map((d, i) => (
+        <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ minWidth: 110, fontSize: 12, fontWeight: 600, color: 'var(--gg-text-secondary)' }}>{d.label}</div>
+          <div style={{ flex: 1, height: 6, background: 'var(--gg-bg-muted)', borderRadius: 3, overflow: 'hidden' }}>
+            <div
+              style={{
+                width: inView ? `${d.score * 10}%` : '0%',
+                height: '100%',
+                background: d.score >= 7 ? 'var(--gg-dot-ready)' : d.score >= 4 ? 'var(--gg-dot-progress)' : 'var(--gg-dot-flag)',
+                transition: 'width 700ms cubic-bezier(0.22, 1, 0.36, 1)',
+                transitionDelay: `${200 + i * 90}ms`,
+              }}
+            />
+          </div>
+          <div
+            style={{
+              minWidth: 20,
+              fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 13,
+              fontVariantNumeric: 'tabular-nums', textAlign: 'right',
+              opacity: inView ? 1 : 0,
+              transition: 'opacity 400ms var(--gg-ease-spring)',
+              transitionDelay: `${500 + i * 90}ms`,
+            }}
+          >
+            {d.score}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
    CAPITAL STACK — /buy Hero 2 (SBA structure)
    4 stacked bars representing layers of the cap stack.
    ═════════════════════════════════════════════════════════════════════ */

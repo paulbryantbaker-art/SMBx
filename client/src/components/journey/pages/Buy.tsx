@@ -14,7 +14,7 @@ import {
   HorizontalTimeline, SectionNav,
   type JourneyTab,
 } from '../primitives';
-import { ScoreRing, CapitalStack } from '../mockups';
+import { ScoreRing, CapitalStack, RundownBars } from '../mockups';
 
 interface Props { onSend: (text: string) => void; onStartFree: () => void; onNavigate?: (d: JourneyTab) => void; }
 
@@ -51,19 +51,8 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
           <Card padding={32} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
             <div className="gg-label" style={{ marginBottom: 20 }}>Live preview · Phoenix pest control</div>
             <ScoreRing score={87} verdict="Pursue" band="hi" />
-            <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {(['Concentration', 'Margins', 'Rev quality', 'Dependency', 'Management', 'Financials', 'Scalability'] as const).map((dim, i) => {
-                const scores = [8, 9, 9, 6, 7, 9, 9];
-                return (
-                  <div key={dim} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{ minWidth: 110, fontSize: 12, fontWeight: 600, color: 'var(--gg-text-secondary)' }}>{dim}</div>
-                    <div style={{ flex: 1, height: 6, background: 'var(--gg-bg-muted)', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ width: `${scores[i] * 10}%`, height: '100%', background: scores[i] >= 7 ? 'var(--gg-dot-ready)' : scores[i] >= 4 ? 'var(--gg-dot-progress)' : 'var(--gg-dot-flag)' }} />
-                    </div>
-                    <div style={{ minWidth: 20, fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 13, fontVariantNumeric: 'tabular-nums', textAlign: 'right' }}>{scores[i]}</div>
-                  </div>
-                );
-              })}
+            <div style={{ marginTop: 28 }}>
+              <RundownBars />
             </div>
           </Card>
         }
