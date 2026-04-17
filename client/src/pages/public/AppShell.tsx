@@ -59,6 +59,9 @@ const MobileAdvisorsStory = lazy(() => import('../../components/mobile/MobileAdv
 const PricingBelow = lazy(() => import('../../components/content/PricingBelow'));
 const MobilePricingStory = lazy(() => import('../../components/mobile/MobilePricingStory'));
 
+// Glass Grok redesign — new public-site components
+const GlassGrokHome = lazy(() => import('../../components/journey/pages/Home'));
+
 // Mobile rebuild — Claude+ pattern
 import { type LearnDest, type WorkspaceTool } from '../../components/mobile/mobileTypes';
 import { LearnDrawer } from '../../components/mobile/LearnDrawer';
@@ -2104,17 +2107,12 @@ export default function AppShell() {
                   visible mismatch between sidebar/journey cards and the body. */}
 
               {activeTab === 'home' ? (
-              <div className="relative z-10 flex-1 flex flex-col" style={{ padding: !isMobile ? '16px' : '0' }}>
-                {/* ═══ HOME PAGE ═══ Floating card on desktop, edge-to-edge on mobile */}
+              <div className="relative z-10 flex-1 flex flex-col">
+                {/* ═══ HOME PAGE ═══ Glass Grok — canvas is #F2F2F4, no framing card. */}
                 <div
                   className="flex-1 flex flex-col"
                   style={{
-                    background: dark ? '#151617' : '#FFFFFF',
-                    border: !isMobile ? (dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9') : 'none',
-                    borderRadius: !isMobile ? 14 : 0,
-                    boxShadow: !isMobile ? (dark
-                      ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
-                      : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)') : 'none',
+                    background: 'var(--gg-bg-app, #F2F2F4)',
                     overflow: 'hidden',
                   }}
                 >
@@ -2225,352 +2223,22 @@ export default function AppShell() {
                       }}
                     />
                   ) : (
-                  <div className="flex flex-col items-center px-6 relative z-10 flex-[1.618] justify-center">
-                    <div className={`w-full text-center ${isMobile ? 'max-w-4xl' : 'max-w-3xl space-y-6'}`}>
-                      {!isMobile && (
-                        <div className="mb-10 flex justify-center">
-                          <LogoHero height={60} dark={dark} />
-                        </div>
-                      )}
-                      {isMobile && (
-                        <div className="flex justify-center mb-10">
-                          <LogoHero height={42} dark={dark} />
-                        </div>
-                      )}
-                      {user && !authLoading ? (
-                        /* ─── Logged in: personal greeting + next steps ─── */
-                        <>
-                          <h1 className={`font-headline font-black tracking-[-0.04em] ${isMobile ? 'text-[36px] leading-[1] mb-4' : 'text-[52px] leading-[1] mb-4'}`}>
-                            Welcome back,{' '}
-                            <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>
-                              {user.display_name?.split(' ')[0] || 'there'}
-                            </span>!
-                          </h1>
-                          <p className={`mx-auto font-medium ${isMobile ? 'text-[15px] leading-[1.5] max-w-[300px]' : 'text-lg max-w-xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                            Here's how we can keep moving forward — tell me what you're working on and I'll pick up where we left off.
-                          </p>
-                        </>
-                      ) : (
-                        /* ─── Not logged in: landing page hook ─── */
-                        <>
-                          <h1
-                            className={`font-headline font-black tracking-[-0.045em] ${isMobile ? 'text-[42px] leading-[1] mb-6' : 'text-[76px] leading-[0.98] mb-6'}`}
-                            style={{ textWrap: 'balance' } as React.CSSProperties}
-                          >
-                            Empower your deal team with <span className={dark ? 'text-[#E8709A]' : 'text-[#D44A78]'}>AI superintelligence</span>.
-                          </h1>
-                          <p className={`mx-auto font-medium ${isMobile ? 'text-[16px] leading-[1.5] max-w-[340px]' : 'text-xl max-w-2xl'} ${dark ? 'text-zinc-400' : 'text-[#636467]'}`}>
-                            Close deals faster and smarter with AI for M&amp;A.
-                          </p>
-
-                          {/* Segment chip row — desktop only, logged-out only.
-                              Tier 1 practitioners + principal seller get a "this is for me"
-                              lane beside the chat pill. Each chip pre-fills the input so
-                              Yulia can respond with segment-specific context on message 1. */}
-                          {!isMobile && (
-                            <div className="flex flex-wrap justify-center gap-2 mt-10 mb-2 max-w-2xl mx-auto">
-                              {[
-                                { label: "I'm an M&A advisor",         fill: "I'm an M&A advisor — " },
-                                { label: "I'm an independent sponsor", fill: "I'm an independent sponsor — " },
-                                { label: "I'm a searcher",             fill: "I'm a searcher — " },
-                                { label: "I'm a business owner",       fill: "I'm a business owner — " },
-                              ].map(chip => (
-                                <button
-                                  key={chip.label}
-                                  type="button"
-                                  onClick={() => fillHomeInput(chip.fill)}
-                                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-[0.97] cursor-pointer border ${
-                                    dark
-                                      ? 'bg-zinc-900/60 border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:border-zinc-600'
-                                      : 'bg-white border-[rgba(15,16,18,0.10)] text-[#1a1c1e] hover:border-[#D44A78]/50 hover:bg-[#D44A78]/5'
-                                  }`}
-                                >
-                                  {chip.label}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </>
-                      )}
-
-                      {/* Next actions cards — logged-in users see Yulia's suggestions.
-                          Desktop only — mobile keeps Grok-like simplicity (greeting + pill, no cards). */}
-                      {user && !isMobile && (
-                        <div className="w-full mt-6 max-w-xl mx-auto">
-                          <NextActionsCards
-                            dark={dark}
-                            onAction={(prefill) => {
-                              const ref = homeInputRef.current;
-                              if (ref) { ref.value = prefill; ref.focus(); }
-                            }}
-                            authHeaders={authHeaders}
-                          />
-                        </div>
-                      )}
-
-                      {/* Desktop: input + micro-copy */}
-                      {!isMobile && (
-                        <>
-                          <div className="w-full max-w-3xl mx-auto mt-8">
-                            <div className="relative group">
-                              {/* De-slopped: no gradient halo. Single hairline border +
-                                  soft shadow. Focus-within gets a subtle accent ring.
-                                  Closer to Grok's flat clarity than Canva-lux glow. */}
-                              <div className={`relative rounded-full flex items-center p-2 pl-4 transition-shadow ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-lg focus-within:shadow-[0_0_0_2px_rgba(232,112,154,0.28)]' : 'bg-white border border-[rgba(15,16,18,0.08)] shadow-md focus-within:shadow-[0_0_0_2px_rgba(212,74,120,0.22)]'}`}>
-                                {/* + Tools button */}
-                                <button
-                                  ref={homePlusRef}
-                                  type="button"
-                                  aria-label="Tools menu"
-                                  aria-expanded={homeToolsOpen}
-                                  onClick={() => setHomeToolsOpen(p => !p)}
-                                  className={`h-10 w-10 rounded-full flex items-center justify-center mr-2 transition-all active:scale-95 cursor-pointer border-none ${dark ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700' : 'bg-[#f3f3f6] text-[#D44A78] hover:bg-[#e3bdc3]/40'}`}
-                                >
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: homeToolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
-                                    <path d="M12 5v14" /><path d="M5 12h14" />
-                                  </svg>
-                                </button>
-                                <input
-                                  ref={homeInputRef}
-                                  className={`bg-transparent border-none focus:ring-0 flex-1 py-4 text-lg outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
-                                  placeholder="Paste a CIM. Describe a deal."
-                                  type="search"
-                                  autoComplete="off"
-                                  data-1p-ignore="true"
-                                  data-lpignore="true"
-                                  data-form-type="other"
-                                  name="yulia-chat-desktop"
-                                  enterKeyHint="send"
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
-                                      handleSend((e.target as HTMLInputElement).value.trim());
-                                      (e.target as HTMLInputElement).value = '';
-                                    }
-                                  }}
-                                />
-                                <button
-                                  onClick={(e) => {
-                                    const input = (e.currentTarget.parentElement?.querySelector('input') as HTMLInputElement);
-                                    if (input?.value.trim()) { handleSend(input.value.trim()); input.value = ''; }
-                                  }}
-                                  className="hero-send-btn h-12 w-12 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all border-none cursor-pointer"
-                                >
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
-                                </button>
-                              </div>
-
-                              {/* Tool popup (drops UP from input) */}
-                              {!isMobile && (
-                                <div ref={homeToolsRef} className={`home-tools-popup ${homeToolsOpen ? 'open' : ''}`} style={{ bottom: 'calc(100% + 12px)' }}>
-                                  <div className="px-4 pt-3 pb-2">
-                                    <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)' }}>Start with Yulia</span>
-                                  </div>
-                                  {HOME_TOOLS.filter(t => t.group === 'journey').map(t => (
-                                    <button key={t.label} className="home-tp-item" onClick={() => fillHomeInput(t.fill)} type="button">
-                                      {t.icon}
-                                      <div>
-                                        <div className={`text-[15px] font-semibold leading-[1.3] ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}>{t.label}</div>
-                                        <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
-                                      </div>
-                                    </button>
-                                  ))}
-                                  <div className="mx-4 my-1" style={{ borderTop: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}` }} />
-                                  <div className="px-4 pt-2 pb-1">
-                                    <span className="text-[12px] font-semibold tracking-wide uppercase" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.35)' }}>Tools</span>
-                                  </div>
-                                  {HOME_TOOLS.filter(t => t.group === 'tool').map(t => (
-                                    <button key={t.label} className="home-tp-item" onClick={() => fillHomeInput(t.fill)} type="button">
-                                      {t.icon}
-                                      <div>
-                                        <div className={`text-[15px] font-semibold leading-[1.3] ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}>{t.label}</div>
-                                        <div className="text-[13px] leading-[1.4] mt-0.5" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)' }}>{t.desc}</div>
-                                      </div>
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Trust line */}
-                          <p className={`text-xs font-medium ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
-                            Free analysis · No account required · Your data stays yours
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  )}
-
-                  {/* Golden-ratio spacer — content above takes 1.618 units, this empty
-                      spacer takes 1 unit. Content lands in the upper 61.8% of the card,
-                      breathing room in the lower 38.2%, and the portaled pill floats over
-                      the bottom of that breathing room. Grok-like simplicity. Mobile only,
-                      and only when NOT showing the deal stack (stack manages its own scroll). */}
-                  {isMobile && !user && !authLoading && <div className="flex-1" aria-hidden />}
-
-                  {/* ╔══════════════════════════════════════════════════════════════════════╗
-                      ║ iOS mobile home pill — LOGGED-OUT ONLY.                              ║
-                      ║ Logged-in PWA users see MobileNotionHome above, which has its own    ║
-                      ║ empty state ("Start your first deal") that transitions to chat mode  ║
-                      ║ where ChatDock renders at the bottom. This portal is marketing-      ║
-                      ║ surface chrome — journey chips + the "Tell me about your business"   ║
-                      ║ input for anonymous users browsing in Safari.                        ║
-                      ║ See memory/architecture_ios_pwa_pill.md for positioning rules.       ║
-                      ╚══════════════════════════════════════════════════════════════════════╝ */}
-                  {isMobile && !user && !authLoading && createPortal(
-                    <div
-                      id="mobile-home-pill-portal"
-                      className="chat-pill-mobile-container fixed left-0 right-0 bottom-0 z-10"
-                      style={{ paddingTop: 12 }}
-                    >
-                      {/* Context-aware chip row — journey chips when empty portfolio,
-                          single "Start a new deal" chip when user has deals. Always shown
-                          on mobile home (not just browser). */}
-                      <DealContextChips
-                        dark={dark}
-                        onNavigate={(path) => {
-                          const tab = (path.replace('/', '') || 'home') as TabId;
-                          setActiveTab(tab);
+                    /* ═══ Glass Grok home — logged-out + desktop-logged-in ═══
+                        New public site per the Glass Grok design system.
+                        Mobile logged-in users above hit MobileDealListHome;
+                        everyone else gets the redesigned chat-first hero. */
+                    <Suspense fallback={<BelowSkeleton />}>
+                      <GlassGrokHome
+                        user={user}
+                        authLoading={authLoading}
+                        onSend={(msg) => handleSend(msg)}
+                        onNavigateJourney={(j) => {
+                          setActiveTab(j);
                           setViewState('landing');
-                          navigate(path);
-                          setHomeToolsOpen(false);
+                          navigate(`/${j}`);
                         }}
                       />
-
-                      <div className={isPWA ? 'px-3' : 'px-4'} style={{ touchAction: 'auto' }}>
-                      {/* Mobile pill — no gradient halo. Safari's bottom toolbar abuts
-                          the pill and visually slices any blur halo. Solid pill only;
-                          the inner border + shadow provide enough depth. */}
-                      <form autoComplete="off" onSubmit={(e) => e.preventDefault()} role="presentation" data-form-type="other">
-                      <div className="relative">
-                        <div className={`relative rounded-full flex items-center p-2 ${user ? 'pl-3' : 'pl-5'} ${dark ? 'bg-zinc-900/90 border border-zinc-700 shadow-2xl' : 'bg-white border border-[#e3bdc3] shadow-xl'}`}>
-                          {/* + button — opens tools/upload drawer.
-                              HIDDEN for logged-out mobile users: the starter
-                              popup doesn't reliably populate the input the
-                              way it does on desktop, so rather than ship a
-                              broken affordance to a potential customer we
-                              hide it. In-app (logged-in) users keep the +
-                              for file upload / tool access. */}
-                          {user && (
-                          <button
-                            type="button"
-                            aria-label="Attach files or tools"
-                            onClick={() => setHomeToolsOpen(p => !p)}
-                            className={`h-9 w-9 rounded-full flex items-center justify-center mr-2 transition-all active:scale-95 cursor-pointer border-none ${dark ? 'bg-zinc-800 text-zinc-300' : 'bg-[#f3f3f6] text-[#D44A78]'}`}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: homeToolsOpen ? 'rotate(45deg)' : 'none', transition: 'transform .2s' }}>
-                              <path d="M12 5v14" /><path d="M5 12h14" />
-                            </svg>
-                          </button>
-                          )}
-                          <input
-                            ref={homeInputMobileRef}
-                            className={`bg-transparent border-none focus:ring-0 flex-1 py-3 text-base outline-none ${dark ? 'text-white placeholder-zinc-500' : 'text-[#1a1c1e] placeholder-[#5a4044]'}`}
-                            placeholder="Paste a CIM. Describe a deal."
-                            type="search"
-                            autoComplete="off"
-                            data-1p-ignore="true"
-                            data-lpignore="true"
-                            data-form-type="other"
-                            name="yulia-chat-mobile"
-                            enterKeyHint="send"
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
-                                e.preventDefault();
-                                handleSend((e.target as HTMLInputElement).value.trim());
-                                (e.target as HTMLInputElement).value = '';
-                              }
-                            }}
-                          />
-                          <button
-                            onClick={(e) => {
-                              const input = (e.currentTarget.parentElement?.querySelector('input') as HTMLInputElement);
-                              if (input?.value.trim()) { handleSend(input.value.trim()); input.value = ''; }
-                            }}
-                            className="hero-send-btn h-10 w-10 rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all border-none cursor-pointer"
-                          >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l7-7 7 7" /><path d="M12 19V5" /></svg>
-                          </button>
-                        </div>
-                        {/* Mobile + popup — chat-starter prefills (job previously carried by chips).
-                            Only renders for logged-in users (see the gate on
-                            the + button above). */}
-                        {user && homeToolsOpen && (
-                          <div
-                            onClick={(e) => { if (e.target === e.currentTarget) setHomeToolsOpen(false); }}
-                            style={{ position: 'fixed', inset: 0, background: 'rgba(15,16,18,0.35)', zIndex: 70 }}
-                            aria-hidden
-                          >
-                            <div
-                              role="menu"
-                              onClick={(e) => e.stopPropagation()}
-                              style={{
-                                position: 'fixed',
-                                left: 12, right: 12,
-                                bottom: 'calc(env(safe-area-inset-bottom) + 84px)',
-                                background: dark ? '#1a1c1e' : '#ffffff',
-                                borderRadius: 20,
-                                border: dark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(15,16,18,0.08)',
-                                boxShadow: '0 20px 48px rgba(0,0,0,0.25)',
-                                padding: 8,
-                                maxHeight: '62vh',
-                                overflowY: 'auto',
-                              }}
-                            >
-                              <div style={{ padding: '10px 14px 6px' }}>
-                                <span style={{
-                                  fontFamily: "'Sora', system-ui, sans-serif",
-                                  fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase',
-                                  color: dark ? 'rgba(240,240,243,0.55)' : '#7c7d80',
-                                }}>Start with Yulia</span>
-                              </div>
-                              {[
-                                { icon: 'sell',               label: 'Sell my business',     fill: 'I want to sell my business — ' },
-                                { icon: 'shopping_cart',      label: 'Buy a business',       fill: 'I want to buy a business — ' },
-                                { icon: 'savings',            label: 'Raise capital',        fill: 'I need to raise capital — ' },
-                                { icon: 'merge',              label: 'Just closed a deal',   fill: 'I just closed an acquisition — ' },
-                                { icon: 'workspace_premium',  label: "I'm an advisor",       fill: "I'm an M&A advisor / broker / CPA / attorney — " },
-                                { icon: 'auto_awesome',       label: 'Ask anything',         fill: '' },
-                              ].map(item => (
-                                <button
-                                  key={item.label}
-                                  onClick={() => { setHomeToolsOpen(false); fillHomeInput(item.fill); }}
-                                  type="button"
-                                  style={{
-                                    display: 'flex', alignItems: 'center', gap: 12,
-                                    padding: '12px 14px',
-                                    width: '100%', borderRadius: 12, border: 'none',
-                                    background: 'transparent', color: dark ? '#f0f0f3' : '#1a1c1e',
-                                    fontFamily: "'Inter', system-ui, sans-serif",
-                                    fontSize: 15, fontWeight: 600, textAlign: 'left',
-                                    cursor: 'pointer',
-                                    WebkitTapHighlightColor: 'transparent',
-                                  }}
-                                >
-                                  <span
-                                    className="material-symbols-outlined"
-                                    style={{ fontSize: 20, color: dark ? '#E8709A' : '#D44A78', fontVariationSettings: "'FILL' 1" }}
-                                    aria-hidden
-                                  >
-                                    {item.icon}
-                                  </span>
-                                  {item.label}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      </form>
-                      {!isPWA && !user && (
-                        <p className={`text-xs font-medium text-center mt-3 ${dark ? 'text-zinc-600' : 'text-[#636467]/50'}`}>
-                          Free analysis · No account required · Your data stays yours
-                        </p>
-                      )}
-                      </div>
-                    </div>,
-                    document.body
+                    </Suspense>
                   )}
                 </main>
                 </div>
