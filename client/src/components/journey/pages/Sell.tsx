@@ -11,11 +11,13 @@ import { useMemo, useState } from 'react';
 import {
   Page, JourneyHero, Section, H2, Body,
   StatBar, Card, CardGrid, Timeline, BottomCta,
+  type JourneyTab,
 } from '../primitives';
 
 interface Props {
   onSend: (text: string) => void;
   onStartFree: () => void;
+  onNavigate?: (dest: JourneyTab) => void;
 }
 
 const CHIPS = [
@@ -25,11 +27,11 @@ const CHIPS = [
   'Am I ready to sell?',
 ] as const;
 
-export default function Sell({ onSend, onStartFree }: Props) {
+export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
   const onChip = (chip: string) => onSend(chip);
 
   return (
-    <Page onStartFree={onStartFree}>
+    <Page active="sell" onNavigate={onNavigate} onStartFree={onStartFree}>
       <JourneyHero
         eyebrow="Selling your business"
         headline="Know what you have. Before anyone else does."

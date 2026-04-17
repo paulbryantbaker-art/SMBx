@@ -12,9 +12,10 @@ import { useMemo, useState } from 'react';
 import {
   Page, JourneyHero, Section, H2, Body,
   Card, CardGrid, BottomCta,
+  type JourneyTab,
 } from '../primitives';
 
-interface Props { onSend: (text: string) => void; onStartFree: () => void; }
+interface Props { onSend: (text: string) => void; onStartFree: () => void; onNavigate?: (d: JourneyTab) => void; }
 
 const CHIPS = [
   'Sell or raise?',
@@ -23,9 +24,9 @@ const CHIPS = [
   'How much capital can I raise?',
 ] as const;
 
-export default function Raise({ onSend, onStartFree }: Props) {
+export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
   return (
-    <Page onStartFree={onStartFree}>
+    <Page active="raise" onNavigate={onNavigate} onStartFree={onStartFree}>
       <JourneyHero
         eyebrow="Raising capital"
         headline="You don\u2019t have to sell 100% to get liquidity."

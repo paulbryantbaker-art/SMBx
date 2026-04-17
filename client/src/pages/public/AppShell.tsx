@@ -2218,14 +2218,19 @@ export default function AppShell() {
                     {(() => {
                       const onGoChat = () => { setViewState('chat'); navigate('/chat'); };
                       const send = (msg: string) => handleSend(msg);
+                      const nav = (d: 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'pricing' | 'how-it-works' | 'enterprise') => {
+                        setActiveTab(d);
+                        setViewState('landing');
+                        navigate(d === 'home' ? '/' : `/${d}`);
+                      };
                       switch (activeTab) {
-                        case 'sell':         return <GlassGrokSell onSend={send} onStartFree={onGoChat} />;
-                        case 'buy':          return <GlassGrokBuy onSend={send} onStartFree={onGoChat} />;
-                        case 'raise':        return <GlassGrokRaise onSend={send} onStartFree={onGoChat} />;
-                        case 'integrate':    return <GlassGrokIntegrate onSend={send} onStartFree={onGoChat} />;
-                        case 'pricing':      return <GlassGrokPricing onSend={send} onStartFree={onGoChat} />;
-                        case 'how-it-works': return <GlassGrokHowItWorks onSend={send} onStartFree={onGoChat} />;
-                        case 'enterprise':   return <GlassGrokEnterprise onSend={send} onStartFree={onGoChat} />;
+                        case 'sell':         return <GlassGrokSell onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'buy':          return <GlassGrokBuy onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'raise':        return <GlassGrokRaise onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'integrate':    return <GlassGrokIntegrate onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'pricing':      return <GlassGrokPricing onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'how-it-works': return <GlassGrokHowItWorks onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'enterprise':   return <GlassGrokEnterprise onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
                         default:             return null;
                       }
                     })()}
@@ -2541,17 +2546,22 @@ export default function AppShell() {
                     {(() => {
                       const onGoChat = () => { setViewState('chat'); navigate('/chat'); };
                       const send = (msg: string) => handleSend(msg);
+                      const nav = (d: 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'pricing' | 'how-it-works' | 'enterprise') => {
+                        setActiveTab(d);
+                        setViewState('landing');
+                        navigate(d === 'home' ? '/' : `/${d}`);
+                      };
                       /* Default to 'sell' if activeTab is 'home' (no canvas for home post-morph) */
                       const journey = activeTab === 'home' ? 'sell' : activeTab;
                       switch (journey) {
-                        case 'sell':         return <GlassGrokSell onSend={send} onStartFree={onGoChat} />;
-                        case 'buy':          return <GlassGrokBuy onSend={send} onStartFree={onGoChat} />;
-                        case 'raise':        return <GlassGrokRaise onSend={send} onStartFree={onGoChat} />;
-                        case 'integrate':    return <GlassGrokIntegrate onSend={send} onStartFree={onGoChat} />;
-                        case 'pricing':      return <GlassGrokPricing onSend={send} onStartFree={onGoChat} />;
-                        case 'how-it-works': return <GlassGrokHowItWorks onSend={send} onStartFree={onGoChat} />;
-                        case 'enterprise':   return <GlassGrokEnterprise onSend={send} onStartFree={onGoChat} />;
-                        default:             return <GlassGrokSell onSend={send} onStartFree={onGoChat} />;
+                        case 'sell':         return <GlassGrokSell onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'buy':          return <GlassGrokBuy onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'raise':        return <GlassGrokRaise onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'integrate':    return <GlassGrokIntegrate onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'pricing':      return <GlassGrokPricing onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'how-it-works': return <GlassGrokHowItWorks onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'enterprise':   return <GlassGrokEnterprise onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        default:             return <GlassGrokSell onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
                       }
                     })()}
                   </Suspense>

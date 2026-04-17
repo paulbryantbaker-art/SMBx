@@ -12,9 +12,10 @@ import { useMemo, useState } from 'react';
 import {
   Page, JourneyHero, Section, H2, Body,
   StatBar, Card, Timeline, BottomCta, AlertBanner,
+  type JourneyTab,
 } from '../primitives';
 
-interface Props { onSend: (text: string) => void; onStartFree: () => void; }
+interface Props { onSend: (text: string) => void; onStartFree: () => void; onNavigate?: (d: JourneyTab) => void; }
 
 const CHIPS = [
   'Score this deal (paste URL)',
@@ -23,9 +24,9 @@ const CHIPS = [
   'What should I offer?',
 ] as const;
 
-export default function Buy({ onSend, onStartFree }: Props) {
+export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
   return (
-    <Page onStartFree={onStartFree}>
+    <Page active="buy" onNavigate={onNavigate} onStartFree={onStartFree}>
       <JourneyHero
         eyebrow="Buying a business"
         headline="Screen ten deals in the time it takes to screen one."

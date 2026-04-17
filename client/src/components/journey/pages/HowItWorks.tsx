@@ -12,9 +12,10 @@ import { useState } from 'react';
 import {
   Page, Section, H2, Body,
   Card, BottomCta,
+  type JourneyTab,
 } from '../primitives';
 
-interface Props { onSend: (text: string) => void; onStartFree: () => void; }
+interface Props { onSend: (text: string) => void; onStartFree: () => void; onNavigate?: (d: JourneyTab) => void; }
 
 const DOES = [
   'Generate documents (valuations, CIMs, financial models, DD checklists, LOIs, pitch decks, LP updates)',
@@ -83,9 +84,9 @@ const DATA_SOURCES = [
   'IRS Statistics of Income — effective tax rates',
 ];
 
-export default function HowItWorks({ onSend, onStartFree }: Props) {
+export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
   return (
-    <Page onStartFree={onStartFree}>
+    <Page active="how-it-works" onNavigate={onNavigate} onStartFree={onStartFree}>
       {/* ─── Hero ──────────────────────────────────────────────────── */}
       <Section>
         <div className="gg-eyebrow" style={{ marginBottom: 16 }}>How it works</div>

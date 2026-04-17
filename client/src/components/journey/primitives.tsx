@@ -16,19 +16,39 @@ import {
 import './glass.css';
 
 /* ═════════════════════════════════════════════════════════════════════
-   PAGE FRAME — floating glass nav + app-canvas background
+   PAGE FRAME
+   Desktop (≥1024px): app shell — Sidebar (68px) + TopBar (64px) + main
+   Mobile (<1024px):  floating glass nav pill over main
+   Canvas is always #F2F2F4. Footer renders at the bottom.
    ═════════════════════════════════════════════════════════════════════ */
+
+export type JourneyTab = 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'pricing' | 'how-it-works' | 'enterprise';
 
 export interface PageProps {
   children: ReactNode;
-  user?: { display_name?: string | null; email?: string | null } | null;
-  /** Called when the nav "Start free" CTA is clicked. */
+  /** Active page — drives nav highlight state. */
+  active?: JourneyTab;
+  /** Called when user picks a top-bar or sidebar destination. */
+  onNavigate?: (dest: JourneyTab) => void;
+  /** Called when Sign-in link is clicked. Optional. */
+  onSignIn?: () => void;
+  /** Called when the primary CTA (Start free / Book a demo) fires. */
   onStartFree: () => void;
-  /** Optional override for the nav CTA label (Enterprise uses "Book a demo"). */
+  /** Optional override for the nav CTA label. */
   ctaLabel?: string;
 }
 
-export function Page({ children, onStartFree, ctaLabel = 'Start free' }: PageProps) {
+const TOPBAR_LINKS: { id: JourneyTab; label: string }[] = [
+  { id: 'sell',         label: 'Sell' },
+  { id: 'buy',          label: 'Buy' },
+  { id: 'raise',        label: 'Raise' },
+  { id: 'integrate',    label: 'Integrate' },
+  { id: 'pricing',      label: 'Pricing' },
+  { id: 'how-it-works', label: 'How it works' },
+  { id: 'enterprise',   label: 'Enterprise' },
+];
+
+export function Page({ children, active, onNavigate, onSignIn, onStartFree, ctaLabel = 'Start free' }: PageProps) {
   return (
     <div
       style={{
@@ -42,33 +62,145 @@ export function Page({ children, onStartFree, ctaLabel = 'Start free' }: PagePro
         fontFamily: 'var(--gg-body)',
       }}
     >
-      <nav
-        className="gg-nav"
-        style={{
-          position: 'absolute',
-          top: 24, left: 16, right: 16,
-          zIndex: 30,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '10px 12px 10px 18px',
-          height: 56,
-        }}
+      {/* ── Desktop shell ─────────────────────────────────────────── */}
+      <div className="gg-desktop-only" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
+        <div className="gg-shell">
+          <Sidebar active={active} onNavigate={onNavigate} />
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <TopBar active={active} onNavigate={onNavigate} onSignIn={onSignIn} onStartFree={onStartFree} ctaLabel={ctaLabel} />
+            <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              {children}
+            </main>
+            <Footer />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Mobile shell (floating nav pill) ─────────────────────── */}
+      <div className="gg-mobile-only" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column', flex: 1, position: 'relative' }}>
+        <nav
+          className="gg-nav"
+          style={{
+            position: 'absolute',
+            top: 24, left: 16, right: 16,
+            zIndex: 30,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '10px 12px 10px 18px',
+            height: 56,
+          }}
+        >
+          <div className="gg-logo" style={{ fontSize: 18 }}>smbx.ai</div>
+          <button
+            type="button"
+            className="gg-btn gg-btn--primary gg-btn--pill"
+            style={{ padding: '9px 16px', fontSize: 12 }}
+            onClick={onStartFree}
+          >
+            {ctaLabel}
+          </button>
+        </nav>
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: 108 }}>
+          {children}
+        </main>
+        <Footer />
+      </div>
+    </div>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   SIDEBAR — 68px icon-only nav, X logo at top
+   ═════════════════════════════════════════════════════════════════════ */
+
+function Sidebar({ active, onNavigate }: { active?: JourneyTab; onNavigate?: (d: JourneyTab) => void }) {
+  const go = (d: JourneyTab) => onNavigate?.(d);
+  return (
+    <aside className="gg-sidebar">
+      <button
+        type="button"
+        className="gg-sidebar__mark"
+        onClick={() => go('home')}
+        aria-label="Home"
+        style={{ border: 0, background: 'transparent', cursor: 'pointer', padding: 0 }}
       >
-        <div className="gg-logo" style={{ fontSize: 18 }}>smbx.ai</div>
+        <img src="/X.png" alt="smbx" style={{ height: 32, width: 'auto', objectFit: 'contain' }} />
+      </button>
+
+      <div className="gg-sidebar__group-label">Explore</div>
+      <NavIcon label="Sell"      active={active === 'sell'}      onClick={() => go('sell')}     icon={<path d="M3 9l9-6 9 6v11a1 1 0 01-1 1h-5v-7h-6v7H4a1 1 0 01-1-1V9z" />} />
+      <NavIcon label="Buy"       active={active === 'buy'}       onClick={() => go('buy')}      icon={<><circle cx="9" cy="20" r="1.5" /><circle cx="18" cy="20" r="1.5" /><path d="M3 4h2l2.5 12h12l2-8H6" /></>} />
+      <NavIcon label="Raise"     active={active === 'raise'}     onClick={() => go('raise')}    icon={<path d="M3 18l6-6 4 4 8-8M14 7h7v7" />} />
+      <NavIcon label="Integrate" active={active === 'integrate'} onClick={() => go('integrate')} icon={<><circle cx="12" cy="8" r="4" /><path d="M5 21c0-4 3-7 7-7s7 3 7 7" /></>} />
+
+      <div className="gg-sidebar__sep" />
+      <div className="gg-sidebar__group-label">Learn</div>
+      <NavIcon label="How it works" active={active === 'how-it-works'} onClick={() => go('how-it-works')} icon={<><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01" /></>} />
+      <NavIcon label="Pricing"      active={active === 'pricing'}      onClick={() => go('pricing')}      icon={<><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" /><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" /></>} />
+      <NavIcon label="Enterprise"   active={active === 'enterprise'}   onClick={() => go('enterprise')}   icon={<><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9v.01M9 13v.01M9 17v.01M15 9v.01M15 13v.01M15 17v.01" /></>} />
+    </aside>
+  );
+}
+
+function NavIcon({ active, onClick, label, icon }: { active: boolean; onClick: () => void; label: string; icon: ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`gg-sidebar__item${active ? ' active' : ''}`}
+      aria-label={label}
+      aria-current={active ? 'page' : undefined}
+      title={label}
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        {icon}
+      </svg>
+    </button>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   TOPBAR — 64px glass, logo + text nav + sign-in + CTA pill
+   ═════════════════════════════════════════════════════════════════════ */
+
+function TopBar({ active, onNavigate, onSignIn, onStartFree, ctaLabel }: {
+  active?: JourneyTab; onNavigate?: (d: JourneyTab) => void; onSignIn?: () => void; onStartFree: () => void; ctaLabel: string;
+}) {
+  return (
+    <header className="gg-topbar">
+      <button
+        type="button"
+        onClick={() => onNavigate?.('home')}
+        style={{ background: 'transparent', border: 0, padding: 0, cursor: 'pointer' }}
+      >
+        <span className="gg-logo" style={{ fontSize: 20 }}>smbx.ai</span>
+      </button>
+      <nav className="gg-topbar__nav">
+        {TOPBAR_LINKS.map(l => (
+          <button
+            key={l.id}
+            type="button"
+            className={`gg-topbar__link${active === l.id ? ' active' : ''}`}
+            aria-current={active === l.id ? 'page' : undefined}
+            onClick={() => onNavigate?.(l.id)}
+          >
+            {l.label}
+          </button>
+        ))}
+      </nav>
+      <div className="gg-topbar__right">
+        {onSignIn && (
+          <button type="button" className="gg-topbar__signin" onClick={onSignIn}>Sign in</button>
+        )}
         <button
           type="button"
-          className="gg-btn gg-btn--primary gg-btn--pill"
-          style={{ padding: '9px 16px', fontSize: 12 }}
+          className="gg-btn gg-btn--primary"
           onClick={onStartFree}
+          style={{ padding: '9px 18px' }}
         >
           {ctaLabel}
         </button>
-      </nav>
-
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: 108 }}>
-        {children}
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </header>
   );
 }
 
@@ -206,7 +338,8 @@ function useRotatingHint(
 }
 
 /* ═════════════════════════════════════════════════════════════════════
-   JOURNEY HERO — eyebrow · H1 · tag · chat · chips
+   JOURNEY HERO — eyebrow · H1 · tag · chat · chips (+ optional right peek)
+   Desktop: 2-col (text left, rightPanel right). Mobile: stacked.
    Same structure across /sell, /buy, /raise, /integrate.
    ═════════════════════════════════════════════════════════════════════ */
 
@@ -218,21 +351,38 @@ export interface JourneyHeroProps {
   chips: readonly string[];
   onSend: (text: string) => void;
   onChip: (chip: string) => void;
+  /** Desktop-only product mockup on the right of the hero. */
+  rightPanel?: ReactNode;
 }
 
 export function JourneyHero(p: JourneyHeroProps) {
   return (
-    <section style={{ padding: 'clamp(32px, 5vw, 72px) clamp(20px, 5vw, 56px) clamp(40px, 5vw, 80px)', maxWidth: 900, margin: '0 auto', width: '100%' }} className="gg-enter">
-      <div className="gg-eyebrow" style={{ marginBottom: 16 }}>{p.eyebrow}</div>
-      <h1 className="gg-h1 gg-h1--journey" style={{ marginBottom: 22 }}>{p.headline}</h1>
-      <p className="gg-body gg-body--lead" style={{ maxWidth: 720, marginBottom: 28 }}>{p.tagline}</p>
-      <div style={{ maxWidth: 640, marginBottom: 20 }}>
-        <ChatInput placeholder={p.chatPlaceholder} onSend={p.onSend} />
-      </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, maxWidth: 720 }}>
-        {p.chips.map(c => (
-          <button key={c} type="button" className="gg-chip" onClick={() => p.onChip(c)}>{c}</button>
-        ))}
+    <section
+      className="gg-enter"
+      style={{
+        position: 'relative',
+        padding: 'clamp(48px, 7vw, 96px) clamp(20px, 5vw, 72px) clamp(56px, 7vw, 96px)',
+        maxWidth: 1520,
+        margin: '0 auto',
+        width: '100%',
+      }}
+    >
+      <div className="gg-grid-bg" />
+      <div className="gg-two-col" style={{ alignItems: 'center', position: 'relative', zIndex: 1 }}>
+        <div>
+          <div className="gg-eyebrow" style={{ marginBottom: 20 }}>{p.eyebrow}</div>
+          <h1 className="gg-h1 gg-h1--journey" style={{ marginBottom: 28 }}>{p.headline}</h1>
+          <p className="gg-body gg-body--lead" style={{ maxWidth: 560, marginBottom: 32 }}>{p.tagline}</p>
+          <div style={{ maxWidth: 560, marginBottom: 20 }}>
+            <ChatInput placeholder={p.chatPlaceholder} onSend={p.onSend} />
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, maxWidth: 720 }}>
+            {p.chips.map(c => (
+              <button key={c} type="button" className="gg-chip" onClick={() => p.onChip(c)}>{c}</button>
+            ))}
+          </div>
+        </div>
+        {p.rightPanel && <div className="gg-desktop-only">{p.rightPanel}</div>}
       </div>
     </section>
   );
@@ -258,18 +408,19 @@ export function Section({ variant = 'app', label, children, tight }: SectionProp
   return (
     <section
       className={cls}
-      style={tight ? { paddingTop: 'var(--gg-s8)', paddingBottom: 'var(--gg-s8)' } : undefined}
+      style={tight ? { paddingTop: 'clamp(32px, 4vw, 56px)', paddingBottom: 'clamp(32px, 4vw, 56px)' } : undefined}
     >
-      <div style={{ maxWidth: 900, margin: '0 auto', width: '100%' }}>
-        {label && <div className="gg-label" style={{ marginBottom: 12 }}>{label}</div>}
+      <div className="gg-section__inner">
+        {label && <div className="gg-label" style={{ marginBottom: 20 }}>{label}</div>}
         {children}
       </div>
     </section>
   );
 }
 
-export function H2({ children, style }: { children: ReactNode; style?: React.CSSProperties }) {
-  return <h2 className="gg-h2" style={{ marginBottom: 16, ...style }}>{children}</h2>;
+export function H2({ children, style, variant }: { children: ReactNode; style?: React.CSSProperties; variant?: 'block' }) {
+  const cls = variant === 'block' ? 'gg-h2 gg-h2--block' : 'gg-h2';
+  return <h2 className={cls} style={{ marginBottom: 20, ...style }}>{children}</h2>;
 }
 
 export function Body({ children, lead, style }: { children: ReactNode; lead?: boolean; style?: React.CSSProperties }) {
@@ -381,11 +532,13 @@ export interface BottomCtaProps {
 
 export function BottomCta(p: BottomCtaProps) {
   return (
-    <Section variant="tint">
-      <H2 style={{ maxWidth: 720 }}>{p.heading}</H2>
-      <Body lead style={{ maxWidth: 640, marginBottom: 28 }}>{p.subhead}</Body>
-      <div style={{ maxWidth: 640 }}>
-        <ChatInput placeholder={p.chatPlaceholder} onSend={p.onSend} />
+    <Section variant="dark">
+      <div style={{ maxWidth: 820, margin: '0 auto', textAlign: 'center' }}>
+        <H2 style={{ marginBottom: 20 }}>{p.heading}</H2>
+        <p className="gg-body--sub" style={{ marginBottom: 36, marginLeft: 'auto', marginRight: 'auto' }}>{p.subhead}</p>
+        <div style={{ maxWidth: 560, margin: '0 auto' }}>
+          <ChatInput placeholder={p.chatPlaceholder} onSend={p.onSend} />
+        </div>
       </div>
     </Section>
   );

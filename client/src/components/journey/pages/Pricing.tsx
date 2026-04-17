@@ -13,9 +13,10 @@ import { useState } from 'react';
 import {
   Page, Section, H2, Body,
   Card, CardGrid, BottomCta,
+  type JourneyTab,
 } from '../primitives';
 
-interface Props { onSend: (text: string) => void; onStartFree: () => void; }
+interface Props { onSend: (text: string) => void; onStartFree: () => void; onNavigate?: (d: JourneyTab) => void; }
 
 type TierKey = 'free' | 'solo' | 'pro' | 'team' | 'enterprise';
 
@@ -104,9 +105,9 @@ const FAQS: readonly { q: string; a: string }[] = [
     a: 'Yes. You can pause for up to 90 days once per year. Pausing preserves your deal history and workspace. After 90 days, auto-resumes or auto-cancels based on your preference.' },
 ];
 
-export default function Pricing({ onSend, onStartFree }: Props) {
+export default function Pricing({ onSend, onStartFree, onNavigate }: Props) {
   return (
-    <Page onStartFree={onStartFree}>
+    <Page active="pricing" onNavigate={onNavigate} onStartFree={onStartFree}>
       {/* ─── Hero ──────────────────────────────────────────────────── */}
       <Section>
         <div className="gg-eyebrow" style={{ marginBottom: 16 }}>Pricing</div>

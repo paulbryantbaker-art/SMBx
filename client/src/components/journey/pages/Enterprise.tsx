@@ -11,9 +11,10 @@ import { useState, type FormEvent } from 'react';
 import {
   Page, Section, H2, Body,
   Card, CardGrid,
+  type JourneyTab,
 } from '../primitives';
 
-interface Props { onSend: (text: string) => void; onStartFree: () => void; }
+interface Props { onSend: (text: string) => void; onStartFree: () => void; onNavigate?: (d: JourneyTab) => void; }
 
 const USE_CASES = [
   { title: 'Lower middle market PE',
@@ -68,9 +69,14 @@ const ROI_ROWS = [
   ['Portfolio monitoring tools',         '$20K\u2013$50K',   'Yes'],
 ];
 
-export default function Enterprise({ onSend, onStartFree: _ }: Props) {
+export default function Enterprise({ onSend, onStartFree: _, onNavigate }: Props) {
   return (
-    <Page onStartFree={() => onSend('I\u2019m interested in Enterprise. Here\u2019s what our team is solving: ')} ctaLabel="Book a demo">
+    <Page
+      active="enterprise"
+      onNavigate={onNavigate}
+      onStartFree={() => onSend('I\u2019m interested in Enterprise. Here\u2019s what our team is solving: ')}
+      ctaLabel="Book a demo"
+    >
       {/* ─── Hero ──────────────────────────────────────────────────── */}
       <Section>
         <div className="gg-eyebrow" style={{ marginBottom: 16 }}>Enterprise</div>

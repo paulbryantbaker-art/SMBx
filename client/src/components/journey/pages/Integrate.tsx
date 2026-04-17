@@ -11,9 +11,10 @@ import { useMemo, useState } from 'react';
 import {
   Page, JourneyHero, Section, H2, Body,
   Card, Timeline, BottomCta,
+  type JourneyTab,
 } from '../primitives';
 
-interface Props { onSend: (text: string) => void; onStartFree: () => void; }
+interface Props { onSend: (text: string) => void; onStartFree: () => void; onNavigate?: (d: JourneyTab) => void; }
 
 const CHIPS = [
   'Build my Day 1 plan',
@@ -22,9 +23,9 @@ const CHIPS = [
   'First 30 days priorities',
 ] as const;
 
-export default function Integrate({ onSend, onStartFree }: Props) {
+export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
   return (
-    <Page onStartFree={onStartFree}>
+    <Page active="integrate" onNavigate={onNavigate} onStartFree={onStartFree}>
       <JourneyHero
         eyebrow="Just acquired"
         headline="Day 1 after the wire. 180 employees. Do you have a plan?"
