@@ -12,7 +12,8 @@
  * sheet. The Apple Music layoutId avatar morph comes in task 20 polish pass.
  */
 
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import type { YuliaState } from '../types';
 import type { AnonMessage } from '../../../hooks/useAnonymousChat';
 
@@ -90,6 +91,8 @@ export default function YuliaAgent({
   onSend,
 }: Props) {
   const [draft, setDraft] = useState('');
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -118,7 +121,8 @@ export default function YuliaAgent({
       : 'Your AI deal partner · tap to chat';
 
   if (state === 'side') {
-    return (
+    if (!mounted || typeof document === 'undefined') return null;
+    return createPortal(
       <button
         type="button"
         onClick={() => onStateChange('mini')}
@@ -146,7 +150,8 @@ export default function YuliaAgent({
         }}
       >
         Y
-      </button>
+      </button>,
+      document.body,
     );
   }
 
@@ -427,7 +432,9 @@ export default function YuliaAgent({
     WebkitTapHighlightColor: 'transparent',
   };
 
-  return (
+  if (!mounted || typeof document === 'undefined') return null;
+
+  return createPortal(
     <button
       type="button"
       onClick={() => onStateChange('full')}
@@ -509,6 +516,7 @@ export default function YuliaAgent({
           </svg>
         )}
       </span>
-    </button>
+    </button>,
+    document.body,
   );
 }

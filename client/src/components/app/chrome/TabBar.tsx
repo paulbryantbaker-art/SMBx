@@ -7,11 +7,15 @@
  * - border-top: 0.5px solid rgba(0,0,0,0.08)
  * - box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.9) -- the specular is mandatory
  *
- * Positioning: position:absolute bottom:0 inside body sized to --vvh
- * (see architecture_ios_pwa_pill.md). NOT position:fixed.
+ * Positioning: portaled into document.body with position:absolute + bottom:0.
+ * Body is sized to var(--vvh) (visualViewport.height) via index.css, so
+ * absolute bottom:0 inside body anchors exactly to the visible viewport
+ * bottom regardless of AppShellInner's internal flex sizing. NOT fixed.
+ * See memory/architecture_ios_pwa_pill.md.
  */
 
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import type { AppTab } from '../types';
 
 interface Props {
@@ -62,7 +66,11 @@ const TABS: Array<{ id: AppTab; label: string; icon: ReactNode }> = [
 ];
 
 export default function TabBar({ active, onChange, pipelineDim }: Props) {
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted || typeof document === 'undefined') return null;
+
+  return createPortal(
     <div
       role="tablist"
       aria-label="App sections"
@@ -146,6 +154,7 @@ export default function TabBar({ active, onChange, pipelineDim }: Props) {
           </button>
         );
       })}
-    </div>
+    </div>,
+    document.body,
   );
 }
