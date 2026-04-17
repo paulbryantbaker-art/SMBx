@@ -472,7 +472,11 @@ function pathToTab(path: string): TabId {
   if (path === '/integrate') return 'integrate';
   if (path === '/how-it-works') return 'how-it-works';
   if (path === '/enterprise') return 'enterprise';
-  if (path === '/advisors') return 'advisors';
+  /* /advisors is a legacy route — no dedicated Glass Grok page. Advisors
+     are customers (Solo/Pro/Team depending on team size) and land on
+     /sell by default since sell-side is the most common engagement.
+     A mount effect replace-navigates the URL so it doesn't linger. */
+  if (path === '/advisors') return 'sell';
   if (path === '/pricing') return 'pricing';
   return 'home';
 }
@@ -558,9 +562,9 @@ function buildCommandItems(a: BuildCommandArgs): CommandItem[] {
     { id: 'buy' as TabId, label: 'Buy a business' },
     { id: 'raise' as TabId, label: 'Raise capital' },
     { id: 'integrate' as TabId, label: 'Post-acquisition integration' },
-    { id: 'advisors' as TabId, label: 'For advisors' },
     { id: 'how-it-works' as TabId, label: 'How it works' },
     { id: 'pricing' as TabId, label: 'Pricing' },
+    { id: 'enterprise' as TabId, label: 'Enterprise' },
   ]).forEach(j => {
     items.push({ id: `nav-${j.id}`, label: j.label, icon: 'arrow_forward', group: 'Go to', onSelect: () => a.onGoToJourney(j.id) });
   });
@@ -1003,6 +1007,12 @@ export default function AppShell() {
 
   // Sync URL → state
   useEffect(() => {
+    /* Legacy /advisors → /sell. Replace the URL (not push) so back button
+       doesn't bounce the user back to a dead route. */
+    if (location === '/advisors') {
+      navigate('/sell', { replace: true });
+      return;
+    }
     const tab = pathToTab(location);
     if (tab !== activeTab && viewState === 'landing') setActiveTab(tab);
     // /deal/:id is the one path-derived viewState we promote authoritatively so
@@ -1802,9 +1812,9 @@ export default function AppShell() {
                     { id: 'buy' as TabId, icon: 'shopping_bag', label: 'Buy' },
                     { id: 'raise' as TabId, icon: 'trending_up', label: 'Raise' },
                     { id: 'integrate' as TabId, icon: 'merge', label: 'Integrate' },
-                    { id: 'advisors' as TabId, icon: 'handshake', label: 'Advisors' },
                     { id: 'how-it-works' as TabId, icon: 'help_outline', label: 'How' },
                     { id: 'pricing' as TabId, icon: 'sell', label: 'Pricing' },
+                    { id: 'enterprise' as TabId, icon: 'apartment', label: 'Ent.' },
                   ]).map(item => {
                     const isActive = activeTab === item.id && viewState === 'landing';
                     return (
@@ -2189,7 +2199,7 @@ export default function AppShell() {
                 {/* Scroll spacer removed — page is exactly 100dvh, pill sits at bottom of
                     visible viewport with safe-area padding for the home indicator. */}
               </div>
-              ) : ['sell','buy','raise','how-it-works','integrate','advisors','pricing','enterprise'].includes(activeTab) ? (
+              ) : ['sell','buy','raise','how-it-works','integrate','pricing','enterprise'].includes(activeTab) ? (
               <div className="relative z-10 flex-1 flex flex-col">
                 {/* Glass Grok journey — canvas is #F2F2F4, no framing card. */}
                 <div
@@ -2211,29 +2221,12 @@ export default function AppShell() {
                         case 'pricing':      return <GlassGrokPricing onSend={send} onStartFree={onGoChat} />;
                         case 'how-it-works': return <GlassGrokHowItWorks onSend={send} onStartFree={onGoChat} />;
                         case 'enterprise':   return <GlassGrokEnterprise onSend={send} onStartFree={onGoChat} />;
-                        /* 'advisors' route temporarily maps to /pricing's tier grid
-                           until the advisors-specific Glass Grok page is written. */
-                        case 'advisors':     return <GlassGrokPricing onSend={send} onStartFree={onGoChat} />;
                         default:             return null;
                       }
                     })()}
                   </Suspense>
-                  {!isMobile ? (
-                    <DesktopFooter
-                      dark={dark}
-                      onTalkToYulia={() => { setViewState('chat'); navigate('/chat'); }}
-                      onNavigate={(path) => {
-                        const t = pathToTab(path);
-                        setActiveTab(t);
-                        setViewState('landing');
-                        navigate(path);
-                      }}
-                    />
-                  ) : (
-                    <footer className={`py-12 flex justify-center ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`}>
-                      <LogoIcon height={44} dark={dark} />
-                    </footer>
-                  )}
+                  {/* Legacy DesktopFooter removed — each Glass Grok page renders
+                      its own slim footer via the Page primitive / Footer export. */}
                 </div>
               </div>
               ) : null}
@@ -2553,7 +2546,6 @@ export default function AppShell() {
                         case 'pricing':      return <GlassGrokPricing onSend={send} onStartFree={onGoChat} />;
                         case 'how-it-works': return <GlassGrokHowItWorks onSend={send} onStartFree={onGoChat} />;
                         case 'enterprise':   return <GlassGrokEnterprise onSend={send} onStartFree={onGoChat} />;
-                        case 'advisors':     return <GlassGrokPricing onSend={send} onStartFree={onGoChat} />;
                         default:             return <GlassGrokSell onSend={send} onStartFree={onGoChat} />;
                       }
                     })()}

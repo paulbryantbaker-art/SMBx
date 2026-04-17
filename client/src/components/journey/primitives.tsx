@@ -67,7 +67,59 @@ export function Page({ children, onStartFree, ctaLabel = 'Start free' }: PagePro
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', paddingTop: 108 }}>
         {children}
       </main>
+      <Footer />
     </div>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   FOOTER — slim, monospace, hairline. Applied by Page automatically;
+   exported so Home (which has a custom hero layout) can include it too.
+   ═════════════════════════════════════════════════════════════════════ */
+
+export function Footer() {
+  const year = new Date().getFullYear();
+  const links: { label: string; href: string }[] = [
+    { label: 'Pricing',       href: '/pricing' },
+    { label: 'How it works',  href: '/how-it-works' },
+    { label: 'Enterprise',    href: '/enterprise' },
+    { label: 'Privacy',       href: '/legal/privacy' },
+    { label: 'Terms',         href: '/legal/terms' },
+    { label: 'hello@smbx.ai', href: 'mailto:hello@smbx.ai' },
+  ];
+  return (
+    <footer
+      style={{
+        borderTop: '0.5px solid var(--gg-border)',
+        padding: '20px clamp(20px, 5vw, 56px)',
+        background: 'var(--gg-bg-app)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: 12,
+        fontFamily: "'JetBrains Mono', ui-monospace, monospace",
+        fontSize: 11, letterSpacing: '0.02em',
+        color: 'var(--gg-text-muted)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+        <span className="gg-logo" style={{ fontSize: 13, fontFamily: 'var(--gg-display)' }}>smbx.ai</span>
+        {links.map(l => (
+          <a
+            key={l.href}
+            href={l.href}
+            style={{
+              color: 'var(--gg-text-muted)',
+              textDecoration: 'none',
+              transition: 'color var(--gg-t-feedback) var(--gg-ease-snap)',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--gg-text-primary)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--gg-text-muted)')}
+          >
+            {l.label}
+          </a>
+        ))}
+      </div>
+      <div style={{ color: 'var(--gg-text-faint)' }}>&copy; {year} smbx.ai</div>
+    </footer>
   );
 }
 

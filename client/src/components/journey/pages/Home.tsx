@@ -11,6 +11,7 @@
 
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import '../glass.css';
+import { Footer } from '../primitives';
 
 /* ─── Rotating placeholder hints ────────────────────────────────────── */
 const ROTATING_HINTS = [
@@ -285,6 +286,7 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
