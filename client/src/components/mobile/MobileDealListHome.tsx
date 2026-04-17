@@ -134,6 +134,9 @@ export default function MobileDealListHome({
 
   // Auto-scroll to the latest message whenever the conversation grows or
   // streaming text updates. `instant` avoids fighting the user's own scroll.
+  // This is the ONLY JS scroll behavior — no visualViewport tracking, no
+  // touchmove blur. See memory/architecture_ios_pwa_pill.md: trust the
+  // browser's interactive-widget=resizes-content for keyboard handling.
   useEffect(() => {
     if (!hasActiveChat) return;
     const el = scrollRef.current;
@@ -142,38 +145,6 @@ export default function MobileDealListHome({
       el.scrollTo({ top: el.scrollHeight, behavior: 'instant' as ScrollBehavior });
     });
   }, [messages.length, streamingText, hasActiveChat]);
-
-  // Keyboard open/close shrinks the visible viewport (interactive-widget=
-  // resizes-content). Re-scroll to bottom so the latest message stays visible
-  // above the pill.
-  useEffect(() => {
-    if (!hasActiveChat) return;
-    const el = scrollRef.current;
-    const vv = typeof window !== 'undefined' ? window.visualViewport : null;
-    if (!el || !vv) return;
-    const onResize = () => {
-      requestAnimationFrame(() => {
-        el.scrollTo({ top: el.scrollHeight, behavior: 'instant' as ScrollBehavior });
-      });
-    };
-    vv.addEventListener('resize', onResize);
-    return () => vv.removeEventListener('resize', onResize);
-  }, [hasActiveChat]);
-
-  // iMessage-style: any touch-drag on the message area dismisses the keyboard.
-  // Touchmove is passive so this doesn't block native momentum scroll.
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onTouchMove = () => {
-      const active = document.activeElement as HTMLElement | null;
-      if (active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT')) {
-        active.blur();
-      }
-    };
-    el.addEventListener('touchmove', onTouchMove, { passive: true });
-    return () => el.removeEventListener('touchmove', onTouchMove);
-  }, []);
   const realDeals = useMemo(
     () => deals.filter(d => d.business_name != null && d.business_name.trim().length > 0),
     [deals],

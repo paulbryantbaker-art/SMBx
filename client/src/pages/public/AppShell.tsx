@@ -316,7 +316,7 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
     overline: 'Post-Acquisition',
     headline: 'The first 100 days determine everything.',
     terraWord: 'everything.',
-    tagline: 'The first 100 days determine everything. Yulia\u2019s plan is built from your deal intelligence \u2014 not a template.',
+    tagline: 'Yulia\u2019s 100-day plan is built from your deal intelligence \u2014 not a template.',
     chips: [
       'I just closed \u2014 give me a 90-day plan',
       'Employee retention strategy',
@@ -329,7 +329,7 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
     overline: 'HOW IT WORKS',
     headline: 'The $24,000 problem.',
     terraWord: '$24,000',
-    tagline: 'Bloomberg Terminal runs $24,000/year. PitchBook runs $24,000/year. Neither was built for your deal.',
+    tagline: 'The legacy stack runs $24,000 a seat. None of it was built for your deal.',
     chips: [
       'How is this different from ChatGPT?',
       'What data sources do you use?',
@@ -1094,23 +1094,6 @@ export default function AppShell() {
       scrollRef.current.scrollTop = 0;
     }
   }, [viewState, activeTab]);
-
-  // iMessage-style swipe-to-dismiss-keyboard — any touch drag on the chat
-  // scroll container dismisses an active keyboard. Covers both pull-down to
-  // dismiss and general "scroll to dismiss" gestures. Mobile only.
-  useEffect(() => {
-    if (!isMobile) return;
-    const el = scrollRef.current;
-    if (!el) return;
-    const onTouchMove = () => {
-      const active = document.activeElement as HTMLElement | null;
-      if (active && (active.tagName === 'TEXTAREA' || active.tagName === 'INPUT')) {
-        active.blur();
-      }
-    };
-    el.addEventListener('touchmove', onTouchMove, { passive: true });
-    return () => el.removeEventListener('touchmove', onTouchMove);
-  }, [isMobile]);
 
   // Subscription model — no wallet balance needed
 
