@@ -82,6 +82,8 @@ export function Page({ children, active, onNavigate, onSignIn, onStartFree, ctaL
         background: 'var(--gg-bg-app, #F2F2F4)',
         color: 'var(--gg-text-primary, #0A0A0B)',
         minHeight: '100%',
+        width: '100%',
+        alignSelf: 'stretch',
         fontFamily: 'var(--gg-body)',
       }}
     >

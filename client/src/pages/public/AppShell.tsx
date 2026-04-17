@@ -2082,7 +2082,7 @@ export default function AppShell() {
 
         {/* Main row: chat + canvas split */}
         {!(viewState === 'deal' && !isMobile) && (
-        <div className="flex-1 flex min-h-0 bg-transparent">
+        <div className="flex-1 flex min-h-0 bg-transparent w-full">
         {/* Chat column — transparent, lets the back layer show through */}
         <div
           className="flex flex-col min-w-0"
@@ -2090,7 +2090,7 @@ export default function AppShell() {
             background: 'transparent',
             ...(!isMobile && viewState === 'chat'
               ? { width: chatWidth, flexShrink: 0 }
-              : { flex: 1 }),
+              : { flex: 1, width: '100%' }),
           }}
         >
         {/* Scroll area */}
@@ -2132,18 +2132,18 @@ export default function AppShell() {
                   visible mismatch between sidebar/journey cards and the body. */}
 
               {activeTab === 'home' ? (
-              <div className="relative z-10 flex-1 flex flex-col">
+              <div className="relative z-10 flex-1 flex flex-col w-full">
                 {/* ═══ HOME PAGE ═══ Glass Grok — canvas is #F2F2F4, no framing card.
                     overflow:hidden only when logged-in (dashboard) — logged-out
                     Glass Grok home is a tall marketing page that must scroll. */}
                 <div
-                  className="flex-1 flex flex-col"
+                  className="flex-1 flex flex-col w-full"
                   style={{
                     background: 'var(--gg-bg-app, #F2F2F4)',
                     overflow: user ? 'hidden' : 'visible',
                   }}
                 >
-                <main className="flex-1 flex flex-col relative">
+                <main className="flex-1 flex flex-col relative w-full">
                   {/* Mobile + logged-in + has deals → Wallet-style deal stack.
                       Replaces the greeting block with glanceable portfolio state.
                       Desktop + logged-out always see the hero/greeting block. */}
