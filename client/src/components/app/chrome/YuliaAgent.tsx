@@ -266,6 +266,8 @@ export default function YuliaAgent({
           background: 'var(--bg-app)',
           zIndex: 50,
           overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         {/* DEBUG readout — remove once composer positioning is stable. */}
@@ -289,15 +291,11 @@ export default function YuliaAgent({
           vvh={Math.round(debug.vvh)} innerH={debug.innerH} pwa={debug.pwa ? '1' : '0'} body={debug.bodyPos} kbH={debug.kbH}
         </div>
 
-        {/* Header — fixed to viewport top. Floating glass buttons,
-            transparent wrapper so content scrolls behind. */}
+        {/* Header — flex row, shrink:0 so it stays a stable height
+            when keyboard opens and the dialog viewport shrinks. */}
         <div
           style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 51,
+            flexShrink: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -341,17 +339,12 @@ export default function YuliaAgent({
         <div
           ref={scrollRef}
           style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 1,
+            flex: '1 1 auto',
+            minHeight: 0,
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            /* Top: header clearance (~56pt). Bottom: composer clearance.
-               Content inside uses flex-end so latest message sits just
-               above the composer when short; when long, the scroll
-               effect pins it to the bottom. */
-            padding: 'calc(env(safe-area-inset-top, 0px) + 60px) 20px 84px',
+            padding: '8px 20px 12px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
@@ -476,19 +469,16 @@ export default function YuliaAgent({
               opens or new messages stream in. */}
         </div>
 
-        {/* Full-mode composer — FIXED to viewport bottom. With body
-            in static flow (html.yulia-chat-open override), iOS lifts
-            position:fixed bottom:0 elements above the keyboard
-            natively. No JS math, no vvh tracking, no fragile state.
-            Same pattern as Grok PWA's composer. */}
+        {/* Full-mode composer — flex row, shrink:0. Pinned to the
+            bottom of the flex column by order. No position:fixed.
+            When iOS resizes the layout viewport on keyboard open
+            (interactive-widget=resizes-content), the flex column
+            recomputes and the composer stays just above the
+            keyboard automatically. Same as Grok PWA. */}
         <form
           onSubmit={handleSubmit}
           style={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 51,
+            flexShrink: 0,
             padding: '8px 12px',
             paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
             background: 'transparent',
