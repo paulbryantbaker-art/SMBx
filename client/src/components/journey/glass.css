@@ -774,6 +774,49 @@
   }
 }
 
+/* Section-level stagger — each direct child of a section fades + lifts
+   in sequence when .gg-stagger-children--in is toggled on the parent.
+   Used inside the home cascade so valuation demo and chat starters
+   don't appear as one block — label, headline, sub, grid each land
+   on their own beat, 120ms apart.
+   Plays on the same easeOutExpo curve as the section wrappers. */
+.gg-stagger-children > * {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 700ms cubic-bezier(0.19, 1, 0.22, 1),
+    transform 700ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+.gg-stagger-children.gg-stagger-children--in > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+.gg-stagger-children.gg-stagger-children--in > *:nth-child(1) { transition-delay: 0ms; }
+.gg-stagger-children.gg-stagger-children--in > *:nth-child(2) { transition-delay: 120ms; }
+.gg-stagger-children.gg-stagger-children--in > *:nth-child(3) { transition-delay: 240ms; }
+.gg-stagger-children.gg-stagger-children--in > *:nth-child(4) { transition-delay: 360ms; }
+.gg-stagger-children.gg-stagger-children--in > *:nth-child(5) { transition-delay: 480ms; }
+.gg-stagger-children.gg-stagger-children--in > *:nth-child(6) { transition-delay: 600ms; }
+
+/* Responsive demo grid — 2-col on desktop, 1-col on mobile.
+   Replaces the inline 'minmax(0, 1.1fr) minmax(0, 1fr)' grid that
+   didn't collapse: on narrow viewports both columns squished and the
+   chip rows and output card overlapped. Used by ValuationDemo,
+   DealRundownPreview, CapitalStackSizer — any "inputs + output card"
+   interactive. */
+.gg-demo-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .gg-demo-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 32px;
+  }
+}
+
 /* Card-grid stagger — each direct child fades + lifts in sequence
    when the grid enters viewport via IntersectionObserver (JS toggles
    .gg-card-grid--in). Pure CSS handles the per-child delay via

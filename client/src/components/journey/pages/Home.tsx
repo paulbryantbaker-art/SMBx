@@ -332,12 +332,12 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
       </section>
 
       {/* ═════ Live valuation demo — interactive, tint band
-           Wrapper div gives the section a full-width tint background
-           (matching the app→tint→app rhythm of every other journey page)
-           while the inner <section> keeps its 1680 max-width content.
-           revealStyle(3) — fades up at stage 3 of the page choreography. */}
+           Wrapper div fades + lifts at stage 3. Inner section stagger-
+           reveals its own children (label, headline, sub, grid) on a
+           120ms cadence so the section lands as a sequence, not a block. */}
       <div style={{ background: 'var(--gg-bg-card)', width: '100%', ...revealStyle(3) }}>
         <section
+          className={`gg-stagger-children${heroStage >= 3 ? ' gg-stagger-children--in' : ''}`}
           style={{
             padding: 'clamp(40px, 5vw, 96px) clamp(20px, 4vw, 88px) clamp(40px, 5vw, 96px)',
             maxWidth: 1680, margin: '0 auto', width: '100%', boxSizing: 'border-box',
@@ -348,8 +348,10 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
       </div>
 
       {/* ═════ Chat starters — prefill Yulia with a real question ═════
-           revealStyle(4) — fades up at stage 4, the final beat. */}
+           revealStyle(4) — fades up at stage 4, the final beat.
+           Stagger-reveals internal children on the same 120ms cadence. */}
       <section
+        className={`gg-stagger-children${heroStage >= 4 ? ' gg-stagger-children--in' : ''}`}
         style={{
           padding: 'clamp(40px, 5vw, 80px) clamp(20px, 4vw, 88px) clamp(72px, 8vw, 120px)',
           maxWidth: 1680, margin: '0 auto', width: '100%', boxSizing: 'border-box',
@@ -458,14 +460,7 @@ function ValuationDemo({ onSend }: { onSend: (text: string) => void }) {
         A rough range in three picks. Yulia’s real valuation uses your actual tax returns, add-backs, and industry comps.
       </p>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1.1fr) minmax(0, 1fr)',
-          gap: 32,
-          alignItems: 'start',
-        }}
-      >
+      <div className="gg-demo-grid">
         {/* ── Inputs ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <DemoInput label="Annual revenue"       options={REVENUE_BANDS.map(b => b.label)}  activeIdx={revIdx}    onPick={setRevIdx} />

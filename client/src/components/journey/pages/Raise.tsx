@@ -642,15 +642,7 @@ function CapitalStackSizer({ onSend }: { onSend: (text: string) => void }) {
         Three picks. Yulia points you to the structure that actually clears the cash you need while leaving the ownership you want.
       </p>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.1fr)',
-          gap: 32,
-          alignItems: 'start',
-          maxWidth: 1120,
-        }}
-      >
+      <div className="gg-demo-grid" style={{ maxWidth: 1120 }}>
         {/* Inputs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div>

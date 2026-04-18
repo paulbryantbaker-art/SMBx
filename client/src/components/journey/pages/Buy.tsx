@@ -373,15 +373,7 @@ function DealRundownPreview({ onSend }: { onSend: (text: string) => void }) {
         Four picks. Yulia gives you a Rundown score and a verdict. Real deal, real financials \u2014 push it to Yulia for the full 22-formula analysis.
       </p>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1.1fr) minmax(0, 1fr)',
-          gap: 32,
-          alignItems: 'start',
-          maxWidth: 1120,
-        }}
-      >
+      <div className="gg-demo-grid" style={{ maxWidth: 1120 }}>
         {/* ── Inputs ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <PickRow label="Customer concentration" options={CONC_OPTIONS}   value={concentration} onPick={setConcentration} />
