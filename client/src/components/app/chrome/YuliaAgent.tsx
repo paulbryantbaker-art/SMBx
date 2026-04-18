@@ -460,47 +460,46 @@ export default function YuliaAgent({
             gap: 8,
           }}
         >
-          <button
-            type="button"
-            aria-label="More"
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
-              background: 'rgba(255,255,255,0.75)',
-              backdropFilter: 'blur(24px) saturate(1.8)',
-              WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-              border: '0.5px solid rgba(0,0,0,0.08)',
-              color: 'var(--text-primary)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 16,
-              fontWeight: 500,
-              flexShrink: 0,
-              cursor: 'pointer',
-              boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.9), 0 4px 14px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)',
-              WebkitTapHighlightColor: 'transparent',
-            }}
-          >
-            +
-          </button>
+          {/* Single unified pill — Grok pattern. + and send are inside
+              the same rounded rectangle as the input. Taller, softer
+              shadow, one cohesive element instead of two fragments. */}
           <div
             style={{
               flex: 1,
               display: 'flex',
               alignItems: 'center',
-              gap: 6,
-              padding: '4px 4px 4px 14px',
-              minHeight: 36,
-              borderRadius: 22,
-              background: 'rgba(255,255,255,0.75)',
-              backdropFilter: 'blur(30px) saturate(1.8)',
-              WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
-              border: '0.5px solid rgba(0,0,0,0.08)',
-              boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.9), 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)',
+              gap: 8,
+              padding: '6px 6px 6px 8px',
+              minHeight: 48,
+              borderRadius: 26,
+              background: '#FFFFFF',
+              border: '0.5px solid rgba(0,0,0,0.06)',
+              boxShadow: '0 6px 24px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04), inset 0 0.5px 0 rgba(255,255,255,0.9)',
             }}
           >
+            <button
+              type="button"
+              aria-label="More"
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: '50%',
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-muted)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                cursor: 'pointer',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
             <input
               type="text"
               value={draft}
@@ -514,16 +513,18 @@ export default function YuliaAgent({
                 outline: 'none',
                 background: 'transparent',
                 fontFamily: "'Inter', system-ui, sans-serif",
-                fontSize: 16, /* 16px prevents iOS auto-zoom on focus */
+                fontSize: 16,
                 color: 'var(--text-primary)',
                 minWidth: 0,
+                padding: '0 4px',
               }}
             />
             <style>{`
-              /* iOS micro-hack: forces a repaint on focus so Safari's
-                 residual 1-frame scroll-into-view jump never lands. */
               .yulia-composer-input:focus {
                 animation: yulia-blink 0.02s;
+              }
+              .yulia-composer-input::placeholder {
+                color: var(--text-faint);
               }
               @keyframes yulia-blink { 0% { opacity: 0; } 100% { opacity: 1; } }
             `}</style>
@@ -532,23 +533,22 @@ export default function YuliaAgent({
               disabled={!draft.trim() || sending}
               aria-label="Send"
               style={{
-                width: 28,
-                height: 28,
+                width: 36,
+                height: 36,
                 borderRadius: '50%',
-                background: draft.trim() && !sending ? 'var(--accent)' : 'transparent',
-                color: draft.trim() && !sending ? '#fff' : 'var(--text-faint)',
+                background: draft.trim() && !sending ? 'var(--accent)' : 'rgba(0,0,0,0.06)',
+                color: draft.trim() && !sending ? '#fff' : 'var(--text-muted)',
                 border: 'none',
                 cursor: draft.trim() && !sending ? 'pointer' : 'default',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
-                boxShadow: draft.trim() && !sending ? 'var(--shadow-primary-btn)' : 'none',
                 transition: 'background 0.15s ease',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 19V5M5 12l7-7 7 7" />
               </svg>
             </button>
