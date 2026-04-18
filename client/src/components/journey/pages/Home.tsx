@@ -165,23 +165,31 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
     if (reduced) { setHeroStage(4); return; }
     if (typingDone && !cascadeStartedRef.current) {
       cascadeStartedRef.current = true;
+      /* Cinematic pacing: 900ms gap between major beats. Each reveal's
+         900ms transition overlaps the next stage's start by ~200ms, so
+         the page feels continuous — never "arrived and waiting". */
       const timers = [
-        window.setTimeout(() => setHeroStage(1), 180),   // subtag + chat
-        window.setTimeout(() => setHeroStage(2), 640),   // peek + trust + pulse
-        window.setTimeout(() => setHeroStage(3), 1100),  // valuation demo section
-        window.setTimeout(() => setHeroStage(4), 1600),  // chat starters section
+        window.setTimeout(() => setHeroStage(1), 300),    // subtag + chat
+        window.setTimeout(() => setHeroStage(2), 1200),   // peek + trust + pulse
+        window.setTimeout(() => setHeroStage(3), 2100),   // valuation demo section
+        window.setTimeout(() => setHeroStage(4), 3000),   // chat starters section
       ];
       return () => { timers.forEach(id => window.clearTimeout(id)); };
     }
   }, [isMarketing, typingDone]);
 
-  /* Stage-driven style helper — fades an element in with a 24px upward
-     lift once it passes the threshold stage. 560ms ease-spring matches
-     the ValuationDemo card transitions so the whole page feels unified. */
+  /* Stage-driven style helper. Cinematic reveal: opacity + 32px lift +
+     slight scale from 0.985 (gives a subtle depth-of-field feel without
+     reading as 3D). 900ms duration on cubic-bezier(0.19, 1, 0.22, 1) —
+     easeOutExpo, the classic luxurious deceleration curve. Long enough
+     to read as deliberate, short enough that the cascade totals ~4s. */
   const revealStyle = (threshold: 1 | 2 | 3 | 4): React.CSSProperties => ({
     opacity: heroStage >= threshold ? 1 : 0,
-    transform: heroStage >= threshold ? 'translateY(0)' : 'translateY(24px)',
-    transition: 'opacity 560ms var(--gg-ease-spring), transform 560ms var(--gg-ease-spring)',
+    transform: heroStage >= threshold ? 'translateY(0) scale(1)' : 'translateY(32px) scale(0.985)',
+    transition:
+      'opacity 900ms cubic-bezier(0.19, 1, 0.22, 1), ' +
+      'transform 900ms cubic-bezier(0.19, 1, 0.22, 1)',
+    willChange: heroStage >= threshold ? 'auto' : 'opacity, transform',
   });
 
   return (

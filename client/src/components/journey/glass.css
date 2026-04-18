@@ -723,17 +723,17 @@
 }
 .gg-enter { animation: gg-fade-up var(--gg-t-morph) var(--gg-ease-spring) both; }
 
-/* Hero chat-pill attention pulse — plays once ~1.4s after mount, after
-   the H1 typewriter completes and the subtag/chat fade in. Scales the
-   pill imperceptibly and ripples a soft accent-color halo outward.
-   One-shot via animation-fill-mode: both + delay. */
+/* Hero chat-pill attention pulse — plays once ~2.5s after mount, AFTER
+   stage 2 of the home page cascade lands (peek stack + trust bar have
+   faded in). Scales the pill imperceptibly and ripples a soft halo
+   outward over 1.2s — slower than before, reads as a breath not a tap. */
 @keyframes gg-chat-hero-pulse {
   0%   { box-shadow: 0 0 0 0   rgba(10, 10, 11, 0),    0 1px 3px rgba(0, 0, 0, 0.05); transform: scale(1); }
-  35%  { box-shadow: 0 0 0 14px rgba(10, 10, 11, 0.10), 0 1px 3px rgba(0, 0, 0, 0.05); transform: scale(1.018); }
+  40%  { box-shadow: 0 0 0 18px rgba(10, 10, 11, 0.09), 0 1px 3px rgba(0, 0, 0, 0.05); transform: scale(1.015); }
   100% { box-shadow: 0 0 0 0   rgba(10, 10, 11, 0),    0 1px 3px rgba(0, 0, 0, 0.05); transform: scale(1); }
 }
 .gg-chat--hero-pulse {
-  animation: gg-chat-hero-pulse 900ms var(--gg-ease-spring) 1400ms both;
+  animation: gg-chat-hero-pulse 1200ms cubic-bezier(0.19, 1, 0.22, 1) 2500ms both;
 }
 @media (prefers-reduced-motion: reduce) {
   .gg-chat--hero-pulse { animation: none !important; }
