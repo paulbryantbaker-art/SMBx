@@ -179,15 +179,17 @@ export default function YuliaAgent({
   }
 
   if (state === 'full') {
-    // Fullscreen chat — flex-column with dialog pinned to 100dvh. Because
-    // the viewport meta no longer has viewport-fit=cover (see
-    // memory/feedback_pwa_chin_viewport_fit.md), 100dvh equals the VISIBLE
-    // area and shrinks when the iOS keyboard opens. So:
-    //   - Header sits at top
-    //   - Composer sits at flex-bottom → just above keyboard when open,
-    //     just above home indicator when closed
-    //   - Message scroll area (flex:1) fills the middle
-    // No position:fixed composer hack needed; iOS resize + dvh handles it.
+    // Fullscreen chat — iMessage layering pattern.
+    //   - Dialog fills 100dvh (shrinks with keyboard since we dropped
+    //     viewport-fit=cover; see memory/feedback_pwa_chin_viewport_fit.md).
+    //   - Scroll area fills the ENTIRE dialog (position:absolute inset:0).
+    //     Messages scroll freely beneath the chrome.
+    //   - Header + composer are position:absolute GLASS OVERLAYS on top.
+    //     Messages scroll BEHIND them, partially visible through blur.
+    //     Neither moves when the user scrolls — only content does.
+    //   - Scroll area has padding-top / padding-bottom = chrome heights so
+    //     the first message never starts under the header and the last
+    //     clears the composer naturally.
     return (
       <div
         role="dialog"
@@ -200,19 +202,24 @@ export default function YuliaAgent({
           height: '100dvh',
           background: 'var(--bg-app)',
           zIndex: 50,
-          display: 'flex',
-          flexDirection: 'column',
           overflow: 'hidden',
         }}
       >
         <div
           style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 2,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '10px 18px 6px',
             paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
-            flexShrink: 0,
+            background: 'rgba(242,242,244,0.72)',
+            backdropFilter: 'blur(20px) saturate(1.6)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
           }}
         >
           <button
@@ -238,18 +245,19 @@ export default function YuliaAgent({
         <div
           ref={scrollRef}
           style={{
-            flex: 1,
+            position: 'absolute',
+            inset: 0,
+            zIndex: 1,
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            padding: '12px 20px 16px',
+            /* Top = header height (~60), bottom = composer height
+               (~72 + safe-area). Messages scroll fully under both chrome
+               layers; these paddings just ensure the first/last message
+               aren't permanently pinned under them. */
+            padding: '68px 20px calc(env(safe-area-inset-bottom, 0px) + 92px)',
             display: 'flex',
             flexDirection: 'column',
-            /* Pin content to the BOTTOM of the container (iMessage pattern).
-               When content fits, it sits just above the composer instead
-               of at the top with empty space below. When content overflows,
-               the auto-scroll effect below snaps to scrollHeight so the
-               newest message stays visible. */
             justifyContent: 'flex-end',
             gap: 14,
           }}
@@ -372,22 +380,30 @@ export default function YuliaAgent({
               opens or new messages stream in. */}
         </div>
 
-        {/* Full-mode composer — sits at flex-column bottom. Because the
-            dialog is sized to 100dvh (which shrinks when the iOS keyboard
-            opens, since we dropped viewport-fit=cover), flex-bottom IS
-            "above the keyboard when open, above home indicator when
-            closed" — no JS anchor math needed. */}
+        {/* Full-mode composer — floating glass overlay, iMessage pattern.
+            position:absolute bottom:0 inside the 100dvh dialog. Because
+            100dvh shrinks with the iOS keyboard (no viewport-fit=cover),
+            the composer automatically rides up to sit just above the
+            keyboard when open, and above the home indicator when closed.
+            Messages scroll underneath the glass — translucent bg +
+            backdrop-filter lets the content show through as it passes. */}
         <form
           onSubmit={handleSubmit}
           style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 2,
             padding: '8px 12px',
             paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
+            background: 'rgba(255,255,255,0.72)',
+            backdropFilter: 'blur(24px) saturate(1.6)',
+            WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
             borderTop: '0.5px solid var(--border)',
-            background: 'var(--bg-card)',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            flexShrink: 0,
           }}
         >
           <span
