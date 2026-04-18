@@ -370,7 +370,6 @@ export default function YuliaAgent({
           {/* Bottom anchor — scrollIntoView target so the latest message
               stays visible just above the composer pill when the keyboard
               opens or new messages stream in. */}
-          <div ref={endRef} aria-hidden style={{ height: 1 }} />
         </div>
 
         {/* Full-mode composer — sits at flex-column bottom. Because the
