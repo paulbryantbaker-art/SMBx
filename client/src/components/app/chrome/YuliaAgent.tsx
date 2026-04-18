@@ -174,22 +174,30 @@ export default function YuliaAgent({
   }
 
   if (state === 'full') {
-    // Fullscreen chat. Container is position:absolute inset:0 inside body
-    // (body is position:fixed inset:0 = layout viewport). The composer
-    // itself is portaled/fixed to top: var(--vvh); translateY(-100%) so
-    // it rides the visible viewport bottom — keyboard open or closed.
-    // Message scroll area reserves padding-bottom to clear the composer.
+    // Fullscreen chat — flex-column with dialog pinned to 100dvh. Because
+    // the viewport meta no longer has viewport-fit=cover (see
+    // memory/feedback_pwa_chin_viewport_fit.md), 100dvh equals the VISIBLE
+    // area and shrinks when the iOS keyboard opens. So:
+    //   - Header sits at top
+    //   - Composer sits at flex-bottom → just above keyboard when open,
+    //     just above home indicator when closed
+    //   - Message scroll area (flex:1) fills the middle
+    // No position:fixed composer hack needed; iOS resize + dvh handles it.
     return (
       <div
         role="dialog"
         aria-label="Chat with Yulia"
         style={{
           position: 'absolute',
-          inset: 0,
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '100dvh',
           background: 'var(--bg-app)',
           zIndex: 50,
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
         <div
@@ -229,10 +237,7 @@ export default function YuliaAgent({
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            /* Bottom padding reserves clearance for the fixed composer
-               (~72px: composer height + its safe-area padding) so the
-               latest message scrolls into view above it, not behind it. */
-            padding: '12px 20px 84px',
+            padding: '12px 20px 16px',
             display: 'flex',
             flexDirection: 'column',
             gap: 14,
@@ -357,22 +362,14 @@ export default function YuliaAgent({
           <div ref={endRef} aria-hidden style={{ height: 1 }} />
         </div>
 
-        {/* Full-mode composer — Glass Grok chat input.
-            Anchored to the VISIBLE viewport bottom via position:absolute +
-            top: var(--vvh); translateY(-100%). --vvh tracks
-            visualViewport.height (set by AppShell's effect), so this sits
-            just above the keyboard when open, and at the screen bottom
-            (minus safe area) when closed. The message scroll area above
-            reserves padding-bottom: 72 so the last message clears the
-            composer — scrollIntoView on endRef re-pins after resize. */}
+        {/* Full-mode composer — sits at flex-column bottom. Because the
+            dialog is sized to 100dvh (which shrinks when the iOS keyboard
+            opens, since we dropped viewport-fit=cover), flex-bottom IS
+            "above the keyboard when open, above home indicator when
+            closed" — no JS anchor math needed. */}
         <form
           onSubmit={handleSubmit}
           style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: 'var(--vvh, 100dvh)',
-            transform: 'translateY(-100%)',
             padding: '8px 12px',
             paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
             borderTop: '0.5px solid var(--border)',
@@ -380,7 +377,7 @@ export default function YuliaAgent({
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            zIndex: 2,
+            flexShrink: 0,
           }}
         >
           <span
