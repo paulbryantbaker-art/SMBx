@@ -94,6 +94,29 @@ export default function YuliaAgent({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  // DEBUG: live viewport readout so we can see why PWA and Safari diverge.
+  // Remove once the composer positioning is stable across both.
+  const [debug, setDebug] = useState({ vvh: 0, innerH: 0, screenH: 0, pwa: false });
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const update = () => {
+      setDebug({
+        vvh: window.visualViewport?.height ?? 0,
+        innerH: window.innerHeight,
+        screenH: window.screen.height,
+        pwa: window.matchMedia('(display-mode: standalone)').matches,
+      });
+    };
+    update();
+    const vv = window.visualViewport;
+    vv?.addEventListener('resize', update);
+    vv?.addEventListener('scroll', update);
+    return () => {
+      vv?.removeEventListener('resize', update);
+      vv?.removeEventListener('scroll', update);
+    };
+  }, [state]);
+
   // Auto-scroll the message list to the bottom whenever new content arrives
   // OR the visible viewport changes (keyboard open/close). We set scrollTop
   // directly (not scrollIntoView) because scrollIntoView walks ancestor
@@ -215,6 +238,27 @@ export default function YuliaAgent({
           overflow: 'hidden',
         }}
       >
+        {/* DEBUG readout — remove once composer positioning is stable. */}
+        <div
+          style={{
+            position: 'fixed',
+            top: 'calc(env(safe-area-inset-top, 0px) + 56px)',
+            left: 8,
+            zIndex: 100,
+            padding: '4px 8px',
+            background: 'rgba(255, 200, 0, 0.9)',
+            color: '#000',
+            fontFamily: 'monospace',
+            fontSize: 10,
+            fontWeight: 700,
+            borderRadius: 6,
+            pointerEvents: 'none',
+            lineHeight: 1.3,
+          }}
+        >
+          vvh={Math.round(debug.vvh)} innerH={debug.innerH} scrnH={debug.screenH} pwa={debug.pwa ? '1' : '0'}
+        </div>
+
         {/* Header — iMessage pattern: transparent wrapper, floating
             glass ISLANDS (back button on left, avatar centered). Content
             scrolls behind them. No bar, no edge-to-edge blur. */}
