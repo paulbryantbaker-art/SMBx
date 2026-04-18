@@ -205,6 +205,9 @@ export default function YuliaAgent({
           overflow: 'hidden',
         }}
       >
+        {/* Header — iMessage pattern: transparent wrapper, floating
+            glass ISLANDS (back button on left, avatar centered). Content
+            scrolls behind them. No bar, no edge-to-edge blur. */}
         <div
           style={{
             position: 'absolute',
@@ -215,16 +218,9 @@ export default function YuliaAgent({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '10px 18px 6px',
-            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
-            /* Same glass recipe as composer — elevated chrome, not a flat
-               strip. Shadow BELOW the header (opposite direction from
-               composer) so it reads as floating over content. */
-            background: 'rgba(255,255,255,0.85)',
-            backdropFilter: 'blur(30px) saturate(1.8)',
-            WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
-            borderBottom: '0.5px solid rgba(0,0,0,0.06)',
-            boxShadow: 'inset 0 -0.5px 0 rgba(255,255,255,0.9), 0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.03)',
+            padding: '8px 12px 4px',
+            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)',
+            pointerEvents: 'none',
           }}
         >
           <button
@@ -232,19 +228,31 @@ export default function YuliaAgent({
             aria-label="Collapse chat"
             type="button"
             style={{
-              background: 'transparent',
-              border: 'none',
-              padding: 4,
-              cursor: 'pointer',
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.75)',
+              backdropFilter: 'blur(24px) saturate(1.8)',
+              WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+              border: '0.5px solid rgba(0,0,0,0.08)',
               color: 'var(--text-primary)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.9), 0 4px 14px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)',
+              pointerEvents: 'auto',
+              WebkitTapHighlightColor: 'transparent',
             }}
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="6 15 12 21 18 15" />
             </svg>
           </button>
-          <YAvatar size={28} radius={9} />
-          <span style={{ width: 22 }} />
+          <div style={{ pointerEvents: 'auto' }}>
+            <YAvatar size={32} radius={10} />
+          </div>
+          <span style={{ width: 36 }} />
         </div>
 
         <div
@@ -256,12 +264,13 @@ export default function YuliaAgent({
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            /* padding-top clears the header. padding-bottom clears ONLY
-               the composer height (~72) + safe-area + 8pt visible gap.
-               When content overflows, scrolling lets messages slide
-               UNDER the composer glass — which is where the backdrop-
-               filter actually earns its keep (iMessage pattern). */
-            padding: '68px 20px calc(env(safe-area-inset-bottom, 0px) + 80px)',
+            /* iMessage pattern: content extends all the way top→bottom.
+               Padding is just safe-area clearance so the very last
+               message isn't stuck to the screen edge — NOT enough to
+               "reserve" a buffer under the composer. The composer is a
+               floating pill ON TOP; content genuinely scrolls behind it
+               and is visible through the glass blur. */
+            padding: '56px 20px calc(env(safe-area-inset-bottom, 0px) + 12px)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
@@ -386,14 +395,12 @@ export default function YuliaAgent({
               opens or new messages stream in. */}
         </div>
 
-        {/* Full-mode composer — floating glass overlay, iMessage pattern.
-            Even on a plain #F2F2F4 canvas, the composer reads as clearly
-            ELEVATED (not part of the canvas) via:
-            - brighter bg than canvas: rgba(255,255,255,0.85)
-            - backdrop blur: blurs anything that scrolls underneath
-            - top hairline border + inset highlight: specular "lift"
-            - soft shadow ABOVE: 0 -8px 24px — the critical detail that
-              communicates this is a floating layer, not a flat strip */}
+        {/* Full-mode composer — iMessage pattern: a rounded PILL ISLAND
+            floating over content. The outer form wrapper is transparent
+            (no bar, no bg, no hairline) so the scroll area genuinely
+            continues behind it. Only the inner pill carries the glass:
+            blur, brighter-than-canvas fill, hairline border, and the
+            shadow that communicates elevation. */}
         <form
           onSubmit={handleSubmit}
           style={{
@@ -403,77 +410,100 @@ export default function YuliaAgent({
             right: 0,
             zIndex: 2,
             padding: '8px 12px',
-            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
-            background: 'rgba(255,255,255,0.85)',
-            backdropFilter: 'blur(30px) saturate(1.8)',
-            WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
-            borderTop: '0.5px solid rgba(0,0,0,0.06)',
-            boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.9), 0 -4px 24px rgba(0,0,0,0.06), 0 -1px 3px rgba(0,0,0,0.03)',
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
+            background: 'transparent',
             display: 'flex',
             alignItems: 'center',
-            gap: 10,
+            gap: 8,
+            pointerEvents: 'none',
           }}
         >
-          <span
-            aria-hidden
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 10,
-              background: 'rgba(0,0,0,0.04)',
-              color: 'var(--text-primary)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 14,
-              fontWeight: 700,
-              flexShrink: 0,
-            }}
-          >
-            +
-          </span>
-          <input
-            type="text"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Reply to Yulia…"
-            autoFocus
-            style={{
-              flex: 1,
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-              fontFamily: "'Inter', system-ui, sans-serif",
-              fontSize: 15,
-              color: 'var(--text-primary)',
-              minWidth: 0,
-            }}
-          />
           <button
-            type="submit"
-            disabled={!draft.trim() || sending}
-            aria-label="Send"
+            type="button"
+            aria-label="More"
             style={{
               width: 32,
               height: 32,
               borderRadius: '50%',
-              background: draft.trim() && !sending ? 'var(--accent)' : 'var(--bg-muted)',
-              color: draft.trim() && !sending ? '#fff' : 'var(--text-faint)',
-              border: 'none',
-              cursor: draft.trim() && !sending ? 'pointer' : 'default',
+              background: 'rgba(255,255,255,0.75)',
+              backdropFilter: 'blur(24px) saturate(1.8)',
+              WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+              border: '0.5px solid rgba(0,0,0,0.08)',
+              color: 'var(--text-primary)',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
+              fontSize: 16,
+              fontWeight: 500,
               flexShrink: 0,
-              boxShadow: draft.trim() && !sending ? 'var(--shadow-primary-btn)' : 'none',
-              transition: 'background 0.15s ease',
+              cursor: 'pointer',
+              boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.9), 0 4px 14px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)',
+              pointerEvents: 'auto',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 19V5M5 12l7-7 7 7" />
-            </svg>
+            +
           </button>
+          <div
+            style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '4px 4px 4px 14px',
+              minHeight: 36,
+              borderRadius: 22,
+              background: 'rgba(255,255,255,0.75)',
+              backdropFilter: 'blur(30px) saturate(1.8)',
+              WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
+              border: '0.5px solid rgba(0,0,0,0.08)',
+              boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.9), 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)',
+              pointerEvents: 'auto',
+            }}
+          >
+            <input
+              type="text"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Reply to Yulia…"
+              autoFocus
+              style={{
+                flex: 1,
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                fontFamily: "'Inter', system-ui, sans-serif",
+                fontSize: 15,
+                color: 'var(--text-primary)',
+                minWidth: 0,
+              }}
+            />
+            <button
+              type="submit"
+              disabled={!draft.trim() || sending}
+              aria-label="Send"
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                background: draft.trim() && !sending ? 'var(--accent)' : 'transparent',
+                color: draft.trim() && !sending ? '#fff' : 'var(--text-faint)',
+                border: 'none',
+                cursor: draft.trim() && !sending ? 'pointer' : 'default',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                boxShadow: draft.trim() && !sending ? 'var(--shadow-primary-btn)' : 'none',
+                transition: 'background 0.15s ease',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 19V5M5 12l7-7 7 7" />
+              </svg>
+            </button>
+          </div>
         </form>
       </div>
     );
