@@ -26,13 +26,16 @@ const ROTATING_HINTS = [
   'What’s this business actually worth…',
 ];
 
-/* ─── Plus-button journey shortcuts ─────────────────────────────────── */
+/* ─── Plus-button journey shortcuts ───────────────────────────────────
+   Clicking an option prefills the chat input with a concrete prompt the
+   user can see, edit, and send. They're help texts, not navigation —
+   visitor enters a Yulia conversation with real context. */
 type Journey = 'sell' | 'buy' | 'raise' | 'integrate';
-const SHORTCUTS: { label: string; journey: Journey }[] = [
-  { label: 'Sell my business', journey: 'sell' },
-  { label: 'Buy a business',    journey: 'buy' },
-  { label: 'Raise capital',     journey: 'raise' },
-  { label: 'Just acquired',     journey: 'integrate' },
+const SHORTCUTS: { label: string; journey: Journey; prompt: string }[] = [
+  { label: 'Sell my business', journey: 'sell',      prompt: 'I\u2019m thinking about selling my business. Walk me through what it might be worth and what I\u2019d keep after tax.' },
+  { label: 'Buy a business',   journey: 'buy',       prompt: 'I\u2019m evaluating a business to acquire. Score it for me on revenue quality, margins, owner dependency, and concentration.' },
+  { label: 'Raise capital',    journey: 'raise',     prompt: 'I need to raise capital. Help me model an SBA structure with senior debt, mezz, and seller notes.' },
+  { label: 'Just acquired',    journey: 'integrate', prompt: 'I just acquired a business. Help me build a Day-1 integration plan \u2014 payroll, systems, first 90 days.' },
 ];
 
 /* ─── Chat starters — each card prefills Yulia with a real prompt ─────
@@ -212,7 +215,7 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
                       key={s.journey}
                       type="button"
                       role="menuitem"
-                      onClick={() => { setPopupOpen(false); onNavigateJourney(s.journey); }}
+                      onClick={() => { setPopupOpen(false); setText(s.prompt); inputRef.current?.focus(); }}
                       style={{
                         width: '100%', textAlign: 'left',
                         padding: '10px 12px',

@@ -599,7 +599,7 @@ export function ChatInput({ placeholder, onSend, rotatingHints, onPlusClick }: C
               key={s.label}
               type="button"
               role="menuitem"
-              onClick={() => { setMenuOpen(false); onSend(s.prompt); }}
+              onClick={() => { setMenuOpen(false); setText(s.prompt); inputRef.current?.focus(); }}
               style={{
                 width: '100%', textAlign: 'left',
                 padding: '10px 12px',
