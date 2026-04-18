@@ -136,34 +136,46 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
     ? 'Pick up where you left off. Tell Yulia what you\u2019re working on.'
     : 'Valuations. CIMs. Deal scoring. Financial models. Due diligence. LOIs. Everything an investment bank delivers \u2014 without the retainer.';
 
-  /* ─── Hero choreography ─────────────────────────────────────────────
-     stage 0: H1 typewriting (subtag/chat/peek hidden)
+  /* ─── Page choreography ─────────────────────────────────────────────
+     stage 0: H1 typewriting; everything else hidden
      stage 1: H1 done, subtag + chat fade in together
      stage 2: peek stack + trust bar fade in; chat pill pulses via CSS
-              (delay matches stage-2 timing; one-shot)
-     Logged-in users skip straight to stage 2 — the typewriter is a
-     marketing-hero flourish, not a dashboard one.
+     stage 3: valuation demo section fades up
+     stage 4: chat starters section fades up
+     Each stage: opacity 0 + 24px translateY → 0, 560ms ease-spring.
+     Total choreography ~2.6s. Gives the visitor a deliberate tour of
+     the page instead of one all-at-once arrival.
+
+     Logged-in users skip straight to stage 4 — typewriter + cascade
+     is a marketing flourish, not a dashboard one.
      Respects prefers-reduced-motion. */
-  const [heroStage, setHeroStage] = useState<0 | 1 | 2>(isMarketing ? 0 : 2);
-  const { shown: typedH1, done: typingDone } = useTypewriter(marketingH1, isMarketing, 38);
+  const [heroStage, setHeroStage] = useState<0 | 1 | 2 | 3 | 4>(isMarketing ? 0 : 4);
+  /* Typewriter at 22 cps → "Your new AI deal team." (22 chars) runs ~1s
+     — deliberate enough to read without feeling slow. */
+  const { shown: typedH1, done: typingDone } = useTypewriter(marketingH1, isMarketing, 22);
 
   useEffect(() => {
-    if (!isMarketing) { setHeroStage(2); return; }
+    if (!isMarketing) { setHeroStage(4); return; }
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (reduced) { setHeroStage(2); return; }
+    if (reduced) { setHeroStage(4); return; }
     if (typingDone && heroStage === 0) {
-      const t1 = window.setTimeout(() => setHeroStage(1), 120);
-      const t2 = window.setTimeout(() => setHeroStage(2), 520);
-      return () => { window.clearTimeout(t1); window.clearTimeout(t2); };
+      const timers = [
+        window.setTimeout(() => setHeroStage(1), 180),   // subtag + chat
+        window.setTimeout(() => setHeroStage(2), 640),   // peek + trust + pulse
+        window.setTimeout(() => setHeroStage(3), 1100),  // valuation demo section
+        window.setTimeout(() => setHeroStage(4), 1600),  // chat starters section
+      ];
+      return () => { timers.forEach(id => window.clearTimeout(id)); };
     }
   }, [isMarketing, typingDone, heroStage]);
 
-  /* Stage-driven style helper — fades an element in with a slight
-     upward lift once it passes the threshold stage. */
-  const revealStyle = (threshold: 1 | 2): React.CSSProperties => ({
+  /* Stage-driven style helper — fades an element in with a 24px upward
+     lift once it passes the threshold stage. 560ms ease-spring matches
+     the ValuationDemo card transitions so the whole page feels unified. */
+  const revealStyle = (threshold: 1 | 2 | 3 | 4): React.CSSProperties => ({
     opacity: heroStage >= threshold ? 1 : 0,
-    transform: heroStage >= threshold ? 'translateY(0)' : 'translateY(10px)',
-    transition: 'opacity 420ms var(--gg-ease-spring), transform 420ms var(--gg-ease-spring)',
+    transform: heroStage >= threshold ? 'translateY(0)' : 'translateY(24px)',
+    transition: 'opacity 560ms var(--gg-ease-spring), transform 560ms var(--gg-ease-spring)',
   });
 
   return (
@@ -308,8 +320,9 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
       {/* ═════ Live valuation demo — interactive, tint band
            Wrapper div gives the section a full-width tint background
            (matching the app→tint→app rhythm of every other journey page)
-           while the inner <section> keeps its 1680 max-width content. */}
-      <div style={{ background: 'var(--gg-bg-card)', width: '100%' }}>
+           while the inner <section> keeps its 1680 max-width content.
+           revealStyle(3) — fades up at stage 3 of the page choreography. */}
+      <div style={{ background: 'var(--gg-bg-card)', width: '100%', ...revealStyle(3) }}>
         <section
           style={{
             padding: 'clamp(40px, 5vw, 96px) clamp(20px, 4vw, 88px) clamp(40px, 5vw, 96px)',
@@ -320,11 +333,13 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
         </section>
       </div>
 
-      {/* ═════ Chat starters — prefill Yulia with a real question ═════ */}
+      {/* ═════ Chat starters — prefill Yulia with a real question ═════
+           revealStyle(4) — fades up at stage 4, the final beat. */}
       <section
         style={{
           padding: 'clamp(40px, 5vw, 80px) clamp(20px, 4vw, 88px) clamp(72px, 8vw, 120px)',
           maxWidth: 1680, margin: '0 auto', width: '100%', boxSizing: 'border-box',
+          ...revealStyle(4),
         }}
       >
         <div className="gg-label" style={{ marginBottom: 14 }}>Start a conversation</div>
