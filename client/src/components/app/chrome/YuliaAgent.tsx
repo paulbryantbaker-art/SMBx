@@ -94,6 +94,18 @@ export default function YuliaAgent({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  // When full-screen chat opens, add `yulia-chat-open` to <html> so our
+  // CSS override in index.css un-fixes body. Body `position: fixed; inset:0`
+  // (needed elsewhere to prevent the PWA chin + rubber-band) breaks
+  // window.visualViewport keyboard tracking in iOS PWA standalone. With
+  // body flowing normally, iOS handles keyboard avoidance natively —
+  // same behavior as Safari browser.
+  useEffect(() => {
+    if (state !== 'full') return;
+    document.documentElement.classList.add('yulia-chat-open');
+    return () => document.documentElement.classList.remove('yulia-chat-open');
+  }, [state]);
+
   // DEBUG: live viewport readout so we can see why PWA and Safari diverge.
   // Remove once the composer positioning is stable across both.
   const [debug, setDebug] = useState({ vvh: 0, innerH: 0, screenH: 0, pwa: false });
@@ -207,21 +219,18 @@ export default function YuliaAgent({
   }
 
   if (state === 'full') {
-    // Fullscreen chat — iOS PWA canonical pattern (mattpilott/ios-chat).
-    //   - PORTALED TO document.body so position:fixed (composer) is
-    //     relative to the VIEWPORT, not trapped by an ancestor's
-    //     transform/filter/backdrop-filter containing block. See memory
-    //     feedback_fixed_position_containing_block.md.
-    //   - Dialog sized to var(--vvh) = window.visualViewport.height,
-    //     tracked by AppShell. 100dvh is wrong on iOS Safari: dvh
-    //     resolves to the LARGE viewport and doesn't track the keyboard.
-    //   - Composer is position:FIXED with top:var(--vvh); translateY(-100%).
-    //     It sits at the bottom of the VISUAL viewport (above keyboard
-    //     when open, above home indicator when closed). bottom:0 would
-    //     trigger Safari's "scroll focused input into view" jump.
-    //   - Messages scroll area is inset:0 inside the dialog, so content
-    //     can scroll BEHIND the composer's glass (iMessage pattern).
-    //   - input:focus blink animation kills the 1-frame scroll jump.
+    // Fullscreen chat — PROVEN cross-environment pattern.
+    //   - PORTALED TO document.body so position:fixed is viewport-relative.
+    //   - Dialog uses `inset: 0` + grid layout (header / scroll / composer).
+    //     Grid auto-sizes the scroll area; no viewport math needed.
+    //   - Composer is a normal grid row at the bottom with padding-bottom
+    //     driven by `env(keyboard-inset-height, env(safe-area-inset-bottom))`.
+    //     On iOS 16.4+ PWA this CSS env returns the keyboard height while
+    //     the keyboard is visible and 0 otherwise — works with or without
+    //     visualViewport tracking (which is unreliable in PWA).
+    //   - The html.yulia-chat-open CSS override in index.css un-fixes
+    //     body while the chat is open so iOS keyboard avoidance works
+    //     naturally (body `position: fixed` breaks it in PWA).
     if (!mounted || typeof document === 'undefined') return null;
     return createPortal(
       <div
@@ -229,12 +238,11 @@ export default function YuliaAgent({
         aria-label="Chat with Yulia"
         style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 'var(--vvh, 100dvh)',
+          inset: 0,
           background: 'var(--bg-app)',
           zIndex: 50,
+          display: 'grid',
+          gridTemplateRows: 'auto minmax(0, 1fr) auto',
           overflow: 'hidden',
         }}
       >
@@ -259,16 +267,12 @@ export default function YuliaAgent({
           vvh={Math.round(debug.vvh)} innerH={debug.innerH} scrnH={debug.screenH} pwa={debug.pwa ? '1' : '0'}
         </div>
 
-        {/* Header — iMessage pattern: transparent wrapper, floating
-            glass ISLANDS (back button on left, avatar centered). Content
-            scrolls behind them. No bar, no edge-to-edge blur. */}
+        {/* Header — top grid row. Floating glass buttons, transparent
+            wrapper so content can scroll up behind them when the dialog
+            briefly overflows (empty state is grid-filled, otherwise the
+            scroll row handles it). */}
         <div
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 2,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -312,19 +316,11 @@ export default function YuliaAgent({
         <div
           ref={scrollRef}
           style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 1,
+            minHeight: 0,
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            /* Top = header clearance (~56pt).
-               Bottom = composer clearance. The composer is ~52pt of
-               pill + vertical padding + safe-area; we give it 72pt +
-               --vvs so the latest message sits ABOVE the composer
-               when scrolled to bottom. When user scrolls up, older
-               messages pass behind the glass (iMessage pattern). */
-            padding: '56px 20px calc(var(--vvs, env(safe-area-inset-bottom, 0px)) + 72px)',
+            padding: '8px 20px 12px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
@@ -449,31 +445,19 @@ export default function YuliaAgent({
               opens or new messages stream in. */}
         </div>
 
-        {/* Full-mode composer — iOS PWA canonical anchor.
-            position:FIXED (not absolute) with top:var(--vvh); translateY(-100%)
-            sits the composer at the bottom of the VISUAL viewport — above
-            the keyboard when open, above the home indicator when closed.
-            bottom:0 would let Safari auto-scroll the whole dialog to bring
-            the focused input into view, yanking content off-screen.
-            Transparent wrapper, rounded pill island inside (iMessage). */}
+        {/* Full-mode composer — bottom grid row. No JS positioning.
+            padding-bottom = env(keyboard-inset-height) when keyboard is
+            open (iOS 16.4+), or env(safe-area-inset-bottom) when closed.
+            The grid row auto-sizes; iOS handles keyboard avoidance. */}
         <form
           onSubmit={handleSubmit}
           style={{
-            position: 'fixed',
-            left: 0,
-            right: 0,
-            top: 'var(--vvh, 100dvh)',
-            transform: 'translateY(-100%)',
-            zIndex: 51,
             padding: '8px 12px',
-            paddingBottom: 'calc(var(--vvs, env(safe-area-inset-bottom, 0px)) + 8px)',
+            paddingBottom: 'calc(env(keyboard-inset-height, env(safe-area-inset-bottom, 0px)) + 8px)',
             background: 'transparent',
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            pointerEvents: 'none',
-            transition: 'top 0.2s ease',
-            willChange: 'top',
           }}
         >
           <button
@@ -496,7 +480,6 @@ export default function YuliaAgent({
               flexShrink: 0,
               cursor: 'pointer',
               boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.9), 0 4px 14px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)',
-              pointerEvents: 'auto',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
@@ -516,7 +499,6 @@ export default function YuliaAgent({
               WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
               border: '0.5px solid rgba(0,0,0,0.08)',
               boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.9), 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)',
-              pointerEvents: 'auto',
             }}
           >
             <input

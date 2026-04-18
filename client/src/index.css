@@ -400,6 +400,27 @@ html, body {
     overscroll-behavior: auto !important;
     touch-action: auto !important;
   }
+
+  /* YULIA FULL-SCREEN CHAT EXCEPTION.
+     YuliaAgent adds `yulia-chat-open` to html.classList when state ===
+     'full'. The body `position: fixed; inset: 0` lock above breaks
+     window.visualViewport keyboard tracking in PWA standalone mode
+     (confirmed via diagnostic: vvh stays at 873 when keyboard opens
+     in PWA, but correctly shrinks 775 → 428 in Safari browser). With
+     body pinned, iOS has no flow to adjust, so visualViewport never
+     fires usable events.
+
+     Fix: when the chat is open, un-fix body so iOS handles keyboard
+     avoidance the same way it does in Safari browser. The dialog is
+     already a position:fixed overlay; it doesn't need body to be
+     fixed for isolation. */
+  html.yulia-chat-open body {
+    position: static !important;
+    inset: auto !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+    touch-action: auto !important;
+  }
 }
 
 #app-root {
