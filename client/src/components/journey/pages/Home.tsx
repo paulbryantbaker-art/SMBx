@@ -150,9 +150,15 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
      is a marketing flourish, not a dashboard one.
      Respects prefers-reduced-motion. */
   const [heroStage, setHeroStage] = useState<0 | 1 | 2 | 3 | 4>(isMarketing ? 0 : 4);
-  /* Typewriter at 22 cps → "Your new AI deal team." (22 chars) runs ~1s
-     — deliberate enough to read without feeling slow. */
-  const { shown: typedH1, done: typingDone } = useTypewriter(marketingH1, isMarketing, 22);
+  /* Typewriter choreography:
+     - 900ms hold BEFORE typing starts. H1 renders empty with a blinking
+       caret so the visitor's eye lands there, then the text writes in.
+       Paul's framing: "cursor pauses for a second while the page loads,
+       then writes out the page."
+     - 30 cps — snappier than the prior 22 cps ("a little too slow").
+       "Your new AI deal team." (22 chars) types in ~730ms. Combined
+       with the 900ms hold, the full H1 lands at ~1.6s after mount. */
+  const { shown: typedH1, done: typingDone } = useTypewriter(marketingH1, isMarketing, 30, 900);
 
   /* Ref guard so the 4-timer cascade only schedules once. Previously
      heroStage was in the effect deps, which meant setting stage 1
@@ -218,14 +224,26 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
           {/* ── Left: copy + chat ── */}
           <div>
             <div className="gg-eyebrow" style={{ marginBottom: 24 }}>{heroEyebrow}</div>
-            <h1 className="gg-h1" style={{ marginBottom: 28 }}>
-              {isMarketing ? (
+            {/* Layout-stable typewriter:
+                - Invisible placeholder (full text, visibility:hidden) reserves
+                  the final H1 height from mount. Without it, the H1 would be
+                  1 line tall during the 900ms pre-type hold, then jump to 2
+                  lines on mobile as the text wraps in — the page below would
+                  bounce.
+                - The visible typed overlay is absolutely positioned inside
+                  the H1. It paints the typed chars + caret over the
+                  invisible placeholder at the same position/size. */}
+            <h1 className="gg-h1" style={{ marginBottom: 28, position: 'relative' }}>
+              {isMarketing && !typingDone ? (
                 <>
-                  {typedH1}
-                  {!typingDone && <span className="gg-caret" aria-hidden="true" />}
+                  <span aria-hidden="true" style={{ visibility: 'hidden' }}>{marketingH1}</span>
+                  <span style={{ position: 'absolute', inset: 0 }}>
+                    {typedH1}
+                    <span className="gg-caret" aria-hidden="true" />
+                  </span>
                 </>
               ) : (
-                loggedInH1
+                isMarketing ? marketingH1 : loggedInH1
               )}
             </h1>
             <p
