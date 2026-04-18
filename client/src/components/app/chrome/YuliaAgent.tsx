@@ -237,17 +237,16 @@ export default function YuliaAgent({
     //     (measured kbH=0 even with keyboard open); do NOT depend on it.
     if (!mounted || typeof document === 'undefined') return null;
     return createPortal(
-      <>
       <div
         role="dialog"
         aria-label="Chat with Yulia"
         style={{
-          /* Dialog fills viewport. Header + scroll area in a flex
-             column inside. Composer is a SIBLING of this dialog
-             (rendered outside) — position:fixed, lifted above the
-             keyboard via translateY(-kbHeight). Being a sibling
-             means iOS can't move dialog + composer together. */
-          height: '100dvh',
+          /* Dialog is a flex column at 100dvh MINUS keyboard height.
+             When keyboard opens, dialog shrinks by kbHeight, flex
+             column recomputes, composer (flex-shrink:0 at bottom)
+             lands at the top of the keyboard. No position:fixed
+             tricks, no sibling layout. */
+          height: `calc(100dvh - ${kbHeight}px)`,
           width: '100%',
           background: 'var(--bg-app)',
           overflow: 'hidden',
@@ -308,10 +307,7 @@ export default function YuliaAgent({
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            /* Bottom padding = composer height (~72) + keyboard height
-               so last message rests above the composer, which itself
-               sits above the keyboard. */
-            padding: `8px 20px ${72 + kbHeight}px`,
+            padding: '8px 20px 12px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
@@ -436,22 +432,13 @@ export default function YuliaAgent({
               opens or new messages stream in. */}
         </div>
 
-      </div>
-        {/* Composer — SIBLING of the dialog (rendered outside it
-            in the portal fragment). position:fixed bottom:0 with
-            translateY(-kbHeight) puts it at the top of the
-            keyboard. As a sibling, iOS can't move it together
-            with the dialog when it scrolls things. */}
+        {/* Composer — normal flex row at the bottom of the column.
+            Dialog height already subtracts kbHeight, so this row
+            lands at the top of the keyboard. */}
         <form
           onSubmit={handleSubmit}
           style={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 60,
-            transform: `translateY(-${kbHeight}px)`,
-            transition: 'transform 0.15s ease-out',
+            flexShrink: 0,
             padding: '8px 12px',
             paddingBottom: kbHeight > 0 ? '8px' : 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
             background: 'transparent',
@@ -554,7 +541,7 @@ export default function YuliaAgent({
             </button>
           </div>
         </form>
-      </>,
+      </div>,
       document.body,
     );
   }
