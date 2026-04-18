@@ -131,7 +131,7 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
   const heroEyebrow = 'Deal intelligence platform';
   const heroH1 = user && !authLoading
     ? <>Welcome back{firstName ? `, ${firstName}` : ''}.</>
-    : <><span style={{ display: 'block' }}>The AI</span><span style={{ display: 'block' }}>deal team.</span></>;
+    : <>Your new AI deal team.</>;
   const heroTag = user && !authLoading
     ? 'Pick up where you left off. Tell Yulia what you’re working on.'
     : 'Valuations. CIMs. Deal scoring. Financial models. Due diligence. LOIs. Everything an investment bank delivers — without the retainer.';
