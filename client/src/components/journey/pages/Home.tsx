@@ -460,6 +460,11 @@ function ValuationDemo({ onSend }: { onSend: (text: string) => void }) {
         A rough range in three picks. Yulia’s real valuation uses your actual tax returns, add-backs, and industry comps.
       </p>
 
+      {/* Interactive tool wrapper — a single bordered white card that
+          makes the inputs + output read as ONE contained widget, not
+          floating chips in empty space. gg-card--static disables the
+          hover lift since the wrapper itself isn't clickable. */}
+      <div className="gg-card gg-card--static" style={{ padding: 'clamp(20px, 3vw, 36px)', borderRadius: 24 }}>
       <div className="gg-demo-grid">
         {/* ── Inputs ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -553,6 +558,7 @@ function ValuationDemo({ onSend }: { onSend: (text: string) => void }) {
             </>
           )}
         </div>
+      </div>
       </div>
     </>
   );

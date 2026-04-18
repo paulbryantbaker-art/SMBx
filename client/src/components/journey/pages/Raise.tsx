@@ -642,7 +642,10 @@ function CapitalStackSizer({ onSend }: { onSend: (text: string) => void }) {
         Three picks. Yulia points you to the structure that actually clears the cash you need while leaving the ownership you want.
       </p>
 
-      <div className="gg-demo-grid" style={{ maxWidth: 1120 }}>
+      {/* Interactive tool wrapper — same contained-widget treatment as
+          Home ValuationDemo and Buy DealScorePicker. */}
+      <div className="gg-card gg-card--static" style={{ padding: 'clamp(20px, 3vw, 36px)', borderRadius: 24, maxWidth: 1120 }}>
+      <div className="gg-demo-grid">
         {/* Inputs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div>
@@ -779,6 +782,7 @@ function CapitalStackSizer({ onSend }: { onSend: (text: string) => void }) {
             </>
           )}
         </div>
+      </div>
       </div>
     </>
   );
