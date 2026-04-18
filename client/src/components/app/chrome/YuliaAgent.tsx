@@ -241,28 +241,28 @@ export default function YuliaAgent({
         role="dialog"
         aria-label="Chat with Yulia"
         style={{
-          /* position:absolute top:0 left:0 right:0 so the dialog
-             anchors to body's top edge regardless of other siblings
-             (React's #root is hidden via CSS but we're defensive).
-             Height = 100dvh - kbHeight: when keyboard opens, dialog
-             shrinks, flex column recomputes, composer lands at top
-             of keyboard. */
+          /* iMessage pattern — three independent layers:
+             - Back: conversation fills the viewport, scrolls freely
+             - Front top: header position:fixed top:0
+             - Front bottom: composer position:fixed bottom:kbHeight
+             Header and composer are their OWN layers on top of the
+             scrolling conversation. When the keyboard opens, only
+             the composer's bottom offset changes — nothing else. */
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: `calc(100dvh - ${kbHeight}px)`,
+          inset: 0,
           background: 'var(--bg-app)',
           overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
         }}
       >
-        {/* Header — flex row, shrink:0 so it stays a stable height
-            when keyboard opens and the dialog viewport shrinks. */}
+        {/* Header — FRONT LAYER at top. Floats above the conversation
+            layer below. */}
         <div
           style={{
-            flexShrink: 0,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 2,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -306,12 +306,16 @@ export default function YuliaAgent({
         <div
           ref={scrollRef}
           style={{
-            flex: '1 1 auto',
-            minHeight: 0,
+            /* BACK LAYER — conversation. Fills entire dialog,
+               scrolls freely. Top/bottom padding clears the fixed
+               header and composer which float above. */
+            position: 'absolute',
+            inset: 0,
+            zIndex: 1,
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            padding: '8px 20px 12px',
+            padding: `calc(env(safe-area-inset-top, 0px) + 60px) 20px ${72 + kbHeight}px`,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
@@ -436,13 +440,18 @@ export default function YuliaAgent({
               opens or new messages stream in. */}
         </div>
 
-        {/* Composer — normal flex row at the bottom of the column.
-            Dialog height already subtracts kbHeight, so this row
-            lands at the top of the keyboard. */}
+        {/* Composer — FRONT LAYER at bottom. bottom: kbHeight keeps
+            it anchored to the top of the keyboard (or to the bottom
+            of the viewport when keyboard is closed). */}
         <form
           onSubmit={handleSubmit}
           style={{
-            flexShrink: 0,
+            position: 'absolute',
+            bottom: kbHeight,
+            left: 0,
+            right: 0,
+            zIndex: 2,
+            transition: 'bottom 0.15s ease-out',
             padding: '8px 12px',
             paddingBottom: kbHeight > 0 ? '8px' : 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
             background: 'transparent',
