@@ -94,26 +94,28 @@ export default function YuliaAgent({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // Track visualViewport.height → dialog height. iOS Safari PWA does NOT
-  // resize the layout viewport when keyboard opens, so position:fixed
-  // children (including flex columns) don't know the keyboard is there.
-  // visualViewport.height IS the only signal that updates. We initialize
-  // from innerHeight so the first render is correct, filter values <300
-  // as garbage (keyboard animations sometimes fire tiny transient
-  // values), and ignore the `scroll` event (also fires garbage during
-  // keyboard animations — only `resize` is reliable).
-  const [vvh, setVvh] = useState<number>(() =>
-    typeof window === 'undefined'
-      ? 0
-      : window.visualViewport?.height ?? window.innerHeight,
-  );
+  // Track keyboard height (innerHeight - visualViewport.height). iOS
+  // Safari PWA does NOT resize the layout viewport when the keyboard
+  // opens, so position:fixed children don't know the keyboard is there.
+  // visualViewport.height IS updated by iOS — we use the delta.
+  //
+  // We track keyboard height (not vvh directly) for defensiveness:
+  // innerHeight is a known-good baseline (the webview's layout size,
+  // stable unless the user rotates). Subtracting gives us the keyboard.
+  // If visualViewport reports garbage mid-animation, we clamp to
+  // [0, innerHeight * 0.75] — a keyboard can't be more than ~75% of
+  // the screen.
+  const [kbHeight, setKbHeight] = useState(0);
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const vv = window.visualViewport;
     if (!vv) return;
     const update = () => {
-      const h = vv.height;
-      if (h > 300) setVvh(h);
+      const innerH = window.innerHeight;
+      const visibleH = vv.height;
+      const raw = innerH - visibleH;
+      const clamped = Math.max(0, Math.min(innerH * 0.75, raw));
+      setKbHeight(clamped);
     };
     update();
     vv.addEventListener('resize', update);
@@ -249,15 +251,16 @@ export default function YuliaAgent({
         aria-label="Chat with Yulia"
         style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          /* iOS PWA does NOT shrink the layout viewport when the keyboard
-             opens. inset:0 would put the bottom of the flex column at
-             the layout bottom, behind the keyboard. We size explicitly
-             to visualViewport.height, which IS updated by iOS. Composer
-             at bottom of flex column → top of keyboard. */
-          height: vvh > 0 ? `${vvh}px` : '100dvh',
+          inset: 0,
+          /* Dialog stays at full viewport (inset:0). When the keyboard
+             opens, reserve its height as BOTTOM PADDING — the flex
+             column's content area naturally shrinks, the composer
+             (flex-shrink:0 at the bottom) lands at the top of the
+             keyboard. Robust to garbage vvh values (clamped to 0..75%
+             of innerHeight) because the dialog itself never resizes
+             to something weird. */
+          paddingBottom: `${kbHeight}px`,
+          boxSizing: 'border-box',
           background: 'var(--bg-app)',
           zIndex: 50,
           overflow: 'hidden',
