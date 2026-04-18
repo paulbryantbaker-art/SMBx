@@ -94,54 +94,41 @@ export default function YuliaAgent({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  // Track visualViewport.height → dialog height. iOS Safari PWA does NOT
+  // resize the layout viewport when keyboard opens, so position:fixed
+  // children (including flex columns) don't know the keyboard is there.
+  // visualViewport.height IS the only signal that updates. We initialize
+  // from innerHeight so the first render is correct, filter values <300
+  // as garbage (keyboard animations sometimes fire tiny transient
+  // values), and ignore the `scroll` event (also fires garbage during
+  // keyboard animations — only `resize` is reliable).
+  const [vvh, setVvh] = useState<number>(() =>
+    typeof window === 'undefined'
+      ? 0
+      : window.visualViewport?.height ?? window.innerHeight,
+  );
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      const h = vv.height;
+      if (h > 300) setVvh(h);
+    };
+    update();
+    vv.addEventListener('resize', update);
+    return () => vv.removeEventListener('resize', update);
+  }, []);
+
   // When full-screen chat opens, add `yulia-chat-open` to <html> so our
   // CSS override in index.css un-fixes body. Body `position: fixed; inset:0`
-  // (needed elsewhere to prevent the PWA chin + rubber-band) breaks
-  // window.visualViewport keyboard tracking in iOS PWA standalone. With
-  // body flowing normally, iOS handles keyboard avoidance natively —
-  // same behavior as Safari browser.
+  // breaks window.visualViewport keyboard tracking in iOS PWA standalone.
   useEffect(() => {
     if (state !== 'full') return;
     document.documentElement.classList.add('yulia-chat-open');
     return () => document.documentElement.classList.remove('yulia-chat-open');
   }, [state]);
 
-  // DEBUG: live viewport readout so we can see why PWA and Safari diverge.
-  // Remove once the composer positioning is stable across both.
-  const [debug, setDebug] = useState({
-    vvh: 0,
-    innerH: 0,
-    pwa: false,
-    bodyPos: '',
-    kbH: '',
-  });
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const probe = document.createElement('div');
-    probe.style.cssText =
-      'position:fixed;bottom:0;height:env(keyboard-inset-height, 0px);width:1px;pointer-events:none;';
-    document.body.appendChild(probe);
-    const update = () => {
-      setDebug({
-        vvh: window.visualViewport?.height ?? 0,
-        innerH: window.innerHeight,
-        pwa: window.matchMedia('(display-mode: standalone)').matches,
-        bodyPos: getComputedStyle(document.body).position,
-        kbH: `${Math.round(probe.getBoundingClientRect().height)}`,
-      });
-    };
-    update();
-    const vv = window.visualViewport;
-    vv?.addEventListener('resize', update);
-    vv?.addEventListener('scroll', update);
-    const t = setInterval(update, 250); // also poll so kb-inset-height updates are visible
-    return () => {
-      vv?.removeEventListener('resize', update);
-      vv?.removeEventListener('scroll', update);
-      clearInterval(t);
-      probe.remove();
-    };
-  }, [state]);
 
   // Auto-scroll the message list to the bottom whenever new content arrives
   // OR the visible viewport changes (keyboard open/close). We set scrollTop
@@ -262,7 +249,15 @@ export default function YuliaAgent({
         aria-label="Chat with Yulia"
         style={{
           position: 'fixed',
-          inset: 0,
+          top: 0,
+          left: 0,
+          right: 0,
+          /* iOS PWA does NOT shrink the layout viewport when the keyboard
+             opens. inset:0 would put the bottom of the flex column at
+             the layout bottom, behind the keyboard. We size explicitly
+             to visualViewport.height, which IS updated by iOS. Composer
+             at bottom of flex column → top of keyboard. */
+          height: vvh > 0 ? `${vvh}px` : '100dvh',
           background: 'var(--bg-app)',
           zIndex: 50,
           overflow: 'hidden',
@@ -270,27 +265,6 @@ export default function YuliaAgent({
           flexDirection: 'column',
         }}
       >
-        {/* DEBUG readout — remove once composer positioning is stable. */}
-        <div
-          style={{
-            position: 'fixed',
-            top: 'calc(env(safe-area-inset-top, 0px) + 56px)',
-            left: 8,
-            zIndex: 100,
-            padding: '4px 8px',
-            background: 'rgba(255, 200, 0, 0.9)',
-            color: '#000',
-            fontFamily: 'monospace',
-            fontSize: 10,
-            fontWeight: 700,
-            borderRadius: 6,
-            pointerEvents: 'none',
-            lineHeight: 1.3,
-          }}
-        >
-          vvh={Math.round(debug.vvh)} innerH={debug.innerH} pwa={debug.pwa ? '1' : '0'} body={debug.bodyPos} kbH={debug.kbH}
-        </div>
-
         {/* Header — flex row, shrink:0 so it stays a stable height
             when keyboard opens and the dialog viewport shrinks. */}
         <div
