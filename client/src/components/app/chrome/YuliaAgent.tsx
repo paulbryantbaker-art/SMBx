@@ -114,7 +114,12 @@ export default function YuliaAgent({
       if (el) el.scrollTop = el.scrollHeight;
     };
     vv.addEventListener('resize', handler);
-    return () => vv.removeEventListener('resize', handler);
+    // iOS fires `scroll` (not `resize`) on some keyboard transitions.
+    vv.addEventListener('scroll', handler);
+    return () => {
+      vv.removeEventListener('resize', handler);
+      vv.removeEventListener('scroll', handler);
+    };
   }, [state]);
 
   const handleSubmit = (e?: React.FormEvent) => {
@@ -179,17 +184,17 @@ export default function YuliaAgent({
   }
 
   if (state === 'full') {
-    // Fullscreen chat — iMessage layering pattern.
-    //   - Dialog fills 100dvh (shrinks with keyboard since we dropped
-    //     viewport-fit=cover; see memory/feedback_pwa_chin_viewport_fit.md).
-    //   - Scroll area fills the ENTIRE dialog (position:absolute inset:0).
-    //     Messages scroll freely beneath the chrome.
-    //   - Header + composer are position:absolute GLASS OVERLAYS on top.
-    //     Messages scroll BEHIND them, partially visible through blur.
-    //     Neither moves when the user scrolls — only content does.
-    //   - Scroll area has padding-top / padding-bottom = chrome heights so
-    //     the first message never starts under the header and the last
-    //     clears the composer naturally.
+    // Fullscreen chat — iOS PWA canonical pattern (mattpilott/ios-chat).
+    //   - Dialog sized to var(--vvh) = window.visualViewport.height,
+    //     tracked by AppShell. 100dvh is wrong on iOS Safari: dvh
+    //     resolves to the LARGE viewport and doesn't track the keyboard.
+    //   - Composer is position:FIXED with top:var(--vvh); translateY(-100%).
+    //     It sits at the bottom of the VISUAL viewport (above keyboard
+    //     when open, above home indicator when closed). bottom:0 would
+    //     trigger Safari's "scroll focused input into view" jump.
+    //   - Messages scroll area is inset:0 inside the dialog, so content
+    //     can scroll BEHIND the composer's glass (iMessage pattern).
+    //   - input:focus blink animation kills the 1-frame scroll jump.
     return (
       <div
         role="dialog"
@@ -199,7 +204,7 @@ export default function YuliaAgent({
           top: 0,
           left: 0,
           right: 0,
-          height: '100dvh',
+          height: 'var(--vvh, 100dvh)',
           background: 'var(--bg-app)',
           zIndex: 50,
           overflow: 'hidden',
@@ -395,27 +400,31 @@ export default function YuliaAgent({
               opens or new messages stream in. */}
         </div>
 
-        {/* Full-mode composer — iMessage pattern: a rounded PILL ISLAND
-            floating over content. The outer form wrapper is transparent
-            (no bar, no bg, no hairline) so the scroll area genuinely
-            continues behind it. Only the inner pill carries the glass:
-            blur, brighter-than-canvas fill, hairline border, and the
-            shadow that communicates elevation. */}
+        {/* Full-mode composer — iOS PWA canonical anchor.
+            position:FIXED (not absolute) with top:var(--vvh); translateY(-100%)
+            sits the composer at the bottom of the VISUAL viewport — above
+            the keyboard when open, above the home indicator when closed.
+            bottom:0 would let Safari auto-scroll the whole dialog to bring
+            the focused input into view, yanking content off-screen.
+            Transparent wrapper, rounded pill island inside (iMessage). */}
         <form
           onSubmit={handleSubmit}
           style={{
-            position: 'absolute',
-            bottom: 0,
+            position: 'fixed',
             left: 0,
             right: 0,
-            zIndex: 2,
+            top: 'var(--vvh, 100dvh)',
+            transform: 'translateY(-100%)',
+            zIndex: 51,
             padding: '8px 12px',
-            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
+            paddingBottom: 'calc(var(--vvs, env(safe-area-inset-bottom, 0px)) + 8px)',
             background: 'transparent',
             display: 'flex',
             alignItems: 'center',
             gap: 8,
             pointerEvents: 'none',
+            transition: 'top 0.2s ease',
+            willChange: 'top',
           }}
         >
           <button
@@ -467,17 +476,26 @@ export default function YuliaAgent({
               onChange={(e) => setDraft(e.target.value)}
               placeholder="Reply to Yulia…"
               autoFocus
+              className="yulia-composer-input"
               style={{
                 flex: 1,
                 border: 'none',
                 outline: 'none',
                 background: 'transparent',
                 fontFamily: "'Inter', system-ui, sans-serif",
-                fontSize: 15,
+                fontSize: 16, /* 16px prevents iOS auto-zoom on focus */
                 color: 'var(--text-primary)',
                 minWidth: 0,
               }}
             />
+            <style>{`
+              /* iOS micro-hack: forces a repaint on focus so Safari's
+                 residual 1-frame scroll-into-view jump never lands. */
+              .yulia-composer-input:focus {
+                animation: yulia-blink 0.02s;
+              }
+              @keyframes yulia-blink { 0% { opacity: 0; } 100% { opacity: 1; } }
+            `}</style>
             <button
               type="submit"
               disabled={!draft.trim() || sending}

@@ -620,8 +620,14 @@ export default function AppShell() {
       document.body.style.setProperty('--vvs', vvs);
     };
     vv.addEventListener('resize', setVVH);
+    // iOS fires `scroll` (not `resize`) on some visualViewport transitions
+    // during keyboard animations. Listen to both so --vvh tracks reality.
+    vv.addEventListener('scroll', setVVH);
     setVVH();
-    return () => vv.removeEventListener('resize', setVVH);
+    return () => {
+      vv.removeEventListener('resize', setVVH);
+      vv.removeEventListener('scroll', setVVH);
+    };
   }, []);
 
   // Toggle chat-mode class on <html> — landing pages use natural body scroll,
