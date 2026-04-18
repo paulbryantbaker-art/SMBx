@@ -94,16 +94,33 @@ export default function YuliaAgent({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // When full-screen chat opens, add `yulia-chat-open` to <html> so our
-  // CSS override in index.css FULLY UNLOCKS html + body — making the
-  // runtime behave like Safari browser (where text-field focus Just
-  // Works, as on any standard form on the web). No JS keyboard math;
-  // we let iOS do what it's been doing correctly for a decade.
+  // When full-screen chat opens, add `yulia-chat-open` to <html>. Our
+  // CSS override makes body static-but-overflow-hidden, which keeps
+  // the page from sliding when iOS tries to scroll the input into
+  // view, while still letting visualViewport report the keyboard.
   useEffect(() => {
     if (state !== 'full') return;
     document.documentElement.classList.add('yulia-chat-open');
     return () => document.documentElement.classList.remove('yulia-chat-open');
   }, [state]);
+
+  // Track keyboard height so the composer can be actively lifted
+  // ABOVE it via transform:translateY. We clamp to sane values to
+  // avoid garbage transients during iOS keyboard animations.
+  const [kbHeight, setKbHeight] = useState(0);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      const raw = window.innerHeight - vv.height;
+      const clamped = Math.max(0, Math.min(window.innerHeight * 0.75, raw));
+      setKbHeight(clamped);
+    };
+    update();
+    vv.addEventListener('resize', update);
+    return () => vv.removeEventListener('resize', update);
+  }, []);
 
 
   // Auto-scroll the message list to the bottom whenever new content arrives
@@ -224,14 +241,9 @@ export default function YuliaAgent({
         role="dialog"
         aria-label="Chat with Yulia"
         style={{
-          /* NORMAL document flow, NOT position:fixed. The CSS override
-             html.yulia-chat-open #app-root { display:none } hides the
-             rest of the app so this dialog is the only visible body
-             content. Being in normal flow means the composer INSIDE
-             this flex column sits on the same layer as any standard
-             <form> input on the web — iOS shifts the page to bring
-             the focused input above the keyboard, same as on any
-             doctor's form. No JS viewport math required. */
+          /* Dialog fills viewport. Header + scroll area in a flex
+             column inside. Composer is SEPARATE — position:fixed,
+             lifted above the keyboard via translateY(-kbHeight). */
           height: '100dvh',
           width: '100%',
           background: 'var(--bg-app)',
@@ -293,7 +305,10 @@ export default function YuliaAgent({
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            padding: '8px 20px 12px',
+            /* Bottom padding = composer height (~72) + keyboard height
+               so last message rests above the composer, which itself
+               sits above the keyboard. */
+            padding: `8px 20px ${72 + kbHeight}px`,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
@@ -418,18 +433,23 @@ export default function YuliaAgent({
               opens or new messages stream in. */}
         </div>
 
-        {/* Full-mode composer — flex row, shrink:0. Pinned to the
-            bottom of the flex column by order. No position:fixed.
-            When iOS resizes the layout viewport on keyboard open
-            (interactive-widget=resizes-content), the flex column
-            recomputes and the composer stays just above the
-            keyboard automatically. Same as Grok PWA. */}
+        {/* Composer — position:FIXED, lifted above keyboard via
+            translateY. Because body is static+overflow-hidden (not
+            pinned), visualViewport updates correctly and we can
+            anchor the composer to the top of the keyboard by
+            translating it up by the keyboard height. */}
         <form
           onSubmit={handleSubmit}
           style={{
-            flexShrink: 0,
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 60,
+            transform: `translateY(-${kbHeight}px)`,
+            transition: 'transform 0.15s ease-out',
             padding: '8px 12px',
-            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
+            paddingBottom: kbHeight > 0 ? '8px' : 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
             background: 'transparent',
             display: 'flex',
             alignItems: 'center',

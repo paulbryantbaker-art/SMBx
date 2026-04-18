@@ -416,24 +416,21 @@ html, body {
      a position:fixed z=50 overlay so the rest of the app stays out
      of the way; it doesn't need the whole-document lock. */
   html.yulia-chat-open {
-    height: auto !important;
-    overflow: visible !important;
-    overscroll-behavior: auto !important;
+    height: 100% !important;
+    overflow: hidden !important;
   }
+  /* Body: NOT position:fixed (that's what breaks visualViewport in
+     PWA), but ALSO NOT scrollable (page-level scroll causes the
+     whole chat to slide up when iOS tries to bring the input into
+     view). Static + overflow:hidden gives us both. */
   html.yulia-chat-open body {
     position: static !important;
     inset: auto !important;
-    height: auto !important;
-    min-height: 100dvh !important;
-    overflow: visible !important;
-    overscroll-behavior: auto !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
     touch-action: auto !important;
   }
-  /* Hide the main app content while chat is open so the chat dialog
-     can render in NORMAL document flow (no position:fixed). That's
-     what allows the composer to be on the keyboard's layer, not the
-     content's — iOS handles keyboard avoidance natively for inputs
-     in normal flow, exactly like on any standard form website. */
   html.yulia-chat-open #app-root {
     display: none !important;
   }
