@@ -217,9 +217,14 @@ export default function YuliaAgent({
             justifyContent: 'space-between',
             padding: '10px 18px 6px',
             paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
-            background: 'rgba(242,242,244,0.72)',
-            backdropFilter: 'blur(20px) saturate(1.6)',
-            WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+            /* Same glass recipe as composer — elevated chrome, not a flat
+               strip. Shadow BELOW the header (opposite direction from
+               composer) so it reads as floating over content. */
+            background: 'rgba(255,255,255,0.85)',
+            backdropFilter: 'blur(30px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
+            borderBottom: '0.5px solid rgba(0,0,0,0.06)',
+            boxShadow: 'inset 0 -0.5px 0 rgba(255,255,255,0.9), 0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.03)',
           }}
         >
           <button
@@ -251,11 +256,12 @@ export default function YuliaAgent({
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            /* Top = header height (~60), bottom = composer height
-               (~72 + safe-area). Messages scroll fully under both chrome
-               layers; these paddings just ensure the first/last message
-               aren't permanently pinned under them. */
-            padding: '68px 20px calc(env(safe-area-inset-bottom, 0px) + 92px)',
+            /* padding-top clears the header. padding-bottom clears ONLY
+               the composer height (~72) + safe-area + 8pt visible gap.
+               When content overflows, scrolling lets messages slide
+               UNDER the composer glass — which is where the backdrop-
+               filter actually earns its keep (iMessage pattern). */
+            padding: '68px 20px calc(env(safe-area-inset-bottom, 0px) + 80px)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
@@ -381,12 +387,13 @@ export default function YuliaAgent({
         </div>
 
         {/* Full-mode composer — floating glass overlay, iMessage pattern.
-            position:absolute bottom:0 inside the 100dvh dialog. Because
-            100dvh shrinks with the iOS keyboard (no viewport-fit=cover),
-            the composer automatically rides up to sit just above the
-            keyboard when open, and above the home indicator when closed.
-            Messages scroll underneath the glass — translucent bg +
-            backdrop-filter lets the content show through as it passes. */}
+            Even on a plain #F2F2F4 canvas, the composer reads as clearly
+            ELEVATED (not part of the canvas) via:
+            - brighter bg than canvas: rgba(255,255,255,0.85)
+            - backdrop blur: blurs anything that scrolls underneath
+            - top hairline border + inset highlight: specular "lift"
+            - soft shadow ABOVE: 0 -8px 24px — the critical detail that
+              communicates this is a floating layer, not a flat strip */}
         <form
           onSubmit={handleSubmit}
           style={{
@@ -397,10 +404,11 @@ export default function YuliaAgent({
             zIndex: 2,
             padding: '8px 12px',
             paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
-            background: 'rgba(255,255,255,0.72)',
-            backdropFilter: 'blur(24px) saturate(1.6)',
-            WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
-            borderTop: '0.5px solid var(--border)',
+            background: 'rgba(255,255,255,0.85)',
+            backdropFilter: 'blur(30px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
+            borderTop: '0.5px solid rgba(0,0,0,0.06)',
+            boxShadow: 'inset 0 0.5px 0 rgba(255,255,255,0.9), 0 -4px 24px rgba(0,0,0,0.06), 0 -1px 3px rgba(0,0,0,0.03)',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
