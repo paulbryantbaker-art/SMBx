@@ -260,15 +260,20 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
         </div>
       </section>
 
-      {/* ═════ Live valuation demo — interactive ═════ */}
-      <section
-        style={{
-          padding: 'clamp(40px, 5vw, 96px) clamp(20px, 4vw, 88px) clamp(40px, 5vw, 96px)',
-          maxWidth: 1680, margin: '0 auto', width: '100%', boxSizing: 'border-box',
-        }}
-      >
-        <ValuationDemo onSend={onSend} />
-      </section>
+      {/* ═════ Live valuation demo — interactive, tint band
+           Wrapper div gives the section a full-width tint background
+           (matching the app→tint→app rhythm of every other journey page)
+           while the inner <section> keeps its 1680 max-width content. */}
+      <div style={{ background: 'var(--gg-bg-card)', width: '100%' }}>
+        <section
+          style={{
+            padding: 'clamp(40px, 5vw, 96px) clamp(20px, 4vw, 88px) clamp(40px, 5vw, 96px)',
+            maxWidth: 1680, margin: '0 auto', width: '100%', boxSizing: 'border-box',
+          }}
+        >
+          <ValuationDemo onSend={onSend} />
+        </section>
+      </div>
 
       {/* ═════ Chat starters — prefill Yulia with a real question ═════ */}
       <section
