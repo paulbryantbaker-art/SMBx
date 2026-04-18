@@ -26,6 +26,18 @@ const DOES = [
   'Model scenarios (base/bull/bear, sensitivity analysis, capital stacks)',
   'Present market data with sources cited',
   'Handle the math (22 deterministic formulas, not AI estimates)',
+  'Find hidden add-backs in tax returns and prove them with documentation',
+  'Build blind teasers and full CIMs from a conversation, not a brief',
+  'Run the 7-dimension Rundown on any target in under 90 seconds',
+  'Benchmark your deal against public comps and private transaction data',
+  'Map the buyer universe — strategics, PE, family offices, SBA lenders',
+  'Generate NDAs, LOIs, term sheets, and APAs ready for attorney review',
+  'Track every offer, every counter, every redline — with full audit trail',
+  'Build working-capital peg schedules and earnout NPV models',
+  'Run post-close value-creation tracking — thesis vs. actual, monthly',
+  'Generate LP updates, board packages, and portco reviews from deal data',
+  'Produce pitch decks for bank meetings, investor meetings, board meetings',
+  'Remember every deal — context, numbers, decisions — across every conversation',
 ];
 const DOESNT = [
   'Recommend what you should do (presents options with trade-offs)',
@@ -88,7 +100,7 @@ const SECNAV = [
   { id: 'the-line',            label: 'The line' },
   { id: 'ib-comparison',       label: 'IB comparison' },
   { id: 'the-math',            label: 'The math' },
-  { id: 'the-harness',         label: 'The harness' },
+  { id: 'the-models',          label: 'The models' },
   { id: 'sample-conversation', label: 'Sample' },
   { id: 'data-sources',        label: 'Sources' },
 ];
@@ -219,36 +231,46 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
         </div>
       </Section>
 
-      {/* ─── The harness ───────────────────────────────────────────── */}
-      <Section label="The harness">
-        <H2>ChatGPT is the engine. smbX is the harness.</H2>
-        <Body>
-          A resourceful practitioner with ChatGPT Plus and a weekend can replicate any one of Yulia’s capabilities. Draft a CIM. Estimate add-backs. Score a deal. Build a capital stack.
+      {/* ─── The models ─────────────────────────────────────────────
+           Perplexity-style: just describe the frontier models we use
+           and what each one handles. No direct ChatGPT-vs-smbX drama. */}
+      <Section label="The models">
+        <H2>The best frontier models, routed to the right job.</H2>
+        <Body lead style={{ maxWidth: 760 }}>
+          Yulia runs on a multi-model stack. Different parts of a deal need different reasoning, so we route each task to the model that handles it best \u2014 and swap in newer ones as they ship.
         </Body>
-        <Body>They can do any one of these. They can’t do twelve.</Body>
-        <Body>
-          Building the harness that makes these capabilities fast, reliable, auditable, team-shareable, and integrated with each other is 2&ndash;12 weeks of real engineering work per capability. Multiply by twelve capabilities and you’re at 2+ years of build.
-        </Body>
-        <Body>
-          The 80% of shops that don’t have a full-time AI engineer aren’t debating ChatGPT versus smbX. They’re debating &ldquo;do we want to spend 2 years building this ourselves, or pay $199/month.&rdquo;
-        </Body>
-
         <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
           <Card padding={24}>
-            <div className="gg-label" style={{ marginBottom: 12 }}>ChatGPT alone</div>
-            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 14, color: 'var(--gg-text-secondary)' }}>
-              [Chat] &rarr; [Output]
-            </div>
+            <div className="gg-label" style={{ marginBottom: 12 }}>Claude (Anthropic)</div>
+            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 15, letterSpacing: '-0.01em', marginBottom: 8 }}>Long-document reasoning.</div>
+            <p className="gg-body" style={{ fontSize: 13.5, marginBottom: 0 }}>
+              CIM drafting, financial-model narrative, DD findings synthesis \u2014 anywhere we need to hold a 200-page context and produce something defensible.
+            </p>
           </Card>
-          <Card padding={24} style={{ borderColor: 'var(--gg-text-primary)' }}>
-            <div className="gg-label" style={{ marginBottom: 12 }}>smbX</div>
-            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 13, color: 'var(--gg-text-primary)', lineHeight: 1.8 }}>
-              [Conversation] &rarr; [Deal memory] &rarr; [22 formulas] &rarr; [Document generation] &rarr; [Team sharing] &rarr; [Audit trail] &rarr; [Regulatory guardrails] &rarr; [Output]
-            </div>
+          <Card padding={24}>
+            <div className="gg-label" style={{ marginBottom: 12 }}>GPT (OpenAI)</div>
+            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 15, letterSpacing: '-0.01em', marginBottom: 8 }}>Structured extraction + chat.</div>
+            <p className="gg-body" style={{ fontSize: 13.5, marginBottom: 0 }}>
+              Deal-conversation front-end, structured extraction from tax returns and CIMs, and the shortform back-and-forth that keeps the thread moving.
+            </p>
+          </Card>
+          <Card padding={24}>
+            <div className="gg-label" style={{ marginBottom: 12 }}>Gemini (Google)</div>
+            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 15, letterSpacing: '-0.01em', marginBottom: 8 }}>Multimodal + web grounding.</div>
+            <p className="gg-body" style={{ fontSize: 13.5, marginBottom: 0 }}>
+              Parsing scanned financials, screenshots, and deal photos. Pulling fresh market data with source citations for comp sets.
+            </p>
+          </Card>
+          <Card padding={24}>
+            <div className="gg-label" style={{ marginBottom: 12 }}>Deterministic code</div>
+            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 15, letterSpacing: '-0.01em', marginBottom: 8 }}>Every number.</div>
+            <p className="gg-body" style={{ fontSize: 13.5, marginBottom: 0 }}>
+              22 formulas run as code, not as an LLM prompt. SDE, DSCR, capital stacks, NPV, sensitivity \u2014 same input, same output, every time, auditable.
+            </p>
           </Card>
         </div>
-        <p className="gg-body" style={{ marginTop: 24, maxWidth: 760 }}>
-          ChatGPT can do any one of these. smbX does all of them, together, with your deal’s context, at a price you don’t have to defend.
+        <p className="gg-body" style={{ marginTop: 24, maxWidth: 760, fontSize: 14, color: 'var(--gg-text-muted)' }}>
+          Frontier models keep shipping. We keep routing to whichever one does each job best today. You don\u2019t pick a model; Yulia does.
         </p>
       </Section>
 

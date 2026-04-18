@@ -2102,22 +2102,17 @@ export default function AppShell() {
           {/* ════ LANDING MODE ════ */}
           {viewState === 'landing' && (
             <div key={activeTab} style={{
-              /* HOME desktop: position:fixed full-viewport wrapper (unchanged).
-                 HOME mobile: natural flow (relative + minHeight) so iOS computes the same
-                 ICB as the chat page, which normalizes the portaled pill's bottom anchor
-                 (home was reporting iH=873, chat iH=932 — the fixed wrapper was the cause).
-                 Other tabs: relative with minHeight. */
-              position: (activeTab === 'home' && !isMobile) ? 'fixed' as const : 'relative' as const,
+              /* Position rules:
+                 - Home desktop + logged-in: position:fixed dashboard shell (scroll
+                   locked inside; canvas tabs manage their own scroll).
+                 - Everyone else (desktop logged-out / mobile): position:relative +
+                   minHeight so the page is a normal scrolling document. Using
+                   position:fixed without explicit inset collapses width to content,
+                   which broke the logged-out desktop home layout. */
+              position: (activeTab === 'home' && !isMobile && user) ? 'fixed' as const : 'relative' as const,
               animation: morphing ? (isMobile ? 'fadeOut 0.2s ease forwards' : 'morphOut 0.3s ease forwards') : activeTab === 'home' ? 'fadeOnly 0.25s ease' : 'slideUp 0.35s ease',
               pointerEvents: morphing ? 'none' as const : undefined,
-              /* Scroll-lock rules:
-                 - Desktop home logged-in: fixed viewport shell (dashboard).
-                 - Mobile home logged-in: viewport-locked with touch-action
-                   none (MobileDealListHome manages its own scroll inside).
-                 - Mobile/desktop home logged-out: Glass Grok home is a
-                   long marketing page — natural scroll. Any overflow
-                   or touch-action block here kills page scroll on mobile.
-                 - Other tabs: always natural scroll. */
+              width: '100%',
               ...(activeTab === 'home' && !isMobile && user
                 ? { top: 0, right: 0, bottom: 0, left: 104, display: 'flex', flexDirection: 'column' as const, overflow: 'hidden', overscrollBehavior: 'none' as const }
                 : activeTab === 'home' && isMobile && user

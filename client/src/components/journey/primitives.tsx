@@ -492,16 +492,42 @@ export interface ChatInputProps {
   placeholder: string;
   onSend: (text: string) => void;
   rotatingHints?: string[];   /* home only */
-  onPlusClick?: () => void;
+  onPlusClick?: () => void;   /* explicit override; otherwise built-in shortcuts popup */
 }
+
+/* Default plus-button popup: 4 journey-spanning shortcut prompts. Any
+   ChatInput without an explicit onPlusClick gets this menu so the +
+   always does something. Each option calls onSend with a prefilled
+   prompt, kicking the visitor into a Yulia conversation with context. */
+const DEFAULT_PLUS_SHORTCUTS: { label: string; prompt: string }[] = [
+  { label: 'What\u2019s my business worth?',        prompt: 'Help me figure out what my business is actually worth. Walk me through the valuation range based on my numbers.' },
+  { label: 'Score a deal I\u2019m looking at',       prompt: 'I\u2019m evaluating a business to acquire. Score it on revenue quality, margins, owner dependency, and concentration.' },
+  { label: 'Model an SBA capital stack',            prompt: 'Help me model an SBA capital stack \u2014 senior debt, mezz, seller notes \u2014 under SOP 50 10 8.' },
+  { label: 'Build my Day-1 integration plan',       prompt: 'I just acquired a business. Help me build a Day-1 integration plan \u2014 payroll, systems, first 90 days.' },
+];
 
 export function ChatInput({ placeholder, onSend, rotatingHints, onPlusClick }: ChatInputProps) {
   const [text, setText] = useState('');
   const [hintIdx, setHintIdx] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
 
   /* Rotate placeholder every 4s when field is empty */
   useRotatingHint(text, rotatingHints?.length ?? 0, setHintIdx);
+
+  /* Close menu on outside click + Esc. Only arms when menu is open so
+     we don't pay the listener cost for every ChatInput on the page. */
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: globalThis.KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    window.addEventListener('mousedown', onDocClick);
+    window.addEventListener('keydown', onKey);
+    return () => { window.removeEventListener('mousedown', onDocClick); window.removeEventListener('keydown', onKey); };
+  }, [menuOpen]);
 
   const submit = (raw: string) => {
     const msg = raw.trim();
@@ -514,18 +540,24 @@ export function ChatInput({ placeholder, onSend, rotatingHints, onPlusClick }: C
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(text); }
   };
 
+  const handlePlusClick = () => {
+    if (onPlusClick) { onPlusClick(); return; }
+    setMenuOpen(v => !v);
+  };
+
   const activePlaceholder = rotatingHints && !text
     ? rotatingHints[hintIdx % rotatingHints.length]
     : placeholder;
 
   return (
-    <form onSubmit={onSubmit} style={{ width: '100%' }}>
+    <form onSubmit={onSubmit} style={{ width: '100%', position: 'relative' }}>
       <div className="gg-chat">
         <button
           type="button"
           className="gg-chat__plus"
-          aria-label="More"
-          onClick={onPlusClick}
+          aria-label="Quick prompts"
+          aria-expanded={menuOpen}
+          onClick={handlePlusClick}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
             <path d="M12 5v14M5 12h14" />
@@ -548,6 +580,44 @@ export function ChatInput({ placeholder, onSend, rotatingHints, onPlusClick }: C
           </svg>
         </button>
       </div>
+
+      {menuOpen && !onPlusClick && (
+        <div
+          ref={popupRef}
+          className="gg-glass-strong"
+          style={{
+            position: 'absolute', top: '100%', left: 0,
+            marginTop: 8, padding: 8,
+            borderRadius: 'var(--gg-r-card)',
+            minWidth: 280, zIndex: 40,
+            animation: 'gg-fade-up 180ms var(--gg-ease-spring) both',
+          }}
+          role="menu"
+        >
+          {DEFAULT_PLUS_SHORTCUTS.map(s => (
+            <button
+              key={s.label}
+              type="button"
+              role="menuitem"
+              onClick={() => { setMenuOpen(false); onSend(s.prompt); }}
+              style={{
+                width: '100%', textAlign: 'left',
+                padding: '10px 12px',
+                border: 0, background: 'transparent', cursor: 'pointer',
+                fontFamily: 'var(--gg-body)',
+                fontSize: 13.5, fontWeight: 600,
+                color: 'var(--gg-text-primary)',
+                borderRadius: 'var(--gg-r-btn)',
+                transition: 'background var(--gg-t-feedback) var(--gg-ease-snap)',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--gg-accent-fill)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      )}
     </form>
   );
 }

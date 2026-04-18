@@ -7,7 +7,6 @@
  * Spec: Glass Grok/SMBX_SITE_COPY.md (page 8)
  */
 
-import { useState, type FormEvent } from 'react';
 import {
   Page, Section, H2, Body,
   Card, CardGrid,
@@ -81,7 +80,7 @@ export default function Enterprise({ onSend, onStartFree: _, onNavigate }: Props
       active="enterprise"
       onNavigate={onNavigate}
       onStartFree={() => onSend('I’m interested in Enterprise. Here’s what our team is solving: ')}
-      ctaLabel="Book a demo"
+      ctaLabel="Start free"
     >
       {/* ─── Hero — 2-col on desktop (copy + team workspace peek) ─── */}
       <section
@@ -101,8 +100,10 @@ export default function Enterprise({ onSend, onStartFree: _, onNavigate }: Props
               For firms closing deals at scale. Shared deal vault. Team workspace. White-label outputs. SSO, audit trails, SOC 2 controls. Same Yulia, enterprise infrastructure.
             </Body>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <a href="#book-demo" className="gg-btn gg-btn--primary" style={{ padding: '13px 22px', fontSize: 14 }}>Book a demo &rarr;</a>
-              <button type="button" className="gg-btn gg-btn--ghost" style={{ padding: '13px 22px', fontSize: 14 }} onClick={() => onSend('Tell me what Enterprise includes and whether it’s right for our firm.')}>
+              <button type="button" className="gg-btn gg-btn--primary" style={{ padding: '13px 22px', fontSize: 14 }} onClick={() => window.location.assign('/signup?plan=enterprise')}>
+                Start with your team &rarr;
+              </button>
+              <button type="button" className="gg-btn gg-btn--ghost" style={{ padding: '13px 22px', fontSize: 14 }} onClick={() => onSend('Tell me what Enterprise includes and whether it\u2019s right for our firm.')}>
                 Ask Yulia
               </button>
             </div>
@@ -228,14 +229,36 @@ export default function Enterprise({ onSend, onStartFree: _, onNavigate }: Props
         </p>
       </Section>
 
-      {/* ─── Book a demo ───────────────────────────────────────────── */}
-      <Section variant="tint" label="Book a demo">
-        <div id="book-demo" />
-        <H2>Tell us what you’re building.</H2>
+      {/* ─── Self-serve start ───────────────────────────────────────
+           No sales team, no demo form. Teams sign up, invite members,
+           start closing deals. If the firm has a specific question, the
+           Ask-Yulia chat handles it in-context. */}
+      <Section variant="tint" label="Get started">
+        <H2>Start today. Your team, your first deal.</H2>
         <Body lead style={{ maxWidth: 720, marginBottom: 28 }}>
-          30-minute call. Real demo, not a sales pitch. We’ll tell you whether smbX Enterprise fits and what it would cost specifically for your team.
+          smbX Enterprise is self-serve. Create your team workspace, invite your partners and analysts, and start a deal in under ten minutes. No sales call required. No procurement dance. If you have questions, Yulia answers them live.
         </Body>
-        <DemoForm onSend={onSend} />
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 28 }}>
+          <button
+            type="button"
+            className="gg-btn gg-btn--primary"
+            style={{ padding: '14px 24px', fontSize: 14 }}
+            onClick={() => window.location.assign('/signup?plan=enterprise')}
+          >
+            Create team workspace &rarr;
+          </button>
+          <button
+            type="button"
+            className="gg-btn gg-btn--ghost"
+            style={{ padding: '14px 24px', fontSize: 14 }}
+            onClick={() => onSend('I\u2019m setting up Enterprise for our firm. We have X partners, Y analysts, and we\u2019re currently using [tools]. What\u2019s the right way to roll this out?')}
+          >
+            Ask Yulia to help plan the rollout
+          </button>
+        </div>
+        <p className="gg-body" style={{ maxWidth: 720, marginTop: 24, fontSize: 13.5, color: 'var(--gg-text-muted)' }}>
+          SSO, audit trail, SOC 2 controls, and single-tenant deployment activate automatically once your workspace is on the Enterprise plan. Migrate existing deals from shared folders or import from your legacy tool \u2014 Yulia walks you through both.
+        </p>
       </Section>
     </Page>
   );
@@ -324,92 +347,3 @@ function TeamWorkspaceMock() {
   );
 }
 
-function DemoForm({ onSend }: { onSend: (text: string) => void }) {
-  const [name, setName] = useState('');
-  const [company, setCompany] = useState('');
-  const [email, setEmail] = useState('');
-  const [teamSize, setTeamSize] = useState<string>('6–15');
-  const [solving, setSolving] = useState('');
-
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!name || !company || !email) return;
-    onSend(`Enterprise demo request.\nName: ${name}\nCompany: ${company}\nEmail: ${email}\nTeam size: ${teamSize}\nSolving: ${solving}`);
-  };
-
-  return (
-    <Card padding={28} style={{ maxWidth: 640 }}>
-      <form onSubmit={submit} style={{ display: 'grid', gap: 16 }}>
-        <TextField label="Name" value={name} onChange={setName} required />
-        <TextField label="Company" value={company} onChange={setCompany} required />
-        <TextField label="Work email" value={email} onChange={setEmail} type="email" required />
-        <div>
-          <div className="gg-label" style={{ marginBottom: 10 }}>Team size</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {['6–15', '16–50', '51–200', '200+'].map(s => (
-              <button
-                key={s}
-                type="button"
-                className={`gg-chip${s === teamSize ? ' active' : ''}`}
-                aria-pressed={s === teamSize}
-                onClick={() => setTeamSize(s)}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <div className="gg-label" style={{ marginBottom: 10 }}>What are you trying to solve?</div>
-          <textarea
-            value={solving}
-            onChange={e => setSolving(e.target.value)}
-            rows={4}
-            style={{
-              width: '100%',
-              padding: '12px 14px',
-              border: '0.5px solid var(--gg-border)',
-              borderRadius: 'var(--gg-r-btn)',
-              fontFamily: 'var(--gg-body)',
-              fontSize: 14, lineHeight: 1.55,
-              color: 'var(--gg-text-primary)',
-              background: 'var(--gg-bg-app)',
-              resize: 'vertical',
-              outline: 'none',
-            }}
-            placeholder="Deal volume, current tool stack, decision-maker…"
-          />
-        </div>
-        <button type="submit" className="gg-btn gg-btn--primary" style={{ justifyContent: 'center' }} disabled={!name || !company || !email}>
-          Book a demo &rarr;
-        </button>
-      </form>
-    </Card>
-  );
-}
-
-function TextField({ label, value, onChange, type = 'text', required }: {
-  label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean;
-}) {
-  return (
-    <label style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <span className="gg-label">{label}{required && ' *'}</span>
-      <input
-        type={type}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        required={required}
-        style={{
-          padding: '12px 14px',
-          border: '0.5px solid var(--gg-border)',
-          borderRadius: 'var(--gg-r-btn)',
-          fontFamily: 'var(--gg-body)',
-          fontSize: 14,
-          color: 'var(--gg-text-primary)',
-          background: 'var(--gg-bg-app)',
-          outline: 'none',
-        }}
-      />
-    </label>
-  );
-}
