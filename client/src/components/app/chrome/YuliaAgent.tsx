@@ -174,21 +174,18 @@ export default function YuliaAgent({
   }
 
   if (state === 'full') {
-    // Fullscreen chat. Height is pinned to var(--vvh) (visualViewport.height
-    // from AppShell's effect) so when the iOS keyboard opens, this container
-    // shrinks with the visible viewport. Composer at the flex bottom then
-    // sits just above the keyboard, and the message area (flex:1) auto-
-    // scrolls within the remaining space — no webview scroll hack needed.
+    // Fullscreen chat. Container is position:absolute inset:0 inside body
+    // (body is position:fixed inset:0 = layout viewport). The composer
+    // itself is portaled/fixed to top: var(--vvh); translateY(-100%) so
+    // it rides the visible viewport bottom — keyboard open or closed.
+    // Message scroll area reserves padding-bottom to clear the composer.
     return (
       <div
         role="dialog"
         aria-label="Chat with Yulia"
         style={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 'var(--vvh, 100dvh)',
+          inset: 0,
           background: 'var(--bg-app)',
           zIndex: 50,
           display: 'flex',
@@ -232,7 +229,10 @@ export default function YuliaAgent({
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            padding: '12px 20px 16px',
+            /* Bottom padding reserves clearance for the fixed composer
+               (~72px: composer height + its safe-area padding) so the
+               latest message scrolls into view above it, not behind it. */
+            padding: '12px 20px 84px',
             display: 'flex',
             flexDirection: 'column',
             gap: 14,
@@ -357,10 +357,22 @@ export default function YuliaAgent({
           <div ref={endRef} aria-hidden style={{ height: 1 }} />
         </div>
 
-        {/* Full-mode composer — Glass Grok chat input */}
+        {/* Full-mode composer — Glass Grok chat input.
+            Anchored to the VISIBLE viewport bottom via position:absolute +
+            top: var(--vvh); translateY(-100%). --vvh tracks
+            visualViewport.height (set by AppShell's effect), so this sits
+            just above the keyboard when open, and at the screen bottom
+            (minus safe area) when closed. The message scroll area above
+            reserves padding-bottom: 72 so the last message clears the
+            composer — scrollIntoView on endRef re-pins after resize. */}
         <form
           onSubmit={handleSubmit}
           style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 'var(--vvh, 100dvh)',
+            transform: 'translateY(-100%)',
             padding: '8px 12px',
             paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
             borderTop: '0.5px solid var(--border)',
@@ -368,7 +380,7 @@ export default function YuliaAgent({
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            flexShrink: 0,
+            zIndex: 2,
           }}
         >
           <span
