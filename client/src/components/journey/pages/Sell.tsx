@@ -14,7 +14,7 @@
 import { useMemo, useState } from 'react';
 import {
   Page, JourneyHero, Section, H2, Body,
-  StatBar, Card, BottomCta,
+  StatBar, Card, BottomCta, GiantAnchor,
   HorizontalTimeline, SectionNav,
   type JourneyTab,
 } from '../primitives';
@@ -76,10 +76,10 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
       <SectionNav items={SECNAV} />
       {/* ═════ Hero — JourneyHero with AddBackSchedule peek ═════ */}
       <JourneyHero
-        eyebrow="Selling your business"
+        eyebrow="Sell-side · for owners and the advisors running the process"
         headline="Know what you have. Before anyone else does."
-        tagline="Yulia finds the value hiding in your financials, builds the documents that sell your business, and manages the process that gets you to the closing table. From first conversation to wire transfer."
-        chatPlaceholder="Tell Yulia about your business — industry, revenue…"
+        tagline="Yulia finds the value hiding in the financials, builds the CIM and financial model, and manages the competitive process to closing. For principals running their own exit — and for brokers / M&A advisors running one for a client."
+        chatPlaceholder="Tell Yulia about the business — industry, revenue…"
         chips={CHIPS}
         onSend={onSend}
         onChip={onSend}
@@ -173,6 +173,25 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
           </div>
         </div>
       </Section>
+
+      {/* ═════ Giant-type anchor ═════
+           Signature "Day 1 after the wire" treatment — single oversized
+           question that frames why the page exists. Chat input beneath
+           turns the anchor into an action. */}
+      <GiantAnchor
+        eyebrow="The anchor"
+        headline={
+          <>
+            <span style={{ display: 'block' }}>$1.1M hiding</span>
+            <span style={{ display: 'block' }}>in the tax returns.</span>
+            <span style={{ display: 'block' }}>Do you see it?</span>
+          </>
+        }
+        subhead="Owner compensation above market. Personal vehicles on the books. Spouse on payroll. Non-recurring legal. Above-market rent to a related entity. Every legitimate add-back Yulia finds moves the multiple — and moves the deal."
+        chatPlaceholder="Industry, revenue, reported EBITDA\u2026"
+        chips={['Find my add-backs', 'What\u2019s a defensible add-back?', 'Run a QofE Lite']}
+        onSend={onSend}
+      />
 
       {/* ═════ Interactive — Add-back estimator ═════ */}
       <Section variant="tint" label="Estimator">
@@ -269,11 +288,11 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
         </div>
       </Section>
 
-      {/* ═════ Bottom CTA — dark ═════ */}
+      {/* ═════ Bottom CTA ═════ */}
       <BottomCta
-        heading="Tell Yulia about your business."
-        subhead="The first conversation is free. The first deliverable is free. Start when you’re ready."
-        chatPlaceholder="Industry, revenue, what you’re thinking…"
+        heading="Know the number. Then run the process."
+        subhead="First conversation free. First deliverable free. If the number isn\u2019t worth running a process, you\u2019ve lost nothing but the afternoon."
+        chatPlaceholder="Industry, revenue, reported EBITDA\u2026"
         onSend={onSend}
       />
     </Page>

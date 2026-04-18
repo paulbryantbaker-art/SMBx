@@ -1132,6 +1132,75 @@ export function BottomCta(p: BottomCtaProps) {
 }
 
 /* ═════════════════════════════════════════════════════════════════════
+   GIANT-TYPE ANCHOR — the "Day 1 after the wire. 180 employees. Do you
+   have a plan?" pattern. Full-width section, oversized Sora 800 headline
+   that spans multiple lines, short subcopy, optional chat handoff input
+   with suggested prefills (chips). Used once per journey page as the
+   signature anchor — the moment the visitor feels the weight of the work
+   Yulia removes.
+   ═════════════════════════════════════════════════════════════════════ */
+
+export interface GiantAnchorProps {
+  eyebrow?: string;
+  headline: ReactNode;
+  subhead?: ReactNode;
+  chatPlaceholder?: string;
+  chips?: readonly string[];
+  onSend?: (text: string) => void;
+}
+
+export function GiantAnchor({ eyebrow, headline, subhead, chatPlaceholder, chips, onSend }: GiantAnchorProps) {
+  return (
+    <Section tight={false}>
+      <div style={{ maxWidth: 1120 }}>
+        {eyebrow && <div className="gg-eyebrow gg-eyebrow--section" style={{ marginBottom: 28 }}>{eyebrow}</div>}
+        <h2
+          style={{
+            fontFamily: 'var(--gg-display)',
+            fontWeight: 800,
+            fontSize: 'clamp(48px, 7.2vw, 104px)',
+            lineHeight: 0.98,
+            letterSpacing: '-0.035em',
+            color: 'var(--gg-text-primary)',
+            margin: 0,
+            marginBottom: subhead ? 28 : 40,
+          }}
+        >
+          {headline}
+        </h2>
+        {subhead && (
+          <p
+            className="gg-body gg-body--lead"
+            style={{ maxWidth: 720, marginBottom: onSend ? 36 : 0 }}
+          >
+            {subhead}
+          </p>
+        )}
+        {onSend && chatPlaceholder && (
+          <div style={{ maxWidth: 640 }}>
+            <ChatInput placeholder={chatPlaceholder} onSend={onSend} />
+            {chips && chips.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 20 }}>
+                {chips.map(c => (
+                  <button
+                    key={c}
+                    type="button"
+                    className="gg-chip"
+                    onClick={() => onSend(c)}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </Section>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
    Regulatory alert banner (dark-inverted) — used on /buy for SBA
    ═════════════════════════════════════════════════════════════════════ */
 

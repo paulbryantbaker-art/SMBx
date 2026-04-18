@@ -40,9 +40,9 @@ export default function Integrate({ onSend, onStartFree, onNavigate }: Props) {
     <Page active="integrate" onNavigate={onNavigate} onStartFree={onStartFree}>
       <SectionNav items={SECNAV} />
       <JourneyHero
-        eyebrow="Just acquired"
+        eyebrow="Post-close \u00b7 for the new operator and the PE team tracking the thesis"
         headline="Day 1 after the wire. 180 employees. Do you have a plan?"
-        tagline="Yulia builds the 180-day integration plan from your specific deal data — risks identified, opportunities found, people to protect. Auto-generated before the wire hits. Executed one day at a time."
+        tagline="Yulia builds the 180-day integration plan from your specific deal data \u2014 risks identified, opportunities found, people to protect. Auto-generated before the wire hits. Executed one day at a time. PE teams track thesis vs. actual monthly."
         chatPlaceholder="Tell Yulia about the business you just acquired…"
         chips={CHIPS}
         onSend={onSend}

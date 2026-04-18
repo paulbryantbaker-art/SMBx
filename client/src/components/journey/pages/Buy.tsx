@@ -10,7 +10,7 @@
 import { Fragment, useMemo, useState } from 'react';
 import {
   Page, JourneyHero, Section, H2, Body,
-  StatBar, Card, BottomCta, AlertBanner,
+  StatBar, Card, BottomCta, AlertBanner, GiantAnchor,
   HorizontalTimeline, SectionNav,
   type JourneyTab,
 } from '../primitives';
@@ -40,10 +40,10 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
     <Page active="buy" onNavigate={onNavigate} onStartFree={onStartFree}>
       <SectionNav items={SECNAV} />
       <JourneyHero
-        eyebrow="Buying a business"
+        eyebrow="Buy-side · searchers, sponsors, PE, and the analysts screening for them"
         headline="Screen ten deals in the time it takes to screen one."
-        tagline="Yulia scores any deal in 90 seconds on seven dimensions, models the capital stack under current SBA rules, and stress-tests the personal guarantee before you sign. For searchers, sponsors, and buyers."
-        chatPlaceholder="Paste a listing URL, describe a deal, or tell Yulia what you’re looking for…"
+        tagline="Yulia scores any deal in 90 seconds on seven dimensions, models the capital stack under current SBA rules, and stress-tests the personal guarantee before you sign. For searchers, independent sponsors, PE associates, and the analysts building models on all of it."
+        chatPlaceholder="Paste a listing URL, describe a deal, or tell Yulia what you\u2019re looking for\u2026"
         chips={CHIPS}
         onSend={onSend}
         onChip={onSend}
@@ -132,6 +132,22 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
           </div>
         </div>
       </Section>
+
+      {/* Giant-type anchor — the buy-side funnel math in oversized type */}
+      <GiantAnchor
+        eyebrow="The anchor"
+        headline={
+          <>
+            <span style={{ display: 'block' }}>3,000 deals.</span>
+            <span style={{ display: 'block' }}>1 closes.</span>
+            <span style={{ display: 'block' }}>Is yours in the 1?</span>
+          </>
+        }
+        subhead="The buy-side funnel hasn\u2019t changed in two decades. Three thousand opportunities, eighteen months of burn, eighty-five thousand in busted diligence. Yulia kills the 2,999 that should be dead in 90 seconds each, so the one that isn\u2019t gets your full attention."
+        chatPlaceholder="Paste a deal, a teaser, or a URL\u2026"
+        chips={['Score this deal', 'What would kill it?', 'Compare to my last 3']}
+        onSend={onSend}
+      />
 
       {/* Interactive — Deal Rundown preview */}
       <Section variant="tint" label="Try it">

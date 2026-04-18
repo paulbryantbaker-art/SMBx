@@ -11,7 +11,7 @@
 import { useMemo, useState } from 'react';
 import {
   Page, JourneyHero, Section, H2, Body,
-  Card, BottomCta, SectionNav,
+  Card, BottomCta, SectionNav, GiantAnchor,
   type JourneyTab,
 } from '../primitives';
 
@@ -59,9 +59,9 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
     <Page active="raise" onNavigate={onNavigate} onStartFree={onStartFree}>
       <SectionNav items={SECNAV} />
       <JourneyHero
-        eyebrow="Raising capital"
-        headline="You don’t have to sell 100% to get liquidity."
-        tagline="Yulia models every capital structure — minority equity, ESOP, mezzanine, convertible, recap — against your specific numbers. Builds the investor materials. Targets the right capital partners. In one conversation."
+        eyebrow="Raise-side · for owners, independent sponsors, and the advisors structuring the deal"
+        headline="You don\u2019t have to sell 100% to get liquidity."
+        tagline="Yulia models every capital structure \u2014 minority equity, ESOP, mezzanine, convertible, recap \u2014 against specific numbers. Builds the investor materials. Targets the right capital partners. In one conversation."
         chatPlaceholder="Tell Yulia about your business and what you’re trying to accomplish…"
         chips={CHIPS}
         onSend={onSend}
@@ -127,6 +127,22 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
         <SellVsRaise onSend={onSend} />
       </Section>
 
+      {/* Giant-type anchor — the reframe in oversized type */}
+      <GiantAnchor
+        eyebrow="The anchor"
+        headline={
+          <>
+            <span style={{ display: 'block' }}>Not every</span>
+            <span style={{ display: 'block' }}>liquidity event</span>
+            <span style={{ display: 'block' }}>is a sale.</span>
+          </>
+        }
+        subhead="Most advisors pitch the full exit first \u2014 it generates the largest one-time fee. Yulia has no fee incentive. She models the minority raise, the recap, the ESOP, the mezz, the partial sale \u2014 and shows the after-tax math against the full sale. Then you pick."
+        chatPlaceholder="I want liquidity but I\u2019m not sure I want to sell entirely\u2026"
+        chips={['Model a minority raise', 'Model a dividend recap', 'ESOP vs. PE vs. strategic']}
+        onSend={onSend}
+      />
+
       {/* Hero 1 Structure modeling — 55/45 text, fan escapes right */}
       <Section label="Hero 1 · Structure modeling">
         <div className="gg-two-col gg-two-col--55-45" style={{ alignItems: 'center' }}>
@@ -175,9 +191,9 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
       </Section>
 
       <BottomCta
-        heading="Not every liquidity event is a sale."
-        subhead="Tell Yulia what you’re trying to accomplish. She’ll show you every path."
-        chatPlaceholder="I want liquidity but I’m not sure I want to sell entirely…"
+        heading="Six structures. One hour. Pick the one that fits."
+        subhead="Yulia models every capital path against your actual numbers \u2014 after-tax proceeds, retained ownership, ongoing cash flow, exit scenarios. Side by side."
+        chatPlaceholder="Deal size, industry, what you\u2019re trying to accomplish\u2026"
         onSend={onSend}
       />
     </Page>
