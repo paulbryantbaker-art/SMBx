@@ -12,7 +12,7 @@
  * sheet. The Apple Music layoutId avatar morph comes in task 20 polish pass.
  */
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import type { YuliaState } from '../types';
 import type { AnonMessage } from '../../../hooks/useAnonymousChat';
@@ -146,13 +146,18 @@ export default function YuliaAgent({
   // Auto-scroll the message list to the bottom whenever new content arrives
   // OR the visible viewport changes (keyboard open/close). We set scrollTop
   // directly (not scrollIntoView) because scrollIntoView walks ancestor
-  // scrolls and can shift the whole dialog off-screen.
+  // scrolls and can shift the whole dialog off-screen. useLayoutEffect
+  // + rAF ensures the scroll happens AFTER the browser has laid out
+  // and painted the new content, not before.
   const scrollRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (state !== 'full') return;
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollTop = el.scrollHeight;
+    const id = requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+    return () => cancelAnimationFrame(id);
   }, [messages.length, streamingText, state]);
   useEffect(() => {
     if (state !== 'full') return;
@@ -233,18 +238,23 @@ export default function YuliaAgent({
   }
 
   if (state === 'full') {
-    // Fullscreen chat — PROVEN cross-environment pattern.
-    //   - PORTALED TO document.body so position:fixed is viewport-relative.
-    //   - Dialog uses `inset: 0` + grid layout (header / scroll / composer).
-    //     Grid auto-sizes the scroll area; no viewport math needed.
-    //   - Composer is a normal grid row at the bottom with padding-bottom
-    //     driven by `env(keyboard-inset-height, env(safe-area-inset-bottom))`.
-    //     On iOS 16.4+ PWA this CSS env returns the keyboard height while
-    //     the keyboard is visible and 0 otherwise — works with or without
-    //     visualViewport tracking (which is unreliable in PWA).
-    //   - The html.yulia-chat-open CSS override in index.css un-fixes
-    //     body while the chat is open so iOS keyboard avoidance works
-    //     naturally (body `position: fixed` breaks it in PWA).
+    // Fullscreen chat — PROVEN cross-environment pattern (confirmed via
+    // in-PWA diagnostic).
+    //   - PORTALED to document.body so position:fixed is viewport-relative.
+    //   - html.yulia-chat-open CSS override un-fixes body (needed for PWA
+    //     so window.visualViewport updates correctly during keyboard).
+    //   - Dialog is position:fixed at top, sized to var(--vvh) (NOT
+    //     inset:0). inset:0 uses the LAYOUT viewport which doesn't shrink
+    //     with the keyboard in PWA — composer would sit behind keyboard.
+    //   - Scroll area is ABSOLUTE inset:0 inside the dialog — fills the
+    //     visible viewport top-to-bottom. Content scrolls freely.
+    //   - Composer is ABSOLUTE bottom:0 — a distinct floating layer ON
+    //     TOP of the scroll area (its own glass bg, blur, shadow). This
+    //     is what makes the pill read as "in front of" the content,
+    //     not part of it.
+    //   - Header is ABSOLUTE top:0 — same layering as composer.
+    //   - env(keyboard-inset-height) is unreliable in PWA standalone
+    //     (measured kbH=0 even with keyboard open); do NOT depend on it.
     if (!mounted || typeof document === 'undefined') return null;
     return createPortal(
       <div
@@ -252,11 +262,12 @@ export default function YuliaAgent({
         aria-label="Chat with Yulia"
         style={{
           position: 'fixed',
-          inset: 0,
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 'var(--vvh, 100dvh)',
           background: 'var(--bg-app)',
           zIndex: 50,
-          display: 'grid',
-          gridTemplateRows: 'auto minmax(0, 1fr) auto',
           overflow: 'hidden',
         }}
       >
@@ -281,12 +292,15 @@ export default function YuliaAgent({
           vvh={Math.round(debug.vvh)} innerH={debug.innerH} pwa={debug.pwa ? '1' : '0'} body={debug.bodyPos} kbH={debug.kbH}
         </div>
 
-        {/* Header — top grid row. Floating glass buttons, transparent
-            wrapper so content can scroll up behind them when the dialog
-            briefly overflows (empty state is grid-filled, otherwise the
-            scroll row handles it). */}
+        {/* Header — absolute top, above scroll area. Floating glass
+            buttons, transparent wrapper so content scrolls behind. */}
         <div
           style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 2,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -330,11 +344,17 @@ export default function YuliaAgent({
         <div
           ref={scrollRef}
           style={{
-            minHeight: 0,
+            position: 'absolute',
+            inset: 0,
+            zIndex: 1,
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            padding: '8px 20px 12px',
+            /* Top: header clearance (~56pt). Bottom: composer clearance.
+               Content inside uses flex-end so latest message sits just
+               above the composer when short; when long, the scroll
+               effect pins it to the bottom. */
+            padding: 'calc(env(safe-area-inset-top, 0px) + 60px) 20px 84px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
@@ -459,15 +479,20 @@ export default function YuliaAgent({
               opens or new messages stream in. */}
         </div>
 
-        {/* Full-mode composer — bottom grid row. No JS positioning.
-            padding-bottom = env(keyboard-inset-height) when keyboard is
-            open (iOS 16.4+), or env(safe-area-inset-bottom) when closed.
-            The grid row auto-sizes; iOS handles keyboard avoidance. */}
+        {/* Full-mode composer — ABSOLUTE bottom:0 floating layer. Reads
+            as distinctly "in front of" the scroll area via its own
+            glass chrome (inner pill has blur + inset highlight +
+            elevation shadow), not as the bottom edge of the page. */}
         <form
           onSubmit={handleSubmit}
           style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 2,
             padding: '8px 12px',
-            paddingBottom: 'calc(env(keyboard-inset-height, env(safe-area-inset-bottom, 0px)) + 8px)',
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
             background: 'transparent',
             display: 'flex',
             alignItems: 'center',
