@@ -157,10 +157,7 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
       <Section label="Hero 3 · Competitive process">
         <div className="gg-two-col gg-two-col--60-40" style={{ alignItems: 'center' }}>
           <div>
-            <H2 variant="block">
-              <span style={{ display: 'block' }}>One buyer gives you a price.</span>
-              <span style={{ display: 'block' }}>Five buyers give you a market.</span>
-            </H2>
+            <H2 variant="block">One buyer gives you a price. Five buyers give you a market.</H2>
             <Body>The competitive process is the single highest-ROI activity in any exit. Most sellers skip it — because it’s logistically complex, because their broker doesn’t have the bandwidth, because they don’t know it’s an option.</Body>
             <Body>Yulia manages the entire process. Buyer identification — strategic, PE, and independent — mapped and scored. Outreach sequencing. IOI comparison matrix that shows not just the headline price, but the terms.</Body>
             <Body>The winning bid in a competitive process is typically <strong style={{ color: 'var(--gg-text-primary)', fontWeight: 700 }}>15–30% above the initial offer</strong>. On a $50M transaction, that’s $7.5M–$15M more.</Body>
@@ -180,13 +177,7 @@ export default function Sell({ onSend, onStartFree, onNavigate }: Props) {
            turns the anchor into an action. */}
       <GiantAnchor
         eyebrow="The anchor"
-        headline={
-          <>
-            <span style={{ display: 'block' }}>$1.1M hiding</span>
-            <span style={{ display: 'block' }}>in the tax returns.</span>
-            <span style={{ display: 'block' }}>Do you see it?</span>
-          </>
-        }
+        headline="$1.1M hiding in the tax returns. Do you see it?"
         subhead="Owner compensation above market. Personal vehicles on the books. Spouse on payroll. Non-recurring legal. Above-market rent to a related entity. Every legitimate add-back Yulia finds moves the multiple — and moves the deal."
         chatPlaceholder="Industry, revenue, reported EBITDA\u2026"
         chips={['Find my add-backs', 'What\u2019s a defensible add-back?', 'Run a QofE Lite']}
@@ -393,7 +384,7 @@ function EstimatorInput({ label, options, activeIdx, onPick }: {
 }) {
   return (
     <div>
-      <div className="gg-label" style={{ marginBottom: 12 }}>{label}</div>
+      <div className="gg-input-label" style={{ marginBottom: 12 }}>{label}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {options.map((opt, i) => (
           <button

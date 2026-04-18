@@ -136,13 +136,7 @@ export default function Buy({ onSend, onStartFree, onNavigate }: Props) {
       {/* Giant-type anchor — the buy-side funnel math in oversized type */}
       <GiantAnchor
         eyebrow="The anchor"
-        headline={
-          <>
-            <span style={{ display: 'block' }}>3,000 deals.</span>
-            <span style={{ display: 'block' }}>1 closes.</span>
-            <span style={{ display: 'block' }}>Is yours in the 1?</span>
-          </>
-        }
+        headline="3,000 deals. 1 closes. Is yours in the 1?"
         subhead="The buy-side funnel hasn\u2019t changed in two decades. Three thousand opportunities, eighteen months of burn, eighty-five thousand in busted diligence. Yulia kills the 2,999 that should be dead in 90 seconds each, so the one that isn\u2019t gets your full attention."
         chatPlaceholder="Paste a deal, a teaser, or a URL\u2026"
         chips={['Score this deal', 'What would kill it?', 'Compare to my last 3']}

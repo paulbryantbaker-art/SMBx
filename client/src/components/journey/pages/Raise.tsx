@@ -130,13 +130,7 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
       {/* Giant-type anchor — the reframe in oversized type */}
       <GiantAnchor
         eyebrow="The anchor"
-        headline={
-          <>
-            <span style={{ display: 'block' }}>Not every</span>
-            <span style={{ display: 'block' }}>liquidity event</span>
-            <span style={{ display: 'block' }}>is a sale.</span>
-          </>
-        }
+        headline="Not every liquidity event is a sale."
         subhead="Most advisors pitch the full exit first \u2014 it generates the largest one-time fee. Yulia has no fee incentive. She models the minority raise, the recap, the ESOP, the mezz, the partial sale \u2014 and shows the after-tax math against the full sale. Then you pick."
         chatPlaceholder="I want liquidity but I\u2019m not sure I want to sell entirely\u2026"
         chips={['Model a minority raise', 'Model a dividend recap', 'ESOP vs. PE vs. strategic']}

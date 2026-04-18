@@ -572,7 +572,7 @@ function Day1ChecklistGenerator({ onSend }: { onSend: (text: string) => void }) 
         <ChipRow label="Revenue" options={REVENUE_OPTS as unknown as string[]} active={revenueIdx} onPick={setRevenueIdx} />
         <ChipRow label="Customer relationships held by seller" options={CUST_REL_OPTS as unknown as string[]} active={custRelIdx} onPick={setCustRelIdx} />
         <div>
-          <div className="gg-label" style={{ marginBottom: 12 }}>Systems migration required?</div>
+          <div className="gg-input-label" style={{ marginBottom: 12 }}>Systems migration required?</div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button type="button" className={`gg-chip${migration ? ' active' : ''}`} aria-pressed={migration} onClick={() => setMigration(true)}>Yes</button>
             <button type="button" className={`gg-chip${!migration ? ' active' : ''}`} aria-pressed={!migration} onClick={() => setMigration(false)}>No</button>
@@ -618,7 +618,7 @@ function ChipRow({ label, options, active, onPick }: {
 }) {
   return (
     <div>
-      <div className="gg-label" style={{ marginBottom: 12 }}>{label}</div>
+      <div className="gg-input-label" style={{ marginBottom: 12 }}>{label}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {options.map((opt, i) => (
           <button

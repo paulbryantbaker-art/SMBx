@@ -122,10 +122,13 @@ export default function HowItWorks({ onSend, onStartFree, onNavigate }: Props) {
         <div className="gg-grid-bg" />
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 980, margin: '0 auto' }}>
           <div className="gg-eyebrow gg-eyebrow--plain" style={{ marginBottom: 24, justifyContent: 'center' }}>How it works</div>
-          <h1 className="gg-h1 gg-h1--journey" style={{ marginBottom: 28 }}>
-            <span style={{ display: 'block' }}>90% of what an investment bank does.</span>
-            <span style={{ display: 'block' }}>Everything that doesn’t require a license.</span>
-          </h1>
+          {/* Two distinct statements → two block elements (per Paul's
+              rule: never span-with-display:block as a pseudo-br). Each
+              sentence carries its own weight. */}
+          <div style={{ marginBottom: 28 }}>
+            <div className="gg-h1 gg-h1--journey">90% of what an investment bank does.</div>
+            <div className="gg-h1 gg-h1--journey" style={{ color: 'var(--gg-text-muted)' }}>Everything that doesn’t require a license.</div>
+          </div>
           <Body lead style={{ maxWidth: 780, marginLeft: 'auto', marginRight: 'auto' }}>
             Yulia handles the production work of a deal team &mdash; valuations, CIMs, financial models, deal scoring, due diligence, LOIs, integration plans. You keep the judgment, the relationships, and the authority to sign.
           </Body>
