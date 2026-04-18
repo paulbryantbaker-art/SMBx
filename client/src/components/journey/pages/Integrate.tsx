@@ -329,43 +329,153 @@ function KeyEmployeesMock() {
 
 function KPIVarianceMock() {
   const months = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6'];
+  /* Thesis figures baked into the deal model; actuals update monthly as
+     ops close the books. Numbers are indexed (M0 = 100) so the chart
+     reads as % progress toward thesis rather than raw $ EBITDA. */
   const projected = [100, 105, 110, 115, 120, 125];
   const actual    = [98, 104, 112, 118, 117, 122];
   const max = Math.max(...projected, ...actual);
+
+  type View = 'both' | 'projected' | 'actual';
+  const [view, setView] = useState<View>('both');
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+
+  const show = (layer: 'projected' | 'actual') => view === 'both' || view === layer;
+  const variance = actual.map((a, i) => a - projected[i]);
+  const cumVar   = variance[variance.length - 1];
+
   return (
     <Card padding={28} style={{ boxShadow: '0 30px 60px rgba(0,0,0,0.08), inset 0 0.5px 0 rgba(255,255,255,1)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 18 }}>
-        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>EBITDA · thesis vs actual</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+        <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>EBITDA &middot; thesis vs actual</div>
         <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>6 months</div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, height: 140, marginBottom: 12 }}>
-        {months.map((m, i) => (
-          <div key={m} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: '100%' }}>
-              <div style={{
-                width: 10,
-                height: `${(projected[i] / max) * 100}%`,
-                background: 'var(--gg-bg-muted)',
-                border: '0.5px solid var(--gg-border)',
-                borderRadius: 2,
-              }} />
-              <div style={{
-                width: 10,
-                height: `${(actual[i] / max) * 100}%`,
-                background: actual[i] >= projected[i] ? 'var(--gg-dot-ready)' : 'var(--gg-dot-progress)',
-                borderRadius: 2,
-              }} />
-            </div>
-            <div style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10, color: 'var(--gg-text-muted)', letterSpacing: '0.04em' }}>{m}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'var(--gg-text-muted)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 10, height: 10, background: 'var(--gg-bg-muted)', border: '0.5px solid var(--gg-border)', borderRadius: 2 }} />
-          Projected
+
+      {/* Headline variance + view toggle */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          <span style={{
+            fontFamily: 'var(--gg-display)', fontWeight: 800,
+            fontSize: 26, letterSpacing: '-0.02em',
+            color: cumVar >= 0 ? 'var(--gg-dot-ready)' : 'var(--gg-dot-flag)',
+            fontVariantNumeric: 'tabular-nums',
+          }}>
+            {cumVar >= 0 ? '+' : ''}{cumVar}
+          </span>
+          <span style={{ fontSize: 11, color: 'var(--gg-text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase', fontFamily: 'var(--gg-display)', fontWeight: 700 }}>
+            pts vs thesis
+          </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ display: 'inline-flex', gap: 2, padding: 2, background: 'var(--gg-bg-subtle)', borderRadius: 999, border: '0.5px solid var(--gg-border)' }}>
+          {(['both', 'projected', 'actual'] as View[]).map(v => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setView(v)}
+              style={{
+                padding: '5px 12px',
+                border: 0,
+                borderRadius: 999,
+                background: view === v ? 'var(--gg-bg-card)' : 'transparent',
+                boxShadow: view === v ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
+                fontFamily: 'var(--gg-display)',
+                fontWeight: 700, fontSize: 10,
+                letterSpacing: '0.06em', textTransform: 'uppercase',
+                color: view === v ? 'var(--gg-text-primary)' : 'var(--gg-text-muted)',
+                cursor: 'pointer',
+                transition: 'all var(--gg-t-feedback) var(--gg-ease-snap)',
+              }}
+              aria-pressed={view === v}
+            >
+              {v === 'both' ? 'Both' : v === 'projected' ? 'Thesis' : 'Actual'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Bar chart with hover tooltip */}
+      <div style={{ position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, height: 140, marginBottom: 12 }}>
+          {months.map((m, i) => {
+            const vi = variance[i];
+            const hovered = hoverIdx === i;
+            return (
+              <div
+                key={m}
+                onMouseEnter={() => setHoverIdx(i)}
+                onMouseLeave={() => setHoverIdx(null)}
+                style={{
+                  flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                  cursor: 'default',
+                  transition: 'opacity var(--gg-t-feedback) var(--gg-ease-snap)',
+                  opacity: hoverIdx !== null && !hovered ? 0.5 : 1,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: '100%' }}>
+                  {show('projected') && (
+                    <div style={{
+                      width: 10,
+                      height: `${(projected[i] / max) * 100}%`,
+                      background: 'var(--gg-bg-muted)',
+                      border: '0.5px solid var(--gg-border)',
+                      borderRadius: 2,
+                      transition: 'height 320ms var(--gg-ease-spring)',
+                    }} />
+                  )}
+                  {show('actual') && (
+                    <div style={{
+                      width: 10,
+                      height: `${(actual[i] / max) * 100}%`,
+                      background: actual[i] >= projected[i] ? 'var(--gg-dot-ready)' : 'var(--gg-dot-progress)',
+                      borderRadius: 2,
+                      transition: 'height 320ms var(--gg-ease-spring)',
+                    }} />
+                  )}
+                </div>
+                <div style={{
+                  fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 10,
+                  color: hovered ? 'var(--gg-text-primary)' : 'var(--gg-text-muted)',
+                  letterSpacing: '0.04em',
+                  transition: 'color var(--gg-t-feedback) var(--gg-ease-snap)',
+                }}>{m}</div>
+                {hovered && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 'calc(100% + 8px)',
+                    left: `${((i + 0.5) / months.length) * 100}%`,
+                    transform: 'translateX(-50%)',
+                    padding: '8px 12px',
+                    background: 'var(--gg-accent)',
+                    color: '#fff',
+                    borderRadius: 10,
+                    fontFamily: 'var(--gg-display)',
+                    fontSize: 11, lineHeight: 1.35,
+                    fontWeight: 600,
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 6px 20px rgba(0,0,0,0.18)',
+                    pointerEvents: 'none',
+                    zIndex: 10,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}>
+                    <div style={{ fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.55, fontWeight: 700, marginBottom: 3 }}>{m}</div>
+                    <div>Thesis {projected[i]} &middot; Actual {actual[i]}</div>
+                    <div style={{ color: vi >= 0 ? 'var(--gg-dot-ready)' : 'var(--gg-dot-flag)', marginTop: 2 }}>
+                      {vi >= 0 ? '+' : ''}{vi} vs thesis
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 16, fontSize: 11, color: 'var(--gg-text-muted)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, opacity: show('projected') ? 1 : 0.35 }}>
+          <span style={{ width: 10, height: 10, background: 'var(--gg-bg-muted)', border: '0.5px solid var(--gg-border)', borderRadius: 2 }} />
+          Thesis
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, opacity: show('actual') ? 1 : 0.35 }}>
           <span style={{ width: 10, height: 10, background: 'var(--gg-dot-ready)', borderRadius: 2 }} />
           Actual
         </div>

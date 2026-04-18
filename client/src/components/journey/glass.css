@@ -725,14 +725,20 @@
 
 /* Scroll-driven reveal — pure CSS via animation-timeline:view().
    Chrome/Edge/Safari: elements fade up as they enter the viewport.
-   Firefox (flag only): element stays visible (no animation, no hiding). */
+   Firefox (flag only): element stays visible (no animation, no hiding).
+
+   Range is entry 0% → entry 80%: the animation runs as the top of the
+   element enters the viewport. Earlier we used `cover 20%`, which only
+   triggers if the element fully fits inside the viewport. Tall
+   full-width sections (like the dark BottomCta) never "cover", so they
+   stayed stuck at opacity 0.5 — dark bg rendered gray. */
 @supports (animation-timeline: view()) {
   .gg-reveal {
     opacity: 0;
     transform: translateY(12px);
     animation: gg-fade-up linear both;
     animation-timeline: view();
-    animation-range: entry 0% cover 20%;
+    animation-range: entry 0% entry 80%;
   }
 }
 
