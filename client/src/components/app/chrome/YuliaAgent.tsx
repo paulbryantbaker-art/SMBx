@@ -185,6 +185,10 @@ export default function YuliaAgent({
 
   if (state === 'full') {
     // Fullscreen chat — iOS PWA canonical pattern (mattpilott/ios-chat).
+    //   - PORTALED TO document.body so position:fixed (composer) is
+    //     relative to the VIEWPORT, not trapped by an ancestor's
+    //     transform/filter/backdrop-filter containing block. See memory
+    //     feedback_fixed_position_containing_block.md.
     //   - Dialog sized to var(--vvh) = window.visualViewport.height,
     //     tracked by AppShell. 100dvh is wrong on iOS Safari: dvh
     //     resolves to the LARGE viewport and doesn't track the keyboard.
@@ -195,12 +199,13 @@ export default function YuliaAgent({
     //   - Messages scroll area is inset:0 inside the dialog, so content
     //     can scroll BEHIND the composer's glass (iMessage pattern).
     //   - input:focus blink animation kills the 1-frame scroll jump.
-    return (
+    if (!mounted || typeof document === 'undefined') return null;
+    return createPortal(
       <div
         role="dialog"
         aria-label="Chat with Yulia"
         style={{
-          position: 'absolute',
+          position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
@@ -523,7 +528,8 @@ export default function YuliaAgent({
             </button>
           </div>
         </form>
-      </div>
+      </div>,
+      document.body,
     );
   }
 
