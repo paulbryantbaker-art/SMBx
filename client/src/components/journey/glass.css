@@ -156,54 +156,80 @@
    CHAT INPUT — the conversion element. On every public page.
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* Grok-inspired pill: fully rounded (999px), beefier elevation,
+   asymmetric padding (more room on the text side, tight on the action
+   side), all action buttons circular. The send button is the darkest
+   element on the page — the one thing that screams "click me." */
 .gg-chat {
   background: var(--gg-bg-card);
   border: 0.5px solid var(--gg-border);
-  border-radius: var(--gg-r-chat);
-  padding: 14px 14px 14px 16px;
+  border-radius: var(--gg-r-pill);
+  padding: 8px 8px 8px 20px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  min-height: 56px;
   box-shadow:
     inset 0 0.5px 0 rgba(255, 255, 255, 1),
-    0 4px 20px rgba(0, 0, 0, 0.06),
-    0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: border-color var(--gg-t-feedback) var(--gg-ease-snap);
+    0 10px 32px rgba(0, 0, 0, 0.07),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+  transition:
+    border-color var(--gg-t-feedback) var(--gg-ease-snap),
+    box-shadow var(--gg-t-feedback) var(--gg-ease-snap);
 }
 .gg-chat:focus-within {
   border-color: rgba(0, 0, 0, 0.24);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 1),
+    0 12px 36px rgba(0, 0, 0, 0.09),
+    0 2px 6px rgba(0, 0, 0, 0.04);
 }
 .gg-chat__plus {
-  width: 30px; height: 30px;
-  border-radius: var(--gg-r-btn);
+  width: 36px; height: 36px;
+  border-radius: 50%;
   background: rgba(0, 0, 0, 0.04);
+  color: var(--gg-text-secondary);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; border: 0; padding: 0; cursor: pointer;
-  transition: background var(--gg-t-feedback) var(--gg-ease-snap);
+  margin-left: -10px; /* tucks the button closer to the pill edge than the text padding */
+  transition:
+    background var(--gg-t-feedback) var(--gg-ease-snap),
+    color var(--gg-t-feedback) var(--gg-ease-snap);
 }
-.gg-chat__plus:hover { background: rgba(0, 0, 0, 0.08); }
+.gg-chat__plus:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--gg-text-primary);
+}
 .gg-chat__field {
   flex: 1; min-width: 0;
   border: 0; outline: 0; background: transparent;
   font-family: var(--gg-body); font-weight: 500;
   font-size: 15px; line-height: 1.4;
   color: var(--gg-text-primary);
-  padding: 0;
+  padding: 0 8px;
 }
 .gg-chat__field::placeholder { color: var(--gg-text-faint); }
 .gg-chat__send {
-  width: 32px; height: 32px;
+  width: 40px; height: 40px;
   border-radius: 50%;
   background: var(--gg-accent);
+  color: #fff;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; border: 0; padding: 0; cursor: pointer;
   box-shadow:
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.15),
-    0 1px 3px rgba(0, 0, 0, 0.15);
-  transition: transform var(--gg-t-feedback) var(--gg-ease-snap);
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.18);
+  transition:
+    transform var(--gg-t-feedback) var(--gg-ease-snap),
+    background var(--gg-t-feedback) var(--gg-ease-snap);
 }
 .gg-chat__send:hover { transform: scale(1.06); }
-.gg-chat__send:disabled { opacity: 0.35; cursor: default; }
+.gg-chat__send:active { transform: scale(0.96); }
+.gg-chat__send:disabled {
+  opacity: 0.35;
+  cursor: default;
+  background: var(--gg-text-secondary);
+}
 .gg-chat__send:disabled:hover { transform: none; }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -761,10 +787,35 @@
    stage 2 of the home page cascade lands (peek stack + trust bar have
    faded in). Scales the pill imperceptibly and ripples a soft halo
    outward over 1.2s — slower than before, reads as a breath not a tap. */
+/* Keyframes preserve the new Grok-style base shadow (10px elevation +
+   2px crisp) and just ripple an outer halo ring through the 4-slot
+   box-shadow stack. Without this, the pulse would flatten the pill to
+   a 1px shadow for the 1.2s animation window. */
 @keyframes gg-chat-hero-pulse {
-  0%   { box-shadow: 0 0 0 0   rgba(10, 10, 11, 0),    0 1px 3px rgba(0, 0, 0, 0.05); transform: scale(1); }
-  40%  { box-shadow: 0 0 0 18px rgba(10, 10, 11, 0.09), 0 1px 3px rgba(0, 0, 0, 0.05); transform: scale(1.015); }
-  100% { box-shadow: 0 0 0 0   rgba(10, 10, 11, 0),    0 1px 3px rgba(0, 0, 0, 0.05); transform: scale(1); }
+  0% {
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 1),
+      0 10px 32px rgba(0, 0, 0, 0.07),
+      0 2px 6px rgba(0, 0, 0, 0.04),
+      0 0 0 0 rgba(10, 10, 11, 0);
+    transform: scale(1);
+  }
+  40% {
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 1),
+      0 12px 36px rgba(0, 0, 0, 0.08),
+      0 2px 6px rgba(0, 0, 0, 0.04),
+      0 0 0 18px rgba(10, 10, 11, 0.09);
+    transform: scale(1.015);
+  }
+  100% {
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 1),
+      0 10px 32px rgba(0, 0, 0, 0.07),
+      0 2px 6px rgba(0, 0, 0, 0.04),
+      0 0 0 0 rgba(10, 10, 11, 0);
+    transform: scale(1);
+  }
 }
 .gg-chat--hero-pulse {
   animation: gg-chat-hero-pulse 1200ms cubic-bezier(0.19, 1, 0.22, 1) 2500ms both;
