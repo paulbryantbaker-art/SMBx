@@ -429,6 +429,14 @@ html, body {
     overscroll-behavior: auto !important;
     touch-action: auto !important;
   }
+  /* Hide the main app content while chat is open so the chat dialog
+     can render in NORMAL document flow (no position:fixed). That's
+     what allows the composer to be on the keyboard's layer, not the
+     content's — iOS handles keyboard avoidance natively for inputs
+     in normal flow, exactly like on any standard form website. */
+  html.yulia-chat-open #app-root {
+    display: none !important;
+  }
 }
 
 #app-root {

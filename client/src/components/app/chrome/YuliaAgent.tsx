@@ -224,10 +224,17 @@ export default function YuliaAgent({
         role="dialog"
         aria-label="Chat with Yulia"
         style={{
-          position: 'fixed',
-          inset: 0,
+          /* NORMAL document flow, NOT position:fixed. The CSS override
+             html.yulia-chat-open #app-root { display:none } hides the
+             rest of the app so this dialog is the only visible body
+             content. Being in normal flow means the composer INSIDE
+             this flex column sits on the same layer as any standard
+             <form> input on the web — iOS shifts the page to bring
+             the focused input above the keyboard, same as on any
+             doctor's form. No JS viewport math required. */
+          height: '100dvh',
+          width: '100%',
           background: 'var(--bg-app)',
-          zIndex: 50,
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
