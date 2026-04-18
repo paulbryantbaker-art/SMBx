@@ -108,24 +108,38 @@ export default function YuliaAgent({
 
   // DEBUG: live viewport readout so we can see why PWA and Safari diverge.
   // Remove once the composer positioning is stable across both.
-  const [debug, setDebug] = useState({ vvh: 0, innerH: 0, screenH: 0, pwa: false });
+  const [debug, setDebug] = useState({
+    vvh: 0,
+    innerH: 0,
+    pwa: false,
+    bodyPos: '',
+    kbH: '',
+  });
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    const probe = document.createElement('div');
+    probe.style.cssText =
+      'position:fixed;bottom:0;height:env(keyboard-inset-height, 0px);width:1px;pointer-events:none;';
+    document.body.appendChild(probe);
     const update = () => {
       setDebug({
         vvh: window.visualViewport?.height ?? 0,
         innerH: window.innerHeight,
-        screenH: window.screen.height,
         pwa: window.matchMedia('(display-mode: standalone)').matches,
+        bodyPos: getComputedStyle(document.body).position,
+        kbH: `${Math.round(probe.getBoundingClientRect().height)}`,
       });
     };
     update();
     const vv = window.visualViewport;
     vv?.addEventListener('resize', update);
     vv?.addEventListener('scroll', update);
+    const t = setInterval(update, 250); // also poll so kb-inset-height updates are visible
     return () => {
       vv?.removeEventListener('resize', update);
       vv?.removeEventListener('scroll', update);
+      clearInterval(t);
+      probe.remove();
     };
   }, [state]);
 
@@ -264,7 +278,7 @@ export default function YuliaAgent({
             lineHeight: 1.3,
           }}
         >
-          vvh={Math.round(debug.vvh)} innerH={debug.innerH} scrnH={debug.screenH} pwa={debug.pwa ? '1' : '0'}
+          vvh={Math.round(debug.vvh)} innerH={debug.innerH} pwa={debug.pwa ? '1' : '0'} body={debug.bodyPos} kbH={debug.kbH}
         </div>
 
         {/* Header — top grid row. Floating glass buttons, transparent
