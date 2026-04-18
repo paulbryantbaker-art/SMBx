@@ -95,19 +95,24 @@ export default function YuliaAgent({
   useEffect(() => setMounted(true), []);
 
   // Auto-scroll the message list to the bottom whenever new content arrives
-  // OR the visible viewport changes (keyboard open/close). Keeps the latest
-  // message visible just above the composer pill.
+  // OR the visible viewport changes (keyboard open/close). We set scrollTop
+  // directly (not scrollIntoView) because scrollIntoView walks ancestor
+  // scrolls and can shift the whole dialog off-screen.
   const scrollRef = useRef<HTMLDivElement>(null);
-  const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (state !== 'full') return;
-    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
   }, [messages.length, streamingText, state]);
   useEffect(() => {
     if (state !== 'full') return;
     const vv = window.visualViewport;
     if (!vv) return;
-    const handler = () => endRef.current?.scrollIntoView({ block: 'end' });
+    const handler = () => {
+      const el = scrollRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
+    };
     vv.addEventListener('resize', handler);
     return () => vv.removeEventListener('resize', handler);
   }, [state]);
@@ -240,6 +245,12 @@ export default function YuliaAgent({
             padding: '12px 20px 16px',
             display: 'flex',
             flexDirection: 'column',
+            /* Pin content to the BOTTOM of the container (iMessage pattern).
+               When content fits, it sits just above the composer instead
+               of at the top with empty space below. When content overflows,
+               the auto-scroll effect below snaps to scrollHeight so the
+               newest message stays visible. */
+            justifyContent: 'flex-end',
             gap: 14,
           }}
         >
