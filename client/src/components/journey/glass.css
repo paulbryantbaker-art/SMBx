@@ -449,7 +449,13 @@
   margin: 0 auto;
   width: 100%;
 }
-.gg-section--tint { background: var(--gg-bg-card); }
+/* .gg-section--tint: deliberately a no-op now. The tint-band-on-app-bg
+   rhythm read as ugly stripes on short sections (Paul's call). We keep
+   the variant prop + class so Section({variant:'tint'}) calls in page
+   code don't break, but the band is invisible — section content just
+   sits on the app bg like every other section. For visual containment
+   on specific blocks, use a gg-card wrapper inside the section instead. */
+.gg-section--tint { background: transparent; }
 .gg-section--dark {
   background: var(--gg-accent);
   color: var(--gg-text-inv);

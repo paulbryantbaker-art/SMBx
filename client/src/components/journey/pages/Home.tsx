@@ -331,21 +331,21 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
         </div>
       </section>
 
-      {/* ═════ Live valuation demo — interactive, tint band
-           Wrapper div fades + lifts at stage 3. Inner section stagger-
-           reveals its own children (label, headline, sub, grid) on a
-           120ms cadence so the section lands as a sequence, not a block. */}
-      <div style={{ background: 'var(--gg-bg-card)', width: '100%', ...revealStyle(3) }}>
-        <section
-          className={`gg-stagger-children${heroStage >= 3 ? ' gg-stagger-children--in' : ''}`}
-          style={{
-            padding: 'clamp(40px, 5vw, 96px) clamp(20px, 4vw, 88px) clamp(40px, 5vw, 96px)',
-            maxWidth: 1680, margin: '0 auto', width: '100%', boxSizing: 'border-box',
-          }}
-        >
-          <ValuationDemo onSend={onSend} />
-        </section>
-      </div>
+      {/* ═════ Live valuation demo — interactive
+           On app bg like every other section (we dropped tint bands
+           site-wide because short ones read as ugly stripes). The
+           ValuationDemo has its own bordered card for containment, so
+           the section itself just needs the fade + stagger. */}
+      <section
+        className={`gg-stagger-children${heroStage >= 3 ? ' gg-stagger-children--in' : ''}`}
+        style={{
+          padding: 'clamp(40px, 5vw, 96px) clamp(20px, 4vw, 88px) clamp(40px, 5vw, 96px)',
+          maxWidth: 1680, margin: '0 auto', width: '100%', boxSizing: 'border-box',
+          ...revealStyle(3),
+        }}
+      >
+        <ValuationDemo onSend={onSend} />
+      </section>
 
       {/* ═════ Chat starters — prefill Yulia with a real question ═════
            revealStyle(4) — fades up at stage 4, the final beat.
