@@ -14,7 +14,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import '../glass.css';
 import { Page, type JourneyTab } from '../primitives';
-import { PeekStack } from '../mockups';
+import { PeekStack, useTypewriter } from '../mockups';
 
 /* ─── Rotating placeholder hints ────────────────────────────────────── */
 const ROTATING_HINTS = [
@@ -129,12 +129,42 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
   };
 
   const heroEyebrow = 'Deal intelligence platform';
-  const heroH1 = user && !authLoading
-    ? <>Welcome back{firstName ? `, ${firstName}` : ''}.</>
-    : <>Your new AI deal team.</>;
+  const isMarketing = !user || authLoading;
+  const marketingH1 = 'Your new AI deal team.';
+  const loggedInH1 = `Welcome back${firstName ? `, ${firstName}` : ''}.`;
   const heroTag = user && !authLoading
-    ? 'Pick up where you left off. Tell Yulia what you’re working on.'
-    : 'Valuations. CIMs. Deal scoring. Financial models. Due diligence. LOIs. Everything an investment bank delivers — without the retainer.';
+    ? 'Pick up where you left off. Tell Yulia what you\u2019re working on.'
+    : 'Valuations. CIMs. Deal scoring. Financial models. Due diligence. LOIs. Everything an investment bank delivers \u2014 without the retainer.';
+
+  /* ─── Hero choreography ─────────────────────────────────────────────
+     stage 0: H1 typewriting (subtag/chat/peek hidden)
+     stage 1: H1 done, subtag + chat fade in together
+     stage 2: peek stack + trust bar fade in; chat pill pulses via CSS
+              (delay matches stage-2 timing; one-shot)
+     Logged-in users skip straight to stage 2 — the typewriter is a
+     marketing-hero flourish, not a dashboard one.
+     Respects prefers-reduced-motion. */
+  const [heroStage, setHeroStage] = useState<0 | 1 | 2>(isMarketing ? 0 : 2);
+  const { shown: typedH1, done: typingDone } = useTypewriter(marketingH1, isMarketing, 38);
+
+  useEffect(() => {
+    if (!isMarketing) { setHeroStage(2); return; }
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) { setHeroStage(2); return; }
+    if (typingDone && heroStage === 0) {
+      const t1 = window.setTimeout(() => setHeroStage(1), 120);
+      const t2 = window.setTimeout(() => setHeroStage(2), 520);
+      return () => { window.clearTimeout(t1); window.clearTimeout(t2); };
+    }
+  }, [isMarketing, typingDone, heroStage]);
+
+  /* Stage-driven style helper — fades an element in with a slight
+     upward lift once it passes the threshold stage. */
+  const revealStyle = (threshold: 1 | 2): React.CSSProperties => ({
+    opacity: heroStage >= threshold ? 1 : 0,
+    transform: heroStage >= threshold ? 'translateY(0)' : 'translateY(10px)',
+    transition: 'opacity 420ms var(--gg-ease-spring), transform 420ms var(--gg-ease-spring)',
+  });
 
   return (
     <Page
@@ -162,12 +192,26 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
           {/* ── Left: copy + chat ── */}
           <div>
             <div className="gg-eyebrow" style={{ marginBottom: 24 }}>{heroEyebrow}</div>
-            <h1 className="gg-h1" style={{ marginBottom: 28 }}>{heroH1}</h1>
-            <p className="gg-body gg-body--lead" style={{ marginBottom: 40, maxWidth: 560 }}>{heroTag}</p>
+            <h1 className="gg-h1" style={{ marginBottom: 28 }}>
+              {isMarketing ? (
+                <>
+                  {typedH1}
+                  {!typingDone && <span className="gg-caret" aria-hidden="true" />}
+                </>
+              ) : (
+                loggedInH1
+              )}
+            </h1>
+            <p
+              className="gg-body gg-body--lead"
+              style={{ marginBottom: 40, maxWidth: 560, ...revealStyle(1) }}
+            >
+              {heroTag}
+            </p>
 
             {/* Chat input */}
-            <form onSubmit={onSubmit} style={{ position: 'relative', maxWidth: 560 }}>
-              <div className="gg-chat" style={{ marginBottom: 24 }}>
+            <form onSubmit={onSubmit} style={{ position: 'relative', maxWidth: 560, ...revealStyle(1) }}>
+              <div className={`gg-chat${isMarketing ? ' gg-chat--hero-pulse' : ''}`} style={{ marginBottom: 24 }}>
                 <button
                   type="button"
                   className="gg-chat__plus"
@@ -242,6 +286,7 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
               fontFamily: 'var(--gg-display)',
               fontSize: 11, fontWeight: 600,
               color: 'var(--gg-text-faint)', letterSpacing: '0.04em',
+              ...revealStyle(2),
             }}>
               <span style={{
                 fontSize: 9, fontWeight: 700, letterSpacing: '0.14em',
@@ -254,7 +299,7 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
           </div>
 
           {/* ── Right: product peek — desktop only ── */}
-          <div className="gg-desktop-only">
+          <div className="gg-desktop-only" style={revealStyle(2)}>
             <PeekStack />
           </div>
         </div>
