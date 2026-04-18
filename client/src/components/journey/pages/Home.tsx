@@ -154,11 +154,17 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
      — deliberate enough to read without feeling slow. */
   const { shown: typedH1, done: typingDone } = useTypewriter(marketingH1, isMarketing, 22);
 
+  /* Ref guard so the 4-timer cascade only schedules once. Previously
+     heroStage was in the effect deps, which meant setting stage 1
+     retriggered the effect, which cleaned up timers 2/3/4 before they
+     could fire — only stage 1 landed and the page stayed half-loaded. */
+  const cascadeStartedRef = useRef(false);
   useEffect(() => {
     if (!isMarketing) { setHeroStage(4); return; }
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     if (reduced) { setHeroStage(4); return; }
-    if (typingDone && heroStage === 0) {
+    if (typingDone && !cascadeStartedRef.current) {
+      cascadeStartedRef.current = true;
       const timers = [
         window.setTimeout(() => setHeroStage(1), 180),   // subtag + chat
         window.setTimeout(() => setHeroStage(2), 640),   // peek + trust + pulse
@@ -167,7 +173,7 @@ export default function Home({ user, authLoading, onSend, onNavigateJourney }: H
       ];
       return () => { timers.forEach(id => window.clearTimeout(id)); };
     }
-  }, [isMarketing, typingDone, heroStage]);
+  }, [isMarketing, typingDone]);
 
   /* Stage-driven style helper — fades an element in with a 24px upward
      lift once it passes the threshold stage. 560ms ease-spring matches
