@@ -237,13 +237,16 @@ export default function YuliaAgent({
     //     (measured kbH=0 even with keyboard open); do NOT depend on it.
     if (!mounted || typeof document === 'undefined') return null;
     return createPortal(
+      <>
       <div
         role="dialog"
         aria-label="Chat with Yulia"
         style={{
           /* Dialog fills viewport. Header + scroll area in a flex
-             column inside. Composer is SEPARATE — position:fixed,
-             lifted above the keyboard via translateY(-kbHeight). */
+             column inside. Composer is a SIBLING of this dialog
+             (rendered outside) — position:fixed, lifted above the
+             keyboard via translateY(-kbHeight). Being a sibling
+             means iOS can't move dialog + composer together. */
           height: '100dvh',
           width: '100%',
           background: 'var(--bg-app)',
@@ -433,11 +436,12 @@ export default function YuliaAgent({
               opens or new messages stream in. */}
         </div>
 
-        {/* Composer — position:FIXED, lifted above keyboard via
-            translateY. Because body is static+overflow-hidden (not
-            pinned), visualViewport updates correctly and we can
-            anchor the composer to the top of the keyboard by
-            translating it up by the keyboard height. */}
+      </div>
+        {/* Composer — SIBLING of the dialog (rendered outside it
+            in the portal fragment). position:fixed bottom:0 with
+            translateY(-kbHeight) puts it at the top of the
+            keyboard. As a sibling, iOS can't move it together
+            with the dialog when it scrolls things. */}
         <form
           onSubmit={handleSubmit}
           style={{
@@ -550,7 +554,7 @@ export default function YuliaAgent({
             </button>
           </div>
         </form>
-      </div>,
+      </>,
       document.body,
     );
   }
