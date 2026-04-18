@@ -1989,14 +1989,18 @@ export default function AppShell() {
     } catch { /* noop */ }
   }, [isPWA, navigate]);
 
-  // ─── PWA install gate ───
-  // Mobile + logged in + NOT in PWA standalone → full-screen InstallWall.
-  // Marketing, journey pages, login, signup, and anon chat all remain
-  // accessible in mobile Safari. The wall only fires for authenticated
-  // users — once you have an account, smbx runs inside the installed PWA.
-  if (isMobile && user && !isPWA) {
-    return <InstallWall dark={dark} userName={user.display_name || user.email || null} />;
-  }
+  // ─── PWA install gate — TEMPORARILY DISABLED (2026-04-18) ───
+  // Paul is testing the mobile-Safari flow end-to-end. Newcomers arrive
+  // in iOS Safari, hit the marketing site, start a chat, eventually
+  // create an account — the install prompt should come at the account
+  // step in the workflow, not at first load after auth. Re-enabling
+  // means restoring the conditional below and routing the install
+  // prompt to the signup/onboarding step instead of this global gate.
+  //
+  // if (isMobile && user && !isPWA) {
+  //   return <InstallWall dark={dark} userName={user.display_name || user.email || null} />;
+  // }
+  void InstallWall; // keep import referenced for when we re-enable
 
   return (
     <div
