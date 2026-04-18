@@ -274,13 +274,13 @@ export default function YuliaAgent({
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            /* iMessage pattern: content extends all the way top→bottom.
-               Padding is just safe-area clearance so the very last
-               message isn't stuck to the screen edge — NOT enough to
-               "reserve" a buffer under the composer. The composer is a
-               floating pill ON TOP; content genuinely scrolls behind it
-               and is visible through the glass blur. */
-            padding: '56px 20px calc(env(safe-area-inset-bottom, 0px) + 12px)',
+            /* Top = header clearance (~56pt).
+               Bottom = composer clearance. The composer is ~52pt of
+               pill + vertical padding + safe-area; we give it 72pt +
+               --vvs so the latest message sits ABOVE the composer
+               when scrolled to bottom. When user scrolls up, older
+               messages pass behind the glass (iMessage pattern). */
+            padding: '56px 20px calc(var(--vvs, env(safe-area-inset-bottom, 0px)) + 72px)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-end',
