@@ -159,6 +159,11 @@ export default function Raise({ onSend, onStartFree, onNavigate }: Props) {
         </div>
       </Section>
 
+      {/* Interactive — Capital stack sizer */}
+      <Section variant="tint" label="Stack sizer">
+        <CapitalStackSizer onSend={onSend} />
+      </Section>
+
       {/* Hero 2 Pitch deck — 40/60 mockup dominant, reversed */}
       <Section variant="tint" label="Hero 2 · Pitch deck + data room">
         <div className="gg-two-col gg-two-col--40-60 gg-two-col--reverse" style={{ alignItems: 'center' }}>
@@ -505,5 +510,284 @@ function SliderInput({ label, display, min, max, step, value, onChange }: {
         style={{ width: '100%', accentColor: 'var(--gg-accent)' }}
       />
     </div>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   CAPITAL STACK SIZER — three picks, live structure recommendation.
+   Maps EBITDA band + cash needed + control preference to a plausible
+   capital mix (senior debt, mezz/seller, investor equity, retained).
+   Heuristic — the real modeling runs against actual financials.
+   ═════════════════════════════════════════════════════════════════════ */
+
+const STACK_EBITDA_BANDS: { label: string; mid: number }[] = [
+  { label: '$500K\u2013$1M',  mid: 750_000 },
+  { label: '$1M\u2013$3M',    mid: 2_000_000 },
+  { label: '$3M\u2013$10M',   mid: 6_500_000 },
+  { label: '$10M+',           mid: 15_000_000 },
+];
+const STACK_CASH_NEEDS: { label: string; amount: number }[] = [
+  { label: '$1M',   amount: 1_000_000 },
+  { label: '$3M',   amount: 3_000_000 },
+  { label: '$10M',  amount: 10_000_000 },
+  { label: '$25M',  amount: 25_000_000 },
+];
+type ControlPick = 'keep' | 'share' | 'exit';
+const CONTROL_OPTIONS: { k: ControlPick; label: string }[] = [
+  { k: 'keep',  label: 'Keep 100% equity' },
+  { k: 'share', label: 'Share (minority)' },
+  { k: 'exit',  label: 'Exit majority' },
+];
+
+type StackLayer = { label: string; amount: number; note: string; color: string };
+type StackResult = {
+  structureName: string;
+  enterpriseValue: number;
+  layers: StackLayer[];
+  retainedPct: number;
+  feasible: boolean;
+  warning?: string;
+};
+
+function computeStack(ebitda: number, cashNeeded: number, control: ControlPick): StackResult {
+  const ev = ebitda * 6;
+
+  if (control === 'keep') {
+    /* Dividend recap: senior debt up to 4× EBITDA to generate cash,
+       owner retains 100% equity. If cash need > 4× EBITDA, flag. */
+    const maxDebt = ebitda * 4;
+    const debt = Math.min(maxDebt, cashNeeded);
+    const feasible = debt >= cashNeeded;
+    return {
+      structureName: 'Dividend recapitalization',
+      enterpriseValue: ev,
+      layers: [
+        { label: 'Senior debt',        amount: debt,                 note: `\u2248 4\u00d7 EBITDA \u00b7 6\u20138% coupon \u00b7 5\u20137 yr`, color: 'var(--gg-accent)' },
+        { label: 'Owner equity (retained)', amount: ev,             note: '100% retained', color: 'var(--gg-bg-muted)' },
+      ],
+      retainedPct: 100,
+      feasible,
+      warning: feasible ? undefined : `At this EBITDA, max recap proceeds are about ${fmtStack(maxDebt)}. Consider mezz + minority to bridge.`,
+    };
+  }
+
+  if (control === 'share') {
+    /* Minority equity raise: sell 20-40% for cash needed. Percent sold
+       = cashNeeded / EV, capped at 40%. Remainder retained. */
+    const pctSold = Math.min(cashNeeded / ev, 0.4);
+    const investorEquity = ev * pctSold;
+    const retainedPct = Math.round((1 - pctSold) * 100);
+    const feasible = investorEquity >= cashNeeded - 1;
+    return {
+      structureName: 'Minority equity raise',
+      enterpriseValue: ev,
+      layers: [
+        { label: 'Investor equity',    amount: investorEquity,       note: `${Math.round(pctSold * 100)}% sold \u00b7 board observer \u00b7 tag-along rights`, color: 'var(--gg-accent)' },
+        { label: 'Owner equity (retained)', amount: ev - investorEquity, note: `${retainedPct}% retained`, color: 'var(--gg-bg-muted)' },
+      ],
+      retainedPct,
+      feasible,
+      warning: feasible ? undefined : `At 40% ceiling on minority sale, max proceeds are ${fmtStack(investorEquity)}. Consider majority rollover or add mezz.`,
+    };
+  }
+
+  /* Exit majority: sell 60-80% of equity. Rollover 20-40%. */
+  const pctSold = Math.min(Math.max(cashNeeded / ev, 0.6), 0.8);
+  const cashOut = ev * pctSold;
+  const rolloverPct = Math.round((1 - pctSold) * 100);
+  const rolloverEquity = ev * (1 - pctSold);
+  return {
+    structureName: 'Majority sale with rollover',
+    enterpriseValue: ev,
+    layers: [
+      { label: 'Buyer cash payment', amount: cashOut,            note: `${Math.round(pctSold * 100)}% sold at 6\u00d7 EBITDA`, color: 'var(--gg-accent)' },
+      { label: 'Rollover equity',    amount: rolloverEquity,    note: `${rolloverPct}% retained for second-bite exit`, color: 'var(--gg-bg-muted)' },
+    ],
+    retainedPct: rolloverPct,
+    feasible: true,
+  };
+}
+
+function fmtStack(n: number): string {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(n < 10_000_000 ? 1 : 0)}M`;
+  if (n >= 1_000)     return `$${Math.round(n / 1_000)}K`;
+  return `$${Math.round(n)}`;
+}
+
+function CapitalStackSizer({ onSend }: { onSend: (text: string) => void }) {
+  const [ebitdaIdx,  setEbitdaIdx]  = useState<number | null>(null);
+  const [cashIdx,    setCashIdx]    = useState<number | null>(null);
+  const [control,    setControl]    = useState<ControlPick | null>(null);
+
+  const result = useMemo(() => {
+    if (ebitdaIdx === null || cashIdx === null || control === null) return null;
+    return computeStack(STACK_EBITDA_BANDS[ebitdaIdx].mid, STACK_CASH_NEEDS[cashIdx].amount, control);
+  }, [ebitdaIdx, cashIdx, control]);
+
+  const handoff = () => {
+    if (ebitdaIdx === null || cashIdx === null || control === null || !result) return;
+    const ebitdaLabel = STACK_EBITDA_BANDS[ebitdaIdx].label;
+    const cashLabel = STACK_CASH_NEEDS[cashIdx].label;
+    const controlLabel = CONTROL_OPTIONS.find(o => o.k === control)!.label.toLowerCase();
+    onSend(
+      `Ran the stack sizer: EBITDA ${ebitdaLabel}, need ${cashLabel} cash, want to ${controlLabel}. ` +
+      `It points to a ${result.structureName.toLowerCase()}. Model this against my actual financials and pull the term comps.`
+    );
+  };
+
+  return (
+    <>
+      <H2>Size the stack before you write the deck.</H2>
+      <p className="gg-body--sub" style={{ marginBottom: 40 }}>
+        Three picks. Yulia points you to the structure that actually clears the cash you need while leaving the ownership you want.
+      </p>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.1fr)',
+          gap: 32,
+          alignItems: 'start',
+          maxWidth: 1120,
+        }}
+      >
+        {/* Inputs */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div>
+            <div className="gg-label" style={{ marginBottom: 10 }}>Annual EBITDA</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {STACK_EBITDA_BANDS.map((b, i) => (
+                <button key={b.label} type="button" className={`gg-chip${i === ebitdaIdx ? ' active' : ''}`} aria-pressed={i === ebitdaIdx} onClick={() => setEbitdaIdx(i)}>
+                  {b.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="gg-label" style={{ marginBottom: 10 }}>Cash you need today</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {STACK_CASH_NEEDS.map((c, i) => (
+                <button key={c.label} type="button" className={`gg-chip${i === cashIdx ? ' active' : ''}`} aria-pressed={i === cashIdx} onClick={() => setCashIdx(i)}>
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="gg-label" style={{ marginBottom: 10 }}>Control preference</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {CONTROL_OPTIONS.map(o => (
+                <button key={o.k} type="button" className={`gg-chip${o.k === control ? ' active' : ''}`} aria-pressed={o.k === control} onClick={() => setControl(o.k)}>
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Output */}
+        <div
+          className="gg-card"
+          style={{
+            padding: 32,
+            borderRadius: 22,
+            borderColor: result ? 'var(--gg-text-primary)' : 'var(--gg-border)',
+            transition: 'border-color 240ms var(--gg-ease-spring)',
+            minHeight: 420,
+            display: 'flex', flexDirection: 'column',
+          }}
+        >
+          {!result ? (
+            <>
+              <div className="gg-label" style={{ marginBottom: 14, color: 'var(--gg-text-faint)' }}>Recommended structure</div>
+              <div style={{
+                fontFamily: 'var(--gg-display)', fontWeight: 800,
+                fontSize: 'clamp(28px, 3.4vw, 40px)', letterSpacing: '-0.02em',
+                lineHeight: 1.1, color: 'var(--gg-text-faint)', marginBottom: 14,
+              }}>
+                Pick three, see the stack.
+              </div>
+              <p className="gg-body" style={{ marginTop: 'auto', fontSize: 14, color: 'var(--gg-text-muted)' }}>
+                EBITDA, cash need, control preference. That\u2019s it.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="gg-label" style={{ marginBottom: 6 }}>Recommended structure</div>
+              <div style={{
+                fontFamily: 'var(--gg-display)', fontWeight: 800,
+                fontSize: 'clamp(28px, 3.4vw, 40px)', letterSpacing: '-0.02em',
+                lineHeight: 1.1, marginBottom: 6,
+              }}>
+                {result.structureName}
+              </div>
+              <p style={{ fontSize: 13, color: 'var(--gg-text-muted)', marginBottom: 24, fontVariantNumeric: 'tabular-nums' }}>
+                Enterprise value {fmtStack(result.enterpriseValue)} \u00b7 retain {result.retainedPct}%
+              </p>
+
+              {/* Stack bars */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                {result.layers.map(layer => {
+                  const pct = Math.max(4, (layer.amount / result.enterpriseValue) * 100);
+                  return (
+                    <div key={layer.label}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+                        <span style={{ fontFamily: 'var(--gg-display)', fontWeight: 700, fontSize: 13, color: 'var(--gg-text-primary)' }}>{layer.label}</span>
+                        <span style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 15, fontVariantNumeric: 'tabular-nums' }}>{fmtStack(layer.amount)}</span>
+                      </div>
+                      <div style={{ height: 10, background: 'var(--gg-bg-muted)', borderRadius: 5, overflow: 'hidden' }}>
+                        <div style={{
+                          width: `${pct}%`,
+                          height: '100%',
+                          background: layer.color,
+                          transition: 'width 500ms var(--gg-ease-spring)',
+                        }} />
+                      </div>
+                      <p style={{ marginTop: 4, marginBottom: 0, fontSize: 11.5, color: 'var(--gg-text-muted)' }}>{layer.note}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {result.warning && (
+                <p style={{
+                  padding: '10px 14px',
+                  borderRadius: 10,
+                  background: 'var(--gg-band-flag-bg)',
+                  color: 'var(--gg-band-flag-fg)',
+                  fontSize: 12.5, marginBottom: 16,
+                }}>
+                  {result.warning}
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={handoff}
+                style={{
+                  marginTop: 'auto',
+                  padding: '13px 20px',
+                  border: 0,
+                  borderRadius: 999,
+                  background: 'var(--gg-accent)',
+                  color: '#fff',
+                  fontFamily: 'var(--gg-display)',
+                  fontWeight: 700, fontSize: 14,
+                  letterSpacing: '-0.005em',
+                  cursor: 'pointer',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  alignSelf: 'flex-start',
+                }}
+              >
+                Model this with Yulia
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </>
   );
 }

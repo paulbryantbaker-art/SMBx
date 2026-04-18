@@ -277,124 +277,249 @@ function DscrGrid() {
 }
 
 /* ═════════════════════════════════════════════════════════════════════
-   DEAL RUNDOWN PREVIEW — interactive (pseudo-score from hash)
+   DEAL SCORE PICKER — chip-picker Rundown.
+   Four qualitative picks map to a 0-100 score using heuristics. Every
+   dimension weight is opinionated and transparent. Preview only — the
+   real Rundown runs 22 deterministic formulas against verified data.
    ═════════════════════════════════════════════════════════════════════ */
 
-const DIMENSIONS = [
+const RUNDOWN_DIMENSIONS = [
   'Concentration', 'Margins', 'Revenue quality', 'Dependency',
   'Management', 'Financials', 'Scalability',
 ] as const;
 
-function hashStr(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return Math.abs(h);
-}
+type ConcentrationPick = 'diversified' | 'moderate' | 'concentrated';
+type MarginPick        = 'thin' | 'healthy' | 'strong';
+type DependencyPick    = 'absent' | 'operator' | 'key-person';
+type GrowthPick        = 'declining' | 'flat-5' | '5-15' | '15-plus';
 
-function scoreFromInput(input: string): { dims: number[]; total: number; verdict: 'PURSUE' | 'DEEPER LOOK' | 'PASS' } {
-  const h = hashStr(input);
-  const dims = DIMENSIONS.map((_, i) => 3 + ((h >> (i * 3)) & 7));
-  const total = Math.round((dims.reduce((a, b) => a + b, 0) / (DIMENSIONS.length * 10)) * 100);
+const CONC_OPTIONS: { k: ConcentrationPick; label: string }[] = [
+  { k: 'diversified',  label: 'Top customer <10%' },
+  { k: 'moderate',     label: '10–25%' },
+  { k: 'concentrated', label: '>25%' },
+];
+const MARGIN_OPTIONS: { k: MarginPick; label: string }[] = [
+  { k: 'thin',    label: 'Thin (<10%)' },
+  { k: 'healthy', label: 'Healthy (10–20%)' },
+  { k: 'strong',  label: 'Strong (20%+)' },
+];
+const DEP_OPTIONS: { k: DependencyPick; label: string }[] = [
+  { k: 'absent',     label: 'Absent owner' },
+  { k: 'operator',   label: 'Operator, not key-person' },
+  { k: 'key-person', label: 'Holds key relationships' },
+];
+const GROWTH_OPTIONS: { k: GrowthPick; label: string }[] = [
+  { k: 'declining', label: 'Flat / declining' },
+  { k: 'flat-5',    label: '0–5%' },
+  { k: '5-15',      label: '5–15%' },
+  { k: '15-plus',   label: '15%+' },
+];
+
+/* Map each pick to a 0-10 score for the dimension it most affects;
+   other dimensions get reasonable defaults. Keeps the 7-bar detail
+   honest even though only 4 picks drive it. */
+function scoreFromPicks(c: ConcentrationPick, m: MarginPick, d: DependencyPick, g: GrowthPick): {
+  dims: number[]; total: number; verdict: 'PURSUE' | 'DEEPER LOOK' | 'PASS';
+} {
+  const cScore = c === 'diversified' ? 9 : c === 'moderate' ? 6 : 2;
+  const mScore = m === 'strong' ? 9 : m === 'healthy' ? 7 : 3;
+  const revQ   = m === 'strong' ? 8 : m === 'healthy' ? 7 : 4;
+  const dScore = d === 'absent' ? 9 : d === 'operator' ? 6 : 2;
+  const mgmt   = d === 'absent' ? 8 : d === 'operator' ? 6 : 3;
+  const fin    = m === 'strong' ? 8 : m === 'healthy' ? 6 : 4;
+  const scal   = g === '15-plus' ? 9 : g === '5-15' ? 7 : g === 'flat-5' ? 5 : 2;
+
+  const dims = [cScore, mScore, revQ, dScore, mgmt, fin, scal];
+  const total = Math.round((dims.reduce((a, b) => a + b, 0) / (RUNDOWN_DIMENSIONS.length * 10)) * 100);
   const verdict: 'PURSUE' | 'DEEPER LOOK' | 'PASS' =
-    total >= 70 ? 'PURSUE' : total >= 40 ? 'DEEPER LOOK' : 'PASS';
+    total >= 70 ? 'PURSUE' : total >= 45 ? 'DEEPER LOOK' : 'PASS';
   return { dims, total, verdict };
 }
 
 function DealRundownPreview({ onSend }: { onSend: (text: string) => void }) {
-  const [input, setInput] = useState('');
-  const [result, setResult] = useState<ReturnType<typeof scoreFromInput> | null>(null);
+  const [concentration, setConcentration] = useState<ConcentrationPick | null>(null);
+  const [margin,        setMargin]        = useState<MarginPick | null>(null);
+  const [dependency,    setDependency]    = useState<DependencyPick | null>(null);
+  const [growth,        setGrowth]        = useState<GrowthPick | null>(null);
 
-  const analyze = () => {
-    if (!input.trim()) return;
-    setResult(scoreFromInput(input));
-  };
+  const result = useMemo(() => {
+    if (!concentration || !margin || !dependency || !growth) return null;
+    return scoreFromPicks(concentration, margin, dependency, growth);
+  }, [concentration, margin, dependency, growth]);
 
   const verdictStyle = useMemo(() => {
-    if (!result) return {};
+    if (!result) return { bg: 'var(--gg-bg-subtle)', fg: 'var(--gg-text-muted)' };
     if (result.verdict === 'PURSUE')      return { bg: 'var(--gg-band-hi-bg)',   fg: 'var(--gg-band-hi-fg)' };
     if (result.verdict === 'DEEPER LOOK') return { bg: 'var(--gg-band-med-bg)',  fg: 'var(--gg-band-med-fg)' };
     return                                       { bg: 'var(--gg-band-flag-bg)', fg: 'var(--gg-band-flag-fg)' };
   }, [result]);
 
+  const sendToYulia = () => {
+    if (!result) return;
+    const c = CONC_OPTIONS.find(o => o.k === concentration)!.label.toLowerCase();
+    const m = MARGIN_OPTIONS.find(o => o.k === margin)!.label.toLowerCase();
+    const d = DEP_OPTIONS.find(o => o.k === dependency)!.label.toLowerCase();
+    const g = GROWTH_OPTIONS.find(o => o.k === growth)!.label.toLowerCase();
+    onSend(
+      `I scored a deal on the home-page Rundown: concentration ${c}, margins ${m}, owner ${d}, growth ${g}. ` +
+      `Got a ${result.total}/100 \u2014 ${result.verdict.toLowerCase()}. Run the real 22-formula Rundown against the actual financials.`
+    );
+  };
+
   return (
     <>
       <H2>Score a deal right now.</H2>
       <p className="gg-body--sub" style={{ marginBottom: 40 }}>
-        Paste a listing URL or upload a teaser. Yulia gives you a preview score in 90 seconds.
+        Four picks. Yulia gives you a Rundown score and a verdict. Real deal, real financials \u2014 push it to Yulia for the full 22-formula analysis.
       </p>
 
-      <Card padding={24} style={{ marginBottom: 24, maxWidth: 900 }}>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            placeholder="Paste a deal URL or describe the business…"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') analyze(); }}
-            style={{
-              flex: 1, minWidth: 220, padding: '12px 16px',
-              border: '0.5px solid var(--gg-border)',
-              borderRadius: 'var(--gg-r-btn)',
-              fontSize: 15, fontFamily: 'var(--gg-body)',
-              background: 'var(--gg-bg-card)',
-              outline: 'none',
-            }}
-          />
-          <button type="button" className="gg-btn gg-btn--primary" onClick={analyze} disabled={!input.trim()}>
-            Score it &rarr;
-          </button>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1.1fr) minmax(0, 1fr)',
+          gap: 32,
+          alignItems: 'start',
+          maxWidth: 1120,
+        }}
+      >
+        {/* ── Inputs ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <PickRow label="Customer concentration" options={CONC_OPTIONS}   value={concentration} onPick={setConcentration} />
+          <PickRow label="EBITDA margin"          options={MARGIN_OPTIONS} value={margin}        onPick={setMargin} />
+          <PickRow label="Owner involvement"      options={DEP_OPTIONS}    value={dependency}    onPick={setDependency} />
+          <PickRow label="Revenue growth"         options={GROWTH_OPTIONS} value={growth}        onPick={setGrowth} />
         </div>
-      </Card>
 
-      {result && (
-        <Card padding={32} style={{ maxWidth: 900 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
-            <div>
-              <div className="gg-label" style={{ marginBottom: 4 }}>Deal score</div>
-              <div className="gg-stat" style={{ fontSize: 'clamp(44px, 5.2vw, 64px)' }}>{result.total}</div>
-            </div>
-            <div
-              style={{
-                padding: '10px 18px',
-                borderRadius: 'var(--gg-r-pill)',
-                background: verdictStyle.bg,
-                color: verdictStyle.fg,
-                fontFamily: 'var(--gg-display)',
-                fontWeight: 800,
-                fontSize: 14,
-                letterSpacing: '0.08em',
-              }}
-            >
-              {result.verdict}
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-            {DIMENSIONS.map((dim, i) => (
-              <div key={dim} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ minWidth: 130, fontSize: 13, fontWeight: 600, color: 'var(--gg-text-secondary)' }}>{dim}</div>
-                <div style={{ flex: 1, height: 8, background: 'var(--gg-bg-muted)', borderRadius: 4, overflow: 'hidden' }}>
+        {/* ── Output card ── */}
+        <div
+          className="gg-card"
+          style={{
+            padding: 32,
+            borderRadius: 22,
+            background: result ? 'var(--gg-bg-card)' : 'var(--gg-bg-card)',
+            borderColor: result ? 'var(--gg-text-primary)' : 'var(--gg-border)',
+            transition: 'border-color 240ms var(--gg-ease-spring)',
+            minHeight: 380,
+            display: 'flex', flexDirection: 'column',
+          }}
+        >
+          {!result ? (
+            <>
+              <div className="gg-label" style={{ marginBottom: 8, color: 'var(--gg-text-faint)' }}>Rundown score</div>
+              <div style={{
+                fontFamily: 'var(--gg-display)', fontWeight: 800,
+                fontSize: 'clamp(44px, 5.2vw, 64px)', color: 'var(--gg-text-faint)',
+                letterSpacing: '-0.025em', lineHeight: 1, marginBottom: 20,
+              }}>
+                —/100
+              </div>
+              <p className="gg-body" style={{ fontSize: 14, color: 'var(--gg-text-muted)', marginTop: 'auto', marginBottom: 0 }}>
+                Pick four characteristics to see the score.
+              </p>
+            </>
+          ) : (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+                <div>
+                  <div className="gg-label" style={{ marginBottom: 4 }}>Rundown score</div>
                   <div style={{
-                    width: `${result.dims[i] * 10}%`, height: '100%',
-                    background: result.dims[i] >= 7 ? 'var(--gg-dot-ready)' : result.dims[i] >= 4 ? 'var(--gg-dot-progress)' : 'var(--gg-dot-flag)',
-                    transition: 'width 600ms var(--gg-ease-spring)',
-                  }} />
+                    fontFamily: 'var(--gg-display)', fontWeight: 800,
+                    fontSize: 'clamp(44px, 5.2vw, 64px)',
+                    letterSpacing: '-0.025em', lineHeight: 1,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}>
+                    {result.total}<span style={{ fontSize: '0.45em', color: 'var(--gg-text-muted)', fontWeight: 600 }}>/100</span>
+                  </div>
                 </div>
-                <div style={{ minWidth: 24, fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 14, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                  {result.dims[i]}
+                <div style={{
+                  padding: '10px 18px',
+                  borderRadius: 'var(--gg-r-pill)',
+                  background: verdictStyle.bg,
+                  color: verdictStyle.fg,
+                  fontFamily: 'var(--gg-display)',
+                  fontWeight: 800, fontSize: 13,
+                  letterSpacing: '0.08em',
+                }}>
+                  {result.verdict}
                 </div>
               </div>
-            ))}
-          </div>
 
-          <p className="gg-body" style={{ marginBottom: 8, fontSize: 14, color: 'var(--gg-text-muted)' }}>
-            Preview only — the real Rundown runs the 22 deterministic formulas against verified financials and actual market data. Scores on this page are illustrative, not auditable.
-          </p>
-          <button type="button" className="gg-btn gg-btn--primary" onClick={() => onSend(`Run the real Rundown on this deal: ${input}`)} style={{ marginTop: 12 }}>
-            Continue in chat &rarr;
-          </button>
-        </Card>
-      )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+                {RUNDOWN_DIMENSIONS.map((dim, i) => (
+                  <div key={dim} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ minWidth: 110, fontSize: 12, fontWeight: 600, color: 'var(--gg-text-secondary)' }}>{dim}</div>
+                    <div style={{ flex: 1, height: 6, background: 'var(--gg-bg-muted)', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{
+                        width: `${result.dims[i] * 10}%`, height: '100%',
+                        background: result.dims[i] >= 7 ? 'var(--gg-dot-ready)' : result.dims[i] >= 4 ? 'var(--gg-dot-progress)' : 'var(--gg-dot-flag)',
+                        transition: 'width 600ms var(--gg-ease-spring)',
+                      }} />
+                    </div>
+                    <div style={{ minWidth: 20, fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 12, textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: 'var(--gg-text-primary)' }}>
+                      {result.dims[i]}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <p className="gg-body" style={{ fontSize: 13, color: 'var(--gg-text-muted)', marginBottom: 20 }}>
+                Preview heuristic \u2014 the real Rundown runs 22 deterministic formulas against the actual financials and market data.
+              </p>
+
+              <button
+                type="button"
+                onClick={sendToYulia}
+                style={{
+                  marginTop: 'auto',
+                  padding: '13px 20px',
+                  border: 0,
+                  borderRadius: 999,
+                  background: 'var(--gg-accent)',
+                  color: '#fff',
+                  fontFamily: 'var(--gg-display)',
+                  fontWeight: 700,
+                  fontSize: 14,
+                  letterSpacing: '-0.005em',
+                  cursor: 'pointer',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  alignSelf: 'flex-start',
+                }}
+              >
+                Run the real Rundown
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </button>
+            </>
+          )}
+        </div>
+      </div>
     </>
+  );
+}
+
+function PickRow<K extends string>({ label, options, value, onPick }: {
+  label: string;
+  options: { k: K; label: string }[];
+  value: K | null;
+  onPick: (k: K) => void;
+}) {
+  return (
+    <div>
+      <div className="gg-label" style={{ marginBottom: 10 }}>{label}</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {options.map(o => (
+          <button
+            key={o.k}
+            type="button"
+            className={`gg-chip${o.k === value ? ' active' : ''}`}
+            aria-pressed={o.k === value}
+            onClick={() => onPick(o.k)}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
