@@ -1154,17 +1154,13 @@ export function GiantAnchor({ eyebrow, headline, subhead, chatPlaceholder, chips
     <Section tight={false}>
       <div style={{ maxWidth: 1120 }}>
         {eyebrow && <div className="gg-eyebrow gg-eyebrow--section" style={{ marginBottom: 28 }}>{eyebrow}</div>}
+        {/* Standard .gg-h2 (clamp 28–52px) — was inline clamp 48–104px
+            which rendered bigger than the page hero H1 and inverted
+            the visual hierarchy. Hero is always biggest; the anchor
+            is a prominent section intro, not a super-hero. */}
         <h2
-          style={{
-            fontFamily: 'var(--gg-display)',
-            fontWeight: 800,
-            fontSize: 'clamp(48px, 7.2vw, 104px)',
-            lineHeight: 0.98,
-            letterSpacing: '-0.035em',
-            color: 'var(--gg-text-primary)',
-            margin: 0,
-            marginBottom: subhead ? 28 : 40,
-          }}
+          className="gg-h2"
+          style={{ margin: 0, marginBottom: subhead ? 20 : 32 }}
         >
           {headline}
         </h2>

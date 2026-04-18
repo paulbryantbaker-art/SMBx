@@ -331,14 +331,19 @@
 .gg-h1 {
   font-family: var(--gg-display);
   font-weight: 800;
-  font-size: clamp(42px, 7vw, 88px);
+  /* Hero is the biggest element on any page — full stop. Prior sizes
+     (max 88px for home, 72px for journey heroes) left the GiantAnchor
+     sections reading as bigger than the hero, which inverted the
+     visual hierarchy. Home hero now tops out at 120px; journey heroes
+     at 108px. text-wrap: balance handles natural line breaks. */
+  font-size: clamp(52px, 8.5vw, 120px);
   line-height: 0.95;
   letter-spacing: -0.045em;
   color: var(--gg-text-primary);
   text-wrap: balance;
 }
 .gg-h1--journey {
-  font-size: clamp(36px, 5.6vw, 72px);
+  font-size: clamp(46px, 7.2vw, 108px);
   line-height: 1;
   letter-spacing: -0.035em;
 }
