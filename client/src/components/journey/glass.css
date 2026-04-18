@@ -400,6 +400,34 @@
   text-transform: uppercase;
   color: var(--gg-text-muted);
 }
+
+/* Stronger label variant for input / picker rows. The default .gg-label
+   is a section eyebrow (faint, tracked-wide) — great above an H2 where
+   the H2 carries the weight. But as a form-field label above chip rows
+   it disappears, leaving the visitor guessing what each row means.
+   .gg-input-label bumps weight to 800, pulls color to primary black,
+   tightens tracking, and prefixes a 16×2px dash mark — a Glass Grok
+   signature hairline — so the label scans clearly without breaking the
+   monochrome rule. Paired with a slightly larger font-size. */
+.gg-input-label {
+  font-family: var(--gg-display);
+  font-weight: 800;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gg-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.gg-input-label::before {
+  content: '';
+  width: 16px;
+  height: 2px;
+  background: var(--gg-text-primary);
+  flex-shrink: 0;
+  border-radius: 1px;
+}
 .gg-logo {
   font-family: var(--gg-display);
   font-weight: 800;
@@ -756,19 +784,29 @@
 }
 
 /* Scroll-driven reveal — pure CSS via animation-timeline:view().
-   Chrome/Edge/Safari: elements fade up as they enter the viewport.
-   Firefox (flag only): element stays visible (no animation, no hiding).
+   Chrome/Edge/Safari: elements fade up + scale up as they enter the
+   viewport. Firefox (flag only): stays visible (no animation).
 
-   Range is entry 0% → entry 80%: the animation runs as the top of the
-   element enters the viewport. Earlier we used `cover 20%`, which only
-   triggers if the element fully fits inside the viewport. Tall
-   full-width sections (like the dark BottomCta) never "cover", so they
-   stayed stuck at opacity 0.5 — dark bg rendered gray. */
+   Dedicated keyframe (not the shared gg-fade-up) so scroll reveals can
+   use a larger displacement + scale without affecting on-mount fades
+   elsewhere. 28px lift + 0.98→1 scale + opacity on easeOutExpo feels
+   cinematic — matches the home cascade's curve so the site reads as
+   one design system whether you're on the home hero or deep in /sell. */
+@keyframes gg-scroll-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 @supports (animation-timeline: view()) {
   .gg-reveal {
     opacity: 0;
-    transform: translateY(12px);
-    animation: gg-fade-up linear both;
+    transform: translateY(28px) scale(0.985);
+    animation: gg-scroll-reveal cubic-bezier(0.19, 1, 0.22, 1) both;
     animation-timeline: view();
     animation-range: entry 0% entry 80%;
   }

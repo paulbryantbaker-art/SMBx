@@ -563,7 +563,7 @@ function DemoInput({ label, options, activeIdx, onPick }: {
 }) {
   return (
     <div>
-      <div className="gg-label" style={{ marginBottom: 12 }}>{label}</div>
+      <div className="gg-input-label" style={{ marginBottom: 12 }}>{label}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {options.map((opt, i) => (
           <button

@@ -431,7 +431,7 @@ function SellVsRaise({ onSend }: { onSend: (text: string) => void }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, maxWidth: 900, marginBottom: 32 }}>
         <SliderInput label="Annual EBITDA" display={`$${ebitda}M`} min={1} max={50} step={1} value={ebitda} onChange={setEbitda} />
         <div>
-          <div className="gg-label" style={{ marginBottom: 10 }}>Years until full exit</div>
+          <div className="gg-input-label" style={{ marginBottom: 10 }}>Years until full exit</div>
           <div style={{ display: 'flex', gap: 8 }}>
             {([3, 5, 7, 10] as const).map(y => (
               <button key={y} type="button" className={`gg-chip${y === years ? ' active' : ''}`} aria-pressed={y === years} onClick={() => setYears(y)}>
@@ -500,7 +500,7 @@ function SliderInput({ label, display, min, max, step, value, onChange }: {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-        <span className="gg-label">{label}</span>
+        <span className="gg-input-label">{label}</span>
         <span style={{ fontFamily: 'var(--gg-display)', fontWeight: 800, fontSize: 18, color: 'var(--gg-text-primary)', fontVariantNumeric: 'tabular-nums' }}>
           {display}
         </span>
@@ -646,7 +646,7 @@ function CapitalStackSizer({ onSend }: { onSend: (text: string) => void }) {
         {/* Inputs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div>
-            <div className="gg-label" style={{ marginBottom: 10 }}>Annual EBITDA</div>
+            <div className="gg-input-label" style={{ marginBottom: 10 }}>Annual EBITDA</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {STACK_EBITDA_BANDS.map((b, i) => (
                 <button key={b.label} type="button" className={`gg-chip${i === ebitdaIdx ? ' active' : ''}`} aria-pressed={i === ebitdaIdx} onClick={() => setEbitdaIdx(i)}>
@@ -656,7 +656,7 @@ function CapitalStackSizer({ onSend }: { onSend: (text: string) => void }) {
             </div>
           </div>
           <div>
-            <div className="gg-label" style={{ marginBottom: 10 }}>Cash you need today</div>
+            <div className="gg-input-label" style={{ marginBottom: 10 }}>Cash you need today</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {STACK_CASH_NEEDS.map((c, i) => (
                 <button key={c.label} type="button" className={`gg-chip${i === cashIdx ? ' active' : ''}`} aria-pressed={i === cashIdx} onClick={() => setCashIdx(i)}>
@@ -666,7 +666,7 @@ function CapitalStackSizer({ onSend }: { onSend: (text: string) => void }) {
             </div>
           </div>
           <div>
-            <div className="gg-label" style={{ marginBottom: 10 }}>Control preference</div>
+            <div className="gg-input-label" style={{ marginBottom: 10 }}>Control preference</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {CONTROL_OPTIONS.map(o => (
                 <button key={o.k} type="button" className={`gg-chip${o.k === control ? ' active' : ''}`} aria-pressed={o.k === control} onClick={() => setControl(o.k)}>

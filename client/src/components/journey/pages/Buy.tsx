@@ -498,7 +498,7 @@ function PickRow<K extends string>({ label, options, value, onPick }: {
 }) {
   return (
     <div>
-      <div className="gg-label" style={{ marginBottom: 10 }}>{label}</div>
+      <div className="gg-input-label" style={{ marginBottom: 10 }}>{label}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {options.map(o => (
           <button
