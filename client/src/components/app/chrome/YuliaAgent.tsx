@@ -94,37 +94,11 @@ export default function YuliaAgent({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // Track keyboard height (innerHeight - visualViewport.height). iOS
-  // Safari PWA does NOT resize the layout viewport when the keyboard
-  // opens, so position:fixed children don't know the keyboard is there.
-  // visualViewport.height IS updated by iOS — we use the delta.
-  //
-  // We track keyboard height (not vvh directly) for defensiveness:
-  // innerHeight is a known-good baseline (the webview's layout size,
-  // stable unless the user rotates). Subtracting gives us the keyboard.
-  // If visualViewport reports garbage mid-animation, we clamp to
-  // [0, innerHeight * 0.75] — a keyboard can't be more than ~75% of
-  // the screen.
-  const [kbHeight, setKbHeight] = useState(0);
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const update = () => {
-      const innerH = window.innerHeight;
-      const visibleH = vv.height;
-      const raw = innerH - visibleH;
-      const clamped = Math.max(0, Math.min(innerH * 0.75, raw));
-      setKbHeight(clamped);
-    };
-    update();
-    vv.addEventListener('resize', update);
-    return () => vv.removeEventListener('resize', update);
-  }, []);
-
   // When full-screen chat opens, add `yulia-chat-open` to <html> so our
-  // CSS override in index.css un-fixes body. Body `position: fixed; inset:0`
-  // breaks window.visualViewport keyboard tracking in iOS PWA standalone.
+  // CSS override in index.css FULLY UNLOCKS html + body — making the
+  // runtime behave like Safari browser (where text-field focus Just
+  // Works, as on any standard form on the web). No JS keyboard math;
+  // we let iOS do what it's been doing correctly for a decade.
   useEffect(() => {
     if (state !== 'full') return;
     document.documentElement.classList.add('yulia-chat-open');
@@ -252,15 +226,6 @@ export default function YuliaAgent({
         style={{
           position: 'fixed',
           inset: 0,
-          /* Dialog stays at full viewport (inset:0). When the keyboard
-             opens, reserve its height as BOTTOM PADDING — the flex
-             column's content area naturally shrinks, the composer
-             (flex-shrink:0 at the bottom) lands at the top of the
-             keyboard. Robust to garbage vvh values (clamped to 0..75%
-             of innerHeight) because the dialog itself never resizes
-             to something weird. */
-          paddingBottom: `${kbHeight}px`,
-          boxSizing: 'border-box',
           background: 'var(--bg-app)',
           zIndex: 50,
           overflow: 'hidden',

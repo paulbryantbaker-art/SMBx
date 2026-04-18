@@ -403,22 +403,30 @@ html, body {
 
   /* YULIA FULL-SCREEN CHAT EXCEPTION.
      YuliaAgent adds `yulia-chat-open` to html.classList when state ===
-     'full'. The body `position: fixed; inset: 0` lock above breaks
-     window.visualViewport keyboard tracking in PWA standalone mode
-     (confirmed via diagnostic: vvh stays at 873 when keyboard opens
-     in PWA, but correctly shrinks 775 → 428 in Safari browser). With
-     body pinned, iOS has no flow to adjust, so visualViewport never
-     fires usable events.
+     'full'. Our PWA scroll-lock (html overflow:hidden + body position:
+     fixed inset:0) fights iOS's native keyboard handling — in Safari
+     browser (no lock) iOS shifts the page to keep the focused input
+     visible. In the installed PWA (with our lock) nothing moves and
+     the composer sits behind the keyboard.
 
-     Fix: when the chat is open, un-fix body so iOS handles keyboard
-     avoidance the same way it does in Safari browser. The dialog is
-     already a position:fixed overlay; it doesn't need body to be
-     fixed for isolation. */
+     Fix: FULLY UNLOCK html + body while the chat is open. Not just
+     unfix body — also restore html overflow and touch so iOS behaves
+     the way it does in a regular mobile Safari page (where text-field
+     focus Just Works, as on any doctor's office form). The dialog is
+     a position:fixed z=50 overlay so the rest of the app stays out
+     of the way; it doesn't need the whole-document lock. */
+  html.yulia-chat-open {
+    height: auto !important;
+    overflow: visible !important;
+    overscroll-behavior: auto !important;
+  }
   html.yulia-chat-open body {
     position: static !important;
     inset: auto !important;
-    height: 100dvh !important;
-    overflow: hidden !important;
+    height: auto !important;
+    min-height: 100dvh !important;
+    overflow: visible !important;
+    overscroll-behavior: auto !important;
     touch-action: auto !important;
   }
 }
