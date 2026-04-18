@@ -241,13 +241,17 @@ export default function YuliaAgent({
         role="dialog"
         aria-label="Chat with Yulia"
         style={{
-          /* Dialog is a flex column at 100dvh MINUS keyboard height.
-             When keyboard opens, dialog shrinks by kbHeight, flex
-             column recomputes, composer (flex-shrink:0 at bottom)
-             lands at the top of the keyboard. No position:fixed
-             tricks, no sibling layout. */
+          /* position:absolute top:0 left:0 right:0 so the dialog
+             anchors to body's top edge regardless of other siblings
+             (React's #root is hidden via CSS but we're defensive).
+             Height = 100dvh - kbHeight: when keyboard opens, dialog
+             shrinks, flex column recomputes, composer lands at top
+             of keyboard. */
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
           height: `calc(100dvh - ${kbHeight}px)`,
-          width: '100%',
           background: 'var(--bg-app)',
           overflow: 'hidden',
           display: 'flex',

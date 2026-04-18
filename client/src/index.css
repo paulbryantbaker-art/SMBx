@@ -431,7 +431,12 @@ html, body {
     overscroll-behavior: none !important;
     touch-action: auto !important;
   }
-  html.yulia-chat-open #app-root {
+  /* Hide the entire React app mount (#root contains AppShell). The
+     YuliaAgent dialog is portaled as a SIBLING of #root under body,
+     so it stays visible. Hiding #root (not just #app-root) ensures
+     the dialog isn't pushed down by any residual height from the
+     React tree. */
+  html.yulia-chat-open #root {
     display: none !important;
   }
 }
