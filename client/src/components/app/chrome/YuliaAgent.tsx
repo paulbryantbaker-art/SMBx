@@ -262,15 +262,7 @@ export default function YuliaAgent({
         aria-label="Chat with Yulia"
         style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          /* Use the JS-tracked visual viewport height directly — no CSS
-             var indirection (which has been unreliable in PWA). When
-             keyboard opens, debug.vvh shrinks (873 → 460 in PWA), so
-             the dialog shrinks and the composer at bottom:0 sits just
-             above the keyboard. */
-          height: debug.vvh > 0 ? `${debug.vvh}px` : '100dvh',
+          inset: 0,
           background: 'var(--bg-app)',
           zIndex: 50,
           overflow: 'hidden',
@@ -297,15 +289,15 @@ export default function YuliaAgent({
           vvh={Math.round(debug.vvh)} innerH={debug.innerH} pwa={debug.pwa ? '1' : '0'} body={debug.bodyPos} kbH={debug.kbH}
         </div>
 
-        {/* Header — absolute top, above scroll area. Floating glass
-            buttons, transparent wrapper so content scrolls behind. */}
+        {/* Header — fixed to viewport top. Floating glass buttons,
+            transparent wrapper so content scrolls behind. */}
         <div
           style={{
-            position: 'absolute',
+            position: 'fixed',
             top: 0,
             left: 0,
             right: 0,
-            zIndex: 2,
+            zIndex: 51,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -484,18 +476,19 @@ export default function YuliaAgent({
               opens or new messages stream in. */}
         </div>
 
-        {/* Full-mode composer — ABSOLUTE bottom:0 floating layer. Reads
-            as distinctly "in front of" the scroll area via its own
-            glass chrome (inner pill has blur + inset highlight +
-            elevation shadow), not as the bottom edge of the page. */}
+        {/* Full-mode composer — FIXED to viewport bottom. With body
+            in static flow (html.yulia-chat-open override), iOS lifts
+            position:fixed bottom:0 elements above the keyboard
+            natively. No JS math, no vvh tracking, no fragile state.
+            Same pattern as Grok PWA's composer. */}
         <form
           onSubmit={handleSubmit}
           style={{
-            position: 'absolute',
+            position: 'fixed',
             bottom: 0,
             left: 0,
             right: 0,
-            zIndex: 2,
+            zIndex: 51,
             padding: '8px 12px',
             paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)',
             background: 'transparent',
