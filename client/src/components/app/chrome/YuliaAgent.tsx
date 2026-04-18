@@ -265,7 +265,12 @@ export default function YuliaAgent({
           top: 0,
           left: 0,
           right: 0,
-          height: 'var(--vvh, 100dvh)',
+          /* Use the JS-tracked visual viewport height directly — no CSS
+             var indirection (which has been unreliable in PWA). When
+             keyboard opens, debug.vvh shrinks (873 → 460 in PWA), so
+             the dialog shrinks and the composer at bottom:0 sits just
+             above the keyboard. */
+          height: debug.vvh > 0 ? `${debug.vvh}px` : '100dvh',
           background: 'var(--bg-app)',
           zIndex: 50,
           overflow: 'hidden',
