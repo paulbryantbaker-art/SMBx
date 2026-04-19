@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>/pricing · smbX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deal-room.css">
+<style>
+  .pr-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:18px; }
+  .pr-card { background:#fff; border:0.5px solid rgba(0,0,0,0.08); border-radius:14px; padding:26px; display:flex; flex-direction:column; gap:14px; }
+  .pr-card--feature { background:#0A0A0B; color:#fff; border-color:#0A0A0B; }
+  .pr-card__n { font-family:'JetBrains Mono'; font-size:9.5px; letter-spacing:0.12em; text-transform:uppercase; opacity:0.6; }
+  .pr-card__p { font-family:'Sora'; font-weight:800; font-size:36px; letter-spacing:-0.03em; line-height:1; }
+  .pr-card__p small { font-size:14px; font-weight:600; opacity:0.7; letter-spacing:0; }
+  .pr-card__d { font-size:12.5px; line-height:1.55; opacity:0.8; }
+  .pr-card ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; font-size:12.5px; line-height:1.45; }
+  .pr-card li::before { content:"— "; opacity:0.5; }
+  .pr-cta { margin-top:auto; padding:12px 16px; border-radius:10px; font-family:'Sora'; font-weight:600; font-size:13px; text-align:center; cursor:pointer; border:0; }
+  .pr-cta--dark { background:#0A0A0B; color:#fff; }
+  .pr-cta--light { background:#fff; color:#0A0A0B; }
+  .pr-cta--ghost { background:transparent; color:inherit; border:0.5px solid rgba(255,255,255,0.2); }
+  .pr-cmp { width:100%; border-collapse:collapse; font-size:13px; margin-top:18px; }
+  .pr-cmp thead th { font-family:'JetBrains Mono'; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:#9A9A9F; padding:12px; font-weight:600; text-align:left; }
+  .pr-cmp td { padding:14px 12px; border-top:0.5px solid rgba(0,0,0,0.06); }
+  .pr-cmp tbody tr:nth-child(even) td { background:#FAFAFB; }
+  .pr-cmp td:not(:first-child) { text-align:center; font-variant-numeric:tabular-nums; }
+  .pr-check { color:#0A0A0B; font-weight:700; }
+  .pr-x { color:#C8C8CC; }
+</style>
+</head>
+<body>
+<div class="dr-top">
+  <div style="display:flex;align-items:center;gap:18px;">
+    <a href="index.html" class="dr-top__logo" style="text-decoration:none;color:inherit;">smbx.ai</a>
+    <nav class="dr-top__nav"><a href="index.html">Home</a><a href="sell.html">Sell</a><a href="buy.html">Buy</a><a href="raise.html">Raise</a><a href="integrate.html">Integrate</a><a href="how-it-works.html">How</a><a href="pricing.html" class="active">Pricing</a><a href="enterprise.html">Enterprise</a></nav>
+  </div>
+  <div class="dr-top__cta"><button class="dr-top__signin">Sign in</button><button class="dr-top__btn">Start free →</button></div>
+</div>
+<nav class="dr-nav"><button data-jump="s1">Which tier?</button><button data-jump="s2">Plans</button><button data-jump="s3">Compare</button><button data-jump="s4">FAQ</button></nav>
+<div class="dr-main">
+  <aside class="dr-rail">
+    <div class="dr-rail__head">
+      <div class="dr-rail__avatar">Y</div>
+      <div class="dr-rail__who"><span class="dr-rail__name">Yulia</span><span class="dr-rail__status">Help me pick</span></div>
+    </div>
+    <div class="dr-rail__scroll" id="chat"></div>
+    <div class="dr-rail__input">
+      <form class="dr-rail__chat" id="chatForm">
+        <input id="chatInput" type="text" autocomplete="off" placeholder="Tell me about your deal…">
+        <button class="dr-rail__send" type="submit" aria-label="Send"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+      </form>
+      <div class="dr-rail__chips"><button data-prompt="I'm selling my $3M business">Selling $3M</button><button data-prompt="Searcher with no deal yet">Searcher, no deal</button><button data-prompt="Family office, 2 deals/yr">Family office</button><button data-prompt="Mid-market firm">Mid-market firm</button></div>
+    </div>
+  </aside>
+  <main class="dr-stage">
+    <section class="dr-step" id="s1">
+      <div class="dr-step__head"><span class="dr-step__idx">Which tier?</span></div>
+      <h1 class="dr-step__title">Tell Yulia what you're doing. She'll tell you what you need.</h1>
+      <p class="dr-step__lede">Most owners pick the wrong tier. First-timers over-buy on their first deal and under-buy on their second. Tell her the shape of your situation and she'll point you at the smallest plan that gets you to close — not the biggest one.</p>
+    </section>
+    <section class="dr-step" id="s2">
+      <div class="dr-step__head"><span class="dr-step__idx">Plans</span></div>
+      <h1 class="dr-step__title">Three plans. Everyone upgrades through them in order.</h1>
+      <p class="dr-step__lede">Start free with Yulia answering questions. Move to Deal when you're actually running a process. Move to Firm when you're running multiple processes for multiple clients.</p>
+      <div class="pr-grid">
+        <div class="pr-card">
+          <div>
+            <div class="pr-card__n">Explore</div>
+            <div class="pr-card__p" style="margin-top:8px;">Free</div>
+            <div class="pr-card__d" style="margin-top:6px;">Forever. No card.</div>
+          </div>
+          <ul><li>Conversational valuation range</li><li>Readiness score</li><li>Add-back identification (top 5)</li><li>Structure comparison</li><li>Sample CIM + LOI templates</li></ul>
+          <button class="pr-cta pr-cta--light">Start free →</button>
+        </div>
+        <div class="pr-card pr-card--feature">
+          <div>
+            <div class="pr-card__n">Most common</div>
+            <div class="pr-card__p" style="margin-top:8px;">$2,400<small>/mo</small></div>
+            <div class="pr-card__d" style="margin-top:6px;">Per active deal. Cancel anytime.</div>
+          </div>
+          <ul><li>Everything in Explore</li><li>Full CIM generation + revisions</li><li>Buyer/target universe + outreach</li><li>42-workstream diligence pack</li><li>LOI + APA drafts, red-lined by your counsel</li><li>Dedicated workspace, versioned</li><li>Human banker review on request</li></ul>
+          <button class="pr-cta pr-cta--light">Start a deal →</button>
+        </div>
+        <div class="pr-card">
+          <div>
+            <div class="pr-card__n">Firm</div>
+            <div class="pr-card__p" style="margin-top:8px;">$9,800<small>/mo</small></div>
+            <div class="pr-card__d" style="margin-top:6px;">Up to 6 concurrent deals. Team seats included.</div>
+          </div>
+          <ul><li>Everything in Deal</li><li>Multi-deal pipeline + thesis tracking</li><li>Team seats (up to 12)</li><li>White-labeled client workspaces</li><li>Data room + investor portal</li><li>Custom comps + private deal library</li><li>Priority human review</li></ul>
+          <button class="pr-cta pr-cta--dark">Talk to us →</button>
+        </div>
+      </div>
+    </section>
+    <section class="dr-step" id="s3">
+      <div class="dr-step__head"><span class="dr-step__idx">Compare</span></div>
+      <h1 class="dr-step__title">Every feature, every tier.</h1>
+      <p class="dr-step__lede">No asterisks, no "contact us" rows. If a feature's in a tier, it's in a tier.</p>
+      <div class="dr-bench" style="margin-top:18px;">
+        <div class="dr-bench__body" style="padding:22px;">
+          <table class="pr-cmp">
+            <thead><tr><th>Feature</th><th>Explore</th><th>Deal</th><th>Firm</th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:600;">Valuation + readiness</td><td class="pr-check">✓</td><td class="pr-check">✓</td><td class="pr-check">✓</td></tr>
+              <tr><td style="font-weight:600;">Add-backs (defensible)</td><td>Top 5</td><td>All</td><td>All</td></tr>
+              <tr><td style="font-weight:600;">CIM generation</td><td class="pr-x">Template</td><td class="pr-check">✓ Custom</td><td class="pr-check">✓ White-label</td></tr>
+              <tr><td style="font-weight:600;">Buyer/target universe</td><td class="pr-x">Sample</td><td>Up to 250</td><td>Unlimited</td></tr>
+              <tr><td style="font-weight:600;">Diligence pack</td><td class="pr-x">—</td><td class="pr-check">✓</td><td class="pr-check">✓</td></tr>
+              <tr><td style="font-weight:600;">LOI + APA drafting</td><td class="pr-x">—</td><td class="pr-check">✓</td><td class="pr-check">✓</td></tr>
+              <tr><td style="font-weight:600;">Integration plan (180d)</td><td class="pr-x">—</td><td class="pr-check">✓</td><td class="pr-check">✓</td></tr>
+              <tr><td style="font-weight:600;">Thesis tracking (post-close)</td><td class="pr-x">—</td><td>1 deal</td><td>Up to 6</td></tr>
+              <tr><td style="font-weight:600;">Team seats</td><td>1</td><td>3</td><td>12</td></tr>
+              <tr><td style="font-weight:600;">Human banker review</td><td class="pr-x">—</td><td>On request</td><td>Priority</td></tr>
+              <tr><td style="font-weight:600;">Data room + investor portal</td><td class="pr-x">—</td><td class="pr-x">—</td><td class="pr-check">✓</td></tr>
+              <tr><td style="font-weight:600;">Custom comps library</td><td class="pr-x">—</td><td class="pr-x">—</td><td class="pr-check">✓</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <section class="dr-step" id="s4">
+      <div class="dr-step__head"><span class="dr-step__idx">FAQ</span></div>
+      <h1 class="dr-step__title">The questions buyers ask before signing up.</h1>
+      <div style="display:grid;gap:12px;margin-top:18px;">
+        <div class="hiw-card" style="background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:22px;"><div style="font-family:'Sora';font-weight:700;font-size:14px;margin-bottom:6px;">Is there a success fee?</div><div style="font-size:13px;line-height:1.55;color:#3A3A3E;">No. Banks take 3–6% of deal value. We take a monthly subscription. On a $10M deal you keep $300–600K that would otherwise go to the banker.</div></div>
+        <div class="hiw-card" style="background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:22px;"><div style="font-family:'Sora';font-weight:700;font-size:14px;margin-bottom:6px;">How long until I need to upgrade from Explore?</div><div style="font-size:13px;line-height:1.55;color:#3A3A3E;">Most owners upgrade to Deal the week they decide to actually go to market — typically 4–12 weeks after first chat. Explore is designed to help you decide; Deal is designed to close.</div></div>
+        <div class="hiw-card" style="background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:22px;"><div style="font-family:'Sora';font-weight:700;font-size:14px;margin-bottom:6px;">Do I still need a lawyer?</div><div style="font-size:13px;line-height:1.55;color:#3A3A3E;">Yes. Yulia drafts. Your counsel red-lines. Deals that skip legal review fall apart in diligence — we design Deal around that workflow, not in place of it.</div></div>
+        <div class="hiw-card" style="background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:22px;"><div style="font-family:'Sora';font-weight:700;font-size:14px;margin-bottom:6px;">What if the deal doesn't close?</div><div style="font-size:13px;line-height:1.55;color:#3A3A3E;">You paid subscription for months of work, same as you'd have paid salary to a team. You keep every artifact — CIM, model, buyer list, diligence pack — for the next process. Unlike a banker's retainer, none of it burns on a re-trade.</div></div>
+      </div>
+    </section>
+    <section class="dr-step" id="close">
+      <div class="dr-bottom">
+        <h2>Or just start, free, and upgrade when you're actually running a deal.</h2>
+        <p>Tell Yulia one thing about what you're doing — she'll route you to the right plan. Usually Explore.</p>
+        <form class="dr-bottom__chat" id="chatFormBottom">
+          <input id="chatInputBottom" type="text" placeholder="Buying, selling, raising, or still deciding?">
+          <button class="dr-bottom__send" type="submit" aria-label="Send"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+window.OPENING = "Hi — I'm <strong>Yulia</strong>. Tell me what you're doing and I'll tell you which plan fits. Most people overbuy.";
+window.REPLY = "Tell me: <strong>buying, selling, raising, or integrating</strong>? And roughly what size? I'll route you — usually to Explore.";
+window.SCRIPT = {};
+</script>
+<script src="deal-room.js"></script>
+</body></html>

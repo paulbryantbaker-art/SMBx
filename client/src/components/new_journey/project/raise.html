@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>/raise · smbX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deal-room.css">
+</head>
+<body>
+<div class="dr-top">
+  <div style="display:flex;align-items:center;gap:18px;">
+    <a href="index.html" class="dr-top__logo" style="text-decoration:none;color:inherit;">smbx.ai</a>
+    <nav class="dr-top__nav"><a href="index.html">Home</a><a href="sell.html">Sell</a><a href="buy.html">Buy</a><a href="raise.html" class="active">Raise</a><a href="integrate.html">Integrate</a><a href="how-it-works.html">How</a><a href="pricing.html">Pricing</a><a href="enterprise.html">Enterprise</a></nav>
+  </div>
+  <div class="dr-top__cta"><button class="dr-top__signin">Sign in</button><button class="dr-top__btn">Start free →</button></div>
+</div>
+<nav class="dr-nav"><button data-jump="s1">Structure</button><button data-jump="s2">Cap stack</button><button data-jump="s3">Deck</button><button data-jump="s4">Investors</button></nav>
+<div class="dr-main">
+  <aside class="dr-rail">
+    <div class="dr-rail__head">
+      <div class="dr-rail__avatar">Y</div>
+      <div class="dr-rail__who"><span class="dr-rail__name">Yulia</span><span class="dr-rail__status">Sizing a growth round</span></div>
+      <span class="dr-rail__live">LIVE DEMO</span>
+    </div>
+    <div class="dr-rail__scroll" id="chat"></div>
+    <div class="dr-rail__input">
+      <form class="dr-rail__chat" id="chatForm">
+        <input id="chatInput" type="text" autocomplete="off" placeholder="Ask Yulia anything…">
+        <button class="dr-rail__send" type="submit" aria-label="Send"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+      </form>
+      <div class="dr-rail__chips"><button data-prompt="Sale vs minority?">Sale vs minority?</button><button data-prompt="Size my round">Size my round</button><button data-prompt="Draft my deck">Draft my deck</button><button data-prompt="Who invests in us?">Who invests in us?</button></div>
+    </div>
+  </aside>
+  <main class="dr-stage">
+    <section class="dr-step" id="s1" data-step="1">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 01 · Structure</span></div>
+      <h1 class="dr-step__title">You probably don't need to sell the whole thing.</h1>
+      <p class="dr-step__lede">Most owners default to a full sale because that's the option a broker offers. Yulia runs five structures side-by-side — full sale, minority recap, majority recap, preferred with PIK, senior-stretch debt — and shows you what each one means for your equity, your control, and your 5-year upside.</p>
+      <div class="dr-bench">
+        <div class="dr-bench__head"><div class="dr-bench__title">Structure comparison · MedCorp · $14M EBITDA</div><div class="dr-bench__meta">MODELED @ 7.5× MULT</div></div>
+        <div class="dr-bench__body" style="padding:22px;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead><tr style="font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:0.1em;color:#9A9A9F;text-transform:uppercase;"><th style="text-align:left;padding:8px 10px;font-weight:600;">Structure</th><th style="text-align:right;padding:8px 10px;font-weight:600;">Cash today</th><th style="text-align:right;padding:8px 10px;font-weight:600;">Retained equity</th><th style="text-align:right;padding:8px 10px;font-weight:600;">5yr upside (P50)</th><th style="text-align:right;padding:8px 10px;font-weight:600;">Control</th></tr></thead>
+            <tbody>
+              <tr style="border-top:0.5px solid rgba(0,0,0,0.06);"><td style="padding:14px 10px;font-weight:600;">Full sale</td><td style="text-align:right;padding:14px 10px;font-variant-numeric:tabular-nums;">$105M</td><td style="text-align:right;padding:14px 10px;color:#9A9A9F;">0%</td><td style="text-align:right;padding:14px 10px;color:#9A9A9F;">—</td><td style="text-align:right;padding:14px 10px;color:#9A9A9F;">None</td></tr>
+              <tr style="border-top:0.5px solid rgba(0,0,0,0.06);background:#FAFAFB;"><td style="padding:14px 10px;font-weight:600;">Majority recap</td><td style="text-align:right;padding:14px 10px;font-variant-numeric:tabular-nums;">$73M</td><td style="text-align:right;padding:14px 10px;font-variant-numeric:tabular-nums;">30%</td><td style="text-align:right;padding:14px 10px;font-variant-numeric:tabular-nums;color:#22A755;">+$58M</td><td style="text-align:right;padding:14px 10px;">Board seat</td></tr>
+              <tr style="border-top:0.5px solid rgba(0,0,0,0.06);background:#0A0A0B;color:#fff;"><td style="padding:14px 10px;font-weight:700;">Minority recap ★</td><td style="text-align:right;padding:14px 10px;font-variant-numeric:tabular-nums;">$42M</td><td style="text-align:right;padding:14px 10px;font-variant-numeric:tabular-nums;">70%</td><td style="text-align:right;padding:14px 10px;font-variant-numeric:tabular-nums;color:#7ED8A1;">+$134M</td><td style="text-align:right;padding:14px 10px;">Full</td></tr>
+              <tr style="border-top:0.5px solid rgba(0,0,0,0.06);"><td style="padding:14px 10px;font-weight:600;">Preferred + PIK</td><td style="text-align:right;padding:14px 10px;font-variant-numeric:tabular-nums;">$35M</td><td style="text-align:right;padding:14px 10px;font-variant-numeric:tabular-nums;">100%</td><td style="text-align:right;padding:14px 10px;font-variant-numeric:tabular-nums;color:#22A755;">+$118M</td><td style="text-align:right;padding:14px 10px;">Full</td></tr>
+              <tr style="border-top:0.5px solid rgba(0,0,0,0.06);background:#FAFAFB;"><td style="padding:14px 10px;font-weight:600;">Senior-stretch debt</td><td style="text-align:right;padding:14px 10px;font-variant-numeric:tabular-nums;">$28M</td><td style="text-align:right;padding:14px 10px;font-variant-numeric:tabular-nums;">100%</td><td style="text-align:right;padding:14px 10px;font-variant-numeric:tabular-nums;color:#22A755;">+$142M</td><td style="text-align:right;padding:14px 10px;">Full</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:14px 22px;background:#FAFAFB;border-top:0.5px solid rgba(0,0,0,0.06);font-size:12.5px;color:#3A3A3E;line-height:1.55;"><strong style="color:#0A0A0B;">Yulia's take:</strong> Minority recap gets you a second bite ~3× the first. The premium for full sale over minority today is only $63M — your retained 70% is worth $94M at entry and $134M at P50 exit.</div>
+      </div>
+    </section>
+    <section class="dr-step" id="s2" data-step="2">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 02 · Cap stack</span></div>
+      <h1 class="dr-step__title">Sized to the deal. Not to what one lender will lend you.</h1>
+      <p class="dr-step__lede">The right stack stretches your equity without forcing a covenant reset every 18 months. Yulia builds three layers — senior, unitranche, preferred equity — models the cash-on-cash return for each, and stress-tests against a 25% EBITDA dip.</p>
+      <div class="dr-bench">
+        <div class="dr-bench__head"><div class="dr-bench__title">Capital stack · Recommended</div><div class="dr-bench__meta">$140M ENTERPRISE VALUE</div></div>
+        <div class="dr-bench__body" style="padding:26px 22px;">
+          <div style="display:flex;flex-direction:column;gap:2px;border-radius:10px;overflow:hidden;">
+            <div style="background:#0A0A0B;color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;"><div><div style="font-family:'Sora';font-weight:700;font-size:14px;">Sponsor equity</div><div style="font-size:11px;opacity:0.7;margin-top:2px;">LP check · 5yr hold target</div></div><div style="text-align:right;"><div style="font-family:'Sora';font-weight:800;font-size:22px;">$42M</div><div style="font-size:10px;opacity:0.6;font-family:'JetBrains Mono';letter-spacing:0.1em;">30%</div></div></div>
+            <div style="background:#3A3A3E;color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;"><div><div style="font-family:'Sora';font-weight:700;font-size:14px;">Preferred equity</div><div style="font-size:11px;opacity:0.7;margin-top:2px;">12% PIK · no maintenance covs</div></div><div style="text-align:right;"><div style="font-family:'Sora';font-weight:800;font-size:22px;">$20M</div><div style="font-size:10px;opacity:0.6;font-family:'JetBrains Mono';letter-spacing:0.1em;">14%</div></div></div>
+            <div style="background:#7A7A80;color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;"><div><div style="font-family:'Sora';font-weight:700;font-size:14px;">Unitranche</div><div style="font-size:11px;opacity:0.85;margin-top:2px;">SOFR + 575 · 1.25× FCCV</div></div><div style="text-align:right;"><div style="font-family:'Sora';font-weight:800;font-size:22px;">$56M</div><div style="font-size:10px;opacity:0.75;font-family:'JetBrains Mono';letter-spacing:0.1em;">40%</div></div></div>
+            <div style="background:#C8C8CC;color:#0A0A0B;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;"><div><div style="font-family:'Sora';font-weight:700;font-size:14px;">ABL revolver</div><div style="font-size:11px;opacity:0.7;margin-top:2px;">$22M committed · $12M drawn</div></div><div style="text-align:right;"><div style="font-family:'Sora';font-weight:800;font-size:22px;">$22M</div><div style="font-size:10px;opacity:0.6;font-family:'JetBrains Mono';letter-spacing:0.1em;">16%</div></div></div>
+          </div>
+        </div>
+        <div style="padding:14px 22px;background:#FAFAFB;border-top:0.5px solid rgba(0,0,0,0.06);font-size:12.5px;color:#3A3A3E;line-height:1.55;"><strong style="color:#0A0A0B;">Stress test:</strong> 25% EBITDA dip year 2 — FCCV holds at 1.08×, no covenant breach. Same deal with all-senior at 4.5× levers would breach in month 14.</div>
+      </div>
+    </section>
+    <section class="dr-step" id="s3" data-step="3">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 03 · Deck</span></div>
+      <h1 class="dr-step__title">A pitch that gets taken seriously. Not a template.</h1>
+      <p class="dr-step__lede">22 slides. Written in the voice of a Lazard MD, not a SaaS founder. Yulia pulls your numbers into a narrative that frames the business the way an IC reads — thesis, moat, unit economics, use of proceeds, return model, risks and mitigants.</p>
+      <div class="dr-bench">
+        <div class="dr-bench__head"><div class="dr-bench__title">Investor deck · Project Spring</div><div class="dr-bench__meta">22 SLIDES · v3</div></div>
+        <div class="dr-bench__body" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:22px;background:#FAFAFB;">
+          <div style="background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:10px;padding:16px;aspect-ratio:16/10;"><div style="font-family:'JetBrains Mono';font-size:9px;letter-spacing:0.1em;color:#9A9A9F;margin-bottom:8px;">01 · Thesis</div><div style="font-family:'Sora';font-weight:700;font-size:12px;line-height:1.3;">Consolidating a fragmented, recurring-revenue specialty services market.</div><div style="height:3px;width:80%;background:#E8E8EB;border-radius:2px;margin-top:10px;"></div><div style="height:3px;width:60%;background:#E8E8EB;border-radius:2px;margin-top:5px;"></div></div>
+          <div style="background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:10px;padding:16px;aspect-ratio:16/10;"><div style="font-family:'JetBrains Mono';font-size:9px;letter-spacing:0.1em;color:#9A9A9F;margin-bottom:8px;">08 · Unit economics</div><div style="font-family:'Sora';font-weight:700;font-size:12px;line-height:1.3;">68% gross margin · 14-mo payback · 132% NRR.</div><div style="display:flex;gap:4px;align-items:end;margin-top:10px;height:28px;"><div style="width:8px;height:40%;background:#0A0A0B;"></div><div style="width:8px;height:55%;background:#0A0A0B;"></div><div style="width:8px;height:70%;background:#0A0A0B;"></div><div style="width:8px;height:85%;background:#0A0A0B;"></div><div style="width:8px;height:100%;background:#0A0A0B;"></div></div></div>
+          <div style="background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:10px;padding:16px;aspect-ratio:16/10;"><div style="font-family:'JetBrains Mono';font-size:9px;letter-spacing:0.1em;color:#9A9A9F;margin-bottom:8px;">14 · Use of proceeds</div><div style="font-family:'Sora';font-weight:700;font-size:12px;line-height:1.3;">$62M roll-up capital · $18M platform tech · $20M WC.</div><div style="display:flex;height:6px;margin-top:12px;border-radius:3px;overflow:hidden;"><div style="flex:62;background:#0A0A0B;"></div><div style="flex:18;background:#3A3A3E;"></div><div style="flex:20;background:#7A7A80;"></div></div></div>
+        </div>
+      </div>
+    </section>
+    <section class="dr-step" id="s4" data-step="4">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 04 · Investors</span></div>
+      <h1 class="dr-step__title">The 23 firms that actually write this check. Not 200.</h1>
+      <p class="dr-step__lede">Yulia maps every fund with an active thesis that matches your sector, stage, and check size — filters out the ones currently deploying elsewhere or off-cycle — and ranks them by historical close rate for deals in your shape.</p>
+      <div class="dr-bench">
+        <div class="dr-bench__head"><div class="dr-bench__title">Investor map · Growth equity · Specialty services</div><div class="dr-bench__meta">23 FITS · 6 TIER-1</div></div>
+        <div class="dr-bench__body" style="padding:0 22px 22px;">
+          <div class="row"><div><div class="row__title">Kepler Growth Partners</div><div class="row__sub">$40–80M checks · 9 services deals last 3yrs · warm intro via J. Chen</div></div><div class="row__amt" style="font-size:15px;">Fit 96</div></div>
+          <div class="row"><div><div class="row__title">Meridian Capital</div><div class="row__sub">$25–60M · sector specialist · known for minority recaps</div></div><div class="row__amt" style="font-size:15px;">Fit 92</div></div>
+          <div class="row"><div><div class="row__title">Halcyon Partners</div><div class="row__sub">$30–70M · operator-led · close rate 42% on sourced deals</div></div><div class="row__amt" style="font-size:15px;">Fit 89</div></div>
+          <div class="row" style="background:#F5F5F7;margin:0 -22px -22px;padding:16px 22px;border-top:0.5px solid rgba(0,0,0,0.08);"><div><div class="row__title">+ 20 more qualified</div><div class="row__sub">Ranked by thesis fit × close rate × cycle timing</div></div><div class="row__amt" style="font-size:15px;">View all</div></div>
+        </div>
+      </div>
+    </section>
+    <section class="dr-step" id="close" data-step="5">
+      <div class="dr-bottom">
+        <h2>Tell Yulia your raise goal. See which structure fits before you pick the advisor.</h2>
+        <p>EBITDA, how much cash you need, whether you want to stay. She returns a five-structure comparison and an investor shortlist in under an hour.</p>
+        <form class="dr-bottom__chat" id="chatFormBottom">
+          <input id="chatInputBottom" type="text" placeholder="EBITDA, cash need, ownership preference…">
+          <button class="dr-bottom__send" type="submit" aria-label="Send"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+window.OPENING = "Hi — I'm <strong>Yulia</strong>. This walkthrough is a $14M EBITDA owner deciding between a full sale and a minority recap. Scroll to watch me run the math.";
+window.REPLY = "Three inputs: <strong>EBITDA</strong>, <strong>how much cash you need out</strong>, and <strong>whether you want to keep running it</strong>. I'll run all five structures against your numbers.";
+window.SCRIPT = {"1":[{"who":"y","text":"At $14M EBITDA × 7.5× you're a $105M business. Full sale nets that today. Minority recap nets $42M today and leaves you 70% of the next bite."},{"who":"me","text":"How big is the second bite?"},{"who":"y","text":"At base case <strong>+$134M</strong> over 5 years. Aggressive gets you to ~$180M. The math favors minority unless you need all the liquidity now."}],"2":[{"who":"y","text":"Stack is sized for <strong>$140M EV</strong>: $42M sponsor + $20M pref + $56M unitranche + $22M ABL. Leverage lands at 4.3× net."},{"who":"y","text":"Stress-tested a 25% EBITDA dip — FCCV holds at 1.08×. All-senior at the same leverage would breach in year two."}],"3":[{"who":"y","text":"Deck is 22 slides, written in IC voice. The three I'd walk first: <strong>thesis, unit economics, use of proceeds</strong>."},{"who":"y","text":"Want me to draft the verbal for each? Most founders over-explain slide 1 and rush slide 14 — it's usually the opposite of what the room wants."}],"4":[{"who":"y","text":"23 firms match. 6 tier-1. Kepler is the top fit — they closed 9 specialty services deals in 3 years and you have a warm intro through J. Chen."},{"who":"y","text":"I can draft the outreach and sequence the pitches. First meetings usually within two weeks."}]};
+</script>
+<script src="deal-room.js"></script>
+</body></html>

@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>/sell · Deal Ticker (V3)</title>
+<link rel="stylesheet" href="shared.css" />
+<link rel="stylesheet" href="glass.css" />
+<style>
+  body { background: #F2F2F4; }
+
+  /* ── Top bar — same vocabulary as V1/V2 ─────────────────────── */
+  .tk-top {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 22px; height: 56px;
+    background: rgba(255,255,255,0.78);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border-bottom: 0.5px solid rgba(0,0,0,0.08);
+  }
+  .tk-top__logo { font-family: 'Sora', sans-serif; font-weight: 800; letter-spacing: -0.025em; font-size: 17px; }
+  .tk-top__nav { display: flex; gap: 2px; }
+  .tk-top__nav button {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600;
+    color: #6B6B70; padding: 7px 12px; border: 0; background: transparent;
+    border-radius: 8px; cursor: pointer; transition: all 150ms;
+  }
+  .tk-top__nav button:hover { background: #F5F5F7; color: #0A0A0B; }
+  .tk-top__nav button.active { background: #E8E8EB; color: #0A0A0B; }
+  .tk-top__cta { display: flex; gap: 8px; align-items: center; }
+  .tk-top__signin { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; color: #6B6B70; padding: 7px 12px; border: 0; background: transparent; cursor: pointer; }
+  .tk-top__btn { font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; color: #fff; background: #0A0A0B; border: 0; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+
+  /* ── Hero strip — bold horizontal stat bar ───────────────────── */
+  .tk-hero {
+    background: #0A0A0B; color: #fff;
+    padding: 56px 32px 36px;
+  }
+  .tk-hero__inner { max-width: 1480px; margin: 0 auto; }
+  .tk-hero__kicker {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.55);
+    letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .tk-hero__kicker__dot { width: 8px; height: 8px; border-radius: 50%; background: #22A755; box-shadow: 0 0 0 3px rgba(34,167,85,0.25); animation: tk-pulse 2.4s infinite; }
+  @keyframes tk-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .tk-hero__h1 {
+    font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: clamp(40px, 5.4vw, 72px); letter-spacing: -0.04em;
+    line-height: 1.0; margin: 0 0 18px; max-width: 1100px;
+    text-wrap: balance;
+  }
+  .tk-hero__sub {
+    font-size: 16px; line-height: 1.55; color: rgba(255,255,255,0.78);
+    max-width: 620px; margin: 0 0 36px;
+  }
+
+  /* Hero stat row — running counters */
+  .tk-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    border-top: 0.5px solid rgba(255,255,255,0.12);
+  }
+  .tk-stat {
+    padding: 22px 0 4px; padding-right: 24px;
+    border-right: 0.5px solid rgba(255,255,255,0.08);
+  }
+  .tk-stat:last-child { border-right: 0; }
+  .tk-stat__lbl {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    color: rgba(255,255,255,0.55); letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .tk-stat__val {
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 38px;
+    letter-spacing: -0.03em; color: #fff; line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .tk-stat__delta {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: #22A755; margin-top: 6px; letter-spacing: 0.04em;
+  }
+
+  /* ── Live ticker strip — marquee of latest events ─────────────── */
+  .tk-marquee {
+    background: #1A1A1C; color: #fff; padding: 12px 0;
+    overflow: hidden; position: relative;
+    border-top: 0.5px solid rgba(255,255,255,0.05);
+  }
+  .tk-marquee__track {
+    display: inline-flex; gap: 56px; white-space: nowrap;
+    animation: tk-scroll 80s linear infinite;
+    will-change: transform;
+  }
+  @keyframes tk-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .tk-marquee__item {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: rgba(255,255,255,0.85); letter-spacing: 0.02em;
+  }
+  .tk-marquee__item b { color: #fff; font-weight: 700; }
+  .tk-marquee__item .tag {
+    font-size: 9.5px; padding: 2px 7px; border-radius: 3px;
+    background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .tk-marquee__item .tag.win { background: rgba(34,167,85,0.18); color: #4ade80; }
+
+  /* ── Body layout — feed + replay ─────────────────────────────── */
+  .tk-body {
+    display: grid; grid-template-columns: minmax(0, 2fr) minmax(360px, 1fr);
+    gap: 24px;
+    max-width: 1480px; margin: 0 auto;
+    padding: 32px 32px 120px;
+  }
+  @media (max-width: 1100px) { .tk-body { grid-template-columns: 1fr; } }
+
+  .tk-feed {
+    background: #0A0A0B; color: #fff;
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+  }
+  .tk-feed__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; border-bottom: 0.5px solid rgba(255,255,255,0.08);
+  }
+  .tk-feed__title {
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .tk-feed__title__dot { width: 7px; height: 7px; border-radius: 50%; background: #22A755; box-shadow: 0 0 0 3px rgba(34,167,85,0.2); animation: tk-pulse 2.4s infinite; }
+  .tk-feed__filters { display: flex; gap: 4px; }
+  .tk-feed__filter {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);
+    border: 0; padding: 6px 10px; border-radius: 4px; cursor: pointer;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    transition: all 150ms;
+  }
+  .tk-feed__filter:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .tk-feed__filter.active { background: #fff; color: #0A0A0B; }
+
+  .tk-row {
+    display: grid; grid-template-columns: 80px 1fr 90px 110px 110px;
+    align-items: center; gap: 16px;
+    padding: 14px 20px;
+    border-bottom: 0.5px solid rgba(255,255,255,0.06);
+    cursor: pointer; transition: background 100ms;
+  }
+  .tk-row:hover { background: rgba(255,255,255,0.04); }
+  .tk-row.active { background: rgba(255,255,255,0.08); }
+  .tk-row.flash { animation: tk-flash 1.4s ease-out; }
+  @keyframes tk-flash {
+    0% { background: rgba(34,167,85,0.22); }
+    100% { background: transparent; }
+  }
+  .tk-row__time {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: rgba(255,255,255,0.5); letter-spacing: 0.04em;
+  }
+  .tk-row__type {
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 12px;
+    color: #fff; letter-spacing: -0.005em;
+  }
+  .tk-row__type__sub {
+    font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 400;
+    color: rgba(255,255,255,0.6); margin-top: 2px;
+  }
+  .tk-row__metric {
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 14px;
+    color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+    text-align: right;
+  }
+  .tk-row__metric.up { color: #4ade80; }
+  .tk-row__metric.up::before { content: '+'; }
+  .tk-row__multiple {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: rgba(255,255,255,0.7); text-align: right;
+  }
+  .tk-row__action {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    background: rgba(255,255,255,0.08); color: #fff;
+    padding: 6px 10px; border-radius: 4px; border: 0; cursor: pointer;
+    letter-spacing: 0.06em; text-transform: uppercase; text-align: center;
+    transition: all 150ms;
+  }
+  .tk-row__action:hover { background: #fff; color: #0A0A0B; }
+  .tk-row.active .tk-row__action { background: #fff; color: #0A0A0B; }
+
+  /* Filter row label header */
+  .tk-row--head {
+    cursor: default; padding: 10px 20px; background: rgba(255,255,255,0.04);
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
+  }
+  .tk-row--head:hover { background: rgba(255,255,255,0.04); }
+  .tk-row--head > * {
+    font-family: 'JetBrains Mono', monospace !important; font-size: 9.5px !important;
+    font-weight: 600 !important; color: rgba(255,255,255,0.45) !important;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  /* ── Replay panel (right column) ─────────────────────────────── */
+  .tk-replay {
+    background: #fff; border: 0.5px solid rgba(0,0,0,0.08);
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 6px 24px rgba(0,0,0,0.05);
+    position: sticky; top: 80px;
+    align-self: start;
+    max-height: calc(100vh - 100px);
+    display: flex; flex-direction: column;
+  }
+  .tk-replay__head {
+    padding: 14px 18px; border-bottom: 0.5px solid rgba(0,0,0,0.06);
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(180deg, #FAFAFB 0%, #fff 100%);
+  }
+  .tk-replay__title {
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 13.5px;
+    color: #0A0A0B; display: flex; align-items: center; gap: 10px;
+  }
+  .tk-replay__close {
+    background: transparent; border: 0; cursor: pointer;
+    color: #6B6B70; font-size: 18px; padding: 4px 8px;
+  }
+  .tk-replay__body {
+    padding: 0; overflow-y: auto; flex: 1;
+  }
+  .tk-replay__hero {
+    padding: 22px 22px 20px; border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  }
+  .tk-replay__hero__lbl {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: #6B6B70; letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .tk-replay__hero__amt {
+    font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: 38px; letter-spacing: -0.03em; line-height: 1;
+    color: #0A0A0B; font-variant-numeric: tabular-nums; margin-bottom: 8px;
+  }
+  .tk-replay__hero__sub {
+    font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.5;
+    color: #3A3A3E;
+  }
+
+  /* Mini chat-style replay steps */
+  .tk-step {
+    padding: 14px 22px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
+    display: flex; gap: 10px;
+    animation: tk-step-in 360ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  @keyframes tk-step-in {
+    from { opacity: 0; transform: translateX(8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .tk-step__num {
+    flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+    background: #0A0A0B; color: #fff;
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tk-step__txt {
+    font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.5;
+    color: #3A3A3E;
+  }
+  .tk-step__txt b { color: #0A0A0B; font-weight: 700; }
+
+  .tk-replay__cta {
+    padding: 16px 18px;
+    border-top: 0.5px solid rgba(0,0,0,0.08);
+    background: #FAFAFB;
+  }
+  .tk-replay__cta__txt {
+    font-family: 'Inter', sans-serif; font-size: 12.5px;
+    color: #3A3A3E; line-height: 1.5; margin: 0 0 12px;
+  }
+  .tk-replay__cta__txt b { color: #0A0A0B; font-weight: 700; }
+  .tk-replay__cta__btn {
+    width: 100%; padding: 11px 16px;
+    background: #0A0A0B; color: #fff; border: 0; border-radius: 10px;
+    font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13.5px;
+    cursor: pointer; transition: all 150ms;
+  }
+  .tk-replay__cta__btn:hover { background: #1A1A1C; }
+
+  /* Empty state */
+  .tk-empty {
+    padding: 56px 22px; text-align: center;
+  }
+  .tk-empty__h {
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 16px;
+    color: #0A0A0B; margin: 0 0 8px;
+  }
+  .tk-empty__s {
+    font-family: 'Inter', sans-serif; font-size: 13px; color: #6B6B70;
+    line-height: 1.55;
+  }
+
+  /* ── Bottom: chat-first CTA ─────────────────────────────────── */
+  .tk-cta {
+    max-width: 1480px; margin: 0 auto; padding: 0 32px 96px;
+  }
+  .tk-cta__card {
+    background: #fff; border: 0.5px solid rgba(0,0,0,0.08);
+    border-radius: 20px;
+    padding: 56px 48px;
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 12px 40px rgba(0,0,0,0.06);
+  }
+  @media (max-width: 900px) { .tk-cta__card { grid-template-columns: 1fr; padding: 36px 28px; gap: 28px; } }
+  .tk-cta__h {
+    font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: clamp(28px, 3.6vw, 44px); letter-spacing: -0.03em;
+    line-height: 1.05; color: #0A0A0B; margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  .tk-cta__sub {
+    font-size: 15px; line-height: 1.55; color: #3A3A3E; margin: 0;
+    max-width: 480px;
+  }
+  .tk-cta__chat {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 6px 6px 18px; min-height: 56px;
+    background: #fff; border: 0.5px solid rgba(0,0,0,0.16);
+    border-radius: 999px;
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,1), 0 6px 20px rgba(0,0,0,0.06);
+  }
+  .tk-cta__chat input {
+    flex: 1; border: 0; outline: 0; background: transparent;
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+    color: #0A0A0B;
+  }
+  .tk-cta__send {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: #0A0A0B; color: #fff; border: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tk-cta__chips { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .tk-cta__chips button {
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+    background: #F5F5F7; color: #0A0A0B; border: 0; padding: 7px 12px;
+    border-radius: 999px; cursor: pointer;
+  }
+  .tk-cta__chips button:hover { background: #E8E8EB; }
+</style>
+</head>
+<body>
+  <div class="tk-top">
+    <div style="display:flex;align-items:center;gap:18px;">
+      <span class="tk-top__logo">smbx.ai</span>
+      <nav class="tk-top__nav">
+        <button class="active">Sell</button>
+        <button>Buy</button>
+        <button>Raise</button>
+        <button>Integrate</button>
+        <button>Pricing</button>
+      </nav>
+    </div>
+    <div class="tk-top__cta">
+      <button class="tk-top__signin">Sign in</button>
+      <button class="tk-top__btn">Start free →</button>
+    </div>
+  </div>
+
+  <!-- ═════ Hero — bold tape over running counters ═════ -->
+  <section class="tk-hero">
+    <div class="tk-hero__inner">
+      <div class="tk-hero__kicker"><span class="tk-hero__kicker__dot"></span>Live · sell-side · what Yulia is doing right now</div>
+      <h1 class="tk-hero__h1">A live tape of every dollar Yulia found, every CIM she shipped, every IOI she beat.</h1>
+      <p class="tk-hero__sub">
+        No screenshots. No staged demo. Real anonymized work from real owners and advisors using smbx.ai today. Tap any row to replay how she did it — then start your own thread.
+      </p>
+
+      <div class="tk-stats">
+        <div class="tk-stat">
+          <div class="tk-stat__lbl">Add-backs found · YTD</div>
+          <div class="tk-stat__val" data-counter data-from="0" data-to="142.7" data-decimals="1" data-suffix="M">$142.7M</div>
+          <div class="tk-stat__delta">+$284K today</div>
+        </div>
+        <div class="tk-stat">
+          <div class="tk-stat__lbl">CIMs shipped</div>
+          <div class="tk-stat__val" data-counter data-from="0" data-to="1284" data-suffix="">1,284</div>
+          <div class="tk-stat__delta">+9 this week</div>
+        </div>
+        <div class="tk-stat">
+          <div class="tk-stat__lbl">Avg multiple lift · post-CIM</div>
+          <div class="tk-stat__val" data-counter data-from="0" data-to="1.4" data-decimals="1" data-suffix="×">+1.4×</div>
+          <div class="tk-stat__delta">vs. broker baseline</div>
+        </div>
+        <div class="tk-stat">
+          <div class="tk-stat__lbl">Closed in 2026</div>
+          <div class="tk-stat__val" data-counter data-from="0" data-to="217" data-suffix="">217</div>
+          <div class="tk-stat__delta">+12 this month</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ Marquee ticker ═════ -->
+  <div class="tk-marquee">
+    <div class="tk-marquee__track" id="marquee">
+      <!-- Items injected by JS — 2x for seamless loop -->
+    </div>
+  </div>
+
+  <!-- ═════ Feed + Replay ═════ -->
+  <section class="tk-body">
+    <div class="tk-feed">
+      <div class="tk-feed__head">
+        <div class="tk-feed__title"><span class="tk-feed__title__dot"></span> Live deal feed</div>
+        <div class="tk-feed__filters">
+          <button class="tk-feed__filter active" data-filter="all">All</button>
+          <button class="tk-feed__filter" data-filter="addback">Add-backs</button>
+          <button class="tk-feed__filter" data-filter="cim">CIMs</button>
+          <button class="tk-feed__filter" data-filter="ioi">IOIs</button>
+          <button class="tk-feed__filter" data-filter="close">Closes</button>
+        </div>
+      </div>
+
+      <div class="tk-row tk-row--head">
+        <div>Time</div>
+        <div>Event</div>
+        <div>Industry</div>
+        <div>Metric</div>
+        <div>Replay</div>
+      </div>
+
+      <div id="rows">
+        <!-- Rows injected by JS -->
+      </div>
+    </div>
+
+    <!-- Right column — replay panel -->
+    <aside class="tk-replay" id="replay">
+      <div class="tk-replay__head">
+        <div class="tk-replay__title"><span style="width:7px;height:7px;border-radius:50%;background:#22A755;box-shadow:0 0 0 3px rgba(34,167,85,0.18);"></span> Replay</div>
+        <button class="tk-replay__close" id="replayClose" style="display:none;">✕</button>
+      </div>
+      <div class="tk-replay__body" id="replayBody">
+        <div class="tk-empty">
+          <div class="tk-empty__h">Pick any row.</div>
+          <div class="tk-empty__s">Watch Yulia replay exactly what she did — then run the same thread on your own business.</div>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ═════ Bottom CTA ═════ -->
+  <section class="tk-cta">
+    <div class="tk-cta__card">
+      <div>
+        <h2 class="tk-cta__h">Get on the tape.</h2>
+        <p class="tk-cta__sub">First conversation free. First deliverable free. Tell Yulia three things — industry, revenue, EBITDA — and you'll be the next row added to the feed in about 20 minutes.</p>
+      </div>
+      <div>
+        <form class="tk-cta__chat" id="ctaForm">
+          <input type="text" id="ctaInput" autocomplete="off" spellcheck="false"
+                 placeholder="Industry, revenue, reported EBITDA…" />
+          <button class="tk-cta__send" type="submit" aria-label="Send">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+          </button>
+        </form>
+        <div class="tk-cta__chips">
+          <button data-prompt="What's my business worth?">What's it worth?</button>
+          <button data-prompt="Find my add-backs.">Find my add-backs</button>
+          <button data-prompt="Draft my CIM.">Draft my CIM</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<script>
+  // ── Source data — anonymized, plausible deal events ──
+  const NOW = Date.now();
+  const min = (n) => NOW - n * 60_000;
+  const hr  = (n) => NOW - n * 3_600_000;
+
+  const EVENTS = [
+    {
+      id: 'e1', t: min(3), kind: 'addback',
+      title: 'Add-backs identified', sub: 'Regional HVAC platform · TX',
+      industry: 'Services', metric: '$284K', metricCls: 'up', detail: '0.4× to multiple', winner: false,
+      hero: { lbl: 'Add-backs found', amt: '+$284K', sub: 'On a $9.4M revenue HVAC business in greater Austin. Defensible, documented, ready for QofE review.' },
+      steps: [
+        { n: 1, txt: 'Owner uploaded <b>3 years of tax returns + QBs</b>.' },
+        { n: 2, txt: 'I read them. Found <b>11 normalizations</b> totaling <b>$284K</b>.' },
+        { n: 3, txt: 'Top three: rent above market <b>+$92K</b>, owner comp delta <b>+$68K</b>, non-recurring legal <b>+$41K</b>.' },
+        { n: 4, txt: 'At the upper-band 5.8× multiple that\'s <b>~$1.65M</b> in enterprise value already in the financials.' },
+      ],
+    },
+    {
+      id: 'e2', t: min(11), kind: 'cim',
+      title: 'CIM shipped · 32 pp', sub: 'Specialty manufacturer · MI',
+      industry: 'Manufacturing', metric: '32 pp', metricCls: '', detail: '$14M revenue', winner: false,
+      hero: { lbl: 'CIM shipped', amt: '32 pages', sub: 'Specialty machined-components platform repositioned from "job shop" to "Tier-2 supplier with FAA pedigree".' },
+      steps: [
+        { n: 1, txt: 'Reframed positioning from <b>contract job shop</b> to <b>Tier-2 aerospace supplier</b>.' },
+        { n: 2, txt: 'Pulled out three growth levers: cert expansion, captive customer share, MRO services.' },
+        { n: 3, txt: 'Drafted, edited, exhibits built. <b>32 pages</b> in 4 hours of operator time.' },
+        { n: 4, txt: 'Same business, this CIM vs. last broker\'s: my model implies <b>+1.6×</b> on the multiple.' },
+      ],
+    },
+    {
+      id: 'e3', t: min(28), kind: 'ioi',
+      title: 'IOI received · top of range', sub: 'Behavioral health roll-up · OH',
+      industry: 'Healthcare', metric: '$11.2M', metricCls: 'up', detail: '7.4× adj EBITDA', winner: true,
+      hero: { lbl: 'Winning IOI', amt: '$11.2M', sub: 'On a $1.5M adj EBITDA outpatient services business. 7.4× — top of the range we modeled.' },
+      steps: [
+        { n: 1, txt: 'CIM went out NDA to <b>14 buyers</b> — 6 PE platforms, 5 strategics, 3 family offices.' },
+        { n: 2, txt: 'Three weeks later, <b>5 IOIs</b> back. Best at <b>$11.2M</b> from a Midwest BH platform.' },
+        { n: 3, txt: 'Headline beats first unsolicited approach by <b>$2.1M</b> (+23%).' },
+        { n: 4, txt: 'Modeled after-tax outcome on all five. Recommended sequence to negotiation.' },
+      ],
+    },
+    {
+      id: 'e4', t: min(54), kind: 'close',
+      title: 'Deal closed · wired', sub: 'Commercial roofing · FL',
+      industry: 'Construction', metric: '$6.8M', metricCls: 'up', detail: '5.5× · 80/20 cash/roll', winner: true,
+      hero: { lbl: 'Closed', amt: '$6.8M', sub: 'Commercial roofing platform sold to a regional strategic. 80% cash at close, 20% rollover into the buyer\'s parent.' },
+      steps: [
+        { n: 1, txt: 'Initial range modeled at <b>$5.4M–$6.5M</b>. Closed at <b>$6.8M</b>.' },
+        { n: 2, txt: 'Source of premium: competitive process moved <b>+$700K</b>, optimized add-backs moved <b>+$220K</b>.' },
+        { n: 3, txt: 'Time from first conversation to wire: <b>11 months</b>.' },
+        { n: 4, txt: 'Owner kept the seat for 24 months and a 20% rollover stake. Second-bite event in ~3.5 years.' },
+      ],
+    },
+    {
+      id: 'e5', t: hr(2), kind: 'addback',
+      title: 'Add-backs identified', sub: 'Pet services platform · GA',
+      industry: 'Services', metric: '$118K', metricCls: 'up', detail: '0.3× to multiple', winner: false,
+      hero: { lbl: 'Add-backs found', amt: '+$118K', sub: 'Multi-location pet services platform · 6 stores in Atlanta MSA.' },
+      steps: [
+        { n: 1, txt: 'Read 3 years of returns + intercompany leases.' },
+        { n: 2, txt: 'Found <b>$118K</b>: family on payroll <b>+$48K</b>, autos <b>+$22K</b>, intercompany rent normalization <b>+$48K</b>.' },
+        { n: 3, txt: 'Net effect on midpoint multiple: <b>+0.3×</b>. Worth roughly <b>$590K</b> in EV.' },
+      ],
+    },
+    {
+      id: 'e6', t: hr(3), kind: 'cim',
+      title: 'CIM shipped · 28 pp', sub: 'B2B SaaS · seed-stage exit · WA',
+      industry: 'Technology', metric: '28 pp', metricCls: '', detail: '$3.8M ARR', winner: false,
+      hero: { lbl: 'CIM shipped', amt: '28 pages', sub: 'Vertical SaaS for property management. $3.8M ARR, 124% NRR, founder-led.' },
+      steps: [
+        { n: 1, txt: 'Built the metrics exhibit: <b>NRR, gross retention, magic number, payback</b>.' },
+        { n: 2, txt: 'Wrote the strategic narrative around <b>data exhaust + workflow lock-in</b>, not just ARR.' },
+        { n: 3, txt: 'Identified <b>9 likely strategic acquirers</b> with M&A history in vertical SaaS.' },
+      ],
+    },
+    {
+      id: 'e7', t: hr(5), kind: 'ioi',
+      title: 'IOI received · mid-range', sub: 'Specialty distributor · IL',
+      industry: 'Distribution', metric: '$22M', metricCls: '', detail: '6.1× adj EBITDA', winner: false,
+      hero: { lbl: 'IOI received', amt: '$22M', sub: 'Mid of the range we modeled. Buyer is a PE-backed roll-up; structure has a 12-month earnout.' },
+      steps: [
+        { n: 1, txt: 'IOI in at <b>$22M</b>. Modeled range was <b>$20–25M</b>.' },
+        { n: 2, txt: 'Earnout adds <b>$2M</b> conditional on retaining top-3 customers · realistic, not aggressive.' },
+        { n: 3, txt: 'Two more IOIs expected by end of week. Holding response.' },
+      ],
+    },
+    {
+      id: 'e8', t: hr(8), kind: 'close',
+      title: 'Deal closed · wired', sub: 'Veterinary practice · NC',
+      industry: 'Healthcare', metric: '$4.1M', metricCls: 'up', detail: '8.2× adj EBITDA', winner: true,
+      hero: { lbl: 'Closed', amt: '$4.1M', sub: 'Single-location vet practice sold to a national consolidator. All cash. 60-day close.' },
+      steps: [
+        { n: 1, txt: 'Initial broker valuation was <b>$2.9M</b>. We put the right buyer universe in front of the right CIM.' },
+        { n: 2, txt: 'Three IOIs · winning bid <b>+$1.2M</b> over the original valuation.' },
+        { n: 3, txt: '<b>11-month</b> total cycle. Owner stayed 6 months as MD then exited.' },
+      ],
+    },
+    {
+      id: 'e9', t: hr(11), kind: 'addback',
+      title: 'Add-backs identified', sub: 'Insurance brokerage · NJ',
+      industry: 'Financial', metric: '$76K', metricCls: 'up', detail: '0.5× to multiple', winner: false,
+      hero: { lbl: 'Add-backs found', amt: '+$76K', sub: 'Independent commercial insurance brokerage. Owner-operator, 22 years.' },
+      steps: [
+        { n: 1, txt: 'P&L plus 3 years of returns. Normalized owner-comp <b>+$36K</b>, T&E <b>+$22K</b>, country club <b>+$18K</b>.' },
+        { n: 2, txt: 'In financial services, <b>0.5×</b> on a 7–9× multiple is meaningful — <b>~$530K</b> EV.' },
+      ],
+    },
+  ];
+
+  const KIND_LABEL = { addback: 'ADD-BACKS', cim: 'CIM', ioi: 'IOI', close: 'CLOSED' };
+
+  function timeAgo(ts) {
+    const s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 60) return s + 's';
+    if (s < 3600) return Math.floor(s / 60) + 'm';
+    if (s < 86400) return Math.floor(s / 3600) + 'h';
+    return Math.floor(s / 86400) + 'd';
+  }
+
+  // ── Render the feed ──
+  const rowsEl = document.getElementById('rows');
+  let activeFilter = 'all';
+
+  function render() {
+    rowsEl.innerHTML = '';
+    EVENTS
+      .filter(e => activeFilter === 'all' || e.kind === activeFilter)
+      .forEach(e => {
+        const row = document.createElement('div');
+        row.className = 'tk-row';
+        row.dataset.id = e.id;
+        row.innerHTML = `
+          <div class="tk-row__time">${timeAgo(e.t)} ago</div>
+          <div>
+            <div class="tk-row__type">${e.title}</div>
+            <div class="tk-row__type__sub">${e.sub}</div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,0.55);letter-spacing:0.04em;">${e.industry}</div>
+          <div class="tk-row__metric ${e.metricCls}">${e.metric}</div>
+          <button class="tk-row__action">Replay →</button>
+        `;
+        row.addEventListener('click', () => openReplay(e));
+        rowsEl.appendChild(row);
+      });
+  }
+  render();
+
+  // ── Filters ──
+  document.querySelectorAll('.tk-feed__filter').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.tk-feed__filter').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      activeFilter = b.dataset.filter;
+      render();
+    });
+  });
+
+  // ── Replay panel ──
+  const replayBody = document.getElementById('replayBody');
+  const replayClose = document.getElementById('replayClose');
+  let activeId = null;
+
+  function openReplay(e) {
+    activeId = e.id;
+    document.querySelectorAll('.tk-row').forEach(r => r.classList.toggle('active', r.dataset.id === e.id));
+    replayClose.style.display = '';
+    replayBody.innerHTML = `
+      <div class="tk-replay__hero">
+        <div class="tk-replay__hero__lbl">${e.hero.lbl}</div>
+        <div class="tk-replay__hero__amt">${e.hero.amt}</div>
+        <div class="tk-replay__hero__sub">${e.hero.sub}</div>
+      </div>
+      ${e.steps.map(s => `
+        <div class="tk-step" style="animation-delay:${s.n * 80}ms">
+          <div class="tk-step__num">${s.n}</div>
+          <div class="tk-step__txt">${s.txt}</div>
+        </div>
+      `).join('')}
+      <div class="tk-replay__cta">
+        <p class="tk-replay__cta__txt">Run this thread on <b>your</b> business. Three inputs, twenty minutes, free.</p>
+        <button class="tk-replay__cta__btn">Start with Yulia →</button>
+      </div>
+    `;
+  }
+  replayClose.addEventListener('click', () => {
+    activeId = null;
+    document.querySelectorAll('.tk-row').forEach(r => r.classList.remove('active'));
+    replayClose.style.display = 'none';
+    replayBody.innerHTML = `
+      <div class="tk-empty">
+        <div class="tk-empty__h">Pick any row.</div>
+        <div class="tk-empty__s">Watch Yulia replay exactly what she did — then run the same thread on your own business.</div>
+      </div>
+    `;
+  });
+
+  // ── Marquee ──
+  const marquee = document.getElementById('marquee');
+  const TICKER_ITEMS = [
+    { txt: '<b>+$284K</b> add-backs · TX HVAC', tag: 'ADD-BACKS' },
+    { txt: '<b>32 pp CIM</b> shipped · MI manufacturer', tag: 'CIM' },
+    { txt: '<b>$11.2M</b> winning IOI · OH healthcare', tag: 'IOI', cls: 'win' },
+    { txt: '<b>$6.8M</b> wired · FL roofing', tag: 'CLOSED', cls: 'win' },
+    { txt: '<b>+$118K</b> add-backs · GA pet services', tag: 'ADD-BACKS' },
+    { txt: '<b>28 pp CIM</b> shipped · WA SaaS', tag: 'CIM' },
+    { txt: '<b>$22M</b> IOI received · IL distribution', tag: 'IOI' },
+    { txt: '<b>$4.1M</b> wired · NC veterinary', tag: 'CLOSED', cls: 'win' },
+    { txt: '<b>+$76K</b> add-backs · NJ insurance', tag: 'ADD-BACKS' },
+    { txt: '<b>$1.95M</b> IOI · CO landscaping', tag: 'IOI' },
+    { txt: '<b>$8.7M</b> wired · AZ trucking', tag: 'CLOSED', cls: 'win' },
+    { txt: '<b>+$162K</b> add-backs · WI dental', tag: 'ADD-BACKS' },
+  ];
+  function buildMarquee() {
+    const items = TICKER_ITEMS.concat(TICKER_ITEMS); // duplicate for seamless loop
+    marquee.innerHTML = items.map(i => `
+      <div class="tk-marquee__item">
+        <span class="tag ${i.cls || ''}">${i.tag}</span>
+        <span>${i.txt}</span>
+      </div>
+    `).join('');
+  }
+  buildMarquee();
+
+  // ── Hero counters — animate on load ──
+  document.querySelectorAll('[data-counter]').forEach(el => {
+    const to = parseFloat(el.dataset.to);
+    const from = parseFloat(el.dataset.from);
+    const decimals = parseInt(el.dataset.decimals || '0', 10);
+    const suffix = el.dataset.suffix || '';
+    const prefix = el.textContent.startsWith('$') ? '$' : '';
+    const dur = 1400;
+    const start = performance.now();
+    function tick(now) {
+      const t = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const val = from + (to - from) * eased;
+      const formatted = decimals > 0 ? val.toFixed(decimals) : Math.round(val).toLocaleString();
+      el.textContent = prefix + formatted + suffix;
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+
+  // ── Live "new event" simulation: every ~8s flash a row + add to the marquee ──
+  function pulseRandom() {
+    const rows = document.querySelectorAll('.tk-row:not(.tk-row--head)');
+    if (!rows.length) return;
+    const r = rows[Math.floor(Math.random() * rows.length)];
+    r.classList.remove('flash'); void r.offsetWidth; r.classList.add('flash');
+  }
+  setInterval(pulseRandom, 7000);
+
+  // ── Bottom CTA wiring (just visual — no actual chat behind it) ──
+  document.getElementById('ctaForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('ctaInput');
+    if (!input.value.trim()) return;
+    input.value = '';
+    input.placeholder = 'Got it — Yulia will be back in ~20 min with your number…';
+  });
+  document.querySelectorAll('.tk-cta__chips button').forEach(b => {
+    b.addEventListener('click', () => {
+      const input = document.getElementById('ctaInput');
+      input.value = b.dataset.prompt;
+      input.focus();
+    });
+  });
+</script>
+</body>
+</html>

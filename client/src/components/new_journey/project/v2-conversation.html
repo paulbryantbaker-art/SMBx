@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>/sell · Conversation Canvas (V2)</title>
+<link rel="stylesheet" href="shared.css" />
+<link rel="stylesheet" href="glass.css" />
+<style>
+  body { background: #F2F2F4; }
+
+  /* ── Top bar ─────────────────────────────────────────────────── */
+  .cc-top {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 22px; height: 56px;
+    background: rgba(255,255,255,0.78);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border-bottom: 0.5px solid rgba(0,0,0,0.08);
+  }
+  .cc-top__logo { font-family: 'Sora', sans-serif; font-weight: 800; letter-spacing: -0.025em; font-size: 17px; }
+  .cc-top__nav { display: flex; gap: 2px; }
+  .cc-top__nav button {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600;
+    color: #6B6B70; padding: 7px 12px; border: 0; background: transparent;
+    border-radius: 8px; cursor: pointer; transition: all 150ms;
+  }
+  .cc-top__nav button:hover { background: #F5F5F7; color: #0A0A0B; }
+  .cc-top__nav button.active { background: #E8E8EB; color: #0A0A0B; }
+  .cc-top__cta { display: flex; gap: 8px; align-items: center; }
+  .cc-top__signin {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600;
+    color: #6B6B70; padding: 7px 12px; border: 0; background: transparent; cursor: pointer;
+  }
+  .cc-top__btn {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700;
+    color: #fff; background: #0A0A0B; border: 0; padding: 8px 14px;
+    border-radius: 8px; cursor: pointer;
+  }
+
+  /* ── Page intro — minimal hero ───────────────────────────────── */
+  .cc-intro {
+    max-width: 760px; margin: 80px auto 32px;
+    padding: 0 24px; text-align: center;
+  }
+  .cc-intro__kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 600; color: #6B6B70;
+    letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px;
+  }
+  .cc-intro__h1 {
+    font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: clamp(36px, 5vw, 56px); letter-spacing: -0.035em;
+    line-height: 1.02; color: #0A0A0B; margin: 0 0 16px;
+    text-wrap: balance;
+  }
+  .cc-intro__sub {
+    font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.55;
+    color: #3A3A3E; margin: 0 auto 28px; max-width: 540px;
+  }
+  .cc-intro__startbar {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; background: #fff;
+    border: 0.5px solid rgba(0,0,0,0.12); border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: #6B6B70; letter-spacing: 0.06em;
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,1), 0 4px 16px rgba(0,0,0,0.04);
+  }
+  .cc-intro__startbar::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%;
+    background: #22A755; box-shadow: 0 0 0 3px rgba(34,167,85,0.18);
+  }
+
+  /* ── Layout — chat column with right marker rail ─────────────── */
+  .cc-stage {
+    display: grid;
+    grid-template-columns: 1fr minmax(680px, 760px) 1fr;
+    padding: 0 0 80px;
+  }
+  .cc-rail--marker {
+    position: sticky; top: 80px;
+    height: max-content; align-self: start;
+    padding: 24px 0 24px 32px;
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .cc-rail--marker > * { display: block; }
+  .cc-marker {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0; cursor: pointer;
+    background: transparent; border: 0; text-align: left;
+    color: #9A9A9F; transition: color 150ms;
+  }
+  .cc-marker:hover { color: #3A3A3E; }
+  .cc-marker.active { color: #0A0A0B; }
+  .cc-marker__tick {
+    width: 18px; height: 1px; background: currentColor;
+    transition: width 200ms;
+  }
+  .cc-marker.active .cc-marker__tick { width: 36px; }
+  .cc-marker__label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  /* The conversation column */
+  .cc-thread {
+    padding: 32px 32px 48px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .cc-section {
+    scroll-margin-top: 80px;
+    padding-top: 28px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .cc-section + .cc-section { margin-top: 12px; }
+
+  /* "Yulia is …" line — used as a section divider */
+  .cc-divider {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 0 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    color: #9A9A9F; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .cc-divider::before, .cc-divider::after {
+    content: ''; flex: 1; height: 0.5px; background: rgba(0,0,0,0.1);
+  }
+
+  /* Message bubbles */
+  .cc-msg {
+    max-width: 88%;
+    font-size: 15.5px; line-height: 1.6;
+    animation: cc-msg-in 380ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  @keyframes cc-msg-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .cc-msg--y { align-self: flex-start; }
+  .cc-msg--y .cc-msg__bubble {
+    background: #fff; color: #0A0A0B;
+    border: 0.5px solid rgba(0,0,0,0.08);
+    border-radius: 4px 18px 18px 18px;
+    padding: 14px 18px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 4px 16px rgba(0,0,0,0.03);
+  }
+  .cc-msg--me { align-self: flex-end; max-width: 78%; }
+  .cc-msg--me .cc-msg__bubble {
+    background: #0A0A0B; color: #fff;
+    border-radius: 18px 4px 18px 18px;
+    padding: 14px 18px;
+  }
+  .cc-msg__avatar {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: #9A9A9F; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .cc-msg__avatar__dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(135deg, #3A3A3E 0%, #0A0A0B 100%);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 11px;
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.15);
+  }
+  .cc-msg--me .cc-msg__avatar { justify-content: flex-end; }
+  .cc-msg__bubble strong { font-weight: 700; }
+  .cc-msg__bubble em { font-style: normal; background: linear-gradient(180deg, transparent 60%, rgba(232,160,51,0.32) 60%); padding: 0 2px; }
+
+  /* Inline artifact card — rendered as a Yulia attachment */
+  .cc-card {
+    align-self: flex-start; max-width: 92%;
+    background: #fff; border: 0.5px solid rgba(0,0,0,0.08);
+    border-radius: 16px; overflow: hidden;
+    box-shadow:
+      inset 0 0.5px 0 rgba(255,255,255,1),
+      0 1px 3px rgba(0,0,0,0.03),
+      0 6px 24px rgba(0,0,0,0.05);
+  }
+  .cc-card__head {
+    padding: 12px 16px; border-bottom: 0.5px solid rgba(0,0,0,0.06);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: linear-gradient(180deg, #FAFAFB 0%, #fff 100%);
+  }
+  .cc-card__title {
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 12.5px;
+    color: #0A0A0B;
+  }
+  .cc-card__meta {
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+    color: #6B6B70; letter-spacing: 0.06em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cc-card__dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #22A755;
+    box-shadow: 0 0 0 2.5px rgba(34,167,85,0.15);
+  }
+
+  /* Add-back rows inside an inline card */
+  .cc-row {
+    display: grid; grid-template-columns: 1fr auto; gap: 12px;
+    padding: 12px 18px; border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  }
+  .cc-row:last-child { border-bottom: 0; }
+  .cc-row__t { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px; color: #0A0A0B; margin-bottom: 1px; }
+  .cc-row__s { font-family: 'Inter', sans-serif; font-size: 11.5px; color: #6B6B70; }
+  .cc-row__a { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 14px; color: #166534; align-self: center; font-variant-numeric: tabular-nums; }
+  .cc-card__total {
+    display: grid; grid-template-columns: 1fr auto; padding: 14px 18px;
+    background: #0A0A0B; color: #fff; align-items: center;
+  }
+  .cc-card__total__lbl { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 2px; }
+  .cc-card__total__note { font-size: 11.5px; color: rgba(255,255,255,0.75); }
+  .cc-card__total__amt { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 30px; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+
+  /* Three-bid mini grid inside an inline card */
+  .cc-bids { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .cc-bid { padding: 16px 14px; border-right: 0.5px solid rgba(0,0,0,0.08); position: relative; }
+  .cc-bid:last-child { border-right: 0; }
+  .cc-bid--win { background: linear-gradient(180deg, #FAFAFB 0%, #fff 100%); }
+  .cc-bid--win::before {
+    content: 'WINS'; position: absolute; top: 8px; right: 8px;
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 8px;
+    letter-spacing: 0.12em; color: #166534; background: #DCFCE7;
+    padding: 2px 6px; border-radius: 3px;
+  }
+  .cc-bid__name { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 10.5px; color: #6B6B70; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+  .cc-bid__price { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -0.025em; color: #0A0A0B; line-height: 1; font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+  .cc-bid__note { font-size: 11px; color: #3A3A3E; line-height: 1.45; }
+
+  /* Mini readiness donut as inline */
+  .cc-ready {
+    display: grid; grid-template-columns: 110px 1fr; gap: 18px; align-items: center; padding: 16px 18px;
+  }
+  .cc-ready__donut { position: relative; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; }
+  .cc-ready__donut svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+  .cc-ready__track { fill: none; stroke: #E8E8EB; stroke-width: 10; }
+  .cc-ready__fill { fill: none; stroke: #0A0A0B; stroke-width: 10; stroke-linecap: round; stroke-dasharray: 282.7; stroke-dashoffset: 70.7; }
+  .cc-ready__num { position: absolute; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 30px; letter-spacing: -0.03em; color: #0A0A0B; }
+  .cc-ready__num small { font-size: 11px; color: #9A9A9F; font-weight: 700; }
+  .cc-ready__rows { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; }
+  .cc-ready__row { display: flex; align-items: center; gap: 8px; }
+  .cc-ready__row__dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .cc-ready__row__lbl { flex: 1; color: #3A3A3E; }
+  .cc-ready__row__val { font-family: 'Sora', sans-serif; font-weight: 700; color: #0A0A0B; font-variant-numeric: tabular-nums; }
+
+  /* "Jump in" reply chip — appears after long Yulia paragraphs */
+  .cc-replies {
+    align-self: flex-start; max-width: 92%;
+    display: flex; flex-wrap: wrap; gap: 8px;
+    padding: 6px 0 4px;
+  }
+  .cc-reply {
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12.5px;
+    background: #fff; color: #0A0A0B; border: 0.5px solid rgba(0,0,0,0.16);
+    padding: 8px 14px; border-radius: 999px; cursor: pointer;
+    transition: all 150ms;
+  }
+  .cc-reply:hover { border-color: #0A0A0B; background: #F5F5F7; }
+
+  /* Bottom dock — sticky chat input that follows the user */
+  .cc-dock {
+    position: sticky; bottom: 18px; z-index: 30;
+    margin: 0 auto; max-width: 720px;
+    padding: 0 32px;
+  }
+  .cc-dock__inner {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 6px 6px 18px; min-height: 52px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border: 0.5px solid rgba(0,0,0,0.12); border-radius: 999px;
+    box-shadow:
+      inset 0 0.5px 0 rgba(255,255,255,1),
+      0 8px 28px rgba(0,0,0,0.1);
+  }
+  .cc-dock__inner input {
+    flex: 1; border: 0; outline: 0; background: transparent;
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+    color: #0A0A0B;
+  }
+  .cc-dock__inner input::placeholder { color: #9A9A9F; }
+  .cc-dock__send {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: #0A0A0B; color: #fff; border: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.18), 0 2px 6px rgba(0,0,0,0.18);
+  }
+
+  /* Big anchor moments — break the rhythm */
+  .cc-anchor {
+    align-self: stretch;
+    margin: 28px -16px;
+    padding: 36px 32px 32px;
+    background: #0A0A0B; color: #fff;
+    border-radius: 18px;
+  }
+  .cc-anchor__kicker {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    color: rgba(255,255,255,0.55); letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .cc-anchor__big {
+    font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: clamp(40px, 6vw, 64px); letter-spacing: -0.035em;
+    line-height: 1.0; margin-bottom: 14px;
+    text-wrap: balance;
+  }
+  .cc-anchor__sub {
+    font-size: 14.5px; line-height: 1.55; color: rgba(255,255,255,0.78);
+    max-width: 540px;
+  }
+
+  /* Hide marker rail on narrow screens */
+  @media (max-width: 1100px) {
+    .cc-stage { grid-template-columns: 1fr minmax(0, 760px) 1fr; }
+    .cc-rail--marker { display: none; }
+  }
+  @media (max-width: 700px) {
+    .cc-thread { padding: 16px 16px 32px; }
+    .cc-anchor { margin: 20px -8px; padding: 28px 22px; }
+  }
+</style>
+</head>
+<body>
+  <div class="cc-top">
+    <div style="display:flex;align-items:center;gap:18px;">
+      <span class="cc-top__logo">smbx.ai</span>
+      <nav class="cc-top__nav">
+        <button class="active">Sell</button>
+        <button>Buy</button>
+        <button>Raise</button>
+        <button>Integrate</button>
+        <button>Pricing</button>
+      </nav>
+    </div>
+    <div class="cc-top__cta">
+      <button class="cc-top__signin">Sign in</button>
+      <button class="cc-top__btn">Start free →</button>
+    </div>
+  </div>
+
+  <section class="cc-intro">
+    <div class="cc-intro__kicker">Sell-side · for owners and the advisors running the process</div>
+    <h1 class="cc-intro__h1">Don't read about Yulia. Watch her work — then jump in.</h1>
+    <p class="cc-intro__sub">
+      What follows is a real conversation with Yulia, our M&amp;A AI, working a sell-side deal
+      for "Acme HVAC". Scroll through it. Tap any reply to take over the thread.
+    </p>
+    <div class="cc-intro__startbar">YULIA · WORKING ON ACME HVAC · LIVE THREAD</div>
+  </section>
+
+  <div class="cc-stage">
+    <!-- empty left gutter -->
+    <div></div>
+
+    <!-- ═════ Conversation thread ═════ -->
+    <main class="cc-thread" id="thread">
+
+      <!-- ──────── Section 1 — Add-backs ──────── -->
+      <section class="cc-section" id="s-addbacks">
+        <div class="cc-divider">Yulia · reading your tax returns</div>
+
+        <div class="cc-msg cc-msg--y">
+          <div class="cc-msg__avatar"><span class="cc-msg__avatar__dot">Y</span> Yulia · 2 min ago</div>
+          <div class="cc-msg__bubble">
+            Hi — I'm <strong>Yulia</strong>. I run M&amp;A inside smbx.ai. The owner of <strong>Acme HVAC</strong> uploaded three years of tax returns this morning. I've read them. Here's what I found.
+          </div>
+        </div>
+
+        <div class="cc-msg cc-msg--y">
+          <div class="cc-msg__bubble">
+            Reported EBITDA was <strong>$1.42M</strong>. <em>Real</em> EBITDA — after defensible add-backs — is closer to <strong>$1.89M</strong>. That's a <strong>$470K</strong> gap. The seller's broker missed it. I read three returns; it took me eight minutes.
+          </div>
+        </div>
+
+        <div class="cc-card">
+          <div class="cc-card__head">
+            <div class="cc-card__title">Add-back schedule · Acme HVAC</div>
+            <div class="cc-card__meta"><span class="cc-card__dot"></span>YULIA · LIVE</div>
+          </div>
+          <div class="cc-row">
+            <div>
+              <div class="cc-row__t">Owner compensation above market</div>
+              <div class="cc-row__s">$165K paid · $143K BLS benchmark</div>
+            </div>
+            <div class="cc-row__a">+$22K</div>
+          </div>
+          <div class="cc-row">
+            <div>
+              <div class="cc-row__t">Personal vehicles on the books</div>
+              <div class="cc-row__s">2 F-150s · fuel, maintenance, insurance</div>
+            </div>
+            <div class="cc-row__a">+$14K</div>
+          </div>
+          <div class="cc-row">
+            <div>
+              <div class="cc-row__t">Spouse on payroll</div>
+              <div class="cc-row__s">Replaceable at market rate</div>
+            </div>
+            <div class="cc-row__a">+$11K</div>
+          </div>
+          <div class="cc-card__total">
+            <div>
+              <div class="cc-card__total__lbl">Blind Equity™</div>
+              <div class="cc-card__total__note">Adds ~0.35× to multiple on upper band</div>
+            </div>
+            <div class="cc-card__total__amt">+$47K</div>
+          </div>
+        </div>
+
+        <div class="cc-msg cc-msg--y">
+          <div class="cc-msg__bubble">
+            At a 5.5× multiple that's an extra <strong>$258K</strong> of enterprise value. Already in the financials — just not on the spreadsheet anyone sent buyers.
+          </div>
+        </div>
+
+        <div class="cc-replies">
+          <button class="cc-reply" data-prompt="Find my add-backs.">Find mine</button>
+          <button class="cc-reply" data-prompt="What counts as a defensible add-back?">What counts as defensible?</button>
+          <button class="cc-reply" data-prompt="Show me a real QofE.">Show a real QofE</button>
+        </div>
+      </section>
+
+      <!-- ──────── Section 2 — Readiness ──────── -->
+      <section class="cc-section" id="s-readiness">
+        <div class="cc-divider">Yulia · scoring through a buyer's lens</div>
+
+        <div class="cc-msg cc-msg--me">
+          <div class="cc-msg__avatar">YOU · 1 min ago</div>
+          <div class="cc-msg__bubble">Ok — but is Acme actually <em>ready</em> to sell, or just findable?</div>
+        </div>
+
+        <div class="cc-msg cc-msg--y">
+          <div class="cc-msg__bubble">
+            Good question. There are <strong>seventeen things</strong> a serious buyer scores any business on before they make an offer. Revenue quality. Margins. Customer concentration. Owner dependency. Management depth. Financial integrity. I just ran them all on Acme.
+          </div>
+        </div>
+
+        <div class="cc-card">
+          <div class="cc-card__head">
+            <div class="cc-card__title">Readiness score · Acme HVAC</div>
+            <div class="cc-card__meta"><span class="cc-card__dot"></span>JUST NOW</div>
+          </div>
+          <div class="cc-ready">
+            <div class="cc-ready__donut">
+              <svg viewBox="0 0 100 100">
+                <circle class="cc-ready__track" cx="50" cy="50" r="45"/>
+                <circle class="cc-ready__fill" cx="50" cy="50" r="45"/>
+              </svg>
+              <div class="cc-ready__num">75<small>/100</small></div>
+            </div>
+            <div class="cc-ready__rows">
+              <div class="cc-ready__row"><span class="cc-ready__row__dot" style="background:#22A755"></span><span class="cc-ready__row__lbl">Revenue quality</span><span class="cc-ready__row__val">8.4</span></div>
+              <div class="cc-ready__row"><span class="cc-ready__row__dot" style="background:#22A755"></span><span class="cc-ready__row__lbl">Margins</span><span class="cc-ready__row__val">7.9</span></div>
+              <div class="cc-ready__row"><span class="cc-ready__row__dot" style="background:#E8A033"></span><span class="cc-ready__row__lbl">Owner dependency</span><span class="cc-ready__row__val">5.2</span></div>
+              <div class="cc-ready__row"><span class="cc-ready__row__dot" style="background:#E8A033"></span><span class="cc-ready__row__lbl">Concentration</span><span class="cc-ready__row__val">6.0</span></div>
+              <div class="cc-ready__row"><span class="cc-ready__row__dot" style="background:#22A755"></span><span class="cc-ready__row__lbl">Financial integrity</span><span class="cc-ready__row__val">8.8</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cc-msg cc-msg--y">
+          <div class="cc-msg__bubble">
+            <strong>75/100.</strong> Margins and books are strong. Owner dependency and a top-customer concentration of 18% are the fixable problems. Each one I close moves the multiple. I'll show you which to attack first and what each is worth in dollars at closing.
+          </div>
+        </div>
+
+        <div class="cc-replies">
+          <button class="cc-reply" data-prompt="Score my business.">Score mine</button>
+          <button class="cc-reply" data-prompt="Show me the playbook for owner dependency.">Show the dependency playbook</button>
+        </div>
+      </section>
+
+      <!-- ──────── Anchor ──────── -->
+      <div class="cc-anchor">
+        <div class="cc-anchor__kicker">The anchor</div>
+        <div class="cc-anchor__big">$1.1M hiding in the tax returns. Average per analysis.</div>
+        <div class="cc-anchor__sub">
+          Owner comp above market. Vehicles on the books. Spouse on payroll. Non-recurring legal. Above-market rent to a related entity. Every legitimate add-back I find moves the multiple — and moves the deal.
+        </div>
+      </div>
+
+      <!-- ──────── Section 3 — CIM ──────── -->
+      <section class="cc-section" id="s-cim">
+        <div class="cc-divider">Yulia · drafting the CIM</div>
+
+        <div class="cc-msg cc-msg--y">
+          <div class="cc-msg__bubble">
+            Numbers found. Score in. Now I write the document the buyers actually read — the <strong>Confidential Information Memorandum</strong>. 28 pages. Most CIMs are data dumps. Mine is a <em>strategic narrative</em>: Acme positioned as a regional platform with three identified growth levers, not a 30-year services business looking for an exit.
+          </div>
+        </div>
+
+        <div class="cc-msg cc-msg--me">
+          <div class="cc-msg__bubble">Does positioning actually move the price?</div>
+        </div>
+
+        <div class="cc-msg cc-msg--y">
+          <div class="cc-msg__bubble">
+            Same business, two ways: <strong>4.5× or 7×</strong>. On Acme, that's a <strong>$4.7M</strong> spread. The difference is almost never the business. It's the document.
+          </div>
+        </div>
+
+        <div class="cc-card">
+          <div class="cc-card__head">
+            <div class="cc-card__title">CIM excerpt · Project Phoenix · p.1</div>
+            <div class="cc-card__meta">28 PP · CONFIDENTIAL</div>
+          </div>
+          <div style="padding: 22px 24px; background: #FAFAFB; font-family: 'Sora', sans-serif;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: #9A9A9F; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px;">01 · Executive summary</div>
+            <h3 style="font-family: 'Sora', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.025em; color: #0A0A0B; line-height: 1.15; margin: 0 0 16px;">A 32‑year regional HVAC platform, positioned for geographic expansion.</h3>
+            <p style="font-family: 'Inter', sans-serif; font-size: 12.5px; color: #3A3A3E; line-height: 1.6; margin: 0 0 14px;">Acme operates in one of the fastest growing metros in the US, serving a recession-resistant mix of commercial and residential customers across the greater Phoenix MSA. The business has compounded revenue at 14% over the last five years with no customer above 18% of revenue and a service-contract base providing 22% of total revenue at 41% gross margin.</p>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px;">
+              <div style="background: #fff; border: 0.5px solid rgba(0,0,0,0.08); padding: 10px 12px; border-radius: 6px;">
+                <div style="font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px; color: #0A0A0B; letter-spacing: -0.02em;">$8.4M</div>
+                <div style="font-family: 'Inter', sans-serif; font-size: 10px; color: #6B6B70; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px;">Revenue</div>
+              </div>
+              <div style="background: #fff; border: 0.5px solid rgba(0,0,0,0.08); padding: 10px 12px; border-radius: 6px;">
+                <div style="font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px; color: #0A0A0B; letter-spacing: -0.02em;">$1.9M</div>
+                <div style="font-family: 'Inter', sans-serif; font-size: 10px; color: #6B6B70; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px;">Adj EBITDA</div>
+              </div>
+              <div style="background: #fff; border: 0.5px solid rgba(0,0,0,0.08); padding: 10px 12px; border-radius: 6px;">
+                <div style="font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px; color: #0A0A0B; letter-spacing: -0.02em;">22.6%</div>
+                <div style="font-family: 'Inter', sans-serif; font-size: 10px; color: #6B6B70; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px;">Margin</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cc-replies">
+          <button class="cc-reply" data-prompt="Draft my CIM.">Draft mine</button>
+          <button class="cc-reply" data-prompt="Show me the full Acme CIM.">See the full CIM</button>
+        </div>
+      </section>
+
+      <!-- ──────── Section 4 — Competitive process ──────── -->
+      <section class="cc-section" id="s-competitive">
+        <div class="cc-divider">Yulia · running outreach</div>
+
+        <div class="cc-msg cc-msg--y">
+          <div class="cc-msg__bubble">
+            CIM is out under NDA to <strong>11 buyers</strong> — strategic, family office, PE roll-up, all mapped to fit. Three weeks in, three IOIs back.
+          </div>
+        </div>
+
+        <div class="cc-card">
+          <div class="cc-card__head">
+            <div class="cc-card__title">IOI comparison · round 1</div>
+            <div class="cc-card__meta">3 OF 11 · WEEK 3</div>
+          </div>
+          <div class="cc-bids">
+            <div class="cc-bid">
+              <div class="cc-bid__name">Family office</div>
+              <div class="cc-bid__price">$2.4M</div>
+              <div class="cc-bid__note">100% cash · 60 days · no earnout</div>
+            </div>
+            <div class="cc-bid cc-bid--win">
+              <div class="cc-bid__name">Strategic</div>
+              <div class="cc-bid__price">$2.9M</div>
+              <div class="cc-bid__note">85% cash · 15% rollover · synergy case strong</div>
+            </div>
+            <div class="cc-bid">
+              <div class="cc-bid__name">PE roll-up</div>
+              <div class="cc-bid__price">$2.7M</div>
+              <div class="cc-bid__note">$400K earnout · 90-day diligence</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cc-msg cc-msg--y">
+          <div class="cc-msg__bubble">
+            Headline winner is the strategic at <strong>$2.9M</strong>. After-tax, all three sit within $180K of each other — but the strategic's 15% rollover is a <em>second bite</em> in 3–5 years that the family office isn't offering. I'd model both for the seller before they sign anything.
+          </div>
+        </div>
+
+        <div class="cc-msg cc-msg--me">
+          <div class="cc-msg__bubble">What would the first-offer price have been without competition?</div>
+        </div>
+
+        <div class="cc-msg cc-msg--y">
+          <div class="cc-msg__bubble">
+            Almost certainly the family office at <strong>$2.4M</strong> — they reached out unsolicited last spring. The competitive process moved the headline <strong>+$500K</strong> and re-shaped the structure. That's a typical 15–30% premium.
+          </div>
+        </div>
+      </section>
+
+      <!-- ──────── Anchor 2 ──────── -->
+      <div class="cc-anchor">
+        <div class="cc-anchor__kicker">The pattern</div>
+        <div class="cc-anchor__big">One buyer gives you a price. Five buyers give you a market.</div>
+        <div class="cc-anchor__sub">
+          Most sellers skip the competitive process — too logistically complex, broker too thin to run it. Yulia runs the whole thing. On Acme it was $500K. On a $50M deal it's $7.5M–$15M.
+        </div>
+      </div>
+
+      <!-- ──────── Section 5 — Close / handoff ──────── -->
+      <section class="cc-section" id="s-close">
+        <div class="cc-divider">Your turn</div>
+
+        <div class="cc-msg cc-msg--y">
+          <div class="cc-msg__bubble">
+            That's the whole arc. <strong>Found</strong> what was hiding. <strong>Scored</strong> what a buyer sees. <strong>Wrote</strong> what they read. <strong>Ran</strong> a process that made the price real.
+          </div>
+        </div>
+
+        <div class="cc-msg cc-msg--y">
+          <div class="cc-msg__bubble">
+            Now your turn. Tell me three things about your business — <strong>industry</strong>, <strong>annual revenue</strong>, and <strong>reported EBITDA</strong> — and I'll come back in about twenty minutes with your value range, your add-back list, and your readiness score. First deliverable is free. If the number isn't worth running a process, you've lost the afternoon.
+          </div>
+        </div>
+
+        <div class="cc-replies">
+          <button class="cc-reply" data-prompt="Services · $4M revenue · $620K EBITDA">Try sample numbers</button>
+          <button class="cc-reply" data-prompt="What are exit paths besides selling 100%?">Other exit paths</button>
+          <button class="cc-reply" data-prompt="I'm an advisor — how does this work for my clients?">I'm an advisor</button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ═════ Right marker rail ═════ -->
+    <aside class="cc-rail--marker" aria-label="Conversation map">
+      <button class="cc-marker active" data-jump="s-addbacks">
+        <span class="cc-marker__tick"></span>
+        <span class="cc-marker__label">Add-backs</span>
+      </button>
+      <button class="cc-marker" data-jump="s-readiness">
+        <span class="cc-marker__tick"></span>
+        <span class="cc-marker__label">Readiness</span>
+      </button>
+      <button class="cc-marker" data-jump="s-cim">
+        <span class="cc-marker__tick"></span>
+        <span class="cc-marker__label">CIM</span>
+      </button>
+      <button class="cc-marker" data-jump="s-competitive">
+        <span class="cc-marker__tick"></span>
+        <span class="cc-marker__label">Competitive</span>
+      </button>
+      <button class="cc-marker" data-jump="s-close">
+        <span class="cc-marker__tick"></span>
+        <span class="cc-marker__label">Your turn</span>
+      </button>
+    </aside>
+  </div>
+
+  <!-- Sticky bottom dock — always-on chat -->
+  <div class="cc-dock">
+    <form class="cc-dock__inner" id="dockForm">
+      <input id="dockInput" type="text" autocomplete="off" spellcheck="false"
+             placeholder="Reply to Yulia — or paste your industry, revenue, EBITDA…" />
+      <button class="cc-dock__send" type="submit" aria-label="Send">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </button>
+    </form>
+  </div>
+
+<script>
+  // Scroll-spy: highlight the active marker
+  const sections = document.querySelectorAll('.cc-section');
+  const markers = document.querySelectorAll('.cc-marker');
+  const obs = new IntersectionObserver((entries) => {
+    const visible = entries.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+    if (visible.length === 0) return;
+    const id = visible[0].target.id;
+    markers.forEach(m => m.classList.toggle('active', m.dataset.jump === id));
+  }, { rootMargin: '-25% 0px -55% 0px', threshold: 0 });
+  sections.forEach(s => obs.observe(s));
+
+  // Marker click → scroll
+  markers.forEach(m => m.addEventListener('click', () => {
+    const el = document.getElementById(m.dataset.jump);
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }));
+
+  // Reply chips → write into dock + submit
+  document.querySelectorAll('.cc-reply').forEach(b => {
+    b.addEventListener('click', () => {
+      const input = document.getElementById('dockInput');
+      input.value = b.dataset.prompt;
+      input.focus();
+      input.scrollIntoView?.({ block: 'center', behavior: 'smooth' });
+    });
+  });
+
+  // Dock submit — append a 'you' message + Yulia canned reply at the END of the thread
+  document.getElementById('dockForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('dockInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const thread = document.getElementById('thread');
+    const me = document.createElement('div');
+    me.className = 'cc-msg cc-msg--me';
+    me.innerHTML = `<div class="cc-msg__avatar">YOU · just now</div><div class="cc-msg__bubble">${text.replace(/[<>]/g, '')}</div>`;
+    thread.appendChild(me);
+    setTimeout(() => {
+      const y = document.createElement('div');
+      y.className = 'cc-msg cc-msg--y';
+      y.innerHTML = `<div class="cc-msg__avatar"><span class="cc-msg__avatar__dot">Y</span> Yulia · just now</div><div class="cc-msg__bubble">Got it. To run your real deal I need three things: <strong>industry</strong>, <strong>annual revenue</strong>, <strong>reported EBITDA</strong>. Drop those in and I'll have a value range, add-back list, and readiness score for you in about 20 minutes. <strong>Start free →</strong></div>`;
+      thread.appendChild(y);
+      y.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 600);
+    input.value = '';
+  });
+</script>
+</body>
+</html>

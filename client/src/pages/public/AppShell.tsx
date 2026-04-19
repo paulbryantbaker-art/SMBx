@@ -48,15 +48,19 @@ import { ScrollProgressBar } from '../../components/content/animations';
    The Glass Grok redesign replaces the old editorial-style pages +
    mobile-first story scaffolding with a single responsive shell. */
 
-// Glass Grok redesign — new public-site components
-const GlassGrokHome = lazy(() => import('../../components/journey/pages/Home'));
-const GlassGrokSell = lazy(() => import('../../components/journey/pages/Sell'));
-const GlassGrokBuy = lazy(() => import('../../components/journey/pages/Buy'));
-const GlassGrokRaise = lazy(() => import('../../components/journey/pages/Raise'));
-const GlassGrokIntegrate = lazy(() => import('../../components/journey/pages/Integrate'));
-const GlassGrokPricing = lazy(() => import('../../components/journey/pages/Pricing'));
-const GlassGrokHowItWorks = lazy(() => import('../../components/journey/pages/HowItWorks'));
-const GlassGrokEnterprise = lazy(() => import('../../components/journey/pages/Enterprise'));
+// Glass Grok v2 — deal-room rearchitecture (2026-04-19).
+// Each journey page is now a split-screen: sticky Yulia chat rail
+// narrates the scroll; reactive workbench shows the artifact being
+// produced. One pattern, seven pages. Old journey/ retained for
+// rollback only. See components/new_journey/project/specs.md.
+const GlassGrokHome = lazy(() => import('../../components/journey_v2/pages/Sell'));      /* / serves the sell arc */
+const GlassGrokSell = lazy(() => import('../../components/journey_v2/pages/Sell'));
+const GlassGrokBuy = lazy(() => import('../../components/journey_v2/pages/Buy'));
+const GlassGrokRaise = lazy(() => import('../../components/journey_v2/pages/Raise'));
+const GlassGrokIntegrate = lazy(() => import('../../components/journey_v2/pages/Integrate'));
+const GlassGrokPricing = lazy(() => import('../../components/journey_v2/pages/Pricing'));
+const GlassGrokHowItWorks = lazy(() => import('../../components/journey_v2/pages/HowItWorks'));
+const GlassGrokEnterprise = lazy(() => import('../../components/journey_v2/pages/Enterprise'));
 
 // Mobile rebuild — Claude+ pattern
 import { type LearnDest, type WorkspaceTool } from '../../components/mobile/mobileTypes';
@@ -2213,14 +2217,17 @@ export default function AppShell() {
                         Mobile logged-in users above hit AppShellInner;
                         everyone else gets the redesigned chat-first hero. */
                     <Suspense fallback={<BelowSkeleton />}>
+                      {/* Home serves the v2 sell arc per specs.md — same
+                          file, active='home' so top-nav highlights Home. */}
                       <GlassGrokHome
-                        user={user}
-                        authLoading={authLoading}
+                        active="home"
                         onSend={(msg) => handleSend(msg)}
-                        onNavigateJourney={(j) => {
-                          setActiveTab(j);
+                        onStartFree={() => { setViewState('chat'); navigate('/chat'); }}
+                        onSignIn={() => navigate('/login')}
+                        onNavigate={(d) => {
+                          setActiveTab(d);
                           setViewState('landing');
-                          navigate(`/${j}`);
+                          navigate(d === 'home' ? '/' : `/${d}`);
                         }}
                       />
                     </Suspense>
@@ -2232,31 +2239,30 @@ export default function AppShell() {
               </div>
               ) : ['sell','buy','raise','how-it-works','integrate','pricing','enterprise'].includes(activeTab) ? (
               <div className="relative z-10 flex-1 flex flex-col">
-                {/* Glass Grok journey — canvas is #F2F2F4, no framing card. */}
-                <div
-                  className="flex-1 flex flex-col"
-                  style={{
-                    background: 'var(--gg-bg-app, #F2F2F4)',
-                    overflow: 'hidden',
-                  }}
-                >
+                {/* Glass Grok v2 journey pages render their own chrome
+                    (top bar, sticky Yulia rail, scroll stage). No outer
+                    overflow:hidden — the v2 pages use sticky positioning
+                    which needs the document to scroll naturally. */}
+                <div className="flex-1 flex flex-col">
                   <Suspense fallback={<BelowSkeleton />}>
                     {(() => {
                       const onGoChat = () => { setViewState('chat'); navigate('/chat'); };
                       const send = (msg: string) => handleSend(msg);
+                      const onSignIn = () => navigate('/login');
                       const nav = (d: 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'pricing' | 'how-it-works' | 'enterprise') => {
                         setActiveTab(d);
                         setViewState('landing');
                         navigate(d === 'home' ? '/' : `/${d}`);
                       };
+                      const common = { active: activeTab as 'sell' | 'buy' | 'raise' | 'integrate' | 'pricing' | 'how-it-works' | 'enterprise', onSend: send, onStartFree: onGoChat, onNavigate: nav, onSignIn };
                       switch (activeTab) {
-                        case 'sell':         return <GlassGrokSell onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
-                        case 'buy':          return <GlassGrokBuy onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
-                        case 'raise':        return <GlassGrokRaise onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
-                        case 'integrate':    return <GlassGrokIntegrate onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
-                        case 'pricing':      return <GlassGrokPricing onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
-                        case 'how-it-works': return <GlassGrokHowItWorks onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
-                        case 'enterprise':   return <GlassGrokEnterprise onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'sell':         return <GlassGrokSell {...common} />;
+                        case 'buy':          return <GlassGrokBuy {...common} />;
+                        case 'raise':        return <GlassGrokRaise {...common} />;
+                        case 'integrate':    return <GlassGrokIntegrate {...common} />;
+                        case 'pricing':      return <GlassGrokPricing {...common} />;
+                        case 'how-it-works': return <GlassGrokHowItWorks {...common} />;
+                        case 'enterprise':   return <GlassGrokEnterprise {...common} />;
                         default:             return null;
                       }
                     })()}
@@ -2566,12 +2572,15 @@ export default function AppShell() {
                   </div>
                 </>
               ) : !user ? (
-                /* Logged-out: render the active Glass Grok journey page in the canvas */
-                <div className="flex-1 overflow-y-auto relative" style={{ background: 'var(--gg-bg-app, #F2F2F4)' }}>
+                /* Logged-out: render the active Glass Grok v2 journey
+                    page in the canvas. Overflow scrolls naturally so the
+                    sticky Yulia rail + top bar behave correctly. */
+                <div className="flex-1 overflow-y-auto relative">
                   <Suspense fallback={<BelowSkeleton />}>
                     {(() => {
                       const onGoChat = () => { setViewState('chat'); navigate('/chat'); };
                       const send = (msg: string) => handleSend(msg);
+                      const onSignIn = () => navigate('/login');
                       const nav = (d: 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'pricing' | 'how-it-works' | 'enterprise') => {
                         setActiveTab(d);
                         setViewState('landing');
@@ -2579,15 +2588,16 @@ export default function AppShell() {
                       };
                       /* Default to 'sell' if activeTab is 'home' (no canvas for home post-morph) */
                       const journey = activeTab === 'home' ? 'sell' : activeTab;
+                      const common = { active: journey as 'sell' | 'buy' | 'raise' | 'integrate' | 'pricing' | 'how-it-works' | 'enterprise', onSend: send, onStartFree: onGoChat, onNavigate: nav, onSignIn };
                       switch (journey) {
-                        case 'sell':         return <GlassGrokSell onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
-                        case 'buy':          return <GlassGrokBuy onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
-                        case 'raise':        return <GlassGrokRaise onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
-                        case 'integrate':    return <GlassGrokIntegrate onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
-                        case 'pricing':      return <GlassGrokPricing onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
-                        case 'how-it-works': return <GlassGrokHowItWorks onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
-                        case 'enterprise':   return <GlassGrokEnterprise onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
-                        default:             return <GlassGrokSell onSend={send} onStartFree={onGoChat} onNavigate={nav} />;
+                        case 'sell':         return <GlassGrokSell {...common} />;
+                        case 'buy':          return <GlassGrokBuy {...common} />;
+                        case 'raise':        return <GlassGrokRaise {...common} />;
+                        case 'integrate':    return <GlassGrokIntegrate {...common} />;
+                        case 'pricing':      return <GlassGrokPricing {...common} />;
+                        case 'how-it-works': return <GlassGrokHowItWorks {...common} />;
+                        case 'enterprise':   return <GlassGrokEnterprise {...common} />;
+                        default:             return <GlassGrokSell {...common} active="sell" />;
                       }
                     })()}
                   </Suspense>

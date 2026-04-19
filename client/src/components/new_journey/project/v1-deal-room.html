@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>/sell · Live Deal Room (V1)</title>
+<link rel="stylesheet" href="shared.css" />
+<link rel="stylesheet" href="glass.css" />
+<style>
+  body { background: #F2F2F4; }
+  /* Top bar — slim, glass */
+  .dr-top {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 22px; height: 56px;
+    background: rgba(255,255,255,0.78);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border-bottom: 0.5px solid rgba(0,0,0,0.08);
+  }
+  .dr-top__logo { font-family: 'Sora', sans-serif; font-weight: 800; letter-spacing: -0.025em; font-size: 17px; }
+  .dr-top__nav { display: flex; gap: 2px; }
+  .dr-top__nav button {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600;
+    color: #6B6B70; padding: 7px 12px; border: 0; background: transparent;
+    border-radius: 8px; cursor: pointer; transition: all 150ms;
+  }
+  .dr-top__nav button:hover { background: #F5F5F7; color: #0A0A0B; }
+  .dr-top__nav button.active { background: #E8E8EB; color: #0A0A0B; }
+  .dr-top__cta {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .dr-top__signin {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600;
+    color: #6B6B70; padding: 7px 12px; border: 0; background: transparent; cursor: pointer;
+  }
+  .dr-top__btn {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700;
+    color: #fff; background: #0A0A0B; border: 0; padding: 8px 14px;
+    border-radius: 8px; cursor: pointer;
+  }
+
+  /* Layout — sticky chat rail + scrollable stage */
+  .dr-main {
+    display: grid;
+    grid-template-columns: minmax(360px, 420px) 1fr;
+    gap: 0;
+    max-width: 1680px; margin: 0 auto;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .dr-main { grid-template-columns: 1fr; }
+    .dr-rail { position: static !important; height: auto !important; border-right: 0 !important; }
+    .dr-rail__scroll { max-height: 520px; }
+  }
+
+  /* ── Left rail — sticky chat conversation ────────────────── */
+  .dr-rail {
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    background: #fff;
+    border-right: 0.5px solid rgba(0,0,0,0.08);
+    display: flex; flex-direction: column;
+  }
+  .dr-rail__head {
+    padding: 18px 22px 14px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .dr-rail__avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #3A3A3E 0%, #0A0A0B 100%);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 14px;
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.15);
+  }
+  .dr-rail__who { display: flex; flex-direction: column; }
+  .dr-rail__name {
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px;
+    color: #0A0A0B;
+  }
+  .dr-rail__status {
+    font-family: 'Inter', sans-serif; font-size: 11px;
+    color: #22A755; font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .dr-rail__status::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: #22A755; box-shadow: 0 0 0 2px rgba(34,167,85,0.18);
+  }
+  .dr-rail__live {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+    color: #6B6B70; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 4px 8px; background: #F5F5F7; border-radius: 999px;
+  }
+
+  .dr-rail__scroll {
+    flex: 1; overflow-y: auto; padding: 20px 22px 16px;
+    display: flex; flex-direction: column; gap: 14px;
+    scroll-behavior: smooth;
+  }
+  .dr-rail__scroll::-webkit-scrollbar { width: 6px; }
+  .dr-rail__scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+
+  .dr-msg {
+    max-width: 86%;
+    font-size: 13.5px; line-height: 1.55;
+    animation: dr-msg-in 380ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  @keyframes dr-msg-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .dr-msg--y { align-self: flex-start; }
+  .dr-msg--y .dr-msg__bubble {
+    background: #F5F5F7; color: #0A0A0B;
+    border-radius: 4px 16px 16px 16px; padding: 10px 14px;
+  }
+  .dr-msg--me { align-self: flex-end; max-width: 80%; }
+  .dr-msg--me .dr-msg__bubble {
+    background: #0A0A0B; color: #fff;
+    border-radius: 16px 4px 16px 16px; padding: 10px 14px;
+  }
+  .dr-msg__meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; color: #9A9A9F; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .dr-msg--me .dr-msg__meta { text-align: right; }
+  .dr-msg__bubble strong { color: inherit; font-weight: 700; }
+  .dr-msg--y .dr-msg__bubble strong { color: #0A0A0B; }
+
+  /* A stage-hinted "Yulia is thinking" dot row used between steps */
+  .dr-typing { display: inline-flex; gap: 4px; padding: 8px 12px; background: #F5F5F7; border-radius: 16px; align-self: flex-start; }
+  .dr-typing span {
+    width: 6px; height: 6px; border-radius: 50%; background: #9A9A9F;
+    animation: dr-typ 1.1s infinite ease-in-out;
+  }
+  .dr-typing span:nth-child(2) { animation-delay: 0.15s; }
+  .dr-typing span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes dr-typ {
+    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-3px); }
+  }
+
+  .dr-rail__input {
+    padding: 12px 16px 16px;
+    border-top: 0.5px solid rgba(0,0,0,0.06);
+    background: #fff;
+  }
+  .dr-rail__chat {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 6px 6px 16px; min-height: 48px;
+    background: #fff; border: 0.5px solid rgba(0,0,0,0.12);
+    border-radius: 999px;
+    box-shadow:
+      inset 0 0.5px 0 rgba(255,255,255,1),
+      0 6px 20px rgba(0,0,0,0.06);
+    transition: border-color 150ms;
+  }
+  .dr-rail__chat:focus-within { border-color: rgba(0,0,0,0.32); }
+  .dr-rail__chat input {
+    flex: 1; border: 0; outline: 0; background: transparent;
+    font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 500;
+    color: #0A0A0B;
+  }
+  .dr-rail__chat input::placeholder { color: #9A9A9F; }
+  .dr-rail__send {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #0A0A0B; color: #fff; border: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.18), 0 2px 6px rgba(0,0,0,0.18);
+  }
+  .dr-rail__send:disabled { opacity: 0.35; cursor: default; }
+  .dr-rail__chips {
+    display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap;
+  }
+  .dr-rail__chips button {
+    font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 600;
+    padding: 6px 11px; background: #fff; border: 0.5px solid rgba(0,0,0,0.12);
+    border-radius: 999px; color: #0A0A0B; cursor: pointer;
+    transition: border-color 150ms;
+  }
+  .dr-rail__chips button:hover { border-color: #0A0A0B; }
+
+  /* ── Right stage — scrollable workbench ───────────────────── */
+  .dr-stage {
+    padding: 0 clamp(20px, 3vw, 40px) 96px;
+  }
+  .dr-step {
+    padding-top: 48px;
+    scroll-margin-top: 72px;
+  }
+  .dr-step__head {
+    display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px;
+  }
+  .dr-step__idx {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: #6B6B70; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px; border-radius: 999px;
+    background: #fff; border: 0.5px solid rgba(0,0,0,0.1);
+  }
+  .dr-step__title {
+    font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: clamp(28px, 3.2vw, 40px); letter-spacing: -0.025em;
+    line-height: 1.05; color: #0A0A0B;
+    text-wrap: balance;
+  }
+  .dr-step__lede {
+    font-family: 'Inter', sans-serif; font-size: 16px; line-height: 1.6;
+    font-weight: 500; color: #3A3A3E; max-width: 620px;
+    margin-bottom: 28px;
+  }
+
+  /* Workbench card — the generic container for each step's artifact */
+  .dr-bench {
+    background: #fff; border: 0.5px solid rgba(0,0,0,0.08);
+    border-radius: 18px;
+    box-shadow:
+      inset 0 0.5px 0 rgba(255,255,255,1),
+      0 1px 3px rgba(0,0,0,0.03),
+      0 6px 24px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+  .dr-bench__head {
+    padding: 14px 18px; border-bottom: 0.5px solid rgba(0,0,0,0.06);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: linear-gradient(180deg, #FAFAFB 0%, #fff 100%);
+  }
+  .dr-bench__title {
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 13.5px;
+    color: #0A0A0B; letter-spacing: -0.005em;
+  }
+  .dr-bench__meta {
+    display: flex; gap: 10px; align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: #6B6B70; letter-spacing: 0.06em;
+  }
+  .dr-bench__dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #22A755;
+    box-shadow: 0 0 0 3px rgba(34,167,85,0.14);
+  }
+  .dr-bench__body { padding: 20px 22px; }
+
+  /* Add-back table */
+  .ab-row {
+    display: grid; grid-template-columns: 1fr auto; gap: 12px;
+    padding: 12px 0; border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  }
+  .ab-row:last-child { border-bottom: 0; }
+  .ab-row__title { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13.5px; color: #0A0A0B; margin-bottom: 2px; }
+  .ab-row__sub { font-family: 'Inter', sans-serif; font-size: 12px; color: #6B6B70; }
+  .ab-row__amt {
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 15px;
+    color: #166534; font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+    align-self: center;
+  }
+  .ab-total {
+    display: grid; grid-template-columns: 1fr auto;
+    padding: 18px 22px;
+    background: #0A0A0B; color: #fff;
+  }
+  .ab-total__lbl {
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 13px;
+    letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.6);
+    margin-bottom: 4px;
+  }
+  .ab-total__note { font-size: 12.5px; color: rgba(255,255,255,0.75); }
+  .ab-total__amt {
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 40px;
+    letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums;
+    align-self: center;
+  }
+
+  /* CIM preview page */
+  .cim {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    padding: 18px;
+  }
+  .cim__page {
+    aspect-ratio: 8.5 / 11;
+    background: #FAFAFB; border: 0.5px solid rgba(0,0,0,0.08);
+    border-radius: 4px; padding: 22px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    position: relative; overflow: hidden;
+  }
+  .cim__page::after {
+    content: ''; position: absolute; top: 0; right: 0; width: 24px; height: 24px;
+    background: linear-gradient(225deg, #F2F2F4 50%, transparent 50%);
+  }
+  .cim__num {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #9A9A9F;
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px;
+  }
+  .cim__h {
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 16px;
+    letter-spacing: -0.02em; color: #0A0A0B; margin-bottom: 10px;
+    line-height: 1.15;
+  }
+  .cim__p {
+    font-size: 9.5px; line-height: 1.6; color: #3A3A3E;
+    margin-bottom: 8px;
+  }
+  .cim__bar {
+    height: 4px; background: #E8E8EB; border-radius: 2px;
+    margin-bottom: 6px;
+  }
+  .cim__bar::before {
+    content: ''; display: block; height: 100%;
+    background: #0A0A0B; border-radius: 2px; width: var(--w, 60%);
+  }
+  .cim__grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px;
+  }
+  .cim__stat {
+    background: #fff; border: 0.5px solid rgba(0,0,0,0.08);
+    padding: 6px 8px; border-radius: 3px;
+  }
+  .cim__stat b {
+    display: block; font-family: 'Sora', sans-serif; font-weight: 800; font-size: 13px;
+    color: #0A0A0B; letter-spacing: -0.01em;
+  }
+  .cim__stat span { font-size: 8px; color: #6B6B70; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* IOI matrix */
+  .ioi {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+    border-top: 0.5px solid rgba(0,0,0,0.08);
+  }
+  .ioi__cell {
+    padding: 22px 20px;
+    border-right: 0.5px solid rgba(0,0,0,0.08);
+    position: relative;
+  }
+  .ioi__cell:last-child { border-right: 0; }
+  .ioi__cell--win {
+    background: linear-gradient(180deg, #FAFAFB 0%, #fff 100%);
+  }
+  .ioi__cell--win::before {
+    content: 'WINNER'; position: absolute; top: 12px; right: 12px;
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 9px;
+    letter-spacing: 0.1em; color: #166534; background: #DCFCE7;
+    padding: 3px 8px; border-radius: 4px;
+  }
+  .ioi__name {
+    font-family: 'Sora', sans-serif; font-weight: 700; font-size: 12px;
+    color: #6B6B70; letter-spacing: 0.04em; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .ioi__price {
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 34px;
+    letter-spacing: -0.03em; color: #0A0A0B; line-height: 1;
+    font-variant-numeric: tabular-nums; margin-bottom: 8px;
+  }
+  .ioi__note { font-size: 12px; color: #3A3A3E; line-height: 1.5; }
+
+  /* Section nav — right-side rail, sticky */
+  .dr-nav {
+    position: fixed; right: 20px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border: 0.5px solid rgba(0,0,0,0.08); border-radius: 12px;
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,1), 0 6px 24px rgba(0,0,0,0.06);
+    z-index: 25;
+  }
+  @media (max-width: 1400px) { .dr-nav { display: none; } }
+  .dr-nav button {
+    font-family: 'Sora', sans-serif; font-weight: 600; font-size: 10.5px;
+    letter-spacing: 0.02em; color: #6B6B70;
+    padding: 5px 10px; background: transparent; border: 0; cursor: pointer;
+    border-radius: 6px; text-align: left; white-space: nowrap;
+    transition: all 150ms;
+  }
+  .dr-nav button:hover { color: #0A0A0B; background: #F5F5F7; }
+  .dr-nav button.active { color: #0A0A0B; background: #E8E8EB; }
+
+  /* Readiness score donut */
+  .ready {
+    display: grid; grid-template-columns: 200px 1fr; gap: 28px; align-items: center;
+    padding: 26px;
+  }
+  .ready__donut {
+    position: relative; width: 200px; height: 200px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ready__donut svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+  .ready__donut__track { fill: none; stroke: #E8E8EB; stroke-width: 14; }
+  .ready__donut__fill {
+    fill: none; stroke: #0A0A0B; stroke-width: 14; stroke-linecap: round;
+    stroke-dasharray: 565.5; stroke-dashoffset: 141; /* ~75% */
+    transition: stroke-dashoffset 1200ms cubic-bezier(0.32,0.72,0,1);
+  }
+  .ready__num {
+    position: absolute; font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: 54px; letter-spacing: -0.035em; color: #0A0A0B;
+    font-variant-numeric: tabular-nums;
+  }
+  .ready__num small { font-size: 18px; color: #9A9A9F; font-weight: 700; }
+  .ready__rows { display: flex; flex-direction: column; gap: 10px; }
+  .ready__row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .ready__row__dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .ready__row__lbl { flex: 1; color: #3A3A3E; font-weight: 500; }
+  .ready__row__val { font-family: 'Sora', sans-serif; font-weight: 700; color: #0A0A0B; font-variant-numeric: tabular-nums; }
+
+  /* Bottom morph — "press chat to continue" large */
+  .dr-bottom {
+    margin-top: 80px; padding: 56px 40px;
+    background: #0A0A0B; color: #fff;
+    border-radius: 20px;
+  }
+  .dr-bottom h2 {
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: clamp(32px, 4vw, 52px);
+    letter-spacing: -0.035em; line-height: 1.02; margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  .dr-bottom p {
+    font-size: 15.5px; line-height: 1.6; color: #C5C5CA;
+    max-width: 560px; margin: 0 0 28px;
+  }
+  .dr-bottom__chat {
+    max-width: 620px;
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 6px 6px 20px; min-height: 56px;
+    background: #fff; border-radius: 999px;
+  }
+  .dr-bottom__chat input {
+    flex: 1; border: 0; outline: 0; background: transparent;
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+    color: #0A0A0B;
+  }
+  .dr-bottom__send {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #0A0A0B; color: #fff; border: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Highlight pulse when chat updates */
+  @keyframes dr-flash {
+    0% { box-shadow: inset 0 0.5px 0 rgba(255,255,255,1), 0 0 0 0 rgba(10,10,11,0.25); }
+    40% { box-shadow: inset 0 0.5px 0 rgba(255,255,255,1), 0 0 0 6px rgba(10,10,11,0.12); }
+    100% { box-shadow: inset 0 0.5px 0 rgba(255,255,255,1), 0 6px 24px rgba(0,0,0,0.05); }
+  }
+  .dr-bench.flash { animation: dr-flash 1200ms cubic-bezier(0.19,1,0.22,1); }
+  .dr-step.active .dr-bench { border-color: rgba(0,0,0,0.2); }
+</style>
+</head>
+<body>
+  <div class="dr-top">
+    <div style="display:flex;align-items:center;gap:18px;">
+      <span class="dr-top__logo">smbx.ai</span>
+      <nav class="dr-top__nav">
+        <button class="active">Sell</button>
+        <button>Buy</button>
+        <button>Raise</button>
+        <button>Integrate</button>
+        <button>Pricing</button>
+      </nav>
+    </div>
+    <div class="dr-top__cta">
+      <button class="dr-top__signin">Sign in</button>
+      <button class="dr-top__btn">Start free →</button>
+    </div>
+  </div>
+
+  <nav class="dr-nav" aria-label="Section nav">
+    <button data-jump="s1" class="active">Add-backs found</button>
+    <button data-jump="s2">Readiness scored</button>
+    <button data-jump="s3">CIM drafted</button>
+    <button data-jump="s4">Competitive bids</button>
+    <button data-jump="s5">Close</button>
+  </nav>
+
+  <div class="dr-main">
+    <!-- ═════ LEFT RAIL — sticky chat ═════ -->
+    <aside class="dr-rail">
+      <div class="dr-rail__head">
+        <div class="dr-rail__avatar">Y</div>
+        <div class="dr-rail__who">
+          <span class="dr-rail__name">Yulia</span>
+          <span class="dr-rail__status">Working on Acme HVAC</span>
+        </div>
+        <span class="dr-rail__live">LIVE DEMO</span>
+      </div>
+
+      <div class="dr-rail__scroll" id="chat">
+        <!-- Seeded conversation — populated by JS on scroll -->
+      </div>
+
+      <div class="dr-rail__input">
+        <form class="dr-rail__chat" id="chatForm">
+          <input id="chatInput" type="text" autocomplete="off" spellcheck="false"
+                 placeholder="Ask Yulia anything about your exit…" />
+          <button class="dr-rail__send" type="submit" aria-label="Send">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+          </button>
+        </form>
+        <div class="dr-rail__chips">
+          <button data-prompt="What's my business worth?">What's it worth?</button>
+          <button data-prompt="Find my hidden add-backs.">Find my add-backs</button>
+          <button data-prompt="Draft my CIM.">Draft my CIM</button>
+          <button data-prompt="Am I ready to sell?">Am I ready?</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═════ RIGHT STAGE — scrollable workbench ═════ -->
+    <main class="dr-stage">
+      <section class="dr-step" id="s1" data-step="1">
+        <div class="dr-step__head">
+          <span class="dr-step__idx">Step 01 · What you have</span>
+        </div>
+        <h1 class="dr-step__title">Know what you have. Before anyone else does.</h1>
+        <p class="dr-step__lede">
+          Yulia read Acme HVAC's last three tax returns. She found <strong>$47K</strong> of
+          defensible add-backs the seller never told the broker. At 5.5× that's a quarter
+          million in enterprise value — already in the financials, just unclaimed.
+        </p>
+
+        <div class="dr-bench" data-bench="addbacks">
+          <div class="dr-bench__head">
+            <div class="dr-bench__title">Add-back schedule · Acme HVAC</div>
+            <div class="dr-bench__meta"><span class="dr-bench__dot"></span>YULIA · LIVE</div>
+          </div>
+          <div class="dr-bench__body" style="padding: 0 22px 0;">
+            <div class="ab-row">
+              <div>
+                <div class="ab-row__title">Owner compensation above market</div>
+                <div class="ab-row__sub">$165K paid · $143K benchmark (BLS, MSA-adjusted)</div>
+              </div>
+              <div class="ab-row__amt">+$22,000</div>
+            </div>
+            <div class="ab-row">
+              <div>
+                <div class="ab-row__title">Personal vehicles on the books</div>
+                <div class="ab-row__sub">2 F-150s · fuel, maintenance, insurance</div>
+              </div>
+              <div class="ab-row__amt">+$14,000</div>
+            </div>
+            <div class="ab-row">
+              <div>
+                <div class="ab-row__title">Spouse on payroll</div>
+                <div class="ab-row__sub">Replaceable at market rate</div>
+              </div>
+              <div class="ab-row__amt">+$11,000</div>
+            </div>
+          </div>
+          <div class="ab-total">
+            <div>
+              <div class="ab-total__lbl">Blind Equity™</div>
+              <div class="ab-total__note">Adds ~0.35× to multiple on upper band</div>
+            </div>
+            <div class="ab-total__amt">+$47K</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="dr-step" id="s2" data-step="2">
+        <div class="dr-step__head">
+          <span class="dr-step__idx">Step 02 · What a buyer sees</span>
+        </div>
+        <h1 class="dr-step__title">Your business, scored through a buyer's lens.</h1>
+        <p class="dr-step__lede">
+          Seventeen dimensions. Revenue quality, margins, concentration, owner dependency,
+          financial integrity. The same checklist every PE associate runs, automated and consistent.
+        </p>
+
+        <div class="dr-bench" data-bench="readiness">
+          <div class="dr-bench__head">
+            <div class="dr-bench__title">Readiness score · Acme HVAC</div>
+            <div class="dr-bench__meta"><span class="dr-bench__dot"></span>6 MIN AGO</div>
+          </div>
+          <div class="ready">
+            <div class="ready__donut">
+              <svg viewBox="0 0 200 200">
+                <circle class="ready__donut__track" cx="100" cy="100" r="90"/>
+                <circle class="ready__donut__fill" cx="100" cy="100" r="90" id="donut"/>
+              </svg>
+              <div class="ready__num">75<small>/100</small></div>
+            </div>
+            <div class="ready__rows">
+              <div class="ready__row"><span class="ready__row__dot" style="background:#22A755"></span><span class="ready__row__lbl">Revenue quality</span><span class="ready__row__val">8.4</span></div>
+              <div class="ready__row"><span class="ready__row__dot" style="background:#22A755"></span><span class="ready__row__lbl">Margins</span><span class="ready__row__val">7.9</span></div>
+              <div class="ready__row"><span class="ready__row__dot" style="background:#E8A033"></span><span class="ready__row__lbl">Owner dependency</span><span class="ready__row__val">5.2</span></div>
+              <div class="ready__row"><span class="ready__row__dot" style="background:#22A755"></span><span class="ready__row__lbl">Management depth</span><span class="ready__row__val">7.1</span></div>
+              <div class="ready__row"><span class="ready__row__dot" style="background:#E8A033"></span><span class="ready__row__lbl">Concentration</span><span class="ready__row__val">6.0</span></div>
+              <div class="ready__row"><span class="ready__row__dot" style="background:#22A755"></span><span class="ready__row__lbl">Financial integrity</span><span class="ready__row__val">8.8</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="dr-step" id="s3" data-step="3">
+        <div class="dr-step__head">
+          <span class="dr-step__idx">Step 03 · What buyers read</span>
+        </div>
+        <h1 class="dr-step__title">A CIM that positions a platform, not a business.</h1>
+        <p class="dr-step__lede">
+          28 pages. Written in the voice of a boutique banker, not a template. The same business,
+          positioned two different ways, trades at <strong>4.5× or 7×</strong>. The difference is almost
+          never the business.
+        </p>
+
+        <div class="dr-bench" data-bench="cim">
+          <div class="dr-bench__head">
+            <div class="dr-bench__title">CIM preview · Project Phoenix</div>
+            <div class="dr-bench__meta">28 PAGES · CONFIDENTIAL</div>
+          </div>
+          <div class="cim">
+            <div class="cim__page">
+              <div class="cim__num">01 · Executive summary</div>
+              <div class="cim__h">A 32‑year regional HVAC platform, positioned for geographic expansion.</div>
+              <div class="cim__bar" style="--w: 94%"></div>
+              <div class="cim__bar" style="--w: 88%"></div>
+              <div class="cim__bar" style="--w: 62%"></div>
+              <div class="cim__p">Acme operates in one of the fastest growing metros in the US, serving a recession-resistant mix of commercial and residential customers…</div>
+              <div class="cim__grid">
+                <div class="cim__stat"><b>$8.4M</b><span>Revenue</span></div>
+                <div class="cim__stat"><b>$1.9M</b><span>Adj EBITDA</span></div>
+                <div class="cim__stat"><b>22.6%</b><span>Margin</span></div>
+              </div>
+            </div>
+            <div class="cim__page">
+              <div class="cim__num">07 · Growth levers</div>
+              <div class="cim__h">Three identified levers to double EBITDA within 36 months.</div>
+              <div class="cim__p">(1) Adjacent metro expansion — demographic overlap, capital-light.</div>
+              <div class="cim__p">(2) Commercial mix shift — contract revenue from 18% to 40%.</div>
+              <div class="cim__p">(3) Service plan attach — proven margin uplift.</div>
+              <div class="cim__bar" style="--w: 72%"></div>
+              <div class="cim__bar" style="--w: 56%"></div>
+              <div class="cim__bar" style="--w: 82%"></div>
+              <div class="cim__bar" style="--w: 44%"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="dr-step" id="s4" data-step="4">
+        <div class="dr-step__head">
+          <span class="dr-step__idx">Step 04 · Competitive process</span>
+        </div>
+        <h1 class="dr-step__title">One buyer gives you a price. Five give you a market.</h1>
+        <p class="dr-step__lede">
+          Yulia identifies the buyer universe, sequences outreach, and stacks IOIs against each other.
+          The winning bid in a competitive process is typically <strong>15–30% above</strong> the first offer.
+        </p>
+
+        <div class="dr-bench" data-bench="ioi">
+          <div class="dr-bench__head">
+            <div class="dr-bench__title">IOI comparison · round 1</div>
+            <div class="dr-bench__meta">3 OF 11 BUYERS · 2 WEEKS IN</div>
+          </div>
+          <div class="ioi">
+            <div class="ioi__cell">
+              <div class="ioi__name">Family office</div>
+              <div class="ioi__price">$2.4M</div>
+              <div class="ioi__note">100% cash · 60-day close · no earnout</div>
+            </div>
+            <div class="ioi__cell ioi__cell--win">
+              <div class="ioi__name">Strategic</div>
+              <div class="ioi__price">$2.9M</div>
+              <div class="ioi__note">85% cash · 15% rollover · synergy case strong</div>
+            </div>
+            <div class="ioi__cell">
+              <div class="ioi__name">PE roll-up</div>
+              <div class="ioi__price">$2.7M</div>
+              <div class="ioi__note">$400K earnout · 90-day diligence</div>
+            </div>
+          </div>
+          <div style="padding: 16px 22px; background: #FAFAFB; border-top: 0.5px solid rgba(0,0,0,0.06); font-size: 12.5px; color: #3A3A3E; line-height: 1.55;">
+            <strong style="color:#0A0A0B;">Yulia's take:</strong> Strategic wins on headline and certainty.
+            After-tax, all three within $180K of each other — but the rollover creates a second-bite in 3–5 years.
+          </div>
+        </div>
+      </section>
+
+      <section class="dr-step" id="s5" data-step="5">
+        <div class="dr-step__head">
+          <span class="dr-step__idx">Step 05 · You're the one who walks to closing</span>
+        </div>
+        <h1 class="dr-step__title">Know the number. Run the process. Keep the multiple.</h1>
+        <p class="dr-step__lede">
+          This whole page was one deal. Yulia runs yours the same way — in a conversation.
+          First deliverable free. If the number isn't worth running a process, you've lost nothing but the afternoon.
+        </p>
+
+        <div class="dr-bottom">
+          <h2>Start where Acme started. Paste revenue, industry, and reported EBITDA.</h2>
+          <p>Yulia returns a preliminary value range, add-back list, and readiness score in about 20 minutes. No credit card.</p>
+          <form class="dr-bottom__chat" id="chatFormBottom">
+            <input type="text" placeholder="Industry, revenue, reported EBITDA…" autocomplete="off" spellcheck="false" id="chatInputBottom"/>
+            <button class="dr-bottom__send" type="submit" aria-label="Send">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+<script>
+  // ═══ Scripted conversation that plays as you scroll ═══
+  // Each step has a short Yulia monologue. When a step scrolls into view,
+  // its messages append to the chat rail and the bench card flashes.
+  const SCRIPT = {
+    1: [
+      { who: 'y', text: "I read Acme's last three <strong>tax returns + QBs</strong>. Found <strong>$47K</strong> of defensible add-backs — owner comp above market, F-150s, spouse on payroll." },
+      { who: 'y', text: "At your band that's ~<strong>$258K</strong> more in enterprise value. Just from cleaning up the P&L." },
+    ],
+    2: [
+      { who: 'y', text: "Now I'm scoring the business through a buyer's lens — seventeen dimensions." },
+      { who: 'y', text: "Acme came in at <strong>75/100</strong>. Margins and financials are strong. Owner dependency and concentration are the fixable ones — I'll show you the playbook." },
+    ],
+    3: [
+      { who: 'y', text: "Drafting the CIM now. 28 pages. I'm positioning Acme as a <strong>regional platform</strong> with three identified growth levers, not just a 30-year services business." },
+      { who: 'me', text: "How much does the positioning actually matter?" },
+      { who: 'y', text: "Same company, described two ways, trades at <strong>4.5× or 7×</strong>. On Acme that's a <strong>$4.7M</strong> spread. The difference is almost never the business." },
+    ],
+    4: [
+      { who: 'y', text: "Outreach went to 11 buyers. Three IOIs back. Strategic is leading on headline + certainty." },
+      { who: 'y', text: "After-tax they're within $180K of each other — but the rollover creates a <strong>second bite in 3–5 years</strong>. Want me to model both?" },
+    ],
+    5: [
+      { who: 'y', text: "That's the whole arc — what you have, what a buyer sees, what they read, what they'll pay, close. <strong>Tell me about your business</strong> and I'll do the same for you." },
+    ],
+  };
+
+  const chat = document.getElementById('chat');
+  const playedSteps = new Set();
+
+  function appendMessage(who, text, { animate = true } = {}) {
+    const el = document.createElement('div');
+    el.className = 'dr-msg dr-msg--' + who;
+    el.innerHTML = `
+      <div class="dr-msg__meta">${who === 'y' ? 'YULIA' : 'YOU'}</div>
+      <div class="dr-msg__bubble">${text}</div>
+    `;
+    if (!animate) el.style.animation = 'none';
+    chat.appendChild(el);
+    chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+  }
+  function appendTyping() {
+    const el = document.createElement('div');
+    el.className = 'dr-typing';
+    el.innerHTML = '<span></span><span></span><span></span>';
+    chat.appendChild(el);
+    chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+    return el;
+  }
+
+  // Seed the first message before scroll — so the rail isn't empty on load.
+  function seedOpening() {
+    appendMessage('y', "Hi — I'm <strong>Yulia</strong>. I'll walk you through how I'd run a real sell-side deal, using Acme HVAC as the example. Scroll to follow along.", { animate: false });
+  }
+  seedOpening();
+
+  function playStep(n) {
+    if (playedSteps.has(n)) return;
+    playedSteps.add(n);
+    const bench = document.querySelector(`[data-step="${n}"] .dr-bench`);
+    if (bench) { bench.classList.remove('flash'); void bench.offsetWidth; bench.classList.add('flash'); }
+    const msgs = SCRIPT[n] || [];
+    // Replay them with a brief typing delay per message.
+    let t = 300;
+    msgs.forEach((m, i) => {
+      setTimeout(() => {
+        if (m.who === 'y' && i > 0) {
+          const typing = appendTyping();
+          setTimeout(() => { typing.remove(); appendMessage(m.who, m.text); }, 500);
+        } else {
+          appendMessage(m.who, m.text);
+        }
+      }, t);
+      t += 900 + m.text.length * 3;
+    });
+  }
+
+  // IntersectionObserver to play step + update sidenav
+  const steps = document.querySelectorAll('.dr-step');
+  const navBtns = document.querySelectorAll('.dr-nav button');
+  const obs = new IntersectionObserver((entries) => {
+    const visible = entries.filter(e => e.isIntersecting).sort((a,b) => a.boundingClientRect.top - b.boundingClientRect.top);
+    if (visible.length > 0) {
+      const topEntry = visible[0].target;
+      const n = parseInt(topEntry.dataset.step, 10);
+      playStep(n);
+      // Update side nav
+      navBtns.forEach(b => b.classList.toggle('active', b.dataset.jump === topEntry.id));
+      steps.forEach(s => s.classList.toggle('active', s === topEntry));
+    }
+  }, { rootMargin: '-20% 0px -55% 0px', threshold: 0 });
+  steps.forEach(s => obs.observe(s));
+
+  // Side-nav click → scroll
+  navBtns.forEach(b => b.addEventListener('click', () => {
+    const el = document.getElementById(b.dataset.jump);
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 72;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }));
+
+  // Donut animation on reveal
+  const donut = document.getElementById('donut');
+  const donutObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        donut.style.strokeDashoffset = 141; // 75%
+        donutObs.disconnect();
+      }
+    });
+  }, { threshold: 0.4 });
+  donutObs.observe(donut);
+
+  // Chat input wiring — user message + canned Yulia reply
+  function handleUserInput(text) {
+    if (!text.trim()) return;
+    appendMessage('me', text);
+    const typing = appendTyping();
+    setTimeout(() => {
+      typing.remove();
+      appendMessage('y', "Great — to run your real numbers I need three things: <strong>industry</strong>, <strong>annual revenue</strong>, and <strong>reported EBITDA</strong>. Drop them in and I'll have a preliminary range and add-back list in about 20 minutes.");
+    }, 900);
+  }
+  document.getElementById('chatForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('chatInput');
+    handleUserInput(input.value);
+    input.value = '';
+  });
+  document.getElementById('chatFormBottom').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = document.getElementById('chatInputBottom');
+    handleUserInput(input.value);
+    // Scroll rail into view on small screens
+    document.querySelector('.dr-rail').scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    input.value = '';
+  });
+  document.querySelectorAll('.dr-rail__chips button').forEach(b => {
+    b.addEventListener('click', () => handleUserInput(b.dataset.prompt));
+  });
+</script>
+</body>
+</html>

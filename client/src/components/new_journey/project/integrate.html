@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>/integrate · smbX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deal-room.css">
+</head>
+<body>
+<div class="dr-top">
+  <div style="display:flex;align-items:center;gap:18px;">
+    <a href="index.html" class="dr-top__logo" style="text-decoration:none;color:inherit;">smbx.ai</a>
+    <nav class="dr-top__nav"><a href="index.html">Home</a><a href="sell.html">Sell</a><a href="buy.html">Buy</a><a href="raise.html">Raise</a><a href="integrate.html" class="active">Integrate</a><a href="how-it-works.html">How</a><a href="pricing.html">Pricing</a><a href="enterprise.html">Enterprise</a></nav>
+  </div>
+  <div class="dr-top__cta"><button class="dr-top__signin">Sign in</button><button class="dr-top__btn">Start free →</button></div>
+</div>
+<nav class="dr-nav"><button data-jump="s1">Day 0</button><button data-jump="s2">180-day plan</button><button data-jump="s3">Retention</button><button data-jump="s4">Thesis tracking</button></nav>
+<div class="dr-main">
+  <aside class="dr-rail">
+    <div class="dr-rail__head">
+      <div class="dr-rail__avatar">Y</div>
+      <div class="dr-rail__who"><span class="dr-rail__name">Yulia</span><span class="dr-rail__status">Day 3 post-close</span></div>
+      <span class="dr-rail__live">LIVE DEMO</span>
+    </div>
+    <div class="dr-rail__scroll" id="chat"></div>
+    <div class="dr-rail__input">
+      <form class="dr-rail__chat" id="chatForm">
+        <input id="chatInput" type="text" autocomplete="off" placeholder="Ask Yulia anything…">
+        <button class="dr-rail__send" type="submit" aria-label="Send"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+      </form>
+      <div class="dr-rail__chips"><button data-prompt="Day 0 checklist">Day 0 checklist</button><button data-prompt="180-day plan">180-day plan</button><button data-prompt="Retain key people">Retain key people</button><button data-prompt="Am I on thesis?">Am I on thesis?</button></div>
+    </div>
+  </aside>
+  <main class="dr-stage">
+    <section class="dr-step" id="s1" data-step="1">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 01 · Day 0</span></div>
+      <h1 class="dr-step__title">The 72 hours that decide whether this deal works.</h1>
+      <p class="dr-step__lede">Bank accounts, payroll, insurance, licenses, vendor notifications, staff town hall, the first Monday. Yulia runs the Day-0 checklist against your deal structure and flags what has to happen <strong>before signing</strong> vs. what can slip to week one.</p>
+      <div class="dr-bench">
+        <div class="dr-bench__head"><div class="dr-bench__title">Day 0 · Atlas Air close</div><div class="dr-bench__meta"><span class="dr-bench__dot"></span>T-48 HOURS</div></div>
+        <div class="dr-bench__body" style="padding:22px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#F5F5F7;border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">New entity + EIN</span><span style="font-family:'JetBrains Mono';color:#22A755;font-size:10px;">DONE</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#F5F5F7;border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">Payroll handover · ADP</span><span style="font-family:'JetBrains Mono';color:#22A755;font-size:10px;">DONE</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#F5F5F7;border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">Ops liability + umbrella</span><span style="font-family:'JetBrains Mono';color:#22A755;font-size:10px;">DONE</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#fff;border:0.5px solid #E8A033;border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">State contractor licenses (TX, OK)</span><span style="font-family:'JetBrains Mono';color:#E8A033;font-size:10px;">AT RISK</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">Top-3 vendor notifications</span><span style="font-family:'JetBrains Mono';color:#6B6B70;font-size:10px;">QUEUED</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">Staff town hall · script drafted</span><span style="font-family:'JetBrains Mono';color:#6B6B70;font-size:10px;">DAY 1, 7:00</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">AP transition · 47 open invoices</span><span style="font-family:'JetBrains Mono';color:#6B6B70;font-size:10px;">DAY 1</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">Keys, fobs, IT cutover</span><span style="font-family:'JetBrains Mono';color:#6B6B70;font-size:10px;">DAY 2</span></div>
+        </div>
+        <div style="padding:14px 22px;background:#FAFAFB;border-top:0.5px solid rgba(0,0,0,0.06);font-size:12.5px;color:#3A3A3E;line-height:1.55;"><strong style="color:#0A0A0B;">Flag:</strong> Texas contractor license transfer needs seller's continued signature for 90 days. Drafting the addendum — add to close docs, don't let it slip to post-close.</div>
+      </div>
+    </section>
+    <section class="dr-step" id="s2" data-step="2">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 02 · 180-day plan</span></div>
+      <h1 class="dr-step__title">The first six months, scripted against your thesis.</h1>
+      <p class="dr-step__lede">You bought this company for a reason. Yulia translates that reason into a 180-day operating plan with named owners, weekly milestones, and a cash runway check at day 30, 90, and 180. You run the business; she watches the plan.</p>
+      <div class="dr-bench">
+        <div class="dr-bench__head"><div class="dr-bench__title">180-day plan · Atlas Air</div><div class="dr-bench__meta">6 WORKSTREAMS</div></div>
+        <div class="dr-bench__body" style="padding:22px;">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:grid;grid-template-columns:180px 1fr auto;gap:14px;align-items:center;font-size:12.5px;"><span style="font-weight:600;">Pricing reset</span><div style="height:24px;background:#F0F0F2;border-radius:4px;position:relative;"><div style="position:absolute;inset:0 55% 0 0;background:#0A0A0B;border-radius:4px;"></div></div><span style="font-family:'JetBrains Mono';font-size:10px;color:#6B6B70;">DAY 45</span></div>
+            <div style="display:grid;grid-template-columns:180px 1fr auto;gap:14px;align-items:center;font-size:12.5px;"><span style="font-weight:600;">MSA renewals × 3</span><div style="height:24px;background:#F0F0F2;border-radius:4px;position:relative;"><div style="position:absolute;inset:0 70% 0 0;background:#0A0A0B;border-radius:4px;"></div></div><span style="font-family:'JetBrains Mono';font-size:10px;color:#6B6B70;">DAY 60</span></div>
+            <div style="display:grid;grid-template-columns:180px 1fr auto;gap:14px;align-items:center;font-size:12.5px;"><span style="font-weight:600;">Service mgr hire</span><div style="height:24px;background:#F0F0F2;border-radius:4px;position:relative;"><div style="position:absolute;inset:0 40% 0 0;background:#0A0A0B;border-radius:4px;"></div></div><span style="font-family:'JetBrains Mono';font-size:10px;color:#6B6B70;">DAY 75</span></div>
+            <div style="display:grid;grid-template-columns:180px 1fr auto;gap:14px;align-items:center;font-size:12.5px;"><span style="font-weight:600;">Route optimization</span><div style="height:24px;background:#F0F0F2;border-radius:4px;position:relative;"><div style="position:absolute;inset:0 25% 0 0;background:#0A0A0B;border-radius:4px;"></div></div><span style="font-family:'JetBrains Mono';font-size:10px;color:#6B6B70;">DAY 120</span></div>
+            <div style="display:grid;grid-template-columns:180px 1fr auto;gap:14px;align-items:center;font-size:12.5px;"><span style="font-weight:600;">Tuck-in #1 · Summit</span><div style="height:24px;background:#F0F0F2;border-radius:4px;position:relative;"><div style="position:absolute;inset:0 5% 0 0;background:#0A0A0B;border-radius:4px;"></div></div><span style="font-family:'JetBrains Mono';font-size:10px;color:#6B6B70;">DAY 180</span></div>
+            <div style="display:grid;grid-template-columns:180px 1fr auto;gap:14px;align-items:center;font-size:12.5px;"><span style="font-weight:600;">Billing system cutover</span><div style="height:24px;background:#F0F0F2;border-radius:4px;position:relative;"><div style="position:absolute;inset:0 10% 0 0;background:#0A0A0B;border-radius:4px;"></div></div><span style="font-family:'JetBrains Mono';font-size:10px;color:#6B6B70;">DAY 150</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="dr-step" id="s3" data-step="3">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 03 · Retention</span></div>
+      <h1 class="dr-step__title">Keep the people who actually run the place.</h1>
+      <p class="dr-step__lede">Most SMB deals lose <strong>40%+ of their key people</strong> in year one. Yulia maps the org, scores each role for replacement risk, and drafts the retention conversation — including stay bonus, equity, title, and a candid talk about what you're changing.</p>
+      <div class="dr-bench">
+        <div class="dr-bench__head"><div class="dr-bench__title">Key-person map · Atlas Air</div><div class="dr-bench__meta">14 ROLES · 4 CRITICAL</div></div>
+        <div class="dr-bench__body" style="padding:0 22px 22px;">
+          <div class="row"><div><div class="row__title">Marco Delgado · Service Manager (22yrs)</div><div class="row__sub">Owns 60% of commercial dispatches · replacement cost ~$340K · flight risk HIGH</div></div><div class="row__amt" style="font-size:15px;color:#B02A2A;">Critical</div></div>
+          <div class="row"><div><div class="row__title">Jennifer Wu · Controller (14yrs)</div><div class="row__sub">Every vendor relationship · bank signer · flight risk MEDIUM</div></div><div class="row__amt" style="font-size:15px;color:#B02A2A;">Critical</div></div>
+          <div class="row"><div><div class="row__title">Three senior techs · certified</div><div class="row__sub">Together cover 48% of revenue hours · replacement 4–6mo each</div></div><div class="row__amt" style="font-size:15px;color:#E8A033;">Elevated</div></div>
+          <div class="row" style="background:#F5F5F7;margin:0 -22px -22px;padding:16px 22px;border-top:0.5px solid rgba(0,0,0,0.08);"><div><div class="row__title">Retention package · Marco</div><div class="row__sub">$45K stay bonus (24mo vest) + 2% rollover equity + VP Operations title</div></div><div class="row__amt" style="font-size:15px;">Draft</div></div>
+        </div>
+      </div>
+    </section>
+    <section class="dr-step" id="s4" data-step="4">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 04 · Thesis tracking</span></div>
+      <h1 class="dr-step__title">Are you on thesis? Yulia tells you every Monday.</h1>
+      <p class="dr-step__lede">Every investment thesis comes with three or four numbers that matter — and fifty that don't. Yulia pulls your GL, AP, CRM, and timesheet data weekly, tracks only the ones that matter, and flags the first week you drift.</p>
+      <div class="dr-bench">
+        <div class="dr-bench__head"><div class="dr-bench__title">Thesis scorecard · week 14</div><div class="dr-bench__meta"><span class="dr-bench__dot"></span>MONDAY 6:02 AM</div></div>
+        <div class="dr-bench__body" style="padding:22px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+          <div style="background:#FAFAFB;border-radius:10px;padding:16px;"><div style="font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:0.1em;color:#22A755;text-transform:uppercase;margin-bottom:6px;">On plan</div><div style="font-family:'Sora';font-weight:800;font-size:28px;margin-bottom:2px;">$1.14M</div><div style="font-size:11.5px;color:#6B6B70;">Trailing 12-mo EBITDA · thesis $1.08M</div></div>
+          <div style="background:#FAFAFB;border-radius:10px;padding:16px;"><div style="font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:0.1em;color:#22A755;text-transform:uppercase;margin-bottom:6px;">Ahead</div><div style="font-family:'Sora';font-weight:800;font-size:28px;margin-bottom:2px;">71%</div><div style="font-size:11.5px;color:#6B6B70;">Recurring revenue mix · thesis 65%</div></div>
+          <div style="background:#FFF5EC;border-radius:10px;padding:16px;"><div style="font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:0.1em;color:#E8A033;text-transform:uppercase;margin-bottom:6px;">Drift</div><div style="font-family:'Sora';font-weight:800;font-size:28px;margin-bottom:2px;">34%</div><div style="font-size:11.5px;color:#6B6B70;">Top-3 concentration · thesis ≤28% by Q2</div></div>
+          <div style="background:#FAFAFB;border-radius:10px;padding:16px;"><div style="font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:0.1em;color:#22A755;text-transform:uppercase;margin-bottom:6px;">On plan</div><div style="font-family:'Sora';font-weight:800;font-size:28px;margin-bottom:2px;">1.42×</div><div style="font-size:11.5px;color:#6B6B70;">FCCV · covenant 1.25×</div></div>
+        </div>
+        <div style="padding:14px 22px;background:#FAFAFB;border-top:0.5px solid rgba(0,0,0,0.06);font-size:12.5px;color:#3A3A3E;line-height:1.55;"><strong style="color:#0A0A0B;">Drift flag:</strong> Concentration hasn't moved since close. Your thesis had 28% by Q2 via two new MSAs. Neither has started. Booking the conversation with Marco for Wednesday.</div>
+      </div>
+    </section>
+    <section class="dr-step" id="close" data-step="5">
+      <div class="dr-bottom">
+        <h2>Just closed a deal? Yulia writes your first 180 days.</h2>
+        <p>Share the LOI, the QoE, and a sentence about your thesis. She returns a Day-0 checklist, a 180-day plan, and a weekly scorecard — ready by your first Monday.</p>
+        <form class="dr-bottom__chat" id="chatFormBottom">
+          <input id="chatInputBottom" type="text" placeholder="Deal size, industry, thesis in one line…">
+          <button class="dr-bottom__send" type="submit" aria-label="Send"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+window.OPENING = "Hi — I'm <strong>Yulia</strong>. You just closed Atlas Air. Close was Friday; it's now Monday morning. Scroll to see what the first 180 days look like.";
+window.REPLY = "Share the <strong>LOI</strong>, the <strong>QoE</strong>, and one sentence about your thesis. I'll have a Day-0 checklist and a 180-day plan on your desk in two hours.";
+window.SCRIPT = {"1":[{"who":"y","text":"Close is <strong>T-48 hours</strong>. Payroll, insurance, banking are done. One flag: <strong>TX contractor license transfer</strong> needs seller's signature for 90 days."},{"who":"y","text":"I drafted the addendum — add it to close docs. Don't let this slip to post-close or you'll be unable to invoice commercial jobs for three weeks."}],"2":[{"who":"y","text":"Plan is 6 workstreams, all named owners. Pricing reset day 45, MSA renewals day 60, service manager hire day 75."},{"who":"me","text":"What happens at day 30?"},{"who":"y","text":"First cash runway check. You bought with <strong>$4.2M of working cap</strong>. I'll flag if we're burning faster than plan a full 60 days before the covenant test."}],"3":[{"who":"y","text":"Marco Delgado is your #1 retention risk. 22 years. Owns 60% of commercial dispatches. Replacement cost ~<strong>$340K</strong> and 4-6 months."},{"who":"y","text":"Package draft: $45K stay bonus over 24mo + 2% rollover + VP Operations title. Meeting is on his calendar Thursday. I wrote the opening."}],"4":[{"who":"y","text":"Week 14. EBITDA on plan. Recurring mix ahead. FCCV clean. One drift: <strong>concentration at 34%</strong>, thesis said 28% by Q2."},{"who":"y","text":"Root cause — neither of the two new MSAs has started. I booked the conversation with Marco for Wednesday."}]};
+</script>
+<script src="deal-room.js"></script>
+</body></html>

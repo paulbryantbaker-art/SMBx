@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>/sell · smbX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deal-room.css">
+</head>
+<body>
+<div class="dr-top">
+  <div style="display:flex;align-items:center;gap:18px;">
+    <a href="index.html" class="dr-top__logo" style="text-decoration:none;color:inherit;">smbx.ai</a>
+    <nav class="dr-top__nav">
+      <a href="index.html" class="">Home</a><a href="sell.html" class="active">Sell</a><a href="buy.html" class="">Buy</a><a href="raise.html" class="">Raise</a><a href="integrate.html" class="">Integrate</a><a href="how-it-works.html" class="">How</a><a href="pricing.html" class="">Pricing</a><a href="enterprise.html" class="">Enterprise</a>
+    </nav>
+  </div>
+  <div class="dr-top__cta">
+    <button class="dr-top__signin">Sign in</button>
+    <button class="dr-top__btn">Start free →</button>
+  </div>
+</div>
+<nav class="dr-nav" aria-label="Section nav"><button data-jump="s1">Add-backs</button><button data-jump="s2">Readiness</button><button data-jump="s3">CIM</button><button data-jump="s4">Bids</button></nav>
+<div class="dr-main">
+  <aside class="dr-rail">
+    <div class="dr-rail__head">
+      <div class="dr-rail__avatar">Y</div>
+      <div class="dr-rail__who"><span class="dr-rail__name">Yulia</span><span class="dr-rail__status">Working on Acme HVAC</span></div>
+      <span class="dr-rail__live">LIVE DEMO</span>
+    </div>
+    <div class="dr-rail__scroll" id="chat"></div>
+    <div class="dr-rail__input">
+      <form class="dr-rail__chat" id="chatForm">
+        <input id="chatInput" type="text" autocomplete="off" placeholder="Ask Yulia anything…">
+        <button class="dr-rail__send" type="submit" aria-label="Send"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+      </form>
+      <div class="dr-rail__chips"><button data-prompt="What's it worth?">What's it worth?</button><button data-prompt="Find my add-backs">Find my add-backs</button><button data-prompt="Draft my CIM">Draft my CIM</button><button data-prompt="Am I ready?">Am I ready?</button></div>
+    </div>
+  </aside>
+  <main class="dr-stage">
+    <section class="dr-step" id="s1" data-step="1">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 01 · What you have</span></div>
+      <h1 class="dr-step__title">Know what you have. Before anyone else does.</h1>
+      <p class="dr-step__lede">Yulia read Acme's last three tax returns. She found <strong>$47K</strong> of defensible add-backs the seller never told the broker. At 5.5× that's a quarter million in enterprise value — already in the financials, just unclaimed.</p>
+      <div class="dr-bench" data-bench="addbacks">
+        <div class="dr-bench__head"><div class="dr-bench__title">Add-back schedule · Acme HVAC</div><div class="dr-bench__meta"><span class="dr-bench__dot"></span>YULIA · LIVE</div></div>
+        <div class="dr-bench__body" style="padding:0 22px 22px;">
+          <div class="row"><div><div class="row__title">Owner comp above market</div><div class="row__sub">$165K paid · $143K benchmark (BLS MSA)</div></div><div class="row__amt">+$22,000</div></div>
+          <div class="row"><div><div class="row__title">Personal vehicles on books</div><div class="row__sub">2 F-150s · fuel, maintenance, insurance</div></div><div class="row__amt">+$14,000</div></div>
+          <div class="row"><div><div class="row__title">Spouse on payroll</div><div class="row__sub">Replaceable at market rate</div></div><div class="row__amt">+$11,000</div></div>
+          <div class="row" style="background:#F5F5F7;margin:0 -22px -22px;padding:16px 22px;border-top:0.5px solid rgba(0,0,0,0.08);"><div><div class="row__title">Blind Equity™ total</div><div class="row__sub">Adds ~0.35× to multiple on upper band</div></div><div class="row__amt" style="font-size:22px;">+$47K</div></div>
+        </div></div>
+    </section>
+    <section class="dr-step" id="s2" data-step="2">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 02 · What a buyer sees</span></div>
+      <h1 class="dr-step__title">Your business, scored through a buyer's lens.</h1>
+      <p class="dr-step__lede">Seventeen dimensions. Revenue quality, margins, concentration, owner dependency, financial integrity. The same checklist every PE associate runs — automated and consistent.</p>
+      <div class="dr-bench" data-bench="readiness">
+        <div class="dr-bench__head"><div class="dr-bench__title">Readiness score · Acme HVAC</div><div class="dr-bench__meta"><span class="dr-bench__dot"></span>6 MIN AGO</div></div>
+        <div class="dr-bench__body" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center;">
+          <div style="position:relative;width:180px;height:180px;">
+            <svg viewBox="0 0 200 200" style="width:100%;height:100%;transform:rotate(-90deg);">
+              <circle cx="100" cy="100" r="90" fill="none" stroke="#F0F0F2" stroke-width="16"/>
+              <circle cx="100" cy="100" r="90" fill="none" stroke="#0A0A0B" stroke-width="16" stroke-linecap="round" stroke-dasharray="565.5" stroke-dashoffset="141" style="transition:stroke-dashoffset 1.4s cubic-bezier(0.19,1,0.22,1);"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="font-family:'Sora';font-weight:800;font-size:54px;letter-spacing:-0.035em;">75<span style="font-size:18px;color:#9A9A9F;">/100</span></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="width:8px;height:8px;border-radius:50%;background:#22A755;"></span><span style="flex:1;color:#3A3A3E;font-weight:500;">Revenue quality</span><span style="font-family:'Sora';font-weight:700;font-variant-numeric:tabular-nums;">8.4</span></div><div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="width:8px;height:8px;border-radius:50%;background:#22A755;"></span><span style="flex:1;color:#3A3A3E;font-weight:500;">Margins</span><span style="font-family:'Sora';font-weight:700;font-variant-numeric:tabular-nums;">7.9</span></div><div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="width:8px;height:8px;border-radius:50%;background:#E8A033;"></span><span style="flex:1;color:#3A3A3E;font-weight:500;">Owner dependency</span><span style="font-family:'Sora';font-weight:700;font-variant-numeric:tabular-nums;">5.2</span></div><div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="width:8px;height:8px;border-radius:50%;background:#22A755;"></span><span style="flex:1;color:#3A3A3E;font-weight:500;">Management depth</span><span style="font-family:'Sora';font-weight:700;font-variant-numeric:tabular-nums;">7.1</span></div><div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="width:8px;height:8px;border-radius:50%;background:#E8A033;"></span><span style="flex:1;color:#3A3A3E;font-weight:500;">Concentration</span><span style="font-family:'Sora';font-weight:700;font-variant-numeric:tabular-nums;">6.0</span></div><div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="width:8px;height:8px;border-radius:50%;background:#22A755;"></span><span style="flex:1;color:#3A3A3E;font-weight:500;">Financial integrity</span><span style="font-family:'Sora';font-weight:700;font-variant-numeric:tabular-nums;">8.8</span></div>
+          </div>
+        </div></div>
+    </section>
+    <section class="dr-step" id="s3" data-step="3">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 03 · What buyers read</span></div>
+      <h1 class="dr-step__title">A CIM that positions a platform, not a business.</h1>
+      <p class="dr-step__lede">28 pages. Written in the voice of a boutique banker — not a template. The same business, positioned two ways, trades at <strong>4.5× or 7×</strong>. The difference is almost never the business.</p>
+      <div class="dr-bench" data-bench="cim">
+        <div class="dr-bench__head"><div class="dr-bench__title">CIM preview · Project Phoenix</div><div class="dr-bench__meta">28 PAGES · CONFIDENTIAL</div></div>
+        <div class="dr-bench__body" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;background:#FAFAFB;padding:22px;">
+          
+            <div style="background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:10px;padding:20px;aspect-ratio:4/5;">
+              <div style="font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:0.1em;color:#9A9A9F;margin-bottom:10px;">01 · Executive summary</div>
+              <div style="font-family:'Sora';font-weight:700;font-size:13px;line-height:1.3;margin-bottom:12px;">A 32-year regional HVAC platform, positioned for geographic expansion.</div>
+              <div style="height:4px;width:94%;background:#E8E8EB;border-radius:2px;margin-bottom:6px;"></div><div style="height:4px;width:88%;background:#E8E8EB;border-radius:2px;margin-bottom:6px;"></div><div style="height:4px;width:62%;background:#E8E8EB;border-radius:2px;margin-bottom:6px;"></div><div style="height:4px;width:70%;background:#E8E8EB;border-radius:2px;margin-bottom:6px;"></div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;"><div><div style="font-family:'Sora';font-weight:800;font-size:13px;">$8.4M</div><div style="font-size:9px;color:#9A9A9F;text-transform:uppercase;letter-spacing:0.08em;">Revenue</div></div><div><div style="font-family:'Sora';font-weight:800;font-size:13px;">$1.9M</div><div style="font-size:9px;color:#9A9A9F;text-transform:uppercase;letter-spacing:0.08em;">Adj EBITDA</div></div><div><div style="font-family:'Sora';font-weight:800;font-size:13px;">22.6%</div><div style="font-size:9px;color:#9A9A9F;text-transform:uppercase;letter-spacing:0.08em;">Margin</div></div></div>
+            </div>
+            <div style="background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:10px;padding:20px;aspect-ratio:4/5;">
+              <div style="font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:0.1em;color:#9A9A9F;margin-bottom:10px;">07 · Growth levers</div>
+              <div style="font-family:'Sora';font-weight:700;font-size:13px;line-height:1.3;margin-bottom:12px;">Three identified levers to double EBITDA within 36 months.</div>
+              <div style="height:4px;width:94%;background:#E8E8EB;border-radius:2px;margin-bottom:6px;"></div><div style="height:4px;width:88%;background:#E8E8EB;border-radius:2px;margin-bottom:6px;"></div><div style="height:4px;width:62%;background:#E8E8EB;border-radius:2px;margin-bottom:6px;"></div><div style="height:4px;width:70%;background:#E8E8EB;border-radius:2px;margin-bottom:6px;"></div>
+              
+            </div>
+        </div></div>
+    </section>
+    <section class="dr-step" id="s4" data-step="4">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 04 · Competitive process</span></div>
+      <h1 class="dr-step__title">One buyer gives you a price. Five give you a market.</h1>
+      <p class="dr-step__lede">Yulia identifies the buyer universe, sequences outreach, and stacks IOIs against each other. The winning bid in a competitive process is typically <strong>15–30% above</strong> the first offer.</p>
+      <div class="dr-bench" data-bench="ioi">
+        <div class="dr-bench__head"><div class="dr-bench__title">IOI comparison · round 1</div><div class="dr-bench__meta">3 OF 11 BUYERS · 2 WEEKS IN</div></div>
+        <div class="dr-bench__body" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:22px;">
+          
+            <div style="background:#fff;color:inherit;border:0.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:18px;">
+              <div style="font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:0.1em;opacity:0.5;margin-bottom:8px;text-transform:uppercase;">Family office</div>
+              <div style="font-family:'Sora';font-weight:800;font-size:26px;letter-spacing:-0.02em;margin-bottom:6px;">$2.4M</div>
+              <div style="font-size:11px;line-height:1.5;opacity:0.7;">100% cash · 60-day close · no earnout</div>
+            </div>
+            <div style="background:#0A0A0B;color:#fff;border:0.5px solid #0A0A0B;border-radius:12px;padding:18px;">
+              <div style="font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:0.1em;opacity:0.7;margin-bottom:8px;text-transform:uppercase;">Strategic</div>
+              <div style="font-family:'Sora';font-weight:800;font-size:26px;letter-spacing:-0.02em;margin-bottom:6px;">$2.9M</div>
+              <div style="font-size:11px;line-height:1.5;opacity:0.85;">85% cash · 15% rollover · synergy case strong</div>
+            </div>
+            <div style="background:#fff;color:inherit;border:0.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:18px;">
+              <div style="font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:0.1em;opacity:0.5;margin-bottom:8px;text-transform:uppercase;">PE roll-up</div>
+              <div style="font-family:'Sora';font-weight:800;font-size:26px;letter-spacing:-0.02em;margin-bottom:6px;">$2.7M</div>
+              <div style="font-size:11px;line-height:1.5;opacity:0.7;">$400K earnout · 90-day diligence</div>
+            </div>
+        </div>
+        <div style="padding:14px 22px;background:#FAFAFB;border-top:0.5px solid rgba(0,0,0,0.06);font-size:12.5px;color:#3A3A3E;line-height:1.55;"><strong style="color:#0A0A0B;">Yulia's take:</strong> Strategic wins on headline and certainty. After-tax, all three within $180K — but the rollover creates a second-bite in 3–5 years.</div>
+      </div>
+    </section>
+    <section class="dr-step" id="close" data-step="5">
+      <div class="dr-bottom">
+        <h2>Paste revenue, industry, and reported EBITDA.</h2>
+        <p>Yulia returns a preliminary value range, add-back list, and readiness score in about 20 minutes. No credit card.</p>
+        <form class="dr-bottom__chat" id="chatFormBottom">
+          <input id="chatInputBottom" type="text" placeholder="Industry, revenue, reported EBITDA…">
+          <button class="dr-bottom__send" type="submit" aria-label="Send"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+window.OPENING = "Hi — I'm <strong>Yulia</strong>. I'll walk you through a real sell-side deal using Acme HVAC as the example. Scroll to follow along.";
+window.REPLY = "To run your numbers I need three things: <strong>industry</strong>, <strong>revenue</strong>, and <strong>reported EBITDA</strong>. Drop them in and I'll have a preliminary range in about 20 minutes.";
+window.SCRIPT = {"1":[{"who":"y","text":"I read Acme's last three <strong>tax returns + QBs</strong>. Found <strong>$47K</strong> of defensible add-backs — owner comp above market, F-150s, spouse on payroll."},{"who":"y","text":"At your band that's ~<strong>$258K</strong> more in enterprise value. Just from cleaning up the P&L."}],"2":[{"who":"y","text":"Now scoring through a buyer's lens — seventeen dimensions."},{"who":"y","text":"Acme came in at <strong>75/100</strong>. Margins + financials are strong. Owner dependency and concentration are the fixable ones — I'll show the playbook."}],"3":[{"who":"y","text":"Drafting the CIM now. 28 pages. Positioning Acme as a <strong>regional platform</strong> with three growth levers, not a 30-year services business."},{"who":"me","text":"How much does positioning actually matter?"},{"who":"y","text":"Same company, two ways, trades at <strong>4.5× or 7×</strong>. On Acme that's a <strong>$4.7M</strong> spread. Rarely about the business."}],"4":[{"who":"y","text":"Outreach went to 11 buyers. Three IOIs back. Strategic is leading on headline + certainty."},{"who":"y","text":"After-tax within $180K — but rollover creates a <strong>second bite in 3–5 years</strong>. Model both?"}]};
+</script>
+<script src="deal-room.js"></script>
+</body></html>

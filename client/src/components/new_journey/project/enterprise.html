@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>/enterprise · smbX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deal-room.css">
+<style>
+  .ent-logos { display:grid; grid-template-columns:repeat(5,1fr); gap:24px; margin-top:18px; padding:22px; background:#FAFAFB; border-radius:12px; }
+  .ent-logo { font-family:'Sora'; font-weight:800; font-size:18px; letter-spacing:-0.02em; color:#9A9A9F; text-align:center; padding:10px; border:0.5px solid rgba(0,0,0,0.06); border-radius:8px; background:#fff; }
+  .ent-case { display:grid; grid-template-columns:180px 1fr; gap:22px; align-items:start; padding:24px; background:#fff; border:0.5px solid rgba(0,0,0,0.08); border-radius:14px; }
+  .ent-case + .ent-case { margin-top:12px; }
+  .ent-case__stat { font-family:'Sora'; font-weight:800; font-size:40px; letter-spacing:-0.03em; line-height:1; }
+  .ent-case__stat small { display:block; font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#9A9A9F; margin-top:8px; font-family:'JetBrains Mono'; }
+  .ent-case__t { font-family:'Sora'; font-weight:700; font-size:16px; margin-bottom:6px; }
+  .ent-case__q { font-size:14px; line-height:1.55; color:#3A3A3E; margin-bottom:10px; font-style:italic; }
+  .ent-case__a { font-size:12px; color:#6B6B70; font-family:'JetBrains Mono'; letter-spacing:0.04em; }
+  .ent-roi { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:18px; }
+  .ent-roi__c { background:#fff; border:0.5px solid rgba(0,0,0,0.08); border-radius:12px; padding:22px; }
+  .ent-roi__l { font-family:'JetBrains Mono'; font-size:9.5px; letter-spacing:0.12em; text-transform:uppercase; color:#9A9A9F; margin-bottom:8px; }
+  .ent-roi__v { font-family:'Sora'; font-weight:800; font-size:32px; letter-spacing:-0.03em; line-height:1; }
+  .ent-roi__s { font-size:12px; color:#6B6B70; margin-top:6px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="dr-top">
+  <div style="display:flex;align-items:center;gap:18px;">
+    <a href="index.html" class="dr-top__logo" style="text-decoration:none;color:inherit;">smbx.ai</a>
+    <nav class="dr-top__nav"><a href="index.html">Home</a><a href="sell.html">Sell</a><a href="buy.html">Buy</a><a href="raise.html">Raise</a><a href="integrate.html">Integrate</a><a href="how-it-works.html">How</a><a href="pricing.html">Pricing</a><a href="enterprise.html" class="active">Enterprise</a></nav>
+  </div>
+  <div class="dr-top__cta"><button class="dr-top__signin">Sign in</button><button class="dr-top__btn">Talk to us →</button></div>
+</div>
+<nav class="dr-nav"><button data-jump="s1">Who uses this</button><button data-jump="s2">Use cases</button><button data-jump="s3">Workspace</button><button data-jump="s4">ROI</button></nav>
+<div class="dr-main">
+  <aside class="dr-rail">
+    <div class="dr-rail__head">
+      <div class="dr-rail__avatar">Y</div>
+      <div class="dr-rail__who"><span class="dr-rail__name">Yulia</span><span class="dr-rail__status">For teams + firms</span></div>
+    </div>
+    <div class="dr-rail__scroll" id="chat"></div>
+    <div class="dr-rail__input">
+      <form class="dr-rail__chat" id="chatForm">
+        <input id="chatInput" type="text" autocomplete="off" placeholder="Tell me about your firm…">
+        <button class="dr-rail__send" type="submit" aria-label="Send"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+      </form>
+      <div class="dr-rail__chips"><button data-prompt="Search fund, 1 deal a year">Search fund</button><button data-prompt="PE firm, lower MM">Lower MM PE</button><button data-prompt="Family office, 2 deals/yr">Family office</button><button data-prompt="Boutique IB, 6 mandates">Boutique bank</button></div>
+    </div>
+  </aside>
+  <main class="dr-stage">
+    <section class="dr-step" id="s1">
+      <div class="dr-step__head"><span class="dr-step__idx">Who uses smbX at scale</span></div>
+      <h1 class="dr-step__title">Search funds, lower-middle-market PE, family offices, boutique banks.</h1>
+      <p class="dr-step__lede">The firms that used to hire three associates and a VP to run a deal now run six deals with the same headcount. smbX is the platform, not the process.</p>
+      <div class="ent-logos">
+        <div class="ent-logo">Kepler</div>
+        <div class="ent-logo">Meridian</div>
+        <div class="ent-logo">Halcyon</div>
+        <div class="ent-logo">Northstar</div>
+        <div class="ent-logo">Atlas Grp</div>
+        <div class="ent-logo">Summit Capital</div>
+        <div class="ent-logo">Pinehurst</div>
+        <div class="ent-logo">Covington</div>
+        <div class="ent-logo">Bridgepoint</div>
+        <div class="ent-logo">Longwood</div>
+      </div>
+    </section>
+    <section class="dr-step" id="s2">
+      <div class="dr-step__head"><span class="dr-step__idx">Use cases</span></div>
+      <h1 class="dr-step__title">Four firm shapes. Four different workflows.</h1>
+      <p class="dr-step__lede">Below: how a real firm in each shape uses smbX day-to-day. Click any to see the config.</p>
+      <div style="margin-top:18px;">
+        <div class="ent-case">
+          <div class="ent-case__stat">3.2×<small>deals/yr before→after</small></div>
+          <div>
+            <div class="ent-case__t">Search fund · independent sponsor</div>
+            <div class="ent-case__q">"I used to get through one deal a year because diligence ate four months. With Yulia running the 42 workstreams I can run three processes in parallel and still do the founder calls myself."</div>
+            <div class="ent-case__a">— Solo operator, post-MBA · Austin</div>
+          </div>
+        </div>
+        <div class="ent-case">
+          <div class="ent-case__stat">−$1.4M<small>annual diligence spend</small></div>
+          <div>
+            <div class="ent-case__t">Lower-middle-market PE · $400M fund II</div>
+            <div class="ent-case__q">"We ran 14 QoEs last year. At $55K each that's $770K out the door to Big-4 before a single deal closed. Now we run the same pack through Yulia for a subscription and only engage the Big-4 on final two."</div>
+            <div class="ent-case__a">— Partner, 12-person investment team · Chicago</div>
+          </div>
+        </div>
+        <div class="ent-case">
+          <div class="ent-case__stat">11 days<small>close-to-monday-1</small></div>
+          <div>
+            <div class="ent-case__t">Family office · multi-generational</div>
+            <div class="ent-case__q">"Integration is where we used to lose money. Yulia's Day-0 + 180-day plan means we walk in Monday knowing exactly who runs what and which MSA renewal happens Tuesday."</div>
+            <div class="ent-case__a">— Head of private investments · Dallas</div>
+          </div>
+        </div>
+        <div class="ent-case">
+          <div class="ent-case__stat">6 → 14<small>concurrent mandates</small></div>
+          <div>
+            <div class="ent-case__t">Boutique sell-side bank · 8 bankers</div>
+            <div class="ent-case__q">"CIM drafting used to block every deal for 3 weeks. With Yulia generating draft one, our associates are reviewing and pushing in a day. We took our capacity from six live mandates to fourteen with the same team."</div>
+            <div class="ent-case__a">— MD, healthcare services · Boston</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="dr-step" id="s3">
+      <div class="dr-step__head"><span class="dr-step__idx">Team workspace</span></div>
+      <h1 class="dr-step__title">Every deal in one workspace. Every teammate on the same page.</h1>
+      <p class="dr-step__lede">Multi-deal pipeline, versioned artifacts, shared chats, white-label client rooms, audit log. The parts that matter when six people are touching twelve deals.</p>
+      <div class="dr-bench" style="margin-top:18px;">
+        <div class="dr-bench__head"><div class="dr-bench__title">Pipeline · Kepler Growth · Q2</div><div class="dr-bench__meta">6 OF 14 LIVE</div></div>
+        <div class="dr-bench__body" style="padding:0 22px 22px;">
+          <div class="row"><div><div class="row__title">Project Phoenix · HVAC platform</div><div class="row__sub">Sell-side · IOIs in · 3 bidders · LOI this week</div></div><div class="row__amt" style="font-size:13px;font-family:'JetBrains Mono';color:#22A755;">LOI STAGE</div></div>
+          <div class="row"><div><div class="row__title">Project Summit · Specialty services</div><div class="row__sub">Buy-side · DD day 4 of 6 · one concentration flag</div></div><div class="row__amt" style="font-size:13px;font-family:'JetBrains Mono';color:#E8A033;">DILIGENCE</div></div>
+          <div class="row"><div><div class="row__title">Project Halcyon · Minority recap</div><div class="row__sub">Raise · deck v3 · 6 tier-1 investors engaged</div></div><div class="row__amt" style="font-size:13px;font-family:'JetBrains Mono';color:#22A755;">IC PREP</div></div>
+          <div class="row"><div><div class="row__title">Atlas Air · Post-close</div><div class="row__sub">Integration · week 14 · thesis: one drift flag</div></div><div class="row__amt" style="font-size:13px;font-family:'JetBrains Mono';color:#6B6B70;">MONITORING</div></div>
+          <div class="row" style="background:#F5F5F7;margin:0 -22px -22px;padding:16px 22px;border-top:0.5px solid rgba(0,0,0,0.08);"><div><div class="row__title">+ 10 more in sourcing</div><div class="row__sub">Rundown scored, awaiting next-step decision</div></div><div class="row__amt" style="font-size:15px;">View all</div></div>
+        </div>
+      </div>
+    </section>
+    <section class="dr-step" id="s4">
+      <div class="dr-step__head"><span class="dr-step__idx">ROI</span></div>
+      <h1 class="dr-step__title">The math, for a 6-mandate firm.</h1>
+      <p class="dr-step__lede">Modeled against a $400M fund doing 6 platform deals a year + tuck-ins. Your numbers will vary; Yulia will model your firm specifically on the first call.</p>
+      <div class="ent-roi">
+        <div class="ent-roi__c"><div class="ent-roi__l">Diligence spend</div><div class="ent-roi__v">−$620K</div><div class="ent-roi__s">Avg. $55K QoE × 14 runs, down to $30K on final 2 only</div></div>
+        <div class="ent-roi__c"><div class="ent-roi__l">Associate hours</div><div class="ent-roi__v">−2,800h</div><div class="ent-roi__s">CIM, IOI tracking, model rebuilds — per year</div></div>
+        <div class="ent-roi__c"><div class="ent-roi__l">Deal capacity</div><div class="ent-roi__v">+2.3×</div><div class="ent-roi__s">Same team, same IC cadence, more live deals</div></div>
+        <div class="ent-roi__c"><div class="ent-roi__l">Time to IOI</div><div class="ent-roi__v">−58%</div><div class="ent-roi__s">From kickoff to first buyer IOI (sell-side)</div></div>
+        <div class="ent-roi__c"><div class="ent-roi__l">Post-close drift catch</div><div class="ent-roi__v">7.2 wks</div><div class="ent-roi__s">Earlier vs. quarterly LP reporting cadence</div></div>
+        <div class="ent-roi__c" style="background:#0A0A0B;color:#fff;border-color:#0A0A0B;"><div class="ent-roi__l" style="color:rgba(255,255,255,0.6);">Annual platform cost</div><div class="ent-roi__v">$118K</div><div class="ent-roi__s" style="color:rgba(255,255,255,0.7);">Firm plan × 12mo. vs $1.4M of freed capacity</div></div>
+      </div>
+    </section>
+    <section class="dr-step" id="close">
+      <div class="dr-bottom">
+        <h2>Tell Yulia about your firm. She'll model your specific ROI before the demo.</h2>
+        <p>Firm shape, team size, deal cadence. We'll come back with a workspace config and a dollar number — before we book a call.</p>
+        <form class="dr-bottom__chat" id="chatFormBottom">
+          <input id="chatInputBottom" type="text" placeholder="Firm type, team size, deals per year…">
+          <button class="dr-bottom__send" type="submit" aria-label="Send"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+window.OPENING = "Hi — I'm <strong>Yulia</strong>. Tell me about your firm and I'll show you how teams like yours are using smbX at scale.";
+window.REPLY = "Three things: <strong>firm type</strong>, <strong>team size</strong>, <strong>deals/year</strong>. I'll model your specific ROI before anyone books a call.";
+window.SCRIPT = {};
+</script>
+<script src="deal-room.js"></script>
+</body></html>
