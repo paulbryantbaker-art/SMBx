@@ -2013,10 +2013,15 @@ export default function AppShell() {
   // }
   void InstallWall; // keep import referenced for when we re-enable
 
-  /* Desktop V4 chrome for /chat when logged in. Single-source of truth for
-     auth/session stays in this file — AuthV4Shell just reskins the chrome
-     around the real chat. Mobile stays on AppShellInner (its own path). */
+  /* Desktop V4 chrome for /chat when logged in, and for journey pages
+     (/sell, /buy, etc.) regardless of auth. AuthV4Shell / JourneyShell
+     own full-viewport chrome in these modes; AppShell's sidebar +
+     main-content wrapper are skipped so the rails don't stack. Mobile
+     stays on AppShellInner / the legacy landing path. */
+  const JOURNEY_TABS = ['sell','buy','raise','integrate','how-it-works','pricing','enterprise'] as const;
   const isV4ChatMode = !isMobile && !!user && isChat;
+  const isV4JourneyMode = !isMobile && viewState === 'landing' && (JOURNEY_TABS as readonly string[]).includes(activeTab);
+  const isV4Mode = isV4ChatMode || isV4JourneyMode;
   const v4ActiveDeal = user && authChat.activeDealId ? authChat.grouped?.deals.find(d => d.id === authChat.activeDealId) : null;
   const v4Chapters = v4ActiveDeal?.conversations?.map((c: any) => ({
     id: c.id,
@@ -2046,10 +2051,34 @@ export default function AppShell() {
         ...(!isMobile && appOffset ? { transform: `translateY(${appOffset}px)` } : {}),
       }}
     >
-      {/* V4 chrome swaps the sidebar + main-content column on desktop /chat.
-          Overlays (NDA modal, artifact sheet, install prompts) continue to
-          render below at the #app-root level. */}
-      {isV4ChatMode ? (
+      {/* V4 chrome swaps the sidebar + main-content column on desktop /chat
+          (logged in) and on desktop journey pages. Overlays render below at
+          the #app-root level. */}
+      {isV4JourneyMode ? (
+        <Suspense fallback={<BelowSkeleton />}>
+          {(() => {
+            const onGoChat = () => { setViewState('chat'); navigate('/chat'); };
+            const send = (msg: string) => handleSend(msg);
+            const onSignIn = () => navigate('/login');
+            const nav = (d: 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'pricing' | 'how-it-works' | 'enterprise') => {
+              setActiveTab(d);
+              setViewState('landing');
+              navigate(d === 'home' ? '/' : `/${d}`);
+            };
+            const common = { active: activeTab as any, onSend: send, onStartFree: onGoChat, onNavigate: nav, onSignIn };
+            switch (activeTab) {
+              case 'sell':         return <GlassGrokSell {...common} />;
+              case 'buy':          return <GlassGrokBuy {...common} />;
+              case 'raise':        return <GlassGrokRaise {...common} />;
+              case 'integrate':    return <GlassGrokIntegrate {...common} />;
+              case 'pricing':      return <GlassGrokPricing {...common} />;
+              case 'how-it-works': return <GlassGrokHowItWorks {...common} />;
+              case 'enterprise':   return <GlassGrokEnterprise {...common} />;
+              default:             return null;
+            }
+          })()}
+        </Suspense>
+      ) : isV4ChatMode ? (
         <AuthV4Shell
           messages={messages}
           streamingText={streamingText}

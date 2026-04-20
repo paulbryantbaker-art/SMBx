@@ -11,14 +11,16 @@
 import type { ReactNode } from 'react';
 
 interface Props {
-  /** Small monospace kicker shown above the title (e.g. "SELL · WALK-THROUGH"). */
+  /** Unused — kept for call-site compatibility. Deal-step titles carry
+      the page heading, so a second sticky header created double-H1 weird
+      space under the hero. Paul flagged this 2026-04-20. */
   kicker?: string;
-  /** Big Sora title shown at the top of the card. */
   title?: string;
   children: ReactNode;
 }
 
 export default function JourneyCanvas({ kicker, title, children }: Props) {
+  void kicker; void title;
   return (
     <div
       className="journey-canvas-wrap"
@@ -43,46 +45,6 @@ export default function JourneyCanvas({ kicker, title, children }: Props) {
           scrollBehavior: 'smooth',
         }}
       >
-        {(kicker || title) && (
-          <div
-            style={{
-              padding: '24px 32px 16px',
-              borderBottom: '1px solid var(--v4-card-line)',
-              position: 'sticky',
-              top: 0,
-              background: 'var(--v4-card)',
-              zIndex: 2,
-            }}
-          >
-            {kicker && (
-              <div
-                style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: 10,
-                  letterSpacing: '0.14em',
-                  color: 'var(--v4-mute)',
-                  textTransform: 'uppercase',
-                  marginBottom: 8,
-                }}
-              >
-                {kicker}
-              </div>
-            )}
-            {title && (
-              <div
-                style={{
-                  fontFamily: "'Sora', sans-serif",
-                  fontWeight: 800,
-                  fontSize: 22,
-                  letterSpacing: '-0.02em',
-                  color: 'var(--v4-ink)',
-                }}
-              >
-                {title}
-              </div>
-            )}
-          </div>
-        )}
         <div style={{ padding: '32px 40px 48px' }}>
           {children}
         </div>
