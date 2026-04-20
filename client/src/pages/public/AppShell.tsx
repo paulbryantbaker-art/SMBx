@@ -2018,7 +2018,7 @@ export default function AppShell() {
      own full-viewport chrome in these modes; AppShell's sidebar +
      main-content wrapper are skipped so the rails don't stack. Mobile
      stays on AppShellInner / the legacy landing path. */
-  const JOURNEY_TABS = ['sell','buy','raise','integrate','how-it-works','pricing','enterprise'] as const;
+  const JOURNEY_TABS = ['home','sell','buy','raise','integrate','how-it-works','pricing','enterprise'] as const;
   const isV4ChatMode = !isMobile && !!user && isChat;
   const isV4JourneyMode = !isMobile && viewState === 'landing' && (JOURNEY_TABS as readonly string[]).includes(activeTab);
   const isV4Mode = isV4ChatMode || isV4JourneyMode;
@@ -2067,6 +2067,7 @@ export default function AppShell() {
             };
             const common = { active: activeTab as any, onSend: send, onStartFree: onGoChat, onNavigate: nav, onSignIn };
             switch (activeTab) {
+              case 'home':         return <GlassGrokHome {...common} />;
               case 'sell':         return <GlassGrokSell {...common} />;
               case 'buy':          return <GlassGrokBuy {...common} />;
               case 'raise':        return <GlassGrokRaise {...common} />;

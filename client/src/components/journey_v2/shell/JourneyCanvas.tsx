@@ -23,31 +23,24 @@ export default function JourneyCanvas({ kicker, title, children }: Props) {
   void kicker; void title;
   return (
     <div
-      className="journey-canvas-wrap"
+      className="journey-canvas v4-canvas"
       style={{
         position: 'absolute',
-        top: 16, bottom: 16, right: 16,
-        left: 'calc(var(--v4-tool-w, 56px) + 28px + var(--v4-chat-w, 380px) + 16px)',
-        overflow: 'hidden',
+        top: 14, bottom: 14, right: 14,
+        left: 'calc(var(--v4-tool-w, 56px) + 14px + var(--v4-chat-w, 380px) + 14px)',
+        background: 'var(--v4-card)',
+        border: '0.5px solid var(--v4-card-line)',
+        borderRadius: 20,
+        boxShadow: 'var(--v4-shadow-md)',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        scrollBehavior: 'smooth',
         display: 'flex',
         flexDirection: 'column',
       }}
     >
-      <div
-        className="journey-canvas"
-        style={{
-          flex: 1,
-          background: 'var(--v4-card)',
-          border: '1px solid var(--v4-card-line)',
-          borderRadius: 18,
-          boxShadow: 'var(--v4-shadow-lg)',
-          overflowY: 'auto',
-          scrollBehavior: 'smooth',
-        }}
-      >
-        <div style={{ padding: '32px 40px 48px' }}>
-          {children}
-        </div>
+      <div style={{ padding: '32px 40px 48px' }}>
+        {children}
       </div>
     </div>
   );
