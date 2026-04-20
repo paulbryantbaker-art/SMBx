@@ -1,10 +1,15 @@
 /**
- * Glass Grok v2 · Buy.tsx
- * 4 steps: sourcing → Rundown → DD pack → LOI structures.
- * Port of new_journey/project/buy.html.
+ * Glass Grok v2 · Buy.tsx — merged SITE_COPY (April 2026) + Atlas Air
+ * walkthrough.
+ *
+ * 6 sections: hero → problem funnel → Rundown → SBA SOP 50 10 8
+ * regulatory alert → personal-guarantee stress test → LOI structures.
+ * Sourcing + DD sections trimmed in favor of the new 7-dim scoring
+ * emphasis + SBA + stress-test sections that are buy-side's biggest
+ * 2026 differentiators.
  */
 import {
-  DealStep, DealBench, Row, ScoreDonut, DimList, DealBottom,
+  DealStep, DealBench, ScoreDonut, DimList, DealBottom,
   type DealTab, type DealStepScript, type Dim,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
@@ -17,87 +22,113 @@ interface Props {
   onSignIn?: () => void;
 }
 
-const SECTION_NAV = [
-  { id: 's1', label: 'Sourcing' },
-  { id: 's2', label: 'Rundown' },
-  { id: 's3', label: 'DD pack' },
-  { id: 's4', label: 'LOI' },
-] as const;
-
-const CHIPS = ['Find me deals', 'Score this target', 'Draft an LOI', 'Build a DD pack'] as const;
+const CHIPS = ['Score this deal', 'Rebuild my SBA stack', 'Stress-test my DSCR', "What should I offer?"] as const;
 
 const RUNDOWN_DIMS: readonly Dim[] = [
-  { label: 'Financial quality',         value: 9.1, tone: 'green' },
-  { label: 'Margin stability',          value: 8.4, tone: 'green' },
-  { label: 'Customer concentration',    value: 6.2, tone: 'amber' },
-  { label: 'Recurring revenue',         value: 7.8, tone: 'green' },
-  { label: 'Owner dependency',          value: 5.9, tone: 'amber' },
-  { label: 'Integration fit · your thesis', value: 8.7, tone: 'green' },
+  { label: 'Financial quality',            value: 9.1, tone: 'green' },
+  { label: 'Margins',                      value: 8.4, tone: 'green' },
+  { label: 'Revenue quality',              value: 7.8, tone: 'green' },
+  { label: 'Concentration',                value: 6.2, tone: 'amber' },
+  { label: 'Management depth',             value: 7.1, tone: 'green' },
+  { label: 'Owner dependency',             value: 5.9, tone: 'amber' },
+  { label: 'Scalability',                  value: 8.2, tone: 'green' },
 ];
 
 const SCRIPT: DealStepScript = {
-  1: [
-    { who: 'y', text: 'Thesis filter: <strong>HVAC, $3–10M rev, TX+OK, 15%+ EBITDA</strong>. I pulled 47 named targets this week, all with owner contact info.' },
-    { who: 'y', text: 'Atlas Air hits a 94 fit — commercial book, retiring 2nd-gen owner, clean financials. Your first outreach.' },
-  ],
   2: [
-    { who: 'y', text: 'Rundown on Atlas: <strong>83/100, Pursue</strong>. Concentration and owner dependency are the two yellows — both fixable in integration.' },
-    { who: 'me', text: 'Is 38% concentration a dealbreaker?' },
-    { who: 'y', text: 'Not at your check size. Two of the three are MSAs with 8+ year tenure. I’ll model a retention scenario before LOI.' },
+    { who: 'y', text: '<strong>Atlas Air</strong> Rundown: 7 dimensions scored. Total <strong>83/100 — Pursue</strong>. Concentration and owner dependency are the two yellows; both unwind in integration.' },
   ],
   3: [
-    { who: 'y', text: 'Running 42 diligence workstreams in parallel. QoE, WC peg, backlog all cleared. Key-person + enviro landing today.' },
-    { who: 'y', text: 'One flag — 38% top-3 concentration on month-to-month MSAs. I drafted the conversation for your owner call.' },
+    { who: 'y', text: 'SBA SOP 50 10 8 took effect June 2025. Your rollover equity path is dead. I rebuilt the stack — <strong>seller note on full standby</strong>, 10% genuine cash injection, senior 7(a) at 85%.' },
   ],
   4: [
-    { who: 'y', text: 'Three LOI structures modeled. Recommended: <strong>$16.8M, 70/20/10</strong>. Maximizes their after-tax NPV and keeps your check under $12M.' },
-    { who: 'y', text: 'Rollover aligns them through year 3 — which is exactly when the concentration risk unwinds. Send it?' },
+    { who: 'me', text: "What's my floor?" },
+    { who: 'y', text: 'Base DSCR 2.1× feels comfortable. Revenue down 25% drops it to <strong>0.9×</strong>. That\'s your line. Structure around it — customer retention escrow + seller note standby.' },
+  ],
+  5: [
+    { who: 'y', text: 'Three LOI structures. Recommended <strong>$16.8M · 70/20/10</strong>. Maximizes their after-tax NPV and keeps your check under $12M. Rollover aligns them through year 3 — when concentration unwinds.' },
   ],
 };
 
+type SbaItem = { label: string; detail: string };
+const SBA_BROKE: readonly SbaItem[] = [
+  { label: 'Rollover equity', detail: 'Effectively eliminated' },
+  { label: 'Seller notes', detail: 'Only count as equity on full standby' },
+  { label: 'Partial change-of-ownership', detail: 'Must be stock purchases' },
+  { label: 'Equity injection', detail: '10% must be genuine cash' },
+  { label: 'Financial covenants', detail: 'Tightened materially' },
+];
+const SBA_WORKS: readonly SbaItem[] = [
+  { label: 'Restructured equity paths', detail: 'Genuine-cash contribution sources' },
+  { label: 'Qualifying seller notes', detail: 'Full-standby structures that pass' },
+  { label: 'Stock-purchase conversions', detail: 'Full change-of-ownership compliance' },
+  { label: 'Alternative contributions', detail: '401(k) rollovers, ROBS, family gifts' },
+];
+
+type Shock = { label: string; margin: string; ebitdaDown: string; dscr: number };
+const BASE_DSCR = 2.1;
+const SHOCKS: readonly Shock[] = [
+  { label: 'Base case',           margin: '–',       ebitdaDown: '–',   dscr: 2.1 },
+  { label: 'Revenue –10%',        margin: '–200bps', ebitdaDown: '–18%', dscr: 1.6 },
+  { label: 'Revenue –15%',        margin: '–200bps', ebitdaDown: '–28%', dscr: 1.3 },
+  { label: 'Top customer leaves', margin: '–150bps', ebitdaDown: '–22%', dscr: 1.2 },
+  { label: 'Top 2 leave',         margin: '–150bps', ebitdaDown: '–34%', dscr: 1.0 },
+  { label: 'Revenue –25%',        margin: '–250bps', ebitdaDown: '–42%', dscr: 0.9 },
+];
+
 export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
-  void SECTION_NAV;
   return (
     <JourneyShell
       active={active}
       onNavigate={onNavigate}
       onSignIn={onSignIn}
       onStartFree={onStartFree}
-      canvasKicker="BUY-SIDE · WALK-THROUGH"
-      canvasTitle="Proprietary deal flow, not the MLS for broken businesses."
       chat={{
         title: 'Yulia',
-        status: 'Sourcing for searcher',
+        status: 'Screening Atlas Air',
         script: SCRIPT,
-        opening: 'Hi — I’m <strong>Yulia</strong>. Today I’m sourcing and diligencing for a searcher on an HVAC roll-up thesis. Scroll to watch.',
-        reply: 'Give me three things: <strong>industry</strong>, <strong>geography</strong>, and <strong>check size</strong>. I’ll return a ranked list of named, off-market targets within the hour.',
+        opening: "Hi — I'm <strong>Yulia</strong>. This walkthrough is a searcher evaluating Atlas Air, a Fort Worth HVAC acquisition. Scroll to watch me score, structure, and stress-test the deal.",
+        reply: 'Three things: <strong>deal size</strong>, <strong>capital structure you can contribute</strong>, and a <strong>URL or teaser</strong>. I\'ll return a scored Rundown and a base-case capital stack in 15 minutes.',
         chips: CHIPS,
         onSend,
       }}
     >
-      {/* Step 01 · Sourcing */}
+      {/* Hero */}
       <DealStep
         n={1}
         id="s1"
-        idx="Step 01 · Sourcing"
-        title="Proprietary deal flow, not the MLS for broken businesses."
-        lede={<>Yulia crawls 14M US business records, filters by your thesis, and pings owners who fit. Off-market. Named. Reachable. <strong>78% of our searchers close a deal that never hit BizBuySell.</strong></>}
-      >
-        <DealBench title="Deal flow · HVAC roll-up · TX+OK" meta="LIVE · 47 NEW THIS WEEK" metaLive bodyStyle={{ padding: '0 22px 22px' }}>
-          <Row title="Atlas Air — Fort Worth, TX" sub="Commercial HVAC · $6.2M rev · 18% EBITDA · 2nd-gen owner, 58yo" amt={<span style={{ fontSize: 15 }}>Fit 94</span>} />
-          <Row title="Summit Climate — Tulsa, OK" sub="Residential + light commercial · $4.1M rev · solo owner, exploring exit" amt={<span style={{ fontSize: 15 }}>Fit 91</span>} />
-          <Row title="Benchmark Mechanical — Dallas, TX" sub="Service-heavy · $9.4M rev · 22% EBITDA · two partners, one retiring" amt={<span style={{ fontSize: 15 }}>Fit 88</span>} />
-          <Row title="+ 44 more matching thesis" sub="Named, contactable, fit ≥ 70" amt={<span style={{ fontSize: 15 }}>View all</span>} highlight />
-        </DealBench>
-      </DealStep>
+        idx="Buy-side"
+        title="Screen ten deals in the time it takes to screen one."
+        lede={<>Yulia scores any deal in 90 seconds on seven dimensions, models the capital stack under current SBA rules, and stress-tests the personal guarantee before you sign. For searchers, sponsors, and buyers.</>}
+      />
 
-      {/* Step 02 · Rundown */}
+      {/* Problem funnel */}
       <DealStep
         n={2}
         id="s2"
-        idx="Step 02 · Rundown"
-        title="Every target, scored the same way. Before you ever get on a call."
-        lede={<>Paste a CIM, a teaser, or three tax returns. Yulia returns a <strong>Rundown score</strong> in 15 minutes — financial quality, concentration risk, key-person risk, integration fit. Kill the 9 out of 10 bad deals fast.</>}
+        idx="The funnel"
+        title="3,000 deals screened. 1 closed. That's the math."
+        lede={<>The buy-side funnel hasn't changed in two decades. Three thousand opportunities to get to one close. Eighteen months of burn rate. Eighty-five thousand dollars in busted diligence on deals that should have been dead before the first call.</>}
+      >
+        <div style={{
+          marginTop: 18,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 10,
+        }}>
+          <StatCard n="3,000 → 1" label="Traditional search funnel" />
+          <StatCard n="$34K" label="Average busted diligence per dead deal" />
+          <StatCard n="78%" label="Sub-40 Rundown deals that die in diligence" />
+        </div>
+      </DealStep>
+
+      {/* Rundown */}
+      <DealStep
+        n={3}
+        id="s3"
+        idx="The Rundown"
+        title="Seven dimensions. Sixty seconds. Pursue or pass."
+        lede={<>Concentration. Margins. Revenue quality. Owner dependency. Management depth. Financial integrity. Scalability. Paste a listing URL, upload a teaser, or type a description. Yulia returns a scored Rundown before you spend an hour on the deal.</>}
       >
         <DealBench
           title="Rundown · Atlas Air"
@@ -108,86 +139,226 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
           <div>
             <ScoreDonut score={83} />
             <div style={{ textAlign: 'center', marginTop: -18 }}>
-              <div style={{ fontFamily: 'JetBrains Mono, ui-monospace, monospace', fontSize: 9, letterSpacing: '0.15em', color: '#22A755', textTransform: 'uppercase' }}>Pursue</div>
+              <div style={{
+                fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                fontSize: 9,
+                letterSpacing: '0.15em',
+                color: '#22A755',
+                textTransform: 'uppercase',
+              }}>Pursue</div>
             </div>
           </div>
           <DimList dims={RUNDOWN_DIMS} />
         </DealBench>
       </DealStep>
 
-      {/* Step 03 · DD workstreams */}
-      <DealStep
-        n={3}
-        id="s3"
-        idx="Step 03 · Diligence pack"
-        title="A Big-4 diligence pack. Without the Big-4 invoice."
-        lede={<>Quality of Earnings. Customer concentration. Working capital peg. Key-person risk. Environmental. Yulia runs all 42 workstreams in parallel and produces the same memo your LPs expect — <strong>in 6 days, not 10 weeks</strong>.</>}
-      >
-        <DealBench title="DD workstreams · Atlas Air" meta="DAY 4 OF 6">
-          <div style={{ padding: 22, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-            <DdTile title="QoE adjustments" status="DONE" tone="done" />
-            <DdTile title="Customer cohort" status="DONE" tone="done" />
-            <DdTile title="WC peg" status="DONE" tone="done" />
-            <DdTile title="Backlog validation" status="DONE" tone="done" />
-            <DdTile title="Key-person interviews" status="LIVE" tone="live" />
-            <DdTile title="Environmental Phase I" status="LIVE" tone="live" />
-            <DdTile title="Legal + corp review" status="DAY 5" tone="queued" />
-            <DdTile title="IT + cyber" status="DAY 5" tone="queued" />
-          </div>
-          <FlagStrip>
-            <strong style={{ color: '#0A0A0B' }}>Flag:</strong> 38% of revenue sits with top 3 customers. Two on month-to-month MSAs. Yulia drafted the retention conversation for the owner call.
-          </FlagStrip>
-        </DealBench>
-      </DealStep>
-
-      {/* Step 04 · LOI */}
+      {/* SBA SOP 50 10 8 alert */}
       <DealStep
         n={4}
         id="s4"
-        idx="Step 04 · LOI"
+        idx="Regulatory alert"
+        title="SOP 50 10 8 changed every SBA-financed deal."
+        lede={<>Effective June 1, 2025. The most disruptive regulatory change in two decades for SMB and lower middle market deals. 41% of brokers report deal delays. Rollover equity is effectively dead. Yulia models the structures that actually qualify — in 90 seconds.</>}
+      >
+        <div style={{
+          marginTop: 18,
+          background: '#0A0A0B',
+          color: '#fff',
+          borderRadius: 14,
+          padding: '18px 22px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+        }}>
+          <div style={{
+            fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+            fontSize: 10,
+            letterSpacing: '0.18em',
+            padding: '4px 9px',
+            border: '0.5px solid rgba(255,255,255,0.3)',
+            borderRadius: 4,
+          }}>REGULATORY ALERT</div>
+          <div style={{ fontSize: 13, fontWeight: 600, opacity: 0.9 }}>If your deal was structured under the old rules, it probably doesn't qualify under the new ones.</div>
+        </div>
+        <div style={{
+          marginTop: 12,
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 12,
+        }}>
+          <SbaCol
+            heading="What the new SOP broke"
+            tone="red"
+            items={SBA_BROKE}
+          />
+          <SbaCol
+            heading="What Yulia models that works"
+            tone="green"
+            items={SBA_WORKS}
+          />
+        </div>
+      </DealStep>
+
+      {/* Stress test */}
+      <DealStep
+        n={5}
+        id="s5"
+        idx="Stress test"
+        title="Know exactly where the deal breaks before you guarantee it."
+        lede={<>The personal guarantee is real. The unwind scenario is real. Most buyers sign anyway because they've modeled the base case on a napkin. Yulia runs your DSCR against the scenarios that actually kill deals — revenue shocks, margin compression, customer churn, rate moves.</>}
+      >
+        <DealBench title="DSCR stress · Atlas Air · Base 2.1×" meta="SHOCK MATRIX">
+          <div style={{ padding: 22 }}>
+            <div style={{ display: 'grid', gap: 6 }}>
+              {SHOCKS.map((s) => {
+                const pct = Math.max(0, Math.min(100, (s.dscr / 2.5) * 100));
+                const tone =
+                  s.dscr >= 1.5 ? { bar: '#22A755', tag: 'HEADROOM', tagColor: '#22A755' } :
+                  s.dscr >= 1.25 ? { bar: '#E8A033', tag: 'TIGHT',   tagColor: '#E8A033' } :
+                  s.dscr >= 1.0  ? { bar: '#E8A033', tag: 'AT LINE', tagColor: '#E8A033' } :
+                                   { bar: '#D44A78', tag: 'BREACH',  tagColor: '#D44A78' };
+                return (
+                  <div key={s.label} style={{
+                    display: 'grid',
+                    gridTemplateColumns: '180px 1fr 60px 80px',
+                    gap: 12,
+                    alignItems: 'center',
+                    fontSize: 12.5,
+                  }}>
+                    <div style={{ fontWeight: 600 }}>{s.label}</div>
+                    <div style={{ position: 'relative', height: 18, background: '#F4F4F5', borderRadius: 4, overflow: 'hidden' }}>
+                      <div style={{
+                        position: 'absolute',
+                        left: 0, top: 0, bottom: 0,
+                        width: `${pct}%`,
+                        background: tone.bar,
+                        borderRadius: 4,
+                        transition: 'width 300ms',
+                      }} />
+                      <div style={{
+                        position: 'absolute',
+                        left: `${(1.25 / 2.5) * 100}%`,
+                        top: 0, bottom: 0, width: 1,
+                        background: 'rgba(0,0,0,0.2)',
+                      }} />
+                    </div>
+                    <div style={{
+                      fontVariantNumeric: 'tabular-nums',
+                      fontWeight: 700,
+                      textAlign: 'right',
+                    }}>{s.dscr.toFixed(1)}×</div>
+                    <div style={{
+                      fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                      fontSize: 9.5,
+                      letterSpacing: '0.1em',
+                      color: tone.tagColor,
+                      textAlign: 'right',
+                    }}>{tone.tag}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div style={{
+            padding: '14px 22px',
+            background: '#FAFAFB',
+            borderTop: '0.5px solid rgba(0,0,0,0.06)',
+            fontSize: 12.5,
+            lineHeight: 1.55,
+            color: '#3A3A3E',
+          }}>
+            <strong style={{ color: '#0A0A0B' }}>Yulia's take:</strong> Atlas breaks at revenue &minus;25% or losing top 2 customers. Structure around that — customer retention escrow, seller note on 3-year standby, WC peg methodology. You sign the guarantee knowing where the line is. Base-case DSCR 1.25× reference per SBA SOP. {BASE_DSCR /* keep BASE_DSCR referenced */ && null}
+          </div>
+        </DealBench>
+      </DealStep>
+
+      {/* LOI */}
+      <DealStep
+        n={6}
+        id="s6"
+        idx="LOI"
         title="Three LOIs. Three structures. One you can actually close."
-        lede={<>Yulia drafts the LOI alongside you — cash/earnout mix, escrow, working-capital peg, non-competes, exclusivity window. She models the after-tax outcome for both sides so you walk in with the right number, not just a big one.</>}
+        lede={<>Yulia drafts the LOI alongside you — cash/earnout mix, escrow, WC peg, non-competes, exclusivity. She models after-tax outcomes for both sides, so you walk in with the right number, not just a big one.</>}
       >
         <DealBench title="LOI structures · Atlas Air" meta="3 OPTIONS · MODELED">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, padding: 22 }}>
-            <LoiCard label="Aggressive" price="$18.4M" terms="85% cash · $2M earnout · 45-day exclusivity" />
+            <LoiCard label="Aggressive"  price="$18.4M" terms="85% cash · $2M earnout · 45-day exclusivity" />
             <LoiCard label="Recommended" price="$16.8M" terms="70% cash · 20% rollover · 10% seller note @ 6%" featured />
             <LoiCard label="Conservative" price="$15.2M" terms="60% cash · 30% rollover · performance earnout" />
           </div>
-          <FlagStrip>
-            <strong style={{ color: '#0A0A0B' }}>Yulia’s take:</strong> Recommended structure maximizes seller’s after-tax NPV at ~$14.1M while keeping your check size under $12M. Rollover aligns them through year 3 — exactly when concentration risk unwinds.
-          </FlagStrip>
+          <div style={{
+            padding: '14px 22px',
+            background: '#FAFAFB',
+            borderTop: '0.5px solid rgba(0,0,0,0.06)',
+            fontSize: 12.5,
+            lineHeight: 1.55,
+            color: '#3A3A3E',
+          }}>
+            <strong style={{ color: '#0A0A0B' }}>Yulia's take:</strong> Recommended structure maximizes seller's after-tax NPV at ~$14.1M while keeping your check under $12M. Rollover aligns them through year 3 — exactly when concentration risk unwinds.
+          </div>
         </DealBench>
       </DealStep>
 
       <DealBottom
-        heading="Tell Yulia your thesis. Get a list of real targets tonight."
-        sub="Industry, geography, check size. She returns a ranked list of named, contactable targets with Rundown scores — usually within an hour."
-        placeholder="Industry, geography, check size…"
+        heading="Paste a deal. Get a score. Free."
+        sub="The first 3 deals you screen on smbX are free. No credit card."
+        placeholder="Paste a URL, describe a deal, or tell Yulia what you're looking for…"
         onSend={onSend}
       />
     </JourneyShell>
   );
 }
 
-/* ─── page-local atoms ─── */
-
-function DdTile({ title, status, tone }: { title: string; status: string; tone: 'done' | 'live' | 'queued' }) {
-  const styles: Record<typeof tone, React.CSSProperties> = {
-    done: { background: '#F5F5F7', border: 'none' },
-    live: { background: '#fff', border: '0.5px solid #E8A033' },
-    queued: { background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)' },
-  };
-  const statusColor = tone === 'done' ? '#22A755' : tone === 'live' ? '#E8A033' : '#6B6B70';
-  const textColor = tone === 'queued' ? '#6B6B70' : '#0A0A0B';
+function StatCard({ n, label }: { n: string; label: string }) {
   return (
     <div style={{
-      display: 'flex', justifyContent: 'space-between',
-      padding: '12px 14px', borderRadius: 8, fontSize: 12.5,
-      ...styles[tone],
+      background: '#fff',
+      border: '0.5px solid rgba(0,0,0,0.08)',
+      borderRadius: 12,
+      padding: 22,
     }}>
-      <span style={{ fontWeight: 600, color: textColor }}>{title}</span>
-      <span style={{ fontFamily: 'JetBrains Mono, ui-monospace, monospace', color: statusColor, fontSize: 10 }}>{status}</span>
+      <div style={{
+        fontFamily: 'Sora, sans-serif',
+        fontWeight: 800,
+        fontSize: 34,
+        letterSpacing: '-0.02em',
+        color: '#0A0A0B',
+      }}>{n}</div>
+      <div style={{
+        marginTop: 6,
+        fontSize: 12.5,
+        lineHeight: 1.45,
+        color: '#3A3A3E',
+      }}>{label}</div>
+    </div>
+  );
+}
+
+function SbaCol({ heading, tone, items }: { heading: string; tone: 'red' | 'green'; items: readonly SbaItem[] }) {
+  const ink = tone === 'red' ? '#D44A78' : '#22A755';
+  return (
+    <div style={{
+      background: '#fff',
+      border: '0.5px solid rgba(0,0,0,0.08)',
+      borderRadius: 14,
+      padding: 22,
+    }}>
+      <div style={{
+        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+        fontSize: 10.5,
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        color: ink,
+        marginBottom: 12,
+      }}>{heading}</div>
+      <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: 10 }}>
+        {items.map((it) => (
+          <li key={it.label} style={{ borderLeft: `2px solid ${ink}`, paddingLeft: 12 }}>
+            <div style={{ fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 12.5 }}>{it.label}</div>
+            <div style={{ fontSize: 11.5, color: '#6B6B70', marginTop: 2 }}>{it.detail}</div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -198,23 +369,29 @@ function LoiCard({ label, price, terms, featured }: { label: string; price: stri
       background: featured ? '#0A0A0B' : '#fff',
       color: featured ? '#fff' : 'inherit',
       border: featured ? '0.5px solid #0A0A0B' : '0.5px solid rgba(0,0,0,0.08)',
-      borderRadius: 12, padding: 18,
+      borderRadius: 12,
+      padding: 18,
     }}>
-      <div style={{ fontFamily: 'JetBrains Mono, ui-monospace, monospace', fontSize: 9.5, letterSpacing: '0.1em', opacity: featured ? 0.7 : 0.5, marginBottom: 8, textTransform: 'uppercase' }}>{label}</div>
-      <div style={{ fontFamily: 'Sora, sans-serif', fontWeight: 800, fontSize: 26, letterSpacing: '-0.02em', marginBottom: 6 }}>{price}</div>
-      <div style={{ fontSize: 11, lineHeight: 1.5, opacity: featured ? 0.85 : 0.7 }}>{terms}</div>
-    </div>
-  );
-}
-
-function FlagStrip({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{
-      padding: '14px 22px', background: '#FAFAFB',
-      borderTop: '0.5px solid rgba(0,0,0,0.06)',
-      fontSize: 12.5, color: '#3A3A3E', lineHeight: 1.55,
-    }}>
-      {children}
+      <div style={{
+        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+        fontSize: 9.5,
+        letterSpacing: '0.1em',
+        opacity: featured ? 0.7 : 0.5,
+        marginBottom: 8,
+        textTransform: 'uppercase',
+      }}>{label}</div>
+      <div style={{
+        fontFamily: 'Sora, sans-serif',
+        fontWeight: 800,
+        fontSize: 26,
+        letterSpacing: '-0.02em',
+        marginBottom: 6,
+      }}>{price}</div>
+      <div style={{
+        fontSize: 11,
+        lineHeight: 1.5,
+        opacity: featured ? 0.85 : 0.7,
+      }}>{terms}</div>
     </div>
   );
 }
