@@ -17,7 +17,9 @@ import { useEffect, useRef, useState } from 'react';
 import { DEALS, type Deal, type Portfolio } from '../data';
 import type { Tab } from '../session';
 import { RundownCard, DDCard, LOICard, CompareCard, ModelCard, ChartCard, SourcingCard } from '../shared/cards';
+import LibraryView from '../canvas/LibraryView';
 import '../shared/cards.css';
+import '../canvas/library.css';
 
 /* ═══════════════════════════════════════════════════════════════════
    V4Top — top action bar
@@ -274,13 +276,16 @@ function V4CanvasBody({ tab, portfolio }: { tab: Tab | null; portfolio: Portfoli
     const portDeals = DEALS.filter((d) => portfolio.dealIds.includes(d.id));
     return <SourcingCard deals={portDeals} />;
   }
-  /* library → task #37. scratch, doc, etc. → generic empty */
+  if (tab.kind === 'library') {
+    return <LibraryView portfolio={portfolio} />;
+  }
+  /* scratch, doc, etc. → generic empty */
   return (
     <div className="v4-canvas__empty">
       <div className="v4-canvas__empty-t">{tab.label}</div>
       <div className="v4-canvas__empty-s">{tab.sub || ''}</div>
       <div style={{ marginTop: 24, fontSize: 11, color: 'var(--v4-faint)', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.1em' }}>
-        {tab.kind === 'library' ? 'LIBRARY VIEW · TASK #37' : 'VIEW PENDING'}
+        VIEW PENDING
       </div>
     </div>
   );

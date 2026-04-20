@@ -13,6 +13,7 @@ import V4Tool from './chrome/V4Tool';
 import V4Chat from './chrome/V4Chat';
 import V4Rail from './chrome/V4Rail';
 import V4Canvas from './chrome/V4Canvas';
+import MobileApp from './mobile/MobileApp';
 import { PORTFOLIOS, DEALS, yuliaReply } from './data';
 import type { ChatMessage } from './session';
 import './tokens.css';
@@ -91,7 +92,12 @@ export default function V4App() {
 
   return (
     <div className={`app-v4 app-v4--${ui.mode}`} data-density={ui.density}>
-      <ModeSwitcher mode={ui.mode} onChange={(mode) => setUI({ mode })} />
+      <DevPill
+        mode={ui.mode}
+        density={ui.density}
+        onMode={(mode) => setUI({ mode })}
+        onDensity={(density) => setUI({ density })}
+      />
       {ui.mode === 'desktop' ? (
         <V4Shell
           ui={ui}
@@ -155,14 +161,24 @@ export default function V4App() {
           }
         />
       ) : (
-        <MobileStub />
+        <MobileApp />
       )}
     </div>
   );
 }
 
-/* ─── Dev-only mode switcher (bottom-right pill). ─────────────────── */
-function ModeSwitcher({ mode, onChange }: { mode: 'desktop' | 'mobile'; onChange: (m: 'desktop' | 'mobile') => void }) {
+/* ─── Dev-only bottom-right pill (mode + density). ─────────────────── */
+function DevPill({
+  mode,
+  density,
+  onMode,
+  onDensity,
+}: {
+  mode: 'desktop' | 'mobile';
+  density: 'comfortable' | 'compact';
+  onMode: (m: 'desktop' | 'mobile') => void;
+  onDensity: (d: 'comfortable' | 'compact') => void;
+}) {
   const btn = (active: boolean): React.CSSProperties => ({
     padding: '6px 12px',
     borderRadius: 999,
@@ -175,43 +191,36 @@ function ModeSwitcher({ mode, onChange }: { mode: 'desktop' | 'mobile'; onChange
     cursor: 'pointer',
     transition: 'background 0.15s ease, color 0.15s ease',
   });
+  const pillStyle: React.CSSProperties = {
+    padding: 4,
+    background: 'var(--v4-card)',
+    border: '0.5px solid var(--v4-card-line)',
+    borderRadius: 999,
+    boxShadow: 'var(--v4-shadow-md)',
+    display: 'flex',
+    gap: 2,
+  };
   return (
-    <div
-      style={{
-        position: 'fixed',
-        bottom: 16,
-        right: 16,
-        zIndex: 9999,
-        padding: 4,
-        background: 'var(--v4-card)',
-        border: '0.5px solid var(--v4-card-line)',
-        borderRadius: 999,
-        boxShadow: 'var(--v4-shadow-md)',
-        display: 'flex',
-        gap: 2,
-      }}
-    >
-      <button type="button" onClick={() => onChange('desktop')} style={btn(mode === 'desktop')}>
-        Desktop
-      </button>
-      <button type="button" onClick={() => onChange('mobile')} style={btn(mode === 'mobile')}>
-        Mobile
-      </button>
+    <div style={{ position: 'fixed', bottom: 16, right: 16, zIndex: 9999, display: 'flex', gap: 8 }}>
+      <div style={pillStyle}>
+        <button type="button" onClick={() => onMode('desktop')} style={btn(mode === 'desktop')}>
+          Desktop
+        </button>
+        <button type="button" onClick={() => onMode('mobile')} style={btn(mode === 'mobile')}>
+          Mobile
+        </button>
+      </div>
+      {mode === 'desktop' && (
+        <div style={pillStyle}>
+          <button type="button" onClick={() => onDensity('comfortable')} style={btn(density === 'comfortable')}>
+            Comfortable
+          </button>
+          <button type="button" onClick={() => onDensity('compact')} style={btn(density === 'compact')}>
+            Compact
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-function MobileStub() {
-  return (
-    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-      <div>
-        <div style={{ fontFamily: "'Sora', system-ui, sans-serif", fontWeight: 800, fontSize: 22, letterSpacing: '-0.02em', color: 'var(--v4-ink)' }}>
-          Mobile shell — pending
-        </div>
-        <div style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13, color: 'var(--v4-mute)', marginTop: 4 }}>
-          Today · Deals · Chat · Inbox
-        </div>
-      </div>
-    </div>
-  );
-}
