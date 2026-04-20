@@ -34,6 +34,7 @@ import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/Canva
 import CanvasPicker from '../../components/canvas/CanvasPicker';
 import InstallWall, { PWA_DEEP_LINK_KEY } from '../../components/mobile/InstallWall';
 import AppShellInner from '../../components/app/AppShellInner';
+import AuthV4Shell from '../../components/app_v4/adapters/AuthV4Shell';
 // MobileChatDrawer removed — mobile chat is full-screen (iMessage pattern).
 import DealWorkspace from '../../components/desktop/DealWorkspace';
 import PipelineTable from '../../components/desktop/PipelineTable';
@@ -2012,6 +2013,19 @@ export default function AppShell() {
   // }
   void InstallWall; // keep import referenced for when we re-enable
 
+  /* Desktop V4 chrome for /chat when logged in. Single-source of truth for
+     auth/session stays in this file — AuthV4Shell just reskins the chrome
+     around the real chat. Mobile stays on AppShellInner (its own path). */
+  const isV4ChatMode = !isMobile && !!user && isChat;
+  const v4ActiveDeal = user && authChat.activeDealId ? authChat.grouped?.deals.find(d => d.id === authChat.activeDealId) : null;
+  const v4Chapters = v4ActiveDeal?.conversations?.map((c: any) => ({
+    id: c.id,
+    title: c.title || 'Chapter',
+    gate_label: c.gate_label,
+    gate_status: c.gate_status,
+    summary: c.summary,
+  })) ?? [];
+
   return (
     <div
       id="app-root"
@@ -2032,6 +2046,41 @@ export default function AppShell() {
         ...(!isMobile && appOffset ? { transform: `translateY(${appOffset}px)` } : {}),
       }}
     >
+      {/* V4 chrome swaps the sidebar + main-content column on desktop /chat.
+          Overlays (NDA modal, artifact sheet, install prompts) continue to
+          render below at the #app-root level. */}
+      {isV4ChatMode ? (
+        <AuthV4Shell
+          messages={messages}
+          streamingText={streamingText}
+          sending={sending}
+          onSend={handleSend}
+          activeDealId={authChat.activeDealId ?? null}
+          currentGate={authChat.currentGate}
+          chapters={v4Chapters}
+          activeChapterId={activeConvId}
+          onSelectChapter={(id) => {
+            authChat.selectConversation(id);
+            navigate(`/chat/${id}`, { replace: true });
+          }}
+          messagesFooterSlot={user && authChat.paywallData && authChat.activeDealId ? (
+            <div style={{ padding: '0 14px', marginBottom: 14 }}>
+              <PaywallCard
+                paywall={authChat.paywallData}
+                dealId={authChat.activeDealId}
+                onUnlocked={(_toGate, deliverableId) => {
+                  authChat.setPaywallData(null);
+                  if (deliverableId) {
+                    openCanvasTab('deliverable', 'Deliverable', { deliverableId });
+                    window.history.pushState({ artifact: true }, '');
+                  }
+                }}
+              />
+            </div>
+          ) : null}
+        />
+      ) : (
+      <>
       {/* Desktop sidebar — fixed 80px icon rail.
           One sidebar, state-aware: 'explore' mode (Sell/Buy/Raise/…)
           on public marketing, 'tools' mode (Library/Data Rm/…) in-app.
@@ -2834,6 +2883,8 @@ export default function AppShell() {
           </div>
         )}
       </div>
+      </>
+      )}
 
       {/* Global keyframe animations */}
       <style>{`
