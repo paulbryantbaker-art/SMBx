@@ -1,13 +1,16 @@
 /**
- * Glass Grok v2 · internal app — shared card primitives + workbench cards.
+ * Shared card primitives + workbench cards for the v4 canvas.
  * Port of claude_design/app/project/cards.jsx.
  *
  * Atoms: Bench, Row, Pill, DimRow, ScoreDonut
  * Cards: RundownCard, SourcingCard, DDCard, LOICard, CompareCard,
  *        ModelCard, ChartCard
+ *
+ * Types imported from ../data — the port-boundary module. When real
+ * APIs land, only data.ts swaps; cards stay the same.
  */
 import type { ReactNode, CSSProperties } from 'react';
-import type { Deal, Dim, DimTone } from '../data';
+import type { Deal, DealDim, DimTone } from '../data';
 
 export const TONE_HEX: Record<DimTone, string> = {
   green: '#22A755',
@@ -64,7 +67,7 @@ export function Pill({ tone = 'ok', children }: { tone?: PillTone; children: Rea
   return <span className={`pill pill--${tone}`}>{children}</span>;
 }
 
-export function DimRow({ label, value, tone }: Dim) {
+export function DimRow({ label, value, tone }: DealDim) {
   return (
     <div className="dim">
       <span className="dim__dot" style={{ background: TONE_HEX[tone] }} />
@@ -255,8 +258,6 @@ export function CompareCard({ deals }: { deals: Deal[] }) {
 
 /* ═══════════════════════════════════════════════════════════════════
    FINANCIAL MODEL (code-styled output)
-   Prototype used dangerouslySetInnerHTML on a pre. React equivalent is
-   a structured span render — safer, same look.
    ═══════════════════════════════════════════════════════════════════ */
 
 export function ModelCard({ deal }: { deal: Deal }) {

@@ -12,6 +12,7 @@ import V4Shell from './chrome/V4Shell';
 import V4Tool from './chrome/V4Tool';
 import V4Chat from './chrome/V4Chat';
 import V4Rail from './chrome/V4Rail';
+import V4Canvas from './chrome/V4Canvas';
 import { PORTFOLIOS, DEALS, yuliaReply } from './data';
 import type { ChatMessage } from './session';
 import './tokens.css';
@@ -113,8 +114,45 @@ export default function V4App() {
               onWidthChange={(w) => setUI({ chatW: w })}
             />
           }
-          canvas={<RegionStub label="V4Canvas" width="center" side="center" />}
-          rail={<RegionStub label="V4Rail" width="var(--v4-rail-w)" side="right" />}
+          canvas={
+            <V4Canvas
+              tab={activeTab}
+              portfolio={portfolio}
+              onCloseTab={closeTab}
+              onOpenDeal={(d) =>
+                openTab({ id: `${d.id}-deal`, kind: 'deal', dealId: d.id, label: d.name, sub: d.kicker || d.stage })
+              }
+              onOpenModule={(m) => {
+                if (m === 'compare') {
+                  openTab({
+                    id: 'compare',
+                    kind: 'compare',
+                    dealIds: DEALS.filter((d) => portfolio.dealIds.includes(d.id) && d.score).slice(0, 3).map((d) => d.id),
+                    label: 'Compare · Live deals',
+                    sub: '3 DEALS',
+                  });
+                } else if (m === 'portfolio') {
+                  openTab({ id: 'portfolio', kind: 'portfolio', label: `${portfolio.name} · Overview`, sub: 'PORTFOLIO' });
+                } else if (m === 'library') {
+                  openTab({ id: 'library', kind: 'library', label: 'Library', sub: 'DOCS · DATA ROOMS · TEMPLATES' });
+                } else if (m === 'sourcing') {
+                  openTab({ id: 'sourcing', kind: 'doc', label: 'Sourcing feed', sub: 'NEW TARGETS' });
+                }
+              }}
+            />
+          }
+          rail={
+            <V4Rail
+              tabs={workspace.tabs}
+              activeTabId={workspace.activeTabId}
+              expanded={ui.railShown}
+              onSwitch={switchTab}
+              onClose={closeTab}
+              onReorder={reorderTabs}
+              onCollapse={() => setUI({ railShown: !ui.railShown })}
+              onNewTab={() => openTab({ id: `doc-${Date.now()}`, kind: 'doc', label: 'Untitled', sub: 'DRAFT' })}
+            />
+          }
         />
       ) : (
         <MobileStub />
@@ -161,43 +199,6 @@ function ModeSwitcher({ mode, onChange }: { mode: 'desktop' | 'mobile'; onChange
       </button>
     </div>
   );
-}
-
-/* ─── Region placeholders until the real components land. ────────── */
-function RegionStub({ label, width, side }: { label: string; width: string; side: 'left' | 'left-chat' | 'center' | 'right' }) {
-  const frame: React.CSSProperties = {
-    position: 'absolute',
-    top: 16,
-    bottom: 16,
-    background: 'var(--v4-card)',
-    border: '0.5px solid var(--v4-card-line)',
-    borderRadius: 16,
-    boxShadow: 'var(--v4-shadow-md)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: 11,
-    letterSpacing: '0.12em',
-    textTransform: 'uppercase',
-    color: 'var(--v4-faint)',
-  };
-
-  const sideStyle: React.CSSProperties =
-    side === 'left'
-      ? { left: 14, width }
-      : side === 'left-chat'
-        ? { left: `calc(14px + var(--v4-tool-w) + 14px)`, width }
-        : side === 'right'
-          ? { right: 14, width }
-          : {
-              left: `calc(14px + var(--v4-tool-w) + 14px + var(--v4-chat-w) + 14px)`,
-              right: `calc(14px + var(--v4-rail-w) + 14px)`,
-              borderRadius: 18,
-              boxShadow: 'var(--v4-shadow-lg)',
-            };
-
-  return <div style={{ ...frame, ...sideStyle }}>{label}</div>;
 }
 
 function MobileStub() {
