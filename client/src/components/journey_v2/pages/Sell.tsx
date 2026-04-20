@@ -12,6 +12,7 @@ import {
   type DealTab, type DealStepScript, type Dim,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+import InteractiveTool from '../shell/InteractiveTool';
 
 interface Props {
   active: DealTab;
@@ -142,9 +143,14 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
         id="s3"
         idx="Estimator"
         title="How much value is hiding in your financials?"
-        lede={<>A quick estimate based on industry patterns. Yulia\'s real analysis is specific to your numbers. Pick three things.</>}
+        lede={<>A quick estimate based on industry patterns. Yulia\'s real analysis is specific to your numbers.</>}
       >
-        <AddBackEstimator />
+        <InteractiveTool
+          kicker="Add-back estimator"
+          sub="Pick three things. See your hidden value range instantly."
+        >
+          <AddBackEstimator />
+        </InteractiveTool>
       </DealStep>
 
       {/* Add-backs Acme walkthrough */}

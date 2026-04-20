@@ -8,11 +8,13 @@
  * emphasis + SBA + stress-test sections that are buy-side's biggest
  * 2026 differentiators.
  */
+import { useEffect, useState } from 'react';
 import {
   DealStep, DealBench, ScoreDonut, DimList, DealBottom,
   type DealTab, type DealStepScript, type Dim,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+import InteractiveTool from '../shell/InteractiveTool';
 
 interface Props {
   active: DealTab;
@@ -100,7 +102,14 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
         idx="Buy-side"
         title="Screen ten deals in the time it takes to screen one."
         lede={<>Yulia scores any deal in 90 seconds on seven dimensions, models the capital stack under current SBA rules, and stress-tests the personal guarantee before you sign. For searchers, sponsors, and buyers.</>}
-      />
+      >
+        <InteractiveTool
+          kicker="The Rundown · live deal calculator"
+          sub="Paste a listing URL, drop a teaser, or type a description. Yulia scores 7 dimensions in 90 seconds."
+        >
+          <RundownCalculator />
+        </InteractiveTool>
+      </DealStep>
 
       {/* Problem funnel */}
       <DealStep
@@ -306,6 +315,263 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
         onSend={onSend}
       />
     </JourneyShell>
+  );
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   RundownCalculator — the front-and-center live scoring tool.
+   User pastes / types a description. We animate the 7 dimensions
+   scoring in, show a total with PURSUE/DEEPER LOOK/PASS verdict.
+   Demo-grade heuristics: score is derived from keyword presence +
+   a deterministic hash for repeatable results. The real product
+   calls a backend — this is the front-door interactive.
+   ─────────────────────────────────────────────────────────────────── */
+
+type DimKey = 'financial' | 'margins' | 'revenue' | 'concentration' | 'management' | 'dependency' | 'scalability';
+const DIM_LABELS: Record<DimKey, string> = {
+  financial: 'Financial quality',
+  margins: 'Margins',
+  revenue: 'Revenue quality',
+  concentration: 'Concentration',
+  management: 'Management depth',
+  dependency: 'Owner dependency',
+  scalability: 'Scalability',
+};
+
+const SAMPLE_DEALS = [
+  'HVAC services, $4.2M revenue, 18% EBITDA, 60% recurring contracts, 2nd-gen owner retiring',
+  'Specialty distribution, $12M revenue, 22% EBITDA, 3 customers = 55% of revenue',
+  'Pest control, Phoenix, $1.2M rev, asking $2.8M, 70% recurring, owner handles top-10 accounts',
+];
+
+function scoreDescription(s: string): Record<DimKey, number> {
+  /* Lightweight deterministic scoring. Each dim starts at 6, nudged
+     by keyword hits (positive or negative). Demo-only — the backend
+     does real analysis. */
+  const t = s.toLowerCase();
+  const has = (needles: string[]) => needles.some((n) => t.includes(n));
+  const score: Record<DimKey, number> = {
+    financial: 6.5, margins: 6.5, revenue: 6.5, concentration: 6.5, management: 6.5, dependency: 6.5, scalability: 6.5,
+  };
+  if (has(['clean', 'audited', 'tax return'])) score.financial += 2;
+  if (has(['qb', 'cash-basis', 'messy']))      score.financial -= 1.5;
+  if (has(['ebitda', 'margin', '20%', '22%', '25%', '18%', '15%'])) score.margins += 1.5;
+  if (has(['low-margin', '8%', '10%']))       score.margins -= 1.5;
+  if (has(['recurring', 'msa', 'subscription', 'contract'])) score.revenue += 2;
+  if (has(['one-time', 'project-based', 'seasonal'])) score.revenue -= 1.5;
+  if (has(['concentration', '55%', '60%', 'top 3', 'top-3'])) score.concentration -= 2.5;
+  if (has(['diversified', '100+ customer', 'long tail'])) score.concentration += 2;
+  if (has(['team', 'management', 'coo', 'vp'])) score.management += 1.5;
+  if (has(['solo', 'no team', 'owner-operator'])) score.management -= 2;
+  if (has(['owner handles', 'owner runs', 'owner does']))  score.dependency -= 2;
+  if (has(['owner stepped back', 'owner absent', 'professional manager'])) score.dependency += 2;
+  if (has(['platform', 'scalable', 'expansion', 'roll-up', 'add-on'])) score.scalability += 2;
+  if (has(['single market', 'local', 'niche'])) score.scalability -= 1;
+  // Clamp 1-10
+  (Object.keys(score) as DimKey[]).forEach((k) => {
+    score[k] = Math.max(1, Math.min(10, Math.round(score[k] * 10) / 10));
+  });
+  return score;
+}
+
+function RundownCalculator() {
+  const [input, setInput] = useState('');
+  const [scoring, setScoring] = useState(false);
+  const [scores, setScores] = useState<Record<DimKey, number> | null>(null);
+  const [revealIdx, setRevealIdx] = useState<number>(0);
+
+  const keys: DimKey[] = ['financial', 'margins', 'revenue', 'concentration', 'management', 'dependency', 'scalability'];
+
+  useEffect(() => {
+    if (!scoring || !scores) return;
+    if (revealIdx >= keys.length) {
+      const t = window.setTimeout(() => setScoring(false), 400);
+      return () => window.clearTimeout(t);
+    }
+    const t = window.setTimeout(() => setRevealIdx((i) => i + 1), 220);
+    return () => window.clearTimeout(t);
+  }, [scoring, revealIdx, scores, keys.length]);
+
+  const runScore = (text: string) => {
+    const s = text.trim();
+    if (s.length < 10) return;
+    setScores(scoreDescription(s));
+    setRevealIdx(0);
+    setScoring(true);
+  };
+
+  const reset = () => {
+    setInput('');
+    setScores(null);
+    setScoring(false);
+    setRevealIdx(0);
+  };
+
+  const total = scores ? Math.round(keys.reduce((sum, k) => sum + scores[k], 0) / keys.length * 10) : 0;
+  const verdict = total >= 70 ? { label: 'PURSUE', color: '#22A755' } : total >= 40 ? { label: 'DEEPER LOOK', color: '#E8A033' } : { label: 'PASS', color: '#D44A78' };
+
+  return (
+    <div>
+      {!scores && (
+        <div>
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            rows={3}
+            placeholder="Paste a deal URL, teaser summary, or type a description — industry, revenue, EBITDA, owner dynamics..."
+            style={{
+              width: '100%',
+              padding: '14px 16px',
+              border: '0.5px solid rgba(0,0,0,0.12)',
+              borderRadius: 10,
+              fontFamily: 'Inter, system-ui, sans-serif',
+              fontSize: 13.5,
+              lineHeight: 1.5,
+              resize: 'vertical',
+              background: '#FAFAFB',
+            }}
+          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              disabled={input.trim().length < 10}
+              onClick={() => runScore(input)}
+              style={{
+                background: input.trim().length >= 10 ? '#0A0A0B' : '#D8D8DA',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 10,
+                padding: '10px 18px',
+                fontFamily: 'Sora, sans-serif',
+                fontWeight: 700,
+                fontSize: 13,
+                cursor: input.trim().length >= 10 ? 'pointer' : 'not-allowed',
+              }}
+            >Score the deal →</button>
+            <span style={{ fontSize: 11.5, color: '#6B6B70' }}>Or try a sample:</span>
+            {SAMPLE_DEALS.map((d, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => { setInput(d); runScore(d); }}
+                style={{
+                  background: '#FAFAFB',
+                  border: '0.5px solid rgba(0,0,0,0.08)',
+                  borderRadius: 999,
+                  padding: '5px 11px',
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: '#3A3A3E',
+                  cursor: 'pointer',
+                }}
+              >Sample {i + 1}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {scores && (
+        <div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'auto 1fr',
+            gap: 32,
+            alignItems: 'center',
+          }}>
+            <div>
+              <ScoreDonut score={revealIdx >= keys.length ? total : Math.round((revealIdx / keys.length) * total)} />
+              <div style={{ textAlign: 'center', marginTop: -18 }}>
+                <div style={{
+                  fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                  fontSize: 9,
+                  letterSpacing: '0.15em',
+                  color: revealIdx >= keys.length ? verdict.color : '#9A9A9F',
+                  textTransform: 'uppercase',
+                  transition: 'color 200ms',
+                }}>
+                  {revealIdx >= keys.length ? verdict.label : 'Scoring…'}
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gap: 6 }}>
+              {keys.map((k, i) => {
+                const revealed = i < revealIdx;
+                const v = scores[k];
+                const pct = (v / 10) * 100;
+                const tone: 'green' | 'amber' | 'red' = v >= 7.5 ? 'green' : v >= 5.5 ? 'amber' : 'red';
+                const color = tone === 'green' ? '#22A755' : tone === 'amber' ? '#E8A033' : '#D44A78';
+                return (
+                  <div key={k} style={{
+                    display: 'grid',
+                    gridTemplateColumns: '160px 1fr 40px',
+                    gap: 12,
+                    alignItems: 'center',
+                    fontSize: 12.5,
+                    opacity: revealed ? 1 : 0.3,
+                    transform: revealed ? 'translateX(0)' : 'translateX(-8px)',
+                    transition: 'opacity 260ms, transform 260ms',
+                  }}>
+                    <div style={{ fontWeight: 600, color: revealed ? '#1A1C1E' : '#9A9A9F' }}>{DIM_LABELS[k]}</div>
+                    <div style={{ position: 'relative', height: 14, background: '#F4F4F5', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{
+                        position: 'absolute',
+                        left: 0, top: 0, bottom: 0,
+                        width: revealed ? `${pct}%` : '0%',
+                        background: color,
+                        borderRadius: 3,
+                        transition: 'width 380ms cubic-bezier(0.22, 1, 0.36, 1)',
+                      }} />
+                    </div>
+                    <div style={{
+                      fontVariantNumeric: 'tabular-nums',
+                      fontWeight: 700,
+                      textAlign: 'right',
+                      color: revealed ? color : '#9A9A9F',
+                    }}>{revealed ? v.toFixed(1) : '—'}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          {revealIdx >= keys.length && (
+            <div style={{
+              marginTop: 18,
+              padding: '14px 18px',
+              background: '#FAFAFB',
+              border: '0.5px solid rgba(0,0,0,0.06)',
+              borderRadius: 10,
+              fontSize: 12.5,
+              lineHeight: 1.55,
+              color: '#3A3A3E',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 14,
+            }}>
+              <div>
+                <strong style={{ color: '#0A0A0B' }}>Total {total}/100 · {verdict.label}.</strong> This is a preview score. Yulia\'s full Rundown writes the deal memo, models the capital stack, and flags every risk specific to this deal.
+              </div>
+              <button
+                type="button"
+                onClick={reset}
+                style={{
+                  background: '#fff',
+                  border: '0.5px solid rgba(0,0,0,0.12)',
+                  borderRadius: 999,
+                  padding: '7px 14px',
+                  fontFamily: 'Sora, sans-serif',
+                  fontWeight: 600,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >Try another →</button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

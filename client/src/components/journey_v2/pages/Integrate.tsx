@@ -9,6 +9,7 @@ import {
   type DealTab, type DealStepScript,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+import InteractiveTool from '../shell/InteractiveTool';
 
 interface Props {
   active: DealTab;
@@ -132,9 +133,14 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         id="generator"
         idx="Generator"
         title="Generate your Day-1 checklist."
-        lede={<>Five questions. Customized checklist by category: IT/Security, People, Customers, Vendors, Operations. A starting point — your full PMI plan starts with a conversation.</>}
+        lede={<>Five questions. Customized checklist by category — IT, People, Customers, Vendors, Operations.</>}
       >
-        <Day1Generator onSend={onSend} />
+        <InteractiveTool
+          kicker="Day-1 checklist generator"
+          sub="Answer five. See your customized starter checklist in 5 seconds."
+        >
+          <Day1Generator onSend={onSend} />
+        </InteractiveTool>
       </DealStep>
 
       {/* Step 04 · Day 0 */}

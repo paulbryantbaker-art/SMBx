@@ -12,6 +12,7 @@ import {
   type DealTab, type DealStepScript,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+import InteractiveTool from '../shell/InteractiveTool';
 
 interface Props {
   active: DealTab;
@@ -200,9 +201,14 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
         id="s5"
         idx="Run your numbers"
         title="Full sale vs. minority raise — over 5 years."
-        lede={<>Input your numbers. Yulia shows you what each path puts in your pocket. Simple comparison here — real analysis includes after-tax math and control trade-offs.</>}
+        lede={<>Simple comparison here — real analysis includes after-tax math and control trade-offs.</>}
       >
-        <SellVsRaise />
+        <InteractiveTool
+          kicker="Sell vs. raise calculator"
+          sub="Drag the sliders. See what each path puts in your pocket."
+        >
+          <SellVsRaise />
+        </InteractiveTool>
       </DealStep>
 
       {/* Cap stack */}

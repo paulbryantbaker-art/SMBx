@@ -346,8 +346,39 @@ export interface DealStepProps {
 }
 
 export function DealStep({ n, id, idx, title, lede, children }: DealStepProps) {
+  const ref = useRef<HTMLElement | null>(null);
+  const [seen, setSeen] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      setSeen(true);
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setSeen(true);
+          io.disconnect();
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
-    <section className="dr-step" id={id} data-step={n}>
+    <section
+      ref={ref}
+      className="dr-step"
+      id={id}
+      data-step={n}
+      style={{
+        opacity: seen ? 1 : 0,
+        transform: seen ? 'translateY(0)' : 'translateY(18px)',
+        transition: 'opacity 520ms cubic-bezier(0.22, 1, 0.36, 1), transform 520ms cubic-bezier(0.22, 1, 0.36, 1)',
+      }}
+    >
       <div className="dr-step__head">
         <span className="dr-step__idx">{idx}</span>
       </div>

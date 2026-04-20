@@ -91,7 +91,7 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
       }}
     >
       {/* Hero */}
-      <div style={{ padding: '24px 0 8px' }}>
+      <div style={{ padding: '24px 0 8px', animation: 'home-hero-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both' }}>
         <div style={{
           fontFamily: 'JetBrains Mono, ui-monospace, monospace',
           fontSize: 11,
@@ -99,39 +99,67 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
           color: 'var(--v4-mute)',
           textTransform: 'uppercase',
           marginBottom: 14,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 8,
         }}>
-          smbX · The AI Investment Bank
+          <span style={{
+            width: 6,
+            height: 6,
+            borderRadius: '50%',
+            background: '#22A755',
+            animation: 'home-live-dot 1.8s ease-in-out infinite',
+          }} />
+          smbX · The AI investment bank
         </div>
         <h1 style={{
           fontFamily: 'Sora, sans-serif',
           fontWeight: 800,
-          fontSize: 52,
-          letterSpacing: '-0.035em',
-          lineHeight: 1.02,
+          fontSize: 64,
+          letterSpacing: '-0.04em',
+          lineHeight: 1.0,
           margin: 0,
           color: 'var(--v4-ink)',
+          background: 'linear-gradient(180deg, #0A0A0B 0%, #3A3A3E 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
         }}>
           The AI deal team.
         </h1>
         <p style={{
-          maxWidth: 640,
-          marginTop: 18,
-          fontSize: 16.5,
-          lineHeight: 1.5,
+          maxWidth: 680,
+          marginTop: 22,
+          fontSize: 17,
+          lineHeight: 1.55,
           color: '#3A3A3E',
         }}>
           Valuations. CIMs. Deal scoring. Financial models. Due diligence. LOIs. Everything an investment bank delivers — without the retainer.
         </p>
+        <style>{`
+          @keyframes home-hero-in {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes home-live-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.75); }
+          }
+          @keyframes home-card-in {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
       </div>
 
-      {/* 4 journey launchers */}
+      {/* 4 journey launchers — staggered fade-in, hover lift */}
       <div style={{
-        marginTop: 36,
+        marginTop: 40,
         display: 'grid',
         gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: 14,
+        gap: 16,
       }}>
-        {LAUNCH.map((c) => (
+        {LAUNCH.map((c, i) => (
           <button
             key={c.tab}
             type="button"
@@ -140,19 +168,23 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
               textAlign: 'left',
               background: '#fff',
               border: '0.5px solid rgba(0,0,0,0.08)',
-              borderRadius: 14,
-              padding: '22px 22px 20px',
+              borderRadius: 16,
+              padding: '28px 26px 24px',
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
-              gap: 10,
+              gap: 12,
               font: 'inherit',
-              transition: 'transform 150ms, box-shadow 150ms, border-color 150ms',
+              transition: 'transform 180ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 180ms, border-color 180ms',
+              animation: `home-card-in 520ms cubic-bezier(0.22, 1, 0.36, 1) ${120 + i * 80}ms both`,
+              minHeight: 180,
+              position: 'relative',
+              overflow: 'hidden',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = '#0A0A0B';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.04), 0 8px 16px rgba(0,0,0,0.04)';
+              e.currentTarget.style.transform = 'translateY(-3px)';
+              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.04), 0 16px 32px rgba(0,0,0,0.06)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)';
@@ -160,32 +192,52 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
               e.currentTarget.style.boxShadow = 'none';
             }}
           >
+            {/* Big faded number in corner */}
+            <div style={{
+              position: 'absolute',
+              right: -6,
+              bottom: -18,
+              fontFamily: 'Sora, sans-serif',
+              fontWeight: 800,
+              fontSize: 110,
+              letterSpacing: '-0.05em',
+              color: 'rgba(10,10,11,0.04)',
+              lineHeight: 0.9,
+              pointerEvents: 'none',
+            }}>{c.eyebrow.split(' · ')[0]}</div>
             <div style={{
               fontFamily: 'JetBrains Mono, ui-monospace, monospace',
               fontSize: 10.5,
               letterSpacing: '0.14em',
               color: 'var(--v4-mute)',
               textTransform: 'uppercase',
+              position: 'relative',
             }}>{c.eyebrow}</div>
             <div style={{
               fontFamily: 'Sora, sans-serif',
-              fontWeight: 700,
-              fontSize: 18,
-              letterSpacing: '-0.015em',
-              lineHeight: 1.25,
+              fontWeight: 800,
+              fontSize: 22,
+              letterSpacing: '-0.025em',
+              lineHeight: 1.15,
               color: 'var(--v4-ink)',
+              position: 'relative',
             }}>{c.title}</div>
             <div style={{
-              fontSize: 12.5,
-              lineHeight: 1.5,
+              fontSize: 13,
+              lineHeight: 1.55,
               color: '#3A3A3E',
+              position: 'relative',
             }}>{c.body}</div>
             <div style={{
-              marginTop: 6,
+              marginTop: 'auto',
               fontFamily: 'Sora, sans-serif',
-              fontWeight: 600,
-              fontSize: 12,
-              color: '#0A0A0B',
+              fontWeight: 700,
+              fontSize: 12.5,
+              color: '#D44A78',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              position: 'relative',
             }}>{c.cta}</div>
           </button>
         ))}
