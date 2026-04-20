@@ -36,7 +36,7 @@ export interface JourneyShellProps {
   /** Called when the visitor clicks "Start free" at the bottom of the rail. */
   onStartFree: () => void;
   /** Chat-well config — scripted Yulia demo per page. */
-  chat: Omit<JourneyChatProps, 'width'>;
+  chat: Omit<JourneyChatProps, 'width' | 'onWidthChange'>;
   /** Page header title on the canvas card (breadcrumb-style). */
   canvasKicker?: string;
   canvasTitle?: string;
