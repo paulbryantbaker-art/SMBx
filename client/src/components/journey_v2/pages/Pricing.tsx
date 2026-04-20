@@ -7,9 +7,10 @@
  * Paul's call — he'll reconcile against pricing canon after cutover.
  */
 import {
-  DealRoomPage, DealStep, DealBench, DealBottom,
+  DealStep, DealBench, DealBottom,
   type DealTab,
 } from '../deal-room';
+import JourneyShell from '../shell/JourneyShell';
 
 interface Props {
   active: DealTab;
@@ -57,15 +58,17 @@ const FAQS: readonly { q: string; a: string }[] = [
 ];
 
 export default function Pricing({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
+  void SECTION_NAV;
   return (
-    <DealRoomPage
+    <JourneyShell
       active={active}
-      sectionNav={SECTION_NAV}
       onNavigate={onNavigate}
       onSignIn={onSignIn}
       onStartFree={onStartFree}
-      rail={{
-        name: 'Yulia',
+      canvasKicker="PRICING"
+      canvasTitle="Tell Yulia what you’re doing. She’ll tell you what you need."
+      chat={{
+        title: 'Yulia',
         status: 'Help me pick',
         script: {},
         opening: 'Hi — I’m <strong>Yulia</strong>. Tell me what you’re doing and I’ll tell you which plan fits. Most people overbuy.',
@@ -171,7 +174,7 @@ export default function Pricing({ active, onSend, onStartFree, onNavigate, onSig
         placeholder="Buying, selling, raising, or still deciding?"
         onSend={onSend}
       />
-    </DealRoomPage>
+    </JourneyShell>
   );
 }
 

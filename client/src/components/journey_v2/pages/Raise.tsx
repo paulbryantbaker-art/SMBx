@@ -4,9 +4,10 @@
  * Port of new_journey/project/raise.html.
  */
 import {
-  DealRoomPage, DealStep, DealBench, Row, DealBottom,
+  DealStep, DealBench, Row, DealBottom,
   type DealTab, type DealStepScript,
 } from '../deal-room';
+import JourneyShell from '../shell/JourneyShell';
 
 interface Props {
   active: DealTab;
@@ -58,15 +59,17 @@ const SCRIPT: DealStepScript = {
 };
 
 export default function Raise({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
+  void SECTION_NAV;
   return (
-    <DealRoomPage
+    <JourneyShell
       active={active}
-      sectionNav={SECTION_NAV}
       onNavigate={onNavigate}
       onSignIn={onSignIn}
       onStartFree={onStartFree}
-      rail={{
-        name: 'Yulia',
+      canvasKicker="RAISE · WALK-THROUGH"
+      canvasTitle="You probably don’t need to sell the whole thing."
+      chat={{
+        title: 'Yulia',
         status: 'Sizing a growth round',
         script: SCRIPT,
         opening: 'Hi — I’m <strong>Yulia</strong>. This walkthrough is a $14M EBITDA owner deciding between a full sale and a minority recap. Scroll to watch me run the math.',
@@ -191,7 +194,7 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
         placeholder="EBITDA, cash need, ownership preference…"
         onSend={onSend}
       />
-    </DealRoomPage>
+    </JourneyShell>
   );
 }
 

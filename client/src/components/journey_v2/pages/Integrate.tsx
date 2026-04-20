@@ -4,9 +4,10 @@
  * Port of new_journey/project/integrate.html.
  */
 import {
-  DealRoomPage, DealStep, DealBench, Row, DealBottom,
+  DealStep, DealBench, Row, DealBottom,
   type DealTab, type DealStepScript,
 } from '../deal-room';
+import JourneyShell from '../shell/JourneyShell';
 
 interface Props {
   active: DealTab;
@@ -76,15 +77,17 @@ const KPIS: readonly ScorecardKpi[] = [
 ];
 
 export default function Integrate({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
+  void SECTION_NAV;
   return (
-    <DealRoomPage
+    <JourneyShell
       active={active}
-      sectionNav={SECTION_NAV}
       onNavigate={onNavigate}
       onSignIn={onSignIn}
       onStartFree={onStartFree}
-      rail={{
-        name: 'Yulia',
+      canvasKicker="POST-CLOSE · WALK-THROUGH"
+      canvasTitle="The 72 hours that decide whether this deal works."
+      chat={{
+        title: 'Yulia',
         status: 'Day 3 post-close',
         script: SCRIPT,
         opening: 'Hi — I’m <strong>Yulia</strong>. You just closed Atlas Air. Close was Friday; it’s now Monday morning. Scroll to see what the first 180 days look like.',
@@ -185,7 +188,7 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         placeholder="Deal size, industry, thesis in one line…"
         onSend={onSend}
       />
-    </DealRoomPage>
+    </JourneyShell>
   );
 }
 

@@ -4,9 +4,10 @@
  * Port of new_journey/project/enterprise.html.
  */
 import {
-  DealRoomPage, DealStep, DealBench, Row, DealBottom,
+  DealStep, DealBench, Row, DealBottom,
   type DealTab,
 } from '../deal-room';
+import JourneyShell from '../shell/JourneyShell';
 
 interface Props {
   active: DealTab;
@@ -69,15 +70,17 @@ const ROI: readonly RoiTile[] = [
 ];
 
 export default function Enterprise({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
+  void SECTION_NAV;
   return (
-    <DealRoomPage
+    <JourneyShell
       active={active}
-      sectionNav={SECTION_NAV}
       onNavigate={onNavigate}
       onSignIn={onSignIn}
       onStartFree={onStartFree}
-      rail={{
-        name: 'Yulia',
+      canvasKicker="ENTERPRISE"
+      canvasTitle="Search funds, lower-middle-market PE, family offices, boutique banks."
+      chat={{
+        title: 'Yulia',
         status: 'For teams + firms',
         script: {},
         opening: 'Hi — I’m <strong>Yulia</strong>. Tell me about your firm and I’ll show you how teams like yours are using smbX at scale.',
@@ -191,7 +194,7 @@ export default function Enterprise({ active, onSend, onStartFree, onNavigate, on
         placeholder="Firm type, team size, deals per year…"
         onSend={onSend}
       />
-    </DealRoomPage>
+    </JourneyShell>
   );
 }
 

@@ -5,9 +5,10 @@
  * Port of new_journey/project/how-it-works.html.
  */
 import {
-  DealRoomPage, DealStep, DealBench, DealBottom,
+  DealStep, DealBench, DealBottom,
   type DealTab,
 } from '../deal-room';
+import JourneyShell from '../shell/JourneyShell';
 
 interface Props {
   active: DealTab;
@@ -74,15 +75,17 @@ const CONVO: readonly ConvoTurn[] = [
 ];
 
 export default function HowItWorks({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
+  void SECTION_NAV;
   return (
-    <DealRoomPage
+    <JourneyShell
       active={active}
-      sectionNav={SECTION_NAV}
       onNavigate={onNavigate}
       onSignIn={onSignIn}
       onStartFree={onStartFree}
-      rail={{
-        name: 'Yulia',
+      canvasKicker="HOW IT WORKS"
+      canvasTitle="Yulia is a banker, a diligence team, and an integration manager."
+      chat={{
+        title: 'Yulia',
         status: 'Ask me anything',
         script: {},   /* explainer — no scripted arc */
         opening: 'Hi — I’m <strong>Yulia</strong>. This page explains what I actually do and how. Scroll through, or ask me anything in the box.',
@@ -184,7 +187,7 @@ export default function HowItWorks({ active, onSend, onStartFree, onNavigate, on
         placeholder="Ask Yulia anything — or paste your situation…"
         onSend={onSend}
       />
-    </DealRoomPage>
+    </JourneyShell>
   );
 }
 

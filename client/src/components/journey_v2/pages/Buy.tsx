@@ -4,9 +4,10 @@
  * Port of new_journey/project/buy.html.
  */
 import {
-  DealRoomPage, DealStep, DealBench, Row, ScoreDonut, DimList, DealBottom,
+  DealStep, DealBench, Row, ScoreDonut, DimList, DealBottom,
   type DealTab, type DealStepScript, type Dim,
 } from '../deal-room';
+import JourneyShell from '../shell/JourneyShell';
 
 interface Props {
   active: DealTab;
@@ -55,15 +56,17 @@ const SCRIPT: DealStepScript = {
 };
 
 export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
+  void SECTION_NAV;
   return (
-    <DealRoomPage
+    <JourneyShell
       active={active}
-      sectionNav={SECTION_NAV}
       onNavigate={onNavigate}
       onSignIn={onSignIn}
       onStartFree={onStartFree}
-      rail={{
-        name: 'Yulia',
+      canvasKicker="BUY-SIDE · WALK-THROUGH"
+      canvasTitle="Proprietary deal flow, not the MLS for broken businesses."
+      chat={{
+        title: 'Yulia',
         status: 'Sourcing for searcher',
         script: SCRIPT,
         opening: 'Hi — I’m <strong>Yulia</strong>. Today I’m sourcing and diligencing for a searcher on an HVAC roll-up thesis. Scroll to watch.',
@@ -163,7 +166,7 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
         placeholder="Industry, geography, check size…"
         onSend={onSend}
       />
-    </DealRoomPage>
+    </JourneyShell>
   );
 }
 

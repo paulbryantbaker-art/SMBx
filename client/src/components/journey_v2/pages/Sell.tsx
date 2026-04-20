@@ -8,9 +8,10 @@
  * Claude Design handoff, keep as-is until cutover is green.
  */
 import {
-  DealRoomPage, DealStep, DealBench, Row, ScoreDonut, DimList, DealBottom,
+  DealStep, DealBench, Row, ScoreDonut, DimList, DealBottom,
   type DealTab, type DealStepScript, type Dim,
 } from '../deal-room';
+import JourneyShell from '../shell/JourneyShell';
 
 interface Props {
   active: DealTab;   /* 'home' or 'sell' — the same page serves both */
@@ -64,15 +65,17 @@ const SCRIPT: DealStepScript = {
 };
 
 export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
+  void SECTION_NAV; /* kept above for future bottom progress indicator */
   return (
-    <DealRoomPage
+    <JourneyShell
       active={active}
-      sectionNav={SECTION_NAV}
       onNavigate={onNavigate}
       onSignIn={onSignIn}
       onStartFree={onStartFree}
-      rail={{
-        name: 'Yulia',
+      canvasKicker="SELL-SIDE · WALK-THROUGH"
+      canvasTitle="Know what you have. Before anyone else does."
+      chat={{
+        title: 'Yulia',
         status: 'Working on Acme HVAC',
         script: SCRIPT,
         opening: 'Hi — I’m <strong>Yulia</strong>. I’ll walk you through a real sell-side deal using Acme HVAC as the example. Scroll to follow along.',
@@ -212,7 +215,7 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
         placeholder="Industry, revenue, reported EBITDA…"
         onSend={onSend}
       />
-    </DealRoomPage>
+    </JourneyShell>
   );
 }
 
