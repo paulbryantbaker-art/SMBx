@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import {
   DealStep, DealBench, DealBottom,
+  PullQuote, StatBreaker,
   type DealTab,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
@@ -110,7 +111,8 @@ export default function HowItWorks({ active, onSend, onStartFree, onNavigate, on
         n={1}
         id="s1"
         idx="How it works"
-        title="90% of what an investment bank does. Everything that doesn't require a license."
+        scale="hero"
+        title={<>90% of what an investment bank does. Everything that doesn&apos;t require a license.</>}
         lede={<>Yulia handles the production work — valuations, CIMs, financial models, deal scoring, due diligence, LOIs, integration plans. You keep the judgment, the relationships, and the authority to sign.</>}
       />
 
@@ -195,11 +197,16 @@ export default function HowItWorks({ active, onSend, onStartFree, onNavigate, on
         </DealBench>
       </DealStep>
 
+      <PullQuote attribution="The distinction that matters">
+        Large language models hallucinate arithmetic. That&apos;s unacceptable in M&A.
+      </PullQuote>
+
       {/* 22 formulas */}
       <DealStep
         n={4}
         id="s4"
         idx="The math"
+        scale="major"
         title="22 deterministic formulas. Not AI estimates."
         lede={<>Large language models hallucinate arithmetic. They compute 2+2=5 with confidence. Unacceptable in M&A where every number is audited. Yulia doesn't ask an LLM to calculate your SDE — the numbers come from code. Same output every time. Auditable. Reproducible. Defensible. The LLM handles the narrative. The code handles the math.</>}
       >
@@ -218,6 +225,7 @@ export default function HowItWorks({ active, onSend, onStartFree, onNavigate, on
         n={5}
         id="s5"
         idx="The harness"
+        scale="major"
         title="ChatGPT is the engine. smbX is the harness."
         lede={<>A resourceful practitioner with ChatGPT Plus and a weekend can replicate any one of Yulia's capabilities. They can't do twelve. Building the harness that makes capabilities fast, reliable, auditable, team-shareable, and integrated with each other is 2–12 weeks of real engineering per capability. Multiply by twelve: 2+ years of build.</>}
       >
@@ -280,6 +288,12 @@ export default function HowItWorks({ active, onSend, onStartFree, onNavigate, on
           </div>
         </DealBench>
       </DealStep>
+
+      <StatBreaker
+        value="22"
+        label="Deterministic formulas. Same output every time. Auditable. Reproducible. Defensible. No hallucinated arithmetic."
+        secondary={{ value: '200–400h', label: 'Typical human touchpoints on a \$30M sell-side engagement. You still sign every document and make every call.' }}
+      />
 
       <DealBottom
         heading="Start a conversation. See for yourself."

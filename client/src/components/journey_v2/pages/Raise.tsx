@@ -9,6 +9,7 @@
 import { useMemo, useState } from 'react';
 import {
   DealStep, DealBench, Row, DealBottom,
+  PullQuote, StatBreaker,
   type DealTab, type DealStepScript,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
@@ -53,23 +54,23 @@ const LIQUIDITY: readonly LiquidityCard[] = [
 /* 5-min Acme walkthrough: Ray Whitaker Jr. considering growth capital
    instead of full sale — Yulia runs six structures against his numbers. */
 const SCRIPT: DealStepScript = {
-  3: [
+  2: [
     { who: 'y',  text: `${ACME.name} at $11M normalized EBITDA × 7.5× = <strong>$82.5M</strong> enterprise value. Your advisor walked in with the full-sale pitch. Let me show you the other five paths.` },
     { who: 'y',  text: `<strong>Minority recap:</strong> sell 30% to a growth investor. You get <strong>$33M today</strong>, keep 70% and full operational control. At 12% EBITDA CAGR you exit year 5 at ~$145M — your 70% is worth $102M. Total haul: <strong>$135M vs. $82M</strong>.` },
     { who: 'me', text: 'Why hasn\'t my advisor mentioned this?' },
     { who: 'y',  text: `A full sale generates the largest one-time fee for the advisor. A minority recap doesn't. That's not sinister — it's the fee model. But it\'s the reason most owners never hear the alternatives. Yulia has no fee incentive. Pick the structure that fits you.` },
   ],
+  4: [
+    { who: 'y',  text: `For the minority recap, stack sized for <strong>$110M post-money valuation</strong>: $33M sponsor + $18M preferred + $42M unitranche + $17M ABL. Net leverage 4.2×.` },
+    { who: 'y',  text: `Stressed a 20% EBITDA dip year 2 — hospitality softening is the real risk. <strong>FCCV holds at 1.14×</strong>. Covenant headroom all 5 years. All-senior at 4.5× would breach in month 14.` },
+  ],
   5: [
-    { who: 'y',  text: `For the minority recap, stack sized for <strong>$110M post-money valuation</strong>: $33M sponsor equity + $18M preferred equity + $42M unitranche + $17M ABL. Net leverage 4.2×.` },
-    { who: 'y',  text: `Stressed a 20% EBITDA dip year 2 — hospitality softening is the real risk in your mix. <strong>FCCV holds at 1.14×</strong>. Covenant headroom all 5 years. Same deal with all-senior at 4.5× would breach in month 14.` },
+    { who: 'y',  text: `Pitch deck: 22 slides. Three to rehearse: <strong>thesis, unit economics, use of proceeds</strong>. Acme\'s story isn't "distributor raising capital" — it\'s <strong>"38-year SW cash-flow platform with four discipline tailwinds."</strong>` },
+    { who: 'y',  text: `Most founders over-explain slide 1 and rush slide 14. Investors want the thesis fast, then 20 minutes on capital deployment. I drafted the verbal for each.` },
   ],
   6: [
-    { who: 'y',  text: `Pitch deck: 22 slides. Three to rehearse: <strong>thesis, unit economics, use of proceeds</strong>. Acme\'s story isn't "distributor raising capital" — it\'s <strong>"38-year SW cash-flow platform with four discipline tailwinds and a pending geographic expansion."</strong>` },
-    { who: 'y',  text: `Most founders over-explain slide 1 and rush slide 14. Investors want to see the thesis fast, then spend 20 minutes on how capital gets deployed. I drafted the verbal for each.` },
-  ],
-  7: [
-    { who: 'y',  text: `21 firms fit. 7 tier-1. Three targeted intros: <strong>Kepler Growth</strong> (closed 9 distribution deals in 3 years, warm via Derek Chen), <strong>Meridian</strong> (SW LMM specialist), <strong>Halcyon</strong> (operator-led, 42% close rate on sourced deals).` },
-    { who: 'y',  text: `Skipping the 14 that don't fit saves you three weeks of pitches that go nowhere. First meetings usually inside two weeks from warm-intro send.` },
+    { who: 'y',  text: `21 firms fit. 7 tier-1. Three targeted intros: <strong>Kepler Growth</strong> (9 distribution deals in 3 years, warm via Derek Chen), <strong>Meridian</strong> (SW LMM specialist), <strong>Halcyon</strong> (operator-led, 42% close rate).` },
+    { who: 'y',  text: `Skipping the 14 that don't fit saves three weeks of pitches that go nowhere. First meetings inside two weeks from warm-intro send.` },
   ],
 };
 
@@ -94,25 +95,22 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
       <DealStep
         n={1}
         id="s1"
-        idx="Raise"
-        title="You don't have to sell 100% to get liquidity."
+        idx="Raise · walkthrough"
+        scale="hero"
+        title={<>You don't have to sell 100% to get liquidity.</>}
         lede={<>Yulia models every capital structure — minority equity, ESOP, mezzanine, convertible, recap — against your specific numbers. Builds the investor materials. Targets the right capital partners. In one conversation.</>}
       />
 
-      {/* Reframe */}
-      <DealStep
-        n={2}
-        id="s2"
-        idx="The reframe"
-        title="Most advisors default to 'sell.' That's not always the answer."
-        lede={<>Selling 100% is one option. It\'s also the option most advisors pitch first — because it generates the largest one-time fee. Yulia has no fee incentive. She models every path against your specific numbers. You decide which one fits.</>}
-      />
+      <PullQuote attribution="The reframe">
+        Most advisors default to sell. That&apos;s because sell generates the fee. It isn&apos;t the same as being the right answer.
+      </PullQuote>
 
       {/* 6 liquidity structures — asymmetric: 2 featured + 4 standard */}
       <DealStep
-        n={3}
-        id="s3"
+        n={2}
+        id="s2"
         idx="Six paths"
+        scale="major"
         title="Six ways to get liquidity without losing your business."
       >
         {/* Two featured — the paths owners most commonly overlook */}
@@ -229,11 +227,11 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
         </div>
       </DealStep>
 
-      {/* Structure comparison (MedCorp) */}
+      {/* Structure comparison · Acme */}
       <DealStep
-        n={4}
-        id="s4"
-        idx="The math · MedCorp"
+        n={3}
+        id="s3"
+        idx={`The math · ${ACME.name}`}
         title="Same company. Different structures. Radically different outcomes."
         lede={<>A $14M EBITDA business modeled at a 7.5× multiple. Full sale today vs. five other structures. The retained equity in a minority recap compounds into the largest total outcome over five years.</>}
       >
@@ -273,11 +271,18 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
         </DealBench>
       </DealStep>
 
+      <StatBreaker
+        value="+$53M"
+        label="The total delta for a $14M EBITDA business between full sale today and a 30% minority recap with the other 70% exiting in 5 years. Same company. One decision."
+        secondary={{ value: '3×', label: 'Typical second-bite size when the rollover exits' }}
+      />
+
       {/* Interactive sell-vs-raise */}
       <DealStep
-        n={5}
-        id="s5"
+        n={4}
+        id="s4"
         idx="Run your numbers"
+        scale="major"
         title="Full sale vs. minority raise — over 5 years."
         lede={<>Simple comparison here — real analysis includes after-tax math and control trade-offs.</>}
       >
@@ -292,8 +297,8 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
 
       {/* Cap stack */}
       <DealStep
-        n={6}
-        id="s6"
+        n={5}
+        id="s5"
         idx="Cap stack"
         title="Sized to the deal. Not to what one lender will lend you."
         lede={<>The right stack stretches your equity without forcing a covenant reset every 18 months. Yulia builds three layers, models cash-on-cash for each, and stress-tests against a 25% EBITDA dip.</>}
@@ -315,8 +320,8 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
 
       {/* Deck */}
       <DealStep
-        n={7}
-        id="s7"
+        n={6}
+        id="s6"
         idx="Pitch deck"
         title="Investor-ready materials in hours, not weeks."
         lede={<>22 slides. Written in the voice of a Lazard MD, not a SaaS founder. Yulia frames the business the way an IC reads it — thesis, moat, unit economics, use of proceeds, returns, risks and mitigants.</>}
@@ -340,8 +345,8 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
 
       {/* Investors */}
       <DealStep
-        n={8}
-        id="s8"
+        n={7}
+        id="s7"
         idx="Investor map"
         title="Not every investor fits every deal."
         lede={<>A growth equity firm looking for 40% YoY growth is wrong for a 12% grower. A PE firm that only buys majority stakes is wrong for a minority raise. Yulia maps the universe against your deal and scores each on thesis alignment.</>}

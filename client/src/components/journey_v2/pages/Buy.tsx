@@ -11,6 +11,7 @@
 import { useEffect, useState } from 'react';
 import {
   DealStep, DealBench, ScoreDonut, DimList, DealBottom,
+  PullQuote, StatBreaker,
   type DealTab, type DealStepScript,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
@@ -30,28 +31,28 @@ const CHIPS = ['Score Acme', 'Rebuild my SBA stack', 'Stress-test my DSCR', "Wha
 /* 5-min Acme walkthrough from the buyer side — a searcher (or LMM
    PE associate) evaluating Acme as a platform acquisition. */
 const SCRIPT: DealStepScript = {
-  3: [
-    { who: 'y',  text: `Running the Rundown on <strong>${ACME.name}</strong> — $65M distributor, Phoenix, multi-discipline. Ray Whitaker Jr. is 2nd gen, 58, exploring exit in 18–24 months.` },
-    { who: 'y',  text: `Scoring seven dimensions. Total lands at <strong>81/100 · Pursue</strong>. Strong on financial integrity (9.1), scalability (8.0), and revenue quality (8.4) — 62% of revenue repeats on blanket POs.` },
+  2: [
+    { who: 'y',  text: `Running the Rundown on <strong>${ACME.name}</strong> — $65M distributor, Phoenix, multi-discipline. Ray Whitaker Jr., 2nd gen, 58, exploring exit in 18–24 months.` },
+    { who: 'y',  text: `Scoring seven dimensions. Total lands at <strong>81/100 · Pursue</strong>. Strong on financial integrity (9.1), scalability (8.0), revenue quality (8.4) — 62% of revenue repeats on blanket POs.` },
     { who: 'me', text: 'Yellows?' },
-    { who: 'y',  text: `Two: <strong>owner dependency (5.4)</strong> — Ray personally signs off on every contract over $50K — and <strong>concentration (6.0)</strong> — top 10 accounts are 35% of revenue, with Marco Delgado (VP Sales, 22yr) holding the relationships. Both are solvable in integration, not reasons to pass.` },
+    { who: 'y',  text: `Two: <strong>owner dependency (5.4)</strong> — Ray signs every contract over $50K — and <strong>concentration (6.0)</strong> — top 10 accounts are 35% of revenue, held by Marco Delgado (VP Sales, 22yr). Both solvable in integration.` },
+  ],
+  3: [
+    { who: 'y',  text: `At $11M normalized EBITDA, upper MM distribution trades 7–8.5×. So the price conversation is <strong>$77M–$94M</strong>. Your equity with a $22M round + SBA 7(a) lands around $14M cash-in.` },
+    { who: 'y',  text: `SBA SOP 50 10 8 took effect June 2025 — rollover equity is dead. Partial change-of-ownership has to be stock purchases. 10% equity injection must be genuine cash.` },
+    { who: 'me', text: 'Can Acme still work?' },
+    { who: 'y',  text: `Yes. Restructured: <strong>$44M SBA 7(a) · $22M unitranche · $18M seller note on full standby · $14M equity</strong>. DSCR base 1.9×. Compliance-clean.` },
   ],
   4: [
-    { who: 'y',  text: `At $11M normalized EBITDA, upper MM distribution trades 7–8.5×. So the price conversation is <strong>$77M–$94M</strong>. Check size for you with a $22M equity round and SBA 7(a) lands around $14M cash-in.` },
-    { who: 'y',  text: `SBA SOP 50 10 8 took effect June 2025 — your rollover equity path you probably modeled six months ago is dead. Partial change-of-ownership has to be stock purchases now. 10% equity injection must be genuine cash.` },
-    { who: 'me', text: 'Can Acme still work?' },
-    { who: 'y',  text: `Yes. Restructured: <strong>$44M SBA 7(a) · $22M unitranche · $18M seller note on full standby · $14M equity</strong>. DSCR base case 1.9×. 10% genuine cash is in the equity tranche, not a seller-note substitute. Compliance-clean.` },
+    { who: 'y',  text: `Stressed Ray's numbers against scenarios that actually kill distribution deals. Base DSCR 1.9×.` },
+    { who: 'y',  text: `Revenue down 15%: drops to <strong>1.3×</strong>, inside covenant. Hospitality softens in a rate shock — that scenario lands 1.25×.` },
+    { who: 'y',  text: `The floor breaks at <strong>revenue down 25% or losing Marco's top two accounts</strong>. Structure around that: retention escrow ($2M), Marco on a 3-year earnout, seller note standby that auto-extends on DSCR breach.` },
   ],
   5: [
-    { who: 'y',  text: `Stressed Ray's numbers against the scenarios that actually kill distribution deals. Base DSCR 1.9×.` },
-    { who: 'y',  text: `Revenue down 15%: drops to <strong>1.3×</strong>, inside covenant. Hospitality softens hard in a rate shock — scenario-tested that too, lands 1.25×.` },
-    { who: 'y',  text: `The floor breaks at <strong>revenue down 25% or losing Marco's top two accounts</strong>. Structure around that: customer retention escrow ($2M), Marco on a 3-year earnout, and the seller note standby gets written to extend automatically if DSCR tests breach.` },
-  ],
-  6: [
     { who: 'y',  text: `Three LOI structures, all compliant. Recommended: <strong>$86M · 60% cash · 20% rollover · 20% seller note (standby)</strong>.` },
-    { who: 'y',  text: `Maximizes Ray's after-tax NPV at $64M — his CPA is going to love the rollover deferral — and keeps your equity check at $14M. The rollover also aligns Ray through year 3, exactly when the concentration risk unwinds into formalized contracts.` },
+    { who: 'y',  text: `Maximizes Ray's after-tax NPV at $64M — the rollover defers tax — keeps your equity check at $14M. Rollover aligns Ray through year 3, exactly when concentration unwinds.` },
     { who: 'me', text: 'Send it?' },
-    { who: 'y',  text: `Draft is ready. Two optional standby provisions I'd add: pre-closing working capital peg at $4.8M (their trailing 12-mo average), and a management retention pool for Nina + Jennifer + Marco. Say the word.` },
+    { who: 'y',  text: `Draft ready. Two standby provisions to add: pre-closing working capital peg at $4.8M, and a management retention pool for Nina + Jennifer + Marco. Say the word.` },
   ],
 };
 
@@ -102,9 +103,10 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
       <DealStep
         n={1}
         id="s1"
-        idx="Buy-side"
-        title="Screen ten deals in the time it takes to screen one."
-        lede={<>Yulia scores any deal in 90 seconds on seven dimensions, models the capital stack under current SBA rules, and stress-tests the personal guarantee before you sign. For searchers, sponsors, and buyers.</>}
+        idx="Buy-side · walkthrough"
+        scale="hero"
+        title={<>Screen ten deals in the time it takes to screen one.</>}
+        lede={<>Yulia scores any deal in 90 seconds on seven dimensions, models the capital stack under current SBA rules, and stress-tests the personal guarantee before you sign.</>}
       >
         <InteractiveTool
           kicker="The Rundown · live deal calculator"
@@ -115,31 +117,19 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
         </InteractiveTool>
       </DealStep>
 
-      {/* Problem funnel */}
-      <DealStep
-        n={2}
-        id="s2"
-        idx="The funnel"
-        title="3,000 deals screened. 1 closed. That's the math."
-        lede={<>The buy-side funnel hasn't changed in two decades. Three thousand opportunities to get to one close. Eighteen months of burn rate. Eighty-five thousand dollars in busted diligence on deals that should have been dead before the first call.</>}
-      >
-        <div style={{
-          marginTop: 18,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 10,
-        }}>
-          <StatCard n="3,000 → 1" label="Traditional search funnel" />
-          <StatCard n="$34K" label="Average busted diligence per dead deal" />
-          <StatCard n="78%" label="Sub-40 Rundown deals that die in diligence" />
-        </div>
-      </DealStep>
+      <StatBreaker
+        value="3,000 → 1"
+        label="The buy-side funnel hasn't changed in two decades. Three thousand opportunities to get to one close. Yulia removes the 2,400 that would have died in diligence anyway."
+        source="Search fund research · Stanford GSB"
+        secondary={{ value: '$34K', label: 'Average busted diligence per dead deal. 78% of sub-40 Rundown scores die in DD.' }}
+      />
 
       {/* Rundown — Acme as the worked example */}
       <DealStep
-        n={3}
-        id="s3"
+        n={2}
+        id="s2"
         idx={`The Rundown · ${ACME.name}`}
+        scale="major"
         title="Seven dimensions. Sixty seconds. Pursue or pass."
         lede={<>Concentration. Margins. Revenue quality. Owner dependency. Management depth. Financial integrity. Scalability. Here\'s the live Rundown on Acme — $65M multi-discipline distributor, Phoenix. Total <strong>81/100 · Pursue</strong>.</>}
       >
@@ -165,11 +155,16 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
         </DealBench>
       </DealStep>
 
+      <PullQuote attribution="On SBA SOP 50 10 8, effective June 2025">
+        If your deal was structured under the old rules, it probably doesn't qualify under the new ones.
+      </PullQuote>
+
       {/* SBA SOP 50 10 8 alert */}
       <DealStep
-        n={4}
-        id="s4"
+        n={3}
+        id="s3"
         idx="Regulatory alert"
+        scale="major"
         title="SOP 50 10 8 changed every SBA-financed deal."
         lede={<>Effective June 1, 2025. The most disruptive regulatory change in two decades for SMB and lower middle market deals. 41% of brokers report deal delays. Rollover equity is effectively dead. Yulia models the structures that actually qualify — in 90 seconds.</>}
       >
@@ -214,8 +209,8 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
 
       {/* Stress test */}
       <DealStep
-        n={5}
-        id="s5"
+        n={4}
+        id="s4"
         idx="Stress test"
         title="Know exactly where the deal breaks before you guarantee it."
         lede={<>The personal guarantee is real. The unwind scenario is real. Most buyers sign anyway because they've modeled the base case on a napkin. Yulia runs your DSCR against the scenarios that actually kill deals — revenue shocks, margin compression, customer churn, rate moves.</>}
@@ -287,9 +282,10 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
 
       {/* LOI */}
       <DealStep
-        n={6}
-        id="s6"
+        n={5}
+        id="s5"
         idx="LOI"
+        scale="major"
         title="Three LOIs. Three structures. One you can actually close."
         lede={<>Yulia drafts the LOI alongside you — cash/earnout mix, escrow, WC peg, non-competes, exclusivity. She models after-tax outcomes for both sides, so you walk in with the right number, not just a big one.</>}
       >

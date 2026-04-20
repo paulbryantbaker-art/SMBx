@@ -194,17 +194,23 @@
 
 /* ── Right stage ─────────────────────────── */
 .dr-stage { padding: 40px clamp(24px, 4vw, 60px) 120px; }
-.dr-step { max-width: 880px; margin: 0 auto 96px; scroll-margin-top: 130px; }
+.dr-step { max-width: 960px; margin: 0 auto; scroll-margin-top: 130px; }
+.dr-step[data-scale="hero"]  { max-width: 1040px; }
+.dr-step[data-scale="major"] { max-width: 1020px; }
 .dr-step__head { margin-bottom: 16px; }
 .dr-step__idx {
+  display: inline-flex; align-items: center;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--gg-mute); padding: 5px 10px; background: #fff; border: 0.5px solid var(--gg-border);
+  font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--gg-mute); padding: 5px 11px; background: #fff; border: 0.5px solid var(--gg-border);
   border-radius: 999px;
 }
+/* dr-step__title spec lives inline on the element now — size/tracking
+   are driven by the `scale` prop on <DealStep>. CSS defaults below are
+   a fallback for any caller that doesn\'t pass a scale. */
 .dr-step__title {
   font-family: 'Sora', sans-serif; font-weight: 800;
-  font-size: clamp(38px, 5vw, 62px); letter-spacing: -0.035em; line-height: 1.0;
+  letter-spacing: -0.035em; line-height: 1.0;
   margin: 0 0 22px; text-wrap: balance;
 }
 .dr-step__lede {

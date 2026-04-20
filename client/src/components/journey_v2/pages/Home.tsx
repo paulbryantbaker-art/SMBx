@@ -115,23 +115,21 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
         <h1 style={{
           fontFamily: 'Sora, sans-serif',
           fontWeight: 800,
-          fontSize: 64,
-          letterSpacing: '-0.04em',
-          lineHeight: 1.0,
+          fontSize: 'clamp(64px, 10vw, 144px)',
+          letterSpacing: '-0.045em',
+          lineHeight: 0.94,
           margin: 0,
-          color: 'var(--v4-ink)',
-          background: 'linear-gradient(180deg, #0A0A0B 0%, #3A3A3E 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
+          maxWidth: '11ch',
+          color: '#0A0A0B',
+          textWrap: 'balance',
         }}>
           The AI deal team.
         </h1>
         <p style={{
-          maxWidth: 680,
-          marginTop: 22,
-          fontSize: 17,
-          lineHeight: 1.55,
+          maxWidth: 720,
+          marginTop: 26,
+          fontSize: 'clamp(17px, 1.4vw, 20px)',
+          lineHeight: 1.5,
           color: '#3A3A3E',
         }}>
           Valuations. CIMs. Deal scoring. Financial models. Due diligence. LOIs. Everything an investment bank delivers — without the retainer.

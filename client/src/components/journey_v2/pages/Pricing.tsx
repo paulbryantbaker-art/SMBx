@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import {
   DealStep, DealBottom,
+  PullQuote,
   type DealTab,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
@@ -107,9 +108,14 @@ export default function Pricing({ active, onSend, onStartFree, onNavigate, onSig
         n={1}
         id="s1"
         idx="Pricing"
-        title="One price. Every capability. Every deal size."
-        lede={<>No feature gates. No success fees. No per-deal charges. Pick the tier that matches your team — every tier does every job. Tiers scale on seats, deal volume, and enterprise infrastructure. Never on what Yulia can do for the deal in front of you.</>}
+        scale="hero"
+        title={<>One price. Every capability. Every deal size.</>}
+        lede={<>No feature gates. No success fees. No per-deal charges. Pick the tier that matches your team.</>}
       />
+
+      <PullQuote attribution="The philosophy">
+        Tiers scale on seats and deal volume. Never on what Yulia can do for the deal in front of you.
+      </PullQuote>
 
       {/* s2 · the 5 plans */}
       <DealStep

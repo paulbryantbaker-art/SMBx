@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import {
   DealStep, DealBench, DealBottom,
+  PullQuote, StatBreaker,
   type DealTab,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
@@ -79,7 +80,8 @@ export default function Enterprise({ active, onSend, onStartFree, onNavigate, on
         n={1}
         id="s1"
         idx="Enterprise"
-        title="Your deal team, multiplied."
+        scale="hero"
+        title={<>Your deal team, multiplied.</>}
         lede={<>For firms closing deals at scale. Shared deal vault. Team workspace. White-label outputs. SSO, audit trails, SOC 2 controls. Same Yulia, enterprise infrastructure.</>}
       />
 
@@ -211,11 +213,16 @@ export default function Enterprise({ active, onSend, onStartFree, onNavigate, on
         </div>
       </DealStep>
 
+      <PullQuote attribution="What firms actually replace">
+        Deal capacity 50–100% higher without adding headcount is worth more than the cost savings.
+      </PullQuote>
+
       {/* ROI math */}
       <DealStep
         n={4}
         id="s4"
         idx="The ROI math"
+        scale="major"
         title="What you're replacing."
         lede={<>Enterprise firms typically consolidate 4–6 existing tools into a single smbX subscription. Here\'s what that looks like — before the revenue-side impact of more deal capacity per person.</>}
       >

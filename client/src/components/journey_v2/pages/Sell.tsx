@@ -9,6 +9,7 @@
 import { useMemo, useState } from 'react';
 import {
   DealStep, DealBench, Row, ScoreDonut, DimList, DealBottom,
+  PullQuote, StatBreaker,
   type DealTab, type DealStepScript,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
@@ -29,28 +30,28 @@ const CHIPS = ['What\'s Acme worth?', 'Find my add-backs', 'Am I ready to sell?'
    Phoenix distribution business his dad founded in 1987. Scripts
    play as each DealStep enters the viewport. */
 const SCRIPT: DealStepScript = {
-  4: [
+  3: [
     { who: 'y',  text: `Let's walk through <strong>${ACME.name}</strong>. Ray Whitaker Jr., 58, 2nd-gen owner. $65M revenue distributor, Phoenix HQ with AZ/NM/TX/NV footprint. Dad founded it in 1987.` },
     { who: 'y',  text: `Reported EBITDA is <strong>$9.2M</strong>. That's what their CPA files. But reported and real aren't the same number — I pulled three years of tax returns and found <strong>$1.8M</strong> of defensible add-backs.` },
     { who: 'me', text: 'What moved the needle?' },
-    { who: 'y',  text: `Two big ones. Ray's Phoenix HQ is leased from a family trust at <strong>$240K above market</strong>. And a discontinued Nevada branch — $820K of overhead on a line that shut Q3 2024 — still sitting in the reported run-rate.` },
-    { who: 'y',  text: `Add Ray's compensation above market ($155K), two siblings on payroll in non-operating roles ($180K), one-time legal settlement ($310K), discretionary travel ($95K) — normalized EBITDA is <strong>$11.0M</strong>.` },
-    { who: 'y',  text: `That's <strong>20% more earnings</strong> than the CPA reports — and every dollar is IRS-documented. At a 7.5× multiple that's <strong>$13.5M</strong> of additional enterprise value sitting in the financials nobody had surfaced.` },
+    { who: 'y',  text: `Two big ones. Ray's Phoenix HQ is leased from a family trust at <strong>$420K above market</strong>. And a discontinued Nevada branch — $640K of overhead still sitting in the reported run-rate after Q3 2024 shutdown.` },
+    { who: 'y',  text: `Add Ray's compensation above market ($155K), two siblings on payroll ($180K), one-time legal ($310K), discretionary travel ($95K) — normalized EBITDA is <strong>$11.0M</strong>.` },
+    { who: 'y',  text: `That's <strong>20% more earnings</strong> than the CPA reports — every dollar IRS-documented. At 7.5× that's <strong>$13.5M</strong> of enterprise value sitting in the financials nobody surfaced.` },
   ],
-  5: [
+  4: [
     { who: 'y',  text: `Now Acme through a buyer's lens — 17 dimensions scored. Total <strong>74/100</strong>. Strong on financial integrity (9.1), revenue quality (8.6), scalability (8.0).` },
     { who: 'y',  text: `Two yellow flags: <strong>owner dependency (5.4)</strong> — Ray still signs every invoice over $50K. And <strong>concentration (6.0)</strong> — top 10 accounts are 35% of revenue, most on handshake with Marco Delgado, VP Sales, 22 years in.` },
     { who: 'me', text: 'Fixable before we go to market?' },
     { who: 'y',  text: `Yes. I built the playbook: promote Nina Arellano (COO, 14yr) into a COO-plus role with signing authority up to $250K. Formalize top-10 contracts with Marco as relationship owner — gets the multiple 0.5–0.75× higher on pack. Earns back $5–8M EV over 12 months.` },
   ],
-  6: [
+  5: [
     { who: 'y',  text: `Drafting Acme's CIM. 32 pages. Positioning isn't "distributor for sale" — it's <strong>"the SW anchor asset for a national multi-discipline platform."</strong>` },
     { who: 'y',  text: `Same diligence pack, two narratives. "Distributor for sale" trades at 6× × $11M = <strong>$66M</strong>. "SW anchor for national consolidation" trades at 8× × $11M = <strong>$88M</strong>.` },
     { who: 'y',  text: `That's a <strong>$22M spread on identical financials</strong>. The four disciplines (industrial MRO 38%, hospitality 24%, healthcare 19%, construction 19%) are the moat — hospitality softens, healthcare picks up. I A/B tested the opening paragraph against 12 simulated buyer reads. The anchor narrative wins every time.` },
     { who: 'me', text: 'Show me page one.' },
     { who: 'y',  text: `Executive summary pulled up on your canvas now. Revenue $65M, Adj EBITDA $11M, 17% margin — but the first sentence is about the <strong>38-year Phoenix-anchored multi-discipline platform</strong>, not the age of the business. Ray reads it. Nods. "That's what I built."` },
   ],
-  7: [
+  6: [
     { who: 'y',  text: `Teaser went to 18 buyers — strategic distributors, PE roll-ups, family offices. <strong>4 IOIs back</strong> inside 21 days.` },
     { who: 'y',  text: `Strategic (HVAC+ Distribution, Dallas-based) leading at <strong>$91M · 80% cash · 20% rollover · 45-day exclusivity</strong>. PE roll-up at $86M, 55% cash, $4M earnout. Family office $82M all-cash, 30-day close. Competing offer at $77M — I told them we'd pass politely.` },
     { who: 'y',  text: `After-tax, all three close within <strong>$4M on headline</strong>. But the strategic's 20% rollover at their exit multiple in 3–5 years models to <strong>$14–18M second bite</strong>. Total haul: $107M vs. $82M all-cash today.` },
@@ -122,38 +123,27 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
       <DealStep
         n={1}
         id="s1"
-        idx="Sell-side"
-        title="Know what you have. Before anyone else does."
+        idx="Sell-side · walkthrough"
+        scale="hero"
+        title={<>Know what you have. Before anyone else does.</>}
         lede={<>Yulia finds the value hiding in your financials, builds the documents that sell your business, and manages the process that gets you to the closing table. From first conversation to wire transfer.</>}
       />
 
-      {/* Problem */}
+      <StatBreaker
+        value="75%"
+        label="of owners who sell their business regret it within a year — the #1 reason is leaving money on the table they never knew was there."
+        source="Exit Planning Institute · 2024 survey"
+        secondary={{ value: '$1.1M', label: 'Average hidden value Yulia finds in pre-LOI analysis.' }}
+      />
+
+      {/* Interactive add-back estimator — merged with the old Problem section */}
       <DealStep
         n={2}
         id="s2"
-        idx="The problem"
-        title="75% of owners who sell their business regret it within a year."
-        lede={<>The Exit Planning Institute surveyed thousands of former owners. The regrets are almost always the same: they weren\'t financially prepared. They left hundreds of thousands — sometimes millions — on the table. In add-backs they never identified. In tax structures they never modeled. In processes they never ran. Most of it was preventable.</>}
-      >
-        <div style={{
-          marginTop: 18,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 10,
-        }}>
-          <StatCard n="$1.1M" label="Average hidden value found per analysis" />
-          <StatCard n="30 min" label="Average time to first deliverable" />
-          <StatCard n="4–7×" label="Typical preparation premium on enterprise value" />
-        </div>
-      </DealStep>
-
-      {/* Interactive add-back estimator */}
-      <DealStep
-        n={3}
-        id="s3"
         idx="Estimator"
-        title="How much value is hiding in your financials?"
-        lede={<>A quick estimate based on industry patterns. Yulia\'s real analysis is specific to your numbers.</>}
+        scale="major"
+        title={<>How much value is hiding in your financials?</>}
+        lede={<>Reported EBITDA and real EBITDA are almost never the same number. Your accountant minimizes taxes. A buyer maximizes the price they\'ll justify to a lender. The gap is larger than you think — pick three things and I\'ll estimate it for you.</>}
       >
         <InteractiveTool
           kicker="Add-back estimator"
@@ -166,8 +156,8 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
 
       {/* Add-backs — Acme, Inc. walkthrough */}
       <DealStep
-        n={4}
-        id="s4"
+        n={3}
+        id="s3"
         idx={`Worked example · ${ACME.name}`}
         title="The money hiding in your tax returns."
         lede={<>Reported EBITDA and real EBITDA are almost never the same number. For Acme — $65M revenue distributor, Phoenix-headquartered — the gap is <strong>{ACME.addBacksLabel} of defensible add-backs</strong>. At 7.5× that\'s $13.5M of enterprise value sitting in the financials the CPA never surfaces.</>}
@@ -192,8 +182,8 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
 
       {/* Readiness */}
       <DealStep
-        n={5}
-        id="s5"
+        n={4}
+        id="s4"
         idx="Readiness"
         title="Your business, scored through a buyer's lens."
         lede={<>Seventeen dimensions. The same checklist every PE associate runs — automated and consistent. Acme comes in at <strong>74/100</strong>: strong on financial integrity and revenue quality, two fixable yellows on owner dependency and concentration.</>}
@@ -209,11 +199,16 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
         </DealBench>
       </DealStep>
 
+      <PullQuote attribution="Same diligence pack. Two narratives.">
+        Same company, described two ways, trades at 6× or 8×.
+      </PullQuote>
+
       {/* CIM */}
       <DealStep
-        n={6}
-        id="s6"
+        n={5}
+        id="s5"
         idx="CIM"
+        scale="major"
         title="Your business deserves better than a data dump."
         lede={<>Most CIMs are data dumps. Yulia's is a strategic narrative. 25–40 pages. Your business positioned not as a business to buy, but as a platform to scale. The same company, described two ways, can trade at <strong>4.5× or 7×</strong>. The difference is rarely the business.</>}
       >
@@ -240,8 +235,8 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
 
       {/* IOI comparison */}
       <DealStep
-        n={7}
-        id="s7"
+        n={6}
+        id="s6"
         idx="Competitive process"
         title="One buyer gives you a price. Five give you a market."
         lede={<>Yulia identifies the buyer universe, sequences outreach, and stacks IOIs against each other. The winning bid in a competitive process is typically <strong>15–30% above</strong> the first offer. On a $50M transaction that\'s $7.5M–$15M more — from running a process instead of accepting a number.</>}
@@ -268,9 +263,10 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
 
       {/* Exit paths */}
       <DealStep
-        n={8}
-        id="s8"
+        n={7}
+        id="s7"
         idx="Exit paths"
+        scale="major"
         title="Selling 100% isn't your only option."
         lede={<>Yulia models every exit structure against your specific numbers. After-tax proceeds, retained ownership, ongoing cash flow, control implications. Side by side. Same financials. Different outcomes.</>}
       >

@@ -339,13 +339,33 @@ export function YuliaRail(props: YuliaRailProps) {
 export interface DealStepProps {
   n: number;
   id: string;
-  idx: string;     /* "Step 01 · What you have" */
+  idx: string;     /* Mono eyebrow — "Step 01 · What you have" */
   title: ReactNode;
   lede?: ReactNode;
   children?: ReactNode;
+  /**
+   * Typography + layout scale.
+   *  - `hero` (default on n=1): clamp(56px, 9vw, 128px) — marquee
+   *  - `major`: clamp(48px, 6vw, 96px) — primary section
+   *  - `section` (default): clamp(40px, 5vw, 72px) — standard section
+   *  - `minor`: clamp(32px, 3.6vw, 48px) — small/aside section
+   */
+  scale?: 'hero' | 'major' | 'section' | 'minor';
+  /**
+   * Composition variant.
+   *  - `full` (default): content fills column
+   *  - `narrow`: editorial column, 560px max — for prose-heavy sections
+   *  - `rail-right`: body on left, narrow callout on right
+   */
+  layout?: 'full' | 'narrow' | 'rail-right';
+  /** Optional right-side callout used with `layout='rail-right'`. */
+  callout?: ReactNode;
 }
 
-export function DealStep({ n, id, idx, title, lede, children }: DealStepProps) {
+export function DealStep({
+  n, id, idx, title, lede, children,
+  scale, layout = 'full', callout,
+}: DealStepProps) {
   const ref = useRef<HTMLElement | null>(null);
   const [seen, setSeen] = useState(false);
   useEffect(() => {
@@ -367,14 +387,35 @@ export function DealStep({ n, id, idx, title, lede, children }: DealStepProps) {
     return () => io.disconnect();
   }, []);
 
-  /* Zigzag rhythm per Paul 2026-04-20. Alternating sections get:
-     - Different top margins (Fibonacci: 55/89/144) so the scroll
-       breathes at irregular intervals
-     - An accent rail on the LEFT for odd steps, RIGHT for even
-     - Slight horizontal inset offset so the eye has to move across
-     Gives the page a rhythm instead of a stack of identical slabs. */
-  const alt = n % 2 === 0;
-  const topGap = n <= 1 ? 0 : n % 3 === 0 ? 144 : alt ? 89 : 55;
+  /* Irregular rhythm: larger vertical breaks before bigger sections so
+     the scroll reads as composed, not metronomic. Hero gets no top gap
+     (it\'s the first thing). */
+  const effectiveScale = scale ?? (n === 1 ? 'hero' : 'section');
+  const topGap = n <= 1
+    ? 0
+    : effectiveScale === 'major' ? 144
+    : effectiveScale === 'hero' ? 144
+    : effectiveScale === 'minor' ? 55
+    : 89;
+
+  const titleSize =
+    effectiveScale === 'hero'   ? 'clamp(56px, 9vw, 128px)' :
+    effectiveScale === 'major'  ? 'clamp(48px, 6vw, 96px)' :
+    effectiveScale === 'minor'  ? 'clamp(32px, 3.6vw, 48px)' :
+                                  'clamp(40px, 5vw, 72px)';
+  const titleLeading = effectiveScale === 'hero' ? 0.95 : effectiveScale === 'major' ? 0.98 : 1.02;
+  const titleTracking = effectiveScale === 'hero' ? '-0.04em' : '-0.035em';
+
+  const contentWrap: React.CSSProperties =
+    layout === 'narrow' ? { maxWidth: 620 } : {};
+
+  const titleWrap: React.CSSProperties = layout === 'narrow'
+    ? { maxWidth: 620 }
+    : effectiveScale === 'hero'
+      ? { maxWidth: '14ch' }          /* Force hero H1 to break into 2-3 lines */
+      : effectiveScale === 'major'
+      ? { maxWidth: '18ch' }
+      : {};
 
   return (
     <section
@@ -382,46 +423,244 @@ export function DealStep({ n, id, idx, title, lede, children }: DealStepProps) {
       className="dr-step"
       id={id}
       data-step={n}
-      data-alt={alt ? 'true' : 'false'}
+      data-scale={effectiveScale}
+      data-layout={layout}
       style={{
         marginTop: topGap,
         opacity: seen ? 1 : 0,
         transform: seen ? 'translateY(0)' : 'translateY(18px)',
         transition: 'opacity 520ms cubic-bezier(0.22, 1, 0.36, 1), transform 520ms cubic-bezier(0.22, 1, 0.36, 1)',
         position: 'relative',
-        paddingLeft: alt ? 0 : 34,
-        paddingRight: alt ? 34 : 0,
       }}
     >
-      {/* Accent rail — alternates side */}
+      {layout === 'rail-right' ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2.2fr) minmax(0, 1fr)', gap: 34 }}>
+          <div>
+            <div className="dr-step__head" style={{ marginBottom: 16 }}>
+              <span className="dr-step__idx">{idx}</span>
+            </div>
+            <h1 className="dr-step__title" style={{
+              fontFamily: 'Sora, sans-serif',
+              fontWeight: 800,
+              fontSize: titleSize,
+              letterSpacing: titleTracking,
+              lineHeight: titleLeading,
+              margin: '0 0 22px',
+              textWrap: 'balance',
+              ...titleWrap,
+            }}>{title}</h1>
+            {lede && <p className="dr-step__lede" style={contentWrap}>{lede}</p>}
+            {children}
+          </div>
+          <aside style={{
+            marginTop: 34,
+            paddingLeft: 22,
+            borderLeft: '2px solid rgba(212,74,120,0.5)',
+          }}>{callout}</aside>
+        </div>
+      ) : (
+        <>
+          <div className="dr-step__head" style={{ marginBottom: 16 }}>
+            <span className="dr-step__idx">{idx}</span>
+          </div>
+          <h1 className="dr-step__title" style={{
+            fontFamily: 'Sora, sans-serif',
+            fontWeight: 800,
+            fontSize: titleSize,
+            letterSpacing: titleTracking,
+            lineHeight: titleLeading,
+            margin: '0 0 22px',
+            textWrap: 'balance',
+            ...titleWrap,
+          }}>{title}</h1>
+          {lede && <p className="dr-step__lede" style={contentWrap}>{lede}</p>}
+          {children}
+        </>
+      )}
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PULL QUOTE — single-sentence thesis statement between dense sections.
+   Light-weight Sora, italic, large. Huge vertical margins. Max 14 words
+   as a rule — if it takes more, it's not a pull-quote, it's prose.
+   ═══════════════════════════════════════════════════════════════════ */
+
+export interface PullQuoteProps {
+  children: ReactNode;
+  attribution?: ReactNode;
+  align?: 'left' | 'center';
+}
+
+export function PullQuote({ children, attribution, align = 'left' }: PullQuoteProps) {
+  const ref = useRef<HTMLElement | null>(null);
+  const [seen, setSeen] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) { setSeen(true); return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => { if (entry.isIntersecting) { setSeen(true); io.disconnect(); } });
+    }, { threshold: 0.3 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <aside
+      ref={ref}
+      style={{
+        margin: '144px 0',
+        maxWidth: align === 'center' ? 960 : 820,
+        marginLeft: align === 'center' ? 'auto' : 0,
+        marginRight: align === 'center' ? 'auto' : 0,
+        opacity: seen ? 1 : 0,
+        transform: seen ? 'translateY(0)' : 'translateY(14px)',
+        transition: 'opacity 620ms cubic-bezier(0.22, 1, 0.36, 1), transform 620ms cubic-bezier(0.22, 1, 0.36, 1)',
+        position: 'relative',
+      }}
+    >
       <div
         aria-hidden
         style={{
-          position: 'absolute',
-          top: 8,
-          bottom: 12,
-          [alt ? 'right' : 'left']: 13,
-          width: 2,
-          background: 'linear-gradient(180deg, rgba(212,74,120,0.55) 0%, rgba(212,74,120,0) 100%)',
-          borderRadius: 1,
-          pointerEvents: 'none',
-        } as React.CSSProperties}
-      />
-      <div className="dr-step__head" style={{
-        textAlign: alt ? 'right' : 'left',
+          fontFamily: 'Sora, sans-serif',
+          fontWeight: 800,
+          fontSize: 120,
+          lineHeight: 0.6,
+          color: '#D44A78',
+          marginBottom: 12,
+          letterSpacing: '-0.04em',
+        }}
+      >“</div>
+      <blockquote
+        style={{
+          fontFamily: 'Sora, sans-serif',
+          fontWeight: 400,
+          fontStyle: 'italic',
+          fontSize: 'clamp(32px, 4.2vw, 54px)',
+          lineHeight: 1.12,
+          letterSpacing: '-0.025em',
+          color: '#0A0A0B',
+          margin: 0,
+          textWrap: 'balance',
+        }}
+      >{children}</blockquote>
+      {attribution && (
+        <div style={{
+          marginTop: 20,
+          fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+          fontSize: 11,
+          letterSpacing: '0.16em',
+          textTransform: 'uppercase',
+          color: '#6B6B70',
+        }}>— {attribution}</div>
+      )}
+    </aside>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STAT BREAKER — full-bleed dark release valve between dense sections.
+   ONE massive number. Tiny label. Nothing else. Ever.
+   ═══════════════════════════════════════════════════════════════════ */
+
+export interface StatBreakerProps {
+  /** The one number that matters. Keep it ≤ 8 chars. */
+  value: string;
+  label: string;
+  /** Optional tiny source line ("HBR, 2024"). */
+  source?: string;
+  /** Optional second stat to the right — sparingly. */
+  secondary?: { value: string; label: string };
+}
+
+export function StatBreaker({ value, label, source, secondary }: StatBreakerProps) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [seen, setSeen] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) { setSeen(true); return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => { if (entry.isIntersecting) { setSeen(true); io.disconnect(); } });
+    }, { threshold: 0.4 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        margin: '120px -40px',
+        padding: '80px 40px',
+        background: '#0A0A0B',
+        color: '#fff',
+        borderRadius: 22,
+        overflow: 'hidden',
+        opacity: seen ? 1 : 0,
+        transform: seen ? 'translateY(0)' : 'translateY(14px)',
+        transition: 'opacity 640ms cubic-bezier(0.22, 1, 0.36, 1), transform 640ms cubic-bezier(0.22, 1, 0.36, 1)',
+      }}
+    >
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: secondary ? '1fr 1fr' : '1fr',
+        gap: 60,
+        maxWidth: 1000,
+        margin: '0 auto',
       }}>
-        <span className="dr-step__idx">{idx}</span>
+        <div>
+          <div style={{
+            fontFamily: 'Sora, sans-serif',
+            fontWeight: 800,
+            fontSize: 'clamp(72px, 12vw, 180px)',
+            letterSpacing: '-0.05em',
+            lineHeight: 0.9,
+            color: '#fff',
+          }}>{value}</div>
+          <div style={{
+            marginTop: 18,
+            fontFamily: 'Inter, system-ui, sans-serif',
+            fontSize: 17,
+            lineHeight: 1.4,
+            color: 'rgba(255,255,255,0.72)',
+            maxWidth: 520,
+          }}>{label}</div>
+          {source && (
+            <div style={{
+              marginTop: 14,
+              fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+              fontSize: 10.5,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.45)',
+            }}>{source}</div>
+          )}
+        </div>
+        {secondary && (
+          <div style={{ borderLeft: '0.5px solid rgba(255,255,255,0.12)', paddingLeft: 40 }}>
+            <div style={{
+              fontFamily: 'Sora, sans-serif',
+              fontWeight: 800,
+              fontSize: 'clamp(56px, 9vw, 120px)',
+              letterSpacing: '-0.04em',
+              lineHeight: 0.92,
+              color: '#E8709A',
+            }}>{secondary.value}</div>
+            <div style={{
+              marginTop: 16,
+              fontFamily: 'Inter, system-ui, sans-serif',
+              fontSize: 15,
+              lineHeight: 1.4,
+              color: 'rgba(255,255,255,0.72)',
+              maxWidth: 380,
+            }}>{secondary.label}</div>
+          </div>
+        )}
       </div>
-      <h1 className="dr-step__title" style={{
-        textAlign: alt ? 'right' : 'left',
-      }}>{title}</h1>
-      {lede && <p className="dr-step__lede" style={{
-        textAlign: alt ? 'right' : 'left',
-        marginLeft: alt ? 'auto' : 0,
-        marginRight: alt ? 0 : 'auto',
-      }}>{lede}</p>}
-      {children}
-    </section>
+    </div>
   );
 }
 

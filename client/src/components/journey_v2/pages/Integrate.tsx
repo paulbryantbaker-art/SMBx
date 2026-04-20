@@ -6,6 +6,7 @@
 import { useMemo, useState } from 'react';
 import {
   DealStep, DealBench, Row, DealBottom,
+  PullQuote, StatBreaker,
   type DealTab, type DealStepScript,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
@@ -34,25 +35,25 @@ const CHIPS = ['Day 0 checklist', '180-day plan', 'Retain key people', 'Am I on 
    Day 0 artifacts, 180-day plan, retention, and thesis tracking
    all from the DD data they already generated. */
 const SCRIPT: DealStepScript = {
-  4: [
+  3: [
     { who: 'y',  text: `You closed <strong>${ACME.name}</strong> Friday. It's Monday morning. Day 3. Wire hit, deal docs are signed, Ray is at the office for the hand-off this week.` },
     { who: 'y',  text: `Day 0 checklist generated from DD data: 62 items across IT, people, customers, vendors, operations. <strong>53 complete before signing, 9 live.</strong>` },
     { who: 'me', text: "What's the red one?" },
     { who: 'y',  text: `<strong>Texas reseller permit.</strong> Ray's name is on it, and TX holds that credential with the individual, not the entity. Can't invoice Texas commercial accounts (~$8M annual) until transfer clears. I drafted Ray's signed consent — in your docket. File it today, cleared in 10 business days.` },
   ],
-  5: [
+  4: [
     { who: 'y',  text: `180-day plan · <strong>6 workstreams, each with named owner + weekly checkpoint.</strong>` },
     { who: 'y',  text: `<strong>Day 45:</strong> Pricing reset across all four disciplines. Ray ran legacy pricing — hospitality is 8% underwater vs. market. Nina executes.` },
     { who: 'y',  text: `<strong>Day 60:</strong> Formalize MSAs with top-10 customers. Marco is the relationship owner — we promote him to SVP so he walks into those conversations with authority. The MSA program takes concentration risk from 35% handshake to 35% contracted over 90 days.` },
     { who: 'y',  text: `<strong>Day 90:</strong> First cash runway check. You bought with <strong>${ACME.workingCapital}</strong> working capital. I'll flag if we\'re burning faster than plan 60 days before covenant test.` },
   ],
-  6: [
+  5: [
     { who: 'y',  text: `Key-person retention map · <strong>3 critical, 2 elevated.</strong>` },
     { who: 'y',  text: `<strong>Marco Delgado</strong> · VP Sales · 22 years · owns the top-10 relationships. Replacement cost $420K + 6 months. Flight risk <strong>HIGH</strong> — Ray told me in DD Marco is 60 and wants to slow down.` },
     { who: 'y',  text: `Package draft: <strong>$75K stay bonus over 36 months · 1.5% rollover equity · SVP Sales title.</strong> I scripted Ray's opening — the reason Marco stays is Ray asks him to, not the comp. Meeting is on his calendar Thursday 2pm.` },
     { who: 'y',  text: `<strong>Nina Arellano</strong> (COO, 14yr) and <strong>Jennifer Wu</strong> (Controller, 11yr) — two other critical roles. Compression-review on both; Nina gets a COO-plus scope + $40K raise, Jennifer gets Controller → VP Finance.` },
   ],
-  7: [
+  6: [
     { who: 'y',  text: `Week 14. Thesis scorecard is <strong>mostly green.</strong>` },
     { who: 'y',  text: `<strong>On plan:</strong> EBITDA $11.2M TTM (thesis $11.0M). Recurring mix 64% (thesis 62%). FCCV 1.42×.` },
     { who: 'y',  text: `<strong>Drift:</strong> Concentration at 34% (thesis said 28% by Q2). Root cause — two of the three Q1 MSAs haven't started because Marco is slow-rolling them. I booked that conversation for Wednesday. If the program slips one more quarter, earnout provisions kick in.` },
@@ -113,36 +114,25 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
       <DealStep
         n={1}
         id="hero"
-        idx="Post-close"
-        title="Day 1 after the wire. 180 employees. Do you have a plan?"
+        idx="Post-close · walkthrough"
+        scale="hero"
+        title={<>Day 1 after the wire. 180 employees. Do you have a plan?</>}
         lede={<>Yulia builds the 180-day integration plan from your specific deal data — risks identified, opportunities found, people to protect. Auto-generated before the wire hits. Executed one day at a time.</>}
       />
 
-      {/* Problem */}
-      <DealStep
-        n={2}
-        id="problem"
-        idx="The stat"
-        title="75% of acquisitions fail to achieve their stated synergies."
-        lede={<>Harvard Business Review. Thirty years of research across thousands of deals. The #1 reason, every time: <strong>no integration plan</strong>. Not a bad plan. No plan.</>}
-      >
-        <div style={{
-          marginTop: 18,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 10,
-        }}>
-          <StatCard n="75%" label="Acquisitions that miss synergy targets (HBR)" />
-          <StatCard n="40%+" label="Key-person attrition in year 1 without a retention plan" />
-          <StatCard n="Day 0" label="When Yulia's 180-day plan lands — before the wire" />
-        </div>
-      </DealStep>
+      <StatBreaker
+        value="75%"
+        label="of acquisitions fail to achieve their stated synergies. The #1 reason, every time: no integration plan. Not a bad plan. No plan."
+        source="Harvard Business Review · 30-year study"
+        secondary={{ value: '40%+', label: 'Key-person attrition in year 1 without a retention plan.' }}
+      />
 
       {/* Day-1 checklist generator */}
       <DealStep
-        n={3}
+        n={2}
         id="generator"
         idx="Generator"
+        scale="major"
         title="Generate your Day-1 checklist."
         lede={<>Five questions. Customized checklist by category — IT, People, Customers, Vendors, Operations.</>}
       >
@@ -155,11 +145,11 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         </InteractiveTool>
       </DealStep>
 
-      {/* Step 04 · Day 0 */}
+      {/* Day 0 */}
       <DealStep
-        n={4}
+        n={3}
         id="s1"
-        idx="Day 0 · Atlas"
+        idx={`Day 0 · ${ACME.name}`}
         title="The 72 hours that decide whether this deal works."
         lede={<>Bank accounts, payroll, insurance, licenses, vendor notifications, staff town hall, the first Monday. Yulia runs the Day-0 checklist against your deal structure and flags what has to happen <strong>before signing</strong> vs. what can slip to week one.</>}
       >
@@ -173,11 +163,12 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         </DealBench>
       </DealStep>
 
-      {/* Step 05 · 180-day plan */}
+      {/* 180-day plan */}
       <DealStep
-        n={5}
+        n={4}
         id="s2"
         idx="180-day plan"
+        scale="major"
         title="The first six months, scripted against your thesis."
         lede={<>You bought this company for a reason. Yulia translates that reason into a 180-day operating plan with named owners, weekly milestones, and a cash runway check at day 30, 90, and 180. You run the business; she watches the plan.</>}
       >
@@ -190,11 +181,16 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         </DealBench>
       </DealStep>
 
-      {/* Step 06 · Retention */}
+      <PullQuote attribution="The rule">
+        The #1 reason synergy targets miss: you lost the four people who ran the place.
+      </PullQuote>
+
+      {/* Retention */}
       <DealStep
-        n={6}
+        n={5}
         id="s3"
         idx="Retention"
+        scale="major"
         title="Keep the people who actually run the place."
         lede={<>Most SMB deals lose <strong>40%+ of their key people</strong> in year one. Yulia maps the org, scores each role for replacement risk, and drafts the retention conversation — including stay bonus, equity, title, and a candid talk about what you’re changing.</>}
       >
@@ -228,9 +224,9 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         </DealBench>
       </DealStep>
 
-      {/* Step 07 · Thesis tracking */}
+      {/* Thesis tracking */}
       <DealStep
-        n={7}
+        n={6}
         id="s4"
         idx="Thesis tracking"
         title="Are you on thesis? Yulia tells you every Monday."
