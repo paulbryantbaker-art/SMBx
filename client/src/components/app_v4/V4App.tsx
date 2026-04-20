@@ -6,14 +6,69 @@
  * from `./chrome/*`. Mobile lives in `./mobile/MobileApp.tsx`.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useV4Session } from './session';
 import V4Shell from './chrome/V4Shell';
+import V4Tool from './chrome/V4Tool';
+import V4Chat from './chrome/V4Chat';
+import V4Rail from './chrome/V4Rail';
+import { PORTFOLIOS, DEALS, yuliaReply } from './data';
+import type { ChatMessage } from './session';
 import './tokens.css';
+import './chrome/shell.css';
 
 export default function V4App() {
   const session = useV4Session();
-  const { ui, setUI } = session;
+  const { ui, setUI, workspace, chats, appendMessage, changePortfolio, openTab, switchTab, closeTab, reorderTabs } = session;
+  const [typing, setTyping] = useState(false);
+
+  const portfolio = useMemo(
+    () => PORTFOLIOS.find((p) => p.id === workspace.portfolioId) ?? PORTFOLIOS[0],
+    [workspace.portfolioId],
+  );
+  const activeTab = workspace.tabs.find((t) => t.id === workspace.activeTabId) ?? null;
+  const messages: ChatMessage[] = chats[portfolio.id] ?? [];
+
+  const nextAction = useMemo(() => {
+    if (activeTab?.kind === 'deal') {
+      const d = DEALS.find((x) => x.id === activeTab.dealId);
+      if (d) return { label: `Run a Rundown on ${d.name}`, kicker: 'YULIA SUGGESTS · NEXT' };
+    }
+    if (activeTab?.kind === 'loi') return { label: 'Draft counter-terms for concentration risk', kicker: 'YULIA SUGGESTS · NEXT' };
+    if (activeTab?.kind === 'compare') return { label: 'Generate a memo comparing these three', kicker: 'YULIA SUGGESTS · NEXT' };
+    return { label: 'Review what needs your attention today', kicker: 'YULIA SUGGESTS · NEXT' };
+  }, [activeTab]);
+
+  const handleSend = (text: string) => {
+    if (!text.trim()) return;
+    appendMessage(portfolio.id, { who: 'me', text });
+    setTyping(true);
+    setTimeout(() => {
+      const deal = activeTab?.dealId ? DEALS.find((d) => d.id === activeTab.dealId) ?? null : null;
+      const reply = yuliaReply(text, deal, portfolio);
+      setTyping(false);
+      appendMessage(portfolio.id, {
+        who: 'y',
+        text: reply.text,
+        progress: reply.progress,
+      });
+      if (reply.spawnTabs) {
+        reply.spawnTabs.forEach((sp, i) =>
+          setTimeout(
+            () =>
+              openTab({
+                id: `${sp.kind}-${sp.dealId ?? sp.dealIds?.join('_') ?? Date.now()}`,
+                kind: sp.kind as any,
+                dealId: sp.dealId,
+                dealIds: sp.dealIds,
+                label: sp.label,
+              }),
+            250 + i * 180,
+          ),
+        );
+      }
+    }, 750);
+  };
 
   // Read initial mode from query string on first mount.
   useEffect(() => {
@@ -39,8 +94,25 @@ export default function V4App() {
       {ui.mode === 'desktop' ? (
         <V4Shell
           ui={ui}
-          tool={<RegionStub label="V4Tool" width="var(--v4-tool-w)" side="left" />}
-          chat={<RegionStub label="V4Chat" width="var(--v4-chat-w)" side="left-chat" />}
+          tool={
+            <V4Tool
+              expanded={ui.toolExpanded}
+              onToggle={() => setUI({ toolExpanded: !ui.toolExpanded })}
+              nextAction={nextAction}
+              onNextGo={() => handleSend(nextAction.label)}
+            />
+          }
+          chat={
+            <V4Chat
+              portfolio={portfolio}
+              onPortfolioChange={changePortfolio}
+              messages={messages}
+              onSend={handleSend}
+              isTyping={typing}
+              width={ui.chatW}
+              onWidthChange={(w) => setUI({ chatW: w })}
+            />
+          }
           canvas={<RegionStub label="V4Canvas" width="center" side="center" />}
           rail={<RegionStub label="V4Rail" width="var(--v4-rail-w)" side="right" />}
         />
