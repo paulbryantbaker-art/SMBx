@@ -23,17 +23,39 @@ import V4Rail from '../chrome/V4Rail';
 import { PORTFOLIOS } from '../data';
 import type { ChatMessage, V4UIState, Tab } from '../session';
 import type { AuthMessage } from '../../../hooks/useAuthChat';
+import GateProgress from '../../chat/GateProgress';
+import { ChapterStrip } from '../../shared/ChapterStrip';
 import '../tokens.css';
 import '../chrome/shell.css';
+
+interface DealChapter {
+  id: number;
+  title: string;
+  gate_label?: string | null;
+  gate_status?: string;
+  summary?: string | null;
+}
 
 interface Props {
   messages: AuthMessage[];
   streamingText: string;
   sending: boolean;
   onSend: (text: string) => void;
+  /** Active deal ID for gate progress bar. Null when the user is in a
+      general (non-deal) conversation. */
+  activeDealId?: number | null;
+  currentGate?: string;
+  /** Conversations within the active deal — shown as a horizontal
+      chapter strip above the messages when > 1. */
+  chapters?: DealChapter[];
+  activeChapterId?: number | null;
+  onSelectChapter?: (id: number) => void;
 }
 
-export default function AuthV4Shell({ messages, streamingText, sending, onSend }: Props) {
+export default function AuthV4Shell({
+  messages, streamingText, sending, onSend,
+  activeDealId, currentGate, chapters, activeChapterId, onSelectChapter,
+}: Props) {
   const [ui, setUI] = useState<V4UIState>({
     mode: 'desktop',
     density: 'comfortable',
@@ -64,6 +86,28 @@ export default function AuthV4Shell({ messages, streamingText, sending, onSend }
 
   const patchUI = (patch: Partial<V4UIState>) => setUI((prev) => ({ ...prev, ...patch }));
 
+  const showChapters = !!chapters && chapters.length > 1 && !!onSelectChapter;
+  const showGates = !!activeDealId;
+  const chatHeaderSlot = (showGates || showChapters) ? (
+    <div className="v4-chat__deal-head">
+      {showChapters && (
+        <ChapterStrip
+          chapters={chapters!.map((c) => ({
+            id: c.id,
+            title: c.title,
+            gate_label: c.gate_label ?? undefined,
+            gate_status: c.gate_status,
+            summary: c.summary ?? undefined,
+          }))}
+          activeChapterId={activeChapterId ?? null}
+          onChapterTap={onSelectChapter!}
+          dark={false}
+        />
+      )}
+      {showGates && <GateProgress dealId={activeDealId!} currentGate={currentGate} />}
+    </div>
+  ) : null;
+
   return (
     <div className="app-v4 app-v4--desktop" data-density={ui.density} style={{ position: 'absolute', inset: 0 }}>
       <V4Shell
@@ -87,6 +131,7 @@ export default function AuthV4Shell({ messages, streamingText, sending, onSend }
             isTyping={sending && !streamingText}
             width={ui.chatW}
             onWidthChange={(w) => patchUI({ chatW: w })}
+            headerSlot={chatHeaderSlot}
           />
         }
         canvas={

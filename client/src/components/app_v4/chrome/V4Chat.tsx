@@ -386,6 +386,12 @@ interface Props {
   onOpenArtifact?: (a: ArtifactSpec) => void;
   width: number;
   onWidthChange: (w: number) => void;
+  /** Optional nodes rendered between the head and the scroll area —
+      e.g. deal gate progress strip, chapter switcher. */
+  headerSlot?: ReactNode;
+  /** Optional nodes rendered inside the scroll area, after the last
+      message and before the typing indicator — e.g. inline paywall. */
+  messagesFooterSlot?: ReactNode;
 }
 
 export default function V4Chat({
@@ -397,6 +403,8 @@ export default function V4Chat({
   onOpenArtifact,
   width,
   onWidthChange,
+  headerSlot,
+  messagesFooterSlot,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -439,6 +447,8 @@ export default function V4Chat({
         </div>
       )}
 
+      {headerSlot}
+
       {empty ? (
         <V4ChatEmpty portfolio={portfolio} onStarter={(p) => onSend(p)} />
       ) : (
@@ -446,6 +456,7 @@ export default function V4Chat({
           {messages.map((m, i) => (
             <V4Msg key={i} who={m.who} text={m.text} progress={m.progress} artifacts={m.artifacts} onOpenArtifact={onOpenArtifact} />
           ))}
+          {messagesFooterSlot}
           {isTyping && <V4Typing />}
         </div>
       )}
