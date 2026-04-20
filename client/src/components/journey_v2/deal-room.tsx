@@ -387,35 +387,18 @@ export function DealStep({
     return () => io.disconnect();
   }, []);
 
-  /* Irregular rhythm: larger vertical breaks before bigger sections so
-     the scroll reads as composed, not metronomic. Hero gets no top gap
-     (it\'s the first thing). */
+  /* Single scale vocabulary. CSS handles the type size from the
+     data-scale attribute — no inline sizing. */
   const effectiveScale = scale ?? (n === 1 ? 'hero' : 'section');
-  const topGap = n <= 1
-    ? 0
-    : effectiveScale === 'major' ? 144
-    : effectiveScale === 'hero' ? 144
-    : effectiveScale === 'minor' ? 55
-    : 89;
 
-  const titleSize =
-    effectiveScale === 'hero'   ? 'clamp(56px, 9vw, 128px)' :
-    effectiveScale === 'major'  ? 'clamp(48px, 6vw, 96px)' :
-    effectiveScale === 'minor'  ? 'clamp(32px, 3.6vw, 48px)' :
-                                  'clamp(40px, 5vw, 72px)';
-  const titleLeading = effectiveScale === 'hero' ? 0.95 : effectiveScale === 'major' ? 0.98 : 1.02;
-  const titleTracking = effectiveScale === 'hero' ? '-0.04em' : '-0.035em';
+  /* Title max-width keeps big headlines from running edge to edge. */
+  const titleMax: React.CSSProperties =
+    effectiveScale === 'hero'  ? { maxWidth: '11ch' } :
+    effectiveScale === 'major' ? { maxWidth: '16ch' } :
+    layout === 'narrow'        ? { maxWidth: '24ch' } :
+                                 { maxWidth: '22ch' };
 
-  const contentWrap: React.CSSProperties =
-    layout === 'narrow' ? { maxWidth: 620 } : {};
-
-  const titleWrap: React.CSSProperties = layout === 'narrow'
-    ? { maxWidth: 620 }
-    : effectiveScale === 'hero'
-      ? { maxWidth: '14ch' }          /* Force hero H1 to break into 2-3 lines */
-      : effectiveScale === 'major'
-      ? { maxWidth: '18ch' }
-      : {};
+  const ledeWrap: React.CSSProperties = layout === 'narrow' ? { maxWidth: '48ch' } : {};
 
   return (
     <section
@@ -426,54 +409,33 @@ export function DealStep({
       data-scale={effectiveScale}
       data-layout={layout}
       style={{
-        marginTop: topGap,
         opacity: seen ? 1 : 0,
-        transform: seen ? 'translateY(0)' : 'translateY(18px)',
+        transform: seen ? 'translateY(0)' : 'translateY(14px)',
         transition: 'opacity 520ms cubic-bezier(0.22, 1, 0.36, 1), transform 520ms cubic-bezier(0.22, 1, 0.36, 1)',
-        position: 'relative',
       }}
     >
-      {layout === 'rail-right' ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2.2fr) minmax(0, 1fr)', gap: 34 }}>
+      {layout === 'rail-right' && callout ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2.2fr) minmax(0, 1fr)', gap: 'var(--dr-s-6)' }}>
           <div>
-            <div className="dr-step__head" style={{ marginBottom: 16 }}>
+            <div className="dr-step__head">
               <span className="dr-step__idx">{idx}</span>
             </div>
-            <h1 className="dr-step__title" style={{
-              fontFamily: 'Sora, sans-serif',
-              fontWeight: 800,
-              fontSize: titleSize,
-              letterSpacing: titleTracking,
-              lineHeight: titleLeading,
-              margin: '0 0 22px',
-              textWrap: 'balance',
-              ...titleWrap,
-            }}>{title}</h1>
-            {lede && <p className="dr-step__lede" style={contentWrap}>{lede}</p>}
+            <h1 className="dr-step__title" style={titleMax}>{title}</h1>
+            {lede && <p className="dr-step__lede" style={ledeWrap}>{lede}</p>}
             {children}
           </div>
           <aside style={{
-            marginTop: 34,
-            paddingLeft: 22,
-            borderLeft: '2px solid rgba(212,74,120,0.5)',
+            paddingLeft: 'var(--dr-s-4)',
+            borderLeft: '2px solid rgba(212,74,120,0.45)',
           }}>{callout}</aside>
         </div>
       ) : (
         <>
-          <div className="dr-step__head" style={{ marginBottom: 16 }}>
+          <div className="dr-step__head">
             <span className="dr-step__idx">{idx}</span>
           </div>
-          <h1 className="dr-step__title" style={{
-            fontFamily: 'Sora, sans-serif',
-            fontWeight: 800,
-            fontSize: titleSize,
-            letterSpacing: titleTracking,
-            lineHeight: titleLeading,
-            margin: '0 0 22px',
-            textWrap: 'balance',
-            ...titleWrap,
-          }}>{title}</h1>
-          {lede && <p className="dr-step__lede" style={contentWrap}>{lede}</p>}
+          <h1 className="dr-step__title" style={titleMax}>{title}</h1>
+          {lede && <p className="dr-step__lede" style={ledeWrap}>{lede}</p>}
           {children}
         </>
       )}
@@ -510,52 +472,16 @@ export function PullQuote({ children, attribution, align = 'left' }: PullQuotePr
   return (
     <aside
       ref={ref}
+      className="dr-pull"
+      data-align={align}
       style={{
-        margin: '144px 0',
-        maxWidth: align === 'center' ? 960 : 820,
-        marginLeft: align === 'center' ? 'auto' : 0,
-        marginRight: align === 'center' ? 'auto' : 0,
         opacity: seen ? 1 : 0,
         transform: seen ? 'translateY(0)' : 'translateY(14px)',
         transition: 'opacity 620ms cubic-bezier(0.22, 1, 0.36, 1), transform 620ms cubic-bezier(0.22, 1, 0.36, 1)',
-        position: 'relative',
       }}
     >
-      <div
-        aria-hidden
-        style={{
-          fontFamily: 'Sora, sans-serif',
-          fontWeight: 800,
-          fontSize: 120,
-          lineHeight: 0.6,
-          color: '#D44A78',
-          marginBottom: 12,
-          letterSpacing: '-0.04em',
-        }}
-      >“</div>
-      <blockquote
-        style={{
-          fontFamily: 'Sora, sans-serif',
-          fontWeight: 400,
-          fontStyle: 'italic',
-          fontSize: 'clamp(32px, 4.2vw, 54px)',
-          lineHeight: 1.12,
-          letterSpacing: '-0.025em',
-          color: '#0A0A0B',
-          margin: 0,
-          textWrap: 'balance',
-        }}
-      >{children}</blockquote>
-      {attribution && (
-        <div style={{
-          marginTop: 20,
-          fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-          fontSize: 11,
-          letterSpacing: '0.16em',
-          textTransform: 'uppercase',
-          color: '#6B6B70',
-        }}>— {attribution}</div>
-      )}
+      <blockquote className="dr-pull__q">{children}</blockquote>
+      {attribution && <div className="dr-pull__attrib">— {attribution}</div>}
     </aside>
   );
 }
@@ -592,74 +518,25 @@ export function StatBreaker({ value, label, source, secondary }: StatBreakerProp
   return (
     <div
       ref={ref}
+      className="dr-stat"
+      data-has-secondary={secondary ? 'true' : 'false'}
       style={{
-        margin: '120px -40px',
-        padding: '80px 40px',
-        background: '#0A0A0B',
-        color: '#fff',
-        borderRadius: 22,
-        overflow: 'hidden',
         opacity: seen ? 1 : 0,
         transform: seen ? 'translateY(0)' : 'translateY(14px)',
         transition: 'opacity 640ms cubic-bezier(0.22, 1, 0.36, 1), transform 640ms cubic-bezier(0.22, 1, 0.36, 1)',
       }}
     >
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: secondary ? '1fr 1fr' : '1fr',
-        gap: 60,
-        maxWidth: 1000,
-        margin: '0 auto',
-      }}>
-        <div>
-          <div style={{
-            fontFamily: 'Sora, sans-serif',
-            fontWeight: 800,
-            fontSize: 'clamp(72px, 12vw, 180px)',
-            letterSpacing: '-0.05em',
-            lineHeight: 0.9,
-            color: '#fff',
-          }}>{value}</div>
-          <div style={{
-            marginTop: 18,
-            fontFamily: 'Inter, system-ui, sans-serif',
-            fontSize: 17,
-            lineHeight: 1.4,
-            color: 'rgba(255,255,255,0.72)',
-            maxWidth: 520,
-          }}>{label}</div>
-          {source && (
-            <div style={{
-              marginTop: 14,
-              fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-              fontSize: 10.5,
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.45)',
-            }}>{source}</div>
-          )}
-        </div>
-        {secondary && (
-          <div style={{ borderLeft: '0.5px solid rgba(255,255,255,0.12)', paddingLeft: 40 }}>
-            <div style={{
-              fontFamily: 'Sora, sans-serif',
-              fontWeight: 800,
-              fontSize: 'clamp(56px, 9vw, 120px)',
-              letterSpacing: '-0.04em',
-              lineHeight: 0.92,
-              color: '#E8709A',
-            }}>{secondary.value}</div>
-            <div style={{
-              marginTop: 16,
-              fontFamily: 'Inter, system-ui, sans-serif',
-              fontSize: 15,
-              lineHeight: 1.4,
-              color: 'rgba(255,255,255,0.72)',
-              maxWidth: 380,
-            }}>{secondary.label}</div>
-          </div>
-        )}
+      <div className="dr-stat__primary">
+        <div className="dr-stat__value">{value}</div>
+        <div className="dr-stat__label">{label}</div>
+        {source && <div className="dr-stat__source">{source}</div>}
       </div>
+      {secondary && (
+        <div className="dr-stat__secondary">
+          <div className="dr-stat__value dr-stat__value--sm">{secondary.value}</div>
+          <div className="dr-stat__label">{secondary.label}</div>
+        </div>
+      )}
     </div>
   );
 }

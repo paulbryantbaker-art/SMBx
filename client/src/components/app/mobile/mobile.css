@@ -1,0 +1,378 @@
+/**
+ * Glass Grok mobile — Apple-App-Store-inspired internal app styles.
+ *
+ * Ported from app_v4/mobile/mobile.css with three delta:
+ *  1. Prefix `.m-*` → `.mm-*` so it doesn't collide with app_v4's dev preview.
+ *  2. Drops the `.phone` simulation frame (390×844 device mock) — real PWA
+ *     runs at actual viewport so we don't want the inset phone chrome.
+ *  3. Retokened onto the global `--text-*`, `--border`, `--dot-*`, `--accent`
+ *     tokens from index.css instead of the v4-local `--gg-*` set. iOS blue
+ *     `#007AFF` action buttons swapped to `var(--accent)` to enforce the
+ *     Glass Grok monochrome-chrome rule.
+ */
+
+/* ─── Typing indicator (three animated dots) ─────────────────── */
+.mm-typing {
+  display: inline-flex; gap: 4px; padding: 10px 14px;
+  background: var(--bg-subtle);
+  border-radius: 14px;
+}
+.mm-typing span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-faint);
+  animation: mm-typing 1.2s infinite;
+}
+.mm-typing span:nth-child(2) { animation-delay: 0.2s; }
+.mm-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes mm-typing {
+  0%,60%,100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
+/* ─── Root body + scroll containment ────────────────────────── */
+.mm-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.mm-body::-webkit-scrollbar { display: none; }
+
+/* ─── Today: header + feed ──────────────────────────────────── */
+.mm-today__head {
+  padding: 12px 20px 8px;
+}
+.mm-today__date {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.02em; text-transform: uppercase;
+}
+.mm-today__title {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 28px; font-weight: 800; letter-spacing: -0.02em;
+  color: var(--text-primary); margin-top: 2px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.mm-today__feed {
+  padding: 8px 16px 20px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+/* ─── Cards ────────────────────────────────────────────────── */
+.mm-card {
+  background: var(--bg-card);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  display: flex; flex-direction: column;
+}
+
+/* Hero card — gradient "daily briefing" with Yulia kicker. This is the
+   one deliberate content-color moment; chrome stays monochrome. */
+.mm-card--hero { min-height: 320px; position: relative; color: var(--text-primary); }
+.mm-card--hero .mm-card__art {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 10%, #FFD5B8 0%, transparent 55%),
+    radial-gradient(ellipse 80% 70% at 95% 25%, #FFE8A8 0%, transparent 55%),
+    radial-gradient(ellipse 90% 80% at 85% 95%, #C9DCFF 0%, transparent 55%),
+    radial-gradient(ellipse 100% 90% at 10% 110%, #F5C9EA 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 50% 50%, #FFD9DE 0%, transparent 55%),
+    #FFF6EC;
+}
+.mm-card--hero .mm-card__art::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(115deg, transparent 0 40px, rgba(10,10,15,0.025) 40px 41px),
+    radial-gradient(ellipse 100% 60% at 50% 0%, rgba(255,255,255,0.35), transparent 55%);
+  mix-blend-mode: soft-light;
+}
+.mm-card--hero .mm-card__art::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(255,246,236,0.5) 100%);
+}
+.mm-card--hero .mm-card__body {
+  position: relative; padding: 20px; margin-top: auto; z-index: 1;
+}
+.mm-card--hero .mm-card__kicker {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; color: #C24A2D;
+}
+.mm-card--hero .mm-card__t {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 26px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1;
+  margin-top: 6px; text-wrap: balance; color: var(--text-primary);
+}
+.mm-card--hero .mm-card__s {
+  font-size: 14px; color: #4A4A50; margin-top: 6px; line-height: 1.4;
+}
+
+/* Standard card kickers + titles (feat/list variants) */
+.mm-card__kicker {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+.mm-card__t {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 20px; font-weight: 800; letter-spacing: -0.02em;
+  color: var(--text-primary); margin-top: 4px; text-wrap: balance;
+}
+.mm-card__s {
+  font-size: 14px; color: var(--text-muted); margin-top: 4px; line-height: 1.4;
+}
+
+/* Feature card — large art area above body */
+.mm-card--feat .mm-card__art {
+  height: 180px;
+  background: linear-gradient(135deg, #FAFAFB 0%, #E8E8EB 100%);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.mm-card--feat .mm-card__body { padding: 16px 18px 18px; }
+
+/* List card — rows inside a single card surface */
+.mm-card--list {
+  background: var(--bg-card); border-radius: 18px;
+  padding: 0;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.04);
+}
+.mm-card--list .mm-card__head {
+  padding: 14px 18px 6px;
+  border-bottom: 0.5px solid var(--border);
+}
+.mm-card--list .mm-card__kicker {
+  color: var(--text-muted); font-size: 10.5px;
+}
+.mm-card--list .mm-card__t { font-size: 17px; margin-top: 2px; }
+
+/* ─── List row (icon · body · action) ──────────────────────── */
+.mm-listrow {
+  display: grid; grid-template-columns: 52px 1fr auto; gap: 12px;
+  padding: 10px 18px; align-items: center;
+  border-top: 0.5px solid var(--border);
+  background: transparent; border-left: 0; border-right: 0; border-bottom: 0;
+  width: 100%; text-align: left; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mm-listrow:first-of-type { border-top: 0; }
+.mm-listrow:active { background: var(--bg-subtle); }
+.mm-listrow__icon {
+  width: 52px; height: 52px; border-radius: 12px;
+  background: linear-gradient(135deg, #FAFAFB, #E8E8EB);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-weight: 800; font-size: 16px;
+  color: var(--text-primary); letter-spacing: -0.02em;
+  flex-shrink: 0;
+  border: 0.5px solid var(--border);
+}
+.mm-listrow__icon--ok {
+  background: linear-gradient(135deg, rgba(34,167,85,0.15), rgba(34,167,85,0.3));
+  color: #1A7E40;
+}
+.mm-listrow__icon--warn {
+  background: linear-gradient(135deg, rgba(232,160,51,0.15), rgba(232,160,51,0.3));
+  color: #8A5A14;
+}
+.mm-listrow__icon--flag {
+  background: linear-gradient(135deg, rgba(220,38,38,0.12), rgba(220,38,38,0.24));
+  color: #991B1B;
+}
+.mm-listrow__icon--ink {
+  background: linear-gradient(135deg, #3A3A3E, #0A0A0B); color: #fff;
+}
+.mm-listrow__body { min-width: 0; }
+.mm-listrow__t {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 15px; font-weight: 700; color: var(--text-primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
+.mm-listrow__s {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12px; color: var(--text-muted); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mm-listrow__btn {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.55) 100%);
+  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  backdrop-filter: blur(20px) saturate(200%);
+  color: var(--text-primary); border: 0.5px solid var(--border);
+  padding: 5px 14px; border-radius: 999px;
+  min-width: 68px;
+  box-shadow:
+    inset 0 0.5px 0 rgba(255,255,255,0.95),
+    0 1px 2px rgba(0,0,0,0.05);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms ease;
+}
+.mm-listrow__btn:active { transform: scale(0.96); }
+.mm-listrow__btn.ink {
+  background: linear-gradient(180deg, #1A1A1E 0%, #000 100%);
+  color: #fff; border: 0;
+  box-shadow:
+    inset 0 0.5px 0 rgba(255,255,255,0.15),
+    0 2px 6px rgba(0,0,0,0.25);
+}
+
+/* ─── Section header (eyebrow + title + "see all") ────────── */
+.mm-sec {
+  padding: 18px 20px 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.mm-sec__t {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.mm-sec__k {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 10px; font-weight: 700;
+  color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase;
+}
+.mm-sec__more {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px; font-weight: 600;
+  color: var(--text-primary);
+  background: transparent; border: 0; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── Horizontal scroll (artifacts / pinned) ───────────────── */
+.mm-hscroll {
+  display: flex; gap: 12px; overflow-x: auto;
+  padding: 4px 16px 12px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.mm-hscroll::-webkit-scrollbar { display: none; }
+.mm-hcard {
+  scroll-snap-align: start;
+  flex: 0 0 260px;
+  background: var(--bg-card); border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.05);
+  border: 0.5px solid var(--border);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mm-hcard__art {
+  height: 140px;
+  background: linear-gradient(135deg, #FAFAFB 0%, #E8E8EB 100%);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.mm-hcard__body { padding: 12px 14px 14px; }
+
+/* ─── Deals tab ────────────────────────────────────────────── */
+.mm-deals__head {
+  padding: 12px 20px 8px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.mm-deals__h1 {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 30px; font-weight: 800; letter-spacing: -0.03em;
+  margin: 0; color: var(--text-primary);
+}
+.mm-stages {
+  display: flex; gap: 8px; padding: 4px 16px 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.mm-stages::-webkit-scrollbar { display: none; }
+.mm-stage {
+  flex-shrink: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px; font-weight: 600;
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
+  padding: 6px 14px; border-radius: 999px;
+  color: var(--text-primary);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255,255,255,0.95),
+    0 1px 2px rgba(0,0,0,0.04);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms ease;
+}
+.mm-stage:active { transform: scale(0.96); }
+.mm-stage.active {
+  background: linear-gradient(180deg, #1A1A1E 0%, #000 100%);
+  color: #fff; border-color: transparent;
+  box-shadow:
+    inset 0 0.5px 0 rgba(255,255,255,0.15),
+    0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* ─── Empty states (Today / Deals / Inbox) ─────────────────── */
+.mm-empty {
+  padding: 32px 24px;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 10px;
+}
+.mm-empty__t {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.mm-empty__s {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px; color: var(--text-muted); line-height: 1.5;
+  max-width: 280px;
+}
+.mm-empty__cta {
+  margin-top: 8px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.02em;
+  background: var(--accent); color: #fff;
+  border: 0; padding: 10px 20px; border-radius: 999px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: var(--shadow-primary-btn);
+}
+
+/* ─── Inbox ────────────────────────────────────────────────── */
+.mm-inbox__head { padding: 12px 20px 8px; }
+.mm-inbox__h1 {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 30px; font-weight: 800; letter-spacing: -0.03em;
+  margin: 0; color: var(--text-primary);
+}
+.mm-inbox__list {
+  padding: 0 16px 20px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.mm-inbox__item {
+  background: var(--bg-card); border-radius: 14px;
+  padding: 14px 16px;
+  display: grid; grid-template-columns: 8px 1fr auto; gap: 10px; align-items: start;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  border: 0.5px solid var(--border);
+  text-align: left; cursor: pointer; width: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+.mm-inbox__item:active { background: var(--bg-subtle); }
+.mm-inbox__dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--dot-ready); margin-top: 5px;
+}
+.mm-inbox__dot.flag { background: var(--dot-flag); }
+.mm-inbox__dot.warn { background: var(--dot-progress); }
+.mm-inbox__dot.muted { background: var(--dot-draft); }
+.mm-inbox__t {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 14px; font-weight: 700; color: var(--text-primary);
+  letter-spacing: -0.01em; line-height: 1.3;
+}
+.mm-inbox__s {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12.5px; color: var(--text-muted);
+  margin-top: 2px; line-height: 1.4;
+}
+.mm-inbox__k {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 9.5px; font-weight: 700;
+  color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase;
+}

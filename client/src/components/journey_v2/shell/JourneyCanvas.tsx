@@ -39,7 +39,7 @@ export default function JourneyCanvas({ kicker, title, children }: Props) {
         flexDirection: 'column',
       }}
     >
-      <div style={{ padding: '32px 40px 48px' }}>
+      <div className="dr-stage">
         {children}
       </div>
     </div>

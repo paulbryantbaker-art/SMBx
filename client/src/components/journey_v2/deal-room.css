@@ -4,6 +4,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 :root {
+  /* Ink / surface */
   --gg-ink: #0A0A0B;
   --gg-ink-2: #3A3A3E;
   --gg-mute: #6B6B70;
@@ -16,7 +17,33 @@
   --gg-ok: #22A755;
   --gg-warn: #E8A033;
   --gg-flag: #D4533A;
-  --gg-accent: #0A0A0B;
+  --gg-accent: #D44A78;
+
+  /* Spatial scale — one Fibonacci ladder, applied everywhere.
+     Use these tokens instead of arbitrary px values. */
+  --dr-s-1: 4px;
+  --dr-s-2: 8px;
+  --dr-s-3: 13px;
+  --dr-s-4: 21px;
+  --dr-s-5: 34px;
+  --dr-s-6: 55px;
+  --dr-s-7: 89px;
+  --dr-s-8: 144px;
+
+  /* Typography scale — modular, 1.25 ratio from 15px base.
+     Hero and major override to clamp() for fluid desktop sizing. */
+  --dr-t-mono:     11px;        /* Eyebrow, tags */
+  --dr-t-body:     15px;        /* Card body, row subs */
+  --dr-t-lede:     18px;        /* Step lede paragraph */
+  --dr-t-pull:     clamp(30px, 3.8vw, 46px);   /* PullQuote */
+  --dr-t-section:  clamp(36px, 4.4vw, 56px);   /* Section H1 */
+  --dr-t-major:    clamp(48px, 6.4vw, 84px);   /* Major H1 */
+  --dr-t-hero:     clamp(64px, 9.6vw, 120px);  /* Hero H1 */
+  --dr-t-stat:     clamp(72px, 11vw, 144px);   /* StatBreaker number */
+
+  /* Content column — single source of truth for page width.
+     Every primitive snaps to this; no rogue max-widths. */
+  --dr-col: min(960px, 100%);
 }
 
 /* Global html/body rules from the prototype stripped — the host app has
@@ -194,28 +221,150 @@
 
 /* ── Right stage ─────────────────────────── */
 .dr-stage { padding: 40px clamp(24px, 4vw, 60px) 120px; }
-.dr-step { max-width: 960px; margin: 0 auto; scroll-margin-top: 130px; }
-.dr-step[data-scale="hero"]  { max-width: 1040px; }
-.dr-step[data-scale="major"] { max-width: 1020px; }
-.dr-step__head { margin-bottom: 16px; }
+/* Stage — the single container every journey section drops into.
+   Establishes the column + vertical rhythm via grid gap. All direct
+   children (DealStep, PullQuote, StatBreaker) sit on the same column. */
+.dr-stage {
+  display: grid;
+  grid-template-columns: var(--dr-col);
+  justify-content: center;
+  row-gap: var(--dr-s-7);            /* 89px default rhythm */
+  padding: var(--dr-s-6) clamp(var(--dr-s-4), 4vw, var(--dr-s-6)) var(--dr-s-8);
+}
+.dr-stage > * + * { /* no individual margins — gap does the work */
+  margin-top: 0;
+}
+
+.dr-step {
+  min-width: 0;                       /* grid item can shrink */
+  scroll-margin-top: 130px;
+}
+.dr-step__head {
+  margin: 0 0 var(--dr-s-4);
+}
 .dr-step__idx {
   display: inline-flex; align-items: center;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
-  font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--gg-mute); padding: 5px 11px; background: #fff; border: 0.5px solid var(--gg-border);
-  border-radius: 999px;
+  font-size: var(--dr-t-mono); letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--gg-mute); padding: 5px 11px; background: #fff;
+  border: 0.5px solid var(--gg-border); border-radius: 999px;
 }
-/* dr-step__title spec lives inline on the element now — size/tracking
-   are driven by the `scale` prop on <DealStep>. CSS defaults below are
-   a fallback for any caller that doesn\'t pass a scale. */
+/* Title size is set via the scale prop on <DealStep>. These are
+   fallback spec — type + spacing shared by every scale. */
 .dr-step__title {
   font-family: 'Sora', sans-serif; font-weight: 800;
-  letter-spacing: -0.035em; line-height: 1.0;
-  margin: 0 0 22px; text-wrap: balance;
+  letter-spacing: -0.035em; line-height: 1.02;
+  margin: 0 0 var(--dr-s-5);          /* 34px to lede */
+  text-wrap: balance;
 }
+.dr-step[data-scale="hero"]  .dr-step__title { font-size: var(--dr-t-hero);    letter-spacing: -0.045em; line-height: 0.94; }
+.dr-step[data-scale="major"] .dr-step__title { font-size: var(--dr-t-major);   letter-spacing: -0.04em;  line-height: 0.98; }
+.dr-step[data-scale="minor"] .dr-step__title { font-size: clamp(28px, 2.8vw, 36px); }
+.dr-step:not([data-scale]) .dr-step__title,
+.dr-step[data-scale="section"] .dr-step__title { font-size: var(--dr-t-section); }
+
 .dr-step__lede {
-  font-size: 17px; line-height: 1.55; color: var(--gg-ink-2);
-  max-width: 720px; margin: 0 0 34px;
+  font-size: var(--dr-t-lede); line-height: 1.55; color: var(--gg-ink-2);
+  max-width: 68ch; margin: 0 0 var(--dr-s-6);
+}
+
+/* ── PullQuote ──────────────────────────── */
+.dr-pull {
+  position: relative;
+  padding: var(--dr-s-5) 0 var(--dr-s-5) var(--dr-s-5);
+  border-left: 2px solid var(--gg-accent);
+  max-width: 62ch;
+}
+.dr-pull[data-align="center"] {
+  padding-left: 0;
+  border-left: 0;
+  text-align: center;
+  max-width: 70ch;
+  margin: 0 auto;
+  position: relative;
+}
+.dr-pull[data-align="center"]::before {
+  content: '';
+  display: block;
+  width: 40px; height: 2px;
+  background: var(--gg-accent);
+  margin: 0 auto var(--dr-s-4);
+}
+.dr-pull__q {
+  font-family: 'Sora', sans-serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: var(--dr-t-pull);
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  color: var(--gg-ink);
+  margin: 0;
+  text-wrap: balance;
+}
+.dr-pull__attrib {
+  margin-top: var(--dr-s-4);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: var(--dr-t-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gg-mute);
+}
+
+/* ── StatBreaker ────────────────────────── */
+.dr-stat {
+  background: var(--gg-ink);
+  color: #fff;
+  border-radius: 18px;
+  padding: var(--dr-s-6) clamp(var(--dr-s-5), 5vw, var(--dr-s-7));
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--dr-s-6);
+  overflow: hidden;
+}
+.dr-stat[data-has-secondary="true"] {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+}
+@media (max-width: 720px) {
+  .dr-stat[data-has-secondary="true"] { grid-template-columns: 1fr; }
+}
+.dr-stat__primary,
+.dr-stat__secondary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dr-s-3);
+}
+.dr-stat__secondary {
+  border-left: 0.5px solid rgba(255,255,255,0.14);
+  padding-left: var(--dr-s-5);
+}
+@media (max-width: 720px) {
+  .dr-stat__secondary { border-left: 0; border-top: 0.5px solid rgba(255,255,255,0.14); padding-left: 0; padding-top: var(--dr-s-5); }
+}
+.dr-stat__value {
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  font-size: var(--dr-t-stat);
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+.dr-stat__value--sm {
+  font-size: clamp(56px, 8vw, 100px);
+  color: #E8709A;
+}
+.dr-stat__label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: var(--dr-t-body);
+  line-height: 1.45;
+  color: rgba(255,255,255,0.75);
+  max-width: 60ch;
+}
+.dr-stat__source {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: var(--dr-t-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
 }
 .dr-step__lede strong { color: var(--gg-ink); font-weight: 700; }
 
