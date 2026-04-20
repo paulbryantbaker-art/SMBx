@@ -85,38 +85,22 @@ function ModeSwitcher({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => v
 
 /* Placeholder bodies until the real shells land. */
 function DesktopStub() {
-  return (
-    <div style={{ ...stubBase, background: 'var(--v4-bg)' }}>
-      <div>
-        <div style={{ fontFamily: "'Sora', system-ui", fontWeight: 800, fontSize: 22, letterSpacing: '-0.02em', color: 'var(--v4-ink)' }}>
-          Desktop shell — pending
-        </div>
-        <div style={{ fontFamily: "'Inter', system-ui", fontSize: 13, color: 'var(--v4-mute)', marginTop: 4 }}>
-          V4Shell · V4Tool · V4Chat · V4Canvas · V4Rail
-        </div>
-      </div>
-    </div>
-  );
+  return <Stub title="Desktop shell — pending" sub="V4Shell · V4Tool · V4Chat · V4Canvas · V4Rail" />;
 }
 function MobileStub() {
+  return <Stub title="Mobile shell — pending" sub="Today · Deals · Chat · Inbox" />;
+}
+function Stub({ title, sub }: { title: string; sub: string }) {
   return (
-    <div style={{ ...stubBase, background: 'var(--v4-bg)' }}>
+    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
       <div>
-        <div style={{ fontFamily: "'Sora', system-ui", fontWeight: 800, fontSize: 22, letterSpacing: '-0.02em', color: 'var(--v4-ink)' }}>
-          Mobile shell — pending
+        <div style={{ fontFamily: "'Sora', system-ui, sans-serif", fontWeight: 800, fontSize: 22, letterSpacing: '-0.02em', color: 'var(--v4-ink)' }}>
+          {title}
         </div>
-        <div style={{ fontFamily: "'Inter', system-ui", fontSize: 13, color: 'var(--v4-mute)', marginTop: 4 }}>
-          Today · Deals · Chat · Inbox
+        <div style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13, color: 'var(--v4-mute)', marginTop: 4 }}>
+          {sub}
         </div>
       </div>
     </div>
   );
 }
-const stubBase: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  textAlign: 'center',
-};
