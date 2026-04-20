@@ -367,23 +367,59 @@ export function DealStep({ n, id, idx, title, lede, children }: DealStepProps) {
     return () => io.disconnect();
   }, []);
 
+  /* Zigzag rhythm per Paul 2026-04-20. Alternating sections get:
+     - Different top margins (Fibonacci: 55/89/144) so the scroll
+       breathes at irregular intervals
+     - An accent rail on the LEFT for odd steps, RIGHT for even
+     - Slight horizontal inset offset so the eye has to move across
+     Gives the page a rhythm instead of a stack of identical slabs. */
+  const alt = n % 2 === 0;
+  const topGap = n <= 1 ? 0 : n % 3 === 0 ? 144 : alt ? 89 : 55;
+
   return (
     <section
       ref={ref}
       className="dr-step"
       id={id}
       data-step={n}
+      data-alt={alt ? 'true' : 'false'}
       style={{
+        marginTop: topGap,
         opacity: seen ? 1 : 0,
         transform: seen ? 'translateY(0)' : 'translateY(18px)',
         transition: 'opacity 520ms cubic-bezier(0.22, 1, 0.36, 1), transform 520ms cubic-bezier(0.22, 1, 0.36, 1)',
+        position: 'relative',
+        paddingLeft: alt ? 0 : 34,
+        paddingRight: alt ? 34 : 0,
       }}
     >
-      <div className="dr-step__head">
+      {/* Accent rail — alternates side */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          top: 8,
+          bottom: 12,
+          [alt ? 'right' : 'left']: 13,
+          width: 2,
+          background: 'linear-gradient(180deg, rgba(212,74,120,0.55) 0%, rgba(212,74,120,0) 100%)',
+          borderRadius: 1,
+          pointerEvents: 'none',
+        } as React.CSSProperties}
+      />
+      <div className="dr-step__head" style={{
+        textAlign: alt ? 'right' : 'left',
+      }}>
         <span className="dr-step__idx">{idx}</span>
       </div>
-      <h1 className="dr-step__title">{title}</h1>
-      {lede && <p className="dr-step__lede">{lede}</p>}
+      <h1 className="dr-step__title" style={{
+        textAlign: alt ? 'right' : 'left',
+      }}>{title}</h1>
+      {lede && <p className="dr-step__lede" style={{
+        textAlign: alt ? 'right' : 'left',
+        marginLeft: alt ? 'auto' : 0,
+        marginRight: alt ? 0 : 'auto',
+      }}>{lede}</p>}
       {children}
     </section>
   );
