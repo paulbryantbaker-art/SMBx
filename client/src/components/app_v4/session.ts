@@ -75,7 +75,7 @@ const DEFAULT_UI: V4UIState = {
   railShown: true,
   chatW: 380,
   dmOpen: false,
-  toolExpanded: false,
+  toolExpanded: true,
 };
 
 const DEFAULT_SESSION: V4Workspace = {

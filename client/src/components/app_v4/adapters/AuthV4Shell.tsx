@@ -60,7 +60,7 @@ export default function AuthV4Shell({
     railShown: false,
     chatW: 420,
     dmOpen: false,
-    toolExpanded: false,
+    toolExpanded: true,
   });
 
   const portfolio = PORTFOLIOS[0];

@@ -50,8 +50,10 @@ export default function JourneyShell({
   children,
 }: JourneyShellProps) {
   /* Left-rail expand state — mirrors V4App.session's toolExpanded. Local
-     for now; persist when we wire up real state. */
-  const [toolExpanded, setToolExpanded] = useState(false);
+     for now; persist when we wire up real state. Expanded by default per
+     Paul 2026-04-20 — labeled nav reads more inviting to first-time
+     visitors than icon-only. */
+  const [toolExpanded, setToolExpanded] = useState(true);
 
   /* Chat-well width — resizable grip inside JourneyChat. */
   const [chatWidth, setChatWidth] = useState(380);
