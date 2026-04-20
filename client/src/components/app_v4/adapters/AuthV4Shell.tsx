@@ -1,27 +1,21 @@
 /**
  * AuthV4Shell — V4 chrome wired to the real auth chat backend.
  *
- * Composes V4Shell + V4Tool + V4Chat + V4Canvas + V4Rail against
- * `useAuthChat()` state (messages, sending, handleSend). Lets
- * AppShell render V4 look + feel on desktop /chat while keeping
- * one source of truth for auth/session/overlays.
+ * Renders V4Tool (left floating rail) + V4Chat (center-left chat well) and
+ * surfaces a `canvasSlot` on the right where AppShell plugs in its
+ * existing canvas-panel JSX (deliverables, models, data rooms, etc.).
+ * Keeps one source of truth for the real app's canvas + tabs — we only
+ * reskin the chrome around it.
  *
  * Message shape adapter:
- *   AuthMessage { role: 'user'|'assistant'|'system', content }
- *     → V4 ChatMessage { who: 'me'|'y', text }
- *
- * Canvas/Rail are passive for now (no tabs). Tabs open when the user
- * clicks a deliverable — wire later.
+ *   AuthMessage { role, content } → V4 ChatMessage { who, text }
  */
 
-import { useMemo, useState } from 'react';
-import V4Shell from '../chrome/V4Shell';
+import { useMemo, useState, type ReactNode } from 'react';
 import V4Tool from '../chrome/V4Tool';
 import V4Chat from '../chrome/V4Chat';
-import V4Canvas from '../chrome/V4Canvas';
-import V4Rail from '../chrome/V4Rail';
 import { PORTFOLIOS } from '../data';
-import type { ChatMessage, V4UIState, Tab } from '../session';
+import type { ChatMessage, V4UIState } from '../session';
 import type { AuthMessage } from '../../../hooks/useAuthChat';
 import GateProgress from '../../chat/GateProgress';
 import { ChapterStrip } from '../../shared/ChapterStrip';
@@ -41,20 +35,24 @@ interface Props {
   streamingText: string;
   sending: boolean;
   onSend: (text: string) => void;
-  /** Active deal ID for gate progress bar. Null when the user is in a
-      general (non-deal) conversation. */
+  /** Active deal ID for gate progress bar. Null for general conversations. */
   activeDealId?: number | null;
   currentGate?: string;
-  /** Conversations within the active deal — shown as a horizontal
-      chapter strip above the messages when > 1. */
+  /** Conversations within the active deal — chapter strip when > 1. */
   chapters?: DealChapter[];
   activeChapterId?: number | null;
   onSelectChapter?: (id: number) => void;
+  /** Host-provided canvas content rendered in the right floating card.
+      AppShell passes its existing canvas-panel JSX here. */
+  canvasSlot?: ReactNode;
+  /** Optional inline slot after the last message (e.g. PaywallCard). */
+  messagesFooterSlot?: ReactNode;
 }
 
 export default function AuthV4Shell({
   messages, streamingText, sending, onSend,
   activeDealId, currentGate, chapters, activeChapterId, onSelectChapter,
+  canvasSlot, messagesFooterSlot,
 }: Props) {
   const [ui, setUI] = useState<V4UIState>({
     mode: 'desktop',
@@ -64,10 +62,9 @@ export default function AuthV4Shell({
     dmOpen: false,
     toolExpanded: false,
   });
-  const [tabs, setTabs] = useState<Tab[]>([]);
-  const [activeTabId, setActiveTabId] = useState<string | null>(null);
 
   const portfolio = PORTFOLIOS[0];
+  const patchUI = (patch: Partial<V4UIState>) => setUI((prev) => ({ ...prev, ...patch }));
 
   const v4Messages: ChatMessage[] = useMemo(() => {
     const mapped: ChatMessage[] = messages
@@ -81,10 +78,6 @@ export default function AuthV4Shell({
     }
     return mapped;
   }, [messages, streamingText]);
-
-  const activeTab = tabs.find((t) => t.id === activeTabId) ?? null;
-
-  const patchUI = (patch: Partial<V4UIState>) => setUI((prev) => ({ ...prev, ...patch }));
 
   const showChapters = !!chapters && chapters.length > 1 && !!onSelectChapter;
   const showGates = !!activeDealId;
@@ -108,79 +101,75 @@ export default function AuthV4Shell({
     </div>
   ) : null;
 
+  const vars: React.CSSProperties = {
+    ['--v4-tool-w' as string]: (ui.toolExpanded ? 184 : 56) + 'px',
+    ['--v4-chat-w' as string]: ui.chatW + 'px',
+  };
+
   return (
     <div className="app-v4 app-v4--desktop" data-density={ui.density} style={{ position: 'absolute', inset: 0 }}>
-      <V4Shell
-        ui={ui}
-        tool={
-          <V4Tool
-            expanded={ui.toolExpanded}
-            onToggle={() => patchUI({ toolExpanded: !ui.toolExpanded })}
-          />
-        }
-        chat={
-          <V4Chat
-            portfolio={portfolio}
-            onPortfolioChange={() => {
-              /* auth shell is single-workspace; picker is cosmetic for now */
-            }}
-            messages={v4Messages}
-            onSend={(text) => {
-              if (!sending) onSend(text);
-            }}
-            isTyping={sending && !streamingText}
-            width={ui.chatW}
-            onWidthChange={(w) => patchUI({ chatW: w })}
-            headerSlot={chatHeaderSlot}
-          />
-        }
-        canvas={
-          <V4Canvas
-            tab={activeTab}
-            portfolio={portfolio}
-            onCloseTab={(id) => {
-              setTabs((prev) => prev.filter((t) => t.id !== id));
-              if (activeTabId === id) setActiveTabId(null);
-            }}
-            onOpenDeal={(d) => {
-              const t: Tab = { id: `${d.id}-deal`, kind: 'deal', dealId: d.id, label: d.name, sub: d.kicker || d.stage };
-              setTabs((prev) => (prev.some((x) => x.id === t.id) ? prev : [...prev, t]));
-              setActiveTabId(t.id);
-            }}
-            onOpenModule={() => {
-              /* module launcher — wire when tabs are real artifacts */
-            }}
-          />
-        }
-        rail={
-          <V4Rail
-            tabs={tabs}
-            activeTabId={activeTabId}
-            expanded={ui.railShown}
-            onSwitch={setActiveTabId}
-            onClose={(id) => {
-              setTabs((prev) => prev.filter((t) => t.id !== id));
-              if (activeTabId === id) setActiveTabId(null);
-            }}
-            onReorder={(draggedId, overId) => {
-              if (draggedId === overId) return;
-              setTabs((prev) => {
-                const next = [...prev];
-                const from = next.findIndex((t) => t.id === draggedId);
-                const to = next.findIndex((t) => t.id === overId);
-                if (from < 0 || to < 0) return prev;
-                const [moved] = next.splice(from, 1);
-                next.splice(to, 0, moved);
-                return next;
-              });
-            }}
-            onCollapse={() => patchUI({ railShown: !ui.railShown })}
-            onNewTab={() => {
-              /* hook to new-tab launcher when we have one */
-            }}
-          />
-        }
-      />
+      <div
+        className="v4-shell"
+        data-tool={ui.toolExpanded ? 'expanded' : 'collapsed'}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'var(--v4-bg)',
+          color: 'var(--v4-ink)',
+          overflow: 'hidden',
+          ...vars,
+        }}
+      >
+        <V4Tool
+          expanded={ui.toolExpanded}
+          onToggle={() => patchUI({ toolExpanded: !ui.toolExpanded })}
+        />
+        <V4Chat
+          portfolio={portfolio}
+          onPortfolioChange={() => {/* single-workspace */}}
+          messages={v4Messages}
+          onSend={(text) => { if (!sending) onSend(text); }}
+          isTyping={sending && !streamingText}
+          width={ui.chatW}
+          onWidthChange={(w) => patchUI({ chatW: w })}
+          headerSlot={chatHeaderSlot}
+          messagesFooterSlot={messagesFooterSlot}
+        />
+        {/* Canvas floating card — host-provided content (AppShell's real
+            deliverable/model/dataroom tabs). Positioned to the right of the
+            chat well with the same 14px inset V4Canvas uses. */}
+        <div
+          className="v4-canvas"
+          style={{
+            position: 'absolute',
+            top: 14,
+            right: 14,
+            bottom: 14,
+            left: 'calc(var(--v4-tool-w) + 14px + var(--v4-chat-w) + 14px)',
+            background: 'var(--v4-card)',
+            border: '0.5px solid var(--v4-card-line)',
+            borderRadius: 20,
+            boxShadow: 'var(--v4-shadow-md)',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {canvasSlot ?? (
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--v4-mute)',
+              fontSize: 14,
+              fontFamily: "'Inter', system-ui, sans-serif",
+            }}>
+              Artifacts Yulia generates will appear here.
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
