@@ -109,6 +109,7 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
         <InteractiveTool
           kicker="The Rundown · live deal calculator"
           sub="Paste a listing URL, drop a teaser, or type a description. Yulia scores 7 dimensions in 90 seconds."
+          tag="90 sec · 7 dims"
         >
           <RundownCalculator />
         </InteractiveTool>

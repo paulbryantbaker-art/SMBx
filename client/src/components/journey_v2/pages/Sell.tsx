@@ -45,13 +45,18 @@ const SCRIPT: DealStepScript = {
   ],
   6: [
     { who: 'y',  text: `Drafting Acme's CIM. 32 pages. Positioning isn't "distributor for sale" — it's <strong>"the SW anchor asset for a national multi-discipline platform."</strong>` },
-    { who: 'y',  text: `The narrative opens with the four disciplines: industrial MRO 38%, hospitality 24%, healthcare 19%, construction 19%. That diversification is the moat — hospitality slows, healthcare picks up.` },
-    { who: 'y',  text: `Same company described two ways trades at <strong>6× or 8×</strong>. On Acme that's a <strong>$22M spread</strong>. The difference is never the business. It's how the CIM tells the story.` },
+    { who: 'y',  text: `Same diligence pack, two narratives. "Distributor for sale" trades at 6× × $11M = <strong>$66M</strong>. "SW anchor for national consolidation" trades at 8× × $11M = <strong>$88M</strong>.` },
+    { who: 'y',  text: `That's a <strong>$22M spread on identical financials</strong>. The four disciplines (industrial MRO 38%, hospitality 24%, healthcare 19%, construction 19%) are the moat — hospitality softens, healthcare picks up. I A/B tested the opening paragraph against 12 simulated buyer reads. The anchor narrative wins every time.` },
+    { who: 'me', text: 'Show me page one.' },
+    { who: 'y',  text: `Executive summary pulled up on your canvas now. Revenue $65M, Adj EBITDA $11M, 17% margin — but the first sentence is about the <strong>38-year Phoenix-anchored multi-discipline platform</strong>, not the age of the business. Ray reads it. Nods. "That's what I built."` },
   ],
   7: [
-    { who: 'y',  text: `Outreach went to 18 buyers — strategic distributors, PE roll-ups, family offices. 4 IOIs back. Ranging <strong>$77M to $94M</strong>.` },
-    { who: 'y',  text: `Strategic (HVAC+ Distribution, Dallas-based) leading at <strong>$91M · 80% cash · 20% rollover</strong>. PE rollup at $86M, 55% cash, earnout. Family office at $82M all cash.` },
-    { who: 'y',  text: `After-tax, all three within $4M. But the strategic's 20% rollover at their exit multiple in 3–5 years is another <strong>$14–18M</strong>. That's the second bite. Ray\'s call on timing vs. certainty.` },
+    { who: 'y',  text: `Teaser went to 18 buyers — strategic distributors, PE roll-ups, family offices. <strong>4 IOIs back</strong> inside 21 days.` },
+    { who: 'y',  text: `Strategic (HVAC+ Distribution, Dallas-based) leading at <strong>$91M · 80% cash · 20% rollover · 45-day exclusivity</strong>. PE roll-up at $86M, 55% cash, $4M earnout. Family office $82M all-cash, 30-day close. Competing offer at $77M — I told them we'd pass politely.` },
+    { who: 'y',  text: `After-tax, all three close within <strong>$4M on headline</strong>. But the strategic's 20% rollover at their exit multiple in 3–5 years models to <strong>$14–18M second bite</strong>. Total haul: $107M vs. $82M all-cash today.` },
+    { who: 'me', text: "What's your call?" },
+    { who: 'y',  text: `Strategic. Your concentration risk unwinds faster inside their platform (they have a fleet-vehicle category you don't have). Rollover aligns them through year 3 — exactly when Marco's top-10 contracts formalize. And the buyer diligence is the cleanest of the four.` },
+    { who: 'y',  text: `Ray texted at 11:47pm Thursday: <strong>"run the strategic."</strong> LOI draft is in your docket. 18 hours from first IOI to his decision.` },
   ],
 };
 
@@ -153,6 +158,7 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
         <InteractiveTool
           kicker="Add-back estimator"
           sub="Pick three things. See your hidden value range instantly."
+          tag="3 inputs · 3 sec"
         >
           <AddBackEstimator />
         </InteractiveTool>

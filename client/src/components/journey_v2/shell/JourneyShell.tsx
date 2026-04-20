@@ -55,8 +55,10 @@ export default function JourneyShell({
      visitors than icon-only. */
   const [toolExpanded, setToolExpanded] = useState(true);
 
-  /* Chat-well width — resizable grip inside JourneyChat. */
-  const [chatWidth, setChatWidth] = useState(380);
+  /* Chat-well width — resizable grip inside JourneyChat. Default 420
+     matches AuthV4Shell so the morph from logged-out to logged-in
+     doesn\'t jump the chat column width. */
+  const [chatWidth, setChatWidth] = useState(420);
 
   const vars: React.CSSProperties = {
     ['--v4-tool-w' as string]: (toolExpanded ? 184 : 56) + 'px',

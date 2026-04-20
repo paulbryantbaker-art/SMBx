@@ -84,15 +84,16 @@ export const ACME = {
   ] as const,
 };
 
-/* Add-back line items for Acme — used on the Sell page's DealBench */
+/* Add-back line items for Acme — used on the Sell page's DealBench.
+   Line items must sum to the stated total: $1.80M. */
 export const ACME_ADDBACKS: readonly { title: string; sub: string; amt: string }[] = [
-  { title: 'Owner comp above market',          sub: "Ray Jr.'s $420K vs $265K market replacement (BLS, distribution VP)", amt: '+$155K' },
-  { title: 'Family on payroll',                 sub: 'Two siblings · non-operating roles · replaceable at market',          amt: '+$180K' },
-  { title: 'Discretionary travel + events',     sub: 'Sponsor suites, board retreats, personal country-club dues',          amt: '+$95K' },
-  { title: 'Legal reserve — one-time litigation', sub: 'Settled 2024 · non-recurring',                                        amt: '+$310K' },
-  { title: 'Real estate above-market lease',    sub: 'Phoenix HQ leased from family trust · market rent delta',              amt: '+$240K' },
-  { title: 'Discontinued Nevada branch',         sub: 'Closed Q3 2024 · $820K overhead · carve-out',                          amt: '+$820K' },
-  { title: 'Defensible total',                  sub: 'All IRS-documented · Big-4 concordance ~96%',                          amt: '+$1.8M' },
+  { title: 'Owner comp above market',           sub: "Ray Jr.'s $420K vs $265K market replacement (BLS, distribution VP)", amt: '+$155K' },
+  { title: 'Family on payroll',                  sub: 'Two siblings · non-operating roles · replaceable at market',           amt: '+$180K' },
+  { title: 'Discretionary travel + events',      sub: 'Sponsor suites, board retreats, personal country-club dues',           amt: '+$95K' },
+  { title: 'Legal reserve — one-time litigation', sub: 'Settled 2024 · non-recurring',                                          amt: '+$310K' },
+  { title: 'Real estate above-market lease',     sub: 'Phoenix HQ leased from family trust · market rent delta',               amt: '+$420K' },
+  { title: 'Discontinued Nevada branch',          sub: 'Closed Q3 2024 · overhead still in reported run-rate · carve-out',     amt: '+$640K' },
+  { title: 'Defensible total',                   sub: 'All IRS-documented · Big-4 concordance ~96%',                           amt: '+$1.80M' },
 ];
 
 /* Readiness dimension scores — referenced on Sell + Buy */

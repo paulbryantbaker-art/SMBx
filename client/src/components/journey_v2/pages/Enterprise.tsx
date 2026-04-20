@@ -26,7 +26,7 @@ const CHIPS = ['Lower middle market PE', 'Boutique M&A advisory', 'Corp dev', 'F
 type UseCase = { n: string; title: string; body: string; outcome: string };
 const USE_CASES: readonly UseCase[] = [
   { n: '01', title: 'Lower middle market PE',       body: 'Screen add-on targets at 3× traditional sourcing volume. Exit readiness scoring across the portfolio quarterly. IC memos in 15 minutes. Portfolio monitoring automated.',  outcome: 'Replaces $40K–$120K/yr in DealCloud + sourcing spend' },
-  { n: '02', title: 'Boutique M&A advisory',        body: 'Turn every analyst hour into an associate hour. CIM production from 4–6 weeks to 48 hours. Deals under $8M EBITDA become profitable engagements again.',                   outcome: '47 brokers across 23 firms deliver output that used to require 85' },
+  { n: '02', title: 'Boutique M&A advisory',        body: 'Turn every analyst hour into an associate hour. CIM production from 4–6 weeks to 48 hours. Deals under $8M EBITDA become profitable engagements again.',                   outcome: 'Deals under $8M EBITDA become profitable' },
   { n: '03', title: 'Corp dev at serial acquirers', body: 'Centralized pipeline across all targets. Thesis-aligned scoring on inbound opportunities. Diligence coordination across legal, finance, HR, IT. PMI plans built from deal data.', outcome: 'Deal capacity +50–100% without headcount' },
   { n: '04', title: 'Multi-family office',           body: 'Direct-investing infrastructure without direct-investing overhead. Every deal scored against the family\'s thesis. Capital structure modeling for co-investments.',           outcome: 'Portfolio variance alerts before the P&L shows it' },
 ];
@@ -83,56 +83,82 @@ export default function Enterprise({ active, onSend, onStartFree, onNavigate, on
         lede={<>For firms closing deals at scale. Shared deal vault. Team workspace. White-label outputs. SSO, audit trails, SOC 2 controls. Same Yulia, enterprise infrastructure.</>}
       />
 
-      {/* Use cases */}
+      {/* Use cases — Bloomberg-style row table, not a card grid */}
       <DealStep
         n={2}
         id="s2"
         idx="How firms use smbX"
         title="Four firm shapes. Four different workflows."
       >
-        <div style={{
-          marginTop: 18,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: 10,
-        }}>
-          {USE_CASES.map((c) => (
-            <div key={c.n} style={{
-              background: '#fff',
-              border: '0.5px solid rgba(0,0,0,0.08)',
-              borderRadius: 12,
-              padding: 22,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10,
-            }}>
-              <div style={{
-                fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-                fontSize: 10,
-                letterSpacing: '0.14em',
-                color: '#9A9A9F',
-                textTransform: 'uppercase',
-              }}>{c.n}</div>
-              <div style={{
-                fontFamily: 'Sora, sans-serif',
-                fontWeight: 700,
-                fontSize: 17,
-                letterSpacing: '-0.015em',
-              }}>{c.title}</div>
-              <div style={{ fontSize: 13, lineHeight: 1.55, color: '#3A3A3E' }}>{c.body}</div>
-              <div style={{
-                marginTop: 'auto',
-                paddingTop: 10,
-                borderTop: '0.5px solid rgba(0,0,0,0.06)',
-                fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-                fontSize: 10.5,
-                letterSpacing: '0.1em',
-                color: '#0A0A0B',
-                textTransform: 'uppercase',
-              }}>{c.outcome}</div>
-            </div>
-          ))}
-        </div>
+        <DealBench title="Use cases" meta="4 SHAPES · LIVE DEPLOYMENTS">
+          <div style={{ padding: 0 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{
+                  fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                  fontSize: 9.5,
+                  letterSpacing: '0.12em',
+                  color: '#9A9A9F',
+                  textTransform: 'uppercase',
+                }}>
+                  <th style={{ textAlign: 'left',  padding: '12px 22px 8px', fontWeight: 600, width: 28 }}></th>
+                  <th style={{ textAlign: 'left',  padding: '12px 12px 8px', fontWeight: 600, width: 220 }}>Shape</th>
+                  <th style={{ textAlign: 'left',  padding: '12px 12px 8px', fontWeight: 600 }}>How they use Yulia</th>
+                  <th style={{ textAlign: 'right', padding: '12px 22px 8px', fontWeight: 600, width: 260 }}>Typical outcome</th>
+                </tr>
+              </thead>
+              <tbody>
+                {USE_CASES.map((c, i) => (
+                  <tr key={c.n} style={{
+                    borderTop: '0.5px solid rgba(0,0,0,0.06)',
+                    background: i % 2 === 1 ? '#FAFAFB' : undefined,
+                  }}>
+                    <td style={{
+                      padding: '18px 0 18px 22px',
+                      verticalAlign: 'top',
+                      fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                      fontSize: 10,
+                      letterSpacing: '0.14em',
+                      color: '#9A9A9F',
+                      textTransform: 'uppercase',
+                    }}>{c.n}</td>
+                    <td style={{
+                      padding: '18px 12px',
+                      verticalAlign: 'top',
+                    }}>
+                      <div style={{
+                        fontFamily: 'Sora, sans-serif',
+                        fontWeight: 700,
+                        fontSize: 15,
+                        letterSpacing: '-0.015em',
+                        color: '#0A0A0B',
+                        lineHeight: 1.2,
+                      }}>{c.title}</div>
+                    </td>
+                    <td style={{
+                      padding: '18px 12px',
+                      verticalAlign: 'top',
+                      fontSize: 12.5,
+                      lineHeight: 1.55,
+                      color: '#3A3A3E',
+                    }}>{c.body}</td>
+                    <td style={{
+                      padding: '18px 22px 18px 12px',
+                      verticalAlign: 'top',
+                      textAlign: 'right',
+                      fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                      fontSize: 10.5,
+                      letterSpacing: '0.08em',
+                      color: '#0A0A0B',
+                      textTransform: 'uppercase',
+                      lineHeight: 1.55,
+                    }}>{c.outcome}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </DealBench>
       </DealStep>
 
       {/* Features */}

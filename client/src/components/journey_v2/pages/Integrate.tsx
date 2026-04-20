@@ -83,10 +83,10 @@ const PLAN_180: readonly Plan[] = [
 
 type ScorecardKpi = { label: string; value: string; sub: string; tone: 'on-plan' | 'ahead' | 'drift' };
 const KPIS: readonly ScorecardKpi[] = [
-  { label: 'On plan', value: '$11.2M', sub: 'TTM EBITDA · thesis $11.0M',                 tone: 'on-plan' },
-  { label: 'Ahead',   value: '64%',    sub: 'Recurring revenue mix · thesis 62%',        tone: 'ahead' },
-  { label: 'Drift',   value: '34%',    sub: 'Top-10 concentration · thesis ≤28% by Q2',  tone: 'drift' },
-  { label: 'On plan', value: '1.42×',  sub: `FCCV · covenant ${ACME.covenantDscr}`,       tone: 'on-plan' },
+  { label: 'On plan', value: '$11.2M', sub: 'TTM EBITDA · thesis $11.0M · +1.8%',                tone: 'on-plan' },
+  { label: 'On plan', value: '64%',    sub: 'Recurring revenue mix · thesis 62% · +3.2%',       tone: 'on-plan' },
+  { label: 'Drift',   value: '34%',    sub: 'Top-10 concentration · thesis ≤28% by Q2 · +21%', tone: 'drift' },
+  { label: 'Ahead',   value: '1.42×',  sub: `FCCV · covenant ${ACME.covenantDscr} · +14%`,      tone: 'ahead' },
 ];
 
 export default function Integrate({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
@@ -149,6 +149,7 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         <InteractiveTool
           kicker="Day-1 checklist generator"
           sub="Answer five. See your customized starter checklist in 5 seconds."
+          tag="5 inputs · 5 sec"
         >
           <Day1Generator onSend={onSend} />
         </InteractiveTool>

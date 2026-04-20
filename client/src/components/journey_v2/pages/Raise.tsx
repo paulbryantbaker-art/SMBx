@@ -108,28 +108,94 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
         lede={<>Selling 100% is one option. It\'s also the option most advisors pitch first — because it generates the largest one-time fee. Yulia has no fee incentive. She models every path against your specific numbers. You decide which one fits.</>}
       />
 
-      {/* 6 liquidity structures */}
+      {/* 6 liquidity structures — asymmetric: 2 featured + 4 standard */}
       <DealStep
         n={3}
         id="s3"
         idx="Six paths"
         title="Six ways to get liquidity without losing your business."
       >
+        {/* Two featured — the paths owners most commonly overlook */}
         <div style={{
           marginTop: 18,
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: 12,
+        }}>
+          {LIQUIDITY.slice(0, 2).map((c) => (
+            <div key={c.n} style={{
+              background: '#0A0A0B',
+              color: '#fff',
+              borderRadius: 14,
+              padding: '28px 26px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              minHeight: 220,
+              position: 'relative',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                position: 'absolute',
+                right: -8,
+                bottom: -28,
+                fontFamily: 'Sora, sans-serif',
+                fontWeight: 800,
+                fontSize: 160,
+                letterSpacing: '-0.05em',
+                color: 'rgba(255,255,255,0.05)',
+                lineHeight: 0.9,
+                pointerEvents: 'none',
+              }}>{c.n}</div>
+              <div style={{
+                fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                fontSize: 10,
+                letterSpacing: '0.16em',
+                color: '#E8709A',
+                textTransform: 'uppercase',
+                position: 'relative',
+              }}>{c.n} · Featured</div>
+              <div style={{
+                fontFamily: 'Sora, sans-serif',
+                fontWeight: 800,
+                fontSize: 22,
+                letterSpacing: '-0.02em',
+                lineHeight: 1.15,
+                position: 'relative',
+              }}>{c.title}</div>
+              <div style={{ fontSize: 13.5, lineHeight: 1.55, opacity: 0.82, position: 'relative' }}>{c.body}</div>
+              {c.typical && (
+                <div style={{
+                  marginTop: 'auto',
+                  fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                  fontSize: 10.5,
+                  letterSpacing: '0.1em',
+                  color: '#E8709A',
+                  textTransform: 'uppercase',
+                  paddingTop: 10,
+                  borderTop: '0.5px solid rgba(255,255,255,0.1)',
+                  position: 'relative',
+                }}>Typical · {c.typical}</div>
+              )}
+            </div>
+          ))}
+        </div>
+        {/* Four compact — the tools with narrower fit */}
+        <div style={{
+          marginTop: 12,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
           gap: 10,
         }}>
-          {LIQUIDITY.map((c) => (
+          {LIQUIDITY.slice(2).map((c) => (
             <div key={c.n} style={{
               background: '#fff',
               border: '0.5px solid rgba(0,0,0,0.08)',
               borderRadius: 12,
-              padding: 20,
+              padding: 18,
               display: 'flex',
               flexDirection: 'column',
-              gap: 10,
+              gap: 8,
             }}>
               <div style={{
                 fontFamily: 'JetBrains Mono, ui-monospace, monospace',
@@ -141,22 +207,22 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
               <div style={{
                 fontFamily: 'Sora, sans-serif',
                 fontWeight: 700,
-                fontSize: 15,
+                fontSize: 14,
                 letterSpacing: '-0.015em',
                 color: '#0A0A0B',
               }}>{c.title}</div>
-              <div style={{ fontSize: 12.5, lineHeight: 1.5, color: '#3A3A3E' }}>{c.body}</div>
+              <div style={{ fontSize: 12, lineHeight: 1.5, color: '#3A3A3E' }}>{c.body}</div>
               {c.typical && (
                 <div style={{
                   marginTop: 'auto',
                   fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-                  fontSize: 10,
+                  fontSize: 9.5,
                   letterSpacing: '0.1em',
                   color: '#6B6B70',
                   textTransform: 'uppercase',
                   paddingTop: 8,
                   borderTop: '0.5px solid rgba(0,0,0,0.06)',
-                }}>Typical · {c.typical}</div>
+                }}>{c.typical}</div>
               )}
             </div>
           ))}
@@ -217,7 +283,8 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
       >
         <InteractiveTool
           kicker="Sell vs. raise calculator"
-          sub="Drag the sliders. See what each path puts in your pocket."
+          sub="Drag the sliders. See what each path puts in your pocket over 5 years."
+          tag="2 inputs · pre-tax"
         >
           <SellVsRaise />
         </InteractiveTool>
