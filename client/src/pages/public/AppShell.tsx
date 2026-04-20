@@ -54,7 +54,7 @@ import { ScrollProgressBar } from '../../components/content/animations';
 // narrates the scroll; reactive workbench shows the artifact being
 // produced. One pattern, seven pages. Old journey/ retained for
 // rollback only. See components/new_journey/project/specs.md.
-const GlassGrokHome = lazy(() => import('../../components/journey_v2/pages/Sell'));      /* / serves the sell arc */
+const GlassGrokHome = lazy(() => import('../../components/journey_v2/pages/Home'));
 const GlassGrokSell = lazy(() => import('../../components/journey_v2/pages/Sell'));
 const GlassGrokBuy = lazy(() => import('../../components/journey_v2/pages/Buy'));
 const GlassGrokRaise = lazy(() => import('../../components/journey_v2/pages/Raise'));
