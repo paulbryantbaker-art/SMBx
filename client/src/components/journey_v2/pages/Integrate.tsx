@@ -10,6 +10,7 @@ import {
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
 import InteractiveTool from '../shell/InteractiveTool';
+import { ACME } from '../acme';
 
 interface Props {
   active: DealTab;
@@ -28,54 +29,64 @@ const SECTION_NAV = [
 
 const CHIPS = ['Day 0 checklist', '180-day plan', 'Retain key people', 'Am I on thesis?'] as const;
 
+/* 5-min Acme post-close walkthrough. Buyer just closed Friday
+   2026-03-21. It's Day 3, Monday 2026-03-24. Yulia walks through
+   Day 0 artifacts, 180-day plan, retention, and thesis tracking
+   all from the DD data they already generated. */
 const SCRIPT: DealStepScript = {
-  1: [
-    { who: 'y', text: 'Close is <strong>T-48 hours</strong>. Payroll, insurance, banking are done. One flag: <strong>TX contractor license transfer</strong> needs seller’s signature for 90 days.' },
-    { who: 'y', text: 'I drafted the addendum — add it to close docs. Don’t let this slip to post-close or you’ll be unable to invoice commercial jobs for three weeks.' },
-  ],
-  2: [
-    { who: 'y', text: 'Plan is 6 workstreams, all named owners. Pricing reset day 45, MSA renewals day 60, service manager hire day 75.' },
-    { who: 'me', text: 'What happens at day 30?' },
-    { who: 'y', text: 'First cash runway check. You bought with <strong>$4.2M of working cap</strong>. I’ll flag if we’re burning faster than plan a full 60 days before the covenant test.' },
-  ],
-  3: [
-    { who: 'y', text: 'Marco Delgado is your #1 retention risk. 22 years. Owns 60% of commercial dispatches. Replacement cost ~<strong>$340K</strong> and 4-6 months.' },
-    { who: 'y', text: 'Package draft: $45K stay bonus over 24mo + 2% rollover + VP Operations title. Meeting is on his calendar Thursday. I wrote the opening.' },
-  ],
   4: [
-    { who: 'y', text: 'Week 14. EBITDA on plan. Recurring mix ahead. FCCV clean. One drift: <strong>concentration at 34%</strong>, thesis said 28% by Q2.' },
-    { who: 'y', text: 'Root cause — neither of the two new MSAs has started. I booked the conversation with Marco for Wednesday.' },
+    { who: 'y',  text: `You closed <strong>${ACME.name}</strong> Friday. It's Monday morning. Day 3. Wire hit, deal docs are signed, Ray is at the office for the hand-off this week.` },
+    { who: 'y',  text: `Day 0 checklist generated from DD data: 62 items across IT, people, customers, vendors, operations. <strong>53 complete before signing, 9 live.</strong>` },
+    { who: 'me', text: "What's the red one?" },
+    { who: 'y',  text: `<strong>Texas reseller permit.</strong> Ray's name is on it, and TX holds that credential with the individual, not the entity. Can't invoice Texas commercial accounts (~$8M annual) until transfer clears. I drafted Ray's signed consent — in your docket. File it today, cleared in 10 business days.` },
+  ],
+  5: [
+    { who: 'y',  text: `180-day plan · <strong>6 workstreams, each with named owner + weekly checkpoint.</strong>` },
+    { who: 'y',  text: `<strong>Day 45:</strong> Pricing reset across all four disciplines. Ray ran legacy pricing — hospitality is 8% underwater vs. market. Nina executes.` },
+    { who: 'y',  text: `<strong>Day 60:</strong> Formalize MSAs with top-10 customers. Marco is the relationship owner — we promote him to SVP so he walks into those conversations with authority. The MSA program takes concentration risk from 35% handshake to 35% contracted over 90 days.` },
+    { who: 'y',  text: `<strong>Day 90:</strong> First cash runway check. You bought with <strong>${ACME.workingCapital}</strong> working capital. I'll flag if we\'re burning faster than plan 60 days before covenant test.` },
+  ],
+  6: [
+    { who: 'y',  text: `Key-person retention map · <strong>3 critical, 2 elevated.</strong>` },
+    { who: 'y',  text: `<strong>Marco Delgado</strong> · VP Sales · 22 years · owns the top-10 relationships. Replacement cost $420K + 6 months. Flight risk <strong>HIGH</strong> — Ray told me in DD Marco is 60 and wants to slow down.` },
+    { who: 'y',  text: `Package draft: <strong>$75K stay bonus over 36 months · 1.5% rollover equity · SVP Sales title.</strong> I scripted Ray's opening — the reason Marco stays is Ray asks him to, not the comp. Meeting is on his calendar Thursday 2pm.` },
+    { who: 'y',  text: `<strong>Nina Arellano</strong> (COO, 14yr) and <strong>Jennifer Wu</strong> (Controller, 11yr) — two other critical roles. Compression-review on both; Nina gets a COO-plus scope + $40K raise, Jennifer gets Controller → VP Finance.` },
+  ],
+  7: [
+    { who: 'y',  text: `Week 14. Thesis scorecard is <strong>mostly green.</strong>` },
+    { who: 'y',  text: `<strong>On plan:</strong> EBITDA $11.2M TTM (thesis $11.0M). Recurring mix 64% (thesis 62%). FCCV 1.42×.` },
+    { who: 'y',  text: `<strong>Drift:</strong> Concentration at 34% (thesis said 28% by Q2). Root cause — two of the three Q1 MSAs haven't started because Marco is slow-rolling them. I booked that conversation for Wednesday. If the program slips one more quarter, earnout provisions kick in.` },
   ],
 };
 
 type Tile = { title: string; status: string; tone: 'done' | 'live' | 'queued' };
 const DAY0_TILES: readonly Tile[] = [
-  { title: 'New entity + EIN',                  status: 'DONE',      tone: 'done' },
-  { title: 'Payroll handover · ADP',            status: 'DONE',      tone: 'done' },
-  { title: 'Ops liability + umbrella',          status: 'DONE',      tone: 'done' },
-  { title: 'State contractor licenses (TX, OK)', status: 'AT RISK',  tone: 'live' },
-  { title: 'Top-3 vendor notifications',        status: 'QUEUED',    tone: 'queued' },
-  { title: 'Staff town hall · script drafted',  status: 'DAY 1, 7:00', tone: 'queued' },
-  { title: 'AP transition · 47 open invoices',  status: 'DAY 1',     tone: 'queued' },
-  { title: 'Keys, fobs, IT cutover',            status: 'DAY 2',     tone: 'queued' },
+  { title: 'New entity + EIN',                       status: 'DONE',        tone: 'done' },
+  { title: 'Payroll handover · ADP',                 status: 'DONE',        tone: 'done' },
+  { title: 'Ops liability + umbrella + cyber',       status: 'DONE',        tone: 'done' },
+  { title: 'TX reseller permit — transfer',          status: 'AT RISK',     tone: 'live' },
+  { title: 'Top-10 customer CEO-to-CEO calls',       status: 'DAY 1–3',     tone: 'live' },
+  { title: 'Staff all-hands (Phoenix · script drafted)', status: 'DAY 1, 9:00', tone: 'queued' },
+  { title: 'AP transition · 89 open invoices',       status: 'DAY 2',       tone: 'queued' },
+  { title: 'ERP credentials + branch IT cutover',    status: 'DAY 2',       tone: 'queued' },
 ];
 
 type Plan = { name: string; pct: number; due: string };
 const PLAN_180: readonly Plan[] = [
-  { name: 'Pricing reset',       pct: 45, due: 'DAY 45' },
-  { name: 'MSA renewals × 3',    pct: 30, due: 'DAY 60' },
-  { name: 'Service mgr hire',    pct: 60, due: 'DAY 75' },
-  { name: 'Route optimization',  pct: 75, due: 'DAY 120' },
-  { name: 'Tuck-in #1 · Summit', pct: 95, due: 'DAY 180' },
-  { name: 'Billing system cutover', pct: 90, due: 'DAY 150' },
+  { name: 'Pricing reset (4 disciplines)',    pct: 45, due: 'DAY 45' },
+  { name: 'Top-10 MSA program (Marco-led)',   pct: 30, due: 'DAY 60' },
+  { name: 'Nina promotion · $250K signing',   pct: 60, due: 'DAY 75' },
+  { name: 'Branch ERP cutover · NM + WTX',    pct: 75, due: 'DAY 120' },
+  { name: 'Tuck-in eval · Albuquerque',       pct: 85, due: 'DAY 150' },
+  { name: 'Year-1 compensation review',       pct: 90, due: 'DAY 180' },
 ];
 
 type ScorecardKpi = { label: string; value: string; sub: string; tone: 'on-plan' | 'ahead' | 'drift' };
 const KPIS: readonly ScorecardKpi[] = [
-  { label: 'On plan', value: '$1.14M', sub: 'Trailing 12-mo EBITDA · thesis $1.08M', tone: 'on-plan' },
-  { label: 'Ahead',   value: '71%',    sub: 'Recurring revenue mix · thesis 65%',    tone: 'ahead' },
-  { label: 'Drift',   value: '34%',    sub: 'Top-3 concentration · thesis ≤28% by Q2', tone: 'drift' },
-  { label: 'On plan', value: '1.42×',  sub: 'FCCV · covenant 1.25×',                 tone: 'on-plan' },
+  { label: 'On plan', value: '$11.2M', sub: 'TTM EBITDA · thesis $11.0M',                 tone: 'on-plan' },
+  { label: 'Ahead',   value: '64%',    sub: 'Recurring revenue mix · thesis 62%',        tone: 'ahead' },
+  { label: 'Drift',   value: '34%',    sub: 'Top-10 concentration · thesis ≤28% by Q2',  tone: 'drift' },
+  { label: 'On plan', value: '1.42×',  sub: `FCCV · covenant ${ACME.covenantDscr}`,       tone: 'on-plan' },
 ];
 
 export default function Integrate({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
@@ -90,10 +101,10 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
       canvasTitle="The 72 hours that decide whether this deal works."
       chat={{
         title: 'Yulia',
-        status: 'Day 3 post-close',
+        status: `Day 3 post-close · ${ACME.name}`,
         script: SCRIPT,
-        opening: 'Hi — I’m <strong>Yulia</strong>. You just closed Atlas Air. Close was Friday; it’s now Monday morning. Scroll to see what the first 180 days look like.',
-        reply: 'Share the <strong>LOI</strong>, the <strong>QoE</strong>, and one sentence about your thesis. I’ll have a Day-0 checklist and a 180-day plan on your desk in two hours.',
+        opening: `Hi — I'm <strong>Yulia</strong>. You just closed <strong>${ACME.name}</strong>. Wire hit Friday; it's Monday morning, Day 3. Ray's here for the handoff. Scroll to see what the first 180 days look like — generated from the DD data you already produced.`,
+        reply: 'Share the <strong>LOI</strong>, the <strong>QoE</strong>, and one sentence about your thesis. I\'ll have a Day-0 checklist and a 180-day plan on your desk in two hours.',
         chips: CHIPS,
         onSend,
       }}
@@ -151,12 +162,12 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         title="The 72 hours that decide whether this deal works."
         lede={<>Bank accounts, payroll, insurance, licenses, vendor notifications, staff town hall, the first Monday. Yulia runs the Day-0 checklist against your deal structure and flags what has to happen <strong>before signing</strong> vs. what can slip to week one.</>}
       >
-        <DealBench title="Day 0 · Atlas Air close" meta="T-48 HOURS" metaLive>
+        <DealBench title={`Day 0 · ${ACME.name} close`} meta="DAY 3 · LIVE" metaLive>
           <div style={{ padding: 22, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
             {DAY0_TILES.map(t => <StatusTile key={t.title} {...t} />)}
           </div>
           <FlagStrip>
-            <strong style={{ color: '#0A0A0B' }}>Flag:</strong> Texas contractor license transfer needs seller’s continued signature for 90 days. Drafting the addendum — add to close docs, don’t let it slip to post-close.
+            <strong style={{ color: '#0A0A0B' }}>Flag:</strong> Texas reseller permit transfer — Ray\'s name is on it, TX holds credential with individual not entity. Can\'t invoice TX commercial (~$8M annual) until transfer clears. Consent drafted in your docket; 10 business days to clear.
           </FlagStrip>
         </DealBench>
       </DealStep>
@@ -169,7 +180,7 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         title="The first six months, scripted against your thesis."
         lede={<>You bought this company for a reason. Yulia translates that reason into a 180-day operating plan with named owners, weekly milestones, and a cash runway check at day 30, 90, and 180. You run the business; she watches the plan.</>}
       >
-        <DealBench title="180-day plan · Atlas Air" meta="6 WORKSTREAMS">
+        <DealBench title={`180-day plan · ${ACME.name}`} meta="6 WORKSTREAMS">
           <div style={{ padding: 22 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {PLAN_180.map(p => <GanttRow key={p.name} {...p} />)}
@@ -186,25 +197,30 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         title="Keep the people who actually run the place."
         lede={<>Most SMB deals lose <strong>40%+ of their key people</strong> in year one. Yulia maps the org, scores each role for replacement risk, and drafts the retention conversation — including stay bonus, equity, title, and a candid talk about what you’re changing.</>}
       >
-        <DealBench title="Key-person map · Atlas Air" meta="14 ROLES · 4 CRITICAL" bodyStyle={{ padding: '0 22px 22px' }}>
+        <DealBench title={`Key-person map · ${ACME.name}`} meta="5 CRITICAL · 2 ELEVATED" bodyStyle={{ padding: '0 22px 22px' }}>
           <Row
-            title="Marco Delgado · Service Manager (22yrs)"
-            sub="Owns 60% of commercial dispatches · replacement cost ~$340K · flight risk HIGH"
+            title={`${ACME.people.sales.name} · VP Sales (22yrs)`}
+            sub="Owns top-10 customer relationships · 35% of revenue · replacement ~$420K + 6mo · flight risk HIGH"
             amt={<span style={{ fontSize: 15, color: '#B02A2A' }}>Critical</span>}
           />
           <Row
-            title="Jennifer Wu · Controller (14yrs)"
-            sub="Every vendor relationship · bank signer · flight risk MEDIUM"
+            title={`${ACME.people.coo.name} · COO (14yrs)`}
+            sub="Holds ops together across 4 branches · flight risk MEDIUM"
             amt={<span style={{ fontSize: 15, color: '#B02A2A' }}>Critical</span>}
           />
           <Row
-            title="Three senior techs · certified"
-            sub="Together cover 48% of revenue hours · replacement 4–6mo each"
+            title={`${ACME.people.controller.name} · Controller (11yrs)`}
+            sub="Every vendor MOU · sole bank signer · flight risk MEDIUM"
+            amt={<span style={{ fontSize: 15, color: '#B02A2A' }}>Critical</span>}
+          />
+          <Row
+            title={`${ACME.people.regional.name} · Regional Mgr NM+WTX (8yrs)`}
+            sub="Manages NM + West Texas branches · 28% of revenue"
             amt={<span style={{ fontSize: 15, color: '#E8A033' }}>Elevated</span>}
           />
           <Row
-            title="Retention package · Marco"
-            sub="$45K stay bonus (24mo vest) + 2% rollover equity + VP Operations title"
+            title={`Retention package · ${ACME.people.sales.name.split(' ')[0]}`}
+            sub="$75K stay bonus (36mo vest) + 1.5% rollover + SVP Sales title · meeting Thu 2pm"
             amt={<span style={{ fontSize: 15 }}>Draft</span>}
             highlight
           />
@@ -219,12 +235,12 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         title="Are you on thesis? Yulia tells you every Monday."
         lede={<>Every investment thesis comes with three or four numbers that matter — and fifty that don’t. Yulia pulls your GL, AP, CRM, and timesheet data weekly, tracks only the ones that matter, and flags the first week you drift.</>}
       >
-        <DealBench title="Thesis scorecard · week 14" meta="MONDAY 6:02 AM" metaLive>
+        <DealBench title={`Thesis scorecard · ${ACME.name} · week 14`} meta="MONDAY 6:02 AM" metaLive>
           <div style={{ padding: 22, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
             {KPIS.map(k => <KpiTile key={k.sub} {...k} />)}
           </div>
           <FlagStrip>
-            <strong style={{ color: '#0A0A0B' }}>Drift flag:</strong> Concentration hasn’t moved since close. Your thesis had 28% by Q2 via two new MSAs. Neither has started. Booking the conversation with Marco for Wednesday.
+            <strong style={{ color: '#0A0A0B' }}>Drift flag:</strong> Concentration hasn\'t moved since close. Thesis had 28% by Q2 via three new MSAs. Two haven\'t started — Marco is slow-rolling them. Booking the conversation with him for Wednesday. If program slips one more quarter, earnout provisions kick in.
           </FlagStrip>
         </DealBench>
       </DealStep>

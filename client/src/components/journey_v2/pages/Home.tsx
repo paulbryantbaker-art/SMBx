@@ -76,7 +76,7 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
         title: 'Yulia',
         status: 'Ready to think',
         script: {},
-        opening: "Hi — I'm <strong>Yulia</strong>. Tell me what you're working on and I'll show you the shortest path to the answer. Or pick a journey on the right.",
+        opening: "Hi — I'm <strong>Yulia</strong>. Every journey on this site uses the same worked example: <strong>Acme, Inc.</strong>, a $65M multi-discipline distributor in the Southwest. $11M normalized EBITDA, 2nd-gen owner, 140 people. Pick a journey to see how I\'d run it, or tell me about your business and I\'ll start.",
         reply: 'I can take it from here. To work the real deal, tell me <strong>industry</strong>, <strong>revenue</strong>, and <strong>reported EBITDA</strong> — or paste a listing URL.',
         chips: CHIPS,
         placeholder: PLACEHOLDERS[hintIdx],

@@ -11,10 +11,11 @@
 import { useEffect, useState } from 'react';
 import {
   DealStep, DealBench, ScoreDonut, DimList, DealBottom,
-  type DealTab, type DealStepScript, type Dim,
+  type DealTab, type DealStepScript,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
 import InteractiveTool from '../shell/InteractiveTool';
+import { ACME, ACME_RUNDOWN } from '../acme';
 
 interface Props {
   active: DealTab;
@@ -24,31 +25,33 @@ interface Props {
   onSignIn?: () => void;
 }
 
-const CHIPS = ['Score this deal', 'Rebuild my SBA stack', 'Stress-test my DSCR', "What should I offer?"] as const;
+const CHIPS = ['Score Acme', 'Rebuild my SBA stack', 'Stress-test my DSCR', "What should I offer?"] as const;
 
-const RUNDOWN_DIMS: readonly Dim[] = [
-  { label: 'Financial quality',            value: 9.1, tone: 'green' },
-  { label: 'Margins',                      value: 8.4, tone: 'green' },
-  { label: 'Revenue quality',              value: 7.8, tone: 'green' },
-  { label: 'Concentration',                value: 6.2, tone: 'amber' },
-  { label: 'Management depth',             value: 7.1, tone: 'green' },
-  { label: 'Owner dependency',             value: 5.9, tone: 'amber' },
-  { label: 'Scalability',                  value: 8.2, tone: 'green' },
-];
-
+/* 5-min Acme walkthrough from the buyer side — a searcher (or LMM
+   PE associate) evaluating Acme as a platform acquisition. */
 const SCRIPT: DealStepScript = {
-  2: [
-    { who: 'y', text: '<strong>Atlas Air</strong> Rundown: 7 dimensions scored. Total <strong>83/100 — Pursue</strong>. Concentration and owner dependency are the two yellows; both unwind in integration.' },
-  ],
   3: [
-    { who: 'y', text: 'SBA SOP 50 10 8 took effect June 2025. Your rollover equity path is dead. I rebuilt the stack — <strong>seller note on full standby</strong>, 10% genuine cash injection, senior 7(a) at 85%.' },
+    { who: 'y',  text: `Running the Rundown on <strong>${ACME.name}</strong> — $65M distributor, Phoenix, multi-discipline. Ray Whitaker Jr. is 2nd gen, 58, exploring exit in 18–24 months.` },
+    { who: 'y',  text: `Scoring seven dimensions. Total lands at <strong>81/100 · Pursue</strong>. Strong on financial integrity (9.1), scalability (8.0), and revenue quality (8.4) — 62% of revenue repeats on blanket POs.` },
+    { who: 'me', text: 'Yellows?' },
+    { who: 'y',  text: `Two: <strong>owner dependency (5.4)</strong> — Ray personally signs off on every contract over $50K — and <strong>concentration (6.0)</strong> — top 10 accounts are 35% of revenue, with Marco Delgado (VP Sales, 22yr) holding the relationships. Both are solvable in integration, not reasons to pass.` },
   ],
   4: [
-    { who: 'me', text: "What's my floor?" },
-    { who: 'y', text: 'Base DSCR 2.1× feels comfortable. Revenue down 25% drops it to <strong>0.9×</strong>. That\'s your line. Structure around it — customer retention escrow + seller note standby.' },
+    { who: 'y',  text: `At $11M normalized EBITDA, upper MM distribution trades 7–8.5×. So the price conversation is <strong>$77M–$94M</strong>. Check size for you with a $22M equity round and SBA 7(a) lands around $14M cash-in.` },
+    { who: 'y',  text: `SBA SOP 50 10 8 took effect June 2025 — your rollover equity path you probably modeled six months ago is dead. Partial change-of-ownership has to be stock purchases now. 10% equity injection must be genuine cash.` },
+    { who: 'me', text: 'Can Acme still work?' },
+    { who: 'y',  text: `Yes. Restructured: <strong>$44M SBA 7(a) · $22M unitranche · $18M seller note on full standby · $14M equity</strong>. DSCR base case 1.9×. 10% genuine cash is in the equity tranche, not a seller-note substitute. Compliance-clean.` },
   ],
   5: [
-    { who: 'y', text: 'Three LOI structures. Recommended <strong>$16.8M · 70/20/10</strong>. Maximizes their after-tax NPV and keeps your check under $12M. Rollover aligns them through year 3 — when concentration unwinds.' },
+    { who: 'y',  text: `Stressed Ray's numbers against the scenarios that actually kill distribution deals. Base DSCR 1.9×.` },
+    { who: 'y',  text: `Revenue down 15%: drops to <strong>1.3×</strong>, inside covenant. Hospitality softens hard in a rate shock — scenario-tested that too, lands 1.25×.` },
+    { who: 'y',  text: `The floor breaks at <strong>revenue down 25% or losing Marco's top two accounts</strong>. Structure around that: customer retention escrow ($2M), Marco on a 3-year earnout, and the seller note standby gets written to extend automatically if DSCR tests breach.` },
+  ],
+  6: [
+    { who: 'y',  text: `Three LOI structures, all compliant. Recommended: <strong>$86M · 60% cash · 20% rollover · 20% seller note (standby)</strong>.` },
+    { who: 'y',  text: `Maximizes Ray's after-tax NPV at $64M — his CPA is going to love the rollover deferral — and keeps your equity check at $14M. The rollover also aligns Ray through year 3, exactly when the concentration risk unwinds into formalized contracts.` },
+    { who: 'me', text: 'Send it?' },
+    { who: 'y',  text: `Draft is ready. Two optional standby provisions I'd add: pre-closing working capital peg at $4.8M (their trailing 12-mo average), and a management retention pool for Nina + Jennifer + Marco. Say the word.` },
   ],
 };
 
@@ -68,14 +71,14 @@ const SBA_WORKS: readonly SbaItem[] = [
 ];
 
 type Shock = { label: string; margin: string; ebitdaDown: string; dscr: number };
-const BASE_DSCR = 2.1;
+const BASE_DSCR = 1.9;
 const SHOCKS: readonly Shock[] = [
-  { label: 'Base case',           margin: '–',       ebitdaDown: '–',   dscr: 2.1 },
-  { label: 'Revenue –10%',        margin: '–200bps', ebitdaDown: '–18%', dscr: 1.6 },
-  { label: 'Revenue –15%',        margin: '–200bps', ebitdaDown: '–28%', dscr: 1.3 },
-  { label: 'Top customer leaves', margin: '–150bps', ebitdaDown: '–22%', dscr: 1.2 },
-  { label: 'Top 2 leave',         margin: '–150bps', ebitdaDown: '–34%', dscr: 1.0 },
-  { label: 'Revenue –25%',        margin: '–250bps', ebitdaDown: '–42%', dscr: 0.9 },
+  { label: 'Base case',              margin: '–',        ebitdaDown: '–',     dscr: 1.9 },
+  { label: 'Revenue –10%',           margin: '–150bps',  ebitdaDown: '–16%',  dscr: 1.5 },
+  { label: 'Revenue –15%',           margin: '–200bps',  ebitdaDown: '–26%',  dscr: 1.3 },
+  { label: 'Hospitality softens',    margin: '–175bps',  ebitdaDown: '–22%',  dscr: 1.25 },
+  { label: 'Marco\'s top 2 leave',   margin: '–150bps',  ebitdaDown: '–32%',  dscr: 1.0 },
+  { label: 'Revenue –25%',           margin: '–225bps',  ebitdaDown: '–42%',  dscr: 0.8 },
 ];
 
 export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
@@ -87,10 +90,10 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
       onStartFree={onStartFree}
       chat={{
         title: 'Yulia',
-        status: 'Screening Atlas Air',
+        status: `Evaluating ${ACME.name}`,
         script: SCRIPT,
-        opening: "Hi — I'm <strong>Yulia</strong>. This walkthrough is a searcher evaluating Atlas Air, a Fort Worth HVAC acquisition. Scroll to watch me score, structure, and stress-test the deal.",
-        reply: 'Three things: <strong>deal size</strong>, <strong>capital structure you can contribute</strong>, and a <strong>URL or teaser</strong>. I\'ll return a scored Rundown and a base-case capital stack in 15 minutes.',
+        opening: `Hi — I'm <strong>Yulia</strong>. This walkthrough is a buyer (LMM PE / search fund) evaluating <strong>${ACME.name}</strong> — $65M multi-discipline distributor, Phoenix HQ, owner exploring exit. Scroll to watch me score, restructure under SBA SOP 50 10 8, stress-test DSCR, and draft the LOI.`,
+        reply: 'Three things: <strong>deal size</strong>, <strong>equity you can contribute</strong>, and a <strong>URL or teaser</strong>. I\'ll return a scored Rundown + compliant capital stack in 15 minutes.',
         chips: CHIPS,
         onSend,
       }}
@@ -131,22 +134,22 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
         </div>
       </DealStep>
 
-      {/* Rundown */}
+      {/* Rundown — Acme as the worked example */}
       <DealStep
         n={3}
         id="s3"
-        idx="The Rundown"
+        idx={`The Rundown · ${ACME.name}`}
         title="Seven dimensions. Sixty seconds. Pursue or pass."
-        lede={<>Concentration. Margins. Revenue quality. Owner dependency. Management depth. Financial integrity. Scalability. Paste a listing URL, upload a teaser, or type a description. Yulia returns a scored Rundown before you spend an hour on the deal.</>}
+        lede={<>Concentration. Margins. Revenue quality. Owner dependency. Management depth. Financial integrity. Scalability. Here\'s the live Rundown on Acme — $65M multi-discipline distributor, Phoenix. Total <strong>81/100 · Pursue</strong>.</>}
       >
         <DealBench
-          title="Rundown · Atlas Air"
+          title={`Rundown · ${ACME.name}`}
           meta="8 MIN AGO"
           metaLive
           bodyStyle={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 32, alignItems: 'center', padding: '26px 22px' }}
         >
           <div>
-            <ScoreDonut score={83} />
+            <ScoreDonut score={81} />
             <div style={{ textAlign: 'center', marginTop: -18 }}>
               <div style={{
                 fontFamily: 'JetBrains Mono, ui-monospace, monospace',
@@ -157,7 +160,7 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
               }}>Pursue</div>
             </div>
           </div>
-          <DimList dims={RUNDOWN_DIMS} />
+          <DimList dims={ACME_RUNDOWN} />
         </DealBench>
       </DealStep>
 
@@ -216,7 +219,7 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
         title="Know exactly where the deal breaks before you guarantee it."
         lede={<>The personal guarantee is real. The unwind scenario is real. Most buyers sign anyway because they've modeled the base case on a napkin. Yulia runs your DSCR against the scenarios that actually kill deals — revenue shocks, margin compression, customer churn, rate moves.</>}
       >
-        <DealBench title="DSCR stress · Atlas Air · Base 2.1×" meta="SHOCK MATRIX">
+        <DealBench title={`DSCR stress · ${ACME.name} · Base ${BASE_DSCR.toFixed(1)}×`} meta="SHOCK MATRIX">
           <div style={{ padding: 22 }}>
             <div style={{ display: 'grid', gap: 6 }}>
               {SHOCKS.map((s) => {
@@ -229,7 +232,7 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
                 return (
                   <div key={s.label} style={{
                     display: 'grid',
-                    gridTemplateColumns: '180px 1fr 60px 80px',
+                    gridTemplateColumns: '200px 1fr 60px 80px',
                     gap: 12,
                     alignItems: 'center',
                     fontSize: 12.5,
@@ -276,7 +279,7 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
             lineHeight: 1.55,
             color: '#3A3A3E',
           }}>
-            <strong style={{ color: '#0A0A0B' }}>Yulia's take:</strong> Atlas breaks at revenue &minus;25% or losing top 2 customers. Structure around that — customer retention escrow, seller note on 3-year standby, WC peg methodology. You sign the guarantee knowing where the line is. Base-case DSCR 1.25× reference per SBA SOP. {BASE_DSCR /* keep BASE_DSCR referenced */ && null}
+            <strong style={{ color: '#0A0A0B' }}>Yulia's take:</strong> Acme breaks at revenue &minus;25% or losing Marco\'s top 2 accounts. Structure around that — customer retention escrow, seller note on 3-year standby, Marco on earnout. You sign the guarantee knowing where the line is. 1.25× covenant reference.
           </div>
         </DealBench>
       </DealStep>
@@ -289,11 +292,11 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
         title="Three LOIs. Three structures. One you can actually close."
         lede={<>Yulia drafts the LOI alongside you — cash/earnout mix, escrow, WC peg, non-competes, exclusivity. She models after-tax outcomes for both sides, so you walk in with the right number, not just a big one.</>}
       >
-        <DealBench title="LOI structures · Atlas Air" meta="3 OPTIONS · MODELED">
+        <DealBench title={`LOI structures · ${ACME.name}`} meta="3 OPTIONS · SBA-COMPLIANT">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, padding: 22 }}>
-            <LoiCard label="Aggressive"  price="$18.4M" terms="85% cash · $2M earnout · 45-day exclusivity" />
-            <LoiCard label="Recommended" price="$16.8M" terms="70% cash · 20% rollover · 10% seller note @ 6%" featured />
-            <LoiCard label="Conservative" price="$15.2M" terms="60% cash · 30% rollover · performance earnout" />
+            <LoiCard label="Aggressive"   price="$94M" terms="70% cash · 25% rollover · 5% earnout · 45-day exclusivity" />
+            <LoiCard label="Recommended"  price="$86M" terms="60% cash · 20% rollover · 20% seller note (full standby)" featured />
+            <LoiCard label="Conservative" price="$82M" terms="50% cash · 30% rollover · $4M performance earnout" />
           </div>
           <div style={{
             padding: '14px 22px',
@@ -303,7 +306,7 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
             lineHeight: 1.55,
             color: '#3A3A3E',
           }}>
-            <strong style={{ color: '#0A0A0B' }}>Yulia's take:</strong> Recommended structure maximizes seller's after-tax NPV at ~$14.1M while keeping your check under $12M. Rollover aligns them through year 3 — exactly when concentration risk unwinds.
+            <strong style={{ color: '#0A0A0B' }}>Yulia's take:</strong> Recommended structure maximizes Ray\'s after-tax NPV at ~$64M — rollover defers tax — while keeping your equity check at $14M. Rollover aligns him through year 3, exactly when concentration unwinds as Marco\'s top-10 contracts formalize. All three comply with SOP 50 10 8.
           </div>
         </DealBench>
       </DealStep>

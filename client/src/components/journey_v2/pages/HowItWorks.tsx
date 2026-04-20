@@ -79,12 +79,13 @@ const FORMULAS: readonly FormulaGroup[] = [
 
 type ConvoTurn = { who: 'y' | 'u'; text: React.ReactNode };
 const CONVO: readonly ConvoTurn[] = [
-  { who: 'u', text: "I'm looking at a pest control company in Phoenix. $1.2M revenue, asking $2.8M. Got the CIM yesterday." },
-  { who: 'y', text: <>Pest control in Phoenix — a market I know well. At $1.2M revenue, preliminary SDE range is <strong>$240K–$360K</strong> depending on owner comp and add-backs. That puts typical value at <strong>$720K–$1.26M</strong> using industry multiples of 3.0×–3.5× SDE. Asking $2.8M is more than 2× above that range.</> },
-  { who: 'y', text: <>Three specific things to check first: <strong>route density</strong> (&gt;25 stops/day trades at a premium), <strong>service contract mix</strong> (recurring gets 4–5× SDE, one-time gets 2–2.5×), and <strong>owner involvement</strong>. What's the recurring vs. one-time breakdown?</> },
-  { who: 'u', text: "About 70% recurring contracts. Owner manages everyone, does estimates, and handles the top 10 commercial accounts." },
-  { who: 'y', text: <>70% recurring justifies a premium — 4.2×–4.7× on the contract portion, 2.5× on one-time. Blended: <strong>$1.1M–$1.4M</strong>. But the owner holds three roles: routes, estimates, top-10 relationships. That's three separate 12–18 month transitions. Discount 0.5×–1.0× for dependency.</> },
-  { who: 'y', text: <>Fair value closes to <strong>$900K–$1.2M</strong>. Asking $2.8M isn't aggressive negotiation — it's a different business than the fundamentals support. Want me to run the full Rundown, or model what would need to be true at $2.8M?</> },
+  { who: 'u', text: "Looking at Acme, Inc. in Phoenix. Multi-discipline distribution. $65M revenue, $9.2M reported EBITDA. Owner asking $95M." },
+  { who: 'y', text: <>Upper MM multi-discipline distribution in the SW — I know the comps well. At $9.2M reported EBITDA, straight 7.5× gets you to <strong>$69M</strong>. Asking $95M implies 10.3× — that\'s above the top of the SW distribution band.</> },
+  { who: 'y', text: <>Before deciding, three things to check: <strong>add-back defensibility</strong> (reported vs. normalized is typically 15–25% gap in founder-run distributors), <strong>discipline mix</strong> (diversification premium on 3+ verticals), and <strong>owner role</strong> (2nd-gen signing every invoice over $50K kills the multiple). What's the revenue split?</> },
+  { who: 'u', text: "Industrial MRO 38%, hospitality 24%, healthcare 19%, construction 19%. Owner is 58, handles top-10 customer relationships." },
+  { who: 'y', text: <>Four disciplines with no one over 40% — that\'s a real <strong>diversification premium</strong>. Hospitality softens, healthcare picks up. Worth 0.5–0.75× on the multiple. But top-10 on the owner\'s handshake is a <strong>concentration + key-person risk stacked</strong> — that's 0.5–1.0× down.</> },
+  { who: 'y', text: <>If their add-backs defend to <strong>$11M normalized EBITDA</strong> (industry-typical), and they formalize top-10 contracts with a sales VP before LOI, 7.5× × $11M = <strong>$82.5M</strong> is defensible. If not, you\'re at 6.5× × $9.2M = <strong>$60M</strong>. That\'s the $22M spread.</> },
+  { who: 'y', text: <>Asking $95M isn\'t aggressive negotiation — it\'s pricing the best-case multiple on the unnormalized number. Want me to run the full Rundown and draft a <strong>counter at $82M contingent on QoE and concentration fix</strong>?</> },
 ];
 
 export default function HowItWorks({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
@@ -253,9 +254,9 @@ export default function HowItWorks({ active, onSend, onStartFree, onNavigate, on
         id="s6"
         idx="Ninety seconds"
         title="A real first conversation."
-        lede={<>Verbatim from a first-time buyer evaluating a $2.8M asking price. Not a demo. One chat turn to preliminary range, three to fair value.</>}
+        lede={<>Verbatim from a buyer evaluating Acme, Inc. at a $95M asking price. Not a demo. One chat turn to preliminary range, three to defensible counter.</>}
       >
-        <DealBench title="Phoenix pest control · asking $2.8M" meta="VERBATIM">
+        <DealBench title="Acme, Inc. · asking $95M" meta="VERBATIM">
           <div style={{ padding: 22 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {CONVO.map((m, i) => (

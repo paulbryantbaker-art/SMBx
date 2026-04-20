@@ -13,6 +13,7 @@ import {
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
 import InteractiveTool from '../shell/InteractiveTool';
+import { ACME } from '../acme';
 
 interface Props {
   active: DealTab;
@@ -28,12 +29,15 @@ type StructureRow = {
   label: string; cash: string; retained: string; upside: string; control: string;
   variant?: 'default' | 'alt' | 'featured';
 };
+/* Structures modeled against Acme: $11M normalized EBITDA × 7.5× = $82.5M EV.
+   5-year assumptions: 12% EBITDA CAGR (conservative for multi-discipline
+   SW distribution), exit at 7.5× flat. */
 const STRUCTURES: readonly StructureRow[] = [
-  { label: 'Full sale',           cash: '$105M', retained: '0%',   upside: '—',        control: 'None',      variant: 'default' },
-  { label: 'Majority recap',      cash: '$73M',  retained: '30%',  upside: '+$58M',    control: 'Board seat', variant: 'alt' },
-  { label: 'Minority recap ★',    cash: '$42M',  retained: '70%',  upside: '+$134M',   control: 'Full',      variant: 'featured' },
-  { label: 'Preferred + PIK',     cash: '$35M',  retained: '100%', upside: '+$118M',   control: 'Full',      variant: 'default' },
-  { label: 'Senior-stretch debt', cash: '$28M',  retained: '100%', upside: '+$142M',   control: 'Full',      variant: 'alt' },
+  { label: 'Full sale',           cash: '$82M',  retained: '0%',   upside: '—',        control: 'None',       variant: 'default' },
+  { label: 'Majority recap',      cash: '$58M',  retained: '30%',  upside: '+$44M',    control: 'Board seat', variant: 'alt' },
+  { label: 'Minority recap ★',    cash: '$33M',  retained: '70%',  upside: '+$102M',   control: 'Full',       variant: 'featured' },
+  { label: 'Preferred + PIK',     cash: '$28M',  retained: '100%', upside: '+$94M',    control: 'Full',       variant: 'default' },
+  { label: 'Senior-stretch debt', cash: '$22M',  retained: '100%', upside: '+$112M',   control: 'Full',       variant: 'alt' },
 ];
 
 type LiquidityCard = { n: string; title: string; body: string; typical?: string };
@@ -46,18 +50,26 @@ const LIQUIDITY: readonly LiquidityCard[] = [
   { n: '06', title: 'Dividend Recapitalization',   body: 'Lever the business with debt, pay yourself a dividend. Retain 100% equity. Business services the debt.', typical: '$10–50M distributed, 4–6× EBITDA' },
 ];
 
+/* 5-min Acme walkthrough: Ray Whitaker Jr. considering growth capital
+   instead of full sale — Yulia runs six structures against his numbers. */
 const SCRIPT: DealStepScript = {
   3: [
-    { who: 'y', text: 'At $14M EBITDA × 7.5× you\'re a $105M business. Full sale nets that today. Minority recap nets $42M today and leaves you 70% of the next bite — at P50 that\'s <strong>+$134M</strong> over 5 years.' },
+    { who: 'y',  text: `${ACME.name} at $11M normalized EBITDA × 7.5× = <strong>$82.5M</strong> enterprise value. Your advisor walked in with the full-sale pitch. Let me show you the other five paths.` },
+    { who: 'y',  text: `<strong>Minority recap:</strong> sell 30% to a growth investor. You get <strong>$33M today</strong>, keep 70% and full operational control. At 12% EBITDA CAGR you exit year 5 at ~$145M — your 70% is worth $102M. Total haul: <strong>$135M vs. $82M</strong>.` },
+    { who: 'me', text: 'Why hasn\'t my advisor mentioned this?' },
+    { who: 'y',  text: `A full sale generates the largest one-time fee for the advisor. A minority recap doesn't. That's not sinister — it's the fee model. But it\'s the reason most owners never hear the alternatives. Yulia has no fee incentive. Pick the structure that fits you.` },
   ],
   5: [
-    { who: 'y', text: 'Stack sized for <strong>$140M EV</strong>: $42M sponsor + $20M pref + $56M unitranche + $22M ABL. Leverage lands at 4.3× net. Stressed a 25% EBITDA dip — FCCV holds at 1.08×.' },
+    { who: 'y',  text: `For the minority recap, stack sized for <strong>$110M post-money valuation</strong>: $33M sponsor equity + $18M preferred equity + $42M unitranche + $17M ABL. Net leverage 4.2×.` },
+    { who: 'y',  text: `Stressed a 20% EBITDA dip year 2 — hospitality softening is the real risk in your mix. <strong>FCCV holds at 1.14×</strong>. Covenant headroom all 5 years. Same deal with all-senior at 4.5× would breach in month 14.` },
   ],
   6: [
-    { who: 'y', text: '22 slides written in IC voice. Three to rehearse first: <strong>thesis, unit economics, use of proceeds</strong>. Most founders over-explain slide 1 and rush slide 14 — it\'s the opposite of what the room wants.' },
+    { who: 'y',  text: `Pitch deck: 22 slides. Three to rehearse: <strong>thesis, unit economics, use of proceeds</strong>. Acme\'s story isn't "distributor raising capital" — it\'s <strong>"38-year SW cash-flow platform with four discipline tailwinds and a pending geographic expansion."</strong>` },
+    { who: 'y',  text: `Most founders over-explain slide 1 and rush slide 14. Investors want to see the thesis fast, then spend 20 minutes on how capital gets deployed. I drafted the verbal for each.` },
   ],
   7: [
-    { who: 'y', text: '23 firms fit. 6 tier-1. Kepler is top — 9 specialty services deals in 3 years and you have a warm intro through J. Chen.' },
+    { who: 'y',  text: `21 firms fit. 7 tier-1. Three targeted intros: <strong>Kepler Growth</strong> (closed 9 distribution deals in 3 years, warm via Derek Chen), <strong>Meridian</strong> (SW LMM specialist), <strong>Halcyon</strong> (operator-led, 42% close rate on sourced deals).` },
+    { who: 'y',  text: `Skipping the 14 that don't fit saves you three weeks of pitches that go nowhere. First meetings usually inside two weeks from warm-intro send.` },
   ],
 };
 
@@ -70,9 +82,9 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
       onStartFree={onStartFree}
       chat={{
         title: 'Yulia',
-        status: 'Sizing a growth round',
+        status: `Sizing a round · ${ACME.name}`,
         script: SCRIPT,
-        opening: "Hi — I'm <strong>Yulia</strong>. This walkthrough is a $14M EBITDA owner deciding between a full sale, a minority recap, and three other paths. Scroll to watch me run the math.",
+        opening: `Hi — I'm <strong>Yulia</strong>. This walkthrough is <strong>${ACME.name}</strong> — $11M EBITDA SW distributor — deciding between a full sale and a minority recap. The advisor defaulted to sell. Scroll to watch me run all six structures and explain why the minority recap probably nets <strong>$50M more over 5 years</strong>.`,
         reply: 'Three inputs: <strong>EBITDA</strong>, <strong>cash needed out</strong>, and <strong>whether you want to keep running it</strong>. I\'ll run all six structures against your numbers.',
         chips: CHIPS,
         onSend,
@@ -159,7 +171,7 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
         title="Same company. Different structures. Radically different outcomes."
         lede={<>A $14M EBITDA business modeled at a 7.5× multiple. Full sale today vs. five other structures. The retained equity in a minority recap compounds into the largest total outcome over five years.</>}
       >
-        <DealBench title="Structure comparison · MedCorp · $14M EBITDA" meta="MODELED @ 7.5× MULT">
+        <DealBench title={`Structure comparison · ${ACME.name} · $11M EBITDA`} meta="MODELED @ 7.5× MULT">
           <div style={{ padding: 22 }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
@@ -190,7 +202,7 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
             </table>
           </div>
           <div style={{ padding: '14px 22px', background: '#FAFAFB', borderTop: '0.5px solid rgba(0,0,0,0.06)', fontSize: 12.5, color: '#3A3A3E', lineHeight: 1.55 }}>
-            <strong style={{ color: '#0A0A0B' }}>Yulia\'s take:</strong> Minority recap gets you a second bite ~3× the first. The premium for full sale over minority today is only $63M — your retained 70% is worth $94M at entry and $134M at P50 exit.
+            <strong style={{ color: '#0A0A0B' }}>Yulia\'s take:</strong> Minority recap gets Ray a second bite 3× the first. The premium for full sale today is only $49M — his retained 70% is worth $58M at entry and <strong>$102M at P50 exit in year 5</strong>. Total haul $135M vs. $82M.
           </div>
         </DealBench>
       </DealStep>
@@ -219,17 +231,17 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
         title="Sized to the deal. Not to what one lender will lend you."
         lede={<>The right stack stretches your equity without forcing a covenant reset every 18 months. Yulia builds three layers, models cash-on-cash for each, and stress-tests against a 25% EBITDA dip.</>}
       >
-        <DealBench title="Capital stack · Recommended" meta="$140M ENTERPRISE VALUE">
+        <DealBench title={`Capital stack · ${ACME.name} · minority recap`} meta="$110M ENTERPRISE VALUE">
           <div style={{ padding: '26px 22px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2, borderRadius: 10, overflow: 'hidden' }}>
-              <StackLayer bg="#0A0A0B" fg="#fff" title="Sponsor equity"  sub="LP check · 5yr hold target"          amt="$42M" pct="30%" />
-              <StackLayer bg="#3A3A3E" fg="#fff" title="Preferred equity" sub="12% PIK · no maintenance covs"       amt="$20M" pct="14%" />
-              <StackLayer bg="#7A7A80" fg="#fff" title="Unitranche"       sub="SOFR + 575 · 1.25× FCCV"             amt="$56M" pct="40%" />
-              <StackLayer bg="#C8C8CC" fg="#0A0A0B" title="ABL revolver"  sub="$22M committed · $12M drawn"         amt="$22M" pct="16%" />
+              <StackLayer bg="#0A0A0B" fg="#fff" title="Sponsor equity"  sub="30% · 5yr hold · Kepler or Meridian" amt="$33M" pct="30%" />
+              <StackLayer bg="#3A3A3E" fg="#fff" title="Preferred equity" sub="12% PIK · no maintenance covs"       amt="$18M" pct="16%" />
+              <StackLayer bg="#7A7A80" fg="#fff" title="Unitranche"       sub="SOFR + 550 · 1.25× FCCV"             amt="$42M" pct="38%" />
+              <StackLayer bg="#C8C8CC" fg="#0A0A0B" title="ABL revolver"  sub="$17M committed · $8M drawn"          amt="$17M" pct="16%" />
             </div>
           </div>
           <div style={{ padding: '14px 22px', background: '#FAFAFB', borderTop: '0.5px solid rgba(0,0,0,0.06)', fontSize: 12.5, color: '#3A3A3E', lineHeight: 1.55 }}>
-            <strong style={{ color: '#0A0A0B' }}>Stress test:</strong> 25% EBITDA dip year 2 — FCCV holds at 1.08×, no covenant breach. Same deal with all-senior at 4.5× levers would breach in month 14.
+            <strong style={{ color: '#0A0A0B' }}>Stress test:</strong> 20% EBITDA dip year 2 (hospitality softens) — FCCV holds at 1.14×, no covenant breach. Same deal with all-senior at 4.5× levers would breach in month 14.
           </div>
         </DealBench>
       </DealStep>

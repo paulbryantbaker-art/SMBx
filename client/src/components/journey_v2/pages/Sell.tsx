@@ -9,10 +9,11 @@
 import { useMemo, useState } from 'react';
 import {
   DealStep, DealBench, Row, ScoreDonut, DimList, DealBottom,
-  type DealTab, type DealStepScript, type Dim,
+  type DealTab, type DealStepScript,
 } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
 import InteractiveTool from '../shell/InteractiveTool';
+import { ACME, ACME_ADDBACKS, ACME_READINESS } from '../acme';
 
 interface Props {
   active: DealTab;
@@ -22,31 +23,35 @@ interface Props {
   onSignIn?: () => void;
 }
 
-const CHIPS = ['What\'s it worth?', 'Find my add-backs', 'Am I ready?', 'Sell or raise?'] as const;
+const CHIPS = ['What\'s Acme worth?', 'Find my add-backs', 'Am I ready to sell?', 'Sell or raise?'] as const;
 
-const READINESS_DIMS: readonly Dim[] = [
-  { label: 'Revenue quality',     value: 8.4, tone: 'green' },
-  { label: 'Margins',             value: 7.9, tone: 'green' },
-  { label: 'Owner dependency',    value: 5.2, tone: 'amber' },
-  { label: 'Management depth',    value: 7.1, tone: 'green' },
-  { label: 'Concentration',       value: 6.0, tone: 'amber' },
-  { label: 'Financial integrity', value: 8.8, tone: 'green' },
-];
-
+/* 5-min Acme walkthrough: Ray Whitaker Jr. exploring exit of the
+   Phoenix distribution business his dad founded in 1987. Scripts
+   play as each DealStep enters the viewport. */
 const SCRIPT: DealStepScript = {
   4: [
-    { who: 'y', text: 'I read Acme\'s last three <strong>tax returns + QBs</strong>. Found <strong>$47K</strong> of defensible add-backs — owner comp above market, F-150s, spouse on payroll.' },
-    { who: 'y', text: 'At your band that\'s ~<strong>$258K</strong> more in enterprise value. Just from cleaning up the P&L.' },
+    { who: 'y',  text: `Let's walk through <strong>${ACME.name}</strong>. Ray Whitaker Jr., 58, 2nd-gen owner. $65M revenue distributor, Phoenix HQ with AZ/NM/TX/NV footprint. Dad founded it in 1987.` },
+    { who: 'y',  text: `Reported EBITDA is <strong>$9.2M</strong>. That's what their CPA files. But reported and real aren't the same number — I pulled three years of tax returns and found <strong>$1.8M</strong> of defensible add-backs.` },
+    { who: 'me', text: 'What moved the needle?' },
+    { who: 'y',  text: `Two big ones. Ray's Phoenix HQ is leased from a family trust at <strong>$240K above market</strong>. And a discontinued Nevada branch — $820K of overhead on a line that shut Q3 2024 — still sitting in the reported run-rate.` },
+    { who: 'y',  text: `Add Ray's compensation above market ($155K), two siblings on payroll in non-operating roles ($180K), one-time legal settlement ($310K), discretionary travel ($95K) — normalized EBITDA is <strong>$11.0M</strong>.` },
+    { who: 'y',  text: `That's <strong>20% more earnings</strong> than the CPA reports — and every dollar is IRS-documented. At a 7.5× multiple that's <strong>$13.5M</strong> of additional enterprise value sitting in the financials nobody had surfaced.` },
   ],
   5: [
-    { who: 'y', text: 'Scoring through a buyer\'s lens — seventeen dimensions. Acme came in at <strong>75/100</strong>. Owner dependency and concentration are the fixable ones.' },
+    { who: 'y',  text: `Now Acme through a buyer's lens — 17 dimensions scored. Total <strong>74/100</strong>. Strong on financial integrity (9.1), revenue quality (8.6), scalability (8.0).` },
+    { who: 'y',  text: `Two yellow flags: <strong>owner dependency (5.4)</strong> — Ray still signs every invoice over $50K. And <strong>concentration (6.0)</strong> — top 10 accounts are 35% of revenue, most on handshake with Marco Delgado, VP Sales, 22 years in.` },
+    { who: 'me', text: 'Fixable before we go to market?' },
+    { who: 'y',  text: `Yes. I built the playbook: promote Nina Arellano (COO, 14yr) into a COO-plus role with signing authority up to $250K. Formalize top-10 contracts with Marco as relationship owner — gets the multiple 0.5–0.75× higher on pack. Earns back $5–8M EV over 12 months.` },
   ],
   6: [
-    { who: 'y', text: 'Drafting the CIM now. 28 pages. Positioning Acme as a <strong>regional platform</strong> with three growth levers, not a 30-year services business.' },
-    { who: 'y', text: 'Same company, two ways, trades at <strong>4.5× or 7×</strong>. On Acme that\'s a <strong>$4.7M</strong> spread. Rarely about the business.' },
+    { who: 'y',  text: `Drafting Acme's CIM. 32 pages. Positioning isn't "distributor for sale" — it's <strong>"the SW anchor asset for a national multi-discipline platform."</strong>` },
+    { who: 'y',  text: `The narrative opens with the four disciplines: industrial MRO 38%, hospitality 24%, healthcare 19%, construction 19%. That diversification is the moat — hospitality slows, healthcare picks up.` },
+    { who: 'y',  text: `Same company described two ways trades at <strong>6× or 8×</strong>. On Acme that's a <strong>$22M spread</strong>. The difference is never the business. It's how the CIM tells the story.` },
   ],
   7: [
-    { who: 'y', text: '11 buyers in. Three IOIs back. Strategic is leading on headline + certainty. After-tax within $180K but rollover creates a <strong>second bite in 3–5 years</strong>.' },
+    { who: 'y',  text: `Outreach went to 18 buyers — strategic distributors, PE roll-ups, family offices. 4 IOIs back. Ranging <strong>$77M to $94M</strong>.` },
+    { who: 'y',  text: `Strategic (HVAC+ Distribution, Dallas-based) leading at <strong>$91M · 80% cash · 20% rollover</strong>. PE rollup at $86M, 55% cash, earnout. Family office at $82M all cash.` },
+    { who: 'y',  text: `After-tax, all three within $4M. But the strategic's 20% rollover at their exit multiple in 3–5 years is another <strong>$14–18M</strong>. That's the second bite. Ray\'s call on timing vs. certainty.` },
   ],
 };
 
@@ -100,10 +105,10 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
       onStartFree={onStartFree}
       chat={{
         title: 'Yulia',
-        status: 'Working on Acme HVAC',
+        status: `Working on ${ACME.name}`,
         script: SCRIPT,
-        opening: "Hi — I'm <strong>Yulia</strong>. I'll walk you through a real sell-side deal using Acme HVAC as the example. Scroll to follow along.",
-        reply: 'To run your numbers I need three things: <strong>industry</strong>, <strong>revenue</strong>, and <strong>reported EBITDA</strong>. Drop them in and I\'ll have a preliminary range in about 20 minutes.',
+        opening: `Hi — I'm <strong>Yulia</strong>. I'm going to walk you through a real sell-side deal: <strong>${ACME.name}</strong>, a $65M multi-discipline distributor in the Southwest. Owner's 58, considering exit. Scroll to watch the whole process — valuation through IOI comparison.`,
+        reply: 'Three things and I\'ll build your real analysis: <strong>industry</strong>, <strong>revenue</strong>, <strong>reported EBITDA</strong>. First deliverable inside 30 minutes. No credit card.',
         chips: CHIPS,
         onSend,
       }}
@@ -153,24 +158,29 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
         </InteractiveTool>
       </DealStep>
 
-      {/* Add-backs Acme walkthrough */}
+      {/* Add-backs — Acme, Inc. walkthrough */}
       <DealStep
         n={4}
         id="s4"
-        idx="Worked example · Acme HVAC"
+        idx={`Worked example · ${ACME.name}`}
         title="The money hiding in your tax returns."
-        lede={<>Reported EBITDA and real EBITDA are almost never the same number. Your accountant minimizes taxes. A buyer maximizes the price they\'ll justify to their lender. The gap is almost always larger than you think.</>}
+        lede={<>Reported EBITDA and real EBITDA are almost never the same number. For Acme — $65M revenue distributor, Phoenix-headquartered — the gap is <strong>{ACME.addBacksLabel} of defensible add-backs</strong>. At 7.5× that\'s $13.5M of enterprise value sitting in the financials the CPA never surfaces.</>}
       >
         <DealBench
-          title="Add-back schedule · Acme HVAC"
+          title={`Add-back schedule · ${ACME.name}`}
           meta="YULIA · LIVE"
           metaLive
           bodyStyle={{ padding: '0 22px 22px' }}
         >
-          <Row title="Owner comp above market"      sub="$165K paid · $143K benchmark (BLS MSA)"       amt="+$22,000" />
-          <Row title="Personal vehicles on books"    sub="2 F-150s · fuel, maintenance, insurance"       amt="+$14,000" />
-          <Row title="Spouse on payroll"              sub="Replaceable at market rate"                    amt="+$11,000" />
-          <Row title="Blind Equity™ total"           sub="Adds ~0.35× to multiple on upper band"          amt="+$47K" highlight />
+          {ACME_ADDBACKS.map((a, i) => (
+            <Row
+              key={a.title}
+              title={a.title}
+              sub={a.sub}
+              amt={a.amt}
+              highlight={i === ACME_ADDBACKS.length - 1}
+            />
+          ))}
         </DealBench>
       </DealStep>
 
@@ -180,16 +190,16 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
         id="s5"
         idx="Readiness"
         title="Your business, scored through a buyer's lens."
-        lede={<>Seventeen dimensions. Revenue quality, margins, concentration, owner dependency, financial integrity. The same checklist every PE associate runs — automated and consistent.</>}
+        lede={<>Seventeen dimensions. The same checklist every PE associate runs — automated and consistent. Acme comes in at <strong>74/100</strong>: strong on financial integrity and revenue quality, two fixable yellows on owner dependency and concentration.</>}
       >
         <DealBench
-          title="Readiness score · Acme HVAC"
+          title={`Readiness score · ${ACME.name}`}
           meta="6 MIN AGO"
           metaLive
           bodyStyle={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 32, alignItems: 'center' }}
         >
-          <ScoreDonut score={75} />
-          <DimList dims={READINESS_DIMS} />
+          <ScoreDonut score={74} />
+          <DimList dims={ACME_READINESS} />
         </DealBench>
       </DealStep>
 
@@ -202,22 +212,22 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
         lede={<>Most CIMs are data dumps. Yulia's is a strategic narrative. 25–40 pages. Your business positioned not as a business to buy, but as a platform to scale. The same company, described two ways, can trade at <strong>4.5× or 7×</strong>. The difference is rarely the business.</>}
       >
         <DealBench
-          title="CIM preview · Project Phoenix"
-          meta="28 PAGES · CONFIDENTIAL"
+          title="CIM preview · Project Mesa"
+          meta="32 PAGES · CONFIDENTIAL"
           bodyStyle={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, background: '#FAFAFB', padding: 22 }}
         >
           <CimPage
             idx="01 · Executive summary"
-            title="A 32-year regional HVAC platform, positioned for geographic expansion."
+            title="A 38-year multi-discipline SW distribution platform, positioned as the anchor asset for national consolidation."
             kpis={[
-              { label: 'Revenue',    value: '$8.4M' },
-              { label: 'Adj EBITDA', value: '$1.9M' },
-              { label: 'Margin',     value: '22.6%' },
+              { label: 'Revenue',    value: ACME.revenueLabel },
+              { label: 'Adj EBITDA', value: ACME.normalizedEbitdaLabel },
+              { label: 'Margin',     value: ACME.normalizedMarginLabel },
             ]}
           />
           <CimPage
             idx="07 · Growth levers"
-            title="Three identified levers to double EBITDA within 36 months."
+            title="Three levers to take normalized EBITDA from $11M to $17M within 36 months."
           />
         </DealBench>
       </DealStep>
@@ -231,21 +241,21 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
         lede={<>Yulia identifies the buyer universe, sequences outreach, and stacks IOIs against each other. The winning bid in a competitive process is typically <strong>15–30% above</strong> the first offer. On a $50M transaction that\'s $7.5M–$15M more — from running a process instead of accepting a number.</>}
       >
         <DealBench
-          title="IOI comparison · round 1"
-          meta="3 OF 11 BUYERS · 2 WEEKS IN"
+          title="IOI comparison · Project Mesa"
+          meta="4 OF 18 BUYERS · 3 WEEKS IN"
           bodyStyle={{ padding: 0 }}
         >
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, padding: 22 }}>
-            <IoiCard label="Family office" price="$2.4M" terms="100% cash · 60-day close · no earnout" />
-            <IoiCard label="Strategic"     price="$2.9M" terms="85% cash · 15% rollover · synergy case strong" featured />
-            <IoiCard label="PE roll-up"    price="$2.7M" terms="$400K earnout · 90-day diligence" />
+            <IoiCard label="Family office"        price="$82M" terms="100% cash · 45-day close · no earnout" />
+            <IoiCard label="Strategic distributor" price="$91M" terms="80% cash · 20% rollover · synergy case strong" featured />
+            <IoiCard label="PE roll-up"           price="$86M" terms="55% cash · $4M earnout · 75-day diligence" />
           </div>
           <div style={{
             padding: '14px 22px', background: '#FAFAFB',
             borderTop: '0.5px solid rgba(0,0,0,0.06)',
             fontSize: 12.5, color: '#3A3A3E', lineHeight: 1.55,
           }}>
-            <strong style={{ color: '#0A0A0B' }}>Yulia's take:</strong> Strategic wins on headline and certainty. After-tax, all three within $180K — but the rollover creates a second-bite in 3–5 years.
+            <strong style={{ color: '#0A0A0B' }}>Yulia's take:</strong> Strategic wins headline + certainty. After-tax all three within $4M. The 20% rollover at strategic\'s exit multiple in 3–5 years is another $14–18M — that\'s the second bite. Ray\'s call on timing vs. certainty.
           </div>
         </DealBench>
       </DealStep>
