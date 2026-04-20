@@ -16,10 +16,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { DEALS, type Deal, type Portfolio } from '../data';
 import type { Tab } from '../session';
-import { RundownCard, DDCard, LOICard, CompareCard, ModelCard, ChartCard, SourcingCard } from '../shared/cards';
+import { RundownCard, DDCard, LOICard, ChartCard } from '../shared/cards';
 import LibraryView from '../canvas/LibraryView';
+import { DCFView, CompareView, PortfolioView, ScratchView } from '../canvas/workspace';
 import '../shared/cards.css';
 import '../canvas/library.css';
+import '../canvas/workspace.css';
 
 /* ═══════════════════════════════════════════════════════════════════
    V4Top — top action bar
@@ -256,15 +258,20 @@ function V4CanvasBody({ tab, portfolio }: { tab: Tab | null; portfolio: Portfoli
   if (tab.kind === 'rundown' && deal) return <div style={{ maxWidth: 720 }}><RundownCard deal={deal} /></div>;
   if (tab.kind === 'dd' && deal) return <div style={{ maxWidth: 720 }}><DDCard deal={deal} /></div>;
   if (tab.kind === 'loi' && deal) return <div style={{ maxWidth: 720 }}><LOICard deal={deal} /></div>;
-  if (tab.kind === 'model' && deal) return <div style={{ maxWidth: 720 }}><ModelCard deal={deal} /></div>;
+
+  /* Full DCF projection page for `model` tabs (replaces the compact
+     ModelCard — rich table + assumptions + bar chart). */
+  if (tab.kind === 'model' && deal) return <DCFView deal={deal} />;
+
+  /* Three-mode compare: side-by-side / overlay / table. Replaces
+     the compact CompareCard. */
   if (tab.kind === 'compare') {
-    const ids = tab.dealIds ?? [];
-    const deals = DEALS.filter((d) => ids.includes(d.id));
-    return <CompareCard deals={deals} />;
+    return <CompareView dealIds={tab.dealIds ?? []} />;
   }
+
+  /* Deal dashboard: stacked RundownCard + ChartCard until a richer
+     DashboardView lands. */
   if (tab.kind === 'deal' && deal) {
-    /* Deal dashboard: stacked RundownCard + ChartCard until we build a
-       full DashboardView. Still a legit show-and-tell. */
     return (
       <div style={{ maxWidth: 720 }}>
         <RundownCard deal={deal} />
@@ -272,14 +279,17 @@ function V4CanvasBody({ tab, portfolio }: { tab: Tab | null; portfolio: Portfoli
       </div>
     );
   }
-  if (tab.kind === 'portfolio') {
-    const portDeals = DEALS.filter((d) => portfolio.dealIds.includes(d.id));
-    return <SourcingCard deals={portDeals} />;
-  }
-  if (tab.kind === 'library') {
-    return <LibraryView portfolio={portfolio} />;
-  }
-  /* scratch, doc, etc. → generic empty */
+
+  /* Portfolio overview — KPIs + stage kanban. */
+  if (tab.kind === 'portfolio') return <PortfolioView portfolio={portfolio} />;
+
+  /* Library (data rooms, my docs, shared, templates). */
+  if (tab.kind === 'library') return <LibraryView portfolio={portfolio} />;
+
+  /* Scratch query results (ad-hoc Yulia answer). */
+  if (tab.kind === 'scratch') return <ScratchView tab={tab} />;
+
+  /* Everything else — doc, memo, unknown kinds. */
   return (
     <div className="v4-canvas__empty">
       <div className="v4-canvas__empty-t">{tab.label}</div>
