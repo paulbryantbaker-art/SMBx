@@ -532,37 +532,14 @@ export interface DealRoomPageProps {
 }
 
 export function DealRoomPage({
-  active, sectionNav = [], children, rail, onNavigate, onSignIn, onStartFree,
-}: DealRoomPageProps) {
-  const [activeSection, setActiveSection] = useState<string | null>(null);
-
-  /* Scroll-spy for the section nav pill. Mirrors the same observer the
-     rail uses to play scripts but we only need top-step-id here. */
-  useEffect(() => {
-    if (sectionNav.length === 0) return;
-    const ids = sectionNav.map(s => s.id);
-    const steps = ids
-      .map(id => document.getElementById(id))
-      .filter((n): n is HTMLElement => !!n);
-    if (steps.length === 0) return;
-    const obs = new IntersectionObserver((entries) => {
-      const visible = entries
-        .filter(e => e.isIntersecting)
-        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-      if (visible.length === 0) return;
-      const top = visible[0].target as HTMLElement;
-      setActiveSection(top.id);
-    }, { rootMargin: '-18% 0px -55% 0px', threshold: 0 });
-    steps.forEach(s => obs.observe(s));
-    return () => obs.disconnect();
-  }, [sectionNav]);
-
-  const jumpTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const y = el.getBoundingClientRect().top + window.scrollY - 80;
-    window.scrollTo({ top: y, behavior: 'smooth' });
-  };
+  active, children, rail, onNavigate, onSignIn, onStartFree,
+  /* sectionNav still accepted on the API so page callers don't break —
+     we just don't render it anymore. Dropped per Paul: "on desktop
+     there are too many menu bars in journey." Step idx badges + the
+     scripted rail cover wayfinding. */
+  sectionNav: _sectionNav = [],
+}: DealRoomPageProps & { sectionNav?: DealRoomPageProps['sectionNav'] }) {
+  void _sectionNav;
 
   /* Stable rail — we don't want it re-mounting when children change.
      Memoize on rail props deeply enough that steps/chips changes don't
@@ -582,7 +559,13 @@ export function DealRoomPage({
         onSignIn={onSignIn}
         onStartFree={onStartFree}
       />
-      <DrNav items={sectionNav} activeId={activeSection} onJump={jumpTo} />
+      {/* DrNav section-nav pill dropped on desktop per Paul 2026-04-20:
+          "on desktop there are too many menu bars in journey." Each
+          dr-step has its own ".dr-step__idx" badge (e.g. "Step 01 · What
+          you have") for in-scroll wayfinding — the pill was redundant.
+          activeSection + jumpTo are unused now but preserved in state
+          for the scroll-spy observer below, which still tracks the top
+          step in case we ever need to expose it to the rail or top bar. */}
       <div className="dr-main">
         {railEl}
         <main className="dr-stage">{children}</main>
