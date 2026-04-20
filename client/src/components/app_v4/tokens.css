@@ -1,0 +1,53 @@
+/* ═══════════════════════════════════════════════════════════════════
+   v4 design tokens — SCOPED to .app-v4 so they don't leak into Glass
+   Grok or journey pages.
+
+   Source: claude_design/app/project/v4.css + app.css
+   Task #27 will port the full set; this file has the minimum needed
+   to render the scaffold (task #26).
+   ═══════════════════════════════════════════════════════════════════ */
+
+.app-v4 {
+  /* Surfaces */
+  --v4-bg:         #F6F6F4;
+  --v4-bg-2:       #EEEEEB;
+  --v4-card:       #FFFFFF;
+  --v4-chip:       #EFEFEC;
+  --v4-chip-h:     #E5E5E1;
+  --v4-gutter:     #E0E0DB;
+
+  /* Text */
+  --v4-ink:        #0A0A0B;
+  --v4-ink-2:      #2E2E32;
+  --v4-mute:       #6A6A70;
+  --v4-faint:      #9C9CA2;
+
+  /* Lines */
+  --v4-line:       #E6E6E2;
+  --v4-line-2:     #DADAD5;
+  --v4-card-line:  #EAEAE6;
+
+  /* Status */
+  --v4-ok:         #22A755;
+  --v4-warn:       #D18B1F;
+  --v4-flag:       #C24A2D;
+  --v4-accent:     #0A0A0B;
+  --v4-on-ink:     #FFFFFF;
+
+  /* Shadows */
+  --v4-shadow-lg: 0 40px 80px -20px rgba(15,15,30,0.18),
+                  0 18px 40px -12px rgba(15,15,30,0.12),
+                  0 4px 10px rgba(15,15,30,0.06);
+  --v4-shadow-md: 0 10px 30px -8px rgba(15,15,30,0.14),
+                  0 4px 12px rgba(15,15,30,0.08),
+                  0 1px 3px rgba(15,15,30,0.04);
+  --v4-shadow-sm: 0 2px 6px rgba(15,15,30,0.08);
+
+  /* Density (comfortable default) */
+  --v4-row-pad-y:  12px;
+  --v4-stack-gap:  14px;
+}
+.app-v4[data-density="compact"] {
+  --v4-row-pad-y: 7px;
+  --v4-stack-gap: 8px;
+}

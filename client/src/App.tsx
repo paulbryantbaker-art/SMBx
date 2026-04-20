@@ -103,6 +103,8 @@ const ValueLensPage = lazy(() => import('./pages/public/ValueLensPage'));
 const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/public/ResetPassword'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+// Dev-only: Claude Design v4 rebuild. Lazy so it doesn't bloat the main bundle.
+const V4App = lazy(() => import('./components/app_v4'));
 
 /** Check if a path should be handled by the unified AppShell */
 function isShellPath(path: string): boolean {
@@ -335,6 +337,12 @@ export default function App() {
         ) : (
           <Redirect to={user ? '/chat' : '/login'} />
         )}
+      </Route>
+
+      {/* Dev-only: Claude Design v4 internal-app rebuild.
+          Not auth-gated — design show-and-tell with mock data. */}
+      <Route path="/v4">
+        <Suspense fallback={<PageLoader />}><V4App /></Suspense>
       </Route>
 
       {/* Search (authenticated) */}
