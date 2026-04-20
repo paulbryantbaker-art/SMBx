@@ -3,6 +3,7 @@
  * 4 steps: Day 0 → 180-day plan → retention → thesis tracking.
  * Port of new_journey/project/integrate.html.
  */
+import { useMemo, useState } from 'react';
 import {
   DealStep, DealBench, Row, DealBottom,
   type DealTab, type DealStepScript,
@@ -96,11 +97,51 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         onSend,
       }}
     >
-      {/* Step 01 · Day 0 */}
+      {/* Hero */}
       <DealStep
         n={1}
+        id="hero"
+        idx="Post-close"
+        title="Day 1 after the wire. 180 employees. Do you have a plan?"
+        lede={<>Yulia builds the 180-day integration plan from your specific deal data — risks identified, opportunities found, people to protect. Auto-generated before the wire hits. Executed one day at a time.</>}
+      />
+
+      {/* Problem */}
+      <DealStep
+        n={2}
+        id="problem"
+        idx="The stat"
+        title="75% of acquisitions fail to achieve their stated synergies."
+        lede={<>Harvard Business Review. Thirty years of research across thousands of deals. The #1 reason, every time: <strong>no integration plan</strong>. Not a bad plan. No plan.</>}
+      >
+        <div style={{
+          marginTop: 18,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 10,
+        }}>
+          <StatCard n="75%" label="Acquisitions that miss synergy targets (HBR)" />
+          <StatCard n="40%+" label="Key-person attrition in year 1 without a retention plan" />
+          <StatCard n="Day 0" label="When Yulia's 180-day plan lands — before the wire" />
+        </div>
+      </DealStep>
+
+      {/* Day-1 checklist generator */}
+      <DealStep
+        n={3}
+        id="generator"
+        idx="Generator"
+        title="Generate your Day-1 checklist."
+        lede={<>Five questions. Customized checklist by category: IT/Security, People, Customers, Vendors, Operations. A starting point — your full PMI plan starts with a conversation.</>}
+      >
+        <Day1Generator onSend={onSend} />
+      </DealStep>
+
+      {/* Step 04 · Day 0 */}
+      <DealStep
+        n={4}
         id="s1"
-        idx="Step 01 · Day 0"
+        idx="Day 0 · Atlas"
         title="The 72 hours that decide whether this deal works."
         lede={<>Bank accounts, payroll, insurance, licenses, vendor notifications, staff town hall, the first Monday. Yulia runs the Day-0 checklist against your deal structure and flags what has to happen <strong>before signing</strong> vs. what can slip to week one.</>}
       >
@@ -114,11 +155,11 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         </DealBench>
       </DealStep>
 
-      {/* Step 02 · 180-day plan */}
+      {/* Step 05 · 180-day plan */}
       <DealStep
-        n={2}
+        n={5}
         id="s2"
-        idx="Step 02 · 180-day plan"
+        idx="180-day plan"
         title="The first six months, scripted against your thesis."
         lede={<>You bought this company for a reason. Yulia translates that reason into a 180-day operating plan with named owners, weekly milestones, and a cash runway check at day 30, 90, and 180. You run the business; she watches the plan.</>}
       >
@@ -131,11 +172,11 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         </DealBench>
       </DealStep>
 
-      {/* Step 03 · Retention */}
+      {/* Step 06 · Retention */}
       <DealStep
-        n={3}
+        n={6}
         id="s3"
-        idx="Step 03 · Retention"
+        idx="Retention"
         title="Keep the people who actually run the place."
         lede={<>Most SMB deals lose <strong>40%+ of their key people</strong> in year one. Yulia maps the org, scores each role for replacement risk, and drafts the retention conversation — including stay bonus, equity, title, and a candid talk about what you’re changing.</>}
       >
@@ -164,11 +205,11 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
         </DealBench>
       </DealStep>
 
-      {/* Step 04 · Thesis tracking */}
+      {/* Step 07 · Thesis tracking */}
       <DealStep
-        n={4}
+        n={7}
         id="s4"
-        idx="Step 04 · Thesis tracking"
+        idx="Thesis tracking"
         title="Are you on thesis? Yulia tells you every Monday."
         lede={<>Every investment thesis comes with three or four numbers that matter — and fifty that don’t. Yulia pulls your GL, AP, CRM, and timesheet data weekly, tracks only the ones that matter, and flags the first week you drift.</>}
       >
@@ -246,6 +287,249 @@ function FlagStrip({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ padding: '14px 22px', background: '#FAFAFB', borderTop: '0.5px solid rgba(0,0,0,0.06)', fontSize: 12.5, color: '#3A3A3E', lineHeight: 1.55 }}>
       {children}
+    </div>
+  );
+}
+
+function StatCard({ n, label }: { n: string; label: string }) {
+  return (
+    <div style={{
+      background: '#fff',
+      border: '0.5px solid rgba(0,0,0,0.08)',
+      borderRadius: 12,
+      padding: 22,
+    }}>
+      <div style={{
+        fontFamily: 'Sora, sans-serif',
+        fontWeight: 800,
+        fontSize: 34,
+        letterSpacing: '-0.02em',
+        color: '#0A0A0B',
+      }}>{n}</div>
+      <div style={{
+        marginTop: 6,
+        fontSize: 12.5,
+        lineHeight: 1.45,
+        color: '#3A3A3E',
+      }}>{label}</div>
+    </div>
+  );
+}
+
+/* Day-1 checklist generator — 5 inputs → computed checklist by category.
+   Industry-pattern outputs, not prescriptive. Tells Yulia to write the
+   real one if the visitor wants to continue. */
+type EmpBand = '<50' | '50–200' | '200–500' | '500+';
+type RevBand = '<$5M' | '$5–25M' | '$25–100M' | '$100M+';
+type CustBand = '0' | '1–5' | '5–20' | '20+';
+
+const EMP_OPTS: readonly EmpBand[] = ['<50', '50–200', '200–500', '500+'];
+const REV_OPTS: readonly RevBand[] = ['<$5M', '$5–25M', '$25–100M', '$100M+'];
+const CUST_OPTS: readonly CustBand[] = ['0', '1–5', '5–20', '20+'];
+const IND_OPTS = ['Services', 'Manufacturing', 'Healthcare', 'Technology', 'Construction', 'Retail', 'Other'] as const;
+
+function Day1Generator({ onSend }: { onSend: (t: string) => void }) {
+  const [industry, setIndustry] = useState<string>('');
+  const [emp, setEmp] = useState<EmpBand | ''>('');
+  const [rev, setRev] = useState<RevBand | ''>('');
+  const [cust, setCust] = useState<CustBand | ''>('');
+  const [sys, setSys] = useState<'yes' | 'no' | ''>('');
+
+  const ready = !!(industry && emp && rev && cust && sys);
+
+  const groups = useMemo(() => {
+    if (!ready) return null;
+    const empFactor = emp === '500+' ? 3 : emp === '200–500' ? 2 : emp === '50–200' ? 1.5 : 1;
+    const sysFactor = sys === 'yes' ? 2 : 1;
+    const custBonus = cust === '20+' ? 4 : cust === '5–20' ? 3 : cust === '1–5' ? 2 : 0;
+    const itBase = [
+      'Rotate admin credentials for top 50 systems',
+      'Transfer DNS + domain ownership',
+      'Audit and remove ex-employee access',
+      'Insurance verification (cyber + D&O + umbrella)',
+    ];
+    const itExtras = [
+      'ITGC review against SOC 2 scope',
+      'Dedicated security-ops handover meeting',
+      'SSO tenant cutover plan',
+    ];
+    const peopleBase = [
+      'Individual retention conversation — top 5 key-people list from DD',
+      'Comp review where compression identified',
+      'First all-hands town hall (script drafted)',
+      'Payroll system cutover confirmation',
+    ];
+    const peopleExtras = [
+      'Union / works-council liaison (where applicable)',
+      'Benefits re-enrollment communication',
+      'Manager-level skip-levels in first 2 weeks',
+    ];
+    const custBase = [
+      'Top customer outreach — CEO-to-CEO calls',
+      'Contract & MSA inventory + renewals schedule',
+    ];
+    const vendBase = [
+      'Top-10 vendor notifications',
+      'AP transition + open-invoice reconciliation',
+    ];
+    const opsBase = [
+      'Legal entity + EIN filings',
+      'Licenses + permits transfer (state-specific)',
+      'First Monday operating cadence defined',
+    ];
+
+    return {
+      'IT / Security':  [...itBase, ...(empFactor > 1.5 ? itExtras : [])],
+      People:           [...peopleBase, ...(empFactor > 1.5 ? peopleExtras : [])],
+      Customers:        [...custBase, ...(custBonus > 0 ? [`Named-contact handoff for ${cust} seller-held relationships`] : [])],
+      Vendors:          vendBase,
+      Operations:       [...opsBase, ...(sysFactor > 1 ? ['Systems migration runbook + dependency map', 'Finance close-cutover rehearsal'] : [])],
+    };
+  }, [ready, emp, sys, cust]);
+
+  const totalCount = useMemo(() => {
+    if (!groups) return 0;
+    return Object.values(groups).reduce((sum, arr) => sum + arr.length, 0);
+  }, [groups]);
+
+  void rev; // rev not used in heuristic currently; kept for future scoring
+  void industry;
+
+  return (
+    <div style={{
+      marginTop: 18,
+      background: '#fff',
+      border: '0.5px solid rgba(0,0,0,0.08)',
+      borderRadius: 14,
+      padding: 22,
+    }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(5, 1fr)',
+        gap: 10,
+      }}>
+        <SelectBlock label="Industry" options={IND_OPTS} value={industry} onChange={setIndustry} />
+        <SelectBlock label="Employees" options={EMP_OPTS} value={emp} onChange={(v) => setEmp(v as EmpBand)} />
+        <SelectBlock label="Revenue"  options={REV_OPTS} value={rev} onChange={(v) => setRev(v as RevBand)} />
+        <SelectBlock label="Seller customer ties" options={CUST_OPTS} value={cust} onChange={(v) => setCust(v as CustBand)} />
+        <SelectBlock label="Systems migration?" options={['yes', 'no'] as const} value={sys} onChange={(v) => setSys(v as 'yes' | 'no')} />
+      </div>
+
+      <div style={{
+        marginTop: 18,
+        padding: 20,
+        background: ready ? '#FAFAFB' : '#FAFAFB',
+        borderRadius: 12,
+        minHeight: 120,
+      }}>
+        {groups ? (
+          <>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 14,
+            }}>
+              <div style={{
+                fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                fontSize: 10,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: '#0A0A0B',
+              }}>Your Day-1 checklist · {totalCount} items</div>
+              <button
+                type="button"
+                onClick={() => onSend(`Generate my full PMI plan — ${industry} · ${emp} employees · ${rev} · ${cust} seller-held customer relationships · systems migration: ${sys}.`)}
+                style={{
+                  background: '#0A0A0B',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 999,
+                  padding: '8px 14px',
+                  fontFamily: 'Sora, sans-serif',
+                  fontWeight: 600,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                }}
+              >Continue with Yulia →</button>
+            </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(5, 1fr)',
+              gap: 10,
+            }}>
+              {Object.entries(groups).map(([group, items]) => (
+                <div key={group} style={{
+                  background: '#fff',
+                  border: '0.5px solid rgba(0,0,0,0.08)',
+                  borderRadius: 10,
+                  padding: 14,
+                  fontSize: 11.5,
+                  lineHeight: 1.5,
+                }}>
+                  <div style={{
+                    fontFamily: 'Sora, sans-serif',
+                    fontWeight: 700,
+                    fontSize: 12,
+                    marginBottom: 8,
+                  }}>{group}</div>
+                  <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: 5 }}>
+                    {items.map((i) => <li key={i}>· {i}</li>)}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div style={{ fontSize: 13, color: '#6B6B70', fontStyle: 'italic' }}>
+            Pick all five inputs to generate a starter checklist.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SelectBlock<T extends string>({ label, options, value, onChange }: {
+  label: string;
+  options: readonly T[];
+  value: string;
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div>
+      <div style={{
+        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+        fontSize: 9.5,
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        color: '#6B6B70',
+        marginBottom: 8,
+      }}>{label}</div>
+      <div style={{ display: 'grid', gap: 4 }}>
+        {options.map((o) => {
+          const active = value === o;
+          return (
+            <button
+              key={o}
+              type="button"
+              onClick={() => onChange(o)}
+              style={{
+                padding: '7px 10px',
+                textAlign: 'left',
+                background: active ? '#0A0A0B' : '#FAFAFB',
+                color: active ? '#fff' : '#1A1C1E',
+                border: 'none',
+                borderRadius: 8,
+                fontFamily: 'Sora, sans-serif',
+                fontWeight: 600,
+                fontSize: 11.5,
+                cursor: 'pointer',
+              }}
+            >{o}</button>
+          );
+        })}
+      </div>
     </div>
   );
 }
