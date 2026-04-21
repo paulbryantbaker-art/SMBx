@@ -716,9 +716,16 @@ chatRouter.get('/conversations/grouped', requireAuth, async (req, res) => {
   try {
     const userId = (req as any).userId;
 
-    // Fetch all active deals for this user
+    // Fetch all active deals for this user. We surface the rich financial +
+    // scoring fields so the mobile shell can render the Apple-App-Store
+    // Today feed (hero valuation, ScoreDonut, stack-ranked by score) without
+    // additional round-trips.
     const deals = await sql`
-      SELECT id, journey_type, current_gate, league, business_name, industry, status, updated_at
+      SELECT id, journey_type, current_gate, league, business_name, industry,
+             status, updated_at,
+             revenue, sde, ebitda, asking_price,
+             seven_factor_composite, seven_factor_scores,
+             employee_count, naics_code
       FROM deals
       WHERE user_id = ${userId} AND status = 'active'
       ORDER BY updated_at DESC
@@ -764,6 +771,17 @@ chatRouter.get('/conversations/grouped', requireAuth, async (req, res) => {
         industry: d.industry,
         status: d.status,
         updated_at: d.updated_at,
+        // Financial fields (BIGINT cents — clients format to dollars)
+        revenue: d.revenue,
+        sde: d.sde,
+        ebitda: d.ebitda,
+        asking_price: d.asking_price,
+        // Scoring fields (composite is 0-100; scores is dim → number JSONB)
+        seven_factor_composite: d.seven_factor_composite,
+        seven_factor_scores: d.seven_factor_scores,
+        // Operating metrics
+        employee_count: d.employee_count,
+        naics_code: d.naics_code,
         conversations: [] as any[],
       });
     }
