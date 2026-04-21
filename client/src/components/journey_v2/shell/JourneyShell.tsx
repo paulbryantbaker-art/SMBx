@@ -30,6 +30,9 @@ import '../../app_v4/chrome/shell.css';
    account buttons, canvas__body padding) take precedence. */
 import '../handoff_v3/page-overrides.css';
 import '../handoff_v3/journey-content.css';
+/* Handoff v4 Home: scoped under #home, only adds styles for the
+   home page's `.h-*` vocabulary — harmless on other routes. */
+import '../handoff_v4/home.css';
 
 export interface JourneyShellProps {
   /** Active journey route — drives the left rail highlight. */

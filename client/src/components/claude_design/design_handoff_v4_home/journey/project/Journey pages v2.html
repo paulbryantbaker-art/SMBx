@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Journey page · 4 variations</title>
+<link rel="stylesheet" href="shared.css" />
+<link rel="stylesheet" href="glass.css" />
+<style>
+  /* ── Canvas scaffold ─────────────────────────────────────────── */
+  :root { --canvas-bg: #ECECEC; --canvas-ink: #1A1A1C; }
+  html, body { min-height: 100%; background: var(--canvas-bg); }
+  .canvas {
+    min-height: 100vh;
+    padding: 56px 40px 120px;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(0,0,0,0.025), transparent 50%),
+      linear-gradient(180deg, #EFEFEF 0%, #E8E8E8 100%);
+  }
+  .canvas__header { max-width: 1400px; margin: 0 auto 48px; }
+  .canvas__kicker {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #6B6B70; margin-bottom: 10px;
+  }
+  .canvas__h1 {
+    font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: 40px; letter-spacing: -0.03em; line-height: 1.04;
+    color: var(--canvas-ink); margin: 0 0 10px;
+  }
+  .canvas__sub {
+    font-family: 'Inter', sans-serif; font-weight: 500;
+    font-size: 15px; line-height: 1.55; color: #3A3A3E; max-width: 720px;
+    margin: 0;
+  }
+  .canvas__toolbar {
+    display: flex; gap: 8px; margin-top: 24px; flex-wrap: wrap;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+  }
+  .canvas__toolbar button {
+    border: 0.5px solid rgba(0,0,0,0.16); background: #fff; color: #0A0A0B;
+    padding: 8px 14px; border-radius: 999px; cursor: pointer; font: inherit;
+    font-weight: 600; letter-spacing: 0.02em;
+    transition: all 150ms;
+  }
+  .canvas__toolbar button:hover { border-color: #0A0A0B; }
+  .canvas__toolbar button.active { background: #0A0A0B; color: #fff; border-color: #0A0A0B; }
+  .canvas__toolbar .sep { width: 0.5px; background: rgba(0,0,0,0.16); margin: 0 4px; }
+
+  /* ── Artboard grid ──────────────────────────────────────────── */
+  .board-grid {
+    display: grid; gap: 64px 48px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 2800px; margin: 0 auto;
+  }
+  .board-grid.single { grid-template-columns: minmax(0, 1fr); max-width: 1400px; }
+
+  .board {
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .board__label {
+    display: flex; align-items: baseline; gap: 10px;
+    margin-bottom: 14px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; letter-spacing: 0.02em; color: #6B6B70;
+  }
+  .board__num {
+    font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: 22px; letter-spacing: -0.02em; color: #0A0A0B;
+  }
+  .board__name {
+    font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: 22px; letter-spacing: -0.02em; color: #0A0A0B;
+  }
+  .board__tag {
+    margin-left: auto;
+    padding: 4px 10px; border-radius: 999px;
+    background: #fff; border: 0.5px solid rgba(0,0,0,0.12);
+    font-size: 10px; font-weight: 600; color: #3A3A3E;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .board__desc {
+    font-family: 'Inter', sans-serif; font-weight: 500;
+    font-size: 13px; line-height: 1.55; color: #52525B;
+    margin-bottom: 18px; max-width: 56ch;
+  }
+  /* The actual frame — scrollable, fixed height, rounded device-like chrome */
+  .board__frame {
+    position: relative;
+    width: 100%;
+    height: 880px;
+    background: #F2F2F4;
+    border-radius: 14px;
+    border: 0.5px solid rgba(0,0,0,0.12);
+    box-shadow:
+      inset 0 0.5px 0 rgba(255,255,255,1),
+      0 2px 6px rgba(0,0,0,0.04),
+      0 20px 60px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .board__frame > iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+  .board__frame--mobile {
+    width: 390px;
+    height: 844px;
+    border-radius: 44px;
+    border: 6px solid #0A0A0B;
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,0.08),
+      0 30px 80px rgba(0,0,0,0.18);
+    margin: 0 auto;
+  }
+  .board__frame--mobile > iframe { border-radius: 38px; }
+
+  /* Single-focus mode */
+  body.focused .canvas { padding: 24px; }
+  body.focused .board__frame { height: calc(100vh - 200px); min-height: 720px; }
+  body.focused .board__desc { display: none; }
+
+  /* Mobile-mode — show all frames as mobile */
+  body.mobile .board__frame { width: 390px; height: 844px; border-radius: 44px; border: 6px solid #0A0A0B; margin: 0 auto; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), 0 30px 80px rgba(0,0,0,0.18); }
+  body.mobile .board__frame > iframe { border-radius: 38px; }
+
+  @media (max-width: 1280px) {
+    .board-grid { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+</head>
+<body>
+  <div class="canvas">
+    <header class="canvas__header">
+      <div class="canvas__kicker">smbx.ai · desktop journey pages · v2 exploration</div>
+      <h1 class="canvas__h1">Four ways to make the journey pages pull visitors into the chat.</h1>
+      <p class="canvas__sub">
+        The current <code>/sell</code>, <code>/buy</code>, <code>/raise</code>, <code>/integrate</code> pages
+        read as marketing scrolls with occasional chat moments. These four reframings each commit harder to the
+        "chat&#8209;first, the&nbsp;page&nbsp;is&nbsp;the&nbsp;product" thesis — same Glass Grok vocabulary,
+        different posture. Using /sell as the working example; structure transfers to the other three.
+        Scroll inside each artboard.
+      </p>
+      <div class="canvas__toolbar" role="toolbar">
+        <button id="viewAll" class="active" type="button">All 4</button>
+        <button id="viewV1" type="button">V1 · Live Deal Room</button>
+        <button id="viewV2" type="button">V2 · Conversation Canvas</button>
+        <button id="viewV3" type="button">V3 · Deal Ticker</button>
+        <button id="viewV4" type="button">V4 · Filmic Anchors</button>
+        <span class="sep"></span>
+        <button id="viewport-desktop" class="active" type="button">Desktop</button>
+        <button id="viewport-mobile" type="button">Mobile</button>
+      </div>
+    </header>
+
+    <div class="board-grid" id="grid">
+      <section class="board" data-variant="v1">
+        <div class="board__label">
+          <span class="board__num">01</span>
+          <span class="board__name">Live Deal Room</span>
+          <span class="board__tag">Split screen</span>
+        </div>
+        <p class="board__desc">
+          Sticky chat rail on the left with a live scripted Yulia thread. The right side is a scrollable workbench —
+          add-back schedule, CIM preview, IOI matrix — that <em>reacts</em> to where you are in the chat.
+          The marketing copy is the UI. Feels like you're already using the product.
+        </p>
+        <div class="board__frame"><iframe src="v1-deal-room.html" title="V1 Live Deal Room" loading="lazy"></iframe></div>
+      </section>
+
+      <section class="board" data-variant="v2">
+        <div class="board__label">
+          <span class="board__num">02</span>
+          <span class="board__name">Conversation Canvas</span>
+          <span class="board__tag">Scroll = dialogue</span>
+        </div>
+        <p class="board__desc">
+          The whole page is one long chat thread — Yulia pitching the product to you, answering the objections you
+          haven't asked yet. Scroll-spy marker on the right tells you where you are. You can jump in at any
+          point by tapping a message. No brochure sections, no zigzag heroes — just a conversation that sells.
+        </p>
+        <div class="board__frame"><iframe src="v2-conversation.html" title="V2 Conversation Canvas" loading="lazy"></iframe></div>
+      </section>
+
+      <section class="board" data-variant="v3">
+        <div class="board__label">
+          <span class="board__num">03</span>
+          <span class="board__name">Deal Ticker</span>
+          <span class="board__tag">Proof-in-motion</span>
+        </div>
+        <p class="board__desc">
+          A live, anonymized feed of deals that just closed, CIMs that just shipped, rundowns that just ran.
+          Visitor can tap any row to "replay" what Yulia did. The ticker becomes the product demo.
+          Sticky chat pill at the bottom. Strong social proof, high motion, close to Bloomberg&#8209;terminal in spirit.
+        </p>
+        <div class="board__frame"><iframe src="v3-ticker.html" title="V3 Deal Ticker" loading="lazy"></iframe></div>
+      </section>
+
+      <section class="board" data-variant="v4">
+        <div class="board__label">
+          <span class="board__num">04</span>
+          <span class="board__name">Filmic Anchors</span>
+          <span class="board__tag">Editorial</span>
+        </div>
+        <p class="board__desc">
+          Maximum restraint. A handful of oversized anchors — "<em>$1.1M.</em>", "<em>Three weeks ago you wouldn't have known.</em>" —
+          each with a single chat prompt attached. Between anchors, full-bleed monochrome mockups. The scroll rhythm is cinematic.
+          For visitors who need to feel the stakes before they ask anything.
+        </p>
+        <div class="board__frame"><iframe src="v4-filmic.html" title="V4 Filmic Anchors" loading="lazy"></iframe></div>
+      </section>
+    </div>
+  </div>
+
+<script>
+  // Toolbar wiring — focus / all / mobile-desktop toggle, persisted in localStorage.
+  const store = {
+    get: k => { try { return localStorage.getItem('jv2.' + k); } catch { return null; } },
+    set: (k, v) => { try { localStorage.setItem('jv2.' + k, v); } catch {} },
+  };
+
+  const grid = document.getElementById('grid');
+  const allBtn = document.getElementById('viewAll');
+  const focusBtns = {
+    v1: document.getElementById('viewV1'),
+    v2: document.getElementById('viewV2'),
+    v3: document.getElementById('viewV3'),
+    v4: document.getElementById('viewV4'),
+  };
+  const vpDesktop = document.getElementById('viewport-desktop');
+  const vpMobile = document.getElementById('viewport-mobile');
+
+  function applyFocus(which) {
+    store.set('focus', which);
+    [allBtn, ...Object.values(focusBtns)].forEach(b => b.classList.remove('active'));
+    if (which === 'all') {
+      allBtn.classList.add('active');
+      grid.classList.remove('single');
+      document.body.classList.remove('focused');
+      grid.querySelectorAll('.board').forEach(b => b.style.display = '');
+    } else {
+      focusBtns[which].classList.add('active');
+      grid.classList.add('single');
+      document.body.classList.add('focused');
+      grid.querySelectorAll('.board').forEach(b => {
+        b.style.display = b.dataset.variant === which ? '' : 'none';
+      });
+    }
+  }
+  function applyViewport(which) {
+    store.set('vp', which);
+    vpDesktop.classList.toggle('active', which === 'desktop');
+    vpMobile.classList.toggle('active', which === 'mobile');
+    document.body.classList.toggle('mobile', which === 'mobile');
+    // Tell each iframe so it can adjust if it wants to.
+    grid.querySelectorAll('iframe').forEach(f => {
+      try { f.contentWindow?.postMessage({ type: 'jv2:viewport', which }, '*'); } catch {}
+    });
+  }
+
+  allBtn.addEventListener('click', () => applyFocus('all'));
+  Object.entries(focusBtns).forEach(([k, b]) => b.addEventListener('click', () => applyFocus(k)));
+  vpDesktop.addEventListener('click', () => applyViewport('desktop'));
+  vpMobile.addEventListener('click', () => applyViewport('mobile'));
+
+  applyFocus(store.get('focus') || 'all');
+  applyViewport(store.get('vp') || 'desktop');
+</script>
+</body>
+</html>

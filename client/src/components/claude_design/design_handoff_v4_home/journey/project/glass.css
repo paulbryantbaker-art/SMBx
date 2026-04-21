@@ -1,0 +1,1044 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Glass Grok — smbx.ai public-site design system
+   ═══════════════════════════════════════════════════════════════════════
+   Monochrome chrome, content-only color, Apple-glass floating surfaces.
+   Canonical in light mode. Sora display + Inter body.
+
+   Source of truth: Glass Grok/glass-grok-style-guide.html
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Surfaces ─────────────────────────────────────────────────── */
+  --gg-bg-app:     #F2F2F4;
+  --gg-bg-card:    #FFFFFF;
+  --gg-bg-subtle:  #F5F5F7;
+  --gg-bg-muted:   #E8E8EB;
+  --gg-bg-dark:    #0A0A0B;
+
+  /* ── Glass intensities ────────────────────────────────────────── */
+  --gg-glass-light:   rgba(255, 255, 255, 0.72);
+  --gg-glass-med:     rgba(255, 255, 255, 0.78);
+  --gg-glass-strong:  rgba(255, 255, 255, 0.88);
+
+  /* ── Text ─────────────────────────────────────────────────────── */
+  --gg-text-primary:   #0A0A0B;
+  --gg-text-secondary: #3A3A3E;
+  --gg-text-muted:     #6B6B70;
+  --gg-text-faint:     #9A9A9F;
+  --gg-text-inv:       #FFFFFF;
+
+  /* ── Borders ──────────────────────────────────────────────────── */
+  --gg-border:         rgba(0, 0, 0, 0.08);
+  --gg-border-solid:   #E5E5E7;
+  --gg-border-strong:  #D1D1D4;
+
+  /* ── Accent (black, not a brand hue) ──────────────────────────── */
+  --gg-accent:       #0A0A0B;
+  --gg-accent-fill:  rgba(10, 10, 11, 0.06);
+
+  /* ── Content-level status (never in chrome) ───────────────────── */
+  --gg-dot-ready:    #22A755;
+  --gg-dot-progress: #E8A033;
+  --gg-dot-flag:     #DC2626;
+  --gg-dot-draft:    #9A9A9F;
+
+  /* ── Score band pairs (desaturated tint + darker text) ────────── */
+  --gg-band-hi-bg:  #DCFCE7;  --gg-band-hi-fg:  #166534;
+  --gg-band-med-bg: #FEF3C7;  --gg-band-med-fg: #92400E;
+  --gg-band-low-bg: #F1F1F2;  --gg-band-low-fg: #52525B;
+  --gg-band-flag-bg:#FEE2E2;  --gg-band-flag-fg:#991B1B;
+
+  /* ── Type ─────────────────────────────────────────────────────── */
+  --gg-display: 'Sora', system-ui, sans-serif;
+  --gg-body:    'Inter', system-ui, sans-serif;
+
+  /* ── Spacing (4px base) ───────────────────────────────────────── */
+  --gg-s1:  4px;
+  --gg-s2:  8px;
+  --gg-s3:  12px;
+  --gg-s4:  16px;
+  --gg-s5:  20px;
+  --gg-s6:  24px;
+  --gg-s7:  28px;
+  --gg-s8:  32px;
+  --gg-s10: 40px;
+  --gg-s14: 56px;
+
+  /* ── Radius ───────────────────────────────────────────────────── */
+  --gg-r-small:   6px;
+  --gg-r-btn:    10px;
+  --gg-r-card-s: 14px;
+  --gg-r-card:   18px;
+  --gg-r-hero:   22px;
+  --gg-r-chat:   20px;
+  --gg-r-pill:   999px;
+
+  /* ── Motion ───────────────────────────────────────────────────── */
+  --gg-ease-snap:    cubic-bezier(0.4, 0, 0.2, 1);        /* 150ms · chips, hover */
+  --gg-ease-spring:  cubic-bezier(0.32, 0.72, 0, 1);      /* 300–400ms · structural */
+  --gg-t-feedback:   150ms;
+  --gg-t-structural: 300ms;
+  --gg-t-morph:      400ms;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   GLASS RECIPE — chrome that floats over content
+   ═══════════════════════════════════════════════════════════════════════
+   The specular highlight (inset 0 0.5px) is non-negotiable. Without it,
+   translucent surfaces read as tinted overlay, not glass.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-glass,
+.gg-glass-med,
+.gg-glass-strong {
+  backdrop-filter: blur(32px) saturate(1.8);
+  -webkit-backdrop-filter: blur(32px) saturate(1.8);
+  border: 0.5px solid var(--gg-border);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.9),
+    0 6px 24px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.gg-glass        { background: var(--gg-glass-light); }
+.gg-glass-med    { background: var(--gg-glass-med); }
+.gg-glass-strong { background: var(--gg-glass-strong); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CONTENT SURFACES — solid, never glass
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-card {
+  background: var(--gg-bg-card);
+  border: 0.5px solid var(--gg-border);
+  border-radius: var(--gg-r-card);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 1),
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 4px 16px rgba(0, 0, 0, 0.04);
+  transition:
+    transform var(--gg-t-structural) var(--gg-ease-spring),
+    box-shadow var(--gg-t-structural) var(--gg-ease-spring);
+}
+/* Subtle lift on hover for interactive content cards. Opt out with
+   .gg-card--static if the card shouldn't respond (e.g. large hero
+   mockups where motion feels wrong). */
+.gg-card:not(.gg-card--static):hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 1),
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 6px 20px rgba(0, 0, 0, 0.07);
+}
+.gg-card--clickable { cursor: pointer; }
+.gg-card--clickable:hover {
+  border-color: var(--gg-text-primary);
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 1),
+    0 2px 6px rgba(0, 0, 0, 0.06),
+    0 10px 28px rgba(0, 0, 0, 0.09);
+}
+.gg-card--clickable:focus-visible {
+  outline: 2px solid var(--gg-text-primary);
+  outline-offset: 2px;
+}
+.gg-card-hero {
+  background: var(--gg-bg-card);
+  border: 0.5px solid var(--gg-border);
+  border-radius: var(--gg-r-hero);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 1),
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CHAT INPUT — the conversion element. On every public page.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Grok-inspired pill: fully rounded (999px), beefier elevation,
+   asymmetric padding (more room on the text side, tight on the action
+   side), all action buttons circular. The send button is the darkest
+   element on the page — the one thing that screams "click me." */
+.gg-chat {
+  background: var(--gg-bg-card);
+  border: 0.5px solid var(--gg-border);
+  border-radius: var(--gg-r-pill);
+  padding: 8px 8px 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 56px;
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 1),
+    0 10px 32px rgba(0, 0, 0, 0.07),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+  transition:
+    border-color var(--gg-t-feedback) var(--gg-ease-snap),
+    box-shadow var(--gg-t-feedback) var(--gg-ease-snap);
+}
+.gg-chat:focus-within {
+  border-color: rgba(0, 0, 0, 0.24);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 1),
+    0 12px 36px rgba(0, 0, 0, 0.09),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+}
+.gg-chat__plus {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--gg-text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; border: 0; padding: 0; cursor: pointer;
+  margin-left: -10px; /* tucks the button closer to the pill edge than the text padding */
+  transition:
+    background var(--gg-t-feedback) var(--gg-ease-snap),
+    color var(--gg-t-feedback) var(--gg-ease-snap);
+}
+.gg-chat__plus:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--gg-text-primary);
+}
+.gg-chat__field {
+  flex: 1; min-width: 0;
+  border: 0; outline: 0; background: transparent;
+  font-family: var(--gg-body); font-weight: 500;
+  font-size: 15px; line-height: 1.4;
+  color: var(--gg-text-primary);
+  padding: 0 8px;
+}
+.gg-chat__field::placeholder { color: var(--gg-text-faint); }
+.gg-chat__send {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--gg-accent);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; border: 0; padding: 0; cursor: pointer;
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.18);
+  transition:
+    transform var(--gg-t-feedback) var(--gg-ease-snap),
+    background var(--gg-t-feedback) var(--gg-ease-snap);
+}
+.gg-chat__send:hover { transform: scale(1.06); }
+.gg-chat__send:active { transform: scale(0.96); }
+.gg-chat__send:disabled {
+  opacity: 0.35;
+  cursor: default;
+  background: var(--gg-text-secondary);
+}
+.gg-chat__send:disabled:hover { transform: none; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CHIPS — pill-shape, hairline, white default, black active
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-chip {
+  display: inline-flex; align-items: center;
+  flex-shrink: 0;
+  background: var(--gg-bg-card);
+  border: 0.5px solid var(--gg-border);
+  border-radius: var(--gg-r-pill);
+  padding: 8px 14px;
+  font-family: var(--gg-body);
+  font-size: 13px; font-weight: 600;
+  color: var(--gg-text-primary);
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 1);
+  transition:
+    background var(--gg-t-feedback) var(--gg-ease-snap),
+    color      var(--gg-t-feedback) var(--gg-ease-snap),
+    border-color var(--gg-t-feedback) var(--gg-ease-snap);
+}
+.gg-chip:hover { border-color: rgba(0, 0, 0, 0.2); }
+.gg-chip.active,
+.gg-chip[aria-pressed='true'] {
+  background: var(--gg-accent);
+  color: var(--gg-text-inv);
+  border-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BUTTONS — primary black, ghost transparent. Rectangle or pill.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 11px 18px;
+  border-radius: var(--gg-r-btn);
+  font-family: var(--gg-body);
+  font-size: 13px; font-weight: 700;
+  border: 0; cursor: pointer;
+  transition: all var(--gg-t-feedback) var(--gg-ease-snap);
+}
+.gg-btn--primary {
+  background: var(--gg-accent);
+  color: var(--gg-text-inv);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.15),
+    0 1px 3px rgba(0, 0, 0, 0.15);
+}
+.gg-btn--primary:hover { transform: translateY(-0.5px); }
+.gg-btn--ghost {
+  background: transparent;
+  color: var(--gg-text-primary);
+  border: 0.5px solid rgba(0, 0, 0, 0.12);
+}
+.gg-btn--ghost:hover { border-color: rgba(0, 0, 0, 0.24); }
+.gg-btn--pill { border-radius: var(--gg-r-pill); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   YULIA AVATAR — the one piece of character in monochrome chrome
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-yulia {
+  background: linear-gradient(135deg, #3A3A3E 0%, #0A0A0B 100%);
+  color: var(--gg-text-inv);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--gg-display);
+  font-weight: 800;
+  flex-shrink: 0;
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.15),
+    0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   NAV PILL — floating glass, public pages
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-nav {
+  background: var(--gg-glass-strong);
+  backdrop-filter: blur(28px) saturate(1.8);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  border: 0.5px solid var(--gg-border);
+  border-radius: var(--gg-r-card-s);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.9),
+    0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TYPE SCALE — display and body
+   Desktop spec: bigger and heavier than mobile. H1 88px home / 72px
+   journey, H2 52px section / 44px hero-block, stat 72px.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-h1 {
+  font-family: var(--gg-display);
+  font-weight: 800;
+  /* Hero is the biggest element on any page — full stop. Prior sizes
+     (max 88px for home, 72px for journey heroes) left the GiantAnchor
+     sections reading as bigger than the hero, which inverted the
+     visual hierarchy. Home hero now tops out at 120px; journey heroes
+     at 108px. text-wrap: balance handles natural line breaks. */
+  font-size: clamp(52px, 8.5vw, 120px);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  color: var(--gg-text-primary);
+  text-wrap: balance;
+}
+.gg-h1--journey {
+  font-size: clamp(46px, 7.2vw, 108px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+.gg-h2 {
+  font-family: var(--gg-display);
+  font-weight: 800;
+  font-size: clamp(28px, 4.2vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--gg-text-primary);
+  text-wrap: balance;
+}
+.gg-h2--block {
+  /* H2 used inside a two-column zigzag (paired with a product mockup);
+     a notch smaller than section-intro H2. */
+  font-size: clamp(28px, 3.2vw, 44px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+.gg-h3 {
+  font-family: var(--gg-display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--gg-text-primary);
+}
+.gg-stat {
+  font-family: var(--gg-display);
+  font-weight: 800;
+  font-size: clamp(52px, 6.5vw, 72px);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--gg-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.gg-eyebrow {
+  font-family: var(--gg-display);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gg-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+/* Line prefix on the eyebrow (small stroke before the label). Present on
+   desktop heroes; auto-shown via CSS without extra markup. */
+.gg-eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+.gg-eyebrow--plain::before { display: none; }
+.gg-body {
+  font-family: var(--gg-body);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--gg-text-secondary);
+}
+.gg-body--lead {
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--gg-text-secondary);
+  font-weight: 500;
+}
+.gg-body--sub {
+  /* Section sub-headline (under H2, before content). */
+  font-family: var(--gg-body);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--gg-text-secondary);
+  max-width: 780px;
+}
+.gg-label {
+  font-family: var(--gg-display);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gg-text-muted);
+}
+
+/* Stronger label variant for input / picker rows. The default .gg-label
+   is a section eyebrow (faint, tracked-wide) — great above an H2 where
+   the H2 carries the weight. But as a form-field label above chip rows
+   it disappears, leaving the visitor guessing what each row means.
+   .gg-input-label bumps weight to 800, pulls color to primary black,
+   tightens tracking, and prefixes a 16×2px dash mark — a Glass Grok
+   signature hairline — so the label scans clearly without breaking the
+   monochrome rule. Paired with a slightly larger font-size. */
+.gg-input-label {
+  font-family: var(--gg-display);
+  font-weight: 800;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gg-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.gg-input-label::before {
+  content: '';
+  width: 16px;
+  height: 2px;
+  background: var(--gg-text-primary);
+  flex-shrink: 0;
+  border-radius: 1px;
+}
+.gg-logo {
+  font-family: var(--gg-display);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: inherit;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION RHYTHM — banding without color
+   Desktop: alternating app-grey → white → app-grey → white → dark.
+   Content cap 1360px, padding 72px (clamp on smaller screens).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-section {
+  padding: clamp(48px, 6vw, 96px) clamp(20px, 5vw, 72px);
+}
+.gg-section__inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  width: 100%;
+}
+/* .gg-section--tint: deliberately a no-op now. The tint-band-on-app-bg
+   rhythm read as ugly stripes on short sections (Paul's call). We keep
+   the variant prop + class so Section({variant:'tint'}) calls in page
+   code don't break, but the band is invisible — section content just
+   sits on the app bg like every other section. For visual containment
+   on specific blocks, use a gg-card wrapper inside the section instead. */
+.gg-section--tint { background: transparent; }
+.gg-section--dark {
+  background: var(--gg-accent);
+  color: var(--gg-text-inv);
+}
+.gg-section--dark .gg-h2,
+.gg-section--dark .gg-h3,
+.gg-section--dark .gg-stat { color: var(--gg-text-inv); }
+.gg-section--dark .gg-body { color: #C5C5CA; }
+.gg-section--dark .gg-eyebrow,
+.gg-section--dark .gg-label { color: #9A9AA0; }
+.gg-section--dark .gg-body--sub { color: #C5C5CA; }
+
+/* Two-column zigzag — the "text + mockup" hero-section pattern.
+   Default is 50/50. Asymmetric variants break monotony across the
+   three hero sections on a journey page — no two ratios in a row. */
+.gg-two-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(32px, 4vw, 64px);
+  align-items: center;
+}
+@media (min-width: 900px) {
+  .gg-two-col             { grid-template-columns: 1fr 1fr;      gap: 80px; }
+  .gg-two-col--55-45      { grid-template-columns: 55fr 45fr;    gap: 72px; }
+  .gg-two-col--60-40      { grid-template-columns: 60fr 40fr;    gap: 64px; }
+  .gg-two-col--40-60      { grid-template-columns: 40fr 60fr;    gap: 64px; }
+  .gg-two-col--45-55      { grid-template-columns: 45fr 55fr;    gap: 72px; }
+  .gg-two-col--70-30      { grid-template-columns: 70fr 30fr;    gap: 56px; }
+  .gg-two-col--reverse > *:first-child { order: 2; }
+}
+
+/* Card escape — lets a mockup card break out of its section's left/right
+   padding and gain a slight rotation. The card feels pinned to the page,
+   not the column. Desktop only — mobile keeps containment. */
+@media (min-width: 900px) {
+  .gg-card--escape-right { margin-right: -48px; transform: rotate(1deg); }
+  .gg-card--escape-left  { margin-left:  -48px; transform: rotate(-1deg); }
+  .gg-card--escape-wide  { margin-left:  -24px; margin-right: -24px; }
+  .gg-card--escape-right:hover,
+  .gg-card--escape-left:hover,
+  .gg-card--escape-wide:hover { transform: rotate(0) translateY(-2px); }
+}
+
+/* Big-stat block — a mid-copy inline stat that dominates its paragraph.
+   Used sparingly: one per journey page, at the moment the number IS the
+   story (e.g. "$1.1M average hidden value", "87 / Pursue", "$6.5M delta").
+   Sits in body flow, breaks the rhythm with scale. */
+.gg-bigstat {
+  display: block;
+  font-family: var(--gg-display);
+  font-weight: 800;
+  font-size: clamp(56px, 8vw, 112px);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--gg-text-primary);
+  font-variant-numeric: tabular-nums;
+  margin: clamp(24px, 3vw, 40px) 0 clamp(12px, 1.6vw, 20px);
+}
+.gg-bigstat + .gg-bigstat__cap {
+  display: block;
+  font-family: var(--gg-display);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gg-text-muted);
+  margin-bottom: clamp(16px, 2vw, 24px);
+}
+
+/* Grid background — 64px squares with radial mask fade. Desktop only.
+   Applied on hero surfaces to add texture without noise. */
+.gg-grid-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+}
+.gg-hero-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(10, 10, 11, 0.025) 0%, transparent 40%),
+    radial-gradient(circle at 85% 60%, rgba(10, 10, 11, 0.02) 0%, transparent 50%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STATUS PILLS — dot carries the signal, pill stays monochrome
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--gg-bg-card);
+  border: 0.5px solid var(--gg-border);
+  border-radius: var(--gg-r-pill);
+  padding: 5px 10px 5px 9px;
+  font-family: var(--gg-body);
+  font-size: 10.5px; font-weight: 600;
+  color: var(--gg-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.gg-status__dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.gg-status__dot--ready    { background: var(--gg-dot-ready); }
+.gg-status__dot--progress { background: var(--gg-dot-progress); }
+.gg-status__dot--flag     { background: var(--gg-dot-flag); }
+.gg-status__dot--draft    { background: var(--gg-dot-draft); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESPONSIVE VISIBILITY — desktop shell vs mobile pill nav
+   Desktop breakpoint: 1024px. At/above, the app shell (sidebar +
+   topbar) is canonical. Below, the floating nav pill takes over.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Force display:none at low specificity loses to inline `display: flex`
+   on the container. Use !important so the media query is authoritative —
+   the Page primitive sets `display: flex` inline for layout when visible,
+   but the shell itself must be invisible below the breakpoint. */
+.gg-desktop-only { display: none !important; }
+.gg-mobile-only  { display: flex !important; }
+@media (min-width: 1024px) {
+  .gg-desktop-only { display: flex !important; }
+  .gg-mobile-only  { display: none !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   APP SHELL — Sidebar (68px) + TopBar (64px) + Main.
+   Sidebar is solid white, icon-only nav. TopBar is glass-strong.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-shell {
+  display: grid;
+  grid-template-columns: 68px 1fr;
+  min-height: 100%;
+  width: 100%;
+}
+.gg-sidebar {
+  background: var(--gg-bg-card);
+  border-right: 0.5px solid var(--gg-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 25;
+}
+.gg-sidebar__mark {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  margin-bottom: 28px;
+}
+.gg-sidebar__group-label {
+  font-family: var(--gg-display);
+  font-weight: 700;
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  color: var(--gg-text-faint);
+  text-transform: uppercase;
+  margin: 10px 0 8px;
+  width: 100%;
+  text-align: center;
+}
+.gg-sidebar__item {
+  width: 44px; height: 44px;
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gg-text-muted);
+  margin-bottom: 4px;
+  cursor: pointer;
+  border: 0; padding: 0; background: transparent;
+  transition:
+    background var(--gg-t-feedback) var(--gg-ease-snap),
+    color      var(--gg-t-feedback) var(--gg-ease-snap);
+}
+.gg-sidebar__item:hover {
+  background: var(--gg-bg-subtle);
+  color: var(--gg-text-primary);
+}
+.gg-sidebar__item.active,
+.gg-sidebar__item[aria-current='page'] {
+  background: var(--gg-bg-muted);
+  color: var(--gg-text-primary);
+}
+.gg-sidebar__sep {
+  width: 32px; height: 0.5px;
+  background: var(--gg-border);
+  margin: 12px 0;
+}
+.gg-sidebar__bottom {
+  margin-top: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding-bottom: 4px;
+}
+
+/* Primary-style CTA button at the bottom of the sidebar. Black-filled
+   44×44 circle with an arrow — the "Start free" affordance. */
+.gg-sidebar__cta {
+  width: 44px; height: 44px;
+  border-radius: var(--gg-r-btn);
+  background: var(--gg-accent);
+  color: var(--gg-text-inv);
+  display: flex; align-items: center; justify-content: center;
+  border: 0; padding: 0; cursor: pointer;
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.15),
+    0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform var(--gg-t-feedback) var(--gg-ease-snap);
+}
+.gg-sidebar__cta:hover { transform: translateY(-1px); }
+
+.gg-topbar {
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  border-bottom: 0.5px solid var(--gg-border);
+  background: var(--gg-glass-strong);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.gg-topbar__nav {
+  display: flex;
+  gap: 4px;
+}
+.gg-topbar__link {
+  font-family: var(--gg-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gg-text-muted);
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  transition: all var(--gg-t-feedback) var(--gg-ease-snap);
+}
+.gg-topbar__link:hover {
+  color: var(--gg-text-primary);
+  background: var(--gg-bg-subtle);
+}
+.gg-topbar__link.active,
+.gg-topbar__link[aria-current='page'] {
+  color: var(--gg-text-primary);
+  background: var(--gg-bg-muted);
+}
+.gg-topbar__right {
+  display: flex; gap: 10px; align-items: center;
+}
+
+/* Topbar responsive compression. Below 1200px drop font size + tighten
+   padding so 7 links + logo + CTA still fit. Below 1100px, hide the
+   less-primary links (How / Enterprise) — they're reachable via the
+   sidebar. Below 900px the mobile pill nav takes over entirely. */
+@media (max-width: 1200px) {
+  .gg-topbar { padding: 0 20px; }
+  .gg-topbar__link { font-size: 12.5px; padding: 8px 10px; }
+  .gg-topbar__nav { gap: 2px; }
+}
+@media (max-width: 1100px) {
+  .gg-topbar__link[data-tier='secondary'] { display: none; }
+}
+.gg-topbar__signin {
+  font-family: var(--gg-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gg-text-muted);
+  padding: 8px 14px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+.gg-topbar__signin:hover { color: var(--gg-text-primary); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MOTION — frost-in, morph, reduced-motion
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@keyframes gg-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes gg-frost-in {
+  from { opacity: 0; backdrop-filter: blur(0); -webkit-backdrop-filter: blur(0); }
+  to   { opacity: 1; backdrop-filter: blur(32px) saturate(1.8); -webkit-backdrop-filter: blur(32px) saturate(1.8); }
+}
+.gg-enter { animation: gg-fade-up var(--gg-t-morph) var(--gg-ease-spring) both; }
+
+/* Hero chat-pill attention pulse — plays once ~2.5s after mount, AFTER
+   stage 2 of the home page cascade lands (peek stack + trust bar have
+   faded in). Scales the pill imperceptibly and ripples a soft halo
+   outward over 1.2s — slower than before, reads as a breath not a tap. */
+/* Keyframes preserve the new Grok-style base shadow (10px elevation +
+   2px crisp) and just ripple an outer halo ring through the 4-slot
+   box-shadow stack. Without this, the pulse would flatten the pill to
+   a 1px shadow for the 1.2s animation window. */
+@keyframes gg-chat-hero-pulse {
+  0% {
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 1),
+      0 10px 32px rgba(0, 0, 0, 0.07),
+      0 2px 6px rgba(0, 0, 0, 0.04),
+      0 0 0 0 rgba(10, 10, 11, 0);
+    transform: scale(1);
+  }
+  40% {
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 1),
+      0 12px 36px rgba(0, 0, 0, 0.08),
+      0 2px 6px rgba(0, 0, 0, 0.04),
+      0 0 0 18px rgba(10, 10, 11, 0.09);
+    transform: scale(1.015);
+  }
+  100% {
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 1),
+      0 10px 32px rgba(0, 0, 0, 0.07),
+      0 2px 6px rgba(0, 0, 0, 0.04),
+      0 0 0 0 rgba(10, 10, 11, 0);
+    transform: scale(1);
+  }
+}
+.gg-chat--hero-pulse {
+  animation: gg-chat-hero-pulse 1200ms cubic-bezier(0.19, 1, 0.22, 1) 2500ms both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gg-chat--hero-pulse { animation: none !important; }
+}
+
+/* Typewriter caret — blinks while the hero H1 is still typing. */
+@keyframes gg-caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+.gg-caret {
+  display: inline-block;
+  width: 0.08em;
+  height: 0.85em;
+  background: currentColor;
+  margin-left: 0.08em;
+  vertical-align: -0.08em;
+  border-radius: 1px;
+  animation: gg-caret-blink 900ms steps(1, end) infinite;
+}
+
+/* Scroll-driven reveal — pure CSS via animation-timeline:view().
+   Chrome/Edge/Safari: elements fade up + scale up as they enter the
+   viewport. Firefox (flag only): stays visible (no animation).
+
+   Dedicated keyframe (not the shared gg-fade-up) so scroll reveals can
+   use a larger displacement + scale without affecting on-mount fades
+   elsewhere. 28px lift + 0.98→1 scale + opacity on easeOutExpo feels
+   cinematic — matches the home cascade's curve so the site reads as
+   one design system whether you're on the home hero or deep in /sell. */
+@keyframes gg-scroll-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@supports (animation-timeline: view()) {
+  .gg-reveal {
+    opacity: 0;
+    transform: translateY(28px) scale(0.985);
+    animation: gg-scroll-reveal cubic-bezier(0.19, 1, 0.22, 1) both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 80%;
+  }
+}
+
+/* Section-level stagger — each direct child of a section fades + lifts
+   in sequence when .gg-stagger-children--in is toggled on the parent.
+   Used inside the home cascade so valuation demo and chat starters
+   don't appear as one block — label, headline, sub, grid each land
+   on their own beat, 120ms apart.
+   Plays on the same easeOutExpo curve as the section wrappers. */
+.gg-stagger-children > * {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 700ms cubic-bezier(0.19, 1, 0.22, 1),
+    transform 700ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+.gg-stagger-children.gg-stagger-children--in > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+.gg-stagger-children.gg-stagger-children--in > *:nth-child(1) { transition-delay: 0ms; }
+.gg-stagger-children.gg-stagger-children--in > *:nth-child(2) { transition-delay: 120ms; }
+.gg-stagger-children.gg-stagger-children--in > *:nth-child(3) { transition-delay: 240ms; }
+.gg-stagger-children.gg-stagger-children--in > *:nth-child(4) { transition-delay: 360ms; }
+.gg-stagger-children.gg-stagger-children--in > *:nth-child(5) { transition-delay: 480ms; }
+.gg-stagger-children.gg-stagger-children--in > *:nth-child(6) { transition-delay: 600ms; }
+
+/* Responsive demo grid — 2-col on desktop, 1-col on mobile.
+   Replaces the inline 'minmax(0, 1.1fr) minmax(0, 1fr)' grid that
+   didn't collapse: on narrow viewports both columns squished and the
+   chip rows and output card overlapped. Used by ValuationDemo,
+   DealRundownPreview, CapitalStackSizer — any "inputs + output card"
+   interactive. */
+.gg-demo-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .gg-demo-grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 32px;
+  }
+}
+
+/* Card-grid stagger — each direct child fades + lifts in sequence
+   when the grid enters viewport via IntersectionObserver (JS toggles
+   .gg-card-grid--in). Pure CSS handles the per-child delay via
+   :nth-child so stagger works without tagging each card. */
+.gg-card-grid > * {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 500ms var(--gg-ease-spring),
+    transform 500ms var(--gg-ease-spring);
+}
+.gg-card-grid--in > * { opacity: 1; transform: translateY(0); }
+.gg-card-grid--in > *:nth-child(1)  { transition-delay: 60ms; }
+.gg-card-grid--in > *:nth-child(2)  { transition-delay: 130ms; }
+.gg-card-grid--in > *:nth-child(3)  { transition-delay: 200ms; }
+.gg-card-grid--in > *:nth-child(4)  { transition-delay: 270ms; }
+.gg-card-grid--in > *:nth-child(5)  { transition-delay: 340ms; }
+.gg-card-grid--in > *:nth-child(6)  { transition-delay: 410ms; }
+.gg-card-grid--in > *:nth-child(7)  { transition-delay: 480ms; }
+.gg-card-grid--in > *:nth-child(8)  { transition-delay: 550ms; }
+.gg-card-grid--in > *:nth-child(9)  { transition-delay: 620ms; }
+.gg-card-grid--in > *:nth-child(10) { transition-delay: 690ms; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION NAV (in-page TOC) — sticky right rail on long journey pages.
+   Desktop only, small footprint. Scroll-spy via IntersectionObserver
+   wires the active state. Auto-hides below 1280px (narrow desktop).
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.gg-secnav {
+  display: none;
+}
+@media (min-width: 1280px) {
+  .gg-secnav {
+    display: flex;
+    position: fixed;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-50%);
+    z-index: 15;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    background: var(--gg-glass-strong);
+    backdrop-filter: blur(28px) saturate(1.8);
+    -webkit-backdrop-filter: blur(28px) saturate(1.8);
+    border: 0.5px solid var(--gg-border);
+    border-radius: 14px;
+    box-shadow:
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.9),
+      0 6px 24px rgba(0, 0, 0, 0.06);
+    font-family: var(--gg-display);
+  }
+}
+.gg-secnav__item {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gg-text-muted);
+  background: transparent;
+  border: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  transition: color var(--gg-t-feedback) var(--gg-ease-snap),
+              background var(--gg-t-feedback) var(--gg-ease-snap);
+}
+.gg-secnav__item:hover {
+  color: var(--gg-text-primary);
+  background: var(--gg-bg-subtle);
+}
+.gg-secnav__item.active {
+  color: var(--gg-text-primary);
+  background: var(--gg-bg-muted);
+}
+
+/* Scroll progress bar — sticky 3px strip at the very top of main.
+   Track is visible hairline so users always see the affordance; fill
+   is solid accent. Uses scroll-driven animations where supported. */
+.gg-scroll-progress {
+  position: sticky;
+  top: 0;
+  height: 3px;
+  background: rgba(10, 10, 11, 0.08);
+  z-index: 10;
+  pointer-events: none;
+}
+.gg-scroll-progress::before {
+  content: '';
+  display: block;
+  height: 100%;
+  background: var(--gg-accent);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+}
+@supports (animation-timeline: scroll()) {
+  .gg-scroll-progress::before {
+    animation: gg-scroll-fill linear;
+    animation-timeline: scroll(root);
+  }
+  @keyframes gg-scroll-fill {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gg-enter,
+  .gg-chat,
+  .gg-chip,
+  .gg-btn,
+  .gg-chat__send,
+  .gg-chat__plus,
+  .gg-card,
+  .gg-reveal,
+  .gg-scroll-progress::before {
+    animation: none !important;
+    transition: opacity var(--gg-t-feedback) linear !important;
+    transform: none !important;
+  }
+  .gg-reveal { opacity: 1; }  /* Ensure content is visible. */
+}

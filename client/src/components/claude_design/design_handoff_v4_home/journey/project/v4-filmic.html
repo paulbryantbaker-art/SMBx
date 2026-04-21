@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>/sell · Filmic Anchors (V4)</title>
+<link rel="stylesheet" href="shared.css" />
+<link rel="stylesheet" href="glass.css" />
+<style>
+  body { background: #F2F2F4; color: #0A0A0B; }
+
+  /* ── Top bar ─────────────────────────────────────────────────── */
+  .fl-top {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 40;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 28px; height: 60px;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(28px) saturate(1.8);
+    -webkit-backdrop-filter: blur(28px) saturate(1.8);
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
+    transition: background 200ms, color 200ms, border-color 200ms;
+  }
+  .fl-top.dark {
+    background: rgba(10,10,11,0.6);
+    border-bottom-color: rgba(255,255,255,0.06);
+    color: #fff;
+  }
+  .fl-top__logo { font-family: 'Sora', sans-serif; font-weight: 800; letter-spacing: -0.025em; font-size: 17px; }
+  .fl-top__nav { display: flex; gap: 2px; }
+  .fl-top__nav button {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600;
+    color: inherit; opacity: 0.65;
+    padding: 7px 12px; border: 0; background: transparent;
+    border-radius: 8px; cursor: pointer; transition: all 150ms;
+  }
+  .fl-top__nav button:hover { opacity: 1; }
+  .fl-top__nav button.active { opacity: 1; background: rgba(0,0,0,0.06); }
+  .fl-top.dark .fl-top__nav button.active { background: rgba(255,255,255,0.1); }
+  .fl-top__cta { display: flex; gap: 8px; align-items: center; }
+  .fl-top__signin {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600;
+    color: inherit; opacity: 0.65; padding: 7px 12px; border: 0; background: transparent; cursor: pointer;
+  }
+  .fl-top__signin:hover { opacity: 1; }
+  .fl-top__btn {
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 700;
+    color: #0A0A0B; background: #fff; border: 0; padding: 8px 14px;
+    border-radius: 8px; cursor: pointer;
+  }
+  .fl-top.dark .fl-top__btn { color: #0A0A0B; background: #fff; }
+
+  /* ── Page rhythm ─────────────────────────────────────────────── */
+  /* Each "act" is a full-viewport block. Anchors are oversized statements
+     on light. Frames are full-bleed dark mockup moments. */
+  main { padding-top: 60px; }
+  .fl-act {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 96px 32px;
+    position: relative;
+    scroll-snap-align: start;
+  }
+  .fl-act--frame {
+    background: #0A0A0B; color: #fff;
+    padding: 0;
+    align-items: stretch; justify-content: stretch;
+  }
+  .fl-act--inverse { background: #0A0A0B; color: #fff; }
+
+  /* Eyebrow above each act */
+  .fl-act__eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: #6B6B70;
+    margin-bottom: 28px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .fl-act--inverse .fl-act__eyebrow,
+  .fl-act--frame .fl-act__eyebrow { color: rgba(255,255,255,0.5); }
+  .fl-act__eyebrow__num {
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 12px;
+    letter-spacing: 0; color: inherit;
+    padding: 3px 8px; border-radius: 999px;
+    background: rgba(0,0,0,0.06);
+  }
+  .fl-act--inverse .fl-act__eyebrow__num,
+  .fl-act--frame .fl-act__eyebrow__num { background: rgba(255,255,255,0.1); color: #fff; }
+
+  /* Centered content column */
+  .fl-act__inner {
+    max-width: 1080px; margin: 0 auto; width: 100%;
+  }
+
+  /* The signature anchor — oversized headline */
+  .fl-anchor {
+    font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: clamp(48px, 9vw, 132px);
+    letter-spacing: -0.045em; line-height: 0.95;
+    color: inherit; margin: 0 0 32px;
+    text-wrap: balance;
+  }
+  .fl-anchor em {
+    font-style: normal;
+    background: linear-gradient(180deg, transparent 62%, rgba(232,160,51,0.38) 62%);
+    padding: 0 4px;
+  }
+  .fl-anchor strong { font-weight: 800; }
+  .fl-anchor__giga {
+    font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: clamp(80px, 16vw, 220px);
+    letter-spacing: -0.06em; line-height: 0.9;
+    margin: 0 0 24px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Subhead under anchor */
+  .fl-act__sub {
+    font-family: 'Inter', sans-serif; font-size: clamp(17px, 1.7vw, 22px);
+    font-weight: 400; line-height: 1.45;
+    color: #3A3A3E; max-width: 640px;
+    margin: 0 0 40px;
+    text-wrap: pretty;
+  }
+  .fl-act--inverse .fl-act__sub,
+  .fl-act--frame .fl-act__sub { color: rgba(255,255,255,0.72); }
+
+  /* Each anchor has a single chat input attached — the only CTA on the page */
+  .fl-prompt {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 8px 8px 22px; min-height: 60px;
+    background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 999px;
+    box-shadow:
+      inset 0 0.5px 0 rgba(255,255,255,1),
+      0 6px 28px rgba(0,0,0,0.06);
+    width: 100%; max-width: 580px;
+    transition: border-color 150ms, box-shadow 150ms;
+  }
+  .fl-prompt:focus-within { border-color: #0A0A0B; box-shadow: 0 0 0 3px rgba(10,10,11,0.06), 0 6px 28px rgba(0,0,0,0.08); }
+  .fl-act--inverse .fl-prompt,
+  .fl-act--frame .fl-prompt {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.18);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .fl-prompt input {
+    flex: 1; border: 0; outline: 0; background: transparent;
+    font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 500;
+    color: #0A0A0B;
+  }
+  .fl-act--inverse .fl-prompt input,
+  .fl-act--frame .fl-prompt input { color: #fff; }
+  .fl-prompt input::placeholder { color: #9A9A9F; }
+  .fl-act--inverse .fl-prompt input::placeholder,
+  .fl-act--frame .fl-prompt input::placeholder { color: rgba(255,255,255,0.5); }
+  .fl-prompt__send {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: #0A0A0B; color: #fff; border: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.18), 0 2px 8px rgba(0,0,0,0.18);
+    transition: transform 150ms;
+  }
+  .fl-prompt__send:hover { transform: scale(1.04); }
+  .fl-act--inverse .fl-prompt__send,
+  .fl-act--frame .fl-prompt__send { background: #fff; color: #0A0A0B; }
+
+  .fl-prompt__hint {
+    margin-top: 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: #6B6B70; letter-spacing: 0.04em;
+  }
+  .fl-act--inverse .fl-prompt__hint,
+  .fl-act--frame .fl-prompt__hint { color: rgba(255,255,255,0.5); }
+
+  /* ── Frame acts: full-bleed monochrome mockup ─────────────── */
+  .fl-frame {
+    flex: 1; display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+    min-height: 100vh;
+  }
+  @media (max-width: 900px) { .fl-frame { grid-template-columns: 1fr; } }
+  .fl-frame__caption {
+    padding: clamp(60px, 8vh, 120px) clamp(28px, 5vw, 80px);
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .fl-frame__mockup {
+    background: #1A1A1C;
+    padding: clamp(40px, 6vh, 80px);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .fl-frame__mockup::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.04), transparent 50%),
+      radial-gradient(circle at 70% 80%, rgba(232,160,51,0.04), transparent 50%);
+    pointer-events: none;
+  }
+  .fl-frame__caption__kicker {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: rgba(255,255,255,0.5); letter-spacing: 0.16em; text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .fl-frame__caption__h {
+    font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: clamp(32px, 4vw, 56px); letter-spacing: -0.035em;
+    line-height: 1.04; margin: 0 0 20px; text-wrap: balance;
+  }
+  .fl-frame__caption__p {
+    font-size: 15.5px; line-height: 1.55; color: rgba(255,255,255,0.72);
+    margin: 0 0 28px; max-width: 480px;
+  }
+
+  /* The actual mockup card (CIM cover) */
+  .fl-cim {
+    width: 100%; max-width: 460px; aspect-ratio: 8.5/11;
+    background: #fff; color: #0A0A0B;
+    border-radius: 6px; padding: 56px 48px;
+    box-shadow:
+      0 0.5px 0 rgba(255,255,255,0.05),
+      0 30px 80px rgba(0,0,0,0.5),
+      0 4px 16px rgba(0,0,0,0.3);
+    position: relative; overflow: hidden;
+    transform: rotate(-1.5deg);
+    transition: transform 600ms cubic-bezier(0.32, 0.72, 0, 1);
+    z-index: 1;
+  }
+  .fl-cim:hover { transform: rotate(0deg); }
+  .fl-cim__brand {
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 12px;
+    letter-spacing: -0.005em; color: #0A0A0B; margin-bottom: 36px;
+  }
+  .fl-cim__brand::before {
+    content: ''; display: inline-block; width: 18px; height: 1px;
+    background: #0A0A0B; vertical-align: middle; margin-right: 10px;
+  }
+  .fl-cim__lbl {
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+    color: #6B6B70; letter-spacing: 0.14em; text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .fl-cim__h {
+    font-family: 'Sora', sans-serif; font-weight: 800;
+    font-size: 30px; letter-spacing: -0.025em; line-height: 1.05;
+    color: #0A0A0B; margin-bottom: 26px;
+  }
+  .fl-cim__sub {
+    font-family: 'Sora', sans-serif; font-weight: 600; font-size: 13px;
+    color: #6B6B70; line-height: 1.5; margin-bottom: 24px;
+  }
+  .fl-cim__rule { height: 0.5px; background: #0A0A0B; margin: 22px 0; }
+  .fl-cim__stats { display: flex; gap: 24px; }
+  .fl-cim__stat__num { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: -0.025em; line-height: 1; }
+  .fl-cim__stat__lbl { font-size: 9.5px; color: #6B6B70; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+  .fl-cim__foot {
+    position: absolute; bottom: 36px; left: 48px; right: 48px;
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    color: #9A9A9F; letter-spacing: 0.1em; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+  }
+  .fl-cim__seal {
+    position: absolute; top: 48px; right: 48px;
+    width: 60px; height: 60px; border: 0.5px solid #0A0A0B;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 7.5px;
+    color: #0A0A0B; letter-spacing: 0.14em; text-transform: uppercase;
+    text-align: center; line-height: 1.2;
+  }
+
+  /* IOI mockup variant */
+  .fl-ioi {
+    width: 100%; max-width: 540px;
+    background: #fff; color: #0A0A0B;
+    border-radius: 12px; overflow: hidden;
+    box-shadow:
+      0 30px 80px rgba(0,0,0,0.5),
+      0 4px 16px rgba(0,0,0,0.3);
+  }
+  .fl-ioi__head {
+    padding: 16px 22px; border-bottom: 0.5px solid rgba(0,0,0,0.08);
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(180deg, #FAFAFB 0%, #fff 100%);
+  }
+  .fl-ioi__head__t { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 13px; }
+  .fl-ioi__head__m {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: #6B6B70; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .fl-ioi__rows { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .fl-ioi__cell { padding: 24px 18px; border-right: 0.5px solid rgba(0,0,0,0.08); position: relative; }
+  .fl-ioi__cell:last-child { border-right: 0; }
+  .fl-ioi__cell--win { background: #FAFAFB; }
+  .fl-ioi__cell--win::before {
+    content: 'WINS'; position: absolute; top: 10px; right: 10px;
+    font-family: 'Sora', sans-serif; font-weight: 800; font-size: 8.5px;
+    letter-spacing: 0.14em; color: #166534; background: #DCFCE7;
+    padding: 3px 7px; border-radius: 3px;
+  }
+  .fl-ioi__name { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 11px; color: #6B6B70; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 12px; }
+  .fl-ioi__price { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 30px; letter-spacing: -0.025em; line-height: 1; font-variant-numeric: tabular-nums; margin-bottom: 6px; }
+  .fl-ioi__note { font-size: 11.5px; color: #3A3A3E; line-height: 1.45; }
+
+  /* Reading time / scroll-progress micro-bar */
+  .fl-progress {
+    position: fixed; top: 60px; left: 0; right: 0; height: 2px;
+    background: transparent; z-index: 39;
+  }
+  .fl-progress__bar {
+    height: 100%; width: 0;
+    background: #0A0A0B;
+    transition: width 80ms linear;
+  }
+  .fl-top.dark + .fl-progress .fl-progress__bar { background: #fff; }
+
+  /* Final act — the closer */
+  .fl-closer {
+    text-align: center;
+  }
+  .fl-closer .fl-anchor { margin-bottom: 24px; }
+  .fl-closer .fl-prompt { margin: 0 auto; }
+  .fl-closer .fl-act__sub { margin-left: auto; margin-right: auto; }
+
+  /* Footer — small */
+  .fl-foot {
+    background: #0A0A0B; color: rgba(255,255,255,0.55);
+    padding: 28px 32px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+  .fl-foot__nav { display: flex; gap: 18px; }
+  .fl-foot__nav a { color: inherit; text-decoration: none; }
+  .fl-foot__nav a:hover { color: #fff; }
+</style>
+</head>
+<body>
+  <div class="fl-top" id="topBar">
+    <div style="display:flex;align-items:center;gap:18px;">
+      <span class="fl-top__logo">smbx.ai</span>
+      <nav class="fl-top__nav">
+        <button class="active">Sell</button>
+        <button>Buy</button>
+        <button>Raise</button>
+        <button>Integrate</button>
+        <button>Pricing</button>
+      </nav>
+    </div>
+    <div class="fl-top__cta">
+      <button class="fl-top__signin">Sign in</button>
+      <button class="fl-top__btn">Start free →</button>
+    </div>
+  </div>
+
+  <div class="fl-progress"><div class="fl-progress__bar" id="progressBar"></div></div>
+
+  <main>
+
+    <!-- ════ ACT 01 — Opening anchor ════ -->
+    <section class="fl-act" data-bar="light">
+      <div class="fl-act__inner">
+        <div class="fl-act__eyebrow">
+          <span class="fl-act__eyebrow__num">01</span>
+          Sell-side · for owners and the advisors running the process
+        </div>
+        <h1 class="fl-anchor">
+          Three weeks ago you wouldn't have known.
+        </h1>
+        <p class="fl-act__sub">
+          The first offer on your business is almost never your best one. The number you'd get from a competitive process — for the same business, in the same market, today — is a number nobody is going to tell you. Yulia tells you.
+        </p>
+        <form class="fl-prompt" data-form>
+          <input type="text" placeholder="Industry, revenue, reported EBITDA — Yulia takes it from there." autocomplete="off" spellcheck="false"/>
+          <button class="fl-prompt__send" type="submit" aria-label="Send">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+          </button>
+        </form>
+        <div class="fl-prompt__hint">↵ to start · first deliverable free · ~20 min</div>
+      </div>
+    </section>
+
+    <!-- ════ ACT 02 — Giga-anchor: the number ════ -->
+    <section class="fl-act fl-act--inverse" data-bar="dark">
+      <div class="fl-act__inner">
+        <div class="fl-act__eyebrow">
+          <span class="fl-act__eyebrow__num">02</span>
+          Average hidden value · per analysis
+        </div>
+        <div class="fl-anchor__giga">$1.1M</div>
+        <p class="fl-act__sub" style="font-size: clamp(18px, 2vw, 26px); max-width: 720px;">
+          That's what's already <em style="font-style:italic;color:#fff;background:none;padding:0;">in</em> your tax returns. Owner comp above market. Personal vehicles on the books. Spouse on payroll. Non-recurring legal. Above-market rent to a related entity. Yulia finds it in twenty minutes — not three weeks and a $50K QofE.
+        </p>
+        <form class="fl-prompt" data-form>
+          <input type="text" placeholder="Find what's hiding in mine →" autocomplete="off" spellcheck="false"/>
+          <button class="fl-prompt__send" type="submit" aria-label="Send">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+          </button>
+        </form>
+        <div class="fl-prompt__hint">No data shared with anyone · numbers stay in your thread</div>
+      </div>
+    </section>
+
+    <!-- ════ ACT 03 — Frame: the CIM (full-bleed mockup) ════ -->
+    <section class="fl-act fl-act--frame" data-bar="dark">
+      <div class="fl-frame">
+        <div class="fl-frame__caption">
+          <div class="fl-frame__caption__kicker">03 · The document buyers actually read</div>
+          <h2 class="fl-frame__caption__h">Same business, two CIMs. <em style="font-style:italic;background:linear-gradient(180deg,transparent 60%,rgba(232,160,51,0.5) 60%);">4.5× or 7×.</em></h2>
+          <p class="fl-frame__caption__p">
+            The Confidential Information Memorandum is the single most expensive 28 pages anyone will write about your business. Most are data dumps. Yulia's reads like Lazard wrote it — strategic narrative, growth case, exhibits — at AI speed, your voice.
+          </p>
+          <form class="fl-prompt" data-form style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18);">
+            <input type="text" placeholder="Draft a CIM for my business →" autocomplete="off" spellcheck="false"/>
+            <button class="fl-prompt__send" type="submit" aria-label="Send">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+            </button>
+          </form>
+        </div>
+        <div class="fl-frame__mockup">
+          <div class="fl-cim">
+            <div class="fl-cim__brand">smbx.ai</div>
+            <div class="fl-cim__seal">YULIA<br/>· DRAFT ·</div>
+            <div class="fl-cim__lbl">Confidential Information Memorandum</div>
+            <div class="fl-cim__h">A 32&#8209;year regional HVAC platform, positioned for geographic expansion.</div>
+            <div class="fl-cim__sub">Project Phoenix · Greater Phoenix MSA · Commercial &amp; residential mix · 22% service-contract revenue at 41% gross margin.</div>
+            <div class="fl-cim__rule"></div>
+            <div class="fl-cim__stats">
+              <div>
+                <div class="fl-cim__stat__num">$8.4M</div>
+                <div class="fl-cim__stat__lbl">Revenue</div>
+              </div>
+              <div>
+                <div class="fl-cim__stat__num">$1.9M</div>
+                <div class="fl-cim__stat__lbl">Adj EBITDA</div>
+              </div>
+              <div>
+                <div class="fl-cim__stat__num">22.6%</div>
+                <div class="fl-cim__stat__lbl">Margin</div>
+              </div>
+            </div>
+            <div class="fl-cim__foot">
+              <span>28 pages</span>
+              <span>April 2026</span>
+              <span>Strictly Confidential</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ ACT 04 — Anchor: the market truth ════ -->
+    <section class="fl-act" data-bar="light">
+      <div class="fl-act__inner">
+        <div class="fl-act__eyebrow">
+          <span class="fl-act__eyebrow__num">04</span>
+          The pattern, every time
+        </div>
+        <h2 class="fl-anchor">
+          One buyer gives you a price.<br/>
+          <em>Five buyers give you a market.</em>
+        </h2>
+        <p class="fl-act__sub">
+          The competitive process is the highest-ROI activity in any exit, and almost nobody runs one — too logistically complex, broker too thin. Yulia maps the buyer universe, sequences outreach, manages the IOI matrix. The winning bid in a competitive process is typically <strong style="font-weight:700;color:#0A0A0B;">15–30% above</strong> the first offer.
+        </p>
+        <form class="fl-prompt" data-form>
+          <input type="text" placeholder="Run a process for me →" autocomplete="off" spellcheck="false"/>
+          <button class="fl-prompt__send" type="submit" aria-label="Send">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ════ ACT 05 — Frame: IOI matrix ════ -->
+    <section class="fl-act fl-act--frame" data-bar="dark">
+      <div class="fl-frame">
+        <div class="fl-frame__mockup" style="order: 0;">
+          <div class="fl-ioi">
+            <div class="fl-ioi__head">
+              <div class="fl-ioi__head__t">IOI comparison · round 1</div>
+              <div class="fl-ioi__head__m">3 of 11 · WEEK 3</div>
+            </div>
+            <div class="fl-ioi__rows">
+              <div class="fl-ioi__cell">
+                <div class="fl-ioi__name">Family office</div>
+                <div class="fl-ioi__price">$2.4M</div>
+                <div class="fl-ioi__note">100% cash · 60-day close · no earnout</div>
+              </div>
+              <div class="fl-ioi__cell fl-ioi__cell--win">
+                <div class="fl-ioi__name">Strategic</div>
+                <div class="fl-ioi__price">$2.9M</div>
+                <div class="fl-ioi__note">85% cash · 15% rollover · second bite in 3–5 yrs</div>
+              </div>
+              <div class="fl-ioi__cell">
+                <div class="fl-ioi__name">PE roll-up</div>
+                <div class="fl-ioi__price">$2.7M</div>
+                <div class="fl-ioi__note">$400K earnout · 90-day diligence</div>
+              </div>
+            </div>
+            <div style="padding: 16px 20px; background: #FAFAFB; border-top: 0.5px solid rgba(0,0,0,0.06); font-size: 12.5px; color: #3A3A3E; line-height: 1.55;">
+              <strong style="color:#0A0A0B; font-weight: 700;">Yulia's read:</strong> Strategic wins on headline + certainty. After-tax all three within $180K — but the rollover is a second bite.
+            </div>
+          </div>
+        </div>
+        <div class="fl-frame__caption" style="order: 1;">
+          <div class="fl-frame__caption__kicker">05 · Three weeks of running a process, on one screen</div>
+          <h2 class="fl-frame__caption__h"><em style="font-style:italic;background:linear-gradient(180deg,transparent 60%,rgba(232,160,51,0.5) 60%);">+$500K</em> on a $2.4M deal. From running the room.</h2>
+          <p class="fl-frame__caption__p">
+            That spread — the difference between the unsolicited offer and the winning IOI — is the entire reason the competitive process exists. On a $2.4M deal it's $500K. On a $50M deal it's $7.5M–$15M. It's the cheapest money you'll ever make.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════ ACT 06 — The closer ════ -->
+    <section class="fl-act fl-closer fl-act--inverse" data-bar="dark">
+      <div class="fl-act__inner">
+        <div class="fl-act__eyebrow" style="justify-content: center;">
+          <span class="fl-act__eyebrow__num">06</span>
+          Your turn
+        </div>
+        <h2 class="fl-anchor">
+          Know the number.<br/>
+          Then run the process.
+        </h2>
+        <p class="fl-act__sub">
+          First conversation free. First deliverable free. If the number isn't worth running a process, you've lost nothing but the afternoon. Three inputs to start.
+        </p>
+        <form class="fl-prompt" data-form>
+          <input type="text" placeholder="Industry, revenue, reported EBITDA…" autocomplete="off" spellcheck="false"/>
+          <button class="fl-prompt__send" type="submit" aria-label="Send">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
+          </button>
+        </form>
+        <div class="fl-prompt__hint">No card · no calendar invite · just a thread</div>
+      </div>
+    </section>
+
+    <footer class="fl-foot">
+      <div>smbx.ai · YULIA · sell-side</div>
+      <div class="fl-foot__nav">
+        <a href="#">Sell</a>
+        <a href="#">Buy</a>
+        <a href="#">Raise</a>
+        <a href="#">Integrate</a>
+        <a href="#">Pricing</a>
+      </div>
+      <div>© 2026</div>
+    </footer>
+  </main>
+
+<script>
+  // ── Top bar adapts to the act underneath it (light/dark) ──
+  const topBar = document.getElementById('topBar');
+  const acts = document.querySelectorAll('.fl-act');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && e.intersectionRatio > 0.3) {
+        const bar = e.target.dataset.bar;
+        topBar.classList.toggle('dark', bar === 'dark');
+      }
+    });
+  }, { threshold: [0.3, 0.5, 0.7] });
+  acts.forEach(a => obs.observe(a));
+
+  // ── Scroll progress ──
+  const bar = document.getElementById('progressBar');
+  function onScroll() {
+    const scrollY = window.scrollY;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? (scrollY / max) * 100 : 0;
+    bar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // ── Form wiring — all share one canned response (visual only) ──
+  document.querySelectorAll('[data-form]').forEach(f => {
+    f.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = f.querySelector('input');
+      if (!input.value.trim()) return;
+      input.value = '';
+      input.placeholder = '✓ Got it — Yulia will be back in ~20 min.';
+      input.blur();
+    });
+  });
+</script>
+</body>
+</html>

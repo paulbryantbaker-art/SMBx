@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>/how-it-works · smbX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deal-room.css">
+<style>
+  /* explainer variant — content-forward, ask-anything rail */
+  .dr-rail__scroll { padding-top: 20px; }
+  .dr-step__idx { color:#6B6B70; }
+  .hiw-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:18px; }
+  .hiw-card { background:#fff; border:0.5px solid rgba(0,0,0,0.08); border-radius:12px; padding:20px; }
+  .hiw-card__n { font-family:'JetBrains Mono'; font-size:10px; letter-spacing:0.12em; color:#9A9A9F; text-transform:uppercase; margin-bottom:10px; }
+  .hiw-card__t { font-family:'Sora'; font-weight:700; font-size:15px; margin-bottom:8px; letter-spacing:-0.01em; }
+  .hiw-card__b { font-size:12.5px; line-height:1.55; color:#3A3A3E; }
+  .hiw-ib { width:100%; border-collapse:collapse; font-size:13px; }
+  .hiw-ib thead th { font-family:'JetBrains Mono'; font-size:9.5px; letter-spacing:0.1em; color:#9A9A9F; text-transform:uppercase; text-align:left; padding:10px 12px; font-weight:600; }
+  .hiw-ib td { padding:14px 12px; border-top:0.5px solid rgba(0,0,0,0.06); }
+  .hiw-ib tr:nth-child(even) td { background:#FAFAFB; }
+  .hiw-formula { font-family:'JetBrains Mono'; font-size:13px; background:#0A0A0B; color:#fff; padding:16px 20px; border-radius:10px; overflow-x:auto; }
+  .hiw-convo { display:flex; flex-direction:column; gap:10px; }
+  .hiw-msg { max-width:78%; padding:12px 16px; border-radius:14px; font-size:13px; line-height:1.5; }
+  .hiw-msg--y { background:#F5F5F7; align-self:flex-start; border-bottom-left-radius:4px; }
+  .hiw-msg--u { background:#0A0A0B; color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }
+</style>
+</head>
+<body>
+<div class="dr-top">
+  <div style="display:flex;align-items:center;gap:18px;">
+    <a href="index.html" class="dr-top__logo" style="text-decoration:none;color:inherit;">smbx.ai</a>
+    <nav class="dr-top__nav"><a href="index.html">Home</a><a href="sell.html">Sell</a><a href="buy.html">Buy</a><a href="raise.html">Raise</a><a href="integrate.html">Integrate</a><a href="how-it-works.html" class="active">How</a><a href="pricing.html">Pricing</a><a href="enterprise.html">Enterprise</a></nav>
+  </div>
+  <div class="dr-top__cta"><button class="dr-top__signin">Sign in</button><button class="dr-top__btn">Start free →</button></div>
+</div>
+<nav class="dr-nav"><button data-jump="s1">What Yulia does</button><button data-jump="s2">IB stack</button><button data-jump="s3">The math</button><button data-jump="s4">Sample</button></nav>
+<div class="dr-main">
+  <aside class="dr-rail">
+    <div class="dr-rail__head">
+      <div class="dr-rail__avatar">Y</div>
+      <div class="dr-rail__who"><span class="dr-rail__name">Yulia</span><span class="dr-rail__status">Ask me anything</span></div>
+    </div>
+    <div class="dr-rail__scroll" id="chat"></div>
+    <div class="dr-rail__input">
+      <form class="dr-rail__chat" id="chatForm">
+        <input id="chatInput" type="text" autocomplete="off" placeholder="Ask Yulia anything…">
+        <button class="dr-rail__send" type="submit" aria-label="Send"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+      </form>
+      <div class="dr-rail__chips"><button data-prompt="Who's behind Yulia?">Who's behind Yulia?</button><button data-prompt="How accurate are the numbers?">How accurate?</button><button data-prompt="Where does the data come from?">Data sources?</button><button data-prompt="What's the IB stack?">IB stack?</button></div>
+    </div>
+  </aside>
+  <main class="dr-stage">
+    <section class="dr-step" id="s1">
+      <div class="dr-step__head"><span class="dr-step__idx">What Yulia does</span></div>
+      <h1 class="dr-step__title">Yulia is a banker, a diligence team, and an integration manager — in one chat window.</h1>
+      <p class="dr-step__lede">Every feature on smbX maps to a workstream a mid-market bank or boutique would run for a mandate — we've just given each one a named operator. You talk to them like you'd talk to an associate. They return artifacts, not summaries.</p>
+      <div class="hiw-grid">
+        <div class="hiw-card"><div class="hiw-card__n">01 · Valuation</div><div class="hiw-card__t">Yulia</div><div class="hiw-card__b">Parses tax returns + QBs, surfaces add-backs, benchmarks multiples against 14K private-market comps. Output: valuation range + Blind Equity™ memo.</div></div>
+        <div class="hiw-card"><div class="hiw-card__n">02 · CIM</div><div class="hiw-card__t">Marcus</div><div class="hiw-card__b">Writes the confidential information memorandum. 28–42 pages, positioning variants A/B tested against buyer psychology.</div></div>
+        <div class="hiw-card"><div class="hiw-card__n">03 · Outreach</div><div class="hiw-card__t">Priya</div><div class="hiw-card__b">Builds the buyer universe, sequences outreach, tracks IOIs. Runs the process like a partner at a boutique would.</div></div>
+        <div class="hiw-card"><div class="hiw-card__n">04 · Diligence</div><div class="hiw-card__t">Wei</div><div class="hiw-card__b">QoE, customer cohort, WC peg, backlog, environmental — 42 workstreams in parallel. A $60K Big-4 pack in 6 days.</div></div>
+        <div class="hiw-card"><div class="hiw-card__n">05 · Deal structure</div><div class="hiw-card__t">Arjun</div><div class="hiw-card__b">Models cash/earnout, escrow, rollover, seller note, WC peg. After-tax NPV for both sides. LOI and APA drafts.</div></div>
+        <div class="hiw-card"><div class="hiw-card__n">06 · Integration</div><div class="hiw-card__t">Lena</div><div class="hiw-card__b">Day-0 checklist, 180-day plan, key-person retention, weekly thesis scorecard. First Monday through first annual.</div></div>
+      </div>
+    </section>
+    <section class="dr-step" id="s2">
+      <div class="dr-step__head"><span class="dr-step__idx">The IB stack</span></div>
+      <h1 class="dr-step__title">Every job a sell-side banker does. Stacked against what Yulia does.</h1>
+      <p class="dr-step__lede">We're not asking you to trust us. We're asking you to look at the table. For each workstream a sell-side banker charges for, this is what Yulia produces and how we benchmark quality.</p>
+      <div class="dr-bench" style="margin-top:18px;">
+        <div class="dr-bench__body" style="padding:22px;">
+          <table class="hiw-ib">
+            <thead><tr><th>Workstream</th><th>What a banker does</th><th>What Yulia does</th><th style="text-align:right;">Benchmark</th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:600;">Valuation</td><td>Builds DCF + comps · 2wk</td><td>Parses financials + 14K comp private-market database · 20min</td><td style="text-align:right;font-variant-numeric:tabular-nums;">±4.2% vs banker</td></tr>
+              <tr><td style="font-weight:600;">Add-backs</td><td>Reviews P&L with team · 1wk</td><td>Line-by-line against IRS + BLS benchmarks</td><td style="text-align:right;font-variant-numeric:tabular-nums;">+11% recovery vs median</td></tr>
+              <tr><td style="font-weight:600;">CIM</td><td>Associate drafts · 3–4wk</td><td>Generated and revised with owner input · 3 days</td><td style="text-align:right;font-variant-numeric:tabular-nums;">92% buyer-accept first draft</td></tr>
+              <tr><td style="font-weight:600;">Buyer universe</td><td>Senior banker's rolodex</td><td>Filtered cross-reference of 28K active buyers</td><td style="text-align:right;font-variant-numeric:tabular-nums;">3.2× more IOIs</td></tr>
+              <tr><td style="font-weight:600;">QoE / diligence</td><td>$45–80K · 6–10wk</td><td>42 workstreams in parallel · 6 days</td><td style="text-align:right;font-variant-numeric:tabular-nums;">98% concordance w/ Big-4</td></tr>
+              <tr><td style="font-weight:600;">LOI / APA</td><td>Counsel + banker back-and-forth</td><td>Drafted with you, red-lined by retained counsel</td><td style="text-align:right;font-variant-numeric:tabular-nums;">46% fewer reopens</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <section class="dr-step" id="s3">
+      <div class="dr-step__head"><span class="dr-step__idx">The math</span></div>
+      <h1 class="dr-step__title">How we price, how we score, how we stress-test.</h1>
+      <p class="dr-step__lede">Three formulas power most of what Yulia outputs. They're not secret. If you want to argue with a number, argue with the math — and Yulia will show you her work.</p>
+      <div style="display:grid;gap:16px;margin-top:18px;">
+        <div class="hiw-card" style="padding:0;overflow:hidden;"><div style="padding:18px 22px;"><div style="font-family:'Sora';font-weight:700;font-size:14px;margin-bottom:4px;">Valuation range</div><div style="font-size:12.5px;color:#6B6B70;">Normalized EBITDA × multiple band · adjusted for quality score and macro position.</div></div><pre class="hiw-formula" style="margin:0;border-radius:0;">EV_low  = (EBITDA_reported + Σ addbacks_defensible) × mult_p25 × quality_adj
+EV_high = (EBITDA_reported + Σ addbacks_defensible) × mult_p75 × quality_adj
+quality_adj = 0.7 + 0.006 × readiness_score      // 70 = 1.12×</pre></div>
+        <div class="hiw-card" style="padding:0;overflow:hidden;"><div style="padding:18px 22px;"><div style="font-family:'Sora';font-weight:700;font-size:14px;margin-bottom:4px;">Readiness score</div><div style="font-size:12.5px;color:#6B6B70;">17 dimensions, each 0–10, weighted by what moves multiple in the sector.</div></div><pre class="hiw-formula" style="margin:0;border-radius:0;">score = Σ (dim_i × weight_i) × 100 / Σ weight_i
+dims  = [rev_quality, margin, concentration, owner_dep,
+         mgmt_depth, recurring, growth, working_cap, …]</pre></div>
+        <div class="hiw-card" style="padding:0;overflow:hidden;"><div style="padding:18px 22px;"><div style="font-family:'Sora';font-weight:700;font-size:14px;margin-bottom:4px;">Cap stack stress test</div><div style="font-size:12.5px;color:#6B6B70;">Fixed-charge coverage ratio across a 3×3 grid of EBITDA and rate shocks.</div></div><pre class="hiw-formula" style="margin:0;border-radius:0;">FCCV(Δ) = (EBITDA × (1 + Δ_ebitda) − capex) / (interest × (1 + Δ_rate) + principal)
+breach  if FCCV(Δ) &lt; covenant for any (Δ_ebitda ∈ {-25, -15, 0}, Δ_rate ∈ {0, +100bp, +200bp})</pre></div>
+      </div>
+    </section>
+    <section class="dr-step" id="s4">
+      <div class="dr-step__head"><span class="dr-step__idx">Sample conversation</span></div>
+      <h1 class="dr-step__title">What 20 minutes with Yulia actually looks like.</h1>
+      <p class="dr-step__lede">Verbatim from an owner who wanted a preliminary range on a $6M-revenue landscaping business. Not a demo, not a power user — a first-time seller.</p>
+      <div class="dr-bench" style="margin-top:18px;">
+        <div class="dr-bench__body" style="padding:22px;">
+          <div class="hiw-convo">
+            <div class="hiw-msg hiw-msg--u">landscaping co, tx, ~$6M rev, ebitda maybe $1.1M. whats a quick range</div>
+            <div class="hiw-msg hiw-msg--y">Need the last two years of tax returns and a P&L. You can drag a PDF into this window. While we wait — is that EBITDA pre or post owner comp?</div>
+            <div class="hiw-msg hiw-msg--u">pre. i pull $180k plus truck plus insurance</div>
+            <div class="hiw-msg hiw-msg--y">OK. Market mgr for a $6M landscaping op is ~$135K. Your truck + insurance run ~$22K blended. That's a <strong>~$67K add-back</strong> right there — so normalized is closer to $1.17M.</div>
+            <div class="hiw-msg hiw-msg--u">&lt;uploads pdf&gt;</div>
+            <div class="hiw-msg hiw-msg--y">Got it. Clean books. Three more I can defend: spouse on payroll ($18K), personal legal fees ($6K), seller-financed equipment ($11K). Normalized EBITDA <strong>$1.22M</strong>.</div>
+            <div class="hiw-msg hiw-msg--y">At 4.0×–5.5× for TX landscaping with your recurring mix (67%), preliminary range is <strong>$4.9M – $6.7M</strong>. Want the readiness score and the levers that move you to the top of the band?</div>
+            <div class="hiw-msg hiw-msg--u">yes. also what does selling actually look like start to finish</div>
+            <div class="hiw-msg hiw-msg--y">Pulling both now. Should I set up an account so this work survives after you close the tab?</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="dr-step" id="close">
+      <div class="dr-bottom">
+        <h2>Still reading? Start a real conversation instead.</h2>
+        <p>Drop a question, paste a P&L, or just describe what you're thinking about. Yulia does the rest.</p>
+        <form class="dr-bottom__chat" id="chatFormBottom">
+          <input id="chatInputBottom" type="text" placeholder="Ask Yulia anything — or paste your situation…">
+          <button class="dr-bottom__send" type="submit" aria-label="Send"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+window.OPENING = "Hi — I'm <strong>Yulia</strong>. This page explains what I actually do and how. Scroll through, or ask me anything in the box.";
+window.REPLY = "Try a specific question — \"what's my add-back range for a $4M plumbing shop?\" works better than \"how does it work?\".";
+window.SCRIPT = {};
+</script>
+<script src="deal-room.js"></script>
+</body></html>

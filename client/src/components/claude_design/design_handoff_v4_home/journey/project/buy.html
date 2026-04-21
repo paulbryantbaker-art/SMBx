@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>/buy · smbX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deal-room.css">
+</head>
+<body>
+<div class="dr-top">
+  <div style="display:flex;align-items:center;gap:18px;">
+    <a href="index.html" class="dr-top__logo" style="text-decoration:none;color:inherit;">smbx.ai</a>
+    <nav class="dr-top__nav"><a href="index.html">Home</a><a href="sell.html">Sell</a><a href="buy.html" class="active">Buy</a><a href="raise.html">Raise</a><a href="integrate.html">Integrate</a><a href="how-it-works.html">How</a><a href="pricing.html">Pricing</a><a href="enterprise.html">Enterprise</a></nav>
+  </div>
+  <div class="dr-top__cta"><button class="dr-top__signin">Sign in</button><button class="dr-top__btn">Start free →</button></div>
+</div>
+<nav class="dr-nav"><button data-jump="s1">Sourcing</button><button data-jump="s2">Rundown</button><button data-jump="s3">DD pack</button><button data-jump="s4">LOI</button></nav>
+<div class="dr-main">
+  <aside class="dr-rail">
+    <div class="dr-rail__head">
+      <div class="dr-rail__avatar">Y</div>
+      <div class="dr-rail__who"><span class="dr-rail__name">Yulia</span><span class="dr-rail__status">Sourcing for searcher</span></div>
+      <span class="dr-rail__live">LIVE DEMO</span>
+    </div>
+    <div class="dr-rail__scroll" id="chat"></div>
+    <div class="dr-rail__input">
+      <form class="dr-rail__chat" id="chatForm">
+        <input id="chatInput" type="text" autocomplete="off" placeholder="Ask Yulia anything…">
+        <button class="dr-rail__send" type="submit" aria-label="Send"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+      </form>
+      <div class="dr-rail__chips"><button data-prompt="Find me deals">Find me deals</button><button data-prompt="Score this target">Score this target</button><button data-prompt="Draft an LOI">Draft an LOI</button><button data-prompt="Build a DD pack">Build a DD pack</button></div>
+    </div>
+  </aside>
+  <main class="dr-stage">
+    <section class="dr-step" id="s1" data-step="1">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 01 · Sourcing</span></div>
+      <h1 class="dr-step__title">Proprietary deal flow, not the MLS for broken businesses.</h1>
+      <p class="dr-step__lede">Yulia crawls 14M US business records, filters by your thesis, and pings owners who fit. Off-market. Named. Reachable. <strong>78% of our searchers close a deal that never hit BizBuySell.</strong></p>
+      <div class="dr-bench">
+        <div class="dr-bench__head"><div class="dr-bench__title">Deal flow · HVAC roll-up · TX+OK</div><div class="dr-bench__meta"><span class="dr-bench__dot"></span>LIVE · 47 NEW THIS WEEK</div></div>
+        <div class="dr-bench__body" style="padding:0 22px 22px;">
+          <div class="row"><div><div class="row__title">Atlas Air — Fort Worth, TX</div><div class="row__sub">Commercial HVAC · $6.2M rev · 18% EBITDA · 2nd-gen owner, 58yo</div></div><div class="row__amt" style="font-size:15px;">Fit 94</div></div>
+          <div class="row"><div><div class="row__title">Summit Climate — Tulsa, OK</div><div class="row__sub">Residential + light commercial · $4.1M rev · solo owner, exploring exit</div></div><div class="row__amt" style="font-size:15px;">Fit 91</div></div>
+          <div class="row"><div><div class="row__title">Benchmark Mechanical — Dallas, TX</div><div class="row__sub">Service-heavy · $9.4M rev · 22% EBITDA · two partners, one retiring</div></div><div class="row__amt" style="font-size:15px;">Fit 88</div></div>
+          <div class="row" style="background:#F5F5F7;margin:0 -22px -22px;padding:16px 22px;border-top:0.5px solid rgba(0,0,0,0.08);"><div><div class="row__title">+ 44 more matching thesis</div><div class="row__sub">Named, contactable, fit ≥ 70</div></div><div class="row__amt" style="font-size:15px;">View all</div></div>
+        </div>
+      </div>
+    </section>
+    <section class="dr-step" id="s2" data-step="2">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 02 · Rundown</span></div>
+      <h1 class="dr-step__title">Every target, scored the same way. Before you ever get on a call.</h1>
+      <p class="dr-step__lede">Paste a CIM, a teaser, or three tax returns. Yulia returns a <strong>Rundown score</strong> in 15 minutes — financial quality, concentration risk, key-person risk, integration fit. Kill the 9 out of 10 bad deals fast.</p>
+      <div class="dr-bench">
+        <div class="dr-bench__head"><div class="dr-bench__title">Rundown · Atlas Air</div><div class="dr-bench__meta"><span class="dr-bench__dot"></span>8 MIN AGO</div></div>
+        <div class="dr-bench__body" style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center;padding:26px 22px;">
+          <div style="position:relative;width:180px;height:180px;">
+            <svg viewBox="0 0 200 200" style="width:100%;height:100%;transform:rotate(-90deg);">
+              <circle cx="100" cy="100" r="90" fill="none" stroke="#F0F0F2" stroke-width="16"/>
+              <circle cx="100" cy="100" r="90" fill="none" stroke="#0A0A0B" stroke-width="16" stroke-linecap="round" stroke-dasharray="565.5" stroke-dashoffset="96"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="font-family:'Sora';font-weight:800;font-size:54px;letter-spacing:-0.035em;">83<span style="font-size:18px;color:#9A9A9F;">/100</span></div><div style="font-family:'JetBrains Mono';font-size:9px;letter-spacing:0.15em;color:#22A755;text-transform:uppercase;margin-top:4px;">Pursue</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="width:8px;height:8px;border-radius:50%;background:#22A755;"></span><span style="flex:1;color:#3A3A3E;font-weight:500;">Financial quality</span><span style="font-family:'Sora';font-weight:700;">9.1</span></div>
+            <div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="width:8px;height:8px;border-radius:50%;background:#22A755;"></span><span style="flex:1;color:#3A3A3E;font-weight:500;">Margin stability</span><span style="font-family:'Sora';font-weight:700;">8.4</span></div>
+            <div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="width:8px;height:8px;border-radius:50%;background:#E8A033;"></span><span style="flex:1;color:#3A3A3E;font-weight:500;">Customer concentration</span><span style="font-family:'Sora';font-weight:700;">6.2</span></div>
+            <div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="width:8px;height:8px;border-radius:50%;background:#22A755;"></span><span style="flex:1;color:#3A3A3E;font-weight:500;">Recurring revenue</span><span style="font-family:'Sora';font-weight:700;">7.8</span></div>
+            <div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="width:8px;height:8px;border-radius:50%;background:#E8A033;"></span><span style="flex:1;color:#3A3A3E;font-weight:500;">Owner dependency</span><span style="font-family:'Sora';font-weight:700;">5.9</span></div>
+            <div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="width:8px;height:8px;border-radius:50%;background:#22A755;"></span><span style="flex:1;color:#3A3A3E;font-weight:500;">Integration fit · your thesis</span><span style="font-family:'Sora';font-weight:700;">8.7</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="dr-step" id="s3" data-step="3">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 03 · Diligence pack</span></div>
+      <h1 class="dr-step__title">A Big-4 diligence pack. Without the Big-4 invoice.</h1>
+      <p class="dr-step__lede">Quality of Earnings. Customer concentration. Working capital peg. Key-person risk. Environmental. Yulia runs all 42 workstreams in parallel and produces the same memo your LPs expect — <strong>in 6 days, not 10 weeks</strong>.</p>
+      <div class="dr-bench">
+        <div class="dr-bench__head"><div class="dr-bench__title">DD workstreams · Atlas Air</div><div class="dr-bench__meta">DAY 4 OF 6</div></div>
+        <div class="dr-bench__body" style="padding:22px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#F5F5F7;border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">QoE adjustments</span><span style="font-family:'JetBrains Mono';color:#22A755;font-size:10px;">DONE</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#F5F5F7;border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">Customer cohort</span><span style="font-family:'JetBrains Mono';color:#22A755;font-size:10px;">DONE</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#F5F5F7;border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">WC peg</span><span style="font-family:'JetBrains Mono';color:#22A755;font-size:10px;">DONE</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#F5F5F7;border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">Backlog validation</span><span style="font-family:'JetBrains Mono';color:#22A755;font-size:10px;">DONE</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#fff;border:0.5px solid #E8A033;border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">Key-person interviews</span><span style="font-family:'JetBrains Mono';color:#E8A033;font-size:10px;">LIVE</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#fff;border:0.5px solid #E8A033;border-radius:8px;font-size:12.5px;"><span style="font-weight:600;">Environmental Phase I</span><span style="font-family:'JetBrains Mono';color:#E8A033;font-size:10px;">LIVE</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:8px;font-size:12.5px;"><span style="font-weight:600;color:#6B6B70;">Legal + corp review</span><span style="font-family:'JetBrains Mono';color:#6B6B70;font-size:10px;">DAY 5</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 14px;background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:8px;font-size:12.5px;"><span style="font-weight:600;color:#6B6B70;">IT + cyber</span><span style="font-family:'JetBrains Mono';color:#6B6B70;font-size:10px;">DAY 5</span></div>
+        </div>
+        <div style="padding:14px 22px;background:#FAFAFB;border-top:0.5px solid rgba(0,0,0,0.06);font-size:12.5px;color:#3A3A3E;line-height:1.55;"><strong style="color:#0A0A0B;">Flag:</strong> 38% of revenue sits with top 3 customers. Two on month-to-month MSAs. Yulia drafted the retention conversation for the owner call.</div>
+      </div>
+    </section>
+    <section class="dr-step" id="s4" data-step="4">
+      <div class="dr-step__head"><span class="dr-step__idx">Step 04 · LOI</span></div>
+      <h1 class="dr-step__title">Three LOIs. Three structures. One you can actually close.</h1>
+      <p class="dr-step__lede">Yulia drafts the LOI alongside you — cash/earnout mix, escrow, working-capital peg, non-competes, exclusivity window. She models the after-tax outcome for both sides so you walk in with the right number, not just a big one.</p>
+      <div class="dr-bench">
+        <div class="dr-bench__head"><div class="dr-bench__title">LOI structures · Atlas Air</div><div class="dr-bench__meta">3 OPTIONS · MODELED</div></div>
+        <div class="dr-bench__body" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:22px;">
+          <div style="background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:18px;"><div style="font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:0.1em;opacity:0.5;margin-bottom:8px;text-transform:uppercase;">Aggressive</div><div style="font-family:'Sora';font-weight:800;font-size:26px;letter-spacing:-0.02em;margin-bottom:6px;">$18.4M</div><div style="font-size:11px;line-height:1.5;opacity:0.7;">85% cash · $2M earnout · 45-day exclusivity</div></div>
+          <div style="background:#0A0A0B;color:#fff;border:0.5px solid #0A0A0B;border-radius:12px;padding:18px;"><div style="font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:0.1em;opacity:0.7;margin-bottom:8px;text-transform:uppercase;">Recommended</div><div style="font-family:'Sora';font-weight:800;font-size:26px;letter-spacing:-0.02em;margin-bottom:6px;">$16.8M</div><div style="font-size:11px;line-height:1.5;opacity:0.85;">70% cash · 20% rollover · 10% seller note @ 6%</div></div>
+          <div style="background:#fff;border:0.5px solid rgba(0,0,0,0.08);border-radius:12px;padding:18px;"><div style="font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:0.1em;opacity:0.5;margin-bottom:8px;text-transform:uppercase;">Conservative</div><div style="font-family:'Sora';font-weight:800;font-size:26px;letter-spacing:-0.02em;margin-bottom:6px;">$15.2M</div><div style="font-size:11px;line-height:1.5;opacity:0.7;">60% cash · 30% rollover · performance earnout</div></div>
+        </div>
+        <div style="padding:14px 22px;background:#FAFAFB;border-top:0.5px solid rgba(0,0,0,0.06);font-size:12.5px;color:#3A3A3E;line-height:1.55;"><strong style="color:#0A0A0B;">Yulia's take:</strong> Recommended structure maximizes seller's after-tax NPV at ~$14.1M while keeping your check size under $12M. Rollover aligns them through year 3 — exactly when concentration risk unwinds.</div>
+      </div>
+    </section>
+    <section class="dr-step" id="close" data-step="5">
+      <div class="dr-bottom">
+        <h2>Tell Yulia your thesis. Get a list of real targets tonight.</h2>
+        <p>Industry, geography, check size. She returns a ranked list of named, contactable targets with Rundown scores — usually within an hour.</p>
+        <form class="dr-bottom__chat" id="chatFormBottom">
+          <input id="chatInputBottom" type="text" placeholder="Industry, geography, check size…">
+          <button class="dr-bottom__send" type="submit" aria-label="Send"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg></button>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+window.OPENING = "Hi — I'm <strong>Yulia</strong>. Today I'm sourcing and diligencing for a searcher on an HVAC roll-up thesis. Scroll to watch.";
+window.REPLY = "Give me three things: <strong>industry</strong>, <strong>geography</strong>, and <strong>check size</strong>. I'll return a ranked list of named, off-market targets within the hour.";
+window.SCRIPT = {"1":[{"who":"y","text":"Thesis filter: <strong>HVAC, $3–10M rev, TX+OK, 15%+ EBITDA</strong>. I pulled 47 named targets this week, all with owner contact info."},{"who":"y","text":"Atlas Air hits a 94 fit — commercial book, retiring 2nd-gen owner, clean financials. Your first outreach."}],"2":[{"who":"y","text":"Rundown on Atlas: <strong>83/100, Pursue</strong>. Concentration and owner dependency are the two yellows — both fixable in integration."},{"who":"me","text":"Is 38% concentration a dealbreaker?"},{"who":"y","text":"Not at your check size. Two of the three are MSAs with 8+ year tenure. I'll model a retention scenario before LOI."}],"3":[{"who":"y","text":"Running 42 diligence workstreams in parallel. QoE, WC peg, backlog all cleared. Key-person + enviro landing today."},{"who":"y","text":"One flag — 38% top-3 concentration on month-to-month MSAs. I drafted the conversation for your owner call."}],"4":[{"who":"y","text":"Three LOI structures modeled. Recommended: <strong>$16.8M, 70/20/10</strong>. Maximizes their after-tax NPV and keeps your check under $12M."},{"who":"y","text":"Rollover aligns them through year 3 — which is exactly when the concentration risk unwinds. Send it?"}]};
+</script>
+<script src="deal-room.js"></script>
+</body></html>

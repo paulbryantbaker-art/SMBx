@@ -43,6 +43,17 @@ export interface JourneyChatProps {
     label: string;                   /* e.g. "See the add-backs" */
     onClick?: () => void;
   };
+  /** Home v1 plus button — renders a circular "+" on the left of the
+      composer that toggles a popup with journey shortcuts. When
+      absent, no plus button is rendered. */
+  plusShortcuts?: {
+    kicker?: string;                /* default "Start a journey" */
+    rows: { id: string; icon: string; label: string; hint: string; seed?: string }[];
+    /** Called when a shortcut is clicked; receives the row id. If the
+        row has a `seed` string, JourneyChat ALSO fills the composer
+        input with it and focuses. */
+    onPick?: (id: string) => void;
+  };
   /** Resizable width. */
   width: number;
   onWidthChange: (w: number) => void;
@@ -89,8 +100,23 @@ export default function JourneyChat({
   placeholder = 'Ask Yulia anything\u2026',
   onSend,
   suggested,
+  plusShortcuts,
   width, onWidthChange,
 }: JourneyChatProps) {
+  const [plusOpen, setPlusOpen] = useState(false);
+
+  /* Close plus popup on click outside */
+  useEffect(() => {
+    if (!plusOpen) return;
+    const onDocClick = (e: MouseEvent) => {
+      const target = e.target as Element | null;
+      if (!target) return;
+      if (target.closest('.h-plus-pop') || target.closest('.v4-comp__plus')) return;
+      setPlusOpen(false);
+    };
+    document.addEventListener('click', onDocClick);
+    return () => document.removeEventListener('click', onDocClick);
+  }, [plusOpen]);
   const [messages, setMessages] = useState<ChatMsg[]>([
     { id: 0, who: 'y', text: opening, animate: false },
   ]);
@@ -281,12 +307,26 @@ export default function JourneyChat({
         </button>
       )}
 
-      {/* Composer — handoff v3 §6: pill with grey→black send on has-text */}
+      {/* Composer — handoff v3 §6: pill with grey→black send on has-text.
+          Optional plus button on the left (handoff v4 Home). */}
       <div className="v4-comp v4-comp--hero">
         <form
           className={`v4-comp__card${hasText ? ' has-text' : ''}`}
           onSubmit={handleSubmit}
         >
+          {plusShortcuts && (
+            <button
+              type="button"
+              className={`v4-comp__plus${plusOpen ? ' on' : ''}`}
+              aria-label="Shortcuts"
+              onClick={(e) => { e.stopPropagation(); setPlusOpen((v) => !v); }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          )}
           <input
             id="chatInput"
             type="text"
@@ -306,6 +346,35 @@ export default function JourneyChat({
             </svg>
           </button>
         </form>
+
+        {plusShortcuts && (
+          <div className={`h-plus-pop${plusOpen ? ' on' : ''}`}>
+            <div className="h-plus-pop__k">{plusShortcuts.kicker ?? 'Start a journey'}</div>
+            {plusShortcuts.rows.map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                className="h-plus-pop__row"
+                onClick={() => {
+                  setPlusOpen(false);
+                  if (r.seed) {
+                    setInput(r.seed);
+                    /* focus the input after state settles */
+                    window.setTimeout(() => {
+                      const el = document.getElementById('chatInput') as HTMLInputElement | null;
+                      el?.focus();
+                    }, 0);
+                  }
+                  plusShortcuts.onPick?.(r.id);
+                }}
+              >
+                <span className="h-plus-pop__row-ico">{r.icon}</span>
+                <span className="h-plus-pop__row-t">{r.label}</span>
+                <span className="h-plus-pop__row-k">{r.hint}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Resize grip */}

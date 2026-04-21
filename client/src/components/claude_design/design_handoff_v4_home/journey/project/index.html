@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>smbX · public journey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="deal-room.css">
+<style>
+  .hub { max-width: 980px; margin: 0 auto; padding: 60px 28px 120px; }
+  .hub__eyebrow { font-family:'JetBrains Mono'; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:#6B6B70; margin-bottom:14px; }
+  .hub h1 { font-family: 'Sora'; font-weight: 800; font-size: 52px; letter-spacing: -0.035em; margin: 0 0 16px; line-height:1.05; }
+  .hub p.lede { font-size: 15.5px; line-height: 1.6; color: #3A3A3E; max-width: 680px; }
+  .hub h2 { font-family:'Sora'; font-weight:700; font-size:18px; letter-spacing:-0.01em; margin:48px 0 12px; display:flex; align-items:center; gap:10px; }
+  .hub h2 .num { font-family:'JetBrains Mono'; font-size:10px; letter-spacing:0.12em; color:#9A9A9F; text-transform:uppercase; font-weight:600; }
+  .pages { display: grid; gap: 10px; }
+  .pg { display:flex; align-items:center; justify-content:space-between; padding: 20px 22px; background:#fff; border:0.5px solid rgba(0,0,0,0.08); border-radius:14px; text-decoration:none; color:inherit; transition: all 180ms; }
+  .pg:hover { border-color:#0A0A0B; transform: translateY(-1px); box-shadow: 0 6px 20px -12px rgba(0,0,0,0.18); }
+  .pg__l { display:flex; flex-direction:column; gap:4px; min-width:0; }
+  .pg__t { font-family:'Sora'; font-weight:700; font-size:16px; letter-spacing:-0.005em; }
+  .pg__s { font-size:12.5px; color:#6B6B70; line-height:1.5; }
+  .pg__r { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .tag { font-family:'JetBrains Mono'; font-size:9.5px; letter-spacing:0.12em; text-transform:uppercase; padding:5px 10px; border-radius:999px; }
+  .tag--done { background:rgba(34,167,85,0.12); color:#1A7E40; }
+  .tag--feature { background:#0A0A0B; color:#fff; }
+  .tag--explainer { background:#F5F5F7; color:#3A3A3E; }
+  .arrow { color:#9A9A9F; font-size:16px; }
+  .meta-card { margin-top:40px; padding:24px 26px; background:#fff; border:0.5px solid rgba(0,0,0,0.08); border-radius:14px; display:grid; grid-template-columns:auto 1fr; gap:22px; align-items:start; }
+  .meta-card__l { font-family:'Sora'; font-weight:800; font-size:40px; letter-spacing:-0.03em; line-height:1; }
+  .meta-card__l small { display:block; font-family:'JetBrains Mono'; font-size:9.5px; letter-spacing:0.12em; color:#9A9A9F; text-transform:uppercase; margin-top:8px; font-weight:600; }
+  .meta-card__r { font-size:13px; line-height:1.55; color:#3A3A3E; }
+  .meta-card__r strong { color:#0A0A0B; }
+  .files { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:14px; }
+  .files a { font-family:'JetBrains Mono'; font-size:11.5px; padding:10px 14px; background:#FAFAFB; border-radius:8px; text-decoration:none; color:#0A0A0B; display:flex; justify-content:space-between; border:0.5px solid rgba(0,0,0,0.04); }
+  .files a:hover { background:#F0F0F2; }
+  .files a span:last-child { color:#9A9A9F; }
+</style></head>
+<body>
+<div class="hub">
+  <div class="hub__eyebrow">smbX · desktop journey rebuild</div>
+  <h1>Eight public pages. One pattern.<br><span style="color:#6B6B70;">V1 Live Deal Room.</span></h1>
+  <p class="lede">Every public page is now a split-screen where Yulia (the agent) narrates the scroll on the left and a reactive workbench shows the artifact she's producing on the right. Each page ends in a chat input. The visitor's first action on smbx.ai is to talk to her — not to read a hero section.</p>
+
+  <h2><span class="num">01</span> Journey pages — scripted arc</h2>
+  <div class="pages">
+    <a class="pg" href="sell.html"><div class="pg__l"><div class="pg__t">Home + /sell</div><div class="pg__s">Add-backs → readiness score → CIM → competitive IOIs → close. First-time sellers.</div></div><div class="pg__r"><span class="tag tag--feature">FLAGSHIP</span><span class="arrow">→</span></div></a>
+    <a class="pg" href="buy.html"><div class="pg__l"><div class="pg__t">/buy</div><div class="pg__s">Sourcing → Rundown score → DD pack → LOI structures. Searchers + independent sponsors.</div></div><div class="pg__r"><span class="tag tag--done">BUILT</span><span class="arrow">→</span></div></a>
+    <a class="pg" href="raise.html"><div class="pg__l"><div class="pg__t">/raise</div><div class="pg__s">5 structures → cap stack → deck → investor map. Minority recap vs. full sale math.</div></div><div class="pg__r"><span class="tag tag--done">BUILT</span><span class="arrow">→</span></div></a>
+    <a class="pg" href="integrate.html"><div class="pg__l"><div class="pg__t">/integrate</div><div class="pg__s">Day 0 → 180-day plan → key-person retention → thesis scorecard. First Monday through first annual.</div></div><div class="pg__r"><span class="tag tag--done">BUILT</span><span class="arrow">→</span></div></a>
+  </div>
+
+  <h2><span class="num">02</span> Explainer pages — rail becomes "ask anything"</h2>
+  <div class="pages">
+    <a class="pg" href="how-it-works.html"><div class="pg__l"><div class="pg__t">/how-it-works</div><div class="pg__s">6 operators · IB stack table · valuation/readiness/FCCV formulas · sample conversation.</div></div><div class="pg__r"><span class="tag tag--explainer">EXPLAINER</span><span class="arrow">→</span></div></a>
+    <a class="pg" href="pricing.html"><div class="pg__l"><div class="pg__t">/pricing</div><div class="pg__s">Explore (free) · Deal ($2,400/mo) · Firm ($9,800/mo). Yulia routes you to the smallest plan.</div></div><div class="pg__r"><span class="tag tag--explainer">EXPLAINER</span><span class="arrow">→</span></div></a>
+    <a class="pg" href="enterprise.html"><div class="pg__l"><div class="pg__t">/enterprise</div><div class="pg__s">4 firm shapes · real use cases · 6-tile ROI. Search funds, LMM PE, family offices, boutique banks.</div></div><div class="pg__r"><span class="tag tag--explainer">EXPLAINER</span><span class="arrow">→</span></div></a>
+  </div>
+
+  <div class="meta-card">
+    <div class="meta-card__l">7 + 1<small>Pages + spec</small></div>
+    <div class="meta-card__r">The pattern is codified in <strong>deal-room.css</strong> + <strong>deal-room.js</strong> — every page is just content hung on the shared chrome. Per-page content + data shapes for Claude Code are in <strong>specs.md</strong>. Journey pages use a scripted chat arc tied to scroll; explainer pages drop the script and keep the rail as an ambient "ask Yulia anything" sidebar.
+    <div class="files">
+      <a href="specs.md"><span>specs.md</span><span>all 8 pages</span></a>
+      <a href="deal-room.css"><span>deal-room.css</span><span>shared chrome</span></a>
+      <a href="deal-room.js"><span>deal-room.js</span><span>rail + scroll</span></a>
+      <a href="glass.css"><span>glass.css</span><span>ref, for comp</span></a>
+    </div>
+    </div>
+  </div>
+</div>
+</body></html>

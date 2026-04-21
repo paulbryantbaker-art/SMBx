@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>/sell · smbx.ai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="v4-tokens.css">
+<link rel="stylesheet" href="v4-shell.css">
+<link rel="stylesheet" href="journey-content.css">
+<link rel="stylesheet" href="sell-editorial.css">
+<style>
+  html, body { height: 100%; background: var(--v4-bg); }
+  body { margin: 0; font-family: 'Inter', system-ui, sans-serif; }
+  .app-v4 { position: fixed; inset: 0; }
+  .v4-shell { position: absolute; inset: 0; overflow: hidden; --v4-tool-w: 184px; --v4-chat-w: 380px; --v4-rail-w: 0px; }
+  .v4-canvas-wrap { right: 16px !important; }
+  .v4-canvas__head { padding: 14px 22px 12px; }
+  .v4-canvas__body { padding: 0; }
+
+  /* tool rail account buttons */
+  .jt-acct { padding: 10px 12px; margin: 0 8px; border-top: 1px solid var(--v4-line); display:flex; flex-direction:column; gap:6px; }
+  .jt-acct__btn { font:600 12px/1 'Inter',sans-serif; padding:9px 12px; border-radius:999px; background:var(--v4-ink); color:var(--v4-on-ink); border:0; cursor:pointer; }
+  .jt-acct__btn--ghost { background:transparent; color:var(--v4-mute); font-weight:500; padding:6px 12px; font-size:11.5px; }
+  .jt-acct__btn--ghost:hover { color:var(--v4-ink); background:var(--v4-bg-2); }
+
+  /* chat message */
+  .v4-msg { margin-bottom:18px; }
+  .v4-msg__bubble { font-size:13px; line-height:1.55; color:var(--v4-ink-2); }
+  .v4-msg--me .v4-msg__bubble { background:var(--v4-bg-2); padding:10px 14px; border-radius:14px 14px 4px 14px; display:inline-block; max-width:92%; }
+  .v4-msg strong { color:var(--v4-ink); font-weight:600; }
+
+  /* Tweaks panel */
+  .tweaks { position:fixed; bottom:16px; right:16px; width:280px; background:var(--v4-card); border:1px solid var(--v4-card-line); border-radius:14px; box-shadow:0 20px 40px -10px rgba(0,0,0,0.15); padding:14px; display:none; z-index:100; font-family:'Inter',sans-serif; }
+  .tweaks.on { display:block; }
+  .tweaks__head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .tweaks__t { font-family:'Sora',sans-serif; font-weight:600; font-size:13px; }
+  .tweaks__x { width:22px; height:22px; border:0; background:var(--v4-bg-2); border-radius:50%; cursor:pointer; color:var(--v4-mute); }
+  .tweaks__row { margin-bottom:10px; }
+  .tweaks__lbl { font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:0.1em; text-transform:uppercase; color:var(--v4-mute); margin-bottom:6px; }
+  .tweaks__seg { display:flex; gap:2px; background:var(--v4-bg-2); padding:3px; border-radius:8px; }
+  .tweaks__seg button { flex:1; border:0; background:transparent; padding:5px 8px; border-radius:6px; font:500 10.5px/1 'Inter',sans-serif; color:var(--v4-mute); cursor:pointer; }
+  .tweaks__seg button.active { background:var(--v4-card); color:var(--v4-ink); box-shadow:0 1px 2px rgba(0,0,0,0.06); }
+
+  /* ─── Chat composer: sits at the bottom of the chat well ─── */
+  .v4-comp.v4-comp--hero {
+    padding: 8px 16px 16px;
+  }
+  /* Composer pill — same elevation vocabulary as the Canvas card */
+  .v4-comp--hero .v4-comp__card {
+    position: relative;
+    display: flex; align-items: center;
+    background: var(--v4-card);
+    border: 1px solid var(--v4-card-line);
+    border-radius: 999px;
+    padding: 7px 7px 7px 22px;
+    gap: 8px;
+    min-height: 58px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 0 0 1px rgba(15,15,20,0.02),
+      0 40px 80px -20px rgba(15,15,30,0.18),
+      0 18px 40px -12px rgba(15,15,30,0.12),
+      0 4px 10px rgba(15,15,30,0.06);
+    transition: box-shadow 160ms, transform 160ms;
+  }
+  /* Top highlight, matching canvas card */
+  .v4-comp--hero .v4-comp__card::before {
+    content: ''; position: absolute; inset: 0 0 auto 0; height: 28px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.5), transparent);
+    pointer-events: none; border-radius: 999px 999px 0 0;
+  }
+  .v4-comp--hero .v4-comp__card:focus-within {
+    box-shadow:
+      0 0 0 3px rgba(10,10,11,0.08),
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 0 0 1px rgba(15,15,20,0.02),
+      0 40px 80px -20px rgba(15,15,30,0.22),
+      0 18px 40px -12px rgba(15,15,30,0.14),
+      0 4px 10px rgba(15,15,30,0.08);
+  }
+  .v4-comp--hero #chatInput {
+    flex: 1; min-width: 0;
+    border: 0; outline: 0; background: transparent;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15.5px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--v4-ink);
+    padding: 10px 0;
+  }
+  .v4-comp--hero #chatInput::placeholder {
+    color: var(--v4-mute);
+    font-weight: 400;
+    letter-spacing: -0.005em;
+  }
+  /* Send: light grey by default, goes black when input has text */
+  .v4-comp--hero .v4-comp__send-btn {
+    width: 44px; height: 44px;
+    border-radius: 999px;
+    background: var(--v4-bg-2);
+    color: var(--v4-mute);
+    border: 0; cursor: pointer;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    transition: background 160ms, color 160ms, transform 120ms, box-shadow 160ms;
+    box-shadow: none;
+  }
+  .v4-comp--hero .v4-comp__card.has-text .v4-comp__send-btn {
+    background: var(--v4-ink);
+    color: var(--v4-on-ink);
+    box-shadow: 0 6px 16px -6px rgba(10,10,11,0.45);
+  }
+  .v4-comp--hero .v4-comp__card.has-text .v4-comp__send-btn:hover {
+    background: #1f1f22;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px -8px rgba(10,10,11,0.55);
+  }
+  .v4-comp--hero .v4-comp__send-btn:active { transform: translateY(0); }
+  .v4-comp__foot {
+    margin-top: 10px;
+    padding: 0 8px;
+    display: flex; gap: 6px; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--v4-faint);
+    font-weight: 500;
+  }
+  .v4-comp__sep { opacity: 0.6; }
+
+  /* ─── Next-action suggestion: subdued ghost chip ─── */
+  .v4-next.v4-next--quiet {
+    margin: 2px 18px 10px;
+    padding: 7px 12px 7px 14px;
+    background: transparent;
+    color: var(--v4-mute);
+    border: 1px dashed var(--v4-line);
+    border-radius: 999px;
+    box-shadow: none;
+    display: inline-flex; align-items: center; gap: 10px;
+    width: fit-content;
+    font-family: 'Inter', sans-serif;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    cursor: pointer;
+    transition: border-color 160ms, color 160ms, background 160ms;
+  }
+  .v4-next.v4-next--quiet:hover {
+    border-color: var(--v4-ink);
+    color: var(--v4-ink);
+    background: var(--v4-bg-2);
+    transform: none;
+  }
+  .v4-next--quiet .v4-next__k {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--v4-faint);
+    margin-bottom: 0;
+  }
+  .v4-next--quiet .v4-next__t {
+    color: inherit;
+    font-weight: 500;
+    font-size: 11.5px;
+  }
+  .v4-next--quiet .v4-next__go {
+    color: var(--v4-faint);
+    font-size: 12px;
+    margin-left: 2px;
+  }
+  .v4-next--quiet:hover .v4-next__go { color: var(--v4-ink); }
+</style>
+</head>
+<body>
+<div class="app-v4" data-density="comfortable">
+  <div class="v4-shell journey-shell" data-tool="expanded">
+
+    <!-- TOOL RAIL -->
+    <aside class="v4-tool v4-tool--expanded" id="tool">
+      <button class="v4-tool__logo" id="toolToggle">X</button>
+      <div class="v4-tool__sep"></div>
+      <div class="v4-tool__list">
+        <div class="v4-tool__group-h">Journeys</div>
+        <button class="v4-tool__btn v4-tool__btn--active"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="v4-tool__lbl">Sell</span></button>
+        <button class="v4-tool__btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><span class="v4-tool__lbl">Buy</span></button>
+        <button class="v4-tool__btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg><span class="v4-tool__lbl">Raise</span></button>
+        <button class="v4-tool__btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span class="v4-tool__lbl">Integrate</span></button>
+        <div class="v4-tool__group-h" style="margin-top:16px;">Learn</div>
+        <button class="v4-tool__btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span class="v4-tool__lbl">How it works</span></button>
+        <button class="v4-tool__btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="v4-tool__lbl">Pricing</span></button>
+        <button class="v4-tool__btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><span class="v4-tool__lbl">Enterprise</span></button>
+      </div>
+      <div class="jt-acct">
+        <button class="jt-acct__btn">Start free</button>
+        <button class="jt-acct__btn jt-acct__btn--ghost">Sign in</button>
+      </div>
+    </aside>
+
+    <!-- CHAT WELL -->
+    <section class="v4-chat" id="chat">
+      <div class="v4-chat__grip"></div>
+      <div class="v4-psw"><button class="v4-psw__btn"><div class="v4-psw__logo">A</div><div class="v4-psw__body"><div class="v4-psw__n">Acme, Inc.</div><div class="v4-psw__k">SELL · $65M · DEMO</div></div><svg class="v4-psw__caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button></div>
+      <div class="v4-chat__head">
+        <div class="v4-chat__head-t">Sell-side · Acme, Inc.</div>
+      </div>
+      <div class="v4-chat__scroll" id="chatScroll"></div>
+      <button class="v4-next v4-next--quiet" id="nextAction">
+        <span class="v4-next__k">Suggested</span>
+        <span class="v4-next__t">See the add-backs</span>
+        <span class="v4-next__go" aria-hidden="true">→</span>
+      </button>
+      <div class="v4-comp v4-comp--hero">
+        <form class="v4-comp__card" id="chatForm">
+          <input id="chatInput" type="text" placeholder="Ask Yulia anything about your business…" autocomplete="off">
+          <button class="v4-comp__send-btn" type="submit" aria-label="Send">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          </button>
+        </form>
+        <div class="v4-comp__foot" hidden>
+          <span>Yulia · Sell-side partner</span>
+          <span class="v4-comp__sep">·</span>
+          <span>Under NDA</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CANVAS: the editorial sell page -->
+    <div class="v4-canvas-wrap">
+      <div class="v4-canvas">
+        <div class="v4-canvas__head">
+          <div class="v4-canvas__crumb">
+            <span class="v4-canvas__crumb-k">smbx.ai / sell</span>
+            <span class="v4-canvas__crumb-sep">·</span>
+            <span class="v4-canvas__crumb-t">Sell a business</span>
+            <span class="v4-canvas__crumb-badge">Demo · Acme, Inc.</span>
+          </div>
+        </div>
+        <div class="v4-canvas__body" id="canvasBody">
+
+        <div class="sell-v2" id="sellv2" data-acc="off" data-density="comfortable" data-motion="subtle">
+
+          <!-- ───── HERO ───── -->
+          <section class="sv-hero sv-hero--full" id="s1">
+            <div class="sv-anim in sv-hero__lede">
+              <div class="sv-hero__eye">SELL-SIDE · YULIA</div>
+              <h1 class="sv-hero__h">Know what you have. <em>Before anyone else does.</em></h1>
+              <p class="sv-hero__sub">Yulia finds value hiding in your financials, builds the documents that sell your business, and runs the process that gets you to the closing table — narrated here with <strong>Acme, Inc.</strong>, a $65M distributor in Phoenix.</p>
+              <div class="sv-hero__cta">
+                <button class="sv-hero__btn">Start the walkthrough <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+                <button class="sv-hero__btn sv-hero__btn--ghost">See pricing</button>
+              </div>
+            </div>
+
+            <!-- Stat row: full-width, below lede -->
+            <div class="sv-hero__stats sv-anim sv-anim-d1 in">
+              <div class="sv-hero__metac"><div class="sv-hero__metav" data-num="65">$65.0M</div><div class="sv-hero__metal">Revenue</div></div>
+              <div class="sv-hero__metac"><div class="sv-hero__metav">$9.2M <span style="color:var(--v4-faint);font-weight:400;">→</span> $11.0M</div><div class="sv-hero__metal">Reported → Normalized EBITDA</div></div>
+              <div class="sv-hero__metac"><div class="sv-hero__metav">7.5×</div><div class="sv-hero__metal">Target multiple</div></div>
+              <div class="sv-hero__metac"><div class="sv-hero__metav">$82.5M</div><div class="sv-hero__metal">Target enterprise value</div></div>
+            </div>
+
+            <!-- Horizontal journey strip: steps left-to-right with a progress line -->
+            <div class="sv-strip sv-anim sv-anim-d2 in" aria-label="Engagement arc">
+              <div class="sv-strip__hd">
+                <span class="sv-strip__k">ACME / SELL</span>
+                <span class="sv-strip__t">The arc of a sell-side engagement · Acme is on step 02</span>
+              </div>
+              <ol class="sv-strip__track">
+                <li class="sv-strip__step" data-state="done">
+                  <span class="sv-strip__n">01</span>
+                  <span class="sv-strip__name">Estimator</span>
+                  <span class="sv-strip__dur">Day 0</span>
+                </li>
+                <li class="sv-strip__step" data-state="active">
+                  <span class="sv-strip__n">02</span>
+                  <span class="sv-strip__name">Add-backs</span>
+                  <span class="sv-strip__dur">Wk 1</span>
+                </li>
+                <li class="sv-strip__step">
+                  <span class="sv-strip__n">03</span>
+                  <span class="sv-strip__name">Readiness</span>
+                  <span class="sv-strip__dur">Wk 2</span>
+                </li>
+                <li class="sv-strip__step">
+                  <span class="sv-strip__n">04</span>
+                  <span class="sv-strip__name">CIM</span>
+                  <span class="sv-strip__dur">Wk 3–4</span>
+                </li>
+                <li class="sv-strip__step">
+                  <span class="sv-strip__n">05</span>
+                  <span class="sv-strip__name">Process</span>
+                  <span class="sv-strip__dur">Wk 5–9</span>
+                </li>
+                <li class="sv-strip__step">
+                  <span class="sv-strip__n">06</span>
+                  <span class="sv-strip__name">Close</span>
+                  <span class="sv-strip__dur">Wk 10–14</span>
+                </li>
+              </ol>
+            </div>
+          </section>
+
+          <!-- ───── ROW 1 · Estimator ───── -->
+          <section class="sv-row" id="s2">
+            <div class="sv-row__text sv-anim">
+              <div class="sv-row__eye"><span class="sv-row__eye__n">01</span>Estimator</div>
+              <h2 class="sv-row__h">How much value is <em>hiding in your financials?</em></h2>
+              <p class="sv-row__p">Reported EBITDA and real EBITDA are almost never the same number. Your accountant minimizes taxes. A buyer maximizes the price their lender will justify. Three inputs, and Yulia estimates the gap on your business.</p>
+              <div class="sv-row__stat">
+                <div class="sv-row__stat-c"><div class="sv-row__stat-v">30 min</div><div class="sv-row__stat-l">First estimate</div></div>
+                <div class="sv-row__stat-c"><div class="sv-row__stat-v">$0</div><div class="sv-row__stat-l">No card</div></div>
+              </div>
+            </div>
+            <div class="sv-anim sv-anim-d2">
+              <div class="jc-est" data-aff="try" style="box-shadow:0 12px 28px -12px rgba(10,10,11,0.08);">
+                <div class="jc-est__head"><div class="jc-est__title">Add-back estimator</div><div class="jc-est__sub">↳ Try it · 3 inputs</div></div>
+                <div class="jc-est__grid" id="est"></div>
+                <div class="jc-est__result empty" id="estResult">Pick all three inputs to see the estimate.</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ───── ROW 2 · Add-backs (reversed) ───── -->
+          <section class="sv-row sv-row--reverse" id="s3">
+            <div class="sv-row__text sv-anim">
+              <div class="sv-row__eye"><span class="sv-row__eye__n">02</span>Add-backs · Acme</div>
+              <h2 class="sv-row__h">The money hiding in <em>a set of tax returns.</em></h2>
+              <p class="sv-row__p">Yulia reads three years of tax returns + detailed P&L in minutes. Six defensible add-backs on Acme — every one IRS-documented. <strong>20% more EBITDA than the CPA reports</strong>. At 7.5× that's $13.5M of enterprise value.</p>
+              <div class="sv-row__stat">
+                <div class="sv-row__stat-c"><div class="sv-row__stat-v">+$1.80M</div><div class="sv-row__stat-l">Defensible add-backs</div></div>
+                <div class="sv-row__stat-c"><div class="sv-row__stat-v">~96%</div><div class="sv-row__stat-l">Big-4 concordance</div></div>
+              </div>
+            </div>
+            <div class="sv-anim sv-anim-d2">
+              <div class="jc-card" data-aff="preview">
+                <div class="jc-card__head"><div class="jc-card__title">Add-back schedule · Acme</div><div class="jc-card__meta jc-card__meta--chip">Example · 6 items · $1.80M</div></div>
+                <div class="jc-card__body jc-card__body--flush"><div class="jc-table" id="addbackTable">
+                  <div class="jc-row"><div><div class="jc-row__t">Real-estate above-market lease</div><div class="jc-row__s">Phoenix HQ · family trust · CBRE comps</div></div><div class="jc-row__amt">+$420K</div></div>
+                  <div class="jc-row"><div><div class="jc-row__t">Discontinued Nevada branch</div><div class="jc-row__s">Closed Q3 2024 · overhead still in run-rate</div></div><div class="jc-row__amt">+$640K</div></div>
+                  <div class="jc-row"><div><div class="jc-row__t">Legal reserve</div><div class="jc-row__s">One-time litigation · settled 2024</div></div><div class="jc-row__amt">+$310K</div></div>
+                  <div class="jc-row"><div><div class="jc-row__t">Family on payroll</div><div class="jc-row__s">Two siblings · non-operating roles</div></div><div class="jc-row__amt">+$180K</div></div>
+                  <div class="jc-row"><div><div class="jc-row__t">Owner comp above market</div><div class="jc-row__s">$420K vs. $265K market (BLS)</div></div><div class="jc-row__amt">+$155K</div></div>
+                  <div class="jc-row"><div><div class="jc-row__t">Discretionary travel + events</div><div class="jc-row__s">Suites, retreats, club dues</div></div><div class="jc-row__amt">+$95K</div></div>
+                  <div class="jc-row jc-row--total"><div><div class="jc-row__t">Defensible total</div></div><div class="jc-row__amt">+$1.80M</div></div>
+                </div></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ───── BIG NUMBER ───── -->
+          <section class="sv-bignum sv-anim" id="bignum">
+            <div>
+              <div class="sv-bignum__k">ON IDENTICAL FINANCIALS</div>
+              <h3 class="sv-bignum__t">Same diligence pack. Two narratives. <em>A $22M spread.</em></h3>
+              <p class="sv-bignum__s">"Distributor for sale" trades at 6×. "Southwest anchor for national consolidation" trades at 8×. On Acme's $11M EBITDA, that's the difference between $66M and $88M. The narrative is the work — Yulia writes it.</p>
+            </div>
+            <div class="sv-bignum__v"><span id="bignumV">$22</span><small>M</small></div>
+          </section>
+
+          <!-- ───── ROW 3 · Readiness ───── -->
+          <section class="sv-row" id="s4">
+            <div class="sv-row__text sv-anim">
+              <div class="sv-row__eye"><span class="sv-row__eye__n">03</span>Readiness</div>
+              <h2 class="sv-row__h">Your business, scored <em>through a buyer's lens.</em></h2>
+              <p class="sv-row__p">Seventeen dimensions — the same checklist a PE associate runs in their first weekend on the file. Acme lands at <strong>74/100</strong>. Strong on financial integrity and revenue quality; two fixable yellows on owner dependency and customer concentration — worth 0.5–0.75× on pack.</p>
+              <div class="sv-row__stat">
+                <div class="sv-row__stat-c"><div class="sv-row__stat-v">17</div><div class="sv-row__stat-l">Dimensions</div></div>
+                <div class="sv-row__stat-c"><div class="sv-row__stat-v">0.5–0.75×</div><div class="sv-row__stat-l">Multiple lift on pack</div></div>
+              </div>
+            </div>
+            <div class="sv-anim sv-anim-d2">
+              <div class="jc-card" data-aff="preview">
+                <div class="jc-card__head"><div class="jc-card__title">Readiness · Acme</div><div class="jc-card__meta jc-card__meta--chip">Example · 17 dims · 7 shown</div></div>
+                <div class="jc-card__body jc-card__body--flush">
+                  <div class="jc-readiness">
+                    <div class="jc-donut">
+                      <svg viewBox="0 0 200 200">
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="#EEEEEB" stroke-width="14"/>
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="#0A0A0B" stroke-width="14" stroke-linecap="round" stroke-dasharray="565.5" stroke-dashoffset="147" class="sv-donut-stroke"/>
+                      </svg>
+                      <div class="jc-donut__inner"><div class="jc-donut__v" id="readinessV">74</div><div class="jc-donut__max">/ 100</div></div>
+                    </div>
+                    <div>
+                      <div class="jc-dim"><span class="jc-dim__dot jc-dim__dot--ok"></span><span class="jc-dim__l">Financial integrity</span><div class="jc-dim__bar" style="--w:91%"></div><span class="jc-dim__v">9.1</span></div>
+                      <div class="jc-dim"><span class="jc-dim__dot jc-dim__dot--ok"></span><span class="jc-dim__l">Revenue quality</span><div class="jc-dim__bar" style="--w:86%"></div><span class="jc-dim__v">8.6</span></div>
+                      <div class="jc-dim"><span class="jc-dim__dot jc-dim__dot--ok"></span><span class="jc-dim__l">Scalability</span><div class="jc-dim__bar" style="--w:80%"></div><span class="jc-dim__v">8.0</span></div>
+                      <div class="jc-dim"><span class="jc-dim__dot jc-dim__dot--ok"></span><span class="jc-dim__l">Margins</span><div class="jc-dim__bar" style="--w:79%"></div><span class="jc-dim__v">7.9</span></div>
+                      <div class="jc-dim"><span class="jc-dim__dot jc-dim__dot--ok"></span><span class="jc-dim__l">Management depth</span><div class="jc-dim__bar" style="--w:74%"></div><span class="jc-dim__v">7.4</span></div>
+                      <div class="jc-dim"><span class="jc-dim__dot jc-dim__dot--warn"></span><span class="jc-dim__l">Concentration</span><div class="jc-dim__bar" style="--w:60%"></div><span class="jc-dim__v">6.0</span></div>
+                      <div class="jc-dim"><span class="jc-dim__dot jc-dim__dot--warn"></span><span class="jc-dim__l">Owner dependency</span><div class="jc-dim__bar" style="--w:54%"></div><span class="jc-dim__v">5.4</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ───── BREAKER ───── -->
+          <section class="sv-break sv-anim">
+            <div class="sv-break__eye">THE PROCESS</div>
+            <h2 class="sv-break__t">One buyer gives you a price. <em>Five give you a market.</em></h2>
+          </section>
+
+          <!-- ───── ROW 4 · CIM (reversed) ───── -->
+          <section class="sv-row sv-row--reverse" id="s5">
+            <div class="sv-row__text sv-anim">
+              <div class="sv-row__eye"><span class="sv-row__eye__n">04</span>The CIM</div>
+              <h2 class="sv-row__h">A 32-page document that <em>moves the multiple.</em></h2>
+              <p class="sv-row__p">Your business deserves better than a data dump. Yulia drafts a narrative — operating history, discipline mix, platform thesis — then runs it against comps to defend the number. On Acme: positioned not as "a distributor" but as "the Southwest anchor asset."</p>
+              <div class="sv-row__stat">
+                <div class="sv-row__stat-c"><div class="sv-row__stat-v">32 pages</div><div class="sv-row__stat-l">Full diligence pack</div></div>
+                <div class="sv-row__stat-c"><div class="sv-row__stat-v">3–5 days</div><div class="sv-row__stat-l">First draft to you</div></div>
+              </div>
+            </div>
+            <div class="sv-anim sv-anim-d2">
+              <div class="jc-card" data-aff="preview">
+                <div class="jc-card__head"><div class="jc-card__title">CIM preview · Acme</div><div class="jc-card__meta jc-card__meta--chip">Example · 32pp · confidential</div></div>
+                <div class="jc-card__body jc-card__body--flush">
+                  <div class="jc-cim">
+                    <div class="jc-cim__page">
+                      <div class="jc-cim__idx">01 · Executive summary</div>
+                      <div class="jc-cim__t">A 38-year multi-discipline Southwest platform, positioned as the anchor asset for national consolidation.</div>
+                      <div class="jc-cim__lines"><div class="jc-cim__line" style="width:96%"></div><div class="jc-cim__line" style="width:88%"></div><div class="jc-cim__line" style="width:72%"></div><div class="jc-cim__line" style="width:84%"></div></div>
+                      <div class="jc-cim__kpis"><div><div class="jc-cim__kv">$65.0M</div><div class="jc-cim__kl">Revenue</div></div><div><div class="jc-cim__kv">$11.0M</div><div class="jc-cim__kl">Adj EBITDA</div></div><div><div class="jc-cim__kv">17.0%</div><div class="jc-cim__kl">Margin</div></div></div>
+                    </div>
+                    <div class="jc-cim__page">
+                      <div class="jc-cim__idx">04 · Discipline mix</div>
+                      <div class="jc-cim__t">Four disciplines anchor the platform. The mix is the moat.</div>
+                      <div style="margin-top:6px;">
+                        <div class="jc-mix__row" style="grid-template-columns:110px 1fr 36px;font-size:11px;padding:0;"><div class="jc-mix__l">Industrial MRO</div><div class="jc-mix__bar" style="height:5px;"><div class="jc-mix__fill" style="width:38%;"></div></div><div class="jc-mix__p">38%</div></div>
+                        <div class="jc-mix__row" style="grid-template-columns:110px 1fr 36px;font-size:11px;padding:0;margin-top:6px;"><div class="jc-mix__l">Hospitality</div><div class="jc-mix__bar" style="height:5px;"><div class="jc-mix__fill" style="width:24%;"></div></div><div class="jc-mix__p">24%</div></div>
+                        <div class="jc-mix__row" style="grid-template-columns:110px 1fr 36px;font-size:11px;padding:0;margin-top:6px;"><div class="jc-mix__l">Healthcare</div><div class="jc-mix__bar" style="height:5px;"><div class="jc-mix__fill" style="width:19%;"></div></div><div class="jc-mix__p">19%</div></div>
+                        <div class="jc-mix__row" style="grid-template-columns:110px 1fr 36px;font-size:11px;padding:0;margin-top:6px;"><div class="jc-mix__l">Construction</div><div class="jc-mix__bar" style="height:5px;"><div class="jc-mix__fill" style="width:19%;"></div></div><div class="jc-mix__p">19%</div></div>
+                      </div>
+                      <div class="jc-cim__kpis" style="grid-template-columns:repeat(2,1fr);"><div><div class="jc-cim__kv">400+</div><div class="jc-cim__kl">Active accounts</div></div><div><div class="jc-cim__kv">62%</div><div class="jc-cim__kl">Recurring</div></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ───── ROW 5 · IOIs ───── -->
+          <section class="sv-row" id="s6">
+            <div class="sv-row__text sv-anim">
+              <div class="sv-row__eye"><span class="sv-row__eye__n">05</span>Competitive process</div>
+              <h2 class="sv-row__h">Four offers. <em>One market.</em></h2>
+              <p class="sv-row__p">Teaser goes to 18 buyers — strategic distributors, PE roll-ups, family offices. Four IOIs come back inside 21 days. The winner in a competitive process typically lands <strong>15–30% above</strong> the first offer. On Acme, that's $12–24M.</p>
+              <div class="sv-row__stat">
+                <div class="sv-row__stat-c"><div class="sv-row__stat-v">18 → 4</div><div class="sv-row__stat-l">Targeted → IOIs</div></div>
+                <div class="sv-row__stat-c"><div class="sv-row__stat-v">21 days</div><div class="sv-row__stat-l">To first round</div></div>
+              </div>
+            </div>
+            <div class="sv-anim sv-anim-d2">
+              <div class="jc-card" data-aff="preview">
+                <div class="jc-card__head"><div class="jc-card__title">IOI comparison · round 1</div><div class="jc-card__meta jc-card__meta--chip">Example · 3 of 4 shown</div></div>
+                <div class="jc-card__body jc-card__body--flush">
+                  <div class="jc-ioi">
+                    <div class="jc-ioi__card"><div class="jc-ioi__k"><span>Family office</span></div><div class="jc-ioi__price">$82M</div><div class="jc-ioi__terms">100% cash · 45-day close · clean diligence</div></div>
+                    <div class="jc-ioi__card jc-ioi__card--winner"><div class="jc-ioi__k"><span>Strategic</span><span class="jc-ioi__tag">LEAD</span></div><div class="jc-ioi__price">$91M</div><div class="jc-ioi__terms">80% cash · 20% rollover · 45-day exclusivity</div></div>
+                    <div class="jc-ioi__card"><div class="jc-ioi__k"><span>PE roll-up</span></div><div class="jc-ioi__price">$86M</div><div class="jc-ioi__terms">55% cash · $4M earnout · 75-day diligence</div></div>
+                  </div>
+                </div>
+                <div class="jc-card__foot"><strong>Yulia's take.</strong> All three within $4M after tax on headline. But the strategic's 20% rollover at their exit multiple models to another <strong>$14–18M</strong> — total haul $107M vs. $82M all-cash today.</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ───── EXIT PATHS (editorial list) ───── -->
+          <section class="sv-paths" id="s7">
+            <div class="sv-paths__head">
+              <div class="sv-row__eye"><span class="sv-row__eye__n">06</span>Exit paths</div>
+              <h2 class="sv-row__h" style="margin:0;">Selling 100% <em>isn't your only option.</em></h2>
+            </div>
+            <div class="sv-paths__list">
+              <div class="sv-paths__row sv-anim"><div class="sv-paths__n">01</div><div class="sv-paths__t">Full sale.</div><div class="sv-paths__b">Maximum immediate liquidity. Clean break. Best when you're ready to exit entirely.</div><div class="sv-paths__typ">100% equity</div></div>
+              <div class="sv-paths__row sv-anim"><div class="sv-paths__n">02</div><div class="sv-paths__t">Majority + rollover.</div><div class="sv-paths__b">Cash today, equity retained for a second bite when the business exits again in 3–5 years.</div><div class="sv-paths__typ">15–30% rolled</div></div>
+              <div class="sv-paths__row sv-anim"><div class="sv-paths__n">03</div><div class="sv-paths__t">Minority raise.</div><div class="sv-paths__b">Growth capital without giving up control. Stay in the operator seat.</div><div class="sv-paths__typ">$5–25M</div></div>
+              <div class="sv-paths__row sv-anim"><div class="sv-paths__n">04</div><div class="sv-paths__t">ESOP.</div><div class="sv-paths__b">§1042 tax deferral. Stay as chairman. Culture preserved. Multi-year transition.</div><div class="sv-paths__typ">70–80% FMV</div></div>
+              <div class="sv-paths__row sv-anim"><div class="sv-paths__n">05</div><div class="sv-paths__t">Dividend recap.</div><div class="sv-paths__b">Take debt against the business, pay yourself a dividend. Retain 100% equity.</div><div class="sv-paths__typ">$10–50M out</div></div>
+              <div class="sv-paths__row sv-anim"><div class="sv-paths__n">06</div><div class="sv-paths__t">Partial asset sale.</div><div class="sv-paths__b">Sell a division, license IP, or sell-leaseback real estate. Unlock value without a full exit.</div><div class="sv-paths__typ">Carve-out</div></div>
+            </div>
+          </section>
+
+          <!-- ───── CTA ───── -->
+          <section class="sv-cta sv-anim" id="close">
+            <div class="sv-cta__eye">START · NO CARD</div>
+            <h2 class="sv-cta__h">Tell Yulia about <em>your business.</em></h2>
+            <p class="sv-cta__s">Three numbers — industry, revenue, reported EBITDA — and she'll return a preliminary value range, an add-back list, and a readiness score inside 30 minutes. The conversation starts in the chat pane on your left.</p>
+            <button class="sv-cta__point" type="button" id="ctaPoint">
+              <span class="sv-cta__point-ar"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></span>
+              <span>Start in the chat pane</span>
+              <span style="opacity:0.55;font-weight:500;">Yulia is ready</span>
+            </button>
+            <div class="sv-cta__meta">
+              <span>30-min first estimate</span>
+              <span>No card</span>
+              <span>Under NDA</span>
+            </div>
+          </section>
+
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TWEAKS -->
+<div class="tweaks" id="tweaks">
+  <div class="tweaks__head"><div class="tweaks__t">Tweaks</div><button class="tweaks__x" onclick="document.getElementById('tweaks').classList.remove('on')">×</button></div>
+  <div class="tweaks__row"><div class="tweaks__lbl">Accent color</div><div class="tweaks__seg" data-tweak="acc"><button data-v="off" class="active">Off</button><button data-v="on">Warm tan</button></div></div>
+  <div class="tweaks__row"><div class="tweaks__lbl">Density</div><div class="tweaks__seg" data-tweak="density"><button data-v="comfortable" class="active">Comfortable</button><button data-v="compact">Compact</button></div></div>
+  <div class="tweaks__row"><div class="tweaks__lbl">Motion</div><div class="tweaks__seg" data-tweak="motion"><button data-v="none">None</button><button data-v="subtle" class="active">Subtle</button><button data-v="full">Full</button></div></div>
+  <div class="tweaks__row"><div class="tweaks__lbl">Hero product</div><div class="tweaks__seg" data-tweak="hero"><button data-v="shell" class="active">Live shell</button><button data-v="stat">Big stat</button></div></div>
+  <div class="tweaks__row"><div class="tweaks__lbl">Paths layout</div><div class="tweaks__seg" data-tweak="paths"><button data-v="list" class="active">Editorial list</button><button data-v="grid">3-col grid</button></div></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════ */
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "acc": "off",
+  "density": "comfortable",
+  "motion": "full",
+  "hero": "shell",
+  "paths": "grid"
+}/*EDITMODE-END*/;
+const state = { ...TWEAK_DEFAULTS };
+
+/* ── Chat narration ───────────────────────────────────────── */
+const OPENING = "Hi — I'm <strong>Yulia</strong>. I'm walking you through a live sell-side deal: <strong>Acme, Inc.</strong>, a $65M multi-discipline distributor in Phoenix. Scroll to watch the whole process.";
+const SCRIPT = {
+  "s3": [{ who:'y', t:"Reading Acme's <strong>three tax returns</strong> + detailed P&L. Six defensible add-backs — <strong>$1.8M</strong>." },
+         { who:'y', t:"Normalized EBITDA lands at <strong>$11.0M</strong> — 20% more than the CPA reports, every dollar IRS-documented." }],
+  "s4": [{ who:'y', t:"Acme through a buyer's lens. Seventeen dimensions → <strong>74/100</strong>." },
+         { who:'me', t:"The yellows?" },
+         { who:'y', t:"Owner dependency (5.4) and concentration (6.0). Fixable pre-market. 0.5–0.75× on pack." }],
+  "s5": [{ who:'y', t:"Drafting the CIM. 32 pages. Positioning: <strong>\"Southwest anchor for national consolidation.\"</strong> 6× vs. 8× — $22M on identical financials." }],
+  "s6": [{ who:'y', t:"Teaser to 18 buyers. Four IOIs in 21 days. Strategic HVAC+ leading at <strong>$91M</strong> with 20% rollover." },
+         { who:'y', t:"Rollover second bite models to another <strong>$14–18M</strong>. Ray texted <em>\"run the strategic\"</em> Thursday night." }],
+};
+const CRUMB = { "s1":"Sell a business","s2":"Sell · estimator","s3":"Sell · add-backs","bignum":"Sell · narrative","s4":"Sell · readiness","s5":"Sell · CIM","s6":"Sell · IOIs","s7":"Sell · exit paths","close":"Sell · get started" };
+const NEXT = { "s1":{k:"Next · Acme demo",t:"See the estimator"},"s2":{k:"Next · Acme demo",t:"See the add-backs"},"s3":{k:"Next · Acme demo",t:"Score the business"},"s4":{k:"Next · Acme demo",t:"Read the CIM"},"s5":{k:"Next · Acme demo",t:"Compare the IOIs"},"s6":{k:"Next · Acme demo",t:"See exit structures"},"s7":{k:"Ready?",t:"Tell Yulia about yours"},"close":{k:"Ready?",t:"Start free — no card"} };
+
+const chatScroll = document.getElementById('chatScroll');
+function msg(who, text) {
+  const d = document.createElement('div');
+  d.className = 'v4-msg ' + (who==='me'?'v4-msg--me':'');
+  d.innerHTML = `<div class="v4-msg__meta"><span class="v4-msg__av">${who==='me'?'R':'Y'}</span><span>${who==='me'?'Ray':'Yulia'}</span></div><div class="v4-msg__bubble">${text}</div>`;
+  chatScroll.appendChild(d);
+  chatScroll.scrollTop = chatScroll.scrollHeight;
+}
+setTimeout(() => msg('y', OPENING), 150);
+
+/* ── Scroll sync ──────────────────────────────────────────── */
+const seen = new Set();
+const canvasBody = document.getElementById('canvasBody');
+const crumbT = document.querySelector('.v4-canvas__crumb-t');
+const nextK = document.querySelector('.v4-next__k');
+const nextT = document.querySelector('.v4-next__t');
+const ids = ['s1','s2','s3','bignum','s4','s5','s6','s7','close'];
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const id = e.target.id;
+    if (CRUMB[id]) crumbT.textContent = CRUMB[id];
+    if (NEXT[id]) { nextK.textContent = NEXT[id].k; nextT.textContent = NEXT[id].t; }
+    if (!seen.has(id) && SCRIPT[id]) { seen.add(id); SCRIPT[id].forEach((ln,i)=>setTimeout(()=>msg(ln.who, ln.t), i*400)); }
+  });
+}, { root: canvasBody, rootMargin: '-25% 0px -55% 0px' });
+ids.forEach(id => { const el=document.getElementById(id); if(el) io.observe(el); });
+
+/* ── Reveal anim observer ─────────────────────────────────── */
+const revealIO = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { root: canvasBody, rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+document.querySelectorAll('.sv-anim').forEach(el => revealIO.observe(el));
+
+/* ── next-action click ────────────────────────────────────── */
+document.getElementById('nextAction').addEventListener('click', () => {
+  const i = ids.findIndex(id => {
+    const el=document.getElementById(id); if(!el) return false;
+    const r=el.getBoundingClientRect(), b=canvasBody.getBoundingClientRect();
+    return r.top >= b.top - 100 && r.top <= b.bottom/2;
+  });
+  const t = document.getElementById(ids[Math.min(i+1, ids.length-1)]);
+  if (t) t.scrollIntoView({ behavior:'smooth', block:'start' });
+});
+
+/* ── Estimator ────────────────────────────────────────────── */
+const EST = {
+  rev: { label:'Annual revenue', opts:['$1–5M','$5–10M','$10–25M','$25–50M','$50M+'] },
+  ind: { label:'Industry', opts:['Services','Manufacturing','Healthcare','Technology','Construction','Retail','Other'] },
+  own: { label:'Owner role', opts:['Full-time operator','Part-time','Team runs it'] }
+};
+const estHost = document.getElementById('est');
+const estResult = document.getElementById('estResult');
+const es = { rev:'', ind:'', own:'' };
+function rest() {
+  estHost.innerHTML='';
+  for (const [k,{label,opts}] of Object.entries(EST)) {
+    const c=document.createElement('div'); c.className='jc-est__col';
+    c.innerHTML = `<div>${label}</div><div class="jc-est__options">${opts.map(o=>`<button class="jc-est__opt ${es[k]===o?'active':''}" data-k="${k}" data-o="${o}" type="button">${o}</button>`).join('')}</div>`;
+    estHost.appendChild(c);
+  }
+}
+function est() {
+  const {rev,ind,own}=es; if(!rev||!ind||!own){ estResult.className='jc-est__result empty'; estResult.textContent='Pick all three inputs to see the estimate.'; return; }
+  const rf={ '$1–5M':[0.35,0.65],'$5–10M':[0.6,1.2],'$10–25M':[1.1,2.2],'$25–50M':[2.0,3.8],'$50M+':[3.5,6.5] }[rev];
+  const ib={ 'Services':1.1,'Manufacturing':1.0,'Healthcare':1.15,'Technology':0.9,'Construction':1.05,'Retail':0.95,'Other':1.0 }[ind];
+  const ob=own==='Full-time operator'?1.25:own==='Part-time'?1.05:0.85;
+  const lo=rf[0]*ib*ob, hi=rf[1]*ib*ob;
+  estResult.className='jc-est__result';
+  estResult.innerHTML=`<div class="jc-est__resk">Estimated hidden EBITDA</div><div class="jc-est__resv">$${lo.toFixed(2)}M<small> — </small>$${hi.toFixed(2)}M</div><div class="jc-est__ress">At a 5–6× multiple, that's <strong>$${(lo*5.5).toFixed(1)}M – $${(hi*5.5).toFixed(1)}M</strong> of enterprise value.</div><div class="jc-est__resn">Industry-pattern estimates — the real number is specific to your financials.</div>`;
+}
+estHost.addEventListener('click', e => { const b=e.target.closest('.jc-est__opt'); if(!b) return; es[b.dataset.k]=b.dataset.o; rest(); est(); const card=estHost.closest('[data-aff="try"]'); if(card) card.classList.add('is-engaged'); });
+rest();
+
+/* ── Composer ─────────────────────────────────────────────── */
+function send(t) { if(!t.trim()) return; msg('me', t); setTimeout(()=>msg('y', "Three numbers and I'll return a preliminary range in 30 minutes: <strong>industry</strong>, <strong>revenue</strong>, <strong>reported EBITDA</strong>."), 450); }
+document.getElementById('chatForm').addEventListener('submit', e => { e.preventDefault(); const i=document.getElementById('chatInput'); send(i.value); i.value=''; i.dispatchEvent(new Event('input')); });
+(() => {
+  const inp = document.getElementById('chatInput');
+  const card = inp?.closest('.v4-comp__card');
+  if (inp && card) inp.addEventListener('input', () => card.classList.toggle('has-text', inp.value.trim().length > 0));
+})();
+document.getElementById('ctaPoint')?.addEventListener('click', () => {
+  const input = document.getElementById('chatInput');
+  if (!input) return;
+  input.focus();
+  const card = input.closest('.v4-comp__card') || input.closest('.v4-comp');
+  if (card) {
+    card.style.transition = 'box-shadow 320ms, border-color 320ms';
+    const prevBS = card.style.boxShadow;
+    card.style.boxShadow = '0 0 0 4px rgba(10,10,11,0.14), 0 20px 44px -20px rgba(10,10,11,0.28)';
+    setTimeout(() => { card.style.boxShadow = prevBS; }, 900);
+  }
+});
+
+/* ── Tool rail toggle ─────────────────────────────────────── */
+document.getElementById('toolToggle').addEventListener('click', () => {
+  const t=document.getElementById('tool'); const s=document.querySelector('.v4-shell');
+  const ex=t.classList.toggle('v4-tool--expanded'); s.style.setProperty('--v4-tool-w', ex?'184px':'56px');
+});
+
+/* ── Chat resize grip ─────────────────────────────────────── */
+(() => {
+  const g=document.querySelector('.v4-chat__grip'); const s=document.querySelector('.v4-shell');
+  let d=false, sx=0, sw=380;
+  g.addEventListener('mousedown', e => { d=true; sx=e.clientX; sw=parseInt(getComputedStyle(s).getPropertyValue('--v4-chat-w')); document.body.style.cursor='col-resize'; });
+  window.addEventListener('mousemove', e => { if(!d) return; s.style.setProperty('--v4-chat-w', Math.max(320, Math.min(560, sw+(e.clientX-sx)))+'px'); });
+  window.addEventListener('mouseup', () => { d=false; document.body.style.cursor=''; });
+})();
+
+/* ── Tweaks protocol ──────────────────────────────────────── */
+window.addEventListener('message', e => {
+  const d=e.data||{};
+  if (d.type==='__activate_edit_mode') document.getElementById('tweaks').classList.add('on');
+  if (d.type==='__deactivate_edit_mode') document.getElementById('tweaks').classList.remove('on');
+});
+window.parent.postMessage({ type:'__edit_mode_available' }, '*');
+
+const root = document.getElementById('sellv2');
+function apply(k, v) {
+  state[k]=v;
+  if (k==='acc')     root.setAttribute('data-acc', v);
+  if (k==='density') root.setAttribute('data-density', v);
+  if (k==='motion')  root.setAttribute('data-motion', v);
+  if (k==='hero') {
+    const heroShell = document.querySelector('.sv-hero .sv-shell');
+    const heroParent = heroShell?.parentElement;
+    if (heroParent) {
+      if (v==='stat') {
+        heroParent.dataset.orig ??= heroParent.innerHTML;
+        heroParent.innerHTML = `<div style="text-align:right;padding:40px 20px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.18em;color:var(--v4-mute);text-transform:uppercase;margin-bottom:24px;">ACME · HIDDEN VALUE</div>
+          <div style="font-family:'Sora',sans-serif;font-weight:500;font-size:180px;letter-spacing:-0.055em;line-height:0.88;color:var(--v4-ink);font-variant-numeric:tabular-nums;">$13.5<small style="font-size:44%;color:var(--v4-mute);font-weight:400;">M</small></div>
+          <div style="font-family:'Sora',sans-serif;font-weight:500;font-size:22px;letter-spacing:-0.02em;color:var(--v4-ink);margin-top:18px;max-width:420px;margin-left:auto;">Of enterprise value the CPA never surfaces.</div>
+        </div>`;
+      } else if (heroParent.dataset.orig) {
+        heroParent.innerHTML = heroParent.dataset.orig;
+      }
+    }
+  }
+  if (k==='paths') {
+    const list=document.querySelector('.sv-paths__list');
+    if (list) {
+      if (v==='grid') {
+        list.style.display='grid';
+        list.style.gridTemplateColumns='repeat(3, 1fr)';
+        list.style.gap='14px';
+        list.querySelectorAll('.sv-paths__row').forEach(r => {
+          r.style.gridTemplateColumns='1fr';
+          r.style.padding='22px';
+          r.style.border='1px solid var(--v4-line)';
+          r.style.borderRadius='14px';
+          r.style.gap='10px';
+          r.style.background='var(--v4-card)';
+        });
+      } else {
+        list.style.display='';
+        list.style.gridTemplateColumns='';
+        list.style.gap='';
+        list.querySelectorAll('.sv-paths__row').forEach(r => {
+          r.style.gridTemplateColumns=''; r.style.padding=''; r.style.border=''; r.style.borderRadius=''; r.style.gap=''; r.style.background='';
+        });
+      }
+    }
+  }
+  window.parent.postMessage({ type:'__edit_mode_set_keys', edits:{ [k]:v } }, '*');
+}
+document.querySelectorAll('.tweaks__seg').forEach(seg => {
+  seg.addEventListener('click', e => {
+    const b=e.target.closest('button[data-v]'); if(!b) return;
+    seg.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    apply(seg.dataset.tweak, b.dataset.v);
+  });
+});
+Object.entries(state).forEach(([k,v]) => {
+  document.querySelectorAll(`.tweaks__seg[data-tweak="${k}"] button`).forEach(btn => btn.classList.toggle('active', btn.dataset.v===String(v)));
+  apply(k, v);
+});
+
+/* ── Bignum count-up ──────────────────────────────────────── */
+const bnEl = document.getElementById('bignumV');
+const bnIO = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting || e.target.dataset.did) return;
+    e.target.dataset.did='1';
+    if (state.motion==='none') { bnEl.textContent='$22'; return; }
+    let n=0; const target=22;
+    const step = () => { n+=1; bnEl.textContent='$'+Math.min(n,target); if(n<target) requestAnimationFrame(step); };
+    step();
+  });
+}, { root: canvasBody, threshold: 0.6 });
+bnIO.observe(document.getElementById('bignum'));
+</script>
+</body>
+</html>

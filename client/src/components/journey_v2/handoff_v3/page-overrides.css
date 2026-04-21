@@ -23,6 +23,20 @@
 .journey-shell .v4-msg__bubble { font-size:13px; line-height:1.55; color:var(--v4-ink-2); }
 .journey-shell .v4-msg--me .v4-msg__bubble { background:var(--v4-bg-2); padding:10px 14px; border-radius:14px 14px 4px 14px; display:inline-block; max-width:92%; }
 .journey-shell .v4-msg strong { color:var(--v4-ink); font-weight:600; }
+.journey-shell .v4-msg em { color: var(--v4-mute); font-style: normal; }
+.journey-shell .v4-msg__meta { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--v4-faint); }
+.journey-shell .v4-msg__av { width: 16px; height: 16px; border-radius: 50%; background: var(--v4-chip); color: var(--v4-mute); display: inline-flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-weight: 700; font-size: 9px; letter-spacing: 0; }
+.journey-shell .v4-msg--me .v4-msg__av { background: var(--v4-ink); color: var(--v4-on-ink); }
+
+/* Composer plus button (handoff v4 Home) — sits left of the input, rotates 45° when popup open */
+.v4-comp--hero .v4-comp__plus {
+  width: 44px; height: 44px; border-radius: 999px; background: var(--v4-bg-2);
+  color: var(--v4-mute); border: 0; cursor: pointer; display: grid; place-items: center;
+  flex-shrink: 0; transition: background 160ms, color 160ms, transform 160ms;
+}
+.v4-comp--hero .v4-comp__plus:hover,
+.v4-comp--hero .v4-comp__plus.on { background: var(--v4-chip); color: var(--v4-ink); }
+.v4-comp--hero .v4-comp__plus.on { transform: rotate(45deg); }
 
   /* ─── Chat composer: sits at the bottom of the chat well ─── */
   .v4-comp.v4-comp--hero {
