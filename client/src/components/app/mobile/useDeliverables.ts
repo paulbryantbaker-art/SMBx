@@ -21,7 +21,7 @@ interface State {
   error: string | null;
 }
 
-export function useDeliverables(dealCount: number, refreshKey: number = 0): State {
+export function useDeliverables(dealCount: number): State {
   const [state, setState] = useState<State>({ deliverables: [], loading: true, error: null });
 
   useEffect(() => {
@@ -51,11 +51,8 @@ export function useDeliverables(dealCount: number, refreshKey: number = 0): Stat
       });
 
     return () => { cancelled = true; };
-    // Re-fetch when deal count or the refresh key changes. The refresh key
-    // lets callers (e.g. ChatFullscreen after a stream completes) opt into
-    // a fresh pull — a new Yulia-generated deliverable lands in the DB a
-    // few ms after the message that announced it.
-  }, [dealCount, refreshKey]);
+    // Re-fetch when deal count changes (new deal added → may produce new deliverables soon).
+  }, [dealCount]);
 
   return state;
 }
