@@ -25,11 +25,12 @@
  *     (Safari tab / iOS PWA / Chrome tab / Android PWA)
  */
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { AnonMessage } from '../../../hooks/useAnonymousChat';
 import type { AppDeliverable } from '../types';
 import type { MobileDeal } from './adaptDeals';
+import InlineArtifact from './InlineArtifact';
 
 interface Props {
   /** Only renders when true. */
@@ -52,7 +53,7 @@ interface Props {
 export default function ChatFullscreen({
   open,
   deal,
-  deliverables: _deliverables,
+  deliverables,
   messages,
   streamingText,
   sending,
@@ -62,6 +63,33 @@ export default function ChatFullscreen({
   onSend,
   onBack,
 }: Props) {
+  /* Pre-compute: which deliverable (if any) belongs to each assistant message?
+     The server doesn't attach deliverable_id to messages in the auth path, so
+     we use temporal proximity — a deliverable created within ±30s of an
+     assistant message is "attached" to that message. This is stable because
+     a single turn produces at most one deliverable in the current flow. */
+  const artifactByMessageId = useMemo(() => {
+    if (!deal) return new Map<number, AppDeliverable>();
+    const dealDeliverables = deliverables
+      .filter((d) => d.deal_id === deal.id)
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    const map = new Map<number, AppDeliverable>();
+    const used = new Set<number>();
+    for (const m of messages) {
+      if (m.role !== 'assistant' || !m.created_at) continue;
+      const msgT = new Date(m.created_at).getTime();
+      const hit = dealDeliverables.find((d) => {
+        if (used.has(d.id)) return false;
+        const dT = new Date(d.created_at).getTime();
+        return Math.abs(dT - msgT) < 30_000;
+      });
+      if (hit) {
+        map.set(m.id, hit);
+        used.add(hit.id);
+      }
+    }
+    return map;
+  }, [messages, deliverables, deal]);
   const [draft, setDraft] = useState('');
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -254,30 +282,41 @@ export default function ChatFullscreen({
               : 'Tell Yulia about your business and she\u2019ll guide you from valuation to CIM.'}
           </div>
         ) : (
-          messages.map((m, i) => (
-            <div
-              key={m.id || i}
-              style={{
-                alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-                maxWidth: '85%',
-                padding: m.role === 'user' ? '10px 14px' : '10px 14px',
-                background: m.role === 'user' ? 'var(--accent)' : 'var(--bg-card)',
-                border: m.role === 'user' ? 'none' : '0.5px solid var(--border)',
-                borderRadius:
-                  m.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                fontFamily: "'Inter', system-ui, sans-serif",
-                fontSize: 14.5,
-                lineHeight: 1.5,
-                color: m.role === 'user' ? '#fff' : 'var(--text-primary)',
-                boxShadow: m.role === 'user' ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
-                overflowWrap: 'anywhere',
-                wordBreak: 'break-word',
-                whiteSpace: 'pre-wrap',
-              }}
-            >
-              {m.content}
-            </div>
-          ))
+          messages.map((m, i) => {
+            const artifact = typeof m.id === 'number' ? artifactByMessageId.get(m.id) : undefined;
+            const bubble = (
+              <div
+                style={{
+                  alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
+                  maxWidth: '85%',
+                  padding: '10px 14px',
+                  background: m.role === 'user' ? 'var(--accent)' : 'var(--bg-card)',
+                  border: m.role === 'user' ? 'none' : '0.5px solid var(--border)',
+                  borderRadius:
+                    m.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontSize: 14.5,
+                  lineHeight: 1.5,
+                  color: m.role === 'user' ? '#fff' : 'var(--text-primary)',
+                  boxShadow: m.role === 'user' ? 'none' : '0 1px 3px rgba(0,0,0,0.04)',
+                  overflowWrap: 'anywhere',
+                  wordBreak: 'break-word',
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
+                {m.content}
+              </div>
+            );
+            return (
+              <div
+                key={m.id || i}
+                style={{ display: 'flex', flexDirection: 'column', alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start', maxWidth: '85%', gap: 6 }}
+              >
+                {bubble}
+                {artifact && deal && <InlineArtifact artifact={artifact} deal={deal} />}
+              </div>
+            );
+          })
         )}
 
         {streamingText && (
