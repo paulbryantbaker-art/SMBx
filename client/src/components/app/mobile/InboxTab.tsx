@@ -1,15 +1,16 @@
 /**
  * InboxTab — a derived feed of "things that need your attention".
  *
- * Layout:
- *   - Hero highlight card (the single most urgent item — flag > warn > ok)
- *     rendered in the gradient-art hero style. Tap opens the chat.
- *   - List card below with the remaining items, dotted by urgency.
+ * Since we don't yet have a real notification table, v1 synthesizes items
+ * from the deal list:
+ *   - flag  — deals with status === 'flagged' / 'flag'
+ *   - warn  — deals at progress gates (S2/S3/B2/B3/R2/R3/PMI1/PMI2)
+ *   - ok    — deals at closing-adjacent gates (S4/S5/B4/B5/R4/R5/PMI3)
+ *   - muted — deals at early gates (S0/S1/B0/B1/R0/R1) — background
  *
- * Empty state: gradient hero card, not a plain "no items" message.
+ * Tap any row → onSelectDeal + onOpenChat.
  *
- * v1 synthesizes items directly from the deal list — when a real
- * notifications table lands, only this adapter swaps.
+ * When we add a real notifications feed, this adapter is the boundary to swap.
  */
 
 import { useMemo } from 'react';
@@ -22,34 +23,27 @@ interface Props {
   onOpenChat: () => void;
 }
 
-type Dot = 'flag' | 'warn' | 'ok' | 'muted';
-
-interface InboxItem {
+type InboxItem = {
   deal: MobileDeal;
-  dot: Dot;
+  dot: 'flag' | 'warn' | 'ok' | 'muted';
   title: string;
   sub: string;
   kicker: string;
-  /** Sort weight — lower = more urgent, renders earlier. */
-  urgencyRank: number;
-}
-
-function dotRank(dot: Dot): number {
-  return dot === 'flag' ? 0 : dot === 'warn' ? 1 : dot === 'ok' ? 2 : 3;
-}
+};
 
 function inboxItemsFromDeals(deals: MobileDeal[]): InboxItem[] {
+  // Sort by most recent update first — we want fresh state on top.
   const byRecent = [...deals].sort((a, b) => {
     const aT = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
     const bT = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
     return bT - aT;
   });
 
-  const items: InboxItem[] = byRecent.map((d) => {
+  return byRecent.map((d) => {
     const latestConv = d.conversations[0];
     const convTitle = latestConv?.title || latestConv?.summary || null;
 
-    let dot: Dot = 'muted';
+    let dot: InboxItem['dot'] = 'muted';
     let title = `${d.name} · ${d.stageLabel}`;
     let sub = convTitle || `Currently in ${d.stageLabel.toLowerCase()}. Open the conversation to continue.`;
 
@@ -67,11 +61,8 @@ function inboxItemsFromDeals(deals: MobileDeal[]): InboxItem[] {
       sub = convTitle || `Closing-phase work — tap to review.`;
     }
 
-    return { deal: d, dot, title, sub, kicker: formatAgo(d.updatedAt), urgencyRank: dotRank(dot) };
+    return { deal: d, dot, title, sub, kicker: formatAgo(d.updatedAt) };
   });
-
-  // Sort by urgency first, then by recency (already applied above as secondary).
-  return items.sort((a, b) => a.urgencyRank - b.urgencyRank);
 }
 
 export default function InboxTab({ deals, onSelectDeal, onOpenChat }: Props) {
@@ -80,75 +71,35 @@ export default function InboxTab({ deals, onSelectDeal, onOpenChat }: Props) {
   if (items.length === 0) {
     return (
       <div className="mm-body">
-        <div className="mm-today__feed">
-          <div className="mm-card mm-card--hero" aria-label="Inbox empty">
-            <div className="mm-card__art" aria-hidden />
-            <div className="mm-card__body">
-              <div className="mm-card__kicker">ALL CAUGHT UP</div>
-              <div className="mm-card__t">Nothing needs you right now.</div>
-              <div className="mm-card__s">Updates and flagged items will land here as soon as you have deals in flight.</div>
-            </div>
+        <div className="mm-empty">
+          <div className="mm-empty__t">You're all caught up</div>
+          <div className="mm-empty__s">
+            Updates and flagged items will land here once you have deals in flight.
           </div>
         </div>
       </div>
     );
   }
 
-  const [highlight, ...rest] = items;
-  const highlightGetsHero = highlight.dot === 'flag' || highlight.dot === 'warn';
-
-  const openChatForItem = (it: InboxItem) => () => {
-    onSelectDeal(it.deal.id);
-    onOpenChat();
-  };
-
   return (
     <div className="mm-body">
-      <div className="mm-today__feed">
-        {highlightGetsHero ? (
-          <HighlightHero item={highlight} onOpenChat={openChatForItem(highlight)} />
-        ) : null}
-
-        {/* Remaining items — or the full list if no highlight was promoted. */}
-        <div className="mm-inbox__list">
-          {(highlightGetsHero ? rest : items).map((it) => (
-            <button
-              key={it.deal.id}
-              type="button"
-              className="mm-inbox__item"
-              onClick={openChatForItem(it)}
-            >
-              <div className={'mm-inbox__dot ' + it.dot} />
-              <div style={{ minWidth: 0 }}>
-                <div className="mm-inbox__t">{it.title}</div>
-                <div className="mm-inbox__s">{it.sub}</div>
-              </div>
-              <div className="mm-inbox__k">{it.kicker}</div>
-            </button>
-          ))}
-        </div>
+      <div className="mm-inbox__list">
+        {items.map((it) => (
+          <button
+            key={it.deal.id}
+            type="button"
+            className="mm-inbox__item"
+            onClick={() => { onSelectDeal(it.deal.id); onOpenChat(); }}
+          >
+            <div className={'mm-inbox__dot ' + it.dot} />
+            <div style={{ minWidth: 0 }}>
+              <div className="mm-inbox__t">{it.title}</div>
+              <div className="mm-inbox__s">{it.sub}</div>
+            </div>
+            <div className="mm-inbox__k">{it.kicker}</div>
+          </button>
+        ))}
       </div>
     </div>
-  );
-}
-
-/* ─── Highlight hero (topmost urgent item) ─────────────── */
-function HighlightHero({ item, onOpenChat }: { item: InboxItem; onOpenChat: () => void }) {
-  const kicker = item.dot === 'flag' ? 'FLAGGED · REVIEW' : item.dot === 'warn' ? 'ACTIVE · NEEDS YOU' : 'READY · REVIEW';
-  return (
-    <button
-      type="button"
-      className="mm-card mm-card--hero"
-      onClick={onOpenChat}
-      style={{ border: 0, padding: 0, textAlign: 'left', cursor: 'pointer', width: '100%' }}
-      aria-label={item.title}
-    >
-      <div className="mm-card__art" aria-hidden />
-      <div className="mm-card__body">
-        <div className="mm-card__kicker">{kicker}</div>
-        <div className="mm-card__t">{item.title}</div>
-        <div className="mm-card__s">{item.sub}</div>
-      </div>
-    </button>
   );
 }

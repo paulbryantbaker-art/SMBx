@@ -1,16 +1,14 @@
 /**
- * DealsTab — the full portfolio view.
+ * DealsTab — the full portfolio view. Stage filter pills + list of deals.
  *
- * Layout: stage filter pills (horizontal scroll) + List⇄Grid segmented
- * toggle (top-right of stages row) + filtered collection below.
+ * Stage filters are derived from the actual deals' `current_gate` — we only
+ * show buckets that have at least one deal in them. "All" is always first.
  *
- * List mode: Apple-App-Store row with icon + name + kicker + stage badge.
- * Grid mode: 2-col tiled cards with tinted gradient art, initials in the
- * art area, optional score badge top-right. Matches the mockup's
- * browseMode. Tone drives the gradient color (ok/warn/flag).
- *
- * Empty state: gradient hero card (same art as Today's hero) pointing the
- * user into a new conversation with Yulia. No "no items" textcard.
+ * Buckets group related gates into coarser stages:
+ *   - Exploring  — S0/S1/B0/B1/R0/R1
+ *   - Valuing    — S2/B2/R2/PMI0/PMI1
+ *   - Packaging  — S3/B3/R3/PMI2
+ *   - Closing    — S4/S5/B4/B5/R4/R5/PMI3
  */
 
 import { useMemo, useState } from 'react';
@@ -24,7 +22,6 @@ interface Props {
 }
 
 type Bucket = 'all' | 'exploring' | 'valuing' | 'packaging' | 'closing';
-type ViewMode = 'list' | 'grid';
 
 const BUCKETS: Array<{ id: Bucket; label: string; gates: RegExp }> = [
   { id: 'exploring', label: 'Exploring', gates: /^(S0|S1|B0|B1|R0|R1)$/ },
@@ -36,8 +33,8 @@ const BUCKETS: Array<{ id: Bucket; label: string; gates: RegExp }> = [
 export default function DealsTab({ deals, onSelectDeal, onOpenChat }: Props) {
   const adapted = useMemo(() => adaptDeals(deals), [deals]);
   const [bucket, setBucket] = useState<Bucket>('all');
-  const [view, setView] = useState<ViewMode>('list');
 
+  // Which buckets have at least one deal?
   const availableBuckets = useMemo(
     () => BUCKETS.filter((b) => adapted.some((d) => b.gates.test(d.stage))),
     [adapted],
@@ -50,100 +47,55 @@ export default function DealsTab({ deals, onSelectDeal, onOpenChat }: Props) {
     return adapted.filter((d) => b.gates.test(d.stage));
   }, [adapted, bucket]);
 
-  /* Empty state — gradient hero, same pattern as Today's empty. */
   if (adapted.length === 0) {
     return (
       <div className="mm-body">
-        <div className="mm-today__feed">
-          <button
-            type="button"
-            className="mm-card mm-card--hero"
-            onClick={onOpenChat}
-            style={{ border: 0, padding: 0, textAlign: 'left', cursor: 'pointer', width: '100%' }}
-          >
-            <div className="mm-card__art" aria-hidden />
-            <div className="mm-card__body">
-              <div className="mm-card__kicker">YULIA · READY</div>
-              <div className="mm-card__t">Your deals live here.</div>
-              <div className="mm-card__s">Tell Yulia about a business you want to buy, sell, or raise for and she'll open your first deal.</div>
-            </div>
+        <div className="mm-empty">
+          <div className="mm-empty__t">No deals yet</div>
+          <div className="mm-empty__s">
+            Talk to Yulia about your business and she'll create your first deal.
+          </div>
+          <button type="button" className="mm-empty__cta" onClick={onOpenChat}>
+            Start a deal
           </button>
         </div>
       </div>
     );
   }
 
-  const openChatForDeal = (dealId: number) => { onSelectDeal(dealId); onOpenChat(); };
-
   return (
     <div className="mm-body">
-      {/* Stage pills + view toggle */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 16px 0' }}>
-        <div className="mm-stages" style={{ padding: 0, flex: 1 }}>
+      <div className="mm-stages">
+        <button
+          type="button"
+          className={'mm-stage' + (bucket === 'all' ? ' active' : '')}
+          onClick={() => setBucket('all')}
+        >
+          All · {adapted.length}
+        </button>
+        {availableBuckets.map((b) => (
           <button
+            key={b.id}
             type="button"
-            className={'mm-stage' + (bucket === 'all' ? ' active' : '')}
-            onClick={() => setBucket('all')}
+            className={'mm-stage' + (bucket === b.id ? ' active' : '')}
+            onClick={() => setBucket(b.id)}
           >
-            All · {adapted.length}
+            {b.label}
           </button>
-          {availableBuckets.map((b) => (
-            <button
-              key={b.id}
-              type="button"
-              className={'mm-stage' + (bucket === b.id ? ' active' : '')}
-              onClick={() => setBucket(b.id)}
-            >
-              {b.label}
-            </button>
+        ))}
+      </div>
+
+      <div style={{ padding: '0 16px 20px' }}>
+        <div className="mm-card mm-card--list">
+          {filtered.map((d) => (
+            <DealRow
+              key={d.id}
+              deal={d}
+              onTap={() => { onSelectDeal(d.id); onOpenChat(); }}
+            />
           ))}
-        </div>
-        <div className="mm-toggle" style={{ flexShrink: 0 }}>
-          <button
-            type="button"
-            className={'mm-toggle__btn' + (view === 'list' ? ' active' : '')}
-            onClick={() => setView('list')}
-            aria-label="List view"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className={'mm-toggle__btn' + (view === 'grid' ? ' active' : '')}
-            onClick={() => setView('grid')}
-            aria-label="Grid view"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
-              <rect x="3" y="3" width="7" height="7" />
-              <rect x="14" y="3" width="7" height="7" />
-              <rect x="3" y="14" width="7" height="7" />
-              <rect x="14" y="14" width="7" height="7" />
-            </svg>
-          </button>
         </div>
       </div>
-      <div style={{ height: 12 }} />
-
-      {/* Collection */}
-      {view === 'list' ? (
-        <div style={{ padding: '0 16px 20px' }}>
-          <div className="mm-card mm-card--list">
-            {filtered.map((d) => (
-              <DealRow key={d.id} deal={d} onTap={() => openChatForDeal(d.id)} />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="mm-grid">
-          {filtered.map((d) => (
-            <DealGridTile key={d.id} deal={d} onTap={() => openChatForDeal(d.id)} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -162,28 +114,6 @@ function DealRow({ deal, onTap }: { deal: MobileDeal; onTap: () => void }) {
         <div className="mm-listrow__s">{deal.kicker}</div>
       </div>
       <span className="mm-listrow__btn">{deal.stage}</span>
-    </button>
-  );
-}
-
-function DealGridTile({ deal, onTap }: { deal: MobileDeal; onTap: () => void }) {
-  const artClass =
-    deal.tone === 'ok' ? 'mm-gcard__art--ok'
-    : deal.tone === 'warn' ? 'mm-gcard__art--warn'
-    : deal.tone === 'flag' ? 'mm-gcard__art--flag'
-    : '';
-  return (
-    <button type="button" className="mm-gcard" onClick={onTap}>
-      <div className={`mm-gcard__art ${artClass}`}>
-        <div className="mm-gcard__initials">{deal.initials}</div>
-        {deal.score != null && <div className="mm-gcard__score">{deal.score}</div>}
-      </div>
-      <div className="mm-gcard__body">
-        <div className="mm-gcard__t">{deal.name}</div>
-        <div className="mm-gcard__s">
-          {[deal.industry, deal.revenueLabel].filter(Boolean).join(' · ') || deal.stageLabel}
-        </div>
-      </div>
     </button>
   );
 }
