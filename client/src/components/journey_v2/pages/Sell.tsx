@@ -88,6 +88,31 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
     );
   }
 
+  /* ── .sv-anim IntersectionObserver ──
+     Handoff v3 spec: every `.sv-anim` starts at opacity 0 + translateY,
+     waits for `.in` class before transitioning to visible. The handoff
+     HTML adds it via a global observer. Port the same behavior. */
+  useEffect(() => {
+    const targets = document.querySelectorAll<HTMLElement>('#sellv2 .sv-anim');
+    if (!targets.length) return;
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      targets.forEach((el) => el.classList.add('in'));
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    targets.forEach((el) => {
+      if (!el.classList.contains('in')) io.observe(el);
+    });
+    return () => io.disconnect();
+  }, []);
+
   /* ── Bignum count-up ── */
   const [bnVal, setBnVal] = useState(0);
   const bnRef = useRef<HTMLElement>(null);
