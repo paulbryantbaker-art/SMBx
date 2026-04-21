@@ -25,6 +25,7 @@ import InboxTab from './mobile/InboxTab';
 import ChatFullscreen from './mobile/ChatFullscreen';
 import HelpSheet from './sheets/HelpSheet';
 import { adaptDeals } from './mobile/adaptDeals';
+import { useDeliverables } from './mobile/useDeliverables';
 import type { MobileTab } from './mobile/types';
 import type { AppShellInnerProps } from './types';
 import './mobile/mobile.css';
@@ -63,6 +64,11 @@ export default function AppShellInner({
     () => adapted.find((d) => d.id === activeDealId) ?? null,
     [adapted, activeDealId],
   );
+
+  // Deliverables feed — powers Today's PINNED artifacts strip and
+  // Chat's inline artifact cards. Fetched once on mount + when deal
+  // count changes (new deal → new deliverables possible).
+  const { deliverables } = useDeliverables(deals.length);
 
   const handleTabChange = (next: MobileTab) => {
     if (next === 'chat') {
@@ -112,6 +118,7 @@ export default function AppShellInner({
           {contentTab === 'today' && (
             <TodayTab
               deals={deals}
+              deliverables={deliverables}
               activeDealId={activeDealId}
               userName={userName}
               onSelectDeal={onSelectDeal}
@@ -143,6 +150,7 @@ export default function AppShellInner({
       <ChatFullscreen
         open={chatOpen}
         deal={activeDeal}
+        deliverables={deliverables}
         messages={messages}
         streamingText={streamingText}
         sending={sending}

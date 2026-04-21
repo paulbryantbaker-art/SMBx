@@ -36,6 +36,17 @@ export interface DealGroup {
   industry: string | null;
   status: string;
   updated_at: string;
+  // Financial fields — BIGINT cents from server (or null when not extracted yet)
+  revenue?: number | null;
+  sde?: number | null;
+  ebitda?: number | null;
+  asking_price?: number | null;
+  // Scoring fields — composite is 0-100, scores is { financial, team, customers, ... }
+  seven_factor_composite?: number | null;
+  seven_factor_scores?: Record<string, number> | null;
+  // Operating
+  employee_count?: number | null;
+  naics_code?: string | null;
   conversations: Conversation[];
 }
 
