@@ -91,7 +91,7 @@ export default function HowItWorks({ active, onSend, onStartFree, onNavigate, on
               </div>
               <h1 className="h-today__h">90% of what an investment bank does. <em>Everything that doesn't require a license.</em></h1>
               <p className="h-today__sub">
-                Yulia handles the production work — valuations, CIMs, financial models, deal scoring, diligence, LOIs, integration plans. You keep the judgment, the relationships, and the authority to sign. <strong>22 deterministic formulas.</strong> Not AI estimates.
+                We sit on the software side of the broker-dealer line. Yulia does the analyst, associate, and VP work — valuations, CIMs, models, scoring, diligence, LOIs, integration plans. <strong>You keep the judgment, the relationships, and the authority to sign.</strong> 22 deterministic formulas. Not AI estimates. ChatGPT can do any one of these. smbx does all of them, together, with your deal's context.
               </p>
               <div className="h-today__cta">
                 <button className="h-today__btn" type="button" onClick={() => seedChat('Show me the math behind a valuation.')}>

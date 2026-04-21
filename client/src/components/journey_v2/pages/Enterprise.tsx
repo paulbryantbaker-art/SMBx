@@ -92,9 +92,9 @@ export default function Enterprise({ active, onSend, onStartFree, onNavigate, on
                 Enterprise
                 <span className="h-today__meta-tag">For firms</span>
               </div>
-              <h1 className="h-today__h">Your deal team, <em>multiplied.</em></h1>
+              <h1 className="h-today__h">DealCloud for a team that <em>isn't 30 people.</em></h1>
               <p className="h-today__sub">
-                For firms closing deals at scale. Shared deal vault. Team workspace. White-label outputs. SSO, audit trails, SOC 2 controls. Single-tenant deployment option. <strong>Same Yulia. Enterprise infrastructure.</strong>
+                For corp dev at serial acquirers below Fortune 500, multi-family offices direct-investing, and mid-market advisory firms. Shared deal vault. Team workspace. SSO, audit trails, SOC 2 controls. Single-tenant option. <strong>Enterprise infrastructure at 10× below category.</strong> Starts at $2,500/month.
               </p>
               <div className="h-today__cta">
                 <button className="h-today__btn" type="button" onClick={() => seedChat('Model Enterprise ROI for my firm.')}>

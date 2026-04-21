@@ -104,9 +104,9 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
                 Sell-side · Acme, Inc.
                 <span className="h-today__meta-tag">Demo</span>
               </div>
-              <h1 className="h-today__h">Know what you have. <em>Before anyone else does.</em></h1>
+              <h1 className="h-today__h">The CIM your client's getting Friday. <em>Drafted by dinner Tuesday.</em></h1>
               <p className="h-today__sub">
-                Yulia finds value hiding in your financials, builds the documents that sell your business, and runs the process that gets you to the closing table. <strong>Narrated here with Acme, Inc.</strong> — $65M revenue distributor, Phoenix HQ, 2nd-gen owner exploring exit.
+                For LMM advisors, brokers, and search-fund operators. Yulia reads the tax returns, defends the add-backs, drafts the CIM, builds the buyer list, and coordinates diligence. <strong>You keep the judgment. You run the deal.</strong> Narrated here with Acme, Inc. — $65M distributor, Phoenix HQ, 2nd-gen owner exploring exit.
               </p>
               <div className="h-today__cta">
                 <button className="h-today__btn" type="button" onClick={() => seedChat("I'm thinking about selling my business.")}>

@@ -103,9 +103,9 @@ export default function Pricing({ active, onSend, onStartFree, onNavigate, onSig
                 Pricing
                 <span className="h-today__meta-tag">Monthly</span>
               </div>
-              <h1 className="h-today__h">One price. Every capability. <em>Every deal size.</em></h1>
+              <h1 className="h-today__h">Priced against the cost of <em>building it yourself.</em></h1>
               <p className="h-today__sub">
-                No feature gates. No success fees. No per-deal charges. Pick the tier that matches your team — every tier does every job. <strong>Tiers scale on seats and deal volume.</strong> Never on what Yulia can do for the deal in front of you.
+                Not against the cost of not having it. That's how everyone else prices — we don't. <strong>Every tier delivers every hero capability.</strong> You pay for volume, seats, and enterprise infrastructure. Never for the work Yulia does. No success fees, ever.
               </p>
               <div className="h-today__cta">
                 <button className="h-today__btn" type="button" onClick={onStartFree}>

@@ -91,9 +91,9 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
                 Raise · Acme, Inc.
                 <span className="h-today__meta-tag">Demo</span>
               </div>
-              <h1 className="h-today__h">You don't have to <em>sell 100% to get liquidity.</em></h1>
+              <h1 className="h-today__h">Your quarterly LP update. <em>Written in 20 minutes.</em></h1>
               <p className="h-today__sub">
-                Yulia models every capital structure — minority equity, ESOP, mezzanine, convertible, recap — against your specific numbers. Builds the investor materials. Targets the right capital partners. <strong>One conversation, six paths modeled.</strong>
+                For independent sponsors, search funders, and small fund managers. Yulia models every capital structure — minority equity, ESOP, mezz, convertible, recap — against your numbers. Drafts LP updates and IC memos from your pipeline. Targets the right capital partners. <strong>You keep the judgment. You run the deal.</strong>
               </p>
               <div className="h-today__cta">
                 <button className="h-today__btn" type="button" onClick={() => seedChat('Model my liquidity options.')}>

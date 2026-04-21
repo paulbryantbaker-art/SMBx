@@ -91,9 +91,9 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
                 Buy-side · Acme, Inc.
                 <span className="h-today__meta-tag">Demo</span>
               </div>
-              <h1 className="h-today__h">Screen ten deals <em>in the time it takes to screen one.</em></h1>
+              <h1 className="h-today__h">Your rollover structure just died. <em>Yulia rebuilds it.</em></h1>
               <p className="h-today__sub">
-                Yulia scores any deal in 90 seconds on seven dimensions, models the capital stack under current SBA rules, and stress-tests the personal guarantee before you sign. <strong>For searchers, sponsors, and independent buyers.</strong>
+                SBA SOP 50 10 8 killed the structure every searcher was trained on. 41% of brokers report deal delays. <strong>Yulia rebuilds the compliant stack in 5 minutes</strong>, scores any deal on 7 dimensions in 90 seconds, and stress-tests the personal guarantee before you sign. For independent sponsors, search funders, and buyers.
               </p>
               <div className="h-today__cta">
                 <button className="h-today__btn" type="button" onClick={() => seedChat('Paste a listing URL or describe a deal.')}>

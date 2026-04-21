@@ -90,9 +90,9 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
                 Post-close · Acme, Inc.
                 <span className="h-today__meta-tag">Demo</span>
               </div>
-              <h1 className="h-today__h">Day 1 after the wire. <em>Do you have a plan?</em></h1>
+              <h1 className="h-today__h">The 180-day plan, drafted <em>before the wire hits.</em></h1>
               <p className="h-today__sub">
-                75% of acquisitions miss their stated synergies. The #1 reason: no integration plan. Yulia builds the 180-day plan from your deal data — risks identified, opportunities found, people to protect. <strong>Auto-generated before the wire hits.</strong>
+                For searchers-turned-CEOs, independent sponsors, and corp dev teams. 75% of acquisitions miss stated synergies — the #1 reason is no integration plan. Yulia generates yours from the LOI + QoE + DD findings. <strong>You keep the judgment. You run the deal.</strong> Narrated here with Acme, Inc. · Day 3 post-close.
               </p>
               <div className="h-today__cta">
                 <button className="h-today__btn" type="button" onClick={() => seedChat('We just closed on an acquisition.')}>

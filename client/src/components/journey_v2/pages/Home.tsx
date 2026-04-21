@@ -249,9 +249,9 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
                 Today · smbx.ai
                 <span className="h-today__meta-tag">Featured</span>
               </div>
-              <h1 className="h-today__h">The operating system for <em>every side of your cap table.</em></h1>
+              <h1 className="h-today__h">The analyst, associate, and VP <em>you couldn't afford to hire.</em></h1>
               <p className="h-today__sub">
-                One chat, one canvas, one agent. <strong>Yulia</strong> sells your business, sources your next acquisition, raises your next round, and runs your first 180 days after close — with the diligence, the documents, and the relationships in the same pane.
+                <strong>90% of what an investment bank does. Everything that doesn't require a license.</strong> CIMs, valuations, deal scoring, financial models, LOI drafts, LP updates — in minutes, not weeks. ChatGPT can do any one of these. smbx does all of them, together, with your deal's context. $199/month for one practitioner. No success fees, ever.
               </p>
               <div className="h-today__cta">
                 <button className="h-today__btn" type="button" onClick={() => {
@@ -282,19 +282,19 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
 
             {/* Demo column */}
             <div className="h-today__demo">
-              <div className="h-today__demo-k">Yulia · live session · Acme, Inc.</div>
-              <div className="h-today__demo-bubble h-today__demo-bubble--me">Read these three tax returns.</div>
+              <div className="h-today__demo-k">Yulia · live on Acme, Inc. · Friday 2pm</div>
+              <div className="h-today__demo-bubble h-today__demo-bubble--me">Draft the CIM. 32 pages. Client meeting Monday.</div>
               <div className="h-today__demo-bubble">
-                Done. Six defensible add-backs — <strong>+$1.80M</strong>. Normalized EBITDA <strong>$11.0M</strong>, 20% above what the CPA reports. At a 7.5× strategic multiple that's <strong>+$13.5M</strong> of enterprise value the accountant never surfaces.
+                Done. 32pp drafted from the add-back schedule + discipline mix + buyer universe. Six defensible add-backs found (<strong>+$1.80M</strong>). First draft ready for your review. <strong>Total time: 28 minutes.</strong> A boutique bank charges $150K retainer plus 4% success fee for the same deliverable.
               </div>
               <div className="h-today__demo-out">
                 <div className="h-today__demo-out-c">
-                  <div className="h-today__demo-out-v">+$1.80<span style={{ fontSize: '60%', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>M</span></div>
-                  <div className="h-today__demo-out-l">Hidden EBITDA</div>
+                  <div className="h-today__demo-out-v">28<span style={{ fontSize: '60%', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>min</span></div>
+                  <div className="h-today__demo-out-l">CIM · first draft</div>
                 </div>
                 <div className="h-today__demo-out-c">
-                  <div className="h-today__demo-out-v">+$13.5<span style={{ fontSize: '60%', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>M</span></div>
-                  <div className="h-today__demo-out-l">Enterprise value</div>
+                  <div className="h-today__demo-out-v">$150K<span style={{ fontSize: '60%', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}> → $199/mo</span></div>
+                  <div className="h-today__demo-out-l">Banker retainer → smbx Pro</div>
                 </div>
               </div>
             </div>
@@ -304,8 +304,8 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
         {/* ══ JOURNEY APPS ══ */}
         <div className="h-sect-h">
           <div className="h-sect-h__l">
-            <div className="h-sect-h__k">Four journeys · one agent</div>
-            <h2 className="h-sect-h__t">Pick a side of the transaction. <em>Yulia does the work.</em></h2>
+            <div className="h-sect-h__k">Four journeys · same agent</div>
+            <h2 className="h-sect-h__t">Every side of every deal. <em>In minutes, not weeks.</em></h2>
           </div>
         </div>
 
@@ -433,23 +433,25 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
         {/* ══ CAPABILITIES RAIL ══ */}
         <div className="h-sect-h">
           <div className="h-sect-h__l">
-            <div className="h-sect-h__k">Inside every subscription</div>
-            <h2 className="h-sect-h__t">Twelve capabilities. <em>One agent.</em></h2>
+            <div className="h-sect-h__k">The harness · every paid tier</div>
+            <h2 className="h-sect-h__t">Not AI. The harness around it. <em>Everything integrated with your deal context.</em></h2>
           </div>
           <button className="h-sect-h__more" type="button">See all →</button>
         </div>
 
         <div className="h-rail" id="caps">
           {[
-            { ico: '$', t: 'Add-back estimator',  s: 'Three inputs, preliminary hidden-EBITDA range in under a minute.',    meta: 'Sell',       tag: 'Try' },
-            { ico: '◎', t: 'Readiness score',     s: '17 dimensions a buyer or IC actually grades you on.',                    meta: 'Sell · Raise', tag: 'Preview' },
-            { ico: '▤', t: 'CIM drafting',        s: '32-page diligence pack. Three–five days to first draft.',                 meta: 'Sell',       tag: 'Live' },
-            { ico: '⌕', t: 'Target radar',        s: 'Thesis-ranked screens against live private-company data.',                 meta: 'Buy',        tag: 'Live' },
-            { ico: '⇌', t: 'IOI / LOI compare',   s: 'Normalized terms side-by-side. Cash-equivalent math on screen.',           meta: 'Sell · Buy', tag: 'Preview' },
-            { ico: '◨', t: 'Cap-stack modeler',   s: 'Equity, debt, hybrid — dilution and yield-to-exit in one view.',           meta: 'Raise',      tag: 'Try' },
-            { ico: '◫', t: 'Day-1 runbook',       s: '180-day integration plan generated from the LOI.',                        meta: 'Integrate',  tag: 'Preview' },
-            { ico: '⟟', t: 'Synergy tracker',     s: 'Committed vs. realized, per workstream, on the same canvas.',             meta: 'Integrate',  tag: 'Live' },
-            { ico: '⎙', t: 'Data room',            s: 'Buyer Q&A, version-controlled, watermarked, fully logged.',               meta: 'Sell · Raise', tag: 'Live' },
+            /* ── 3 hero capabilities first (per research matrix) ── */
+            { ico: '$', t: 'Add-back + QoE Lite',    s: '$25K of pre-LOI decision insurance, 30 minutes, 22 deterministic formulas.', meta: 'Sell · Buy',   tag: 'Hero' },
+            { ico: '◨', t: 'SBA SOP 50 10 8',         s: 'Your rollover is dead. Yulia rebuilds the compliant stack in 5 minutes.',    meta: 'Buy',          tag: 'Hero' },
+            { ico: '◎', t: 'The Rundown',             s: 'Screen a deal in 90 seconds on 7 dimensions. Pursue or pass before a dollar is spent.', meta: 'Buy',  tag: 'Hero' },
+            /* ── Platform depth ── */
+            { ico: '✎', t: 'LP updates + IC memos',   s: 'Quarterly LP update written in 20 minutes. IC memo from your pipeline.',     meta: 'Raise · IS',   tag: 'Try' },
+            { ico: '▤', t: 'CIM drafting',            s: '32-page diligence pack. Three–five days to first draft.',                    meta: 'Sell',         tag: 'Live' },
+            { ico: '⇌', t: 'LOI / IOI drafting',      s: 'Attorney-ready first-draft offer documents from your deal context.',         meta: 'Sell · Buy',   tag: 'Live' },
+            { ico: '◫', t: 'Day-1 runbook',           s: '180-day integration plan generated from the LOI + QoE.',                     meta: 'Integrate',    tag: 'Preview' },
+            { ico: '⎙', t: 'Data room',                s: 'Buyer Q&A, version-controlled, watermarked, fully logged.',                 meta: 'Sell · Raise', tag: 'Live' },
+            { ico: '⟟', t: 'Synergy tracker',         s: 'Committed vs. realized, per workstream, on the same canvas.',                meta: 'Integrate',    tag: 'Live' },
           ].map((c) => (
             <div key={c.t} className="h-cap">
               <div className="h-cap__ico">{c.ico}</div>
