@@ -7,9 +7,28 @@
  *
  * Acme, Inc. remains the running example across the page.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+
+/* ── Add-back estimator heuristics ── */
+const REV_OPTS = ['$1–5M', '$5–10M', '$10–25M', '$25–50M', '$50M+'] as const;
+const IND_OPTS = ['Services', 'Manufacturing', 'Healthcare', 'Technology', 'Construction', 'Retail', 'Other'] as const;
+const OWN_OPTS = ['Full-time operator', 'Part-time', 'Team runs it'] as const;
+const REV_RANGE: Record<string, [number, number]> = {
+  '$1–5M': [0.35, 0.65],
+  '$5–10M': [0.60, 1.20],
+  '$10–25M': [1.10, 2.20],
+  '$25–50M': [2.00, 3.80],
+  '$50M+': [3.50, 6.50],
+};
+const IND_BIAS: Record<string, number> = {
+  Services: 1.10, Manufacturing: 1.00, Healthcare: 1.15,
+  Technology: 0.90, Construction: 1.05, Retail: 0.95, Other: 1.00,
+};
+const OWN_BIAS: Record<string, number> = {
+  'Full-time operator': 1.25, 'Part-time': 1.05, 'Team runs it': 0.85,
+};
 
 interface Props {
   active: DealTab;
@@ -139,6 +158,9 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
             </div>
           </div>
         </section>
+
+        {/* ══ LIVE ADD-BACK ESTIMATOR ══ */}
+        <AddbackEstimator />
 
         {/* ══ FIVE-PHASE ARC ══ */}
         <div className="h-sect-h">
@@ -354,5 +376,109 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
 
       </div>
     </JourneyShell>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   AddbackEstimator — 3 inputs (revenue band, industry, owner role)
+   → industry-pattern hidden-EBITDA range + 5.5× enterprise value.
+   ═══════════════════════════════════════════════════════════════════ */
+function AddbackEstimator() {
+  const [rev, setRev] = useState('');
+  const [ind, setInd] = useState('');
+  const [own, setOwn] = useState('');
+  const est = useMemo(() => {
+    if (!rev || !ind || !own) return null;
+    const rf = REV_RANGE[rev];
+    const ib = IND_BIAS[ind];
+    const ob = OWN_BIAS[own];
+    return { low: rf[0] * ib * ob, high: rf[1] * ib * ob };
+  }, [rev, ind, own]);
+
+  return (
+    <div className="h-try h-anim">
+      <div className="h-try__head">
+        <span className="h-try__k">Try it live</span>
+        <span className="h-try__tag">3 inputs · 3 sec</span>
+      </div>
+      <h3 className="h-try__t">Add-back estimator. <em>How much is hiding in your financials?</em></h3>
+      <p className="h-try__s">Pick three things. Yulia returns an industry-pattern estimate of defensible add-backs and the enterprise-value lift at 5–6×. A quick sanity check before the real analysis.</p>
+
+      <div className="h-try__body">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+          <PickBlock label="Annual revenue" options={REV_OPTS} value={rev} onChange={setRev} />
+          <PickBlock label="Industry" options={IND_OPTS} value={ind} onChange={setInd} />
+          <PickBlock label="Owner involvement" options={OWN_OPTS} value={own} onChange={setOwn} />
+        </div>
+        <div style={{
+          marginTop: 18, padding: 20,
+          background: est ? '#0A0A0B' : '#fff',
+          color: est ? '#fff' : '#6B6B70',
+          borderRadius: 14, minHeight: 110,
+          border: est ? 'none' : '1px solid rgba(0,0,0,0.08)',
+        }}>
+          {est ? (
+            <>
+              <div style={{
+                fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase',
+                opacity: 0.6,
+              }}>Estimated hidden EBITDA</div>
+              <div style={{
+                fontFamily: 'Sora, sans-serif', fontWeight: 800,
+                fontSize: 'clamp(32px, 4vw, 42px)',
+                letterSpacing: '-0.03em', marginTop: 6,
+              }}>${est.low.toFixed(2)}M – ${est.high.toFixed(2)}M</div>
+              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 8 }}>
+                At a 5–6× multiple, that's <strong>${(est.low * 5.5).toFixed(1)}M – ${(est.high * 5.5).toFixed(1)}M</strong> of enterprise value the CPA never surfaces.
+              </div>
+              <div style={{ fontSize: 11, opacity: 0.55, marginTop: 10 }}>
+                Industry-pattern estimate. The real number is specific to your financials — a full QoE Lite runs in 30 minutes after you pick a plan.
+              </div>
+            </>
+          ) : (
+            <div style={{ fontSize: 13, fontStyle: 'italic', paddingTop: 4 }}>Pick all three inputs to see the estimate.</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PickBlock<T extends string>({ label, options, value, onChange }: {
+  label: string;
+  options: readonly T[];
+  value: string;
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div>
+      <div style={{
+        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+        fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase',
+        color: '#6B6B70', marginBottom: 8,
+      }}>{label}</div>
+      <div style={{ display: 'grid', gap: 5 }}>
+        {options.map((o) => {
+          const active = value === o;
+          return (
+            <button
+              key={o}
+              type="button"
+              onClick={() => onChange(o)}
+              style={{
+                padding: '8px 12px', textAlign: 'left',
+                background: active ? '#0A0A0B' : '#fff',
+                color: active ? '#fff' : '#1A1C1E',
+                border: active ? 'none' : '1px solid rgba(0,0,0,0.08)',
+                borderRadius: 10,
+                fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 12.5,
+                cursor: 'pointer', transition: 'background 150ms',
+              }}
+            >{o}</button>
+          );
+        })}
+      </div>
+    </div>
   );
 }

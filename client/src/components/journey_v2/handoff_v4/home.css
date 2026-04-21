@@ -37,6 +37,65 @@
 .h-anim-d4 { transition-delay: 320ms; }
 .h-page[data-motion="none"] .h-anim { opacity: 1; transform: none; transition: none; }
 
+/* ── Interactive "try it live" section ──────────────────────────────
+   White rounded card matching .h-app aesthetic but hosts a live
+   widget — paste/pick → animated result. Sits between hero and
+   card grid on journey pages that have a signature interactive. */
+.h-try {
+  background: var(--h-card, #FFFFFF);
+  border: 1px solid var(--h-line, rgba(0,0,0,0.08));
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+  position: relative;
+  margin: 24px 0 14px;
+}
+.h-try__head {
+  padding: 18px 24px 6px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px;
+}
+.h-try__k {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: #D44A78;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.h-try__k::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: #D44A78; display: inline-block;
+  animation: h-try-pulse 1.8s ease-in-out infinite;
+}
+@keyframes h-try-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.8); }
+}
+.h-try__tag {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--h-mute, #6B6B70);
+}
+.h-try__t {
+  padding: 0 24px 4px;
+  font-family: 'Sora', sans-serif; font-weight: 700;
+  font-size: clamp(20px, 2.2vw, 26px);
+  letter-spacing: -0.02em; line-height: 1.2;
+  color: var(--h-ink, #0A0A0B);
+}
+.h-try__t em { font-style: normal; color: var(--h-mute, #6B6B70); font-weight: 500; }
+.h-try__s {
+  padding: 0 24px 18px;
+  font-size: 14px; line-height: 1.5;
+  color: var(--h-ink-2, #3A3A3E);
+  max-width: 72ch;
+}
+.h-try__body {
+  padding: 18px 24px 24px;
+  border-top: 1px solid var(--h-line-2, rgba(0,0,0,0.05));
+  background: #FAFAFA;
+}
+
 /* ══════════════════════════════════════════════════════════════════════
    FEATURED · "TODAY" CARD — the App Store hero slot
    ══════════════════════════════════════════════════════════════════════ */

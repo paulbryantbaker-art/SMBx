@@ -3,9 +3,53 @@
  * Buyer POV: searcher / LMM PE associate evaluating acquisitions.
  * Running example: Acme, Inc. scored 81/100 via the Rundown.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+
+/* ── Rundown heuristics (demo-only; real product calls backend) ── */
+type DimKey = 'financial' | 'margins' | 'revenue' | 'concentration' | 'management' | 'dependency' | 'scalability';
+const RD_LABELS: Record<DimKey, string> = {
+  financial: 'Financial quality',
+  margins: 'Margins',
+  revenue: 'Revenue quality',
+  concentration: 'Concentration',
+  management: 'Management depth',
+  dependency: 'Owner dependency',
+  scalability: 'Scalability',
+};
+const RD_KEYS: DimKey[] = ['financial', 'margins', 'revenue', 'concentration', 'management', 'dependency', 'scalability'];
+
+function scoreDealText(s: string): Record<DimKey, number> {
+  const t = s.toLowerCase();
+  const has = (n: string[]) => n.some((x) => t.includes(x));
+  const out: Record<DimKey, number> = {
+    financial: 6.5, margins: 6.5, revenue: 6.5, concentration: 6.5,
+    management: 6.5, dependency: 6.5, scalability: 6.5,
+  };
+  if (has(['clean', 'audited', 'tax return']))                        out.financial += 2;
+  if (has(['qb', 'cash-basis', 'messy']))                             out.financial -= 1.5;
+  if (has(['ebitda', '20%', '22%', '25%', '18%', '15%']))            out.margins += 1.5;
+  if (has(['low-margin', '8%', '10%']))                               out.margins -= 1.5;
+  if (has(['recurring', 'msa', 'subscription', 'contract']))          out.revenue += 2;
+  if (has(['one-time', 'project-based', 'seasonal']))                 out.revenue -= 1.5;
+  if (has(['concentration', '55%', '60%', 'top 3', 'top-3']))         out.concentration -= 2.5;
+  if (has(['diversified', '100+ customer', 'long tail']))             out.concentration += 2;
+  if (has(['team', 'management', 'coo', 'vp']))                       out.management += 1.5;
+  if (has(['solo', 'no team', 'owner-operator']))                     out.management -= 2;
+  if (has(['owner handles', 'owner runs', 'owner does']))             out.dependency -= 2;
+  if (has(['owner stepped back', 'professional manager']))            out.dependency += 2;
+  if (has(['platform', 'scalable', 'expansion', 'roll-up']))          out.scalability += 2;
+  if (has(['single market', 'local', 'niche']))                       out.scalability -= 1;
+  RD_KEYS.forEach((k) => { out[k] = Math.max(1, Math.min(10, Math.round(out[k] * 10) / 10)); });
+  return out;
+}
+
+const SAMPLE_DEALS = [
+  'HVAC services, $4.2M revenue, 18% EBITDA, 60% recurring contracts, 2nd-gen owner retiring',
+  'Specialty distribution, $12M revenue, 22% EBITDA, 3 customers = 55% of revenue',
+  'Pest control, Phoenix, $1.2M rev, asking $2.8M, 70% recurring, owner handles top-10 accounts',
+];
 
 interface Props {
   active: DealTab;
@@ -124,6 +168,9 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
             </div>
           </div>
         </section>
+
+        {/* ══ LIVE RUNDOWN ══ */}
+        <RundownCalculator />
 
         {/* FOUR PHASES */}
         <div className="h-sect-h">
@@ -341,5 +388,202 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
 
       </div>
     </JourneyShell>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RundownCalculator — live deal scoring. Paste a description or pick
+   a sample, watch 7 dimensions animate in sequentially, see the
+   PURSUE / DEEPER LOOK / PASS verdict.
+   ═══════════════════════════════════════════════════════════════════ */
+function RundownCalculator() {
+  const [input, setInput] = useState('');
+  const [scores, setScores] = useState<Record<DimKey, number> | null>(null);
+  const [revealIdx, setRevealIdx] = useState(0);
+
+  useEffect(() => {
+    if (!scores) return;
+    if (revealIdx >= RD_KEYS.length) return;
+    const t = window.setTimeout(() => setRevealIdx((i) => i + 1), 220);
+    return () => window.clearTimeout(t);
+  }, [scores, revealIdx]);
+
+  const runScore = (text: string) => {
+    const s = text.trim();
+    if (s.length < 10) return;
+    setScores(scoreDealText(s));
+    setRevealIdx(0);
+  };
+  const reset = () => { setInput(''); setScores(null); setRevealIdx(0); };
+
+  const total = scores
+    ? Math.round(RD_KEYS.reduce((sum, k) => sum + scores[k], 0) / RD_KEYS.length * 10)
+    : 0;
+  const verdict = total >= 70
+    ? { label: 'PURSUE', color: '#22A755' }
+    : total >= 40
+      ? { label: 'DEEPER LOOK', color: '#E8A033' }
+      : { label: 'PASS', color: '#D44A78' };
+
+  return (
+    <div className="h-try h-anim">
+      <div className="h-try__head">
+        <span className="h-try__k">Try it live</span>
+        <span className="h-try__tag">90 sec · 7 dims</span>
+      </div>
+      <h3 className="h-try__t">The Rundown. <em>Live deal calculator.</em></h3>
+      <p className="h-try__s">Paste a listing URL, drop a teaser, or type a description. Yulia scores 7 dimensions in 90 seconds and tells you pursue, deeper look, or pass.</p>
+
+      <div className="h-try__body">
+        {!scores ? (
+          <div>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              rows={3}
+              placeholder="Paste a deal URL, teaser summary, or type a description — industry, revenue, EBITDA, owner dynamics…"
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                border: '1px solid rgba(0,0,0,0.12)',
+                borderRadius: 12,
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontSize: 13.5,
+                lineHeight: 1.5,
+                resize: 'vertical',
+                background: '#fff',
+              }}
+            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                disabled={input.trim().length < 10}
+                onClick={() => runScore(input)}
+                style={{
+                  background: input.trim().length >= 10 ? '#0A0A0B' : '#D8D8DA',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 999,
+                  padding: '10px 18px',
+                  fontFamily: 'Sora, sans-serif',
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: input.trim().length >= 10 ? 'pointer' : 'not-allowed',
+                }}
+              >Score the deal →</button>
+              <span style={{ fontSize: 11.5, color: '#6B6B70' }}>Or try a sample:</span>
+              {SAMPLE_DEALS.map((d, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => { setInput(d); runScore(d); }}
+                  style={{
+                    background: '#fff',
+                    border: '1px solid rgba(0,0,0,0.08)',
+                    borderRadius: 999,
+                    padding: '5px 11px',
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: '#3A3A3E',
+                    cursor: 'pointer',
+                  }}
+                >Sample {i + 1}</button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 32, alignItems: 'center' }}>
+            <div>
+              <div style={{ width: 140, height: 140, position: 'relative' }}>
+                <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%' }}>
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(0,0,0,0.08)" strokeWidth="9" />
+                  <circle cx="50" cy="50" r="42" fill="none" stroke={revealIdx >= RD_KEYS.length ? verdict.color : '#0A0A0B'} strokeWidth="9"
+                    strokeLinecap="round" strokeDasharray="263.9"
+                    strokeDashoffset={263.9 - 263.9 * (revealIdx >= RD_KEYS.length ? total : Math.round((revealIdx / RD_KEYS.length) * total)) / 100}
+                    style={{ transition: 'stroke-dashoffset 380ms, stroke 200ms' }}
+                  />
+                </svg>
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center',
+                  fontFamily: 'Sora, sans-serif', fontWeight: 800,
+                  fontSize: 32, letterSpacing: '-0.02em', lineHeight: 1,
+                }}>
+                  {revealIdx >= RD_KEYS.length ? total : Math.round((revealIdx / RD_KEYS.length) * total)}
+                </div>
+              </div>
+              <div style={{
+                textAlign: 'center', marginTop: 10,
+                fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase',
+                color: revealIdx >= RD_KEYS.length ? verdict.color : '#9A9A9F',
+                transition: 'color 200ms',
+              }}>
+                {revealIdx >= RD_KEYS.length ? verdict.label : 'Scoring…'}
+              </div>
+            </div>
+            <div style={{ display: 'grid', gap: 6 }}>
+              {RD_KEYS.map((k, i) => {
+                const revealed = i < revealIdx;
+                const v = scores[k];
+                const pct = (v / 10) * 100;
+                const tone = v >= 7.5 ? '#22A755' : v >= 5.5 ? '#E8A033' : '#D44A78';
+                return (
+                  <div key={k} style={{
+                    display: 'grid',
+                    gridTemplateColumns: '150px 1fr 40px',
+                    gap: 12,
+                    alignItems: 'center',
+                    fontSize: 12.5,
+                    opacity: revealed ? 1 : 0.3,
+                    transform: revealed ? 'translateX(0)' : 'translateX(-8px)',
+                    transition: 'opacity 260ms, transform 260ms',
+                  }}>
+                    <div style={{ fontWeight: 600 }}>{RD_LABELS[k]}</div>
+                    <div style={{ position: 'relative', height: 14, background: '#F0F0F0', borderRadius: 3, overflow: 'hidden' }}>
+                      <div style={{
+                        position: 'absolute', left: 0, top: 0, bottom: 0,
+                        width: revealed ? `${pct}%` : '0%',
+                        background: tone,
+                        borderRadius: 3,
+                        transition: 'width 380ms cubic-bezier(0.22, 1, 0.36, 1)',
+                      }} />
+                    </div>
+                    <div style={{
+                      fontVariantNumeric: 'tabular-nums', fontWeight: 700,
+                      textAlign: 'right', color: revealed ? tone : '#9A9A9F',
+                    }}>{revealed ? v.toFixed(1) : '—'}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {scores && revealIdx >= RD_KEYS.length && (
+          <div style={{
+            marginTop: 18, padding: '14px 18px',
+            background: '#fff', border: '1px solid rgba(0,0,0,0.08)',
+            borderRadius: 12,
+            fontSize: 12.5, lineHeight: 1.55, color: '#3A3A3E',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14,
+          }}>
+            <div>
+              <strong style={{ color: '#0A0A0B' }}>Total {total}/100 · {verdict.label}.</strong> This is a preview score. Yulia's full Rundown writes the deal memo, models the SBA-compliant capital stack, and flags every risk specific to this deal.
+            </div>
+            <button
+              type="button" onClick={reset}
+              style={{
+                background: '#fff', border: '1px solid rgba(0,0,0,0.12)',
+                borderRadius: 999, padding: '7px 14px',
+                fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 12,
+                cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >Try another →</button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

@@ -2,9 +2,15 @@
  * Integrate.tsx — rebuilt on handoff v4 `.h-*` vocabulary.
  * Running example: Day 3 post-close of Acme. Ray is at the office.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+
+const D1_IND = ['Services', 'Manufacturing', 'Healthcare', 'Technology', 'Construction', 'Retail', 'Other'] as const;
+const D1_EMP = ['<50', '50–200', '200–500', '500+'] as const;
+const D1_REV = ['<$5M', '$5–25M', '$25–100M', '$100M+'] as const;
+const D1_CUST = ['0', '1–5', '5–20', '20+'] as const;
+const D1_SYS = ['no', 'yes'] as const;
 
 interface Props {
   active: DealTab;
@@ -123,6 +129,9 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
             </div>
           </div>
         </section>
+
+        {/* ══ LIVE DAY-1 CHECKLIST GENERATOR ══ */}
+        <Day1Generator onSeed={seedChat} />
 
         {/* FOUR PHASES */}
         <div className="h-sect-h">
@@ -326,5 +335,184 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
 
       </div>
     </JourneyShell>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Day1Generator — 5 inputs → customized Day-1 checklist grouped by
+   IT/People/Customers/Vendors/Ops.
+   ═══════════════════════════════════════════════════════════════════ */
+function Day1Generator({ onSeed }: { onSeed: (t: string) => void }) {
+  const [industry, setIndustry] = useState<string>('');
+  const [emp, setEmp] = useState<string>('');
+  const [rev, setRev] = useState<string>('');
+  const [cust, setCust] = useState<string>('');
+  const [sys, setSys] = useState<string>('');
+
+  const ready = !!(industry && emp && rev && cust && sys);
+  void rev;
+
+  const groups = useMemo(() => {
+    if (!ready) return null;
+    const empFactor = emp === '500+' ? 3 : emp === '200–500' ? 2 : emp === '50–200' ? 1.5 : 1;
+    const sysFactor = sys === 'yes' ? 2 : 1;
+    const custBonus = cust === '20+' ? 4 : cust === '5–20' ? 3 : cust === '1–5' ? 2 : 0;
+    const itBase = [
+      'Rotate admin credentials for top 50 systems',
+      'Transfer DNS + domain ownership',
+      'Audit and remove ex-employee access',
+      'Insurance verification (cyber + D&O + umbrella)',
+    ];
+    const itExtras = [
+      'ITGC review against SOC 2 scope',
+      'Dedicated security-ops handover meeting',
+      'SSO tenant cutover plan',
+    ];
+    const peopleBase = [
+      'Individual retention conversation — top 5 key-people from DD',
+      'Comp review where compression identified',
+      'First all-hands town hall (script drafted)',
+      'Payroll system cutover confirmation',
+    ];
+    const peopleExtras = [
+      'Union / works-council liaison',
+      'Benefits re-enrollment communication',
+      'Manager-level skip-levels in first 2 weeks',
+    ];
+    const custBase = [
+      'Top customer outreach — CEO-to-CEO calls',
+      'Contract & MSA inventory + renewals schedule',
+    ];
+    const vendBase = [
+      'Top-10 vendor notifications',
+      'AP transition + open-invoice reconciliation',
+    ];
+    const opsBase = [
+      'Legal entity + EIN filings',
+      'Licenses + permits transfer (state-specific)',
+      'First Monday operating cadence defined',
+    ];
+    return {
+      'IT / Security': [...itBase, ...(empFactor > 1.5 ? itExtras : [])],
+      People: [...peopleBase, ...(empFactor > 1.5 ? peopleExtras : [])],
+      Customers: [...custBase, ...(custBonus > 0 ? [`Named-contact handoff for ${cust} seller-held relationships`] : [])],
+      Vendors: vendBase,
+      Operations: [...opsBase, ...(sysFactor > 1 ? ['Systems migration runbook + dependency map', 'Finance close-cutover rehearsal'] : [])],
+    };
+  }, [ready, emp, sys, cust]);
+
+  const totalCount = useMemo(() => {
+    if (!groups) return 0;
+    return Object.values(groups).reduce((sum, arr) => sum + arr.length, 0);
+  }, [groups]);
+
+  return (
+    <div className="h-try h-anim">
+      <div className="h-try__head">
+        <span className="h-try__k">Try it live</span>
+        <span className="h-try__tag">5 inputs · 5 sec</span>
+      </div>
+      <h3 className="h-try__t">Day-1 checklist. <em>Generated for your acquisition.</em></h3>
+      <p className="h-try__s">Answer five questions. Yulia generates a starter checklist grouped by IT, People, Customers, Vendors, Operations. A starting point — your full PMI plan pulls from your actual LOI + QoE.</p>
+
+      <div className="h-try__body">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+          <PickLiveBlock label="Industry" options={D1_IND} value={industry} onChange={setIndustry} />
+          <PickLiveBlock label="Employees" options={D1_EMP} value={emp} onChange={setEmp} />
+          <PickLiveBlock label="Revenue" options={D1_REV} value={rev} onChange={setRev} />
+          <PickLiveBlock label="Seller ties" options={D1_CUST} value={cust} onChange={setCust} />
+          <PickLiveBlock label="Sys migration?" options={D1_SYS} value={sys} onChange={setSys} />
+        </div>
+
+        {groups ? (
+          <div style={{ marginTop: 18 }}>
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              marginBottom: 12,
+            }}>
+              <div style={{
+                fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase',
+                color: '#0A0A0B',
+              }}>Your Day-1 checklist · {totalCount} items</div>
+              <button
+                type="button"
+                onClick={() => onSeed(`Generate my full PMI plan — ${industry} · ${emp} employees · ${rev} · ${cust} seller customer ties · systems migration: ${sys}.`)}
+                style={{
+                  background: '#0A0A0B', color: '#fff', border: 'none',
+                  borderRadius: 999, padding: '8px 14px',
+                  fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 12,
+                  cursor: 'pointer',
+                }}
+              >Build the full plan →</button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+              {Object.entries(groups).map(([name, items]) => (
+                <div key={name} style={{
+                  background: '#fff', border: '1px solid rgba(0,0,0,0.08)',
+                  borderRadius: 12, padding: 14,
+                  fontSize: 11.5, lineHeight: 1.5,
+                }}>
+                  <div style={{
+                    fontFamily: 'Sora, sans-serif', fontWeight: 700,
+                    fontSize: 12, marginBottom: 8,
+                  }}>{name}</div>
+                  <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: 5 }}>
+                    {items.map((i) => <li key={i}>· {i}</li>)}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div style={{
+            marginTop: 18, padding: 20,
+            background: '#fff', border: '1px solid rgba(0,0,0,0.08)',
+            borderRadius: 12, color: '#6B6B70',
+            fontSize: 13, fontStyle: 'italic',
+          }}>
+            Pick all five inputs to generate a starter checklist.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PickLiveBlock<T extends string>({ label, options, value, onChange }: {
+  label: string;
+  options: readonly T[];
+  value: string;
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div>
+      <div style={{
+        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+        fontSize: 9.5, letterSpacing: '0.14em', textTransform: 'uppercase',
+        color: '#6B6B70', marginBottom: 8,
+      }}>{label}</div>
+      <div style={{ display: 'grid', gap: 4 }}>
+        {options.map((o) => {
+          const active = value === o;
+          return (
+            <button
+              key={o}
+              type="button"
+              onClick={() => onChange(o)}
+              style={{
+                padding: '7px 10px', textAlign: 'left',
+                background: active ? '#0A0A0B' : '#fff',
+                color: active ? '#fff' : '#1A1C1E',
+                border: active ? 'none' : '1px solid rgba(0,0,0,0.08)',
+                borderRadius: 8,
+                fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 11.5,
+                cursor: 'pointer',
+              }}
+            >{o}</button>
+          );
+        })}
+      </div>
+    </div>
   );
 }

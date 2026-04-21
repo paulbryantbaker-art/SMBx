@@ -3,7 +3,7 @@
  * Running example: Acme, Inc. $11M EBITDA owner considering liquidity
  * structures beyond a full sale.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
 
@@ -124,6 +124,9 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
             </div>
           </div>
         </section>
+
+        {/* ══ LIVE SELL-VS-RAISE CALCULATOR ══ */}
+        <SellVsRaise />
 
         {/* SIX STRUCTURES */}
         <div className="h-sect-h">
@@ -318,5 +321,125 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
 
       </div>
     </JourneyShell>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SellVsRaise — 2 sliders (EBITDA, years). Computes full-sale vs.
+   30% minority recap total over N years at 12% EBITDA CAGR, 7.5×.
+   ═══════════════════════════════════════════════════════════════════ */
+function SellVsRaise() {
+  const [ebitda, setEbitda] = useState(11);
+  const [years, setYears] = useState(5);
+  const multiple = 7.5;
+  const growthPa = 0.12;
+  const ev = ebitda * multiple;
+  const fullSale = ev;
+  const minorityToday = ev * 0.30;
+  const futureEv = ebitda * Math.pow(1 + growthPa, years) * multiple;
+  const minorityFuture = futureEv * 0.70;
+  const minorityTotal = minorityToday + minorityFuture;
+  const delta = minorityTotal - fullSale;
+
+  return (
+    <div className="h-try h-anim">
+      <div className="h-try__head">
+        <span className="h-try__k">Try it live</span>
+        <span className="h-try__tag">2 sliders · pre-tax</span>
+      </div>
+      <h3 className="h-try__t">Sell vs. raise. <em>Over five years.</em></h3>
+      <p className="h-try__s">Drag the sliders. Yulia runs the minority-recap math against the full-sale baseline and shows you the 5-year delta. Simple pre-tax model — real analysis includes after-tax, earnout mechanics, and control trade-offs.</p>
+
+      <div className="h-try__body">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+          <div>
+            <div style={{
+              fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+              fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase',
+              color: '#6B6B70', marginBottom: 8,
+            }}>Annual EBITDA · <strong style={{ color: '#0A0A0B' }}>${ebitda}M</strong></div>
+            <input
+              type="range" min={3} max={50} step={1}
+              value={ebitda} onChange={(e) => setEbitda(Number(e.target.value))}
+              style={{ width: '100%', accentColor: '#0A0A0B' }}
+            />
+          </div>
+          <div>
+            <div style={{
+              fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+              fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase',
+              color: '#6B6B70', marginBottom: 8,
+            }}>Years to full exit · <strong style={{ color: '#0A0A0B' }}>{years}</strong></div>
+            <input
+              type="range" min={3} max={10} step={1}
+              value={years} onChange={(e) => setYears(Number(e.target.value))}
+              style={{ width: '100%', accentColor: '#0A0A0B' }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <ResultCard
+            heading="Full sale today"
+            lines={[
+              { l: 'Enterprise value', v: `$${fullSale.toFixed(0)}M` },
+              { l: 'Cash at close',    v: `$${fullSale.toFixed(0)}M` },
+              { l: `In ${years} years`, v: '—', muted: true },
+            ]}
+            foot="Clean break. Tax event today."
+          />
+          <ResultCard
+            heading="Minority recap · 30% today"
+            accent
+            lines={[
+              { l: 'Cash today',      v: `$${minorityToday.toFixed(0)}M` },
+              { l: `Retained 70% in ${years}yrs`, v: `$${minorityFuture.toFixed(0)}M` },
+              { l: 'Total',            v: `$${minorityTotal.toFixed(0)}M`, emphasize: true },
+            ]}
+            foot={`${delta >= 0 ? '+' : '−'}$${Math.abs(Math.round(delta))}M vs. full-sale today · ${Math.round(growthPa * 100)}% CAGR at ${multiple}×`}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ResultCard({ heading, lines, foot, accent }: {
+  heading: string;
+  lines: { l: string; v: string; emphasize?: boolean; muted?: boolean }[];
+  foot: string;
+  accent?: boolean;
+}) {
+  return (
+    <div style={{
+      background: accent ? '#0A0A0B' : '#fff',
+      color: accent ? '#fff' : '#1A1C1E',
+      border: accent ? 'none' : '1px solid rgba(0,0,0,0.08)',
+      borderRadius: 14, padding: 20,
+    }}>
+      <div style={{
+        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+        fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase',
+        opacity: 0.65, marginBottom: 12,
+      }}>{heading}</div>
+      <div style={{ display: 'grid', gap: 8 }}>
+        {lines.map((l) => (
+          <div key={l.l} style={{
+            display: 'flex', justifyContent: 'space-between', gap: 10,
+            fontSize: l.emphasize ? 15 : 13,
+            fontWeight: l.emphasize ? 700 : 500,
+            opacity: l.muted ? 0.5 : 1,
+          }}>
+            <span>{l.l}</span>
+            <span style={{ fontVariantNumeric: 'tabular-nums' }}>{l.v}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{
+        marginTop: 12, paddingTop: 10,
+        borderTop: accent ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
+        fontSize: 11, opacity: 0.72, lineHeight: 1.4,
+      }}>{foot}</div>
+    </div>
   );
 }
