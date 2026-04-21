@@ -1,17 +1,8 @@
 /**
- * Glass Grok v2 · Enterprise.tsx — SITE_COPY April 2026.
- *
- * Drops the fictional anonymized quote cards. Replaces with: use-case
- * grid (LMM PE / boutique advisory / corp dev / family office),
- * enterprise feature grid, tool-consolidation ROI math table, and a
- * book-a-demo bottom.
+ * Enterprise.tsx — rebuilt on handoff v4 `.h-*` vocabulary.
  */
-import { useState } from 'react';
-import {
-  DealStep, DealBench, DealBottom,
-  PullQuote, StatBreaker,
-  type DealTab,
-} from '../deal-room';
+import { useEffect, useRef, useState } from 'react';
+import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
 
 interface Props {
@@ -22,323 +13,306 @@ interface Props {
   onSignIn?: () => void;
 }
 
-const CHIPS = ['Lower middle market PE', 'Boutique M&A advisory', 'Corp dev', 'Family office'] as const;
-
-type UseCase = { n: string; title: string; body: string; outcome: string };
-const USE_CASES: readonly UseCase[] = [
-  { n: '01', title: 'Lower middle market PE',       body: 'Screen add-on targets at 3× traditional sourcing volume. Exit readiness scoring across the portfolio quarterly. IC memos in 15 minutes. Portfolio monitoring automated.',  outcome: 'Replaces $40K–$120K/yr in DealCloud + sourcing spend' },
-  { n: '02', title: 'Boutique M&A advisory',        body: 'Turn every analyst hour into an associate hour. CIM production from 4–6 weeks to 48 hours. Deals under $8M EBITDA become profitable engagements again.',                   outcome: 'Deals under $8M EBITDA become profitable' },
-  { n: '03', title: 'Corp dev at serial acquirers', body: 'Centralized pipeline across all targets. Thesis-aligned scoring on inbound opportunities. Diligence coordination across legal, finance, HR, IT. PMI plans built from deal data.', outcome: 'Deal capacity +50–100% without headcount' },
-  { n: '04', title: 'Multi-family office',           body: 'Direct-investing infrastructure without direct-investing overhead. Every deal scored against the family\'s thesis. Capital structure modeling for co-investments.',           outcome: 'Portfolio variance alerts before the P&L shows it' },
-];
-
-type FeatureRow = { title: string; body: string };
-const FEATURES: readonly FeatureRow[] = [
-  { title: 'Team workspace + shared deal vault', body: 'Role-based permissions. Shared deal vault. Activity feeds across the team.' },
-  { title: 'White-label outputs',                body: 'CIMs, valuations, deal rooms — your logo, your letterhead, your styling. Your client sees your brand.' },
-  { title: 'Unlimited seats',                    body: '6–50 seats included. Custom pricing above 50.' },
-  { title: 'SSO integration',                    body: 'Okta, Google Workspace, Azure AD.' },
-  { title: 'Single-tenant deployment',           body: 'For family offices, regulated entities, and firms that require isolated infrastructure.' },
-  { title: 'SOC 2 audit trails',                 body: 'Complete activity logging. User actions, document access, data changes. Audit-ready.' },
-  { title: 'API access',                         body: 'Programmatic access to deal data, deliverables, and workflows.' },
-  { title: 'Named account manager',              body: 'Direct line. Quarterly business reviews. Onboarding support.' },
-  { title: '99.9% SLA',                          body: 'Uptime guarantees with defined response times.' },
-  { title: 'Compliance review workflow',         body: 'For regulated entities: pre-delivery compliance review on every outbound deliverable.' },
-];
-
-type RoiRow = { category: string; spend: string; replaces: 'full' | 'partial' };
-const ROI: readonly RoiRow[] = [
-  { category: 'Deal management / CRM',            spend: '$30K–$80K',   replaces: 'full' },
-  { category: 'Sourcing (Grata / Sourcescrub)',   spend: '$20K–$60K',   replaces: 'partial' },
-  { category: 'Data room (Datasite / Firmex)',    spend: '$15K–$40K',   replaces: 'full' },
-  { category: 'Financial modeling analyst hours', spend: '$100K–$200K', replaces: 'partial' },
-  { category: 'Document generation (Rogo / Hebbia)', spend: '$24K–$75K',  replaces: 'full' },
-  { category: 'Portfolio monitoring tools',       spend: '$20K–$50K',   replaces: 'full' },
-];
-
 export default function Enterprise({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
-  const [form, setForm] = useState({ name: '', company: '', email: '', teamSize: '', goals: '' });
-  const canSubmit = form.name && form.company && form.email && form.teamSize;
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [form, setForm] = useState({ name: '', company: '', email: '', team: '', goals: '' });
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const targets = root.querySelectorAll<HTMLElement>('.h-anim');
+    if (!targets.length) return;
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      targets.forEach((el) => el.classList.add('in'));
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    targets.forEach((el) => { if (!el.classList.contains('in')) io.observe(el); });
+    return () => io.disconnect();
+  }, []);
+
+  const pulseChat = () => {
+    const input = document.getElementById('chatInput') as HTMLInputElement | null;
+    input?.focus();
+    document.getElementById('chat')?.animate(
+      [{ boxShadow: '0 0 0 0 rgba(10,10,11,0.25)' }, { boxShadow: '0 0 0 14px rgba(10,10,11,0)' }],
+      { duration: 720, easing: 'cubic-bezier(0.22,0.8,0.32,1)' },
+    );
+  };
+
+  const seedChat = (text: string) => {
+    const input = document.getElementById('chatInput') as HTMLInputElement | null;
+    if (!input) return;
+    input.value = text;
+    input.focus();
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+
+  const canSubmit = form.name && form.company && form.email && form.team;
+
   return (
     <JourneyShell
       active={active}
       onNavigate={onNavigate}
       onSignIn={onSignIn}
       onStartFree={onStartFree}
+      canvasKicker="smbx.ai / enterprise"
+      canvasTitle="Enterprise"
+      canvasBadge="For firms · SSO · SOC 2"
       chat={{
         title: 'Yulia',
         status: 'For teams + firms',
+        pswLogo: 'Y',
+        pswName: 'Yulia',
+        pswMeta: 'ENTERPRISE',
         script: {},
-        opening: "Hi — I'm <strong>Yulia</strong>. Tell me about your firm and I'll show you how teams like yours are using smbX at scale — and what it would cost specifically for your team.",
-        reply: 'Three things: <strong>firm type</strong>, <strong>team size</strong>, <strong>deals per year</strong>. I\'ll model your specific ROI before anyone books a call.',
-        chips: CHIPS,
+        opening: "Hi — I'm <strong>Yulia</strong>. Tell me about your firm and I'll show you how teams like yours are using smbx at scale — and what it would cost specifically for your team.",
+        reply: "Three things: <strong>firm type</strong>, <strong>team size</strong>, <strong>deals per year</strong>. I'll model your specific ROI before anyone books a call.",
+        chips: [] as const,
+        placeholder: 'Firm type, team size, deals per year…',
         onSend,
+        suggested: {
+          kicker: 'Next',
+          label: 'See the 4 firm shapes',
+          onClick: () => document.getElementById('usecases')?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+        },
       }}
     >
-      {/* Hero */}
-      <DealStep
-        n={1}
-        id="s1"
-        idx="Enterprise"
-        scale="hero"
-        title={<>Your deal team, multiplied.</>}
-        lede={<>For firms closing deals at scale. Shared deal vault. Team workspace. White-label outputs. SSO, audit trails, SOC 2 controls. Same Yulia, enterprise infrastructure.</>}
-      />
+      <div id="enterprise" className="h-page" data-density="comfortable" data-motion="full" data-hero="shell" ref={rootRef}>
 
-      {/* Use cases — Bloomberg-style row table, not a card grid */}
-      <DealStep
-        n={2}
-        id="s2"
-        idx="How firms use smbX"
-        title="Four firm shapes. Four different workflows."
-      >
-        <DealBench title="Use cases" meta="4 SHAPES · LIVE DEPLOYMENTS">
-          <div style={{ padding: 0 }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-              <thead>
-                <tr style={{
-                  fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-                  fontSize: 9.5,
-                  letterSpacing: '0.12em',
-                  color: '#9A9A9F',
-                  textTransform: 'uppercase',
-                }}>
-                  <th style={{ textAlign: 'left',  padding: '12px 22px 8px', fontWeight: 600, width: 28 }}></th>
-                  <th style={{ textAlign: 'left',  padding: '12px 12px 8px', fontWeight: 600, width: 220 }}>Shape</th>
-                  <th style={{ textAlign: 'left',  padding: '12px 12px 8px', fontWeight: 600 }}>How they use Yulia</th>
-                  <th style={{ textAlign: 'right', padding: '12px 22px 8px', fontWeight: 600, width: 260 }}>Typical outcome</th>
-                </tr>
-              </thead>
-              <tbody>
-                {USE_CASES.map((c, i) => (
-                  <tr key={c.n} style={{
-                    borderTop: '0.5px solid rgba(0,0,0,0.06)',
-                    background: i % 2 === 1 ? '#FAFAFB' : undefined,
-                  }}>
-                    <td style={{
-                      padding: '18px 0 18px 22px',
-                      verticalAlign: 'top',
-                      fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-                      fontSize: 10,
-                      letterSpacing: '0.14em',
-                      color: '#9A9A9F',
-                      textTransform: 'uppercase',
-                    }}>{c.n}</td>
-                    <td style={{
-                      padding: '18px 12px',
-                      verticalAlign: 'top',
-                    }}>
-                      <div style={{
-                        fontFamily: 'Sora, sans-serif',
-                        fontWeight: 700,
-                        fontSize: 15,
-                        letterSpacing: '-0.015em',
-                        color: '#0A0A0B',
-                        lineHeight: 1.2,
-                      }}>{c.title}</div>
-                    </td>
-                    <td style={{
-                      padding: '18px 12px',
-                      verticalAlign: 'top',
-                      fontSize: 12.5,
-                      lineHeight: 1.55,
-                      color: '#3A3A3E',
-                    }}>{c.body}</td>
-                    <td style={{
-                      padding: '18px 22px 18px 12px',
-                      verticalAlign: 'top',
-                      textAlign: 'right',
-                      fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-                      fontSize: 10.5,
-                      letterSpacing: '0.08em',
-                      color: '#0A0A0B',
-                      textTransform: 'uppercase',
-                      lineHeight: 1.55,
-                    }}>{c.outcome}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </DealBench>
-      </DealStep>
-
-      {/* Features */}
-      <DealStep
-        n={3}
-        id="s3"
-        idx="Infrastructure"
-        title="Built for teams that close deals at scale."
-      >
-        <div style={{
-          marginTop: 18,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: 8,
-        }}>
-          {FEATURES.map((f, i) => (
-            <div key={f.title} style={{
-              background: '#fff',
-              border: '0.5px solid rgba(0,0,0,0.08)',
-              borderRadius: 10,
-              padding: 14,
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: 10,
-              }}>
-                <div style={{
-                  fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-                  fontSize: 10,
-                  color: '#9A9A9F',
-                  letterSpacing: '0.1em',
-                  minWidth: 18,
-                }}>{String(i + 1).padStart(2, '0')}</div>
-                <div style={{
-                  fontFamily: 'Sora, sans-serif',
-                  fontWeight: 700,
-                  fontSize: 13,
-                }}>{f.title}</div>
+        {/* HERO */}
+        <section className="h-today h-anim" id="hero">
+          <div className="h-today__inner">
+            <div className="h-today__copy">
+              <div className="h-today__meta">
+                Enterprise
+                <span className="h-today__meta-tag">For firms</span>
               </div>
-              <div style={{
-                marginTop: 6,
-                marginLeft: 28,
-                fontSize: 12,
-                lineHeight: 1.5,
-                color: '#6B6B70',
-              }}>{f.body}</div>
+              <h1 className="h-today__h">Your deal team, <em>multiplied.</em></h1>
+              <p className="h-today__sub">
+                For firms closing deals at scale. Shared deal vault. Team workspace. White-label outputs. SSO, audit trails, SOC 2 controls. Single-tenant deployment option. <strong>Same Yulia. Enterprise infrastructure.</strong>
+              </p>
+              <div className="h-today__cta">
+                <button className="h-today__btn" type="button" onClick={() => seedChat('Model Enterprise ROI for my firm.')}>
+                  Book a demo
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+                  </svg>
+                </button>
+                <button className="h-today__btn h-today__btn--ghost" type="button" onClick={() => onNavigate('pricing')}>See pricing</button>
+              </div>
+            </div>
+            <div className="h-today__demo">
+              <div className="h-today__demo-k">Yulia · ROI · 20-person LMM PE fund</div>
+              <div className="h-today__demo-bubble h-today__demo-bubble--me">How does Enterprise compare to our existing stack?</div>
+              <div className="h-today__demo-bubble">
+                Your DealCloud + Sourcescrub + Datasite + Rogo + portfolio-monitoring tools stack runs <strong>$309K/yr</strong>. Enterprise consolidates 4 of those 5 into one subscription. Net <strong>$189K saved</strong> + deal capacity +50–100%.
+              </div>
+              <div className="h-today__demo-out">
+                <div className="h-today__demo-out-c">
+                  <div className="h-today__demo-out-v">$189<span style={{ fontSize: '60%', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>K</span></div>
+                  <div className="h-today__demo-out-l">Typical annual savings</div>
+                </div>
+                <div className="h-today__demo-out-c">
+                  <div className="h-today__demo-out-v">+50–100<span style={{ fontSize: '60%', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>%</span></div>
+                  <div className="h-today__demo-out-l">Deal capacity, same team</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* USE CASES */}
+        <div className="h-sect-h">
+          <div className="h-sect-h__l">
+            <div className="h-sect-h__k">Four firm shapes</div>
+            <h2 className="h-sect-h__t">How firms use smbx. <em>Today.</em></h2>
+          </div>
+        </div>
+
+        <div className="h-apps" id="usecases">
+          {[
+            {
+              n: '01 · Lower-middle-market PE', title: '3× the screening volume without adding headcount.',
+              foot: 'Replaces $40K–$120K/yr in DealCloud + sourcing',
+              rows: [
+                { l: 'Screening volume',   r: '3×',      tone: 'ok' },
+                { l: 'Exit readiness',      r: 'Quarterly', tone: 'ok' },
+                { l: 'IC memo drafting',    r: '15 min',  tone: 'ok' },
+                { l: 'Portfolio monitoring', r: 'Auto',    tone: 'ok' },
+              ],
+            },
+            {
+              n: '02 · Boutique M&A advisory', title: 'Every analyst hour becomes an associate hour.',
+              foot: 'Deals under $8M EBITDA become profitable again',
+              rows: [
+                { l: 'CIM turnaround',      r: '4–6wk → 48h', tone: 'ok' },
+                { l: 'Valuation turnaround', r: 'Same-day',    tone: 'ok' },
+                { l: 'Deals / broker / yr', r: '2×',            tone: 'ok' },
+                { l: 'Floor engagement',    r: '$8M EBITDA',   tone: 'ok' },
+              ],
+            },
+            {
+              n: '03 · Corp dev · serial acquirers', title: 'Pipeline, thesis, diligence — centralized.',
+              foot: 'Deal cadence without the team cost',
+              rows: [
+                { l: 'Pipeline source',     r: 'Centralized', tone: 'ok' },
+                { l: 'Thesis scoring',      r: 'Auto',        tone: 'ok' },
+                { l: 'DD coordination',     r: 'Cross-team',  tone: 'ok' },
+                { l: 'PMI plans',           r: 'Auto-gen',    tone: 'ok' },
+              ],
+            },
+            {
+              n: '04 · Multi-family office', title: 'Direct-investing infrastructure, without overhead.',
+              foot: 'Every deal scored against the family thesis',
+              rows: [
+                { l: 'Deal screening',      r: 'Thesis-fit',  tone: 'ok' },
+                { l: 'Co-invest modeling',  r: 'Per-deal',    tone: 'ok' },
+                { l: 'Portfolio variance',  r: 'Alerts',      tone: 'warn' },
+                { l: 'Family reporting',    r: 'Monthly',     tone: 'ok' },
+              ],
+            },
+          ].map((u, i) => (
+            <a
+              key={u.n}
+              className={`h-app h-anim${i ? ` h-anim-d${Math.min(i, 3)}` : ''}`}
+              href="#"
+              onClick={(e) => { e.preventDefault(); seedChat(`I'm at a ${u.n.replace(/^\d+\s·\s/, '').toLowerCase()} — model my ROI.`); }}
+            >
+              <div className="h-app__art">
+                <div className="h-app__art-k">{u.n}</div>
+                <h3 className="h-app__art-h">{u.title}</h3>
+                <div className="h-app__preview">
+                  <div className="h-app__row h-app__row--head"><span>How they use smbx</span><span>—</span></div>
+                  {u.rows.map((r) => (
+                    <div key={r.l} className="h-app__row">
+                      <span className="h-app__row-l">{r.l}</span>
+                      <span className={`h-app__row-r h-app__row-r--${r.tone}`}>{r.r}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="h-app__foot">
+                <div className="h-app__foot-l">
+                  <div className="h-app__foot-t">Typical outcome</div>
+                  <div className="h-app__foot-s">{u.foot}</div>
+                </div>
+                <button className="h-app__get" type="button">Model</button>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        {/* RAIL — infrastructure */}
+        <div className="h-sect-h">
+          <div className="h-sect-h__l">
+            <div className="h-sect-h__k">Enterprise infrastructure</div>
+            <h2 className="h-sect-h__t">Everything you need for IT and compliance. <em>Built in.</em></h2>
+          </div>
+        </div>
+
+        <div className="h-rail" id="infra">
+          {[
+            { ico: '⎙', t: 'Team workspace + vault', s: 'Shared deal vault · role-based permissions · activity feed.',          meta: 'Team+' },
+            { ico: '▦', t: 'White-label outputs',    s: 'CIMs · valuations · data rooms branded to your firm.',                 meta: 'Team+' },
+            { ico: '⟟', t: 'SSO',                     s: 'Okta · Azure AD · Google Workspace.',                                   meta: 'Enterprise' },
+            { ico: '◨', t: 'Single-tenant deployment', s: 'Isolated infrastructure for regulated entities + family offices.',    meta: 'Enterprise' },
+            { ico: '◷', t: 'SOC 2 audit trails',      s: 'Complete activity logging · audit-ready out of the box.',               meta: 'Enterprise' },
+            { ico: '⇌', t: 'API access',              s: 'Programmatic access to deals · deliverables · workflows.',              meta: 'Enterprise' },
+            { ico: '✎', t: 'Named account manager',   s: 'Direct line · QBR · onboarding support.',                                meta: 'Enterprise' },
+            { ico: '◎', t: '99.9% SLA',               s: 'Uptime guarantees with defined response times.',                         meta: 'Enterprise' },
+            { ico: '◫', t: 'Compliance review',       s: 'Pre-delivery compliance review on every outbound deliverable.',          meta: 'Regulated' },
+          ].map((c) => (
+            <div key={c.t} className="h-cap">
+              <div className="h-cap__ico">{c.ico}</div>
+              <div className="h-cap__t">{c.t}</div>
+              <div className="h-cap__s">{c.s}</div>
+              <div className="h-cap__meta"><span>{c.meta}</span><span>Included</span></div>
             </div>
           ))}
         </div>
-      </DealStep>
 
-      <PullQuote attribution="What firms actually replace">
-        Deal capacity 50–100% higher without adding headcount is worth more than the cost savings.
-      </PullQuote>
-
-      {/* ROI math */}
-      <DealStep
-        n={4}
-        id="s4"
-        idx="The ROI math"
-        scale="major"
-        title="What you're replacing."
-        lede={<>Enterprise firms typically consolidate 4–6 existing tools into a single smbX subscription. Here\'s what that looks like — before the revenue-side impact of more deal capacity per person.</>}
-      >
-        <DealBench title="Tool consolidation · typical firm" meta="ANNUAL SPEND">
-          <div style={{ padding: 22 }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-              <thead>
-                <tr style={{
-                  fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-                  fontSize: 9.5,
-                  letterSpacing: '0.1em',
-                  color: '#9A9A9F',
-                  textTransform: 'uppercase',
-                }}>
-                  <th style={{ textAlign: 'left', padding: '8px 10px', fontWeight: 600 }}>Tool category</th>
-                  <th style={{ textAlign: 'right', padding: '8px 10px', fontWeight: 600 }}>Typical annual spend</th>
-                  <th style={{ textAlign: 'right', padding: '8px 10px', fontWeight: 600 }}>smbX replaces</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ROI.map((r) => (
-                  <tr key={r.category} style={{ borderTop: '0.5px solid rgba(0,0,0,0.06)' }}>
-                    <td style={{ padding: '11px 10px', fontWeight: 600 }}>{r.category}</td>
-                    <td style={{ textAlign: 'right', padding: '11px 10px', fontVariantNumeric: 'tabular-nums', color: '#3A3A3E' }}>{r.spend}</td>
-                    <td style={{ textAlign: 'right', padding: '11px 10px' }}>
-                      <span style={{
-                        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-                        fontSize: 10,
-                        letterSpacing: '0.1em',
-                        color: r.replaces === 'full' ? '#22A755' : '#E8A033',
-                        textTransform: 'uppercase',
-                      }}>{r.replaces}</span>
-                    </td>
-                  </tr>
-                ))}
-                <tr style={{
-                  borderTop: '1px solid #0A0A0B',
-                  fontWeight: 700,
-                }}>
-                  <td style={{ padding: '14px 10px' }}>Total typical spend</td>
-                  <td style={{ textAlign: 'right', padding: '14px 10px', fontVariantNumeric: 'tabular-nums' }}>$209K–$505K / yr</td>
-                  <td />
-                </tr>
-                <tr style={{ background: '#0A0A0B', color: '#fff', fontWeight: 700 }}>
-                  <td style={{ padding: '14px 10px' }}>smbX Enterprise</td>
-                  <td style={{ textAlign: 'right', padding: '14px 10px', fontVariantNumeric: 'tabular-nums' }}>$30K–$120K / yr</td>
-                  <td style={{ textAlign: 'right', padding: '14px 10px', color: '#7ED8A1' }}>Net $89K–$385K saved</td>
-                </tr>
-              </tbody>
-            </table>
+        {/* CLAIM */}
+        <section className="h-claim h-anim" id="claim">
+          <div className="h-claim__l">
+            <div className="h-claim__k">The ROI</div>
+            <h2 className="h-claim__h">Consolidate 4–6 tools <em>into one subscription.</em></h2>
+            <p className="h-claim__p">
+              Enterprise firms typically consolidate DealCloud, Sourcescrub, Datasite, Rogo, and portfolio-monitoring stacks into a single smbx subscription. Annual spend drops from $209K–$505K to $30K–$120K — net savings $89K–$385K/yr, before the revenue-side impact of 50–100% more deal capacity.
+            </p>
           </div>
-          <div style={{
-            padding: '14px 22px',
-            background: '#FAFAFB',
-            borderTop: '0.5px solid rgba(0,0,0,0.06)',
-            fontSize: 12.5,
-            lineHeight: 1.55,
-            color: '#3A3A3E',
-          }}>
-            This is before the revenue-side impact. Our enterprise customers typically see <strong>deal capacity increase 50–100%</strong> without adding headcount — worth materially more than the cost savings.
+          <div className="h-claim__viz">
+            {[
+              { l: 'DealCloud + Salesforce',      w: '100%', v: '$30–80K',    tone: 'big' },
+              { l: 'Datasite / Firmex',           w: '52%',  v: '$15–40K',    tone: 'big' },
+              { l: 'Rogo / Hebbia',               w: '68%',  v: '$24–75K',    tone: 'big' },
+              { l: 'smbx.ai · Enterprise',        w: '18%',  v: 'From $30K',  tone: 'small' },
+            ].map((r) => (
+              <div key={r.l} className="h-claim__row" data-tone={r.tone}>
+                <span className="h-claim__row-l">{r.l}</span>
+                <span className="h-claim__row-bar"><span className="h-claim__row-fill" style={{ ['--w' as string]: r.w } as React.CSSProperties} /></span>
+                <span className="h-claim__row-v">{r.v}</span>
+              </div>
+            ))}
           </div>
-        </DealBench>
-      </DealStep>
+        </section>
 
-      {/* Book a demo */}
-      <DealStep
-        n={5}
-        id="s5"
-        idx="Book a demo"
-        title="Tell us what you're building."
-        lede={<>30-minute call. Real demo, not a sales pitch. We\'ll tell you whether smbX Enterprise fits and what it would cost specifically for your team.</>}
-      >
-        <div style={{
-          marginTop: 18,
-          background: '#fff',
-          border: '0.5px solid rgba(0,0,0,0.08)',
-          borderRadius: 14,
-          padding: 26,
+        {/* BOOK A DEMO FORM */}
+        <div className="h-sect-h">
+          <div className="h-sect-h__l">
+            <div className="h-sect-h__k">Book a demo</div>
+            <h2 className="h-sect-h__t">Tell us what you're building. <em>30-min real demo.</em></h2>
+          </div>
+        </div>
+
+        <div className="h-anim" id="demo" style={{
+          marginTop: 'var(--h-pad)',
+          background: 'var(--v4-card)',
+          border: '1px solid var(--v4-card-line)',
+          borderRadius: 18,
+          padding: 28,
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
           gap: 14,
         }}>
-          <FormField label="Name"
-            value={form.name}
-            onChange={(v) => setForm({ ...form, name: v })} />
-          <FormField label="Company"
-            value={form.company}
-            onChange={(v) => setForm({ ...form, company: v })} />
-          <FormField label="Email (work email only)"
-            value={form.email}
-            onChange={(v) => setForm({ ...form, email: v })}
-            type="email" />
+          {[
+            { k: 'name',    label: 'Name',                 type: 'text',  ph: 'Your name' },
+            { k: 'company', label: 'Company',              type: 'text',  ph: 'Firm / fund / advisory' },
+            { k: 'email',   label: 'Work email',           type: 'email', ph: 'you@firm.com' },
+          ].map((f) => (
+            <div key={f.k}>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--v4-mute)', marginBottom: 8 }}>{f.label}</div>
+              <input
+                type={f.type}
+                placeholder={f.ph}
+                value={form[f.k as keyof typeof form]}
+                onChange={(e) => setForm({ ...form, [f.k]: e.target.value })}
+                style={{
+                  width: '100%', padding: '10px 12px',
+                  background: 'var(--v4-bg-2)', border: '1px solid var(--v4-card-line)',
+                  borderRadius: 10, fontFamily: 'Inter, sans-serif', fontSize: 13,
+                }}
+              />
+            </div>
+          ))}
           <div>
-            <div style={{
-              fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-              fontSize: 9.5,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: '#6B6B70',
-              marginBottom: 8,
-            }}>Team size</div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--v4-mute)', marginBottom: 8 }}>Team size</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
               {['6–15', '16–50', '51–200', '200+'].map((s) => (
                 <button
                   key={s}
                   type="button"
-                  onClick={() => setForm({ ...form, teamSize: s })}
+                  onClick={() => setForm({ ...form, team: s })}
                   style={{
-                    padding: '8px 10px',
-                    background: form.teamSize === s ? '#0A0A0B' : '#FAFAFB',
-                    color: form.teamSize === s ? '#fff' : '#1A1C1E',
-                    border: 'none',
-                    borderRadius: 8,
-                    fontFamily: 'Sora, sans-serif',
-                    fontWeight: 600,
-                    fontSize: 12,
+                    padding: '10px 8px',
+                    background: form.team === s ? 'var(--v4-ink)' : 'var(--v4-bg-2)',
+                    color: form.team === s ? 'var(--v4-on-ink)' : 'var(--v4-ink)',
+                    border: 'none', borderRadius: 10,
+                    fontFamily: 'Sora, sans-serif', fontWeight: 600, fontSize: 12,
                     cursor: 'pointer',
                   }}
                 >{s}</button>
@@ -346,91 +320,71 @@ export default function Enterprise({ active, onSend, onStartFree, onNavigate, on
             </div>
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
-            <div style={{
-              fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-              fontSize: 9.5,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: '#6B6B70',
-              marginBottom: 8,
-            }}>What are you trying to solve?</div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--v4-mute)', marginBottom: 8 }}>What are you trying to solve?</div>
             <textarea
               value={form.goals}
               onChange={(e) => setForm({ ...form, goals: e.target.value })}
               rows={3}
+              placeholder="A few sentences on what you're building and what's broken today…"
               style={{
-                width: '100%',
-                padding: '10px 12px',
-                background: '#FAFAFB',
-                border: '0.5px solid rgba(0,0,0,0.08)',
-                borderRadius: 8,
-                fontFamily: 'Inter, system-ui, sans-serif',
-                fontSize: 13,
-                resize: 'vertical',
+                width: '100%', padding: '10px 12px',
+                background: 'var(--v4-bg-2)', border: '1px solid var(--v4-card-line)',
+                borderRadius: 10, fontFamily: 'Inter, sans-serif', fontSize: 13, resize: 'vertical',
               }}
             />
           </div>
-          <div style={{ gridColumn: '1 / -1' }}>
-            <button
-              type="button"
-              disabled={!canSubmit}
-              onClick={() => {
-                onSend(`Book a demo — ${form.name} · ${form.company} · ${form.teamSize} · ${form.goals || '(no goals)'}`);
-              }}
-              style={{
-                width: '100%',
-                padding: '12px 18px',
-                background: canSubmit ? '#0A0A0B' : '#D8D8DA',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 10,
-                fontFamily: 'Sora, sans-serif',
-                fontWeight: 700,
-                fontSize: 14,
-                cursor: canSubmit ? 'pointer' : 'not-allowed',
-              }}
-            >Book a demo →</button>
+          <button
+            type="button"
+            disabled={!canSubmit}
+            onClick={() => onSend(`Book a demo — ${form.name} · ${form.company} · ${form.team} · ${form.goals || '(no goals)'}`)}
+            style={{
+              gridColumn: '1 / -1', marginTop: 6,
+              padding: '12px 18px',
+              background: canSubmit ? 'var(--v4-ink)' : 'var(--v4-bg-2)',
+              color: canSubmit ? 'var(--v4-on-ink)' : 'var(--v4-mute)',
+              border: 'none', borderRadius: 12,
+              fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 13.5,
+              cursor: canSubmit ? 'pointer' : 'not-allowed',
+            }}
+          >Book a demo →</button>
+        </div>
+
+        {/* TRUST */}
+        <div className="h-trust" id="trust">
+          <div className="h-trust__k">Security posture</div>
+          <div className="h-trust__list">
+            <span>SOC 2 Type II</span>
+            <span>Single-tenant option</span>
+            <span>256-bit encryption at rest + in transit</span>
+            <span>Customer-managed keys</span>
+            <span>US + EU data residency</span>
           </div>
         </div>
-      </DealStep>
 
-      <DealBottom
-        heading="Tell Yulia about your firm. She'll model your specific ROI before the demo."
-        sub="Firm shape, team size, deal cadence. We'll come back with a workspace config and a dollar number."
-        placeholder="Firm type, team size, deals per year…"
-        onSend={onSend}
-      />
+        {/* CTA */}
+        <section className="h-cta h-anim" id="cta">
+          <div className="h-cta__k">Start · Real demo</div>
+          <h2 className="h-cta__h">30 minutes. <em>Real product, real deal.</em></h2>
+          <p className="h-cta__s">
+            Not a sales pitch. Yulia runs a real deal from your pipeline against the Enterprise feature set. We'll tell you if smbx Enterprise fits — and what it would cost specifically for your team.
+          </p>
+          <button className="h-cta__point" type="button" onClick={pulseChat}>
+            <span className="h-cta__point-ar">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+              </svg>
+            </span>
+            Start in the chat pane
+            <span style={{ opacity: 0.65, fontWeight: 500 }}>Yulia is ready</span>
+          </button>
+          <div className="h-cta__meta">
+            <span>30-min real demo</span>
+            <span>Custom ROI math</span>
+            <span>From $2,500 / mo</span>
+          </div>
+        </section>
+
+      </div>
     </JourneyShell>
-  );
-}
-
-function FormField({ label, value, onChange, type = 'text' }: {
-  label: string; value: string; onChange: (v: string) => void; type?: string;
-}) {
-  return (
-    <div>
-      <div style={{
-        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-        fontSize: 9.5,
-        letterSpacing: '0.14em',
-        textTransform: 'uppercase',
-        color: '#6B6B70',
-        marginBottom: 8,
-      }}>{label}</div>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          width: '100%',
-          padding: '10px 12px',
-          background: '#FAFAFB',
-          border: '0.5px solid rgba(0,0,0,0.08)',
-          borderRadius: 8,
-          fontFamily: 'Inter, system-ui, sans-serif',
-          fontSize: 13,
-        }}
-      />
-    </div>
   );
 }

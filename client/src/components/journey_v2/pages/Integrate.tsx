@@ -1,17 +1,10 @@
 /**
- * Glass Grok v2 · Integrate.tsx
- * 4 steps: Day 0 → 180-day plan → retention → thesis tracking.
- * Port of new_journey/project/integrate.html.
+ * Integrate.tsx — rebuilt on handoff v4 `.h-*` vocabulary.
+ * Running example: Day 3 post-close of Acme. Ray is at the office.
  */
-import { useMemo, useState } from 'react';
-import {
-  DealStep, DealBench, Row, DealBottom,
-  PullQuote, StatBreaker,
-  type DealTab, type DealStepScript,
-} from '../deal-room';
+import { useEffect, useRef } from 'react';
+import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
-import InteractiveTool from '../shell/InteractiveTool';
-import { ACME } from '../acme';
 
 interface Props {
   active: DealTab;
@@ -21,534 +14,317 @@ interface Props {
   onSignIn?: () => void;
 }
 
-const SECTION_NAV = [
-  { id: 's1', label: 'Day 0' },
-  { id: 's2', label: '180-day plan' },
-  { id: 's3', label: 'Retention' },
-  { id: 's4', label: 'Thesis tracking' },
-] as const;
-
-const CHIPS = ['Day 0 checklist', '180-day plan', 'Retain key people', 'Am I on thesis?'] as const;
-
-/* 5-min Acme post-close walkthrough. Buyer just closed Friday
-   2026-03-21. It's Day 3, Monday 2026-03-24. Yulia walks through
-   Day 0 artifacts, 180-day plan, retention, and thesis tracking
-   all from the DD data they already generated. */
-const SCRIPT: DealStepScript = {
-  3: [
-    { who: 'y',  text: `You closed <strong>${ACME.name}</strong> Friday. It's Monday morning. Day 3. Wire hit, deal docs are signed, Ray is at the office for the hand-off this week.` },
-    { who: 'y',  text: `Day 0 checklist generated from DD data: 62 items across IT, people, customers, vendors, operations. <strong>53 complete before signing, 9 live.</strong>` },
-    { who: 'me', text: "What's the red one?" },
-    { who: 'y',  text: `<strong>Texas reseller permit.</strong> Ray's name is on it, and TX holds that credential with the individual, not the entity. Can't invoice Texas commercial accounts (~$8M annual) until transfer clears. I drafted Ray's signed consent — in your docket. File it today, cleared in 10 business days.` },
-  ],
-  4: [
-    { who: 'y',  text: `180-day plan · <strong>6 workstreams, each with named owner + weekly checkpoint.</strong>` },
-    { who: 'y',  text: `<strong>Day 45:</strong> Pricing reset across all four disciplines. Ray ran legacy pricing — hospitality is 8% underwater vs. market. Nina executes.` },
-    { who: 'y',  text: `<strong>Day 60:</strong> Formalize MSAs with top-10 customers. Marco is the relationship owner — we promote him to SVP so he walks into those conversations with authority. The MSA program takes concentration risk from 35% handshake to 35% contracted over 90 days.` },
-    { who: 'y',  text: `<strong>Day 90:</strong> First cash runway check. You bought with <strong>${ACME.workingCapital}</strong> working capital. I'll flag if we\'re burning faster than plan 60 days before covenant test.` },
-  ],
-  5: [
-    { who: 'y',  text: `Key-person retention map · <strong>3 critical, 2 elevated.</strong>` },
-    { who: 'y',  text: `<strong>Marco Delgado</strong> · VP Sales · 22 years · owns the top-10 relationships. Replacement cost $420K + 6 months. Flight risk <strong>HIGH</strong> — Ray told me in DD Marco is 60 and wants to slow down.` },
-    { who: 'y',  text: `Package draft: <strong>$75K stay bonus over 36 months · 1.5% rollover equity · SVP Sales title.</strong> I scripted Ray's opening — the reason Marco stays is Ray asks him to, not the comp. Meeting is on his calendar Thursday 2pm.` },
-    { who: 'y',  text: `<strong>Nina Arellano</strong> (COO, 14yr) and <strong>Jennifer Wu</strong> (Controller, 11yr) — two other critical roles. Compression-review on both; Nina gets a COO-plus scope + $40K raise, Jennifer gets Controller → VP Finance.` },
-  ],
-  6: [
-    { who: 'y',  text: `Week 14. Thesis scorecard is <strong>mostly green.</strong>` },
-    { who: 'y',  text: `<strong>On plan:</strong> EBITDA $11.2M TTM (thesis $11.0M). Recurring mix 64% (thesis 62%). FCCV 1.42×.` },
-    { who: 'y',  text: `<strong>Drift:</strong> Concentration at 34% (thesis said 28% by Q2). Root cause — two of the three Q1 MSAs haven't started because Marco is slow-rolling them. I booked that conversation for Wednesday. If the program slips one more quarter, earnout provisions kick in.` },
-  ],
-};
-
-type Tile = { title: string; status: string; tone: 'done' | 'live' | 'queued' };
-const DAY0_TILES: readonly Tile[] = [
-  { title: 'New entity + EIN',                       status: 'DONE',        tone: 'done' },
-  { title: 'Payroll handover · ADP',                 status: 'DONE',        tone: 'done' },
-  { title: 'Ops liability + umbrella + cyber',       status: 'DONE',        tone: 'done' },
-  { title: 'TX reseller permit — transfer',          status: 'AT RISK',     tone: 'live' },
-  { title: 'Top-10 customer CEO-to-CEO calls',       status: 'DAY 1–3',     tone: 'live' },
-  { title: 'Staff all-hands (Phoenix · script drafted)', status: 'DAY 1, 9:00', tone: 'queued' },
-  { title: 'AP transition · 89 open invoices',       status: 'DAY 2',       tone: 'queued' },
-  { title: 'ERP credentials + branch IT cutover',    status: 'DAY 2',       tone: 'queued' },
-];
-
-type Plan = { name: string; pct: number; due: string };
-const PLAN_180: readonly Plan[] = [
-  { name: 'Pricing reset (4 disciplines)',    pct: 45, due: 'DAY 45' },
-  { name: 'Top-10 MSA program (Marco-led)',   pct: 30, due: 'DAY 60' },
-  { name: 'Nina promotion · $250K signing',   pct: 60, due: 'DAY 75' },
-  { name: 'Branch ERP cutover · NM + WTX',    pct: 75, due: 'DAY 120' },
-  { name: 'Tuck-in eval · Albuquerque',       pct: 85, due: 'DAY 150' },
-  { name: 'Year-1 compensation review',       pct: 90, due: 'DAY 180' },
-];
-
-type ScorecardKpi = { label: string; value: string; sub: string; tone: 'on-plan' | 'ahead' | 'drift' };
-const KPIS: readonly ScorecardKpi[] = [
-  { label: 'On plan', value: '$11.2M', sub: 'TTM EBITDA · thesis $11.0M · +1.8%',                tone: 'on-plan' },
-  { label: 'On plan', value: '64%',    sub: 'Recurring revenue mix · thesis 62% · +3.2%',       tone: 'on-plan' },
-  { label: 'Drift',   value: '34%',    sub: 'Top-10 concentration · thesis ≤28% by Q2 · +21%', tone: 'drift' },
-  { label: 'Ahead',   value: '1.42×',  sub: `FCCV · covenant ${ACME.covenantDscr} · +14%`,      tone: 'ahead' },
-];
-
 export default function Integrate({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
-  void SECTION_NAV;
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const targets = root.querySelectorAll<HTMLElement>('.h-anim');
+    if (!targets.length) return;
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      targets.forEach((el) => el.classList.add('in'));
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    targets.forEach((el) => { if (!el.classList.contains('in')) io.observe(el); });
+    return () => io.disconnect();
+  }, []);
+
+  const pulseChat = () => {
+    const input = document.getElementById('chatInput') as HTMLInputElement | null;
+    input?.focus();
+    document.getElementById('chat')?.animate(
+      [{ boxShadow: '0 0 0 0 rgba(10,10,11,0.25)' }, { boxShadow: '0 0 0 14px rgba(10,10,11,0)' }],
+      { duration: 720, easing: 'cubic-bezier(0.22,0.8,0.32,1)' },
+    );
+  };
+
+  const seedChat = (text: string) => {
+    const input = document.getElementById('chatInput') as HTMLInputElement | null;
+    if (!input) return;
+    input.value = text;
+    input.focus();
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+
   return (
     <JourneyShell
       active={active}
       onNavigate={onNavigate}
       onSignIn={onSignIn}
       onStartFree={onStartFree}
-      canvasKicker="POST-CLOSE · WALK-THROUGH"
-      canvasTitle="The 72 hours that decide whether this deal works."
+      canvasKicker="smbx.ai / integrate"
+      canvasTitle="Integrate an acquisition"
+      canvasBadge="Demo · Acme, Inc. · Day 3"
       chat={{
         title: 'Yulia',
-        status: `Day 3 post-close · ${ACME.name}`,
-        script: SCRIPT,
-        opening: `Hi — I'm <strong>Yulia</strong>. You just closed <strong>${ACME.name}</strong>. Wire hit Friday; it's Monday morning, Day 3. Ray's here for the handoff. Scroll to see what the first 180 days look like — generated from the DD data you already produced.`,
-        reply: 'Share the <strong>LOI</strong>, the <strong>QoE</strong>, and one sentence about your thesis. I\'ll have a Day-0 checklist and a 180-day plan on your desk in two hours.',
-        chips: CHIPS,
+        status: 'Post-close · Day 3',
+        pswLogo: 'A',
+        pswName: 'Acme, Inc.',
+        pswMeta: 'INTEGRATE · DAY 3',
+        script: {},
+        opening: "Hi — I'm <strong>Yulia</strong>. You closed <strong>Acme</strong> Friday. It's Monday morning. Ray is at the office for the handoff. Scroll to see what the first 180 days look like — generated from the DD data you already produced.",
+        reply: "Send me the <strong>LOI</strong> and a <strong>chart of accounts</strong>. I'll have a Day-0 checklist and a 180-day runbook on your desk in two hours.",
+        chips: [] as const,
+        placeholder: 'Tell me about the business you just bought…',
         onSend,
+        suggested: {
+          kicker: 'Next',
+          label: 'See the Day-0 checklist',
+          onClick: () => document.getElementById('day0')?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+        },
       }}
     >
-      {/* Hero */}
-      <DealStep
-        n={1}
-        id="hero"
-        idx="Post-close · walkthrough"
-        scale="hero"
-        title={<>Day 1 after the wire. 180 employees. Do you have a plan?</>}
-        lede={<>Yulia builds the 180-day integration plan from your specific deal data — risks identified, opportunities found, people to protect. Auto-generated before the wire hits. Executed one day at a time.</>}
-      />
+      <div id="integrate" className="h-page" data-density="comfortable" data-motion="full" data-hero="shell" ref={rootRef}>
 
-      <StatBreaker
-        value="75%"
-        label="of acquisitions fail to achieve their stated synergies. The #1 reason, every time: no integration plan. Not a bad plan. No plan."
-        source="Harvard Business Review · 30-year study"
-        secondary={{ value: '40%+', label: 'Key-person attrition in year 1 without a retention plan.' }}
-      />
-
-      {/* Day-1 checklist generator */}
-      <DealStep
-        n={2}
-        id="generator"
-        idx="Generator"
-        scale="major"
-        title="Generate your Day-1 checklist."
-        lede={<>Five questions. Customized checklist by category — IT, People, Customers, Vendors, Operations.</>}
-      >
-        <InteractiveTool
-          kicker="Day-1 checklist generator"
-          sub="Answer five. See your customized starter checklist in 5 seconds."
-          tag="5 inputs · 5 sec"
-        >
-          <Day1Generator onSend={onSend} />
-        </InteractiveTool>
-      </DealStep>
-
-      {/* Day 0 */}
-      <DealStep
-        n={3}
-        id="s1"
-        idx={`Day 0 · ${ACME.name}`}
-        title="The 72 hours that decide whether this deal works."
-        lede={<>Bank accounts, payroll, insurance, licenses, vendor notifications, staff town hall, the first Monday. Yulia runs the Day-0 checklist against your deal structure and flags what has to happen <strong>before signing</strong> vs. what can slip to week one.</>}
-      >
-        <DealBench title={`Day 0 · ${ACME.name} close`} meta="DAY 3 · LIVE" metaLive>
-          <div style={{ padding: 22, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-            {DAY0_TILES.map(t => <StatusTile key={t.title} {...t} />)}
-          </div>
-          <FlagStrip>
-            <strong style={{ color: '#0A0A0B' }}>Flag:</strong> Texas reseller permit transfer — Ray\'s name is on it, TX holds credential with individual not entity. Can\'t invoice TX commercial (~$8M annual) until transfer clears. Consent drafted in your docket; 10 business days to clear.
-          </FlagStrip>
-        </DealBench>
-      </DealStep>
-
-      {/* 180-day plan */}
-      <DealStep
-        n={4}
-        id="s2"
-        idx="180-day plan"
-        scale="major"
-        title="The first six months, scripted against your thesis."
-        lede={<>You bought this company for a reason. Yulia translates that reason into a 180-day operating plan with named owners, weekly milestones, and a cash runway check at day 30, 90, and 180. You run the business; she watches the plan.</>}
-      >
-        <DealBench title={`180-day plan · ${ACME.name}`} meta="6 WORKSTREAMS">
-          <div style={{ padding: 22 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {PLAN_180.map(p => <GanttRow key={p.name} {...p} />)}
+        {/* HERO */}
+        <section className="h-today h-anim" id="hero">
+          <div className="h-today__inner">
+            <div className="h-today__copy">
+              <div className="h-today__meta">
+                Post-close · Acme, Inc.
+                <span className="h-today__meta-tag">Demo</span>
+              </div>
+              <h1 className="h-today__h">Day 1 after the wire. <em>Do you have a plan?</em></h1>
+              <p className="h-today__sub">
+                75% of acquisitions miss their stated synergies. The #1 reason: no integration plan. Yulia builds the 180-day plan from your deal data — risks identified, opportunities found, people to protect. <strong>Auto-generated before the wire hits.</strong>
+              </p>
+              <div className="h-today__cta">
+                <button className="h-today__btn" type="button" onClick={() => seedChat('We just closed on an acquisition.')}>
+                  Build the plan
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+                  </svg>
+                </button>
+                <button className="h-today__btn h-today__btn--ghost" type="button" onClick={() => onNavigate('pricing')}>See pricing</button>
+              </div>
             </div>
-          </div>
-        </DealBench>
-      </DealStep>
-
-      <PullQuote attribution="The rule">
-        The #1 reason synergy targets miss: you lost the four people who ran the place.
-      </PullQuote>
-
-      {/* Retention */}
-      <DealStep
-        n={5}
-        id="s3"
-        idx="Retention"
-        scale="major"
-        title="Keep the people who actually run the place."
-        lede={<>Most SMB deals lose <strong>40%+ of their key people</strong> in year one. Yulia maps the org, scores each role for replacement risk, and drafts the retention conversation — including stay bonus, equity, title, and a candid talk about what you’re changing.</>}
-      >
-        <DealBench title={`Key-person map · ${ACME.name}`} meta="5 CRITICAL · 2 ELEVATED" bodyStyle={{ padding: '0 22px 22px' }}>
-          <Row
-            title={`${ACME.people.sales.name} · VP Sales (22yrs)`}
-            sub="Owns top-10 customer relationships · 35% of revenue · replacement ~$420K + 6mo · flight risk HIGH"
-            amt={<span style={{ fontSize: 15, color: '#B02A2A' }}>Critical</span>}
-          />
-          <Row
-            title={`${ACME.people.coo.name} · COO (14yrs)`}
-            sub="Holds ops together across 4 branches · flight risk MEDIUM"
-            amt={<span style={{ fontSize: 15, color: '#B02A2A' }}>Critical</span>}
-          />
-          <Row
-            title={`${ACME.people.controller.name} · Controller (11yrs)`}
-            sub="Every vendor MOU · sole bank signer · flight risk MEDIUM"
-            amt={<span style={{ fontSize: 15, color: '#B02A2A' }}>Critical</span>}
-          />
-          <Row
-            title={`${ACME.people.regional.name} · Regional Mgr NM+WTX (8yrs)`}
-            sub="Manages NM + West Texas branches · 28% of revenue"
-            amt={<span style={{ fontSize: 15, color: '#E8A033' }}>Elevated</span>}
-          />
-          <Row
-            title={`Retention package · ${ACME.people.sales.name.split(' ')[0]}`}
-            sub="$75K stay bonus (36mo vest) + 1.5% rollover + SVP Sales title · meeting Thu 2pm"
-            amt={<span style={{ fontSize: 15 }}>Draft</span>}
-            highlight
-          />
-        </DealBench>
-      </DealStep>
-
-      {/* Thesis tracking */}
-      <DealStep
-        n={6}
-        id="s4"
-        idx="Thesis tracking"
-        title="Are you on thesis? Yulia tells you every Monday."
-        lede={<>Every investment thesis comes with three or four numbers that matter — and fifty that don’t. Yulia pulls your GL, AP, CRM, and timesheet data weekly, tracks only the ones that matter, and flags the first week you drift.</>}
-      >
-        <DealBench title={`Thesis scorecard · ${ACME.name} · week 14`} meta="MONDAY 6:02 AM" metaLive>
-          <div style={{ padding: 22, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
-            {KPIS.map(k => <KpiTile key={k.sub} {...k} />)}
-          </div>
-          <FlagStrip>
-            <strong style={{ color: '#0A0A0B' }}>Drift flag:</strong> Concentration hasn\'t moved since close. Thesis had 28% by Q2 via three new MSAs. Two haven\'t started — Marco is slow-rolling them. Booking the conversation with him for Wednesday. If program slips one more quarter, earnout provisions kick in.
-          </FlagStrip>
-        </DealBench>
-      </DealStep>
-
-      <DealBottom
-        heading="Just closed a deal? Yulia writes your first 180 days."
-        sub="Share the LOI, the QoE, and a sentence about your thesis. She returns a Day-0 checklist, a 180-day plan, and a weekly scorecard — ready by your first Monday."
-        placeholder="Deal size, industry, thesis in one line…"
-        onSend={onSend}
-      />
-    </JourneyShell>
-  );
-}
-
-/* ─── atoms ─── */
-
-function StatusTile({ title, status, tone }: Tile) {
-  const style: Record<Tile['tone'], React.CSSProperties> = {
-    done:   { background: '#F5F5F7', border: 'none' },
-    live:   { background: '#fff', border: '0.5px solid #E8A033' },
-    queued: { background: '#fff', border: '0.5px solid rgba(0,0,0,0.08)' },
-  };
-  const statusColor = tone === 'done' ? '#22A755' : tone === 'live' ? '#E8A033' : '#6B6B70';
-  const textColor = tone === 'queued' ? '#6B6B70' : '#0A0A0B';
-  return (
-    <div style={{
-      display: 'flex', justifyContent: 'space-between',
-      padding: '12px 14px', borderRadius: 8, fontSize: 12.5,
-      ...style[tone],
-    }}>
-      <span style={{ fontWeight: 600, color: textColor }}>{title}</span>
-      <span style={{ fontFamily: 'JetBrains Mono, ui-monospace, monospace', color: statusColor, fontSize: 10 }}>{status}</span>
-    </div>
-  );
-}
-
-function GanttRow({ name, pct, due }: Plan) {
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr auto', gap: 14, alignItems: 'center', fontSize: 12.5 }}>
-      <span style={{ fontWeight: 600 }}>{name}</span>
-      <div style={{ height: 24, background: '#F0F0F2', borderRadius: 4, position: 'relative' }}>
-        <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: `${pct}%`, background: '#0A0A0B', borderRadius: 4 }} />
-      </div>
-      <span style={{ fontFamily: 'JetBrains Mono, ui-monospace, monospace', fontSize: 10, color: '#6B6B70' }}>{due}</span>
-    </div>
-  );
-}
-
-function KpiTile({ label, value, sub, tone }: ScorecardKpi) {
-  const palette: Record<ScorecardKpi['tone'], { bg: string; fg: string }> = {
-    'on-plan': { bg: '#FAFAFB', fg: '#22A755' },
-    'ahead':   { bg: '#FAFAFB', fg: '#22A755' },
-    'drift':   { bg: '#FFF5EC', fg: '#E8A033' },
-  };
-  const { bg, fg } = palette[tone];
-  return (
-    <div style={{ background: bg, borderRadius: 10, padding: 16 }}>
-      <div style={{ fontFamily: 'JetBrains Mono, ui-monospace, monospace', fontSize: 9.5, letterSpacing: '0.1em', color: fg, textTransform: 'uppercase', marginBottom: 6 }}>{label}</div>
-      <div style={{ fontFamily: 'Sora, sans-serif', fontWeight: 800, fontSize: 28, marginBottom: 2 }}>{value}</div>
-      <div style={{ fontSize: 11.5, color: '#6B6B70' }}>{sub}</div>
-    </div>
-  );
-}
-
-function FlagStrip({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{ padding: '14px 22px', background: '#FAFAFB', borderTop: '0.5px solid rgba(0,0,0,0.06)', fontSize: 12.5, color: '#3A3A3E', lineHeight: 1.55 }}>
-      {children}
-    </div>
-  );
-}
-
-function StatCard({ n, label }: { n: string; label: string }) {
-  return (
-    <div style={{
-      background: '#fff',
-      border: '0.5px solid rgba(0,0,0,0.08)',
-      borderRadius: 12,
-      padding: 22,
-    }}>
-      <div style={{
-        fontFamily: 'Sora, sans-serif',
-        fontWeight: 800,
-        fontSize: 34,
-        letterSpacing: '-0.02em',
-        color: '#0A0A0B',
-      }}>{n}</div>
-      <div style={{
-        marginTop: 6,
-        fontSize: 12.5,
-        lineHeight: 1.45,
-        color: '#3A3A3E',
-      }}>{label}</div>
-    </div>
-  );
-}
-
-/* Day-1 checklist generator — 5 inputs → computed checklist by category.
-   Industry-pattern outputs, not prescriptive. Tells Yulia to write the
-   real one if the visitor wants to continue. */
-type EmpBand = '<50' | '50–200' | '200–500' | '500+';
-type RevBand = '<$5M' | '$5–25M' | '$25–100M' | '$100M+';
-type CustBand = '0' | '1–5' | '5–20' | '20+';
-
-const EMP_OPTS: readonly EmpBand[] = ['<50', '50–200', '200–500', '500+'];
-const REV_OPTS: readonly RevBand[] = ['<$5M', '$5–25M', '$25–100M', '$100M+'];
-const CUST_OPTS: readonly CustBand[] = ['0', '1–5', '5–20', '20+'];
-const IND_OPTS = ['Services', 'Manufacturing', 'Healthcare', 'Technology', 'Construction', 'Retail', 'Other'] as const;
-
-function Day1Generator({ onSend }: { onSend: (t: string) => void }) {
-  const [industry, setIndustry] = useState<string>('');
-  const [emp, setEmp] = useState<EmpBand | ''>('');
-  const [rev, setRev] = useState<RevBand | ''>('');
-  const [cust, setCust] = useState<CustBand | ''>('');
-  const [sys, setSys] = useState<'yes' | 'no' | ''>('');
-
-  const ready = !!(industry && emp && rev && cust && sys);
-
-  const groups = useMemo(() => {
-    if (!ready) return null;
-    const empFactor = emp === '500+' ? 3 : emp === '200–500' ? 2 : emp === '50–200' ? 1.5 : 1;
-    const sysFactor = sys === 'yes' ? 2 : 1;
-    const custBonus = cust === '20+' ? 4 : cust === '5–20' ? 3 : cust === '1–5' ? 2 : 0;
-    const itBase = [
-      'Rotate admin credentials for top 50 systems',
-      'Transfer DNS + domain ownership',
-      'Audit and remove ex-employee access',
-      'Insurance verification (cyber + D&O + umbrella)',
-    ];
-    const itExtras = [
-      'ITGC review against SOC 2 scope',
-      'Dedicated security-ops handover meeting',
-      'SSO tenant cutover plan',
-    ];
-    const peopleBase = [
-      'Individual retention conversation — top 5 key-people list from DD',
-      'Comp review where compression identified',
-      'First all-hands town hall (script drafted)',
-      'Payroll system cutover confirmation',
-    ];
-    const peopleExtras = [
-      'Union / works-council liaison (where applicable)',
-      'Benefits re-enrollment communication',
-      'Manager-level skip-levels in first 2 weeks',
-    ];
-    const custBase = [
-      'Top customer outreach — CEO-to-CEO calls',
-      'Contract & MSA inventory + renewals schedule',
-    ];
-    const vendBase = [
-      'Top-10 vendor notifications',
-      'AP transition + open-invoice reconciliation',
-    ];
-    const opsBase = [
-      'Legal entity + EIN filings',
-      'Licenses + permits transfer (state-specific)',
-      'First Monday operating cadence defined',
-    ];
-
-    return {
-      'IT / Security':  [...itBase, ...(empFactor > 1.5 ? itExtras : [])],
-      People:           [...peopleBase, ...(empFactor > 1.5 ? peopleExtras : [])],
-      Customers:        [...custBase, ...(custBonus > 0 ? [`Named-contact handoff for ${cust} seller-held relationships`] : [])],
-      Vendors:          vendBase,
-      Operations:       [...opsBase, ...(sysFactor > 1 ? ['Systems migration runbook + dependency map', 'Finance close-cutover rehearsal'] : [])],
-    };
-  }, [ready, emp, sys, cust]);
-
-  const totalCount = useMemo(() => {
-    if (!groups) return 0;
-    return Object.values(groups).reduce((sum, arr) => sum + arr.length, 0);
-  }, [groups]);
-
-  void rev; // rev not used in heuristic currently; kept for future scoring
-  void industry;
-
-  return (
-    <div style={{
-      marginTop: 18,
-      background: '#fff',
-      border: '0.5px solid rgba(0,0,0,0.08)',
-      borderRadius: 14,
-      padding: 22,
-    }}>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(5, 1fr)',
-        gap: 10,
-      }}>
-        <SelectBlock label="Industry" options={IND_OPTS} value={industry} onChange={setIndustry} />
-        <SelectBlock label="Employees" options={EMP_OPTS} value={emp} onChange={(v) => setEmp(v as EmpBand)} />
-        <SelectBlock label="Revenue"  options={REV_OPTS} value={rev} onChange={(v) => setRev(v as RevBand)} />
-        <SelectBlock label="Seller customer ties" options={CUST_OPTS} value={cust} onChange={(v) => setCust(v as CustBand)} />
-        <SelectBlock label="Systems migration?" options={['yes', 'no'] as const} value={sys} onChange={(v) => setSys(v as 'yes' | 'no')} />
-      </div>
-
-      <div style={{
-        marginTop: 18,
-        padding: 20,
-        background: ready ? '#FAFAFB' : '#FAFAFB',
-        borderRadius: 12,
-        minHeight: 120,
-      }}>
-        {groups ? (
-          <>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 14,
-            }}>
-              <div style={{
-                fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-                fontSize: 10,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                color: '#0A0A0B',
-              }}>Your Day-1 checklist · {totalCount} items</div>
-              <button
-                type="button"
-                onClick={() => onSend(`Generate my full PMI plan — ${industry} · ${emp} employees · ${rev} · ${cust} seller-held customer relationships · systems migration: ${sys}.`)}
-                style={{
-                  background: '#0A0A0B',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 999,
-                  padding: '8px 14px',
-                  fontFamily: 'Sora, sans-serif',
-                  fontWeight: 600,
-                  fontSize: 12,
-                  cursor: 'pointer',
-                }}
-              >Continue with Yulia →</button>
-            </div>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(5, 1fr)',
-              gap: 10,
-            }}>
-              {Object.entries(groups).map(([group, items]) => (
-                <div key={group} style={{
-                  background: '#fff',
-                  border: '0.5px solid rgba(0,0,0,0.08)',
-                  borderRadius: 10,
-                  padding: 14,
-                  fontSize: 11.5,
-                  lineHeight: 1.5,
-                }}>
-                  <div style={{
-                    fontFamily: 'Sora, sans-serif',
-                    fontWeight: 700,
-                    fontSize: 12,
-                    marginBottom: 8,
-                  }}>{group}</div>
-                  <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: 5 }}>
-                    {items.map((i) => <li key={i}>· {i}</li>)}
-                  </ul>
+            <div className="h-today__demo">
+              <div className="h-today__demo-k">Yulia · Day 3 · Acme close</div>
+              <div className="h-today__demo-bubble h-today__demo-bubble--me">What's the red one?</div>
+              <div className="h-today__demo-bubble">
+                <strong>Texas reseller permit.</strong> Ray's name is on it. TX holds that credential with the individual, not the entity. Can't invoice TX commercial (~$8M annual) until transfer clears. I drafted Ray's signed consent — in your docket. 10 business days.
+              </div>
+              <div className="h-today__demo-out">
+                <div className="h-today__demo-out-c">
+                  <div className="h-today__demo-out-v">62</div>
+                  <div className="h-today__demo-out-l">Day-0 checklist items</div>
                 </div>
-              ))}
+                <div className="h-today__demo-out-c">
+                  <div className="h-today__demo-out-v">$8<span style={{ fontSize: '60%', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>M</span></div>
+                  <div className="h-today__demo-out-l">TX revenue on the flag</div>
+                </div>
+              </div>
             </div>
-          </>
-        ) : (
-          <div style={{ fontSize: 13, color: '#6B6B70', fontStyle: 'italic' }}>
-            Pick all five inputs to generate a starter checklist.
           </div>
-        )}
-      </div>
-    </div>
-  );
-}
+        </section>
 
-function SelectBlock<T extends string>({ label, options, value, onChange }: {
-  label: string;
-  options: readonly T[];
-  value: string;
-  onChange: (v: T) => void;
-}) {
-  return (
-    <div>
-      <div style={{
-        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-        fontSize: 9.5,
-        letterSpacing: '0.14em',
-        textTransform: 'uppercase',
-        color: '#6B6B70',
-        marginBottom: 8,
-      }}>{label}</div>
-      <div style={{ display: 'grid', gap: 4 }}>
-        {options.map((o) => {
-          const active = value === o;
-          return (
-            <button
-              key={o}
-              type="button"
-              onClick={() => onChange(o)}
-              style={{
-                padding: '7px 10px',
-                textAlign: 'left',
-                background: active ? '#0A0A0B' : '#FAFAFB',
-                color: active ? '#fff' : '#1A1C1E',
-                border: 'none',
-                borderRadius: 8,
-                fontFamily: 'Sora, sans-serif',
-                fontWeight: 600,
-                fontSize: 11.5,
-                cursor: 'pointer',
-              }}
-            >{o}</button>
-          );
-        })}
+        {/* FOUR PHASES */}
+        <div className="h-sect-h">
+          <div className="h-sect-h__l">
+            <div className="h-sect-h__k">Day 0 to Day 180</div>
+            <h2 className="h-sect-h__t">The plan that survives close. <em>Executed one day at a time.</em></h2>
+          </div>
+        </div>
+
+        <div className="h-apps" id="phases">
+          {/* 01 · Day 0 */}
+          <a className="h-app h-anim" id="day0" href="#" onClick={(e) => { e.preventDefault(); seedChat('Show me the Day-0 checklist.'); }}>
+            <div className="h-app__art">
+              <div className="h-app__art-k">01 · Day 0</div>
+              <h3 className="h-app__art-h">Every credential. Every signer. Every permit.</h3>
+              <div className="h-app__preview">
+                <div className="h-app__row h-app__row--head"><span>Day 0 · Acme · 62 items</span><span>STATE</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">Entity + EIN · payroll · insurance</span><span className="h-app__row-r h-app__row-r--ok">Done</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">TX reseller permit · transfer</span><span className="h-app__row-r h-app__row-r--warn">At risk</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">Top-10 CEO-to-CEO calls</span><span className="h-app__row-r h-app__row-r--warn">Day 1–3</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">Staff all-hands · script drafted</span><span className="h-app__row-r h-app__row-r--ok">Day 1</span></div>
+                <div className="h-app__row h-app__row--total"><span className="h-app__row-l">Risk flags live</span><span className="h-app__row-r h-app__row-r--total">1</span></div>
+              </div>
+            </div>
+            <div className="h-app__foot">
+              <div className="h-app__foot-l">
+                <div className="h-app__foot-t">Day-0 checklist</div>
+                <div className="h-app__foot-s">Generated from your DD data · state-specific · audit log</div>
+              </div>
+              <button className="h-app__get" type="button">Preview</button>
+            </div>
+          </a>
+
+          {/* 02 · 180-day plan */}
+          <a className="h-app h-anim h-anim-d1" id="plan" href="#" onClick={(e) => { e.preventDefault(); seedChat('Build my 180-day plan.'); }}>
+            <div className="h-app__art">
+              <div className="h-app__art-k">02 · 180-day plan</div>
+              <h3 className="h-app__art-h">Six workstreams. Named owners. Weekly checkpoints.</h3>
+              <div className="h-app__preview">
+                <div className="h-app__row h-app__row--head"><span>Day 1–180 · Acme</span><span>DAY 21</span></div>
+                <div className="h-app__tl">
+                  <span className="h-app__tl-seg" data-state="done" />
+                  <span className="h-app__tl-seg" data-state="active" />
+                  <span className="h-app__tl-seg" />
+                  <span className="h-app__tl-seg" />
+                  <span className="h-app__tl-seg" />
+                  <span className="h-app__tl-seg" />
+                </div>
+                <div className="h-app__tl-labels">
+                  <span>D1</span><span>D30</span><span>D60</span><span>D90</span><span>D120</span><span>D180</span>
+                </div>
+                <div className="h-app__row"><span className="h-app__row-l">Pricing reset · 4 verticals</span><span className="h-app__row-r h-app__row-r--warn">D45</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">Top-10 MSA formalization</span><span className="h-app__row-r h-app__row-r--warn">D60</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">Branch ERP cutover</span><span className="h-app__row-r h-app__row-r--ok">D120</span></div>
+              </div>
+            </div>
+            <div className="h-app__foot">
+              <div className="h-app__foot-l">
+                <div className="h-app__foot-t">180-day runbook</div>
+                <div className="h-app__foot-s">Generated from the LOI + QoE · one canvas · editable</div>
+              </div>
+              <button className="h-app__get" type="button">Preview</button>
+            </div>
+          </a>
+
+          {/* 03 · Retention */}
+          <a className="h-app h-anim h-anim-d2" id="retention" href="#" onClick={(e) => { e.preventDefault(); seedChat('Retain the key people at Acme.'); }}>
+            <div className="h-app__art">
+              <div className="h-app__art-k">03 · Retention</div>
+              <h3 className="h-app__art-h">The four people who can't leave in the first 90 days.</h3>
+              <div className="h-app__preview">
+                <div className="h-app__row h-app__row--head"><span>Key-person map · Acme</span><span>RISK</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">Marco · VP Sales · 22yr</span><span className="h-app__row-r h-app__row-r--warn">HIGH</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">Nina · COO · 14yr</span><span className="h-app__row-r h-app__row-r--warn">MED</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">Jennifer · Controller · 11yr</span><span className="h-app__row-r h-app__row-r--warn">MED</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">Marco package · draft</span><span className="h-app__row-r h-app__row-r--total">$75K + 1.5%</span></div>
+                <div className="h-app__row h-app__row--total"><span className="h-app__row-l">Meetings scheduled</span><span className="h-app__row-r h-app__row-r--total">Thu 2pm</span></div>
+              </div>
+            </div>
+            <div className="h-app__foot">
+              <div className="h-app__foot-l">
+                <div className="h-app__foot-t">Key-person retention</div>
+                <div className="h-app__foot-s">Scripted opening + package structure + meeting booked</div>
+              </div>
+              <button className="h-app__get" type="button">Preview</button>
+            </div>
+          </a>
+
+          {/* 04 · Thesis tracking */}
+          <a className="h-app h-anim h-anim-d3" id="thesis" href="#" onClick={(e) => { e.preventDefault(); seedChat('Am I on thesis at week 14?'); }}>
+            <div className="h-app__art">
+              <div className="h-app__art-k">04 · Thesis tracking</div>
+              <h3 className="h-app__art-h">Are you on thesis? Yulia tells you every Monday.</h3>
+              <div className="h-app__preview">
+                <div className="h-app__row h-app__row--head"><span>Week 14 scorecard</span><span>VS THESIS</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">TTM EBITDA · thesis $11.0M</span><span className="h-app__row-r h-app__row-r--ok">$11.2M</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">Recurring mix · thesis 62%</span><span className="h-app__row-r h-app__row-r--ok">64%</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">Top-10 concentration · ≤28%</span><span className="h-app__row-r h-app__row-r--warn">34%</span></div>
+                <div className="h-app__row"><span className="h-app__row-l">FCCV · covenant 1.25×</span><span className="h-app__row-r h-app__row-r--ok">1.42×</span></div>
+                <div className="h-app__row h-app__row--total"><span className="h-app__row-l">On plan · Drift · Ahead</span><span className="h-app__row-r h-app__row-r--total">3 / 1 / 0</span></div>
+              </div>
+            </div>
+            <div className="h-app__foot">
+              <div className="h-app__foot-l">
+                <div className="h-app__foot-t">Monday scorecard</div>
+                <div className="h-app__foot-s">Drift flag on concentration → Yulia booked the Marco conversation for Wed.</div>
+              </div>
+              <button className="h-app__get" type="button">Preview</button>
+            </div>
+          </a>
+        </div>
+
+        {/* RAIL */}
+        <div className="h-sect-h">
+          <div className="h-sect-h__l">
+            <div className="h-sect-h__k">Every post-close capability · one subscription</div>
+            <h2 className="h-sect-h__t">What Yulia does the day you close. <em>All of it.</em></h2>
+          </div>
+        </div>
+
+        <div className="h-rail" id="caps">
+          {[
+            { ico: '◫', t: 'Day-0 checklist',      s: '62-item checklist generated from DD findings.',                      meta: 'Live' },
+            { ico: '◷', t: '180-day runbook',       s: '6 workstreams, named owners, weekly checkpoints.',                  meta: 'Live' },
+            { ico: '⟟', t: 'Synergy tracker',      s: 'Committed vs. realized, per workstream, on the same canvas.',        meta: 'Live' },
+            { ico: '◎', t: 'Thesis scorecard',     s: 'Weekly variance against the deal model.',                            meta: 'Preview' },
+            { ico: '✎', t: 'Retention conversations', s: 'Scripted openings, packages, meeting booked.',                     meta: 'Try' },
+            { ico: '⇌', t: 'AP consolidation',     s: 'Vendor MOU migration + duplicate-payment audit.',                    meta: 'Live' },
+            { ico: '▦', t: 'ERP cutover',           s: 'Data-mapping, migration plan, rollback runbook.',                    meta: 'Preview' },
+            { ico: '⎙', t: 'Document docket',      s: 'Every signed doc · version-locked · audit-logged.',                  meta: 'Live' },
+            { ico: '⌕', t: 'Tuck-in radar',         s: 'Next acquisitions ranked against your platform thesis.',             meta: 'Live' },
+          ].map((c) => (
+            <div key={c.t} className="h-cap">
+              <div className="h-cap__ico">{c.ico}</div>
+              <div className="h-cap__t">{c.t}</div>
+              <div className="h-cap__s">{c.s}</div>
+              <div className="h-cap__meta"><span>Post-close</span><span>{c.meta}</span></div>
+            </div>
+          ))}
+        </div>
+
+        {/* CLAIM */}
+        <section className="h-claim h-anim" id="claim">
+          <div className="h-claim__l">
+            <div className="h-claim__k">The economics</div>
+            <h2 className="h-claim__h">Big-4 charges <em>$900K for a 180-day integration.</em></h2>
+            <p className="h-claim__p">
+              Deloitte, PwC, EY, KPMG — each quotes $650K–$1.2M for a 180-day post-close integration engagement. They bring a playbook and a team; Yulia builds the plan from your actual LOI, runs it week by week, and flags drift before it shows up in the P&L.
+            </p>
+          </div>
+          <div className="h-claim__viz">
+            {[
+              { l: 'Big-4 integration',        w: '100%', v: '$900K · 180d', tone: 'big' },
+              { l: 'Interim COO + consultant', w: '46%',  v: '$420K',        tone: 'big' },
+              { l: 'Missed synergy (median)',  w: '62%',  v: '$560K',        tone: 'big' },
+              { l: 'smbx.ai · Pro',            w: '3%',   v: '$199 / mo',    tone: 'small' },
+            ].map((r) => (
+              <div key={r.l} className="h-claim__row" data-tone={r.tone}>
+                <span className="h-claim__row-l">{r.l}</span>
+                <span className="h-claim__row-bar"><span className="h-claim__row-fill" style={{ ['--w' as string]: r.w } as React.CSSProperties} /></span>
+                <span className="h-claim__row-v">{r.v}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* TRUST */}
+        <div className="h-trust" id="trust">
+          <div className="h-trust__k">Under NDA by default</div>
+          <div className="h-trust__list">
+            <span>SOC 2 Type II</span>
+            <span>Single-tenant inference</span>
+            <span>No training on your data</span>
+            <span>Encrypted document docket</span>
+            <span>Row-level audit log</span>
+          </div>
+        </div>
+
+        {/* CTA */}
+        <section className="h-cta h-anim" id="cta">
+          <div className="h-cta__k">Start · No card</div>
+          <h2 className="h-cta__h">You closed the deal. <em>Now the work begins.</em></h2>
+          <p className="h-cta__s">
+            Send Yulia the LOI, the QoE, and one sentence about your thesis. She returns a Day-0 checklist and a 180-day runbook inside two hours. The conversation starts in the chat pane on your left.
+          </p>
+          <button className="h-cta__point" type="button" onClick={pulseChat}>
+            <span className="h-cta__point-ar">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+              </svg>
+            </span>
+            Start in the chat pane
+            <span style={{ opacity: 0.65, fontWeight: 500 }}>Yulia is ready</span>
+          </button>
+          <div className="h-cta__meta">
+            <span>Day-0 in 2 hours</span>
+            <span>180 days scripted</span>
+            <span>Weekly scorecard</span>
+          </div>
+        </section>
+
       </div>
-    </div>
+    </JourneyShell>
   );
 }
