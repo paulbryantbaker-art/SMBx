@@ -116,15 +116,25 @@ export default function AppShellInner({
       )}
 
       {/* Tab content — single scrollable region. Padding-bottom reserves
-          room for the floating tab bar (54 + 10 bottom = 64) + breathing (16). */}
+          room for the floating tab bar (54 + 10 bottom = 64) + breathing (16).
+          CRITICAL: minHeight: 0 is load-bearing. Without it, a flex child's
+          default `min-height: auto` keeps it from shrinking below its content
+          size. With taller-than-viewport content (Today's hero + feature +
+          continue + PINNED + stack-ranked stack), <main> grows beyond its
+          flex-calculated height, its parent's overflow:hidden clips the
+          overflow, and the user sees the dark body theme-color bg showing
+          through the bottom of the viewport — aka the "bottom half
+          disappears in PWA" bug. minHeight: 0 lets <main> shrink to its
+          flex allocation and invoke its own overflow-y:auto to scroll. */}
       {!chatOpen && (
         <main
           style={{
             flex: 1,
+            minHeight: 0,
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            paddingBottom: 80,
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)',
           }}
         >
           {contentTab === 'today' && (
