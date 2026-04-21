@@ -6,6 +6,17 @@
 import { useEffect, useRef, useState } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+import SectionNav, { type Section } from '../shell/SectionNav';
+
+const RAISE_SECTIONS: readonly Section[] = [
+  { id: 'hero',   label: 'Overview' },
+  { id: 'try',    label: 'Sell vs. raise' },
+  { id: 'paths',  label: 'Three paths' },
+  { id: 'caps',   label: 'Capabilities' },
+  { id: 'claim',  label: 'Speed advantage' },
+  { id: 'trust',  label: 'Trust' },
+  { id: 'cta',    label: 'Start' },
+];
 
 interface Props {
   active: DealTab;
@@ -82,6 +93,7 @@ export default function Raise({ active, onSend, onStartFree, onNavigate, onSignI
       }}
     >
       <div id="raise" className="h-page" data-density="comfortable" data-motion="full" data-hero="shell" ref={rootRef}>
+        <SectionNav sections={RAISE_SECTIONS} />
 
         {/* HERO */}
         <section className="h-today h-anim" id="hero">
@@ -342,7 +354,7 @@ function SellVsRaise() {
   const delta = minorityTotal - fullSale;
 
   return (
-    <div className="h-try h-anim">
+    <div className="h-try h-anim" id="try">
       <div className="h-try__head">
         <span className="h-try__k">Try it live</span>
         <span className="h-try__tag">2 sliders · pre-tax</span>

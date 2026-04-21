@@ -4,6 +4,17 @@
 import { useEffect, useRef, useState } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+import SectionNav, { type Section } from '../shell/SectionNav';
+
+const ENT_SECTIONS: readonly Section[] = [
+  { id: 'hero',     label: 'Overview' },
+  { id: 'usecases', label: 'Use cases' },
+  { id: 'infra',    label: 'Infrastructure' },
+  { id: 'claim',    label: 'Speed advantage' },
+  { id: 'demo',     label: 'Request demo' },
+  { id: 'trust',    label: 'Trust' },
+  { id: 'cta',      label: 'Start' },
+];
 
 interface Props {
   active: DealTab;
@@ -83,6 +94,7 @@ export default function Enterprise({ active, onSend, onStartFree, onNavigate, on
       }}
     >
       <div id="enterprise" className="h-page" data-density="comfortable" data-motion="full" data-hero="shell" ref={rootRef}>
+        <SectionNav sections={ENT_SECTIONS} />
 
         {/* HERO */}
         <section className="h-today h-anim" id="hero">

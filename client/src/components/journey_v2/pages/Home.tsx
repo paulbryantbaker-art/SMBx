@@ -17,6 +17,16 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+import SectionNav, { type Section } from '../shell/SectionNav';
+
+const HOME_SECTIONS: readonly Section[] = [
+  { id: 'today', label: 'Today' },
+  { id: 'apps',  label: 'Four journeys' },
+  { id: 'caps',  label: 'Capabilities' },
+  { id: 'claim', label: 'Speed advantage' },
+  { id: 'trust', label: 'Trust' },
+  { id: 'cta',   label: 'Start' },
+];
 
 interface Props {
   active: DealTab;
@@ -240,6 +250,7 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
       }}
     >
       <div id="home" className="h-page" data-density="comfortable" data-motion="full" data-hero="shell" ref={rootRef}>
+        <SectionNav sections={HOME_SECTIONS} />
 
         {/* ══ TODAY CARD ══ */}
         <section className="h-today h-anim" id="today">

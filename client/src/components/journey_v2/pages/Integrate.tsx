@@ -5,6 +5,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+import SectionNav, { type Section } from '../shell/SectionNav';
+
+const INT_SECTIONS: readonly Section[] = [
+  { id: 'hero',    label: 'Overview' },
+  { id: 'try',     label: 'Day-1 checklist' },
+  { id: 'phases',  label: 'Four phases' },
+  { id: 'caps',    label: 'Capabilities' },
+  { id: 'claim',   label: 'Speed advantage' },
+  { id: 'trust',   label: 'Trust' },
+  { id: 'cta',     label: 'Start' },
+];
 
 const D1_IND = ['Services', 'Manufacturing', 'Healthcare', 'Technology', 'Construction', 'Retail', 'Other'] as const;
 const D1_EMP = ['<50', '50–200', '200–500', '500+'] as const;
@@ -87,6 +98,7 @@ export default function Integrate({ active, onSend, onStartFree, onNavigate, onS
       }}
     >
       <div id="integrate" className="h-page" data-density="comfortable" data-motion="full" data-hero="shell" ref={rootRef}>
+        <SectionNav sections={INT_SECTIONS} />
 
         {/* HERO */}
         <section className="h-today h-anim" id="hero">
@@ -407,7 +419,7 @@ function Day1Generator({ onSeed }: { onSeed: (t: string) => void }) {
   }, [groups]);
 
   return (
-    <div className="h-try h-anim">
+    <div className="h-try h-anim" id="try">
       <div className="h-try__head">
         <span className="h-try__k">Try it live</span>
         <span className="h-try__tag">5 inputs · 5 sec</span>

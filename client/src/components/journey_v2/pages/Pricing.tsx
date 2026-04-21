@@ -3,9 +3,19 @@
  * Canonical ladder: Free / Solo $79 / Pro $199 / Team $499 /
  * Enterprise from $2,500.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+import SectionNav, { type Section } from '../shell/SectionNav';
+
+const PRICING_SECTIONS: readonly Section[] = [
+  { id: 'hero',  label: 'Overview' },
+  { id: 'plans', label: 'Compare plans' },
+  { id: 'caps',  label: 'Capabilities' },
+  { id: 'faq',   label: 'FAQ' },
+  { id: 'trust', label: 'Trust' },
+  { id: 'cta',   label: 'Start' },
+];
 
 interface Props {
   active: DealTab;
@@ -94,6 +104,7 @@ export default function Pricing({ active, onSend, onStartFree, onNavigate, onSig
       }}
     >
       <div id="pricing" className="h-page" data-density="comfortable" data-motion="full" data-hero="shell" ref={rootRef}>
+        <SectionNav sections={PRICING_SECTIONS} />
 
         {/* HERO */}
         <section className="h-today h-anim" id="hero">
@@ -121,7 +132,7 @@ export default function Pricing({ active, onSend, onStartFree, onNavigate, onSig
               <div className="h-today__demo-k">Yulia · help me pick</div>
               <div className="h-today__demo-bubble h-today__demo-bubble--me">I'm a solo searcher. Which plan?</div>
               <div className="h-today__demo-bubble">
-                <strong>Solo at $79/mo.</strong> One seat, one active deal, unlimited deliverables. Step up to Pro ($199) when you\'re juggling multiple deals or want a team seat.
+                <strong>Solo at $79/mo.</strong> One seat, one active deal, unlimited deliverables. Step up to Pro ($199) when you're juggling multiple deals or want a team seat.
               </div>
               <div className="h-today__demo-out">
                 <div className="h-today__demo-out-c">
@@ -137,48 +148,23 @@ export default function Pricing({ active, onSend, onStartFree, onNavigate, onSig
           </div>
         </section>
 
-        {/* FIVE TIERS */}
+        {/* FIVE TIERS — comparison table (28% better conversion per dossier) */}
         <div className="h-sect-h">
           <div className="h-sect-h__l">
-            <div className="h-sect-h__k">Five plans · same capabilities</div>
+            <div className="h-sect-h__k">Five plans · every hero capability in every paid tier</div>
             <h2 className="h-sect-h__t">Pick based on who you are. <em>Not what your deal looks like.</em></h2>
           </div>
         </div>
 
-        <div className="h-apps" id="plans" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
-          {[
-            { n: '01 · Free',        price: '$0',              who: 'Trying Yulia out',                                                       seats: '1',    deals: '1',            deliverables: '1 (ever)' },
-            { n: '02 · Solo',        price: '$79/mo',          who: 'Solo operators · searchers · principal sellers',                         seats: '1',    deals: '1',            deliverables: 'Unlimited' },
-            { n: '03 · Pro ★',      price: '$199/mo',         who: 'Practitioners · IS · search funders · LMM advisors',                      seats: '1',    deals: 'Unlimited',    deliverables: 'Unlimited', winner: true },
-            { n: '04 · Team',        price: '$499/mo',         who: 'Boutique firms · small corp dev · multi-FO',                              seats: '5',    deals: 'Unlimited',    deliverables: 'Unlimited' },
-            { n: '05 · Enterprise',  price: 'From $2,500/mo',  who: 'Firms · serial acquirers · PE funds · regulated',                         seats: '6+',   deals: 'Unlimited',    deliverables: 'Unlimited' },
-          ].map((t, i) => (
-            <a
-              key={t.n}
-              className={`h-app h-anim${i ? ` h-anim-d${Math.min(i, 3)}` : ''}`}
-              href="#"
-              onClick={(e) => { e.preventDefault(); pickTier(t.n.split(' · ')[1]); }}
-            >
-              <div className="h-app__art">
-                <div className="h-app__art-k">{t.n}</div>
-                <h3 className="h-app__art-h" style={{ fontSize: 'clamp(24px, 3.2vw, 32px)' }}>{t.price}</h3>
-                <div className="h-app__preview">
-                  <div className="h-app__row h-app__row--head"><span>What's included</span><span>—</span></div>
-                  <div className="h-app__row"><span className="h-app__row-l">Seats</span><span className="h-app__row-r h-app__row-r--ok">{t.seats}</span></div>
-                  <div className="h-app__row"><span className="h-app__row-l">Active deals</span><span className="h-app__row-r h-app__row-r--ok">{t.deals}</span></div>
-                  <div className="h-app__row"><span className="h-app__row-l">Deliverables</span><span className="h-app__row-r h-app__row-r--ok">{t.deliverables}</span></div>
-                  <div className="h-app__row"><span className="h-app__row-l">All capabilities</span><span className="h-app__row-r h-app__row-r--ok">Yes</span></div>
-                </div>
-              </div>
-              <div className="h-app__foot">
-                <div className="h-app__foot-l">
-                  <div className="h-app__foot-t">{t.winner ? 'Most common' : 'Who it fits'}</div>
-                  <div className="h-app__foot-s">{t.who}</div>
-                </div>
-                <button className="h-app__get" type="button">{t.n.includes('Free') ? 'Start' : t.n.includes('Enterprise') ? 'Talk' : 'Pick'}</button>
-              </div>
-            </a>
-          ))}
+        <div className="h-anim" id="plans" style={{
+          marginTop: 18,
+          background: 'var(--h-card, #fff)',
+          border: '1px solid var(--h-line, rgba(0,0,0,0.08))',
+          borderRadius: 18,
+          overflow: 'hidden',
+          boxShadow: '0 4px 18px rgba(0,0,0,0.06)',
+        }}>
+          <PricingTable onPick={pickTier} />
         </div>
 
         {/* RAIL — every capability */}
@@ -264,7 +250,7 @@ export default function Pricing({ active, onSend, onStartFree, onNavigate, onSig
           <div className="h-cta__k">Start · No card</div>
           <h2 className="h-cta__h">Start free. <em>Upgrade when you know it's worth it.</em></h2>
           <p className="h-cta__s">
-            Unlimited chat with Yulia. One deliverable free, forever. Upgrade when you\'re actually running a deal. Most people overbuy on their first subscription — I'll tell you the smallest plan that covers what you\'re doing.
+            Unlimited chat with Yulia. One deliverable free, forever. Upgrade when you're actually running a deal. Most people overbuy on their first subscription — I'll tell you the smallest plan that covers what you're doing.
           </p>
           <button className="h-cta__point" type="button" onClick={pulseChat}>
             <span className="h-cta__point-ar">
@@ -286,3 +272,191 @@ export default function Pricing({ active, onSend, onStartFree, onNavigate, onSig
     </JourneyShell>
   );
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PricingTable — 5-column comparison table.
+   Per the pricing dossier, comparison tables convert ~28% better than
+   a grid of 5 separate tier cards. One glance answers "what's the
+   difference between Solo and Pro." Pro is the anchor (★).
+   ═══════════════════════════════════════════════════════════════════ */
+
+type Tier = {
+  name: 'Free' | 'Solo' | 'Pro' | 'Team' | 'Enterprise';
+  price: string;
+  cadence: string;
+  who: string;
+  badge?: string;
+  cta: string;
+  featured?: boolean;
+};
+
+const TIERS: readonly Tier[] = [
+  { name: 'Free',       price: '$0',      cadence: '',         who: 'Curious operators',            cta: 'Start free' },
+  { name: 'Solo',       price: '$79',     cadence: '/mo',      who: 'Solo searcher · SBA buyer',    cta: 'Start Solo' },
+  { name: 'Pro',        price: '$199',    cadence: '/mo',      who: 'Active searcher · fund-less',  badge: 'Most pick this', cta: 'Start Pro', featured: true },
+  { name: 'Team',       price: '$499',    cadence: '/mo',      who: 'Holdco · 2–5 person firm',     cta: 'Start Team' },
+  { name: 'Enterprise', price: '$2,500+', cadence: '/mo',      who: 'Family office · fund · firm',  cta: 'Talk to sales' },
+];
+
+type Row =
+  | { kind: 'group'; label: string }
+  | { kind: 'text';  label: string; vals: readonly [string, string, string, string, string] }
+  | { kind: 'check'; label: string; vals: readonly [boolean, boolean, boolean, boolean, boolean] };
+
+const ROWS: readonly Row[] = [
+  { kind: 'group', label: 'Fit' },
+  { kind: 'text',  label: 'Seats',           vals: ['1', '1', '1', '5 included', 'Unlimited'] },
+  { kind: 'text',  label: 'Active deals',    vals: ['—', '1', '3', '10', 'Unlimited'] },
+  { kind: 'text',  label: 'Deliverables',    vals: ['1 ever', '10 / mo', 'Unlimited', 'Unlimited', 'Unlimited'] },
+
+  { kind: 'group', label: 'Every hero capability' },
+  { kind: 'check', label: 'Unlimited chat with Yulia',           vals: [true, true, true, true, true] },
+  { kind: 'check', label: 'Add-back + QoE Lite',                 vals: [false, true, true, true, true] },
+  { kind: 'check', label: 'The Rundown · 7-dim deal scoring',    vals: [false, true, true, true, true] },
+  { kind: 'check', label: 'CIM drafting · 32-page diligence',    vals: [false, true, true, true, true] },
+  { kind: 'check', label: 'LOI + APA first drafts',              vals: [false, true, true, true, true] },
+  { kind: 'check', label: 'SBA SOP 50 10 8 structures',          vals: [false, true, true, true, true] },
+  { kind: 'check', label: 'DD coordination + data room',         vals: [false, true, true, true, true] },
+  { kind: 'check', label: 'Investor + IC + LP memos',            vals: [false, true, true, true, true] },
+  { kind: 'check', label: '180-day post-close runbook',          vals: [false, true, true, true, true] },
+
+  { kind: 'group', label: 'Team + enterprise' },
+  { kind: 'check', label: 'Shared workspace + roles',            vals: [false, false, false, true, true] },
+  { kind: 'check', label: 'Dedicated success manager',           vals: [false, false, false, true, true] },
+  { kind: 'check', label: 'SSO / SAML · SOC 2 · custom DPA',     vals: [false, false, false, false, true] },
+  { kind: 'check', label: 'On-prem LLM · bring-your-own-model',  vals: [false, false, false, false, true] },
+  { kind: 'check', label: 'White-label for client deliverables', vals: [false, false, false, false, true] },
+];
+
+function PricingTable({ onPick }: { onPick: (name: Tier['name']) => void }) {
+  return (
+    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+    <div role="table" aria-label="Pricing comparison" style={{
+      display: 'grid',
+      gridTemplateColumns: 'minmax(200px, 1.2fr) repeat(5, minmax(140px, 1fr))',
+      minWidth: 920,
+      fontFamily: 'Inter, system-ui, sans-serif',
+      fontSize: 13,
+      color: 'var(--h-ink, #0A0A0B)',
+    }}>
+      {/* Header row — tier columns */}
+      <div role="rowgroup" style={{ display: 'contents' }}>
+        <div role="columnheader" style={hCellFirst} />
+        {TIERS.map((t) => (
+          <div key={t.name} role="columnheader" style={{
+            ...hCell,
+            background: t.featured ? 'linear-gradient(180deg, #FAF6F5 0%, #FFFFFF 100%)' : 'transparent',
+            borderBottom: '1px solid var(--h-line, rgba(0,0,0,0.08))',
+            position: 'relative',
+          }}>
+            {t.badge && (
+              <div style={{
+                position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
+                fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+                color: '#C7616F',
+              }}>★ {t.badge}</div>
+            )}
+            <div style={{ fontFamily: 'Sora, sans-serif', fontWeight: 800, fontSize: 18, marginTop: t.badge ? 22 : 4 }}>{t.name}</div>
+            <div style={{ fontFamily: 'Sora, sans-serif', fontWeight: 800, fontSize: 28, marginTop: 6, letterSpacing: '-0.01em' }}>
+              {t.price}
+              <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--h-mute, #6B6B70)' }}>{t.cadence}</span>
+            </div>
+            <div style={{ fontSize: 11.5, color: 'var(--h-mute, #6B6B70)', marginTop: 6, minHeight: 30, lineHeight: 1.35 }}>{t.who}</div>
+            <button
+              type="button"
+              onClick={() => onPick(t.name)}
+              style={{
+                marginTop: 12,
+                width: '100%',
+                padding: '10px 12px',
+                borderRadius: 10,
+                border: t.featured ? '1px solid #0A0A0B' : '1px solid var(--h-line, rgba(0,0,0,0.12))',
+                background: t.featured ? '#0A0A0B' : '#FFFFFF',
+                color: t.featured ? '#FFFFFF' : '#0A0A0B',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontSize: 12.5,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'transform 120ms ease, box-shadow 120ms ease',
+              }}
+              onMouseDown={(e) => { e.currentTarget.style.transform = 'translateY(1px)'; }}
+              onMouseUp={(e) => { e.currentTarget.style.transform = ''; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = ''; }}
+            >
+              {t.cta}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Body rows */}
+      {ROWS.map((r, idx) => {
+        if (r.kind === 'group') {
+          return (
+            <div key={`g-${idx}`} role="row" style={{ display: 'contents' }}>
+              <div role="cell" style={{
+                gridColumn: '1 / -1',
+                padding: '18px 20px 8px',
+                fontSize: 10.5,
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: 'var(--h-faint, #9A9A9F)',
+                borderTop: '1px solid var(--h-line-2, rgba(0,0,0,0.05))',
+                background: '#FAFAFA',
+              }}>{r.label}</div>
+            </div>
+          );
+        }
+        return (
+          <div key={`r-${idx}`} role="row" style={{ display: 'contents' }}>
+            <div role="rowheader" style={{ ...bCellFirst, borderTop: '1px solid var(--h-line-2, rgba(0,0,0,0.05))' }}>
+              {r.label}
+            </div>
+            {r.vals.map((v, i) => {
+              const tier = TIERS[i];
+              const isCheck = r.kind === 'check';
+              return (
+                <div key={i} role="cell" style={{
+                  ...bCell,
+                  borderTop: '1px solid var(--h-line-2, rgba(0,0,0,0.05))',
+                  background: tier.featured ? 'rgba(199,97,111,0.03)' : 'transparent',
+                  color: isCheck
+                    ? (v === true ? 'var(--h-ok, #22A755)' : 'var(--h-faint, #C7C7CC)')
+                    : 'var(--h-ink-2, #3A3A3E)',
+                  fontWeight: isCheck ? 700 : 500,
+                  fontSize: isCheck ? 16 : 12.5,
+                }}>
+                  {isCheck ? (v === true ? '✓' : '–') : v}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+    </div>
+  );
+}
+
+const hCell: CSSProperties = {
+  padding: '16px 16px 18px',
+  textAlign: 'center',
+  borderLeft: '1px solid var(--h-line-2, rgba(0,0,0,0.05))',
+};
+const hCellFirst: CSSProperties = {
+  padding: '16px 20px 18px',
+  borderBottom: '1px solid var(--h-line, rgba(0,0,0,0.08))',
+};
+const bCell: CSSProperties = {
+  padding: '14px 12px',
+  textAlign: 'center',
+  borderLeft: '1px solid var(--h-line-2, rgba(0,0,0,0.05))',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+};
+const bCellFirst: CSSProperties = {
+  padding: '14px 20px',
+  fontSize: 12.5,
+  fontWeight: 500,
+  color: 'var(--h-ink-2, #3A3A3E)',
+};

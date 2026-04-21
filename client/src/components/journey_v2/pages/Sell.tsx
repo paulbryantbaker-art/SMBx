@@ -7,9 +7,20 @@
  *
  * Acme, Inc. remains the running example across the page.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+import SectionNav, { type Section } from '../shell/SectionNav';
+
+const SELL_SECTIONS: readonly Section[] = [
+  { id: 'hero',    label: 'Overview' },
+  { id: 'try',     label: 'Add-back estimator' },
+  { id: 'phases',  label: 'Five phases' },
+  { id: 'caps',    label: 'Capabilities' },
+  { id: 'claim',   label: 'Speed advantage' },
+  { id: 'trust',   label: 'Trust' },
+  { id: 'cta',     label: 'Start' },
+];
 
 /* ── Add-back estimator heuristics ── */
 const REV_OPTS = ['$1–5M', '$5–10M', '$10–25M', '$25–50M', '$50M+'] as const;
@@ -38,8 +49,64 @@ interface Props {
   onSignIn?: () => void;
 }
 
+type Voice = 'owner' | 'advisor';
+
+type VoiceCopy = {
+  meta: string;
+  h1: string; h1Em: string;
+  sub: ReactNode;
+  ctaLabel: string;
+  ctaSeed: string;
+  demoK: string;
+  demoMe: string;
+  demoYulia: ReactNode;
+};
+
+const VOICE_COPY: Record<Voice, VoiceCopy> = {
+  owner: {
+    meta: 'Sell-side · My business',
+    h1: 'The buyer will see six things.',
+    h1Em: 'Fix five before they do.',
+    sub: (
+      <>
+        For <strong>owners</strong> exploring exit. Yulia reads your tax returns, finds the add-backs your CPA missed, and tells you what a real buyer will see — <em>before</em> a broker tells you what to sell. Acme, Inc. is the running example below — $65M distributor, Phoenix HQ, 2nd-gen owner.
+      </>
+    ),
+    ctaLabel: 'Start with my numbers',
+    ctaSeed: "I'm thinking about selling my business.",
+    demoK: 'Yulia · my readiness',
+    demoMe: 'Read last three years of tax returns.',
+    demoYulia: (
+      <>
+        Six defensible add-backs — <strong>+$1.80M</strong>. Normalized EBITDA <strong>$11.0M</strong>, 20% above what your CPA reports. At a 7.5× multiple that's <strong>+$13.5M</strong> of enterprise value you'd leave on the table.
+      </>
+    ),
+  },
+  advisor: {
+    meta: 'Sell-side · Acme, Inc.',
+    h1: "The CIM your client's getting Friday.",
+    h1Em: 'Drafted by dinner Tuesday.',
+    sub: (
+      <>
+        For <strong>LMM advisors, brokers, and M&amp;A intermediaries</strong>. Yulia reads the tax returns, defends the add-backs, drafts the CIM, builds the buyer list, and coordinates diligence. <strong>You keep the judgment. You run the deal.</strong> Narrated here with Acme, Inc. — $65M distributor, Phoenix HQ, 2nd-gen owner exploring exit.
+      </>
+    ),
+    ctaLabel: 'Start the walkthrough',
+    ctaSeed: 'I have a seller engagement starting.',
+    demoK: 'Yulia · live on Acme, Inc.',
+    demoMe: 'Read these three tax returns.',
+    demoYulia: (
+      <>
+        Done. Six defensible add-backs — <strong>+$1.80M</strong>. Normalized EBITDA <strong>$11.0M</strong>, 20% above what the CPA reports. At 7.5× that's <strong>+$13.5M</strong> of enterprise value.
+      </>
+    ),
+  },
+};
+
 export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const [voice, setVoice] = useState<Voice>('advisor');
+  const copy = VOICE_COPY[voice];
 
   /* Reveal-on-scroll for .h-anim */
   useEffect(() => {
@@ -114,22 +181,22 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
       }}
     >
       <div id="sell" className="h-page" data-density="comfortable" data-motion="full" data-hero="shell" ref={rootRef}>
+        <SectionNav sections={SELL_SECTIONS} />
 
         {/* ══ HERO ══ */}
         <section className="h-today h-anim" id="hero">
           <div className="h-today__inner">
             <div className="h-today__copy">
+              <VoiceToggle voice={voice} onChange={setVoice} />
               <div className="h-today__meta">
-                Sell-side · Acme, Inc.
+                {copy.meta}
                 <span className="h-today__meta-tag">Demo</span>
               </div>
-              <h1 className="h-today__h">The CIM your client's getting Friday. <em>Drafted by dinner Tuesday.</em></h1>
-              <p className="h-today__sub">
-                For LMM advisors, brokers, and search-fund operators. Yulia reads the tax returns, defends the add-backs, drafts the CIM, builds the buyer list, and coordinates diligence. <strong>You keep the judgment. You run the deal.</strong> Narrated here with Acme, Inc. — $65M distributor, Phoenix HQ, 2nd-gen owner exploring exit.
-              </p>
+              <h1 className="h-today__h">{copy.h1} <em>{copy.h1Em}</em></h1>
+              <p className="h-today__sub">{copy.sub}</p>
               <div className="h-today__cta">
-                <button className="h-today__btn" type="button" onClick={() => seedChat("I'm thinking about selling my business.")}>
-                  Start the walkthrough
+                <button className="h-today__btn" type="button" onClick={() => seedChat(copy.ctaSeed)}>
+                  {copy.ctaLabel}
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="19" y1="12" x2="5" y2="12" />
                     <polyline points="12 19 5 12 12 5" />
@@ -140,11 +207,9 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
             </div>
 
             <div className="h-today__demo">
-              <div className="h-today__demo-k">Yulia · live on Acme, Inc.</div>
-              <div className="h-today__demo-bubble h-today__demo-bubble--me">Read these three tax returns.</div>
-              <div className="h-today__demo-bubble">
-                Done. Six defensible add-backs — <strong>+$1.80M</strong>. Normalized EBITDA <strong>$11.0M</strong>, 20% above what the CPA reports. At 7.5× that's <strong>+$13.5M</strong> of enterprise value.
-              </div>
+              <div className="h-today__demo-k">{copy.demoK}</div>
+              <div className="h-today__demo-bubble h-today__demo-bubble--me">{copy.demoMe}</div>
+              <div className="h-today__demo-bubble">{copy.demoYulia}</div>
               <div className="h-today__demo-out">
                 <div className="h-today__demo-out-c">
                   <div className="h-today__demo-out-v">+$1.80<span style={{ fontSize: '60%', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>M</span></div>
@@ -396,7 +461,7 @@ function AddbackEstimator() {
   }, [rev, ind, own]);
 
   return (
-    <div className="h-try h-anim">
+    <div className="h-try h-anim" id="try">
       <div className="h-try__head">
         <span className="h-try__k">Try it live</span>
         <span className="h-try__tag">3 inputs · 3 sec</span>
@@ -479,6 +544,61 @@ function PickBlock<T extends string>({ label, options, value, onChange }: {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   VoiceToggle — segmented persona switch at the top of the hero.
+   Sell speaks to two personas: owner (principal) and advisor
+   (practitioner). The toggle re-voices every piece of hero copy so both
+   audiences feel addressed by the first slide.
+   ══════════════════════════════════════════════════════════════════════ */
+function VoiceToggle({ voice, onChange }: { voice: Voice; onChange: (v: Voice) => void }) {
+  const opts: readonly { id: Voice; label: string }[] = [
+    { id: 'advisor', label: 'I help clients sell' },
+    { id: 'owner',   label: 'I want to sell my business' },
+  ];
+  return (
+    <div
+      role="tablist"
+      aria-label="Who are you selling for?"
+      style={{
+        display: 'inline-flex',
+        gap: 4,
+        padding: 4,
+        background: 'rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.12)',
+        borderRadius: 12,
+        marginBottom: 18,
+      }}
+    >
+      {opts.map(({ id, label }) => {
+        const active = id === voice;
+        return (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={active}
+            type="button"
+            onClick={() => onChange(id)}
+            style={{
+              padding: '8px 14px',
+              background: active ? '#FFFFFF' : 'transparent',
+              color: active ? '#0A0A0B' : 'rgba(255,255,255,0.72)',
+              border: 'none',
+              borderRadius: 9,
+              fontFamily: 'Inter, system-ui, sans-serif',
+              fontSize: 12.5,
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 150ms ease, color 150ms ease',
+            }}
+          >
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -362,6 +362,19 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
     ],
     placeholder: 'Ask about pricing...',
   },
+  enterprise: {
+    overline: 'Enterprise',
+    headline: 'Your firm. Your infrastructure. Your Yulia.',
+    terraWord: 'Your Yulia.',
+    tagline: 'SSO, SOC 2, custom DPA, on-prem LLM, white-label. Starts at $2,500 / month.',
+    chips: [
+      'What does white-label look like?',
+      'Can we host the LLM on-prem?',
+      'SOC 2 Type II documentation',
+      'Set up a custom DPA',
+    ],
+    placeholder: 'Tell Yulia about your firm...',
+  },
 };
 
 /* Helper: highlight terra word in headline */
@@ -1218,7 +1231,7 @@ export default function AppShell() {
   const handleBack = useCallback(() => {
     setHeroFocused(false);
     setViewState('landing');
-    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
+    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing', enterprise: '/enterprise' };
     navigate(urlMap[activeTab]);
   }, [activeTab, navigate]);
 
@@ -1233,7 +1246,7 @@ export default function AppShell() {
       return;
     }
     setViewState('landing');
-    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing' };
+    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing', enterprise: '/enterprise' };
     if (window.location.pathname !== urlMap[tab]) navigate(urlMap[tab]);
   }, [navigate, viewState]);
 

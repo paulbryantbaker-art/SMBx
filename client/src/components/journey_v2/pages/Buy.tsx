@@ -3,9 +3,69 @@
  * Buyer POV: searcher / LMM PE associate evaluating acquisitions.
  * Running example: Acme, Inc. scored 81/100 via the Rundown.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+import SectionNav, { type Section } from '../shell/SectionNav';
+
+const BUY_SECTIONS: readonly Section[] = [
+  { id: 'hero',    label: 'Overview' },
+  { id: 'try',     label: 'Try the Rundown' },
+  { id: 'phases',  label: 'Four phases' },
+  { id: 'caps',    label: 'Capabilities' },
+  { id: 'claim',   label: 'Speed advantage' },
+  { id: 'trust',   label: 'Trust' },
+  { id: 'cta',     label: 'Start' },
+];
+
+type BuyerVoice = 'searcher' | 'sponsor';
+
+const BUYER_COPY: Record<BuyerVoice, {
+  meta: string;
+  h1: string; h1Em: string;
+  sub: ReactNode;
+  ctaLabel: string;
+  ctaSeed: string;
+  demoMe: string;
+  demoYulia: ReactNode;
+}> = {
+  searcher: {
+    meta: 'Buy-side · Searcher · Acme, Inc.',
+    h1: 'Your rollover structure just died.',
+    h1Em: 'Yulia rebuilds it.',
+    sub: (
+      <>
+        SBA SOP 50 10 8 killed the capital stack every searcher was trained on. 41% of brokers report deal delays. <strong>Yulia rebuilds the compliant stack in 5 minutes</strong>, scores any deal on 7 dimensions in 90 seconds, and stress-tests the personal guarantee before you sign.
+      </>
+    ),
+    ctaLabel: 'Score a deal',
+    ctaSeed: 'Paste a listing URL or describe a deal.',
+    demoMe: 'Score this deal — $65M distributor, Phoenix.',
+    demoYulia: (
+      <>
+        <strong>81/100 · Pursue.</strong> Strong financial integrity (9.1), scalability (8.0), revenue quality (8.4). SBA stack rebuilt under SOP 50 10 8 — seller-note subordination clean, PG stress-tested at 1.25× DSCR.
+      </>
+    ),
+  },
+  sponsor: {
+    meta: 'Buy-side · Independent sponsor · Acme, Inc.',
+    h1: "The LP is on the phone Thursday.",
+    h1Em: 'The IC memo hits Wednesday.',
+    sub: (
+      <>
+        For <strong>independent sponsors, search funders, and fund-less capital</strong>. Yulia scores any deal on 7 dimensions in 90 seconds, models the debt/equity/rollover/earnout stack, stress-tests the returns, and drafts the IC memo your capital partner actually reads. <strong>You run the deal. Yulia runs the work.</strong>
+      </>
+    ),
+    ctaLabel: 'Run a Rundown',
+    ctaSeed: 'Sourced deal — model the capital stack and write the IC memo.',
+    demoMe: 'Run the numbers — $11M EBITDA, targeting 3.5× debt, 20% rollover.',
+    demoYulia: (
+      <>
+        <strong>81/100 · Pursue.</strong> Base case 2.8× MOIC / 28% IRR over 5 years. Downside at 4% revenue decline still clears 1.8×. Two yellow flags — concentration (6.0) and owner dependency (5.4). Both solvable in the 100-day plan.
+      </>
+    ),
+  },
+};
 
 /* ── Rundown heuristics (demo-only; real product calls backend) ── */
 type DimKey = 'financial' | 'margins' | 'revenue' | 'concentration' | 'management' | 'dependency' | 'scalability';
@@ -61,6 +121,8 @@ interface Props {
 
 export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const [voice, setVoice] = useState<BuyerVoice>('searcher');
+  const copy = BUYER_COPY[voice];
 
   useEffect(() => {
     const root = rootRef.current;
@@ -126,22 +188,22 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
       }}
     >
       <div id="buy" className="h-page" data-density="comfortable" data-motion="full" data-hero="shell" ref={rootRef}>
+        <SectionNav sections={BUY_SECTIONS} />
 
         {/* HERO */}
         <section className="h-today h-anim" id="hero">
           <div className="h-today__inner">
             <div className="h-today__copy">
+              <BuyerVoiceToggle voice={voice} onChange={setVoice} />
               <div className="h-today__meta">
-                Buy-side · Acme, Inc.
+                {copy.meta}
                 <span className="h-today__meta-tag">Demo</span>
               </div>
-              <h1 className="h-today__h">Your rollover structure just died. <em>Yulia rebuilds it.</em></h1>
-              <p className="h-today__sub">
-                SBA SOP 50 10 8 killed the structure every searcher was trained on. 41% of brokers report deal delays. <strong>Yulia rebuilds the compliant stack in 5 minutes</strong>, scores any deal on 7 dimensions in 90 seconds, and stress-tests the personal guarantee before you sign. For independent sponsors, search funders, and buyers.
-              </p>
+              <h1 className="h-today__h">{copy.h1} <em>{copy.h1Em}</em></h1>
+              <p className="h-today__sub">{copy.sub}</p>
               <div className="h-today__cta">
-                <button className="h-today__btn" type="button" onClick={() => seedChat('Paste a listing URL or describe a deal.')}>
-                  Score a deal
+                <button className="h-today__btn" type="button" onClick={() => seedChat(copy.ctaSeed)}>
+                  {copy.ctaLabel}
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
                   </svg>
@@ -151,10 +213,8 @@ export default function Buy({ active, onSend, onStartFree, onNavigate, onSignIn 
             </div>
             <div className="h-today__demo">
               <div className="h-today__demo-k">Yulia · Rundown on Acme</div>
-              <div className="h-today__demo-bubble h-today__demo-bubble--me">Score this deal — $65M distributor, Phoenix.</div>
-              <div className="h-today__demo-bubble">
-                <strong>81/100 · Pursue.</strong> Strong on financial integrity (9.1), scalability (8.0), revenue quality (8.4). Two yellow flags — concentration (6.0) and owner dependency (5.4). Both solvable in integration.
-              </div>
+              <div className="h-today__demo-bubble h-today__demo-bubble--me">{copy.demoMe}</div>
+              <div className="h-today__demo-bubble">{copy.demoYulia}</div>
               <div className="h-today__demo-out">
                 <div className="h-today__demo-out-c">
                   <div className="h-today__demo-out-v">81<span style={{ fontSize: '60%', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>/100</span></div>
@@ -426,7 +486,7 @@ function RundownCalculator() {
       : { label: 'PASS', color: '#D44A78' };
 
   return (
-    <div className="h-try h-anim">
+    <div className="h-try h-anim" id="try">
       <div className="h-try__head">
         <span className="h-try__k">Try it live</span>
         <span className="h-try__tag">90 sec · 7 dims</span>
@@ -584,6 +644,60 @@ function RundownCalculator() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   BuyerVoiceToggle — segmented persona switch at the top of the hero.
+   Buy serves two distinct audiences with different capital structures:
+   searchers (SBA stack) and capital sponsors (debt + equity + rollover).
+   ══════════════════════════════════════════════════════════════════════ */
+function BuyerVoiceToggle({ voice, onChange }: { voice: BuyerVoice; onChange: (v: BuyerVoice) => void }) {
+  const opts: readonly { id: BuyerVoice; label: string }[] = [
+    { id: 'searcher', label: 'Searcher · SBA' },
+    { id: 'sponsor',  label: 'Capital sponsor · search fund' },
+  ];
+  return (
+    <div
+      role="tablist"
+      aria-label="Which buyer are you?"
+      style={{
+        display: 'inline-flex',
+        gap: 4,
+        padding: 4,
+        background: 'rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.12)',
+        borderRadius: 12,
+        marginBottom: 18,
+      }}
+    >
+      {opts.map(({ id, label }) => {
+        const active = id === voice;
+        return (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={active}
+            type="button"
+            onClick={() => onChange(id)}
+            style={{
+              padding: '8px 14px',
+              background: active ? '#FFFFFF' : 'transparent',
+              color: active ? '#0A0A0B' : 'rgba(255,255,255,0.72)',
+              border: 'none',
+              borderRadius: 9,
+              fontFamily: 'Inter, system-ui, sans-serif',
+              fontSize: 12.5,
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 150ms ease, color 150ms ease',
+            }}
+          >
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
 }

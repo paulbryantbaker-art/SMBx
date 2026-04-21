@@ -4,6 +4,16 @@
 import { useEffect, useRef } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+import SectionNav, { type Section } from '../shell/SectionNav';
+
+const HOW_SECTIONS: readonly Section[] = [
+  { id: 'hero',  label: 'Overview' },
+  { id: 'scope', label: 'What I do' },
+  { id: 'math',  label: 'The math' },
+  { id: 'claim', label: 'Speed advantage' },
+  { id: 'trust', label: 'Trust' },
+  { id: 'cta',   label: 'Start' },
+];
 
 interface Props {
   active: DealTab;
@@ -80,6 +90,7 @@ export default function HowItWorks({ active, onSend, onStartFree, onNavigate, on
       }}
     >
       <div id="how" className="h-page" data-density="comfortable" data-motion="full" data-hero="shell" ref={rootRef}>
+        <SectionNav sections={HOW_SECTIONS} />
 
         {/* HERO */}
         <section className="h-today h-anim" id="hero">
