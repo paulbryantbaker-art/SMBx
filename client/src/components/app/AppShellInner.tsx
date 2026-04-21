@@ -1,39 +1,33 @@
 /**
- * AppShellInner — the Glass Grok post-morph internal app composition.
+ * AppShellInner — the Glass Grok mobile internal app, Apple-App-Store pattern.
  *
  * Renders when: mobile PWA user has authed AND the shell has frosted in
  * (progressive reveal — owned by AppShell.tsx).
  *
- * Layout (body is sized to var(--vvh) so scroll is contained; see
- * architecture_ios_pwa_pill.md):
+ * Four tabs: Today · Deals · Chat · Inbox. Chat is implemented as a
+ * portaled full-screen overlay (Messages.app / WhatsApp pattern) rather
+ * than an inline tab body — this lets the proven PWA keyboard infrastructure
+ * stay honest (portal escapes transform ancestors; body is sized to
+ * var(--vvh) so the overlay sees the visible viewport). When Chat is
+ * active, the top bar and tab bar both hide; a back chevron inside the
+ * chat header returns to the previous tab.
  *
- *   ┌────────────────────────────────────┐
- *   │  TopBar (wordmark + profile)       │
- *   ├────────────────────────────────────┤
- *   │                                    │
- *   │  TabContent (routed: deal / docs / │
- *   │              pipeline / search)    │
- *   │                                    │
- *   │        ┌──────────────────────┐    │
- *   │        │  YuliaAgent (mini)   │    │  ← glass, above tab bar
- *   │        └──────────────────────┘    │
- *   ├────────────────────────────────────┤
- *   │  TabBar (glass, 4 tabs)            │
- *   └────────────────────────────────────┘
- *
- * See memory/architecture_glass_grok.md for the full spec.
+ * See memory/architecture_glass_grok.md for the design spec and
+ * memory/feedback_pwa_chat_flex_layout.md for the chat infrastructure saga.
  */
 
-import { useState } from 'react';
-import TopBar from './chrome/TopBar';
-import TabBar from './chrome/TabBar';
-import YuliaAgent from './chrome/YuliaAgent';
-import DealTab from './tabs/DealTab';
-import DocsTab from './tabs/DocsTab';
-import PipelineTab from './tabs/PipelineTab';
-import SearchTab from './tabs/SearchTab';
+import { useMemo, useState } from 'react';
+import MobileTopBar from './mobile/chrome/MobileTopBar';
+import MobileTabBar from './mobile/chrome/MobileTabBar';
+import TodayTab from './mobile/TodayTab';
+import DealsTab from './mobile/DealsTab';
+import InboxTab from './mobile/InboxTab';
+import ChatFullscreen from './mobile/ChatFullscreen';
 import HelpSheet from './sheets/HelpSheet';
-import type { AppTab, YuliaState, AppShellInnerProps } from './types';
+import { adaptDeals } from './mobile/adaptDeals';
+import type { MobileTab } from './mobile/types';
+import type { AppShellInnerProps } from './types';
+import './mobile/mobile.css';
 
 export default function AppShellInner({
   userName,
@@ -53,31 +47,36 @@ export default function AppShellInner({
   onAccountTap,
   onBack: _onBack,
 }: AppShellInnerProps) {
-  const [tab, setTab] = useState<AppTab>('deal');
-  const [yuliaState, setYuliaState] = useState<YuliaState>('mini');
+  // Active content tab (Today / Deals / Inbox). When user taps the Chat tab,
+  // we open ChatFullscreen as an overlay instead of switching content; the
+  // last non-chat tab is remembered so the back chevron returns here.
+  const [contentTab, setContentTab] = useState<Exclude<MobileTab, 'chat'>>('today');
+  const [chatOpen, setChatOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
 
-  // Pipeline tab dims until there's sourcing or watchlist data. For v1,
-  // "has deals" is the gate — once the user has any deals, Pipeline is live.
-  const pipelineDim = deals.length === 0;
+  // Which tab reads as "active" in the bottom tab bar — 'chat' when the
+  // chat overlay is up, else the current content tab.
+  const activeTab: MobileTab = chatOpen ? 'chat' : contentTab;
 
-  const isFull = yuliaState === 'full';
+  const adapted = useMemo(() => adaptDeals(deals), [deals]);
+  const activeDeal = useMemo(
+    () => adapted.find((d) => d.id === activeDealId) ?? null,
+    [adapted, activeDealId],
+  );
 
-  // Log helpers referenced but unused in v1 — keep to avoid lint errors while
-  // TypeScript checks the full prop pass-through from AppShell.
-  void userName;
+  const handleTabChange = (next: MobileTab) => {
+    if (next === 'chat') {
+      setChatOpen(true);
+    } else {
+      setChatOpen(false);
+      setContentTab(next);
+    }
+  };
 
   return (
     <div
       style={{
         position: 'relative',
-        /* Fill the flex parent naturally. The ancestor chain is:
-             <main flex-1>  ← parent (fills 100dvh via minHeight up the chain)
-             └─ AppShellInner (this)
-           Using an explicit height: calc(100dvh - safe-top) here left the
-           safe-top amount as dead space BELOW this container inside <main>,
-           which then stacked on the TabBar's bottom offset and produced a
-           ~70pt gap below the tab bar. flex:1 keeps us sized to <main>. */
         flex: 1,
         minHeight: 0,
         overflow: 'hidden',
@@ -88,73 +87,77 @@ export default function AppShellInner({
         flexDirection: 'column',
       }}
     >
-      {/* Top bar — hidden when full chat is open (chat has its own header). */}
-      {!isFull && (
-        <TopBar
+      {/* TopBar — hidden while chat overlay is up (chat has its own header). */}
+      {!chatOpen && (
+        <MobileTopBar
+          tab={contentTab}
           userInitial={userInitial}
-          onAccountTap={onAccountTap}
           onHelpTap={() => setHelpOpen(true)}
+          onAccountTap={onAccountTap}
         />
       )}
 
-      {/* Tab content — hidden when full chat is open. */}
-      {!isFull && (
+      {/* Tab content — single scrollable region. Padding-bottom reserves
+          room for the floating tab bar (54 + 10 bottom = 64) + breathing (16). */}
+      {!chatOpen && (
         <main
-          className="gg-tab-scroll"
           style={{
             flex: 1,
             overflowY: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehavior: 'contain',
-            /* Reserve room for floating TabBar (54 + 10 bottom = 64) +
-               floating YuliaAgent mini pill (54 + 8 gap = 62) + top gap (12). */
-            paddingBottom: 138,
+            paddingBottom: 80,
           }}
         >
-          {tab === 'deal' && (
-            <DealTab
+          {contentTab === 'today' && (
+            <TodayTab
               deals={deals}
               activeDealId={activeDealId}
+              userName={userName}
               onSelectDeal={onSelectDeal}
+              onOpenChat={() => setChatOpen(true)}
               onOpenHelp={() => setHelpOpen(true)}
             />
           )}
-          {tab === 'docs' && <DocsTab />}
-          {tab === 'pipeline' && (
-            <PipelineTab
+          {contentTab === 'deals' && (
+            <DealsTab
               deals={deals}
-              activeDealId={activeDealId}
-              onSelectDeal={(dealId) => {
-                onSelectDeal(dealId);
-                setTab('deal'); // jump to Deal tab after selection
-              }}
+              onSelectDeal={onSelectDeal}
+              onOpenChat={() => setChatOpen(true)}
             />
           )}
-          {tab === 'search' && <SearchTab />}
+          {contentTab === 'inbox' && (
+            <InboxTab
+              deals={deals}
+              onSelectDeal={onSelectDeal}
+              onOpenChat={() => setChatOpen(true)}
+            />
+          )}
         </main>
       )}
 
-      {/* Yulia — floats above tab bar in mini or side; covers everything in full. */}
-      <YuliaAgent
-        state={yuliaState}
-        onStateChange={setYuliaState}
+      {/* Tab bar — portaled to body. Hidden while chat is open. */}
+      {!chatOpen && <MobileTabBar active={activeTab} onChange={handleTabChange} />}
+
+      {/* Chat overlay — portaled to body. Only renders when chatOpen. */}
+      <ChatFullscreen
+        open={chatOpen}
+        deal={activeDeal}
         messages={messages}
         streamingText={streamingText}
         sending={sending}
         activeTool={activeTool}
-        onSend={onSend}
         chatError={chatError}
         onRetry={onRetry}
+        onSend={onSend}
+        onBack={() => setChatOpen(false)}
       />
 
-      {/* Tab bar — hidden when full chat is open. */}
-      {!isFull && <TabBar active={tab} onChange={setTab} pipelineDim={pipelineDim} />}
-
-      {/* Help & glossary bottom sheet — opens from TopBar bell + first-run primer. */}
+      {/* Help & Glossary bottom sheet — opens from TopBar bell + Today primer. */}
       <HelpSheet
         open={helpOpen}
         onOpenChange={setHelpOpen}
-        onAskYulia={() => setYuliaState('full')}
+        onAskYulia={() => { setHelpOpen(false); setChatOpen(true); }}
       />
     </div>
   );
