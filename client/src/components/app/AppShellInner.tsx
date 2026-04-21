@@ -66,9 +66,11 @@ export default function AppShellInner({
   );
 
   // Deliverables feed — powers Today's PINNED artifacts strip and
-  // Chat's inline artifact cards. Fetched once on mount + when deal
-  // count changes (new deal → new deliverables possible).
-  const { deliverables } = useDeliverables(deals.length);
+  // Chat's inline artifact cards. Fetched on mount, on deal-count change,
+  // and after every assistant message completes (messages.length tracks
+  // both user + assistant turns, so it increments when Yulia replies —
+  // which is when a new deliverable would have just been produced).
+  const { deliverables } = useDeliverables(deals.length, messages.length);
 
   const handleTabChange = (next: MobileTab) => {
     if (next === 'chat') {
