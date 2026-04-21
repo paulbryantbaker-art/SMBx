@@ -1,0 +1,492 @@
+/* ═══════════════════════════════════════════════════════════════════
+   sell-overdrive.css — automated visual-story moments for the Sell
+   page. Three signature sequences:
+     1. .sv-cim     — autonomous CIM-page-1 builder (hero right col)
+     2. .sv-wf      — deliverable waterfall (replaces 5-card apps grid)
+     3. .sv-gantt   — before/after Gantt bars (replaces h-claim chart)
+
+   Stays inside the `.h-*` Grok Glass App Store vocabulary:
+   dark hero surface, Sora+Inter, rose accent (#C7616F), Fibonacci-ish
+   spacing. Only the CONTENT goes cinematic; the container chrome is
+   the same palette users already know from other pages.
+
+   All three respect `prefers-reduced-motion: reduce` by collapsing
+   to the finished end-state (no motion, content still legible).
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────────────────────────────────────────────
+   1) CIMBuilder — the CIM writes itself
+   Sits inside .h-today__demo slot on the Sell hero.
+   ─────────────────────────────────────────────────────────────────── */
+
+.sv-cim {
+  position: relative;
+  padding: 18px 18px 20px;
+  background: linear-gradient(180deg, #141416 0%, #0F0F11 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.32);
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #FFFFFF;
+}
+
+.sv-cim__kicker {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 14px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
+.sv-cim__clock {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: rgba(255,255,255,0.78);
+}
+.sv-cim__clock::before {
+  content: ''; width: 6px; height: 6px; border-radius: 999px;
+  background: #C7616F; box-shadow: 0 0 0 0 rgba(199,97,111,0.6);
+  animation: sv-cim-pulse 1.8s ease-in-out infinite;
+}
+@keyframes sv-cim-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(199,97,111,0.6); }
+  50%      { box-shadow: 0 0 0 6px rgba(199,97,111,0); }
+}
+
+/* The paper — white CIM page */
+.sv-cim__paper {
+  position: relative;
+  background: #FFFFFF;
+  color: #0A0A0B;
+  border-radius: 8px;
+  padding: 16px 18px 14px;
+  min-height: 360px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+
+/* Thin header bar at the top of the CIM page */
+.sv-cim__bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 8px; margin-bottom: 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.12);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(0,0,0,0.55);
+}
+.sv-cim__bar-tag {
+  padding: 2px 6px; border-radius: 4px;
+  background: rgba(199,97,111,0.14); color: #C7616F;
+}
+
+/* Section pill chip */
+.sv-cim__pill {
+  display: inline-block;
+  padding: 3px 8px;
+  background: rgba(10,10,11,0.06);
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(0,0,0,0.65);
+  margin-bottom: 8px;
+}
+
+/* The main title on the CIM page */
+.sv-cim__h {
+  font-family: 'Sora', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  margin: 0 0 3px 0;
+}
+.sv-cim__sub {
+  font-size: 10.5px;
+  color: rgba(0,0,0,0.62);
+  margin: 0 0 12px 0;
+}
+
+/* Typed paragraph with caret */
+.sv-cim__para {
+  font-size: 11.5px;
+  line-height: 1.58;
+  color: rgba(0,0,0,0.84);
+  margin: 0 0 10px 0;
+  min-height: 56px; /* reserve vertical space so KPI strip doesn't jump */
+}
+.sv-cim__caret {
+  display: inline-block;
+  width: 1px; height: 12px;
+  background: #0A0A0B;
+  vertical-align: -2px;
+  margin-left: 2px;
+  animation: sv-cim-caret 0.85s steps(1) infinite;
+}
+@keyframes sv-cim-caret {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* KPI strip — 4 cells */
+.sv-cim__kpi {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 10px 0;
+  margin: 10px 0;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.sv-cim__kpi-c { text-align: left; }
+.sv-cim__kpi-k {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(0,0,0,0.5);
+  margin-bottom: 2px;
+}
+.sv-cim__kpi-v {
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: #0A0A0B;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Concentration mini-chart: 4 bars */
+.sv-cim__chart {
+  display: flex; align-items: flex-end; gap: 6px;
+  height: 46px;
+  margin: 6px 0 4px;
+}
+.sv-cim__chart-b {
+  flex: 1;
+  background: linear-gradient(180deg, #C7616F 0%, #9B4855 100%);
+  border-radius: 2px 2px 0 0;
+  height: 0;
+  transition: height 600ms cubic-bezier(0.22, 0.8, 0.32, 1);
+}
+.sv-cim__chart-l {
+  display: flex; gap: 6px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 8px; color: rgba(0,0,0,0.55);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.sv-cim__chart-l span { flex: 1; text-align: center; }
+
+/* Page footer */
+.sv-cim__foot {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 10px; padding-top: 8px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(0,0,0,0.45);
+}
+
+/* Analyst-hours saved readout (outside the paper, below it) */
+.sv-cim__save {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 12px; padding: 10px 12px;
+  background: rgba(199,97,111,0.09);
+  border: 1px solid rgba(199,97,111,0.18);
+  border-radius: 8px;
+}
+.sv-cim__save-k {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
+.sv-cim__save-v {
+  font-family: 'Sora', sans-serif;
+  font-weight: 800; font-size: 16px;
+  color: #FFFFFF;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.sv-cim__save-v em {
+  font-style: normal;
+  color: #E9A8B1;
+  margin-right: 6px;
+}
+
+/* Fade-in class applied to each section as the sequence unfolds */
+.sv-cim [data-stage="hidden"]  { opacity: 0; transform: translateY(4px); }
+.sv-cim [data-stage="visible"] {
+  opacity: 1; transform: none;
+  transition: opacity 350ms ease, transform 350ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sv-cim__caret, .sv-cim__clock::before { animation: none; }
+  .sv-cim [data-stage] { opacity: 1; transform: none; transition: none; }
+}
+
+
+/* ───────────────────────────────────────────────────────────────────
+   2) DeliverableWaterfall — 12 IB deliverables, scroll-triggered
+   ─────────────────────────────────────────────────────────────────── */
+
+.sv-wf {
+  position: relative;
+  margin-top: var(--h-pad, 24px);
+  background: var(--h-card, #FFFFFF);
+  border: 1px solid var(--h-line, rgba(0,0,0,0.08));
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+}
+
+.sv-wf__head {
+  padding: 24px 28px 18px;
+  border-bottom: 1px solid var(--h-line-2, rgba(0,0,0,0.05));
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 20px;
+}
+.sv-wf__head-l { display: flex; flex-direction: column; gap: 6px; }
+.sv-wf__k {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--h-mute, #6B6B70);
+}
+.sv-wf__t {
+  font-family: 'Sora', sans-serif; font-weight: 800;
+  font-size: clamp(22px, 2.4vw, 28px);
+  letter-spacing: -0.015em; line-height: 1.15;
+  margin: 0; color: var(--h-ink, #0A0A0B);
+}
+.sv-wf__t em { font-style: italic; color: #C7616F; font-weight: 700; }
+
+.sv-wf__total {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  background: rgba(199,97,111,0.08);
+  border: 1px solid rgba(199,97,111,0.18);
+  border-radius: 10px;
+  font-family: 'Sora', sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+.sv-wf__total-v {
+  font-weight: 800; font-size: 18px; color: #C7616F;
+  letter-spacing: -0.01em;
+}
+.sv-wf__total-l {
+  font-family: 'Inter', sans-serif; font-weight: 500;
+  font-size: 11px; color: var(--h-mute, #6B6B70);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* List rows */
+.sv-wf__list { display: grid; }
+.sv-wf__row {
+  display: grid;
+  grid-template-columns: 32px 1fr auto auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 28px;
+  border-bottom: 1px solid var(--h-line-2, rgba(0,0,0,0.05));
+  opacity: 0;
+  transform: translateX(-12px);
+  transition: opacity 500ms cubic-bezier(0.22, 0.8, 0.32, 1),
+              transform 500ms cubic-bezier(0.22, 0.8, 0.32, 1);
+}
+.sv-wf__row:last-child { border-bottom: none; }
+.sv-wf__row.in { opacity: 1; transform: none; }
+
+/* Checkbox — starts empty, fills when the row "completes" */
+.sv-wf__check {
+  width: 22px; height: 22px;
+  border: 1.5px solid var(--h-line, rgba(0,0,0,0.18));
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  background: #FFFFFF;
+  transition: background 300ms ease, border-color 300ms ease, transform 200ms ease;
+}
+.sv-wf__check svg {
+  width: 14px; height: 14px; color: #FFFFFF;
+  stroke-dasharray: 24; stroke-dashoffset: 24;
+  transition: stroke-dashoffset 400ms cubic-bezier(0.22, 0.8, 0.32, 1) 100ms;
+}
+.sv-wf__row.in .sv-wf__check {
+  background: #1F8248;
+  border-color: #1F8248;
+  transform: scale(1.06);
+}
+.sv-wf__row.in .sv-wf__check svg { stroke-dashoffset: 0; }
+
+.sv-wf__name {
+  font-family: 'Sora', sans-serif; font-weight: 600;
+  font-size: 14.5px; color: var(--h-ink, #0A0A0B);
+  letter-spacing: -0.005em;
+}
+.sv-wf__name-s {
+  display: block;
+  font-family: 'Inter', sans-serif; font-weight: 500;
+  font-size: 11.5px; color: var(--h-mute, #6B6B70);
+  margin-top: 1px;
+}
+
+.sv-wf__before, .sv-wf__after {
+  font-family: 'Sora', sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  text-align: right;
+}
+.sv-wf__before {
+  font-weight: 600; font-size: 13px; color: var(--h-mute, #6B6B70);
+  text-decoration: line-through;
+  text-decoration-color: rgba(199,97,111,0.5);
+  text-decoration-thickness: 2px;
+  min-width: 68px;
+}
+.sv-wf__arrow {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  color: var(--h-faint, #9A9A9F);
+  font-size: 14px;
+}
+.sv-wf__after {
+  font-weight: 800; font-size: 15px;
+  color: #1F8248;
+  min-width: 70px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sv-wf__row { opacity: 1; transform: none; transition: none; }
+  .sv-wf__row .sv-wf__check { background: #1F8248; border-color: #1F8248; }
+  .sv-wf__row .sv-wf__check svg { stroke-dashoffset: 0; }
+}
+
+
+/* ───────────────────────────────────────────────────────────────────
+   3) BrokerGantt — before/after timeline bars
+   ─────────────────────────────────────────────────────────────────── */
+
+.sv-gantt {
+  position: relative;
+  padding: 32px 0 8px;
+  display: grid; gap: 28px;
+}
+
+.sv-gantt__head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end; gap: 20px;
+  margin-bottom: 6px;
+}
+.sv-gantt__head-l { display: flex; flex-direction: column; gap: 6px; }
+.sv-gantt__k {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--h-mute, #6B6B70);
+}
+.sv-gantt__t {
+  font-family: 'Sora', sans-serif; font-weight: 800;
+  font-size: clamp(22px, 2.4vw, 28px);
+  letter-spacing: -0.015em; line-height: 1.15;
+  margin: 0; color: var(--h-ink, #0A0A0B);
+}
+.sv-gantt__t em { font-style: italic; color: #C7616F; font-weight: 700; }
+
+/* One row = a whole practice */
+.sv-gantt__row { display: grid; gap: 10px; }
+.sv-gantt__row-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.sv-gantt__label {
+  font-family: 'Sora', sans-serif; font-weight: 700;
+  font-size: 13px; color: var(--h-ink, #0A0A0B);
+  letter-spacing: -0.005em;
+}
+.sv-gantt__label em { font-style: normal; color: var(--h-mute, #6B6B70); font-weight: 500; }
+.sv-gantt__metric {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  font-family: 'Sora', sans-serif; font-variant-numeric: tabular-nums;
+}
+.sv-gantt__metric-v { font-weight: 800; font-size: 18px; letter-spacing: -0.01em; }
+.sv-gantt__metric-l {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 500; font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--h-mute, #6B6B70);
+}
+
+/* Timeline track */
+.sv-gantt__track {
+  position: relative;
+  height: 44px;
+  background: rgba(10,10,11,0.04);
+  border-radius: 10px;
+  overflow: hidden;
+}
+/* Week gridlines */
+.sv-gantt__grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(90deg,
+    transparent 0, transparent calc(var(--sv-w, 1)*1% - 1px),
+    rgba(10,10,11,0.06) calc(var(--sv-w, 1)*1% - 1px),
+    rgba(10,10,11,0.06) calc(var(--sv-w, 1)*1% + 0px));
+  background-size: calc(var(--sv-w, 1)*1%) 100%;
+  pointer-events: none;
+}
+
+/* A phase segment */
+.sv-gantt__seg {
+  position: absolute; top: 6px; bottom: 6px;
+  display: flex; align-items: center;
+  padding: 0 10px;
+  border-radius: 6px;
+  overflow: hidden;
+  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600; font-size: 11px;
+  letter-spacing: 0;
+  white-space: nowrap;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 1px 3px rgba(0,0,0,0.15);
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 620ms cubic-bezier(0.22, 0.8, 0.32, 1);
+}
+.sv-gantt__row.in .sv-gantt__seg { transform: scaleX(1); }
+.sv-gantt__seg > span {
+  opacity: 0;
+  transition: opacity 240ms ease 420ms;
+}
+.sv-gantt__row.in .sv-gantt__seg > span { opacity: 1; }
+
+/* Phase colors — today's practice uses muted slate */
+.sv-gantt__row[data-variant="today"] .sv-gantt__seg {
+  background: linear-gradient(180deg, #3A3A3E 0%, #2A2A2E 100%);
+}
+/* With-Yulia practice uses rose */
+.sv-gantt__row[data-variant="yulia"] .sv-gantt__seg {
+  background: linear-gradient(180deg, #C7616F 0%, #9B4855 100%);
+}
+
+/* Week scale below — shown once for both rows */
+.sv-gantt__scale {
+  display: flex;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 9.5px; letter-spacing: 0.1em;
+  color: var(--h-faint, #9A9A9F);
+  text-transform: uppercase;
+  padding: 0 2px;
+}
+.sv-gantt__scale-t {
+  flex: 1;
+  text-align: left;
+}
+
+.sv-gantt__cap {
+  margin-top: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px; color: var(--h-ink-2, #3A3A3E);
+  line-height: 1.55;
+}
+.sv-gantt__cap strong { color: var(--h-ink, #0A0A0B); font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sv-gantt__seg { transform: scaleX(1); transition: none; }
+  .sv-gantt__seg > span { opacity: 1; transition: none; }
+}

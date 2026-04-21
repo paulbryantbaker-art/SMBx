@@ -13,13 +13,13 @@ import JourneyShell from '../shell/JourneyShell';
 import SectionNav, { type Section } from '../shell/SectionNav';
 
 const SELL_SECTIONS: readonly Section[] = [
-  { id: 'hero',    label: 'Overview' },
-  { id: 'try',     label: 'Add-back estimator' },
-  { id: 'phases',  label: 'Five phases' },
-  { id: 'caps',    label: 'Capabilities' },
-  { id: 'claim',   label: 'Speed advantage' },
-  { id: 'trust',   label: 'Trust' },
-  { id: 'cta',     label: 'Start' },
+  { id: 'hero',       label: 'Overview' },
+  { id: 'waterfall',  label: '12 deliverables' },
+  { id: 'phases',     label: 'Engagement arc' },
+  { id: 'caps',       label: 'Capabilities' },
+  { id: 'claim',      label: 'Practice math' },
+  { id: 'trust',      label: 'Trust' },
+  { id: 'cta',        label: 'Start' },
 ];
 
 /* ── Add-back estimator heuristics ── */
@@ -83,16 +83,16 @@ const VOICE_COPY: Record<Voice, VoiceCopy> = {
     ),
   },
   advisor: {
-    meta: 'Sell-side · Acme, Inc.',
-    h1: "The CIM your client's getting Friday.",
-    h1Em: 'Drafted by dinner Tuesday.',
+    meta: 'Sell-side · Broker + advisor workflow',
+    h1: 'A CIM takes 40 hours.',
+    h1Em: 'Yulia drafts one in 30 minutes.',
     sub: (
       <>
-        For <strong>LMM advisors, brokers, and M&amp;A intermediaries</strong>. Yulia reads the tax returns, defends the add-backs, drafts the CIM, builds the buyer list, and coordinates diligence. <strong>You keep the judgment. You run the deal.</strong> Narrated here with Acme, Inc. — $65M distributor, Phoenix HQ, 2nd-gen owner exploring exit.
+        For <strong>LMM advisors, brokers, and M&amp;A intermediaries</strong>. Yulia writes the CIM, builds the buyer list, runs the data room, drafts the LOI — <strong>every deliverable a sell-side engagement ships</strong>. You keep the judgment, the relationship, and the success fee. Watch it work on Acme, Inc. to the right →
       </>
     ),
-    ctaLabel: 'Start the walkthrough',
-    ctaSeed: 'I have a seller engagement starting.',
+    ctaLabel: 'Start a mandate',
+    ctaSeed: 'I have a seller engagement starting — walk me through the first week.',
     demoK: 'Yulia · live on Acme, Inc.',
     demoMe: 'Read these three tax returns.',
     demoYulia: (
@@ -206,31 +206,19 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
               </div>
             </div>
 
-            <div className="h-today__demo">
-              <div className="h-today__demo-k">{copy.demoK}</div>
-              <div className="h-today__demo-bubble h-today__demo-bubble--me">{copy.demoMe}</div>
-              <div className="h-today__demo-bubble">{copy.demoYulia}</div>
-              <div className="h-today__demo-out">
-                <div className="h-today__demo-out-c">
-                  <div className="h-today__demo-out-v">+$1.80<span style={{ fontSize: '60%', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>M</span></div>
-                  <div className="h-today__demo-out-l">Hidden EBITDA</div>
-                </div>
-                <div className="h-today__demo-out-c">
-                  <div className="h-today__demo-out-v">$82.5<span style={{ fontSize: '60%', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>M</span></div>
-                  <div className="h-today__demo-out-l">Target enterprise value</div>
-                </div>
-              </div>
+            <div className="h-today__demo" style={{ padding: 0, background: 'transparent', border: 'none', boxShadow: 'none' }}>
+              <CIMBuilder />
             </div>
           </div>
         </section>
 
-        {/* ══ LIVE ADD-BACK ESTIMATOR ══ */}
-        <AddbackEstimator />
+        {/* ══ OVERDRIVE 1 · DELIVERABLE WATERFALL ══ */}
+        <DeliverableWaterfall />
 
-        {/* ══ FIVE-PHASE ARC ══ */}
-        <div className="h-sect-h">
+        {/* ══ FIVE-PHASE ARC (kept as supporting detail below waterfall) ══ */}
+        <div className="h-sect-h" style={{ marginTop: 32 }}>
           <div className="h-sect-h__l">
-            <div className="h-sect-h__k">The arc · 14 weeks · 5 phases</div>
+            <div className="h-sect-h__k">Zooming in · the engagement arc</div>
             <h2 className="h-sect-h__t">Every sell-side step, <em>one canvas.</em></h2>
           </div>
         </div>
@@ -376,32 +364,8 @@ export default function Sell({ active, onSend, onStartFree, onNavigate, onSignIn
           ))}
         </div>
 
-        {/* ══ CLAIM ══ */}
-        <section className="h-claim h-anim" id="claim">
-          <div className="h-claim__l">
-            <div className="h-claim__k">The economics</div>
-            <h2 className="h-claim__h">Priced against <em>the hour, not the outcome.</em></h2>
-            <p className="h-claim__p">
-              A sell-side engagement at a boutique bank: $750K–$2M, twelve months, success fees on top. On a $30M sale, that's another $1.2M if it closes. Yulia does the same work — reads the returns, writes the CIM, runs the process — for a flat monthly subscription. You keep the success fee.
-            </p>
-          </div>
-          <div className="h-claim__viz">
-            {[
-              { l: 'Boutique M&A retainer',    w: '100%', v: '$1.4M · 12mo',    tone: 'big' },
-              { l: 'Success fee (4% on $30M)', w: '82%',  v: '+$1.2M',          tone: 'big' },
-              { l: 'Legal · tax · QoE',        w: '28%',  v: '$420K',           tone: 'big' },
-              { l: 'smbx.ai',                  w: '7%',   v: '$4K / mo',        tone: 'small' },
-            ].map((r) => (
-              <div key={r.l} className="h-claim__row" data-tone={r.tone}>
-                <span className="h-claim__row-l">{r.l}</span>
-                <span className="h-claim__row-bar">
-                  <span className="h-claim__row-fill" style={{ ['--w' as string]: r.w } as React.CSSProperties} />
-                </span>
-                <span className="h-claim__row-v">{r.v}</span>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* ══ OVERDRIVE 3 · BROKER BEFORE/AFTER GANTT ══ */}
+        <BrokerGantt />
 
         {/* ══ TRUST ══ */}
         <div className="h-trust" id="trust">
@@ -600,5 +564,364 @@ function VoiceToggle({ voice, onChange }: { voice: Voice; onChange: (v: Voice) =
         );
       })}
     </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   CIMBuilder — the CIM writes itself.
+   Lives in the hero right column. Runs an autonomous ~18-second loop:
+   pill → title → typed paragraph → KPI count-up → concentration chart →
+   page footer. Clock in the top-right animates 00:00 → 30:00 over the
+   full loop. Analyst-hours readout below the paper ticks 0 → 40.
+   Pauses when not visible. Respects prefers-reduced-motion.
+   ══════════════════════════════════════════════════════════════════════ */
+
+const CIM_PARA =
+  'Acme, Inc. is a Phoenix-based specialty distributor serving commercial HVAC contractors across Arizona, Nevada, and New Mexico. Revenue of $65M grew at a 14% CAGR over the trailing three years, with normalized EBITDA of $11.0M (16.9% margin) after defensible add-backs.';
+
+type CimStage = 0 | 1 | 2 | 3 | 4 | 5;
+
+function CIMBuilder() {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [stage, setStage] = useState<CimStage>(0);
+  const [typed, setTyped] = useState('');
+  const [visible, setVisible] = useState(true);
+  const [reduced, setReduced] = useState(false);
+
+  /* Pause when off-screen — cheap. */
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || typeof window === 'undefined') return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduced(mq.matches);
+    const onMq = () => setReduced(mq.matches);
+    mq.addEventListener?.('change', onMq);
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => setVisible(e.isIntersecting)),
+      { threshold: 0.1 },
+    );
+    io.observe(el);
+    return () => { io.disconnect(); mq.removeEventListener?.('change', onMq); };
+  }, []);
+
+  /* Stage driver. Each stage has a duration after which we advance. */
+  useEffect(() => {
+    if (reduced) { setStage(5); setTyped(CIM_PARA); return; }
+    if (!visible) return;
+    const durations: Record<CimStage, number> = {
+      0: 600,   // paper settle
+      1: 1000,  // pill + title fade
+      2: 6200,  // paragraph typing
+      3: 2000,  // KPI count-up
+      4: 2000,  // chart bars
+      5: 5000,  // hold, then loop
+    };
+    const t = setTimeout(() => {
+      setStage((s) => ((s + 1) % 6) as CimStage);
+      if (stage === 5) setTyped(''); // reset for next loop
+    }, durations[stage]);
+    return () => clearTimeout(t);
+  }, [stage, visible, reduced]);
+
+  /* Char-by-char typing during stage 2. */
+  useEffect(() => {
+    if (reduced || !visible || stage !== 2) return;
+    let i = typed.length;
+    if (i >= CIM_PARA.length) return;
+    const id = setInterval(() => {
+      i += 2; // 2 chars per tick for natural feel
+      if (i >= CIM_PARA.length) { setTyped(CIM_PARA); clearInterval(id); }
+      else setTyped(CIM_PARA.slice(0, i));
+    }, 28);
+    return () => clearInterval(id);
+  }, [stage, visible, reduced, typed.length]);
+
+  /* Clock + analyst-hours counters — tween toward the target as stages
+     advance. We compute each independently from `stage` so the two
+     readouts feel linked but smooth. */
+  const totalProgress = Math.min(1, stage / 5);
+  const clockMin = Math.floor(30 * totalProgress);
+  const clockSec = Math.floor(((30 * totalProgress) % 1) * 60);
+  const clockStr = `${String(clockMin).padStart(2, '0')}:${String(clockSec).padStart(2, '0')}`;
+  const savedHrs = Math.round(40 * totalProgress);
+
+  const svRev = stage >= 3 ? '$65M' : '$0';
+  const svEbitda = stage >= 3 ? '$11.0M' : '$0';
+  const svMargin = stage >= 3 ? '16.9%' : '0.0%';
+  const svEmp = stage >= 3 ? '120' : '0';
+
+  const chartHeights = stage >= 4 ? [62, 44, 36, 24] : [0, 0, 0, 0];
+
+  const S = (needStage: CimStage): 'visible' | 'hidden' =>
+    stage >= needStage ? 'visible' : 'hidden';
+
+  return (
+    <div className="sv-cim" ref={rootRef} aria-label="Yulia drafts a CIM page">
+      <div className="sv-cim__kicker">
+        <span>Yulia · drafting · Acme CIM</span>
+        <span className="sv-cim__clock" aria-live="polite">{clockStr} / 30:00</span>
+      </div>
+
+      <div className="sv-cim__paper">
+        <div className="sv-cim__bar" data-stage={S(1)}>
+          <span>Acme, Inc. · Confidential · Sept 2026</span>
+          <span className="sv-cim__bar-tag">SELL-SIDE</span>
+        </div>
+
+        <div className="sv-cim__pill" data-stage={S(1)}>Executive Summary</div>
+        <h3 className="sv-cim__h" data-stage={S(1)}>Acme, Inc.</h3>
+        <div className="sv-cim__sub" data-stage={S(1)}>Confidential Information Memorandum</div>
+
+        <p className="sv-cim__para" data-stage={S(2)}>
+          {typed}
+          {stage === 2 && typed.length < CIM_PARA.length && <span className="sv-cim__caret" />}
+        </p>
+
+        <div className="sv-cim__kpi" data-stage={S(3)}>
+          <div className="sv-cim__kpi-c">
+            <div className="sv-cim__kpi-k">Revenue · ttm</div>
+            <div className="sv-cim__kpi-v">{svRev}</div>
+          </div>
+          <div className="sv-cim__kpi-c">
+            <div className="sv-cim__kpi-k">EBITDA · norm</div>
+            <div className="sv-cim__kpi-v">{svEbitda}</div>
+          </div>
+          <div className="sv-cim__kpi-c">
+            <div className="sv-cim__kpi-k">Margin</div>
+            <div className="sv-cim__kpi-v">{svMargin}</div>
+          </div>
+          <div className="sv-cim__kpi-c">
+            <div className="sv-cim__kpi-k">Employees</div>
+            <div className="sv-cim__kpi-v">{svEmp}</div>
+          </div>
+        </div>
+
+        <div data-stage={S(4)}>
+          <div className="sv-cim__pill">Customer concentration · top 4</div>
+          <div className="sv-cim__chart">
+            {chartHeights.map((h, i) => (
+              <span key={i} className="sv-cim__chart-b" style={{ height: `${h}%` }} />
+            ))}
+          </div>
+          <div className="sv-cim__chart-l">
+            <span>Mesa HVAC</span><span>Sun Corp</span><span>DesertMech</span><span>Others</span>
+          </div>
+        </div>
+
+        <div className="sv-cim__foot" data-stage={S(5)}>
+          <span>Page 1 / 30</span>
+          <span>Acme · Confidential</span>
+        </div>
+      </div>
+
+      <div className="sv-cim__save">
+        <span className="sv-cim__save-k">Analyst hours saved</span>
+        <span className="sv-cim__save-v"><em>{savedHrs}</em>of 40</span>
+      </div>
+    </div>
+  );
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   DeliverableWaterfall — 12 IB deliverables, scroll-triggered stagger.
+   Each row lights up in sequence: analyst-hours struck through, Yulia
+   minutes appear. Replaces the 4-card .h-apps phase grid on Sell.
+   ══════════════════════════════════════════════════════════════════════ */
+
+const WF_DELIVERABLES: readonly { name: string; sub: string; before: string; after: string }[] = [
+  { name: 'Confidential Information Memorandum', sub: '30–40 pages, investment-grade narrative',      before: '40 hrs', after: '30 min' },
+  { name: 'One-page teaser',                     sub: 'Anonymized, buyer-ready, branded',             before: '6 hrs',  after: '4 min'  },
+  { name: 'Financial model · 3-statement',       sub: 'Operating model, add-back schedule, DCF',       before: '24 hrs', after: '6 min'  },
+  { name: 'Valuation summary',                   sub: 'Precedent comps, DCF, range of value',          before: '12 hrs', after: '3 min'  },
+  { name: 'Buyer list · strategic + financial',  sub: '200+ targets scored on thesis fit',             before: '20 hrs', after: '5 min'  },
+  { name: 'Management presentation deck',        sub: '18-slide narrative with exhibits',              before: '16 hrs', after: '8 min'  },
+  { name: 'Virtual data room · structured',      sub: '147-folder tree, NDA-gated, audit-logged',      before: '10 hrs', after: '2 min'  },
+  { name: 'DD question response kit',            sub: '147-item checklist with pre-drafted answers',   before: '18 hrs', after: '6 min'  },
+  { name: 'Bid-compare analysis',                sub: 'IOIs normalized: cash-equivalent, after-tax',   before: '8 hrs',  after: '4 min'  },
+  { name: 'LOI draft + redline',                 sub: 'First-pass attorney-ready structure',           before: '6 hrs',  after: '4 min'  },
+  { name: 'Purchase agreement redline',          sub: 'APA / SPA markup against buyer draft',          before: '14 hrs', after: '7 min'  },
+  { name: 'Closing binder',                      sub: 'All signed docs, schedules, certificates',      before: '10 hrs', after: '3 min'  },
+];
+
+function DeliverableWaterfall() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [activated, setActivated] = useState<number>(0);
+
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      setActivated(WF_DELIVERABLES.length);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          /* Stagger each row by 140ms once the block enters view. */
+          WF_DELIVERABLES.forEach((_, i) => {
+            setTimeout(() => setActivated((n) => Math.max(n, i + 1)), 140 * i);
+          });
+          io.disconnect();
+        });
+      },
+      { rootMargin: '-10% 0px', threshold: 0.1 },
+    );
+    io.observe(root);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div className="sv-wf h-anim" ref={ref} id="waterfall">
+      <div className="sv-wf__head">
+        <div className="sv-wf__head-l">
+          <div className="sv-wf__k">The full sell-side deliverable list</div>
+          <h2 className="sv-wf__t">Twelve artifacts ship every engagement. <em>Yulia produces all of them.</em></h2>
+        </div>
+        <div className="sv-wf__total">
+          <span className="sv-wf__total-v">184<span style={{ fontSize: '65%', opacity: 0.7 }}>h → </span>62<span style={{ fontSize: '65%', opacity: 0.7 }}>m</span></span>
+          <span className="sv-wf__total-l">Practice capacity · 3.4× unlocked</span>
+        </div>
+      </div>
+
+      <div className="sv-wf__list" role="list">
+        {WF_DELIVERABLES.map((d, i) => (
+          <div
+            key={d.name}
+            role="listitem"
+            className={`sv-wf__row${i < activated ? ' in' : ''}`}
+          >
+            <div className="sv-wf__check" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="4 12 10 18 20 6" />
+              </svg>
+            </div>
+            <div>
+              <div className="sv-wf__name">{d.name}</div>
+              <div className="sv-wf__name-s">{d.sub}</div>
+            </div>
+            <div className="sv-wf__before">{d.before}</div>
+            <div className="sv-wf__arrow">→</div>
+            <div className="sv-wf__after">{d.after}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   BrokerGantt — before/after timeline bars.
+   14-week sell-side engagement visualized against a 4-week engagement
+   with Yulia. Segments animate from left (scaleX) when block enters
+   view. Same milestones shown in both rows so the eye maps them.
+   ══════════════════════════════════════════════════════════════════════ */
+
+type Seg = { label: string; start: number; len: number };
+const TODAY_SEGS: readonly Seg[] = [
+  { label: 'Mandate',  start: 0,  len: 1 },
+  { label: 'CIM',      start: 1,  len: 3 },
+  { label: 'Buyer list', start: 4, len: 2 },
+  { label: 'Marketing', start: 6, len: 4 },
+  { label: 'LOI',       start: 10, len: 2 },
+  { label: 'DD',        start: 12, len: 2 },
+];
+const YULIA_SEGS: readonly Seg[] = [
+  { label: 'Mandate', start: 0,   len: 0.2 },
+  { label: 'CIM',     start: 0.2, len: 0.4 },
+  { label: 'Buyers',  start: 0.6, len: 0.4 },
+  { label: 'Market',  start: 1,   len: 1.4 },
+  { label: 'LOI',     start: 2.4, len: 0.6 },
+  { label: 'DD',      start: 3,   len: 1 },
+];
+
+function BrokerGantt() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  const TOTAL_WEEKS = 14;
+
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) { setInView(true); return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { setInView(true); io.disconnect(); } });
+    }, { rootMargin: '-10% 0px', threshold: 0.1 });
+    io.observe(root);
+    return () => io.disconnect();
+  }, []);
+
+  const pct = (w: number) => `${(w / TOTAL_WEEKS) * 100}%`;
+  const minSeg = 7; /* small segments need room for the label */
+
+  return (
+    <section className="sv-gantt h-anim" ref={ref} id="claim">
+      <div className="sv-gantt__head">
+        <div className="sv-gantt__head-l">
+          <div className="sv-gantt__k">The practice math</div>
+          <h2 className="sv-gantt__t">Same engagement. <em>Three-and-a-half times the throughput.</em></h2>
+        </div>
+      </div>
+
+      {/* Today */}
+      <div className={`sv-gantt__row${inView ? ' in' : ''}`} data-variant="today">
+        <div className="sv-gantt__row-meta">
+          <div className="sv-gantt__label">Your practice today <em>· 14 weeks · 240 analyst hours</em></div>
+          <div className="sv-gantt__metric">
+            <span className="sv-gantt__metric-v">1.0×</span>
+            <span className="sv-gantt__metric-l">capacity</span>
+          </div>
+        </div>
+        <div className="sv-gantt__track" role="img" aria-label="14-week engagement timeline">
+          {TODAY_SEGS.map((s, i) => (
+            <div
+              key={i}
+              className="sv-gantt__seg"
+              style={{
+                left: pct(s.start),
+                width: `max(${minSeg}%, ${pct(s.len).replace('%', '')}%)`,
+                transitionDelay: `${i * 90}ms`,
+              }}
+            ><span>{s.label}</span></div>
+          ))}
+        </div>
+      </div>
+
+      {/* With Yulia */}
+      <div className={`sv-gantt__row${inView ? ' in' : ''}`} data-variant="yulia">
+        <div className="sv-gantt__row-meta">
+          <div className="sv-gantt__label">Your practice with Yulia <em>· 4 weeks · 68 analyst hours</em></div>
+          <div className="sv-gantt__metric">
+            <span className="sv-gantt__metric-v" style={{ color: '#C7616F' }}>3.5×</span>
+            <span className="sv-gantt__metric-l">capacity</span>
+          </div>
+        </div>
+        <div className="sv-gantt__track" role="img" aria-label="4-week engagement timeline with Yulia">
+          {YULIA_SEGS.map((s, i) => (
+            <div
+              key={i}
+              className="sv-gantt__seg"
+              style={{
+                left: pct(s.start),
+                width: `max(${minSeg}%, ${pct(s.len).replace('%', '')}%)`,
+                transitionDelay: `${600 + i * 90}ms`,
+              }}
+            ><span>{s.label}</span></div>
+          ))}
+        </div>
+      </div>
+
+      <div className="sv-gantt__scale" aria-hidden="true">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <span key={i} className="sv-gantt__scale-t">W{i * 2 + 1}</span>
+        ))}
+      </div>
+
+      <p className="sv-gantt__cap">
+        A boutique M&amp;A engagement runs <strong>$750K–$2M retainer + 4% success fee</strong> over 12 months. With Yulia, the same deliverables ship in a quarter of the time — your retainer becomes margin, your success fee becomes upside, and you run three engagements where you used to run one.
+      </p>
+    </section>
   );
 }
