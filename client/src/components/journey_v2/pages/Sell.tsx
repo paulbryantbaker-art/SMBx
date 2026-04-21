@@ -18,6 +18,10 @@
 import { useEffect, useRef, useState } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+/* Sell-page-specific editorial system — .sv-hero, .sv-row, .sv-strip,
+   .sv-bignum, .sv-break, .sv-paths, .sv-cta, plus the [data-aff]
+   affordance system. Scoped to this page via import. */
+import '../handoff_v3/sell-editorial.css';
 
 interface Props {
   active: DealTab;
