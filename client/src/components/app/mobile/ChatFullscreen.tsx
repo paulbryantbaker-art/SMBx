@@ -28,7 +28,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { AnonMessage } from '../../../hooks/useAnonymousChat';
-import type { AppDeliverable } from '../types';
 import type { MobileDeal } from './adaptDeals';
 
 interface Props {
@@ -36,8 +35,6 @@ interface Props {
   open: boolean;
   /** Active deal to show in the header. Null when user has no deals yet. */
   deal: MobileDeal | null;
-  /** Deliverables across all user's deals — used by inline artifact cards. */
-  deliverables: AppDeliverable[];
   messages: AnonMessage[];
   streamingText: string;
   sending: boolean;
@@ -52,7 +49,6 @@ interface Props {
 export default function ChatFullscreen({
   open,
   deal,
-  deliverables: _deliverables,
   messages,
   streamingText,
   sending,

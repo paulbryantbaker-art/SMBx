@@ -13,13 +13,11 @@
  */
 
 import { useMemo } from 'react';
-import type { AppDeal, AppDeliverable } from '../types';
+import type { AppDeal } from '../types';
 import { adaptDeals, type MobileDeal } from './adaptDeals';
 
 interface Props {
   deals: AppDeal[];
-  /** Deliverables across all user's deals. Empty array if none yet. */
-  deliverables: AppDeliverable[];
   activeDealId: number | null;
   userName: string | null;
   onSelectDeal: (dealId: number) => void;
@@ -27,7 +25,7 @@ interface Props {
   onOpenHelp: () => void;
 }
 
-export default function TodayTab({ deals, deliverables: _deliverables, activeDealId, userName, onSelectDeal, onOpenChat, onOpenHelp }: Props) {
+export default function TodayTab({ deals, activeDealId, userName, onSelectDeal, onOpenChat, onOpenHelp }: Props) {
   const adapted = useMemo(() => adaptDeals(deals), [deals]);
   const firstName = (userName || '').trim().split(/\s+/)[0] || 'there';
 

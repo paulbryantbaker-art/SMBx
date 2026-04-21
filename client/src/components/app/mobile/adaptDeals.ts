@@ -59,9 +59,8 @@ export function initials(name: string | null): string {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-/** The display shape mobile tabs consume. Purely derived from AppDeal —
- *  no synthetic numbers. Fields that can't be derived for a given deal
- *  are null and the UI gracefully omits the corresponding section. */
+/** The display shape mobile tabs consume. Purely derived from AppDeal — no
+ *  synthetic numbers, no fake scores. Fields that can't be derived are null. */
 export interface MobileDeal {
   id: number;
   name: string;
@@ -81,42 +80,13 @@ export interface MobileDeal {
   conversations: AppConversation[];
   latestConversationId: number | null;
   updatedAt: string | null;
-  // ── Financials ─────────────────────────────────────────────
-  /** Pre-formatted dollar strings ("$4.1M") — null when source is null. */
-  revenueLabel: string | null;
-  sdeLabel: string | null;
-  ebitdaLabel: string | null;
-  askingPriceLabel: string | null;
-  // ── Scoring ────────────────────────────────────────────────
-  /** Composite 0-100. Null when not yet computed (fresh S0/S1 deals). */
-  score: number | null;
-  /** Per-factor scores from seven_factor_scores JSONB. */
-  scoreFactors: Record<string, number> | null;
-  // ── Operating ──────────────────────────────────────────────
-  employeeCount: number | null;
-}
-
-/** Format BIGINT cents to a compact dollar string. Returns null for null/0/NaN.
- *  Examples: 410000000 → "$4.1M", 695000 → "$6.9K", 1200000000000 → "$1.2T". */
-function formatMoney(cents: number | null | undefined): string | null {
-  if (cents == null || !Number.isFinite(cents) || cents <= 0) return null;
-  const dollars = cents / 100;
-  if (dollars >= 1_000_000_000) return `$${(dollars / 1_000_000_000).toFixed(1)}B`;
-  if (dollars >= 1_000_000) return `$${(dollars / 1_000_000).toFixed(1)}M`;
-  if (dollars >= 1_000) return `$${(dollars / 1_000).toFixed(0)}K`;
-  return `$${Math.round(dollars).toLocaleString()}`;
 }
 
 export function adaptDeal(d: AppDeal): MobileDeal {
   const stage = stageCode(d.current_gate);
   const stageLabel = GATE_LABEL[stage] || 'Getting started';
   const latestConv = d.conversations?.[0] ?? null;
-  const revenueLabel = formatMoney(d.revenue);
-  // Kicker prefers industry · revenue · stage when revenue exists,
-  // else falls back to industry · stage. Matches the App-Store list
-  // density (one short subtitle line per row).
-  const kickerParts = [d.industry, revenueLabel, stageLabel].filter(Boolean);
-  const kicker = kickerParts.length > 0 ? kickerParts.join(' · ') : stageLabel;
+  const kicker = [d.industry, stageLabel].filter(Boolean).join(' · ') || stageLabel;
   return {
     id: d.id,
     name: d.business_name || 'Untitled deal',
@@ -131,13 +101,6 @@ export function adaptDeal(d: AppDeal): MobileDeal {
     conversations: d.conversations || [],
     latestConversationId: latestConv?.id ?? null,
     updatedAt: d.updated_at,
-    revenueLabel,
-    sdeLabel: formatMoney(d.sde),
-    ebitdaLabel: formatMoney(d.ebitda),
-    askingPriceLabel: formatMoney(d.asking_price),
-    score: typeof d.seven_factor_composite === 'number' ? d.seven_factor_composite : null,
-    scoreFactors: d.seven_factor_scores ?? null,
-    employeeCount: typeof d.employee_count === 'number' ? d.employee_count : null,
   };
 }
 

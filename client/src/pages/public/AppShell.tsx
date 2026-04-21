@@ -2260,18 +2260,6 @@ export default function AppShell() {
                         league: d.league ?? null,
                         updated_at: d.updated_at,
                         status: d.status,
-                        // Financial fields from server (BIGINT cents) — pass
-                        // through unchanged. Adapter formats to dollars.
-                        revenue: d.revenue ?? null,
-                        sde: d.sde ?? null,
-                        ebitda: d.ebitda ?? null,
-                        asking_price: d.asking_price ?? null,
-                        // Scoring fields
-                        seven_factor_composite: d.seven_factor_composite ?? null,
-                        seven_factor_scores: d.seven_factor_scores ?? null,
-                        // Operating
-                        employee_count: d.employee_count ?? null,
-                        naics_code: d.naics_code ?? null,
                         conversations: (d.conversations || []).map((c: any) => ({
                           id: c.id,
                           title: c.title || 'Conversation',
