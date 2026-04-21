@@ -724,44 +724,94 @@ function CIMBuilder() {
 
 
 /* ══════════════════════════════════════════════════════════════════════
-   DeliverableWaterfall — 12 IB deliverables, scroll-triggered stagger.
-   Each row lights up in sequence: analyst-hours struck through, Yulia
-   minutes appear. Replaces the 4-card .h-apps phase grid on Sell.
+   DeliverablePacks — 3-column infographic.
+   Groups the 12 sell-side deliverables into three "packs" that map to
+   the engagement arc: Diligence → Market → Closing. Each pack has an
+   aggregate hours-saved readout. Scroll-triggered stagger; chips animate
+   in with a document icon + green check flash when each "completes."
+   Replaces the previous row-by-row list layout.
    ══════════════════════════════════════════════════════════════════════ */
 
-const WF_DELIVERABLES: readonly { name: string; sub: string; before: string; after: string }[] = [
-  { name: 'Confidential Information Memorandum', sub: '30–40 pages, investment-grade narrative',      before: '40 hrs', after: '30 min' },
-  { name: 'One-page teaser',                     sub: 'Anonymized, buyer-ready, branded',             before: '6 hrs',  after: '4 min'  },
-  { name: 'Financial model · 3-statement',       sub: 'Operating model, add-back schedule, DCF',       before: '24 hrs', after: '6 min'  },
-  { name: 'Valuation summary',                   sub: 'Precedent comps, DCF, range of value',          before: '12 hrs', after: '3 min'  },
-  { name: 'Buyer list · strategic + financial',  sub: '200+ targets scored on thesis fit',             before: '20 hrs', after: '5 min'  },
-  { name: 'Management presentation deck',        sub: '18-slide narrative with exhibits',              before: '16 hrs', after: '8 min'  },
-  { name: 'Virtual data room · structured',      sub: '147-folder tree, NDA-gated, audit-logged',      before: '10 hrs', after: '2 min'  },
-  { name: 'DD question response kit',            sub: '147-item checklist with pre-drafted answers',   before: '18 hrs', after: '6 min'  },
-  { name: 'Bid-compare analysis',                sub: 'IOIs normalized: cash-equivalent, after-tax',   before: '8 hrs',  after: '4 min'  },
-  { name: 'LOI draft + redline',                 sub: 'First-pass attorney-ready structure',           before: '6 hrs',  after: '4 min'  },
-  { name: 'Purchase agreement redline',          sub: 'APA / SPA markup against buyer draft',          before: '14 hrs', after: '7 min'  },
-  { name: 'Closing binder',                      sub: 'All signed docs, schedules, certificates',      before: '10 hrs', after: '3 min'  },
+type DKind = 'memo' | 'list' | 'model' | 'legal';
+type Deliverable = { name: string; sub: string; before: string; after: string; kind: DKind };
+
+type Pack = {
+  num: '01' | '02' | '03';
+  name: string;
+  total: { before: string; after: string };
+  items: readonly Deliverable[];
+};
+
+const WF_PACKS: readonly Pack[] = [
+  {
+    num: '01',
+    name: 'Diligence pack',
+    total: { before: '76 hrs', after: '13 min' },
+    items: [
+      { name: 'Add-back schedule',            sub: '3 yrs of returns → defensible normalizations', before: '8 hrs',  after: '30 sec', kind: 'model' },
+      { name: 'QoE Lite',                     sub: 'Pre-LOI earnings quality, IRS-documented',     before: '24 hrs', after: '30 min', kind: 'model' },
+      { name: '3-statement financial model',  sub: 'Operating model + DCF + sensitivity',          before: '24 hrs', after: '6 min',  kind: 'model' },
+      { name: 'Valuation summary',            sub: 'Precedent comps, DCF, range of value',         before: '20 hrs', after: '3 min',  kind: 'model' },
+    ],
+  },
+  {
+    num: '02',
+    name: 'Market pack',
+    total: { before: '82 hrs', after: '19 min' },
+    items: [
+      { name: 'CIM · 32 pages',               sub: 'Investment-grade narrative + exhibits', before: '40 hrs', after: '30 min', kind: 'memo' },
+      { name: 'One-page teaser',              sub: 'Anonymized, buyer-ready, branded',      before: '6 hrs',  after: '4 min',  kind: 'memo' },
+      { name: 'Buyer list · 200+ targets',    sub: 'Strategic + financial scored on thesis',  before: '20 hrs', after: '5 min',  kind: 'list' },
+      { name: 'Management presentation',       sub: '18-slide narrative with exhibits',       before: '16 hrs', after: '8 min',  kind: 'memo' },
+    ],
+  },
+  {
+    num: '03',
+    name: 'Closing pack',
+    total: { before: '38 hrs', after: '16 min' },
+    items: [
+      { name: 'Data room · 147 folders',       sub: 'NDA-gated, Q&A-tracked, audit-logged',  before: '10 hrs', after: '2 min',  kind: 'list' },
+      { name: 'DD response kit',               sub: '147-item checklist with pre-drafted answers', before: '8 hrs',  after: '3 min',  kind: 'list' },
+      { name: 'Bid compare + LOI draft',       sub: 'IOIs normalized · first-pass LOI',       before: '14 hrs', after: '8 min',  kind: 'legal' },
+      { name: 'APA redline + closing binder',  sub: 'Markup against buyer draft + binder',    before: '6 hrs',  after: '3 min',  kind: 'legal' },
+    ],
+  },
 ];
 
 function DeliverableWaterfall() {
   const ref = useRef<HTMLDivElement>(null);
-  const [activated, setActivated] = useState<number>(0);
+  const [containerIn, setContainerIn] = useState(false);
+  /* flat index → packIndex * 10 + itemIndex so each chip has a unique key */
+  const [activated, setActivated] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
     if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
-      setActivated(WF_DELIVERABLES.length);
+      setContainerIn(true);
+      const full = new Set<string>();
+      WF_PACKS.forEach((p, pi) => p.items.forEach((_, ii) => full.add(`${pi}:${ii}`)));
+      setActivated(full);
       return;
     }
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
           if (!e.isIntersecting) return;
-          /* Stagger each row by 140ms once the block enters view. */
-          WF_DELIVERABLES.forEach((_, i) => {
-            setTimeout(() => setActivated((n) => Math.max(n, i + 1)), 140 * i);
+          setContainerIn(true);
+          /* Fan chips in: 320ms delay after container settles, then
+             70ms between chips within a pack, 140ms between packs. */
+          WF_PACKS.forEach((p, pi) => {
+            p.items.forEach((_, ii) => {
+              const delay = 340 + pi * 160 + ii * 70;
+              setTimeout(() => {
+                setActivated((prev) => {
+                  const next = new Set(prev);
+                  next.add(`${pi}:${ii}`);
+                  return next;
+                });
+              }, delay);
+            });
           });
           io.disconnect();
         });
@@ -773,39 +823,64 @@ function DeliverableWaterfall() {
   }, []);
 
   return (
-    <div className="sv-wf h-anim" ref={ref} id="waterfall">
+    <div className={`sv-wf h-anim${containerIn ? ' in' : ''}`} ref={ref} id="waterfall">
       <div className="sv-wf__head">
         <div className="sv-wf__head-l">
-          <div className="sv-wf__k">The full sell-side deliverable list</div>
-          <h2 className="sv-wf__t">Twelve artifacts ship every engagement. <em>Yulia produces all of them.</em></h2>
+          <div className="sv-wf__k">Every deliverable · one subscription</div>
+          <h2 className="sv-wf__t">The three packs that win every mandate — <em>drafted, reviewed, shipped.</em></h2>
         </div>
-        <div className="sv-wf__total">
-          <span className="sv-wf__total-v">184<span style={{ fontSize: '65%', opacity: 0.7 }}>h → </span>62<span style={{ fontSize: '65%', opacity: 0.7 }}>m</span></span>
-          <span className="sv-wf__total-l">Practice capacity · 3.4× unlocked</span>
+        <div className="sv-wf__hero" aria-label="Analyst hours to Yulia minutes">
+          <span className="sv-wf__hero-before">196<span className="sv-wf__hero-unit">h</span></span>
+          <span className="sv-wf__hero-arrow">→</span>
+          <span className="sv-wf__hero-after">48<span className="sv-wf__hero-unit">m</span></span>
         </div>
       </div>
 
-      <div className="sv-wf__list" role="list">
-        {WF_DELIVERABLES.map((d, i) => (
-          <div
-            key={d.name}
-            role="listitem"
-            className={`sv-wf__row${i < activated ? ' in' : ''}`}
-          >
-            <div className="sv-wf__check" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="4 12 10 18 20 6" />
-              </svg>
+      <div className="sv-wf__packs" role="list">
+        {WF_PACKS.map((pack, pi) => (
+          <div key={pack.num} className="sv-wf__pack" role="listitem">
+            <div className="sv-wf__pack-h">
+              <div>
+                <div className="sv-wf__pack-num">Pack {pack.num}</div>
+                <div className="sv-wf__pack-name">{pack.name}</div>
+              </div>
+              <div className="sv-wf__pack-meta">
+                <strong>{pack.total.before}</strong> → <strong>{pack.total.after}</strong>
+              </div>
             </div>
-            <div>
-              <div className="sv-wf__name">{d.name}</div>
-              <div className="sv-wf__name-s">{d.sub}</div>
-            </div>
-            <div className="sv-wf__before">{d.before}</div>
-            <div className="sv-wf__arrow">→</div>
-            <div className="sv-wf__after">{d.after}</div>
+
+            {pack.items.map((d, ii) => (
+              <div
+                key={d.name}
+                className={`sv-wf__chip${activated.has(`${pi}:${ii}`) ? ' in' : ''}`}
+                data-kind={d.kind}
+              >
+                <div className="sv-wf__doc" aria-hidden="true">
+                  <div className="sv-wf__doc-tick">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="4 12 10 18 20 6" />
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <div className="sv-wf__chip-name">{d.name}</div>
+                  <div className="sv-wf__chip-sub">{d.sub}</div>
+                </div>
+                <div className="sv-wf__chip-time">
+                  <span className="sv-wf__chip-before">{d.before}</span>
+                  <span className="sv-wf__chip-after">{d.after}</span>
+                </div>
+              </div>
+            ))}
           </div>
         ))}
+      </div>
+
+      <div className="sv-wf__foot">
+        <div className="sv-wf__foot-t">
+          <strong>You still review every deliverable.</strong> Yulia drafts — you red-pen, tune the narrative, and sign off. Her output is the first draft your analyst would have given you, only it arrives before lunch instead of in 10 days.
+        </div>
+        <span className="sv-wf__foot-pill">3.4× capacity · same team</span>
       </div>
     </div>
   );
@@ -819,23 +894,27 @@ function DeliverableWaterfall() {
    view. Same milestones shown in both rows so the eye maps them.
    ══════════════════════════════════════════════════════════════════════ */
 
-type Seg = { label: string; start: number; len: number };
+type Seg = { label: string; start: number; len: number; mandate?: 1 | 2 | 3 };
 const TODAY_SEGS: readonly Seg[] = [
-  { label: 'Mandate',  start: 0,  len: 1 },
-  { label: 'CIM',      start: 1,  len: 3 },
-  { label: 'Buyer list', start: 4, len: 2 },
-  { label: 'Marketing', start: 6, len: 4 },
-  { label: 'LOI',       start: 10, len: 2 },
-  { label: 'DD',        start: 12, len: 2 },
+  { label: 'Mandate',    start: 0,  len: 1 },
+  { label: 'CIM',        start: 1,  len: 3 },
+  { label: 'Buyer list', start: 4,  len: 2 },
+  { label: 'Marketing',  start: 6,  len: 4 },
+  { label: 'LOI',        start: 10, len: 2 },
+  { label: 'DD',         start: 12, len: 2 },
 ];
-const YULIA_SEGS: readonly Seg[] = [
-  { label: 'Mandate', start: 0,   len: 0.2 },
-  { label: 'CIM',     start: 0.2, len: 0.4 },
-  { label: 'Buyers',  start: 0.6, len: 0.4 },
-  { label: 'Market',  start: 1,   len: 1.4 },
-  { label: 'LOI',     start: 2.4, len: 0.6 },
-  { label: 'DD',      start: 3,   len: 1 },
+/* Three mandates back-to-back, each ~4.6 weeks. Same phases, repeated. */
+const mandate1: readonly Seg[] = [
+  { label: 'Mandate', start: 0,    len: 0.3, mandate: 1 },
+  { label: 'CIM',     start: 0.3,  len: 0.7, mandate: 1 },
+  { label: 'Buyers',  start: 1.0,  len: 0.6, mandate: 1 },
+  { label: 'Market',  start: 1.6,  len: 1.8, mandate: 1 },
+  { label: 'LOI',     start: 3.4,  len: 0.5, mandate: 1 },
+  { label: 'DD',      start: 3.9,  len: 0.7, mandate: 1 },
 ];
+const mandate2: readonly Seg[] = mandate1.map((s) => ({ ...s, start: s.start + 4.7, mandate: 2 }));
+const mandate3: readonly Seg[] = mandate1.map((s) => ({ ...s, start: s.start + 9.4, mandate: 3 }));
+const YULIA_SEGS: readonly Seg[] = [...mandate1, ...mandate2, ...mandate3];
 
 function BrokerGantt() {
   const ref = useRef<HTMLDivElement>(null);
@@ -860,18 +939,18 @@ function BrokerGantt() {
     <section className="sv-gantt h-anim" ref={ref} id="claim">
       <div className="sv-gantt__head">
         <div className="sv-gantt__head-l">
-          <div className="sv-gantt__k">The practice math</div>
-          <h2 className="sv-gantt__t">Same engagement. <em>Three-and-a-half times the throughput.</em></h2>
+          <div className="sv-gantt__k">Your practice math</div>
+          <h2 className="sv-gantt__t">Same engagement. Same retainer. <em>Three mandates where one used to fit.</em></h2>
         </div>
       </div>
 
       {/* Today */}
       <div className={`sv-gantt__row${inView ? ' in' : ''}`} data-variant="today">
         <div className="sv-gantt__row-meta">
-          <div className="sv-gantt__label">Your practice today <em>· 14 weeks · 240 analyst hours</em></div>
+          <div className="sv-gantt__label">Today <em>· one mandate · 14 weeks · 240 analyst-hours</em></div>
           <div className="sv-gantt__metric">
-            <span className="sv-gantt__metric-v">1.0×</span>
-            <span className="sv-gantt__metric-l">capacity</span>
+            <span className="sv-gantt__metric-v">1</span>
+            <span className="sv-gantt__metric-l">engagement</span>
           </div>
         </div>
         <div className="sv-gantt__track" role="img" aria-label="14-week engagement timeline">
@@ -892,24 +971,31 @@ function BrokerGantt() {
       {/* With Yulia */}
       <div className={`sv-gantt__row${inView ? ' in' : ''}`} data-variant="yulia">
         <div className="sv-gantt__row-meta">
-          <div className="sv-gantt__label">Your practice with Yulia <em>· 4 weeks · 68 analyst hours</em></div>
+          <div className="sv-gantt__label">With Yulia <em>· three mandates · 14 weeks · 204 analyst-hours</em></div>
           <div className="sv-gantt__metric">
-            <span className="sv-gantt__metric-v" style={{ color: '#C7616F' }}>3.5×</span>
-            <span className="sv-gantt__metric-l">capacity</span>
+            <span className="sv-gantt__metric-v" style={{ color: '#C7616F' }}>3</span>
+            <span className="sv-gantt__metric-l">engagements</span>
           </div>
         </div>
-        <div className="sv-gantt__track" role="img" aria-label="4-week engagement timeline with Yulia">
+        <div className="sv-gantt__track" role="img" aria-label="Three back-to-back mandates in the same 14-week window with Yulia">
           {YULIA_SEGS.map((s, i) => (
             <div
               key={i}
               className="sv-gantt__seg"
+              data-mandate={s.mandate}
               style={{
                 left: pct(s.start),
-                width: `max(${minSeg}%, ${pct(s.len).replace('%', '')}%)`,
-                transitionDelay: `${600 + i * 90}ms`,
+                width: `calc(${pct(s.len).replace('%', '')}% - 2px)`,
+                transitionDelay: `${520 + i * 38}ms`,
               }}
             ><span>{s.label}</span></div>
           ))}
+          {/* Mandate boundary markers */}
+          <div className="sv-gantt__divider" style={{ left: pct(4.7) }} />
+          <div className="sv-gantt__divider" style={{ left: pct(9.4) }} />
+          <div className="sv-gantt__mandate-tag" style={{ left: pct(0) }}>Mandate 1</div>
+          <div className="sv-gantt__mandate-tag" style={{ left: pct(4.7) }}>Mandate 2</div>
+          <div className="sv-gantt__mandate-tag" style={{ left: pct(9.4) }}>Mandate 3</div>
         </div>
       </div>
 
@@ -920,7 +1006,7 @@ function BrokerGantt() {
       </div>
 
       <p className="sv-gantt__cap">
-        A boutique M&amp;A engagement runs <strong>$750K–$2M retainer + 4% success fee</strong> over 12 months. With Yulia, the same deliverables ship in a quarter of the time — your retainer becomes margin, your success fee becomes upside, and you run three engagements where you used to run one.
+        <strong>The retainer stays. The success fee stays. The relationship stays.</strong> What changes is the clock. Your CIM, your buyer list, your process — drafted faster, ready for your red pen sooner, in your client's hands weeks earlier. Three mandates fit inside the window where one used to live. Same desk. Same team. Three times the book.
       </p>
     </section>
   );
