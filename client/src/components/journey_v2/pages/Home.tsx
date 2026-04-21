@@ -239,7 +239,7 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
         },
       }}
     >
-      <div id="home" data-density="comfortable" data-motion="full" data-hero="shell" ref={rootRef}>
+      <div id="home" className="h-page" data-density="comfortable" data-motion="full" data-hero="shell" ref={rootRef}>
 
         {/* ══ TODAY CARD ══ */}
         <section className="h-today h-anim" id="today">

@@ -4,7 +4,7 @@
    Scoped under #home so it doesn't leak to other pages.
    ══════════════════════════════════════════════════════════════════════ */
 
-#home {
+.h-page, #home {
   --h-bg:      #F2F2F4;
   --h-card:    #FFFFFF;
   --h-ink:     #0A0A0B;
@@ -26,7 +26,7 @@
   margin: 0 auto;
 }
 
-#home[data-density="compact"] { --h-pad: clamp(20px, 2.8vw, 32px); }
+.h-page[data-density="compact"] { --h-pad: clamp(20px, 2.8vw, 32px); }
 
 /* ── reveal animation ───────────────────────────────────────── */
 .h-anim { opacity: 0; transform: translateY(14px); transition: opacity 500ms ease, transform 500ms cubic-bezier(0.22, 0.8, 0.32, 1); }
@@ -35,7 +35,7 @@
 .h-anim-d2 { transition-delay: 160ms; }
 .h-anim-d3 { transition-delay: 240ms; }
 .h-anim-d4 { transition-delay: 320ms; }
-#home[data-motion="none"] .h-anim { opacity: 1; transform: none; transition: none; }
+.h-page[data-motion="none"] .h-anim { opacity: 1; transform: none; transition: none; }
 
 /* ══════════════════════════════════════════════════════════════════════
    FEATURED · "TODAY" CARD — the App Store hero slot
@@ -731,13 +731,13 @@
    Tweaks — hero variant: stat
    ══════════════════════════════════════════════════════════════════════ */
 
-#home[data-hero="stat"] .h-today__inner {
+.h-page[data-hero="stat"] .h-today__inner {
   grid-template-columns: minmax(0, 1fr);
   padding: 60px 56px;
 }
-#home[data-hero="stat"] .h-today__copy { max-width: none; gap: 28px; }
-#home[data-hero="stat"] .h-today__demo { display: none; }
-#home[data-hero="stat"] .h-today__h {
+.h-page[data-hero="stat"] .h-today__copy { max-width: none; gap: 28px; }
+.h-page[data-hero="stat"] .h-today__demo { display: none; }
+.h-page[data-hero="stat"] .h-today__h {
   font-size: clamp(60px, 8.2vw, 128px);
   line-height: 0.92;
   letter-spacing: -0.045em;
@@ -759,8 +759,8 @@
   mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
   -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
 }
-#home[data-hero="ticker"] .h-ticker { display: block; }
-#home[data-hero="ticker"] .h-today__demo { min-height: 260px; }
+.h-page[data-hero="ticker"] .h-ticker { display: block; }
+.h-page[data-hero="ticker"] .h-today__demo { min-height: 260px; }
 .h-ticker__track {
   display: flex; gap: 40px;
   animation: hticker 32s linear infinite;
