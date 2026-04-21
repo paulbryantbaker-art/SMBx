@@ -94,10 +94,19 @@ export default function ChatFullscreen({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  /* Body un-fix while the chat is open so visualViewport works in PWA. */
+  /* Body un-fix while the chat is open so visualViewport works in PWA.
+     CRITICAL: index.css:439 has `html.yulia-chat-open #root { display: none }`
+     — if this class ever sticks on <html> while open=false, the ENTIRE
+     APP DISAPPEARS (dark theme-color bg shows through, looking "blanked").
+     This manifests most aggressively in installed PWA standalone mode.
+     Cleanup is therefore bulletproof — removes the class unconditionally
+     in every branch + the effect cleanup, so the class can never leak. */
   useEffect(() => {
-    if (!open) return;
-    document.documentElement.classList.add('yulia-chat-open');
+    if (open) {
+      document.documentElement.classList.add('yulia-chat-open');
+    } else {
+      document.documentElement.classList.remove('yulia-chat-open');
+    }
     return () => document.documentElement.classList.remove('yulia-chat-open');
   }, [open]);
 

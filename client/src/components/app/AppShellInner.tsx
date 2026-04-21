@@ -16,7 +16,7 @@
  * memory/feedback_pwa_chat_flex_layout.md for the chat infrastructure saga.
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import MobileTopBar from './mobile/chrome/MobileTopBar';
 import MobileTabBar from './mobile/chrome/MobileTabBar';
 import TodayTab from './mobile/TodayTab';
@@ -54,6 +54,16 @@ export default function AppShellInner({
   const [contentTab, setContentTab] = useState<Exclude<MobileTab, 'chat'>>('today');
   const [chatOpen, setChatOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+
+  /* SAFETY NET — `html.yulia-chat-open` applies `#root { display: none !important }`
+     per index.css:439. If a prior session (same PWA instance, React StrictMode
+     remount, or any other path) ever left the class on <html>, the entire app
+     appears as a blank dark screen because the theme-color body bg shows
+     through. Force-clear on mount — cheap no-op when the class isn't present.
+     See memory/feedback_pwa_chat_flex_layout.md for the chat infra saga. */
+  useEffect(() => {
+    document.documentElement.classList.remove('yulia-chat-open');
+  }, []);
 
   // Which tab reads as "active" in the bottom tab bar — 'chat' when the
   // chat overlay is up, else the current content tab.
