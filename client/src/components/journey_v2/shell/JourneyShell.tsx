@@ -25,6 +25,11 @@ import type { DealTab } from '../deal-room';
    CSS order deterministic: tokens first, then shell primitives. */
 import '../../app_v4/tokens.css';
 import '../../app_v4/chrome/shell.css';
+/* Claude Design v3 handoff: editorial system for journey pages. Load
+   after v4-shell.css so page-specific overrides (composer, tool-rail
+   account buttons, canvas__body padding) take precedence. */
+import '../handoff_v3/page-overrides.css';
+import '../handoff_v3/journey-content.css';
 
 export interface JourneyShellProps {
   /** Active journey route — drives the left rail highlight. */
@@ -37,16 +42,17 @@ export interface JourneyShellProps {
   onStartFree: () => void;
   /** Chat-well config — scripted Yulia demo per page. */
   chat: Omit<JourneyChatProps, 'width' | 'onWidthChange'>;
-  /** Page header title on the canvas card (breadcrumb-style). */
+  /** Canvas breadcrumb (handoff v3): kicker · title + optional right badge. */
   canvasKicker?: string;
   canvasTitle?: string;
+  canvasBadge?: string;
   /** Deal steps + bottom close — content that scrolls inside the canvas. */
   children: ReactNode;
 }
 
 export default function JourneyShell({
   active, onNavigate, onSignIn, onStartFree, chat,
-  canvasKicker, canvasTitle,
+  canvasKicker, canvasTitle, canvasBadge,
   children,
 }: JourneyShellProps) {
   /* Left-rail expand state — mirrors V4App.session's toolExpanded. Local
@@ -88,7 +94,11 @@ export default function JourneyShell({
           onToggle={() => setToolExpanded((v) => !v)}
         />
         <JourneyChat {...chat} width={chatWidth} onWidthChange={setChatWidth} />
-        <JourneyCanvas kicker={canvasKicker} title={canvasTitle}>
+        <JourneyCanvas
+          crumbKicker={canvasKicker}
+          crumbTitle={canvasTitle}
+          crumbBadge={canvasBadge}
+        >
           {children}
         </JourneyCanvas>
       </div>

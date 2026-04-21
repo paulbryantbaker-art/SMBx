@@ -90,31 +90,37 @@ export default function JourneyTool({
 
       <div className="v4-tool__sep" />
 
-      {/* Bottom — Sign in + Start free (replaces Trash/Account/Settings
-          from the in-app V4Tool since the visitor isn't authenticated). */}
-      <div className="v4-tool__list" style={{ flex: 'none' }}>
-        {onSignIn && (
+      {/* Bottom — Account CTAs. Handoff v3 §3 uses the .jt-acct vocabulary:
+          a solid ink "Start free" + a ghost "Sign in" beneath it. When
+          the tool rail is collapsed, fall back to icon-only buttons. */}
+      {expanded ? (
+        <div className="jt-acct">
+          <button type="button" className="jt-acct__btn" onClick={onStartFree}>Start free</button>
+          {onSignIn && (
+            <button type="button" className="jt-acct__btn jt-acct__btn--ghost" onClick={onSignIn}>Sign in</button>
+          )}
+        </div>
+      ) : (
+        <div className="v4-tool__list" style={{ flex: 'none' }}>
+          {onSignIn && (
+            <button
+              type="button"
+              className="v4-tool__btn"
+              onClick={onSignIn}
+              data-tip="Sign in"
+            >
+              {Ic.signIn}
+            </button>
+          )}
           <button
             type="button"
-            className="v4-tool__btn"
-            onClick={onSignIn}
-            data-tip={expanded ? undefined : 'Sign in'}
+            className="v4-tool__btn v4-tool__btn--active"
+            onClick={onStartFree}
+            data-tip="Start free"
+            style={{ marginTop: 4 }}
           >
-            {Ic.signIn}
-            {expanded && <span className="v4-tool__lbl">Sign in</span>}
+            {Ic.startFree}
           </button>
-        )}
-        <button
-          type="button"
-          className="v4-tool__btn v4-tool__btn--active"
-          onClick={onStartFree}
-          data-tip={expanded ? undefined : 'Start free'}
-          style={{ marginTop: 4 }}
-        >
-          {Ic.startFree}
-          {expanded && <span className="v4-tool__lbl">Start free</span>}
-        </button>
-        {!expanded && (
           <button
             type="button"
             className="v4-tool__btn"
@@ -123,8 +129,8 @@ export default function JourneyTool({
           >
             {Ic.chevronRight}
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </aside>
   );
 }

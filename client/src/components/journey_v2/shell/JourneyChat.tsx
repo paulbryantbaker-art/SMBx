@@ -21,6 +21,10 @@ export interface JourneyChatProps {
   title?: string;
   /** Status line next to the title — "Working on Acme HVAC", etc. */
   status?: string;
+  /** Portfolio switcher logo + name + mono meta line (handoff v3). */
+  pswLogo?: string;   /* one-letter glyph */
+  pswName?: string;
+  pswMeta?: string;
   /** Opening Yulia message rendered immediately. */
   opening: string;
   /** Generic reply when the visitor sends text the script doesn't cover. */
@@ -33,6 +37,12 @@ export interface JourneyChatProps {
   placeholder?: string;
   /** Visitor sent something real — escape the demo, go to real chat. */
   onSend?: (text: string) => void;
+  /** "Suggested" dashed-ghost chip above the composer (handoff v3). */
+  suggested?: {
+    kicker?: string;                /* default "Suggested" */
+    label: string;                   /* e.g. "See the add-backs" */
+    onClick?: () => void;
+  };
   /** Resizable width. */
   width: number;
   onWidthChange: (w: number) => void;
@@ -71,12 +81,14 @@ function Msg({ who, text }: { who: 'y' | 'me'; text: string }) {
 export default function JourneyChat({
   title = 'Yulia',
   status,
+  pswLogo, pswName, pswMeta,
   opening,
   reply,
   script,
   chips = [],
   placeholder = 'Ask Yulia anything\u2026',
   onSend,
+  suggested,
   width, onWidthChange,
 }: JourneyChatProps) {
   const [messages, setMessages] = useState<ChatMsg[]>([
@@ -194,12 +206,33 @@ export default function JourneyChat({
 
   const styleVars: React.CSSProperties = { ['--v4-chat-w' as string]: width + 'px' };
 
+  const hasText = input.trim().length > 0;
+
   return (
     <section className="v4-chat" style={styleVars}>
-      {/* Thread header — mirrors V4Chat's head (minus portfolio switcher
-          which is a logged-in concept). */}
+      {/* Portfolio switcher — per Claude Design v3 handoff (§4.1).
+          Shown when the page passes pswName. */}
+      {pswName && (
+        <div className="v4-psw">
+          <button className="v4-psw__btn" type="button">
+            <div className="v4-psw__logo">{pswLogo ?? pswName.charAt(0).toUpperCase()}</div>
+            <div className="v4-psw__body">
+              <div className="v4-psw__n">{pswName}</div>
+              {pswMeta && <div className="v4-psw__k">{pswMeta}</div>}
+            </div>
+            <svg className="v4-psw__caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Thread header */}
       <div className="v4-chat__head">
-        <div className="v4-chat__head-t">{title}{status && <span style={{ color: 'var(--v4-mute)', fontWeight: 500, marginLeft: 8 }}>· {status}</span>}</div>
+        <div className="v4-chat__head-t">
+          {title}
+          {status && <span style={{ color: 'var(--v4-mute)', fontWeight: 500, marginLeft: 8 }}>· {status}</span>}
+        </div>
       </div>
 
       {/* Scrolling message list */}
@@ -235,29 +268,43 @@ export default function JourneyChat({
         )}
       </div>
 
-      {/* Composer — simple pill matching V4Composer shape. */}
-      <div className="v4-comp">
-        <form className="v4-comp__wrap" onSubmit={handleSubmit}>
-          <div className="v4-comp__pill">
-            <input
-              type="text"
-              className="v4-comp__ta"
-              placeholder={placeholder}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              autoComplete="off"
-            />
-            <button
-              type="submit"
-              className={`v4-comp__send${input.trim() ? '' : ' v4-comp__send--idle'}`}
-              disabled={!input.trim()}
-              aria-label="Send"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-                <path d="M12 19V5M5 12l7-7 7 7" />
-              </svg>
-            </button>
-          </div>
+      {/* "Suggested" quiet-ghost chip — per handoff v3 §5 */}
+      {suggested && (
+        <button
+          type="button"
+          className="v4-next v4-next--quiet"
+          onClick={suggested.onClick}
+        >
+          <span className="v4-next__k">{suggested.kicker ?? 'Suggested'}</span>
+          <span className="v4-next__t">{suggested.label}</span>
+          <span className="v4-next__go" aria-hidden="true">→</span>
+        </button>
+      )}
+
+      {/* Composer — handoff v3 §6: pill with grey→black send on has-text */}
+      <div className="v4-comp v4-comp--hero">
+        <form
+          className={`v4-comp__card${hasText ? ' has-text' : ''}`}
+          onSubmit={handleSubmit}
+        >
+          <input
+            id="chatInput"
+            type="text"
+            placeholder={placeholder}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            autoComplete="off"
+          />
+          <button
+            type="submit"
+            className="v4-comp__send-btn"
+            aria-label="Send"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={hasText ? '#fff' : 'currentColor'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="19" x2="12" y2="5" />
+              <polyline points="5 12 12 5 19 12" />
+            </svg>
+          </button>
         </form>
       </div>
 

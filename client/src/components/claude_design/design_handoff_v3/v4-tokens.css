@@ -1,0 +1,84 @@
+/* ═══════════════════════════════════════════════════════════════════
+   v4 design tokens — SCOPED to .app-v4 so they don't leak into
+   Glass Grok or journey pages.
+
+   Mirrors `:root` declarations in:
+   - claude_design/app/project/v4.css
+   - claude_design/app/project/app.css
+
+   Variables keep their original --v4-* / --gg-* names so component
+   styles ported verbatim from the design bundle will resolve.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.app-v4 {
+  /* ───── v4 palette (canvas / rail / shell) ───────────────────── */
+  --v4-bg:         #F6F6F4;   /* backdrop — cool off-white */
+  --v4-bg-2:       #EEEEEB;   /* subtle variant */
+  --v4-ink:        #0A0A0B;   /* primary text */
+  --v4-ink-2:      #2E2E32;   /* secondary */
+  --v4-mute:       #6A6A70;
+  --v4-faint:      #9C9CA2;
+  --v4-line:       #E6E6E2;   /* hairlines on backdrop */
+  --v4-line-2:     #DADAD5;
+  --v4-card:       #FFFFFF;   /* canvas + dock cards */
+  --v4-card-line:  #EAEAE6;
+  --v4-gutter:     #E0E0DB;   /* vertical divider line */
+  --v4-chip:       #EFEFEC;
+  --v4-chip-h:     #E5E5E1;
+
+  /* Elevations */
+  --v4-shadow-lg: 0 40px 80px -20px rgba(15, 15, 30, 0.18),
+                  0 18px 40px -12px rgba(15, 15, 30, 0.12),
+                  0 4px 10px rgba(15, 15, 30, 0.06);
+  --v4-shadow-md: 0 10px 30px -8px rgba(15, 15, 30, 0.14),
+                  0 4px 12px rgba(15, 15, 30, 0.08),
+                  0 1px 3px rgba(15, 15, 30, 0.04);
+  --v4-shadow-sm: 0 2px 6px rgba(15, 15, 30, 0.08);
+
+  /* Semantic / status */
+  --v4-ok:         #22A755;
+  --v4-warn:       #D18B1F;
+  --v4-flag:       #C24A2D;
+  --v4-accent:     #0A0A0B;
+  --v4-on-ink:     #FFFFFF;
+
+  /* ───── Glass-Grok palette (mobile primitives share this set) ── */
+  --gg-ink:         #0A0A0B;
+  --gg-ink-2:       #3A3A3E;
+  --gg-mute:        #6B6B70;
+  --gg-faint:       #9A9A9F;
+  --gg-line:        #E8E8EB;
+  --gg-border:      rgba(0, 0, 0, 0.08);
+  --gg-border-soft: rgba(0, 0, 0, 0.06);
+  --gg-bg:          #F2F2F4;
+  --gg-panel:       #FAFAFB;
+  --gg-card:        #FFFFFF;
+  --gg-hover:       #F5F5F7;
+  --gg-ok:          #22A755;
+  --gg-warn:        #E8A033;
+  --gg-flag:        #D4533A;
+
+  /* ───── Density (comfortable default) ─────────────────────────── */
+  --row-pad-y: 12px;
+  --stack-gap: 14px;
+}
+
+.app-v4[data-density="compact"] {
+  --row-pad-y: 7px;
+  --stack-gap: 8px;
+}
+
+/* Reset defaults for the scoped app — don't inherit journey-page
+   body rules, paint the app-v4 surface edge-to-edge. */
+.app-v4 {
+  position: fixed;
+  inset: 0;
+  background: var(--v4-bg);
+  color: var(--v4-ink);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.app-v4 *, .app-v4 *::before, .app-v4 *::after {
+  box-sizing: border-box;
+}

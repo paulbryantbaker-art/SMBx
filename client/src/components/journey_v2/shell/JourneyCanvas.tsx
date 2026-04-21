@@ -1,46 +1,47 @@
 /**
- * JourneyCanvas — floating content card on the right, holds the journey
- * deal-steps. Matches V4Canvas shape but simpler (no breadcrumb pills,
- * no tab strip — journey is linear scroll).
+ * JourneyCanvas — right-floating canvas card per the Claude Design v3
+ * handoff. Same elevation recipe as the in-app canvas: white fill,
+ * 18px radius, `--v4-shadow-lg`-equivalent stack, 80px top highlight.
  *
- * Positioned absolute to the right of the chat well using the shared
- * `--v4-tool-w` and `--v4-chat-w` CSS custom properties. Scrolls
- * vertically; the inner card has rounded corners + shadow matching the
- * v4 canvas.
+ * Structure matches `Sell refined.html`:
+ *   .v4-canvas-wrap > .v4-canvas
+ *                       > .v4-canvas__head  (breadcrumb row)
+ *                       > .v4-canvas__body  (scrollable content)
+ *
+ * Content lives inside `.v4-canvas__body` with zero padding on journey
+ * pages — the editorial system (`.sv-*`, `.jc-*`) handles its own
+ * gutters.
  */
 import type { ReactNode } from 'react';
 
 interface Props {
-  /** Unused — kept for call-site compatibility. Deal-step titles carry
-      the page heading, so a second sticky header created double-H1 weird
-      space under the hero. Paul flagged this 2026-04-20. */
-  kicker?: string;
-  title?: string;
+  /** Breadcrumb kicker — e.g. "smbx.ai / sell" */
+  crumbKicker?: string;
+  /** Breadcrumb title — e.g. "Sell a business" */
+  crumbTitle?: string;
+  /** Right-aligned badge chip — e.g. "Demo · Acme, Inc." */
+  crumbBadge?: string;
   children: ReactNode;
 }
 
-export default function JourneyCanvas({ kicker, title, children }: Props) {
-  void kicker; void title;
+export default function JourneyCanvas({ crumbKicker, crumbTitle, crumbBadge, children }: Props) {
+  const hasCrumb = !!(crumbKicker || crumbTitle || crumbBadge);
   return (
-    <div
-      className="journey-canvas v4-canvas"
-      style={{
-        position: 'absolute',
-        top: 14, bottom: 14, right: 14,
-        left: 'calc(var(--v4-tool-w, 56px) + 14px + var(--v4-chat-w, 380px) + 14px)',
-        background: 'var(--v4-card)',
-        border: '0.5px solid var(--v4-card-line)',
-        borderRadius: 20,
-        boxShadow: 'var(--v4-shadow-md)',
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        scrollBehavior: 'smooth',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <div className="dr-stage">
-        {children}
+    <div className="v4-canvas-wrap">
+      <div className="v4-canvas">
+        {hasCrumb && (
+          <div className="v4-canvas__head">
+            <div className="v4-canvas__crumb">
+              {crumbKicker && <span className="v4-canvas__crumb-k">{crumbKicker}</span>}
+              {crumbKicker && crumbTitle && <span className="v4-canvas__crumb-sep">·</span>}
+              {crumbTitle && <span className="v4-canvas__crumb-t">{crumbTitle}</span>}
+              {crumbBadge && <span className="v4-canvas__crumb-badge">{crumbBadge}</span>}
+            </div>
+          </div>
+        )}
+        <div className="v4-canvas__body">
+          {children}
+        </div>
       </div>
     </div>
   );
