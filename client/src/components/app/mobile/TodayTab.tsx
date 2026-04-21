@@ -31,15 +31,12 @@ interface Props {
 }
 
 export default function TodayTab({ deals, deliverables, activeDealId, userName, onSelectDeal, onOpenChat, onOpenHelp }: Props) {
+  /* ALL hooks must run every render — before ANY early return. Moving the
+     empty-state gate below these was a rules-of-hooks violation that crashed
+     the app the moment deals loaded async (empty → populated transition
+     changed the hook count). */
   const adapted = useMemo(() => adaptDeals(deals), [deals]);
-  const firstName = (userName || '').trim().split(/\s+/)[0] || 'there';
 
-  /* Empty state — user has no deals yet. */
-  if (adapted.length === 0) {
-    return <EmptyToday firstName={firstName} onOpenChat={onOpenChat} onOpenHelp={onOpenHelp} />;
-  }
-
-  /* Sort deals with active pinned first, rest by updated_at desc. */
   const sorted = useMemo(() => {
     return [...adapted].sort((a, b) => {
       if (a.id === activeDealId) return -1;
@@ -50,12 +47,20 @@ export default function TodayTab({ deals, deliverables, activeDealId, userName, 
     });
   }, [adapted, activeDealId]);
 
-  const leadDeal = sorted[0];
-  const pickList = sorted.slice(1, 5);  // next 4 after the hero deal
   const scoredDeals = useMemo(
     () => adapted.filter((d) => typeof d.score === 'number').sort((a, b) => (b.score ?? 0) - (a.score ?? 0)),
     [adapted],
   );
+
+  const firstName = (userName || '').trim().split(/\s+/)[0] || 'there';
+
+  /* Empty state — user has no deals yet. */
+  if (adapted.length === 0) {
+    return <EmptyToday firstName={firstName} onOpenChat={onOpenChat} onOpenHelp={onOpenHelp} />;
+  }
+
+  const leadDeal = sorted[0];
+  const pickList = sorted.slice(1, 5);  // next 4 after the hero deal
   const featureDeal = scoredDeals[0] ?? null;
   const stackRanked = scoredDeals.slice(0, 3);
 
