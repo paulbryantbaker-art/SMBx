@@ -1,27 +1,24 @@
 /**
- * TodayTab — Apple-App-Store "Today" pattern, wired to real backend data.
+ * TodayTab — Apple-App-Store "Today" pattern wired to real deals.
  *
- * Five sections, each gracefully hides when the backing data isn't
- * available for the current user:
+ * Sections (rendered only when there's data):
+ *   - Hero card                 — always (prompts first deal if deals.length===0)
+ *   - "Continue your work"      — top 3 by updated_at, list card
+ *   - "All your deals"          — remaining deals list
  *
- *   1. Hero card           — always renders (default greeting if no active deal)
- *   2. Feature card        — active deal's ScoreDonut (only if score != null)
- *   3. Top picks list      — deals sorted by recency, secondary to active
- *   4. PINNED artifacts    — user's deliverables feed (horizontal scroll)
- *   5. Stack-ranked list   — deals with scores, ordered desc (only if ≥2)
- *
- * Data comes from two props:
- *   - deals         → from /chat/conversations/grouped (widened in Phase A)
- *   - deliverables  → from /api/deliverables/all (via useDeliverables hook)
+ * We intentionally SKIP mock-only sections from the Claude Design v4 reference
+ * (PINNED artifacts scroll, ScoreDonut "rundown ready" feature card,
+ * stack-ranked by-score list) until we have real artifact and scoring data.
+ * Better to ship a clean Today that works with real data than a fake one.
  */
 
 import { useMemo } from 'react';
 import type { AppDeal, AppDeliverable } from '../types';
 import { adaptDeals, type MobileDeal } from './adaptDeals';
-import { ScoreDonut, Pill } from './atoms';
 
 interface Props {
   deals: AppDeal[];
+  /** Deliverables across all user's deals. Empty array if none yet. */
   deliverables: AppDeliverable[];
   activeDealId: number | null;
   userName: string | null;
@@ -30,90 +27,60 @@ interface Props {
   onOpenHelp: () => void;
 }
 
-export default function TodayTab({ deals, deliverables, activeDealId, userName, onSelectDeal, onOpenChat, onOpenHelp }: Props) {
+export default function TodayTab({ deals, deliverables: _deliverables, activeDealId, userName, onSelectDeal, onOpenChat, onOpenHelp }: Props) {
   const adapted = useMemo(() => adaptDeals(deals), [deals]);
   const firstName = (userName || '').trim().split(/\s+/)[0] || 'there';
 
-  /* Empty state — user has no deals yet. */
   if (adapted.length === 0) {
     return <EmptyToday firstName={firstName} onOpenChat={onOpenChat} onOpenHelp={onOpenHelp} />;
   }
 
-  /* Sort deals with active pinned first, rest by updated_at desc. */
-  const sorted = useMemo(() => {
-    return [...adapted].sort((a, b) => {
-      if (a.id === activeDealId) return -1;
-      if (b.id === activeDealId) return 1;
-      const aT = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
-      const bT = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
-      return bT - aT;
-    });
-  }, [adapted, activeDealId]);
+  // Sort by updated_at desc. Active deal pinned first.
+  const sorted = [...adapted].sort((a, b) => {
+    if (a.id === activeDealId) return -1;
+    if (b.id === activeDealId) return 1;
+    const aT = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+    const bT = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+    return bT - aT;
+  });
 
-  const leadDeal = sorted[0];
-  const pickList = sorted.slice(1, 5);  // next 4 after the hero deal
-  const scoredDeals = useMemo(
-    () => adapted.filter((d) => typeof d.score === 'number').sort((a, b) => (b.score ?? 0) - (a.score ?? 0)),
-    [adapted],
-  );
-  const featureDeal = scoredDeals[0] ?? null;
-  const stackRanked = scoredDeals.slice(0, 3);
-
-  const openChatForDeal = (d: MobileDeal) => () => { onSelectDeal(d.id); onOpenChat(); };
+  const [lead, ...rest] = sorted;
+  const continueList = rest.slice(0, 3);
+  const restList = rest.slice(3);
 
   return (
     <div className="mm-body">
       <div className="mm-today__feed">
-        {/* 1. Hero */}
-        <HeroCard deal={leadDeal} onOpenChat={openChatForDeal(leadDeal)} />
+        <HeroCard deal={lead} onOpenChat={() => { onSelectDeal(lead.id); onOpenChat(); }} />
 
-        {/* 2. Feature ScoreDonut — only when at least one deal is scored */}
-        {featureDeal && <FeatureScoreCard deal={featureDeal} onOpenChat={openChatForDeal(featureDeal)} />}
-
-        {/* 3. Top picks */}
-        {pickList.length > 0 && (
+        {continueList.length > 0 && (
           <div className="mm-card mm-card--list">
             <div className="mm-card__head">
               <div className="mm-card__kicker">CONTINUE</div>
               <div className="mm-card__t">Pick up where you left off</div>
             </div>
-            {pickList.map((d) => (
-              <DealRow key={d.id} deal={d} onTap={openChatForDeal(d)} />
+            {continueList.map((d) => (
+              <DealRow
+                key={d.id}
+                deal={d}
+                onTap={() => { onSelectDeal(d.id); onOpenChat(); }}
+              />
             ))}
           </div>
         )}
 
-        {/* 4. PINNED artifacts — horizontal scroll of user's deliverables */}
-        {deliverables.length > 0 && (
-          <ArtifactsScroll
-            deliverables={deliverables}
-            deals={adapted}
-            onTap={(dealId) => { onSelectDeal(dealId); onOpenChat(); }}
-          />
-        )}
-
-        {/* 5. Stack-ranked — only when 2+ deals have scores */}
-        {stackRanked.length >= 2 && (
+        {restList.length > 0 && (
           <div className="mm-card mm-card--list">
             <div className="mm-card__head">
-              <div className="mm-card__kicker">STACK-RANKED</div>
-              <div className="mm-card__t">
-                {stackRanked.length === 2 ? 'Your 2 scored deals' : `Your top ${stackRanked.length} deals`}
-              </div>
+              <div className="mm-card__kicker">YOUR DEALS</div>
+              <div className="mm-card__t">All {adapted.length} deals</div>
             </div>
-            {stackRanked.map((d, i) => (
-              <button key={d.id} type="button" className="mm-listrow" onClick={openChatForDeal(d)}>
-                <div className="mm-listrow__icon mm-listrow__icon--ink">#{i + 1}</div>
-                <div className="mm-listrow__body">
-                  <div className="mm-listrow__t">{d.name}</div>
-                  <div className="mm-listrow__s">
-                    {d.score}/100
-                    {d.revenueLabel ? ` · ${d.revenueLabel} rev` : ''}
-                    {d.industry ? ` · ${d.industry}` : ''}
-                  </div>
-                </div>
-                <span className="mm-listrow__btn ink">OPEN</span>
-              </button>
+            {restList.map((d) => (
+              <DealRow
+                key={d.id}
+                deal={d}
+                onTap={() => { onSelectDeal(d.id); onOpenChat(); }}
+              />
             ))}
           </div>
         )}
@@ -122,15 +89,14 @@ export default function TodayTab({ deals, deliverables, activeDealId, userName, 
   );
 }
 
-/* ─── 1. Hero card ──────────────────────────────────── */
+/* ─── Hero card ─────────────────────────────────────────── */
 function HeroCard({ deal, onOpenChat }: { deal: MobileDeal; onOpenChat: () => void }) {
-  const latestConv = deal.conversations[0];
-  const convTitle = latestConv?.title || latestConv?.summary || null;
-  const headline = convTitle
+  const lastConvTitle = deal.conversations[0]?.title || deal.conversations[0]?.summary || null;
+  const headline = lastConvTitle
     ? `${deal.name} · ${deal.stageLabel}`
     : `${deal.name} is in ${deal.stageLabel}`;
-  const sub = convTitle
-    ? convTitle
+  const sub = lastConvTitle
+    ? lastConvTitle
     : `Open the conversation — Yulia is ready to pick up where you left off.`;
 
   return (
@@ -151,134 +117,7 @@ function HeroCard({ deal, onOpenChat }: { deal: MobileDeal; onOpenChat: () => vo
   );
 }
 
-/* ─── 2. Feature ScoreDonut card ────────────────────── */
-function FeatureScoreCard({ deal, onOpenChat }: { deal: MobileDeal; onOpenChat: () => void }) {
-  const score = deal.score ?? 0;
-  const status = score >= 70 ? 'Pursue' : score >= 55 ? 'Hold' : 'Pass';
-  const statusTone = score >= 70 ? 'ok' : score >= 55 ? 'warn' : 'flag';
-  return (
-    <button
-      type="button"
-      className="mm-card mm-card--feat"
-      onClick={onOpenChat}
-      style={{ border: 0, padding: 0, textAlign: 'left', cursor: 'pointer', width: '100%' }}
-      aria-label={`Open rundown for ${deal.name}`}
-    >
-      <div className="mm-card__art">
-        <ScoreDonut score={score} size={160} />
-      </div>
-      <div className="mm-card__body">
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
-          <div className="mm-card__kicker">RUNDOWN</div>
-          <Pill tone={statusTone}>{status}</Pill>
-        </div>
-        <div className="mm-card__t">{deal.name} · {score}/100</div>
-        <div className="mm-card__s">
-          {deal.industry ? `${deal.industry}` : null}
-          {deal.revenueLabel ? `${deal.industry ? ' · ' : ''}${deal.revenueLabel} rev` : null}
-          {deal.ebitdaLabel ? ` · ${deal.ebitdaLabel} EBITDA` : null}
-        </div>
-      </div>
-    </button>
-  );
-}
-
-/* ─── 4. PINNED artifacts horizontal scroll ────────── */
-function ArtifactsScroll({
-  deliverables,
-  deals,
-  onTap,
-}: {
-  deliverables: AppDeliverable[];
-  deals: MobileDeal[];
-  onTap: (dealId: number) => void;
-}) {
-  const dealById = useMemo(() => new Map(deals.map((d) => [d.id, d])), [deals]);
-
-  // Top 8 most-recent completed deliverables — hero scroll density.
-  const top = useMemo(
-    () => deliverables
-      .filter((x) => x.status === 'completed' || x.completed_at != null)
-      .slice(0, 8),
-    [deliverables],
-  );
-  if (top.length === 0) return null;
-
-  return (
-    <div>
-      <div className="mm-sec" style={{ padding: '0 20px 8px' }}>
-        <div>
-          <div className="mm-sec__k">PINNED</div>
-          <div className="mm-sec__t">Your artifacts</div>
-        </div>
-      </div>
-      <div className="mm-hscroll">
-        {top.map((art) => {
-          const deal = dealById.get(art.deal_id);
-          return (
-            <button
-              key={art.id}
-              type="button"
-              className="mm-hcard"
-              style={{ border: 0, padding: 0, textAlign: 'left' }}
-              onClick={() => onTap(art.deal_id)}
-              aria-label={`Open ${art.name} for ${deal?.name ?? 'deal'}`}
-            >
-              <div className="mm-hcard__art">
-                <ArtifactMetric slug={art.slug} deal={deal ?? null} artifactName={art.name} />
-              </div>
-              <div className="mm-hcard__body">
-                <div className="mm-listrow__t" style={{ fontSize: 13 }}>{art.name}</div>
-                <div className="mm-listrow__s" style={{ fontSize: 11 }}>
-                  {deal?.name ?? 'Deal'}
-                </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/* Maps a deliverable slug to a big-numeral visual — the signature Sora
-   44px compressed type the mockup uses. We pull the metric from the
-   parent deal where possible; for slugs without a numeric proxy, we
-   fall back to a short label badge. */
-function ArtifactMetric({ slug, deal, artifactName }: { slug: string; deal: MobileDeal | null; artifactName: string }) {
-  const big = (text: string) => (
-    <div style={{
-      fontFamily: "'Sora', system-ui, sans-serif",
-      fontWeight: 800,
-      fontSize: 44,
-      letterSpacing: '-0.03em',
-      color: 'var(--text-primary)',
-      lineHeight: 1,
-    }}>{text}</div>
-  );
-  const badge = (text: string) => (
-    <div style={{
-      fontFamily: "'Inter', system-ui, sans-serif",
-      fontWeight: 700,
-      fontSize: 13,
-      letterSpacing: '0.05em',
-      textTransform: 'uppercase',
-      color: 'var(--text-muted)',
-    }}>{text}</div>
-  );
-
-  if (/rundown|score/i.test(slug) && deal?.score != null) return big(String(deal.score));
-  if (/baseline/i.test(slug) && deal?.revenueLabel) return big(deal.revenueLabel);
-  if (/cim/i.test(slug)) return big('CIM');
-  if (/loi/i.test(slug) && deal?.askingPriceLabel) return big(deal.askingPriceLabel);
-  if (/dd|diligence/i.test(slug)) return badge('DD');
-  if (/compare/i.test(slug)) return big('3');
-  if (/model|dcf|lbo/i.test(slug) && deal?.ebitdaLabel) return big(deal.ebitdaLabel);
-  // Fallback — artifact name as a short label
-  return badge(artifactName.slice(0, 4).toUpperCase());
-}
-
-/* ─── 3/5. Deal row ─────────────────────────────────── */
+/* ─── Deal row ──────────────────────────────────────────── */
 function DealRow({ deal, onTap }: { deal: MobileDeal; onTap: () => void }) {
   const toneClass =
     deal.tone === 'ok' ? 'mm-listrow__icon--ok'
@@ -297,16 +136,18 @@ function DealRow({ deal, onTap }: { deal: MobileDeal; onTap: () => void }) {
   );
 }
 
-/* ─── Empty state ───────────────────────────────────── */
+/* ─── Empty state ───────────────────────────────────────── */
 function EmptyToday({ firstName, onOpenChat, onOpenHelp }: { firstName: string; onOpenChat: () => void; onOpenHelp: () => void }) {
   return (
     <div className="mm-body">
       <div className="mm-today__feed">
-        <button
-          type="button"
+        <div
           className="mm-card mm-card--hero"
           onClick={onOpenChat}
-          style={{ border: 0, padding: 0, textAlign: 'left', cursor: 'pointer', width: '100%' }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpenChat(); }}
+          style={{ cursor: 'pointer' }}
         >
           <div className="mm-card__art" aria-hidden />
           <div className="mm-card__body">
@@ -314,7 +155,7 @@ function EmptyToday({ firstName, onOpenChat, onOpenHelp }: { firstName: string; 
             <div className="mm-card__t">Let's start a deal, {firstName}.</div>
             <div className="mm-card__s">Tell Yulia about your business (revenue, industry, your role) and she'll guide you from valuation to CIM.</div>
           </div>
-        </button>
+        </div>
 
         <div className="mm-card mm-card--list">
           <div className="mm-card__head">
