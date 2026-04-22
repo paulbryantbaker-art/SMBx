@@ -21,6 +21,9 @@ interface Props {
   deals: AppDeal[];
   onSelectDeal: (dealId: number) => void;
   onOpenChat: () => void;
+  /** Optional — if provided, tapping a deal tile/row opens the detail
+   *  sheet instead of jumping straight into chat (App Store pattern). */
+  onOpenDetail?: (dealId: number) => void;
 }
 
 type Bucket = 'all' | 'exploring' | 'valuing' | 'packaging' | 'closing';
@@ -33,7 +36,7 @@ const BUCKETS: Array<{ id: Bucket; label: string; gates: RegExp }> = [
   { id: 'closing',   label: 'Closing',   gates: /^(S4|S5|B4|B5|R4|R5|PMI3)$/ },
 ];
 
-export default function DealsTab({ deals, onSelectDeal, onOpenChat }: Props) {
+export default function DealsTab({ deals, onSelectDeal, onOpenChat, onOpenDetail }: Props) {
   const adapted = useMemo(() => adaptDeals(deals), [deals]);
   const [bucket, setBucket] = useState<Bucket>('all');
   const [view, setView] = useState<ViewMode>('list');
@@ -73,7 +76,16 @@ export default function DealsTab({ deals, onSelectDeal, onOpenChat }: Props) {
     );
   }
 
-  const openChatForDeal = (dealId: number) => { onSelectDeal(dealId); onOpenChat(); };
+  // Tile/row tap — Apple App Store behavior: open detail page, not chat.
+  // Fallback to old behavior (go straight to chat) when no onOpenDetail.
+  const openDeal = (dealId: number) => {
+    if (onOpenDetail) {
+      onOpenDetail(dealId);
+    } else {
+      onSelectDeal(dealId);
+      onOpenChat();
+    }
+  };
 
   return (
     <div className="mm-body">
@@ -133,14 +145,14 @@ export default function DealsTab({ deals, onSelectDeal, onOpenChat }: Props) {
         <div style={{ padding: '0 16px 20px' }}>
           <div className="mm-card mm-card--list">
             {filtered.map((d) => (
-              <DealRow key={d.id} deal={d} onTap={() => openChatForDeal(d.id)} />
+              <DealRow key={d.id} deal={d} onTap={() => openDeal(d.id)} />
             ))}
           </div>
         </div>
       ) : (
         <div className="mm-grid">
           {filtered.map((d) => (
-            <DealGridTile key={d.id} deal={d} onTap={() => openChatForDeal(d.id)} />
+            <DealGridTile key={d.id} deal={d} onTap={() => openDeal(d.id)} />
           ))}
         </div>
       )}

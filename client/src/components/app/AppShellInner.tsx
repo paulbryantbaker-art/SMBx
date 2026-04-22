@@ -23,6 +23,7 @@ import TodayTab from './mobile/TodayTab';
 import DealsTab from './mobile/DealsTab';
 import InboxTab from './mobile/InboxTab';
 import ChatFullscreen from './mobile/ChatFullscreen';
+import DealDetailSheet from './mobile/DealDetailSheet';
 import HelpSheet from './sheets/HelpSheet';
 import { adaptDeals } from './mobile/adaptDeals';
 import { useDeliverables } from './mobile/useDeliverables';
@@ -54,6 +55,10 @@ export default function AppShellInner({
   const [contentTab, setContentTab] = useState<Exclude<MobileTab, 'chat'>>('today');
   const [chatOpen, setChatOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  // Detail-sheet deal id — Apple App Store "app detail page" pattern.
+  // Tapping a deal in DealsTab or Today opens this instead of chat; the
+  // sheet's primary CTA routes into chat.
+  const [detailDealId, setDetailDealId] = useState<number | null>(null);
 
   /* SAFETY NET — `html.yulia-chat-open` applies `#root { display: none !important }`
      per index.css:439. If a prior session (same PWA instance, React StrictMode
@@ -73,6 +78,13 @@ export default function AppShellInner({
   const activeDeal = useMemo(
     () => adapted.find((d) => d.id === activeDealId) ?? null,
     [adapted, activeDealId],
+  );
+  // Detail sheet reads from adapted by its own id — independent of
+  // activeDealId so tapping a tile never mutates chat state until the
+  // user hits "Chat with Yulia" inside the sheet.
+  const detailDeal = useMemo(
+    () => (detailDealId != null ? adapted.find((d) => d.id === detailDealId) ?? null : null),
+    [adapted, detailDealId],
   );
 
   // Deliverables feed — powers Today's PINNED artifacts strip and
@@ -153,6 +165,7 @@ export default function AppShellInner({
               deals={deals}
               onSelectDeal={onSelectDeal}
               onOpenChat={() => setChatOpen(true)}
+              onOpenDetail={(id) => setDetailDealId(id)}
             />
           )}
           {contentTab === 'inbox' && (
@@ -181,6 +194,19 @@ export default function AppShellInner({
         onRetry={onRetry}
         onSend={onSend}
         onBack={() => setChatOpen(false)}
+      />
+
+      {/* Deal detail sheet — portaled to body. Apple App Store detail page. */}
+      <DealDetailSheet
+        open={detailDealId != null}
+        deal={detailDeal}
+        deliverables={deliverables}
+        onBack={() => setDetailDealId(null)}
+        onOpenChat={() => {
+          if (detailDealId != null) onSelectDeal(detailDealId);
+          setDetailDealId(null);
+          setChatOpen(true);
+        }}
       />
 
       {/* Help & Glossary bottom sheet — opens from TopBar bell + Today primer. */}
