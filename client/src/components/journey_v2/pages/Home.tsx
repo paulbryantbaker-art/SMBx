@@ -1,31 +1,46 @@
 /**
- * Home.tsx — ported from Claude Design handoff v4 (`Home v1.html`).
+ * Home.tsx — rebuilt per the April 2026 site spec (§1).
  *
- * Structure and class names preserved verbatim per the handoff
- * contract. Styling lives in `handoff_v4/home.css` (scoped under
- * `#home`). Shell wiring (portfolio switcher, suggested chip, plus
- * button) flows through JourneyChat props.
+ * The front door. Deliberately short. The primary conversion action
+ * (the chat input) is at the top. Sections below build context for
+ * users who scroll before typing.
  *
- * JS ports from the handoff inline <script>:
- *   - Reveal-on-scroll observer adds `.in` to `.h-anim`
- *   - Scroll-sync observer updates the crumb + next-chip labels and
- *     plays scripted Yulia narration once per section
- *   - Plus popup seeds the composer with a journey-specific line
- *   - App-card click seeds the composer (except Sell, which navigates)
- *   - CTA pointer focuses composer + pulses the chat column
+ * Structure (top → bottom, inside the canvas):
+ *   1. HeroInput       — H1 + subtitle + inline ChatDock + 4 chips
+ *   2. TrustRow        — data source attribution, small muted
+ *   3. CardGrid (6)    — WHAT YULIA DOES
+ *   4. Pillars (3)     — EVERY DEAL. THREE THINGS THAT MATTER.
+ *   5. PillRow (4)     — YULIA WORKS FOR
+ *   6. BottomCTA       — quiet invitation + second inline ChatDock
+ *
+ * No dark hero band, no app-card grid, no h-rail of 9 capabilities —
+ * all retired by the new spec. The h-page container + SectionNav are
+ * preserved so the sticky dot-rail still works.
  */
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
 import SectionNav, { type Section } from '../shell/SectionNav';
+import {
+  HeroInput, TrustRow, SectionLabel, CardGrid, Pillars, PillRow, BottomCTA,
+  type Card, type Pillar, type RolePill,
+} from '../shell/JourneyPrimitives';
 
 const HOME_SECTIONS: readonly Section[] = [
-  { id: 'today', label: 'Today' },
-  { id: 'apps',  label: 'Four journeys' },
-  { id: 'caps',  label: 'Capabilities' },
-  { id: 'claim', label: 'Speed advantage' },
-  { id: 'trust', label: 'Trust' },
-  { id: 'cta',   label: 'Start' },
+  { id: 'hero',     label: 'Yulia' },
+  { id: 'does',     label: 'What Yulia does' },
+  { id: 'pillars',  label: 'Three truths' },
+  { id: 'who',      label: 'Who Yulia is for' },
+  { id: 'cta',      label: 'Start' },
+];
+
+const HERO_HINTS: readonly string[] = [
+  'Screen a deal in 90 seconds…',
+  'Find the add-backs hiding in your financials…',
+  'Draft a CIM from a conversation…',
+  'Model an SBA structure under SOP 50 10 8…',
+  'Build your LP update in 20 minutes…',
+  "What's this business actually worth…",
 ];
 
 interface Props {
@@ -36,55 +51,10 @@ interface Props {
   onSignIn?: () => void;
 }
 
-/* Section IDs drive the scroll-sync + crumb updates. Order = reading order. */
-const SECTION_IDS = ['today', 'apps', 'caps', 'claim', 'trust', 'cta'] as const;
-type SectionId = typeof SECTION_IDS[number];
-
-const CRUMB: Record<SectionId, string> = {
-  today: 'Home',
-  apps:  'Home · journeys',
-  caps:  'Home · capabilities',
-  claim: 'Home · pricing',
-  trust: 'Home · trust',
-  cta:   'Home · get started',
-};
-
-const NEXT: Record<SectionId, { k: string; t: string }> = {
-  today: { k: 'Next',   t: 'See the journeys' },
-  apps:  { k: 'Next',   t: 'See the capabilities' },
-  caps:  { k: 'Next',   t: "How it's priced" },
-  claim: { k: 'Next',   t: 'Read the trust posture' },
-  trust: { k: 'Ready?', t: 'Tell Yulia what you need' },
-  cta:   { k: 'Ready?', t: 'Start free — no card' },
-};
-
-/* Additional scripted narration — plays once when each section is seen. */
-const SECTION_SCRIPT: Partial<Record<SectionId, { who: 'y' | 'me'; t: string }[]>> = {
-  apps: [
-    { who: 'y', t: 'Four journeys: <strong>Sell, Buy, Raise, Integrate.</strong> Same agent, same chat, same canvas — different tools when you switch.' },
-  ],
-  caps: [
-    { who: 'y', t: "These are the <em>capabilities</em> — the primitives I use across journeys. An estimator you can try. A CIM I draft live. Twelve in total; nine shown." },
-  ],
-  claim: [
-    { who: 'y', t: 'Priced flat. A banker on a sell-side: <strong>$1.4M over 12 months.</strong> Growth equity fees: <strong>5.5%</strong> of the round. smbx.ai: <strong>$4K/mo.</strong>' },
-  ],
-  cta: [
-    { who: 'y', t: 'Ready? One line — <em>"I\'m thinking about selling,"</em> <em>"we just closed Monarch"</em> — and I take it from there.' },
-  ],
-};
-
-const PLUS_ROWS = [
-  { id: 'sell',      icon: '$', label: 'Sell my business',          hint: '30 min',     seed: "I'm thinking about selling my business." },
-  { id: 'buy',       icon: '⌕', label: 'Buy a business',            hint: 'Thesis',     seed: "I want to buy a business. Here's my thesis." },
-  { id: 'raise',     icon: '↗', label: 'Raise capital',             hint: 'Term sheet', seed: "I need to raise capital." },
-  { id: 'integrate', icon: '◫', label: 'Integrate an acquisition',  hint: '180 days',   seed: "We just closed on an acquisition." },
-];
-
 export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
 
-  /* ── Reveal `.h-anim` elements on scroll into view ── */
+  /* Reveal on scroll. */
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -95,126 +65,105 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
       return;
     }
     const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in');
-          io.unobserve(entry.target);
-        }
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
       });
     }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
     targets.forEach((el) => { if (!el.classList.contains('in')) io.observe(el); });
     return () => io.disconnect();
   }, []);
 
-  /* ── Scroll-sync: update crumb + next-chip + play section script. ── */
-  const seenRef = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
+  /* Seed a chat message into the side ChatDock (and the page's inline
+     ChatDock, via onSend). Both routes morph the page into chat mode. */
+  const seed = (text: string) => onSend(text);
 
-    const crumbT = document.querySelector<HTMLElement>('.v4-canvas__crumb-t');
-    const nextK  = document.querySelector<HTMLElement>('.v4-next__k');
-    const nextT  = document.querySelector<HTMLElement>('.v4-next__t');
-    const scrollEl = document.querySelector<HTMLElement>('#chatScroll');
-
-    const postMsg = (who: 'y' | 'me', html: string) => {
-      if (!scrollEl) return;
-      const d = document.createElement('div');
-      d.className = 'v4-msg' + (who === 'me' ? ' v4-msg--me' : '');
-      d.innerHTML = `<div class="v4-msg__meta"><span class="v4-msg__av">${who === 'me' ? 'R' : 'Y'}</span><span>${who === 'me' ? 'You' : 'Yulia'}</span></div><div class="v4-msg__bubble">${html}</div>`;
-      scrollEl.appendChild(d);
-      scrollEl.scrollTop = scrollEl.scrollHeight;
+  /* Chip handlers — map label → journey-entry seed. */
+  const chipSeed = (chip: string) => {
+    const map: Record<string, string> = {
+      "I'm selling": "I want to sell my business.",
+      "I'm buying": "I want to buy a business.",
+      "I'm raising": "I need to raise capital.",
+      "I just closed a deal": "We just closed an acquisition.",
     };
-
-    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const id = entry.target.id as SectionId;
-        if (CRUMB[id] && crumbT) crumbT.textContent = CRUMB[id];
-        if (NEXT[id]) {
-          if (nextK) nextK.textContent = NEXT[id].k;
-          if (nextT) nextT.textContent = NEXT[id].t;
-        }
-        const script = SECTION_SCRIPT[id];
-        if (script && !seenRef.current.has(id)) {
-          seenRef.current.add(id);
-          script.forEach((ln, i) => window.setTimeout(() => postMsg(ln.who, ln.t), i * 450));
-        }
-      });
-    }, { rootMargin: '-25% 0px -55% 0px' });
-
-    SECTION_IDS.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) io.observe(el);
-    });
-    return () => io.disconnect();
-  }, []);
-
-  /* ── Next-chip: advance to the next section. ── */
-  const advanceSection = () => {
-    if (typeof document === 'undefined') return;
-    const i = SECTION_IDS.findIndex((id) => {
-      const el = document.getElementById(id);
-      if (!el) return false;
-      const r = el.getBoundingClientRect();
-      return r.top >= 0 && r.top <= window.innerHeight / 2;
-    });
-    const nextId = SECTION_IDS[Math.min(Math.max(i, 0) + 1, SECTION_IDS.length - 1)];
-    const target = document.getElementById(nextId);
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    seed(map[chip] ?? chip);
   };
 
-  /* ── CTA pointer: focus the composer + pulse the chat well. ── */
-  const pulseChat = () => {
-    const input = document.getElementById('chatInput') as HTMLInputElement | null;
-    input?.focus();
-    const chat = document.getElementById('chat');
-    chat?.animate(
-      [
-        { boxShadow: '0 0 0 0 rgba(10,10,11,0.25)' },
-        { boxShadow: '0 0 0 14px rgba(10,10,11,0)' },
-      ],
-      { duration: 720, easing: 'cubic-bezier(0.22,0.8,0.32,1)' },
-    );
-  };
+  /* ── SECTION 3: capability cards ── */
+  const capabilityCards: readonly Card[] = [
+    {
+      icon: <Glyph name="search" />,
+      title: 'Find the hidden money',
+      proof: 'Add-back analysis. $1.1M average found. 20 minutes.',
+      onClick: () => seed('Find the add-backs hiding in my financials.'),
+    },
+    {
+      icon: <Glyph name="score" />,
+      title: 'Score any deal in 90 seconds',
+      proof: '7 dimensions. Pursue or pass before you spend a dollar.',
+      onClick: () => seed('Score a deal for me.'),
+    },
+    {
+      icon: <Glyph name="reg" />,
+      title: 'Rebuild what SBA SOP 50 10 8 broke',
+      proof: 'Capital stacks, seller notes, equity injection. Current rules.',
+      onClick: () => seed('Rebuild my SBA capital stack under SOP 50 10 8.'),
+    },
+    {
+      icon: <Glyph name="doc" />,
+      title: 'Draft the CIM',
+      proof: '25–40 pages. 30 minutes from a 20-minute conversation.',
+      onClick: () => seed('Draft my CIM.'),
+    },
+    {
+      icon: <Glyph name="loi" />,
+      title: 'Draft the LOI',
+      proof: 'Attorney-ready. First draft from deal context.',
+      onClick: () => seed('Draft an LOI for the deal I just pasted.'),
+    },
+    {
+      icon: <Glyph name="memo" />,
+      title: 'Write the LP update',
+      proof: 'IC memos, LP updates, board decks. 20 minutes.',
+      onClick: () => seed('Write my LP update.'),
+    },
+  ];
 
-  /* ── App-card click: seed chat for buy/raise/integrate; Sell navigates. ── */
-  const handleAppClick = (j: string, e: React.MouseEvent) => {
-    if (j === 'sell') {
-      e.preventDefault();
-      onNavigate('sell');
-      return;
-    }
-    e.preventDefault();
-    const seeds: Record<string, string> = {
-      buy:       "I want to buy a business. Here's my thesis.",
-      raise:     'I need to raise capital.',
-      integrate: 'We just closed on an acquisition.',
-    };
-    const seed = seeds[j];
-    const input = document.getElementById('chatInput') as HTMLInputElement | null;
-    if (input && seed) {
-      input.value = seed;
-      input.focus();
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-  };
+  /* ── SECTION 4: three pillars ── */
+  const pillars: readonly Pillar[] = [
+    {
+      kicker: 'Pillar 1',
+      heading: 'Sell for more',
+      body: 'What buyers pay comes from what sellers can show. Yulia finds the value hiding in your financials, builds the documents, and runs the process.',
+      ctaLabel: 'Tell Yulia about your business',
+      onCta: () => onNavigate('sell'),
+    },
+    {
+      kicker: 'Pillar 2',
+      heading: 'Buy right',
+      body: 'The best deals go to the fastest screeners. Yulia scores any deal in 90 seconds, models the structure, and stress-tests the guarantee.',
+      ctaLabel: 'Paste a deal for Yulia',
+      onCta: () => onNavigate('buy'),
+    },
+    {
+      kicker: 'Pillar 3',
+      heading: 'Do it faster',
+      body: 'Every practitioner is racing the same clock. Yulia does the analyst and associate work. You run the deal.',
+      ctaLabel: 'Show me what Yulia does',
+      onCta: () => onNavigate('how-it-works'),
+    },
+  ];
 
-  /* ── Composer send: journey-aware reply. ── */
-  const replyTo = useMemo(() => (t: string): string => {
-    const low = t.toLowerCase();
-    if (/sell|exit|cim|buyer|ioi/.test(low))                    return "Great — tell me three numbers and I'll return a preliminary range in 30 minutes: <strong>industry</strong>, <strong>revenue</strong>, <strong>reported EBITDA</strong>.";
-    if (/buy|acqui|target|thesis|roll-?up/.test(low))           return "Got it. What's the thesis — industry, geography, check size? I'll build a target list overnight.";
-    if (/raise|round|series|equity|capital/.test(low))          return 'Okay. <strong>Stage</strong> and <strong>use of funds</strong>, and I\'ll score your readiness against what ICs actually grade.';
-    if (/integr|day\s*1|day-?one|synergy|post.?close/.test(low)) return "Day zero. Send me the <strong>LOI</strong> and a <strong>chart of accounts</strong>. I'll have a 180-day runbook in the canvas in an hour.";
-    return 'Tell me what you\'re trying to do — <em>"I\'m thinking about selling,"</em> <em>"we need to raise,"</em> <em>"we just closed on Monarch"</em> — and I\'ll pick the journey and start.';
-  }, []);
-
-  const handleSend = (text: string) => {
-    void replyTo; // reply wiring currently uses JourneyChat's internal reply; kept for future routing
-    onSend(text);
-  };
+  /* ── SECTION 5: four role pills ── */
+  const rolePills: readonly RolePill[] = [
+    { title: 'Sellers',  body: '$5M EBITDA and up. Exit planning through close.',
+      onClick: () => onNavigate('sell') },
+    { title: 'Buyers',   body: 'Search funders, independent sponsors, PE, corp dev, principal buyers.',
+      onClick: () => onNavigate('buy') },
+    { title: 'Advisors', body: "Brokers, M&A boutiques, solo bankers. Yulia is the analyst you don't have.",
+      onClick: () => onNavigate('sell') },
+    { title: 'Investors', body: 'Family offices, fundless sponsors, LP groups. Evaluation through portfolio ops.',
+      onClick: () => onNavigate('buy') },
+  ];
 
   return (
     <JourneyShell
@@ -222,321 +171,108 @@ export default function Home({ active, onSend, onStartFree, onNavigate, onSignIn
       onNavigate={onNavigate}
       onSignIn={onSignIn}
       onStartFree={onStartFree}
-      canvasKicker="smbx.ai"
-      canvasTitle="Home"
-      canvasBadge="Today · live"
+      canvasKicker="smbx.ai / home"
+      canvasTitle="The AI deal team"
+      canvasBadge="Free"
       chat={{
         title: 'Yulia',
-        status: 'smbx.ai · Home',
+        status: 'Ready',
         pswLogo: 'Y',
         pswName: 'Yulia',
-        pswMeta: 'SMBX · GENERAL',
+        pswMeta: 'READY',
         script: {},
-        opening: "Hi — I'm <strong>Yulia</strong>. I'm the agent that runs smbx.ai. Scroll through the canvas to see what I do; or tell me what you're trying to do and I'll pick the right journey.",
-        reply: 'Tell me what you\'re trying to do — I\'ll pick the journey and start.',
+        opening: "Hi — I'm <strong>Yulia</strong>. Tell me what you're working on and I'll take it from there. Sell, buy, raise, integrate — one conversation covers all of it.",
+        reply: "One line — <em>\"I'm thinking about selling,\"</em> <em>\"we just closed on a deal\"</em> — and I pick the journey and start.",
         chips: [] as const,
-        placeholder: 'Ask Yulia anything about your business…',
-        onSend: handleSend,
-        suggested: { kicker: 'Next', label: 'See the journeys', onClick: advanceSection },
-        plusShortcuts: {
-          rows: PLUS_ROWS,
-          onPick: (id) => {
-            if (id === 'sell') onNavigate('sell');
-            if (id === 'buy') onNavigate('buy');
-            if (id === 'raise') onNavigate('raise');
-            if (id === 'integrate') onNavigate('integrate');
-          },
+        placeholder: 'Tell Yulia what you need…',
+        onSend,
+        suggested: {
+          kicker: 'Next',
+          label: 'See what Yulia does',
+          onClick: () => document.getElementById('does')?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
         },
       }}
     >
       <div id="home" className="h-page" data-density="comfortable" data-motion="full" data-hero="shell" ref={rootRef}>
         <SectionNav sections={HOME_SECTIONS} />
 
-        {/* ══ TODAY CARD ══ */}
-        <section className="h-today h-anim" id="today">
-          <div className="h-today__inner">
-            <div className="h-today__copy">
-              <div className="h-today__meta">
-                Today · smbx.ai
-                <span className="h-today__meta-tag">Featured</span>
-              </div>
-              <h1 className="h-today__h">The analyst, associate, and VP <em>you couldn't afford to hire.</em></h1>
-              <p className="h-today__sub">
-                <strong>90% of what an investment bank does. Everything that doesn't require a license.</strong> CIMs, valuations, deal scoring, financial models, LOI drafts, LP updates — in minutes, not weeks. ChatGPT can do any one of these. smbx does all of them, together, with your deal's context. $199/month for one practitioner. No success fees, ever.
-              </p>
-              <div className="h-today__cta">
-                <button className="h-today__btn" type="button" onClick={() => {
-                  (document.getElementById('chatInput') as HTMLInputElement | null)?.focus();
-                }}>
-                  Open the chat
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12" />
-                    <polyline points="12 19 5 12 12 5" />
-                  </svg>
-                </button>
-                <button className="h-today__btn h-today__btn--ghost" type="button">Watch a demo</button>
-              </div>
+        {/* §1 HERO */}
+        <HeroInput
+          heading={<>The AI deal team.</>}
+          subtitle="Valuations. CIMs. Deal scoring. Financial models. Due diligence. LOIs. Everything an investment bank delivers — without the retainer."
+          placeholder="Tell Yulia what you're working on…"
+          typewriterHints={HERO_HINTS}
+          chips={["I'm selling", "I'm buying", "I'm raising", "I just closed a deal"]}
+          onChipClick={chipSeed}
+          onSend={onSend}
+        />
 
-              {/* Ticker — shown only when hero=ticker */}
-              <div className="h-ticker">
-                <div className="h-ticker__track">
-                  {[0, 1].flatMap((loop) => [
-                    <span key={`a-${loop}`}><strong>Acme</strong> · add-backs · +$1.8M</span>,
-                    <span key={`b-${loop}`}><strong>Apex</strong> · 47 targets screened</span>,
-                    <span key={`c-${loop}`}><strong>Crestline</strong> · Series B · $22M committed</span>,
-                    <span key={`d-${loop}`}><strong>Monarch</strong> · day 42 · 3 synergies hit</span>,
-                    <span key={`e-${loop}`}><strong>Ridgeline</strong> · 4 IOIs inside 21 days</span>,
-                  ])}
-                </div>
-              </div>
-            </div>
+        {/* §2 TRUST ROW */}
+        <TrustRow>
+          Built on U.S. Census · Bureau of Labor Statistics · FRED · SEC EDGAR · SBA · IRS SOI
+        </TrustRow>
 
-            {/* Demo column */}
-            <div className="h-today__demo">
-              <div className="h-today__demo-k">Yulia · live on Acme, Inc. · Friday 2pm</div>
-              <div className="h-today__demo-bubble h-today__demo-bubble--me">Draft the CIM. 32 pages. Client meeting Monday.</div>
-              <div className="h-today__demo-bubble">
-                Done. 32pp drafted from the add-back schedule + discipline mix + buyer universe. Six defensible add-backs found (<strong>+$1.80M</strong>). First draft ready for your review. <strong>Total time: 28 minutes.</strong> A boutique bank charges $150K retainer plus 4% success fee for the same deliverable.
-              </div>
-              <div className="h-today__demo-out">
-                <div className="h-today__demo-out-c">
-                  <div className="h-today__demo-out-v">28<span style={{ fontSize: '60%', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>min</span></div>
-                  <div className="h-today__demo-out-l">CIM · first draft</div>
-                </div>
-                <div className="h-today__demo-out-c">
-                  <div className="h-today__demo-out-v">$150K<span style={{ fontSize: '60%', color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}> → $199/mo</span></div>
-                  <div className="h-today__demo-out-l">Banker retainer → smbx Pro</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ══ JOURNEY APPS ══ */}
-        <div className="h-sect-h">
-          <div className="h-sect-h__l">
-            <div className="h-sect-h__k">Four journeys · same agent</div>
-            <h2 className="h-sect-h__t">Every side of every deal. <em>In minutes, not weeks.</em></h2>
-          </div>
+        {/* §3 WHAT YULIA DOES */}
+        <div id="does" style={{ marginTop: 48 }}>
+          <SectionLabel>What Yulia does</SectionLabel>
+          <CardGrid cards={capabilityCards} />
         </div>
 
-        <div className="h-apps" id="apps">
-          {/* SELL */}
-          <a className="h-app h-anim" data-app="sell" data-j="sell" href="/sell" onClick={(e) => handleAppClick('sell', e)}>
-            <div className="h-app__art">
-              <div className="h-app__art-k">01 · Sell</div>
-              <h3 className="h-app__art-h">Every dollar of hidden EBITDA, defended on the record.</h3>
-              <div className="h-app__preview">
-                <div className="h-app__row h-app__row--head"><span>Add-back schedule · Acme</span><span>$</span></div>
-                <div className="h-app__row"><span className="h-app__row-l">Above-market lease</span><span className="h-app__row-r h-app__row-r--ok">+$420K</span></div>
-                <div className="h-app__row"><span className="h-app__row-l">Discontinued branch</span><span className="h-app__row-r h-app__row-r--ok">+$640K</span></div>
-                <div className="h-app__row"><span className="h-app__row-l">Legal reserve</span><span className="h-app__row-r h-app__row-r--ok">+$310K</span></div>
-                <div className="h-app__row"><span className="h-app__row-l">Family on payroll</span><span className="h-app__row-r h-app__row-r--ok">+$180K</span></div>
-                <div className="h-app__row h-app__row--total"><span className="h-app__row-l">Defensible total</span><span className="h-app__row-r h-app__row-r--total">+$1.80M</span></div>
-              </div>
-            </div>
-            <div className="h-app__foot">
-              <div className="h-app__foot-l">
-                <div className="h-app__foot-t">Sell a business</div>
-                <div className="h-app__foot-s">Estimator → add-backs → CIM → IOIs → close</div>
-              </div>
-              <button className="h-app__get" type="button">Open</button>
-            </div>
-          </a>
-
-          {/* BUY */}
-          <a className="h-app h-anim h-anim-d1" data-app="buy" data-j="buy" href="#" onClick={(e) => handleAppClick('buy', e)}>
-            <div className="h-app__art">
-              <div className="h-app__art-k">02 · Buy</div>
-              <h3 className="h-app__art-h">A thesis, a pipeline, and a letter on the desk.</h3>
-              <div className="h-app__preview">
-                <div className="h-app__row h-app__row--head"><span>Thesis · Southwest MRO roll-up</span><span>FIT</span></div>
-                <div className="h-app__row"><span className="h-app__row-l">Ridgeline Supply · Tucson</span><span className="h-app__row-r h-app__row-r--ok">94</span></div>
-                <div className="h-app__row"><span className="h-app__row-l">Granite Industrial · Denver</span><span className="h-app__row-r h-app__row-r--ok">88</span></div>
-                <div className="h-app__row"><span className="h-app__row-l">Summit Parts · Albuquerque</span><span className="h-app__row-r h-app__row-r--ok">82</span></div>
-                <div className="h-app__row"><span className="h-app__row-l">Desert Flow · Phoenix</span><span className="h-app__row-r h-app__row-r--warn">71</span></div>
-                <div className="h-app__row h-app__row--total"><span className="h-app__row-l">47 targets screened</span><span className="h-app__row-r h-app__row-r--total">4 live</span></div>
-              </div>
-            </div>
-            <div className="h-app__foot">
-              <div className="h-app__foot-l">
-                <div className="h-app__foot-t">Buy a business</div>
-                <div className="h-app__foot-s">Thesis → screening → outreach → diligence → LOI</div>
-              </div>
-              <button className="h-app__get" type="button">Open</button>
-            </div>
-          </a>
-
-          {/* RAISE */}
-          <a className="h-app h-anim h-anim-d2" data-app="raise" data-j="raise" href="#" onClick={(e) => handleAppClick('raise', e)}>
-            <div className="h-app__art">
-              <div className="h-app__art-k">03 · Raise</div>
-              <h3 className="h-app__art-h">Readiness scored the way an IC actually scores it.</h3>
-              <div className="h-app__donut">
-                <svg viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(0,0,0,0.08)" strokeWidth="9" />
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="#0A0A0B" strokeWidth="9"
-                    strokeLinecap="round" strokeDasharray="263.9" strokeDashoffset="68" />
-                </svg>
-                <div className="h-app__donut-v">74</div>
-              </div>
-              <div className="h-app__preview" style={{ marginTop: 0 }}>
-                <div className="h-app__bars">
-                  {[
-                    { l: 'Growth',     w: '88%', v: '8.8' },
-                    { l: 'Unit econ.', w: '82%', v: '8.2' },
-                    { l: 'Team',       w: '72%', v: '7.2' },
-                    { l: 'TAM story',  w: '58%', v: '5.8' },
-                  ].map((b) => (
-                    <div key={b.l} className="h-app__bar">
-                      <span className="h-app__bar-l">{b.l}</span>
-                      <span className="h-app__bar-t">
-                        <span className="h-app__bar-f" style={{ ['--w' as string]: b.w } as React.CSSProperties} />
-                      </span>
-                      <span className="h-app__bar-v">{b.v}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="h-app__foot">
-              <div className="h-app__foot-l">
-                <div className="h-app__foot-t">Raise capital</div>
-                <div className="h-app__foot-s">Readiness → data room → pitch → term sheet</div>
-              </div>
-              <button className="h-app__get" type="button">Open</button>
-            </div>
-          </a>
-
-          {/* INTEGRATE */}
-          <a className="h-app h-anim h-anim-d3" data-app="integrate" data-j="integrate" href="#" onClick={(e) => handleAppClick('integrate', e)}>
-            <div className="h-app__art">
-              <div className="h-app__art-k">04 · Integrate</div>
-              <h3 className="h-app__art-h">Day 1 to 180 — the plan that survives close.</h3>
-              <div className="h-app__preview">
-                <div className="h-app__row h-app__row--head"><span>Day 1–180 · Monarch</span><span>DAY 42</span></div>
-                <div className="h-app__tl">
-                  <span className="h-app__tl-seg" data-state="done" />
-                  <span className="h-app__tl-seg" data-state="done" />
-                  <span className="h-app__tl-seg" data-state="active" />
-                  <span className="h-app__tl-seg" />
-                  <span className="h-app__tl-seg" />
-                  <span className="h-app__tl-seg" />
-                </div>
-                <div className="h-app__tl-labels">
-                  <span>D1</span><span>D30</span><span>D60</span><span>D90</span><span>D120</span><span>D180</span>
-                </div>
-                <div className="h-app__row"><span className="h-app__row-l">ERP cutover</span><span className="h-app__row-r h-app__row-r--ok">Done</span></div>
-                <div className="h-app__row"><span className="h-app__row-l">AP consolidation</span><span className="h-app__row-r h-app__row-r--warn">In flight</span></div>
-                <div className="h-app__row"><span className="h-app__row-l">Synergy: freight</span><span className="h-app__row-r h-app__row-r--ok">+$420K</span></div>
-              </div>
-            </div>
-            <div className="h-app__foot">
-              <div className="h-app__foot-l">
-                <div className="h-app__foot-t">Integrate an acquisition</div>
-                <div className="h-app__foot-s">Day-1 plan → synergy tracker → 180-day close-out</div>
-              </div>
-              <button className="h-app__get" type="button">Open</button>
-            </div>
-          </a>
+        {/* §4 THREE PILLARS */}
+        <div id="pillars" style={{ marginTop: 72 }}>
+          <SectionLabel>Every deal. Three things that matter.</SectionLabel>
+          <Pillars pillars={pillars} />
         </div>
 
-        {/* ══ CAPABILITIES RAIL ══ */}
-        <div className="h-sect-h">
-          <div className="h-sect-h__l">
-            <div className="h-sect-h__k">The harness · every paid tier</div>
-            <h2 className="h-sect-h__t">Not AI. The harness around it. <em>Everything integrated with your deal context.</em></h2>
-          </div>
-          <button className="h-sect-h__more" type="button">See all →</button>
+        {/* §5 FOR WHOM */}
+        <div id="who" style={{ marginTop: 72 }}>
+          <SectionLabel>Yulia works for</SectionLabel>
+          <PillRow pills={rolePills} />
         </div>
 
-        <div className="h-rail" id="caps">
-          {[
-            /* ── 3 hero capabilities first (per research matrix) ── */
-            { ico: '$', t: 'Add-back + QoE Lite',    s: '$25K of pre-LOI decision insurance, 30 minutes, 22 deterministic formulas.', meta: 'Sell · Buy',   tag: 'Hero' },
-            { ico: '◨', t: 'SBA SOP 50 10 8',         s: 'Your rollover is dead. Yulia rebuilds the compliant stack in 5 minutes.',    meta: 'Buy',          tag: 'Hero' },
-            { ico: '◎', t: 'The Rundown',             s: 'Screen a deal in 90 seconds on 7 dimensions. Pursue or pass before a dollar is spent.', meta: 'Buy',  tag: 'Hero' },
-            /* ── Platform depth ── */
-            { ico: '✎', t: 'LP updates + IC memos',   s: 'Quarterly LP update written in 20 minutes. IC memo from your pipeline.',     meta: 'Raise · IS',   tag: 'Try' },
-            { ico: '▤', t: 'CIM drafting',            s: '32-page diligence pack. Three–five days to first draft.',                    meta: 'Sell',         tag: 'Live' },
-            { ico: '⇌', t: 'LOI / IOI drafting',      s: 'Attorney-ready first-draft offer documents from your deal context.',         meta: 'Sell · Buy',   tag: 'Live' },
-            { ico: '◫', t: 'Day-1 runbook',           s: '180-day integration plan generated from the LOI + QoE.',                     meta: 'Integrate',    tag: 'Preview' },
-            { ico: '⎙', t: 'Data room',                s: 'Buyer Q&A, version-controlled, watermarked, fully logged.',                 meta: 'Sell · Raise', tag: 'Live' },
-            { ico: '⟟', t: 'Synergy tracker',         s: 'Committed vs. realized, per workstream, on the same canvas.',                meta: 'Integrate',    tag: 'Live' },
-          ].map((c) => (
-            <div key={c.t} className="h-cap">
-              <div className="h-cap__ico">{c.ico}</div>
-              <div className="h-cap__t">{c.t}</div>
-              <div className="h-cap__s">{c.s}</div>
-              <div className="h-cap__meta"><span>{c.meta}</span><span>{c.tag}</span></div>
-            </div>
-          ))}
-        </div>
-
-        {/* ══ CLAIM ══ */}
-        <section className="h-claim h-anim" id="claim">
-          <div className="h-claim__l">
-            <div className="h-claim__k">The economics</div>
-            <h2 className="h-claim__h">Priced against <em>the hour, not the outcome.</em></h2>
-            <p className="h-claim__p">
-              A sell-side engagement at a boutique bank: $750K–$2M, twelve months, success fees on top. A growth-equity raise: 4–7% of the round. Yulia does the same work — reads the returns, writes the CIM, runs the process — for a flat monthly subscription.
-            </p>
-          </div>
-          <div className="h-claim__viz">
-            {[
-              { l: 'Boutique M&A',        w: '100%', v: '$1.4M · 12mo',   tone: 'big' },
-              { l: 'Growth equity fee',   w: '52%',  v: '5.5% of round',  tone: 'big' },
-              { l: 'Big-4 integration',   w: '68%',  v: '$900K · 180d',   tone: 'big' },
-              { l: 'smbx.ai',             w: '7%',   v: '$4K / mo',       tone: 'small' },
-            ].map((r) => (
-              <div key={r.l} className="h-claim__row" data-tone={r.tone}>
-                <span className="h-claim__row-l">{r.l}</span>
-                <span className="h-claim__row-bar">
-                  <span className="h-claim__row-fill" style={{ ['--w' as string]: r.w } as React.CSSProperties} />
-                </span>
-                <span className="h-claim__row-v">{r.v}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ══ TRUST ══ */}
-        <div className="h-trust" id="trust">
-          <div className="h-trust__k">Under NDA by default</div>
-          <div className="h-trust__list">
-            <span>SOC 2 Type II</span>
-            <span>Single-tenant inference</span>
-            <span>No training on your data</span>
-            <span>Customer-managed keys</span>
-            <span>Row-level audit log</span>
-          </div>
-        </div>
-
-        {/* ══ BOTTOM CTA ══ */}
-        <section className="h-cta h-anim" id="cta">
-          <div className="h-cta__k">Start · No card</div>
-          <h2 className="h-cta__h">Tell Yulia <em>what you're trying to do.</em></h2>
-          <p className="h-cta__s">
-            One line in the chat pane on your left — "I'm thinking about selling," "I need to raise," "we just closed on Monarch" — and she picks the journey, opens the canvas, and starts the work.
-          </p>
-          <button className="h-cta__point" type="button" onClick={pulseChat}>
-            <span className="h-cta__point-ar">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12" />
-                <polyline points="12 19 5 12 12 5" />
-              </svg>
-            </span>
-            Start in the chat pane
-            <span style={{ opacity: 0.65, fontWeight: 500 }}>Yulia is ready</span>
-          </button>
-          <div className="h-cta__meta">
-            <span>30-min first estimate</span>
-            <span>No card</span>
-            <span>Under NDA</span>
-          </div>
-        </section>
-
+        {/* §6 BOTTOM CLOSE */}
+        <BottomCTA
+          heading="The first conversation is free. The first deliverable is free."
+          subtitle="Start when you're ready."
+          placeholder="Tell Yulia what you're working on…"
+          onSend={onSend}
+        />
       </div>
     </JourneyShell>
   );
+}
+
+/* ── Monochrome functional glyphs for the capability cards. ─────── */
+function Glyph({ name }: { name: 'search' | 'score' | 'reg' | 'doc' | 'loi' | 'memo' }) {
+  const common = {
+    width: 18, height: 18, viewBox: '0 0 24 24',
+    fill: 'none' as const, stroke: 'currentColor',
+    strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
+  };
+  switch (name) {
+    case 'search':
+      return (
+        <svg {...common}><circle cx="10.5" cy="10.5" r="6.5" /><line x1="20" y1="20" x2="15" y2="15" /></svg>
+      );
+    case 'score':
+      return (
+        <svg {...common}><rect x="3" y="4" width="18" height="16" rx="2" /><polyline points="7 13 10 16 17 9" /></svg>
+      );
+    case 'reg':
+      return (
+        <svg {...common}><path d="M5 3h11l4 4v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" /><path d="M16 3v4h4" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="8" y1="16" x2="14" y2="16" /></svg>
+      );
+    case 'doc':
+      return (
+        <svg {...common}><path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" /><path d="M15 3v4h4" /><line x1="8" y1="13" x2="16" y2="13" /><line x1="8" y1="17" x2="14" y2="17" /><line x1="8" y1="9" x2="12" y2="9" /></svg>
+      );
+    case 'loi':
+      return (
+        <svg {...common}><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="3 8 12 14 21 8" /></svg>
+      );
+    case 'memo':
+      return (
+        <svg {...common}><rect x="3" y="5" width="18" height="14" rx="2" /><line x1="7" y1="10" x2="17" y2="10" /><polyline points="7 14 11 17 17 11" /></svg>
+      );
+  }
 }

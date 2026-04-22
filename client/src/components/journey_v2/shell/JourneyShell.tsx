@@ -33,6 +33,10 @@ import '../handoff_v3/journey-content.css';
 /* Handoff v4 Home: scoped under #home, only adds styles for the
    home page's `.h-*` vocabulary — harmless on other routes. */
 import '../handoff_v4/home.css';
+/* Shared primitives for the April 2026 site rebuild — zigzag heroes,
+   timelines, card grids, stat rows, interactive blocks, bottom CTAs.
+   Used across Home + Sell + Buy + Raise + Integrate. */
+import '../handoff_v4/journey-primitives.css';
 /* Page-specific overdrive sequences (cinematic content only; stays
    inside the .h-* vocabulary). Sell first — 3 automated visual stories. */
 import '../handoff_v4/sell-overdrive.css';
