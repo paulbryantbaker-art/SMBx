@@ -29,14 +29,34 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { AnonMessage } from '../../../hooks/useAnonymousChat';
 import type { AppDeliverable } from '../types';
-import type { MobileDeal } from './adaptDeals';
 import InlineArtifact from './InlineArtifact';
+
+/** Deal shape ChatFullscreen + InlineArtifact need — previously pulled
+ *  from adaptDeals.MobileDeal. Inlined after the mobile UI strip so the
+ *  chat layer has no dependency on the (deleted) mobile tabs.
+ *
+ *  ChatFullscreen itself only uses id/name/stageLabel; the remaining
+ *  fields are passed through to InlineArtifact for inline previews of
+ *  rundowns, baselines, CIMs, LOIs, and models. All formatted strings
+ *  ("$4.1M") — raw cents live on AppDeal; AppShellInner does the format. */
+export interface ChatDeal {
+  id: number;
+  name: string;
+  stageLabel: string;
+  // Optional — drive InlineArtifact's kind-specific previews.
+  industry?: string | null;
+  score?: number | null;
+  revenueLabel?: string | null;
+  sdeLabel?: string | null;
+  ebitdaLabel?: string | null;
+  askingPriceLabel?: string | null;
+}
 
 interface Props {
   /** Only renders when true. */
   open: boolean;
   /** Active deal to show in the header. Null when user has no deals yet. */
-  deal: MobileDeal | null;
+  deal: ChatDeal | null;
   /** Deliverables across all user's deals — used by inline artifact cards. */
   deliverables: AppDeliverable[];
   messages: AnonMessage[];

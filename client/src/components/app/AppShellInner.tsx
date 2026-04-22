@@ -1,40 +1,30 @@
 /**
- * AppShellInner — the Glass Grok mobile internal app, Apple-App-Store pattern.
+ * AppShellInner — the mobile internal-app shell (post-strip, 2026-04-22).
  *
- * Renders when: mobile PWA user has authed AND the shell has frosted in
- * (progressive reveal — owned by AppShell.tsx).
+ * Scope after the mobile UI reset: this is now a near-empty container.
+ * All prior tabs (Today / Deals / Inbox), chrome (MobileTopBar, MobileTabBar),
+ * detail sheet, and NowYuliaBar were deleted. The next design drop will
+ * repopulate this surface. Until then, the landing is a single centered
+ * "Chat with Yulia" button that opens the (preserved) ChatFullscreen
+ * overlay — the chat + PWA keyboard infrastructure is load-bearing and
+ * stays.
  *
- * Four tabs: Today · Deals · Chat · Inbox. Chat is implemented as a
- * portaled full-screen overlay (Messages.app / WhatsApp pattern) rather
- * than an inline tab body — this lets the proven PWA keyboard infrastructure
- * stay honest (portal escapes transform ancestors; body is sized to
- * var(--vvh) so the overlay sees the visible viewport). When Chat is
- * active, the top bar and tab bar both hide; a back chevron inside the
- * chat header returns to the previous tab.
- *
- * See memory/architecture_glass_grok.md for the design spec and
- * memory/feedback_pwa_chat_flex_layout.md for the chat infrastructure saga.
+ * Load-bearing pieces preserved:
+ *   - ChatFullscreen portaled overlay with PWA keyboard handling
+ *   - InlineArtifact cards inside chat
+ *   - useDeliverables hook (feeds ChatFullscreen's temporal matching)
+ *   - yulia-chat-open mount-time safety net (index.css line 439 interaction)
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import MobileTopBar from './mobile/chrome/MobileTopBar';
-import MobileTabBar from './mobile/chrome/MobileTabBar';
-import TodayTab from './mobile/TodayTab';
-import DealsTab from './mobile/DealsTab';
-import InboxTab from './mobile/InboxTab';
-import ChatFullscreen from './mobile/ChatFullscreen';
-import DealDetailSheet from './mobile/DealDetailSheet';
-import NowYuliaBar from './mobile/NowYuliaBar';
+import ChatFullscreen, { type ChatDeal } from './mobile/ChatFullscreen';
 import HelpSheet from './sheets/HelpSheet';
-import { adaptDeals } from './mobile/adaptDeals';
 import { useDeliverables } from './mobile/useDeliverables';
-import type { MobileTab } from './mobile/types';
 import type { AppShellInnerProps } from './types';
-import './mobile/mobile.css';
 
 export default function AppShellInner({
   userName,
-  userInitial,
+  userInitial: _userInitial,
   deals,
   activeDealId,
   activeConversationId: _activeConversationId,
@@ -45,71 +35,46 @@ export default function AppShellInner({
   chatError,
   onRetry,
   onSend,
-  onSelectDeal,
+  onSelectDeal: _onSelectDeal,
   onOpenDeliverable: _onOpenDeliverable,
-  onAccountTap,
+  onAccountTap: _onAccountTap,
   onBack: _onBack,
 }: AppShellInnerProps) {
-  // Active content tab (Today / Deals / Inbox). When user taps the Chat tab,
-  // we open ChatFullscreen as an overlay instead of switching content; the
-  // last non-chat tab is remembered so the back chevron returns here.
-  const [contentTab, setContentTab] = useState<Exclude<MobileTab, 'chat'>>('today');
   const [chatOpen, setChatOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  // Detail-sheet deal id — Apple App Store "app detail page" pattern.
-  // Tapping a deal in DealsTab or Today opens this instead of chat; the
-  // sheet's primary CTA routes into chat.
-  const [detailDealId, setDetailDealId] = useState<number | null>(null);
-  // Has the user opened chat at least once this session? Drives NowYuliaBar
-  // visibility — the "Now Playing" pill only makes sense after the user
-  // has something to return to. Also true if prior messages exist (returning
-  // user), so the pill shows immediately on app open.
-  const [hasOpenedChatSession, setHasOpenedChatSession] = useState(false);
-  useEffect(() => { if (chatOpen) setHasOpenedChatSession(true); }, [chatOpen]);
-  const hasOpenedChat = hasOpenedChatSession || messages.length > 0;
 
   /* SAFETY NET — `html.yulia-chat-open` applies `#root { display: none !important }`
-     per index.css:439. If a prior session (same PWA instance, React StrictMode
-     remount, or any other path) ever left the class on <html>, the entire app
-     appears as a blank dark screen because the theme-color body bg shows
-     through. Force-clear on mount — cheap no-op when the class isn't present.
-     See memory/feedback_pwa_chat_flex_layout.md for the chat infra saga. */
+     per index.css:439. If a prior session (React StrictMode remount, any other
+     path) ever left the class on <html>, the entire app appears blank because
+     the theme-color body bg shows through. Force-clear on mount — cheap no-op
+     when the class isn't present. */
   useEffect(() => {
     document.documentElement.classList.remove('yulia-chat-open');
   }, []);
 
-  // Which tab reads as "active" in the bottom tab bar — 'chat' when the
-  // chat overlay is up, else the current content tab.
-  const activeTab: MobileTab = chatOpen ? 'chat' : contentTab;
+  // ChatDeal for the chat layer. Active deal or first deal as fallback.
+  // Money fields (BIGINT cents on AppDeal) are formatted to display
+  // strings here — InlineArtifact renders the already-formatted values.
+  const chatDeal: ChatDeal | null = useMemo(() => {
+    const source = deals.find((d) => d.id === activeDealId) ?? deals[0] ?? null;
+    if (!source) return null;
+    return {
+      id: source.id,
+      name: source.business_name || 'Untitled deal',
+      stageLabel: stageLabelFor(source.current_gate),
+      industry: source.industry ?? null,
+      score: typeof source.seven_factor_composite === 'number' ? source.seven_factor_composite : null,
+      revenueLabel: formatMoney(source.revenue ?? null),
+      sdeLabel: formatMoney(source.sde ?? null),
+      ebitdaLabel: formatMoney(source.ebitda ?? null),
+      askingPriceLabel: formatMoney(source.asking_price ?? null),
+    };
+  }, [deals, activeDealId]);
 
-  const adapted = useMemo(() => adaptDeals(deals), [deals]);
-  const activeDeal = useMemo(
-    () => adapted.find((d) => d.id === activeDealId) ?? null,
-    [adapted, activeDealId],
-  );
-  // Detail sheet reads from adapted by its own id — independent of
-  // activeDealId so tapping a tile never mutates chat state until the
-  // user hits "Chat with Yulia" inside the sheet.
-  const detailDeal = useMemo(
-    () => (detailDealId != null ? adapted.find((d) => d.id === detailDealId) ?? null : null),
-    [adapted, detailDealId],
-  );
-
-  // Deliverables feed — powers Today's PINNED artifacts strip and
-  // Chat's inline artifact cards. Fetched on mount, on deal-count change,
-  // and after every assistant message completes (messages.length tracks
-  // both user + assistant turns, so it increments when Yulia replies —
-  // which is when a new deliverable would have just been produced).
+  // Deliverables feed — ChatFullscreen's inline artifact matching uses this.
   const { deliverables } = useDeliverables(deals.length, messages.length);
 
-  const handleTabChange = (next: MobileTab) => {
-    if (next === 'chat') {
-      setChatOpen(true);
-    } else {
-      setChatOpen(false);
-      setContentTab(next);
-    }
-  };
+  const firstName = (userName || '').trim().split(/\s+/)[0] || 'there';
 
   return (
     <div
@@ -125,75 +90,79 @@ export default function AppShellInner({
         flexDirection: 'column',
       }}
     >
-      {/* TopBar — hidden while chat overlay is up (chat has its own header). */}
+      {/* Blank-canvas landing — one button. Next design drop will replace
+          this block. Everything else on the page intentionally absent. */}
       {!chatOpen && (
-        <MobileTopBar
-          tab={contentTab}
-          userInitial={userInitial}
-          onHelpTap={() => setHelpOpen(true)}
-          onAccountTap={onAccountTap}
-        />
-      )}
-
-      {/* Tab content — single scrollable region. Padding-bottom reserves
-          room for the floating tab bar (54 + 10 bottom = 64) + breathing (16).
-          CRITICAL: minHeight: 0 is load-bearing. Without it, a flex child's
-          default `min-height: auto` keeps it from shrinking below its content
-          size. With taller-than-viewport content (Today's hero + feature +
-          continue + PINNED + stack-ranked stack), <main> grows beyond its
-          flex-calculated height, its parent's overflow:hidden clips the
-          overflow, and the user sees the dark body theme-color bg showing
-          through the bottom of the viewport — aka the "bottom half
-          disappears in PWA" bug. minHeight: 0 lets <main> shrink to its
-          flex allocation and invoke its own overflow-y:auto to scroll. */}
-      {!chatOpen && (
-        <main
+        <div
           style={{
             flex: 1,
             minHeight: 0,
-            overflowY: 'auto',
-            WebkitOverflowScrolling: 'touch',
-            overscrollBehavior: 'contain',
-            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 80px)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 28px',
+            gap: 16,
           }}
         >
-          {contentTab === 'today' && (
-            <TodayTab
-              deals={deals}
-              deliverables={deliverables}
-              activeDealId={activeDealId}
-              userName={userName}
-              onSelectDeal={onSelectDeal}
-              onOpenChat={() => setChatOpen(true)}
-              onOpenHelp={() => setHelpOpen(true)}
-              onOpenDetail={(id) => setDetailDealId(id)}
-            />
-          )}
-          {contentTab === 'deals' && (
-            <DealsTab
-              deals={deals}
-              onSelectDeal={onSelectDeal}
-              onOpenChat={() => setChatOpen(true)}
-              onOpenDetail={(id) => setDetailDealId(id)}
-            />
-          )}
-          {contentTab === 'inbox' && (
-            <InboxTab
-              deals={deals}
-              onSelectDeal={onSelectDeal}
-              onOpenChat={() => setChatOpen(true)}
-            />
-          )}
-        </main>
+          <div
+            style={{
+              fontFamily: "'Sora', system-ui, sans-serif",
+              fontWeight: 800,
+              fontSize: 28,
+              letterSpacing: '-0.025em',
+              color: 'var(--text-primary)',
+              textAlign: 'center',
+              lineHeight: 1.15,
+            }}
+          >
+            Hi {firstName}.
+          </div>
+          <div
+            style={{
+              fontFamily: "'Inter', system-ui, sans-serif",
+              fontSize: 15,
+              color: 'var(--text-muted)',
+              textAlign: 'center',
+              lineHeight: 1.45,
+              maxWidth: 280,
+            }}
+          >
+            New mobile coming soon. Yulia is still here whenever you want to talk.
+          </div>
+          <button
+            type="button"
+            onClick={() => setChatOpen(true)}
+            style={{
+              marginTop: 8,
+              fontFamily: "'Inter', system-ui, sans-serif",
+              fontSize: 15,
+              fontWeight: 700,
+              letterSpacing: '-0.005em',
+              color: '#fff',
+              background: 'linear-gradient(180deg, #1A1A1E 0%, #000 100%)',
+              border: 0,
+              padding: '14px 28px',
+              borderRadius: 999,
+              cursor: 'pointer',
+              WebkitTapHighlightColor: 'transparent',
+              boxShadow:
+                'inset 0 0.5px 0 rgba(255,255,255,0.15), 0 4px 14px rgba(0,0,0,0.22)',
+              transition: 'transform 160ms cubic-bezier(0.23, 1, 0.32, 1)',
+            }}
+            onPointerDown={(e) => { e.currentTarget.style.transform = 'scale(0.97)'; }}
+            onPointerUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+            onPointerLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+          >
+            Chat with Yulia
+          </button>
+        </div>
       )}
 
-      {/* Tab bar — portaled to body. Hidden while chat is open. */}
-      {!chatOpen && <MobileTabBar active={activeTab} onChange={handleTabChange} />}
-
-      {/* Chat overlay — portaled to body. Only renders when chatOpen. */}
+      {/* Chat overlay — preserved verbatim. Portaled to body, PWA-safe. */}
       <ChatFullscreen
         open={chatOpen}
-        deal={activeDeal}
+        deal={chatDeal}
         deliverables={deliverables}
         messages={messages}
         streamingText={streamingText}
@@ -205,33 +174,7 @@ export default function AppShellInner({
         onBack={() => setChatOpen(false)}
       />
 
-      {/* Deal detail sheet — portaled to body. Apple App Store detail page. */}
-      <DealDetailSheet
-        open={detailDealId != null}
-        deal={detailDeal}
-        deliverables={deliverables}
-        onBack={() => setDetailDealId(null)}
-        onOpenChat={() => {
-          if (detailDealId != null) onSelectDeal(detailDealId);
-          setDetailDealId(null);
-          setChatOpen(true);
-        }}
-      />
-
-      {/* Now Yulia pill — "Now Playing" bar above tab bar. Hybrid state:
-          tool/streaming preview when active, last-message preview when
-          idle. Portaled to body; hidden while chat or detail is open. */}
-      <NowYuliaBar
-        chatOpen={chatOpen}
-        hasOpenedChat={hasOpenedChat}
-        activeTool={activeTool}
-        streamingText={streamingText}
-        messages={messages}
-        onTap={() => setChatOpen(true)}
-        hidden={detailDealId != null}
-      />
-
-      {/* Help & Glossary bottom sheet — opens from TopBar bell + Today primer. */}
+      {/* Help & Glossary bottom sheet — kept for future callers. */}
       <HelpSheet
         open={helpOpen}
         onOpenChange={setHelpOpen}
@@ -239,4 +182,27 @@ export default function AppShellInner({
       />
     </div>
   );
+}
+
+/** Map a gate code → human label. Previously came from adaptDeals.GATE_LABEL;
+ *  inlined here so AppShellInner has no dependency on deleted mobile files. */
+function stageLabelFor(gate: string | null): string {
+  const g = (gate || 'S0').toUpperCase();
+  const map: Record<string, string> = {
+    S0: 'Getting started', S1: 'Financials', S2: 'Valuation', S3: 'Packaging', S4: 'Matching', S5: 'Closing',
+    B0: 'Thesis', B1: 'Sourcing', B2: 'Valuation', B3: 'Due diligence', B4: 'Structuring', B5: 'Closing',
+    R0: 'Getting started', R1: 'Package', R2: 'Materials', R3: 'Outreach', R4: 'Terms', R5: 'Closing',
+    PMI0: 'Day zero', PMI1: 'Stabilization', PMI2: 'Assessment', PMI3: 'Optimization',
+  };
+  return map[g] || 'Getting started';
+}
+
+/** Format BIGINT cents → compact dollar string. Previously adaptDeals.formatMoney. */
+function formatMoney(cents: number | null | undefined): string | null {
+  if (cents == null || !Number.isFinite(cents) || cents <= 0) return null;
+  const dollars = cents / 100;
+  if (dollars >= 1_000_000_000) return `$${(dollars / 1_000_000_000).toFixed(1)}B`;
+  if (dollars >= 1_000_000) return `$${(dollars / 1_000_000).toFixed(1)}M`;
+  if (dollars >= 1_000) return `$${(dollars / 1_000).toFixed(0)}K`;
+  return `$${Math.round(dollars).toLocaleString()}`;
 }
