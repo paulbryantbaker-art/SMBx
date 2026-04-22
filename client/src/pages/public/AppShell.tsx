@@ -66,9 +66,11 @@ const GlassGrokEnterprise = lazy(() => import('../../components/journey_v2/pages
 // Mobile rebuild — Claude+ pattern
 import { type LearnDest, type WorkspaceTool } from '../../components/mobile/mobileTypes';
 import { LearnDrawer } from '../../components/mobile/LearnDrawer';
-import { StarterChips } from '../../components/mobile/StarterChips';
+/* StarterChips retired 2026-04-22 along with the rest of the journey
+   content library. Import removed. */
 import { MobileSellPage } from '../../components/mobile/MobileSellPage';
-import { MobileJourneySheet } from '../../components/mobile/MobileJourneySheet';
+/* MobileJourneySheet retired 2026-04-22 along with the rest of the
+   journey content library. Import removed. */
 import { MobileWorkspaceSheet } from '../../components/mobile/MobileWorkspaceSheet';
 import { isStandalone } from '../../lib/pwa';
 import { NextActionsCards } from '../../components/mobile/NextActionsCards';

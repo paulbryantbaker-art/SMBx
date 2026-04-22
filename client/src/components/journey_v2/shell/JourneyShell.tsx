@@ -25,21 +25,10 @@ import type { DealTab } from '../deal-room';
    CSS order deterministic: tokens first, then shell primitives. */
 import '../../app_v4/tokens.css';
 import '../../app_v4/chrome/shell.css';
-/* Claude Design v3 handoff: editorial system for journey pages. Load
-   after v4-shell.css so page-specific overrides (composer, tool-rail
-   account buttons, canvas__body padding) take precedence. */
-import '../handoff_v3/page-overrides.css';
-import '../handoff_v3/journey-content.css';
-/* Handoff v4 Home: scoped under #home, only adds styles for the
-   home page's `.h-*` vocabulary — harmless on other routes. */
-import '../handoff_v4/home.css';
-/* Shared primitives for the April 2026 site rebuild — zigzag heroes,
-   timelines, card grids, stat rows, interactive blocks, bottom CTAs.
-   Used across Home + Sell + Buy + Raise + Integrate. */
-import '../handoff_v4/journey-primitives.css';
-/* Page-specific overdrive sequences (cinematic content only; stays
-   inside the .h-* vocabulary). Sell first — 3 automated visual stories. */
-import '../handoff_v4/sell-overdrive.css';
+/* All prior journey content (handoff v3/v4 CSS, JourneyPrimitives,
+   SectionNav) retired 2026-04-22 — archived under
+   `_retired/journey_v1/`. New direction starts from a blank canvas;
+   the app shell (tokens + chrome above) is the only thing preserved. */
 
 export interface JourneyShellProps {
   /** Active journey route — drives the left rail highlight. */
