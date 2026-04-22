@@ -24,6 +24,7 @@ import DealsTab from './mobile/DealsTab';
 import InboxTab from './mobile/InboxTab';
 import ChatFullscreen from './mobile/ChatFullscreen';
 import DealDetailSheet from './mobile/DealDetailSheet';
+import NowYuliaBar from './mobile/NowYuliaBar';
 import HelpSheet from './sheets/HelpSheet';
 import { adaptDeals } from './mobile/adaptDeals';
 import { useDeliverables } from './mobile/useDeliverables';
@@ -59,6 +60,13 @@ export default function AppShellInner({
   // Tapping a deal in DealsTab or Today opens this instead of chat; the
   // sheet's primary CTA routes into chat.
   const [detailDealId, setDetailDealId] = useState<number | null>(null);
+  // Has the user opened chat at least once this session? Drives NowYuliaBar
+  // visibility — the "Now Playing" pill only makes sense after the user
+  // has something to return to. Also true if prior messages exist (returning
+  // user), so the pill shows immediately on app open.
+  const [hasOpenedChatSession, setHasOpenedChatSession] = useState(false);
+  useEffect(() => { if (chatOpen) setHasOpenedChatSession(true); }, [chatOpen]);
+  const hasOpenedChat = hasOpenedChatSession || messages.length > 0;
 
   /* SAFETY NET — `html.yulia-chat-open` applies `#root { display: none !important }`
      per index.css:439. If a prior session (same PWA instance, React StrictMode
@@ -207,6 +215,19 @@ export default function AppShellInner({
           setDetailDealId(null);
           setChatOpen(true);
         }}
+      />
+
+      {/* Now Yulia pill — "Now Playing" bar above tab bar. Hybrid state:
+          tool/streaming preview when active, last-message preview when
+          idle. Portaled to body; hidden while chat or detail is open. */}
+      <NowYuliaBar
+        chatOpen={chatOpen}
+        hasOpenedChat={hasOpenedChat}
+        activeTool={activeTool}
+        streamingText={streamingText}
+        messages={messages}
+        onTap={() => setChatOpen(true)}
+        hidden={detailDealId != null}
       />
 
       {/* Help & Glossary bottom sheet — opens from TopBar bell + Today primer. */}
