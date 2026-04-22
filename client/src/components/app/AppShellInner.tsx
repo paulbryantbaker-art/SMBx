@@ -166,6 +166,7 @@ export default function AppShellInner({
               onSelectDeal={onSelectDeal}
               onOpenChat={() => setChatOpen(true)}
               onOpenHelp={() => setHelpOpen(true)}
+              onOpenDetail={(id) => setDetailDealId(id)}
             />
           )}
           {contentTab === 'deals' && (
