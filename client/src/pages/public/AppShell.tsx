@@ -32,6 +32,8 @@ import IntelPanel from '../../components/chat/IntelPanel';
 import DealMessagesPanel from '../../components/documents/DealMessagesPanel';
 import CanvasToolbar, { type ToolbarAction } from '../../components/canvas/CanvasToolbar';
 import CanvasPicker from '../../components/canvas/CanvasPicker';
+import CanvasTabStrip from '../../components/canvas/CanvasTabStrip';
+import MobileComingSoon from '../../components/canvas_marketing/MobileComingSoon';
 import InstallWall, { PWA_DEEP_LINK_KEY } from '../../components/mobile/InstallWall';
 import AppShellInner from '../../components/app/AppShellInner';
 import AuthV4Shell from '../../components/app_v4/adapters/AuthV4Shell';
@@ -62,6 +64,17 @@ const GlassGrokIntegrate = lazy(() => import('../../components/journey_v2/pages/
 const GlassGrokPricing = lazy(() => import('../../components/journey_v2/pages/Pricing'));
 const GlassGrokHowItWorks = lazy(() => import('../../components/journey_v2/pages/HowItWorks'));
 const GlassGrokEnterprise = lazy(() => import('../../components/journey_v2/pages/Enterprise'));
+
+// 2026-04-22 — V16 marketing canvas: three Dia tabs rendered inside the
+// right canvas panel for logged-out visitors. These supersede the
+// journey_v2 full-width pages above, which remain imported only so
+// legacy redirect fallbacks still compile (removable once every
+// journey_v2 entry point is gone from the site).
+const MarketingHome = lazy(() => import('../../components/canvas_marketing/HomeCanvas'));
+const MarketingJourney = lazy(() => import('../../components/canvas_marketing/JourneyCanvas'));
+const MarketingHowItWorks = lazy(() => import('../../components/canvas_marketing/HowItWorksCanvas'));
+const MarketingPricing = lazy(() => import('../../components/canvas_marketing/PricingCanvas'));
+import { YuliaWalkthroughV22 } from '../../components/canvas_marketing/edition/YuliaWalkthroughV22';
 
 // Mobile rebuild — Claude+ pattern
 import { type LearnDest, type WorkspaceTool } from '../../components/mobile/mobileTypes';
@@ -249,7 +262,7 @@ const HOME_TOOLS: HomeToolItem[] = [
 
 /* ═══ TYPES ═══ */
 
-export type TabId = 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'how-it-works' | 'advisors' | 'pricing' | 'enterprise';
+export type TabId = 'home' | 'journey' | 'how-it-works' | 'sell' | 'buy' | 'raise' | 'integrate' | 'advisors' | 'pricing' | 'enterprise';
 export type ViewState = 'landing' | 'chat' | 'pipeline' | 'dataroom' | 'settings' | 'seller-dashboard' | 'buyer-pipeline' | 'documents' | 'analytics' | 'deal';
 
 /* ═══ PAGE COPY ═══ */
@@ -275,6 +288,17 @@ const PAGE_COPY: Record<TabId, PageCopy> = {
       'Need to raise capital',
       'Just closed — what now?',
     ],
+    placeholder: 'Message Yulia...',
+  },
+  /* V16 marketing canvas tabs supply their own copy via
+     components/canvas_marketing/*. This PAGE_COPY entry exists only so
+     the TabId record stays exhaustive for legacy chrome consumers. */
+  journey: {
+    overline: '',
+    headline: '',
+    terraWord: '',
+    tagline: '',
+    chips: [],
     placeholder: 'Message Yulia...',
   },
   sell: {
@@ -386,7 +410,7 @@ function renderHeadline(text: string, terraWord: string) {
   return (
     <>
       {text.substring(0, idx)}
-      <span style={{ color: '#D44A78' }}>{terraWord}</span>
+      <span style={{ color: '#D4714E' }}>{terraWord}</span>
       {text.substring(idx + terraWord.length)}
     </>
   );
@@ -476,17 +500,13 @@ const JOURNEY_NAV_ITEMS: { id: TabId; label: string; icon: JSX.Element }[] = [
 /* ═══ HELPERS ═══ */
 
 function pathToTab(path: string): TabId {
-  if (path === '/sell') return 'sell';
-  if (path === '/buy') return 'buy';
-  if (path === '/raise') return 'raise';
-  if (path === '/integrate') return 'integrate';
+  /* V21 IA (2026-04-27): four marketing canvas tabs — home, journey,
+     how-it-works, pricing. Legacy routes (/sell, /buy, /raise,
+     /integrate, /enterprise, /advisors) redirect to / and land on the
+     home tab. The old journey_v2 pages are retained for rollback but
+     no longer reachable via the top nav. */
+  if (path === '/journey') return 'journey';
   if (path === '/how-it-works') return 'how-it-works';
-  if (path === '/enterprise') return 'enterprise';
-  /* /advisors is a legacy route — no dedicated Glass Grok page. Advisors
-     are customers (Solo/Pro/Team depending on team size) and land on
-     /sell by default since sell-side is the most common engagement.
-     A mount effect replace-navigates the URL so it doesn't linger. */
-  if (path === '/advisors') return 'sell';
   if (path === '/pricing') return 'pricing';
   return 'home';
 }
@@ -525,7 +545,7 @@ interface BuildCommandArgs {
 function buildCommandItems(a: BuildCommandArgs): CommandItem[] {
   const items: CommandItem[] = [];
   const JOURNEY_DOT: Record<string, string> = {
-    sell: '#D44A78', buy: '#3E8E8E', raise: '#C99A3E', pmi: '#8F4A7A',
+    sell: '#D4714E', buy: '#3E8E8E', raise: '#C99A3E', pmi: '#8F4A7A',
   };
 
   // Deals — each open into workspace
@@ -536,7 +556,7 @@ function buildCommandItems(a: BuildCommandArgs): CommandItem[] {
       label: d.business_name,
       hint: d.industry || d.journey_type || undefined,
       group: 'Deals',
-      dot: JOURNEY_DOT[(d.journey_type || 'sell').toLowerCase()] || '#D44A78',
+      dot: JOURNEY_DOT[(d.journey_type || 'sell').toLowerCase()] || '#D4714E',
       keywords: `${d.business_name} ${d.industry || ''} ${d.journey_type || ''}`,
       onSelect: () => a.onOpenDeal(d.id),
     });
@@ -599,7 +619,7 @@ function getInitialConversationId(path: string): number | null {
 }
 
 const JOURNEY_COLORS: Record<string, string> = {
-  sell: '#D44A78', // brand pink — unchanged
+  sell: '#D4714E', // brand pink — unchanged
   buy: '#3E8E8E',  // muted teal — warmer counterpoint to pink than tech-blue
   raise: '#C99A3E', // warm ochre — reads as capital / gold
   pmi: '#8F4A7A',  // plum — warmer purple, rhymes with the brand pink
@@ -613,7 +633,16 @@ export default function AppShell() {
   const [dark, setDark] = useDarkMode();
 
   // Core state
-  const [viewState, setViewState] = useState<ViewState>(() => pathToViewState(location));
+  const [viewState, setViewState] = useState<ViewState>(() => {
+    /* V16: logged-out marketing routes (/, /journey, /how-it-works) go
+       straight into chat+canvas split on first paint — no flash of the
+       legacy full-width landing. If auth is still loading, default to
+       chat since the anonymous experience is the more common case. */
+    const initial = pathToViewState(location);
+    const MARKETING_PATHS = ['/', '/journey', '/how-it-works', '/pricing'];
+    if (initial === 'landing' && MARKETING_PATHS.includes(location)) return 'chat';
+    return initial;
+  });
   const isChat = viewState === 'chat';
   const [workspaceDealId, setWorkspaceDealId] = useState<number | null>(() => getInitialDealId(location));
   const { appOffset } = useAppHeight(isChat);   // Only constrain viewport in chat mode
@@ -875,7 +904,14 @@ export default function AppShell() {
   }, [activeCanvasTabId, persistTabClose]);
   const [morphing, setMorphing] = useState(false);
   const [heroFocused, setHeroFocused] = useState(false); // tracks when hero input is focused — controls logo position
-  const [chatWidth, setChatWidth] = useState(520); // resizable chat column width
+  /* Default chat column width. V17 brief calls for cols 1-4 of 12 grid
+     (~33% of viewport). On 1440px that's ~480px; on 1920px ~640px.
+     We clamp to [440, 560] so the column is always substantial but
+     never starves the canvas of reading width. User can drag-resize. */
+  const [chatWidth, setChatWidth] = useState(() => {
+    if (typeof window === 'undefined') return 480;
+    return Math.max(440, Math.min(560, Math.round(window.innerWidth * 0.33)));
+  });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop sidebar collapse
   // (chatDrawerSnap state removed — mobile is full-screen chat now.)
   const [pickerCollapsed, setPickerCollapsed] = useState<boolean>(() => {
@@ -1023,14 +1059,34 @@ export default function AppShell() {
 
   // Sync URL → state
   useEffect(() => {
-    /* Legacy /advisors → /sell. Replace the URL (not push) so back button
-       doesn't bounce the user back to a dead route. */
-    if (location === '/advisors') {
-      navigate('/sell', { replace: true });
+    /* V16 IA redirects: legacy marketing routes collapse to "/". The
+       three survivors are /, /journey, /how-it-works. Replace (not
+       push) so swipe-back doesn't land on a dead route. */
+    const LEGACY_REDIRECTS: Record<string, string> = {
+      '/sell': '/',
+      '/buy': '/',
+      '/raise': '/',
+      '/integrate': '/',
+      // V21 (2026-04-26): /pricing is its own page now — no legacy redirect.
+      '/enterprise': '/how-it-works#enterprise',
+      '/advisors': '/journey?p=advisor',
+    };
+    if (LEGACY_REDIRECTS[location]) {
+      navigate(LEGACY_REDIRECTS[location], { replace: true });
       return;
     }
+    /* Sync activeTab to URL whenever we're on a marketing route. The
+       previous `viewState === 'landing'` guard meant clicking the
+       Journey tab while in chat-mode would update the URL but leave
+       activeTab stale, and a subsequent re-render snapped it back to
+       'home'. Marketing tabs (Home / Journey / How it works) are valid
+       in either landing OR chat viewState, so always sync them. */
     const tab = pathToTab(location);
-    if (tab !== activeTab && viewState === 'landing') setActiveTab(tab);
+    const isMarketingRoute =
+      location === '/' || location === '/journey' || location === '/how-it-works';
+    if (tab !== activeTab && (viewState === 'landing' || isMarketingRoute)) {
+      setActiveTab(tab);
+    }
     // /deal/:id is the one path-derived viewState we promote authoritatively so
     // deep-links, back-button, and `navigate('/deal/...')` all converge.
     const nextDealId = getInitialDealId(location);
@@ -1043,6 +1099,20 @@ export default function AppShell() {
       setWorkspaceDealId(null);
     }
   }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* V16 marketing shell: logged-out visitors on /, /journey, or
+     /how-it-works see the full chat + canvas split (chat column left,
+     Dia-tabbed canvas right). The old full-width landing render stays
+     wired for logged-in desktop users who hit "/" — but anonymous
+     traffic always lands in chat-mode with the canvas populated by the
+     3 marketing components. */
+  useEffect(() => {
+    if (authLoading || user) return;
+    const MARKETING_PATHS = ['/', '/journey', '/how-it-works', '/pricing'];
+    if (MARKETING_PATHS.includes(location) && viewState !== 'chat') {
+      setViewState('chat');
+    }
+  }, [authLoading, user, location, viewState]);
 
   // iOS Safari bfcache recovery — when the user swipes back to a cached page,
   // React state is restored from the snapshot (not re-derived from localStorage).
@@ -1233,7 +1303,7 @@ export default function AppShell() {
   const handleBack = useCallback(() => {
     setHeroFocused(false);
     setViewState('landing');
-    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing', enterprise: '/enterprise' };
+    const urlMap: Record<TabId, string> = { home: '/', journey: '/journey', 'how-it-works': '/how-it-works', sell: '/', buy: '/', raise: '/', integrate: '/', advisors: '/journey?p=advisor', pricing: '/pricing', enterprise: '/how-it-works#enterprise' };
     navigate(urlMap[activeTab]);
   }, [activeTab, navigate]);
 
@@ -1248,7 +1318,7 @@ export default function AppShell() {
       return;
     }
     setViewState('landing');
-    const urlMap: Record<TabId, string> = { home: '/', sell: '/sell', buy: '/buy', raise: '/raise', integrate: '/integrate', 'how-it-works': '/how-it-works', advisors: '/advisors', pricing: '/pricing', enterprise: '/enterprise' };
+    const urlMap: Record<TabId, string> = { home: '/', journey: '/journey', 'how-it-works': '/how-it-works', sell: '/', buy: '/', raise: '/', integrate: '/', advisors: '/journey?p=advisor', pricing: '/pricing', enterprise: '/how-it-works#enterprise' };
     if (window.location.pathname !== urlMap[tab]) navigate(urlMap[tab]);
   }, [navigate, viewState]);
 
@@ -1775,17 +1845,17 @@ export default function AppShell() {
 
   const sidebarContent = (_mobile: boolean) => (
     <aside
-      className={`hidden lg:flex flex-col w-[72px] fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-[#151617]' : 'bg-white'}`}
+      className={`hidden lg:flex flex-col w-[72px] fixed left-0 top-0 z-50 items-center py-6 ${dark ? 'bg-[#141413]' : 'bg-white'}`}
       style={{
         top: 16,
         left: 16,
         bottom: 16,
         height: 'auto',
         borderRadius: 14,
-        border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9',
+        border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #e8e6dc',
         boxShadow: dark
           ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
-          : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
+          : '0 1px 2px rgba(26,25,24,0.06), 0 4px 8px rgba(26,25,24,0.04)',
       }}
     >
       {/* Logo — X mark, always visible */}
@@ -1857,8 +1927,8 @@ export default function AppShell() {
                         onClick={() => handleTabClick(item.id)}
                         className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                           isActive
-                            ? (dark ? 'text-white bg-white/10' : 'text-[#0A0A0B] bg-[#E8E8EB]')
-                            : (dark ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-[#6B6B70] hover:text-[#0A0A0B] hover:bg-[#F5F5F7]')
+                            ? (dark ? 'text-white bg-white/10' : 'text-[#1a1918] bg-[#e8e6dc]')
+                            : (dark ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-[#87867f] hover:text-[#1a1918] hover:bg-[#f5f4ed]')
                         }`}
                         title={item.label}
                         type="button"
@@ -1899,8 +1969,8 @@ export default function AppShell() {
                         }}
                         className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
                           isActive
-                            ? (dark ? 'text-white bg-white/10' : 'text-[#0A0A0B] bg-[#E8E8EB]')
-                            : (dark ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-[#6B6B70] hover:text-[#0A0A0B] hover:bg-[#F5F5F7]')
+                            ? (dark ? 'text-white bg-white/10' : 'text-[#1a1918] bg-[#e8e6dc]')
+                            : (dark ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-[#87867f] hover:text-[#1a1918] hover:bg-[#f5f4ed]')
                         }`}
                         title={gated ? `${item.label} · sign in to unlock` : item.label}
                         type="button"
@@ -1919,7 +1989,7 @@ export default function AppShell() {
       })()}
 
       {/* Divider */}
-      <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#eeeef0]'}`} />
+      <div className={`w-10 my-4 ${dark ? 'border-t border-zinc-800/50' : 'border-t border-[#e8e6dc]'}`} />
 
       {/* Deals section */}
       <div className="flex flex-col items-center gap-1 w-full px-2">
@@ -1927,7 +1997,7 @@ export default function AppShell() {
         {user && (
         <button
           onClick={() => { handleNewChat(); }}
-          className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer transition-all ${dark ? 'text-white bg-white/10' : 'text-[#0A0A0B] bg-[#E8E8EB]'}`}
+          className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 border-none cursor-pointer transition-all ${dark ? 'text-white bg-white/10' : 'text-[#1a1918] bg-[#e8e6dc]'}`}
           title="New Deal"
           type="button"
         >
@@ -1939,8 +2009,8 @@ export default function AppShell() {
           onClick={() => { setViewState('chat'); navigate('/chat', { replace: viewState === 'chat' }); }}
           className={`sidebar-icon-btn w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all border-none cursor-pointer ${
             viewState === 'chat'
-              ? (dark ? 'text-white bg-white/10' : 'text-[#0A0A0B] bg-[#E8E8EB]')
-              : (dark ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-[#6B6B70] hover:text-[#0A0A0B] hover:bg-[#F5F5F7]')
+              ? (dark ? 'text-white bg-white/10' : 'text-[#1a1918] bg-[#e8e6dc]')
+              : (dark ? 'text-zinc-500 hover:text-white hover:bg-white/5' : 'text-[#87867f] hover:text-[#1a1918] hover:bg-[#f5f4ed]')
           }`}
           title="All Deals"
           type="button"
@@ -1958,7 +2028,7 @@ export default function AppShell() {
         {/* Theme toggle — always visible (logged in or out) */}
         <button
           onClick={() => setDark(!dark)}
-          className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-white' : 'text-[#6B6B70] hover:text-[#0A0A0B]'}`}
+          className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-white' : 'text-[#87867f] hover:text-[#1a1918]'}`}
           type="button"
           title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
@@ -1969,7 +2039,7 @@ export default function AppShell() {
         {user && (user.role === 'admin' || user.email === 'pbaker@smbx.ai') && (
           <button
             onClick={() => navigate('/admin')}
-            className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-white' : 'text-[#6B6B70] hover:text-[#0A0A0B]'}`}
+            className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors mb-2 p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-white' : 'text-[#87867f] hover:text-[#1a1918]'}`}
             type="button"
             title="Admin Console"
           >
@@ -1979,7 +2049,7 @@ export default function AppShell() {
         )}
         <button
           onClick={() => { if (user) { openCanvasTab('settings', 'Settings'); } else window.location.href = '/login'; }}
-          className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-white' : 'text-[#6B6B70] hover:text-[#0A0A0B]'}`}
+          className={`sidebar-icon-btn flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors p-1 rounded-lg ${dark ? 'text-zinc-500 hover:text-white' : 'text-[#87867f] hover:text-[#1a1918]'}`}
           type="button"
         >
           <span className="material-symbols-outlined text-[22px]">{user ? 'person' : 'login'}</span>
@@ -2035,8 +2105,21 @@ export default function AppShell() {
      stays on AppShellInner / the legacy landing path. */
   const JOURNEY_TABS = ['home','sell','buy','raise','integrate','how-it-works','pricing','enterprise'] as const;
   const isV4ChatMode = !isMobile && !!user && isChat;
-  const isV4JourneyMode = !isMobile && viewState === 'landing' && (JOURNEY_TABS as readonly string[]).includes(activeTab);
+  /* 2026-04-22: V16 marketing IA means logged-out visitors on /, /journey,
+     /how-it-works should render the chat + canvas split (with the new
+     MarketingHome/Journey/HowItWorks components). Gating V4JourneyMode
+     on `!!user` ensures the old full-width GlassGrok* fallback only
+     fires for logged-in traffic. */
+  const isV4JourneyMode = !isMobile && !!user && viewState === 'landing' && (JOURNEY_TABS as readonly string[]).includes(activeTab);
   const isV4Mode = isV4ChatMode || isV4JourneyMode;
+  /* Edition routes (logged-out marketing): /, /journey, /how-it-works, /pricing.
+     The walkthrough rail is the only chat surface — AppShell's original chat
+     column + resize handle must NOT render, otherwise they paint over the
+     walkthrough as a ghost middle pane. CSS-only hiding loses to React's
+     inline styles after hydration; this skips the render entirely. */
+  const isEditionRoute = !user && !isMobile && (
+    location === '/' || location === '/journey' || location === '/how-it-works' || location === '/pricing'
+  );
   const v4ActiveDeal = user && authChat.activeDealId ? authChat.grouped?.deals.find(d => d.id === authChat.activeDealId) : null;
   const v4Chapters = v4ActiveDeal?.conversations?.map((c: any) => ({
     id: c.id,
@@ -2046,10 +2129,19 @@ export default function AppShell() {
     summary: c.summary,
   })) ?? [];
 
+  /* V16 mobile: desktop-first rollout. Logged-out visitors on marketing
+     routes get a Coming-Soon placeholder on mobile. Logged-in mobile
+     users still reach AppShellInner via the normal flow. /login and
+     /chat stay unguarded so users can sign in and chat anonymously. */
+  const MOBILE_MARKETING_PATHS = ['/', '/journey', '/how-it-works', '/pricing'];
+  if (!authLoading && !user && isMobile && MOBILE_MARKETING_PATHS.includes(location)) {
+    return <MobileComingSoon dark={dark} />;
+  }
+
   return (
     <div
       id="app-root"
-      className={`flex font-sans ${dark ? 'text-[#f0f0f3]' : 'text-[#1a1c1e]'}`}
+      className={`flex font-sans ${dark ? 'text-[#f5f4ed]' : 'text-[#1a1918]'}`}
       style={{
         width: '100%',
         // No background here — body provides the warm paper back layer with noise.
@@ -2127,13 +2219,14 @@ export default function AppShell() {
       ) : (
       <>
       {/* Desktop sidebar — fixed 80px icon rail.
-          One sidebar, state-aware: 'explore' mode (Sell/Buy/Raise/…)
-          on public marketing, 'tools' mode (Library/Data Rm/…) in-app.
-          Morph handled inside sidebarContent. */}
-      {sidebarContent(false)}
+          2026-04-22 (V16): hidden entirely for logged-out visitors. The
+          canvas tab strip at the top of the marketing panel carries the
+          public nav; showing the tools/deals rail to anonymous traffic
+          made the surface read like the logged-in app. */}
+      {user && sidebarContent(false)}
 
-      {/* Main canvas — offset by sidebar (16 left + 72 width + 16 gap = 104px). */}
-      <div className={`flex-1 flex flex-col min-w-0 lg:ml-[104px] bg-transparent ${isChat ? 'h-full' : ''}`}>
+      {/* Main canvas — offset by sidebar (16 left + 72 width + 16 gap = 104px) only when sidebar renders. */}
+      <div className={`flex-1 flex flex-col min-w-0 ${user ? 'lg:ml-[104px]' : ''} bg-transparent ${isChat ? 'h-full' : ''}`}>
         {/* Offline banner */}
         {isOffline && (
           <div className="shrink-0 bg-yellow-50 border-b border-yellow-200 px-4 py-2 flex items-center justify-center gap-2 z-30">
@@ -2191,11 +2284,22 @@ export default function AppShell() {
         {/* Main row: chat + canvas split */}
         {!(viewState === 'deal' && !isMobile) && (
         <div className="flex-1 flex min-h-0 bg-transparent w-full">
-        {/* Chat column — transparent, lets the back layer show through */}
+        {/* Chat column — V17 warm gradient top → bottom. Brief calls for
+            subtle warm gradient on the Yulia panel so the surface reads
+            as "paper" rather than flat fill. Cream at top (FAF6EE) →
+            slightly warmer at bottom (EDE4D1). Right-edge hairline rule.
+            On Edition routes the walkthrough rail OWNS the chat surface —
+            this column is suppressed entirely. */}
+        {!isEditionRoute && (
         <div
           className="flex flex-col min-w-0"
           style={{
-            background: 'transparent',
+            background: dark
+              ? 'linear-gradient(180deg, #1F1C17 0%, #1A1814 100%)'
+              : 'linear-gradient(180deg, #FAF6EE 0%, #EFE6D4 100%)',
+            borderRight: !isMobile && viewState === 'chat'
+              ? (dark ? '1px solid rgba(244,238,227,0.08)' : '1px solid rgba(26,24,20,0.08)')
+              : 'none',
             ...(!isMobile && viewState === 'chat'
               ? { width: chatWidth, flexShrink: 0 }
               : { flex: 1, width: '100%' }),
@@ -2236,13 +2340,13 @@ export default function AppShell() {
 
               {activeTab === 'home' ? (
               <div className="relative z-10 flex-1 flex flex-col w-full">
-                {/* ═══ HOME PAGE ═══ Glass Grok — canvas is #F2F2F4, no framing card.
+                {/* ═══ HOME PAGE ═══ Glass Grok — canvas is #faf9f5, no framing card.
                     overflow:hidden only when logged-in (dashboard) — logged-out
                     Glass Grok home is a tall marketing page that must scroll. */}
                 <div
                   className="flex-1 flex flex-col w-full"
                   style={{
-                    background: 'var(--gg-bg-app, #F2F2F4)',
+                    background: 'var(--gg-bg-app, #faf9f5)',
                     overflow: user ? 'hidden' : 'visible',
                   }}
                 >
@@ -2318,23 +2422,23 @@ export default function AppShell() {
                       onBack={() => { setViewState('landing'); setActiveTab('home'); navigate('/'); }}
                     />
                   ) : (
-                    /* ═══ Glass Grok home — logged-out + desktop-logged-in ═══
-                        New public site per the Glass Grok design system.
-                        Mobile logged-in users above hit AppShellInner;
-                        everyone else gets the redesigned chat-first hero. */
+                    /* ═══ Marketing home — logged-out + desktop-logged-in ═══
+                        Cowork DL homepage (HomeCanvas). The earlier
+                        GlassGrokHome path pointed at a 4-line stub that
+                        never rendered V17/V19 work — swapped to the real
+                        MarketingHome component 2026-04-24. */
                     <Suspense fallback={<BelowSkeleton />}>
-                      {/* Home serves the v2 sell arc per specs.md — same
-                          file, active='home' so top-nav highlights Home. */}
-                      <GlassGrokHome
-                        active="home"
+                      <MarketingHome
                         onSend={(msg) => handleSend(msg)}
-                        onStartFree={() => { setViewState('chat'); navigate('/chat'); }}
-                        onSignIn={() => navigate('/login')}
-                        onNavigate={(d) => {
-                          setActiveTab(d);
-                          setViewState('landing');
-                          navigate(d === 'home' ? '/' : `/${d}`);
+                        onGoJourney={(persona) => {
+                          const url = persona ? `/journey?p=${persona}` : '/journey';
+                          setActiveTab('journey');
+                          if (window.location.pathname + window.location.search !== url) navigate(url);
                         }}
+                        onGoHow={() => { setActiveTab('how-it-works'); if (window.location.pathname !== '/how-it-works') navigate('/how-it-works'); }}
+                        onFocusChat={() => { try { dockRef.current?.focus?.(); } catch { /* noop */ } }}
+                        onGoLogin={!user ? () => navigate('/login') : undefined}
+                        dark={dark}
                       />
                     </Suspense>
                   )}
@@ -2343,12 +2447,66 @@ export default function AppShell() {
                 {/* Scroll spacer removed — page is exactly 100dvh, pill sits at bottom of
                     visible viewport with safe-area padding for the home indicator. */}
               </div>
-              ) : ['sell','buy','raise','how-it-works','integrate','pricing','enterprise'].includes(activeTab) ? (
+              ) : activeTab === 'journey' ? (
+              /* V20 marketing /journey route. Reads `?p=` for persona. */
               <div className="relative z-10 flex-1 flex flex-col">
-                {/* Glass Grok v2 journey pages render their own chrome
-                    (top bar, sticky Yulia rail, scroll stage). No outer
-                    overflow:hidden — the v2 pages use sticky positioning
-                    which needs the document to scroll naturally. */}
+                <div className="flex-1 flex flex-col">
+                  <Suspense fallback={<BelowSkeleton />}>
+                    {(() => {
+                      const search = typeof window !== 'undefined' ? window.location.search : '';
+                      const params = new URLSearchParams(search);
+                      const p = params.get('p');
+                      const persona = (
+                        p === 'searcher' || p === 'advisor' || p === 'broker' ||
+                        p === 'sponsor' || p === 'banker' || p === 'planner'
+                      ) ? p : 'searcher';
+                      return (
+                        <MarketingJourney
+                          persona={persona}
+                          onPersonaChange={(next) => {
+                            const url = `/journey?p=${next}`;
+                            navigate(url);
+                          }}
+                          onSend={(msg) => handleSend(msg)}
+                          dark={dark}
+                        />
+                      );
+                    })()}
+                  </Suspense>
+                </div>
+              </div>
+              ) : activeTab === 'how-it-works' ? (
+              /* V21 marketing /how-it-works route. */
+              <div className="relative z-10 flex-1 flex flex-col">
+                <div className="flex-1 flex flex-col">
+                  <Suspense fallback={<BelowSkeleton />}>
+                    <MarketingHowItWorks
+                      onStartFree={() => { setViewState('chat'); if (window.location.pathname !== '/') navigate('/'); }}
+                      onContactSales={() => handleSend("I'd like to book a scoping call for Enterprise — here's our team size and use case: ")}
+                      dark={dark}
+                    />
+                  </Suspense>
+                </div>
+              </div>
+              ) : activeTab === 'pricing' ? (
+              /* V21 marketing /pricing route. */
+              <div className="relative z-10 flex-1 flex flex-col">
+                <div className="flex-1 flex flex-col">
+                  <Suspense fallback={<BelowSkeleton />}>
+                    <MarketingPricing
+                      onStartFree={() => { setViewState('chat'); if (window.location.pathname !== '/') navigate('/'); }}
+                      onContactSales={() => handleSend("I'd like to book a scoping call for Enterprise — here's our team size and use case: ")}
+                      dark={dark}
+                    />
+                  </Suspense>
+                </div>
+              </div>
+              ) : ['sell','buy','raise','integrate','enterprise'].includes(activeTab) ? (
+              <div className="relative z-10 flex-1 flex flex-col">
+                {/* Legacy Glass Grok routes — kept for /sell, /buy, /raise,
+                    /integrate, /pricing, /enterprise URLs that may still
+                    be referenced. The Journey + How it works tabs above
+                    use the new V20 marketing components. */}
                 <div className="flex-1 flex flex-col">
                   <Suspense fallback={<BelowSkeleton />}>
                     {(() => {
@@ -2360,21 +2518,17 @@ export default function AppShell() {
                         setViewState('landing');
                         navigate(d === 'home' ? '/' : `/${d}`);
                       };
-                      const common = { active: activeTab as 'sell' | 'buy' | 'raise' | 'integrate' | 'pricing' | 'how-it-works' | 'enterprise', onSend: send, onStartFree: onGoChat, onNavigate: nav, onSignIn };
+                      const common = { active: activeTab as 'sell' | 'buy' | 'raise' | 'integrate' | 'how-it-works' | 'enterprise', onSend: send, onStartFree: onGoChat, onNavigate: nav, onSignIn };
                       switch (activeTab) {
-                        case 'sell':         return <GlassGrokSell {...common} />;
-                        case 'buy':          return <GlassGrokBuy {...common} />;
-                        case 'raise':        return <GlassGrokRaise {...common} />;
-                        case 'integrate':    return <GlassGrokIntegrate {...common} />;
-                        case 'pricing':      return <GlassGrokPricing {...common} />;
-                        case 'how-it-works': return <GlassGrokHowItWorks {...common} />;
-                        case 'enterprise':   return <GlassGrokEnterprise {...common} />;
-                        default:             return null;
+                        case 'sell':       return <GlassGrokSell {...common} />;
+                        case 'buy':        return <GlassGrokBuy {...common} />;
+                        case 'raise':      return <GlassGrokRaise {...common} />;
+                        case 'integrate':  return <GlassGrokIntegrate {...common} />;
+                        case 'enterprise': return <GlassGrokEnterprise {...common} />;
+                        default:           return null;
                       }
                     })()}
                   </Suspense>
-                  {/* Legacy DesktopFooter removed — each Glass Grok page renders
-                      its own slim footer via the Page primitive / Footer export. */}
                 </div>
               </div>
               ) : null}
@@ -2464,6 +2618,14 @@ export default function AppShell() {
                    duplicating the same "What are you working on?" empty state
                    inside the chat view made the second screen feel pointless. */
                 hideEmptyState={isMobile}
+                onChipClick={(text) => {
+                  // Anonymous — fire the text through anonChat.
+                  if (!user) {
+                    anonChat.sendMessage(text);
+                  } else {
+                    handleSend(text);
+                  }
+                }}
               />
               </div>
 
@@ -2517,7 +2679,7 @@ export default function AppShell() {
         {showDock && viewState === 'chat' && !isMobile && (
           <div
             className="force-chat-dark shrink-0 px-4 pt-2"
-            style={{ paddingBottom: 16, touchAction: 'manipulation' }}
+            style={{ paddingBottom: 12, touchAction: 'manipulation' }}
           >
             <ChatDock
               ref={dockRef}
@@ -2526,9 +2688,33 @@ export default function AppShell() {
               variant="hero"
               rows={1}
               placeholder="Reply to Yulia..."
+              rotatingPlaceholders={!user ? [
+                'Paste a document. Ask what to do next.',
+                'Describe what you\'re working on.',
+                'Tell me about your business.',
+                'Ask Yulia anything.',
+              ] : undefined}
               disabled={sending}
               isMobile={isMobile}
             />
+            {/* V17 footer — anonymous chat panel only. Logged-in users have
+                subscription context in the sidebar, so this signal is noise. */}
+            {!user && (
+              <div
+                style={{
+                  fontFamily: "'Inter', system-ui, sans-serif",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  letterSpacing: '0.04em',
+                  color: 'rgba(244,238,227,0.42)',
+                  textAlign: 'center',
+                  marginTop: 10,
+                  paddingBottom: 4,
+                }}
+              >
+                Free to try &middot; No credit card
+              </div>
+            )}
           </div>
         )}
         {/* MOBILE CHAT PILL — canonical position:fixed bottom:0 portal.
@@ -2569,10 +2755,30 @@ export default function AppShell() {
           document.body
         )}
 
-        </div>{/* end chat column */}
+        </div>
+        )}{/* end chat column + isEditionRoute guard */}
+
+        {/* ════ EDITION CHAT RAIL — V22 walkthrough, rendered at AppShell level ════
+            Sibling of MarketingHome (not nested) so the fixed-position <aside>
+            doesn't get trapped inside a transformed/clipped ancestor. Renders
+            on every Edition route (/, /journey, /how-it-works, /pricing) so
+            the chrome is consistent — the per-canvas V21 YuliaWalkthroughRail
+            embeds in JourneyCanvas/HowItWorksCanvas/PricingCanvas were
+            removed in the same pass to prevent double-mount. */}
+        {isEditionRoute && (
+          <YuliaWalkthroughV22
+            onSend={(text) => handleSend(text)}
+            onPersonaChange={(id) => {
+              if (id === 'searcher' || id === 'advisor' || id === 'broker') {
+                setActiveTab('journey');
+                navigate(`/journey?p=${id}`);
+              }
+            }}
+          />
+        )}
 
         {/* ════ RESIZE HANDLE — vertical dots on the canvas card edge ════ */}
-        {!isMobile && viewState === 'chat' && (
+        {!isMobile && viewState === 'chat' && !isEditionRoute && (
           <div
             className="resize-handle group"
             onMouseDown={handleResizeStart}
@@ -2606,28 +2812,135 @@ export default function AppShell() {
           </div>
         )}
 
-        {/* ════ DESKTOP CANVAS PANEL — tabbed, always visible on desktop ════ */}
+        {/* ════ DESKTOP CANVAS PANEL — tabbed, always visible on desktop ════
+            2026-04-22: outer container restructured to flex-col so the
+            top Dia tab strip can sit above the canvas card for logged-out
+            marketing. Logged-in users still get the horizontal layout
+            with CanvasPicker on the right (migration to top tabs for
+            logged-in is a follow-up pass). */}
         {!isMobile && viewState === 'chat' && (
           <div
-            className="flex min-w-0"
+            className="flex flex-col min-w-0"
             style={{
               flex: 1,
               background: 'transparent',
               position: 'relative',
-              padding: '16px 16px 16px 16px',
+              /* Edition routes: edge-to-edge. The rail's clamp on the left
+                 is owned by .smbx-edition-route's margin-left; the right
+                 must reach the viewport. Other routes keep the 16px gutter
+                 that frames the logged-in tabbed canvas card. */
+              padding: isEditionRoute ? '0' : '16px 16px 16px 16px',
             }}
           >
-            {/* The active card — sharp 1px border + tight defined shadow */}
+            {/* ─── Dia-style top tab strip — logged-out marketing only ───
+                Suppressed on /home (the V22 Masthead inside MarketingHome
+                carries the editorial mono-cap nav HOME / JOURNEY / HOW IT
+                WORKS / PRICING — a CanvasTabStrip on top would double
+                chrome). Visible on /journey, /how-it-works, /pricing because
+                those canvases don't ship a masthead — without this strip
+                they're navless. Long-term fix: extract a shared
+                <EditionMasthead> and mount it in every canvas. */}
+            {!user && (
+              <CanvasTabStrip
+                tabs={[
+                  { id: 'home', label: 'Home' },
+                  { id: 'journey', label: 'Journey' },
+                  { id: 'how-it-works', label: 'How it works' },
+                  { id: 'pricing', label: 'Pricing' },
+                ]}
+                activeTabId={
+                  activeTab === 'journey' ? 'journey'
+                  : activeTab === 'how-it-works' ? 'how-it-works'
+                  : activeTab === 'pricing' ? 'pricing'
+                  : 'home'
+                }
+                onSelect={(id) => {
+                  /* Stabilize state on tab click. Set activeTab atomically,
+                     clear any in-flight morph animation, and force chat
+                     viewState so the canvas-card marketing branch renders
+                     consistently. Navigate last so all React updates are
+                     batched before the location effect fires. */
+                  const route =
+                    id === 'home' ? '/' :
+                    id === 'journey' ? '/journey' :
+                    id === 'pricing' ? '/pricing' :
+                    '/how-it-works';
+                  setActiveTab(id as TabId);
+                  setMorphing(false);
+                  if (viewState !== 'chat') setViewState('chat');
+                  if (window.location.pathname !== route) navigate(route);
+                }}
+                dark={dark}
+                leftSlot={
+                  <button
+                    type="button"
+                    onClick={() => { setActiveTab('home'); if (window.location.pathname !== '/') navigate('/'); }}
+                    aria-label="smbx home"
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      padding: 0,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      WebkitTapHighlightColor: 'transparent',
+                      fontFamily: "'Figtree', system-ui, sans-serif",
+                      fontWeight: 700,
+                      fontSize: 20,
+                      letterSpacing: '-0.04em',
+                      color: dark ? '#F4EEE3' : '#1A1814',
+                    }}
+                  >
+                    smbx<span style={{ color: '#D4714E' }}>.</span>ai
+                  </button>
+                }
+                rightSlot={
+                  /* On Home, the pinned section-marker pill (top-right
+                     fixed) handles Login via its "| LOGIN" segment, so
+                     the TabStrip Sign in would overlap it. Hide on Home;
+                     keep it on Journey/HowItWorks where the marker pill
+                     isn't rendered. */
+                  activeTab === 'home' ? null : (
+                    <button
+                      type="button"
+                      onClick={() => navigate('/login')}
+                      style={{
+                        padding: '6px 14px',
+                        background: 'transparent',
+                        border: 'none',
+                        color: dark ? 'rgba(245,244,237,0.72)' : '#5e5d59',
+                        fontFamily: "'Figtree', system-ui, sans-serif",
+                        fontSize: 13,
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        letterSpacing: '-0.005em',
+                        borderRadius: 8,
+                        WebkitTapHighlightColor: 'transparent',
+                        transition: 'color 0.15s ease, background 0.15s ease',
+                      }}
+                      className="tab-strip-signin"
+                    >
+                      Sign in
+                    </button>
+                  )
+                }
+              />
+            )}
+
+            <div className="flex min-w-0" style={{ flex: 1, minHeight: 0 }}>
+            {/* Canvas card — lifts off the darker body via warm-tinted
+                shadow + hairline border that's slightly darker than body.
+                The active CanvasTab merges into this card's top edge. */}
             <div
               ref={canvasCardRef}
               className="flex-1 flex flex-col min-w-0 overflow-hidden relative"
               style={{
-                background: dark ? '#151617' : '#FFFFFF',
-                border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9',
+                background: dark ? '#1a1918' : '#faf9f5',
+                border: dark ? '1px solid rgba(245,244,237,0.08)' : '1px solid #dedcd1',
                 borderRadius: 14,
                 boxShadow: dark
-                  ? '0 1px 2px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25)'
-                  : '0 1px 2px rgba(60,55,45,0.06), 0 4px 8px rgba(60,55,45,0.04)',
+                  ? '0 1px 2px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.35)'
+                  : '0 1px 3px rgba(26,25,24,0.06), 0 8px 24px rgba(26,25,24,0.05)',
                 zIndex: 1,
               }}
             >
@@ -2645,7 +2958,7 @@ export default function AppShell() {
                         <div style={{
                           flex: 1, minWidth: 0, minHeight: 0,
                           position: 'relative',
-                          borderRight: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9',
+                          borderRight: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #e8e6dc',
                           overflow: 'hidden',
                         }}>
                           <div className="absolute inset-0 overflow-y-auto">
@@ -2678,33 +2991,83 @@ export default function AppShell() {
                   </div>
                 </>
               ) : !user ? (
-                /* Logged-out: render the active Glass Grok v2 journey
-                    page in the canvas. Overflow scrolls naturally so the
-                    sticky Yulia rail + top bar behave correctly. */
+                /* Logged-out marketing canvas (V16 IA, 2026-04-22):
+                   three pages — Home, Journey (persona-tabbed),
+                   How-it-works (pattern + pricing + enterprise). The
+                   canvas scrolls naturally; chat column on the left
+                   stays static. Legacy journey_v2 imports remain for
+                   rollback but are no longer reachable. */
                 <div className="flex-1 overflow-y-auto relative">
                   <Suspense fallback={<BelowSkeleton />}>
                     {(() => {
-                      const onGoChat = () => { setViewState('chat'); navigate('/chat'); };
                       const send = (msg: string) => handleSend(msg);
-                      const onSignIn = () => navigate('/login');
-                      const nav = (d: 'home' | 'sell' | 'buy' | 'raise' | 'integrate' | 'pricing' | 'how-it-works' | 'enterprise') => {
-                        setActiveTab(d);
-                        setViewState('landing');
-                        navigate(d === 'home' ? '/' : `/${d}`);
-                      };
-                      /* Default to 'sell' if activeTab is 'home' (no canvas for home post-morph) */
-                      const journey = activeTab === 'home' ? 'sell' : activeTab;
-                      const common = { active: journey as 'sell' | 'buy' | 'raise' | 'integrate' | 'pricing' | 'how-it-works' | 'enterprise', onSend: send, onStartFree: onGoChat, onNavigate: nav, onSignIn };
-                      switch (journey) {
-                        case 'sell':         return <GlassGrokSell {...common} />;
-                        case 'buy':          return <GlassGrokBuy {...common} />;
-                        case 'raise':        return <GlassGrokRaise {...common} />;
-                        case 'integrate':    return <GlassGrokIntegrate {...common} />;
-                        case 'pricing':      return <GlassGrokPricing {...common} />;
-                        case 'how-it-works': return <GlassGrokHowItWorks {...common} />;
-                        case 'enterprise':   return <GlassGrokEnterprise {...common} />;
-                        default:             return <GlassGrokSell {...common} active="sell" />;
+                      const goHome = () => { setActiveTab('home'); if (window.location.pathname !== '/') navigate('/'); };
+                      const goJourney = () => { setActiveTab('journey'); if (window.location.pathname !== '/journey') navigate('/journey'); };
+                      const goHow = () => { setActiveTab('how-it-works'); if (window.location.pathname !== '/how-it-works') navigate('/how-it-works'); };
+                      if (activeTab === 'journey') {
+                        const search = typeof window !== 'undefined' ? window.location.search : '';
+                        const params = new URLSearchParams(search);
+                        const p = params.get('p');
+                        const persona = (
+                          p === 'searcher' || p === 'advisor' || p === 'broker' ||
+                          p === 'sponsor' || p === 'banker' || p === 'planner'
+                        ) ? p : 'searcher';
+                        return (
+                          <div className="smbx-edition-route">
+                            <MarketingJourney
+                              persona={persona}
+                              onPersonaChange={(next) => {
+                                const url = `/journey?p=${next}`;
+                                navigate(url);
+                              }}
+                              onSend={send}
+                              dark={dark}
+                            />
+                          </div>
+                        );
                       }
+                      if (activeTab === 'how-it-works') {
+                        return (
+                          <div className="smbx-edition-route">
+                            <MarketingHowItWorks
+                              onStartFree={() => { setViewState('chat'); if (window.location.pathname !== '/') navigate('/'); }}
+                              onContactSales={() => send('I’d like to book a scoping call for Enterprise — here’s our team size and use case: ')}
+                              dark={dark}
+                            />
+                          </div>
+                        );
+                      }
+                      if (activeTab === 'pricing') {
+                        return (
+                          <div className="smbx-edition-route">
+                            <MarketingPricing
+                              onStartFree={() => { setViewState('chat'); if (window.location.pathname !== '/') navigate('/'); }}
+                              onContactSales={() => send('I’d like to book a scoping call for Enterprise — here’s our team size and use case: ')}
+                              dark={dark}
+                            />
+                          </div>
+                        );
+                      }
+                      return (
+                        /* v22b: route container mirrors the rail's clamp via
+                           `.smbx-edition-route { margin-left: clamp(360px, 30vw, 480px) }`.
+                           Wrapping the page (not the rail) is what keeps the
+                           page's content from sitting under the chat rail. */
+                        <div className="smbx-edition-route">
+                          <MarketingHome
+                            onSend={send}
+                            onGoJourney={(persona) => {
+                              const url = persona ? `/journey?p=${persona}` : '/journey';
+                              setActiveTab('journey');
+                              if (window.location.pathname + window.location.search !== url) navigate(url);
+                            }}
+                            onGoHow={goHow}
+                            onFocusChat={() => { try { dockRef.current?.focus?.(); } catch { /* noop */ } }}
+                            onGoLogin={!user ? () => navigate('/login') : undefined}
+                            dark={dark}
+                          />
+                        </div>
+                      );
                     })()}
                   </Suspense>
                 </div>
@@ -2751,6 +3114,7 @@ export default function AppShell() {
                 />
               );
             })()}
+            </div>{/* end horizontal row — card + picker */}
           </div>
         )}
 
@@ -2761,7 +3125,7 @@ export default function AppShell() {
         {/* ════ MOBILE CANVAS OVERLAY ════ */}
         {canvasTabs.length > 0 && isMobile && mobileCanvasVisible && (
           <div
-            className={`fixed inset-0 z-40 flex flex-col ${dark ? 'bg-[#151617]' : 'bg-white'}`}
+            className={`fixed inset-0 z-40 flex flex-col ${dark ? 'bg-[#141413]' : 'bg-white'}`}
             style={{
               animation: 'slideUpIn 0.3s ease',
               overscrollBehavior: 'contain',
@@ -2777,13 +3141,13 @@ export default function AppShell() {
               const dealName = deal?.business_name || null;
               const journey = (deal?.journey_type || '').toLowerCase();
               const accentMap: Record<string, string> = {
-                sell: dark ? '#E8709A' : '#D44A78',
+                sell: dark ? '#ec9d78' : '#D4714E',
                 buy: dark ? '#52A8A8' : '#3E8E8E',
                 raise: dark ? '#DDB25E' : '#C99A3E',
                 pmi: dark ? '#AE6D9A' : '#8F4A7A',
                 integrate: dark ? '#AE6D9A' : '#8F4A7A',
               };
-              const accent = accentMap[journey] || (dark ? '#E8709A' : '#D44A78');
+              const accent = accentMap[journey] || (dark ? '#ec9d78' : '#D4714E');
               /* Glass Grok canvas header — replaces the deleted MobileCanvasHeader.
                  Plain: back button + title + share icon. Inline here since the
                  overall canvas overlay is a transitional surface that will be
@@ -2826,7 +3190,7 @@ export default function AppShell() {
                     style={{
                       flex: 1,
                       minWidth: 0,
-                      fontFamily: "'Sora', system-ui, sans-serif",
+                      fontFamily: "'Figtree', system-ui, sans-serif",
                       fontSize: 14,
                       fontWeight: 700,
                       color: 'var(--text-primary)',
@@ -2899,8 +3263,8 @@ export default function AppShell() {
                     style={{
                       maxWidth: '100%',
                       scrollbarWidth: 'none',
-                      background: dark ? '#151617' : '#FFFFFF',
-                      border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E1D9',
+                      background: dark ? '#141413' : '#FFFFFF',
+                      border: dark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #e8e6dc',
                       borderRadius: 100,
                       padding: '4px',
                     }}
@@ -2920,13 +3284,13 @@ export default function AppShell() {
                               ? (dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)')
                               : 'transparent',
                             color: isActive
-                              ? (dark ? '#F0F0F3' : '#1A1C1E')
+                              ? (dark ? '#f5f4ed' : '#1a1918')
                               : (dark ? '#A0A0A0' : '#5D5E61'),
                             fontSize: 12,
                             fontWeight: isActive ? 600 : 500,
                             whiteSpace: 'nowrap',
                             cursor: 'pointer',
-                            fontFamily: "'Inter', system-ui, sans-serif",
+                            fontFamily: "'Figtree', system-ui, sans-serif",
                           }}
                         >
                           {tab.label}
@@ -2952,7 +3316,7 @@ export default function AppShell() {
         }
         input:not(:placeholder-shown) + .hero-send-btn,
         input:focus:not(:placeholder-shown) + .hero-send-btn {
-          background: #D44A78;
+          background: #D4714E;
           color: #fff;
           pointer-events: auto;
         }
@@ -2966,7 +3330,7 @@ export default function AppShell() {
           position: absolute;
           inset: -2px;
           border-radius: 14px;
-          background: radial-gradient(circle at center, rgba(212,74,120,0.18), rgba(212,74,120,0) 70%);
+          background: radial-gradient(circle at center, rgba(212,113,78,0.18), rgba(212,113,78,0) 70%);
           opacity: 0;
           transition: opacity 0.25s ease;
           pointer-events: none;
@@ -3210,7 +3574,7 @@ export default function AppShell() {
               minHeight: 320,
               textAlign: 'center',
               gap: 12,
-              color: dark ? 'rgba(240,240,243,0.55)' : 'rgba(26,28,30,0.55)',
+              color: dark ? 'rgba(245,244,237,0.55)' : 'rgba(26,28,30,0.55)',
             }}>
               <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -3369,18 +3733,18 @@ export default function AppShell() {
             style={{ animation: 'fadeOnly 0.2s ease' }}
           />
           <nav
-            className={`fixed top-0 right-0 bottom-0 z-[61] w-64 flex flex-col py-12 px-6 overflow-y-auto ${dark ? 'bg-[#1a1c1e] border-l border-zinc-800' : 'bg-white border-l border-[#eeeef0] shadow-xl'}`}
+            className={`fixed top-0 right-0 bottom-0 z-[61] w-64 flex flex-col py-12 px-6 overflow-y-auto ${dark ? 'bg-[#1a1918] border-l border-zinc-800' : 'bg-white border-l border-[#e8e6dc] shadow-xl'}`}
             style={{ animation: 'slideInRight 0.25s ease' }}
           >
             <button
               onClick={() => setIsMobileCanvasDrawerOpen(false)}
-              className={`absolute top-4 left-4 bg-transparent border-none cursor-pointer p-0 ${dark ? 'text-[#f0f0f3]/70' : 'text-[#1a1c1e]/70'}`}
+              className={`absolute top-4 left-4 bg-transparent border-none cursor-pointer p-0 ${dark ? 'text-[#f5f4ed]/70' : 'text-[#1a1918]/70'}`}
               type="button"
               aria-label="Close canvas menu"
             >
               <span className="material-symbols-outlined text-[24px]">close</span>
             </button>
-            <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-4 mt-2 ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Canvas Tools</span>
+            <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-4 mt-2 ${dark ? 'text-zinc-500' : 'text-[#5e5d59]'}`}>Canvas Tools</span>
             {user ? (
               <>
                 {([
@@ -3392,7 +3756,7 @@ export default function AppShell() {
                   <button
                     key={item.type}
                     onClick={() => { setIsMobileCanvasDrawerOpen(false); openCanvasTab(item.type, item.label); }}
-                    className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 hover:text-white bg-transparent' : 'text-[#636467] hover:text-[#1a1c1e] bg-transparent'}`}
+                    className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${dark ? 'text-zinc-400 hover:text-white bg-transparent' : 'text-[#5e5d59] hover:text-[#1a1918] bg-transparent'}`}
                     type="button"
                   >
                     <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
@@ -3401,15 +3765,15 @@ export default function AppShell() {
                 ))}
                 {canvasTabs.length > 0 && (
                   <>
-                    <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-2 mt-6 ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Open Tabs</span>
+                    <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-2 mt-6 ${dark ? 'text-zinc-500' : 'text-[#5e5d59]'}`}>Open Tabs</span>
                     {canvasTabs.map(tab => (
                       <button
                         key={tab.id}
                         onClick={() => { setIsMobileCanvasDrawerOpen(false); setActiveCanvasTabId(tab.id); }}
                         className={`flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all border-none cursor-pointer text-sm font-medium ${
                           tab.id === activeCanvasTabId
-                            ? (dark ? 'text-white bg-white/10' : 'text-[#0A0A0B] bg-[#E8E8EB]')
-                            : (dark ? 'text-zinc-400 hover:text-white bg-transparent' : 'text-[#636467] hover:text-[#1a1c1e] bg-transparent')
+                            ? (dark ? 'text-white bg-white/10' : 'text-[#1a1918] bg-[#e8e6dc]')
+                            : (dark ? 'text-zinc-400 hover:text-white bg-transparent' : 'text-[#5e5d59] hover:text-[#1a1918] bg-transparent')
                         }`}
                         type="button"
                       >
@@ -3421,7 +3785,7 @@ export default function AppShell() {
                 )}
               </>
             ) : (
-              <p className={`text-sm ${dark ? 'text-zinc-500' : 'text-[#636467]'}`}>Sign in to access canvas tools.</p>
+              <p className={`text-sm ${dark ? 'text-zinc-500' : 'text-[#5e5d59]'}`}>Sign in to access canvas tools.</p>
             )}
           </nav>
         </>
@@ -3479,14 +3843,14 @@ export default function AppShell() {
             width: 36,
             height: 36,
             borderRadius: '50%',
-            background: `linear-gradient(135deg, ${dark ? '#E8709A' : '#D44A78'}, #E8709A)`,
+            background: `linear-gradient(135deg, ${dark ? '#ec9d78' : '#D4714E'}, #ec9d78)`,
             color: '#fff',
             border: 'none',
             cursor: 'pointer',
-            fontFamily: 'Sora, system-ui',
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 14,
             fontWeight: 800,
-            boxShadow: '0 4px 12px rgba(212,74,120,0.28)',
+            boxShadow: '0 4px 12px rgba(212,113,78,0.28)',
             transition: 'transform 120ms',
             WebkitTapHighlightColor: 'transparent',
           }}
@@ -3517,10 +3881,10 @@ export default function AppShell() {
             padding: '0 12px 0 10px',
             borderRadius: 999,
             background: dark ? '#1f2123' : '#ffffff',
-            color: dark ? '#E8709A' : '#D44A78',
+            color: dark ? '#ec9d78' : '#D4714E',
             border: `1px solid ${dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,16,18,0.08)'}`,
             cursor: 'pointer',
-            fontFamily: 'Inter, system-ui',
+            fontFamily: "'Figtree', system-ui, sans-serif",
             fontSize: 13,
             fontWeight: 700,
             boxShadow: dark ? 'none' : '0 1px 4px rgba(26,28,30,0.06)',
@@ -3550,13 +3914,13 @@ export default function AppShell() {
 
       {flyingLogo && (() => {
         const letters = [
-          { ch: 's', color: '#1A1A18', weight: 700 },
-          { ch: 'm', color: '#1A1A18', weight: 700 },
-          { ch: 'b', color: '#1A1A18', weight: 700 },
-          { ch: 'x', color: '#D44A78', weight: 800 },
-          { ch: '.', color: '#1A1A18', weight: 700 },
-          { ch: 'a', color: '#1A1A18', weight: 700 },
-          { ch: 'i', color: '#1A1A18', weight: 700 },
+          { ch: 's', color: '#1a1918', weight: 700 },
+          { ch: 'm', color: '#1a1918', weight: 700 },
+          { ch: 'b', color: '#1a1918', weight: 700 },
+          { ch: 'x', color: '#D4714E', weight: 800 },
+          { ch: '.', color: '#1a1918', weight: 700 },
+          { ch: 'a', color: '#1a1918', weight: 700 },
+          { ch: 'i', color: '#1a1918', weight: 700 },
         ];
         const toSidebar = flyingLogo.direction === 'to-sidebar';
         const heroSource = heroLogoRef.current;
@@ -3636,7 +4000,7 @@ export default function AppShell() {
                 position: 'fixed',
                 zIndex: 9999,
                 pointerEvents: 'none',
-                fontFamily: "'Sora', sans-serif",
+                fontFamily: "'Figtree', system-ui, sans-serif",
                 fontSize: 48,
                 fontWeight: l.weight,
                 color: l.color,
@@ -3656,7 +4020,7 @@ export default function AppShell() {
 // ─── Canvas Tab Icon ────────────────────────────────────────────────
 
 function CircuitSparks({ dark }: { dark: boolean }) {
-  const sparkColor = dark ? '#E8709A' : '#D44A78';
+  const sparkColor = dark ? '#ec9d78' : '#D4714E';
   const sparks = [
     { left: '14%', top: '72%', delay: '0s', duration: '4.5s' },
     { left: '82%', top: '18%', delay: '2.2s', duration: '5.8s' },

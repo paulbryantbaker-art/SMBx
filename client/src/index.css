@@ -112,14 +112,12 @@ a.btn:active,
    programmatic focus. The --focus-ring var lets individual components
    override (e.g. contrasting focus on colored backgrounds). */
 :root {
-  /* Glass Grok canonical focus — monochrome, never tinted.
-     Marketing pages (handled by the external agent) may override to --terra
-     if they need brand-aligned focus. */
-  --focus-ring: #0A0A0B;
+  /* Cowork focus ring — clay accent, matches brand. */
+  --focus-ring: #D4714E;
   --focus-ring-offset: 2px;
 }
 html.dark {
-  --focus-ring: #FFFFFF;
+  --focus-ring: #e89874;
 }
 *:focus { outline: none; }
 *:focus-visible {
@@ -155,108 +153,1019 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
 .text-editorial-body { line-height: 1.6; }
 .zig-zag-container > div:nth-child(even) { flex-direction: row-reverse; }
 
+/* ═══════════════════════════════════════════════════════════════════
+   smbx · The Edition — Claude Design handoff scope (2026-04-25).
+   Tokens, utility classes, and motion primitives for the three public
+   marketing pages (`/`, `/journey`, `/how-it-works`). Everything is
+   scoped under `.smbx-edition` so it cannot leak into the rest of the
+   app. Source-of-truth tokens lift directly from CD's styles.css.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* When an Edition canvas is mounted, hide AppShell's anonymous ChatDock,
+   ChatDock portal, sidebar, and sidebar-explore strip. The walkthrough
+   rail is the canonical chat surface on marketing pages — two would
+   double-render. body:has() is universal as of 2026. */
+body:has(.smbx-edition) #mobile-chat-dock-portal,
+body:has(.smbx-edition) .force-chat-dark,
+body:has(.smbx-edition) .dock-outer {
+  display: none !important;
+}
+
+/* Hide the desktop AppShell sidebar on logged-out marketing routes per
+   the design — the chat rail is already on the left, and a second rail
+   is noise. The Edition canvas occupies the full viewport. */
+body:has(.smbx-edition) aside.fixed.left-0 {
+  display: none !important;
+}
+
+/* Hide AppShell's original chat column (warm gradient #FAF6EE→#EFE6D4)
+   and the resize handle between it and the canvas. The walkthrough rail
+   is the only chat surface on Edition pages. */
+body:has(.smbx-edition) [style*="EFE6D4"],
+body:has(.smbx-edition) .resize-handle {
+  display: none !important;
+}
+
+/* Hide the page-level scrollbar on Edition pages — magazine layouts
+   don't show a permanent rail. Page still scrolls; bar just isn't
+   painted. Other browsers honor `scrollbar-width: none`; WebKit needs
+   the `::-webkit-scrollbar` rule. */
+/* Auto-hide scrollbars on Edition routes (Canva-style):
+   thumb is transparent by default, fades in on hover/scroll.
+   Replaces the previous fully-hidden treatment which lost the
+   visual signal that the page was scrollable. */
+body:has(.smbx-edition) {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+body:has(.smbx-edition):hover {
+  scrollbar-color: rgba(26, 24, 20, 0.18) transparent;
+}
+body:has(.smbx-edition) ::-webkit-scrollbar,
+html:has(.smbx-edition) ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+body:has(.smbx-edition) ::-webkit-scrollbar-track {
+  background: transparent;
+}
+body:has(.smbx-edition) ::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 320ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+body:has(.smbx-edition):hover ::-webkit-scrollbar-thumb {
+  background: rgba(26, 24, 20, 0.14);
+  background-clip: padding-box;
+}
+body:has(.smbx-edition) ::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 24, 20, 0.32);
+  background-clip: padding-box;
+}
+
+/* Neutralize AppShell's canvas-card chrome on Edition pages — its own
+   border / background / radius / shadow creates a SECOND nested
+   container that reads as a ghost rail between the walkthrough and
+   the actual content. The .smbx-edition wrapper provides its own
+   elevation; this strips every chrome layer up the tree so there's
+   only one canvas. Uses :has() to match any element that contains an
+   .smbx-edition descendant, EXCLUDING the .smbx-edition itself. */
+body:has(.smbx-edition) :has(.smbx-edition):not(.smbx-edition):not(body):not(html):not(#app-root) {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Strip the 16px padding on AppShell's main flex column on Edition
+   pages — it creates a gutter between the rail and the canvas's left
+   edge. Same for any inline-styled padding container that wraps the
+   canvas. */
+body:has(.smbx-edition) main,
+body:has(.smbx-edition) main:has(.smbx-edition) {
+  padding: 0 !important;
+}
+body:has(.smbx-edition) :has(> main:has(.smbx-edition)) {
+  padding: 0 !important;
+}
+
+/* CanvasTabStrip rendered above the canvas-card — pin onto the canvas
+   plane via margin-left (matches the canvas's left edge) and -1px
+   margin-bottom so the active tab merges into the canvas's top
+   border. Browser-tab metaphor: active tab = part of the canvas. */
+body:has(.smbx-edition) .canvas-tab-strip {
+  margin-left: clamp(360px, 30vw, 480px);
+  margin-bottom: -1px;
+  position: relative;
+  z-index: 5;
+}
+
+/* ─── Paper grain layer ─────────────────────────────────────────────
+   Tactile warmth on the cream canvas — a single SVG turbulence filter
+   layered at 7% opacity. GPU-rasterized once, reused everywhere. The
+   grain is too fine to read consciously; it gives the page a slight
+   "this isn't a Figma export" feel.
+
+   Disabled on prefers-reduced-motion (some users get visual noise from
+   high-frequency texture) and on devices that signal limited resources
+   via the data-low-power body attribute (set elsewhere if needed).
+
+   The actual SVG filter is injected once at the document root by the
+   Edition canvas wrapper (see PaperGrain primitive). The CSS here just
+   declares the pseudo-element layer that consumes it. */
+
+.smbx-edition::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.07;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch' seed='4'/><feColorMatrix values='0 0 0 0 0.10  0 0 0 0 0.09  0 0 0 0 0.08  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 420px 420px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smbx-edition::before { display: none; }
+}
+
+/* Hide grain on touch devices with low power — cheap perf safety net. */
+@media (hover: none) and (pointer: coarse) {
+  .smbx-edition::before { opacity: 0.04; }
+}
+
+.smbx-edition {
+  /* Surfaces */
+  --canvas-warm: #F4EEE3;
+  --canvas-cream: #FAF6EE;
+  --canvas-paper: #FFFFFF;
+  --canvas-night: #16130E;
+  --canvas-night-deeper: #0E0C09;
+  /* V22 aliases — CD's components reference these names directly. */
+  --canvas-deep: #16130E;
+  --canvas-deeper: #0E0C09;
+
+  /* Ink — slightly warmer than the global ladder to keep the magazine
+     feel on cream. Scoped here so global text colors aren't disturbed. */
+  --ink-primary: #1A1814;
+  --ink-secondary: #3D3D3A;
+  --ink-tertiary: #87867F;
+  --ink-quaternary: #B5AE9F;
+  --ink-inverse: #F4EEE3;
+
+  /* Rules / dividers */
+  --rule: #E8E6DC;
+  --rule-soft: rgba(26, 24, 20, 0.06);
+  --rule-warm: rgba(212, 113, 78, 0.18);
+  --rule-dark: rgba(244, 238, 227, 0.10);
+
+  /* Terra — sacred, ≤6 uses per page */
+  --terra: #D4714E;
+  --terra-hover: #B85A3A;
+  --terra-on-dark: #E58761;
+  --terra-tint: rgba(212, 113, 78, 0.08);
+
+  /* Type stacks — Cowork DL canonical (per .impeccable.md).
+     Display + body share Figtree (variable 300–900); display headlines
+     use weight 700–800. Italic foil only via Instrument Serif inline.
+     Sora / Inter were the V21-era pre-Cowork stack; both are dead. */
+  --font-display: 'Figtree', system-ui, sans-serif;
+  --font-editorial: 'Instrument Serif', 'Times New Roman', Georgia, serif;
+  --font-body: 'Figtree', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Earth-tone tints — used as full backgrounds for ~30% of artifact
+     tiles in V23B's spreads. Only the AA-safe lighter tones; darker
+     earth tones (mineral, sky, olive, fig, plum) stay as accent stripes
+     applied inline. */
+  --cactus:  #bcd1ca;
+  --oat:     #e3dacc;
+  --peach:   #ebc9b7;
+  --coral:   #ebcece;
+  --heather: #cbcadb;
+
+  /* Mono eyebrow */
+  --mono-eyebrow-size: 11px;
+  --mono-eyebrow-tracking: 0.16em;
+
+  font-family: var(--font-body);
+  color: var(--ink-primary);
+  background: var(--canvas-warm);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* V22 — magazine OpenType. Hanging punctuation pulls open-quotes
+     into the margin like a print quarterly; ss01/onum/calt + kern/liga
+     turn on the editorial figures + ligatures tokens consume. */
+  font-feature-settings: "kern", "liga", "calt", "onum", "ss01";
+  hanging-punctuation: first last;
+}
+
+/* V22 utility classes — magazine craft layer. Drop cap with shape-outside
+   wrap; margin-italic notes; running cover plate; ❦ fleuron; engraved
+   diamond rule; small caps + tabular/oldstyle figs. */
+
+.smbx-edition .dropcap-v2::first-letter {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-weight: 400;
+  float: left;
+  font-size: 5.6em;
+  line-height: 0.84;
+  padding: 6px 12px 0 0;
+  color: var(--ink-primary);
+  shape-outside: margin-box;
+}
+
+.smbx-edition .marginalia {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-tertiary);
+  letter-spacing: -0.005em;
+  border-left: 1px solid var(--rule);
+  padding: 4px 0 4px 16px;
+}
+
+.smbx-edition .cover-plate {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.smbx-edition .cover-plate .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.smbx-edition .cover-plate .row:first-child {
+  border-top: 1px solid var(--ink-primary);
+}
+.smbx-edition .cover-plate .row strong {
+  color: var(--ink-primary);
+  font-weight: 600;
+}
+
+.smbx-edition .fleuron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 28px 0;
+  color: var(--ink-quaternary);
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: 22px;
+  letter-spacing: 0.6em;
+}
+.smbx-edition .fleuron::before,
+.smbx-edition .fleuron::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+  max-width: 120px;
+}
+
+.smbx-edition .rule-engraved {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+}
+.smbx-edition .rule-engraved::before,
+.smbx-edition .rule-engraved::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ink-primary);
+}
+.smbx-edition .rule-engraved span {
+  width: 5px;
+  height: 5px;
+  background: var(--ink-primary);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.smbx-edition .figs-tab { font-variant-numeric: tabular-nums lining-nums; }
+.smbx-edition .figs-old { font-variant-numeric: oldstyle-nums; }
+
+.smbx-edition .smallcaps {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.06em;
+}
+
+/* Mobile: hide V22's fixed-position rail. Page goes full width. */
+@media (max-width: 1023px) {
+  .smbx-yulia-rail { display: none !important; }
+}
+
+/* Lock down rail geometry with raised specificity + !important. The rail's
+   wrapStyle inline style sets these correctly, but there's an intermittent
+   collapse to ~140px in the wild that's consistent with another stylesheet
+   winning on `width`/`position` (an unspecific `aside` rule, an old chat-
+   panel utility, etc.). Pinning here means inline + this rule both have to
+   be overridden to break it. `aside.smbx-yulia-rail` lifts specificity
+   above any plain `.smbx-yulia-rail` rule.
+
+   Width: v22b canonical clamp(360px, 30vw, 480px). Mirror this value in
+   the wrapStyle inline width, the route's padding-left, and the tab strip's
+   margin-left — all four must agree. */
+@media (min-width: 1024px) {
+  aside.smbx-yulia-rail {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: clamp(360px, 30vw, 480px) !important;
+    z-index: 30 !important;
+  }
+}
+
+/* Edition: lock `display: grid` on any element using `className="grid"`
+   inside the page. Tailwind v3 emits `.grid { display: grid }` from JIT
+   scanning, but section components ship inline `gridTemplateColumns`
+   that is useless if `display: grid` is missing — the cells collapse to
+   block flow and cards "render as plain inline text." `.smbx-edition .grid`
+   has 2-class specificity and beats Tailwind's single-class utility. */
+.smbx-edition .grid {
+  display: grid;
+}
+
+/* Cap section content at ~1200px even when the canvas is wider. v22b's
+   editorial sections use a fixed `padding: '60px 56px'` shorthand; on
+   monitors wider than 1440px that lets the cover plate, dateline strip,
+   and pricing grid sprawl across 2000px+ of canvas with hero text on the
+   far left and cover plate on the far right.
+
+   The trick: `padding-inline: max(56px, calc(50% - 600px))`. At <=1440px
+   viewport the calc resolves negative and the max picks 56px (original
+   v22b padding, no change). On wider viewports the calc grows symmetrically
+   so the inner content area stays at ~1200px. Section bg (cream / paper /
+   dark) still bleeds edge-to-edge — only the content is reined in.
+
+   `!important` is required because the components ship inline padding via
+   the `padding` shorthand, which sets padding-inline-start/end as longhands
+   that win against unprefixed CSS otherwise. */
+@media (min-width: 1024px) {
+  .smbx-edition section,
+  .smbx-edition header,
+  .smbx-edition footer {
+    padding-inline: max(56px, calc(50% - 600px)) !important;
+  }
+}
+
+/* V22b — Edition route geometry. The rail (`.smbx-yulia-rail`) is fixed
+   at viewport left with `width: clamp(360px, 30vw, 480px)`. The route
+   container reserves that same width as left padding (NOT margin), so
+   the inner `.smbx-edition` page can use `margin-inline: auto` to float
+   like a newspaper centered between the rail's right edge and the
+   viewport's right edge.
+
+   At <=1440px viewport the page still bleeds edge-to-edge because the
+   max-width cap is wider than the canvas can fit — v22b's tested
+   proportions are preserved. On wider monitors the warm app background
+   shows on both sides of the page, making the editorial "lifts off the
+   warm cream" composition read as intended. */
+@media (min-width: 1024px) {
+  .smbx-edition-route {
+    padding-left: clamp(360px, 30vw, 480px);
+  }
+}
+
+.smbx-edition .eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--mono-eyebrow-size);
+  font-weight: 500;
+  letter-spacing: var(--mono-eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+}
+
+.smbx-edition .body {
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-secondary);
+  text-wrap: pretty;
+}
+
+.smbx-edition .editorial {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+
+.smbx-edition .tnum { font-variant-numeric: tabular-nums; }
+
+.smbx-edition .dropcap::first-letter {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  float: left;
+  font-size: 5.4em;
+  line-height: 0.8;
+  padding: 4px 10px 0 0;
+  color: var(--terra);
+}
+
+.smbx-edition .hairline {
+  height: 1px;
+  background: var(--rule);
+  border: 0;
+  margin: 0;
+}
+
+.smbx-edition .hairline-warm {
+  height: 1px;
+  background: var(--rule-warm);
+  border: 0;
+  margin: 0;
+}
+
+.smbx-edition ::selection {
+  background: rgba(212, 113, 78, 0.25);
+  color: var(--ink-primary);
+}
+
+@keyframes smbx-type-cursor {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Reveal primitives — fired by useEditionScroll on data-scroll elements.
+   Default state is invisible; .is-visible removes the offset. */
+.smbx-edition [data-scroll] {
+  opacity: 1;
+}
+
+.smbx-edition [data-edition-fade] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--edition-delay, 0ms);
+}
+
+.smbx-edition [data-edition-fade].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smbx-edition [data-edition-fade] {
+    transition: opacity 200ms ease;
+    transform: none;
+  }
+}
+
+/* Strikethrough draw — used on the /how-it-works restraint list. */
+.smbx-edition [data-strike] {
+  position: relative;
+  display: inline-block;
+}
+
+.smbx-edition [data-strike]::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  top: 53%;
+  height: 2px;
+  background: var(--terra);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
+}
+
+.smbx-edition [data-strike].is-visible::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smbx-edition [data-strike]::after {
+    transition: opacity 200ms ease;
+  }
+}
+
+/* ─── Cinematic scroll choreography ─────────────────────────────────
+   Driven by useScrollProgress (exposes --edition-scroll: 0..1 on the
+   .smbx-edition root). All effects below read from that variable so
+   they share one rAF source and stay in lockstep.
+
+   Native @scroll-timeline + animation-timeline: scroll() would let us
+   do this purely in CSS, but Firefox doesn't ship it without a flag.
+   We use a single JS rAF loop that updates the CSS var; modern browsers
+   composite the rest of the work. ~1ms/frame on the main thread. */
+
+@property --edition-scroll {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+/* ─── Hero — cover headline shrinks into a folio mark ───
+   The hero begins at 168px / 1.0 scale. As --hero-progress climbs from
+   0 → 1 (computed by useScrollProgress over the hero section), the
+   headline scales down to ~0.18 and translates toward the top-left,
+   then docks as a static folio mark. Past 1.0, the static folio (a
+   separate element) takes over so the headline can be hidden. */
+
+.smbx-edition [data-hero-cover] {
+  position: relative;
+  /* The cover takes one viewport for the shrink choreography. */
+  min-height: clamp(540px, 92vh, 920px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.smbx-edition [data-hero-headline] {
+  /* CSS reads the var; JS hook writes it. Default = full size. */
+  --p: var(--hero-progress, 0);
+  /* Clamp progress so the headline is full-size in the hero and locks
+     into corner-folio state by the end of the cover viewport. */
+  transform-origin: 0% 50%;
+  transform: scale(calc(1 - var(--p) * 0.78))
+             translate(calc(var(--p) * -2vw), calc(var(--p) * -38vh));
+  letter-spacing: calc(-0.044em + var(--p) * 0.02em);
+  will-change: transform, letter-spacing;
+}
+
+.smbx-edition [data-hero-headline][data-folio-locked] {
+  /* Past the hero, freeze in the folio position so the headline can
+     gracefully exit out of the document flow as a fixed corner mark. */
+  position: fixed;
+  top: 16px;
+  left: clamp(36px, 4.5vw, 72px);
+  z-index: 5;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smbx-edition [data-hero-headline] {
+    transform: none !important;
+    letter-spacing: -0.044em !important;
+  }
+  .smbx-edition [data-hero-headline][data-folio-locked] {
+    position: static;
+  }
+}
+
+/* Static folio that materializes once the hero locks. Stays cream/ink
+   so it reads on top of all content sections. Subtle terra dot left of
+   the wordmark to match the brand "currently reading" cue. */
+.smbx-edition [data-folio-mark] {
+  position: fixed;
+  top: 18px;
+  left: clamp(36px, 4.5vw, 72px);
+  z-index: 6;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -0.024em;
+  color: var(--ink-primary);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 240ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.smbx-edition [data-folio-mark][data-visible] {
+  opacity: 1;
+  transform: none;
+}
+
+.smbx-edition [data-folio-mark]::before {
+  content: '●';
+  color: var(--terra);
+  font-size: 8px;
+  transform: translateY(-2px);
+}
+
+/* ─── Spine breakers — scale up as they enter viewport center ───
+   Each spine has --spine-progress = 0..1 computed by useScrollProgress
+   over its own section. We map that to a scale curve where:
+     0.0 (entering bottom) = 0.92
+     0.5 (centered)        = 1.18
+     1.0 (leaving top)     = 0.92
+   Like a film title card pushing forward as you read it. */
+
+.smbx-edition [data-spine] {
+  --p: var(--spine-progress, 0);
+  --centered: calc(1 - abs(0.5 - var(--p)) * 2);
+}
+
+.smbx-edition [data-spine] h2 {
+  transform-origin: 0% 50%;
+  transform: scale(calc(1 + var(--centered, 0) * 0.18));
+  transition: transform 80ms linear;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smbx-edition [data-spine] h2 {
+    transform: none !important;
+  }
+}
+
+/* ─── SDE recast card — scroll-driven row build ───
+   Card is initially at rest; rows progressively reveal as the user
+   scrolls past the recast feature. --recast-progress (0..1) drives the
+   reveal index. JS sets it; CSS reads it via stagger calc. */
+
+.smbx-edition [data-recast-card] [data-recast-row] {
+  --i: 0;
+  --p: var(--recast-progress, 0);
+  --threshold: calc((var(--i) + 1) / 8);
+  /* Row appears once progress crosses (i+1)/total. */
+  opacity: clamp(0, calc((var(--p) - var(--threshold)) * 12), 1);
+  transform: translateY(calc(8px - var(--p) * 8px / 1));
+  transition: opacity 240ms cubic-bezier(0.22, 1, 0.36, 1),
+              transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.smbx-edition [data-recast-card][data-fully-revealed] [data-recast-row] {
+  opacity: 1;
+  transform: none;
+}
+
+/* The terra valuation pulses once when the card finishes building. */
+.smbx-edition [data-recast-card][data-fully-revealed] [data-recast-valuation] {
+  animation: edition-valuation-pulse 900ms cubic-bezier(0.22, 1, 0.36, 1) 240ms;
+}
+
+@keyframes edition-valuation-pulse {
+  0%   { text-shadow: 0 0 0 rgba(212, 113, 78, 0.0); }
+  50%  { text-shadow: 0 0 28px rgba(212, 113, 78, 0.45); }
+  100% { text-shadow: 0 0 0 rgba(212, 113, 78, 0.0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smbx-edition [data-recast-card] [data-recast-row] {
+    opacity: 1;
+    transform: none;
+  }
+  .smbx-edition [data-recast-card][data-fully-revealed] [data-recast-valuation] {
+    animation: none;
+  }
+}
+
+/* ─── View Transitions — persona swap ───
+   Browsers that support View Transitions (all major as of 2026) get a
+   crossfade with shared element morph on the persona-tag eyebrow and
+   the headline. Browsers without fall back to instant swap. */
+
+@supports (view-transition-name: a) {
+  /* Default is crossfade; we customize specific named transitions. */
+  ::view-transition-old(persona-headline),
+  ::view-transition-new(persona-headline) {
+    animation-duration: 360ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  ::view-transition-old(persona-eyebrow),
+  ::view-transition-new(persona-eyebrow) {
+    animation-duration: 240ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  /* Faster crossfade on root so the rest of the page barely flickers. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 260ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(persona-headline),
+  ::view-transition-new(persona-headline),
+  ::view-transition-old(persona-eyebrow),
+  ::view-transition-new(persona-eyebrow),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
+/* ─── Hover + focus polish ─── */
+
+.smbx-edition button,
+.smbx-edition a {
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 160ms ease,
+              color 160ms ease,
+              border-color 160ms ease;
+}
+
+/* Terra primary button — lift + deeper warm shadow on hover */
+.smbx-edition button[style*="var(--terra)"]:hover,
+.smbx-edition button[style*="rgb(212, 113, 78)"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 36px rgba(212, 113, 78, 0.36);
+}
+
+/* Outline links / eyebrow CTAs in the dark closer — soften on hover */
+.smbx-edition a:hover,
+.smbx-edition button:hover {
+  text-decoration: none;
+}
+
+/* Persona pills (.smbx-edition sticky tab bar) — lift inactive pill on hover */
+.smbx-edition .eyebrow {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Focus-visible — terra ring; never harsher than 2px */
+.smbx-edition button:focus-visible,
+.smbx-edition a:focus-visible,
+.smbx-edition [tabindex]:focus-visible {
+  outline: 2px solid var(--terra);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Card lift — applies to the SDE recast card, the CIM artifact, the
+   teaser PDF, and the CIM § 3.2 paper card via attribute targeting on
+   the data-edition-fade wrappers' inner card boxes. Subtle. */
+@media (hover: hover) {
+  .smbx-edition [data-card-lift]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 48px rgba(26, 24, 20, 0.10);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smbx-edition button,
+  .smbx-edition a,
+  .smbx-edition [data-card-lift] {
+    transition: opacity 160ms ease, color 160ms ease, background-color 160ms ease;
+    transform: none !important;
+  }
+}
+
+/* ─── Mobile collapse — CD designed for 1440 desktop. Grids reflow to
+       single-column under 900px. Uses stable [data-grid] attributes on
+       the canvas components instead of fragile [style*=...] matching. ─── */
+@media (max-width: 900px) {
+  .smbx-edition [data-grid="hero-split"],
+  .smbx-edition [data-grid="upagainst-split"],
+  .smbx-edition [data-grid="recast-split"],
+  .smbx-edition [data-grid="capabilities-row"],
+  .smbx-edition [data-grid="two-up"],
+  .smbx-edition [data-grid="restraint-split"],
+  .smbx-edition [data-grid="loi-split"],
+  .smbx-edition [data-grid="closer-split"],
+  .smbx-edition [data-grid="act-split"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 32px !important;
+  }
+  .smbx-edition [data-grid="changes-row"],
+  .smbx-edition [data-grid="act-frame"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 16px !important;
+  }
+  .smbx-edition [data-grid="personas-row"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .smbx-edition [data-grid="arc-row"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .smbx-edition [data-grid="personas-row"],
+  .smbx-edition [data-grid="capabilities-index"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .smbx-edition [data-grid="upagainst-stats"],
+  .smbx-edition [data-grid="teaser-table"],
+  .smbx-edition [data-grid="pricing-row"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .smbx-edition section {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+}
+
 :root {
-  /* ═══ Stitch V2 palette (marketing pages / external chat) ═══
-     Do not use these for new internal-app work. Internal app uses the
-     Glass Grok tokens below. These remain for marketing compatibility. */
-  --ink: #1a1c1e;
-  --terra: #D44A78;
-  --terra-hover: #90003b;
-  --terra-container: #E8709A;
-  --stone: rgba(0,0,0,0.06);
-  --surface: #f9f9fc;
-  --tint: #f9f9fc;
-  --white: #FFFFFF;
-  --cream: #f3f3f6;
-  --fill: #FFFFFF;
-  --terra-soft: #ffd9de;
-  --terra-glow: rgba(176, 0, 74, 0.12);
-  --text: #1a1c1e;
-  --text-mid: #5d5e61;
-  --muted: #636467;
-  --faint: #8e6f74;
-  --border: rgba(0,0,0,0.08);
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
-  --shadow-card: 0 1px 4px rgba(0,0,0,.06);
-  --shadow-md: 0 2px 10px rgba(0,0,0,.08);
-  --shadow-lg: 0 4px 24px rgba(0,0,0,.10);
-  --sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --headline: 'Sora', 'Inter', system-ui, sans-serif;
-  --serif: 'Sora', sans-serif;
+  /* ═══════════════════════════════════════════════════════════════════
+     SMBX V17 CINEMATIC DESIGN LANGUAGE (2026-04-23)
+     Editorial publication for dealmakers — modeled on
+     claude.com/product/claude-code but warmer. Oat canvas, deep
+     carbon ink, terra cotta as the sacred six-uses-per-page accent.
+     Display type is Sora ExtraBold. Body is Inter.
 
-  /* ═══ Glass Grok tokens — internal app (post-morph) ═══
-     Canonical design system. See memory/architecture_glass_grok.md.
-     Chrome is monochrome; color only enters for content. */
+     Supersedes the interim Cowork pivot (Instrument Serif + Figtree
+     + clay). See architecture_cowork_dl.md for history.
+     ═══════════════════════════════════════════════════════════════════ */
 
-  /* Backgrounds */
-  --bg-app: #F2F2F4;         /* app canvas */
-  --bg-card: #FFFFFF;         /* solid content cards */
-  --bg-subtle: #F5F5F7;       /* chip interior, icon button */
-  --bg-muted: #E8E8EB;        /* deeper fill, dividers */
-  --bg-dark: #0A0A0B;         /* dark-inverted surfaces */
+  /* ─── V17 canvas + ink ──────────────────────────────────────────── */
+  --canvas-warm:     #F4EEE3;              /* oat — primary light bg */
+  --canvas-deep:     #1A1814;              /* carbon — primary dark bg */
+  --canvas-cream:    #FAF6EE;              /* lighter variant for glass */
+  --ink-primary:     #1A1814;
+  --ink-secondary:   #4A4438;
+  --ink-tertiary:    #8A8275;
+  --ink-inverse:     #F4EEE3;              /* primary text on dark */
+  --accent-terra:    #D4714E;              /* sacred accent — 6 uses per page */
+  --accent-terra-hover: #B85A3A;
+  --rule:            rgba(26, 24, 20, 0.08);
+  --rule-warm:       rgba(212, 113, 78, 0.15);
+  --glass-warm:      rgba(244, 238, 227, 0.72);
+  --glass-deep:      rgba(26, 24, 20, 0.72);
 
-  /* Glass (floating chrome only — never on content cards).
-     Three-tier material system, modeled on Apple's Liquid Glass
-     .regular / .clear / .identity. Primary chrome uses regular;
-     secondary chrome that needs to show content bleed uses clear;
-     thin is a near-solid fallback for high-contrast contexts. */
-  --glass-regular: rgba(255,255,255,0.72);  /* tab bar, primary chrome */
-  --glass-clear:   rgba(255,255,255,0.40);  /* secondary, content-bleed */
-  --glass-thin:    rgba(255,255,255,0.90);  /* near-solid, high-contrast */
-  /* Back-compat aliases — existing components still reference these names. */
+  /* ─── Legacy gray ladder — mapped to V17 neutrals ──────────────── */
+  --gray-000: #ffffff;
+  --gray-050: #FAF6EE;
+  --gray-100: #F4EEE3;
+  --gray-150: #E8DFCD;
+  --gray-200: #D8CDB6;
+  --gray-250: #C4B89F;
+  --gray-300: #A8987E;
+  --gray-400: #8A8275;   /* ink-tertiary */
+  --gray-500: #6A6354;
+  --gray-600: #4A4438;   /* ink-secondary */
+  --gray-700: #38332A;
+  --gray-800: #26221C;
+  --gray-850: #1F1C17;
+  --gray-900: #1A1814;   /* ink-primary / canvas-deep */
+  --gray-950: #141210;
+
+  /* ─── Clay aliases (pre-V17) now resolve to terra ──────────────── */
+  --clay: var(--accent-terra);
+  --clay-interactive: var(--accent-terra-hover);
+  --clay-soft: rgba(212,113,78,0.12);
+  --clay-glow: rgba(212,113,78,0.22);
+
+  /* ─── Earth-tone palette for badges, charts, categorization.
+         Use sparingly; clay is the hero. ─── */
+  --cactus: #bcd1ca;   /* sage — success */
+  --mineral: #629987;  /* forest */
+  --olive: #788c5d;
+  --oat: #e3dacc;      /* warm beige */
+  --peach: #ebc9b7;
+  --coral: #ebcece;
+  --fig: #c46686;
+  --plum: #827dbd;
+  --heather: #cbcadb;
+  --sky: #6a9bcc;
+
+  /* ─── V17 surface tokens ───────────────────────────────────────── */
+  /* Page body is canvas-warm (oat). Cards are canvas-cream (lighter).
+     That's the only depth — oat canvas + cream cards + 1px rule borders. */
+  --bg-body: var(--canvas-warm);
+  --bg-app: var(--canvas-warm);
+  --bg-canvas: var(--canvas-warm);
+  --bg-card: var(--canvas-cream);
+  --bg-subtle: var(--canvas-cream);
+  --bg-muted: var(--gray-150);
+  --bg-sunken: var(--gray-200);
+  --bg-dark: var(--canvas-deep);
+
+  /* ─── V17 text ─── */
+  --text-primary: var(--ink-primary);
+  --text-secondary: var(--ink-secondary);
+  --text-muted: var(--ink-tertiary);
+  --text-faint: var(--gray-300);
+  --text-inv: var(--ink-inverse);
+
+  /* ─── Borders ─── */
+  --gg-border: var(--rule);
+  --gg-border-solid: var(--gray-200);
+  --gg-border-strong: var(--gray-250);
+
+  /* ─── Accent ─── */
+  --accent: var(--accent-terra);
+  --accent-hover: var(--accent-terra-hover);
+  --accent-fill: var(--rule-warm);
+
+  /* ─── Glass/frost (kept for chrome compatibility — tinted warm) ─── */
+  --glass-regular: rgba(250,249,245,0.72);
+  --glass-clear:   rgba(250,249,245,0.40);
+  --glass-thin:    rgba(250,249,245,0.90);
   --glass-light: var(--glass-regular);
-  --glass-med: rgba(255,255,255,0.78);
-  --glass-strong: rgba(255,255,255,0.88);
+  --glass-med: rgba(250,249,245,0.78);
+  --glass-strong: rgba(250,249,245,0.88);
 
-  /* Text */
-  --text-primary: #0A0A0B;
-  --text-secondary: #3A3A3E;
-  --text-muted: #6B6B70;
-  --text-faint: #9A9A9F;
-  --text-inv: #FFFFFF;
+  /* ─── Content-level status dots ─── */
+  --dot-ready: var(--mineral);
+  --dot-progress: var(--clay);
+  --dot-flag: #b53333;
+  --dot-draft: var(--gray-400);
 
-  /* Borders */
-  --gg-border: rgba(0,0,0,0.08);
-  --gg-border-solid: #E5E5E7;
-  --gg-border-strong: #D1D1D4;
+  /* ─── Score bands — earth-toned, matches Cowork tag chips ─── */
+  --band-high-bg: #dfeae4;   --band-high-fg: #1f4a3a;
+  --band-med-bg: #f4e4d5;    --band-med-fg: #7a4a1e;
+  --band-low-bg: var(--gray-150);   --band-low-fg: var(--gray-600);
+  --band-flag-bg: #f0d4d4;   --band-flag-fg: #7a1e1e;
 
-  /* Accent (strictly monochrome) */
-  --accent: #0A0A0B;
-  --accent-fill: rgba(10,10,11,0.06);
+  /* ─── V17 Typography ─── */
+  --font-display: 'Sora', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'GT America Mono', ui-monospace, monospace;
+  --font-serif: 'Instrument Serif', Georgia, serif;  /* retained for rare editorial flourishes */
 
-  /* Content-level status (the ONLY color in the system) */
-  --dot-ready: #22A755;
-  --dot-progress: #E8A033;
-  --dot-flag: #DC2626;
-  --dot-draft: #9A9A9F;
+  /* Role aliases. Display = Sora ExtraBold. Body = Inter. */
+  --display: var(--font-display);
+  --headline: var(--font-display);
+  --body: var(--font-sans);
+  --sans: var(--font-sans);
+  --serif: var(--font-serif);
 
-  /* Score band pairs — content-level tint + dark text */
-  --band-high-bg: #DCFCE7;    --band-high-fg: #166534;
-  --band-med-bg: #FEF3C7;     --band-med-fg: #92400E;
-  --band-low-bg: #F1F1F2;     --band-low-fg: #52525B;
-  --band-flag-bg: #FEE2E2;    --band-flag-fg: #991B1B;
+  /* Line-height scale */
+  --lh-display: 1.02;   /* V17 display leading — 96px Sora Bold */
+  --lh-tight: 1.05;
+  --lh-heading: 1.15;
+  --lh-body: 1.45;      /* V17 subhead leading */
+  --lh-long: 1.6;       /* V17 body leading */
 
-  /* Typography (shared with Stitch names but explicit here) */
-  --display: 'Sora', system-ui, -apple-system, sans-serif;
-  --body: 'Inter', system-ui, -apple-system, sans-serif;
+  /* ─── V17 Spacing System (8px base) ───────────────────────────── */
+  --space-section-lg: 160px;   /* between major scroll sections (desktop) */
+  --space-section-md: 112px;
+  --space-section-sm: 80px;
 
-  /* Radius scale */
-  --r-small: 6px;
-  --r-btn: 10px;
-  --r-card-s: 14px;
-  --r-card: 18px;
-  --r-card-lg: 22px;
-  --r-hero: 24px;
-  --r-pill: 999px;
+  --space-block-lg: 64px;      /* between sibling blocks inside a section */
+  --space-block-md: 48px;
+  --space-block-sm: 32px;
 
-  /* Shadows */
-  --shadow-inset-highlight: inset 0 0.5px 0 rgba(255,255,255,1);
-  --shadow-gg-card: 0 1px 3px rgba(0,0,0,0.03), 0 4px 16px rgba(0,0,0,0.04);
+  --space-stack-lg: 32px;      /* headline → subhead */
+  --space-stack-md: 20px;      /* subhead → body */
+  --space-stack-sm: 12px;
+
+  --space-inline-lg: 32px;
+  --space-inline-md: 20px;
+  --space-inline-sm: 12px;
+  --space-inline-xs: 8px;
+
+  /* ─── Radii (Anthropic brand scale) ─── */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: clamp(16px, 2vw, 24px);
+  --radius-2xl: clamp(16px, 3vw, 32px);
+  --radius-pill: 999px;
+  /* Back-compat aliases */
+  --r-small: var(--radius-xs);
+  --r-btn: var(--radius-sm);
+  --r-card-s: var(--radius-md);
+  --r-card: var(--radius-lg);
+  --r-card-lg: var(--radius-xl);
+  --r-hero: var(--radius-xl);
+  --r-pill: var(--radius-pill);
+
+  /* ─── Shadows (soft, warm-tinted — rgba uses the ink color) ─── */
+  --shadow-xs: 0 1px 2px rgba(26,25,24,.04);
+  --shadow-sm: 0 1px 3px rgba(26,25,24,.05);
+  --shadow-md: 0 2px 8px rgba(26,25,24,.06), 0 1px 2px rgba(26,25,24,.04);
+  --shadow-lg: 0 8px 24px rgba(26,25,24,.08), 0 2px 4px rgba(26,25,24,.04);
+  --shadow-xl: 0 16px 48px rgba(26,25,24,.10), 0 4px 8px rgba(26,25,24,.05);
+  --shadow-card: var(--shadow-sm);
+  --shadow-gg-card: var(--shadow-sm);
   --shadow-glass: inset 0 0.5px 0 rgba(255,255,255,0.9),
-                  0 6px 24px rgba(0,0,0,0.08),
-                  0 1px 3px rgba(0,0,0,0.05);
+                  0 6px 24px rgba(26,25,24,0.08),
+                  0 1px 3px rgba(26,25,24,0.05);
   --shadow-primary-btn: inset 0 0.5px 0 rgba(255,255,255,0.15),
-                        0 1px 3px rgba(0,0,0,0.15);
+                        0 1px 3px rgba(26,25,24,0.15);
+  --shadow-inset-highlight: inset 0 0.5px 0 rgba(255,255,255,1);
+
+  /* ═══════════════════════════════════════════════════════════════════
+     Legacy alias block — components that reference --terra, --ink,
+     --cream, --surface, --text, etc. inherit Cowork values here.
+     Keep until a full sweep is done; safe to leave forever.
+     ═══════════════════════════════════════════════════════════════════ */
+  --ink: var(--gray-900);
+  --terra: var(--clay);
+  --terra-hover: var(--clay-interactive);
+  --terra-container: var(--clay);
+  --terra-soft: var(--clay-soft);
+  --terra-glow: var(--clay-glow);
+  --stone: var(--gg-border);
+  --surface: var(--gray-050);
+  --tint: var(--gray-100);
+  --white: var(--gray-000);
+  --cream: var(--gray-150);
+  --fill: var(--gray-000);
+  --text: var(--gray-900);
+  --text-mid: var(--gray-600);
+  --muted: var(--gray-500);
+  --faint: var(--gray-400);
+  --border: var(--gg-border);
 }
 
 /* ═══ Liquid Glass pill — structural sheen + interactive lift ═══
@@ -297,28 +1206,15 @@ html.dark .ghost-border { border-color: rgba(255, 255, 255, 0.06); }
   .gg-glass-pill.is-interactive:active { transform: none; }
 }
 
-/* ═══ SITE BACKGROUND ═══
-   Marketing / external journey pages: medium charcoal (#2A2C2E) with a
-   subtle noise texture — the "table" on which darker near-black cards
-   (sidebar, canvas) float.
-
-   Internal app (PWA standalone, post-morph): Glass Grok --bg-app (#F2F2F4),
-   solid, no noise. See the @media (display-mode: standalone) override below. */
+/* ═══ SITE BACKGROUND — Cowork DL ═══
+   Body sits on the darker cream --bg-body (#e8e6dc). Canvas cards set
+   their own bright --bg-canvas fill, which lifts visibly off the body
+   to create real depth — the Cowork/Claude Design "floating card on
+   darker backdrop" effect. No noise. */
 html, body {
   width: 100%;
-  background-color: #2A2C2E !important;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
-  background-repeat: repeat;
-}
-
-/* Glass Grok app canvas — installed PWA overrides the marketing charcoal
-   with the monochrome Grok-inspired light grey (--bg-app). No noise. */
-@media (display-mode: standalone) {
-  html, body {
-    background-color: var(--bg-app) !important;
-    background-image: none !important;
-  }
+  background-color: var(--bg-body) !important;
+  background-image: none;
 }
 /* Default: natural document flow for landing/journey pages */
 #root {
@@ -463,28 +1359,55 @@ html, body {
   }
 }
 html.dark {
-  --ink: #f0f0f2;
-  --text: #f0f0f2;
-  --text-mid: #a0a0a3;
-  --muted: #9a9a9e;
-  --faint: #b09a9e;
-  --surface: #0f1012;
-  --tint: #1a1c1e;
-  --white: #2f3133;
-  --cream: #232527;
-  --fill: #2f3133;
-  --stone: rgba(255,255,255,0.06);
-  --border: rgba(255,255,255,0.08);
-  --terra-soft: rgba(176, 0, 74, 0.15);
-  --terra-glow: rgba(176, 0, 74, 0.18);
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.2);
-  --shadow-card: 0 1px 4px rgba(0,0,0,.3);
-  --shadow-md: 0 2px 10px rgba(0,0,0,.4);
-  --shadow-lg: 0 4px 24px rgba(0,0,0,.5);
-}
-html.dark {
-  /* Body bg + noise are set once at the top of this file (always dark).
-     Only set color-scheme here for native UI in dark mode. */
+  /* V17 dark — warm carbon ladder. Body is the deepest, canvas steps
+     up, cards lightest of the dark tier. */
+  --bg-body: var(--gray-950);
+  --bg-app: var(--canvas-deep);
+  --bg-canvas: var(--canvas-deep);
+  --bg-card: var(--gray-850);
+  --bg-subtle: var(--gray-800);
+  --bg-muted: var(--gray-800);
+  --bg-sunken: var(--gray-950);
+
+  --text-primary: #f5f4ed;
+  --text-secondary: #dedcd1;
+  --text-muted: var(--gray-400);
+  --text-faint: var(--gray-500);
+
+  --gg-border: rgba(245,244,237,0.08);
+  --gg-border-solid: #30302e;
+  --gg-border-strong: #3d3d3a;
+
+  --glass-regular: rgba(26,25,24,0.72);
+  --glass-clear: rgba(26,25,24,0.40);
+  --glass-thin: rgba(26,25,24,0.90);
+
+  --clay-soft: rgba(212,113,78,0.16);
+  --clay-glow: rgba(212,113,78,0.28);
+
+  /* Legacy aliases — dark variants */
+  --ink: #f5f4ed;
+  --text: #f5f4ed;
+  --text-mid: #dedcd1;
+  --muted: var(--gray-400);
+  --faint: var(--gray-500);
+  --surface: var(--gray-900);
+  --tint: var(--gray-850);
+  --white: var(--gray-800);
+  --cream: var(--gray-800);
+  --fill: var(--gray-850);
+  --stone: rgba(245,244,237,0.06);
+  --border: rgba(245,244,237,0.08);
+  --terra-soft: var(--clay-soft);
+  --terra-glow: var(--clay-glow);
+
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.35);
+  --shadow-md: 0 2px 8px rgba(0,0,0,.4);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,.5);
+  --shadow-xl: 0 16px 48px rgba(0,0,0,.55);
+  --shadow-card: var(--shadow-sm);
+
   color-scheme: dark;
 }
 html.dark #root {
@@ -511,19 +1434,19 @@ input[type="range"]::-webkit-slider-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #D44A78;
+  background: var(--clay);
   cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  border: 2px solid var(--bg-card);
+  box-shadow: 0 1px 4px rgba(26,25,24,0.15);
 }
 input[type="range"]::-moz-range-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #D44A78;
+  background: var(--clay);
   cursor: pointer;
-  border: 2px solid white;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  border: 2px solid var(--bg-card);
+  box-shadow: 0 1px 4px rgba(26,25,24,0.15);
 }
 @media (max-width: 767px) {
   input[type="range"] {
@@ -598,16 +1521,141 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: var(--ink);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  color: var(--text-primary);
+  background-color: var(--bg-app);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'kern' 1;
+  text-rendering: optimizeLegibility;
 }
 
-/* Stitch V2 editorial title class */
+/* V17 display utility — Sora ExtraBold with stylistic alternates for
+   editorial feel. Use on hero + major section headlines. */
+.v17-display,
 .editorial-title {
-  font-family: 'Sora', sans-serif;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: var(--lh-display);
+  font-feature-settings: 'ss01', 'cv01', 'cv11', 'kern' 1;
+  text-wrap: balance;
+}
+
+/* V17 section headline — mid-tier display (56–64px) */
+.v17-section-heading {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+/* V17 subhead — Inter 22px, generous leading, cap width */
+.v17-subhead {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: var(--lh-body);
+  letter-spacing: -0.01em;
+  color: var(--ink-secondary);
+  max-width: 640px;
+  text-wrap: pretty;
+}
+
+/* V17 eyebrow — uppercase label above headlines */
+.v17-eyebrow {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-tertiary);
+  margin-bottom: 16px;
+  display: inline-block;
+}
+
+.v17-eyebrow--terra {
+  color: var(--accent-terra);
+}
+
+/* V17 body copy — Inter 17px, reading width */
+.v17-body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: var(--lh-long);
+  color: var(--ink-primary);
+  max-width: 580px;
+  text-wrap: pretty;
+}
+
+.v17-caption {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-tertiary);
+}
+
+.v17-meta {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--ink-tertiary);
+}
+
+.v17-mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Un-blur reveal — brief's signature scroll-into-view transition.
+   4px Gaussian blur resolves to 0 over 400ms with spring easing +
+   8px Y translate. Apply via [data-v17-reveal] attribute. */
+@keyframes v17-reveal {
+  from { opacity: 0; filter: blur(4px); transform: translateY(8px); }
+  to   { opacity: 1; filter: blur(0);  transform: translateY(0); }
+}
+[data-v17-reveal] {
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(8px);
+}
+[data-v17-reveal][data-v17-revealed='true'] {
+  animation: v17-reveal 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-v17-reveal] {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    animation: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   V17 dark-bleed slide-over reveal — each full-width dark section
+   (Spine, Consolidation) slides UP from below as it enters the
+   viewport, literally covering the preceding content.
+
+   Implementation: scroll-linked. A rAF loop in HomeCanvas writes
+   --bleed-reveal (0 → 1) on each .v17-dark-bleed element based on
+   its scroll position. Here we map that to translateY(50vh → 0) so
+   the section rolls up over the content that came before it. This is
+   a faithful approximation of `animation-timeline: view()` without
+   relying on that API (Firefox still doesn't ship it). Reduced-motion
+   users get the resting state immediately.
+   ═══════════════════════════════════════════════════════════════════ */
+/* Dark-bleed sections sit in their natural flow. Earlier attempts at
+   a scroll-linked translateY were colliding with position: sticky and
+   causing huge vertical gaps. Keeping it simple and correct. */
+.v17-dark-bleed {
+  transform: none;
 }
 
 /* Glass panel for nav/overlays */
@@ -733,7 +1781,7 @@ html.dark .glass-panel {
 
 /* Tinted depth zone behind dock card (applied by parent) */
 .dock-depth-zone {
-  background: #FAFAFA;
+  background: var(--bg-subtle);
   border-radius: 24px;
   padding: 12px;
 }
@@ -763,142 +1811,210 @@ html.dark .glass-panel {
   border-radius: 12px; border: none; background: transparent; width: 100%;
   font-family: inherit; cursor: pointer; transition: background 0.15s; text-align: left;
 }
-.home-tp-item:hover { background: #FAFAFA; }
+.home-tp-item:hover { background: var(--bg-subtle); }
 .home-tp-item:active { background: #E8E5E0; }
-.home-tp-item svg { width: 20px; height: 20px; color: #D44A78; flex-shrink: 0; margin-top: 1px; }
+.home-tp-item svg { width: 20px; height: 20px; color: var(--clay); flex-shrink: 0; margin-top: 1px; }
 
 /* Dock outer wrapper */
 .dock-outer {
-  background: #fff;
-  border-color: rgba(0,0,0,0.06);
+  background: var(--bg-card);
+  border-color: var(--gg-border);
 }
 .dark .dock-outer {
-  background: #1a1c1e;
-  border-color: rgba(255,255,255,0.06);
+  background: var(--gray-850);
+  border-color: rgba(245,244,237,0.08);
 }
 
-/* Hero pill variant — overrides inline styles removed from component */
+/* Hero pill — Cowork cream surface with a warm border.
+   Refined 2026-04-25 to match Claude Design's editorial chat composer:
+   true white pill on cream wash, warm 1px hairline (#E8E6DC), soft
+   single-layer shadow. The previous double-shadow read as floating
+   chrome; CD's reads as paper. */
 .dock-hero-pill {
-  background: #fff;
-  border: 1.5px solid rgba(0,0,0,0.18);
-  box-shadow: 0 6px 32px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  background: #FFFFFF;
+  border: 1px solid #E8E6DC;
+  box-shadow: 0 1px 2px rgba(26,24,20,0.04), 0 8px 24px rgba(26,24,20,0.05);
+  transition: box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 220ms ease;
+}
+.dock-hero-pill:focus-within {
+  box-shadow: 0 1px 2px rgba(26,24,20,0.04), 0 16px 36px rgba(26,24,20,0.08);
+  border-color: #D8D2C2;
 }
 .dark .dock-hero-pill {
-  background: #151617;
-  border-color: rgba(255,255,255,0.1);
+  background: var(--gray-850);
+  border-color: rgba(245,244,237,0.1);
   box-shadow: 0 6px 32px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.25);
 }
 .dock-hero-pill textarea {
-  color: #1a1c1e;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
 }
 .dark .dock-hero-pill textarea {
-  color: #f0f0f3 !important;
+  color: #f5f4ed !important;
 }
 .dock-hero-pill textarea::placeholder {
-  color: rgba(0,0,0,0.45);
+  color: #B5AE9F; /* ink-quaternary — warmer, softer than text-muted */
 }
 .dark .dock-hero-pill textarea::placeholder {
-  color: rgba(255,255,255,0.4) !important;
+  color: rgba(245,244,237,0.4) !important;
 }
 
-/* ═══ CHAT-PANE FORCED DARK ═══
-   The chat pill and pane are always dark-mode styled regardless
-   of the user's light/dark toggle — near-black (#151617) to
-   contrast against the lighter #2A2C2E body. */
+/* ═══ CHAT-PANE FORCED DARK (Cowork warm-dark) ═══
+   Used by specific chat surfaces that want the inverted treatment
+   regardless of the global theme toggle. Warm near-black (gray-900) ─
+   never cool. */
 .force-chat-dark .dock-hero-pill {
-  background: #151617 !important;
-  border: 1.5px solid rgba(255,255,255,0.1) !important;
+  background: var(--gray-900) !important;
+  border: 1px solid rgba(245,244,237,0.1) !important;
   box-shadow: 0 6px 32px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.25) !important;
 }
 .force-chat-dark .dock-hero-pill textarea {
-  color: #f0f0f3 !important;
+  color: #f5f4ed !important;
 }
 .force-chat-dark .dock-hero-pill textarea::placeholder {
-  color: rgba(255,255,255,0.4) !important;
+  color: rgba(245,244,237,0.4) !important;
 }
 .force-chat-dark .home-dock-card {
-  background: #151617 !important;
-  border-color: rgba(255,255,255,0.08) !important;
+  background: var(--gray-900) !important;
+  border-color: rgba(245,244,237,0.08) !important;
 }
 .force-chat-dark .home-dock-card textarea {
-  color: #f0f0f3 !important;
+  color: #f5f4ed !important;
 }
 .force-chat-dark .home-dock-card textarea::placeholder {
-  color: rgba(255,255,255,0.4) !important;
+  color: rgba(245,244,237,0.4) !important;
 }
 .force-chat-dark .dock-plus-btn {
-  background: rgba(255,255,255,0.06) !important;
-  border-color: rgba(255,255,255,0.1) !important;
-  color: rgba(255,255,255,0.6) !important;
+  background: rgba(245,244,237,0.06) !important;
+  border-color: rgba(245,244,237,0.1) !important;
+  color: rgba(245,244,237,0.6) !important;
 }
 
-/* ═══ CHATDOCK DARK MODE ═══ */
+/* ═══ CHATDOCK DARK MODE — Cowork warm-dark ═══ */
 .dark .home-dock-card {
-  background: #151617;
-  border-color: rgba(255,255,255,0.08);
+  background: var(--gray-850);
+  border-color: rgba(245,244,237,0.08);
 }
 .dark .home-dock-card:focus-within {
-  border-color: rgba(255,255,255,0.2);
+  border-color: rgba(245,244,237,0.2);
 }
 .dark .home-dock-card textarea {
-  color: #f0f0f3 !important;
+  color: #f5f4ed !important;
 }
 .dark .home-dock-card textarea::placeholder {
-  color: rgba(255,255,255,0.4) !important;
+  color: rgba(245,244,237,0.4) !important;
 }
 .dark .home-tools-popup,
 .force-chat-dark .home-tools-popup {
-  background: rgba(26, 28, 30, 0.82);
+  background: rgba(38,38,36,0.82);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-color: rgba(255,255,255,0.08);
+  border-color: rgba(245,244,237,0.08);
   box-shadow: 0 4px 24px rgba(0,0,0,.4);
 }
 .dark .home-tp-item:hover,
-.force-chat-dark .home-tp-item:hover { background: rgba(255,255,255,0.06); }
+.force-chat-dark .home-tp-item:hover { background: rgba(245,244,237,0.06); }
 .dark .home-tp-item:active,
-.force-chat-dark .home-tp-item:active { background: rgba(255,255,255,0.1); }
+.force-chat-dark .home-tp-item:active { background: rgba(245,244,237,0.1); }
 .dark .home-tp-item .text-\[15px\].font-semibold,
-.force-chat-dark .home-tp-item .text-\[15px\].font-semibold { color: #f0f0f3; }
+.force-chat-dark .home-tp-item .text-\[15px\].font-semibold { color: #f5f4ed; }
 /* Dock textarea inner bg */
-.dock-textarea-bg { background: #F5F5F3; }
-.dark .dock-textarea-bg { background: rgba(255,255,255,0.06); }
+.dock-textarea-bg { background: var(--bg-subtle); }
+.dark .dock-textarea-bg { background: rgba(245,244,237,0.06); }
 /* Dock plus button */
-.dock-plus-btn { background: #fff; color: rgba(0,0,0,0.6); }
-.dock-plus-btn:hover { background: #F5F5F5; color: rgba(0,0,0,0.85); }
-.dark .dock-plus-btn { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
-.dark .dock-plus-btn:hover { background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.95); }
+.dock-plus-btn { background: var(--bg-card); color: var(--text-muted); }
+.dock-plus-btn:hover { background: var(--bg-subtle); color: var(--text-primary); }
+.dark .dock-plus-btn { background: rgba(245,244,237,0.08); color: rgba(245,244,237,0.7); }
+.dark .dock-plus-btn:hover { background: rgba(245,244,237,0.14); color: rgba(245,244,237,0.95); }
 
 /* Home chat input — focus border */
 .home-input-wrap { transition: border-color 200ms; }
 .home-input-wrap:focus-within {
-  border-color: rgba(0,0,0,0.18) !important;
+  border-color: var(--gg-border-strong) !important;
 }
 
 /* ═══ AUTHENTICATED COMPONENT STYLES ═══ */
 
-/* Gate stepper pulse */
+/* Gate stepper pulse — clay */
 @keyframes gatePulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(176, 0, 74,.3); }
-  50% { box-shadow: 0 0 0 4px rgba(176, 0, 74,.1); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212,113,78,.35); }
+  50% { box-shadow: 0 0 0 4px rgba(212,113,78,.1); }
 }
 
-/* Canvas content styles */
-.canvas-md h1 { font-size: 20px; font-weight: 700; color: #0D0D0D; margin: 1.5em 0 0.5em; padding-bottom: 6px; border-bottom: 2px solid #D44A78; }
-.canvas-md h2 { font-size: 16px; font-weight: 700; color: #3D3B37; margin: 1.2em 0 0.4em; }
-.canvas-md h3 { font-size: 14px; font-weight: 600; color: #6E6A63; margin: 1em 0 0.3em; }
-.canvas-md p { font-size: 14px; line-height: 1.7; color: #3D3B37; margin: 0.6em 0; }
-.canvas-md ul, .canvas-md ol { font-size: 14px; line-height: 1.7; padding-left: 24px; color: #3D3B37; }
-.canvas-md li { margin: 0.3em 0; }
-.canvas-md strong { color: #0D0D0D; }
-.canvas-md table { border-collapse: collapse; width: 100%; margin: 12px 0; border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; overflow: hidden; }
-.canvas-md th { background: #F5F5F5; text-align: left; padding: 8px 12px; font-size: 12px; font-weight: 600; color: #3D3B37; border-bottom: 1px solid rgba(0,0,0,0.08); }
-.canvas-md td { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid #EBE7DF; }
-.canvas-md blockquote { border-left: 3px solid #D44A78; margin: 1em 0; padding: 0.5em 1em; background: #FFF8F5; border-radius: 0 8px 8px 0; }
-.canvas-md code { background: #F5F5F5; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
-.canvas-md pre { background: #F5F5F5; padding: 16px; border-radius: 8px; overflow-x: auto; }
+/* Canvas content — editorial rhythm. Serif headings echo Cowork's type pairing
+   (Instrument Serif display over Figtree body). Headings drop their colored
+   underline in favor of a generous vertical rhythm. */
+.canvas-md h1 {
+  font-family: var(--font-serif);
+  font-size: 28px; font-weight: 400; letter-spacing: -0.01em;
+  line-height: var(--lh-display); color: var(--text-primary);
+  margin: 1.6em 0 0.5em; text-wrap: balance;
+}
+.canvas-md h2 {
+  font-family: var(--font-serif);
+  font-size: 22px; font-weight: 400; letter-spacing: -0.005em;
+  line-height: var(--lh-heading); color: var(--text-primary);
+  margin: 1.4em 0 0.4em; text-wrap: balance;
+}
+.canvas-md h3 {
+  font-family: var(--font-sans);
+  font-size: 15px; font-weight: 600; letter-spacing: -0.005em;
+  color: var(--text-primary); margin: 1.2em 0 0.3em;
+  text-transform: uppercase; font-feature-settings: 'ss01' 1;
+}
+.canvas-md p {
+  font-family: var(--font-sans);
+  font-size: 15px; line-height: var(--lh-long);
+  color: var(--text-secondary); margin: 0.8em 0;
+  text-wrap: pretty;
+}
+.canvas-md ul, .canvas-md ol {
+  font-family: var(--font-sans);
+  font-size: 15px; line-height: var(--lh-long);
+  padding-left: 24px; color: var(--text-secondary);
+}
+.canvas-md li { margin: 0.4em 0; }
+.canvas-md strong { color: var(--text-primary); font-weight: 600; }
+.canvas-md table {
+  border-collapse: collapse; width: 100%; margin: 16px 0;
+  border: 1px solid var(--gg-border-solid); border-radius: var(--radius-md);
+  overflow: hidden; font-variant-numeric: tabular-nums;
+}
+.canvas-md th {
+  background: var(--bg-muted); text-align: left;
+  padding: 10px 14px; font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--gg-border-solid);
+}
+.canvas-md td {
+  padding: 10px 14px; font-size: 14px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--gg-border);
+}
+.canvas-md blockquote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  border-left: 2px solid var(--clay);
+  margin: 1.2em 0; padding: 0.2em 1.2em;
+  color: var(--text-primary);
+  font-size: 18px; line-height: 1.5;
+}
+.canvas-md code {
+  font-family: var(--font-mono);
+  background: var(--bg-muted); padding: 2px 6px;
+  border-radius: var(--radius-xs); font-size: 13px;
+  color: var(--text-primary);
+}
+.canvas-md pre {
+  font-family: var(--font-mono);
+  background: var(--bg-muted); padding: 16px;
+  border-radius: var(--radius-md); overflow-x: auto;
+  border: 1px solid var(--gg-border);
+}
 .canvas-md pre code { background: none; padding: 0; }
-.canvas-md hr { border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 1.5em 0; }
+.canvas-md hr { border: none; border-top: 1px solid var(--gg-border); margin: 2em 0; }
 
 /* Spinner */
 @keyframes spin {
@@ -932,9 +2048,9 @@ input[type="range"]::-webkit-slider-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #D44A78;
-  border: 3px solid #fff;
-  box-shadow: 0 2px 8px rgba(176, 0, 74, 0.35);
+  background: var(--clay);
+  border: 3px solid var(--bg-card);
+  box-shadow: 0 2px 8px rgba(212,113,78,0.35);
   cursor: pointer;
   transition: transform 0.15s;
 }
@@ -947,9 +2063,9 @@ input[type="range"]::-moz-range-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #D44A78;
-  border: 3px solid #fff;
-  box-shadow: 0 2px 8px rgba(176, 0, 74, 0.35);
+  background: var(--clay);
+  border: 3px solid var(--bg-card);
+  box-shadow: 0 2px 8px rgba(212,113,78,0.35);
   cursor: pointer;
 }
 
@@ -1063,12 +2179,13 @@ button:active:not(:disabled), [role="button"]:active {
   box-shadow: none;
 }
 
-/* Terra cotta accent button glow on hover */
+/* Clay accent button glow on hover (was "terra-btn" — kept class name for
+   back-compat; glow now clay-toned). */
 .terra-btn:hover {
-  box-shadow: 0 2px 12px rgba(176, 0, 74,0.25);
+  box-shadow: 0 2px 12px rgba(212,113,78,0.28);
 }
 .terra-btn:active {
-  box-shadow: 0 1px 4px rgba(176, 0, 74,0.15);
+  box-shadow: 0 1px 4px rgba(212,113,78,0.18);
 }
 
 /* Conversation list item hover */
@@ -1090,13 +2207,13 @@ button:active:not(:disabled), [role="button"]:active {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Send button pulse when input has content */
+/* Send button pulse when input has content — clay glow */
 .send-ready {
   animation: sendPulse 2s ease infinite;
 }
 @keyframes sendPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(176, 0, 74,0.3); }
-  50% { box-shadow: 0 0 0 6px rgba(176, 0, 74,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212,113,78,0.32); }
+  50% { box-shadow: 0 0 0 6px rgba(212,113,78,0); }
 }
 
 /* Smooth scrollbar styling */
@@ -1150,17 +2267,17 @@ button:active:not(:disabled), [role="button"]:active {
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-/* Terra CTA button glow on hover */
+/* Clay CTA button glow on hover */
 .cta-glow {
   transition: all 250ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .cta-glow:hover {
-  box-shadow: 0 4px 20px rgba(176, 0, 74,0.35);
+  box-shadow: 0 4px 20px rgba(212,113,78,0.38);
   transform: translateY(-1px);
 }
 .cta-glow:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(176, 0, 74,0.25);
+  box-shadow: 0 2px 8px rgba(212,113,78,0.28);
 }
 
 /* FAQ accordion smooth expand/collapse */
@@ -1187,7 +2304,7 @@ button:active:not(:disabled), [role="button"]:active {
   right: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(to right, #D44A78, #E8709A);
+  background: linear-gradient(to right, var(--clay), var(--clay-interactive));
   z-index: 100;
   transform-origin: left;
   will-change: transform;
@@ -1348,8 +2465,8 @@ button:active:not(:disabled), [role="button"]:active {
 }
 .force-chat-dark .chat-pill-mobile-container,
 .dark .chat-pill-mobile-container {
-  background: rgba(20,22,24,0.72);
-  border-top: 1px solid rgba(255,255,255,0.08);
+  background: rgba(26,25,24,0.72);  /* warm near-black */
+  border-top: 1px solid rgba(245,244,237,0.08);
 }
 
 /* Mobile text rendering — crisp on retina */
