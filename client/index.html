@@ -12,63 +12,22 @@
          safe-area padding everywhere content ends. -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, interactive-widget=resizes-content" />
     <link rel="manifest" href="/manifest.json" />
-    <title>Sell or Buy Any Business, Anywhere — smbx.ai</title>
-    <meta name="description" content="AI deal advisory from valuation to close. Sell, buy, raise capital, or integrate. Start free." />
-    <meta property="og:title" content="smbx.ai — AI Deal Advisory" />
-    <meta property="og:description" content="AI deal advisory from valuation to close. Sell, buy, raise capital, or integrate. Start free." />
+    <title>smbx.ai — M&amp;A workspace</title>
+    <meta name="description" content="Yulia is the deal team you hire. M&amp;A deal work end-to-end — recasts, baselines, buyer lists, IOIs. $149/mo flat. No success fees, ever." />
+    <meta property="og:title" content="smbx.ai — M&amp;A workspace" />
+    <meta property="og:description" content="Yulia is the deal team you hire. M&amp;A deal work end-to-end. $149/mo flat. No success fees, ever." />
     <meta property="og:type" content="website" />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#F4EEE3" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#F6F7F9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <!-- Status bar: "default" pairs with a light theme-color. iOS paints
-         the status-bar region with theme-color since we dropped
-         viewport-fit=cover, so no PWA chrome conflict. -->
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script>
-      // Resolve dark mode + body color before first paint to prevent any flash
-      // and to make the iOS Safari toolbar (and PWA chin / home-indicator
-      // area, which iOS fills with theme-color) match the visible page.
-      //
-      // Cowork DL (2026-04-23): body sits on the darker cream --bg-body
-      // (#e8e6dc) so canvas cards lift visibly off it. Dark mode inverts —
-      // body is the darkest layer (gray-950).
-      (function() {
-        var stored = localStorage.getItem('smbx-theme'); // 'light' | 'dark' | null
-        var isDark = stored === 'dark';
-
-        if (isDark) {
-          document.documentElement.classList.add('dark');
-          document.documentElement.style.colorScheme = 'dark';
-        }
-
-        var color = isDark ? '#1A1814' : '#F4EEE3';
-
-        var metas = document.querySelectorAll('meta[name="theme-color"]');
-        metas.forEach(function(m) { m.setAttribute('content', color); });
-
-        // Set the body/html bg directly so the very first paint matches.
-        document.documentElement.style.backgroundColor = color;
-        // Body element doesn't exist yet at this point in the head, so we set it
-        // when the body is parsed via a one-shot observer.
-        if (document.body) {
-          document.body.style.backgroundColor = color;
-        } else {
-          document.addEventListener('DOMContentLoaded', function() {
-            document.body.style.backgroundColor = color;
-          });
-        }
-
-        // Favicon: dark X for light mode, white X for dark mode
-        function setFavicon(dark) {
-          var link = document.querySelector('link[rel="icon"]');
-          if (link) link.href = dark ? '/X-white.png' : '/X.png';
-        }
-        setFavicon(isDark);
-        window.__setFavicon = setFavicon;
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-          if (!localStorage.getItem('smbx-theme')) setFavicon(e.matches);
-        });
-      })();
+      // V3: light-only. Set body bg before first paint to avoid any flash.
+      document.documentElement.style.backgroundColor = '#F6F7F9';
+      if (document.body) document.body.style.backgroundColor = '#F6F7F9';
+      else document.addEventListener('DOMContentLoaded', function() {
+        document.body.style.backgroundColor = '#F6F7F9';
+      });
     </script>
     <!-- Site-wide Organization + SoftwareApplication schema. Per-page
          FAQPage / BreadcrumbList are injected by usePageMeta. -->
@@ -111,11 +70,8 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/pwa-icon-180-dark.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Cowork DL fonts (2026-04-23): Instrument Serif = editorial display (Anthropic Serif analog);
-         Figtree = warm humanist sans (Anthropic Sans analog); JetBrains Mono = data.
-         Sora/Inter/Poppins/Caveat kept for back-compat — legacy components still reference them. -->
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <!-- V3 fonts: Inter Tight = display, Inter = body, JetBrains Mono = data/microlabels. -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
