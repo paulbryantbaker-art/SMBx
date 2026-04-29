@@ -12,9 +12,10 @@
  * while the new journey direction is built. The only content inside the
  * canvas is a quiet placeholder + a hint that users can still chat.
  */
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import type { DealTab } from '../deal-room';
 import JourneyShell from '../shell/JourneyShell';
+import { useRevealOnScroll } from '../../../hooks/useRevealOnScroll';
 
 export interface BlankJourneyProps {
   active: DealTab;
@@ -35,6 +36,15 @@ export default function BlankJourney({
   active, onSend, onStartFree, onNavigate, onSignIn,
   title, kicker, badge, children,
 }: Props) {
+  const heroRef = useRef<HTMLDivElement>(null);
+  useRevealOnScroll(heroRef, {
+    selector: '[data-reveal]',
+    stagger: 0.12,
+    y: 16,
+    duration: 0.7,
+    ease: 'power3.out',
+    start: 'top 100%',
+  });
   return (
     <JourneyShell
       active={active}
@@ -60,44 +70,48 @@ export default function BlankJourney({
       }}
     >
       <div
+        ref={heroRef}
         style={{
           minHeight: 360,
           padding: '96px 32px',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
           textAlign: 'center',
-          fontFamily: 'Inter, system-ui, sans-serif',
-          color: '#6B6B70',
+          fontFamily: 'Figtree, system-ui, sans-serif',
+          color: '#87867f',
         }}
       >
         <div style={{ maxWidth: 520 }}>
           <div
+            data-reveal
             style={{
               fontFamily: 'JetBrains Mono, ui-monospace, monospace',
               fontSize: 11,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
-              fontWeight: 700,
-              color: '#C7616F',
-              marginBottom: 12,
+              fontWeight: 600,
+              color: '#D4714E',
+              marginBottom: 14,
             }}
           >
             Blank canvas
           </div>
           <h1
+            data-reveal
             style={{
-              fontFamily: 'Sora, sans-serif',
-              fontWeight: 800,
-              fontSize: 44,
-              letterSpacing: '-0.025em',
+              fontFamily: 'Instrument Serif, Georgia, serif',
+              fontWeight: 400,
+              fontSize: 56,
+              letterSpacing: '-0.015em',
               lineHeight: 1.08,
-              color: '#0A0A0B',
-              margin: '0 0 14px',
+              color: '#1a1918',
+              margin: '0 0 18px',
+              textWrap: 'balance',
             }}
           >
             {title}
           </h1>
-          <p style={{ fontSize: 15, lineHeight: 1.55, margin: 0 }}>
+          <p data-reveal style={{ fontSize: 16, lineHeight: 1.6, margin: 0, textWrap: 'pretty' }}>
             This page is being rebuilt from scratch. Chat with Yulia in the left column — she's fully operational while the new marketing content is in flight.
           </p>
           {children}

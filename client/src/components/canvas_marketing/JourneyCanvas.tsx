@@ -32,7 +32,38 @@
  * scripts). Only the rendering shell is replaced.
  */
 
-import { useCallback, useEffect, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+
+/* Scroll-reveal observer — adds `is-visible` to [data-reveal] elements
+   when they enter viewport. Above-fold elements reveal immediately so
+   the page doesn't flicker. CSS layer respects prefers-reduced-motion. */
+function useScrollReveal(rootRef: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    if (typeof IntersectionObserver === 'undefined') return;
+    const targets = root.querySelectorAll<HTMLElement>('[data-reveal]');
+    if (targets.length === 0) return;
+    const reveal = (el: HTMLElement) => el.classList.add('is-visible');
+    const aboveFold = window.innerHeight * 0.85;
+    targets.forEach((el) => {
+      if (el.getBoundingClientRect().top < aboveFold) reveal(el);
+    });
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            reveal(e.target as HTMLElement);
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { rootMargin: '0px 0px -10% 0px' },
+    );
+    targets.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [rootRef]);
+}
 
 export type PersonaId =
   | 'searcher'
@@ -352,12 +383,15 @@ export default function JourneyCanvas({ persona, onPersonaChange, onSend }: Prop
   );
 
   const t = DATA[active] ?? DATA.searcher;
+  const rootRef = useRef<HTMLDivElement>(null);
+  useScrollReveal(rootRef);
 
   return (
     <div
+      ref={rootRef}
       className="smbx-edition v23c"
       style={{
-        background: 'var(--canvas-warm)',
+        background: 'transparent',
         color: 'var(--ink-primary)',
         fontFamily: 'var(--font-body)',
         minHeight: '100%',
@@ -369,16 +403,8 @@ export default function JourneyCanvas({ persona, onPersonaChange, onSend }: Prop
         style={{
           position: 'relative',
           background: 'var(--canvas-paper)',
-          borderRadius: 12,
-          margin: '8px 16px 32px 0',
-          boxShadow: [
-            'inset 0 1px 0 rgba(255, 255, 255, 0.65)',
-            '0 1px 0 rgba(26, 24, 20, 0.04)',
-            '0 6px 14px rgba(26, 24, 20, 0.05)',
-            '0 16px 36px rgba(26, 24, 20, 0.08)',
-            '0 36px 60px -16px rgba(26, 24, 20, 0.14)',
-            '0 56px 96px -28px rgba(26, 24, 20, 0.10)',
-          ].join(', '),
+          borderRadius: '0 0 12px 12px',
+          margin: '0 16px 32px 0',
         }}
       >
         <PersonaTabBar active={active} onChange={handleChange} />
@@ -389,8 +415,8 @@ export default function JourneyCanvas({ persona, onPersonaChange, onSend }: Prop
         <SixMonthsIn t={t} />
         <PricingPointer t={t} />
         <FinalCTA t={t} onSend={onSend} />
-        <SiteFooter />
       </div>
+      <SiteFooter />
     </div>
   );
 }
@@ -541,14 +567,14 @@ function PersonaTabBar({ active, onChange }: { active: PersonaId; onChange: (p: 
 /* ─────────────────── 1. Hero ─────────────────── */
 function Hero({ t, onSend }: { t: PersonaContent; onSend: (msg: string) => void }) {
   return (
-    <section style={{ padding: `96px ${SECTION_PAD} 72px` }}>
+    <section data-reveal style={{ padding: `120px ${SECTION_PAD} 88px` }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={eyebrowStyle()}>{t.tag}</div>
         <h1
           style={{
             fontFamily: 'var(--font-display)',
             fontWeight: 800,
-            fontSize: 'clamp(40px, 5.4vw, 72px)',
+            fontSize: 'clamp(48px, 6vw, 80px)',
             lineHeight: 1.02,
             letterSpacing: '-0.034em',
             margin: 0,
@@ -671,12 +697,17 @@ function Hero({ t, onSend }: { t: PersonaContent; onSend: (msg: string) => void 
 /* ─────────────────── 2. Up against ─────────────────── */
 function UpAgainst({ t }: { t: PersonaContent }) {
   return (
+    /* Obsidian editorial moment — Journey's equivalent of home's
+       ProductMockBand. The proof-point stat grid lands harder on dark:
+       big numbers + cited sources read as "this is the math, no
+       hedging." Pairs with the FinalCTA dark close to give Journey
+       two-darks-per-page rhythm. */
     <section
+      data-reveal
       style={{
         padding: `88px ${SECTION_PAD}`,
-        background: 'var(--canvas-cream)',
-        borderTop: '1px solid var(--rule)',
-        borderBottom: '1px solid var(--rule)',
+        background: 'var(--canvas-obsidian)',
+        color: 'var(--ink-inverse)',
       }}
     >
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -690,7 +721,18 @@ function UpAgainst({ t }: { t: PersonaContent }) {
           }}
         >
           <div>
-            <div style={eyebrowStyle()}>What you’re up against</div>
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 11,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color: 'rgba(244, 238, 227, 0.55)',
+                marginBottom: 14,
+              }}
+            >
+              What you’re up against
+            </div>
             <h2
               style={{
                 fontFamily: 'var(--font-display)',
@@ -699,7 +741,7 @@ function UpAgainst({ t }: { t: PersonaContent }) {
                 lineHeight: 1.06,
                 letterSpacing: '-0.028em',
                 margin: '0 0 24px',
-                color: 'var(--ink-primary)',
+                color: 'var(--ink-inverse)',
                 textWrap: 'balance',
               }}
             >
@@ -710,7 +752,7 @@ function UpAgainst({ t }: { t: PersonaContent }) {
                 fontFamily: 'var(--font-mono)',
                 fontSize: 11,
                 letterSpacing: '0.06em',
-                color: 'var(--ink-tertiary)',
+                color: 'rgba(244, 238, 227, 0.55)',
                 margin: 0,
                 lineHeight: 1.6,
               }}
@@ -726,8 +768,8 @@ function UpAgainst({ t }: { t: PersonaContent }) {
                 display: 'grid',
                 gridTemplateColumns: 'repeat(2, 1fr)',
                 marginBottom: 28,
-                borderTop: '1px solid var(--ink-primary)',
-                borderBottom: '1px solid var(--rule)',
+                borderTop: '1px solid rgba(244, 238, 227, 0.4)',
+                borderBottom: '1px solid rgba(244, 238, 227, 0.18)',
               }}
             >
               {t.stats.map(([n, l], i) => (
@@ -735,25 +777,35 @@ function UpAgainst({ t }: { t: PersonaContent }) {
                   key={`${n}-${l}`}
                   style={{
                     padding: '22px 22px',
-                    borderRight: i % 2 === 0 ? '1px solid var(--rule)' : 'none',
-                    borderBottom: i < 2 ? '1px solid var(--rule)' : 'none',
+                    borderRight: i % 2 === 0 ? '1px solid rgba(244, 238, 227, 0.18)' : 'none',
+                    borderBottom: i < 2 ? '1px solid rgba(244, 238, 227, 0.18)' : 'none',
                   }}
                 >
                   <div
                     style={{
                       fontFamily: 'var(--font-display)',
                       fontWeight: 800,
-                      fontSize: 36,
+                      fontSize: 40,
                       letterSpacing: '-0.028em',
                       lineHeight: 1,
                       marginBottom: 10,
-                      color: 'var(--ink-primary)',
+                      color: 'var(--ink-inverse)',
                       fontVariantNumeric: 'tabular-nums',
                     }}
                   >
                     {n}
                   </div>
-                  <div style={{ ...eyebrowStyle(), color: 'var(--ink-tertiary)' }}>{l}</div>
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 11,
+                      letterSpacing: '0.18em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(244, 238, 227, 0.55)',
+                    }}
+                  >
+                    {l}
+                  </div>
                 </div>
               ))}
             </div>
@@ -762,7 +814,7 @@ function UpAgainst({ t }: { t: PersonaContent }) {
                 fontFamily: 'var(--font-body)',
                 fontSize: 16,
                 lineHeight: 1.6,
-                color: 'var(--ink-secondary)',
+                color: 'rgba(244, 238, 227, 0.7)',
                 margin: 0,
               }}
             >
@@ -778,7 +830,7 @@ function UpAgainst({ t }: { t: PersonaContent }) {
 /* ─────────────────── 3. How Yulia changes that ─────────────────── */
 function HowChanges({ t }: { t: PersonaContent }) {
   return (
-    <section style={{ padding: `96px ${SECTION_PAD}` }}>
+    <section data-reveal style={{ padding: `96px ${SECTION_PAD}` }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={eyebrowStyle()}>How Yulia changes that</div>
         <h2
@@ -849,6 +901,7 @@ function HowChanges({ t }: { t: PersonaContent }) {
 function Arc({ t }: { t: PersonaContent }) {
   return (
     <section
+      data-reveal
       style={{
         padding: `96px ${SECTION_PAD}`,
         background: 'var(--canvas-cream)',
@@ -941,7 +994,7 @@ function Arc({ t }: { t: PersonaContent }) {
 /* ─────────────────── 5. Six months in ─────────────────── */
 function SixMonthsIn({ t }: { t: PersonaContent }) {
   return (
-    <section style={{ padding: `120px ${SECTION_PAD}` }}>
+    <section data-reveal style={{ padding: `120px ${SECTION_PAD}` }}>
       <div style={{ maxWidth: 1000, margin: '0 auto' }}>
         <div style={{ ...eyebrowStyle(), marginBottom: 28 }}>Six months in</div>
         <p
@@ -1034,47 +1087,47 @@ function PricingPointer({ t }: { t: PersonaContent }) {
 /* ─────────────────── 7. Final CTA ─────────────────── */
 function FinalCTA({ t, onSend }: { t: PersonaContent; onSend: (msg: string) => void }) {
   return (
+    /* Obsidian close — matches home FinalCTA. Italic-serif headline,
+       rounded bottom corners to terminate the canvas-card cleanly. */
     <section
+      data-reveal
       style={{
         padding: `144px ${SECTION_PAD} 160px`,
-        background: 'var(--canvas-paper)',
+        background: 'var(--canvas-obsidian)',
+        color: 'var(--ink-inverse)',
         textAlign: 'center',
-        borderTop: '1px solid var(--rule)',
+        borderRadius: '0 0 12px 12px',
       }}
     >
       <div style={{ maxWidth: 760, margin: '0 auto' }}>
-        <div style={{ ...eyebrowStyle(), marginBottom: 22 }}>The invitation</div>
+        <div
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 11,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'rgba(244, 238, 227, 0.55)',
+            marginBottom: 22,
+          }}
+        >
+          The invitation
+        </div>
         <h2
           style={{
-            fontFamily: 'var(--font-display)',
-            fontWeight: 800,
-            fontSize: 'clamp(40px, 4.8vw, 64px)',
-            lineHeight: 1.04,
-            letterSpacing: '-0.028em',
+            fontFamily: 'var(--font-editorial)',
+            fontWeight: 400,
+            fontStyle: 'italic',
+            fontSize: 'clamp(48px, 6.0vw, 80px)',
+            lineHeight: 1.02,
+            letterSpacing: '-0.012em',
             margin: 0,
-            color: 'var(--ink-primary)',
+            color: 'var(--ink-inverse)',
             textWrap: 'balance',
           }}
         >
-          {t.footerCta.replace(/Yulia/, '__YULIA__').split('__YULIA__').map((part, i, arr) => (
-            <span key={i}>
-              {part}
-              {i < arr.length - 1 && (
-                <span
-                  style={{
-                    fontFamily: 'var(--font-editorial)',
-                    fontStyle: 'italic',
-                    fontWeight: 400,
-                    color: 'var(--terra)',
-                  }}
-                >
-                  Yulia
-                </span>
-              )}
-            </span>
-          ))}
+          {t.footerCta}
         </h2>
-        <div style={{ display: 'inline-flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginTop: 32 }}>
+        <div style={{ display: 'inline-flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', marginTop: 32 }}>
           <button
             type="button"
             className="cta-primary"
@@ -1088,10 +1141,19 @@ function FinalCTA({ t, onSend }: { t: PersonaContent; onSend: (msg: string) => v
           </button>
           <a
             href="/how-it-works"
-            className="cta-secondary"
-            style={{ ...secondaryCta(), textDecoration: 'none' }}
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 12,
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+              fontWeight: 500,
+              color: 'rgba(244, 238, 227, 0.7)',
+              textDecoration: 'none',
+              borderBottom: '1px solid rgba(244, 238, 227, 0.3)',
+              paddingBottom: 2,
+            }}
           >
-            See how it works <span style={{ color: 'var(--terra)' }}>→</span>
+            See how it works →
           </a>
         </div>
       </div>
@@ -1109,7 +1171,7 @@ function SiteFooter() {
     { heading: 'Terms',     links: ['Privacy', 'Terms of service', 'Security', 'Compliance'] },
   ];
   return (
-    <footer style={{ padding: `80px ${SECTION_PAD} 56px`, background: 'var(--canvas-warm)', borderTop: '1px solid var(--rule)' }}>
+    <footer style={{ padding: `80px ${SECTION_PAD} 56px`, background: 'transparent', borderTop: '1px solid var(--rule)' }}>
       <div
         className="footer-grid"
         style={{ display: 'grid', gridTemplateColumns: '1.4fr repeat(5, 1fr)', gap: 40, marginBottom: 56 }}

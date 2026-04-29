@@ -31,7 +31,38 @@
  *   - Body: 14.5–16.5px Figtree 400
  */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+/* Scroll-reveal observer — adds `is-visible` to [data-reveal] elements
+   when they enter viewport. Above-fold elements reveal immediately so
+   the page doesn't flicker. CSS layer respects prefers-reduced-motion. */
+function useScrollReveal(rootRef: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    if (typeof IntersectionObserver === "undefined") return;
+    const targets = root.querySelectorAll<HTMLElement>("[data-reveal]");
+    if (targets.length === 0) return;
+    const reveal = (el: HTMLElement) => el.classList.add("is-visible");
+    const aboveFold = window.innerHeight * 0.85;
+    targets.forEach((el) => {
+      if (el.getBoundingClientRect().top < aboveFold) reveal(el);
+    });
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            reveal(e.target as HTMLElement);
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { rootMargin: "0px 0px -10% 0px" },
+    );
+    targets.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [rootRef]);
+}
 
 interface Props {
   onStartFree: () => void;
@@ -263,11 +294,14 @@ const FAQS: FAQ[] = [
 ];
 
 export default function PricingCanvas({ onStartFree, onContactSales }: Props) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  useScrollReveal(rootRef);
   return (
     <div
+      ref={rootRef}
       className="smbx-edition v23c"
       style={{
-        background: "var(--canvas-warm)",
+        background: "transparent",
         color: "var(--ink-primary)",
         fontFamily: "var(--font-body)",
         minHeight: "100%",
@@ -284,16 +318,8 @@ export default function PricingCanvas({ onStartFree, onContactSales }: Props) {
         style={{
           position: "relative",
           background: "var(--canvas-paper)",
-          borderRadius: 12,
-          margin: "8px 16px 32px 0",
-          boxShadow: [
-            "inset 0 1px 0 rgba(255, 255, 255, 0.65)",
-            "0 1px 0 rgba(26, 24, 20, 0.04)",
-            "0 6px 14px rgba(26, 24, 20, 0.05)",
-            "0 16px 36px rgba(26, 24, 20, 0.08)",
-            "0 36px 60px -16px rgba(26, 24, 20, 0.14)",
-            "0 56px 96px -28px rgba(26, 24, 20, 0.10)",
-          ].join(", "),
+          borderRadius: "0 0 12px 12px",
+          margin: "0 16px 32px 0",
         }}
       >
         <Hero onStartFree={onStartFree} onContactSales={onContactSales} />
@@ -302,8 +328,8 @@ export default function PricingCanvas({ onStartFree, onContactSales }: Props) {
         <RulesSection />
         <FAQSection />
         <FinalCTA onStartFree={onStartFree} onContactSales={onContactSales} />
-        <SiteFooter />
       </div>
+      <SiteFooter />
     </div>
   );
 }
@@ -499,15 +525,15 @@ function Hero({
   onContactSales,
 }: Pick<Props, "onStartFree" | "onContactSales">) {
   return (
-    <section style={{ padding: `112px ${SECTION_PAD} 64px` }}>
-      <div style={{ textAlign: "center", maxWidth: 880, margin: "0 auto" }}>
+    <section data-reveal style={{ padding: `120px ${SECTION_PAD} 72px` }}>
+      <div style={{ textAlign: "center", maxWidth: 940, margin: "0 auto" }}>
         <div
           style={{
             fontFamily: "var(--font-mono)",
             fontSize: 11,
             letterSpacing: "0.18em",
             textTransform: "uppercase",
-            color: "var(--terra)",
+            color: "var(--ink-tertiary)",
             fontWeight: 600,
             marginBottom: 24,
           }}
@@ -518,16 +544,15 @@ function Hero({
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 800,
-            fontSize: "clamp(44px, 5.4vw, 72px)",
-            lineHeight: 1.04,
-            letterSpacing: "-0.028em",
+            fontSize: "clamp(52px, 6.4vw, 88px)",
+            lineHeight: 1.02,
+            letterSpacing: "-0.032em",
             margin: 0,
             color: "var(--ink-primary)",
             textWrap: "balance",
           }}
         >
-          Priced so you don&apos;t have to think about it
-          <span style={{ color: "var(--terra)" }}>.</span>
+          Priced so you don&apos;t have to <span className="underline-draw">think</span> about it.
         </h1>
         <p
           style={{
@@ -572,7 +597,7 @@ function Hero({
             style={secondaryCta()}
           >
             Talk to sales
-            <span style={{ color: "var(--terra)" }}>→</span>
+            <span aria-hidden>→</span>
           </button>
         </div>
       </div>
@@ -652,7 +677,7 @@ function TierCards({
           }}
         >
           Compare every feature
-          <span style={{ color: "var(--terra)" }}>↓</span>
+          <span aria-hidden>↓</span>
         </a>
       </div>
     </section>
@@ -875,6 +900,7 @@ function CompareSection({
   return (
     <section
       id="compare"
+      data-reveal
       style={{
         // Compare section runs HORIZONTAL padding 0 — the table is the
         // widest content on the page, and on 1440px displays the chat
@@ -1394,7 +1420,11 @@ function TrustStrip() {
     "exit planners",
   ];
   return (
-    <section style={{ padding: `64px ${SECTION_PAD}`, background: "var(--canvas-warm)" }}>
+    /* Obsidian editorial moment — Pricing's equivalent of home's
+       ProductMockBand. Single italic-serif statement on dark, naming
+       who the product is for. Pairs with the FinalCTA dark close to
+       give Pricing two-darks-per-page rhythm. */
+    <section data-reveal style={{ padding: `96px ${SECTION_PAD}`, background: "var(--canvas-obsidian)", color: "var(--ink-inverse)" }}>
       <div style={{ maxWidth: 920, margin: "0 auto", textAlign: "center" }}>
         <div
           style={{
@@ -1402,20 +1432,20 @@ function TrustStrip() {
             fontSize: 11,
             letterSpacing: "0.18em",
             textTransform: "uppercase",
-            color: "var(--terra)",
+            color: "rgba(244, 238, 227, 0.55)",
             fontWeight: 600,
-            marginBottom: 18,
+            marginBottom: 22,
           }}
         >
-          ● Built for the firms that close
+          Built for the firms that close
         </div>
         <p
           style={{
             fontFamily: "var(--font-editorial)",
             fontStyle: "italic",
-            fontSize: "clamp(20px, 2.2vw, 28px)",
+            fontSize: "clamp(22px, 2.4vw, 32px)",
             lineHeight: 1.4,
-            color: "var(--ink-primary)",
+            color: "var(--ink-inverse)",
             margin: 0,
             textWrap: "balance",
           }}
@@ -1423,7 +1453,7 @@ function TrustStrip() {
           Designed for{" "}
           {audiences.map((a, i) => (
             <span key={a}>
-              <span style={{ color: "var(--ink-primary)", fontStyle: "normal", fontFamily: "var(--font-display)", fontWeight: 600 }}>
+              <span style={{ color: "var(--ink-inverse)", fontStyle: "normal", fontFamily: "var(--font-display)", fontWeight: 600 }}>
                 {a}
               </span>
               {i < audiences.length - 2 ? ", " : i === audiences.length - 2 ? ", and " : ""}
@@ -1433,12 +1463,12 @@ function TrustStrip() {
         </p>
         <div
           style={{
-            marginTop: 18,
+            marginTop: 22,
             fontFamily: "var(--font-mono)",
             fontSize: 10,
             letterSpacing: "0.16em",
             textTransform: "uppercase",
-            color: "var(--ink-tertiary)",
+            color: "rgba(244, 238, 227, 0.4)",
           }}
         >
           Real coverage badges · land at GA
@@ -1452,6 +1482,7 @@ function TrustStrip() {
 function RulesSection() {
   return (
     <section
+      data-reveal
       style={{
         padding: `112px ${SECTION_PAD}`,
         background: "var(--canvas-paper)",
@@ -1508,7 +1539,7 @@ function RulesSection() {
                 fontWeight: 800,
                 fontSize: 32,
                 letterSpacing: "-0.028em",
-                color: "var(--terra)",
+                color: "var(--ink-primary)",
                 lineHeight: 1,
                 fontVariantNumeric: "tabular-nums lining-nums",
                 flexShrink: 0,
@@ -1554,7 +1585,7 @@ function RulesSection() {
 /* ─────────────────── FAQ ─────────────────── */
 function FAQSection() {
   return (
-    <section style={{ padding: `128px ${SECTION_PAD} 144px` }}>
+    <section data-reveal style={{ padding: `128px ${SECTION_PAD} 144px` }}>
       <div style={{ textAlign: "center", marginBottom: 56 }}>
         <div
           style={{
@@ -1663,12 +1694,16 @@ function FinalCTA({
   onContactSales,
 }: Pick<Props, "onStartFree" | "onContactSales">) {
   return (
+    /* Obsidian close — matches home + journey + howitworks. Italic-serif
+       headline, rounded bottom corners terminate the canvas-card. */
     <section
+      data-reveal
       style={{
         padding: `144px ${SECTION_PAD} 160px`,
-        background: "var(--canvas-paper)",
+        background: "var(--canvas-obsidian)",
+        color: "var(--ink-inverse)",
         textAlign: "center",
-        borderTop: "1px solid var(--rule)",
+        borderRadius: "0 0 12px 12px",
       }}
     >
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
@@ -1678,7 +1713,7 @@ function FinalCTA({
             fontSize: 11,
             letterSpacing: "0.18em",
             textTransform: "uppercase",
-            color: "var(--ink-tertiary)",
+            color: "rgba(244, 238, 227, 0.55)",
             marginBottom: 22,
           }}
         >
@@ -1686,23 +1721,25 @@ function FinalCTA({
         </div>
         <h2
           style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 800,
-            fontSize: "clamp(40px, 4.8vw, 64px)",
-            lineHeight: 1.04,
-            letterSpacing: "-0.028em",
+            fontFamily: "var(--font-editorial)",
+            fontWeight: 400,
+            fontStyle: "italic",
+            fontSize: "clamp(48px, 6.0vw, 80px)",
+            lineHeight: 1.02,
+            letterSpacing: "-0.012em",
             margin: 0,
-            color: "var(--ink-primary)",
+            color: "var(--ink-inverse)",
+            textWrap: "balance",
           }}
         >
-          See what Yulia produces<span style={{ color: "var(--terra)" }}>.</span>
+          See what Yulia produces.
         </h2>
         <p
           style={{
             fontFamily: "var(--font-body)",
             fontSize: "clamp(16px, 1.4vw, 19px)",
             lineHeight: 1.55,
-            color: "var(--ink-secondary)",
+            color: "rgba(244, 238, 227, 0.7)",
             margin: "20px auto 32px",
             maxWidth: 580,
             textWrap: "pretty",
@@ -1711,15 +1748,30 @@ function FinalCTA({
           The first deliverable is free — no card, no sales call. Talk to Yulia,
           paste a teaser, see what she produces.
         </p>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
           <button type="button" className="cta-primary" onClick={onStartFree} style={primaryCta()}>
             Start free
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
               <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <button type="button" className="cta-secondary" onClick={onContactSales} style={secondaryCta()}>
-            Talk to sales <span style={{ color: "var(--terra)" }}>→</span>
+          <button
+            type="button"
+            onClick={onContactSales}
+            style={{
+              all: "unset",
+              cursor: "pointer",
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              fontWeight: 500,
+              color: "rgba(244, 238, 227, 0.7)",
+              borderBottom: "1px solid rgba(244, 238, 227, 0.3)",
+              paddingBottom: 2,
+            }}
+          >
+            Talk to sales →
           </button>
         </div>
       </div>
@@ -1737,7 +1789,7 @@ function SiteFooter() {
     { heading: "Terms",     links: ["Privacy", "Terms of service", "Security", "Compliance"] },
   ];
   return (
-    <footer style={{ padding: `80px ${SECTION_PAD} 56px`, background: "var(--canvas-warm)", borderTop: "1px solid var(--rule)" }}>
+    <footer style={{ padding: `80px ${SECTION_PAD} 56px`, background: "transparent", borderTop: "1px solid var(--rule)" }}>
       <div
         className="footer-grid"
         style={{

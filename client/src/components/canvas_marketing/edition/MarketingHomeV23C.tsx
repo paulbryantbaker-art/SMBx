@@ -33,8 +33,42 @@
 import {
   CSSProperties,
   useEffect,
+  useRef,
   useState,
 } from "react";
+
+/* Scroll-reveal observer — adds `is-visible` class to any
+   `[data-reveal]` element when it enters the viewport. Used across all
+   4 marketing pages to give static sections quiet motion. Above-fold
+   elements reveal immediately so the page doesn't flicker. Honors
+   prefers-reduced-motion (CSS layer). */
+function useScrollReveal(rootRef: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    if (typeof IntersectionObserver === "undefined") return;
+    const targets = root.querySelectorAll<HTMLElement>("[data-reveal]");
+    if (targets.length === 0) return;
+    const reveal = (el: HTMLElement) => el.classList.add("is-visible");
+    const aboveFold = window.innerHeight * 0.85;
+    targets.forEach((el) => {
+      if (el.getBoundingClientRect().top < aboveFold) reveal(el);
+    });
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            reveal(e.target as HTMLElement);
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { rootMargin: "0px 0px -10% 0px" },
+    );
+    targets.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [rootRef]);
+}
 
 interface MarketingHomeV23CProps {
   onSend?: (msg: string) => void;
@@ -52,48 +86,38 @@ export function MarketingHomeV23C({
   onGoJourney,
   onGoHowItWorks,
 }: MarketingHomeV23CProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  useScrollReveal(rootRef);
   return (
     <div
+      ref={rootRef}
       className="smbx-edition v23c"
       style={{
-        background: "var(--canvas-warm)",
+        background: "transparent",
         color: "var(--ink-primary)",
         fontFamily: "var(--font-body)",
         minHeight: "100%",
-        /* Outer wrapper stays warm so the canvas-card's gutter
-           exposes the warm body color (the "desk" the paper sits on). */
+        /* Body element is the SOLE painter of --canvas-warm. Wrapper
+           is transparent so body shows through, the grain pseudo
+           layers uniformly across the whole viewport, and there's
+           no element-boundary seam between rail-area body and the
+           canvas-card's gutters. */
       }}
     >
       <PageStyles />
-      {/* Canvas card — rounded paper sheet that lifts off the warm body.
-          Right + bottom gutters show the warm bg. NO overflow:hidden:
-          that's what historically broke sticky elements + floating
-          pills. Border-radius alone gives the rounded look at the
-          card's exposed edges (top + right/bottom gutters); inner
-          sections fill the card width with their own bgs as before. */}
-      <div
-        className="canvas-card"
-        style={{
-          position: "relative",
-          background: "var(--canvas-paper)",
-          borderRadius: 12,
-          margin: "8px 16px 32px 0",
-          /* Layered shadow — bottom-weighted (Canva-style). The inner
-             top highlight reads as paper edge sheen; mid shadows add
-             ambient depth; bottom-weighted shadows (negative spread
-             offsets) make the canvas feel like paper resting on a
-             warm desk surface. */
-          boxShadow: [
-            "inset 0 1px 0 rgba(255, 255, 255, 0.65)",
-            "0 1px 0 rgba(26, 24, 20, 0.04)",
-            "0 6px 14px rgba(26, 24, 20, 0.05)",
-            "0 16px 36px rgba(26, 24, 20, 0.08)",
-            "0 36px 60px -16px rgba(26, 24, 20, 0.14)",
-            "0 56px 96px -28px rgba(26, 24, 20, 0.10)",
-          ].join(", "),
-        }}
-      >
+      {/* ONE continuous canvas-card holds the whole document:
+          hero → dark mock band → workspace sections → dark close.
+          Dark bands are sections WITHIN the canvas-card (bleed to
+          card edges, not viewport edges). The footer sits outside
+          the card on warm body — the byline beneath the document.
+
+          The dark FinalCTA gets `borderRadius: 0 0 12 12` so its
+          bottom corners match the card's rounded bottom edge — without
+          requiring `overflow: hidden` on the card (which would break
+          sticky elements on Pricing/Journey that share canvasCardStyle). */}
+      <div className="canvas-card" style={canvasCardStyle}>
         <Hero onFocusChat={onFocusChat} />
+        <ProductMockBand />
         <CapabilityRow />
         <FeatureRecast onGoHowItWorks={onGoHowItWorks} />
         <FeatureCIM onGoHowItWorks={onGoHowItWorks} />
@@ -101,9 +125,88 @@ export function MarketingHomeV23C({
         <HowItWorks />
         <LatestNews />
         <FinalCTA onFocusChat={onFocusChat} />
-        <SiteFooter />
       </div>
+      <SiteFooter />
     </div>
+  );
+}
+
+/* Canvas-card style — depth via color contrast, not shadow.
+   Pre-2026-04-28 used a 6-layer box-shadow to lift the paper off a
+   lighter warm body. Now the body is darker (canvas-warm pushed to
+   #E8DDC9) and the paper just sits on it — color difference does
+   the differentiation. Cleaner, more Anthropic, no shadow rendering
+   cost.
+
+   Tab merge geometry preserved:
+     - Top margin = 0 (sits directly under tab strip)
+     - Top corners square (active tab merges into straight top edge)
+     - Bottom corners rounded (paper still has clean rounded bottom) */
+const canvasCardStyle: React.CSSProperties = {
+  position: "relative",
+  background: "var(--canvas-paper)",
+  borderRadius: "0 0 12px 12px",
+  margin: "0 16px 32px 0",
+};
+
+/* ─────────────────── ProductMockBand — dark editorial frame ────────
+   Anthropic's Project Glasswing pattern. Quieter than the FinalCTA
+   dark band — less padding, no big headline, no CTAs, just:
+     - small mono eyebrow above the mock
+     - the high-fidelity working-session screenshot
+     - italic-serif caption underneath
+
+   Two dark bands per page: this one is a *display* (look at this
+   thing); the FinalCTA is a *call* (now act). Same color, different
+   weight class.
+   ──────────────────────────────────────────────────────────────────── */
+function ProductMockBand() {
+  return (
+    <section
+      data-reveal
+      style={{
+        background: "var(--canvas-obsidian)",
+        color: "var(--ink-inverse)",
+        padding: "72px 0 88px",
+      }}
+    >
+      <div
+        style={{
+          textAlign: "center",
+          fontFamily: "var(--font-mono)",
+          fontSize: 11,
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          color: "rgba(244, 238, 227, 0.55)",
+          marginBottom: 36,
+        }}
+      >
+        Live workspace
+      </div>
+      <div style={{ maxWidth: 1180, margin: "0 auto", padding: `0 ${SECTION_PAD}` }}>
+        <ProductScreenshot />
+      </div>
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: 44,
+          fontFamily: "var(--font-editorial)",
+          fontStyle: "italic",
+          fontWeight: 400,
+          fontSize: 22,
+          lineHeight: 1.45,
+          color: "rgba(244, 238, 227, 0.88)",
+          letterSpacing: "-0.008em",
+          maxWidth: 760,
+          marginLeft: "auto",
+          marginRight: "auto",
+          padding: `0 ${SECTION_PAD}`,
+          textWrap: "pretty",
+        }}
+      >
+        Yulia, midway through a teaser screen — industrial services, $5.4M EBITDA, drafted in 47 minutes.
+      </div>
+    </section>
   );
 }
 
@@ -273,22 +376,24 @@ function Hero({
   onFocusChat,
 }: Pick<MarketingHomeV23CProps, "onFocusChat">) {
   return (
-    <section style={{ padding: `112px ${SECTION_PAD} 96px` }}>
-      {/* Centered text block */}
-      <div style={{ textAlign: "center", maxWidth: 880, margin: "0 auto" }}>
+    <section data-reveal style={{ padding: `120px ${SECTION_PAD} 104px` }}>
+      {/* Centered text block. Anthropic-style emphasis: underlined keyword
+          on the noun ("deals" — the user's domain), no color accent. The
+          underline + bigger scale carry the bold without needing Clay. */}
+      <div style={{ textAlign: "center", maxWidth: 940, margin: "0 auto" }}>
         <h1
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 800,
-            fontSize: "clamp(44px, 5.4vw, 72px)",
-            lineHeight: 1.04,
-            letterSpacing: "-0.028em",
+            fontSize: "clamp(52px, 6.4vw, 88px)",
+            lineHeight: 1.02,
+            letterSpacing: "-0.032em",
             margin: 0,
             color: "var(--ink-primary)",
             textWrap: "balance",
           }}
         >
-          Close deals faster<span style={{ color: "var(--terra)" }}>.</span>
+          Close <span className="underline-draw">deals</span> faster.
         </h1>
 
         <p
@@ -360,30 +465,13 @@ function Hero({
             }}
           >
             Watch the agent
-            <span style={{ color: "var(--terra)" }}>→</span>
+            <span aria-hidden>→</span>
           </button>
         </div>
       </div>
-
-      {/* High-fidelity product screenshot mock */}
-      <div style={{ marginTop: 88, maxWidth: 1180, margin: "88px auto 0" }}>
-        <ProductScreenshot />
-      </div>
-
-      {/* Tiny supporting line under the screenshot — Anthropic move */}
-      <div
-        style={{
-          marginTop: 28,
-          textAlign: "center",
-          fontFamily: "var(--font-mono)",
-          fontSize: 11,
-          letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          color: "var(--ink-tertiary)",
-        }}
-      >
-        Live workspace · industrial services · $5.4M EBITDA · drafted in 47 minutes
-      </div>
+      {/* Product mock used to live here. Pulled out into ProductMockBand
+          (rendered between the two canvas-cards) — editorial dark frame
+          on the Glasswing pattern. Hero is now text + CTAs only. */}
     </section>
   );
 }
@@ -876,7 +964,7 @@ function CIMPageMock() {
         }}
       >
         <span>Confidential · CIM</span>
-        <span style={{ color: "var(--terra)" }}>● drafting</span>
+        <span style={{ color: "var(--ink-tertiary)" }}>● drafting</span>
       </div>
 
       <div
@@ -1007,6 +1095,7 @@ function CapabilityRow() {
 
   return (
     <section
+      data-reveal
       style={{
         padding: `96px ${SECTION_PAD} 112px`,
         background: "var(--canvas-cream)",
@@ -1071,7 +1160,7 @@ function CapabilityRow() {
                 fontSize: 10,
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                color: "var(--terra)",
+                color: "var(--ink-tertiary)",
                 fontWeight: 600,
                 marginBottom: 10,
               }}
@@ -1141,7 +1230,7 @@ function FeatureBlockShell({
           fontSize: 11,
           letterSpacing: "0.18em",
           textTransform: "uppercase",
-          color: "var(--terra)",
+          color: "var(--ink-tertiary)",
           fontWeight: 600,
           marginBottom: 16,
         }}
@@ -1194,7 +1283,7 @@ function FeatureBlockShell({
         }}
       >
         {ctaLabel}
-        <span style={{ color: "var(--terra)" }}>→</span>
+        <span aria-hidden>→</span>
       </button>
     </div>
   );
@@ -1207,6 +1296,7 @@ function FeatureBlockShell({
 
   return (
     <section
+      data-reveal
       style={{
         padding: `112px ${SECTION_PAD}`,
         background,
@@ -1275,7 +1365,7 @@ function RecastVisual() {
         }}
       >
         <span>P&amp;L Recast · TTM</span>
-        <span style={{ color: "var(--terra)" }}>● defended</span>
+        <span style={{ color: "var(--ink-tertiary)" }}>● defended</span>
       </div>
 
       {/* Big EBITDA delta */}
@@ -1293,7 +1383,7 @@ function RecastVisual() {
         >
           $1.50M
         </span>
-        <span style={{ color: "var(--terra)", fontSize: 14 }}>→</span>
+        <span style={{ color: "var(--ink-tertiary)", fontSize: 14 }} aria-hidden>→</span>
         <span
           style={{
             fontFamily: "var(--font-display)",
@@ -1405,7 +1495,7 @@ function RecastVisual() {
                     fontWeight: isLast ? 700 : 400,
                     padding: "8px 0",
                     borderBottom: "1px dotted var(--rule)",
-                    color: isLast ? "var(--terra)" : "var(--ink-primary)",
+                    color: "var(--ink-primary)",
                   }}
                 >
                   {r[2]}
@@ -1502,7 +1592,7 @@ function CIMVisual() {
         }}
       >
         <span>Confidential · CIM</span>
-        <span style={{ color: "var(--terra)" }}>● drafting</span>
+        <span style={{ color: "var(--ink-tertiary)" }}>● drafting</span>
       </div>
 
       {/* Page body */}
@@ -1589,7 +1679,7 @@ function FeatureBuyers({ onGoHowItWorks }: { onGoHowItWorks?: () => void }) {
   return (
     <FeatureBlockShell
       eyebrow="The buyers"
-      headline={<>Strategic. Financial. Platform plays. <span style={{ color: "var(--terra)" }}>Scored, not piled.</span></>}
+      headline={<>Strategic. Financial. Platform plays. Scored, not piled.</>}
       body="Pulled from current public filings, recent transactions, and live activity — not a database that goes stale between renewals. Scored against the seller's profile so the outreach that goes out has a response rate."
       ctaLabel="How sourcing works"
       onCta={onGoHowItWorks}
@@ -1650,7 +1740,7 @@ function BuyerListVisual() {
             fontWeight: 700,
             fontSize: 13,
             letterSpacing: "-0.012em",
-            color: "var(--terra)",
+            color: "var(--ink-primary)",
           }}
         >
           21% pursue
@@ -1763,7 +1853,11 @@ function HowItWorks() {
   ];
 
   return (
+    /* Option A 60-30-10 reset: HowItWorks back to paper. The page's
+       single dark moment is the FinalCTA close — everything before
+       it alternates between paper and cream. */
     <section
+      data-reveal
       style={{
         padding: `128px ${SECTION_PAD} 144px`,
         background: "var(--canvas-paper)",
@@ -1825,7 +1919,7 @@ function HowItWorks() {
                 fontSize: 64,
                 letterSpacing: "-0.04em",
                 lineHeight: 1,
-                color: "var(--terra)",
+                color: "var(--ink-primary)",
                 marginBottom: 22,
                 fontVariantNumeric: "tabular-nums lining-nums",
               }}
@@ -1945,7 +2039,7 @@ function StepDraftVisual() {
           fontSize: 9,
           letterSpacing: "0.18em",
           textTransform: "uppercase",
-          color: "var(--terra)",
+          color: "var(--ink-tertiary)",
           marginBottom: 10,
         }}
       >
@@ -2048,6 +2142,7 @@ function LatestNews() {
 
   return (
     <section
+      data-reveal
       style={{
         padding: `112px ${SECTION_PAD}`,
         background: "var(--canvas-cream)",
@@ -2109,7 +2204,7 @@ function LatestNews() {
             background: "var(--canvas-paper)",
           }}
         >
-          All posts <span style={{ color: "var(--terra)" }}>→</span>
+          All posts <span aria-hidden>→</span>
         </button>
       </div>
 
@@ -2159,7 +2254,7 @@ function LatestNews() {
                 color: "var(--ink-tertiary)",
               }}
             >
-              <span style={{ color: "var(--terra)", fontWeight: 600 }}>{it.date}</span>
+              <span style={{ color: "var(--ink-secondary)", fontWeight: 600 }}>{it.date}</span>
               <span>·</span>
               <span>{it.tag}</span>
             </div>
@@ -2200,7 +2295,7 @@ function LatestNews() {
                 color: "var(--ink-primary)",
               }}
             >
-              Read <span style={{ color: "var(--terra)" }}>→</span>
+              Read <span aria-hidden>→</span>
             </span>
           </article>
         ))}
@@ -2215,11 +2310,17 @@ function LatestNews() {
 
 function FinalCTA({ onFocusChat }: Pick<MarketingHomeV23CProps, "onFocusChat">) {
   return (
+    /* Anchor dark section — Anthropic's "Glasswing" pattern.
+       Bottom-corner radius matches canvas-card's bottom corners
+       (12px) so the dark close visually terminates the paper. */
     <section
+      data-reveal
       style={{
         padding: `144px ${SECTION_PAD} 160px`,
-        background: "var(--canvas-paper)",
+        background: "var(--canvas-obsidian)",
+        color: "var(--ink-inverse)",
         textAlign: "center",
+        borderRadius: "0 0 12px 12px",
       }}
     >
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
@@ -2229,31 +2330,38 @@ function FinalCTA({ onFocusChat }: Pick<MarketingHomeV23CProps, "onFocusChat">) 
             fontSize: 11,
             letterSpacing: "0.18em",
             textTransform: "uppercase",
-            color: "var(--ink-tertiary)",
+            color: "rgba(244, 238, 227, 0.55)",
             marginBottom: 22,
           }}
         >
           Ready?
         </div>
+        {/* Serif headline — Anthropic's "Project Glasswing" pattern.
+            The font-mix (sans on light sections, serif on the dark
+            anchor) IS the editorial moment. Instrument Serif at weight
+            400 with slight letter-spacing relax — heavy serifs distort
+            at this scale, so we go regular weight + larger size and let
+            the serif's intrinsic visual texture carry the weight. */}
         <h2
           style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 800,
-            fontSize: "clamp(40px, 4.8vw, 64px)",
-            lineHeight: 1.04,
-            letterSpacing: "-0.028em",
+            fontFamily: "var(--font-editorial)",
+            fontWeight: 400,
+            fontStyle: "italic",
+            fontSize: "clamp(48px, 6.0vw, 80px)",
+            lineHeight: 1.02,
+            letterSpacing: "-0.012em",
             margin: 0,
-            color: "var(--ink-primary)",
+            color: "var(--ink-inverse)",
           }}
         >
-          Hand off the work<span style={{ color: "var(--terra)" }}>.</span>
+          Hand off the work.
         </h2>
         <p
           style={{
             fontFamily: "var(--font-body)",
             fontSize: "clamp(16px, 1.4vw, 19px)",
             lineHeight: 1.55,
-            color: "var(--ink-secondary)",
+            color: "rgba(244, 238, 227, 0.7)",
             margin: "20px auto 32px",
             maxWidth: 580,
             textWrap: "pretty",
@@ -2285,7 +2393,7 @@ function FinalCTA({ onFocusChat }: Pick<MarketingHomeV23CProps, "onFocusChat">) 
               background: "var(--terra)",
               padding: "14px 28px",
               borderRadius: 999,
-              boxShadow: "0 8px 22px rgba(212, 113, 78, 0.22)",
+              boxShadow: "0 16px 44px rgba(212, 113, 78, 0.34)",
               display: "inline-flex",
               alignItems: "center",
               gap: 10,
@@ -2296,26 +2404,22 @@ function FinalCTA({ onFocusChat }: Pick<MarketingHomeV23CProps, "onFocusChat">) 
               <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <button
-            type="button"
-            className="cta-secondary"
+          <a
+            href="/pricing"
             style={{
-              all: "unset",
-              cursor: "pointer",
-              fontFamily: "var(--font-body)",
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
               fontWeight: 500,
-              fontSize: 16,
-              color: "var(--ink-primary)",
-              padding: "13px 22px",
-              borderRadius: 999,
-              border: "1px solid var(--rule)",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
+              color: "rgba(244, 238, 227, 0.7)",
+              textDecoration: "none",
+              borderBottom: "1px solid rgba(244, 238, 227, 0.3)",
+              paddingBottom: 2,
             }}
           >
-            See pricing <span style={{ color: "var(--terra)" }}>→</span>
-          </button>
+            See pricing →
+          </a>
         </div>
       </div>
     </section>
@@ -2339,7 +2443,7 @@ function SiteFooter() {
     <footer
       style={{
         padding: `80px ${SECTION_PAD} 56px`,
-        background: "var(--canvas-warm)",
+        background: "transparent",
         borderTop: "1px solid var(--rule)",
       }}
     >

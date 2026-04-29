@@ -276,7 +276,13 @@ body:has(.smbx-edition) .canvas-tab-strip {
    Edition canvas wrapper (see PaperGrain primitive). The CSS here just
    declares the pseudo-element layer that consumes it. */
 
-.smbx-edition::before {
+/* Paper grain on body, NOT on .smbx-edition. mix-blend-mode is scoped
+   to the element's stacking context — putting the grain on .smbx-edition
+   meant the area outside it (under the transparent chat rail, where
+   body bg shows through) didn't blend the same way, creating a faint
+   seam at the rail / canvas boundary. Hoisting to body covers the
+   whole viewport so the grain treats both areas identically. */
+body:has(.smbx-edition)::before {
   content: '';
   position: fixed;
   inset: 0;
@@ -289,28 +295,45 @@ body:has(.smbx-edition) .canvas-tab-strip {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .smbx-edition::before { display: none; }
+  body:has(.smbx-edition)::before { display: none; }
 }
 
 /* Hide grain on touch devices with low power — cheap perf safety net. */
 @media (hover: none) and (pointer: coarse) {
-  .smbx-edition::before { opacity: 0.04; }
+  body:has(.smbx-edition)::before { opacity: 0.04; }
 }
 
 .smbx-edition {
-  /* Surfaces */
-  --canvas-warm: #F4EEE3;
+  /* Surfaces — body bg #E5DDD0 (stone-gray tan), cream #FAF6EE
+     (light alternating sections inside canvas). Single-painter
+     pattern: body is the sole canvas-warm consumer; wrapper +
+     footer are transparent. */
+  --canvas-warm: #E5DDD0;
   --canvas-cream: #FAF6EE;
   --canvas-paper: #FFFFFF;
   --canvas-night: #16130E;
   --canvas-night-deeper: #0E0C09;
+  /* Obsidian — Anthropic's Glasswing-grade black. Reserved for the
+     ONE dark anchor band per page (FinalCTA, hero anchor, etc).
+     Solid, not gradient. Warmer-than-true-black so it harmonizes
+     with the cream + Clay palette. */
+  --canvas-obsidian: #0A0908;
+  /* Charcoal — mid-dark, used for SECONDARY editorial moments
+     (mid-page bands, process steps). Notably lighter than obsidian
+     so the page reads as a hierarchy: charcoal supports, obsidian
+     punctuates. Same warm hue family. */
+  --canvas-charcoal: #2A2622;
   /* V22 aliases — CD's components reference these names directly. */
   --canvas-deep: #16130E;
   --canvas-deeper: #0E0C09;
 
-  /* Ink — slightly warmer than the global ladder to keep the magazine
-     feel on cream. Scoped here so global text colors aren't disturbed. */
-  --ink-primary: #1A1814;
+  /* Ink — same warm hue family, pushed deeper for confidence on cream.
+     Pre-2026-04-28: --ink-primary was #1A1814 (~14:1 on canvas-warm).
+     Anthropic's homepage uses near-pure-black (~17:1) to make headlines
+     feel inevitable. We keep the warm hue (matches cream surfaces) but
+     deepen the lightness to land at ~15:1 — confident without going
+     achromatic-cool. */
+  --ink-primary: #15130E;
   --ink-secondary: #3D3D3A;
   --ink-tertiary: #87867F;
   --ink-quaternary: #B5AE9F;
@@ -522,6 +545,84 @@ body:has(.smbx-edition) .canvas-tab-strip {
   .smbx-edition header,
   .smbx-edition footer {
     padding-inline: max(56px, calc(50% - 600px)) !important;
+  }
+}
+
+/* ─── Scroll-reveal motion (universal across edition pages) ──────────
+   `data-reveal` elements start hidden + offset; gain `is-visible` when
+   they enter viewport via IntersectionObserver (wired in mountReveal()
+   below). Subtle 12px translateY + opacity — quiet confidence, not
+   flashy entrance. Respects prefers-reduced-motion (instant reveal). */
+.smbx-edition [data-reveal] {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.smbx-edition [data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.smbx-edition [data-reveal][data-reveal-delay="1"] { transition-delay: 80ms; }
+.smbx-edition [data-reveal][data-reveal-delay="2"] { transition-delay: 160ms; }
+.smbx-edition [data-reveal][data-reveal-delay="3"] { transition-delay: 240ms; }
+.smbx-edition [data-reveal][data-reveal-delay="4"] { transition-delay: 320ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .smbx-edition [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Underline-draw: hero keyword's underline grows from 0 to full width
+   on entrance. Pairs with [data-reveal] containers. The underline is
+   a pseudo-element so we can animate its width independently. */
+.smbx-edition .underline-draw {
+  position: relative;
+  display: inline-block;
+}
+.smbx-edition .underline-draw::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0.04em;
+  height: 0.06em;
+  width: 0;
+  background: currentColor;
+  transition: width 800ms cubic-bezier(0.22, 1, 0.36, 1) 200ms;
+}
+.smbx-edition [data-reveal].is-visible .underline-draw::after,
+.smbx-edition .underline-draw.is-visible::after {
+  width: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .smbx-edition .underline-draw::after {
+    width: 100%;
+    transition: none;
+  }
+}
+
+/* Hover lifts on interactive cards (feature blocks, tier cards, news
+   cards). Subtle translate + shadow boost — affordance without flash. */
+.smbx-edition [data-card-lift] {
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.smbx-edition [data-card-lift]:hover {
+  transform: translateY(-3px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .smbx-edition [data-card-lift] {
+    transition: none;
+  }
+  .smbx-edition [data-card-lift]:hover {
+    transform: none;
   }
 }
 
@@ -975,7 +1076,7 @@ body:has(.smbx-edition) .canvas-tab-strip {
      ═══════════════════════════════════════════════════════════════════ */
 
   /* ─── V17 canvas + ink ──────────────────────────────────────────── */
-  --canvas-warm:     #F4EEE3;              /* oat — primary light bg */
+  --canvas-warm:     #E5DDD0;              /* stone-tan — body bg, kept in lockstep with .smbx-edition scope */
   --canvas-deep:     #1A1814;              /* carbon — primary dark bg */
   --canvas-cream:    #FAF6EE;              /* lighter variant for glass */
   --ink-primary:     #1A1814;

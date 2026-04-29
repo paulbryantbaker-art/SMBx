@@ -190,7 +190,7 @@ export function useEditionScroll(rootRef: React.RefObject<HTMLElement | null>) {
     if (!root) return;
     if (typeof IntersectionObserver === 'undefined') return;
 
-    const targets = root.querySelectorAll<HTMLElement>('[data-edition-fade], [data-strike]');
+    const targets = root.querySelectorAll<HTMLElement>('[data-edition-fade], [data-strike], [data-reveal]');
     const reveal = (el: HTMLElement) => el.classList.add('is-visible');
 
     // Above-the-fold elements should NOT animate in — show them at rest.
